@@ -102,7 +102,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 		this.companies_ready = false;
 		this.list = null;
 		this.destroy_trend();
-		this.destroy_credit_chart();
+		this.destroy_charts();
 	}
 
 	build_header() {
@@ -452,7 +452,7 @@ erpnext.CustomerOverview = class CustomerOverview {
 	}
 
 	render_receivables() {
-		this.destroy_credit_chart();
+		this.destroy_charts();
 		this.$charts.empty().toggle(!!this.accounts && !this.ar?.none);
 		if (!this.accounts || this.ar?.none) return;
 		this.render_ageing();
@@ -472,16 +472,17 @@ erpnext.CustomerOverview = class CustomerOverview {
 			return;
 		}
 
-		frappe.ui
-			.bar_list({
-				items: a.buckets.map((b) => ({
-					label: b.label,
-					value: flt(b.value),
-					formatted: this.short_money(b.value),
-				})),
-				format: (v) => this.short_money(v),
-			})
-			.appendTo($('<div class="co-age-chart">').appendTo($panel));
+		const $chart = $('<div class="co-age-chart">').appendTo($panel);
+		this.ageing_chart = new frappe.Chart($chart[0], {
+			type: "bar",
+			barOptions: { horizontal: 1 },
+			data: {
+				labels: a.buckets.map((b) => b.label),
+				datasets: [{ values: a.buckets.map((b) => flt(b.value)) }],
+			},
+			colors: ["var(--blue-600)"],
+			axisOptions: { numberFormatter: (v) => this.short_money(v) },
+		});
 
 		$('<div class="co-note">')
 			.text(
@@ -556,8 +557,10 @@ erpnext.CustomerOverview = class CustomerOverview {
 		}
 	}
 
-	destroy_credit_chart() {
+	destroy_charts() {
+		if (this.ageing_chart) this.ageing_chart.destroy();
 		if (this.credit_chart) this.credit_chart.destroy();
+		this.ageing_chart = null;
 		this.credit_chart = null;
 	}
 
