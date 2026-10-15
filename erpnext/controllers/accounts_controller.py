@@ -3443,8 +3443,13 @@ class AccountsController(TransactionBase):
 		if not source_doc.discount_amount:
 			return
 
+		if source_doc.has_mapped_discount:
+			self.clear_stale_mapped_discount_total()
+			self.calculate_taxes_and_totals()
+			return
+
 		# ensure additional_discount_percentage is not set in the source doc
-		if source_doc.get("additional_discount_percentage") or source_doc.has_mapped_discount:
+		if source_doc.get("additional_discount_percentage"):
 			return
 
 		item_doctype = self.meta.get_field("items").options
