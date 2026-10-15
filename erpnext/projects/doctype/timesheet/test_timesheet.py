@@ -642,6 +642,17 @@ class TestTimesheet(FrappeTestCase):
 		execute()
 		self.assertFalse(frappe.db.get_value("Timesheet", timesheet.name, "user"))
 
+	def test_title_follows_employee(self):
+		first = make_employee("_test_timesheet_title_one@example.com", company="_Test Company")
+		second = make_employee("_test_timesheet_title_two@example.com", company="_Test Company")
+
+		timesheet = make_timesheet(first, simulate=True, do_not_submit=True)
+		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", first, "employee_name"))
+
+		timesheet.employee = second
+		timesheet.save()
+		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", second, "employee_name"))
+
 
 def make_timesheet_without_employee(start, hours):
 	return frappe.get_doc(
