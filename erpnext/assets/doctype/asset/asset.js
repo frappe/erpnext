@@ -595,6 +595,71 @@ frappe.ui.form.on("Asset", {
 		});
 	},
 
+<<<<<<< HEAD
+=======
+	sell_asset: function (frm) {
+		const make_sales_invoice = (sell_qty) => {
+			frappe.call({
+				method: "erpnext.assets.doctype.asset.mapper.make_sales_invoice",
+				args: {
+					asset: frm.doc.name,
+					item_code: frm.doc.item_code,
+					company: frm.doc.company,
+					serial_no: frm.doc.serial_no,
+					sell_qty: sell_qty,
+				},
+				callback: function (r) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				},
+			});
+		};
+
+		let dialog = new frappe.ui.Dialog({
+			title: __("Sell Asset"),
+			fields: [
+				{
+					fieldname: "sell_qty",
+					fieldtype: "Int",
+					label: __("Sell Qty"),
+					reqd: 1,
+				},
+			],
+		});
+
+		dialog.set_primary_action(__("Sell"), function (dialog_data) {
+			const sell_qty = cint(dialog_data.sell_qty);
+			const asset_qty = cint(frm.doc.asset_quantity);
+
+			if (sell_qty <= 0) {
+				frappe.throw(__("Sell quantity must be greater than zero"));
+			}
+
+			if (sell_qty > asset_qty) {
+				frappe.throw(__("Sell quantity cannot exceed the asset quantity"));
+			}
+
+			if (sell_qty < asset_qty) {
+				frappe.confirm(
+					__(
+						"The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
+					),
+					() => {
+						make_sales_invoice(sell_qty);
+						dialog.hide();
+					}
+				);
+				return;
+			}
+
+			make_sales_invoice(sell_qty);
+			dialog.hide();
+		});
+
+		dialog.show();
+	},
+
+>>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))
 	split_asset: function (frm) {
 		const title = __("Split Asset");
 
@@ -612,8 +677,7 @@ frappe.ui.form.on("Asset", {
 			fields: fields,
 		});
 
-		dialog.set_primary_action(__("Split"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Split"), function (dialog_data) {
 			frappe.call({
 				args: {
 					asset_name: frm.doc.name,

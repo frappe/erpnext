@@ -846,3 +846,97 @@ function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
 		__("Set Quantity")
 	);
 }
+<<<<<<< HEAD
+=======
+
+frappe.ui.form.on("BOM Operation", {
+	add_raw_materials(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frm.events._prompt_for_raw_materials(frm, row);
+	},
+});
+
+frappe.ui.form.on("BOM", {
+	_prompt_for_raw_materials(frm, row) {
+		let fields = frm.events.get_fields_for_prompt(frm, row);
+		frm._bom_rm_dialog = new frappe.ui.Dialog({
+			title: __("Add Raw Materials"),
+			fields: fields,
+			primary_action_label: __("Add"),
+			primary_action: (values) => {
+				if (values) {
+					frm.events._add_raw_materials(frm, values);
+					frm._bom_rm_dialog.hide();
+				}
+			},
+		});
+
+		let items = frm.doc.items.filter((item) => cint(item.operation_row_id) === cint(row.idx));
+		if (items?.length) {
+			items.forEach((item) => {
+				frm._bom_rm_dialog.fields_dict.items.df.data.push({
+					item_code: item.item_code,
+					qty: item.qty,
+					name: item.name,
+				});
+			});
+
+			frm._bom_rm_dialog.fields_dict.items.grid.refresh();
+		}
+
+		frm._bom_rm_dialog.show();
+	},
+
+	get_fields_for_prompt(frm, row) {
+		return [
+			{
+				label: __("Raw Materials"),
+				fieldname: "items",
+				fieldtype: "Table",
+				data: [],
+				reqd: 1,
+				fields: [
+					{
+						label: __("Item"),
+						fieldname: "item_code",
+						fieldtype: "Link",
+						options: "Item",
+						reqd: 1,
+						in_list_view: 1,
+						change() {
+							let doc = this.doc;
+							doc.qty = 1.0;
+							this.grid.set_value("qty", 1.0, doc);
+						},
+					},
+					{
+						label: __("Qty"),
+						fieldname: "qty",
+						default: 1.0,
+						fieldtype: "Float",
+						reqd: 1,
+						in_list_view: 1,
+					},
+				],
+			},
+			{
+				fieldname: "operation_row_id",
+				fieldtype: "Data",
+				hidden: 1,
+				default: row.idx,
+			},
+		];
+	},
+
+	_add_raw_materials(frm, values) {
+		frm.call({
+			method: "add_raw_materials",
+			doc: frm.doc,
+			args: {
+				operation_row_id: values.operation_row_id,
+				items: values.items,
+			},
+		});
+	},
+});
+>>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))

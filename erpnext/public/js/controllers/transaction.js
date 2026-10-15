@@ -432,6 +432,131 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		})
 	}
+<<<<<<< HEAD
+=======
+	make_payment_request_with_schedule = async function () {
+		let frm = this.frm;
+		const { message: schedules } = await frappe.call({
+			method: "erpnext.accounts.doctype.payment_request.payment_request.get_available_payment_schedules",
+			args: {
+				reference_doctype: frm.doctype,
+				reference_name: frm.doc.name,
+			},
+		});
+
+		if (!schedules?.length) {
+			this.make_payment_request();
+			return;
+		}
+
+		const value = await frappe.db.get_single_value(
+			"Accounts Settings",
+			"fetch_payment_schedule_in_payment_request"
+		);
+
+		if (!value) {
+			this.make_payment_request();
+			return;
+		}
+
+		schedules.forEach((schedule) => {
+			schedule.__checked = 1;
+			schedule.currency = frm.doc.currency;
+		});
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Payment Schedule"),
+			fields: [
+				{
+					fieldtype: "Table",
+					fieldname: "payment_schedules",
+					label: __("Payment Schedules"),
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					in_place_edit: false,
+					data: schedules,
+					fields: [
+						{
+							fieldtype: "Data",
+							fieldname: "name",
+							label: __("Schedule Name"),
+							read_only: 1,
+						},
+						{
+							fieldtype: "Data",
+							fieldname: "payment_term",
+							label: __("Payment Term"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Date",
+							fieldname: "due_date",
+							label: __("Due Date"),
+							in_list_view: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Link",
+							fieldname: "currency",
+							label: __("Currency"),
+							options: "Currency",
+							hidden: 1,
+							read_only: 1,
+						},
+						{
+							fieldtype: "Currency",
+							fieldname: "payment_amount",
+							label: __("Amount"),
+							options: "currency",
+							in_list_view: 1,
+							read_only: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Create Payment Request"),
+			primary_action: async (values) => {
+				const selected = values.payment_schedules.filter((r) => r.__checked);
+
+				if (!selected.length) {
+					frappe.show_alert({
+						message: __("Please select at least one schedule."),
+						indicator: "orange",
+					});
+					return;
+				}
+				dialog.hide();
+				let me = this;
+				const payment_request_type = ["Sales Order", "Sales Invoice"].includes(this.frm.doc.doctype)
+					? "Inward"
+					: "Outward";
+				const { message: pr_name } = await frappe.call({
+					method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request",
+					args: {
+						dt: me.frm.doc.doctype,
+						dn: me.frm.doc.name,
+						recipient_id: me.frm.doc.contact_email,
+						payment_request_type: payment_request_type,
+						party_type: payment_request_type == "Outward" ? "Supplier" : "Customer",
+						party: payment_request_type == "Outward" ? me.frm.doc.supplier : me.frm.doc.customer,
+						party_name:
+							payment_request_type == "Outward"
+								? me.frm.doc.supplier_name
+								: me.frm.doc.customer_name,
+						reference_doctype: frm.doctype,
+						reference_name: frm.docname,
+						schedules: selected,
+					},
+				});
+				frappe.model.sync(pr_name);
+				frappe.set_route("Form", "Payment Request", pr_name.name);
+			},
+		});
+
+		dialog.show();
+	};
+>>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))
 	onload_post_render() {
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !this.frm.doc.__onload?.load_after_mapping) {
@@ -2516,9 +2641,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
 			fields: fields,
+<<<<<<< HEAD
 			primary_action: function () {
 				const data = dialog.get_values();
 				const selected_data = data.items.filter(item => item?.__checked == 1 );
+=======
+			primary_action: function (data) {
+				const selected_data = data.items.filter((item) => item?.__checked == 1);
+>>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
 					args: {
