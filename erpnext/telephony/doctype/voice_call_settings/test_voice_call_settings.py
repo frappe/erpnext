@@ -57,6 +57,24 @@ class TestVoiceCallSettings(ERPNextTestSuite):
 			)
 		self.assertTrue(frappe.db.exists("Voice Call Settings", settings.name))
 
+	def test_patch_removes_existing_shares(self):
+		from erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users import execute
+
+		owner = make_user("voice-call-owner@example.com")
+		other_user = make_user("voice-call-other@example.com")
+		make_settings(owner)
+		frappe.share.add_docshare(
+			"Voice Call Settings", owner, other_user, write=1, flags={"ignore_share_permission": True}
+		)
+		with as_user(other_user):
+			self.assertIn(owner, frappe.get_list("Voice Call Settings", pluck="name"))
+
+		execute()
+
+		with as_user(other_user):
+			self.assertNotIn(owner, frappe.get_list("Voice Call Settings", pluck="name"))
+			self.assertRaises(frappe.PermissionError, frappe.client.get, "Voice Call Settings", owner)
+
 
 def make_user(email: str) -> str:
 	return make_fenced_user(email, ["Sales User"])
