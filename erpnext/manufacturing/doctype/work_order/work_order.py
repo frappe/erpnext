@@ -43,7 +43,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_l
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 CONSUMPTION_PURPOSES = ("Manufacture", "Material Consumption for Manufacture")
@@ -1742,12 +1742,19 @@ class WorkOrder(Document):
 		return check_if_scrap_warehouse_mandatory(self.bom_no)
 
 	def set_available_qty(self):
+		items_by_warehouse = {}
+		for d in self.get("required_items"):
+			for warehouse in (d.source_warehouse, self.wip_warehouse):
+				if warehouse:
+					items_by_warehouse.setdefault(warehouse, set()).add(d.item_code)
+
+		available_qty = get_latest_stock_qty_for_items(items_by_warehouse)
 		for d in self.get("required_items"):
 			if d.source_warehouse:
-				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				d.available_qty_at_source_warehouse = available_qty.get((d.item_code, d.source_warehouse))
 
 			if self.wip_warehouse:
-				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
+				d.available_qty_at_wip_warehouse = available_qty.get((d.item_code, self.wip_warehouse))
 
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
 		"""set required_items for production to keep track of reserved qty"""
