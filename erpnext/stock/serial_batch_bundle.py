@@ -5,7 +5,17 @@ from frappe import _, bold
 from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, cint, cstr, escape_html, flt, get_link_to_form, getdate, now
+from frappe.utils import (
+	add_days,
+	cint,
+	create_batch,
+	cstr,
+	escape_html,
+	flt,
+	get_link_to_form,
+	getdate,
+	now,
+)
 from pypika import Order
 from pypika.terms import ExistsCriterion
 
@@ -23,6 +33,8 @@ CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES = (
 	"Material Consumption for Manufacture",
 )
 INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES = ("Disassemble", "Material Receipt")
+
+SERIAL_NO_QUERY_BATCH_SIZE = 500
 
 
 def get_serial_no_status(sle):
@@ -727,6 +739,14 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
 	def get_serial_no_wise_incoming_rate(self, serial_nos):
+		incoming_rates = frappe._dict()
+		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
+			for serial_no, incoming_rate in self.get_inward_serial_no_rates(serial_nos_batch):
+				incoming_rates.setdefault(serial_no, incoming_rate)
+
+		return incoming_rates
+
+	def get_inward_serial_no_rates(self, serial_nos):
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		query = (
 			frappe.qb.from_(bundle_child)
@@ -750,11 +770,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		if self.sle.posting_datetime:
 			query = query.where(bundle_child.posting_datetime <= self.sle.posting_datetime)
 
-		incoming_rates = frappe._dict()
-		for serial_no, incoming_rate in query.run():
-			incoming_rates.setdefault(serial_no, incoming_rate)
-
-		return incoming_rates
+		return query.run()
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):
