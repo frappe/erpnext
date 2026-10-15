@@ -274,8 +274,8 @@ frappe.ui.form.on("Project", {
 									project: frm.doc.name,
 								}
 							)
-							.then(() => {
-								frappe.set_route("List", "Task", "Kanban", frm.doc.project_name);
+							.then((r) => {
+								frappe.set_route("List", "Task", "Kanban", r.message);
 							});
 					},
 					__("View")
