@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
+from pypika import analytics
 
 
 def execute(filters=None):
@@ -20,18 +21,16 @@ def get_data(report_filters):
 	invoice = frappe.qb.DocType("Purchase Invoice")
 	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 	item = frappe.qb.DocType("Item")
-	receipt = frappe.qb.DocType("Purchase Receipt")
 	received = get_received_as_on(as_on_date)
 	returned = get_returned_as_on(as_on_date)
 	invoice_first_returns = get_receipt_returns_as_on(
 		as_on_date, "purchase_invoice_item", "invoice_first_returns"
 	)
-	receipt_first_returns = get_receipt_returns_as_on(as_on_date, "name", "receipt_first_returns")
-	received_from_receipt = invoice_item.qty - IfNull(receipt_first_returns.qty, 0)
+	receipt_first = get_receipt_first_received_as_on(as_on_date)
 	received_qty = (
 		IfNull(received.qty, 0)
 		- IfNull(invoice_first_returns.qty, 0)
-		+ Case().when(receipt.name.isnotnull(), received_from_receipt).else_(0)
+		+ IfNull(receipt_first.qty, 0)
 		- IfNull(returned.stock_qty, 0)
 	)
 	returned_qty = IfNull(returned.qty, 0)
@@ -48,14 +47,8 @@ def get_data(report_filters):
 		.on(returned.detail == invoice_item.name)
 		.left_join(invoice_first_returns)
 		.on(invoice_first_returns.detail == invoice_item.name)
-		.left_join(receipt_first_returns)
-		.on(receipt_first_returns.detail == invoice_item.pr_detail)
-		.left_join(receipt)
-		.on(
-			(receipt.name == invoice_item.purchase_receipt)
-			& (receipt.docstatus == 1)
-			& (receipt.posting_date <= as_on_date)
-		)
+		.left_join(receipt_first)
+		.on(receipt_first.detail == invoice_item.name)
 		.select(
 			invoice.name,
 			invoice.supplier,
@@ -128,6 +121,51 @@ def get_returned_as_on(as_on_date):
 		.where(debit_note_item.purchase_invoice_item.isnotnull())
 		.groupby(debit_note_item.purchase_invoice_item)
 	).as_("returned")
+
+
+def get_receipt_first_received_as_on(as_on_date):
+	"""Qty received per invoice row made from a receipt, as on the date.
+
+	A receipt row billed by several invoices has its net received qty (after returns) handed out
+	to those invoice rows in posting order, so a return is counted only once across them.
+	"""
+	invoice = frappe.qb.DocType("Purchase Invoice")
+	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	receipt = frappe.qb.DocType("Purchase Receipt")
+	receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+	receipt_returns = get_receipt_returns_as_on(as_on_date, "name", "receipt_returns")
+	billed_before = get_billed_through(invoice, invoice_item) - invoice_item.qty
+	unallocated = receipt_item.received_qty - IfNull(receipt_returns.qty, 0) - billed_before
+	allocated = (
+		Case()
+		.when(unallocated >= invoice_item.qty, invoice_item.qty)
+		.when(unallocated > 0, unallocated)
+		.else_(0)
+	)
+	return (
+		frappe.qb.from_(invoice_item)
+		.join(invoice)
+		.on(invoice.name == invoice_item.parent)
+		.join(receipt_item)
+		.on(receipt_item.name == invoice_item.pr_detail)
+		.join(receipt)
+		.on(receipt.name == receipt_item.parent)
+		.left_join(receipt_returns)
+		.on(receipt_returns.detail == receipt_item.name)
+		.select(invoice_item.name.as_("detail"), allocated.as_("qty"))
+		.where((invoice.docstatus == 1) & (invoice.is_return == 0) & (invoice.posting_date <= as_on_date))
+		.where((receipt.docstatus == 1) & (receipt.posting_date <= as_on_date))
+	).as_("receipt_first")
+
+
+def get_billed_through(invoice, invoice_item):
+	"""Running total of qty billed against the receipt row, up to and including this invoice row."""
+	return (
+		analytics.Sum(invoice_item.qty)
+		.over(invoice_item.pr_detail)
+		.orderby(invoice.posting_date, invoice.name, invoice_item.idx)
+		.rows(analytics.Preceding(), analytics.CURRENT_ROW)
+	)
 
 
 def get_receipt_returns_as_on(as_on_date, linked_by: str, alias: str):
