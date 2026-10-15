@@ -812,7 +812,7 @@ def create_kanban_board_if_not_exists(project: str) -> str:
 
 
 def get_project_kanban_board(project: str) -> str | None:
-	for board in frappe.get_all(
+	for board in frappe.get_list(
 		"Kanban Board", filters={"reference_doctype": "Task"}, fields=["name", "filters"]
 	):
 		filters = frappe.parse_json(board.filters or "[]")
