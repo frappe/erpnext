@@ -627,3 +627,90 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(len(doc.item_wise_tax_details), 1)
 		self.assertEqual(doc.item_wise_tax_details[0].item_row, doc.items[0].name)
 		self.assertEqual(doc.item_wise_tax_details[0].amount, 10)
+
+	def make_doc_with_cascading_tax(self, charge_type):
+		exempt_from = {}
+		for title, account in [
+			("_Test Service Tax Not Applicable", "_Test Account Service Tax - _TC"),
+			("_Test VAT Not Applicable", "_Test Account VAT - _TC"),
+		]:
+			exempt_from[account] = frappe.get_doc(
+				{
+					"doctype": "Item Tax Template",
+					"title": title,
+					"company": "_Test Company",
+					"taxes": [{"tax_type": account, "tax_rate": 0, "not_applicable": 1}],
+				}
+			).insert(ignore_if_duplicate=True)
+
+		self.doc.items[0].item_tax_template = exempt_from["_Test Account Service Tax - _TC"].name
+		self.doc.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 100,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"item_tax_template": exempt_from["_Test Account VAT - _TC"].name,
+			},
+		)
+		self.doc.extend(
+			"taxes",
+			[
+				{
+					"charge_type": "Actual",
+					"account_head": "_Test Account VAT - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"description": "VAT",
+					"tax_amount": 10,
+				},
+				{
+					"charge_type": charge_type,
+					"row_id": 1,
+					"account_head": "_Test Account Service Tax - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"description": "Service Tax",
+					"rate": 10,
+				},
+			],
+		)
+		self.doc.disable_rounded_total = 1
+		self.doc.save()
+		self.doc.submit()
+		return self.doc
+
+	def get_gl_map(self, doc):
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": doc.doctype, "voucher_no": doc.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		return {d.account: d.debit - d.credit for d in gl_entries}
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_actual_tax_cascading_on_previous_row_total(self):
+		doc = self.make_doc_with_cascading_tax("On Previous Row Total")
+
+		# exempt item 2 gets no VAT share, so service tax is 10% of 100
+		self.assertEqual(doc.taxes[1].tax_amount, 10)
+		self.assertEqual(doc.grand_total, 220)
+
+		gl_map = self.get_gl_map(doc)
+		self.assertEqual(gl_map["_Test Account VAT - _TC"], -10)
+		self.assertEqual(gl_map["_Test Account Service Tax - _TC"], -10)
+		self.assertEqual(gl_map[doc.debit_to], 220)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_actual_tax_cascading_on_previous_row_amount(self):
+		doc = self.make_doc_with_cascading_tax("On Previous Row Amount")
+
+		# exempt item 2 has no VAT amount to charge service tax on
+		self.assertEqual(doc.taxes[1].tax_amount, 0)
+		self.assertEqual(doc.grand_total, 210)
+
+		gl_map = self.get_gl_map(doc)
+		self.assertEqual(gl_map["_Test Account VAT - _TC"], -10)
+		self.assertNotIn("_Test Account Service Tax - _TC", gl_map)
+		self.assertEqual(gl_map[doc.debit_to], 210)
