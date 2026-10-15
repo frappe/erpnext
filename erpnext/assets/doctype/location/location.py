@@ -84,20 +84,28 @@ class Location(NestedSet):
 
 	def update_ancestor_location_features(self):
 		ancestors = self.get_ancestors()
-		subtree = {self.name, *get_descendants_of(self.doctype, self.name, ignore_permissions=True)}
-		features = self.get_subtree_features(subtree)
+		descendants = get_descendants_of(self.doctype, self.name, ignore_permissions=True)
+		subtree = {self.name, *descendants}
+		features = self.get_own_features(subtree)
+		for descendant in descendants:
+			features.extend(frappe.get_doc("Location", descendant).get_own_features(subtree))
 
 		for ancestor in set(self.get("previous_ancestors") or []) - set(ancestors):
 			set_features_in_ancestor(ancestor, subtree, [])
 		for ancestor in ancestors:
 			set_features_in_ancestor(ancestor, subtree, features)
 
-	def get_subtree_features(self, subtree: set[str]) -> list[dict]:
-		"""Return this location's features, tagging any not owned by a location in `subtree` as its own."""
-		features = self.get_location_features()
-		for feature in features:
-			if feature.get("properties").get("feature_of") not in subtree:
-				feature["properties"].update({"child_feature": True, "feature_of": self.location_name})
+	def get_own_features(self, subtree: set[str]) -> list[dict]:
+		"""Return the features drawn on this location, skipping those rolled up from other `subtree` locations.
+
+		Rolled-up features are read from each descendant's saved map, so editing them here has no effect.
+		"""
+		features = []
+		for feature in self.get_location_features():
+			if feature.get("properties").get("feature_of") in subtree - {self.name}:
+				continue
+			feature["properties"].update({"child_feature": True, "feature_of": self.location_name})
+			features.append(feature)
 
 		return features
 

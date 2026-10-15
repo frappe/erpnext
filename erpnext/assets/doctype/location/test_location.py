@@ -67,6 +67,22 @@ class TestLocation(ERPNextTestSuite):
 		feature = json.loads(new_parent.reload().location)["features"][0]
 		self.assertEqual(feature["properties"]["feature_of"], child.location_name)
 
+	def test_ancestors_keep_child_features_deleted_from_group_map(self):
+		parent = make_location("Keep Parent", is_group=1)
+		group = make_location("Keep Group", parent_location=parent.name, is_group=1)
+		child = make_location("Keep Child", parent_location=group.name, location=square(83.0))
+
+		group.reload()
+		location = json.loads(group.location)
+		location["features"] = []
+		group.location = json.dumps(location)
+		group.save()
+
+		self.assertEqual(get_area_and_feature_count(parent.name), (child.area, 1))
+		feature = json.loads(parent.reload().location)["features"][0]
+		self.assertEqual(feature["geometry"], json.loads(square(83.0))["features"][0]["geometry"])
+		self.assertEqual(feature["properties"]["feature_of"], child.name)
+
 	def test_child_cannot_replace_sibling_features_in_parent(self):
 		parent = make_location("Sibling Parent", is_group=1)
 		sibling = make_location("Sibling A", parent_location=parent.name, location=square(80.0))
