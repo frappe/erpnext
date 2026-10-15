@@ -2724,6 +2724,20 @@ class TestPaymentEntryValidation(ERPNextTestSuite):
 		doc.setup_party_account_field()
 		doc.validate_party_details()
 
+	def test_custom_party_details_use_name_without_a_title_field(self):
+		frappe.get_doc(doctype="Party Type", party_type="Sales Partner", account_type="Receivable").insert()
+		party = "_Test Sales Partner India - 1"
+		details = get_party_details("_Test Company", "Sales Partner", party, nowdate())
+		self.assertEqual(details["party_name"], party)
+		self.assertEqual(details["party_account"], "Debtors - _TC")
+
+	def test_party_details_use_configured_title_field(self):
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.customer_name = "Customer display title"
+		customer.save()
+		details = get_party_details("_Test Company", "Customer", customer.name, nowdate())
+		self.assertEqual(details["party_name"], "Customer display title")
+
 	def test_amount_and_exchange_rate_fields_are_mandatory(self):
 		# every field but target_exchange_rate is set, so that missing one raises
 		doc = self.make_pe(
