@@ -2,7 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form
 
 
 class Cheque(Document):
@@ -35,8 +37,46 @@ class Cheque(Document):
 		frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
 		super().check_if_latest()
 
+	def validate(self):
+		# Cheque Book makes cheques with a bulk insert, so only a manual insert or save gets here
+		self.refuse_manual_change()
+
+	def before_update_after_submit(self):
+		self.refuse_manual_change()
+
 	def before_cancel(self):
+		self.refuse_manual_change()
 		self.status = "Cancelled"
 
 	def on_cancel(self):
 		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).update_status()
+
+	@frappe.whitelist(methods=["POST"])
+	def cancel_with_reason(self, reason: str, remarks: str | None = None):
+		"""Cancel a spoiled or lost cheque that no payment uses."""
+		if self.status == "Issued":
+			frappe.throw(
+				_("Cheque {0} is used in {1}. Cancel the Payment Entry to cancel the cheque.").format(
+					frappe.bold(self.cheque_no), get_link_to_form("Payment Entry", self.payment_entry)
+				)
+			)
+		if not reason.strip():
+			frappe.throw(_("Enter a reason to cancel the cheque"), frappe.MandatoryError)
+
+		self.void(reason.strip(), remarks)
+
+	def void(self, reason: str | None = None, remarks: str | None = None):
+		"""Cancel the cheque and record why. The caller decides if the cheque can be cancelled."""
+		self.cancellation_reason = reason
+		self.remarks = remarks
+		self.flags.system_change = True
+		self.cancel()
+
+	def refuse_manual_change(self):
+		if not self.flags.system_change:
+			frappe.throw(
+				_(
+					"A cheque changes only through its Cheque Book, its Payment Entry or Cancel Cheque with a reason"
+				),
+				title=_("Cheque is read only"),
+			)
