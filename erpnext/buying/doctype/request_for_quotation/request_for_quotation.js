@@ -277,8 +277,9 @@ frappe.ui.form.on("Request for Quotation", {
 				}
 
 				const quotes = r.message || [];
-				const has_quotes = Boolean(quotes && quotes.length > 0);
-				frm.events.toggle_quotations_tab(frm, has_quotes, quotes);
+				// a comparison needs at least two supplier quotations
+				const quotation_count = new Set(quotes.map((q) => q.supplier_quotation).filter(Boolean)).size;
+				frm.events.toggle_quotations_tab(frm, quotation_count > 1, quotes);
 			},
 		});
 	},
@@ -530,7 +531,7 @@ frappe.ui.form.on("Request for Quotation", {
 		const min_offer_total = complete_offer_totals.length > 0 ? Math.min(...complete_offer_totals) : null;
 
 		const quotation_count = offers.length;
-		const categorize_by = quotation_count === 1 ? "Item" : frm.quotations_categorize_by || "Supplier";
+		const categorize_by = frm.quotations_categorize_by || "Supplier";
 		const has_quotes = quotes && quotes.length > 0;
 
 		const context = {
@@ -601,41 +602,36 @@ frappe.ui.form.on("Request for Quotation", {
 
 		// Categorize By Control using Frappe UI Control
 		if ($container.find(".categorize-by-filter-container").length) {
-			if (quotation_count === 1) {
-				$container.find(".categorize-by-filter-container").hide();
-			} else {
-				$container.find(".categorize-by-filter-container").show();
-				const categorize_control = frappe.ui.form.make_control({
-					df: {
-						fieldtype: "Select",
-						fieldname: "quotations_categorize_by",
-						options: [
-							{ label: __("Categorize by Supplier"), value: "Supplier" },
-							{ label: __("Categorize by Item"), value: "Item" },
-						],
-						input_class: "input-sm",
-						change: function () {
-							const val = categorize_control.get_value() || "Supplier";
-							if (val !== (frm.quotations_categorize_by || "Supplier")) {
-								frm.quotations_categorize_by = val;
-								frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
-							}
-						},
+			const categorize_control = frappe.ui.form.make_control({
+				df: {
+					fieldtype: "Select",
+					fieldname: "quotations_categorize_by",
+					options: [
+						{ label: __("Categorize by Supplier"), value: "Supplier" },
+						{ label: __("Categorize by Item"), value: "Item" },
+					],
+					input_class: "input-sm",
+					change: function () {
+						const val = categorize_control.get_value() || "Supplier";
+						if (val !== (frm.quotations_categorize_by || "Supplier")) {
+							frm.quotations_categorize_by = val;
+							frm.events.draw_quotations_comparison_table(frm, $wrapper, quotes);
+						}
 					},
-					parent: $container.find(".categorize-by-filter-container"),
-					only_input: true,
-				});
-				categorize_control.set_value(categorize_by || "Supplier");
-				categorize_control.refresh();
-				$(categorize_control.wrapper).css({ position: "relative", width: "100%", margin: "0" });
-				$(categorize_control.wrapper).find(".select-icon").css({
-					position: "absolute",
-					right: "10px",
-					top: "50%",
-					transform: "translateY(-50%)",
-					"pointer-events": "none",
-				});
-			}
+				},
+				parent: $container.find(".categorize-by-filter-container"),
+				only_input: true,
+			});
+			categorize_control.set_value(categorize_by);
+			categorize_control.refresh();
+			$(categorize_control.wrapper).css({ position: "relative", width: "100%", margin: "0" });
+			$(categorize_control.wrapper).find(".select-icon").css({
+				position: "absolute",
+				right: "10px",
+				top: "50%",
+				transform: "translateY(-50%)",
+				"pointer-events": "none",
+			});
 		}
 
 		$container.find(".btn-new-supplier-quotation").on("click", function () {
