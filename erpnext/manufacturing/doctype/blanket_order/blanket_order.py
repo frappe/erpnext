@@ -426,11 +426,14 @@ def validate_against_blanket_order(order_doc):
 			bo_doc.set_order_rates(order_doc)
 
 
-def validate_reopen_against_blanket_order(order_doc):
+def validate_reopen_against_blanket_order(order_doc, rows=None):
 	fulfilled_field = FULFILLED_QTY_FIELD[order_doc.doctype]
+	if rows is None:
+		rows = [item for item in order_doc.get("items") if not item.get("closed")]
+
 	order_data = {}
-	for item in order_doc.get("items"):
-		if item.blanket_order and not item.get("closed"):
+	for item in rows:
+		if item.blanket_order:
 			pending_qty = (flt(item.qty) - flt(item.get(fulfilled_field))) * (
 				flt(item.conversion_factor) or 1
 			)

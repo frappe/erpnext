@@ -242,6 +242,37 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
 		self.assertEqual(blanket_order_ordered_qty(bo), 80)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_closing_and_reopening_one_row_of_an_open_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=100)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 100,
+				"schedule_date": today(),
+				"warehouse": po.items[0].warehouse,
+			},
+		)
+		po.submit()
+		receive_purchase_order(po, 80)
+
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+		self.assertEqual(blanket_order_ordered_qty(bo), 80)
+
+		make_purchase_order_against(bo, qty=20).submit()
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"cannot be ordered more than",
+			update_closed_status,
+			"Purchase Order",
+			po.name,
+			[po.items[0].name],
+			0,
+		)
+
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
 		po = make_purchase_order_against(bo, qty=10)
