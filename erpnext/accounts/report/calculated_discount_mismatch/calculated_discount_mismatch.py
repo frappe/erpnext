@@ -189,4 +189,6 @@ def parse_formatted_amount(value: str | float, currency: str) -> float:
 	number_format = get_number_format()
 	symbol = frappe.db.get_value("Currency", currency, "symbol", cache=True) or currency
 	amount = value.replace(_(symbol), "").strip().replace(number_format.thousands_separator, "")
-	return flt(amount.replace(number_format.decimal_separator, "."))
+	if number_format.decimal_separator:
+		amount = amount.replace(number_format.decimal_separator, ".")
+	return flt(amount)

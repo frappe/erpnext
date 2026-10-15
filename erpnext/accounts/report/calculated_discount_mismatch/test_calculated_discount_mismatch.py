@@ -2,13 +2,18 @@
 # See license.txt
 
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe.desk.query_report import run
 from frappe.utils.formatters import format_value
+from frappe.utils.number_format import NumberFormat
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.calculated_discount_mismatch.calculated_discount_mismatch import execute
+from erpnext.accounts.report.calculated_discount_mismatch.calculated_discount_mismatch import (
+	execute,
+	parse_formatted_amount,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -101,6 +106,19 @@ class TestCalculatedDiscountMismatch(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		self.assertIsNone(row)
+
+	def test_amounts_parse_in_formats_without_decimal_separator(self):
+		symbol = frappe.db.get_value("Currency", "INR", "symbol") or "INR"
+		for number_format, formatted in (("#,###", "1,250"), ("#.###", "1.250")):
+			with (
+				self.subTest(number_format=number_format),
+				patch(
+					"erpnext.accounts.report.calculated_discount_mismatch.calculated_discount_mismatch.get_number_format",
+					return_value=NumberFormat.from_string(number_format),
+				),
+			):
+				self.assertEqual(parse_formatted_amount(f"{symbol} {formatted}", "INR"), 1250.0)
+				self.assertEqual(parse_formatted_amount("100", "INR"), 100.0)
 
 	def format_discount(self, invoice: "frappe.Document", amount: float) -> str:
 		discount_field = frappe.get_meta("Sales Invoice").get_field("discount_amount")
