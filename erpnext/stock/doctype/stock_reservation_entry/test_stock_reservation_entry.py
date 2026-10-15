@@ -1378,6 +1378,10 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		sre.update_status()
 
 		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "status"), "Partially Used")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
 	def test_read_only_users_cannot_reserve_stock(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_subcontracting_order,
@@ -1411,7 +1415,6 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		frappe.set_user(user)
 		self.assertRaises(frappe.PermissionError, sales_order.create_stock_reservation_entries)
 		self.assertRaises(frappe.PermissionError, subcontracting_order.reserve_raw_materials)
-
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -1524,13 +1527,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
-		{
-			"enable_stock_reservation": 1,
-			"allow_partial_reservation": 1,
-			"allow_negative_stock": 0,
-			"auto_reserve_stock_for_sales_order_on_purchase": 1,
-		},
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
 	)
 	def test_pick_list_reservation_is_not_rounded_up_to_a_whole_sales_unit(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -1572,6 +1569,15 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		)
 		self.assertLessEqual(sum(reserved), 5)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_stock_for_sales_order_on_purchase": 1,
+		},
+	)
 	def test_split_receipts_reserve_the_completed_sales_unit(self):
 		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
 		item_code = make_item(
