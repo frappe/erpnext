@@ -24,7 +24,7 @@ class ChequeBook(Document):
 
 		amended_from: DF.Link | None
 		bank_account: DF.Link
-		cheque_book_no: DF.Data
+		cheque_book_no: DF.Int
 		cheque_end_no: DF.Data
 		cheque_start_no: DF.Data
 		company: DF.Link | None
@@ -51,7 +51,17 @@ class ChequeBook(Document):
 
 	def validate(self):
 		self.validate_bank_account()
-		if not self.amended_from and frappe.db.get_value(
+		self.set_cheque_book_no()
+		self.validate_duplicate_cheque_book_no()
+		self.validate_cheque_range()
+		self.validate_overlapping_range()
+
+	def validate_duplicate_cheque_book_no(self):
+		"""An amendment keeps the number of the book it replaces, so it is left alone."""
+		if self.amended_from:
+			return
+
+		if name := frappe.db.get_value(
 			"Cheque Book",
 			{
 				"bank_account": self.bank_account,
@@ -62,15 +72,41 @@ class ChequeBook(Document):
 			for_update=True,
 		):
 			frappe.throw(
-				_("Cheque Book No {0} already exists for Bank Account {1}").format(
-					frappe.bold(self.cheque_book_no), frappe.bold(self.bank_account)
+				_("Cheque Book No {0} already exists for Bank Account {1} as {2}").format(
+					frappe.bold(self.cheque_book_no),
+					frappe.bold(self.bank_account),
+					get_link_to_form("Cheque Book", name),
 				)
 			)
-		self.validate_cheque_range()
-		self.validate_overlapping_range()
 
 	def before_submit(self):
 		self.status = "Submitted"
+
+	@frappe.whitelist()
+	def set_cheque_book_no(self):
+		"""Suggest a number for the selected account, preserving a manually entered number."""
+		number = str(self.cheque_book_no or "").strip()
+		if number and not (number.isascii() and number.isdigit()):
+			frappe.throw(_("Cheque Book No must be a whole number"))
+		self.cheque_book_no = int(number) if number else 0
+		suggestion = self.get_onload().get("cheque_book_no_suggestion", {})
+		if self.bank_account and (
+			not self.cheque_book_no
+			or (
+				self.is_new()
+				and suggestion.get("bank_account") != self.bank_account
+				and suggestion.get("number") == self.cheque_book_no
+			)
+		):
+			self.check_permission("create" if self.is_new() else "write")
+			frappe.has_permission("Bank Account", doc=self.bank_account, ptype="read", throw=True)
+			self.cheque_book_no = get_next_cheque_book_no(self.bank_account, exclude=self.name)
+			self.set_onload(
+				"cheque_book_no_suggestion",
+				{"bank_account": self.bank_account, "number": self.cheque_book_no},
+			)
+		if self.cheque_book_no > 2147483647:
+			frappe.throw(_("Cheque Book No cannot exceed {0}").format(2147483647))
 
 	def validate_bank_account(self):
 		bank_account = frappe.db.get_value(
@@ -200,26 +236,20 @@ def count_free_cheques(book, for_update=False):
 	return book.no_of_cheques - len(get_occupied_cheque_nos(book, for_update=for_update))
 
 
-@frappe.whitelist()
-def get_next_cheque_book_no(bank_account: str) -> str:
-	"""Suggest the number after the highest numbered cheque book of the bank account, else 01.
+def get_next_cheque_book_no(bank_account: str, exclude: str | None = None) -> int:
+	"""The number after the highest numbered cheque book of the bank account, else 1.
 
-	Cancelled books count too, so their book numbers are not reused.
+	Cancelled books count too, so their book numbers are not reused. Every book of the
+	account is read, whatever the saving user may list, or the number would repeat.
 	"""
-	frappe.has_permission("Cheque Book", throw=True)
-	frappe.has_permission("Bank Account", doc=bank_account, ptype="read", throw=True)
-	numbers = [
-		no
-		for no in frappe.get_list(
-			"Cheque Book", filters={"bank_account": bank_account}, pluck="cheque_book_no"
-		)
-		if no.isdigit()
-	]
-	if not numbers:
-		return "01"
-
-	last_no = max(numbers, key=int)
-	return str(int(last_no) + 1).zfill(len(last_no))
+	numbers = frappe.db.get_values(
+		"Cheque Book",
+		filters={"bank_account": bank_account, "name": ("!=", exclude or "")},
+		fieldname="cheque_book_no",
+		pluck=True,
+		for_update=True,
+	)
+	return max(numbers, default=0) + 1
 
 
 @frappe.whitelist()

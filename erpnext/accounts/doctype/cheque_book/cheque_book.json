@@ -84,9 +84,10 @@
   },
   {
    "fieldname": "cheque_book_no",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Cheque Book No",
+   "non_negative": 1,
    "reqd": 1
   },
   {
@@ -166,7 +167,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-12 02:42:29.000000",
+ "modified": "2026-10-15 14:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Book",

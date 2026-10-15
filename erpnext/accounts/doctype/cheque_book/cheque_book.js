@@ -9,17 +9,23 @@ frappe.ui.form.on("Cheque Book", {
 		}));
 	},
 
+	bank_account(frm) {
+		if (!frm.is_new() || !frm.doc.bank_account) return;
+
+		return frm.call({ doc: frm.doc, method: "set_cheque_book_no", freeze: true });
+	},
+
 	onload_post_render(frm) {
-		// Keep numeric input as text so the displayed leading zeros are preserved.
-		["cheque_start_no", "cheque_end_no"].forEach((fieldname) =>
+		// Cheque leaf numbers retain their leading zeros.
+		["cheque_book_no", "cheque_start_no", "cheque_end_no"].forEach((fieldname) =>
 			frm.fields_dict[fieldname].$input
 				?.attr({ inputmode: "numeric", pattern: "[0-9]*" })
-				.off(".cheque_range")
-				.on("input.cheque_range", (e) => {
+				.off(".cheque_number")
+				.on("input.cheque_number", (e) => {
 					e.target.value = e.target.value.replace(/\D/g, "");
 				})
-				.on("blur.cheque_range", (e) => {
-					if (/^\d+$/.test(e.target.value)) {
+				.on("blur.cheque_number", (e) => {
+					if (fieldname !== "cheque_book_no" && /^\d+$/.test(e.target.value)) {
 						return frm.set_value(fieldname, BigInt(e.target.value).toString().padStart(6, "0"));
 					}
 				})
@@ -66,17 +72,6 @@ frappe.ui.form.on("Cheque Book", {
 		}
 
 		show_cheques(frm);
-	},
-
-	async bank_account(frm) {
-		if (!frm.is_new() || !frm.doc.bank_account || frm.doc.cheque_book_no) return;
-
-		frm.set_value(
-			"cheque_book_no",
-			await frappe.xcall("erpnext.accounts.doctype.cheque_book.cheque_book.get_next_cheque_book_no", {
-				bank_account: frm.doc.bank_account,
-			})
-		);
 	},
 });
 
