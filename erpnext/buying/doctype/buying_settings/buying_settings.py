@@ -127,3 +127,7 @@ def get_billed_qty(doc, item) -> float:
 		return flt(item.qty)
 
 	return flt(item.qty) + flt(item.rejected_qty)
+
+
+def get_billed_stock_qty(doc, item) -> float:
+	return get_billed_qty(doc, item) * (flt(item.get("conversion_factor")) or 1)

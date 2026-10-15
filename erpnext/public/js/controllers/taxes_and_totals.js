@@ -139,9 +139,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	apply_mapped_discount_to_item(item) {
-		const billed_qty = this.get_billed_qty(item);
 		item.distributed_discount_amount = flt(
-			flt(item.mapped_additional_discount_amount) * billed_qty,
+			flt(item.mapped_additional_discount_amount) * this.get_billed_stock_qty(item),
 			precision("distributed_discount_amount", item)
 		);
 		if (!item.distributed_discount_amount) return;
@@ -150,7 +149,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			item.net_amount - item.distributed_discount_amount,
 			precision("net_amount", item)
 		);
-		item.net_rate = flt(item.net_amount / billed_qty, precision("net_rate", item));
+		item.net_rate = flt(item.net_amount / this.get_billed_qty(item), precision("net_rate", item));
 		item._unrounded_net_amount = null;
 		this.set_in_company_currency(item, ["net_rate", "net_amount"]);
 	}
@@ -233,6 +232,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		return flt(item.qty) + flt(item.rejected_qty);
+	}
+
+	get_billed_stock_qty(item) {
+		return this.get_billed_qty(item) * (flt(item.conversion_factor) || 1);
 	}
 
 	calculate_item_values() {
@@ -389,7 +392,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			});
 
 			item._mapped_discount_inclusive_amount =
-				flt(item.mapped_additional_discount_amount) * me.get_billed_qty(item) * (1 + total_tax_slope);
+				flt(item.mapped_additional_discount_amount) *
+				me.get_billed_stock_qty(item) *
+				(1 + total_tax_slope);
 
 			if (!me.discount_amount_applied && item.qty && (total_tax_intercept || total_tax_slope)) {
 				var amount = flt(item.amount) - total_tax_intercept;

@@ -46,7 +46,7 @@ from erpnext.accounts.utils import (
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
-	get_billed_qty,
+	get_billed_stock_qty,
 )
 from erpnext.controllers.item_close import clear_closed_rows_on_amend
 from erpnext.controllers.print_settings import (
@@ -1662,10 +1662,10 @@ class AccountsController(TransactionBase):
 			return
 
 		for item in self.items:
-			billed_qty = get_billed_qty(self, item)
-			if billed_qty:
+			billed_stock_qty = get_billed_stock_qty(self, item)
+			if billed_stock_qty:
 				item.mapped_additional_discount_amount = flt(
-					flt(item.distributed_discount_amount) / billed_qty,
+					flt(item.distributed_discount_amount) / billed_stock_qty,
 					item.precision("mapped_additional_discount_amount"),
 				)
 
@@ -1782,7 +1782,13 @@ class AccountsController(TransactionBase):
 			.where(item_table.mapped_additional_discount_amount != 0)
 		)
 		applied = flt(
-			linked_rows.select(Sum(item_table.mapped_additional_discount_amount * item_table.qty)).run()[0][0]
+			linked_rows.select(
+				Sum(
+					item_table.mapped_additional_discount_amount
+					* item_table.qty
+					* item_table.conversion_factor
+				)
+			).run()[0][0]
 		)
 		if self.doctype == "Purchase Invoice":
 			applied += self.get_mapped_discount_on_billed_rejected_qty(linked_rows, item_table)
@@ -1807,7 +1813,11 @@ class AccountsController(TransactionBase):
 			.where(item_table.rejected_qty != 0)
 			.select(
 				*invoice_fields,
-				Sum(item_table.mapped_additional_discount_amount * item_table.rejected_qty).as_("discount"),
+				Sum(
+					item_table.mapped_additional_discount_amount
+					* item_table.rejected_qty
+					* item_table.conversion_factor
+				).as_("discount"),
 			)
 			.groupby(invoice.name, *invoice_fields)
 		).run(as_dict=True)
