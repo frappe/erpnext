@@ -244,15 +244,19 @@ def _snapshot_variant(snapshot, vid, base_ids, head_ids):
 
 
 def _assertions(expect, base_ids, head_ids, skipped, load, check):
-	"""Evaluate every assertion. A required side passes only if one of its assertions ran.
+	"""Evaluate every assertion. Every locked assertion must run, or the review is INVALID.
 
 	A variant the run skipped had the same settings as the site default, so its
-	assertions run against v0. An unknown variant id makes the review INVALID.
+	assertions run against v0. An assertion that names a variant explicitly must
+	run on it: an unknown variant, or a variant without that snapshot, makes the
+	review INVALID. With "*", variants that cannot have the snapshot are left out,
+	but the assertion must still run on at least one variant.
 	"""
 	order = list(dict.fromkeys(["v0", *base_ids, *head_ids]))
 	ran = {"base": 0, "head": 0}
 	for a in expect.get("assertions", []):
-		wanted = order if a.get("variants", "*") == "*" else a["variants"]
+		explicit = a.get("variants", "*") != "*"
+		wanted = a["variants"] if explicit else order
 		targets = set()
 		for vid in wanted:
 			vid = "v0" if vid in skipped else vid
@@ -260,15 +264,22 @@ def _assertions(expect, base_ids, head_ids, skipped, load, check):
 				check("INVALID", "assertion", a["path"], f"assertion names unknown variant {vid!r}")
 				continue
 			target = _snapshot_variant(a["snapshot"], vid, base_ids, head_ids)
-			if target is None:
+			if target is not None:
+				targets.add(target)
+			elif explicit:
 				check(
-					"WARN",
+					"INVALID",
 					"assertion",
 					f"{vid} {a['snapshot']} {a['path']}",
-					"not run: this variant has no such snapshot",
+					f"variant {vid} has no {a['snapshot']} snapshot on this run, so this assertion cannot run",
 				)
-			else:
-				targets.add(target)
+		if not targets:
+			check(
+				"INVALID",
+				"assertion",
+				f"{a['snapshot']} {a['path']}",
+				"this assertion ran on no variant",
+			)
 		for vid in sorted(targets, key=order.index):
 			snap = load(SIDES[a["snapshot"]].format(v=vid))
 			if a["snapshot"].startswith("ui_"):

@@ -120,7 +120,7 @@ rate explicitly. A scenario must give the same ledger every time it runs.
 
 `expect.json` holds two lists:
 
-- `assertions`: exact values on one snapshot. Each one has a `path` (for example `docs.s0_invoice.outstanding_amount`, `balances.Debtors`, `gl.<s0_invoice>` or `outcomes.cancel-s0`), a `snapshot` (`base`, `head`, `base_legacy` or `head_legacy`), the value it `equals`, and a `why` that quotes the requirement. A bug review needs at least one `base` assertion (**Reported**) and one `head` assertion (**Expected**).
+- `assertions`: exact values on one snapshot. Each one has a `path` (for example `docs.s0_invoice.outstanding_amount`, `balances.Debtors`, `gl.<s0_invoice>` or `outcomes.cancel-s0`), a `snapshot` (`base`, `head`, `base_legacy` or `head_legacy`), the value it `equals`, and a `why` that quotes the requirement. A bug review needs at least one `base` assertion (**Reported**) and one `head` assertion (**Expected**). Every assertion must run. An assertion that lists `variants` must run on each one, so a listed variant without that snapshot (for example `head_legacy` on a setting that only the PR adds) makes the review `INVALID`. With `"*"`, the assertion runs on every variant that has the snapshot.
 - `allowed_changes`: each ledger difference between base code and PR code that the fix may cause. Each one has a `comparison` (`build`, `rescan`, `legacy`, `flip` or `*`), a `path` glob, optional `variants`, and a `reason`. Declare the narrowest path that covers the change.
 
 For a feature rather than a bug, set `"kind": "feature"`. It then needs only `head` assertions.
