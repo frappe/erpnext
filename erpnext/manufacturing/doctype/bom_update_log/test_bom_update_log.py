@@ -1,8 +1,11 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
+from erpnext.manufacturing.doctype.bom_update_log import bom_update_log
 from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import (
 	BOMMissingError,
 	resume_bom_cost_update_jobs,
@@ -102,6 +105,214 @@ class TestBOMUpdateLog(ERPNextTestSuite):
 		exploded_items = [item.item_code for item in exploded_items]
 		expected_exploded_items = ["B-Item C", "B-Item G"]
 		self.assertEqual(sorted(exploded_items), sorted(expected_exploded_items))
+
+	def test_update_cost_without_leaf_boms_completes(self):
+		with patch.object(bom_update_log, "get_leaf_boms", return_value=[]):
+			log = enqueue_update_cost()
+
+		log.reload()
+		self.assertEqual(log.status, "Completed")
+		self.assertFalse(log.bom_batches)
+		enqueue_update_cost()
+
+	def test_update_cost_reaches_parents_of_inactive_child(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		child_rm = make_item("_Test BUL Child RM", {"is_stock_item": 1}).name
+		parent_rm = make_item("_Test BUL Parent RM", {"is_stock_item": 1}).name
+		child_item = make_item("_Test BUL Child", {"is_stock_item": 1}).name
+		parent_item = make_item("_Test BUL Parent", {"is_stock_item": 1}).name
+		top_item = make_item("_Test BUL Top", {"is_stock_item": 1}).name
+		for item in (child_rm, parent_rm):
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		child = make_test_bom(child_item, [(child_rm, None)])
+		parent = make_test_bom(parent_item, [(child_item, child.name), (parent_rm, None)])
+		top = make_test_bom(top_item, [(parent_item, parent.name)])
+		child.db_set("is_active", 0)
+
+		make_stock_entry(item_code=parent_rm, target="_Test Warehouse - _TC", qty=10, basic_rate=500)
+		log = update_cost_in_all_boms_in_test()
+
+		self.assertEqual(log.status, "Completed")
+		self.assertEqual(
+			frappe.db.get_value("BOM Item", {"parent": parent.name, "item_code": parent_rm}, "rate"), 300
+		)
+		self.assertEqual(
+			frappe.db.get_value("BOM", top.name, "total_cost"),
+			frappe.db.get_value("BOM", parent.name, "total_cost"),
+		)
+
+	def test_replace_refuses_unusable_new_bom(self):
+		draft = frappe.copy_doc(self.new_bom_doc)
+		draft.docstatus = 0
+		draft.insert()
+		self.assertRaises(
+			frappe.ValidationError,
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=draft.name),
+		)
+
+		inactive = frappe.copy_doc(self.new_bom_doc)
+		inactive.docstatus = 0
+		inactive.insert()
+		inactive.submit()
+		inactive.db_set("is_active", 0)
+		self.assertRaises(
+			frappe.ValidationError,
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=inactive.name),
+		)
+
+		foreign = frappe.copy_doc(self.new_bom_doc)
+		foreign.docstatus = 0
+		foreign.currency = "INR"
+		foreign.conversion_rate = 1
+		foreign.insert()
+		foreign.submit()
+		self.assertRaises(
+			frappe.ValidationError,
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=self.boms.current_bom, new_bom=foreign.name),
+		)
+
+	def test_replace_recalculates_rows_in_their_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		rm = make_item("_Test BUL UOM RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_stock_entry(item_code=rm, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sub_item = make_item(
+			"_Test BUL UOM Sub",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		parent_item = make_item("_Test BUL UOM Parent", {"is_stock_item": 1}).name
+		top_item = make_item("_Test BUL UOM Top", {"is_stock_item": 1}).name
+
+		sub_1 = make_test_bom(sub_item, [(rm, None, 1)])
+		sub_2 = make_test_bom(sub_item, [(rm, None, 0.5)])
+		parent = make_test_bom(parent_item, [(sub_item, sub_1.name, 1, "Box")])
+		top = make_test_bom(top_item, [(parent_item, parent.name, 1)])
+		self.assertEqual(frappe.db.get_value("BOM", top.name, "total_cost"), 1200)
+
+		enqueue_replace_bom(boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name))
+
+		row = frappe.db.get_value(
+			"BOM Item", {"parent": parent.name}, ["bom_no", "rate", "amount"], as_dict=True
+		)
+		self.assertEqual((row.bom_no, row.rate, row.amount), (sub_2.name, 600, 600))
+		self.assertEqual(frappe.db.get_value("BOM", parent.name, "total_cost"), 600)
+		self.assertEqual(frappe.db.get_value("BOM", top.name, "total_cost"), 600)
+
+	def test_replace_refuses_semi_finished_goods_operation_boms(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		rm = make_item("_Test BUL Op RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_stock_entry(item_code=rm, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sub_item = make_item("_Test BUL Op Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test BUL Op FG", {"is_stock_item": 1}).name
+		make_workstation({"workstation": "_Test BUL Workstation"})
+		make_operation({"operation": "_Test BUL Operation", "workstation": "_Test BUL Workstation"})
+
+		sub_1 = make_test_bom(sub_item, [(rm, None, 1)])
+		sub_2 = make_test_bom(sub_item, [(rm, None, 2)])
+
+		parent = frappe.new_doc("BOM", company="_Test Company", item=fg_item, quantity=1, currency="INR")
+		parent.with_operations = 1
+		parent.track_semi_finished_goods = 1
+		operation = {
+			"operation": "_Test BUL Operation",
+			"workstation": "_Test BUL Workstation",
+			"time_in_mins": 10,
+		}
+		parent.append(
+			"operations", dict(operation, finished_good=sub_item, bom_no=sub_1.name, finished_good_qty=1)
+		)
+		parent.append("operations", dict(operation, finished_good=fg_item, is_final_finished_good=1))
+		parent.append("items", {"item_code": sub_item, "qty": 1, "operation_row_id": 2, "do_not_explode": 1})
+		parent.insert()
+		parent.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"track semi-finished goods",
+			enqueue_replace_bom,
+			boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name),
+		)
+		self.assertEqual(
+			frappe.db.get_value("BOM Operation", {"parent": parent.name, "idx": 1}, "bom_no"), sub_1.name
+		)
+
+	def test_replace_needs_write_access_to_operation_linked_parents(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		rm = make_item("_Test BUL Perm RM", {"is_stock_item": 1}).name
+		sub_item = make_item("_Test BUL Perm Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test BUL Perm FG", {"is_stock_item": 1}).name
+		make_workstation({"workstation": "_Test BUL Perm Workstation"})
+		make_operation({"operation": "_Test BUL Perm Operation", "workstation": "_Test BUL Perm Workstation"})
+		sub_1 = make_test_bom(sub_item, [(rm, None, 1)])
+		sub_2 = make_test_bom(sub_item, [(rm, None, 2)])
+
+		parent = frappe.new_doc("BOM", company="_Test Company", item=fg_item, quantity=1, currency="INR")
+		parent.with_operations = 1
+		parent.append(
+			"operations",
+			{
+				"operation": "_Test BUL Perm Operation",
+				"workstation": "_Test BUL Perm Workstation",
+				"time_in_mins": 10,
+				"bom_no": sub_1.name,
+			},
+		)
+		parent.append("items", {"item_code": rm, "qty": 1})
+		parent.insert()
+		parent.submit()
+
+		fenced = make_fenced_user(
+			"bom-op-fenced@example.com", ["Manufacturing Manager"], [("BOM", sub_1.name), ("BOM", sub_2.name)]
+		)
+		with as_user(fenced):
+			self.assertRaises(
+				frappe.PermissionError,
+				enqueue_replace_bom,
+				boms=frappe._dict(current_bom=sub_1.name, new_bom=sub_2.name),
+			)
+
+
+def make_test_bom(item, rows):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": item,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": 1,
+			"rm_cost_as_per": "Valuation Rate",
+			"items": [make_test_bom_row(*row) for row in rows],
+		}
+	)
+	bom.insert()
+	bom.submit()
+	return bom
+
+
+def make_test_bom_row(item_code, bom_no, qty=1, uom=None):
+	row = {"item_code": item_code, "qty": qty, "bom_no": bom_no, "source_warehouse": "_Test Warehouse - _TC"}
+	if uom:
+		row["uom"] = uom
+	return row
 
 
 def remove_bom(item_code):
