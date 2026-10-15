@@ -547,3 +547,4 @@ erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
 erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types
 erpnext.patches.v16_0.unhide_item_barcode_fields
 execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report", 1)
+erpnext.patches.v16_0.migrate_project_is_active_to_status

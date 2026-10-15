@@ -481,7 +481,7 @@ def get_project_name(
 	proj = qb.DocType("Project")
 	meta = frappe.get_meta(doctype)
 
-	list_filters = [["status", "not in", ["Completed", "Cancelled", "On hold"]]]
+	list_filters = [["status", "=", "Open"]]
 
 	if filters:
 		if filters.get("customer"):
