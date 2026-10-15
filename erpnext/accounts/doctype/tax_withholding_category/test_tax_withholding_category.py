@@ -3768,6 +3768,68 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.assertEqual(entries[0].status, "Settled")
 		self.assertEqual(entries[0].withholding_amount, 2000.0)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_tds_on_gross_total_with_actual_tax_not_applicable_item(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		create_tax_withholding_category(
+			category_name="Gross Total TDS Category",
+			rate=10,
+			from_date=fiscal_year[1],
+			to_date=fiscal_year[2],
+			account="TDS - _TC",
+			tax_deduction_basis="Gross Total",
+		)
+		vat_exempt = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test VAT Not Applicable",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account VAT - _TC", "tax_rate": 0, "not_applicable": 1}],
+			}
+		).insert(ignore_if_duplicate=True)
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "Gross Total TDS Category")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier5", rate=100)
+		pi.append(
+			"items",
+			{
+				"item_code": pi.items[0].item_code,
+				"qty": 1,
+				"rate": 100,
+				"cost_center": "Main - _TC",
+				"expense_account": "Stock Received But Not Billed - _TC",
+				"item_tax_template": vat_exempt.name,
+			},
+		)
+		pi.append(
+			"taxes",
+			{
+				"category": "Total",
+				"charge_type": "Actual",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "Main - _TC",
+				"tax_amount": 10,
+				"description": "VAT",
+			},
+		)
+		pi.save()
+		pi.submit()
+
+		# item 1 carries the full VAT, so taxable amount is 100 + 10 + 100
+		entry = pi.tax_withholding_entries[0]
+		self.assertEqual(entry.taxable_amount, 210)
+		self.assertEqual(entry.withholding_amount, 21)
+		self.validate_tax_deduction(pi, 21)
+
+		tds_gl = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pi.name, "account": "TDS - _TC", "is_cancelled": 0},
+			fields=["credit"],
+		)
+		self.assertEqual([d.credit for d in tds_gl], [21])
+
+		self.cleanup_invoices([pi])
+
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
