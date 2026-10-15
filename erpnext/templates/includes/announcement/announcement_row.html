@@ -24,10 +24,10 @@
 			if(content.length > show_char) {
 
 				var c = content.substr(0, show_char)
-				var h = content.substr(show_char, content.length - show_char);
 
-				html = c + '&nbsp;&nbsp;...'
-				$(this).html(html);
+				// Set as text (not HTML) so DOM text isn't re-interpreted as
+				// markup (XSS). \u00a0 is a non-breaking space (same as &nbsp;).
+				$(this).text(c + '\u00a0\u00a0...');
 			}
 		});
 	});
