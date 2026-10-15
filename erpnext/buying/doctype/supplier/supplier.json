@@ -11,6 +11,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "supplier_name",
   "supplier_type",
@@ -88,6 +91,22 @@
   "dashboard_tab"
  ],
  "fields": [
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
