@@ -1,0 +1,217 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+
+import frappe
+from frappe.model.document import Document
+from frappe.utils import add_days, today
+
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.accounts_payable_summary.accounts_payable_summary import execute
+from erpnext.tests.utils import ERPNextTestSuite
+
+
+class TestAccountsPayableSummary(ERPNextTestSuite):
+	"""Payable Summary is a thin wrapper over AccountsReceivableSummary with
+	account_type=Payable; these tests lock the supplier-side output: invoiced,
+	advance, paid, outstanding, ageing buckets and the optional GL-balance /
+	future-payment columns."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.maxDiff = None
+		self.company = "_Test Company"
+		self.supplier = "_Test Supplier"
+
+	def _filters(self, **overrides):
+		filters = {
+			"company": self.company,
+			"supplier": self.supplier,
+			"posting_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+		filters.update(overrides)
+		return filters
+
+	def _make_invoice(self, rate=200, due_date=None):
+		pi = make_purchase_invoice(
+			company=self.company,
+			supplier=self.supplier,
+			qty=1,
+			rate=rate,
+			price_list_rate=rate,
+			posting_date=today(),
+			do_not_save=True,
+		)
+		pi.due_date = due_date or today()
+		pi.insert()
+		return pi.submit()
+
+	def _make_journal_entry(self, amount: float, offset_account: str, **supplier_row) -> Document:
+		"""Credit the supplier by `amount` (a negative amount debits it) against `offset_account`."""
+		je = frappe.new_doc("Journal Entry")
+		je.update({"company": self.company, "posting_date": today()})
+		je.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": max(amount, 0),
+				"debit_in_account_currency": max(-amount, 0),
+				**supplier_row,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": offset_account,
+				"cost_center": "_Test Cost Center - _TC",
+				"debit_in_account_currency": max(amount, 0),
+				"credit_in_account_currency": max(-amount, 0),
+			},
+		)
+		return je.submit()
+
+	def _expected_row(self, pi, **overrides):
+		supplier_group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
+		row = {
+			"party_type": "Supplier",
+			"advance": 0,
+			"party": self.supplier,
+			"invoiced": 200.0,
+			"paid": 0.0,
+			"credit_note": 0.0,
+			"outstanding": 200.0,
+			"range0": 0.0,
+			"range1": 200.0,
+			"range2": 0.0,
+			"range3": 0.0,
+			"range4": 0.0,
+			"range5": 0.0,
+			"total_due": 200.0,
+			"future_amount": 0.0,
+			"sales_person": [],
+			"currency": pi.currency,
+			"supplier_group": supplier_group,
+		}
+		row.update(overrides)
+		return row
+
+	def test_01_payable_summary_output(self):
+		"""Invoiced -> advance -> partial payment progression for a single supplier."""
+		filters = self._filters()
+		pi = self._make_invoice()
+
+		expected = self._expected_row(pi)
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 1)
+		self.assertDictEqual(rows[0], expected)
+
+		# advance payment: pay 50 but allocate nothing against the invoice
+		pe = get_payment_entry(pi.doctype, pi.name)
+		pe.paid_amount = 50
+		pe.references[0].allocated_amount = 0
+		pe.save().submit()
+
+		expected.update({"advance": 50.0, "outstanding": 150.0, "range1": 150.0, "total_due": 150.0})
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 1)
+		self.assertDictEqual(rows[0], expected)
+
+		# partial payment allocated against the invoice
+		pe = get_payment_entry(pi.doctype, pi.name)
+		pe.paid_amount = 125
+		pe.references[0].allocated_amount = 125
+		pe.save().submit()
+
+		expected.update(
+			{"advance": 50.0, "paid": 125.0, "outstanding": 25.0, "range1": 25.0, "total_due": 25.0}
+		)
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 1)
+		self.assertDictEqual(rows[0], expected)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"supp_master_name": "Naming Series"})
+	def test_02_gl_balance_and_future_payment_columns(self):
+		"""Naming-series naming adds party_name; show_gl_balance / show_future_payments
+		add their columns; a fully-paid invoice drops out of the report."""
+		filters = self._filters()
+		pi = self._make_invoice()
+
+		pe = get_payment_entry(pi.doctype, pi.name)
+		pe.paid_amount = 150
+		pe.references[0].allocated_amount = 150
+		pe.save().submit()
+
+		expected = self._expected_row(
+			pi,
+			party_name=frappe.db.get_value("Supplier", self.supplier, "supplier_name"),
+			paid=150.0,
+			outstanding=50.0,
+			range1=50.0,
+			total_due=50.0,
+		)
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 1)
+		self.assertDictEqual(rows[0], expected)
+
+		# GL balance reconciliation columns
+		filters.update({"show_gl_balance": True})
+		expected.update({"gl_balance": 50.0, "diff": 0.0})
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 1)
+		self.assertDictEqual(rows[0], expected)
+
+		# future payment columns
+		filters.update({"show_future_payments": True})
+		expected.update({"remaining_balance": 50.0})
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 1)
+		self.assertDictEqual(rows[0], expected)
+
+		# clear the remaining balance -> supplier drops out of the summary entirely
+		get_payment_entry(pi.doctype, pi.name).save().submit()
+		rows = execute(filters)[1]
+		self.assertEqual(len(rows), 0)
+
+	def test_03_not_yet_due_in_range0(self):
+		self._make_invoice(due_date=add_days(today(), 20))
+
+		row = execute(self._filters(ageing_based_on="Due Date"))[1][0]
+
+		self.assertEqual((row.range0, row.range1, row.total_due), (200.0, 0.0, 0.0))
+
+	def test_04_gl_balance_ignores_customer_of_same_name(self):
+		self._make_invoice()
+		if not frappe.db.exists("Customer", self.supplier):
+			frappe.get_doc(doctype="Customer", customer_name=self.supplier).insert()
+		create_sales_invoice(customer=self.supplier, rate=700)
+
+		row = execute(self._filters(show_gl_balance=True))[1][0]
+
+		self.assertEqual((row.gl_balance, row.diff), (200.0, 0.0))
+
+	def test_05_advance_follows_cost_center_filter(self):
+		for cost_center, amount in (("Main - _TC", 50), ("_Test Cost Center 2 - _TC", 30)):
+			pe = create_payment_entry(party=self.supplier, paid_amount=amount)
+			pe.cost_center = cost_center
+			pe.save().submit()
+
+		row = execute(self._filters(cost_center="Main - _TC"))[1][0]
+
+		self.assertEqual((row.advance, row.paid, row.outstanding), (50.0, 0.0, -50.0))
+
+	def test_06_payment_against_journal_entry_is_not_advance(self):
+		debt = self._make_journal_entry(500, "_Test Account Cost for Goods Sold - _TC")
+		self._make_journal_entry(
+			-300, "_Test Bank - _TC", reference_type="Journal Entry", reference_name=debt.name
+		)
+		self._make_journal_entry(-80, "_Test Bank - _TC")
+
+		row = execute(self._filters())[1][0]
+
+		self.assertEqual((row.advance, row.invoiced, row.paid, row.outstanding), (80.0, 500.0, 300.0, 120.0))
