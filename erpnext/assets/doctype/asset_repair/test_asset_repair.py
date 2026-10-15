@@ -19,7 +19,6 @@ from frappe.utils import (
 )
 
 from erpnext.assets.doctype.asset.asset import (
-	Asset,
 	get_asset_account,
 	get_asset_value_after_depreciation,
 )
@@ -33,6 +32,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
+from erpnext.assets.doctype.asset_repair import asset_repair as asset_repair_module
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
@@ -141,27 +141,26 @@ class TestAssetRepair(ERPNextTestSuite):
 			]
 		)
 
-	def test_completed_repair_ignores_stale_pending_repair_snapshot(self):
+	def test_status_job_restores_asset_after_both_repairs_complete(self):
 		asset = create_asset(submit=1)
-		first_repair = create_asset_repair(asset=asset)
-		second_repair = create_asset_repair(asset=asset)
-		first_repair.repair_status = "Completed"
-		first_repair.completion_date = now_datetime()
-		first_repair.save()
+		repairs = [create_asset_repair(asset=asset), create_asset_repair(asset=asset)]
 
-		# Simulates a concurrent save whose read snapshot still shows the first repair as Pending
-		second_repair.repair_status = "Completed"
-		second_repair.completion_date = now_datetime()
-		with patch.object(Asset, "has_pending_repair", return_value=True):
-			second_repair.save()
+		with patch(f"{asset_repair_module.__name__}.update_asset_status_after_repair") as deferred_job:
+			for repair in repairs:
+				repair.repair_status = "Completed"
+				repair.completion_date = now_datetime()
+				repair.save()
 
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		for call in deferred_job.call_args_list:
+			asset_repair_module.update_asset_status_after_repair(**call.kwargs)
+
+		self.assertEqual(deferred_job.call_count, 2)
 		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
-		self.assertTrue(
-			frappe.db.exists(
-				"Asset Activity",
-				{"asset": asset.name, "subject": ("like", f"%back in service%{second_repair.name}%")},
-			)
+		back_in_service_logs = frappe.get_all(
+			"Asset Activity", {"asset": asset.name, "subject": ("like", "%back in service%")}
 		)
+		self.assertEqual(len(back_in_service_logs), 1)
 
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)

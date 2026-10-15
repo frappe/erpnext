@@ -190,45 +190,18 @@ class AssetRepair(AccountsController):
 			)
 
 	def update_status(self):
-		if self.repair_status == "Pending" and self.asset_doc.status != "Out of Order":
+		if self.repair_status != "Pending":
+			frappe.enqueue(
+				update_asset_status_after_repair,
+				asset=self.asset,
+				asset_repair=self.name,
+				enqueue_after_commit=True,
+				now=frappe.in_test,
+			)
+		elif frappe.db.get_value("Asset", self.asset, "status", for_update=True) != "Out of Order":
 			frappe.db.set_value("Asset", self.asset, "status", "Out of Order")
 			self.add_asset_activity(
 				_("Asset out of order due to Asset Repair {0}").format(
-					get_link_to_form("Asset Repair", self.name)
-				),
-			)
-		elif not self.has_other_pending_repairs():
-			self.restore_asset_status()
-
-	def has_other_pending_repairs(self) -> bool:
-		# Locking read: waits for concurrent saves of other repairs of this asset and sees their
-		# committed status, so two simultaneous completions cannot both leave the asset Out of Order
-		return bool(
-			frappe.db.get_value(
-				"Asset Repair",
-				{
-					"asset": self.asset,
-					"repair_status": "Pending",
-					"docstatus": ("<", 2),
-					"name": ("!=", self.name),
-				},
-				"name",
-				for_update=True,
-			)
-		)
-
-	def restore_asset_status(self) -> None:
-		previous_status = self.asset_doc.status
-		if self.repair_status == "Pending":
-			self.asset_doc.set_status()
-			return
-
-		# Other repairs were already checked with a locking read; Asset.set_status() would recheck
-		# them against a possibly stale snapshot
-		self.asset_doc.set_status(self.asset_doc.get_status())
-		if previous_status == "Out of Order" and self.asset_doc.status != "Out of Order":
-			self.add_asset_activity(
-				_("Asset back in service after Asset Repair {0}").format(
 					get_link_to_form("Asset Repair", self.name)
 				),
 			)
@@ -447,6 +420,38 @@ class AssetRepair(AccountsController):
 			)
 
 		add_asset_activity(self.asset, subject)
+
+
+def update_asset_status_after_repair(asset: str, asset_repair: str) -> None:
+	"""Bring the asset back in service once no repair is pending.
+
+	Runs after the repair save commits, so repairs of the same asset completed concurrently
+	see each other's committed status."""
+	if has_pending_repair(asset):
+		return
+
+	asset_doc = frappe.get_doc("Asset", asset, for_update=True)
+	previous_status = asset_doc.status
+	asset_doc.set_status(asset_doc.get_status())
+	if previous_status == "Out of Order" and asset_doc.status != "Out of Order":
+		add_asset_activity(
+			asset,
+			_("Asset back in service after Asset Repair {0}").format(
+				get_link_to_form("Asset Repair", asset_repair)
+			),
+		)
+
+
+def has_pending_repair(asset: str) -> bool:
+	# Locking read: waits for in-flight repair saves of this asset and reads their committed status
+	return bool(
+		frappe.db.get_value(
+			"Asset Repair",
+			{"asset": asset, "repair_status": "Pending", "docstatus": ("<", 2)},
+			"name",
+			for_update=True,
+		)
+	)
 
 
 def check_asset_repair_access(company: str | None = None) -> None:
