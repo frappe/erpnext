@@ -1556,10 +1556,11 @@ def get_material_request_items(
 		quantity = round_up_whole_uom(required_qty / conversion_factor, uom)
 
 	if flt(row.get("qty")) > 0:
+		precision = frappe.get_precision("Material Request Plan Item", "quantity")
 		item = {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": quantity,
+			"quantity": flt(quantity, precision),
 			"conversion_factor": conversion_factor,
 			"required_bom_qty": row.get("qty"),
 			"stock_uom": row.get("stock_uom"),
@@ -1620,9 +1621,6 @@ def _adjust_required_qty_for_uom(row, required_qty):
 					row["purchase_uom"], row["stock_uom"], row.item_code
 				)
 			)
-
-			required_qty = required_qty / row["conversion_factor"]
-
 
 	return required_qty
 
@@ -2071,7 +2069,9 @@ def get_materials_from_other_locations(
 		if consider_minimum_order_qty:
 			required_qty = max(required_qty, flt(item.get("min_order_qty")))
 
-		item["quantity"] = round_up_whole_uom(required_qty / item.get("conversion_factor"), item.get("uom"))
+		item["quantity"] = round_up_whole_uom(
+			flt(required_qty / item.get("conversion_factor"), precision), item.get("uom")
+		)
 		_keep_stock_qty_whole(item, required_qty)
 
 		new_mr_items.append(item)
