@@ -64,7 +64,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertTrue(len(pln.mr_items), 2)
 
 		for row in pln.mr_items:
-			row.schedule_date = add_to_date(nowdate(), days=10)
+			row.db_set("schedule_date", add_to_date(nowdate(), days=10))
 
 		pln.make_material_request()
 		pln.reload()
@@ -115,7 +115,7 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_production_plan_material_request_skips_zero_qty_items(self):
 		pln = create_production_plan(item_code="Test Production Item 1")
 		zero_qty_item, requested_item = pln.mr_items
-		zero_qty_item.quantity = "0"
+		zero_qty_item.db_set("quantity", 0)
 
 		pln.make_material_request()
 
@@ -1917,12 +1917,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Nos"}
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Kg"}
 		).name
 
-		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Nos"}):
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Kg"}):
 			doc = frappe.get_doc("Item", bom_item)
-			doc.append("uoms", {"uom": "Nos", "conversion_factor": 3})
+			doc.append("uoms", {"uom": "Kg", "conversion_factor": 3})
 			doc.save()
 
 		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
@@ -3378,7 +3378,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Nos"}
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Kg"}
 		).name
 
 		store_warehouse = create_warehouse("Store Warehouse", company="_Test Company")
@@ -3386,9 +3386,9 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		make_stock_entry(item_code=bom_item, qty=4, target=store_warehouse, rate=100)
 
-		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Nos"}):
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Kg"}):
 			doc = frappe.get_doc("Item", bom_item)
-			doc.append("uoms", {"uom": "Nos", "conversion_factor": 3})
+			doc.append("uoms", {"uom": "Kg", "conversion_factor": 3})
 			doc.save()
 
 		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
