@@ -87,12 +87,19 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				if isinstance(self.party_total[d.party][k], float):
 					self.party_total[d.party][k] += d.get(k) or 0.0
 
-			# unallocated payments are the rows of non invoice vouchers
 			if d.voucher_type not in invoice_doctypes:
-				self.party_advance[d.party] = self.party_advance.get(d.party, 0.0) + flt(d.paid)
+				self.party_advance.setdefault(d.party, 0.0)
+				self.party_advance[d.party] += self.get_unallocated_credit(d)
 
 			# set territory, customer_group, sales person etc
 			self.set_party_details(d)
+
+	def get_unallocated_credit(self, row: frappe._dict) -> float:
+		"""Credit left on a non invoice voucher after settling its own debit.
+
+		Payments allocated against a debt booked by a Journal Entry land on that
+		entry's row, so only the excess over its own debit is an advance."""
+		return max(flt(row.paid) - flt(row.invoiced), 0.0)
 
 	def init_party_total(self, row):
 		default_dict = {
