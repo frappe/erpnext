@@ -529,21 +529,19 @@ frappe.ui.form.on("Material Request Plan Item", {
 		const row = locals[cdt][cdn];
 		if (row.warehouse && row.item_code && frm.doc.company) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_pooled_bin_details",
 				args: {
 					row: row,
 					company: frm.doc.company,
 					for_warehouse: row.warehouse,
 				},
 				callback: function (r) {
-					if (r.message) {
-						let { projected_qty, actual_qty } = r.message[0];
+					let { projected_qty, actual_qty } = r.message;
 
-						frappe.model.set_value(cdt, cdn, {
-							projected_qty: projected_qty,
-							actual_qty: actual_qty,
-						});
-					}
+					frappe.model.set_value(cdt, cdn, {
+						projected_qty: projected_qty,
+						actual_qty: actual_qty,
+					});
 				},
 			});
 		}
@@ -602,16 +600,14 @@ frappe.ui.form.on("Production Plan Sub Assembly Item", {
 			};
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_pooled_bin_details",
 				args: {
 					row: child_row,
 					company: frm.doc.company,
 					for_warehouse: row.fg_warehouse,
 				},
 				callback: function (r) {
-					if (r.message && r.message.length) {
-						frappe.model.set_value(cdt, cdn, "actual_qty", r.message[0].actual_qty);
-					}
+					frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
 				},
 			});
 		}
