@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import CombineDatetime, Max, Min, Sum
+from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Min, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -540,7 +540,13 @@ class WorkOrder(Document):
 		if purpose == "Manufacture":
 			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
 		else:
-			query = query.select(Sum(table.fg_completed_qty))
+			job_card = frappe.qb.DocType("Job Card")
+			query = (
+				query.left_join(job_card)
+				.on(table.job_card == job_card.name)
+				.where(IfNull(job_card.is_corrective_job_card, 0) == 0)
+				.select(Sum(table.fg_completed_qty))
+			)
 
 		return flt(query.run()[0][0])
 
