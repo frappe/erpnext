@@ -57,8 +57,7 @@ def get_parent_filters(doctype):
 		parent = frappe.qb.DocType("BOM")
 		condition = get_allowed_companies_condition(parent.company, "BOM")
 
-	if not condition:
-		return []
-
-	allowed_parents = frappe.qb.from_(parent).select(parent.name).where(condition)
+	allowed_parents = frappe.qb.from_(parent).select(parent.name).where(parent.docstatus == 1)
+	if condition:
+		allowed_parents = allowed_parents.where(condition)
 	return [frappe.qb.DocType(doctype).parent.isin(allowed_parents)]
