@@ -9,7 +9,6 @@ from collections import defaultdict
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	add_days,
@@ -1363,43 +1362,10 @@ def get_material_request_items(
 	bin_dict,
 	consumed_qty,
 ):
-	required_qty = 0
-	item_code = row.get("item_code")
-
-	if ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
-		required_qty = flt(row.get("qty"))
-	else:
-		key = (item_code, warehouse)
-		available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
-		if available_qty > 0:
-			required_qty = max(0, flt(row.get("qty")) - available_qty)
-			consumed_qty[key] += min(flt(row.get("qty")), available_qty)
-		else:
-			required_qty = flt(row.get("qty"))
-
-	if doc.get("consider_minimum_order_qty") and required_qty > 0 and required_qty < row["min_order_qty"]:
-		required_qty = row["min_order_qty"]
-
+	required_qty = _required_qty_for_mr(
+		doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+	)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
-
-	if not row["purchase_uom"]:
-		row["purchase_uom"] = row["stock_uom"]
-
-	if row["purchase_uom"] != row["stock_uom"]:
-		if not (row["conversion_factor"] or frappe.flags.show_qty_in_stock_uom):
-			frappe.throw(
-				_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(
-					row["purchase_uom"], row["stock_uom"], row.item_code
-				)
-			)
-
-			required_qty = required_qty / row["conversion_factor"]
-
-	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
-		required_qty = ceil(required_qty)
-
-	if include_safety_stock:
-		required_qty += flt(row["safety_stock"])
 
 	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
 
@@ -1437,6 +1403,49 @@ def get_material_request_items(
 			"uom": row.get("purchase_uom") or row.get("stock_uom"),
 			"main_item_code": row.get("main_bom_item"),
 		}
+
+
+def _required_qty_for_mr(
+	doc, row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+):
+	safety_stock = flt(row["safety_stock"]) if include_safety_stock else 0
+	qty = flt(row.get("qty"))
+
+	if ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
+		required_qty = _apply_minimum_order_qty(doc, row, qty + safety_stock)
+		return _adjust_required_qty_for_uom(row, required_qty)
+
+	key = (row.get("item_code"), warehouse)
+	available_qty = flt(bin_dict.get("projected_qty", 0)) - consumed_qty[key]
+	required_qty = _apply_minimum_order_qty(doc, row, max(0, qty - (available_qty - safety_stock)))
+	required_qty = _adjust_required_qty_for_uom(row, required_qty)
+	consumed_qty[key] += qty - required_qty
+	return required_qty
+
+
+def _apply_minimum_order_qty(doc, row, required_qty):
+	if doc.get("consider_minimum_order_qty") and 0 < required_qty < row["min_order_qty"]:
+		return row["min_order_qty"]
+	return required_qty
+
+
+def _adjust_required_qty_for_uom(row, required_qty):
+	if not row["purchase_uom"]:
+		row["purchase_uom"] = row["stock_uom"]
+
+	if row["purchase_uom"] != row["stock_uom"]:
+		if not (row["conversion_factor"] or frappe.flags.show_qty_in_stock_uom):
+			frappe.throw(
+				_("UOM Conversion factor ({0} -> {1}) not found for item: {2}").format(
+					row["purchase_uom"], row["stock_uom"], row.item_code
+				)
+			)
+
+			required_qty = required_qty / row["conversion_factor"]
+
+	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
+		required_qty = ceil(required_qty)
+	return required_qty
 
 
 def get_sales_orders(self):
@@ -1989,10 +1998,7 @@ def _get_plan_reservations(item_code):
 		.select(
 			table.name.as_("production_plan"),
 			child.warehouse,
-			Sum(
-				(Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity))
-				* child.conversion_factor
-			).as_("reserved_qty"),
+			Sum(child.required_bom_qty).as_("reserved_qty"),
 		)
 		.where(
 			(table.docstatus == 1)
