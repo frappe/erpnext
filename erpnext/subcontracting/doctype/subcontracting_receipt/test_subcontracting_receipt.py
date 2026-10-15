@@ -453,6 +453,212 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_return_takes_back_additional_costs(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		additional_costs_account = "Expenses Included In Valuation - TCP1"
+		scr = make_subcontracting_receipt(sco.name)
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": additional_costs_account,
+				"description": "Test Additional Costs",
+				"amount": 100,
+				"base_amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(
+			scr_name=scr.name, qty=-4, supplier_warehouse=scr.supplier_warehouse
+		)
+
+		additional_costs = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
+			if gle.account == additional_costs_account
+		)
+		self.assertEqual(additional_costs, 40)
+
+	def test_return_takes_back_additional_costs_that_net_to_zero(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		for description, amount in (("Freight", 100), ("Rebate", -100)):
+			scr.append(
+				"additional_costs",
+				{
+					"expense_account": "Expenses Included In Valuation - TCP1",
+					"description": description,
+					"amount": amount,
+					"base_amount": amount,
+				},
+			)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(
+			scr_name=scr.name, supplier_warehouse=scr.supplier_warehouse
+		)
+
+		self.assertEqual([row.amount for row in scr_return.additional_costs], [-100, 100])
+
+	def test_return_takes_back_additional_costs_allocated_by_amount(self):
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": rate,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for service_item, fg_item, rate in (
+				("Subcontracted Service Item 7", "Subcontracted Item SA7", 100),
+				("Subcontracted Service Item 1", "Subcontracted Item SA4", 300),
+			)
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		additional_costs_account = "Expenses Included In Valuation - TCP1"
+		scr = make_subcontracting_receipt(sco.name)
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": additional_costs_account,
+				"description": "Test Additional Costs",
+				"amount": 100,
+				"base_amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items = scr_return.items[:1]
+		scr_return.save()
+		scr_return.submit()
+
+		additional_costs = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
+			if gle.account == additional_costs_account
+		)
+		self.assertEqual(additional_costs, flt(scr.items[0].additional_cost_per_qty * 5, 2))
+
+	def make_amount_distributed_receipt_with_rejected_qty(self):
+		service_items = [
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": service_item,
+				"qty": 5,
+				"rate": rate,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+			for service_item, fg_item, rate in (
+				("Subcontracted Service Item 7", "Subcontracted Item SA7", 100),
+				("Subcontracted Service Item 8", "Subcontracted Item SA8", 300),
+			)
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.distribute_additional_costs_based_on = "Amount"
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "Test Additional Costs",
+				"amount": 3000,
+				"base_amount": 3000,
+			},
+		)
+		scr.save()
+		scr.submit()
+		return scr
+
+	def test_partial_return_of_amount_distributed_receipt_balances_the_ledger(self):
+		scr = self.make_amount_distributed_receipt_with_rejected_qty()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items = [scr_return.items[1]]
+		scr_return.save()
+		scr_return.submit()
+
+		original_row = scr.items[1]
+		self.assertEqual(
+			flt(scr_return.total_additional_costs, 2),
+			flt(-1 * original_row.qty * original_row.additional_cost_per_qty, 2),
+		)
+
+	def test_multi_row_return_keeps_original_additional_cost_per_qty(self):
+		scr = self.make_amount_distributed_receipt_with_rejected_qty()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		costs_after_save = [row.additional_cost_per_qty for row in scr_return.items]
+		scr_return.get_scrap_items(recalculate_rate=True)
+
+		for return_row, original_row, cost_after_save in zip(
+			scr_return.items, scr.items, costs_after_save, strict=True
+		):
+			self.assertEqual(flt(cost_after_save, 2), flt(original_row.additional_cost_per_qty, 2))
+			self.assertEqual(
+				flt(return_row.additional_cost_per_qty, 2), flt(original_row.additional_cost_per_qty, 2)
+			)
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
@@ -1476,6 +1682,53 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		# Verify that the original document's rejected quantity is not affected
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
+
+	def test_purchase_receipt_keeps_purchase_order_currency(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 10,
+				},
+			],
+			is_subcontracted=1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_save=True,
+		)
+		po.conversion_rate = 80
+		po.set_missing_values()
+		po.insert()
+		po.submit()
+
+		sco = get_subcontracting_order(po_name=po.name)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name, save=True)
+
+		self.assertEqual(pr.currency, "USD")
+		self.assertEqual(pr.conversion_rate, 80)
+		self.assertEqual(pr.grand_total, 1000)
+		self.assertEqual(pr.base_grand_total, 80000)
 
 	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):

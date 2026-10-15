@@ -35,7 +35,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 )
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
-from erpnext.stock.valuation import FIFOValuation
+from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 
 class SerialNoExistsInFutureTransactionError(frappe.ValidationError):
@@ -413,7 +413,7 @@ class SerialandBatchBundle(Document):
 
 			stock_queue = []
 			non_batchwise_batches = []
-			if not self.has_serial_no and valuation_method == "FIFO":
+			if not self.has_serial_no and valuation_method in ("FIFO", "LIFO"):
 				non_batchwise_batches = frappe.get_all(
 					"Batch",
 					filters={
@@ -461,8 +461,11 @@ class SerialandBatchBundle(Document):
 					if flt(row.qty) > 0:
 						stock_queue.append([row.qty, row.incoming_rate])
 					elif flt(row.qty) < 0:
-						stock_queue = FIFOValuation(stock_queue)
-						stock_queue.remove_stock(qty=abs(row.qty))
+						queue_class = LIFOValuation if valuation_method == "LIFO" else FIFOValuation
+						stock_queue = queue_class(stock_queue)
+						stock_queue.remove_stock(
+							qty=abs(row.qty), outgoing_rate=row.incoming_rate, is_return_purchase_entry=True
+						)
 						stock_queue = stock_queue.state
 					row.stock_queue = json.dumps(stock_queue)
 
@@ -718,11 +721,12 @@ class SerialandBatchBundle(Document):
 				actual_qty = d.qty
 				if (
 					stock_queue
-					and val_method == "FIFO"
+					and val_method in ("FIFO", "LIFO")
 					and d.batch_no in sn_obj.non_batchwise_valuation_batches
 				):
 					if actual_qty < 0:
-						stock_queue = FIFOValuation(stock_queue)
+						queue_class = LIFOValuation if val_method == "LIFO" else FIFOValuation
+						stock_queue = queue_class(stock_queue)
 						_prev_qty, prev_stock_value = stock_queue.get_total_stock_and_value()
 
 						stock_queue.remove_stock(qty=abs(actual_qty))
@@ -885,7 +889,7 @@ class SerialandBatchBundle(Document):
 		)
 
 		if prev_sle and prev_sle.stock_queue and parse_json(prev_sle.stock_queue):
-			if batches and valuation_method == "FIFO":
+			if batches and valuation_method in ("FIFO", "LIFO"):
 				stock_queue = parse_json(prev_sle.stock_queue)
 
 		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
@@ -894,16 +898,14 @@ class SerialandBatchBundle(Document):
 
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
-			fifo_batch_wise_val = True
-			if valuation_method == "FIFO" and d.batch_no in batches:
-				fifo_batch_wise_val = False
+			is_queue_valued = valuation_method in ("FIFO", "LIFO") and d.batch_no in batches
 
 			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
 				rate = 0.0
 			elif (
 				(flt(d.incoming_rate, precision) == flt(rate, precision))
 				and not stock_queue
-				and fifo_batch_wise_val
+				and not is_queue_valued
 				and d.qty
 				and d.stock_value_difference
 			):
@@ -916,7 +918,7 @@ class SerialandBatchBundle(Document):
 			if d.qty:
 				d.stock_value_difference = flt(d.qty) * d.incoming_rate
 
-			if valuation_method == "FIFO" and d.batch_no in batches and d.incoming_rate is not None:
+			if is_queue_valued and d.incoming_rate is not None:
 				stock_queue.append([d.qty, d.incoming_rate])
 				d.stock_queue = json.dumps(stock_queue)
 

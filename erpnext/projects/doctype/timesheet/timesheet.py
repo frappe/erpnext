@@ -14,6 +14,7 @@ from frappe.utils import (
 	flt,
 	get_datetime,
 	getdate,
+	nowdate,
 	time_diff_in_hours,
 	time_diff_in_seconds,
 )
@@ -76,6 +77,7 @@ class Timesheet(Document):
 
 	def validate(self):
 		self.set_status()
+		self.set_user()
 		self.validate_dates()
 		self.calculate_hours()
 		self.validate_time_logs()
@@ -144,6 +146,9 @@ class Timesheet(Document):
 		if self.sales_invoice:
 			self.status = "Completed"
 
+	def set_user(self):
+		self.user = frappe.db.get_value("Employee", self.employee, "user_id") if self.employee else self.owner
+
 	def set_dates(self):
 		if self.docstatus < 2 and self.time_logs:
 			start_date = min(getdate(d.from_time) for d in self.time_logs)
@@ -194,6 +199,8 @@ class Timesheet(Document):
 
 	def validate_dates(self):
 		for data in self.time_logs:
+			if flt(data.hours) < 0:
+				frappe.throw(_("Row {0}: Hours value must be greater than zero.").format(data.idx))
 			if data.from_time and data.to_time and time_diff_in_hours(data.to_time, data.from_time) < 0:
 				frappe.throw(_("To date cannot be before from date"))
 
@@ -304,33 +311,32 @@ class Timesheet(Document):
 
 	def update_cost(self):
 		for data in self.time_logs:
-			if data.activity_type or data.is_billable:
-				rate = _get_activity_cost(self.employee, data.activity_type)
-				hours = data.billing_hours or 0
-				costing_hours = data.hours or 0
-				if rate:
-					data.billing_rate = (
-						flt(rate.get("billing_rate")) if flt(data.billing_rate) == 0 else data.billing_rate
-					)
-					data.costing_rate = (
-						flt(rate.get("costing_rate")) if flt(data.costing_rate) == 0 else data.costing_rate
-					)
-					data.billing_amount = data.billing_rate * hours
-					data.costing_amount = data.costing_rate * costing_hours
+			self.update_billing_hours(data)
+			needs_rate = not flt(data.costing_rate) or (data.is_billable and not flt(data.billing_rate))
+			rate = (
+				_get_activity_cost(self.employee, data.activity_type, self.currency)
+				if data.activity_type and needs_rate
+				else {}
+			)
+			data.billing_rate = flt(data.billing_rate) or flt(rate.get("billing_rate"))
+			data.costing_rate = flt(data.costing_rate) or flt(rate.get("costing_rate"))
 
-					exchange_rate = flt(self.get("exchange_rate")) or 1.0
-					data.base_billing_rate = flt(
-						data.billing_rate * exchange_rate, data.precision("base_billing_rate")
-					)
-					data.base_costing_rate = flt(
-						data.costing_rate * exchange_rate, data.precision("base_costing_rate")
-					)
-					data.base_billing_amount = flt(
-						data.billing_amount * exchange_rate, data.precision("base_billing_amount")
-					)
-					data.base_costing_amount = flt(
-						data.costing_amount * exchange_rate, data.precision("base_costing_amount")
-					)
+			data.billing_amount = data.billing_rate * flt(data.billing_hours)
+			data.costing_amount = data.costing_rate * flt(data.hours)
+
+			exchange_rate = flt(self.get("exchange_rate")) or 1.0
+			data.base_billing_rate = flt(
+				data.billing_rate * exchange_rate, data.precision("base_billing_rate")
+			)
+			data.base_costing_rate = flt(
+				data.costing_rate * exchange_rate, data.precision("base_costing_rate")
+			)
+			data.base_billing_amount = flt(
+				data.billing_amount * exchange_rate, data.precision("base_billing_amount")
+			)
+			data.base_costing_amount = flt(
+				data.costing_amount * exchange_rate, data.precision("base_costing_amount")
+			)
 
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:
@@ -498,8 +504,10 @@ def make_sales_invoice(
 	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
 	billing_rate = billing_amount / hours
 
+	projects = {log.project for log in timesheet.time_logs if log.is_billable and not log.sales_invoice}
+
 	target.company = timesheet.company
-	target.project = timesheet.parent_project
+	target.project = timesheet.parent_project or (projects.pop() if len(projects) == 1 else None)
 	if customer:
 		target.customer = customer
 		default_price_list = frappe.get_value("Customer", customer, "default_price_list")
@@ -563,6 +571,13 @@ def _get_activity_cost(employee=None, activity_type=None, currency=None):
 		["costing_rate", "billing_rate"],
 		as_dict=True,
 	)
+	if not rate and employee:
+		rate = frappe.db.get_values(
+			"Activity Cost",
+			{"employee": ("is", "not set"), "activity_type": activity_type},
+			["costing_rate", "billing_rate"],
+			as_dict=True,
+		)
 	if not rate:
 		rate = frappe.db.get_values(
 			"Activity Type",
@@ -570,10 +585,17 @@ def _get_activity_cost(employee=None, activity_type=None, currency=None):
 			["costing_rate", "billing_rate"],
 			as_dict=True,
 		)
-		if rate and currency and currency != base_currency:
-			exchange_rate = get_exchange_rate(base_currency, currency)
-			rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
-			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
+	if rate and currency and currency != base_currency:
+		exchange_rate = get_exchange_rate(base_currency, currency)
+		if not exchange_rate:
+			frappe.throw(
+				_(
+					"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+				).format(base_currency, currency, nowdate())
+			)
+
+		rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
+		rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
 	return rate[0] if rate else {}
 
@@ -643,6 +665,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				(table.sales_invoice | child_table.sales_invoice).as_("sales_invoice"),
 				child_table.project,
 			)
+			.where(table.docstatus == 1)
 			.orderby(table.end_date)
 			.limit(limit_page_length)
 			.offset(limit_start)
