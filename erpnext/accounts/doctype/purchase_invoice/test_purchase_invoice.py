@@ -929,13 +929,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pi = make_purchase_invoice(
 			item_code="_Test Non Stock Item",
+			supplier="_Test Supplier USD",
 			currency="USD",
 			conversion_rate=60,
 			project=project.name,
-			do_not_save=True,
 		)
-		pi.credit_to = "_Test Payable USD - _TC"
-		pi.submit()
 		self.assertEqual(frappe.db.get_value("Project", project.name, "total_purchase_cost"), 15000)
 
 		pi1 = make_purchase_invoice(item_code="_Test Non Stock Item", qty=10, project=project.name)
