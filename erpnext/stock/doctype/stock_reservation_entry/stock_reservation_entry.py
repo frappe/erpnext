@@ -169,7 +169,7 @@ class StockReservationEntry(Document):
 				)
 
 			if (self.has_batch_no or self.has_serial_no) and row.reservation_based_on == "Serial and Batch":
-				set_source_delivered_qty(row, get_serial_batch_delivered_qty(row.name))
+				set_source_delivered_qty(row, min(row.reserved_qty, get_serial_batch_delivered_qty(row.name)))
 			elif delivered_qty >= 0.0:
 				delivered_qty -= set_source_delivered_qty(row, min(row.reserved_qty, delivered_qty))
 
@@ -2022,23 +2022,32 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 def get_serial_batch_to_reverse(
 	serial_batch_data: frappe._dict, source_batch_qty: dict, sre_name: str
 ) -> frappe._dict:
-	"""Batch qty this transfer took from the source SRE, limited to what the target has not used.
-
-	Targets created before the source split was stored are capped at the source's delivered batch qty
-	that no other active transfer has recorded as its own.
-	"""
-	batch_qty_taken = (
-		source_batch_qty.get(sre_name, {})
-		if source_batch_qty
-		else get_untracked_delivered_batch_qty(sre_name)
-	)
+	"""Batch qty this transfer took from the source SRE, limited to what the target has not used."""
+	if not source_batch_qty:
+		return get_legacy_serial_batch_to_reverse(serial_batch_data, sre_name)
 
 	batches = {}
-	for batch_no, qty in batch_qty_taken.items():
+	for batch_no, qty in source_batch_qty.get(sre_name, {}).items():
 		qty_to_reverse = min(qty, serial_batch_data.batches.get(batch_no, 0))
 		if qty_to_reverse > 0:
 			batches[batch_no] = qty_to_reverse
 			serial_batch_data.batches[batch_no] -= qty_to_reverse
+
+	return frappe._dict(serial_nos=serial_batch_data.serial_nos, batches=batches)
+
+
+def get_legacy_serial_batch_to_reverse(serial_batch_data: frappe._dict, sre_name: str) -> frappe._dict:
+	"""Batch qty to reverse for a transfer made before the source split was stored.
+
+	Such transfers added the full transferred batch qty to every source SRE, so the same qty is
+	reversed from each source, capped at its delivered batch qty no active transfer has recorded.
+	"""
+	untracked_qty = get_untracked_delivered_batch_qty(sre_name)
+	batches = {
+		batch_no: min(qty, untracked_qty[batch_no])
+		for batch_no, qty in serial_batch_data.batches.items()
+		if qty > 0 and untracked_qty.get(batch_no, 0) > 0
+	}
 
 	return frappe._dict(serial_nos=serial_batch_data.serial_nos, batches=batches)
 

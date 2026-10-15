@@ -3805,10 +3805,10 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_shared_batch_delivered_qty_split_per_reservation_on_transfer(self):
 		self.assert_shared_batch_split_reversed_on_cancel("SPLIT")
 
-	def test_cancelling_legacy_transfer_reverses_each_source_reservation_once(self):
-		self.assert_shared_batch_split_reversed_on_cancel("LEGACY", clear_source_batches=True)
+	def test_cancelling_legacy_transfer_frees_every_source_reservation(self):
+		self.assert_shared_batch_split_reversed_on_cancel("LEGACY", simulate_legacy_transfer=True)
 
-	def assert_shared_batch_split_reversed_on_cancel(self, suffix, clear_source_batches=False):
+	def assert_shared_batch_split_reversed_on_cancel(self, suffix, simulate_legacy_transfer=False):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 			reserve_stock_for_production_plan,
@@ -3865,17 +3865,32 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual(batch_delivered_qty(), {row.name: row.sabb_qty for row in source_entries})
 
-		if clear_source_batches:
-			targets = frappe.get_all(
-				"Stock Reservation Entry",
-				filters={"voucher_type": "Work Order", "voucher_no": wo.name},
-				pluck="name",
-			)
-			self.assertTrue(frappe.db.exists("Stock Reservation Source", {"parent": ("in", targets)}))
-			frappe.db.delete("Stock Reservation Source", {"parent": ("in", targets)})
+		if simulate_legacy_transfer:
+			self.make_legacy_transfer(wo, source_entries, batch_no)
 
 		wo.cancel()
 		self.assertEqual(batch_delivered_qty(), {row.name: 0 for row in source_entries})
+		sources = [row.name for row in source_entries]
+		self.assertEqual(get_sre_delivered_qty(*sources), {name: 0 for name in sources})
+
+	def make_legacy_transfer(self, wo, source_entries, batch_no):
+		"""Older transfers stored no source split and added the full batch qty to every source."""
+		targets = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": "Work Order", "voucher_no": wo.name},
+			pluck="name",
+		)
+		self.assertTrue(frappe.db.exists("Stock Reservation Source", {"parent": ("in", targets)}))
+		frappe.db.delete("Stock Reservation Source", {"parent": ("in", targets)})
+
+		transferred_qty = sum(row.sabb_qty for row in source_entries)
+		for row in source_entries:
+			frappe.db.set_value(
+				"Serial and Batch Entry",
+				{"parent": row.name, "batch_no": batch_no},
+				"delivered_qty",
+				transferred_qty,
+			)
 
 	def test_cancelling_work_order_reverses_only_its_own_shared_batch_qty(self):
 		(
