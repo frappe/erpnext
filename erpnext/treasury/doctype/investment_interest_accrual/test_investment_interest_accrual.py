@@ -108,6 +108,11 @@ class TestInvestmentInterestAccrual(ERPNextTestSuite):
 		self.assertEqual(get_days_30_360(getdate("2026-02-01"), getdate("2026-03-01")), 30)
 		self.assertEqual(get_days_30_360(getdate("2026-01-31"), getdate("2026-03-31")), 60)
 		self.assertEqual(get_days_30_360(getdate("2026-01-01"), getdate("2027-01-01")), 360)
+		# February's month end also counts as the 30th
+		self.assertEqual(get_days_30_360(getdate("2026-02-28"), getdate("2026-03-31")), 30)
+		self.assertEqual(get_days_30_360(getdate("2028-02-29"), getdate("2028-08-31")), 180)
+		self.assertEqual(get_days_30_360(getdate("2026-08-31"), getdate("2027-02-28")), 178)
+		self.assertEqual(get_days_30_360(getdate("2026-02-28"), getdate("2027-02-28")), 360)
 
 		# the coupon period of any date matches stepping back from maturity, month ends included
 		for maturity_date, frequency in (

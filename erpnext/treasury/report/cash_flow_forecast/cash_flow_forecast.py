@@ -69,12 +69,14 @@ def get_flow_labels():
 
 
 def get_party_flows(company):
-	"""Outstanding customer and supplier invoices, each expected on its due date."""
+	"""Outstanding customer and supplier invoices, each expected on its due date, or per payment term."""
 	ple = frappe.qb.DocType("Payment Ledger Entry")
 	rows = (
 		frappe.qb.from_(ple)
 		.select(
 			ple.account_type,
+			ple.against_voucher_type.as_("voucher_type"),
+			ple.against_voucher_no.as_("voucher_no"),
 			Sum(ple.amount).as_("outstanding"),
 			Max(ple.due_date).as_("due_date"),
 			Min(ple.posting_date).as_("posting_date"),
@@ -86,12 +88,61 @@ def get_party_flows(company):
 	).run(as_dict=True)
 
 	flows = {"receivables": [], "payables": []}
+	unpaid = []
 	for row in rows:
-		outstanding = flt(row.outstanding, 2)
-		if row.account_type == "Receivable" and outstanding > 0:
-			flows["receivables"].append((row.due_date or row.posting_date, outstanding))
-		elif row.account_type == "Payable" and outstanding < 0:
-			flows["payables"].append((row.due_date or row.posting_date, -outstanding))
+		row.outstanding = flt(row.outstanding, 2)
+		if row.account_type == "Receivable" and row.outstanding > 0:
+			unpaid.append((flows["receivables"], row, row.outstanding))
+		elif row.account_type == "Payable" and row.outstanding < 0:
+			unpaid.append((flows["payables"], row, -row.outstanding))
+
+	payment_terms = get_payment_terms([row for _flows, row, _outstanding in unpaid])
+	for party_flows, row, outstanding in unpaid:
+		terms = payment_terms.get((row.voucher_type, row.voucher_no))
+		if terms:
+			party_flows.extend(spread_over_terms(outstanding, terms))
+		else:
+			party_flows.append((row.due_date or row.posting_date, outstanding))
+
+	return flows
+
+
+def get_payment_terms(rows):
+	"""Payment schedule (due date, company currency amount) of each invoice, earliest first."""
+	terms = {}
+	for voucher_type in {row.voucher_type for row in rows}:
+		schedules = frappe.get_all(
+			"Payment Schedule",
+			filters={
+				"parenttype": voucher_type,
+				"parent": ("in", [row.voucher_no for row in rows if row.voucher_type == voucher_type]),
+			},
+			fields=["parent", "due_date", "base_payment_amount"],
+			order_by="due_date asc, idx asc",
+		)
+		for schedule in schedules:
+			terms.setdefault((voucher_type, schedule.parent), []).append(
+				(schedule.due_date, flt(schedule.base_payment_amount))
+			)
+
+	return terms
+
+
+def spread_over_terms(outstanding, terms):
+	"""The outstanding amount on the due dates of the terms it is left on: payments settled the earliest first."""
+	paid = sum(amount for _due_date, amount in terms) - outstanding
+	flows = []
+	for due_date, amount in terms:
+		settled = min(amount, max(paid, 0))
+		paid -= settled
+		if flt(amount - settled, 2) > 0:
+			flows.append((due_date, amount - settled))
+
+	# rounding, or an outstanding above the schedule's total, stays with the last term
+	difference = flt(outstanding - sum(amount for _due_date, amount in flows), 2)
+	if difference:
+		due_date, amount = flows.pop() if flows else (terms[-1][0], 0)
+		flows.append((due_date, amount + difference))
 
 	return flows
 

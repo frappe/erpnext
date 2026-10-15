@@ -29,6 +29,7 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 	def setUp(self):
 		create_investment_type("_Test Bank FD", "Deposit")
 		create_investment_type("_Test Equity Fund", "Units")
+		create_investment_type("_Test Corporate Bond", "Bond")
 		create_financial_institution("_Test Bank")
 
 	def test_invalid_transaction_is_rejected(self):
@@ -46,6 +47,17 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 			investment.name, "Purchase", gross_amount=1000, cost_center=other_cost_center
 		)
 		self.assertRaises(frappe.ValidationError, purchase.insert)
+
+		# nothing earns interest after maturity, so nothing can be bought then
+		for transaction_type in ("Purchase", "Opening"):
+			with self.subTest(transaction_type):
+				purchase = make_transaction(
+					investment.name,
+					transaction_type,
+					gross_amount=1000,
+					posting_date=investment.maturity_date,
+				)
+				self.assertRaises(frappe.ValidationError, purchase.insert)
 
 	def test_purchase_posts_gl(self):
 		investment = make_submitted_investment()
@@ -71,21 +83,31 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 
 	def test_fields_that_do_not_apply_are_ignored(self):
 		investment = make_submitted_investment(approved_amount=200000)
+		# a deposit is not bought with accrued interest, only a bond is
 		purchase = make_transaction(
-			investment.name, "Purchase", gross_amount=100000, tax_withheld=100, penalty_applied=50
+			investment.name,
+			"Purchase",
+			gross_amount=100000,
+			tax_withheld=100,
+			penalty_applied=50,
+			accrued_interest_in_purchase=2000,
 		).submit()
 
-		self.assertEqual((purchase.tax_withheld, purchase.penalty_applied), (0, 0))
+		self.assertEqual(
+			(purchase.tax_withheld, purchase.penalty_applied, purchase.accrued_interest_in_purchase),
+			(0, 0, 0),
+		)
 		self.assertEqual(
 			get_gl_entries(purchase.name),
 			{"Short-term Investments - _TC": (100000, 0), BANK_ACCOUNT: (0, 100000)},
 		)
 
+		# an opening moves no cash, so it has no charges
 		opening = make_transaction(
-			investment.name, "Opening", gross_amount=100000, accrued_interest_in_purchase=2000
+			investment.name, "Opening", gross_amount=100000, accrued_interest_in_purchase=2000, charges=500
 		).submit()
 
-		self.assertEqual(opening.accrued_interest_in_purchase, 0)
+		self.assertEqual((opening.accrued_interest_in_purchase, opening.charges), (0, 0))
 		# no interest was accrued, so nothing can be received
 		receipt = make_transaction(investment.name, "Interest Receipt", interest_amount=2000)
 		self.assertRaises(frappe.ValidationError, receipt.insert)
@@ -107,14 +129,20 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		self.assertEqual(finance_books, ["_Test Treasury Book"])
 
 	def test_purchase_above_approved_amount_is_blocked(self):
-		investment = make_submitted_investment(approved_amount=100000)
-		# 61000 paid, but only 59000 is the investment itself; 2000 is interest bought with it
+		investment = make_submitted_investment(
+			investment_type="_Test Corporate Bond",
+			face_value=1000,
+			coupon_rate=8,
+			coupon_frequency="Semi-Annual",
+			approved_amount=100000,
+		)
+		# 61000 paid, but only 59000 is the bonds themselves; 2000 is interest bought with them
 		make_transaction(
-			investment.name, "Purchase", gross_amount=61000, accrued_interest_in_purchase=2000
+			investment.name, "Purchase", units=61, rate=1000, accrued_interest_in_purchase=2000
 		).submit()
-		make_transaction(investment.name, "Purchase", gross_amount=41000).submit()
+		make_transaction(investment.name, "Purchase", units=41, rate=1000).submit()
 
-		transaction = make_transaction(investment.name, "Purchase", gross_amount=1)
+		transaction = make_transaction(investment.name, "Purchase", units=1, rate=1000)
 		self.assertRaises(frappe.ValidationError, transaction.insert)
 
 	def test_sale_uses_fifo_cost(self):
@@ -266,6 +294,26 @@ class TestInvestmentTransaction(ERPNextTestSuite):
 		receipt.insert().submit()
 		investment.reload()
 		self.assertEqual(investment.accrued_interest, 0)
+
+	def test_backdated_receipt_leaves_what_later_receipts_need(self):
+		investment = make_submitted_investment()
+		make_transaction(investment.name, "Purchase", gross_amount=100000).submit()
+		make_accrual_for_today(investment.name, 400)
+		make_interest_accrual(investment.name, add_days(nowdate(), 1), add_days(nowdate(), 10), 400).submit()
+		make_transaction(
+			investment.name, "Interest Receipt", interest_amount=400, posting_date=add_days(nowdate(), 12)
+		).submit()
+
+		# day 5 has 400 accrued and none received; the day 12 receipt is covered by the second 400
+		make_transaction(
+			investment.name, "Interest Receipt", interest_amount=400, posting_date=add_days(nowdate(), 5)
+		).submit()
+
+		# both 400s are now taken, so even 1 more on day 6 would leave a receipt short
+		receipt = make_transaction(
+			investment.name, "Interest Receipt", interest_amount=1, posting_date=add_days(nowdate(), 6)
+		)
+		self.assertRaises(frappe.ValidationError, receipt.insert)
 
 	def test_cannot_cancel_accrual_already_received(self):
 		investment = make_submitted_investment()

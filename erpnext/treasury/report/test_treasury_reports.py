@@ -152,6 +152,21 @@ class TestTreasuryReports(ERPNextTestSuite):
 		)
 		self.assertEqual(after["Committed Investments"] - before["Committed Investments"], 100000)
 
+	def test_cash_flow_forecast_expects_each_payment_term_on_its_due_date(self):
+		invoice = create_sales_invoice(qty=1, rate=5000, do_not_save=1)
+		invoice.due_date = add_days(nowdate(), 60)
+		for days in (30, 60):
+			invoice.append(
+				"payment_schedule",
+				{"due_date": add_days(nowdate(), days), "invoice_portion": 50, "payment_amount": 2500},
+			)
+		invoice.insert().submit()
+
+		receivables = cash_flow_forecast.get_party_flows(TEST_COMPANY)["receivables"]
+
+		for term in invoice.payment_schedule:
+			self.assertIn((getdate(term.due_date), term.base_payment_amount), receivables)
+
 	def test_cash_flow_forecast_leaves_out_received_interest(self):
 		investment = make_fd(FD_TERMS)
 		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).submit()

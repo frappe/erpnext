@@ -7,7 +7,7 @@ from functools import cached_property
 from itertools import pairwise
 
 import frappe
-from frappe.utils import add_days, add_months, date_diff, flt, getdate
+from frappe.utils import add_days, add_months, date_diff, flt, get_last_day, getdate
 
 INTEREST_CLASSES = ("Deposit", "Bond")
 FREQUENCY_MONTHS = {"Monthly": 1, "Quarterly": 3, "Semi-Annual": 6, "Annual": 12}
@@ -277,8 +277,19 @@ def take_fifo(lots, get_quantity, already_taken, to_take):
 
 
 def get_days_30_360(start, end):
-	"""Day count under the 30/360 (bond basis) convention."""
-	start_day = min(start.day, 30)
-	end_day = 30 if end.day == 31 and start_day == 30 else end.day
+	"""Day count under the 30/360 US convention: every month has 30 days, so a month end counts as the 30th."""
+	start_day, end_day = start.day, end.day
+	if is_end_of_february(start):
+		if is_end_of_february(end):
+			end_day = 30
+		start_day = 30
+
+	if end_day == 31 and start_day >= 30:
+		end_day = 30
+	start_day = min(start_day, 30)
 
 	return (end.year - start.year) * 360 + (end.month - start.month) * 30 + (end_day - start_day)
+
+
+def is_end_of_february(date):
+	return date.month == 2 and getdate(get_last_day(date)) == getdate(date)

@@ -210,7 +210,7 @@
    "label": "Bond"
   },
   {
-   "depends_on": "eval:doc.transaction_type=='Purchase'",
+   "depends_on": "eval:doc.instrument_class=='Bond' && doc.transaction_type=='Purchase'",
    "fieldname": "accrued_interest_in_purchase",
    "fieldtype": "Currency",
    "label": "Accrued Interest in Purchase",
@@ -342,7 +342,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-14 17:00:00.000000",
+ "modified": "2026-10-15 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
  "name": "Investment Transaction",

@@ -190,8 +190,21 @@ class InvestmentTransaction(AccountsController):
 			)
 
 	def validate_dates(self):
-		if getdate(self.posting_date) < getdate(self.get_investment().purchase_date):
+		investment = self.get_investment()
+		if getdate(self.posting_date) < getdate(investment.purchase_date):
 			frappe.throw(_("Posting Date cannot be before the investment's Purchase Date"))
+
+		# nothing earns interest after maturity, so nothing more can be bought
+		if (
+			self.transaction_type in PURCHASE_TYPES
+			and investment.maturity_date
+			and getdate(self.posting_date) >= getdate(investment.maturity_date)
+		):
+			frappe.throw(
+				_("Posting Date of a {0} must be before the investment's Maturity Date").format(
+					_(self.transaction_type)
+				)
+			)
 
 	def set_missing_values(self):
 		if not self.cost_center:
@@ -207,7 +220,10 @@ class InvestmentTransaction(AccountsController):
 		if self.transaction_type not in (*EXIT_TYPES, *INCOME_TYPES):
 			self.tax_withheld = 0
 
-		if self.transaction_type != "Purchase":
+		if self.transaction_type == "Opening":
+			self.charges = 0
+
+		if not (self.instrument_class == "Bond" and self.transaction_type == "Purchase"):
 			self.accrued_interest_in_purchase = 0
 
 		if not (self.instrument_class == "Bond" and self.transaction_type in ("Sale", "Redemption")):
@@ -844,10 +860,29 @@ def get_accrued_interest(investment, upto=None, exclude=None, for_update=False):
 	return accrued + bought
 
 
-def get_unreceived_interest(investment, upto=None, exclude_receipt=None, for_update=False):
-	"""Interest accrued up to a date and not yet received."""
-	return get_accrued_interest(investment, upto, for_update=for_update) - get_interest_received(
-		investment, exclude_receipt, for_update=for_update
+def get_unreceived_interest(investment, upto, exclude_receipt=None, for_update=False):
+	"""Interest accrued up to a date and not received by then, less what later collections need.
+
+	Each collection must stay within the interest accrued by its own date, so taking more on `upto`
+	may leave a later one short: the least unreceived interest over `upto` and the dates after it."""
+	later_collections = frappe.get_all(
+		"Investment Transaction",
+		filters={
+			"investment": investment,
+			"docstatus": 1,
+			"name": ("!=", exclude_receipt or ""),
+			"posting_date": (">", upto),
+			"transaction_type": ("in", ("Interest Receipt", *EXIT_TYPES)),
+		},
+		or_filters={"interest_amount": (">", 0), "accrued_interest_in_sale": (">", 0)},
+		pluck="posting_date",
+		distinct=True,
+	)
+
+	return min(
+		get_accrued_interest(investment, date, for_update=for_update)
+		- get_interest_received(investment, exclude_receipt, date, for_update=for_update)
+		for date in {getdate(upto), *later_collections}
 	)
 
 
