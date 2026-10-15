@@ -780,10 +780,11 @@ class TestProject(ERPNextTestSuite):
 		self.assertIn(project.name, frappe.db.get_value("Kanban Board", board, "filters"))
 
 		lead_board = quick_kanban_board("Lead", f"{name} lead", "status").name
+		quick_kanban_board("Lead", f"{lead_board}-1", "status")
 		lead_named_project = make_project({"project_name": lead_board})
 		board = create_kanban_board_if_not_exists(lead_named_project.name)
 
-		self.assertNotEqual(board, lead_board)
+		self.assertEqual(board, f"{lead_board}-2")
 		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
 
 	def test_kanban_board_skips_another_users_private_board(self):
