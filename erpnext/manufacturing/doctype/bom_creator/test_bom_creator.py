@@ -491,6 +491,29 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(doc.items[0].rate, 10)
 		self.assertEqual(doc.raw_material_cost, 10)
 
+	def test_recreated_bom_keeps_its_own_sub_assembly(self):
+		doc, _first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM Recreated Children")
+		doc.submit()
+		doc.create_boms()
+
+		top_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Bicycle", "docstatus": 1})
+		seat_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Seat Assembly", "docstatus": 1})
+		second_wheel_bom = frappe.db.get_value(
+			"BOM", {"bom_creator": doc.name, "bom_creator_item": second_wheel, "docstatus": 1}
+		)
+		top_bom.cancel()
+		seat_bom.cancel()
+
+		doc.reload()
+		doc.create_boms()
+		new_seat_bom = frappe.get_doc(
+			"BOM", {"bom_creator": doc.name, "item": "Seat Assembly", "docstatus": 1}
+		)
+		self.assertEqual(
+			[row.bom_no for row in new_seat_bom.items if row.item_code == "Wheel Assembly"],
+			[second_wheel_bom],
+		)
+
 	def test_currency_change_refreshes_the_exchange_rate(self):
 		if not frappe.db.exists("Currency", "TSR"):
 			frappe.get_doc({"doctype": "Currency", "currency_name": "TSR", "enabled": 1}).insert()
