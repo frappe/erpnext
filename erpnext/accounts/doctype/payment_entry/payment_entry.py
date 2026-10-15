@@ -647,6 +647,24 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Paid From and Paid To accounts must be different for an Internal Transfer."))
 
 	def validate_party_details(self):
+		if self.party_type:
+			if not frappe.db.exists("Party Type", self.party_type):
+				frappe.throw(_("{0} is not a valid Party Type").format(self.party_type))
+
+			if self.get("party_account") and self.party_type != "Employee":
+				account_type = frappe.get_cached_value("Account", self.party_account, "account_type")
+				party_account_type = frappe.get_cached_value("Party Type", self.party_type, "account_type")
+				if (
+					account_type != party_account_type
+					and not (self.party_type == "Shareholder" and account_type == "Equity")
+					and not self.book_advance_payments_in_separate_party_account
+				):
+					frappe.throw(
+						_("Account {0} and Party Type {1} have different account types").format(
+							self.party_account, self.party_type
+						)
+					)
+
 		if self.party and not frappe.db.exists(self.party_type, self.party):
 			frappe.throw(_("{0} {1} does not exist").format(_(self.party_type), self.party))
 

@@ -1464,6 +1464,33 @@ class TestPaymentEntry(ERPNextTestSuite):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
 		create_payment_entry(party_type="Employee", party=employee, save=True)
 
+	def test_shareholder_payment_with_equity_account(self):
+		shareholder = frappe.get_doc(
+			doctype="Shareholder", title="_Test Shareholder Equity", company="_Test Company"
+		).insert()
+		account = create_account(
+			account_name="_Test Shareholder Equity",
+			account_type="Equity",
+			parent_account=frappe.get_value(
+				"Account", {"company": "_Test Company", "root_type": "Equity", "is_group": 1}, "name"
+			),
+			company="_Test Company",
+		)
+		for payment_type in ("Receive", "Pay"):
+			with self.subTest(payment_type=payment_type):
+				payment = create_payment_entry(
+					payment_type=payment_type,
+					party_type="Shareholder",
+					party=shareholder.name,
+					paid_from=account if payment_type == "Receive" else "_Test Cash - _TC",
+					paid_to=account if payment_type == "Pay" else "_Test Cash - _TC",
+					save=True,
+					submit=True,
+				)
+				self.assertTrue(
+					frappe.db.exists("GL Entry", {"voucher_no": payment.name, "account": account})
+				)
+
 	def test_duplicate_payment_entry_allocate_amount(self):
 		si = create_sales_invoice()
 
@@ -2669,6 +2696,33 @@ class TestPaymentEntryValidation(ERPNextTestSuite):
 	def test_nonexistent_party_is_rejected(self):
 		doc = self.make_pe(party_type="Customer", party="__No Such Customer__")
 		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
+
+	def test_unregistered_party_type_is_rejected(self):
+		doc = self.make_pe(party_type="User", party="Administrator")
+		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
+
+	def test_party_account_type_must_match(self):
+		for payment_type in ("Receive", "Pay"):
+			with self.subTest(payment_type=payment_type):
+				doc = self.make_pe(
+					payment_type=payment_type,
+					party_type="Customer",
+					party="_Test Customer",
+					paid_from="Creditors - _TC",
+					paid_to="Creditors - _TC",
+				)
+				doc.setup_party_account_field()
+				self.assertRaises(frappe.ValidationError, doc.validate_party_details)
+
+	def test_registered_party_with_matching_account_is_accepted(self):
+		doc = self.make_pe(
+			payment_type="Receive",
+			party_type="Customer",
+			party="_Test Customer",
+			paid_from="Debtors - _TC",
+		)
+		doc.setup_party_account_field()
+		doc.validate_party_details()
 
 	def test_amount_and_exchange_rate_fields_are_mandatory(self):
 		# every field but target_exchange_rate is set, so that missing one raises
