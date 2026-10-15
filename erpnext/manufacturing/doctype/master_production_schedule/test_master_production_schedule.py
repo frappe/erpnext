@@ -75,6 +75,37 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 			[("Finished Goods - _TC", 4), ("Stores - _TC", 3)],
 		)
 
+	def test_delivery_schedules_leave_out_delivered_and_closed_orders(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import (
+			create_dn_against_so,
+			make_sales_order,
+		)
+
+		item = make_item("_Test MPS Schedule Item", {"is_stock_item": 1}).name
+		orders = []
+		for qty in (10, 4):
+			order = make_sales_order(item_code=item, qty=qty)
+			order.create_delivery_schedule(
+				order.items[0].as_dict(),
+				[
+					{"delivery_date": add_days(today(), 5), "qty": qty / 2},
+					{"delivery_date": add_days(today(), 10), "qty": qty / 2},
+				],
+			)
+			orders.append(order)
+
+		delivered, closed = orders
+		create_dn_against_so(delivered.name, delivered_qty=6)
+		closed.reload()
+		closed.update_status("Closed")
+
+		mps = make_mps(
+			to_date=add_days(today(), 30), select_items=[item], sales_orders=[o.name for o in orders]
+		)
+		mps.get_actual_demand()
+
+		self.assertEqual([(row.item_code, row.planned_qty) for row in mps.items], [(item, 4)])
+
 	def test_mps_details_need_read_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
