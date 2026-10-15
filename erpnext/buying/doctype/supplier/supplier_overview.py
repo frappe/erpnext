@@ -417,7 +417,7 @@ def order_tiles(supplier, company, as_of):
 
 
 def invoiced_quantities(supplier, company, lines):
-	if not frappe.has_permission("Purchase Invoice", "read"):
+	if not _unrestricted_read("Purchase Invoice"):
 		return None
 	if not lines:
 		return {}
