@@ -29,6 +29,16 @@ class TestDowntimeEntry(ERPNextTestSuite):
 
 		make_downtime_entry(self.workstation, self.operator, "2031-01-06 15:00:00", "2031-01-06 16:00:00")
 
+	def test_overlap_check_locks_the_workstation(self):
+		from unittest.mock import call, patch
+
+		with patch.object(frappe.db, "get_value", wraps=frappe.db.get_value) as get_value:
+			make_downtime_entry(self.workstation, self.operator, "2031-01-07 13:00:00", "2031-01-07 14:00:00")
+
+		self.assertIn(
+			call("Workstation", self.workstation, "name", for_update=True), get_value.call_args_list
+		)
+
 
 def make_downtime_entry(workstation, operator, from_time, to_time):
 	return frappe.get_doc(

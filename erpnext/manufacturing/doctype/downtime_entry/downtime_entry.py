@@ -45,6 +45,8 @@ class DowntimeEntry(Document):
 			self.validate_overlap()
 
 	def validate_overlap(self):
+		frappe.db.get_value("Workstation", self.workstation, "name", for_update=True)
+
 		entry = frappe.qb.DocType("Downtime Entry")
 		overlap = (
 			frappe.qb.from_(entry)
