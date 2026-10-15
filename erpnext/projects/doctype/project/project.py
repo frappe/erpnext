@@ -210,14 +210,14 @@ class Project(Document):
 
 	def get_stock_entry_additional_costs(self) -> float:
 		stock_entry = qb.DocType("Stock Entry")
-		additional_cost = qb.DocType("Landed Cost Taxes and Charges")
+		stock_entry_item = qb.DocType("Stock Entry Detail")
 		amount = (
-			qb.from_(stock_entry)
-			.join(additional_cost)
-			.on((additional_cost.parent == stock_entry.name) & (additional_cost.parenttype == "Stock Entry"))
-			.select(Sum(additional_cost.base_amount))
+			qb.from_(stock_entry_item)
+			.join(stock_entry)
+			.on(stock_entry.name == stock_entry_item.parent)
+			.select(Sum(stock_entry_item.additional_cost))
 			.where(
-				(stock_entry.project == self.name)
+				(stock_entry_item.project == self.name)
 				& (stock_entry.docstatus == 1)
 				& (stock_entry.purpose != "Material Receipt")
 			)

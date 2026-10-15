@@ -761,14 +761,19 @@ class TestProject(ERPNextTestSuite):
 				"purpose": "Manufacture",
 				"stock_entry_type": "Manufacture",
 				"company": "_Test Company",
-				"project": project.name,
 				"items": [
-					{"item_code": raw_material, "qty": 10, "s_warehouse": "_Test Warehouse - _TC"},
+					{
+						"item_code": raw_material,
+						"qty": 10,
+						"s_warehouse": "_Test Warehouse - _TC",
+						"project": project.name,
+					},
 					{
 						"item_code": finished_good,
 						"qty": 1,
 						"t_warehouse": "_Test Warehouse - _TC",
 						"is_finished_item": 1,
+						"project": project.name,
 					},
 				],
 				"additional_costs": [
@@ -782,6 +787,10 @@ class TestProject(ERPNextTestSuite):
 		)
 		manufacture.insert()
 		manufacture.submit()
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 0)
+
 		issue_to_project(finished_good, 1, project.name)
 
 		project.reload()
