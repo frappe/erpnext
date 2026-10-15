@@ -44,6 +44,9 @@ class Cheque(Document):
 	def before_update_after_submit(self):
 		self.refuse_manual_change()
 
+	def on_update_after_submit(self):
+		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).update_status()
+
 	def before_cancel(self):
 		self.refuse_manual_change()
 		self.status = "Cancelled"
@@ -60,10 +63,19 @@ class Cheque(Document):
 					frappe.bold(self.cheque_no), get_link_to_form("Payment Entry", self.payment_entry)
 				)
 			)
-		if not reason.strip():
-			frappe.throw(_("Enter a reason to cancel the cheque"), frappe.MandatoryError)
+		self.void(require_reason(reason), remarks)
 
-		self.void(reason.strip(), remarks)
+	def issue(self, payment_entry: str):
+		"""Record the payment that uses this cheque. The fetched fields copy its party and amount."""
+		self.status = "Issued"
+		self.payment_entry = payment_entry
+		self.save_as_system()
+
+	def keep_cancellation_reason(self, reason: str, remarks: str | None):
+		"""Store why the cheque is cancelled, so that its payment cancel can use it."""
+		self.cancellation_reason = reason
+		self.remarks = remarks
+		self.save_as_system()
 
 	def void(self, reason: str | None = None, remarks: str | None = None):
 		"""Cancel the cheque and record why. The caller decides if the cheque can be cancelled."""
@@ -71,6 +83,11 @@ class Cheque(Document):
 		self.remarks = remarks
 		self.flags.system_change = True
 		self.cancel()
+
+	def save_as_system(self):
+		self.flags.system_change = True
+		self.flags.ignore_permissions = True
+		self.save()
 
 	def refuse_manual_change(self):
 		if not self.flags.system_change:
@@ -80,3 +97,9 @@ class Cheque(Document):
 				),
 				title=_("Cheque is read only"),
 			)
+
+
+def require_reason(reason: str) -> str:
+	if not reason.strip():
+		frappe.throw(_("Enter a reason to cancel the cheque"), frappe.MandatoryError)
+	return reason.strip()
