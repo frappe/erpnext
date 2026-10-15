@@ -66,7 +66,9 @@ class Workstation(Document):
 	# end: auto-generated types
 
 	def before_save(self):
-		self._set_data_based_on_workstation_type()
+		if self.has_value_changed("workstation_type"):
+			self._set_data_based_on_workstation_type()
+
 		self.set_hour_rate()
 		self.set_total_working_hours()
 
@@ -113,11 +115,10 @@ class Workstation(Document):
 				return
 
 			for field in fields:
-				if self.get(field):
+				if field == "description" and self.description:
 					continue
 
-				if value := data.get(field):
-					self.set(field, value)
+				self.set(field, data.get(field))
 
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
