@@ -498,6 +498,44 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertEqual(invoice.discount_amount, 0)
 		self.assertEqual(invoice.grand_total, 100)
 
+	def test_update_items_uom_change_keeps_the_carried_discount(self):
+		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+
+		item = make_item(
+			"_Test Mapped Discount Box Item", {"uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		sales_order = self.make_combined_sales_order(item=item.name, qty=10)
+		discounted, regular = sales_order.items
+		self.assertEqual(sales_order.discount_amount, 100)
+
+		update_child_qty_rate(
+			"Sales Order",
+			frappe.as_json(
+				[
+					{
+						"docname": discounted.name,
+						"item_code": discounted.item_code,
+						"qty": 1,
+						"rate": 1000,
+						"uom": "Box",
+						"conversion_factor": 10,
+					},
+					{
+						"docname": regular.name,
+						"item_code": regular.item_code,
+						"qty": regular.qty,
+						"rate": regular.rate,
+					},
+				]
+			),
+			sales_order.name,
+		)
+
+		sales_order.reload()
+		self.assertEqual(sales_order.items[0].uom, "Box")
+		self.assertEqual(sales_order.discount_amount, 100)
+		self.assertEqual(sales_order.grand_total, 1900)
+
 	def test_header_edit_through_the_api_replaces_carried_discounts(self):
 		for field, value, discount, regular_net_amount in (
 			("discount_amount", 5, 5, 197.5),
@@ -570,20 +608,20 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		regular = self.make_order(item="_Test Item 2", qty=2)
 		return self.combine(discounted, regular).save(), regular
 
-	def make_combined_sales_order(self):
+	def make_combined_sales_order(self, item="_Test Item", qty=1):
 		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 
 		quotations = []
-		for item, percentage in (("_Test Item", 10), ("_Test Item 2", 0)):
-			quotation = make_quotation(item_code=item, qty=1, rate=100, do_not_save=True)
+		for item_code, percentage in ((item, 10), ("_Test Item 2", 0)):
+			quotation = make_quotation(item_code=item_code, qty=qty, rate=100, do_not_save=True)
 			quotation.apply_discount_on = "Net Total"
 			quotation.additional_discount_percentage = percentage
 			quotations.append(quotation.insert().submit())
 
 		sales_order = self.combine(*quotations, mapper=SALES_ORDER_FROM_QUOTATION, doctype="Sales Order")
 		sales_order.delivery_date = add_days(nowdate(), 5)
-		for item in sales_order.items:
-			item.delivery_date = sales_order.delivery_date
+		for row in sales_order.items:
+			row.delivery_date = sales_order.delivery_date
 		return sales_order.insert().submit()
 
 	def make_invoice_with_cash_discount(self, order):
