@@ -1532,6 +1532,46 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 			"auto_reserve_stock_for_sales_order_on_purchase": 1,
 		},
 	)
+	def test_pick_list_reservation_is_not_rounded_up_to_a_whole_sales_unit(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			create_stock_reservation_entries_for_so_items,
+		)
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=24, basic_rate=100)
+		sales_order = make_sales_order(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, uom="Box", do_not_submit=1
+		)
+		sales_order.items[0].conversion_factor = 12
+		sales_order.submit()
+
+		create_stock_reservation_entries_for_so_items(
+			sales_order,
+			items_details=[
+				{
+					"sales_order_item": sales_order.items[0].name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty_to_reserve": 5,
+				}
+			],
+			from_voucher_type="Pick List",
+			notify=False,
+		)
+
+		reserved = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": sales_order.name, "docstatus": 1},
+			pluck="reserved_qty",
+		)
+		self.assertLessEqual(sum(reserved), 5)
+
 	def test_split_receipts_reserve_the_completed_sales_unit(self):
 		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
 		item_code = make_item(
