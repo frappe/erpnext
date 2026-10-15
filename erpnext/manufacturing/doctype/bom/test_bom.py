@@ -57,6 +57,30 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
 
 	@timeout
+	def test_bom_diff_preserves_repeated_rows(self):
+		from erpnext.manufacturing.doctype.bom.bom import diff_table_field
+
+		for old_qtys, new_qtys, added, removed, changed in (
+			([1, 2], [2, 1], [], [], []),
+			([1, 2], [2], [], [1], []),
+			([1], [1, 1], [1], [], []),
+			([1, 2], [2, 3], [], [], [1]),
+		):
+			with self.subTest(old_qtys=old_qtys, new_qtys=new_qtys):
+				old, new = (
+					frappe.get_doc(
+						{"doctype": "BOM", "items": [{"item_code": "_Test Item", "qty": qty} for qty in qtys]}
+					)
+					for qtys in (old_qtys, new_qtys)
+				)
+				out = frappe._dict(added=[], removed=[], row_changed=[])
+				diff_table_field(old.meta.get_field("items"), old, new, out)
+
+				self.assertEqual([row.qty for _, row in out.added], added)
+				self.assertEqual([row.qty for _, row in out.removed], removed)
+				self.assertEqual([index for _, index, _, _ in out.row_changed], changed)
+
+	@timeout
 	def test_default_bom(self):
 		def _get_default_bom_in_item():
 			return cstr(frappe.db.get_value("Item", "_Test FG Item 2", "default_bom"))
