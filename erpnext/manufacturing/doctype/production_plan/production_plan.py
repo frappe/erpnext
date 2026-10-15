@@ -1802,6 +1802,11 @@ def _get_bin_details(row, company, for_warehouse=None, all_warehouse=False, perm
 	return query.run(as_dict=True)
 
 
+@frappe.whitelist()
+def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
+	return aggregate_bin_details(get_bin_details(row, company, for_warehouse))
+
+
 def aggregate_bin_details(bin_list):
 	qty_fields = (
 		"projected_qty",
