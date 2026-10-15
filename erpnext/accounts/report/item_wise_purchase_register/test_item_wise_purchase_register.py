@@ -98,12 +98,16 @@ class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 			)
 			self.assertEqual([row["invoice"] for row in execute(filters)[1]], [pi.name])
 
-	def test_purchase_receipt_for_invoice_made_from_order(self):
+	def test_purchase_receipts_for_invoice_made_from_order(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice, make_purchase_receipt
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		po = create_purchase_order(item_code=self.item, company=self.company, supplier=self.supplier, qty=1)
-		pr = make_purchase_receipt(po.name).submit()
+		po = create_purchase_order(item_code=self.item, company=self.company, supplier=self.supplier, qty=2)
+		receipts = []
+		for _receipt in range(2):
+			pr = make_purchase_receipt(po.name)
+			pr.items[0].qty = 1
+			receipts.append(pr.submit().name)
 		pi = make_purchase_invoice(po.name)
 		pi.bill_no = "test-receipt-column"
 		pi.submit()
@@ -111,7 +115,7 @@ class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
 		row = next(row for row in execute(filters)[1] if row["invoice"] == pi.name)
 
-		self.assertEqual(row["purchase_receipt"], pr.name)
+		self.assertCountEqual(row["purchase_receipt"].split(", "), receipts)
 
 	def test_grouped_percent_of_grand_total_follows_filters(self):
 		self.create_purchase_invoice()
