@@ -874,15 +874,29 @@ def update_project_sales_billing():
 
 
 @frappe.whitelist()
-def create_kanban_board_if_not_exists(project: str):
+def create_kanban_board_if_not_exists(project: str) -> str:
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
 	project = frappe.get_doc("Project", project)
 	project.check_permission("read")
-	if not frappe.db.exists("Kanban Board", project.project_name):
-		quick_kanban_board("Task", project.project_name, "status", project.name)
 
-	return True
+	if board := get_project_kanban_board(project.name):
+		return board
+
+	board_name = project.project_name
+	if frappe.db.exists("Kanban Board", board_name):
+		board_name = f"{project.project_name} ({project.name})"
+
+	return quick_kanban_board("Task", board_name, "status", project.name).name
+
+
+def get_project_kanban_board(project: str) -> str | None:
+	for board in frappe.get_all(
+		"Kanban Board", filters={"reference_doctype": "Task"}, fields=["name", "filters"]
+	):
+		filters = frappe.parse_json(board.filters or "[]")
+		if any(isinstance(f, list) and f[1:4] == ["project", "=", project] for f in filters):
+			return board.name
 
 
 @frappe.whitelist(methods=["POST"])

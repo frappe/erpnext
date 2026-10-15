@@ -764,6 +764,28 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Kanban Board", project.project_name))
 
+	def test_kanban_board_is_found_by_project_not_by_name(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		name = f"_Test Kanban {frappe.generate_hash(length=6)}"
+		renamed = make_project({"project_name": name})
+		renamed_board = create_kanban_board_if_not_exists(renamed.name)
+		renamed.db_set("project_name", f"{name} old")
+
+		project = make_project({"project_name": name})
+		board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, renamed_board)
+		self.assertEqual(create_kanban_board_if_not_exists(renamed.name), renamed_board)
+		self.assertIn(project.name, frappe.db.get_value("Kanban Board", board, "filters"))
+
+		lead_board = quick_kanban_board("Lead", f"{name} lead", "status").name
+		lead_named_project = make_project({"project_name": lead_board})
+		board = create_kanban_board_if_not_exists(lead_named_project.name)
+
+		self.assertNotEqual(board, lead_board)
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
+
 	def test_cost_center_name_needs_project_access(self):
 		project = make_project({"project_name": f"_Test Cost Center Access {frappe.generate_hash(length=6)}"})
 		project.db_set("cost_center", "_Test Cost Center - _TC")
