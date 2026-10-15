@@ -155,6 +155,44 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertEqual(flt(stock_value_difference, 2), -500)
 
+	def test_outward_serial_valued_at_latest_inward_rate_in_warehouse(self):
+		item_code = make_item(
+			"_Test Serial Latest Inward Rate Item",
+			{"has_serial_no": 1, "serial_no_series": "TEST-SER-LIR-.#####", "is_stock_item": 1},
+		).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code, qty=1, rate=100, target=warehouse, posting_date=add_days(today(), -10)
+		)
+		serial_no_name = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+		serial_no = [frappe.db.get_value("Serial No", serial_no_name, "serial_no")]
+		for days, rate, target, source in ((-8, 0, None, warehouse), (-6, 150, warehouse, None)):
+			make_stock_entry(
+				item_code=item_code,
+				qty=1,
+				rate=rate,
+				target=target,
+				source=source,
+				serial_no=serial_no,
+				posting_date=add_days(today(), days),
+				use_serial_batch_fields=1,
+			)
+
+		issue = make_stock_entry(
+			item_code=item_code,
+			qty=1,
+			source=warehouse,
+			serial_no=serial_no,
+			posting_date=add_days(today(), -2),
+			use_serial_batch_fields=1,
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -150)
+
 	def test_inward_outward_batch_valuation(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
