@@ -25,6 +25,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_op_cost_from_sub_assemblies,
 	validate_bom_no,
 )
+from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
@@ -530,16 +531,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			item.set_transfer_qty()
 
 	def update_cost_in_project(self):
-		if self.work_order and not frappe.db.get_value(
-			"Work Order", self.work_order, "update_consumed_material_cost_in_project"
-		):
-			return
-
-		projects = set(item.project for item in self.items if item.project)
-		for project in projects:
-			project_doc = frappe.get_doc("Project", project)
-			project_doc.set_consumed_material_cost()
-			project_doc.save(ignore_permissions=True)
+		update_consumed_material_cost({item.project for item in self.items if item.project})
 
 	def validate_item(self):
 		for item in self.get("items"):
