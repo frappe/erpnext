@@ -1379,6 +1379,7 @@ def check_matching(
 	from_reference_date=None,
 	to_reference_date=None,
 ):
+	document_types = document_types or []
 	exact_match = True if "exact_match" in document_types else False
 
 	common_filters = frappe._dict(
