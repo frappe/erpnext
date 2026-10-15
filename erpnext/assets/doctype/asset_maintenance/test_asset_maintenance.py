@@ -171,6 +171,7 @@ class TestAssetMaintenance(ERPNextTestSuite):
 	def test_cancelled_task_releases_its_log_and_assignee(self):
 		asset_maintenance = self.make_asset_maintenance()
 		task = asset_maintenance.asset_maintenance_tasks[1]
+		cancelled_assignee = task.assign_to
 		task.maintenance_status = "Cancelled"
 		asset_maintenance.save()
 
@@ -178,10 +179,15 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			frappe.db.get_value("Asset Maintenance Log", {"task": task.name}, "maintenance_status"),
 			"Cancelled",
 		)
+		self.assertEqual(self.get_open_todo_assignees(asset_maintenance.name), ["marcus@abc.com"])
+
+		task.assign_to = None
+		asset_maintenance.save()
+		self.assertEqual(self.get_open_todo_assignees(asset_maintenance.name), ["marcus@abc.com"])
 
 		team = frappe.get_doc("Asset Maintenance Team", "Team Awesome")
 		team.maintenance_team_members = [
-			row for row in team.maintenance_team_members if row.team_member != task.assign_to
+			row for row in team.maintenance_team_members if row.team_member != cancelled_assignee
 		]
 		team.save()
 		asset_maintenance.reload()
@@ -192,12 +198,7 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		asset_maintenance.asset_maintenance_tasks[1].assign_to = "marcus@abc.com"
 		asset_maintenance.save()
 
-		open_todos = frappe.get_all(
-			"ToDo",
-			filters={"reference_name": asset_maintenance.name, "status": "Open"},
-			pluck="allocated_to",
-		)
-		self.assertEqual(open_todos, ["marcus@abc.com"])
+		self.assertEqual(self.get_open_todo_assignees(asset_maintenance.name), ["marcus@abc.com"])
 
 	def test_assign_task_to_user_whose_name_is_not_the_email(self):
 		team = frappe.get_doc("Asset Maintenance Team", "Team Awesome")
@@ -307,6 +308,13 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			}
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "must be submitted", maintenance.insert)
+
+	def get_open_todo_assignees(self, asset_maintenance_name: str) -> list[str]:
+		return frappe.get_all(
+			"ToDo",
+			filters={"reference_name": asset_maintenance_name, "status": "Open"},
+			pluck="allocated_to",
+		)
 
 	def submit_asset(self):
 		self.asset_doc.available_for_use_date = self.asset_doc.available_for_use_date or nowdate()

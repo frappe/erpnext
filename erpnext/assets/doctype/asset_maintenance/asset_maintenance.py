@@ -78,7 +78,7 @@ class AssetMaintenance(Document):
 			task.maintenance_status = "Planned"
 
 	def on_update(self):
-		for task in self.get("asset_maintenance_tasks"):
+		for task in self.get_active_tasks():
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
 		self.close_unassigned_todos()
 		self.sync_maintenance_tasks()
@@ -96,7 +96,7 @@ class AssetMaintenance(Document):
 			asset.set_status()
 
 	def close_unassigned_todos(self):
-		assignees = [task.assign_to for task in self.asset_maintenance_tasks]
+		assignees = [task.assign_to for task in self.get_active_tasks()]
 		unassigned_users = frappe.get_all(
 			"ToDo",
 			filters={
@@ -109,6 +109,9 @@ class AssetMaintenance(Document):
 		)
 		for user in unassigned_users:
 			assign_to.remove(self.doctype, self.name, user)
+
+	def get_active_tasks(self) -> list:
+		return [task for task in self.asset_maintenance_tasks if task.maintenance_status != "Cancelled"]
 
 	def sync_maintenance_tasks(self):
 		tasks_names = []
