@@ -3374,38 +3374,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 						if qty <= 0:
 							continue
 
-						if d.batch_no and original_qty > 0:
+						qty = min(qty, original_qty)
+						if d.batch_no:
 							new_row = frappe.copy_doc(d)
 							new_row.name = None
-							new_row.batch_no = batch_no
-							new_row.qty = qty
-							new_row.idx = d.idx + 1
-							if new_row.batch_no and details.get("batchwise_sn"):
-								new_row.serial_no = "\n".join(
-									details.get("batchwise_sn")[new_row.batch_no][: cint(new_row.qty)]
-								)
-
+							self.assign_reserved_batch(new_row, batches, details, batch_no, qty)
 							new_items_to_add.append(new_row)
-							original_qty -= qty
-							batches[batch_no] -= qty
+						else:
+							self.assign_reserved_batch(d, batches, details, batch_no, qty)
 
-						if qty >= d.qty and not d.batch_no:
-							d.batch_no = batch_no
-							batches[batch_no] -= d.qty
-							if d.batch_no and details.get("batchwise_sn"):
-								d.serial_no = "\n".join(
-									details.get("batchwise_sn")[d.batch_no][: cint(d.qty)]
-								)
-						elif not d.batch_no:
-							d.batch_no = batch_no
-							d.qty = qty
-							original_qty -= qty
-							batches[batch_no] = 0
+						original_qty -= qty
 
-							if d.batch_no and details.get("batchwise_sn"):
-								d.serial_no = "\n".join(
-									details.get("batchwise_sn")[d.batch_no][: cint(d.qty)]
-								)
+					if original_qty > 0 and d.batch_no:
+						new_row = frappe.copy_doc(d)
+						new_row.update(
+							{"name": None, "batch_no": None, "serial_no": None, "qty": original_qty}
+						)
+						new_items_to_add.append(new_row)
 
 				if details.get("serial_no"):
 					d.serial_no = "\n".join(details.get("serial_no")[: cint(d.qty)])
@@ -3425,6 +3410,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 			idx += 1
 			row.idx = idx
 		self.set("items", sorted_items)
+
+	@staticmethod
+	def assign_reserved_batch(row, batches, details, batch_no, qty):
+		row.batch_no = batch_no
+		row.qty = qty
+		batches[batch_no] -= qty
+		if details.get("batchwise_sn"):
+			row.serial_no = "\n".join(details.get("batchwise_sn")[batch_no][: cint(qty)])
 
 	def get_backflush_based_on(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
