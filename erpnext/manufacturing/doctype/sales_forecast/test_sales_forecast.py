@@ -73,6 +73,18 @@ class TestSalesForecastIntegration(ERPNextTestSuite):
 		forecast.cancel()
 		self.assertEqual(frappe.db.get_value("Sales Forecast", forecast.name, "status"), "Cancelled")
 
+	def test_amended_forecast_can_create_mps(self):
+		forecast = make_sales_forecast()
+		forecast.cancel()
+
+		amended = frappe.copy_doc(forecast)
+		amended.update({"amended_from": forecast.name, "docstatus": 0})
+		amended.insert()
+		amended.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Forecast", amended.name, "status"), "Planned")
+		create_mps(amended.name).insert()
+
 	def test_selected_items_need_no_demand_qty(self):
 		forecast = make_sales_forecast(selected_items=[{"item_code": "_Test Item"}], do_not_submit=True)
 		self.assertTrue(forecast.items)

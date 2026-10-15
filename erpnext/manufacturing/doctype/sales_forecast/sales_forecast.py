@@ -33,6 +33,9 @@ class SalesForecast(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		if self.is_new():
+			self.status = "Planned"
+
 		self.validate_demand_qty()
 		self.validate_parent_warehouse()
 		self.validate_periods_and_dates()
