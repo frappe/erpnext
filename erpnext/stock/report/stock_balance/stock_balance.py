@@ -53,6 +53,7 @@ class StockBalanceReport:
 		self.data = []
 		self.columns = []
 		self.sle_entries: list[SLEntry] = []
+		self.item_warehouse_balances = {}
 		self.set_company_currency()
 
 	def set_company_currency(self) -> None:
@@ -92,6 +93,7 @@ class StockBalanceReport:
 			group_by_key = self.get_group_by_key(entry)
 			if group_by_key not in self.opening_data:
 				self.opening_data.setdefault(group_by_key, entry)
+				self.add_to_item_warehouse_opening(entry)
 
 	def prepare_new_data(self):
 		self.item_warehouse_map = self.get_item_warehouse_map()
@@ -256,6 +258,7 @@ class StockBalanceReport:
 
 	def prepare_item_warehouse_map(self, item_warehouse_map, entry, group_by_key):
 		qty_dict = item_warehouse_map[group_by_key]
+		balance = self.get_item_warehouse_balance(entry, qty_dict)
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
@@ -267,16 +270,17 @@ class StockBalanceReport:
 			entry.voucher_type == "Stock Reconciliation"
 			and not entry.is_adjustment_entry
 			and (not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle)
-			and len(group_by_key) == 2
+			and len(group_by_key) == 3
 		):
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0
+				balance.bal_qty = 0.0
 				qty_diff = flt(entry.actual_qty)
 				value_diff = flt(entry.stock_value_difference)
 			else:
-				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
-				value_diff = flt(entry.stock_value) - flt(qty_dict.bal_val)
+				qty_diff = flt(entry.qty_after_transaction) - flt(balance.bal_qty)
+				value_diff = flt(entry.stock_value) - flt(balance.bal_val)
 		else:
 			qty_diff = flt(entry.actual_qty)
 			value_diff = flt(entry.stock_value_difference)
@@ -301,6 +305,27 @@ class StockBalanceReport:
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
+		if balance is not qty_dict:
+			balance.bal_qty += qty_diff
+			balance.bal_val += value_diff
+
+	def get_item_warehouse_balance(self, entry, qty_dict) -> frappe._dict:
+		"""Balance of the whole item and warehouse, which a dimension-wise row holds only part of."""
+		if not self.filters.get("show_dimension_wise_stock"):
+			return qty_dict
+
+		key = (entry.company, entry.item_code, entry.warehouse)
+		return self.item_warehouse_balances.setdefault(key, frappe._dict(bal_qty=0.0, bal_val=0.0))
+
+	def add_to_item_warehouse_opening(self, entry):
+		"""Closing rows carry the dimensions of their last entry, so add each to its item and warehouse."""
+		if not self.filters.get("show_dimension_wise_stock"):
+			return
+
+		key = (entry.company, entry.item_code, entry.warehouse)
+		balance = self.item_warehouse_balances.setdefault(key, frappe._dict(bal_qty=0.0, bal_val=0.0))
+		balance.bal_qty += flt(entry.bal_qty)
+		balance.bal_val += flt(entry.bal_val)
 
 	def initialize_data(self, item_warehouse_map, group_by_key, entry):
 		opening_data = self.opening_data.get(group_by_key, {})
