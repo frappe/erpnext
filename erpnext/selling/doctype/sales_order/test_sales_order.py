@@ -3575,6 +3575,25 @@ class TestSalesOrder(ERPNextTestSuite):
 		po.submit()
 		self.assertEqual(po.taxes[0].tax_amount, 2)
 
+	def test_make_purchase_order_does_not_inherit_incoterm(self):
+		for delivered_by_supplier in (0, 1):
+			with self.subTest(delivered_by_supplier=delivered_by_supplier):
+				so = make_sales_order(do_not_save=True)
+				so.incoterm = "CIF"
+				so.named_place = "Hamburg port"
+				so.items[0].delivered_by_supplier = delivered_by_supplier
+				so.items[0].supplier = "_Test Supplier"
+				so.submit()
+
+				po = make_purchase_order(so.name, selected_items=so.items)[0]
+
+				self.assertFalse(po.incoterm)
+				self.assertFalse(po.named_place)
+				self.assertEqual(po.items[0].sales_order, so.name)
+				self.assertEqual(po.supplier, "_Test Supplier")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "incoterm"), "CIF")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "named_place"), "Hamburg port")
+
 	def test_make_purchase_order_does_not_inherit_party_fields(self):
 		"""
 		Customer-derived fields must not leak from a drop-ship SO into the PO.
