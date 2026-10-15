@@ -534,7 +534,6 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 		pluck="name",
 	)
 
-
 	conditions = sq_item.request_for_quotation == rfq_name
 	if rfq_item_names:
 		conditions = conditions | (sq_item.request_for_quotation_item.isin(rfq_item_names))

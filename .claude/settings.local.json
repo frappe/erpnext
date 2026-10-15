@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(claude mcp add --scope user --transport http sketch https://sketch.netchamp.dev/mcp --header \"Authorization: Bearer sk_iTM8C6uYD5kW_5PE6_ZVzlZGoHisP4dWtwTzylNIot4\")",
+      "PowerShell($p = \"$env:USERPROFILE\\\\.claude.json\"; Test-Path $p; \\(Get-Item $p\\).Length; \\(Get-Command node -ErrorAction SilentlyContinue\\).Source; \\(Get-Command python -ErrorAction SilentlyContinue\\).Source)",
+      "PowerShell(node \"C:\\\\Users\\\\ADLEEN~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\--wsl-localhost-Ubuntu-home-adleena06-frappe-erpnext-erpnext-apps-erpnext\\\\91fe1b53-bc53-40c2-bc40-9c81910b56b2\\\\scratchpad\\\\add_sketch.js\")",
+      "mcp__sketch__get_skill",
+      "mcp__sketch__create_prototype",
+      "mcp__sketch__write_files",
+      "mcp__sketch__check",
+      "mcp__sketch__edit_files",
+      "mcp__sketch__edit_file",
+      "mcp__sketch__commit",
+      "mcp__sketch__read_files",
+      "PowerShell(wsl -d Ubuntu -- grep -rn \"no-indicator-dot\" /home/adleena06/frappe-erpnext/erpnext/apps/frappe/frappe/public/scss/common/indicator.scss)",
+      "PowerShell(wsl -d Ubuntu -- sed -i 's/class=\"quotation-link text-muted small truncate\"/class=\"quotation-link small truncate\"/g' /home/adleena06/frappe-erpnext/erpnext/apps/erpnext/erpnext/buying/doctype/request_for_quotation/supplier_quotation_comparision.html)",
+      "PowerShell(wsl -d Ubuntu -- bash -c \"cd /home/adleena06/frappe-erpnext/erpnext/apps/erpnext && git diff --stat && npx --no-install prettier --check erpnext/buying/doctype/request_for_quotation/request_for_quotation.js 2>&1 | tail -2\")",
+      "PowerShell(wsl -d Ubuntu -- grep -rn \"\\\\.cursor-pointer\" /home/adleena06/frappe-erpnext/erpnext/apps/frappe/frappe/public/scss)",
+      "PowerShell(wsl -d Ubuntu -- bash -c \"cd /home/adleena06/frappe-erpnext/erpnext/apps/erpnext && git status --short && git diff\")",
+      "PowerShell(wsl -d Ubuntu -- bash -c \"cd /home/adleena06/frappe-erpnext/erpnext/apps/erpnext && git log --oneline -5 && git show --stat HEAD | head -20\")",
+      "PowerShell(wsl -d Ubuntu -- bash -c \"cd /home/adleena06/frappe-erpnext/erpnext/apps/erpnext && echo '--- fetch refspecs:' && git config --get-all remote.origin.fetch; echo '--- tracking ref:' && git rev-parse --verify -q refs/remotes/origin/supplier-quotation; echo '--- FETCH_HEAD:' && head -1 .git/FETCH_HEAD 2>/dev/null || cat \\\\$\\(git rev-parse --git-dir\\)/FETCH_HEAD | head -1; echo '--- local:' && git rev-parse HEAD\")",
+      "PowerShell(wsl -d Ubuntu -- bash -c \"cd /home/adleena06/frappe-erpnext/erpnext/apps/erpnext && echo '--- files changed vs upstream/develop:' && git diff --stat upstream/develop...HEAD && echo '--- commits not in upstream/develop:' && git log --oneline upstream/develop..HEAD && echo '--- commits in upstream/develop not in branch:' && git log --oneline HEAD..upstream/develop | wc -l && echo '--- test file history:' && git log --oneline -3 -- erpnext/accounts/report/asset_depreciation_ledger/test_asset_depreciation_ledger.py\")",
+      "PowerShell(wsl -d Ubuntu -- python3 \"/mnt/c/Users/Adleena Lobo/AppData/Local/Temp/claude/--wsl-localhost-Ubuntu-home-adleena06-frappe-erpnext-erpnext-apps-erpnext/ed05b72a-812a-48e7-9a67-9bc6f003c558/scratchpad/scan.py\")",
+      "Bash(cd \"//wsl.localhost/Ubuntu/home/adleena06/frappe-erpnext/erpnext/apps/erpnext\"; head -5 erpnext/accounts/doctype/account/chart_of_accounts/verified/philippines.json; grep -n \"^def \\\\|verified\\\\|country_code\\\\|\\\\\"name\\\\\"\" erpnext/accounts/doctype/account/chart_of_accounts/chart_of_accounts.py | head -40; grep -n \"Philippines\" -r erpnext/setup erpnext/tests --include=*.py | head)",
+      "Read(///wsl.localhost/Ubuntu/home/adleena06/frappe-erpnext/erpnext/apps/**)",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd ~/frappe-erpnext/erpnext && ls sites && cat sites/common_site_config.json | head -20\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd ~/frappe-erpnext/erpnext && bench --site erpnext.test run-tests --module erpnext.setup.doctype.company.test_company --test test_philippines_coa_default_payable_account 2>&1 | tail -30\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd ~/frappe-erpnext/erpnext/sites && ../env/bin/python '/mnt/c/Users/Adleena Lobo/AppData/Local/Temp/claude/--wsl-localhost-Ubuntu-home-adleena06-frappe-erpnext-erpnext-apps-erpnext/ed05b72a-812a-48e7-9a67-9bc6f003c558/scratchpad/run_company_test.py' 2>&1 | tail -30\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd ~/frappe-erpnext/erpnext/sites && ../env/bin/python '/mnt/c/Users/Adleena Lobo/AppData/Local/Temp/claude/--wsl-localhost-Ubuntu-home-adleena06-frappe-erpnext-erpnext-apps-erpnext/ed05b72a-812a-48e7-9a67-9bc6f003c558/scratchpad/run_company_test.py' 2>&1 | grep -v RuntimeWarning | tail -30\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd ~/frappe-erpnext/erpnext/apps/erpnext && ../../env/bin/python -m ruff check erpnext/accounts/doctype/account/test_account.py erpnext/setup/doctype/company/test_company.py; ../../env/bin/python -m ruff format --check erpnext/accounts/doctype/account/test_account.py erpnext/setup/doctype/company/test_company.py; git diff --stat -- erpnext/accounts/doctype/account/test_account.py erpnext/setup/doctype/company/test_company.py\")"
+    ]
+  }
+}

@@ -109,6 +109,48 @@ class TestCompany(ERPNextTestSuite):
 				finally:
 					frappe.delete_doc("Company", template)
 
+	def test_philippines_coa_default_payable_account(self):
+		company_name = "_Test Philippines COA Company"
+		if frappe.db.exists("Company", company_name):
+			frappe.delete_doc("Company", company_name)
+
+		abbr = random_string(3)
+		while frappe.db.exists("Company", {"abbr": abbr}):
+			abbr = random_string(3)
+
+		company = frappe.new_doc("Company")
+		company.company_name = company_name
+		company.abbr = abbr
+		company.default_currency = "PHP"
+		company.country = "Philippines"
+		company.create_chart_of_accounts_based_on = "Standard Template"
+		company.chart_of_accounts = "Philippines"
+		company.save()
+
+		try:
+			company.reload()
+			self.assertTrue(company.default_payable_account)
+			self.assertEqual(
+				frappe.db.get_value("Account", company.default_payable_account, "account_name"),
+				"Accounts Payable - Trade",
+			)
+
+			customer_deposits = frappe.db.get_value(
+				"Account",
+				{"company": company.name, "account_name": "Customer Deposits"},
+				["name", "account_type"],
+				as_dict=True,
+			)
+			self.assertTrue(customer_deposits)
+			self.assertNotEqual(customer_deposits.account_type, "Payable")
+			self.assertNotEqual(company.default_payable_account, customer_deposits.name)
+
+			self.assertFalse(
+				frappe.db.exists("Account", {"company": company.name, "account_name": ["like", "%Demo%"]})
+			)
+		finally:
+			frappe.delete_doc("Company", company.name)
+
 	def test_basic_tree(self, records=None):
 		self.load_test_records("Company")
 		min_lft = 1

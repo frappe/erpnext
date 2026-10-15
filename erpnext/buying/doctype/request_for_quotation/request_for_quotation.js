@@ -125,13 +125,13 @@ frappe.ui.form.on("Request for Quotation", {
 							var w = window.open(
 								frappe.urllib.get_full_url(
 									"/api/method/erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_pdf?" +
-									new URLSearchParams({
-										name: frm.doc.name,
-										supplier: data.supplier,
-										print_format: data.print_format || "Standard",
-										language: data.language || frappe.boot.lang,
-										letterhead: data.letter_head || frm.doc.letter_head || "",
-									}).toString()
+										new URLSearchParams({
+											name: frm.doc.name,
+											supplier: data.supplier,
+											print_format: data.print_format || "Standard",
+											language: data.language || frappe.boot.lang,
+											letterhead: data.letter_head || frm.doc.letter_head || "",
+										}).toString()
 								)
 							);
 							if (!w) {
@@ -230,7 +230,12 @@ frappe.ui.form.on("Request for Quotation", {
 			const text = $(this).text().trim();
 			const fieldname = $(this).find(".nav-link").attr("data-fieldname");
 			const href = $(this).find(".nav-link").attr("href") || "";
-			return text === __("Quotations") || text === "Quotations" || fieldname === "quotations_tab" || href.includes("quotations");
+			return (
+				text === __("Quotations") ||
+				text === "Quotations" ||
+				fieldname === "quotations_tab" ||
+				href.includes("quotations")
+			);
 		});
 
 		if (!show) {
@@ -247,8 +252,16 @@ frappe.ui.form.on("Request for Quotation", {
 
 		if ($tab_li.length) {
 			$tab_li.show().removeClass("hide hidden d-none").attr("style", "");
-			if (frm.fields_dict && frm.fields_dict.quotations_html && frm.fields_dict.quotations_html.$wrapper) {
-				frm.events.draw_quotations_comparison_table(frm, frm.fields_dict.quotations_html.$wrapper, quotes);
+			if (
+				frm.fields_dict &&
+				frm.fields_dict.quotations_html &&
+				frm.fields_dict.quotations_html.$wrapper
+			) {
+				frm.events.draw_quotations_comparison_table(
+					frm,
+					frm.fields_dict.quotations_html.$wrapper,
+					quotes
+				);
 				return;
 			}
 		}
@@ -281,9 +294,7 @@ frappe.ui.form.on("Request for Quotation", {
 
 		const all_items = frm.doc.items || [];
 		const selected_item = frm.quotations_item_filter || "";
-		const items = selected_item
-			? all_items.filter((i) => i.item_code === selected_item )
-			: all_items;
+		const items = selected_item ? all_items.filter((i) => i.item_code === selected_item) : all_items;
 
 		const quote_map = {};
 		(quotes || []).forEach((q) => {
