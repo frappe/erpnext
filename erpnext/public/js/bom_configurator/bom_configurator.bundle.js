@@ -246,22 +246,9 @@ class BOMConfigurator {
 		});
 
 		dialog.show();
-<<<<<<< HEAD
 		view.events.set_default_qty(dialog);
 
-		dialog.set_primary_action(__("Add"), () => {
-			let bom_item = dialog.get_values();
-=======
 		dialog.set_primary_action(__("Add"), (bom_item) => {
-			if (dialog.operation && !dialog.workstation_type && !dialog.workstation) {
-				frappe.throw(__("Either Workstation or Workstation Type is mandatory"));
-			}
-
-			if (!node.data?.parent_id) {
-				node.data.parent_id = this.frm.doc.name;
-			}
->>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))
-
 			frappe.call({
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
@@ -354,30 +341,9 @@ class BOMConfigurator {
 		});
 
 		dialog.show();
-<<<<<<< HEAD
 		view.events.set_default_qty(dialog);
 
-		dialog.set_primary_action(__("Add"), () => {
-			let bom_item = dialog.get_values();
-=======
 		dialog.set_primary_action(__("Add"), (bom_item) => {
-			if (!bom_item.item_code) {
-				frappe.throw(
-					phantom ? __("Phantom Item is mandatory") : __("Sub Assembly Item is mandatory")
-				);
-			}
-
-			bom_item.items.forEach((d) => {
-				if (!d.item_code) {
-					frappe.throw(__("Item is mandatory in Raw Materials table."));
-				}
-			});
-
-			if (dialog.operation && !dialog.workstation_type && !dialog.workstation) {
-				frappe.throw(__("Either Workstation or Workstation Type is mandatory"));
-			}
->>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))
-
 			frappe.call({
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
