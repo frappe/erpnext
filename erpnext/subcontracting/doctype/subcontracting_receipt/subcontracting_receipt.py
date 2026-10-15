@@ -224,9 +224,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.create_raw_materials_supplied()
 
 	def validate_closed_subcontracting_order(self):
-		for item in self.items:
-			if item.subcontracting_order:
-				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
+		if reference := self.get_on_hold_or_closed_reference("Subcontracting Order", "subcontracting_order"):
+			check_on_hold_or_closed_status("Subcontracting Order", reference[0])
 
 	def set_service_expense_account(self, default_expense_account):
 		for row in self.get("items"):

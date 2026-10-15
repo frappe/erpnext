@@ -585,11 +585,8 @@ class BuyingController(SubcontractingController):
 				)
 
 	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
-		for d in self.get("items"):
-			if d.get(ref_fieldname):
-				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status")
-				if status in ("Closed", "On Hold"):
-					frappe.throw(_("{0} {1} is {2}").format(ref_doctype, d.get(ref_fieldname), status))
+		if reference := self.get_on_hold_or_closed_reference(ref_doctype, ref_fieldname):
+			frappe.throw(_("{0} {1} is {2}").format(ref_doctype, *reference))
 
 	def get_internal_transfer_qty(self, row) -> float:
 		if flt(row.qty) or not self.is_internal_receipt():
