@@ -674,10 +674,8 @@ $.extend(erpnext.journal_entry, {
 			],
 		});
 
-<<<<<<< HEAD
-		dialog.set_primary_action(__("Save"), function () {
+		dialog.set_primary_action(__("Save"), function (values) {
 			var btn = this;
-			var values = dialog.get_values();
 
 			frm.set_value("posting_date", values.posting_date);
 			frm.set_value("naming_series", values.naming_series);
@@ -716,10 +714,6 @@ $.extend(erpnext.journal_entry, {
 
 			frm.save();
 
-=======
-		dialog.set_primary_action(__("Save"), (values) => {
-			erpnext.journal_entry.save_quick_entry(frm, values);
->>>>>>> 662d22c (fix: use values passed to dialog primary actions (#60798))
 			dialog.hide();
 		});
 
