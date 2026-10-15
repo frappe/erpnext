@@ -196,6 +196,7 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
