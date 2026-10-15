@@ -763,12 +763,12 @@ def get_workstation_oee(workstation: str) -> dict | None:
 	"""
 	today = getdate()
 	scheduled_min = flt(frappe.db.get_value("Workstation", workstation, "total_working_hours")) * 60
-	actual_run_min, ideal_min = _get_run_and_ideal_minutes(workstation, today)
+	actual_run_min, ideal_min, worked_job_cards = _get_run_and_ideal_minutes(workstation, today)
 	completed_jcs = _get_completed_jcs_today(workstation, today)
 	ideal_min += sum(
 		flt(j.time_required) / flt(j.for_quantity) * flt(j.process_loss_qty)
 		for j in completed_jcs
-		if flt(j.for_quantity)
+		if flt(j.for_quantity) and j.name in worked_job_cards
 	)
 
 	# No activity at all today — nothing to display.
@@ -777,22 +777,24 @@ def get_workstation_oee(workstation: str) -> dict | None:
 	return _build_oee(scheduled_min, actual_run_min, ideal_min, completed_jcs)
 
 
-def _get_run_and_ideal_minutes(workstation, today) -> tuple[float, float]:
+def _get_run_and_ideal_minutes(workstation, today) -> tuple[float, float, set]:
 	"""Sum actual run minutes (clipped to today) and the ideal minutes for produced qty."""
 	today_start = get_datetime(f"{today} 00:00:00")
 	today_end = get_datetime(f"{today} 23:59:59")
 	now = now_datetime()
 	actual_run_min = 0.0
 	ideal_min = 0.0
+	worked_job_cards = set()
 	for log in _get_oee_time_logs(workstation, today_start, today_end):
 		# Clip the log's interval to today's window for fair attribution.
 		start = max(get_datetime(log.from_time), today_start)
 		end = min(get_datetime(log.to_time) if log.to_time else now, today_end)
 		if end > start:
 			actual_run_min += time_diff_in_seconds(end, start) / 60
+			worked_job_cards.add(log.job_card)
 		if log.completed_qty and log.for_quantity and log.time_required:
 			ideal_min += (flt(log.time_required) / flt(log.for_quantity)) * flt(log.completed_qty)
-	return actual_run_min, ideal_min
+	return actual_run_min, ideal_min, worked_job_cards
 
 
 def _get_oee_time_logs(workstation, today_start, today_end) -> list[dict]:
@@ -803,7 +805,14 @@ def _get_oee_time_logs(workstation, today_start, today_end) -> list[dict]:
 		frappe.qb.from_(tl)
 		.inner_join(jc)
 		.on(jc.name == tl.parent)
-		.select(tl.from_time, tl.to_time, tl.completed_qty, jc.for_quantity, jc.time_required)
+		.select(
+			jc.name.as_("job_card"),
+			tl.from_time,
+			tl.to_time,
+			tl.completed_qty,
+			jc.for_quantity,
+			jc.time_required,
+		)
 		.where(jc.workstation == workstation)
 		.where(jc.docstatus < 2)
 		.where(tl.from_time <= today_end)
@@ -816,7 +825,7 @@ def _get_completed_jcs_today(workstation, today) -> list[dict]:
 	jc = frappe.qb.DocType("Job Card")
 	return (
 		frappe.qb.from_(jc)
-		.select(jc.total_completed_qty, jc.process_loss_qty, jc.for_quantity, jc.time_required)
+		.select(jc.name, jc.total_completed_qty, jc.process_loss_qty, jc.for_quantity, jc.time_required)
 		.where(jc.workstation == workstation)
 		.where(jc.status.isin(["Completed", "Submitted"]))
 		.where(Date(jc.modified) == today)

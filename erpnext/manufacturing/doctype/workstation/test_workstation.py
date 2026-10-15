@@ -390,6 +390,37 @@ class TestWorkstation(ERPNextTestSuite):
 			self.assertEqual(oee["quality"], 80)
 			self.assertEqual(oee["performance"], 100)
 
+	def test_oee_leaves_out_loss_of_work_done_on_another_day(self):
+		from frappe.tests.classes.context_managers import freeze_time
+		from frappe.utils import add_to_date, now_datetime, nowdate
+
+		from erpnext.manufacturing.page.shop_floor.shop_floor import get_workstation_oee
+
+		with freeze_time(f"{nowdate()} 12:00:00", tick=True):
+			shifts = [("00:00:00", "23:59:00")]
+			yesterday = add_to_date(now_datetime(), days=-1, hours=-2)
+			old_card = make_scheduled_job_card(
+				"_Test WS OEE Days", shifts, 6, yesterday.strftime("%Y-%m-%d %H:%M:%S"), qty=10
+			)
+			old_card.append(
+				"time_logs",
+				{"from_time": yesterday, "to_time": add_to_date(yesterday, minutes=60), "completed_qty": 8},
+			)
+			old_card.save()
+			old_card.submit()
+
+			start = add_to_date(now_datetime(), minutes=-90)
+			card = make_scheduled_job_card(
+				"_Test WS OEE Days", shifts, 6, start.strftime("%Y-%m-%d %H:%M:%S"), qty=10
+			)
+			card.append(
+				"time_logs",
+				{"from_time": start, "to_time": add_to_date(start, minutes=60), "completed_qty": 5},
+			)
+			card.save()
+
+			self.assertEqual(get_workstation_oee("_Test WS OEE Days")["performance"], 50)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
