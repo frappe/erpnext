@@ -5324,7 +5324,16 @@ def _get_available_material(available_materials, key, row):
 
 
 def _get_consumption_buckets(available_materials, key):
-	return [bucket for material_key, bucket in available_materials.items() if material_key[:2] == key[:2]]
+	if key[2] and key in available_materials:
+		return [available_materials[key]]
+
+	buckets = [available_materials[key]] if key in available_materials else []
+	buckets.extend(
+		bucket
+		for material_key, bucket in available_materials.items()
+		if material_key[:2] == key[:2] and material_key != key
+	)
+	return buckets
 
 
 def _deduct_consumed_material(buckets, row):
@@ -5406,7 +5415,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 			& (stock_entry.work_order == work_order)
 			& (stock_entry.docstatus == 1)
 		)
-		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
+		.orderby(stock_entry.creation, stock_entry.name, stock_entry_detail.item_code, stock_entry_detail.idx)
 	)
 
 	if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
