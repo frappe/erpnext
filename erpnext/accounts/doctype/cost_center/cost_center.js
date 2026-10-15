@@ -71,8 +71,7 @@ frappe.ui.form.on("Cost Center", {
 					default: 0,
 				},
 			],
-			primary_action: function () {
-				let data = d.get_values();
+			primary_action: function (data) {
 				if (
 					data.cost_center_name === frm.doc.cost_center_name &&
 					data.cost_center_number === frm.doc.cost_center_number
