@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Interest Accrual",
+ "creation": "2026-10-15 12:00:00.000000",
+ "description": "Record interest earned but not yet received, so your books show it in the right period.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-15 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Create Investment Interest Accrual",
+ "owner": "Administrator",
+ "reference_document": "Investment Interest Accrual",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Book interest earned",
+ "validate_action": 1
+}

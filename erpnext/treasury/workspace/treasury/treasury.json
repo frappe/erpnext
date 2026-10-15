@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"inv-nc-ih\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Investments\", \"col\": 6}}, {\"id\": \"inv-nc-pa\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Investments Pending Approval\", \"col\": 6}}, {\"id\": \"inv-hdr-sc\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eYour Shortcuts\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"inv-sc-ih\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment\", \"col\": 4}}, {\"id\": \"inv-sc-itx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Investment Transaction\", \"col\": 4}}, {\"id\": \"inv-hdr-mr\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eMasters &amp; Reports\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"inv-card-hd\", \"type\": \"card\", \"data\": {\"card_name\": \"Investments\", \"col\": 4}}, {\"id\": \"inv-card-ms\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"inv-card-rp\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"inv-onb\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Treasury Onboarding\", \"col\": 12}}, {\"id\": \"inv-nc-ih\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Investments\", \"col\": 4}}, {\"id\": \"inv-nc-pa\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Investments Pending Approval\", \"col\": 4}}, {\"id\": \"inv-nc-ti\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Invested\", \"col\": 4}}, {\"id\": \"inv-card-hd\", \"type\": \"card\", \"data\": {\"card_name\": \"Investments\", \"col\": 4}}, {\"id\": \"inv-card-ms\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"inv-card-rp\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "creation": "2026-10-07 15:48:30.203611",
  "custom_blocks": [],
  "docstatus": 0,
@@ -205,9 +205,10 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-07 15:48:30.702627",
+ "modified": "2026-10-15 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "Treasury",
+ "module_onboarding": "Treasury Onboarding",
  "name": "Treasury",
  "number_cards": [
   {
@@ -217,6 +218,10 @@
   {
    "label": "Investments Pending Approval",
    "number_card_name": "Investments Pending Approval"
+  },
+  {
+   "label": "Total Invested",
+   "number_card_name": "Total Invested"
   }
  ],
  "owner": "Administrator",
@@ -226,24 +231,7 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 1.0,
- "shortcuts": [
-  {
-   "color": "Green",
-   "doc_view": "List",
-   "label": "Investment",
-   "link_to": "Investment",
-   "stats_filter": "[[\"Investment\",\"status\",\"=\",\"Active\",false]]",
-   "type": "DocType"
-  },
-  {
-   "color": "Blue",
-   "doc_view": "List",
-   "label": "Investment Transaction",
-   "link_to": "Investment Transaction",
-   "stats_filter": "[[\"Investment Transaction\",\"docstatus\",\"=\",\"0\",false]]",
-   "type": "DocType"
-  }
- ],
+ "shortcuts": [],
  "standard": 1,
  "title": "Treasury",
  "type": "Workspace"

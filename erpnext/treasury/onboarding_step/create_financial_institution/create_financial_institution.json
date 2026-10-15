@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Financial Institution",
+ "creation": "2026-10-15 12:00:00.000000",
+ "description": "The bank, fund house or company you put money with. Each investment is held with one of them.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-15 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Create Financial Institution",
+ "owner": "Administrator",
+ "reference_document": "Financial Institution",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Add a bank or issuer",
+ "validate_action": 1
+}
