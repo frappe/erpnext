@@ -80,6 +80,28 @@ class TestItemGroup(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "multiple Item Defaults"):
 			group.save()
 
+	def test_company_resolved_defaults_require_company_read(self):
+		from erpnext.setup.doctype.item_group.item_group import get_company_resolved_defaults
+
+		user = frappe.get_doc(
+			doctype="User",
+			email="item-group-reader@example.com",
+			first_name="Item Group Reader",
+			user_type="Website User",
+			send_welcome_email=0,
+		).insert()
+		for username in ("Guest", user.name):
+			with self.subTest(user=username), self.set_user(username):
+				with self.assertRaises(frappe.PermissionError):
+					get_company_resolved_defaults("_Test Company")
+
+		defaults = get_company_resolved_defaults("_Test Company")
+		self.assertEqual(
+			defaults["income_account"],
+			frappe.get_cached_value("Company", "_Test Company", "default_income_account"),
+		)
+		self.assertEqual(get_company_resolved_defaults(""), {})
+
 	def test_rebuild_tree(self):
 		rebuild_tree("Item Group")
 		self.test_basic_tree()

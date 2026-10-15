@@ -112,6 +112,7 @@ def get_company_resolved_defaults(company: str) -> dict:
 	if not company:
 		return {}
 
+	frappe.has_permission("Company", "read", company, throw=True)
 	company_doc = frappe.get_cached_doc("Company", company)
 
 	return {
