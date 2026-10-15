@@ -108,7 +108,7 @@ def get_party_flows(company):
 
 
 def get_payment_terms(rows):
-	"""Payment schedule (due date, company currency amount still owed) of each invoice, earliest first.
+	"""Payment schedule (due date, company currency amount, amount recorded as paid) of each invoice, earliest first.
 
 	A payment allocated to a term is in that term's paid and discounted amounts; other payments are not.
 	The term's outstanding is not used, as it is left empty when the term is entered as an amount."""
@@ -135,25 +135,34 @@ def get_payment_terms(rows):
 				continue
 
 			# the amounts paid are in the invoice currency
-			unpaid = (
-				flt(schedule.payment_amount) - flt(schedule.paid_amount) - flt(schedule.discounted_amount)
+			paid = flt(schedule.paid_amount) + flt(schedule.discounted_amount)
+			base_paid = flt(schedule.base_payment_amount) * paid / flt(schedule.payment_amount)
+			terms.setdefault((voucher_type, schedule.parent), []).append(
+				(schedule.due_date, flt(schedule.base_payment_amount), base_paid)
 			)
-			owed = flt(schedule.base_payment_amount) * unpaid / flt(schedule.payment_amount)
-			terms.setdefault((voucher_type, schedule.parent), []).append((schedule.due_date, owed))
 
 	return terms
 
 
 def spread_over_terms(outstanding, terms):
-	"""The outstanding amount on the due dates of the terms it is left on: payments not allocated to a term
-	settled the earliest first."""
-	paid = sum(amount for _due_date, amount in terms) - outstanding
-	flows = []
-	for due_date, amount in terms:
-		settled = min(amount, max(paid, 0))
-		paid -= settled
-		if flt(amount - settled, 2) > 0:
-			flows.append((due_date, amount - settled))
+	"""The outstanding amount on the due dates of the terms it is left on.
+
+	Only what the ledger shows as received is settled: first against the terms it is recorded on, then,
+	for payments not allocated to a term, the earliest first. An invoice made from an order copies the
+	order's paid amounts, which the ledger does not show against the invoice, so they settle nothing."""
+	received = sum(amount for _due_date, amount, _paid in terms) - outstanding
+	left = []
+	for due_date, amount, paid in terms:
+		settled = min(paid, amount, max(received, 0))
+		received -= settled
+		left.append([due_date, amount - settled])
+
+	for term in left:
+		settled = min(term[1], max(received, 0))
+		received -= settled
+		term[1] -= settled
+
+	flows = [(due_date, amount) for due_date, amount in left if flt(amount, 2) > 0]
 
 	# rounding, or an outstanding above the schedule's total, stays with the last term
 	difference = flt(outstanding - sum(amount for _due_date, amount in flows), 2)

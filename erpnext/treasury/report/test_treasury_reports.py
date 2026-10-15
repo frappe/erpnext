@@ -197,6 +197,20 @@ class TestTreasuryReports(ERPNextTestSuite):
 		for days in (40, 50):
 			self.assertIn((getdate(add_days(nowdate(), days)), 1500), receivables)
 
+		# a paid amount copied from the order, with no payment against the invoice, settles nothing
+		invoice = create_sales_invoice(qty=1, rate=4000, do_not_save=1)
+		invoice.due_date = add_days(nowdate(), 80)
+		for days, paid in ((70, 1000), (80, 0)):
+			invoice.append(
+				"payment_schedule",
+				{"due_date": add_days(nowdate(), days), "payment_amount": 2000, "paid_amount": paid},
+			)
+		invoice.insert().submit()
+
+		receivables = cash_flow_forecast.get_party_flows(TEST_COMPANY)["receivables"]
+		for days in (70, 80):
+			self.assertIn((getdate(add_days(nowdate(), days)), 2000), receivables)
+
 	def test_cash_flow_forecast_leaves_out_received_interest(self):
 		investment = make_fd(FD_TERMS)
 		make_interest_accrual(investment.name, "2026-01-01", "2026-03-31", 1800).submit()
