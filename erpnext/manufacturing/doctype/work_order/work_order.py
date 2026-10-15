@@ -1460,8 +1460,8 @@ class WorkOrder(Document):
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 
-		def _get_operations(bom_no, qty=1, exploded=False):
-			data = frappe.get_all(
+		def _get_operations(bom_no):
+			return frappe.get_all(
 				"BOM Operation",
 				filters={"parent": bom_no},
 				fields=[
@@ -1490,9 +1490,24 @@ class WorkOrder(Document):
 				order_by="idx",
 			)
 
+		def _get_batch_size_flags(operation_names):
+			names = {name for name in operation_names if name}
+			if not names:
+				return {}
+			return dict(
+				frappe.get_all(
+					"Operation",
+					filters={"name": ["in", list(names)]},
+					fields=["name", "create_job_card_based_on_batch_size"],
+					as_list=True,
+					limit_page_length=0,
+				)
+			)
+
+		def _adjust_operations(data, batch_size_flags, qty=1, exploded=False):
 			for d in data:
 				if not d.fixed_time:
-					if frappe.get_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+					if batch_size_flags.get(d.operation):
 						qty = d.batch_size
 
 					if exploded:
@@ -1511,7 +1526,7 @@ class WorkOrder(Document):
 		if not self.bom_no or not frappe.get_cached_value("BOM", self.bom_no, "with_operations"):
 			return
 
-		operations = []
+		groups = []
 
 		if self.use_multi_level_bom:
 			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
@@ -1519,12 +1534,16 @@ class WorkOrder(Document):
 
 			for node in bom_traversal:
 				if node.is_bom:
-					operations.extend(
-						_get_operations(node.name, qty=node.exploded_qty / node.bom_qty, exploded=True)
-					)
+					groups.append((_get_operations(node.name), node.exploded_qty / node.bom_qty, True))
 
 		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
-		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
+		groups.append((_get_operations(self.bom_no), bom_qty, False))
+
+		batch_size_flags = _get_batch_size_flags(d.operation for data, qty, exploded in groups for d in data)
+
+		operations = []
+		for data, qty, exploded in groups:
+			operations.extend(_adjust_operations(data, batch_size_flags, qty=qty, exploded=exploded))
 
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index
