@@ -4465,7 +4465,17 @@ def add_transferred_material(item_data, row):
 
 
 def get_available_buckets(available_materials, row, warehouse):
-	buckets = [bucket for key, bucket in available_materials.items() if key[:2] == (row.item_code, warehouse)]
+	"""Use exact attribution when present; otherwise drain the direct item first."""
+	key = (row.item_code, warehouse, row.original_item or None)
+	if row.original_item and key in available_materials:
+		return [available_materials[key]]
+
+	buckets = [available_materials[key]] if key in available_materials else []
+	buckets.extend(
+		bucket
+		for material_key, bucket in available_materials.items()
+		if material_key[:2] == key[:2] and material_key != key
+	)
 	if not buckets:
 		key = (row.item_code, warehouse, None)
 		buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
