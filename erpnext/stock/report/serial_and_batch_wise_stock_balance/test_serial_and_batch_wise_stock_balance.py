@@ -52,6 +52,25 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		self.assertTrue(all(row.batch_no for row in rows[1:]))
 		self.assertEqual(rows[0].batch_no, f"{rows[1].batch_no}\n{rows[2].batch_no}")
 
+	def test_pooled_batches_take_the_item_rate(self):
+		rows = self.run_report(
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBW-P-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "SBW-PS-.#####",
+				"use_serial_no_wise_valuation": 0,
+				"valuation_method": "Moving Average",
+			},
+			[{"qty": 2, **RECEIVE}, {"qty": 2, **RECEIVE, "rate": 200}],
+		)
+
+		self.assertEqual(
+			[(row.bal_qty, row.bal_val, row.val_rate) for row in rows],
+			[(4, 600, 150), (2, 300, 150), (2, 300, 150)],
+		)
+
 	def test_item_row_lists_the_batches_under_it(self):
 		rows = self.run_report(
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SBW-Z-.#####"},
@@ -121,6 +140,7 @@ class TestSerialAndBatchWiseStockBalance(ERPNextTestSuite):
 		report.inventory_dimensions = ["project"]
 		report.serial_map = {}
 		report.batch_numbers = {}
+		report.pool_valuation_details = {"SBW Item": _dict(has_batch_no=1, valuation_method="FIFO")}
 		report.batch_map = {
 			("SBW Item", WAREHOUSE, "SBW Project"): {"SBW Batch": _dict(bal_qty=5, bal_val=500)}
 		}

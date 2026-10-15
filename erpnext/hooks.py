@@ -131,10 +131,6 @@ demo_master_doctypes = [
 	"customer",
 	"supplier",
 ]
-demo_transaction_doctypes = [
-	"purchase_order",
-	"sales_order",
-]
 
 jinja = {
 	"methods": [

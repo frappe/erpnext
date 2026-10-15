@@ -777,6 +777,29 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"allow_negative_stock": 0,
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
+		},
+	)
+	def test_auto_reserve_batch_received_after_order_date(self) -> None:
+		item = make_batch_item()
+		so = make_sales_order(
+			item_code=item.name,
+			warehouse=self.warehouse,
+			qty=1,
+			transaction_date=add_days(today(), -1),
+		)
+
+		batch = frappe.get_doc(doctype="Batch", item=item.name).insert().name
+		make_stock_entry(item_code=item.name, qty=1, to_warehouse=self.warehouse, rate=100, batch_no=batch)
+		so.create_stock_reservation_entries()
+
+		self.assertSetEqual(get_reserved_batch_nos(so.name), {batch})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
 		},
 	)

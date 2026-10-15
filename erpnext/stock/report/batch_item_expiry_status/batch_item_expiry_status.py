@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
+from frappe.utils import date_diff, today
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.report.utils import prepare_serial_batch_report
@@ -54,9 +55,7 @@ def get_data(filters):
 				batch.stock_uom,
 				batch.batch_qty,
 				batch.expiry_date,
-				max((batch.expiry_date - frappe.utils.datetime.date.today()).days, 0)
-				if batch.expiry_date
-				else None,
+				date_diff(batch.expiry_date, today()) if batch.expiry_date else None,
 			]
 		)
 
