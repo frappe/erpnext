@@ -239,6 +239,22 @@ class TestItemGroup(ERPNextTestSuite):
 		)
 		self.test_basic_tree()
 
+	def test_insert_under_leaf(self):
+		group = frappe.get_doc(
+			doctype="Item Group",
+			item_group_name="_Test Invalid Child Group",
+			parent_item_group="_Test Item Group B - 3",
+			is_group=1,
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "must be a group node"):
+			group.insert()
+
+	def test_move_under_leaf(self):
+		group = frappe.get_doc("Item Group", "_Test Item Group B - 2")
+		group.parent_item_group = "_Test Item Group B - 3"
+		with self.assertRaisesRegex(frappe.ValidationError, "must be a group node"):
+			group.save()
+
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
 		records_to_test = self.globalTestRecords["Item Group"][2:]
