@@ -37,6 +37,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	setup: function (frm) {
+		frm.set_query("item_group", () => ({ filters: { is_group: 0 } }));
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");
 		frm.add_fetch("attribute", "to_range", "to_range");
