@@ -307,6 +307,19 @@ class TestAppointment(ERPNextTestSuite):
 				},
 			)
 
+	def test_portal_slot_requests_are_rate_limited(self):
+		from erpnext.www.book_appointment.index import SLOT_REQUESTS_PER_MINUTE
+
+		self.addCleanup(setattr, frappe.local, "request", getattr(frappe.local, "request", None))
+		self.addCleanup(frappe.cache.delete_keys, "rl:")
+		set_request(method="GET", path="/api/method/erpnext.www.book_appointment.index.get_appointment_slots")
+		frappe.local.request_ip = "127.0.0.9"
+
+		with self.set_user("Guest"):
+			for _ in range(SLOT_REQUESTS_PER_MINUTE):
+				self.assertRaises(TypeError, get_appointment_slots)
+			self.assertRaises(frappe.RateLimitExceededError, get_appointment_slots)
+
 	def test_booked_slot_unavailable_on_portal(self):
 		from frappe.utils.data import get_system_timezone
 
