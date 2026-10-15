@@ -110,7 +110,8 @@ def get_party_flows(company):
 def get_payment_terms(rows):
 	"""Payment schedule (due date, company currency amount still owed) of each invoice, earliest first.
 
-	A payment allocated to a term is already off that term's outstanding; other payments are not."""
+	A payment allocated to a term is in that term's paid and discounted amounts; other payments are not.
+	The term's outstanding is not used, as it is left empty when the term is entered as an amount."""
 	terms = {}
 	for voucher_type in {row.voucher_type for row in rows}:
 		schedules = frappe.get_all(
@@ -119,17 +120,25 @@ def get_payment_terms(rows):
 				"parenttype": voucher_type,
 				"parent": ("in", [row.voucher_no for row in rows if row.voucher_type == voucher_type]),
 			},
-			fields=["parent", "due_date", "payment_amount", "outstanding", "base_payment_amount"],
+			fields=[
+				"parent",
+				"due_date",
+				"payment_amount",
+				"paid_amount",
+				"discounted_amount",
+				"base_payment_amount",
+			],
 			order_by="due_date asc, idx asc",
 		)
 		for schedule in schedules:
 			if not flt(schedule.payment_amount):
 				continue
 
-			# outstanding is in the invoice currency
-			owed = (
-				flt(schedule.base_payment_amount) * flt(schedule.outstanding) / flt(schedule.payment_amount)
+			# the amounts paid are in the invoice currency
+			unpaid = (
+				flt(schedule.payment_amount) - flt(schedule.paid_amount) - flt(schedule.discounted_amount)
 			)
+			owed = flt(schedule.base_payment_amount) * unpaid / flt(schedule.payment_amount)
 			terms.setdefault((voucher_type, schedule.parent), []).append((schedule.due_date, owed))
 
 	return terms
