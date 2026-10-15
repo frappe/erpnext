@@ -610,5 +610,8 @@ class ProductionPlan(Document):
 def get_schedule_signature(doc):
 	return (
 		sorted((row.name, row.item_code, row.bom_no, flt(row.planned_qty)) for row in doc.po_items),
-		sorted((row.name, row.production_item, row.bom_no, flt(row.qty)) for row in doc.sub_assembly_items),
+		sorted(
+			(row.name, row.production_item, row.bom_no, flt(row.qty), row.type_of_manufacturing)
+			for row in doc.sub_assembly_items
+		),
 	)

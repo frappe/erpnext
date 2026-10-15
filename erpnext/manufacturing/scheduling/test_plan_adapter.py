@@ -556,6 +556,23 @@ class TestPlanAdapter(ERPNextTestSuite):
 	def has_schedule(self, plan):
 		return bool(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
 
+	def test_changing_the_manufacturing_type_changes_the_schedule_signature(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import get_schedule_signature
+
+		def plan_with(type_of_manufacturing):
+			row = frappe._dict(
+				name="row-1",
+				production_item="_Test Item",
+				bom_no="BOM-1",
+				qty=5,
+				type_of_manufacturing=type_of_manufacturing,
+			)
+			return frappe._dict(po_items=[], sub_assembly_items=[row])
+
+		self.assertNotEqual(
+			get_schedule_signature(plan_with("In House")), get_schedule_signature(plan_with("Subcontract"))
+		)
+
 	def test_editing_draft_plan_items_clears_schedule(self):
 		plan = self.make_draft_plan()
 		apply_schedule(plan.name, "2026-12-01 09:00:00")
