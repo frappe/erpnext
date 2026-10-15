@@ -401,6 +401,17 @@ class Project(Document):
 		else:
 			self.per_gross_margin = 0
 
+	def db_set_cost(self, cost_field: str):
+		self.calculate_gross_margin()
+		self.db_set(
+			{
+				cost_field: self.get(cost_field),
+				"gross_margin": self.gross_margin,
+				"per_gross_margin": self.per_gross_margin,
+			},
+			update_modified=False,
+		)
+
 	def update_purchase_costing(self):
 		self.total_purchase_cost = self.get_non_stock_purchase_cost() - self.get_capitalised_landed_cost()
 
@@ -995,18 +1006,16 @@ def get_users_email(doc):
 
 def update_purchase_cost(projects: set[str]):
 	for name in projects:
-		project = frappe.get_doc("Project", name)
+		project = frappe.get_doc("Project", name, for_update=True)
 		project.update_purchase_costing()
-		project.calculate_gross_margin()
-		project.db_update()
+		project.db_set_cost("total_purchase_cost")
 
 
 def update_consumed_material_cost(projects: set[str]):
 	for name in projects:
-		project = frappe.get_doc("Project", name)
+		project = frappe.get_doc("Project", name, for_update=True)
 		project.set_consumed_material_cost()
-		project.calculate_gross_margin()
-		project.db_update()
+		project.db_set_cost("total_consumed_material_cost")
 
 
 @frappe.whitelist()
