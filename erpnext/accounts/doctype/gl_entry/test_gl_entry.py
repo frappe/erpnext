@@ -3,12 +3,14 @@
 
 import frappe
 from frappe.model.naming import parse_naming_series
+from frappe.utils import flt
 
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
 	set_amount_in_reporting_currency,
 )
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.general_ledger import make_round_off_gle
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -43,6 +45,40 @@ class TestGLEntry(ERPNextTestSuite):
 		)
 
 		self.assertTrue(round_off_entry)
+
+	def test_existing_round_off_entry_is_kept_for_one_cent_imbalance(self):
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
+		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
+
+		def make_entry(account, debit=0, credit=0):
+			return frappe._dict(
+				voucher_type="Journal Entry",
+				voucher_no="_Test Round Off JV",
+				company="_Test Company",
+				posting_date="2024-01-01",
+				remarks="",
+				is_opening="No",
+				account=account,
+				debit=debit,
+				credit=credit,
+				debit_in_account_currency=debit,
+				credit_in_account_currency=credit,
+			)
+
+		round_off_gle = make_entry("_Test Write Off - _TC", debit=0.03)
+		gl_map = [
+			make_entry("_Test Account Cost for Goods Sold - _TC", debit=100),
+			make_entry("_Test Bank - _TC", credit=100.01),
+			round_off_gle,
+		]
+
+		# total debit - credit = 100.03 - 100.01 = 0.02
+		make_round_off_gle(gl_map, 0.02, 0.02, 2)
+
+		self.assertIn(round_off_gle, gl_map)
+		self.assertEqual(round_off_gle.debit, 0.01)
+		self.assertEqual(round_off_gle.credit, 0)
+		self.assertEqual(flt(sum(d.debit - d.credit for d in gl_map), 2), 0)
 
 	def test_rename_entries(self):
 		je = make_journal_entry(
