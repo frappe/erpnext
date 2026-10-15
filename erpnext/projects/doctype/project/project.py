@@ -199,7 +199,7 @@ class Project(Document):
 
 	def set_consumed_material_cost(self):
 		self.total_consumed_material_cost = (
-			self.get_stock_value_consumed() + self.get_stock_entry_additional_costs()
+			self.get_stock_value_consumed() + self.get_stock_entry_capitalised_costs()
 		)
 
 	def get_stock_value_consumed(self) -> float:
@@ -219,14 +219,14 @@ class Project(Document):
 		).run()
 		return -flt(value_change[0][0])
 
-	def get_stock_entry_additional_costs(self) -> float:
+	def get_stock_entry_capitalised_costs(self) -> float:
 		stock_entry = qb.DocType("Stock Entry")
 		stock_entry_item = qb.DocType("Stock Entry Detail")
 		amount = (
 			qb.from_(stock_entry_item)
 			.join(stock_entry)
 			.on(stock_entry.name == stock_entry_item.parent)
-			.select(Sum(stock_entry_item.additional_cost))
+			.select(Sum(stock_entry_item.additional_cost + stock_entry_item.landed_cost_voucher_amount))
 			.where(
 				(stock_entry_item.project == self.name)
 				& (stock_entry.docstatus == 1)
