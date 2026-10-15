@@ -33,7 +33,11 @@
 	</div>
 	<div class="flex justify-between items-center mb-2">
 		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
-		<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+		{% if (q.status === "Expired") { %}
+			<span class="valid-till expired" title="{{ __("Expired on {0}", [frappe.datetime.str_to_user(q.valid_till)]) }}">{{ frappe.datetime.str_to_user(q.valid_till) }}</span>
+		{% } else { %}
+			<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+		{% } %}
 	</div>
 	<div class="flex justify-between items-center">
 		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
