@@ -926,6 +926,58 @@ class TestProductionPlan(ERPNextTestSuite):
 				frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty"), qty
 			)
 
+	def test_draft_request_in_another_unit_counts_in_plan_units(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		raw_material = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[raw_material.name], rm_qty=100)
+		plan = frappe.get_doc(
+			{
+				"doctype": "Production Plan",
+				"company": "_Test Company",
+				"posting_date": nowdate(),
+				"po_items": [
+					{
+						"item_code": fg_item,
+						"bom_no": bom.name,
+						"planned_qty": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+				"mr_items": [
+					{
+						"item_code": raw_material.name,
+						"quantity": 10,
+						"uom": "Box",
+						"conversion_factor": 10,
+						"warehouse": "_Test Warehouse - _TC",
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).submit()
+		plan.make_material_request()
+
+		draft = frappe.get_doc(
+			"Material Request",
+			frappe.db.get_value(
+				"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
+			),
+		)
+		draft.items[0].update({"uom": raw_material.stock_uom, "conversion_factor": 1, "qty": 10})
+		draft.save()
+
+		plan.make_material_request()
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"material_request_plan_item": plan.mr_items[0].name, "parent": ("!=", draft.name)},
+			fields=["qty", "uom"],
+		)
+		self.assertEqual([(row.qty, row.uom) for row in requested], [(9, "Box")])
+
 	def test_material_request_is_not_planned_twice(self):
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 

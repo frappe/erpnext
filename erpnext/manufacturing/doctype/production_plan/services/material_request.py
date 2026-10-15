@@ -64,7 +64,9 @@ class MaterialRequestService:
 		draft_qty = self.get_draft_requested_qty()
 		for item in self.doc.mr_items:
 			qty_to_request = flt(
-				flt(item.quantity) - flt(item.requested_qty) - flt(draft_qty.get(item.name)),
+				flt(item.quantity)
+				- flt(item.requested_qty)
+				- flt(draft_qty.get(item.name)) / (flt(item.conversion_factor) or 1),
 				item.precision("quantity"),
 			)
 			if qty_to_request <= 0:
@@ -84,7 +86,7 @@ class MaterialRequestService:
 		return frappe._dict(
 			(
 				frappe.qb.from_(mr_item)
-				.select(mr_item.material_request_plan_item, Sum(mr_item.qty))
+				.select(mr_item.material_request_plan_item, Sum(mr_item.stock_qty))
 				.where((mr_item.production_plan == self.doc.name) & (mr_item.docstatus == 0))
 				.groupby(mr_item.material_request_plan_item)
 			).run()
