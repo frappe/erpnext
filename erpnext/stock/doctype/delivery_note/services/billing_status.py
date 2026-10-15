@@ -90,14 +90,23 @@ def get_creditable_qty(return_doc) -> dict:
 
 
 def get_billed_qty(original_rows: set) -> dict:
+	si = frappe.qb.DocType("Sales Invoice")
 	sii = frappe.qb.DocType("Sales Invoice Item")
-	invoiced_qty = frappe._dict(
-		frappe.qb.from_(sii)
-		.select(sii.dn_detail, Sum(sii.qty))
-		.where(sii.dn_detail.isin(list(original_rows)) & (sii.docstatus == 1) & (sii.qty > 0))
-		.groupby(sii.dn_detail)
-		.run()
-	)
+	invoiced = {
+		row.dn_detail: row
+		for row in (
+			frappe.qb.from_(sii)
+			.join(si)
+			.on(si.name == sii.parent)
+			.select(sii.dn_detail, Sum(sii.qty).as_("qty"), Sum(sii.amount).as_("amount"))
+			.where(
+				sii.dn_detail.isin(list(original_rows))
+				& (sii.docstatus == 1)
+				& ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
+			)
+			.groupby(sii.dn_detail)
+		).run(as_dict=True)
+	}
 
 	billed_qty = {}
 	for row in frappe.get_all(
@@ -105,12 +114,19 @@ def get_billed_qty(original_rows: set) -> dict:
 		filters={"name": ("in", list(original_rows))},
 		fields=["name", "billed_amt", "rate", "qty"],
 	):
-		if row.name in invoiced_qty:
-			billed_qty[row.name] = flt(invoiced_qty[row.name])
-		else:
-			billed_qty[row.name] = flt(row.billed_amt) / flt(row.rate) if flt(row.rate) else flt(row.qty)
+		billed_qty[row.name] = get_row_billed_qty(row, invoiced.get(row.name))
 
 	return billed_qty
+
+
+def get_row_billed_qty(row, invoiced) -> float:
+	if not flt(row.rate):
+		return flt(invoiced.qty) if invoiced else flt(row.qty)
+
+	direct_qty = flt(invoiced.qty) if invoiced else 0.0
+	direct_amount = flt(invoiced.amount) if invoiced else 0.0
+	order_billed_amount = max(flt(row.billed_amt) - direct_amount, 0.0)
+	return direct_qty + flt(order_billed_amount / flt(row.rate), 6)
 
 
 def get_credited_qty(original_rows: set, current_return: str) -> dict:
