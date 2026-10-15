@@ -91,36 +91,40 @@ def get_bom_diff(bom1: str, bom2: str):
 	out = get_diff(doc1, doc2)
 	out.row_changed, out.added, out.removed = [], [], []
 	for df in doc1.meta.fields:
-		diff_table_field(df, doc1, doc2, out)
+		_diff_table_field(df, doc1, doc2, out)
 	return out
 
 
-def diff_table_field(df, doc1, doc2, out):
+def _diff_table_field(df, doc1, doc2, out):
 	from frappe.model import table_fields
 
 	if df.fieldtype not in table_fields:
 		return
 
 	identifier = _BOM_DIFF_IDENTIFIERS[df.fieldname]
-	old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
 	old_rows = {}
-	for row in old_value:
+	for row in doc1.get(df.fieldname):
 		old_rows.setdefault(row.get(identifier), []).append(row)
 
-	# Reserve unchanged matches before pairing edited rows with repeated identifiers.
 	unmatched_rows = []
-	for index, row in enumerate(new_value):
-		candidates = old_rows.get(row.get(identifier), [])
-		for candidate_index, candidate in enumerate(candidates):
-			diff = get_diff(candidate, row, for_child=True)
-			if not diff or not diff.changed:
-				candidates.pop(candidate_index)
-				break
-		else:
+	for index, row in enumerate(doc2.get(df.fieldname)):
+		if not _pop_unchanged_row(old_rows.get(row.get(identifier), []), row):
 			unmatched_rows.append((index, row))
 
+	_collect_row_changes(df, identifier, old_rows, unmatched_rows, out)
+	for rows in old_rows.values():
+		out.removed.extend([df.fieldname, row.as_dict()] for row in rows)
+
+
+def _pop_unchanged_row(candidates, row):
+	for index, candidate in enumerate(candidates):
+		if not get_diff(candidate, row, for_child=True):
+			return candidates.pop(index)
+
+
+def _collect_row_changes(df, identifier, old_rows, unmatched_rows, out):
 	for index, row in unmatched_rows:
-		candidates = old_rows.get(row.get(identifier), [])
+		candidates = old_rows.get(row.get(identifier))
 		if not candidates:
 			out.added.append([df.fieldname, row.as_dict()])
 			continue
@@ -128,10 +132,6 @@ def diff_table_field(df, doc1, doc2, out):
 		diff = get_diff(candidates.pop(0), row, for_child=True)
 		if diff and diff.changed:
 			out.row_changed.append((df.fieldname, index, row.get(identifier), diff.changed))
-
-	for candidates in old_rows.values():
-		for row in candidates:
-			out.removed.append([df.fieldname, row.as_dict()])
 
 
 @frappe.whitelist()
