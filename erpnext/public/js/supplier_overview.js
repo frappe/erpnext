@@ -127,7 +127,6 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			type: "bar",
 			height: 280,
 			colors: ["--co-series-1", "--co-series-2"],
-			empty_text: __("No purchases or payments in this period"),
 			notes,
 			data: t?.points.some((p) => flt(p.purchased) || flt(p.paid)) && {
 				labels: t.points.map((p) => p.label),
@@ -170,7 +169,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 		});
 		if (this.show_state($panel, this.overview, 280, this.overview_error, "delivery")) return;
 		if (!d.lines) {
-			this.empty_note($panel, __("No order lines were due in this period"), 180);
+			$panel.remove();
 			return;
 		}
 		this.draw_donut($panel, {

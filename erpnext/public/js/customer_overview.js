@@ -93,7 +93,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			return {
 				label,
 				value: "—",
-				caption: __("Not available in Accounts Receivable Summary"),
+				caption: __("Not available with your permissions"),
 				onclick: () => this.open_ledger(),
 			};
 		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ledger() };
@@ -126,7 +126,6 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
 			type: "line",
 			colors: ["--blue-600"],
-			empty_text: __("No sales in this period"),
 			notes,
 			data: t?.points.some((p) => flt(p.value)) && {
 				labels: t.points.map((p) => p.label),
@@ -147,6 +146,7 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 				__("Overdue {0} · {1}% of unpaid invoices", [this.money0(a.overdue), flt(a.overdue_pct, 1)]),
 		});
 		this.render_credit();
+		this.$charts.toggle(this.$charts.children().length > 0);
 	}
 
 	render_credit() {

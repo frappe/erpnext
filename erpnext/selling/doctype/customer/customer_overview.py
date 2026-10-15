@@ -263,7 +263,8 @@ def reported_advances(customer, company, report_date):
 			"range": "30, 60, 90",
 		}
 	)[1]
-	return next((row.get("advance") for row in rows if row.get("party") == customer), None)
+	missing = 0 if _unrestricted_read("Payment Ledger Entry") else None
+	return next((row.get("advance") for row in rows if row.get("party") == customer), missing)
 
 
 def ageing(ar):

@@ -319,7 +319,7 @@ erpnext.PartyOverview = class PartyOverview {
 		const $panel = this.panel(this.$trend, spec);
 		if (this.show_state($panel, this.overview, 220, this.overview_error, "trend")) return;
 		if (!spec.data) {
-			this.empty_note($panel, spec.empty_text, 220);
+			this.$trend.empty().hide();
 			return;
 		}
 
@@ -390,7 +390,7 @@ erpnext.PartyOverview = class PartyOverview {
 		if (this.show_state($panel, this.balances, 180, this.balances_error)) return;
 		const a = this.balances.data.ageing;
 		if (flt(a.total) <= 0) {
-			this.empty_note($panel, __("Nothing outstanding"), 180);
+			$panel.remove();
 			return;
 		}
 
