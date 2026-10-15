@@ -70,6 +70,9 @@ class ItemGroup(NestedSet):
 	def validate_item_group_defaults(self):
 		from erpnext.stock.doctype.item.item import validate_item_default_company_links
 
+		if len({row.company for row in self.item_group_defaults}) != len(self.item_group_defaults):
+			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
+
 		validate_item_default_company_links(self.item_group_defaults)
 
 

@@ -69,6 +69,17 @@ class TestItemGroup(ERPNextTestSuite):
 		group_b.parent_item_group = "All Item Groups"
 		group_b.save()
 
+	def test_duplicate_company_defaults(self):
+		group = frappe.get_doc("Item Group", "_Test Item Group")
+		group.set("item_group_defaults", [])
+		for _ in range(2):
+			group.append(
+				"item_group_defaults",
+				{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"},
+			)
+		with self.assertRaisesRegex(frappe.ValidationError, "multiple Item Defaults"):
+			group.save()
+
 	def test_rebuild_tree(self):
 		rebuild_tree("Item Group")
 		self.test_basic_tree()
