@@ -35,6 +35,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock import stock_ledger
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -2120,20 +2121,39 @@ class StockEntry(StockController):
 				)
 
 	def update_stock_ledger(self, allow_negative_stock=False):
-		sl_entries = []
+		"""On submit, post the source legs, recalculate once for bundles picked while posting them,
+		then post the target legs. Only the second call updates batch qty, for the whole voucher."""
+		source_entries, target_entries = [], []
 		finished_item_row = self.get_finished_item_row()
+		self.get_sle_for_source_warehouse(source_entries, finished_item_row)
+		self.get_sle_for_target_warehouse(target_entries, finished_item_row)
 
-		# make sl entries for source warehouse first
-		self.get_sle_for_source_warehouse(sl_entries, finished_item_row)
-
-		# SLE for target warehouse
-		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-
-		# reverse sl entries if cancel
 		if self.docstatus == 2:
-			sl_entries.reverse()
+			self.make_sl_entries(
+				(source_entries + target_entries)[::-1], allow_negative_stock=allow_negative_stock
+			)
+			return
 
-		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+		stock_ledger.make_sl_entries(source_entries, allow_negative_stock)
+		self.recalculate_for_bundles_picked_while_posting()
+		self.make_sl_entries(target_entries, allow_negative_stock=allow_negative_stock)
+
+	def recalculate_for_bundles_picked_while_posting(self):
+		if not frappe.db.exists(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"actual_qty": ("<", 0),
+				"auto_created_serial_and_batch_bundle": 1,
+				"is_cancelled": 0,
+			},
+		):
+			return
+
+		stock_entry = frappe.get_doc(self.doctype, self.name)
+		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		stock_entry.db_update_all()
 
 	def get_finished_item_row(self):
 		finished_item_row = None
