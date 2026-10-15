@@ -1630,6 +1630,21 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 	return query.run(as_dict=True)
 
 
+def aggregate_bin_details(bin_list):
+	qty_fields = (
+		"projected_qty",
+		"actual_qty",
+		"ordered_qty",
+		"reserved_qty_for_production",
+		"planned_qty",
+	)
+	aggregated = {field: 0 for field in qty_fields}
+	for row in bin_list or []:
+		for field in qty_fields:
+			aggregated[field] += flt(row.get(field))
+	return aggregated
+
+
 @frappe.whitelist()
 def get_so_details(sales_order):
 	return frappe.db.get_value(
@@ -1976,28 +1991,26 @@ def get_sub_assembly_items(
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
-			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
-				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+			if warehouse and d.item_code not in bin_details:
+				bins = get_bin_details(d, company, for_warehouse=warehouse)
+				bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
-				for _bin_dict in bin_details[d.item_code]:
-					if _bin_dict.projected_qty > 0:
-						if _bin_dict.projected_qty >= stock_qty:
-							_bin_dict.projected_qty -= stock_qty
-							stock_qty = 0
-							continue
-						else:
-							stock_qty = stock_qty - _bin_dict.projected_qty
-							sub_assembly_items.append(d.item_code)
-			elif warehouse:
-				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
+				bin_dict = bin_details[d.item_code]
+				available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
+				if available_qty >= stock_qty:
+					bin_dict.available_qty = available_qty - stock_qty
+					stock_qty = 0
+				elif available_qty > 0:
+					bin_dict.available_qty = 0
+					stock_qty -= available_qty
+					sub_assembly_items.append(d.item_code)
 
 			if stock_qty > 0:
 				bom_data.append(
 					frappe._dict(
 						{
-							"actual_qty": bin_details[d.item_code][0].get("actual_qty", 0)
-							if bin_details.get(d.item_code)
-							else 0,
+							"actual_qty": bin_details.get(d.item_code, {}).get("actual_qty", 0),
 							"parent_item_code": parent_item_code,
 							"description": d.description,
 							"production_item": d.item_code,
