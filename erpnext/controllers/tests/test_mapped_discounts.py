@@ -459,6 +459,18 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.assertEqual(sales_order.discount_amount, 0)
 		self.assertEqual(sales_order.grand_total, 200)
 
+	def test_invoice_of_the_undiscounted_row_takes_no_discount(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		sales_order = self.make_combined_sales_order()
+		discounted = make_sales_invoice(sales_order.name)
+		discounted.remove(discounted.items[1])
+		discounted.save().submit()
+
+		invoice = make_sales_invoice(sales_order.name)
+		self.assertEqual(invoice.discount_amount, 0)
+		self.assertEqual(invoice.grand_total, 100)
+
 	def test_header_edit_through_the_api_replaces_carried_discounts(self):
 		for field, value, discount, regular_net_amount in (
 			("discount_amount", 5, 5, 197.5),
