@@ -20,4 +20,4 @@ def execute():
 		bin_name = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 		if not bin_name:
 			continue
-		frappe.get_doc("Bin", bin_name, for_update=True).update_reserved_qty_for_production_plan()
+		frappe.get_doc("Bin", bin_name, for_update=True).recalculate_values()
