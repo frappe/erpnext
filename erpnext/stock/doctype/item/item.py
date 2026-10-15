@@ -325,7 +325,7 @@ class Item(Document):
 		currency = frappe.get_cached_value("Price List", price_list, "currency") or default_currency
 		price_list_rate = flt(self.standard_rate)
 		if default_currency and currency != default_currency:
-			exchange_rate = flt(get_exchange_rate(currency, default_currency))
+			exchange_rate = flt(get_exchange_rate(currency, default_currency, args="for_selling"))
 			if not exchange_rate:
 				return False
 
