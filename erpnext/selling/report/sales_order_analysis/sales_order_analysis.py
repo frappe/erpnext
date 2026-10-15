@@ -9,6 +9,7 @@ from frappe import _, qb
 from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
 from frappe.utils import date_diff, flt, nowdate
+from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
 
@@ -117,7 +118,8 @@ def get_data(filters):
 	)
 
 	if filters.get("warehouse"):
-		query = query.where(soi.warehouse == filters.get("warehouse"))
+		warehouses = [*get_descendants_of("Warehouse", filters.get("warehouse")), filters.get("warehouse")]
+		query = query.where(soi.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
 

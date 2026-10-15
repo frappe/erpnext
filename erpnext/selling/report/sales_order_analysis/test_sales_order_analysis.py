@@ -521,5 +521,26 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 		for key, val in expected_value.items():
 			with self.subTest(key=key, val=val):
 				self.assertEqual(data[0][key], val)
->>>>>>> 83e8f5e84e (fix: keep billed qty consistent with billed amount after a credit note in Sales Order Analysis)
->>>>>>> 1bad7736f8 (fix: keep billed qty consistent with billed amount after a credit note in Sales Order Analysis)
+
+	def test_17_warehouse_filter_includes_child_warehouses(self):
+		transaction_date = "2021-06-01"
+		group = "_Test Warehouse Group - _TC"
+		child = "_Test Warehouse Group-C1 - _TC"
+		sibling = "_Test Warehouse Group-C2 - _TC"
+		item = create_item("_Test SOA WH Item", is_stock_item=1).item_code
+		so = make_sales_order(transaction_date=transaction_date, item=item, qty=5, rate=100, warehouse=child)
+
+		def orders_for(warehouse):
+			columns, data, message, chart = execute(
+				{
+					"company": "_Test Company",
+					"from_date": "2021-06-01",
+					"to_date": "2021-06-30",
+					"warehouse": warehouse,
+				}
+			)
+			return [row["sales_order"] for row in data]
+
+		# the parent group resolves to its children, a sibling child does not
+		self.assertIn(so.name, orders_for(group))
+		self.assertNotIn(so.name, orders_for(sibling))
