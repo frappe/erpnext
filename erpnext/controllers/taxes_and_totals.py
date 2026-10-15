@@ -15,6 +15,7 @@ import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 from erpnext.controllers.accounts_controller import (
+	get_qty_in_stock_uom,
 	validate_conversion_rate,
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
@@ -294,7 +295,7 @@ class calculate_taxes_and_totals:
 
 	def apply_mapped_discount_to_item(self, item):
 		item.distributed_discount_amount = flt(
-			flt(item.mapped_additional_discount_amount) * flt(item.qty),
+			flt(item.mapped_additional_discount_amount) * get_qty_in_stock_uom(item),
 			item.precision("distributed_discount_amount"),
 		)
 		if not item.distributed_discount_amount:
@@ -371,7 +372,9 @@ class calculate_taxes_and_totals:
 				total_tax_intercept += tax_intercept_per_qty * flt(item.qty)
 
 			item._mapped_discount_inclusive_amount = (
-				flt(item.get("mapped_additional_discount_amount")) * flt(item.qty) * (1 + total_tax_slope)
+				flt(item.get("mapped_additional_discount_amount"))
+				* get_qty_in_stock_uom(item)
+				* (1 + total_tax_slope)
 			)
 
 			if not self.discount_amount_applied and item.qty and (total_tax_slope or total_tax_intercept):
