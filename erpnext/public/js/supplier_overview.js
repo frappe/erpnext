@@ -192,6 +192,9 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			],
 			center: { value: d.lines, label: d.lines === 1 ? __("delivery") : __("deliveries") },
 		});
+		$('<div class="co-note">')
+			.text(__("{0}% delivered on time", [Math.round(d.on_time_rate)]))
+			.appendTo($panel);
 		return $panel;
 	}
 
