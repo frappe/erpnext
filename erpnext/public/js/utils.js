@@ -1525,3 +1525,20 @@ $.extend(erpnext.stock.utils, {
 		});
 	},
 });
+
+// A task's priority as an icon and its label, all in one gray: Urgent as a filled alert square, the others
+// as bars filled up to their level. Empty when there is none; a custom priority gets its label only.
+erpnext.utils.task_priority_html = function (priority) {
+	if (!priority) return "";
+	const icons = {
+		Urgent: "priority-urgent",
+		High: "priority-high",
+		Medium: "priority-medium",
+		Low: "priority-low",
+	};
+	const icon = icons[priority]
+		? frappe.utils.icon(icons[priority], "sm", "", "", "mr-2 text-ink-gray-7", true)
+		: "";
+	const label = frappe.utils.escape_html(__(priority));
+	return `<span class="inline-flex items-center whitespace-nowrap">${icon}<span>${label}</span></span>`;
+};

@@ -124,6 +124,8 @@ frappe.ui.form.on("Project", {
 		}
 
 		const project = frm.doc.name;
+		// kept on the form, so the chosen order survives a reload of the document
+		frm.tasks_sort ??= { sort_by: "creation", sort_order: "asc" };
 		// loading Task's meta also loads task_list.js, whose indicators the Status column reuses
 		const pending = Promise.all([
 			frappe.require("embedded_list.bundle.js"),
@@ -134,48 +136,25 @@ frappe.ui.form.on("Project", {
 
 			const list = new frappe.ui.EmbeddedList({
 				wrapper: $wrapper,
-				get_page: ({ start, page_length, txt }) => {
-					const args = {
-						fields: [
-							"name",
-							"subject",
-							"status",
-							"priority",
-							"_assign",
-							"exp_start_date",
-							"exp_end_date",
-							"progress",
-						],
-						filters: { project },
-						order_by: "creation asc",
+				get_page: ({ start, page_length, txt }) =>
+					frappe.xcall("erpnext.projects.doctype.project.project.get_project_tasks", {
+						project,
+						...frm.tasks_sort,
 						start,
-						limit: page_length,
-					};
-					if (txt) {
-						args.or_filters = [
-							["subject", "like", `%${txt}%`],
-							["name", "like", `%${txt}%`],
-						];
-					}
-					return frappe.db.get_list("Task", args);
-				},
+						page_length,
+						txt,
+					}),
 				empty_message: __("No Tasks in this Project yet."),
 				add_button: frappe.model.can_create("Task") && {
 					label: __("Add Task"),
-					action: () => {
-						frappe.model.with_doctype("Task", () => {
-							const task = frappe.model.get_new_doc("Task");
-							task.project = frm.doc.name;
-							// % Complete and status are recomputed on the server when a task changes
-							frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
-						});
-					},
+					action: () => frm.events.create_task(frm),
 				},
 				on_row_click: (row) => frappe.set_route("Form", "Task", row.name),
 				columns: [
 					{ label: __("Task Name"), fieldname: "subject" },
 					{
 						label: __("Status"),
+						fieldname: "status",
 						render: (row) => {
 							if (!row.status) return "";
 							// the Task list gives no colour for statuses missing from its map, e.g. ones
@@ -188,17 +167,24 @@ frappe.ui.form.on("Project", {
 							});
 						},
 					},
-					{ label: __("Priority"), render: (row) => __(row.priority || "") },
+					{
+						label: __("Priority"),
+						fieldname: "priority",
+						render: (row) => erpnext.utils.task_priority_html(row.priority),
+					},
 					{
 						label: __("Start Date"),
+						fieldname: "exp_start_date",
 						render: (row) => frappe.datetime.str_to_user(row.exp_start_date, false, true),
 					},
 					{
 						label: __("End Date"),
+						fieldname: "exp_end_date",
 						render: (row) => frappe.datetime.str_to_user(row.exp_end_date, false, true),
 					},
 					{
 						label: __("Progress"),
+						fieldname: "progress",
 						align: "right",
 						render: (row) => frappe.format(flt(row.progress), { fieldtype: "Percent" }),
 					},
@@ -216,6 +202,28 @@ frappe.ui.form.on("Project", {
 				],
 			});
 
+			const $actions = $wrapper.find(".embedded-list-header-actions");
+			new frappe.ui.SortSelector({
+				parent: $actions,
+				doctype: "Task",
+				args: {
+					sort_by: frm.tasks_sort.sort_by,
+					sort_order: frm.tasks_sort.sort_order,
+					// the columns shown, besides when tasks were created and last changed
+					options: [
+						{ fieldname: "creation", label: __("Created On") },
+						{ fieldname: "modified", label: __("Last Updated On") },
+						...list.columns
+							.filter((column) => column.fieldname)
+							.map(({ fieldname, label }) => ({ fieldname, label })),
+					],
+				},
+				onchange: (sort_by, sort_order) => {
+					frm.tasks_sort = { sort_by, sort_order };
+					list.refresh();
+				},
+			}).wrapper.insertAfter($actions.find("[data-action='search']"));
+
 			// cells are rendered as HTML, so avatar_group's own handler for "+" is lost; bound here instead
 			$wrapper.off(".project_tasks").on("click.project_tasks", ".avatar-group", (e) => {
 				// the avatars only show their user's name on hover, rather than opening the task
@@ -230,6 +238,15 @@ frappe.ui.form.on("Project", {
 			return list;
 		});
 		return pending;
+	},
+
+	create_task: function (frm) {
+		frappe.model.with_doctype("Task", () => {
+			const task = frappe.model.get_new_doc("Task");
+			task.project = frm.doc.name;
+			// % Complete and status are recomputed on the server when a task changes
+			frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
+		});
 	},
 
 	set_custom_buttons: function (frm) {
