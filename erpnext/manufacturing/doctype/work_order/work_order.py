@@ -1124,6 +1124,7 @@ def set_work_order_ops(name: str):
 
 @frappe.whitelist()
 def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | None = None) -> float:
+	frappe.has_permission("Stock Entry", "read", doc=stock_entry_name, throw=True)
 	se = frappe.db.get_value("Stock Entry", stock_entry_name, ["fg_completed_qty"], as_dict=True)
 	if not se:
 		return 0.0
