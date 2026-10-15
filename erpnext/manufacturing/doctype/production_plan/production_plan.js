@@ -850,8 +850,8 @@ frappe.ui.form.on("Production Plan", {
 
 			dialog.show();
 
-			dialog.set_primary_action(__("Get Items"), () => {
-				let warehouses = dialog.get_values().warehouses;
+			dialog.set_primary_action(__("Get Items"), (values) => {
+				let warehouses = values.warehouses;
 				frm.events.get_items_for_material_requests(frm, warehouses);
 				dialog.hide();
 			});
