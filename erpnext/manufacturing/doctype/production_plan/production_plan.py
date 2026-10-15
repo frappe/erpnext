@@ -606,9 +606,11 @@ class ProductionPlan(Document):
 	@frappe.whitelist()
 	def make_material_request(self):
 		submit_material_request = cint(self.get("submit_material_request"))
-		if not self.is_new():
-			self.load_from_db()
-			self.check_permission("write")
+		if not (self.name and frappe.db.exists("Production Plan", self.name)):
+			frappe.throw(_("Save the Production Plan before creating Material Requests"))
+
+		self.load_from_db()
+		self.check_permission("write")
 		self.submit_material_request = submit_material_request
 		self.validate_plan_is_open()
 
