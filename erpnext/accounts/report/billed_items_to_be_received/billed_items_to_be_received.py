@@ -23,9 +23,15 @@ def get_data(report_filters):
 	receipt = frappe.qb.DocType("Purchase Receipt")
 	received = get_received_as_on(as_on_date)
 	returned = get_returned_as_on(as_on_date)
+	invoice_first_returns = get_receipt_returns_as_on(
+		as_on_date, "purchase_invoice_item", "invoice_first_returns"
+	)
+	receipt_first_returns = get_receipt_returns_as_on(as_on_date, "name", "receipt_first_returns")
+	received_from_receipt = invoice_item.qty - IfNull(receipt_first_returns.qty, 0)
 	received_qty = (
 		IfNull(received.qty, 0)
-		+ Case().when(receipt.name.isnotnull(), invoice_item.qty).else_(0)
+		- IfNull(invoice_first_returns.qty, 0)
+		+ Case().when(receipt.name.isnotnull(), received_from_receipt).else_(0)
 		- IfNull(returned.stock_qty, 0)
 	)
 	returned_qty = IfNull(returned.qty, 0)
@@ -40,6 +46,10 @@ def get_data(report_filters):
 		.on(received.detail == invoice_item.name)
 		.left_join(returned)
 		.on(returned.detail == invoice_item.name)
+		.left_join(invoice_first_returns)
+		.on(invoice_first_returns.detail == invoice_item.name)
+		.left_join(receipt_first_returns)
+		.on(receipt_first_returns.detail == invoice_item.pr_detail)
 		.left_join(receipt)
 		.on(
 			(receipt.name == invoice_item.purchase_receipt)
@@ -118,6 +128,34 @@ def get_returned_as_on(as_on_date):
 		.where(debit_note_item.purchase_invoice_item.isnotnull())
 		.groupby(debit_note_item.purchase_invoice_item)
 	).as_("returned")
+
+
+def get_receipt_returns_as_on(as_on_date, linked_by: str, alias: str):
+	"""Qty sent back by receipt returns posted on or before the date.
+
+	Return receipts link only to the original receipt row, so `linked_by` picks the invoice row
+	(`purchase_invoice_item`) for receipts made from an invoice, or the receipt row itself (`name`)
+	for invoices made from a receipt.
+	"""
+	return_receipt = frappe.qb.DocType("Purchase Receipt")
+	return_item = frappe.qb.DocType("Purchase Receipt Item")
+	original_item = frappe.qb.DocType("Purchase Receipt Item").as_("original_item")
+	link_field = getattr(original_item, linked_by)
+	return (
+		frappe.qb.from_(return_item)
+		.join(return_receipt)
+		.on(return_receipt.name == return_item.parent)
+		.join(original_item)
+		.on(original_item.name == return_item.purchase_receipt_item)
+		.select(link_field.as_("detail"), Sum(-return_item.received_qty).as_("qty"))
+		.where(
+			(return_receipt.docstatus == 1)
+			& (return_receipt.is_return == 1)
+			& (return_receipt.posting_date <= as_on_date)
+		)
+		.where(link_field.isnotnull())
+		.groupby(link_field)
+	).as_(alias)
 
 
 def get_columns():

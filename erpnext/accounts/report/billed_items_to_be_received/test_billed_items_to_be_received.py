@@ -8,6 +8,7 @@ from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note, ma
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.billed_items_to_be_received.billed_items_to_be_received import execute
 from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice_from_receipt
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt as make_receipt
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -141,7 +142,29 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 
 		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(10, 0, 6)])
 
-	def receive(self, invoice: str, posting_date: str, qty: float | None = None) -> None:
+	def test_receipt_return_reopens_invoice_made_from_receipt(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
+		pi = make_invoice_from_receipt(receipt.name)
+		pi.insert()
+		pi.submit()
+		self.return_to_supplier(receipt.name, qty=2)
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
+
+	def test_receipt_return_reopens_invoice_received_later(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
+		)
+		receipt = self.receive(pi.name, today())
+		self.return_to_supplier(receipt, qty=4)
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(10, 6, 0)])
+
+	def receive(self, invoice: str, posting_date: str, qty: float | None = None) -> str:
 		receipt = make_purchase_receipt(invoice)
 		if qty:
 			receipt.items[0].qty = receipt.items[0].received_qty = qty
@@ -149,6 +172,13 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 		receipt.posting_date = posting_date
 		receipt.insert()
 		receipt.submit()
+		return receipt.name
+
+	def return_to_supplier(self, receipt: str, qty: float) -> None:
+		receipt_return = make_purchase_return(receipt)
+		receipt_return.items[0].qty = receipt_return.items[0].received_qty = -qty
+		receipt_return.insert()
+		receipt_return.submit()
 
 	def test_posting_date_upper_bound_filter(self):
 		"""A PI posted after the filter's posting_date must be excluded."""
