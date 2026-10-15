@@ -376,6 +376,16 @@ erpnext.PartyOverview = class PartyOverview {
 		return this.$charts ? this.$charts.empty() : $();
 	}
 
+	remove_panel($panel) {
+		if (!$panel) return;
+		this.charts = this.charts.filter((chart) => {
+			if (!$panel[0].contains(chart.parent)) return true;
+			chart.destroy();
+			return false;
+		});
+		$panel.remove();
+	}
+
 	set_trend_notes(notes) {
 		if (!this.$trend_notes) return;
 		this.$trend_notes.text(notes.join(" · ")).toggle(!!notes.length);
@@ -387,11 +397,11 @@ erpnext.PartyOverview = class PartyOverview {
 			subtitle,
 			right: this.report_link(__(this.ledger_report), () => this.open_ledger()),
 		});
-		if (this.show_state($panel, this.balances, 180, this.balances_error)) return;
+		if (this.show_state($panel, this.balances, 180, this.balances_error)) return $panel;
 		const a = this.balances.data.ageing;
 		if (flt(a.total) <= 0) {
 			$panel.remove();
-			return;
+			return null;
 		}
 
 		const $chart = $('<div class="co-age-chart">').appendTo($panel);
@@ -412,6 +422,7 @@ erpnext.PartyOverview = class PartyOverview {
 		$('<div class="co-note">')
 			.text(flt(a.overdue) > 0 ? note(a) : __("Nothing overdue"))
 			.appendTo($panel);
+		return $panel;
 	}
 
 	render_pipeline() {

@@ -139,16 +139,28 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 		};
 	}
 
-	render_charts() {
-		this.clear_charts();
-		if (this.accounts && !this.balances?.none)
-			this.render_ageing({
-				title: __("Payables Ageing"),
-				subtitle: __("Unpaid bills by due date"),
-				note: (a) =>
-					__("Overdue {0} · {1}% of unpaid bills", [this.money0(a.overdue), flt(a.overdue_pct, 1)]),
-			});
-		if (this.overview && this.overview.data?.delivery !== null) this.render_delivery();
+	render_charts(key) {
+		if (key !== "overview") {
+			this.remove_panel(this.$age_panel);
+			this.$age_panel =
+				this.accounts && !this.balances?.none
+					? this.render_ageing({
+							title: __("Payables Ageing"),
+							subtitle: __("Unpaid bills by due date"),
+							note: (a) =>
+								__("Overdue {0} · {1}% of unpaid bills", [
+									this.money0(a.overdue),
+									flt(a.overdue_pct, 1),
+								]),
+					  })
+					: null;
+			this.$age_panel?.prependTo(this.$charts);
+		}
+		if (key !== "balances") {
+			this.remove_panel(this.$delivery_panel);
+			this.$delivery_panel =
+				this.overview && this.overview.data?.delivery !== null ? this.render_delivery() : null;
+		}
 		this.$charts.toggle(this.$charts.children().length > 0);
 	}
 
@@ -167,10 +179,10 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 					frappe.set_route("Form", "Supplier Scorecard", this.frm.doc.name)
 				),
 		});
-		if (this.show_state($panel, this.overview, 280, this.overview_error, "delivery")) return;
+		if (this.show_state($panel, this.overview, 280, this.overview_error, "delivery")) return $panel;
 		if (!d.lines) {
 			$panel.remove();
-			return;
+			return null;
 		}
 		this.draw_donut($panel, {
 			segments: [
@@ -180,6 +192,7 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			],
 			center: { value: d.lines, label: d.lines === 1 ? __("delivery") : __("deliveries") },
 		});
+		return $panel;
 	}
 
 	pipeline_specs(pl) {
