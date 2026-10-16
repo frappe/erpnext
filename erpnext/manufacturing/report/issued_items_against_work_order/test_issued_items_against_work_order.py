@@ -57,3 +57,9 @@ class TestIssuedItemsAgainstWorkOrder(ERPNextTestSuite):
 		make_stock_return_entry(work_order.name).submit()
 
 		self.assertEqual(self.issued_qty(work_order.name), [-1, 2])
+
+	def test_skip_transfer_order_lists_material_issued_by_manufacture(self):
+		work_order = self.make_work_order(3, skip_transfer=1)
+		self.make_entry(work_order.name, "Manufacture", 3)
+
+		self.assertEqual(self.issued_qty(work_order.name), [3])
