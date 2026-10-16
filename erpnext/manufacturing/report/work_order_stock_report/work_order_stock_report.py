@@ -4,8 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull, Max, Sum
-from frappe.utils import cint
+from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
@@ -18,83 +17,84 @@ def execute(filters=None):
 
 
 def get_item_list(wo_list, filters):
+	if not wo_list:
+		return []
+
+	descriptions = get_bom_descriptions(wo_list)
+	items_by_order = get_work_order_items(wo_list)
+	stock = get_stock(items_by_order, filters)
+
 	out = []
-
-	if wo_list:
-		bin = frappe.qb.DocType("Bin")
-		bom = frappe.qb.DocType("BOM")
-		bom_item = frappe.qb.DocType("BOM Item")
-
-		# Add a row for each item/qty
-		for wo_details in wo_list:
-			desc = frappe.db.get_value("BOM", wo_details.bom_no, "description")
-
-			for wo_item_details in frappe.db.get_values(
-				"Work Order Item", {"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1
-			):
-				item_list = (
-					frappe.qb.from_(bom)
-					.from_(bom_item)
-					.left_join(bin)
-					.on(
-						(bom_item.item_code == bin.item_code)
-						& (bin.warehouse == IfNull(wo_item_details.source_warehouse, filters.warehouse))
-					)
-					.select(
-						bom_item.item_code.as_("item_code"),
-						# Aggregate so the query stays one row per item_code and is Postgres
-						# GROUP-BY-valid. A BOM may list the same item on several lines; adding the
-						# qty columns to GROUP BY would split the row and change the row count on
-						# MariaDB. actual_qty (single warehouse) and bom.quantity (single BOM) are
-						# pinned to one value, so Max() returns that value; the per-unit requirement
-						# is the TOTAL of this item across its lines, so stock_qty is summed. For the
-						# common single-line item this equals the prior expression exactly.
-						IfNull(Max(bin.actual_qty) * Max(bom.quantity) / Sum(bom_item.stock_qty), 0).as_(
-							"build_qty"
-						),
-					)
-					.where(
-						(bom.name == bom_item.parent)
-						& (bom_item.item_code == wo_item_details.item_code)
-						& (bom.name == wo_details.bom_no)
-					)
-					.groupby(bom_item.item_code)
-				).run(as_dict=1)
-
-				stock_qty = 0
-				count = 0
-				buildable_qty = wo_details.qty
-				for item in item_list:
-					count = count + 1
-					if item.build_qty >= (wo_details.qty - wo_details.produced_qty):
-						stock_qty = stock_qty + 1
-					elif buildable_qty >= item.build_qty:
-						buildable_qty = item.build_qty
-
-				if count == stock_qty:
-					build = "Y"
-				else:
-					build = "N"
-
-				row = frappe._dict(
-					{
-						"work_order": wo_details.name,
-						"status": wo_details.status,
-						"req_items": cint(count),
-						"instock": stock_qty,
-						"description": desc,
-						"source_warehouse": wo_item_details.source_warehouse,
-						"item_code": wo_item_details.item_code,
-						"bom_no": wo_details.bom_no,
-						"qty": wo_details.qty,
-						"buildable_qty": buildable_qty,
-						"ready_to_build": build,
-					}
-				)
-
-				out.append(row)
+	for wo_details in wo_list:
+		for item in items_by_order.get(wo_details.name, []):
+			out.append(get_row(wo_details, item, descriptions, stock, filters))
 
 	return out
+
+
+def get_row(wo_details, item, descriptions, stock, filters):
+	warehouse = item.source_warehouse or filters.get("warehouse")
+	pending_qty = flt(wo_details.qty) - flt(wo_details.produced_qty)
+	qty_per_unit = flt(item.required_qty) / flt(wo_details.qty) if flt(wo_details.qty) else 0.0
+	available_qty = flt(stock.get((item.item_code, warehouse)))
+	build_qty = available_qty / qty_per_unit if qty_per_unit else flt(wo_details.qty)
+	in_stock = 1 if build_qty >= pending_qty else 0
+
+	return frappe._dict(
+		{
+			"work_order": wo_details.name,
+			"status": wo_details.status,
+			"req_items": 1,
+			"instock": in_stock,
+			"description": descriptions.get(wo_details.bom_no),
+			"source_warehouse": item.source_warehouse,
+			"item_code": item.item_code,
+			"bom_no": wo_details.bom_no,
+			"qty": wo_details.qty,
+			"buildable_qty": wo_details.qty if in_stock else build_qty,
+			"ready_to_build": "Y" if in_stock else "N",
+		}
+	)
+
+
+def get_bom_descriptions(wo_list):
+	boms = list({d.bom_no for d in wo_list if d.bom_no})
+	return dict(
+		frappe.get_all("BOM", filters={"name": ["in", boms]}, fields=["name", "description"], as_list=True)
+	)
+
+
+def get_work_order_items(wo_list):
+	items_by_order = {}
+	for row in frappe.get_all(
+		"Work Order Item",
+		filters={"parent": ["in", [d.name for d in wo_list]], "parenttype": "Work Order"},
+		fields=["parent", "item_code", "source_warehouse", "required_qty"],
+		order_by="idx",
+	):
+		items_by_order.setdefault(row.parent, []).append(row)
+
+	return items_by_order
+
+
+def get_stock(items_by_order, filters):
+	rows = [row for items in items_by_order.values() for row in items]
+	warehouses = {row.source_warehouse or filters.get("warehouse") for row in rows} - {None, ""}
+	if not rows or not warehouses:
+		return {}
+
+	stock = {}
+	for d in frappe.get_all(
+		"Bin",
+		filters={
+			"item_code": ["in", list({row.item_code for row in rows})],
+			"warehouse": ["in", list(warehouses)],
+		},
+		fields=["item_code", "warehouse", "actual_qty"],
+	):
+		stock[(d.item_code, d.warehouse)] = flt(d.actual_qty)
+
+	return stock
 
 
 def get_work_orders():
