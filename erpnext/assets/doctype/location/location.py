@@ -82,18 +82,31 @@ class Location(NestedSet):
 
 		self.db_set("location", json.dumps(location))
 
-	def update_ancestor_location_features(self):
+	def after_rename(self, old_name: str, new_name: str, merge: bool = False):
+		NestedSet.after_rename(self, old_name, new_name, merge)
+		self.update_ancestor_location_features(old_names={old_name})
+
+	def update_ancestor_location_features(self, old_names: set[str] | None = None):
+		"""Replace this subtree's features in ancestors, including those still tagged with `old_names`."""
 		ancestors = self.get_ancestors()
+		previous_ancestors = set(self.get("previous_ancestors") or []) - set(ancestors)
+		if not ancestors and not previous_ancestors:
+			return
+
+		subtree, features = self.get_subtree_features()
+		for ancestor in previous_ancestors:
+			set_features_in_ancestor(ancestor, subtree, [])
+		for ancestor in ancestors:
+			set_features_in_ancestor(ancestor, subtree | (old_names or set()), features)
+
+	def get_subtree_features(self) -> tuple[set[str], list[dict]]:
 		descendants = get_descendants_of(self.doctype, self.name, ignore_permissions=True)
 		subtree = {self.name, *descendants}
 		features = self.get_own_features(subtree)
 		for descendant in descendants:
 			features.extend(frappe.get_doc("Location", descendant).get_own_features(subtree))
 
-		for ancestor in set(self.get("previous_ancestors") or []) - set(ancestors):
-			set_features_in_ancestor(ancestor, subtree, [])
-		for ancestor in ancestors:
-			set_features_in_ancestor(ancestor, subtree, features)
+		return subtree, features
 
 	def get_own_features(self, subtree: set[str]) -> list[dict]:
 		"""Return the features drawn on this location, skipping those rolled up from other `subtree` locations.

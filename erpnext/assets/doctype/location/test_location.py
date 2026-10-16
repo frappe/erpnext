@@ -83,6 +83,20 @@ class TestLocation(ERPNextTestSuite):
 		self.assertEqual(feature["geometry"], json.loads(square(83.0))["features"][0]["geometry"])
 		self.assertEqual(feature["properties"]["feature_of"], child.name)
 
+	def test_renamed_child_features_are_not_counted_twice(self):
+		parent = make_location("Rename Parent", is_group=1)
+		group = make_location("Rename Group", parent_location=parent.name, is_group=1)
+		child = make_location("Rename Child", parent_location=group.name, location=square(84.0))
+
+		frappe.rename_doc("Location", child.name, "Renamed Child")
+		group.reload()
+		group.save()
+
+		for location in (parent.name, group.name):
+			self.assertEqual(get_area_and_feature_count(location), (child.area, 1))
+			feature = json.loads(frappe.get_doc("Location", location).location)["features"][0]
+			self.assertEqual(feature["properties"]["feature_of"], "Renamed Child")
+
 	def test_child_cannot_replace_sibling_features_in_parent(self):
 		parent = make_location("Sibling Parent", is_group=1)
 		sibling = make_location("Sibling A", parent_location=parent.name, location=square(80.0))
