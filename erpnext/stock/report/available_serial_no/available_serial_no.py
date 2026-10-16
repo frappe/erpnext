@@ -20,7 +20,7 @@ def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	columns = get_columns(filters)
 	items = get_items(filters)
-	sl_entries = get_stock_ledger_entries(filters, items)
+	sl_entries = get_stock_ledger_entries(filters, items) if items else []
 
 	if not sl_entries:
 		return prepare_serial_batch_report(columns, [], serial_fields=("serial_no", "balance_serial_no"))

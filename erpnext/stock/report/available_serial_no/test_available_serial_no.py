@@ -68,3 +68,17 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 		)
 		self.assertEqual(len(in_stock), 4)
 		self.assertEqual(sorted(data[-1]["balance_serial_no"].split("\n")), sorted(in_stock))
+
+	def test_item_without_serial_nos_lists_nothing(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		make_purchase_receipt(qty=1, item_code="_Test Item with Serial No")
+
+		filters = self.filters.copy()
+		filters.update(item_code=item, from_date=add_days(today(), -1), to_date=today())
+		data = frappe.get_doc("Report", "Available Serial No").get_data(filters=filters)[1]
+
+		self.assertEqual(data, [])
