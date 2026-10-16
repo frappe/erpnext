@@ -108,3 +108,24 @@ class TestProductBundleBalance(ERPNextTestSuite):
 		self.assertEqual(
 			[(row["actual_qty"], row["bundle_qty"]) for row in data if row.get("indent")], [(10, 5)]
 		)
+
+	def test_last_of_entries_at_the_same_time_gives_the_balance(self):
+		parent = make_item(properties={"is_stock_item": 0}).name
+		children = [make_item(properties={"is_stock_item": 1}).name for _child in range(6)]
+		self.make_bundle(parent, dict.fromkeys(children, 1))
+		for child in children:
+			make_stock_entry(
+				item_code=child,
+				target=WH,
+				qty=10,
+				basic_rate=100,
+				posting_date="2026-06-01",
+				posting_time="10:00:00",
+			)
+			make_stock_entry(
+				item_code=child, source=WH, qty=9, posting_date="2026-06-01", posting_time="10:00:00"
+			)
+
+		data = self.run_report(parent)
+
+		self.assertEqual([row["actual_qty"] for row in data if row.get("indent")], [1] * 6)

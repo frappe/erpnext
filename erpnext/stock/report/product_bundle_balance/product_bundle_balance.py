@@ -227,6 +227,7 @@ def get_stock_ledger_entries(filters, items):
 		)
 		.select(sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company)
 		.where(sle.is_cancelled == 0)
+		.orderby(sle.creation)
 	)
 
 	if filters.get("warehouse"):
