@@ -76,8 +76,6 @@ def get_data(filters) -> list[list]:
 			"name": name,
 		}
 
-		last_index = 0
-		vendor_invoice_list = vendor_invoices.get(name, [])
 		for i, d in enumerate(vouchers):
 			if i:
 				res = {}
@@ -91,15 +89,10 @@ def get_data(filters) -> list[list]:
 				}
 			)
 
-			if len(vendor_invoice_list) > i:
-				res["vendor_invoice"] = vendor_invoice_list[i]
-
 			data.append(res)
-			last_index = i
 
-		if vendor_invoice_list and len(vendor_invoice_list) > len(vouchers):
-			for row in vendor_invoice_list[last_index + 1 :]:
-				data.append({"vendor_invoice": row})
+		for vendor_invoice in vendor_invoices.get(name, []):
+			data.append({"vendor_invoice": vendor_invoice})
 
 	return data
 
@@ -118,6 +111,8 @@ def get_landed_cost_vouchers(filters):
 			lcv_voucher.receipt_document.as_("voucher_no"),
 		)
 		.where((lcv.docstatus == 1) & (lcv.company == filters.company))
+		.orderby(lcv.name)
+		.orderby(lcv_voucher.idx)
 	)
 
 	if filters.from_date and filters.to_date:

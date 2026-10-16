@@ -92,3 +92,31 @@ class TestLandedCostReport(ERPNextTestSuite):
 		self.assertEqual(
 			[(row.get("voucher_no"), row.get("landed_cost")) for row in rows], [(receipts[1].name, 100)]
 		)
+
+	def test_vendor_invoices_are_listed_on_their_own_rows(self):
+		lcv, receipts = self.make_voucher_for_two_receipts()
+		for idx, invoice in enumerate(("FREIGHT-INV", "CUSTOMS-INV"), start=1):
+			frappe.get_doc(
+				{
+					"doctype": "Landed Cost Vendor Invoice",
+					"parent": lcv.name,
+					"parenttype": "Landed Cost Voucher",
+					"parentfield": "vendor_invoices",
+					"vendor_invoice": invoice,
+					"idx": idx,
+					"docstatus": 1,
+				}
+			).db_insert()
+
+		rows = self.run_report()
+		start = next(idx for idx, row in enumerate(rows) if row.get("name") == lcv.name)
+
+		self.assertEqual(
+			[(row.get("voucher_no"), row.get("vendor_invoice")) for row in rows[start : start + 4]],
+			[
+				(receipts[0].name, None),
+				(receipts[1].name, None),
+				(None, "FREIGHT-INV"),
+				(None, "CUSTOMS-INV"),
+			],
+		)
