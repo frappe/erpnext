@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-window.doc={{ doc.as_json() }};
+window.doc = {{ portal_doc | tojson }};
 
 $(document).ready(function() {
 	new rfq();
