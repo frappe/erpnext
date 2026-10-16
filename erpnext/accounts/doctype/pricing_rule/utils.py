@@ -40,7 +40,13 @@ def get_pricing_rules(args, doc=None):
 		candidates = [
 			rule
 			for rule in _get_pricing_rules(apply_on, args, values)
-			if not rule.coupon_code_based or rule.name == coupon_pricing_rule
+			if not rule.coupon_code_based
+			or rule.name == coupon_pricing_rule
+			or (
+				doc
+				and not doc.meta.has_field("coupon_code")
+				and rule.name in get_applied_pricing_rules(args.get("pricing_rules"))
+			)
 		]
 		pricing_rules.extend(candidates)
 		if pricing_rules and pricing_rules[0].has_priority:
@@ -860,8 +866,11 @@ def get_pricing_rule_items(pr_doc, other_items=False) -> list:
 	return list(set(apply_on_data))
 
 
-def validate_coupon_code(coupon_name):
+def validate_coupon_code(coupon_name, customer=None):
 	coupon = frappe.get_doc("Coupon Code", coupon_name)
+	if coupon.coupon_type == "Gift Card" and coupon.customer != customer:
+		frappe.throw(_("This Gift Card cannot be used by this customer"))
+
 	if coupon.valid_from and coupon.valid_from > getdate(today()):
 		frappe.throw(_("Sorry, this coupon code's validity has not started"))
 	elif coupon.valid_upto and coupon.valid_upto < getdate(today()):
