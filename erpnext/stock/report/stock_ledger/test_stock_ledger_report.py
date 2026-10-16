@@ -403,3 +403,40 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		rows = list(execute(filters)[1])
 
 		self.assertEqual(rows[0]["qty_after_transaction"], 10)
+
+	def test_project_filter_keeps_the_opening_without_a_warehouse(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": frappe.generate_hash(length=10),
+				"company": "_Test Company",
+			}
+		).insert()
+		for qty, days in ((10, -10), (2, -2)):
+			entry = make_stock_entry(
+				item_code=item,
+				to_warehouse=WAREHOUSE,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), days),
+				do_not_submit=True,
+			)
+			entry.project = project.name
+			for row in entry.items:
+				row.project = project.name
+			entry.save()
+			entry.submit()
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			project=project.name,
+		)
+		rows = list(execute(filters)[1])
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [10, 12])
