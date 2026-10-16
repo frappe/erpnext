@@ -1265,6 +1265,41 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, pick_list.submit)
 
+	def test_manual_batch_pick_checks_other_open_pick_lists(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": f"{item}-B1"}).insert()
+		make_stock_entry(
+			item=item,
+			to_warehouse="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			batch_no=batch.name,
+			use_serial_batch_fields=1,
+		)
+
+		def make_batch_pick_list():
+			return frappe.get_doc(
+				{
+					"doctype": "Pick List",
+					"company": "_Test Company",
+					"purpose": "Material Transfer",
+					"pick_manually": 1,
+					"locations": [
+						{
+							"item_code": item,
+							"warehouse": "_Test Warehouse - _TC",
+							"qty": 8,
+							"picked_qty": 8,
+							"batch_no": batch.name,
+							"use_serial_batch_fields": 1,
+						}
+					],
+				}
+			)
+
+		make_batch_pick_list().insert().submit()
+		self.assertRaises(frappe.ValidationError, make_batch_pick_list().insert)
+
 	def test_grouped_print_keeps_different_uoms_apart(self):
 		item = make_item(
 			properties={

@@ -174,8 +174,14 @@ class PickList(TransactionBase):
 	def validate_batch_stock_qty(self, picked_qty):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
+		if not picked_qty:
+			return
+
+		held_qty = self.get_qty_held_by_other_picks(picked_qty)
 		for (item_code, warehouse, batch_no), (qty, row) in picked_qty.items():
-			batch_qty = get_batch_qty(batch_no, warehouse, item_code)
+			batch_qty = flt(get_batch_qty(batch_no, warehouse, item_code)) - flt(
+				held_qty.get((item_code, warehouse, batch_no))
+			)
 			if qty > batch_qty:
 				frappe.throw(
 					_(
@@ -190,6 +196,20 @@ class PickList(TransactionBase):
 					),
 					title=_("Insufficient Stock"),
 				)
+
+	def get_qty_held_by_other_picks(self, picked_qty):
+		holders = get_pick_list_holders(
+			list({key[0] for key in picked_qty}),
+			warehouses=list({key[1] for key in picked_qty}),
+			exclude_pick_list=self.name,
+		)
+
+		held_qty = {}
+		for holder in holders:
+			key = (holder.item_code, holder.warehouse, holder.batch_no or "")
+			held_qty[key] = held_qty.get(key, 0.0) + flt(holder.holding_qty)
+
+		return held_qty
 
 	def validate_free_stock_qty(self, picked_qty):
 		if not picked_qty:
