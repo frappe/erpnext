@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import flt
 
 from erpnext.manufacturing.report.exponential_smoothing_forecasting.exponential_smoothing_forecasting import (
@@ -80,11 +82,35 @@ class TestExponentialSmoothingForecasting(ERPNextTestSuite):
 		for month in ("jun_2026", "jul_2026", "aug_2026"):
 			self.assertAlmostEqual(flt(row.get(f"forecast_{month}")), 100, places=6)
 
+	def test_report_follows_document_permissions(self):
+		self.create_sales_orders({"2026-05-15": 10})
+
+		stock_user = create_user("forecast-stock-user@example.com", "Stock User")
+		with self.set_user(stock_user.name):
+			self.assertRaises(
+				frappe.PermissionError, execute, self.get_filters(based_on_document="Sales Invoice")
+			)
+
+		sales_user = create_user("forecast-sales-user@example.com", "Sales User")
+		add_user_permission("Customer", "_Test Customer 1", sales_user.name)
+		with self.set_user(sales_user.name):
+			data = execute(self.get_filters())[1]
+		self.assertFalse([row for row in data if row.get("item_code") == self.item])
+
 	def create_sales_orders(self, date_to_qty):
 		for transaction_date, qty in date_to_qty.items():
 			make_sales_order(item_code=self.item, qty=qty, transaction_date=transaction_date)
 
 	def run_report(self, **extra):
+		columns, data = execute(self.get_filters(**extra))[:2]
+		item_row = next(
+			(r for r in data if r.get("item_code") == self.item),
+			None,
+		)
+		self.assertIsNotNone(item_row, f"{self.item} row missing from report output")
+		return columns, item_row
+
+	def get_filters(self, **extra):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
@@ -99,11 +125,4 @@ class TestExponentialSmoothingForecasting(ERPNextTestSuite):
 			}
 		)
 		filters.update(extra)
-
-		columns, data = execute(filters)[:2]
-		item_row = next(
-			(r for r in data if r.get("item_code") == self.item),
-			None,
-		)
-		self.assertIsNotNone(item_row, f"{self.item} row missing from report output")
-		return columns, item_row
+		return filters

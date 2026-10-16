@@ -124,6 +124,14 @@ class ForecastingReport(ExponentialSmoothingForecast):
 			)
 		)
 
+		permitted = frappe.qb.get_query(
+			self.doctype,
+			fields=["name"],
+			filters={"docstatus": 1, "company": self.filters.company},
+			ignore_permissions=False,
+		)
+		query = query.where(parent.name.isin(permitted))
+
 		if self.filters.item_code:
 			query = query.where(child.item_code == self.filters.item_code)
 
