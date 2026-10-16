@@ -2379,6 +2379,12 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual([row[5] for row in data if row[0] == item_code], [2])
 
+	def test_age_ranges_default_and_are_sorted(self):
+		from erpnext.stock.report.stock_ageing.stock_ageing import get_age_ranges
+
+		self.assertEqual(get_age_ranges(None), ["30", "60", "90"])
+		self.assertEqual(get_age_ranges("90, 30, 60"), ["30", "60", "90"])
+
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"
