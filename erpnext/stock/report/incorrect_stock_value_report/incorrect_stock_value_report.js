@@ -31,6 +31,7 @@ frappe.query_reports["Incorrect Stock Value Report"] = {
 			label: __("From Date"),
 			fieldname: "from_date",
 			fieldtype: "Date",
+			default: frappe.datetime.month_start(),
 		},
 	],
 };

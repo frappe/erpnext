@@ -107,3 +107,12 @@ class TestIncorrectStockValueReport(ERPNextTestSuite):
 		rows = self.run_report(account=account, from_date=add_days(today(), -4))
 
 		self.assertEqual([row.name for row in rows], [changed])
+
+	def test_wrong_stock_value_is_found_when_the_ledger_matches_the_accounts(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		sle = self.issue(item, warehouse, 2, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value", 1300)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -4))
+
+		self.assertEqual([(row.name, row.difference_value) for row in rows], [(sle, 500)])

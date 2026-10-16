@@ -5,12 +5,11 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Min
-from frappe.utils import add_days, getdate, today
+from frappe.query_builder.functions import Min, Sum
+from frappe.utils import add_days, flt, getdate, today
 
 import erpnext
 from erpnext.accounts.utils import get_stock_and_account_balance
-from erpnext.stock.utils import get_stock_value_on
 
 
 def execute(filters=None):
@@ -49,16 +48,30 @@ def get_unsync_date(filters):
 
 
 def get_data(report_filters):
-	from_date = get_unsync_date(report_filters)
-
+	from_date = report_filters.from_date or get_unsync_date(report_filters)
 	if not from_date:
 		return []
 
-	result = []
+	entries = get_entries_from(from_date, report_filters.company)
+	running_values = get_stock_values_before(from_date, report_filters.company, entries)
 
-	voucher_wise_dict = {}
+	result = []
+	for data in entries:
+		key = (data.item_code, data.warehouse)
+		expected_stock_value = flt(running_values.get(key)) + flt(data.stock_value_difference)
+		if abs(flt(data.stock_value) - expected_stock_value) > 0.1:
+			data.difference_value = abs(flt(data.stock_value) - expected_stock_value)
+			data.expected_stock_value = expected_stock_value
+			result.append(data)
+
+		running_values[key] = expected_stock_value
+
+	return result
+
+
+def get_entries_from(from_date, company):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	data = (
+	return (
 		frappe.qb.from_(sle)
 		.select(
 			sle.name,
@@ -71,30 +84,29 @@ def get_data(report_filters):
 			sle.warehouse,
 			sle.item_code,
 		)
-		.where(
-			(sle.posting_date == from_date)
-			& (sle.company == report_filters.company)
-			& (sle.is_cancelled == 0)
-		)
+		.where((sle.posting_date >= from_date) & (sle.company == company) & (sle.is_cancelled == 0))
 		.orderby(sle.posting_datetime, sle.creation)
 	).run(as_dict=True)
 
-	for d in data:
-		voucher_wise_dict.setdefault((d.item_code, d.warehouse), []).append(d)
 
-	closing_date = add_days(from_date, -1)
-	for key, stock_data in voucher_wise_dict.items():
-		prev_stock_value = get_stock_value_on(posting_date=closing_date, item_code=key[0], warehouses=key[1])
-		for data in stock_data:
-			expected_stock_value = prev_stock_value + data.stock_value_difference
-			if abs(data.stock_value - expected_stock_value) > 0.1:
-				data.difference_value = abs(data.stock_value - expected_stock_value)
-				data.expected_stock_value = expected_stock_value
-				result.append(data)
+def get_stock_values_before(from_date, company, entries):
+	if not entries:
+		return {}
 
-			prev_stock_value = expected_stock_value
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	rows = (
+		frappe.qb.from_(sle)
+		.select(sle.item_code, sle.warehouse, Sum(sle.stock_value_difference))
+		.where(
+			(sle.posting_date < from_date)
+			& (sle.company == company)
+			& (sle.is_cancelled == 0)
+			& (sle.item_code.isin({row.item_code for row in entries}))
+		)
+		.groupby(sle.item_code, sle.warehouse)
+	).run()
 
-	return result
+	return {(item_code, warehouse): flt(value) for item_code, warehouse, value in rows}
 
 
 def get_columns(filters):
