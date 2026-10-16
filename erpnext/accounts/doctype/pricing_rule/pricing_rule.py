@@ -474,11 +474,29 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	pricing_rules = (
 		get_applied_pricing_rules(args.get("pricing_rules"))
-		if for_validate and args.get("pricing_rules")
+		if for_validate
+		and args.get("pricing_rules")
+		and not (doc and doc.meta.has_field("coupon_code") and doc.has_value_changed("coupon_code"))
 		else get_pricing_rules(args, doc)
 	)
 
 	if pricing_rules:
+		selected_rules = {
+			rule if isinstance(rule, str) else rule.get("name") for rule in pricing_rules if rule
+		}
+		removed_rules = [
+			rule
+			for rule in get_applied_pricing_rules(args.get("pricing_rules"))
+			if rule not in selected_rules
+		]
+		if removed_rules:
+			item_details = remove_pricing_rule_for_item(
+				frappe.as_json(removed_rules),
+				item_details,
+				item_code=args.item_code,
+				rate=args.price_list_rate,
+			)
+
 		rules = []
 
 		for pricing_rule in pricing_rules:
@@ -530,6 +548,11 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 					apply_price_discount_rule(pricing_rule, item_details, args)
 				else:
 					get_product_discount_rule(pricing_rule, item_details, args, doc)
+
+		if not rules and args.get("pricing_rules"):
+			return remove_pricing_rule_for_item(
+				args.pricing_rules, item_details, item_code=args.item_code, rate=args.price_list_rate
+			)
 
 		if not item_details.get("has_margin"):
 			item_details.margin_type = None
@@ -676,13 +699,10 @@ def remove_pricing_rule_for_item(
 		pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 
 		if pricing_rule.price_or_product_discount == "Price":
-			if pricing_rule.rate_or_discount == "Discount Percentage":
+			if pricing_rule.rate_or_discount in ["Discount Percentage", "Discount Amount"]:
 				item_details.discount_percentage = 0.0
 				item_details.discount_amount = 0.0
 				item_details.rate = rate or 0.0
-
-			if pricing_rule.rate_or_discount == "Discount Amount":
-				item_details.discount_amount = 0.0
 
 			if pricing_rule.margin_type in ["Percentage", "Amount"]:
 				item_details.margin_rate_or_amount = 0.0
