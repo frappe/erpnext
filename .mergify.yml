@@ -75,7 +75,6 @@ pull_request_rules:
   - name: Merge PRs tested alone
     conditions:
       - label=merge-alone
-      - "#approved-reviews-by>=1"
       - and: *pr_checks
       - and: *suite_checks
     actions:
