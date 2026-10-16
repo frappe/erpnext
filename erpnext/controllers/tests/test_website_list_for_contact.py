@@ -3,6 +3,7 @@
 
 import json
 
+import frappe
 from frappe.tests.utils import FrappeTestCase
 
 
@@ -34,3 +35,29 @@ class TestWebsiteListForContact(FrappeTestCase):
 			"Request for Quotation Supplier", "Request for Quotation", [supplier], 0, 20
 		)
 		self.assertIn(rfq.name, [row.name for row in rows])
+
+	def test_website_permission_respects_user_permissions(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.tests.permission_test_utils import as_user, make_company_fenced_user
+
+		invoice = create_sales_invoice()
+		user = make_company_fenced_user("_test_fenced@example.com", ["Accounts User"], "_Test Company 1")
+
+		with as_user(user):
+			self.assertFalse(frappe.has_website_permission(invoice))
+
+	def test_website_permission_for_customer_and_supplier_portal_user(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.website_list_for_contact import has_website_permission
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		invoice = make_purchase_invoice(supplier="_Test Supplier", do_not_submit=True)
+		user = make_fenced_user("_test_portal_party@example.com", ["Customer", "Supplier"])
+		for doctype, name in (("Supplier", "_Test Supplier"), ("Customer", "_Test Customer 1")):
+			party = frappe.get_doc(doctype, name)
+			party.append("portal_users", {"user": user})
+			party.save()
+
+		self.assertTrue(has_website_permission(invoice, "read", user))
+		with as_user(user):
+			self.assertTrue(has_website_permission(invoice, "read", user))
