@@ -370,7 +370,9 @@ class JobCard(Document):
 		for d in self.get("time_logs"):
 			self.validate_time_log_row(d)
 
-		self.total_time_in_mins = get_workstation_minutes(self.time_logs)
+		self.total_time_in_mins = flt(
+			get_workstation_minutes(self.time_logs), self.precision("total_time_in_mins")
+		)
 		self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
 		if save and self.docstatus == 1:
@@ -1095,7 +1097,7 @@ class JobCard(Document):
 			self.set(end_field, max(time_list))
 
 		if child_table == "time_logs":
-			time_in_mins = get_workstation_minutes(self.time_logs)
+			time_in_mins = flt(get_workstation_minutes(self.time_logs), self.precision("total_time_in_mins"))
 
 		self.set(time_required, time_in_mins)
 		return False
