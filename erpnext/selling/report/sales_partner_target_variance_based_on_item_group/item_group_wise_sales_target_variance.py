@@ -231,9 +231,20 @@ def get_item_group_parent_child_map():
 
 def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_field):
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
+	doctype = filters.get("doctype")
 
-	parent_doc = frappe.qb.DocType(filters.get("doctype"))
-	child_doc = frappe.qb.DocType(filters.get("doctype") + " Item")
+	permitted_docs = frappe.qb.get_query(
+		table=doctype,
+		fields=["name"],
+		filters={
+			"docstatus": 1,
+			date_field: ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
+		},
+		ignore_permissions=False,
+	)
+
+	parent_doc = frappe.qb.DocType(doctype)
+	child_doc = frappe.qb.DocType(doctype + " Item")
 
 	query = frappe.qb.from_(parent_doc).inner_join(child_doc).on(child_doc.parent == parent_doc.name)
 
@@ -255,11 +266,7 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 		(stock_qty).as_("stock_qty"),
 		(net_amount).as_("base_net_amount"),
 		sales_field_col,
-	).where(
-		(parent_doc.docstatus == 1)
-		& (parent_doc[date_field].between(fiscal_year.year_start_date, fiscal_year.year_end_date))
-		& (sales_field_col.isin(sales_users_or_territory_data))
-	)
+	).where(parent_doc.name.isin(permitted_docs) & (sales_field_col.isin(sales_users_or_territory_data)))
 
 	return query.run(as_dict=True)
 
