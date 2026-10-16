@@ -547,6 +547,26 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
 
+	def test_reference_count_needs_voucher_read(self):
+		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import doc_has_references
+
+		si = self.create_sales_invoice()
+		pe = self.create_payment_entry()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 100},
+		)
+		pe.save().submit()
+
+		inside = make_company_fenced_user("unrec-count@example.com", ["Accounts User"], self.company)
+		with as_user(inside):
+			self.assertEqual(doc_has_references(si.doctype, si.name), 1)
+			self.assertRaises(frappe.ValidationError, doc_has_references, si.doctype, "")
+
+		outside = make_company_fenced_user("unrec-count@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			self.assertRaises(frappe.PermissionError, doc_has_references, si.doctype, si.name)
+
 	def test_unreconcile_selection_fences_the_voucher(self):
 		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
 			create_unreconcile_doc_for_selection,
