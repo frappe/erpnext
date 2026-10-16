@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.query_builder.functions import Avg, IfNull
 from frappe.utils import flt, today
 
@@ -153,6 +154,8 @@ def get_open_sales_orders_count(variants_list):
 
 def get_stock_details_map(variant_list):
 	bin_filters = [{"item_code": ["in", variant_list]}]
+	if warehouses := get_permitted_documents("Warehouse"):
+		bin_filters.append({"warehouse": ["in", warehouses]})
 	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
 		bin_filters.append(condition)
 
