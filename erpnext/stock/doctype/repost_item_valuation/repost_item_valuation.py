@@ -32,6 +32,7 @@ from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_item_wh_first_reposted_from_reposting_data,
 	get_items_to_be_repost,
+	get_reposting_data,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -443,6 +444,10 @@ class RepostItemValuation(Document):
 	def get_repost_started_at(self):
 		return self.flags.repost_started_at or now()
 
+	def get_saved_repost_started_at(self):
+		if self.reposting_data_file:
+			return get_reposting_data(self.reposting_data_file).get("repost_started_at")
+
 	def skip_reposts_covered_by_dependents(self):
 		if self.repost_only_accounting_ledgers:
 			return
@@ -636,7 +641,7 @@ def repost(doc):
 		# This is to avoid TooManyWritesError in case of large reposts
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
-		doc.flags.repost_started_at = now()
+		doc.flags.repost_started_at = doc.get_saved_repost_started_at() or now()
 		doc.set_status("In Progress")
 		if not frappe.in_test:
 			frappe.db.commit()

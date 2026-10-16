@@ -576,6 +576,7 @@ def update_args_in_repost_item_valuation(
 			"item_wh_wise_last_posted_sle": {str(k): v for k, v in item_wh_wise_last_posted_sle.items()}
 			or {},
 			"item_wh_first_reposted": {str(k): v for k, v in item_wh_first_reposted.items()},
+			"repost_started_at": doc.flags.repost_started_at,
 		},
 		doc,
 		file_name,
