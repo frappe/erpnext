@@ -178,6 +178,8 @@ class ProductionPlanReport:
 					qty_field.as_("required_qty_per_unit"),
 				)
 				.where((bom_item.parent.isin(bom_nos)) & (bom_item.parent == bom.name) & (bom.docstatus == 1))
+				.orderby(bom_item.parent)
+				.orderby(bom_item.idx)
 			).run(as_dict=True)
 
 		if not raw_materials:
@@ -283,19 +285,16 @@ class ProductionPlanReport:
 		self.index = 0
 		self.raw_materials_dict.get(key)
 
-		warehouses = self.mrp_warehouses or []
 		for d in self.raw_materials_dict.get(key):
 			if self.filters.based_on != "Work Order":
 				d.required_qty = d.required_qty_per_unit * data.qty_to_manufacture
 
-			if not warehouses:
-				warehouses = [data.warehouse]
-
+			warehouses = self.mrp_warehouses or [data.warehouse]
 			if self.filters.based_on == "Work Order" and d.warehouse:
 				warehouses = [d.warehouse]
 			else:
 				item_details = self.item_details.get(d.item_code)
-				if item_details:
+				if item_details and item_details.get("default_warehouse"):
 					warehouses = [item_details["default_warehouse"]]
 
 			if self.filters.raw_material_warehouse:
