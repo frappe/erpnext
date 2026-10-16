@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   test:
-    if: ${{ !startsWith(github.event.pull_request.title, 'merge queue:') }}
+    if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
