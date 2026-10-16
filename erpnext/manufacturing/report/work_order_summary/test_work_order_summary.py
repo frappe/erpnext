@@ -58,3 +58,16 @@ class TestWorkOrderSummary(ERPNextTestSuite):
 		# A window that includes today does contain it.
 		names = {row["name"] for row in self.run_report()}
 		self.assertIn(wo.name, names)
+
+	def test_work_order_planned_for_later_is_listed(self):
+		wo = make_wo_order_test_record(
+			production_item="_Test FG Item",
+			qty=10,
+			company="_Test Company",
+			planned_start_date=add_days(today(), 5),
+		)
+
+		rows = {row["name"]: row for row in self.run_report(to_date=add_days(today(), 30))}
+
+		self.assertIn(wo.name, rows)
+		self.assertEqual(rows[wo.name]["age"], 0)

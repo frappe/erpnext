@@ -74,7 +74,7 @@ def get_data(filters):
 		d.age = 0
 
 		if d.status != "Completed":
-			d.age = date_diff(today(), start_date)
+			d.age = max(date_diff(today(), start_date), 0)
 
 		if filters.get("age") <= d.age:
 			res.append(d)
