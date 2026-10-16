@@ -127,3 +127,25 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 		cols, data = stock_analytics(filters)
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [10, 10, 15])
+
+	def test_weekly_entries_fall_in_the_week_that_contains_them(self):
+		from unittest.mock import patch
+
+		self.generate_stock([(3, datetime.date(2026, 8, 16))])
+		filters = _dict(
+			range="Weekly",
+			from_date=datetime.date(2026, 8, 2),
+			to_date=datetime.date(2026, 8, 29),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		with patch(
+			"erpnext.stock.report.stock_analytics.stock_analytics.get_first_day_of_week",
+			side_effect=lambda date: getdate(date)
+			- datetime.timedelta(days=(getdate(date).weekday() + 1) % 7),
+		):
+			cols, data = stock_analytics(filters)
+
+		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 0, 3, 3])

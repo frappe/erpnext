@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
+from bisect import bisect_right
 
 import frappe
 from frappe import _, scrub
@@ -133,6 +134,15 @@ def get_period(posting_date, filters):
 	return period
 
 
+def get_period_of_date(posting_date, ranges, periods, filters):
+	posting_date = getdate(posting_date)
+	index = bisect_right(ranges, posting_date, key=lambda date_range: getdate(date_range[0])) - 1
+	if index >= 0 and posting_date <= getdate(ranges[index][1]):
+		return periods[index]
+
+	return get_period(posting_date, filters)
+
+
 def get_periodic_data(entry, filters):
 	"""Structured as:
 	Item 1
@@ -166,7 +176,7 @@ def get_periodic_data(entry, filters):
 
 	periodic_data = {}
 	for d in entry:
-		period = get_period(d.posting_date, filters)
+		period = get_period_of_date(d.posting_date, expected_ranges, expected_periods, filters)
 		bal_qty = 0
 
 		fill_intermediate_periods(periodic_data, d.item_code, period, expected_periods)
