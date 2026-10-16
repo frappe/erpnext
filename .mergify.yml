@@ -1,6 +1,5 @@
 shared:
   pr_checks: &pr_checks
-    - "#approved-reviews-by>=1"
     - label!=dont-merge
     - check-success=linters
     - check-success=Check Commit Titles
@@ -76,6 +75,7 @@ pull_request_rules:
     conditions:
       - base=develop
       - label=merge-alone
+      - "#approved-reviews-by>=1"
       - and: *pr_checks
       - and: *suite_checks
     actions:
