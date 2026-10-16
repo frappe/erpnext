@@ -83,7 +83,8 @@ jobs:
             printf '%s' "$reply" > reply.json
             gh api -X POST "repos/${{ github.repository }}/pulls/$PR/comments" --input reply.json --jq '.html_url'
           done
-          jq -c '(.discussion // [])[] | {body: .}' review.json | while read -r note; do
+          gh api --paginate "repos/${{ github.repository }}/issues/$PR/comments" --jq '.[] | select(.user.login == "frappe-pr-bot") | {body}' > posted-notes.json
+          jq -c --slurpfile posted posted-notes.json '(.discussion // [])[] | {body: .} | select(. as $note | $posted | any(. == $note) | not)' review.json | while read -r note; do
             printf '%s' "$note" > note.json
             gh api -X POST "repos/${{ github.repository }}/issues/$PR/comments" --input note.json --jq '.html_url'
           done
