@@ -808,6 +808,56 @@ class TestInventoryDimension(ERPNextTestSuite):
 				else:
 					doc.submit()
 
+	def test_backdated_issue_before_a_transfer_within_the_dimension_is_allowed(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		for dimension_name, validate_negative_stock in (("Inv Site", 1), ("Rack", 0)):
+			create_inventory_dimension(
+				apply_to_all_doctypes=1,
+				dimension_name=dimension_name,
+				reference_document=dimension_name,
+				document_type=dimension_name,
+			).db_set("validate_negative_stock", validate_negative_stock)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			for site in ("Site 1", "Site 2"):
+				receipt = make_stock_entry(
+					item_code=item_code,
+					target=warehouse,
+					qty=10,
+					posting_date=add_days(nowdate(), -10),
+					do_not_submit=True,
+				)
+				receipt.items[0].update({"to_inv_site": site, "to_rack": "Rack 1"})
+				receipt.submit()
+
+			transfer = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				target=warehouse,
+				qty=10,
+				posting_date=add_days(nowdate(), -2),
+				do_not_submit=True,
+			)
+			transfer.items[0].update(
+				{"inv_site": "Site 1", "to_inv_site": "Site 1", "rack": "Rack 1", "to_rack": "Rack 2"}
+			)
+			transfer.submit()
+
+			issue = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				qty=1,
+				posting_date=add_days(nowdate(), -5),
+				do_not_submit=True,
+			)
+			issue.items[0].update({"inv_site": "Site 1", "rack": "Rack 1"})
+			issue.submit()
+			self.assertEqual(issue.docstatus, 1)
+
 	def test_backdated_transfer_keeping_checked_dimension_is_allowed(self):
 		from frappe.utils import add_days
 

@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Concat_ws, Max, Sum
+from frappe.query_builder.functions import Concat_ws, Max, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -164,10 +164,11 @@ class StockLedgerEntry(Document):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		return (
 			self.get_dimension_sle_query(sle, dimensions)
-			.select(sle.actual_qty)
+			.select(Sum(sle.actual_qty))
 			.where(sle.posting_datetime > self.posting_datetime)
+			.groupby(sle.posting_datetime, sle.voucher_type, sle.voucher_no)
 			.orderby(sle.posting_datetime)
-			.orderby(sle.creation)
+			.orderby(Min(sle.creation))
 			.run(pluck=True)
 		)
 
