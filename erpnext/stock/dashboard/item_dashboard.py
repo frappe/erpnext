@@ -105,7 +105,6 @@ def get_data(
 		)
 		filters.append(["item_code", "in", items])
 
-	# Warehouse-only User Permissions do not apply to the Bin query.
 	if build_match_conditions("Warehouse", user=frappe.session.user):
 		filters.append(["warehouse", "in", frappe.get_list("Warehouse", pluck="name", limit_page_length=0)])
 
