@@ -1,12 +1,15 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
+	start_import,
 )
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.projects.doctype.project.test_project import make_project
@@ -195,6 +198,208 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 
 		self.assertEqual(sales_invoice_1.items[0].project, project_1.name)
 		self.assertEqual(sales_invoice_2.items[0].project, project_2.name)
+
+	def test_party_currency_does_not_change_company_currency_amount(self):
+		for invoice_type, party_type in (("Sales", "Customer"), ("Purchase", "Supplier")):
+			with self.subTest(invoice_type=invoice_type):
+				frappe.db.set_value(party_type, f"_Test {party_type}", "default_currency", "USD")
+				tool = self.make_invoices(
+					invoice_type=invoice_type, company="_Test Opening Invoice Company", return_doc=True
+				)
+				tool.invoices = tool.invoices[:1]
+				tool.invoices[0].outstanding_amount = 1000
+				names = tool.make_invoices()
+				self.assertEqual(len(names), 1)
+				invoice = frappe.get_doc(f"{invoice_type} Invoice", names[0])
+				self.assertEqual(invoice.currency, "INR")
+				self.assertEqual(invoice.base_grand_total, 1000)
+				self.assertEqual(invoice.outstanding_amount, 1000)
+
+	def test_explicit_foreign_currency_and_summary(self):
+		company = "_Test Opening Invoice Company"
+		tool = self.make_invoices(company=company, return_doc=True)
+		before = tool.get_opening_invoice_summary()[0]
+		for invoice_type, party_type, account_type, parent_account in (
+			("Sales", "Customer", "Receivable", "Accounts Receivable - _TOIC"),
+			("Purchase", "Supplier", "Payable", "Accounts Payable - _TOIC"),
+		):
+			with self.subTest(invoice_type=invoice_type):
+				account = create_account(
+					account_name=f"_Test Opening {account_type} USD",
+					parent_account=parent_account,
+					company=company,
+					account_type=account_type,
+					account_currency="USD",
+				)
+				party = frappe.copy_doc(frappe.get_doc(party_type, f"_Test {party_type}"))
+				party.set(party_type.lower() + "_name", f"_Test Opening USD {party_type}")
+				party.default_currency = "USD"
+				party.set("accounts", [])
+				party.append("accounts", {"company": company, "account": account})
+				party.insert()
+				tool = self.make_invoices(invoice_type=invoice_type, company=company, return_doc=True)
+				tool.invoices = tool.invoices[:1]
+				tool.invoices[0].party = party.name
+				tool.invoices[0].currency = "USD"
+				tool.invoices[0].outstanding_amount = 1000
+				invoices = tool.get_invoices()
+				invoices[0].conversion_rate = 83
+				names = start_import(invoices)
+				self.assertEqual(len(names), 1)
+				invoice = frappe.get_doc(f"{invoice_type} Invoice", names[0])
+				self.assertEqual(invoice.currency, "USD")
+				self.assertEqual(invoice.outstanding_amount, 1000)
+				self.assertEqual(invoice.base_grand_total, 83000)
+				entries = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_type": invoice.doctype, "voucher_no": invoice.name, "account": account},
+					fields=["debit", "credit"],
+				)
+				self.assertEqual(len(entries), 1)
+				self.assertEqual(entries[0].debit or entries[0].credit, 83000)
+				summary = tool.get_opening_invoice_summary()[0]
+				previous = before.get(company, {}).get(invoice.doctype, {}).get("outstanding_amount", 0)
+				self.assertEqual(summary[company][invoice.doctype].outstanding_amount - previous, 83000)
+
+	def test_summary_does_not_convert_company_currency_receivable_twice(self):
+		company = "_Test Opening Invoice Company"
+		tool = self.make_invoices(company=company, return_doc=True)
+		before = tool.get_opening_invoice_summary()[0]
+		tool.invoices = tool.invoices[:1]
+		tool.invoices[0].currency = "USD"
+		tool.invoices[0].outstanding_amount = 1000
+		invoices = tool.get_invoices()
+		invoices[0].conversion_rate = 83
+		names = start_import(invoices)
+		self.assertEqual(len(names), 1)
+		invoice = frappe.get_doc("Sales Invoice", names[0])
+		self.assertEqual(invoice.party_account_currency, "INR")
+		self.assertEqual(invoice.outstanding_amount, 83000)
+		summary = tool.get_opening_invoice_summary()[0]
+		previous = before.get(company, {}).get(invoice.doctype, {}).get("outstanding_amount", 0)
+		self.assertEqual(summary[company][invoice.doctype].outstanding_amount - previous, 83000)
+
+	def test_existing_party_name_is_reused(self):
+		for invoice_type, party_type in (("Sales", "Customer"), ("Purchase", "Supplier")):
+			with self.subTest(invoice_type=invoice_type):
+				tool = self.make_invoices(
+					invoice_type=invoice_type, company="_Test Opening Invoice Company", return_doc=True
+				)
+				tool.create_missing_party = 1
+				party = f"_Test {party_type}"
+				party_name = frappe.db.get_value(party_type, party, party_type.lower() + "_name")
+				for row in tool.invoices:
+					row.party = None
+					row.party_name = party_name
+				count = frappe.db.count(party_type)
+				names = tool.make_invoices()
+				self.assertEqual(len(names), 2)
+				self.assertEqual(frappe.db.count(party_type), count)
+				for name in names:
+					self.assertEqual(
+						frappe.db.get_value(f"{invoice_type} Invoice", name, party_type.lower()), party
+					)
+
+	def test_ambiguous_party_name_requires_party_id(self):
+		tool = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
+		customer = frappe.copy_doc(frappe.get_doc("Customer", "_Test Customer"))
+		customer.insert()
+		tool.create_missing_party = 1
+		tool.invoices[0].party = None
+		tool.invoices[0].party_name = customer.customer_name
+		with self.assertRaisesRegex(frappe.ValidationError, "Please select the Party ID"):
+			tool.make_invoices()
+
+	def test_missing_party_creation_requires_permission(self):
+		tool = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
+		with self.set_user("Guest"):
+			self.assertRaises(
+				frappe.PermissionError, tool.add_party, "Customer", "_Test Missing Opening Customer"
+			)
+
+	def test_quantity_rounding_preserves_opening_amount(self):
+		for invoice_type in ("Sales", "Purchase"):
+			for qty, amount in ((3, 100), (7, 1000), (2, 100), (1.234, 1000)):
+				with self.subTest(invoice_type=invoice_type, qty=qty):
+					tool = self.make_invoices(
+						invoice_type=invoice_type, company="_Test Opening Invoice Company", return_doc=True
+					)
+					tool.invoices = tool.invoices[:1]
+					tool.invoices[0].qty = str(qty)
+					tool.invoices[0].outstanding_amount = amount
+					names = tool.make_invoices()
+					self.assertEqual(len(names), 1)
+					invoice = frappe.get_doc(f"{invoice_type} Invoice", names[0])
+					self.assertEqual(invoice.grand_total, amount)
+					self.assertEqual(invoice.outstanding_amount, amount)
+					if invoice.items[0].qty != qty:
+						self.assertIn(f"Original Quantity: {qty}", invoice.items[0].description)
+
+	def test_invalid_quantity_is_rejected_before_import(self):
+		for qty in ("0", "two", "-1", "nan", "inf"):
+			with self.subTest(qty=qty):
+				tool = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
+				tool.invoices[1].qty = qty
+				with self.assertRaisesRegex(
+					frappe.ValidationError, "Row #2: Quantity must be a positive number"
+				):
+					tool.make_invoices()
+
+	def test_opening_invoice_skips_credit_and_overdue_checks(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+
+		with (
+			patch.object(SalesInvoice, "check_credit_limit") as credit_check,
+			patch.object(SalesInvoice, "check_overdue_billing_threshold") as overdue_check,
+		):
+			names = self.make_invoices(company="_Test Opening Invoice Company")
+			self.assertEqual(len(names), 2)
+			credit_check.assert_not_called()
+			overdue_check.assert_not_called()
+
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		with (
+			patch.object(SalesInvoice, "check_credit_limit") as credit_check,
+			patch.object(SalesInvoice, "check_overdue_billing_threshold") as overdue_check,
+		):
+			create_sales_invoice(uom=frappe.get_cached_value("Item", "_Test Item", "stock_uom"))
+			credit_check.assert_called_once()
+			overdue_check.assert_called_once()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{
+			"credit_controller": "",
+			"enable_overdue_billing_threshold": 1,
+			"role_allowed_to_bypass_overdue_billing": "",
+		},
+	)
+	def test_existing_balances_can_exceed_credit_and_overdue_limits(self):
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			check_overdue_billing_threshold,
+		)
+
+		company = "_Test Opening Invoice Company"
+		customer = frappe.get_doc("Customer", make_customer("_Test Opening Credit Customer"))
+		customer.append(
+			"credit_limits", {"company": company, "credit_limit": 5000, "overdue_billing_threshold": 5000}
+		)
+		customer.save()
+		names = self.make_invoices(
+			company=company,
+			invoices=[
+				{"party": customer.name, "outstanding_amount": 3000},
+				{"party": customer.name, "outstanding_amount": 4000},
+			],
+		)
+		self.assertEqual(len(names), 2)
+		self.assertEqual(
+			sum(frappe.db.get_value("Sales Invoice", name, "outstanding_amount") for name in names), 7000
+		)
+		self.assertRaises(frappe.ValidationError, check_credit_limit, customer.name, company)
+		self.assertRaises(frappe.ValidationError, check_overdue_billing_threshold, customer.name, company)
 
 
 def get_opening_invoice_creation_dict(**args):
