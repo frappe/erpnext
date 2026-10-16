@@ -484,7 +484,7 @@ class MaterialRequirementsPlanningReport:
 			if rm_details.raw_materials:
 				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
 
-			self.set_lead_time(row, rm_details.raw_materials)
+			self.set_lead_time(row)
 			data.append(row)
 			if rm_details.raw_materials:
 				self.update_rm_details(
@@ -493,38 +493,10 @@ class MaterialRequirementsPlanningReport:
 
 		return data
 
-	def set_lead_time(self, row, raw_materials=None):
+	def set_lead_time(self, row):
 		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
-		if (
-			raw_materials
-			and row.required_qty > 0
-			and flt(get_item_lead_time_details(row.item_code).manufacturing_time_in_mins) <= 0
-		):
-			lead_time += self.get_lead_time_from_raw_materials(raw_materials, row.required_qty)
-
 		row.lead_time = math.ceil(lead_time)
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
-
-	def get_lead_time_from_raw_materials(self, raw_materials, qty=1):
-		lead_time = 0
-		for material in raw_materials:
-			material_qty = material.qty * qty
-			# Reuse descendant totals within this report, keeping different net quantities separate.
-			subtree_lead_times = material.setdefault("subtree_lead_times", {})
-			if material_qty not in subtree_lead_times:
-				type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
-				material_lead_time = math.ceil(
-					get_item_lead_time(material.item_code, type_of_material, material_qty)
-				)
-				if material.raw_materials:
-					material_lead_time += self.get_lead_time_from_raw_materials(
-						material.raw_materials, material_qty
-					)
-				subtree_lead_times[material_qty] = material_lead_time
-
-			lead_time += subtree_lead_times[material_qty]
-
-		return lead_time
 
 	def add_non_planned_so(self, row):
 		keys = [
@@ -862,7 +834,7 @@ class MaterialRequirementsPlanningReport:
 				row.capacity = get_item_capacity(material.item_code, self.filters.bucket_size)
 
 			self.update_required_qty(row)
-			self.set_lead_time(row, material.raw_materials)
+			self.set_lead_time(row)
 
 			data.append(row)
 

@@ -1,8 +1,6 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from unittest.mock import patch
-
 import frappe
 from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, flt, formatdate, getdate, today
@@ -132,8 +130,8 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			(3000, 1, 0, 3),
 			(30, 0.5, 1, 2),
 			(30, 0, 1, 0),
-			(0, 49, 1, 4),
-			(-30, 49, 1, 4),
+			(0, 49, 1, 1),
+			(-30, 49, 1, 1),
 		)
 		for minutes, qty, buffer_days, expected_days in cases:
 			with self.subTest(minutes=minutes, qty=qty, buffer_days=buffer_days):
@@ -181,49 +179,21 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.rm_item].required_qty, 48)
 		self.assertEqual(rows[plan.rm_item].lead_time, 3)
 
-	def test_raw_material_fallback_reuses_subtrees_by_required_quantity(self):
-		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
-		frappe.get_doc(
-			{
-				"doctype": "Item Lead Time",
-				"item_code": plan.fg_item,
-				"manufacturing_time_in_mins": 30,
-				"buffer_time": 1,
-			}
-		).insert()
-		frappe.get_doc({"doctype": "Item Lead Time", "item_code": plan.rm_item, "purchase_time": 3}).insert()
+	def test_component_lead_time_is_not_added_to_the_parent(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		other_rm = make_item(properties={"is_stock_item": 1, "is_purchase_item": 1}).name
+		make_bom(item=plan.fg_item, raw_materials=[plan.rm_item, other_rm], rate=100)
+		for item in (plan.rm_item, other_rm):
+			frappe.get_doc({"doctype": "Item Lead Time", "item_code": item, "purchase_time": 10}).insert()
 
-		parents = []
-		child_item = plan.fg_item
-		for _ in range(6):
-			parent_item = make_item(properties={"is_stock_item": 1}).name
-			make_bom(item=parent_item, raw_materials=[child_item], rm_qty=1, rate=100)
-			frappe.get_doc({"doctype": "Item Lead Time", "item_code": parent_item, "buffer_time": 1}).insert()
-			parents.append(parent_item)
-			child_item = parent_item
+		rows = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))
 
-		mps = frappe.get_doc("Master Production Schedule", plan.mps)
-		mps.items[0].item_code = parents[-1]
-		mps.save()
-		with patch(f"{execute.__module__}.get_item_lead_time", wraps=get_item_lead_time) as lead_time:
-			rows = get_mrp_rows(mps)
-			# Descendant calculations should grow with the row count, not the square of BOM depth.
-			self.assertLessEqual(lead_time.call_count, 2 * len(rows))
-
-		for level, parent_item in enumerate(parents):
-			self.assertEqual(rows[parent_item].required_qty, 49)
-			self.assertEqual(rows[parent_item].lead_time, level + 7)
-		self.assertEqual(rows[plan.fg_item].lead_time, 3)
-		self.assertEqual(rows[plan.rm_item].lead_time, 3)
-
-		# Stock changes the quantity below this assembly after the ancestor fallback was calculated.
-		make_stock_entry(item_code=parents[2], target=WAREHOUSE, qty=1, rate=100)
-		rows = get_mrp_rows(mps)
-		self.assertEqual(rows[parents[-1]].lead_time, 12)
-		self.assertEqual(rows[parents[2]].required_qty, 48)
-		self.assertEqual(rows[parents[2]].lead_time, 8)
-		self.assertEqual(rows[plan.fg_item].required_qty, 48)
-		self.assertEqual(rows[plan.fg_item].lead_time, 2)
+		fg_row = rows[plan.fg_item]
+		self.assertEqual(fg_row.lead_time, 0)
+		self.assertEqual(fg_row.release_date, fg_row.delivery_date)
+		for item in (plan.rm_item, other_rm):
+			self.assertEqual(rows[item].delivery_date, fg_row.release_date)
+			self.assertEqual(rows[item].release_date, add_days(fg_row.delivery_date, -10))
 
 	def test_manufactured_component_without_bom_keeps_buffer_duration(self):
 		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
@@ -244,7 +214,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(component.type_of_material, "Manufacture")
 		self.assertFalse(component.bom_no)
 		self.assertEqual(component.lead_time, 3)
-		self.assertEqual(rows[plan.fg_item].lead_time, 3)
+		self.assertEqual(rows[plan.fg_item].lead_time, 0)
 		self.assertEqual(component.delivery_date, rows[plan.fg_item].release_date)
 
 	def test_purchase_item_without_bom_is_purchased(self):
