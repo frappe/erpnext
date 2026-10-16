@@ -76,3 +76,20 @@ class TestItemwiseRecommendedReorderLevel(ERPNextTestSuite):
 		row = self.find_row(self.run_report(), components[0])
 
 		self.assertEqual(flt(row[8]), 5)
+
+	def test_purchase_returns_are_not_consumption(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=10, posting_date="2026-06-02")
+		purchase_return = make_purchase_return(receipt.name)
+		purchase_return.items[0].qty = -2
+		purchase_return.posting_date = "2026-06-03"
+		purchase_return.set_posting_time = 1
+		purchase_return.submit()
+
+		row = self.find_row(self.run_report(), item)
+
+		self.assertEqual(flt(row[7]), 0)

@@ -119,7 +119,17 @@ def get_consumed_items(filters):
 			& (sle.is_cancelled == 0)
 			# the stock an Adjustment Entry counts out comes back in, it is not consumed
 			& (sle.is_adjustment_entry == 0)
-			& (sle.voucher_type.notin(["Delivery Note", "Sales Invoice"]))
+			& (
+				sle.voucher_type.notin(
+					[
+						"Delivery Note",
+						"Sales Invoice",
+						"Purchase Receipt",
+						"Purchase Invoice",
+						"Subcontracting Receipt",
+					]
+				)
+			)
 			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))
 		)
 		.groupby(sle.item_code)
