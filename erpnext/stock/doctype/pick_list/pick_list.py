@@ -155,14 +155,21 @@ class PickList(TransactionBase):
 	def get_picked_qty_by_location(self) -> dict:
 		picked_qty = {}
 		for row in self.get("locations"):
-			if not row.picked_qty:
+			row_qty = self.get_qty_to_pick(row)
+			if not row_qty:
 				continue
 
 			key = (row.item_code, row.warehouse, row.batch_no or "")
 			qty, first_row = picked_qty.get(key, (0.0, row))
-			picked_qty[key] = (qty + flt(row.picked_qty), first_row)
+			picked_qty[key] = (qty + row_qty, first_row)
 
 		return picked_qty
+
+	def get_qty_to_pick(self, row):
+		if row.picked_qty or self.scan_mode or not self.docstatus.is_submitted():
+			return flt(row.picked_qty)
+
+		return flt(row.stock_qty)
 
 	def validate_batch_stock_qty(self, picked_qty):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
