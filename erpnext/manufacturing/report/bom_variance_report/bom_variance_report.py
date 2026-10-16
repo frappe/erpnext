@@ -125,9 +125,8 @@ def get_materials_by_work_order(work_orders):
 def get_work_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	wo = frappe.qb.DocType("Work Order")
 	query = (
-		frappe.qb.from_(wo)
-		.select(wo.name)
-		.where((wo.name.like(f"{txt}%")) & (wo.produced_qty > 0) & (wo.docstatus == 1))
+		get_work_order_query(["name"])
+		.where(wo.name.like(f"{txt}%"))
 		.orderby(wo.name)
 		.limit(page_len)
 		.offset(start)
