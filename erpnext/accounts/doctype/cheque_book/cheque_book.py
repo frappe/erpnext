@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form, now
+from frappe.utils import cstr, get_link_to_form, now
 
 CHEQUE_NO_WIDTH = 6
 MAX_CHEQUES_PER_BOOK = 1000
@@ -212,9 +212,9 @@ class ChequeBook(Document):
 		)
 
 
-def format_cheque_no(cheque_no: str | None) -> str:
+def format_cheque_no(cheque_no: str | int | None) -> str:
 	"""Strip and zero-pad a typed number. Other text stays as typed, for validation to reject."""
-	cheque_no = (cheque_no or "").strip()
+	cheque_no = cstr(cheque_no).strip()  # the API and Data Import can send a number
 	if cheque_no.isascii() and cheque_no.isdigit():
 		return str(int(cheque_no)).zfill(CHEQUE_NO_WIDTH)
 	return cheque_no

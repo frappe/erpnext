@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.cheque.cheque_payment import (
 	cancel_cheque_payment,
 	get_cheque_summary,
 	get_next_cheque,
+	lock_cheque,
 	validate_cheque,
 )
 from erpnext.accounts.doctype.cheque_book.test_cheque_book import (
@@ -268,6 +269,10 @@ class TestChequePayment(ERPNextTestSuite):
 		payment = self.pay("000101", submit=False)
 		locks = record_locks(payment.submit)
 		self.assertLess(locks.index("Cheque Book"), locks.index("Cheque"))
+
+	def test_missing_cheque_is_refused_before_any_lock(self):
+		locks = record_locks(lambda: self.assertRaises(frappe.DoesNotExistError, lock_cheque, "missing"))
+		self.assertEqual(locks, [])
 
 
 def count_queries(action):

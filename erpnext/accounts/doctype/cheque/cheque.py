@@ -34,7 +34,8 @@ class Cheque(Document):
 	def check_if_latest(self):
 		# Every cheque writer locks the book, then the cheque.
 		# Frappe locks this cheque in the parent method, so lock the book first.
-		frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
+		if self.cheque_book:
+			frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
 		super().check_if_latest()
 
 	def validate(self):
