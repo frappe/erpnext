@@ -14,7 +14,6 @@ on:
       - 'crowdin.yml'
       - '.coderabbit.yml'
       - '.mergify.yml'
-      - '.agents/**'
   workflow_dispatch:
 
 concurrency:
