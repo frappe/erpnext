@@ -138,6 +138,22 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
 		)
 
+	def test_dependant_repost_keeps_requests_queued_after_start(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		queued_during_run = self.make_queued_item_repost(fg_item, add_days(today(), -8))
+
+		stock_ledger.skip_reposts_covered_by_dependant_repost(
+			running,
+			{(fg_item, "_Test Warehouse - _TC"): get_combine_datetime(add_days(today(), -10), "00:00:00")},
+		)
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
 	def test_restart_only_failed_reposts(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
