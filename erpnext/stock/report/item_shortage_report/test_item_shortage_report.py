@@ -58,3 +58,18 @@ class TestItemShortageReport(ERPNextTestSuite):
 		report_data = item_shortage_report({"company": so.company, "warehouse": [group]})[1]
 
 		self.assertIn(item, [row.get("item_code") for row in report_data])
+
+	def test_quantity_columns_add_up_to_the_projected_qty(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, warehouse="Stores - _TC", qty=12)
+		make_material_request(item_code=item, warehouse="Stores - _TC", qty=4)
+
+		row = next(
+			row for row in item_shortage_report({"company": so.company})[1] if row.get("item_code") == item
+		)
+
+		self.assertEqual(
+			(row.get("indented_qty"), row.get("reserved_qty"), row.get("projected_qty")), (4, 12, -8)
+		)
