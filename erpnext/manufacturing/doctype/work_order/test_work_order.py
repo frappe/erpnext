@@ -6650,6 +6650,43 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
 		self.assertEqual(wo.operations, [])
 
+	def test_draft_qty_change_keeps_fixed_time_of_sub_assembly_operations(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		fixed_operation, workstation = make_review_operation()
+		operation, _workstation = make_review_operation()
+		sub_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{
+					"operation": fixed_operation,
+					"workstation": workstation,
+					"time_in_mins": 30,
+					"fixed_time": 1,
+				}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": sub_assembly, "qty": 1, "bom_no": sub_bom.name}],
+			operations=[{"operation": operation, "workstation": _workstation, "time_in_mins": 10}],
+		)
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False, use_multi_level_bom=1)
+		self.assertEqual(
+			sorted((row.operation, row.time_in_mins) for row in wo.operations),
+			sorted([(fixed_operation, 30), (operation, 50)]),
+		)
+
+		wo.qty = 10
+		wo.save()
+		self.assertEqual(
+			sorted((row.operation, row.time_in_mins) for row in wo.operations),
+			sorted([(fixed_operation, 30), (operation, 100)]),
+		)
+
 	def test_status_change_accepts_only_its_own_statuses(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name

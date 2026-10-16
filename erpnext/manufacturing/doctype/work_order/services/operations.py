@@ -217,19 +217,25 @@ class OperationsService:
 
 	def _scale_saved_operation_time(self, previous):
 		saved_rows = {row.name: row for row in previous.get("operations")}
-		fixed_operations = set(
-			frappe.get_all(
-				"BOM Operation",
-				filters={"parent": self.doc.bom_no, "parenttype": "BOM", "fixed_time": 1},
-				pluck="operation",
-			)
-		)
+		fixed_operations = self._get_fixed_time_operations()
 		for d in self.doc.get("operations"):
 			saved = saved_rows.get(d.name)
-			if not saved or d.operation in fixed_operations or flt(saved.time_in_mins) != flt(d.time_in_mins):
+			is_fixed = (d.bom or self.doc.bom_no, d.operation) in fixed_operations
+			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue
 			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
 		self.calculate_operating_cost()
+
+	def _get_fixed_time_operations(self):
+		boms = {d.bom or self.doc.bom_no for d in self.doc.get("operations")}
+		return set(
+			frappe.get_all(
+				"BOM Operation",
+				filters={"parent": ["in", list(boms)], "parenttype": "BOM", "fixed_time": 1},
+				fields=["parent", "operation"],
+				as_list=True,
+			)
+		)
 
 	def set_operation_warehouses(self):
 		"""For semi-finished goods tracking, default each operation's warehouses from the Work
