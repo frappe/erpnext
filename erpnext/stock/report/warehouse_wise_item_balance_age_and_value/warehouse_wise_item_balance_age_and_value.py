@@ -82,7 +82,7 @@ def execute(filters=None):
 			row += [total_qty]
 		row += bal_qty
 
-		if total_qty > 0:
+		if total_qty != 0:
 			data.append(row)
 		elif not filters.get("filter_total_zero_qty"):
 			data.append(row)
