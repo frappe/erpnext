@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Count
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
@@ -39,7 +40,7 @@ def get_data(filters):
 
 	for d in bom_wise_data:
 		for row in bom_wise_data[d]:
-			row.used_as_subassembly_items = used_as_subassembly_items.get(row.name, 0)
+			row.used_as_subassembly_items = used_as_subassembly_items.get(d, 0)
 			report_data.append(row)
 
 	return report_data
@@ -83,18 +84,27 @@ def get_filtered_data(filters):
 
 
 def get_bom_count(bom_data):
-	data = frappe.get_all(
-		"BOM Item",
-		fields=[{"COUNT": "*", "as": "count"}, "bom_no"],
-		filters={"bom_no": ("in", bom_data)},
-		group_by="bom_no",
-	)
+	if not bom_data:
+		return {}
 
-	bom_count = {}
-	for d in data:
-		bom_count.setdefault(d.bom_no, d.count)
+	bom = frappe.qb.DocType("BOM")
+	bom_item = frappe.qb.DocType("BOM Item")
 
-	return bom_count
+	data = (
+		frappe.qb.from_(bom_item)
+		.join(bom)
+		.on(bom_item.parent == bom.name)
+		.select(bom_item.bom_no, Count(bom_item.parent).distinct().as_("count"))
+		.where(
+			(bom_item.parenttype == "BOM")
+			& (bom_item.bom_no.isin(bom_data))
+			& (bom.docstatus == 1)
+			& (bom.is_active == 1)
+		)
+		.groupby(bom_item.bom_no)
+	).run(as_dict=True)
+
+	return {d.bom_no: d.count for d in data}
 
 
 def get_args():
