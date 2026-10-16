@@ -159,6 +159,14 @@ class TestChequePayment(ERPNextTestSuite):
 		self.assertEqual((cheque.party_name, cheque.amount), (payment.party_name, 2500))
 		self.assertEqual(getdate(cheque.cheque_date), getdate(payment.reference_date))
 
+	def test_cheque_shows_the_clearance_date_of_its_payment(self):
+		payment = self.pay("000101")
+		frappe.db.set_value("Payment Entry", payment.name, "clearance_date", "2026-01-31")
+
+		# the form gets this through as_dict, and the status shows Cleared from it
+		cheque = frappe.get_doc("Cheque", self.name_of("000101")).as_dict()
+		self.assertEqual(getdate(cheque.clearance_date), getdate("2026-01-31"))
+
 	def test_typed_number_is_padded_and_must_be_in_the_book(self):
 		payment = self.pay("102", submit=False)
 		self.assertEqual((payment.reference_no, payment.cheque), ("000102", self.name_of("000102")))

@@ -31,6 +31,12 @@ class Cheque(Document):
 		status: DF.Literal["Available", "Issued", "Cancelled"]
 	# end: auto-generated types
 
+	@property
+	def clearance_date(self):
+		# Bank clearance writes the date on the Payment Entry only, so read it from there
+		if self.payment_entry:
+			return frappe.db.get_value("Payment Entry", self.payment_entry, "clearance_date")
+
 	def check_if_latest(self):
 		# Every cheque writer locks the book, then the cheque.
 		# Frappe locks this cheque in the parent method, so lock the book first.

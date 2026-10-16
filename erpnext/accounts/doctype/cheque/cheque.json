@@ -15,6 +15,7 @@
   "payment_section",
   "party_name",
   "cheque_date",
+  "clearance_date",
   "column_break_payment",
   "amount",
   "currency",
@@ -116,6 +117,14 @@
    "read_only": 1
   },
   {
+   "description": "From the Payment Entry",
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "is_virtual": 1,
+   "label": "Clearance Date",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_payment",
    "fieldtype": "Column Break"
   },
@@ -178,7 +187,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-15 16:00:00.000000",
+ "modified": "2026-10-16 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque",
@@ -208,20 +217,6 @@
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Blue",
-   "title": "Available"
-  },
-  {
-   "color": "Green",
-   "title": "Issued"
-  },
-  {
-   "color": "Red",
-   "title": "Cancelled"
-  }
- ],
  "title_field": "cheque_no",
  "track_changes": 1
 }

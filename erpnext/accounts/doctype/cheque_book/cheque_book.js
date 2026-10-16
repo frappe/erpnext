@@ -62,7 +62,8 @@ function set_no_of_cheques(frm) {
 }
 
 async function show_cheques(frm) {
-	await frappe.require("embedded_list.bundle.js");
+	// the Cheque meta brings cheque_list.js, which gives the status of each cheque
+	await Promise.all([frappe.require("embedded_list.bundle.js"), frappe.model.with_doctype("Cheque")]);
 	// the wrapper is emptied so that a form refresh does not stack lists
 	const wrapper = frm.get_field("cheques_html").$wrapper.empty();
 	const cheques = new frappe.ui.EmbeddedList({
@@ -72,6 +73,7 @@ async function show_cheques(frm) {
 		fields: [
 			"name",
 			"cheque_no",
+			"docstatus",
 			"status",
 			"cheque_date",
 			"party_name",
@@ -86,7 +88,9 @@ async function show_cheques(frm) {
 		// the badge column reads a fieldname, and a stored value is searchable too
 		before_render() {
 			this._all_data.sort((a, b) => compare_cheque_nos(a.cheque_no, b.cheque_no));
-			this._all_data.forEach((row) => (row.cheque_status = __(get_cheque_status(row))));
+			this._all_data.forEach((row) => {
+				[row.cheque_status, row.status_color] = frappe.get_indicator(row, "Cheque");
+			});
 		},
 		columns: [
 			{
@@ -99,7 +103,7 @@ async function show_cheques(frm) {
 				label: __("Status"),
 				fieldname: "cheque_status",
 				type: "badge",
-				color: (row) => CHEQUE_STATUS_COLOR[get_cheque_status(row)],
+				color: (row) => row.status_color,
 			},
 			{
 				label: __("Cheque Date"),
@@ -129,35 +133,25 @@ async function show_cheques(frm) {
 		],
 	});
 
-	const [, free, issued] = await Promise.all([
+	const book = { cheque_book: frm.doc.name };
+	// an issued cheque dated after today is post dated, so the bank does not pay it yet
+	const post_dated = { ...book, status: "Issued", cheque_date: [">", frappe.datetime.get_today()] };
+	const [, free, issued, pdc] = await Promise.all([
 		cheques.refresh(),
-		frappe.db.count("Cheque", { filters: { cheque_book: frm.doc.name, status: "Available" } }),
-		frappe.db.count("Cheque", { filters: { cheque_book: frm.doc.name, status: "Issued" } }),
+		frappe.db.count("Cheque", { filters: { ...book, status: "Available" } }),
+		frappe.db.count("Cheque", { filters: { ...book, status: "Issued" } }),
+		frappe.db.count("Cheque", { filters: post_dated }),
 	]);
 	const total = frm.doc.no_of_cheques;
 	frm.dashboard.set_headline(
-		__("Total: {0} · Free: {1} · Issued: {2} · Cancelled: {3}", [
+		__("Total: {0} · Free: {1} · Issued: {2} · PDC: {3} · Cancelled: {4}", [
 			total,
 			free,
-			issued,
+			issued - pdc,
+			pdc,
 			total - free - issued,
 		])
 	);
-}
-
-const CHEQUE_STATUS_COLOR = {
-	Available: "blue",
-	Issued: "green",
-	PDC: "orange",
-	Cleared: "green",
-	Cancelled: "red",
-};
-
-// An issued cheque dated after today is post dated, so the bank does not pay it yet
-function get_cheque_status(row) {
-	if (row.status !== "Issued") return row.status;
-	if (row.clearance_date) return "Cleared";
-	return row.cheque_date > frappe.datetime.get_today() ? "PDC" : "Issued";
 }
 
 function compare_cheque_nos(a, b) {
