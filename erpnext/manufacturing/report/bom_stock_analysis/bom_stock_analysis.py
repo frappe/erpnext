@@ -303,7 +303,20 @@ def explode_phantom_boms(data, filters):
 		data.pop(idx)
 		data[idx:idx] = children
 
-	return data
+	return merge_rows_by_item(data) if replacements else data
+
+
+def merge_rows_by_item(data):
+	merged = {}
+	for row in data:
+		if row.item_code in merged:
+			merged[row.item_code].qty_per_unit = flt(merged[row.item_code].qty_per_unit) + flt(
+				row.qty_per_unit
+			)
+		else:
+			merged[row.item_code] = row
+
+	return list(merged.values())
 
 
 def get_manufacturer_records():

@@ -233,6 +233,34 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		self.assertEqual(flt(rows[0].qty_per_unit), 5.0)
 		self.assertEqual(flt(rows[0].producible_qty), 2.0)
 
+	def build_bom_with_shared_material(self):
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		phantom_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		phantom_bom = make_bom(item=phantom_item, raw_materials=[material], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		parent = make_bom(item=fg_item, raw_materials=[material, phantom_item], do_not_save=True)
+		parent.items[1].bom_no = phantom_bom.name
+		parent.save()
+		parent.submit()
+
+		warehouse = create_warehouse("_Test BOM Stock Analysis Shared")
+		create_stock_reconciliation(item_code=material, warehouse=warehouse, qty=10, rate=10)
+		return parent.name, material, warehouse
+
+	def test_material_used_directly_and_in_phantom_is_counted_once(self):
+		bom, material, warehouse = self.build_bom_with_shared_material()
+
+		for exploded in (False, True):
+			with self.subTest(exploded=exploded):
+				items, footer = run_report(bom, warehouse, exploded, qty_to_make=1)
+				self.assertEqual(list(items), [material])
+				self.assertEqual(items[material]["qty_per_unit"], fmt_qty(2))
+				self.assertEqual(footer["description"], 5)
+
 
 def run_report(bom, warehouse, exploded, qty_to_make):
 	"""Component rows keyed by item code, plus the footer row."""
