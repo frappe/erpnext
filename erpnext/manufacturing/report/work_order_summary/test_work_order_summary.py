@@ -6,8 +6,12 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
 
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.work_order_summary.work_order_summary import execute
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -127,3 +131,36 @@ class TestWorkOrderSummary(ERPNextTestSuite):
 		self.assertIn(wo.name, {row.name for row in data})
 		self.assertEqual(chart["data"]["datasets"][0]["values"][3], 0)
 		self.assertEqual(chart["data"]["datasets"][0]["values"][0], len(data))
+
+	def test_quantity_chart_has_nothing_pending_for_finished_orders(self):
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[material])
+		test_stock_entry.make_stock_entry(
+			item_code=material, target="_Test Warehouse - _TC", qty=2, basic_rate=10
+		)
+		wo = make_wo_order_test_record(
+			item=fg_item, bom_no=bom.name, qty=2, source_warehouse="_Test Warehouse - _TC", skip_transfer=1
+		)
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 2))
+		for row in manufacture.items:
+			if row.is_finished_item:
+				row.qty = 1
+		manufacture.submit()
+		wo.reload()
+		self.assertEqual((wo.status, wo.produced_qty, wo.process_loss_qty), ("Completed", 1, 1))
+
+		_columns, _data, _message, chart = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"from_date": add_days(today(), -1),
+					"to_date": today(),
+					"production_item": [fg_item],
+					"charts_based_on": "Quantity",
+				}
+			)
+		)
+
+		pending, completed = (dataset["values"] for dataset in chart["data"]["datasets"])
+		self.assertEqual((sum(pending), sum(completed)), (0, 1))

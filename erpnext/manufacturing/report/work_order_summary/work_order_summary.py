@@ -40,6 +40,7 @@ def get_data(filters):
 		"qty",
 		"creation",
 		"produced_qty",
+		"process_loss_qty",
 		"planned_start_date",
 		"planned_end_date",
 		"actual_start_date",
@@ -233,10 +234,17 @@ def prepare_chart_data(data, filters):
 
 		for d in data:
 			if getdate(d.planned_start_date) >= from_date and getdate(d.planned_start_date) <= end_date:
-				periodic_data["Pending"][period] += flt(d.qty) - flt(d.produced_qty)
+				periodic_data["Pending"][period] += get_pending_qty(d)
 				periodic_data["Completed"][period] += flt(d.produced_qty)
 
 	return labels, periodic_data
+
+
+def get_pending_qty(work_order):
+	if work_order.status in ("Completed", "Closed", "Stopped"):
+		return 0.0
+
+	return flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
 
 
 def get_columns(filters, show_actual_finished_goods=False):
