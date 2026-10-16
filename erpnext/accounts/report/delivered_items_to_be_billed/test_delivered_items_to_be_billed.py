@@ -114,6 +114,16 @@ class TestDeliveredItemsToBeBilled(ERPNextTestSuite):
 		)
 		self.assertEqual(self.run_report(delivery_note=dn.name), [])
 
+		credit_note = make_sales_return(si.name)
+		credit_note.posting_date = "2026-06-20"
+		credit_note.set_posting_time = 1
+		credit_note.update_billed_amount_in_delivery_note = 1
+		credit_note.items[0].qty = -1
+		credit_note.submit()
+
+		self.assertEqual(self.run_report(delivery_note=dn.name, posting_date="2026-06-10"), [])
+		self.assertEqual(self.run_report(delivery_note=dn.name)[0].pending_amount, 280)
+
 	def test_later_credit_note_not_updating_billing_is_ignored(self):
 		self.stock_up_item()
 		dn = create_delivery_note(

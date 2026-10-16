@@ -47,8 +47,9 @@ class OrderBillingAsOn:
 		then = self.spread(rows, billed.amount_then, billed.qty_then, billed_against_rows, "amount_then")
 		billed_later = {}
 		for row in rows:
-			if difference := flt(today[row.name] - then[row.name], self.precision):
-				billed_later[row.name] = difference * flt(row.conversion_rate)
+			difference = flt((today[row.name] - then[row.name]) * flt(row.conversion_rate), self.precision)
+			if difference:
+				billed_later[row.name] = difference
 		return billed_later
 
 	def spread(

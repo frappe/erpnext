@@ -4,6 +4,8 @@
 import frappe
 
 from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+from erpnext.accounts.report.non_billed_report import BILLING_LINKS
+from erpnext.accounts.report.order_billing_as_on import OrderBillingAsOn
 from erpnext.accounts.report.received_items_to_be_billed.received_items_to_be_billed import execute
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_pi_from_po
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_pr_from_po
@@ -201,6 +203,16 @@ class TestReceivedItemsToBeBilled(ERPNextTestSuite):
 		data = self.run_report()
 		self.assertEqual(self.get_row(data, first_pr.name).pending_amount, 40)
 		self.assertEqual(self.get_row(data, second_pr.name).pending_amount, 60)
+
+	def test_fractional_order_billing_later_is_converted_before_rounding(self):
+		order_billing = OrderBillingAsOn(
+			"Purchase Receipt", BILLING_LINKS["Purchase Receipt"], "2026-06-10", precision=2
+		)
+		row = frappe._dict(name="receipt-row", amount=100, qty=3, conversion_rate=100)
+		billed = frappe._dict(amount=1.004, qty=1, amount_then=1, qty_then=1)
+
+		billed_later = order_billing.get_line_billed_later([row], billed, {})
+		self.assertAlmostEqual(billed_later["receipt-row"], 0.4)
 
 
 def make_receipt_from_order(purchase_order, qty, posting_date):
