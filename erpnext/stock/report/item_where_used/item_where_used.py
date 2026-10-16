@@ -13,6 +13,7 @@ def execute(filters=None):
 	data = []
 
 	if filters.get("item"):
+		frappe.has_permission("Item", "read", doc=filters.item, throw=True)
 		data = get_data(filters)
 
 	return get_columns(data), data
@@ -130,7 +131,18 @@ def get_data(filters):
 	if not filters.get("section") or filters.section == REFERENCES_SECTION:
 		data.extend(get_reference_data(filters))
 
+<<<<<<< HEAD
 	return data
+=======
+	allowed_items = set(
+		get_permitted_list(
+			"Item",
+			filters={"name": ["in", get_unique_names([row.related_item for row in data])]},
+			pluck="name",
+		)
+	)
+	return [row for row in data if row.related_item in allowed_items]
+>>>>>>> d401f0b (fix(stock): apply read permissions in Item Where Used report)
 
 
 def get_where_used_data(filters):
@@ -232,7 +244,7 @@ def get_bom_output_rows(item, company=None):
 	if company:
 		filters["company"] = company
 
-	rows = frappe.get_all(
+	rows = get_permitted_list(
 		"BOM",
 		filters=filters,
 		fields=["name", "item", "company", "is_default", "is_active", "quantity", "uom"],
@@ -291,7 +303,7 @@ def get_product_bundle_component_rows(item):
 
 
 def get_product_bundle_parent_rows(item):
-	rows = frappe.get_all(
+	rows = get_permitted_list(
 		"Product Bundle",
 		filters={"new_item_code": item, "docstatus": 0},
 		fields=["name", "new_item_code", "disabled"],
@@ -316,7 +328,7 @@ def get_product_bundle_parent_rows(item):
 def get_subcontracting_bom_rows(item):
 	data = []
 
-	for row in frappe.get_all(
+	for row in get_permitted_list(
 		"Subcontracting BOM",
 		filters={"service_item": item},
 		fields=[
@@ -343,7 +355,7 @@ def get_subcontracting_bom_rows(item):
 			)
 		)
 
-	for row in frappe.get_all(
+	for row in get_permitted_list(
 		"Subcontracting BOM",
 		filters={"finished_good": item},
 		fields=[
@@ -373,7 +385,7 @@ def get_subcontracting_bom_rows(item):
 
 
 def get_variant_rows(item):
-	rows = frappe.get_all(
+	rows = get_permitted_list(
 		"Item",
 		filters={"variant_of": item},
 		fields=["name", "variant_of", "disabled"],
@@ -397,7 +409,7 @@ def get_variant_rows(item):
 def get_item_alternative_rows(item):
 	data = []
 
-	for row in frappe.get_all(
+	for row in get_permitted_list(
 		"Item Alternative",
 		filters={"item_code": item},
 		fields=["name", "item_code", "alternative_item_code"],
@@ -414,7 +426,7 @@ def get_item_alternative_rows(item):
 			)
 		)
 
-	for row in frappe.get_all(
+	for row in get_permitted_list(
 		"Item Alternative",
 		filters={"alternative_item_code": item},
 		fields=["name", "item_code", "alternative_item_code"],
@@ -445,7 +457,7 @@ def get_bom_map(bom_names, company=None):
 
 	return {
 		row.name: row
-		for row in frappe.get_all(
+		for row in get_permitted_list(
 			"BOM",
 			filters=filters,
 			fields=["name", "item", "company", "is_default", "is_active"],
@@ -460,7 +472,7 @@ def get_product_bundle_map(bundle_names):
 
 	return {
 		row.name: row
-		for row in frappe.get_all(
+		for row in get_permitted_list(
 			"Product Bundle",
 			filters={"name": ["in", bundle_names], "docstatus": 0},
 			fields=["name", "new_item_code", "disabled"],
@@ -512,3 +524,10 @@ def get_unique_names(names):
 		unique_names.append(name)
 
 	return unique_names
+
+
+def get_permitted_list(doctype, **kwargs):
+	if not frappe.has_permission(doctype, "read"):
+		return []
+
+	return frappe.get_list(doctype, limit_page_length=0, **kwargs)
