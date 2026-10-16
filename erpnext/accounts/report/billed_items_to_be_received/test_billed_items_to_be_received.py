@@ -164,6 +164,19 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 		rows = self.get_rows_for(data, second_invoice)
 		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
 
+	def test_rebilled_receipt_row_is_received_by_replacement_invoice(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
+		cancelled_invoice = self.bill_receipt(receipt.name, qty=5)
+		debit_note = make_debit_note(cancelled_invoice)
+		debit_note.insert()
+		debit_note.submit()
+		replacement_invoice = self.bill_receipt(receipt.name, qty=5)
+
+		names = {row.name for row in self.run_report()}
+
+		self.assertNotIn(cancelled_invoice, names)
+		self.assertNotIn(replacement_invoice, names)
+
 	def test_receipt_return_reopens_invoice_received_later(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0

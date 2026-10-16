@@ -100,10 +100,14 @@ def get_received_as_on(as_on_date):
 
 
 def get_returned_as_on(as_on_date):
-	"""Qty cancelled and stock sent back per invoice row by debit notes posted on or before the date."""
+	"""Qty cancelled and stock sent back per invoice row by debit notes posted on or before the date.
+
+	`billing_only_qty` is the part cancelled by debit notes that do not move stock.
+	"""
 	debit_note = frappe.qb.DocType("Purchase Invoice")
 	debit_note_item = frappe.qb.DocType("Purchase Invoice Item")
 	stock_returned_qty = Case().when(debit_note.update_stock == 1, -debit_note_item.received_qty).else_(0)
+	billing_only_qty = Case().when(debit_note.update_stock == 0, -debit_note_item.qty).else_(0)
 	return (
 		frappe.qb.from_(debit_note_item)
 		.join(debit_note)
@@ -112,6 +116,7 @@ def get_returned_as_on(as_on_date):
 			debit_note_item.purchase_invoice_item.as_("detail"),
 			Sum(-debit_note_item.qty).as_("qty"),
 			Sum(stock_returned_qty).as_("stock_qty"),
+			Sum(billing_only_qty).as_("billing_only_qty"),
 		)
 		.where(
 			(debit_note.docstatus == 1)
@@ -127,21 +132,20 @@ def get_receipt_first_received_as_on(as_on_date):
 	"""Qty received per invoice row made from a receipt, as on the date.
 
 	A receipt row billed by several invoices has its net received qty (after returns) handed out
-	to those invoice rows in posting order, so a return is counted only once across them.
+	to those invoice rows in posting order, so a return is counted only once across them. Each
+	invoice row claims only its qty net of debit notes that do not move stock, so a cancelled
+	bill leaves the units for the bill that replaces it.
 	"""
 	invoice = frappe.qb.DocType("Purchase Invoice")
 	invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 	receipt = frappe.qb.DocType("Purchase Receipt")
 	receipt_item = frappe.qb.DocType("Purchase Receipt Item")
 	receipt_returns = get_receipt_returns_as_on(as_on_date, "name", "receipt_returns")
-	billed_before = get_billed_through(invoice, invoice_item) - invoice_item.qty
+	debit_notes = get_returned_as_on(as_on_date)
+	billed_qty = invoice_item.qty - IfNull(debit_notes.billing_only_qty, 0)
+	billed_before = get_billed_through(invoice, invoice_item, billed_qty) - billed_qty
 	unallocated = receipt_item.received_qty - IfNull(receipt_returns.qty, 0) - billed_before
-	allocated = (
-		Case()
-		.when(unallocated >= invoice_item.qty, invoice_item.qty)
-		.when(unallocated > 0, unallocated)
-		.else_(0)
-	)
+	allocated = Case().when(unallocated >= billed_qty, billed_qty).when(unallocated > 0, unallocated).else_(0)
 	return (
 		frappe.qb.from_(invoice_item)
 		.join(invoice)
@@ -152,16 +156,18 @@ def get_receipt_first_received_as_on(as_on_date):
 		.on(receipt.name == receipt_item.parent)
 		.left_join(receipt_returns)
 		.on(receipt_returns.detail == receipt_item.name)
+		.left_join(debit_notes)
+		.on(debit_notes.detail == invoice_item.name)
 		.select(invoice_item.name.as_("detail"), allocated.as_("qty"))
 		.where((invoice.docstatus == 1) & (invoice.is_return == 0) & (invoice.posting_date <= as_on_date))
 		.where((receipt.docstatus == 1) & (receipt.posting_date <= as_on_date))
 	).as_("receipt_first")
 
 
-def get_billed_through(invoice, invoice_item):
+def get_billed_through(invoice, invoice_item, billed_qty):
 	"""Running total of qty billed against the receipt row, up to and including this invoice row."""
 	return (
-		analytics.Sum(invoice_item.qty)
+		analytics.Sum(billed_qty)
 		.over(invoice_item.pr_detail)
 		.orderby(invoice.posting_date, invoice.name, invoice_item.idx)
 		.rows(analytics.Preceding(), analytics.CURRENT_ROW)
