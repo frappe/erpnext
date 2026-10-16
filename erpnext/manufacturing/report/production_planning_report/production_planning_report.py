@@ -166,7 +166,7 @@ class ProductionPlanReport:
 			if self.filters.include_subassembly_raw_materials:
 				qty_field = bom_item.qty_consumed_per_unit
 			else:
-				qty_field = bom_item.qty / bom.quantity
+				qty_field = bom_item.stock_qty / bom.quantity
 
 			raw_materials = (
 				frappe.qb.from_(bom)
