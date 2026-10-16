@@ -64,7 +64,7 @@ def get_data(filters):
 	else:
 		query_filters["creation"] = ("between", [filters.get("from_date"), filters.get("to_date")])
 
-	data = frappe.get_all(
+	data = frappe.get_list(
 		"Work Order", fields=fields, filters=query_filters, order_by="planned_start_date asc"
 	)
 

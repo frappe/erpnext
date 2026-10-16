@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
 
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -84,3 +86,24 @@ class TestWorkOrderSummary(ERPNextTestSuite):
 		names = {row["name"] for row in self.run_report(based_on="Planned Date", from_date=today())}
 
 		self.assertIn(wo.name, names)
+
+	def test_chart_counts_only_permitted_work_orders(self):
+		make_wo_order_test_record(production_item="_Test FG Item", qty=10, company="_Test Company")
+		make_wo_order_test_record(production_item="_Test FG Item 2", qty=10, company="_Test Company")
+		user = create_user("work-order-summary-user@example.com", "Manufacturing User")
+		add_user_permission("Item", "_Test FG Item", user.name)
+
+		with self.set_user(user.name):
+			_columns, data, _message, chart = execute(
+				frappe._dict(
+					{
+						"company": "_Test Company",
+						"from_date": add_days(today(), -1),
+						"to_date": today(),
+						"charts_based_on": "Status",
+					}
+				)
+			)
+
+		self.assertEqual({row.production_item for row in data}, {"_Test FG Item"})
+		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), len(data))
