@@ -111,7 +111,13 @@ def execute(filters=None):
 				actual_qty = sle.qty_after_transaction
 				stock_value = sle.stock_value
 
-			sle.update({"qty_after_transaction": actual_qty, "stock_value": stock_value})
+			sle.update(
+				{
+					"qty_after_transaction": actual_qty,
+					"stock_value": stock_value,
+					"valuation_rate": flt(stock_value) / flt(actual_qty) if actual_qty else 0,
+				}
+			)
 
 		sle.update({"in_qty": max(sle.actual_qty, 0), "out_qty": min(sle.actual_qty, 0)})
 
@@ -247,7 +253,9 @@ def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict, filte
 		stock_value_before_transaction += new_sle.stock_value_difference
 
 		new_sle.valuation_rate = (
-			stock_value_before_transaction / qty_before_transaction if qty_before_transaction else 0
+			flt(new_sle.stock_value) / flt(new_sle.qty_after_transaction)
+			if new_sle.qty_after_transaction
+			else 0
 		)
 
 		segregated_entries.append(new_sle)

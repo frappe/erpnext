@@ -518,3 +518,40 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
 
 		self.assertEqual(reconciliation["in_qty"], 5)
+
+	def test_batch_rows_show_the_batch_valuation_rate(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batches = [
+			frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": frappe.generate_hash(length=10)})
+			.insert()
+			.name
+			for _batch in range(2)
+		]
+		for batch_no, rate in zip(batches, (100, 200), strict=True):
+			make_stock_entry(
+				item_code=item,
+				to_warehouse=WAREHOUSE,
+				qty=10,
+				basic_rate=rate,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+		make_stock_entry(
+			item_code=item, from_warehouse=WAREHOUSE, qty=3, batch_no=batches[1], use_serial_batch_fields=1
+		)
+
+		for segregate in (0, 1):
+			filters = frappe._dict(
+				company="_Test Company",
+				from_date=add_days(today(), -1),
+				to_date=today(),
+				item_code=[item],
+				warehouse=WAREHOUSE,
+				batch_no=batches[1],
+				segregate_serial_batch_bundle=segregate,
+			)
+			rows = [row for row in execute(filters)[1] if row.get("voucher_no")]
+
+			self.assertEqual([row["valuation_rate"] for row in rows], [200, 200], f"segregate={segregate}")
