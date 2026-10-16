@@ -109,6 +109,47 @@ class TestTerritoryTargetVarianceBasedOnItemGroup(FrappeTestCase):
 		self.assertEqual(flt(group_a.total_achieved, 2), 5000)
 		self.assertEqual(flt(overall.total_achieved, 2), 8000)
 
+	def test_achieved_respects_user_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		distribution = create_target_distribution(self.fiscal_year)
+		territory = create_territory_with_target(
+			"_Test Target Territory Perm", self.fiscal_year, distribution.name
+		)
+
+		for customer, qty in (("_Test Customer", 5), ("_Test Customer 2", 3)):
+			so = make_sales_order(customer=customer, rate=1000, qty=qty, do_not_submit=True)
+			so.territory = territory.name
+			so.submit()
+
+		def achieved():
+			return sum(
+				flt(r.get("total_achieved"))
+				for r in execute(
+					frappe._dict(
+						{
+							"fiscal_year": self.fiscal_year,
+							"doctype": "Sales Order",
+							"period": "Yearly",
+							"target_on": "Quantity",
+						}
+					)
+				)[1]
+				if r.get("territory") == territory.name
+			)
+
+		self.assertEqual(flt(achieved(), 2), 8)
+
+		user = create_user("tgt_variance_restricted@example.com", "Sales Manager").name
+		add_user_permission("Customer", "_Test Customer 2", user)
+		try:
+			with self.set_user(user):
+				restricted = achieved()
+		finally:
+			remove_user_permission("Customer", "_Test Customer 2", user)
+		self.assertEqual(flt(restricted, 2), 3)
+
 
 def create_territory_with_target(name, fiscal_year, distribution_id, target_qty=50):
 	doc = frappe.new_doc("Territory")
