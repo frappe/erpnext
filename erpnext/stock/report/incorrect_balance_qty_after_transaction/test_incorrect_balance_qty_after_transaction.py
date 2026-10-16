@@ -76,3 +76,20 @@ class TestIncorrectBalanceQtyAfterTransaction(ERPNextTestSuite):
 
 		self.assertEqual(len(flagged), 1)
 		self.assertAlmostEqual(flagged[0]["differnce"], 0.4)
+
+	def test_reconciliation_entry_is_checked_against_its_reconciled_qty(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=100, posting_date="2026-06-01")
+		reconciliation = create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=7, rate=100, posting_date="2026-06-02"
+		)
+		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": reconciliation.name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", sle_name, "qty_after_transaction", 9)
+
+		flagged = [row for row in self.run_report(item_code=item) if row.get("name") == sle_name]
+
+		self.assertEqual([(row["expected_balance_qty"], row["differnce"]) for row in flagged], [(7, 2)])
