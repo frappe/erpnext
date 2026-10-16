@@ -1,6 +1,5 @@
 import frappe
 from frappe import qb
-from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 from frappe.tests.utils import FrappeTestCase
 
@@ -8,6 +7,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.payment_ledger.payment_ledger import execute
+from erpnext.tests.permission_test_utils import make_company_fenced_user, make_fenced_user
 
 
 class TestPaymentLedger(FrappeTestCase):
@@ -76,10 +76,11 @@ class TestPaymentLedger(FrappeTestCase):
 		)
 		other = create_sales_invoice()
 
-		user = create_user("test_payment_ledger_user@example.com", "Accounts User")
-		add_user_permission("Company", self.company, user.name)
+		user = make_company_fenced_user(
+			"test_payment_ledger_user@example.com", ["Accounts User"], self.company
+		)
 
-		with self.set_user(user.name):
+		with self.set_user(user):
 			columns, data = execute(filters=frappe._dict())
 
 		vouchers = [x.get("voucher_no") for x in data]
@@ -119,10 +120,11 @@ class TestPaymentLedger(FrappeTestCase):
 		no_party.accounts[0].party_type = "Customer"
 		no_party.submit()
 
-		user = create_user("test_payment_ledger_party_user@example.com", "Accounts User")
-		add_user_permission("Customer", "_Test Customer", user.name)
+		user = make_fenced_user(
+			"test_payment_ledger_party_user@example.com", ["Accounts User"], [("Customer", "_Test Customer")]
+		)
 
-		with self.set_user(user.name):
+		with self.set_user(user):
 			columns, data = execute(filters=frappe._dict())
 
 		vouchers = [x.get("voucher_no") for x in data]
@@ -131,10 +133,10 @@ class TestPaymentLedger(FrappeTestCase):
 		self.assertIn(partyless.name, vouchers)
 		self.assertIn(no_party.name, vouchers)
 
-		scoped = create_user("test_payment_ledger_scoped_user@example.com", "Accounts User")
-		add_user_permission("Customer", "_Test Customer", scoped.name, applicable_for="Payment Ledger Entry")
+		scoped = make_fenced_user("test_payment_ledger_scoped_user@example.com", ["Accounts User"])
+		add_user_permission("Customer", "_Test Customer", scoped, applicable_for="Payment Ledger Entry")
 
-		with self.set_user(scoped.name):
+		with self.set_user(scoped):
 			columns, data = execute(filters=frappe._dict())
 
 		vouchers = [x.get("voucher_no") for x in data]
