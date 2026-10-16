@@ -254,7 +254,9 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 		net_amount = child_doc.base_net_amount * sales_team.allocated_percentage / 100
 		sales_field_col = sales_team[sales_field]
 
-		query = query.inner_join(sales_team).on(sales_team.parent == parent_doc.name)
+		query = query.inner_join(sales_team).on(
+			(sales_team.parent == parent_doc.name) & (sales_team.parenttype == doctype)
+		)
 	else:
 		stock_qty = child_doc.stock_qty
 		net_amount = child_doc.base_net_amount
