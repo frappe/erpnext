@@ -2,13 +2,21 @@
 # See license.txt
 
 
+from itertools import product
+
 import frappe
 from frappe.utils import add_days, add_years, cint, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+	create_payment_entry,
+	create_payment_term,
+	create_payment_terms_template,
+	create_payment_terms_template_with_discount,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
@@ -694,41 +702,722 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
 
-	def test_negative_debit_or_credit_journal_against_invoice(self):
-		transaction_date = nowdate()
-		amount = 100
-		si = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+	def test_journal_against_invoice_with_payment_terms(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion = 30
+		template.terms[1].invoice_portion = 70
+		template.save()
 
-		# credit debtors account to record a payment
-		je = self.create_journal_entry(self.bank, self.debit_to, amount, transaction_date)
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_save=True, do_not_submit=True)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+
+		je = self.create_journal_entry(self.bank, self.debit_to, 100)
 		je.accounts[1].party_type = "Customer"
 		je.accounts[1].party = self.customer
-		je.accounts[1].credit_in_account_currency = 0
-		je.accounts[1].debit_in_account_currency = -1 * amount
-		je.save()
-		je.submit()
+		je.save().submit()
 
 		pr = self.create_payment_reconciliation()
-
+		pr.invoice_name = si.name
+		pr.payment_name = je.name
 		pr.get_unreconciled_entries()
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.invoices), 2)
 
-		# Difference amount should not be calculated for base currency accounts
-		for row in pr.allocation:
-			self.assertEqual(flt(row.get("difference_amount")), 0.0)
-
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [invoice.as_dict() for invoice in pr.invoices],
+					"payments": [payment.as_dict() for payment in pr.payments],
+				}
+			)
+		)
 		pr.reconcile()
 
-		# assert outstanding
 		si.reload()
-		self.assertEqual(si.status, "Paid")
-		self.assertEqual(si.outstanding_amount, 0)
+		self.assertEqual([term.outstanding for term in si.payment_schedule], [0, 0])
 
-		# check PR tool output
-		self.assertEqual(len(pr.get("invoices")), 0)
-		self.assertEqual(len(pr.get("payments")), 0)
+		je.reload().cancel()
+		si.reload()
+		self.assertEqual(
+			[term.outstanding for term in si.payment_schedule],
+			[term.payment_amount for term in si.payment_schedule],
+		)
+
+		amended_je = frappe.copy_doc(je)
+		amended_je.docstatus = 0
+		amended_je.amended_from = je.name
+		overpaid_je = frappe.copy_doc(amended_je)
+		overpaid_je.amended_from = je.name
+		overpaid_je.set(
+			"accounts",
+			[
+				row
+				for row in overpaid_je.accounts
+				if not row.payment_term or row.payment_term == si.payment_schedule[0].payment_term
+			],
+		)
+		for row in overpaid_je.accounts:
+			row.debit_in_account_currency = 50 if row.account == self.bank else 0
+			row.credit_in_account_currency = 0 if row.account == self.bank else 50
+		frappe.db.savepoint("overpaid_payment_term")
+		try:
+			with self.assertRaisesRegex(frappe.ValidationError, "outstanding.*payment term"):
+				overpaid_je.save().submit()
+		finally:
+			frappe.db.rollback(save_point="overpaid_payment_term")
+		amended_je.save().submit()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assertEqual([term.outstanding for term in si.payment_schedule], [0, 0])
+		self.assertEqual([term.paid_amount for term in si.payment_schedule], [30, 70])
+
+		for action in ("cancel", "unreconcile"):
+			with self.subTest(action=action):
+				reverse_je = make_reverse_journal_entry(amended_je.name)
+				reverse_je.posting_date = nowdate()
+				reverse_je.save().submit()
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 100)
+				self.assertEqual([term.outstanding for term in si.payment_schedule], [30, 70])
+				self.assertEqual([term.paid_amount for term in si.payment_schedule], [0, 0])
+
+				if action == "unreconcile":
+					unreconcile = frappe.get_doc(
+						doctype="Unreconcile Payment",
+						company=self.company,
+						voucher_type=reverse_je.doctype,
+						voucher_no=reverse_je.name,
+					)
+					unreconcile.add_references()
+					unreconcile.save().submit()
+					si.reload()
+					self.assertEqual(si.outstanding_amount, 0)
+					self.assertEqual([term.outstanding for term in si.payment_schedule], [0, 0])
+				reverse_je.reload().cancel()
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assertEqual([term.outstanding for term in si.payment_schedule], [0, 0])
+				self.assertEqual([term.paid_amount for term in si.payment_schedule], [30, 70])
+
+		amended_je.cancel()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 100)
+		self.assertEqual([term.outstanding for term in si.payment_schedule], [30, 70])
+		self.assertEqual([term.paid_amount for term in si.payment_schedule], [0, 0])
+		self.assertEqual([term.base_outstanding for term in si.payment_schedule], [30, 70])
+		self.assertEqual([term.base_paid_amount for term in si.payment_schedule], [0, 0])
+
+	def test_payment_term_allocations_match_ledger_outstanding(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion = 30
+		template.terms[1].invoice_portion = 70
+		template.save()
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+		for settlement, (currency, conversion_rate, remaining) in product(
+			("Journal Entry", "Credit Note"), (("INR", 1, 60), ("USD", 80, 4800))
+		):
+			with self.subTest(settlement=settlement, currency=currency):
+				si = create_sales_invoice(
+					qty=1, rate=100, currency=currency, conversion_rate=conversion_rate, do_not_save=True
+				)
+				si.payment_terms_template = template.name
+				si.save().submit()
+				if settlement == "Journal Entry":
+					payment = self.create_journal_entry(self.bank, self.debit_to, 40 * conversion_rate)
+					payment.accounts[1].party_type = "Customer"
+					payment.accounts[1].party = self.customer
+					payment.accounts[1].reference_type = si.doctype
+					payment.accounts[1].reference_name = si.name
+					payment.save().submit()
+				else:
+					payment = create_sales_invoice(
+						qty=-1,
+						rate=40,
+						currency=currency,
+						conversion_rate=conversion_rate,
+						is_return=1,
+					)
+					pr = self.create_payment_reconciliation()
+					pr.invoice_name, pr.payment_name = si.name, payment.name
+					pr.get_unreconciled_entries()
+					pr.allocate_entries(
+						frappe._dict(
+							invoices=[row.as_dict() for row in pr.invoices],
+							payments=[row.as_dict() for row in pr.payments],
+						)
+					)
+					pr.reconcile()
+
+				si.reload()
+				self.assertEqual(si.outstanding_amount, remaining)
+				pe = self.create_payment_entry(amount=remaining)
+				pe.save().submit()
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, pe.name
+				pr.get_unreconciled_entries()
+				self.assertEqual([row.outstanding_amount for row in pr.invoices], [remaining])
+				pr.allocate_entries(
+					frappe._dict(
+						invoices=[row.as_dict() for row in pr.invoices],
+						payments=[row.as_dict() for row in pr.payments],
+					)
+				)
+				pr.reconcile()
+				self.assertEqual(si.reload().outstanding_amount, 0)
+
+	def test_small_payment_term_remainders_can_be_reconciled(self):
+		create_payment_terms_template()
+		for precision, remaining in ((2, 0.01), (2, 0.05), (2, 0.10), (3, 0.005)):
+			with (
+				self.subTest(precision=precision, remaining=remaining),
+				self.change_settings("System Settings", currency_precision=precision),
+			):
+				si = self.create_sales_invoice(rate=remaining, do_not_save=True, do_not_submit=True)
+				si.payment_terms_template = "Test Receivable Template"
+				si.save().submit()
+				pe = self.create_payment_entry(amount=remaining)
+				pe.save().submit()
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, pe.name
+				pr.get_unreconciled_entries()
+				self.assertEqual(sum(row.outstanding_amount for row in pr.invoices), remaining)
+				pr.allocate_entries(
+					frappe._dict(
+						invoices=[row.as_dict() for row in pr.invoices],
+						payments=[row.as_dict() for row in pr.payments],
+					)
+				)
+				pr.reconcile()
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assertEqual(sum(row.outstanding for row in si.payment_schedule), 0)
+
+	def test_converted_payment_terms_preserve_total_outstanding(self):
+		create_payment_terms_template()
+		create_payment_term("_Test Third Payment Term")
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion = 33.333
+		template.terms[1].invoice_portion = 33.333
+		template.append(
+			"terms", {"payment_term": "_Test Third Payment Term", "invoice_portion": 33.334, "credit_days": 3}
+		)
+		template.save()
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+		si = create_sales_invoice(qty=1, rate=0.03, currency="USD", conversion_rate=83.3333, do_not_save=True)
+		si.payment_terms_template = template.name
+		si.save().submit()
+		pe = self.create_payment_entry(amount=2.50)
+		pe.save().submit()
+		pr = self.create_payment_reconciliation()
+		pr.invoice_name, pr.payment_name = si.name, pe.name
+		pr.get_unreconciled_entries()
+		self.assertEqual(si.outstanding_amount, 2.50)
+		self.assertEqual([row.outstanding_amount for row in pr.invoices], [0.83, 0.84, 0.83])
+		pr.allocate_entries(
+			frappe._dict(
+				invoices=[row.as_dict() for row in pr.invoices],
+				payments=[row.as_dict() for row in pr.payments],
+			)
+		)
+		pr.reconcile()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assertEqual(sum(row.outstanding for row in si.payment_schedule), 0)
+
+	def test_purchase_invoice_payment_terms_with_partial_journal_payment(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion = 30
+		template.terms[1].invoice_portion = 70
+		template.save()
+		pi = make_purchase_invoice(qty=1, rate=118000, do_not_save=True)
+		pi.payment_terms_template = template.name
+		pi.save().submit()
+		pe = get_payment_entry(pi.doctype, pi.name, bank_account=self.cash)
+		pe.set("references", [pe.references[0]])
+		pe.references[0].allocated_amount = 25400
+		pe.paid_amount = pe.received_amount = 25400
+		pe.save().submit()
+		je = self.create_journal_entry(self.creditors, self.cash, 1000)
+		je.accounts[0].party_type = "Supplier"
+		je.accounts[0].party = pi.supplier
+		je.save().submit()
+
+		self.supplier = pi.supplier
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.invoice_name, pr.payment_name = pi.name, je.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				invoices=[row.as_dict() for row in pr.invoices],
+				payments=[row.as_dict() for row in pr.payments],
+			)
+		)
+		pr.reconcile()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 91600)
+		self.assertEqual([row.outstanding for row in pi.payment_schedule], [9000, 82600])
+
+		je.reload().cancel()
+		pi.reload()
+		self.assertEqual([row.outstanding for row in pi.payment_schedule], [10000, 82600])
+		amended_je = frappe.copy_doc(je)
+		amended_je.docstatus = 0
+		amended_je.amended_from = je.name
+		amended_je.save().submit()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 91600)
+		self.assertEqual([row.outstanding for row in pi.payment_schedule], [9000, 82600])
+
+		reverse_je = make_reverse_journal_entry(amended_je.name)
+		reverse_je.posting_date = nowdate()
+		reverse_je.save().submit()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 92600)
+		self.assertEqual([row.outstanding for row in pi.payment_schedule], [10000, 82600])
+		reverse_je.cancel()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 91600)
+		self.assertEqual([row.outstanding for row in pi.payment_schedule], [9000, 82600])
+
+		unreconcile = frappe.get_doc(
+			doctype="Unreconcile Payment",
+			company=self.company,
+			voucher_type=amended_je.doctype,
+			voucher_no=amended_je.name,
+		)
+		unreconcile.add_references()
+		unreconcile.save().submit()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 92600)
+		self.assertEqual([row.outstanding for row in pi.payment_schedule], [10000, 82600])
+
+	def test_payment_terms_do_not_include_another_invoice_type(self):
+		create_payment_terms_template()
+		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+		pi = make_purchase_invoice(qty=1, rate=200, do_not_save=True)
+		pi.payment_terms_template = "Test Receivable Template"
+		pi.insert(set_name=si.name).submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 2)
+		self.assertEqual(sum(row.outstanding_amount for row in pr.invoices), 100)
+		pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash)
+		pe.submit()
+		pi.reload()
+		self.assertEqual(sum(row.outstanding for row in pi.payment_schedule), 200)
+
+	def test_journal_payment_terms_with_base_currency_account(self):
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+		create_payment_terms_template()
+		si = create_sales_invoice(qty=1, rate=100, currency="USD", conversion_rate=80, do_not_save=True)
+		si.payment_terms_template = "Test Receivable Template"
+		si.save().submit()
+		je = self.create_journal_entry(self.bank, self.debit_to, 8000)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+		pr = self.create_payment_reconciliation()
+		pr.invoice_name, pr.payment_name = si.name, je.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				invoices=[row.as_dict() for row in pr.invoices],
+				payments=[row.as_dict() for row in pr.payments],
+			)
+		)
+		pr.reconcile()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assertEqual(sum(row.paid_amount for row in si.payment_schedule), 100)
+		self.assertEqual(sum(row.base_paid_amount for row in si.payment_schedule), 8000)
+		je.reload().cancel()
+		si.reload()
+		self.assertEqual(sum(row.outstanding for row in si.payment_schedule), 100)
+		self.assertEqual(sum(row.base_outstanding for row in si.payment_schedule), 8000)
+
+	def test_automatic_reconciliation_preserves_payment_terms(self):
+		from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
+			get_next_allocation,
+		)
+
+		create_payment_terms_template()
+		for voucher_type in ("Journal Entry", "Payment Entry"):
+			with self.subTest(voucher_type=voucher_type):
+				si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+				si.payment_terms_template = "Test Receivable Template"
+				si.save().submit()
+				if voucher_type == "Journal Entry":
+					payment = self.create_journal_entry(self.bank, self.debit_to, 100)
+					payment.accounts[1].party_type = "Customer"
+					payment.accounts[1].party = self.customer
+				else:
+					payment = self.create_payment_entry(amount=100)
+				payment.save().submit()
+
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, payment.name
+				pr.get_unreconciled_entries()
+				pr.allocate_entries(
+					frappe._dict(
+						invoices=[row.as_dict() for row in pr.invoices],
+						payments=[row.as_dict() for row in pr.payments],
+					)
+				)
+				process = frappe.get_doc(
+					doctype="Process Payment Reconciliation",
+					company=self.company,
+					party_type="Customer",
+					party=self.customer,
+					receivable_payable_account=self.debit_to,
+				).insert()
+				log = frappe.get_doc(doctype="Process Payment Reconciliation Log", process_pr=process.name)
+				for row in pr.allocation:
+					log.append("allocations", row.as_dict().update({"name": None}))
+				log.insert()
+
+				pr.set("allocation", [])
+				for row in get_next_allocation(log.name):
+					self.assertEqual(row.payment_term_exchange_rate, 1)
+					pr.append("allocation", row)
+				pr.reconcile_allocations(skip_ref_details_update_for_pe=True)
+
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assertEqual([row.outstanding for row in si.payment_schedule], [0, 0])
+
+	def test_reconciled_payment_terms_are_reversed(self):
+		create_payment_terms_template()
+		create_payment_terms_template_with_discount()
+		for template_name, action in product(
+			("Test Receivable Template", "Test Discount Template"), ("cancel", "unreconcile")
+		):
+			with self.subTest(template=template_name, action=action):
+				si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+				si.payment_terms_template = template_name
+				si.save().submit()
+				pe = self.create_payment_entry(amount=100)
+				pe.save().submit()
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, pe.name
+				pr.get_unreconciled_entries()
+				pr.allocate_entries(
+					frappe._dict(
+						invoices=[row.as_dict() for row in pr.invoices],
+						payments=[row.as_dict() for row in pr.payments],
+					)
+				)
+				pr.reconcile()
+				si.reload()
+				for row in si.payment_schedule:
+					self.assertEqual(row.outstanding, 0)
+					self.assertEqual(row.paid_amount, row.payment_amount)
+					self.assertEqual(row.discounted_amount, 0)
+				if action == "cancel":
+					pe.reload().cancel()
+				else:
+					unreconcile = frappe.get_doc(
+						doctype="Unreconcile Payment",
+						company=self.company,
+						voucher_type=pe.doctype,
+						voucher_no=pe.name,
+					)
+					unreconcile.add_references()
+					unreconcile.save().submit()
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 100)
+				for row in si.payment_schedule:
+					self.assertEqual(row.paid_amount, 0)
+					self.assertEqual(row.outstanding, row.payment_amount)
+					self.assertEqual(row.base_outstanding, row.base_payment_amount)
+
+	def test_reconciliation_keeps_an_existing_payment_term_discount(self):
+		create_payment_terms_template_with_discount()
+		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		si.payment_terms_template = "Test Discount Template"
+		si.save().submit()
+		pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash)
+		pe.references[0].allocated_amount = 40
+		pe.save().submit()
+		self.assertEqual(pe.unallocated_amount, 60)
+
+		pr = self.create_payment_reconciliation()
+		pr.invoice_name, pr.payment_name = si.name, pe.name
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				invoices=[row.as_dict() for row in pr.invoices],
+				payments=[row.as_dict() for row in pr.payments],
+			)
+		)
+		pr.reconcile()
+		si.reload()
+		self.assertEqual(si.payment_schedule[0].paid_amount, 90)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 10)
+		self.assertEqual(si.payment_schedule[0].outstanding, 0)
+
+		pe.reload().cancel()
+		si.reload()
+		self.assertEqual(si.payment_schedule[0].paid_amount, 0)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 0)
+		self.assertEqual(si.payment_schedule[0].outstanding, 100)
+
+		amended_pe = frappe.copy_doc(pe)
+		amended_pe.docstatus = 0
+		amended_pe.amended_from = pe.name
+		amended_pe.save().submit()
+		si.reload()
+		self.assertEqual(sorted(cint(row.is_payment_reconciliation) for row in amended_pe.references), [0, 1])
+		self.assertEqual(si.payment_schedule[0].paid_amount, 90)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 10)
+		self.assertEqual(si.payment_schedule[0].outstanding, 0)
+		amended_pe.cancel()
+		si.reload()
+		self.assertEqual(si.payment_schedule[0].paid_amount, 0)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 0)
+		self.assertEqual(si.payment_schedule[0].outstanding, 100)
+
+	def test_reconciled_payment_term_amendment_checks_combined_amount(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion, template.terms[1].invoice_portion = 30, 70
+		template.save()
+		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		si.payment_terms_template = template.name
+		si.save().submit()
+		pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash)
+		pe.set("references", [pe.references[0]])
+		pe.references[0].allocated_amount = 10
+		pe.paid_amount = pe.received_amount = 30
+		pe.save().submit()
+		pr = self.create_payment_reconciliation()
+		pr.invoice_name, pr.payment_name = si.name, pe.name
+		for _ in range(2):
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				frappe._dict(
+					invoices=[row.as_dict() for row in pr.invoices],
+					payments=[row.as_dict() for row in pr.payments],
+				)
+			)
+			pr.allocation[0].allocated_amount = 10
+			pr.reconcile()
+		pe.reload().cancel()
+		amended_pe = frappe.copy_doc(pe)
+		amended_pe.docstatus = 0
+		amended_pe.amended_from = pe.name
+		self.assertEqual(
+			sorted(cint(row.is_payment_reconciliation) for row in amended_pe.references), [0, 1, 1]
+		)
+		duplicate = amended_pe.append("references", amended_pe.references[0].as_dict())
+		with self.assertRaisesRegex(frappe.ValidationError, "Duplicate entry"):
+			amended_pe.validate_duplicate_entry()
+		amended_pe.remove(duplicate)
+		overpaid_pe = frappe.copy_doc(amended_pe)
+		overpaid_pe.amended_from = pe.name
+		overpaid_pe.references[0].allocated_amount = 20
+		overpaid_pe.paid_amount = overpaid_pe.received_amount = 40
+		frappe.db.savepoint("overpaid_combined_payment_term")
+		try:
+			with self.assertRaisesRegex(frappe.ValidationError, "Cannot allocate more"):
+				overpaid_pe.save().submit()
+		finally:
+			frappe.db.rollback(save_point="overpaid_combined_payment_term")
+		amended_pe.save().submit()
+		si.reload()
+		self.assertEqual([row.outstanding for row in si.payment_schedule], [0, 70])
+		amended_pe.cancel()
+		si.reload()
+		self.assertEqual([row.outstanding for row in si.payment_schedule], [30, 70])
+
+	def test_rounded_foreign_currency_payment_terms(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		for term in template.terms:
+			term.invoice_portion = 50
+		template.save()
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+		for voucher_type, action, partial, conversion_rate in product(
+			("Journal Entry", "Payment Entry"),
+			("cancel", "unreconcile"),
+			(False, True),
+			(0.8333, 25000.123456),
+		):
+			with self.subTest(
+				voucher_type=voucher_type, action=action, partial=partial, conversion_rate=conversion_rate
+			):
+				invoice_amount = 100 if conversion_rate == 0.8333 else 10000
+				payment_amount = 83.33 if conversion_rate == 0.8333 else 250001234.56
+				term_amounts = [invoice_amount / 2, invoice_amount / 2]
+				si = create_sales_invoice(
+					qty=1,
+					rate=invoice_amount,
+					currency="USD",
+					conversion_rate=conversion_rate,
+					do_not_save=True,
+				)
+				si.payment_terms_template = template.name
+				si.save().submit()
+				if voucher_type == "Journal Entry":
+					payment = self.create_journal_entry(self.bank, self.debit_to, payment_amount)
+					payment.accounts[1].party_type = "Customer"
+					payment.accounts[1].party = self.customer
+				else:
+					payment = self.create_payment_entry(amount=payment_amount)
+				payment.save().submit()
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, payment.name
+				pr.get_unreconciled_entries()
+				self.assertEqual(
+					[row.outstanding_amount for row in pr.invoices],
+					[41.66, 41.67] if conversion_rate == 0.8333 else [125000617.28, 125000617.28],
+				)
+				pr.allocate_entries(
+					frappe._dict(
+						invoices=[row.as_dict() for row in pr.invoices],
+						payments=[row.as_dict() for row in pr.payments],
+					)
+				)
+				if partial:
+					pr.set("allocation", [pr.allocation[0]])
+					pr.allocation[0].allocated_amount = 20 if conversion_rate == 0.8333 else 50000000
+					pr.reconcile()
+					pr.get_unreconciled_entries()
+					pr.allocate_entries(
+						frappe._dict(
+							invoices=[row.as_dict() for row in pr.invoices],
+							payments=[row.as_dict() for row in pr.payments],
+						)
+					)
+				pr.reconcile()
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assertEqual([row.paid_amount for row in si.payment_schedule], term_amounts)
+				self.assertEqual([row.outstanding for row in si.payment_schedule], [0, 0])
+				if action == "cancel":
+					payment.reload().cancel()
+					amended_payment = frappe.copy_doc(payment)
+					amended_payment.docstatus = 0
+					amended_payment.amended_from = payment.name
+					amended_payment.save().submit()
+					si.reload()
+					self.assertEqual([row.paid_amount for row in si.payment_schedule], term_amounts)
+					self.assertEqual([row.outstanding for row in si.payment_schedule], [0, 0])
+					amended_payment.cancel()
+				else:
+					unreconcile = frappe.get_doc(
+						doctype="Unreconcile Payment",
+						company=self.company,
+						voucher_type=payment.doctype,
+						voucher_no=payment.name,
+					)
+					unreconcile.add_references()
+					unreconcile.save().submit()
+				si.reload()
+				self.assertEqual([row.paid_amount for row in si.payment_schedule], [0, 0])
+				self.assertEqual([row.outstanding for row in si.payment_schedule], term_amounts)
+				if action == "cancel" and conversion_rate == 0.8333:
+					replacement_si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+					replacement_si.payment_terms_template = template.name
+					replacement_si.save().submit()
+					for amend in (True, False):
+						reassigned_payment = frappe.copy_doc(amended_payment)
+						reassigned_payment.docstatus = 0
+						reassigned_payment.amended_from = amended_payment.name if amend else None
+						for row in reassigned_payment.get(
+							"accounts" if voucher_type == "Journal Entry" else "references"
+						):
+							if row.payment_term:
+								row.reference_name = replacement_si.name
+						reassigned_payment.save().submit()
+						replacement_si.reload()
+						self.assertAlmostEqual(
+							sum(row.paid_amount for row in replacement_si.payment_schedule), 83.33
+						)
+						self.assertAlmostEqual(
+							sum(row.outstanding for row in replacement_si.payment_schedule), 16.67
+						)
+						reassigned_payment.cancel()
+						replacement_si.reload()
+						self.assertEqual(
+							[row.outstanding for row in replacement_si.payment_schedule], [50, 50]
+						)
+
+	def test_negative_debit_or_credit_journal_against_invoice(self):
+		for action in ("cancel", "unreconcile"):
+			with self.subTest(action=action):
+				transaction_date = nowdate()
+				amount = 100
+				create_payment_terms_template()
+				si = self.create_sales_invoice(
+					qty=1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+				)
+				si.payment_terms_template = "Test Receivable Template"
+				si.save().submit()
+
+				# credit debtors account to record a payment
+				je = self.create_journal_entry(self.bank, self.debit_to, amount, transaction_date)
+				je.accounts[1].party_type = "Customer"
+				je.accounts[1].party = self.customer
+				je.accounts[1].credit_in_account_currency = 0
+				je.accounts[1].debit_in_account_currency = -1 * amount
+				je.save()
+				je.submit()
+
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, je.name
+
+				pr.get_unreconciled_entries()
+				invoices = [x.as_dict() for x in pr.get("invoices")]
+				payments = [x.as_dict() for x in pr.get("payments")]
+				pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+				# Difference amount should not be calculated for base currency accounts
+				for row in pr.allocation:
+					self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
+				pr.reconcile()
+
+				# assert outstanding
+				si.reload()
+				self.assertEqual(si.status, "Paid")
+				self.assertEqual(si.outstanding_amount, 0)
+				self.assertEqual([row.outstanding for row in si.payment_schedule], [0, 0])
+
+				# check PR tool output
+				self.assertEqual(len(pr.get("invoices")), 0)
+				self.assertEqual(len(pr.get("payments")), 0)
+
+				if action == "cancel":
+					je.reload().cancel()
+				else:
+					unreconcile = frappe.get_doc(
+						doctype="Unreconcile Payment",
+						company=self.company,
+						voucher_type=je.doctype,
+						voucher_no=je.name,
+					)
+					unreconcile.add_references()
+					unreconcile.save().submit()
+				si.reload()
+				self.assertEqual(sum(row.paid_amount for row in si.payment_schedule), 0)
+				self.assertEqual(sum(row.outstanding for row in si.payment_schedule), 100)
+				self.assertEqual(sum(row.base_outstanding for row in si.payment_schedule), 100)
 
 	def test_journal_against_journal(self):
 		transaction_date = nowdate()

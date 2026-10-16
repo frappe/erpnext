@@ -573,6 +573,9 @@ def reconcile_against_document(
 
 		doc.save(ignore_permissions=True)
 
+		if voucher_type == "Payment Entry":
+			doc.update_payment_schedule(references=reposting_rows)
+
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			for row in reposting_rows:
 				doc.make_advance_gl_entries(entry=row)
@@ -733,6 +736,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	new_row.set("reference_type", d["against_voucher_type"])
 	new_row.set("reference_name", d["against_voucher"])
+	new_row.set("payment_term", d.get("payment_term"))
+	new_row.set("payment_term_exchange_rate", d.get("payment_term_exchange_rate"))
 
 	new_row.against_account = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
@@ -761,6 +766,9 @@ def update_reference_in_payment_entry(
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
+		"payment_term": d.get("payment_term"),
+		"is_payment_reconciliation": 1,
+		"payment_term_exchange_rate": d.get("payment_term_exchange_rate"),
 		"exchange_rate": d.exchange_rate
 		if d.difference_amount is not None
 		else payment_entry.get_exchange_rate(),
@@ -1054,7 +1062,42 @@ def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: st
 def remove_ref_doc_link_from_jv(
 	ref_type: str | None = None, ref_no: str | None = None, payment_name: str | None = None
 ):
+	from erpnext.accounts.services.payment_schedule import update_invoice_payment_schedule
+
 	jea = qb.DocType("Journal Entry Account")
+
+	payment_schedule_allocations = (
+		qb.from_(jea)
+		.select(
+			jea.reference_type,
+			jea.reference_name,
+			jea.payment_term,
+			jea.payment_term_exchange_rate,
+			jea.debit_in_account_currency,
+			jea.credit_in_account_currency,
+			jea.account_currency,
+			jea.exchange_rate,
+		)
+		.where((jea.reference_type == ref_type) & (jea.reference_name == ref_no) & (jea.docstatus.lt(2)))
+	)
+	if payment_name:
+		payment_schedule_allocations = payment_schedule_allocations.where(jea.parent == payment_name)
+	for allocation in payment_schedule_allocations.run(as_dict=True):
+		allocated_amount = flt(allocation.credit_in_account_currency) - flt(
+			allocation.debit_in_account_currency
+		)
+		if allocation.reference_type == "Purchase Invoice":
+			allocated_amount = -allocated_amount
+		update_invoice_payment_schedule(
+			allocation.reference_type,
+			allocation.reference_name,
+			allocation.payment_term,
+			allocated_amount,
+			allocation.account_currency,
+			allocation.exchange_rate,
+			cancel=True,
+			payment_term_exchange_rate=allocation.payment_term_exchange_rate,
+		)
 
 	linked_jv = (
 		qb.from_(jea)
@@ -1127,6 +1170,11 @@ def remove_ref_doc_link_from_pe(
 		row_names.add(row.name)
 		if row.advance_voucher_type and row.advance_voucher_no:
 			advance_vouchers.add((row.advance_voucher_type, row.advance_voucher_no))
+
+	for pe in linked_pe:
+		frappe.get_doc("Payment Entry", pe).update_payment_schedule(
+			cancel=1, references=[row for row in reference_rows if row.parent == pe]
+		)
 
 	from erpnext.accounts.doctype.payment_request.payment_request import (
 		update_payment_requests_as_per_pe_references,

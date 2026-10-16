@@ -10,6 +10,8 @@
   "due_date",
   "bill_no",
   "payment_term",
+  "payment_term_exchange_rate",
+  "is_payment_reconciliation",
   "payment_term_outstanding",
   "account_type",
   "payment_type",
@@ -100,10 +102,27 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "is_payment_reconciliation",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Payment Reconciliation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "payment_term",
    "fieldtype": "Link",
    "label": "Payment Term",
    "options": "Payment Term"
+  },
+  {
+   "fieldname": "payment_term_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Payment Term Exchange Rate",
+   "precision": "9",
+   "read_only": 1
   },
   {
    "depends_on": "exchange_gain_loss",

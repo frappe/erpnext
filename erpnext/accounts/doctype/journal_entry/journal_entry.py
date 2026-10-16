@@ -234,6 +234,9 @@ class JournalEntry(AccountsController):
 
 	def before_submit(self):
 		"""Ensure total debit equals total credit before submission (skipped on data import)."""
+		from erpnext.accounts.services.payment_schedule import clear_changed_payment_term_exchange_rates
+
+		clear_changed_payment_term_exchange_rates(self)
 		# Do not validate while importing via data import
 		if not frappe.flags.in_import:
 			self.validate_total_debit_and_credit()
@@ -249,6 +252,7 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		JournalTaxWithholding(self).on_submit()
+		self.update_payment_schedule()
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self) -> None:
@@ -340,6 +344,7 @@ class JournalEntry(AccountsController):
 
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
 		super().on_cancel()
+		self.update_payment_schedule(cancel=True)
 
 		from_doc_events = getattr(self, "ignore_linked_doctypes", ())
 		self.ignore_linked_doctypes = (
@@ -366,6 +371,26 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		AssetService(self).unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+
+	def update_payment_schedule(self, cancel=False):
+		from erpnext.accounts.services.payment_schedule import update_invoice_payment_schedule
+
+		for account in self.accounts:
+			allocated_amount = flt(account.credit_in_account_currency) - flt(
+				account.debit_in_account_currency
+			)
+			if account.reference_type == "Purchase Invoice":
+				allocated_amount = -allocated_amount
+			update_invoice_payment_schedule(
+				account.reference_type,
+				account.reference_name,
+				account.payment_term,
+				allocated_amount,
+				account.account_currency,
+				account.exchange_rate,
+				cancel=cancel,
+				payment_term_exchange_rate=account.payment_term_exchange_rate,
+			)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
