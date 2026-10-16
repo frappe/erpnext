@@ -2283,6 +2283,29 @@ class TestSalesOrder(ERPNextTestSuite):
 		si.insert()
 		self.assertTrue(si.get("payment_schedule"))
 
+	def test_work_order_items_need_sales_order_read(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+		from erpnext.tests.permission_test_utils import (
+			OTHER_COMPANY,
+			as_user,
+			make_company_fenced_user,
+			make_fenced_user,
+		)
+
+		so = make_sales_order(item_code="_Test FG Item", qty=10)
+		expected = get_work_order_items(so.name)
+		self.assertTrue(expected)
+
+		with as_user(make_company_fenced_user("so-wo-items@example.com", ["Sales User"], so.company)):
+			self.assertEqual(get_work_order_items(so.name), expected)
+
+		for outsider in (
+			make_fenced_user("so-wo-items-website@example.com", []),
+			make_company_fenced_user("so-wo-items-fenced@example.com", ["Sales User"], OTHER_COMPANY),
+		):
+			with as_user(outsider):
+				self.assertRaises(frappe.PermissionError, get_work_order_items, so.name)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_work_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
