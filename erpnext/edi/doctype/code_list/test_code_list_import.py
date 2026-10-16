@@ -113,6 +113,18 @@ class TestCodeListImport(ERPNextTestSuite):
 			file_doc = frappe.get_doc("File", import_result["file"])
 			self.assertEqual(file_doc.get_content(encodings=()), SAMPLE_GENERICODE)
 
+	def test_uploaded_file_is_saved_under_a_plain_name(self):
+		cases = (("../../sub/list.xml", "_.._sub_list.xml"), ("..", "genericode.xml"))
+		for index, (file_name, expected) in enumerate(cases):
+			frappe.db.delete("Code List", "test-code-list-v1")
+			content = SAMPLE_GENERICODE + f"<!-- {index} {frappe.generate_hash()} -->".encode()
+			with self.upload_context(content=content, file_name=file_name):
+				import_result = code_list_import.import_genericode()
+
+			file_doc = frappe.get_doc("File", import_result["file"])
+			self.assertEqual(file_doc.file_name, expected)
+			self.assertEqual(file_doc.file_url, f"/private/files/{expected}")
+
 	def test_process_genericode_import_reads_file_doc_content(self):
 		with self.upload_context(content=SAMPLE_GENERICODE, file_name="uploaded_genericode.xml"):
 			import_result = code_list_import.import_genericode()
