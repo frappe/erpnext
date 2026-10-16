@@ -98,7 +98,7 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
 
 
-def create_delivery_wo_so(pick_list, target, target_doc=None):
+def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations=None):
 	if not target_doc:
 		target_doc = frappe.new_doc(target)
 
@@ -115,7 +115,9 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 			"parent": "",
 		},
 	}
-	map_pl_locations(pick_list, item_table_mapper_without_so, target_doc)
+	map_pl_locations(
+		pick_list, item_table_mapper_without_so, target_doc, selected_locations=selected_locations
+	)
 	target_doc.flags.ignore_mandatory = True
 	if target == "Sales Invoice":
 		target_doc.update_stock = 1
@@ -159,7 +161,9 @@ def create_dn_for_pick_lists(
 		if isinstance(delivery_note, str):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
-		delivery_note = create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
+		delivery_note = create_delivery_wo_so(
+			pick_list, "Delivery Note", delivery_note, set(kwargs.get("filtered_children") or [])
+		)
 
 	return delivery_note
 
@@ -267,7 +271,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 
 			update_child_item(source_doc, child_item, target_doc)
 
-	add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order)
+	if sales_order:
+		add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order, selected_locations)
+
 	set_target_missing_values(target_doc)
 
 	target_doc.company = pick_list.company
@@ -279,12 +285,22 @@ def add_product_bundles_to_delivery_note(pick_list, delivery_note, item_mapper, 
 	return add_product_bundles_to_target(pick_list, delivery_note, item_mapper, sales_order)
 
 
-def add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order=None) -> None:
+def add_product_bundles_to_target(
+	pick_list, target_doc, item_mapper, sales_order=None, selected_locations=None
+) -> None:
 	"""Add product bundles found in pick list to target document.
 
 	When mapping pick list items, the bundle item itself isn't part of the
 	locations. Dynamically fetch and add parent bundle item into target document."""
 	product_bundles = pick_list._get_product_bundles()
+	if selected_locations:
+		selected_bundles = {
+			row.sales_order_item
+			for row in pick_list.locations
+			if row.product_bundle_item and row.name in selected_locations
+		}
+		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+
 	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
 
 	for so_row, value in product_bundles.items():
