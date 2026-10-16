@@ -508,7 +508,7 @@ class JobCard(Document):
 		if not len(time_logs):
 			return False
 
-		alloted_capacity = self.get_alloted_capacity(time_logs)
+		alloted_capacity = self.get_alloted_capacity(merge_time_logs_per_job_card(time_logs))
 		# if number of keys is greater or equal to production capacity, full capacity is utilized -> overlap
 		return len(alloted_capacity) >= production_capacity
 
@@ -2061,6 +2061,17 @@ class JobCard(Document):
 		for row in ste.stock_entry.items:
 			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
+
+
+def merge_time_logs_per_job_card(time_logs):
+	merged = []
+	for name in dict.fromkeys(log.name for log in time_logs):
+		for log in sorted((log for log in time_logs if log.name == name), key=lambda log: log.from_time):
+			if merged and merged[-1].name == name and log.from_time < merged[-1].to_time:
+				merged[-1].to_time = max(merged[-1].to_time, log.to_time)
+			else:
+				merged.append(frappe._dict(log))
+	return merged
 
 
 def get_workstation_minutes(time_logs):
