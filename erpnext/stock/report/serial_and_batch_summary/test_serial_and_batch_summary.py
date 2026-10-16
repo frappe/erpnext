@@ -139,3 +139,24 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		columns = execute(frappe._dict(item_code=item, voucher_no=[se.name], voucher_type="Stock Entry"))[0]
 
 		self.assertIn("qty", [column.get("fieldname") for column in columns])
+
+	def test_batch_filter_lists_nothing_without_access_to_batches(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_batch_nos
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		frappe.get_doc(doctype="Batch", item=item, batch_id="Summary-Hidden-Batch").insert()
+		user = "summary-purchase-user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				doctype="User",
+				email=user,
+				first_name="Summary",
+				send_welcome_email=0,
+				roles=[{"role": "Purchase User"}],
+			).insert()
+
+		with self.set_user(user):
+			rows = get_batch_nos("Batch", "Summary-Hidden", "name", 0, 5, {"item_code": item})
+
+		self.assertEqual(rows, [])

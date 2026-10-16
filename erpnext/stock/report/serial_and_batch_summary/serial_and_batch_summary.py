@@ -238,6 +238,9 @@ def get_serial_batch_options(doctype, txt, start, page_len, filters):
 	if filters.get("item_code"):
 		frappe.has_permission("Item", "read", filters["item_code"], throw=True)
 
+	if not frappe.has_permission(doctype, "select"):
+		return []
+
 	identity = SerialBatchIdentity(doctype)
 	query = frappe.qb.get_query(
 		doctype,
