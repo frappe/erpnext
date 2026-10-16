@@ -47,6 +47,7 @@ class MaterialRequirementsPlanningReport:
 		self.item_rm_details = self.get_raw_materials_data(items)
 
 		self._bin_details = self.get_item_wise_bin_details()
+		self._safety_stock_reserved = set()
 		self.add_non_planned_orders(items)
 
 		self._wo_details = self.get_work_order_data()
@@ -598,14 +599,26 @@ class MaterialRequirementsPlanningReport:
 		row.in_hand_qty = 0.0
 
 		self.add_non_planned_so(row)
+		self.reserve_safety_stock(row)
 		self.add_bin_details(row)
 		self.add_po_details(row)
 		self.add_wo_details(row)
-		self.add_safety_stock(row)
 
-	def add_safety_stock(self, row):
-		if self.filters.add_safety_stock:
-			row.required_qty += flt(row.safety_stock)
+	def reserve_safety_stock(self, row):
+		if not self.filters.add_safety_stock or not flt(row.safety_stock):
+			return
+
+		if row.item_code in self._safety_stock_reserved:
+			return
+
+		self._safety_stock_reserved.add(row.item_code)
+		bin_details = self._bin_details.setdefault(
+			row.item_code, frappe._dict({"actual_qty": 0.0, "reserved_stock": 0.0})
+		)
+		available = max(flt(bin_details.actual_qty) - flt(bin_details.reserved_stock), 0.0)
+		reserved = min(flt(row.safety_stock), available)
+		bin_details.actual_qty = flt(bin_details.actual_qty) - reserved
+		row.required_qty += flt(row.safety_stock) - reserved
 
 	def get_work_order_data(self):
 		wo_details = frappe._dict({})

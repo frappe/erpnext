@@ -521,6 +521,40 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			[(2, "Box", 12, 24)],
 		)
 
+	def test_safety_stock_is_ordered_once_and_only_when_stock_is_short(self):
+		def make_plan_with_safety_stock():
+			plan = make_mrp_plan(self)
+			frappe.db.set_value("Item", plan.fg_item, "safety_stock", 4)
+			frappe.db.set_value("Item", plan.rm_item, "safety_stock", 5)
+			mps = frappe.get_doc("Master Production Schedule", plan.mps)
+			for days in (40, 50):
+				mps.append(
+					"items",
+					{
+						"item_code": plan.fg_item,
+						"warehouse": WAREHOUSE,
+						"delivery_date": add_days(today(), days),
+						"planned_qty": 10,
+						"uom": mps.items[0].uom,
+					},
+				)
+			mps.save()
+			return plan, mps
+
+		def required(rows, item_code):
+			return [row.required_qty for row in rows if row.item_code == item_code]
+
+		plan, mps = make_plan_with_safety_stock()
+		rows = get_mrp_row_list(mps, add_safety_stock=1)
+		self.assertEqual(required(rows, plan.fg_item), [14, 10, 10])
+		self.assertEqual(sum(required(rows, plan.rm_item)), 73)
+
+		make_stock_entry(item_code=plan.fg_item, target=WAREHOUSE, qty=50, rate=100)
+		make_stock_entry(item_code=plan.rm_item, target=WAREHOUSE, qty=100, rate=100)
+		rows = get_mrp_row_list(mps, add_safety_stock=1)
+		self.assertEqual(required(rows, plan.fg_item), [0, 0, 0])
+		self.assertEqual(sum(required(rows, plan.rm_item)), 0)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
