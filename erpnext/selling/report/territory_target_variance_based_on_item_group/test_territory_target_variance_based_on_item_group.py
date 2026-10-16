@@ -12,6 +12,7 @@ from erpnext.selling.report.sales_person_target_variance_based_on_item_group.tes
 from erpnext.selling.report.territory_target_variance_based_on_item_group.territory_target_variance_based_on_item_group import (
 	execute,
 )
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -49,6 +50,61 @@ class TestTerritoryTargetVarianceBasedOnItemGroup(ERPNextTestSuite):
 		self.assertEqual(flt(row.total_target, 2), 50)
 		self.assertEqual(flt(row.total_achieved, 2), 20)
 		self.assertEqual(flt(row.total_variance, 2), -30)
+
+	def test_overall_target_counts_all_item_groups(self):
+		distribution = create_target_distribution(self.fiscal_year)
+		item_a = make_item(properties={"item_group": "_Test Item Group A"}).name
+		item_d = make_item(properties={"item_group": "_Test Item Group D"}).name
+
+		territory = frappe.new_doc("Territory")
+		territory.territory_name = "_Test Target Territory Mixed"
+		territory.parent_territory = "All Territories"
+		territory.is_group = 0
+		# overall target leaves item_group unset; the second row targets one group
+		territory.append(
+			"targets",
+			{
+				"fiscal_year": self.fiscal_year,
+				"target_amount": 20000,
+				"distribution_id": distribution.name,
+			},
+		)
+		territory.append(
+			"targets",
+			{
+				"fiscal_year": self.fiscal_year,
+				"item_group": "_Test Item Group A",
+				"target_amount": 4000,
+				"distribution_id": distribution.name,
+			},
+		)
+		territory.insert()
+
+		for item_code, qty in ((item_a, 5), (item_d, 3)):
+			so = make_sales_order(item_code=item_code, rate=1000, qty=qty, do_not_submit=True)
+			so.territory = territory.name
+			so.submit()
+
+		rows = [
+			frappe._dict(r)
+			for r in execute(
+				frappe._dict(
+					{
+						"fiscal_year": self.fiscal_year,
+						"doctype": "Sales Order",
+						"period": "Yearly",
+						"target_on": "Amount",
+					}
+				)
+			)[1]
+			if r.get("territory") == territory.name
+		]
+
+		# the item-group row counts only its own sales, the overall row counts every group
+		group_a = next(r for r in rows if r.item_group == "_Test Item Group A")
+		overall = next(r for r in rows if not r.item_group)
+		self.assertEqual(flt(group_a.total_achieved, 2), 5000)
+		self.assertEqual(flt(overall.total_achieved, 2), 8000)
 
 
 def create_territory_with_target(name, fiscal_year, distribution_id, target_qty=50):

@@ -193,7 +193,8 @@ def prepare_data(
 					and period.from_date <= r.get(date_field)
 					and r.get(date_field) <= period.to_date
 					and (
-						not sales_user_wise_item_groups.get(d.parent)
+						not d.item_group
+						or not sales_user_wise_item_groups.get(d.parent)
 						or r.item_group == d.item_group
 						or r.item_group in item_group_parent_child_map.get(d.item_group, [])
 					)
