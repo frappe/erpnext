@@ -80,9 +80,4 @@ queue_rules:
       - check-success=Python Unit Tests (4)
 
 merge_queue:
-  queue_controls_comment: false
   skip_intermediate_results: true
-
-merge_protections_settings:
-  auto_merge_conditions:
-    - base=develop
