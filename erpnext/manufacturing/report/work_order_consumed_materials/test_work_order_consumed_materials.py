@@ -7,6 +7,7 @@ from frappe.utils import add_days, nowdate
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry, make_stock_return_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
 from erpnext.manufacturing.report.work_order_consumed_materials.work_order_consumed_materials import execute
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
@@ -156,3 +157,18 @@ class TestWorkOrderConsumedMaterials(ERPNextTestSuite):
 			[(row.raw_material_item_code, row.consumed_qty, row.extra_consumed_qty) for row in rows],
 			[(material, 8, 0)],
 		)
+
+	def test_closed_work_orders_are_listed(self):
+		wo = make_wo_order_test_record(production_item="_Test FG Item", qty=10, company="_Test Company")
+		for item in wo.required_items:
+			test_stock_entry.make_stock_entry(
+				item_code=item.item_code, target=item.source_warehouse, qty=item.required_qty, basic_rate=100
+			)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5)).submit()
+		close_work_order(wo.name, "Closed")
+
+		rows = self.get_wo_rows(self.run_report(), wo.name)
+
+		self.assertEqual(len(rows), len(wo.required_items))
+		self.assertEqual(rows[0].status, "Closed")

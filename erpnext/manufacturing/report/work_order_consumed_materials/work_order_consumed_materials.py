@@ -68,7 +68,7 @@ def get_fields():
 def get_filter_condition(report_filters):
 	filters = {
 		"docstatus": 1,
-		"status": ("in", ["In Process", "Completed", "Stopped"]),
+		"status": ("in", ["In Process", "Completed", "Stopped", "Closed"]),
 		"creation": ("between", [report_filters.from_date, report_filters.to_date]),
 	}
 
