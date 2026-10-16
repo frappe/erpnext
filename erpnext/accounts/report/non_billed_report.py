@@ -6,7 +6,7 @@ import frappe
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import IfNull, Round, Sum
 from frappe.utils import flt
-from pypika.queries import QueryBuilder
+from pypika.queries import QueryBuilder, Table
 
 from erpnext import get_default_currency
 from erpnext.accounts.report.order_billing_as_on import OrderBillingAsOn
@@ -21,6 +21,7 @@ BILLING_LINKS = {
 		billing_flag="update_billed_amount_in_delivery_note",
 		return_link="dn_detail",
 		returned_qty="stock_qty",
+		billed_by_qty=True,
 	),
 	"Purchase Receipt": frappe._dict(
 		invoice="Purchase Invoice",
@@ -107,6 +108,8 @@ def get_ordered_to_be_billed_data(args, filters=None):
 
 	if docname:
 		query = query.where(doctype.name == docname)
+	if links.billed_by_qty:
+		query = exclude_billed_in_full_by_qty(query, child_doctype, returned, links, as_on_date)
 
 	return deduct_order_billed_later(query.run(as_dict=True), order_billed_later, precision)
 
@@ -125,21 +128,36 @@ def deduct_order_billed_later(data: list, order_billed_later: dict[str, float], 
 	return pending_rows
 
 
+def exclude_billed_in_full_by_qty(
+	query: QueryBuilder, child_doctype: Table, returned: QueryBuilder, links: frappe._dict, as_on_date: str
+) -> QueryBuilder:
+	"""Drop rows whose qty, net of returns, was fully invoiced on the date, even at a lower rate."""
+	invoice = frappe.qb.DocType(links.invoice)
+	billed_qty = get_billed_against_rows(links, "qty").where(invoice.posting_date <= as_on_date)
+	billed_qty = billed_qty.as_("billed_qty")
+	net_qty = child_doctype.qty - IfNull(returned.qty, 0) / child_doctype.conversion_factor
+	return (
+		query.left_join(billed_qty)
+		.on(billed_qty.detail == child_doctype.name)
+		.where(IfNull(billed_qty.qty, 0) < net_qty)
+	)
+
+
 def get_billed_after(links, as_on_date):
 	"""Amount billed per row by invoices posted after the date, to take out of the stored billed_amt."""
 	invoice = frappe.qb.DocType(links.invoice)
 	return get_billed_against_rows(links).where(invoice.posting_date > as_on_date).as_("later_billed")
 
 
-def get_billed_against_rows(links: frappe._dict) -> QueryBuilder:
-	"""Amount billed per row by invoices made against it, skipping notes that don't update billing."""
+def get_billed_against_rows(links: frappe._dict, field: str = "amount") -> QueryBuilder:
+	"""`field` billed per row by invoices made against it, skipping notes that don't update billing."""
 	invoice = frappe.qb.DocType(links.invoice)
 	invoice_item = frappe.qb.DocType(links.invoice + " Item")
 	return (
 		frappe.qb.from_(invoice_item)
 		.inner_join(invoice)
 		.on(invoice.name == invoice_item.parent)
-		.select(invoice_item[links.invoice_link].as_("detail"), Sum(invoice_item.amount).as_("amount"))
+		.select(invoice_item[links.invoice_link].as_("detail"), Sum(invoice_item[field]).as_(field))
 		.where(invoice.docstatus == 1)
 		.where((invoice.is_return == 0) | (invoice[links.billing_flag] == 1))
 		.where(invoice_item[links.invoice_link].isnotnull())
