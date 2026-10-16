@@ -311,6 +311,13 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		self.assertEqual(items[material]["available_qty"], fmt_qty(10))
 		self.assertEqual(footer["description"], 10)
 
+	def test_default_view_without_warehouse(self):
+		bom, material, permitted = self.build_bom_with_stock_in_many_warehouses()
+
+		items, footer = run_report(bom, None, exploded=False, qty_to_make=0)
+		self.assertEqual(items[material]["available_qty"], fmt_qty(100))
+		self.assertEqual(footer["description"], 100)
+
 
 def run_report(bom, warehouse, exploded, qty_to_make):
 	"""Component rows keyed by item code, plus the footer row."""

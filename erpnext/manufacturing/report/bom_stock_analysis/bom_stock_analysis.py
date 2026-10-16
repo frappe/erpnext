@@ -343,9 +343,6 @@ def get_manufacturer_records():
 
 
 def get_producible_fg_items(filters):
-	if not filters.get("warehouse"):
-		frappe.throw(_("Warehouse is required to get producible FG Items"))
-
 	rows = get_bom_data(filters)
 	for row in rows:
 		row.qty_per_unit = flt(row.qty_per_unit)
