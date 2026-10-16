@@ -531,11 +531,11 @@ class MaterialRequirementsPlanningReport:
 				if row.item_code == item_code and getdate(delivery_date) <= getdate(row.delivery_date):
 					po_ordered_qty = po_data.qty
 					if row.required_qty > po_ordered_qty:
-						row.po_ordered_qty = po_ordered_qty
+						row.po_ordered_qty = flt(row.po_ordered_qty) + po_ordered_qty
 						row.required_qty -= po_ordered_qty
 						dict_update[(item_code, delivery_date)] = 0.0
 					else:
-						row.po_ordered_qty = row.required_qty
+						row.po_ordered_qty = flt(row.po_ordered_qty) + row.required_qty
 						dict_update[(item_code, delivery_date)] = flt(po_data.qty) - flt(row.required_qty)
 						row.required_qty = 0.0
 
@@ -555,11 +555,11 @@ class MaterialRequirementsPlanningReport:
 				if row.item_code == item_code and getdate(delivery_date) <= getdate(row.delivery_date):
 					wo_ordered_qty = wo_data.qty
 					if row.required_qty > wo_ordered_qty:
-						row.wo_ordered_qty = wo_ordered_qty
+						row.wo_ordered_qty = flt(row.wo_ordered_qty) + wo_ordered_qty
 						row.required_qty -= wo_ordered_qty
 						dict_update[(item_code, delivery_date)] = 0.0
 					else:
-						row.wo_ordered_qty = row.required_qty
+						row.wo_ordered_qty = flt(row.wo_ordered_qty) + row.required_qty
 						dict_update[(item_code, delivery_date)] = flt(wo_data.qty) - flt(row.required_qty)
 						row.required_qty = 0.0
 

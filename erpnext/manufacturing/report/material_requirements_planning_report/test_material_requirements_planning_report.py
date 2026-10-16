@@ -6,6 +6,7 @@ from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
@@ -580,6 +581,18 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		work_order = frappe.get_doc("Work Order", {"mps": plan.mps, "production_item": plan.fg_item})
 		self.assertEqual(work_order.stock_uom, sub_assembly.stock_uom)
+
+	def test_planned_purchase_order_shows_every_order_used(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		for days, qty in ((1, 5), (2, 3)):
+			purchase_order = create_purchase_order(item_code=plan.rm_item, qty=qty, do_not_save=True)
+			purchase_order.schedule_date = purchase_order.items[0].schedule_date = add_days(today(), days)
+			purchase_order.insert()
+			purchase_order.submit()
+
+		rm_row = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))[plan.rm_item]
+
+		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
 
 
 def make_chart_row(delivery_date, planned_qty=1):
