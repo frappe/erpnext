@@ -1042,8 +1042,10 @@ class WorkOrder(Document):
 
 		if self.operations:
 			bom.with_operations = 1
+			source_operations = self.get_source_bom_operations()
 			for operation in self.operations:
-				bom.append("operations", self.get_bom_operation_row(operation, bom.quantity))
+				source = source_operations.get(operation.operation)
+				bom.append("operations", self.get_bom_operation_row(operation, bom.quantity, source))
 
 		bom.set_bom_material_details()
 		return bom
@@ -1067,15 +1069,51 @@ class WorkOrder(Document):
 			.run(as_dict=1)
 		)
 
-	def get_bom_operation_row(self, operation, bom_qty):
+	def get_source_bom_operations(self):
+		operations = frappe.get_all(
+			"BOM Operation",
+			filters={"parent": self.bom_no, "parenttype": "BOM"},
+			fields=["operation", "time_in_mins", "fixed_time", "batch_size"],
+			order_by="idx",
+		)
+		batch_based = set(
+			frappe.get_all(
+				"Operation",
+				filters={
+					"name": ("in", list({d.operation for d in operations}) or [""]),
+					"create_job_card_based_on_batch_size": 1,
+				},
+				pluck="name",
+			)
+		)
+
+		source_operations = {}
+		for d in operations:
+			if d.fixed_time or (d.operation in batch_based and flt(d.batch_size)):
+				source_operations.setdefault(d.operation, d)
+		return source_operations
+
+	def get_bom_operation_row(self, operation, bom_qty, source=None):
+		row = {}
+		for fieldname in _BOM_OPERATION_FIELDS_FROM_WORK_ORDER:
+			row[fieldname] = operation.get(fieldname)
+
+		if source:
+			row.update(
+				{
+					"time_in_mins": source.time_in_mins,
+					"fixed_time": source.fixed_time,
+					"batch_size": source.batch_size,
+				}
+			)
+			return row
+
 		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
 			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
 		else:
 			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 
-		row = {"time_in_mins": time_per_unit * flt(bom_qty)}
-		for fieldname in _BOM_OPERATION_FIELDS_FROM_WORK_ORDER:
-			row[fieldname] = operation.get(fieldname)
+		row["time_in_mins"] = time_per_unit * flt(bom_qty)
 		return row
 
 	def calculate_operating_cost(self):
