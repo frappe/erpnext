@@ -226,7 +226,7 @@ class Appointment(Document):
 		frappe.sendmail(
 			recipients=[self.customer_email],
 			template=template,
-			args={"full_name": self.customer_name, "site_url": frappe.utils.get_url(), **args},
+			args={"full_name": self.customer_name, "site_url": get_url(allow_header_override=False), **args},
 			subject=subject,
 			**kwargs,
 		)
@@ -405,7 +405,7 @@ class Appointment(Document):
 
 	def _get_verify_url(self):
 		key = self.generate_verification_key()
-		return get_url("/book_appointment/verify?" + urlencode({"key": key}))
+		return get_url("/book_appointment/verify?" + urlencode({"key": key}), allow_header_override=False)
 
 	def generate_verification_key(self):
 		# store only the hash; the raw key lives solely in the emailed link
