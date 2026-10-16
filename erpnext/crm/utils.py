@@ -286,13 +286,11 @@ class CRMNote(Document):
 
 	@frappe.whitelist()
 	def edit_note(self, note: str, row_id: str):
-		# db_update() skips the write check that save() does in add_note/delete_note
-		self.check_permission("write")
-
 		for d in self.notes:
 			if cstr(d.name) == row_id:
 				d.note = note
-				d.db_update()
+				break
+		self.save()
 
 	@frappe.whitelist()
 	def delete_note(self, row_id: str):

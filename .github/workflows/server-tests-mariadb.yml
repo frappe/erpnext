@@ -4,17 +4,7 @@ on:
   repository_dispatch:
     types: [frappe-framework-change]
   pull_request:
-    paths-ignore:
-      - '**.js'
-      - '**.css'
-      - '**.svg'
-      - '**.md'
-      - '**.html'
-      - 'crowdin.yml'
-      - '.coderabbit.yml'
-      - '.mergify.yml'
-      - '.agents/**'
-      - '**.po'
+    types: [opened, reopened, synchronize, labeled]
   schedule:
     # Run everday at midnight UTC / 5:30 IST
     - cron: "0 0 * * *"
@@ -36,7 +26,7 @@ permissions:
   packages: read
 
 concurrency:
-  group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
+  group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}${{ github.event.action == 'labeled' && github.event.label.name != 'merge-alone' && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 # Shared across both jobs. Both run in the SAME CI image so the bench lives at the identical
@@ -60,6 +50,12 @@ jobs:
   # The expensive, non-parallelisable work happens here exactly once instead of on every shard.
   setup:
     name: Build & reinstall (setup)
+    if: >-
+      (github.event.action != 'labeled' || github.event.label.name == 'merge-alone')
+      && (github.event_name != 'pull_request'
+      || (github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/'))
+      || contains(github.event.pull_request.labels.*.name, 'merge-alone')
+      || (startsWith(github.base_ref, 'version-') && !endsWith(github.base_ref, '-hotfix')))
     outputs:
       bench_sha256: ${{ steps.stage.outputs.sha256 }}
     # Dedicated scale set (fat cpu request) so the build+reinstall runs at full speed, uncontended
@@ -144,8 +140,8 @@ jobs:
           cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/frappe-bench/hydrate.sh
           cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/frappe-bench/start-db.sh
           mkdir -p /opt/ci-bench-staging
-          # self-clean: drop bench tars from runs older than 2h
-          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +120 -delete 2>/dev/null || true
+          # self-clean: drop bench tars from runs older than 24h
+          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +1440 -delete 2>/dev/null || true
           # Exclude .git/node_modules; the mariadb-data datadir IS included (the pre-loaded DB).
           sha256=$(tar -I 'zstd -T0' -cpf - -C /home/ci \
             --exclude='.git' --exclude='node_modules' frappe-bench \
@@ -182,6 +178,10 @@ jobs:
       # GitHub download. -p preserves the ci (uid 1001) ownership so bench runs as ci cleanly.
       - name: Untar bench from node (hostPath)
         run: |
+          if [ ! -f "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" ]; then
+            echo "::error::Bench from the setup job has expired. Re-run all jobs, not only the failed ones."
+            exit 1
+          fi
           cp "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" /tmp/bench.tar.zst
           echo "${BENCH_SHA256}  /tmp/bench.tar.zst" | sha256sum --check --strict -
           tar -I zstd -xpf /tmp/bench.tar.zst -C /home/ci

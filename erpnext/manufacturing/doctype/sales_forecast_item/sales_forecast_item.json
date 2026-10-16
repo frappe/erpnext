@@ -59,8 +59,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Demand Qty",
-   "non_negative": 1,
-   "reqd": 1
+   "non_negative": 1
   },
   {
    "columns": 2,
@@ -76,7 +75,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-21 12:38:47.636301",
+ "modified": "2026-10-12 17:30:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Sales Forecast Item",

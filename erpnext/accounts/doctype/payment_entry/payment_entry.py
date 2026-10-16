@@ -2704,7 +2704,9 @@ def get_payment_entry(
 	pe.received_amount = received_amount
 	pe.letter_head = doc.get("letter_head")
 	pe.bank_account = frappe.db.get_value(
-		"Bank Account", {"is_company_account": 1, "is_default": 1, "company": doc.company}, "name"
+		"Bank Account",
+		{"is_company_account": 1, "is_default": 1, "company": doc.company, "disabled": 0},
+		"name",
 	)
 
 	if dt in ["Purchase Order", "Sales Order", "Sales Invoice", "Purchase Invoice"]:

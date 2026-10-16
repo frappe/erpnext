@@ -141,7 +141,10 @@ def make_asset_maintenance():
 	purchase_receipt = make_purchase_receipt(
 		item_code="Photocopier", qty=1, rate=100000.0, location="Test Location"
 	)
-	asset = frappe.db.get_value("Asset", {"purchase_receipt": purchase_receipt.name}, "name")
+	asset = frappe.get_doc("Asset", {"purchase_receipt": purchase_receipt.name})
+	asset.available_for_use_date = asset.available_for_use_date or nowdate()
+	asset.maintenance_required = 1
+	asset.submit()
 	tasks = get_maintenance_tasks()
 	for task in tasks:
 		task["next_due_date"] = nowdate()
@@ -149,7 +152,7 @@ def make_asset_maintenance():
 	return frappe.get_doc(
 		{
 			"doctype": "Asset Maintenance",
-			"asset_name": asset,
+			"asset_name": asset.name,
 			"maintenance_team": "Team Awesome",
 			"company": "_Test Company",
 			"asset_maintenance_tasks": tasks,

@@ -5036,6 +5036,113 @@ class TestWorkOrder(ERPNextTestSuite):
 			[(wo.wip_warehouse, "Stores - _TC", batches[0], 3)],
 		)
 
+	def test_manufacture_cannot_be_cancelled_below_the_disassembled_qty(self):
+		rm_item = make_item("_Test Disassembled Cancel RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Disassembled Cancel FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=2,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+
+		manufacture_entries = []
+		for _qty in range(2):
+			entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+			entry.submit()
+			manufacture_entries.append(entry)
+
+		frappe.get_doc(make_stock_entry(work_order.name, "Disassemble", 2)).submit()
+		self.assertRaises(frappe.ValidationError, manufacture_entries[0].cancel)
+
+	def test_manufacture_without_from_bom_keeps_the_work_order_qty(self):
+		rm_item = make_item("_Test Without From BOM RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Without From BOM FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=5,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
+		entry.from_bom = 0
+		entry.submit()
+
+		self.assertEqual(entry.fg_completed_qty, 5)
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "produced_qty"), 5)
+
+	def test_return_is_capped_at_the_work_order_unconsumed_qty(self):
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		for item_code in ("_Test Item", "_Test Item Home Desktop 100"):
+			test_stock_entry.make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+			)
+
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 2)).submit()
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target=work_order.wip_warehouse, qty=10, basic_rate=100
+		)
+		close_work_order(work_order.name, "Closed")
+
+		return_entry = make_stock_return_entry(work_order.name)
+		row = next(d for d in return_entry.items if d.item_code == "_Test Item")
+		row.qty += 10
+		self.assertRaises(frappe.ValidationError, return_entry.save)
+
+	def test_return_of_components_transferred_in_another_uom(self):
+		raw_material = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 50}],
+			}
+		).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=50)
+		test_stock_entry.make_stock_entry(
+			item_code=raw_material, target="_Test Warehouse - _TC", qty=100, basic_rate=10
+		)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good, bom_no=bom.name, qty=1, source_warehouse="_Test Warehouse - _TC"
+		)
+
+		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 1))
+		transfer.items[0].update({"uom": "Box", "conversion_factor": 50, "qty": 1})
+		transfer.submit()
+		close_work_order(work_order.name, "Closed")
+
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.save()
+		self.assertEqual(sum(row.transfer_qty for row in return_entry.items), 50)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM"})
+	def test_excess_transfer_check_uses_the_stock_uom_qty(self):
+		rm_item = make_item(
+			"_Test Excess Transfer UOM RM",
+			{"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 50}]},
+		).name
+		fg_item = make_item("_Test Excess Transfer UOM FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=10)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=1, source_warehouse="_Test Warehouse - _TC"
+		)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=100)
+
+		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0))
+		transfer.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 50})
+		self.assertRaises(frappe.ValidationError, transfer.save)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
