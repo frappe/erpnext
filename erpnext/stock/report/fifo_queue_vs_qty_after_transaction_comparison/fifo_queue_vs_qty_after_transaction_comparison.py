@@ -67,9 +67,11 @@ def get_stock_ledger_entries(filters):
 			frappe.get_all("Item", filters=item_group_filter, pluck="name", order_by=None),
 		)
 
-	if filters.from_date:
+	if filters.from_date and filters.to_date:
+		sle_filters["posting_date"] = ("between", [filters.from_date, filters.to_date])
+	elif filters.from_date:
 		sle_filters["posting_date"] = (">=", filters.from_date)
-	if filters.to_date:
+	elif filters.to_date:
 		sle_filters["posting_date"] = ("<=", filters.to_date)
 
 	ledger_filters = [sle_filters]

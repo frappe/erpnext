@@ -37,7 +37,7 @@ frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
 		{
 			fieldname: "to_date",
 			fieldtype: "Date",
-			label: "From Posting Date",
+			label: "To Posting Date",
 		},
 	],
 	formatter(value, row, column, data, default_formatter) {
