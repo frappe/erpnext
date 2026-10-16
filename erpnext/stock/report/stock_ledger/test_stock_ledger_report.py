@@ -440,3 +440,32 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		rows = list(execute(filters)[1])
 
 		self.assertEqual([row["qty_after_transaction"] for row in rows], [10, 12])
+
+	def test_include_uom_works_with_segregated_bundles(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SLU-.#####",
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		for _receipt in range(3):
+			make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, basic_rate=100)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			include_uom="Box",
+			segregate_serial_batch_bundle=1,
+		)
+		rows = list(execute(filters)[1])
+
+		self.assertEqual([row.get("in_qty_box") for row in rows if row.get("in_qty")], [1, 1, 1])
