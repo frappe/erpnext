@@ -90,3 +90,4 @@ class TestDelayedOrderReport(ERPNextTestSuite):
 		data = self.run_report(sales_order=sales_order.name)
 
 		self.assertEqual([(str(row.posting_date), row.delayed_days) for row in data], [("2026-06-13", 8)])
+		self.assertEqual(data[0].grand_total, 1000)
