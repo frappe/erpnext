@@ -542,6 +542,26 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 		self.assertRaises(PendingRepostingError, self.submit_closing, self.make_closing("2026-03-31"))
 
+	def test_queued_closing_waits_for_reposts_added_after_queueing(self):
+		closing = self.submit_closing(self.make_closing("2026-03-31"))
+		repost = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": make_item("_Test SCE Pending Repost Item", {"is_stock_item": 1}).name,
+				"warehouse": WAREHOUSE,
+				"company": COMPANY,
+				"posting_date": "2026-03-10",
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
+
+		prepare_closing_stock_balance(closing.name)
+
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Failed")
+		self.assertFalse(frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": closing.name}))
+
 	def test_backdated_entry_before_open_closing_is_reposted(self):
 		item = make_item("_Test SCE Open Closing Item", {"is_stock_item": 1}).name
 		make_stock_entry(item_code=item, qty=10, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-15")
