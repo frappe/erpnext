@@ -343,6 +343,7 @@ permission_query_conditions = {
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.get_inherited_permission_query_conditions",
 }
 
@@ -350,6 +351,7 @@ has_permission = {
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission",
 }
 
