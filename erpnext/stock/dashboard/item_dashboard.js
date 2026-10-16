@@ -288,7 +288,7 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 			source_warehouse: dialog.get_value("source"),
 			target_warehouse: dialog.get_value("target"),
 			qty: dialog.get_value("qty"),
-			rate: dialog.get_value("rate"),
+			rate: flt(dialog.get_value("rate")),
 		});
 	});
 };
