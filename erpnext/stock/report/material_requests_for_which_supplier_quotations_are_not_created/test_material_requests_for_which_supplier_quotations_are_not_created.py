@@ -38,3 +38,9 @@ class TestMaterialRequestsWithoutSupplierQuotations(ERPNextTestSuite):
 		self.make_quotation(request, "_Test Item").cancel()
 
 		self.assertEqual(self.get_listed_request_items(request.name), ["_Test Item", "_Test Item 2"])
+
+	def test_quotation_for_one_item_keeps_the_other_items_listed(self):
+		request = self.make_request()
+		self.make_quotation(request, "_Test Item")
+
+		self.assertEqual(self.get_listed_request_items(request.name), ["_Test Item 2"])
