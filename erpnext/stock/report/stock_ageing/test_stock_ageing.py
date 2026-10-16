@@ -2385,6 +2385,50 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(get_age_ranges(None), ["30", "60", "90"])
 		self.assertEqual(get_age_ranges("90, 30, 60"), ["30", "60", "90"])
 
+	def test_purchase_return_removes_the_returned_lot(self):
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				warehouse="WH 1",
+				posting_date="2021-09-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=20,
+				stock_value_difference=2000,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Purchase Receipt",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=-10,
+				qty_after_transaction=10,
+				stock_value_difference=-2000,
+				warehouse="WH 1",
+				posting_date="2021-12-05",
+				voucher_type="Purchase Receipt",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
+
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"

@@ -31,6 +31,7 @@ BATCH_SLOT_DATE_INDEX = 3
 BATCH_SLOT_VALUE_INDEX = 4
 
 AVERAGE_AGE_COLUMN = 6
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt")
 MAX_CHART_ITEMS = 10
 
 
@@ -833,6 +834,10 @@ class FIFOSlots:
 		index = -1 if from_end else 0
 		qty_to_pop = abs(row.actual_qty)
 		stock_value = abs(row.stock_value_difference)
+		if row.voucher_type in PURCHASE_VOUCHER_TYPES and qty_to_pop:
+			qty_to_pop, stock_value = self._consume_slots_at_return_rate(
+				fifo_queue, transfer_key, qty_to_pop, stock_value
+			)
 
 		while qty_to_pop:
 			slot = fifo_queue[index] if fifo_queue else [0, None, 0]
@@ -858,6 +863,30 @@ class FIFOSlots:
 				)
 				qty_to_pop = 0
 				stock_value = 0
+
+	def _consume_slots_at_return_rate(
+		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float
+	) -> tuple[float, float]:
+		return_rate = stock_value / qty_to_pop
+		for slot in list(fifo_queue):
+			slot_qty = flt(slot[FIFO_QTY_INDEX])
+			if slot_qty <= 0 or abs(flt(slot[FIFO_VALUE_INDEX]) / slot_qty - return_rate) > 0.01:
+				continue
+
+			qty = min(slot_qty, qty_to_pop)
+			value = flt(slot[FIFO_VALUE_INDEX]) * qty / slot_qty
+			slot[FIFO_QTY_INDEX] = slot_qty - qty
+			slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_VALUE_INDEX]) - value
+			if not slot[FIFO_QTY_INDEX]:
+				fifo_queue.remove(slot)
+
+			self.transferred_item_details[transfer_key].append([qty, slot[FIFO_DATE_INDEX], value])
+			qty_to_pop -= qty
+			stock_value -= value
+			if not qty_to_pop:
+				break
+
+		return qty_to_pop, stock_value
 
 	def _adjust_incoming_transfer_qty(
 		self,
