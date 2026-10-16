@@ -151,6 +151,8 @@ def is_sle_has_correct_data(sle, float_precision, currency_precision):
 		and flt(sle.diff_value_diff, currency_precision) == 0.0
 		and flt(sle.fifo_qty_diff, float_precision) == 0.0
 		and flt(sle.fifo_value_diff, currency_precision) == 0.0
+		and flt(sle.fifo_difference_diff, currency_precision) == 0.0
+		and abs(flt(sle.valuation_diff) * flt(sle.qty_after_transaction)) < 1 / (10**currency_precision)
 	)
 
 
