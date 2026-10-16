@@ -4,10 +4,12 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.report.financial_ratios.financial_ratios import (
 	avg_ratio_balance,
 	execute,
 	get_gl_data,
+	update_balances,
 )
 from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.tests.utils import ERPNextTestSuite
@@ -40,6 +42,30 @@ class TestFinancialRatios(ERPNextTestSuite):
 		# Net Sales / Net Fixed Assets = 20,000 / 10,000 = 2.0
 		# (the old behaviour divided by total assets, giving 20,000 / 30,000 = 0.667)
 		self.assertEqual(ratio_row[year_key], 2.0)
+
+	def test_fixed_asset_turnover_combines_groups_of_same_type(self):
+		self.make_group_with_ledger(
+			"_Test Solar Power System", "Application of Funds (Assets)", "Fixed Asset", "_Test Solar Panels"
+		)
+		self.make_group_with_ledger("_Test Plant Group", "Fixed Assets", "Fixed Asset", "_Test Plant")
+		self.make_journal_entry("Buildings", "Capital Stock", 10000)
+		self.make_journal_entry("_Test Solar Panels", "Capital Stock", 5000)
+		self.make_journal_entry("_Test Plant", "Capital Stock", 3000)
+		self.make_journal_entry("Cash", "Sales", 36000)
+
+		columns, data = execute(self.get_report_filters())
+		ratio_row = next(row for row in data if row.get("ratio") == "Fixed Asset Turnover Ratio")
+
+		self.assertEqual(ratio_row[columns[1]["fieldname"]], 2.0)
+
+	def test_direct_expense_combines_groups_of_same_type(self):
+		self.set_account_type("Direct Expenses", "Direct Expense")
+		self.make_group_with_ledger("_Test Freight Group", "Expenses", "Direct Expense", "_Test Freight")
+		before = self.get_direct_expense()
+		self.make_journal_entry("Cost of Goods Sold", "Creditors", 200, supplier="_Test Supplier")
+		self.make_journal_entry("_Test Freight", "Creditors", 300, supplier="_Test Supplier")
+
+		self.assertEqual(self.get_direct_expense() - before, 500)
 
 	def test_creditor_turnover_is_positive(self):
 		self.set_account_type("Direct Expenses", "Direct Expense")
@@ -122,6 +148,15 @@ class TestFinancialRatios(ERPNextTestSuite):
 		root = next((row for row in income if row.get("account") and not row.get("parent_account")), {})
 		return root.get(period_list[0].key, 0)
 
+	def get_direct_expense(self):
+		filters = self.get_report_filters()
+		period_list = self.get_period_list(filters)
+		year = period_list[0].key
+		expense = get_gl_data(filters, period_list, [year])[3]
+		direct_expense = {}
+		update_balances(direct_expense, {}, "Direct Expense", year, expense, "Expense")
+		return direct_expense.get(year, 0)
+
 	def get_report_filters(self):
 		active_fy = frappe.db.get_value(
 			"Fiscal Year",
@@ -137,6 +172,20 @@ class TestFinancialRatios(ERPNextTestSuite):
 			period_end_date=active_fy.year_end_date,
 			filter_based_on="Fiscal Year",
 			periodicity="Yearly",
+		)
+
+	def make_group_with_ledger(self, group_name, parent_name, account_type, ledger_name):
+		create_account(
+			account_name=group_name,
+			parent_account=f"{parent_name} - {self.abbr}",
+			account_type=account_type,
+			is_group=1,
+			company=self.company,
+		)
+		create_account(
+			account_name=ledger_name,
+			parent_account=f"{group_name} - {self.abbr}",
+			company=self.company,
 		)
 
 	def make_journal_entry(self, debit_account, credit_account, amount, posting_date=None, supplier=None):
