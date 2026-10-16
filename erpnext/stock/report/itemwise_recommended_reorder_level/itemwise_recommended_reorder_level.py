@@ -149,12 +149,13 @@ def get_delivered_items(filters):
 
 	si_items = query.run(as_dict=True)
 
+	# Delivery Notes and stock-updating Sales Invoices are separate deliveries, so add them up
 	dn_item_map = {}
 	for item in dn_items:
-		dn_item_map.setdefault(item.item_code, item.dn_qty)
+		dn_item_map[item.item_code] = flt(dn_item_map.get(item.item_code)) + flt(item.dn_qty)
 
 	for item in si_items:
-		dn_item_map.setdefault(item.item_code, item.si_qty)
+		dn_item_map[item.item_code] = flt(dn_item_map.get(item.item_code)) + flt(item.si_qty)
 
 	return dn_item_map
 
