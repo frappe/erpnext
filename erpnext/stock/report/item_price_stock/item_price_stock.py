@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import today
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_masters_condition,
@@ -59,6 +60,21 @@ def get_columns():
 			"width": 120,
 		},
 		{"label": _("Selling Rate"), "fieldname": "selling_rate", "fieldtype": "Currency", "width": 120},
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 80},
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 120,
+		},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"fieldtype": "Link",
+			"options": "Supplier",
+			"width": 120,
+		},
 	]
 
 
@@ -85,8 +101,15 @@ def get_item_price_qty_data(filters):
 			item_price.item_name,
 			item_price.name.as_("price_list_name"),
 			item_price.brand.as_("brand"),
+			item_price.uom,
+			item_price.customer,
+			item_price.supplier,
 			bin.warehouse.as_("warehouse"),
 			bin.actual_qty.as_("actual_qty"),
+		)
+		.where(
+			(item_price.valid_from.isnull() | (item_price.valid_from <= today()))
+			& (item_price.valid_upto.isnull() | (item_price.valid_upto >= today()))
 		)
 	)
 
@@ -116,6 +139,9 @@ def get_item_price_qty_data(filters):
 				"buying_rate": 0.0,
 				"selling_price_list": "",
 				"selling_rate": 0.0,
+				"uom": item_dict.uom,
+				"customer": item_dict.customer,
+				"supplier": item_dict.supplier,
 			}
 
 			price_list = item_dict["price_list_name"]

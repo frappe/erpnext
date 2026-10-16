@@ -59,3 +59,34 @@ class TestItemPriceStock(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, self.run_report, item_code="_Test Item")
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_only_current_prices_are_listed_with_their_uom_and_party(self):
+		from frappe.utils import add_days, today
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		for rate, extra in (
+			(500, {}),
+			(450, {"customer": "_Test Customer"}),
+			(400, {"valid_from": add_days(today(), -60), "valid_upto": add_days(today(), -31)}),
+			(6000, {"uom": "Box"}),
+		):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item,
+					"price_list": "Standard Selling",
+					"price_list_rate": rate,
+					**extra,
+				}
+			).insert()
+
+		rows = self.run_report(item_code=item)
+
+		self.assertEqual(
+			sorted((row["selling_rate"], row["uom"], row["customer"]) for row in rows),
+			[(450, "Nos", "_Test Customer"), (500, "Nos", None), (6000, "Box", None)],
+		)
