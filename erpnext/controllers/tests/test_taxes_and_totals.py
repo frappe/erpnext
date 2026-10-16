@@ -20,6 +20,94 @@ def resolve_on_mrp(calc, item, tax):
 
 
 class TestTaxesAndTotals(ERPNextTestSuite):
+	def test_remove_pricing_discounts_on_sales_and_purchase(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Shared Discount Item", {"is_stock_item": 0})
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "_Test Price List",
+				"price_list_rate": 100,
+			}
+		).insert()
+		rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Shared Discount",
+				"apply_on": "Item Code",
+				"items": [{"item_code": item.name}],
+				"selling": 1,
+				"buying": 1,
+				"currency": "INR",
+				"rate_or_discount": "Discount Amount",
+				"discount_amount": 20,
+			}
+		).insert()
+		for make_order in (make_sales_order, create_purchase_order):
+			with self.subTest(make_order=make_order.__name__):
+				order = make_order(item_code=item.name, qty=1, do_not_save=True)
+				order.set(
+					"selling_price_list" if order.doctype == "Sales Order" else "buying_price_list",
+					"_Test Price List",
+				)
+				order.insert()
+				self.assertEqual(order.items[0].rate, 80)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [rule.name])
+				order.ignore_pricing_rule = 1
+				order.save()
+				self.assertEqual(order.items[0].rate, 100)
+				self.assertEqual(order.items[0].discount_percentage, 0)
+				self.assertEqual(order.items[0].discount_amount, 0)
+				self.assertFalse(order.items[0].pricing_rules)
+
+				frappe.db.set_single_value(
+					"Selling Settings" if order.doctype == "Sales Order" else "Buying Settings",
+					"allow_multiple_items",
+					1,
+				)
+				rule.price_or_product_discount = "Product"
+				rule.same_item = 1
+				rule.free_qty = 1
+				rule.save()
+				order.ignore_pricing_rule = 0
+				order.save()
+				self.assertEqual([row.pricing_rules for row in order.items if row.is_free_item], [rule.name])
+				order.append("items", {"item_code": item.name, "qty": 2, "rate": 0, "is_free_item": 1})
+				replacement = frappe.copy_doc(rule)
+				replacement.same_item = 0
+				replacement.free_item = "_Test Item"
+				replacement.insert()
+				rule.disable = 1
+				rule.save()
+				order.set_missing_item_details()
+				order.save()
+				self.assertEqual(
+					[row.pricing_rules for row in order.items if row.is_free_item and row.pricing_rules],
+					[replacement.name],
+				)
+				replacement.dont_enforce_free_item_qty = 1
+				replacement.save()
+				order.ignore_pricing_rule = 1
+				order.save()
+				self.assertEqual(sum(row.is_free_item for row in order.items), 2)
+				order.ignore_pricing_rule = 0
+				order.save()
+				replacement.dont_enforce_free_item_qty = 0
+				replacement.save()
+				order.ignore_pricing_rule = 1
+				order.save()
+				self.assertEqual(
+					[(row.item_code, row.qty) for row in order.items if row.is_free_item], [(item.name, 2)]
+				)
+				replacement.disable = 1
+				replacement.save()
+				rule.disable = 0
+				rule.price_or_product_discount = "Price"
+				rule.save()
+
 	def test_regional_round_off_accounts(self):
 		"""
 		Regional overrides cannot extend the list in-place — the return
