@@ -6613,6 +6613,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		other_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		operation, workstation = make_review_operation()
+		_operation, _workstation = make_review_operation()
 		bom = make_review_bom(
 			fg_item,
 			[
@@ -6636,9 +6637,17 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.save()
 		self.assertEqual([row.time_in_mins for row in wo.operations], [100])
 
+		wo.operations[0].workstation = _workstation
+		wo.save()
+		wo.qty = 20
+		wo.save()
+		self.assertEqual(
+			[(row.workstation, row.time_in_mins) for row in wo.operations], [(_workstation, 200)]
+		)
+
 		wo.bom_no = other_bom.name
 		wo.save()
-		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 20)])
+		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
 		self.assertEqual(wo.operations, [])
 
 	def test_status_change_accepts_only_its_own_statuses(self):

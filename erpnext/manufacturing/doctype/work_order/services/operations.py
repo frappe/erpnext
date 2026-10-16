@@ -212,8 +212,24 @@ class OperationsService:
 
 		if previous.bom_no != self.doc.bom_no or previous.use_multi_level_bom != self.doc.use_multi_level_bom:
 			self.doc.get_items_and_operations_from_bom()
-		elif flt(previous.qty) != flt(self.doc.qty) and self.doc.get("operations"):
-			self.set_work_order_operations()
+		elif flt(previous.qty) != flt(self.doc.qty) and flt(previous.qty):
+			self._scale_saved_operation_time(previous)
+
+	def _scale_saved_operation_time(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		fixed_operations = set(
+			frappe.get_all(
+				"BOM Operation",
+				filters={"parent": self.doc.bom_no, "parenttype": "BOM", "fixed_time": 1},
+				pluck="operation",
+			)
+		)
+		for d in self.doc.get("operations"):
+			saved = saved_rows.get(d.name)
+			if not saved or d.operation in fixed_operations or flt(saved.time_in_mins) != flt(d.time_in_mins):
+				continue
+			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
+		self.calculate_operating_cost()
 
 	def set_operation_warehouses(self):
 		"""For semi-finished goods tracking, default each operation's warehouses from the Work
