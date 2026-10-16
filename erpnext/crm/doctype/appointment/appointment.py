@@ -8,7 +8,12 @@ from urllib.parse import urlencode
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.desk.form.assign_to import add as add_assignment
+=======
+from frappe.desk.form.assign_to import _add as add_assignment
+from frappe.desk.form.assign_to import clear as clear_assignments
+>>>>>>> 3773a8e (fix(appointment): verify portal booking without switching user)
 from frappe.model.document import Document
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
@@ -312,7 +317,10 @@ class Appointment(Document):
 		if not frappe.has_permission(doc=self, user=agent):
 			add_docshare(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
 
-		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+		# the assigning user may be the Guest verifying a portal booking
+		add_assignment(
+			{"doctype": self.doctype, "name": self.name, "assign_to": [agent]}, ignore_permissions=True
+		)
 
 	def create_calendar_event(self):
 		if self.calendar_event:
