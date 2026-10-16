@@ -9,10 +9,12 @@ from frappe.model.document import Document
 from frappe.utils import add_days, cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
 
 from .mapper import (
+	get_existing_customer_name,
 	get_ordered_items,
 )
 
@@ -174,6 +176,10 @@ class Quotation(SellingController):
 		self.validate_valid_till()
 		self.validate_revision()
 		self.validate_lead()
+		if self.coupon_code:
+			customer = get_existing_customer_name(self.quotation_to, self.party_name)
+			validate_coupon_code(self.coupon_code, customer)
+
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
