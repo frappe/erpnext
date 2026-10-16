@@ -69,3 +69,23 @@ class TestAvailableBatchReport(ERPNextTestSuite):
 		data = execute(frappe._dict(to_date=add_days(today(), -1), item_code=item))[1]
 
 		self.assertEqual([row.batch_no for row in data], [valid])
+
+	def test_batch_issued_after_today_is_listed_for_today(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.report.available_batch_report.available_batch_report import execute
+
+		item = make_item(properties={"has_batch_no": 1, "is_stock_item": 1}).name
+		batch = self.make_batch_with_stock(item)
+		make_stock_entry(
+			item_code=item,
+			source="_Test Warehouse - _TC",
+			qty=5,
+			batch_no=batch,
+			use_serial_batch_fields=1,
+			posting_date=add_days(today(), 3),
+		)
+
+		data = execute(frappe._dict(to_date=today(), item_code=item))[1]
+
+		self.assertEqual([(row.batch_no, row.balance_qty) for row in data], [(batch, 5)])
