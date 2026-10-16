@@ -842,8 +842,11 @@ def get_pricing_rule_items(pr_doc, other_items=False) -> list:
 	return list(set(apply_on_data))
 
 
-def validate_coupon_code(coupon_name):
+def validate_coupon_code(coupon_name, customer=None):
 	coupon = frappe.get_doc("Coupon Code", coupon_name)
+	if coupon.coupon_type == "Gift Card" and coupon.customer != customer:
+		frappe.throw(_("This Gift Card cannot be used by this customer"))
+
 	if coupon.valid_from and coupon.valid_from > getdate(today()):
 		frappe.throw(_("Sorry, this coupon code's validity has not started"))
 	elif coupon.valid_upto and coupon.valid_upto < getdate(today()):
