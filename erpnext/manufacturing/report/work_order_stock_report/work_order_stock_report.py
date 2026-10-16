@@ -99,7 +99,12 @@ def get_stock(items_by_order, filters):
 
 
 def get_work_orders():
-	work_order_filters = [{"docstatus": 1, "status": ("!=", "Completed")}]
+	work_order_filters = [
+		{
+			"docstatus": 1,
+			"status": ("in", ["Not Started", "In Process", "Stock Reserved", "Stock Partially Reserved"]),
+		}
+	]
 	if condition := get_allowed_companies_condition(frappe.qb.DocType("Work Order").company, "Work Order"):
 		work_order_filters.append(condition)
 

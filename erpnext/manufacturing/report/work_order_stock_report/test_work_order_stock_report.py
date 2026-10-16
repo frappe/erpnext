@@ -6,6 +6,7 @@ import frappe
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import close_work_order, stop_unstop
 from erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report import execute
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
@@ -112,3 +113,14 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 		row = self.get_rows(wo.name, warehouse=STORES)[material]
 
 		self.assertEqual((row.instock, row.buildable_qty, row.ready_to_build), (1, 10, "Y"))
+
+	def test_closed_and_stopped_work_orders_are_left_out(self):
+		closed, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
+		frappe.get_doc(make_stock_entry(closed.name, "Material Transfer for Manufacture", 10)).submit()
+		close_work_order(closed.name, "Closed")
+		stopped, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
+		frappe.get_doc(make_stock_entry(stopped.name, "Material Transfer for Manufacture", 10)).submit()
+		stop_unstop(stopped.name, "Stopped")
+
+		self.assertEqual(self.get_rows(closed.name, warehouse=STORES), {})
+		self.assertEqual(self.get_rows(stopped.name, warehouse=STORES), {})
