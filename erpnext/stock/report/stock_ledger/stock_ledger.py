@@ -42,10 +42,14 @@ def execute(filters=None):
 			else:
 				inv_dimension_key.append(value)
 
+	inv_dimension_opening = []
 	if filters.get("batch_no"):
 		opening_row = get_opening_balance_from_batch(filters, columns, sl_entries)
 	elif inv_dimension_wise_value:
-		opening_row = get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value)
+		inv_dimension_opening = get_opening_balance_for_inv_dimension(
+			filters, inv_dimension_wise_value, items
+		)
+		opening_row = get_inv_dimension_opening_row(inv_dimension_opening)
 	else:
 		opening_row = get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value)
 
@@ -73,9 +77,7 @@ def execute(filters=None):
 		batch_balance_dict[filters.batch_no] = [actual_qty, stock_value]
 
 	inv_dimension_wise_dict = frappe._dict({})
-	set_opening_row_for_inv_dimension(
-		inv_dimension_wise_dict, filters, inv_dimension_key=inv_dimension_key, opening_row=opening_row
-	)
+	set_opening_row_for_inv_dimension(inv_dimension_wise_dict, inv_dimension_key, inv_dimension_opening)
 
 	item_wh_wise_prev_sle = {}
 	for sle in sl_entries:
@@ -149,28 +151,12 @@ def get_opening_conversion_factor(filters, item_details):
 	return item_details[item_codes[0]].get("conversion_factor") or 0
 
 
-def set_opening_row_for_inv_dimension(
-	inv_dimension_wise_dict, filters, inv_dimension_key=None, opening_row=None
-):
-	if (
-		not inv_dimension_key
-		or not opening_row
-		or not filters.get("item_code")
-		or not filters.get("warehouse")
-	):
-		return
-
-	if len(filters.get("item_code")) > 1 or len(filters.get("warehouse")) > 1:
-		return
-
-	if inv_dimension_key and opening_row and filters.get("item_code") and filters.get("warehouse"):
-		new_key = copy.deepcopy(inv_dimension_key)
-		new_key.extend([filters.item_code[0], filters.warehouse[0]])
-
-		opening_key = tuple(new_key)
+def set_opening_row_for_inv_dimension(inv_dimension_wise_dict, inv_dimension_key, inv_dimension_opening):
+	for row in inv_dimension_opening or []:
+		opening_key = tuple([*inv_dimension_key, row.item_code, row.warehouse])
 		inv_dimension_wise_dict[opening_key] = {
-			"qty_after_transaction": flt(opening_row.get("qty_after_transaction")),
-			"dimension_stock_value": flt(opening_row.get("stock_value")),
+			"qty_after_transaction": flt(row.qty_after_transaction),
+			"dimension_stock_value": flt(row.stock_value),
 		}
 
 
@@ -476,8 +462,8 @@ def get_stock_ledger_entries(filters, items):
 	if inventory_dimension_fields:
 		for fieldname in inventory_dimension_fields:
 			query = query.select(fieldname)
-			if fieldname in filters and filters.get(fieldname):
-				query = query.where(sle[fieldname].isin(filters.get(fieldname)))
+			if values := filters.get(fieldname):
+				query = query.where(sle[fieldname].isin([values] if isinstance(values, str) else values))
 
 	if items:
 		query = query.where(sle.item_code.isin(items))
@@ -864,23 +850,11 @@ def get_item_group_condition(item_group, item_table=None):
 				where ig.lft >= {item_group_details.lft} and ig.rgt <= {item_group_details.rgt} and item.item_group = ig.name)"
 
 
-def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
-	if not filters.item_code or not filters.warehouse or not filters.from_date:
-		return
-
-	item_codes = filters.get("item_code")
-	if isinstance(item_codes, str):
-		item_codes = [item_codes]
-
-	warehouses = filters.get("warehouse")
-	if isinstance(warehouses, str):
-		warehouses = [warehouses]
-
-	if len(item_codes) > 1 or len(warehouses) > 1:
-		return
+def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value, items=None):
+	if not filters.from_date:
+		return []
 
 	sl_doctype = frappe.qb.DocType("Stock Ledger Entry")
-
 	query = (
 		frappe.qb.from_(sl_doctype)
 		.select(
@@ -894,13 +868,17 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 			& (sl_doctype.docstatus < 2)
 			& (sl_doctype.is_cancelled == 0)
 		)
+		.groupby(sl_doctype.item_code, sl_doctype.warehouse)
 	)
 
-	if item_codes:
-		query = query.where(sl_doctype.item_code.isin(item_codes))
+	if items:
+		query = query.where(sl_doctype.item_code.isin(items))
 
-	if warehouses:
+	if warehouses := get_matching_warehouses(filters.get("warehouse")):
 		query = query.where(sl_doctype.warehouse.isin(warehouses))
+
+	if filters.get("company"):
+		query = query.where(sl_doctype.company == filters.company)
 
 	for key, value in inv_dimension_wise_value.items():
 		if isinstance(value, list | tuple):
@@ -908,24 +886,23 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 		else:
 			query = query.where(sl_doctype[key] == value)
 
-	query = query.groupby(sl_doctype.item_code, sl_doctype.warehouse)
+	return query.run(as_dict=True)
 
-	opening_data = query.run(as_dict=True)
 
-	if opening_data:
-		return frappe._dict(
-			{
-				"item_code": _("'Opening'"),
-				"qty_after_transaction": opening_data[0].qty_after_transaction,
-				"stock_value": opening_data[0].stock_value,
-				"valuation_rate": flt(opening_data[0].stock_value)
-				/ flt(opening_data[0].qty_after_transaction)
-				if opening_data[0].qty_after_transaction
-				else 0,
-			}
-		)
+def get_inv_dimension_opening_row(inv_dimension_opening):
+	if not inv_dimension_opening:
+		return frappe._dict({})
 
-	return frappe._dict({})
+	qty = sum(flt(row.qty_after_transaction) for row in inv_dimension_opening)
+	stock_value = sum(flt(row.stock_value) for row in inv_dimension_opening)
+	return frappe._dict(
+		{
+			"item_code": _("'Opening'"),
+			"qty_after_transaction": qty,
+			"stock_value": stock_value,
+			"valuation_rate": stock_value / qty if qty else 0,
+		}
+	)
 
 
 def get_inv_dimension_wise_value(filters) -> list:
