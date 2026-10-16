@@ -19,6 +19,7 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 	website_send_message(sender, message, subject)
 
 	message = escape_html(message)
+	subject = escape_html(subject)
 
 	oppotunity_creation = frappe.get_single_value(
 		"CRM Settings", "enable_opportunity_creation_from_contact_us"
