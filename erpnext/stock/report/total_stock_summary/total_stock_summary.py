@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.query_builder.functions import Max, Sum
 
 
@@ -44,6 +45,9 @@ def get_total_stock(filters):
 		.on(wh.name == bin.warehouse)
 		.where(bin.actual_qty != 0)
 	)
+
+	if warehouses := get_permitted_documents("Warehouse"):
+		query = query.where(bin.warehouse.isin(warehouses))
 
 	if filters.get("group_by") == "Warehouse":
 		if filters.get("company"):
