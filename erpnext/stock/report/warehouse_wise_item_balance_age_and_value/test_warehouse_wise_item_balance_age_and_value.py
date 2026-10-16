@@ -78,7 +78,7 @@ class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
 		columns, data = self.run_report_with_columns(item_code=item_code, warehouse=[wh_a, wh_b])
 
 		# a column per selected warehouse, preceded by the total qty column
-		self.assertEqual(columns[-3:], ["Total Qty:Int:120", f"{wh_a}:Int:100", f"{wh_b}:Int:100"])
+		self.assertEqual(columns[-3:], ["Total Qty:Float:120", f"{wh_a}:Float:100", f"{wh_b}:Float:100"])
 
 		rows = [row for row in data if row[0] == item_code]
 		self.assertEqual(len(rows), 1)
@@ -98,11 +98,11 @@ class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
 			item_code=item_code, warehouse=["_Test Warehouse Group - _TC"]
 		)
 
-		self.assertIn(f"{wh_a}:Int:100", columns)
+		self.assertIn(f"{wh_a}:Float:100", columns)
 
 		rows = [row for row in data if row[0] == item_code]
 		self.assertEqual(len(rows), 1)
-		self.assertEqual(rows[0][columns.index(f"{wh_a}:Int:100")], 10)
+		self.assertEqual(rows[0][columns.index(f"{wh_a}:Float:100")], 10)
 
 	def test_multiple_item_filter(self):
 		item_a = make_item(properties={"is_stock_item": 1}).name
@@ -144,5 +144,11 @@ class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertNotIn("Stores - _TC:Int:100", columns)
+		self.assertNotIn("Stores - _TC:Float:100", columns)
 		self.assertEqual([row[4] for row in data if row[0] == item_code], [])
+
+	def test_quantity_columns_keep_fractions(self):
+		columns = self.run_report_with_columns(warehouse=["Stores - _TC", "Finished Goods - _TC"])[0]
+
+		self.assertIn("Total Qty:Float:120", columns)
+		self.assertIn("Stores - _TC:Float:100", columns)
