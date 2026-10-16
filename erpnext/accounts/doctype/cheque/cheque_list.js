@@ -14,7 +14,7 @@ frappe.listview_settings["Cheque"] = {
 		if (doc.status === "Issued" && doc.cheque_date > today) {
 			return [__("PDC"), "orange", `status,=,Issued|cheque_date,>,${today}`];
 		}
-		const color = { Available: "blue", Issued: "purple", Cancelled: "red" }[doc.status];
+		const color = { Available: "blue", Issued: "green", Cancelled: "red" }[doc.status];
 		return [__(doc.status), color, `status,=,${doc.status}`];
 	},
 };
