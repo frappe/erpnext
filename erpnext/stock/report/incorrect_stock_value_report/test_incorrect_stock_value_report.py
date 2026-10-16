@@ -87,3 +87,23 @@ class TestIncorrectStockValueReport(ERPNextTestSuite):
 		rows = self.run_report(account=account, from_date=add_days(today(), -1))
 
 		self.assertEqual([row.name for row in rows], [sle])
+
+	def test_later_entries_of_the_same_day_follow_the_running_value(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		other_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(
+			item_code=other_item,
+			to_warehouse=warehouse,
+			qty=10,
+			basic_rate=100,
+			company=COMPANY,
+			posting_date=add_days(today(), -5),
+		)
+		self.issue(item, warehouse, 2, add_days(today(), -3))
+		self.issue(item, warehouse, 3, add_days(today(), -3))
+		changed = self.issue(other_item, warehouse, 1, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", changed, "stock_value_difference", -50)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -4))
+
+		self.assertEqual([row.name for row in rows], [changed])
