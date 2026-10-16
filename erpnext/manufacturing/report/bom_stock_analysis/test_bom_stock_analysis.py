@@ -261,6 +261,17 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 				self.assertEqual(items[material]["qty_per_unit"], fmt_qty(2))
 				self.assertEqual(footer["description"], 5)
 
+	def test_default_view_explodes_phantom_boms(self):
+		bom, material, warehouse = self.build_bom_with_shared_material()
+
+		for exploded in (False, True):
+			with self.subTest(exploded=exploded):
+				items, footer = run_report(bom, warehouse, exploded, qty_to_make=0)
+				self.assertEqual(list(items), [material])
+				self.assertEqual(items[material]["qty_per_unit"], fmt_qty(2))
+				self.assertEqual(items[material]["available_qty"], fmt_qty(10))
+				self.assertEqual(footer["description"], 5)
+
 
 def run_report(bom, warehouse, exploded, qty_to_make):
 	"""Component rows keyed by item code, plus the footer row."""
