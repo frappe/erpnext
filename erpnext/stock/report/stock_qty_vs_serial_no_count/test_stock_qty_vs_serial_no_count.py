@@ -103,3 +103,21 @@ class TestStockQtyVsSerialNoCount(ERPNextTestSuite):
 		)
 
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Consumed")
+
+	def test_sync_restores_serial_nos_in_stock(self):
+		from erpnext.stock.report.stock_qty_vs_serial_no_count.stock_qty_vs_serial_no_count import (
+			sync_serial_no_status_for_warehouse,
+		)
+
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=1, rate=100)
+		serial_no = frappe.get_all(
+			"Serial and Batch Entry", {"parent": se.items[0].serial_and_batch_bundle}, pluck="serial_no"
+		)[0]
+		frappe.db.set_value("Serial No", serial_no, {"status": "Inactive", "warehouse": None})
+
+		sync_serial_no_status_for_warehouse("Stores - _TC", item_code=item)
+
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial_no, ["status", "warehouse"]), ("Active", "Stores - _TC")
+		)
