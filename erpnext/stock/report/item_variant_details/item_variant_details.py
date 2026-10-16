@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_masters_condition,
@@ -127,23 +128,25 @@ def get_columns(item):
 def get_open_sales_orders_count(variants_list):
 	open_sales_orders = frappe.db.get_list(
 		"Sales Order",
-		fields=["name", "`tabSales Order Item`.item_code"],
+		fields=[
+			"name",
+			"`tabSales Order Item`.item_code",
+			"`tabSales Order Item`.qty",
+			"`tabSales Order Item`.delivered_qty",
+		],
 		filters=[
 			["Sales Order", "docstatus", "=", 1],
+			["Sales Order", "status", "not in", ["Closed", "Completed"]],
 			["Sales Order Item", "item_code", "in", variants_list],
 		],
-		distinct=1,
 	)
 
-	order_count_map = {}
+	open_orders = {}
 	for row in open_sales_orders:
-		item_code = row.get("item_code")
-		if order_count_map.get(item_code) is None:
-			order_count_map[item_code] = 1
-		else:
-			order_count_map[item_code] += 1
+		if flt(row.delivered_qty) < flt(row.qty):
+			open_orders.setdefault(row.item_code, set()).add(row.name)
 
-	return order_count_map
+	return {item_code: len(orders) for item_code, orders in open_orders.items()}
 
 
 def get_stock_details_map(variant_list):

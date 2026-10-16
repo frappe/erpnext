@@ -35,3 +35,25 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		self.assertEqual(row.get("test_size"), "Small")
 		self.assertEqual(row.get("current_stock"), 5)
 		self.assertEqual(row.get("open_orders"), 0)
+
+	def test_open_orders_leave_out_delivered_and_closed_orders(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant.insert(ignore_if_duplicate=True)
+		make_stock_entry(item_code=variant.name, to_warehouse="Stores - _TC", qty=10, rate=100)
+
+		orders = [
+			make_sales_order(item_code=variant.name, qty=2, warehouse="Stores - _TC") for _order in range(3)
+		]
+		make_delivery_note(orders[1].name).submit()
+		orders[2].update_status("Closed")
+
+		row = next(
+			row
+			for row in self.run_report(item="_Test Variant Item")
+			if row.get("variant_name") == variant.name
+		)
+
+		self.assertEqual(row.get("open_orders"), 1)
