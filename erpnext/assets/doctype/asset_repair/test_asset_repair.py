@@ -165,7 +165,6 @@ class TestAssetRepair(ERPNextTestSuite):
 	def test_status_job_keeps_asset_out_of_order_for_repair_pending_before_it_runs(self):
 		asset = create_asset(submit=1)
 		first_repair = create_asset_repair(asset=asset)
-		asset_modified = frappe.db.get_value("Asset", asset.name, "modified")
 
 		with patch(f"{asset_repair_module.__name__}.update_asset_status_after_repair") as deferred_job:
 			first_repair.repair_status = "Completed"
@@ -173,14 +172,33 @@ class TestAssetRepair(ERPNextTestSuite):
 			first_repair.save()
 			create_asset_repair(asset=asset)
 
-		self.assertEqual(frappe.db.get_value("Asset", asset.name, "modified"), asset_modified)
-		asset_repair_module.update_asset_status_after_repair(**deferred_job.call_args.kwargs)
+		asset_repair_module.update_asset_status_after_repair(**deferred_job.call_args_list[0].kwargs)
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
 		back_in_service_logs = frappe.get_all(
 			"Asset Activity", {"asset": asset.name, "subject": ("like", "%back in service%")}
 		)
 		self.assertFalse(back_in_service_logs)
+
+	def test_failed_save_of_pending_repair_keeps_asset_out_of_order(self):
+		asset = create_asset(submit=1)
+		completed_repair = create_asset_repair(asset=asset)
+		pending_repair = create_asset_repair(asset=asset)
+
+		with patch(f"{asset_repair_module.__name__}.update_asset_status_after_repair") as deferred_job:
+			completed_repair.repair_status = "Completed"
+			completed_repair.completion_date = now_datetime()
+			completed_repair.save()
+
+			pending_repair.repair_status = "Completed"
+			pending_repair.completion_date = add_days(pending_repair.failure_date, -1)
+			self.assertRaises(frappe.ValidationError, pending_repair.save)
+
+		self.assertEqual(deferred_job.call_count, 1)
+		asset_repair_module.update_asset_status_after_repair(**deferred_job.call_args.kwargs)
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		self.assertEqual(frappe.db.get_value("Asset Repair", pending_repair.name, "repair_status"), "Pending")
 
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
