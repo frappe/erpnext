@@ -112,8 +112,11 @@ class PaymentRequest(Document):
 		if self.get("__islocal"):
 			self.status = "Draft"
 		self.validate_reference_document()
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		ref_doc.check_permission("read")
+		self.validate_reference_company(ref_doc)
 		self.validate_against_payment_reference()
-		self.validate_payment_request_amount()
+		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
 
@@ -139,7 +142,19 @@ class PaymentRequest(Document):
 		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
-	def validate_payment_request_amount(self):
+	def validate_reference_company(self, ref_doc):
+		if self.company != ref_doc.company:
+			frappe.throw(
+				_("Company {0} does not match the company {1} of {2} {3}").format(
+					frappe.bold(self.company),
+					frappe.bold(ref_doc.company),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Company"),
+			)
+
+	def validate_payment_request_amount(self, ref_doc):
 		if self.payment_reference:
 			return
 		if self.grand_total == 0:
@@ -148,7 +163,6 @@ class PaymentRequest(Document):
 				title=_("Invalid Amount"),
 			)
 
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if not hasattr(ref_doc, "order_type") or ref_doc.order_type != "Shopping Cart":
 			ref_amount = get_amount(ref_doc, self.payment_account)
 			if not ref_amount:

@@ -1001,3 +1001,54 @@ class TestPaymentRequest(ERPNextTestSuite):
 				return_doc=True,
 				schedules=schedules,
 			)
+
+	def test_payment_request_company_must_match_reference_company(self):
+		po = create_purchase_order()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": "_Test Company 1",
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"does not match the company"),
+			pr.insert,
+		)
+
+	def test_payment_request_requires_read_permission_on_reference(self):
+		po = create_purchase_order()
+
+		accounts_user = "accounts-user@example.com"
+		if not frappe.db.exists("User", accounts_user):
+			user = frappe.new_doc("User")
+			user.email = accounts_user
+			user.first_name = "Accounts"
+			user.send_welcome_email = 0
+			user.add_roles("Accounts User")
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": po.company,
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+			}
+		)
+
+		with self.set_user(accounts_user):
+			self.assertRaises(frappe.PermissionError, pr.insert)
