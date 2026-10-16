@@ -101,7 +101,7 @@ function get_filters() {
 
 				const filters = budget_against !== "Branch" && company ? { company: company } : {};
 
-				return frappe.db.get_link_options(budget_against, txt, filters);
+				return erpnext.utils.get_link_options(budget_against, txt, filters);
 			},
 		},
 		{
