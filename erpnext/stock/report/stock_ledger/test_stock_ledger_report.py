@@ -488,3 +488,29 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		rows = list(execute(filters)[1])
 
 		self.assertEqual([row.get("in_qty_box") for row in rows if row.get("in_qty")], [1, 1, 1])
+
+	def test_opening_row_is_converted_to_the_include_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=17, basic_rate=100, posting_date=add_days(today(), -3)
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			include_uom="Box",
+		)
+		opening = execute(filters)[1][0]
+
+		self.assertEqual(opening["qty_after_transaction_box"], 1.7)
