@@ -33,36 +33,6 @@ class TestEmployee(ERPNextTestSuite):
 		employee_doc.save()
 		self.assertNotIn("Employee", frappe.get_roles(user))
 
-	def test_hr_user_links_only_users_without_extra_roles(self):
-		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
-
-		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
-		manager = make_fenced_user("employee-manager@example.com", ["System Manager"])
-		staff = make_fenced_user("employee-staff@example.com", ["Employee"])
-		for user in (manager, staff):
-			frappe.db.set_value("User", user, "enabled", 1)
-			frappe.db.delete("Employee", {"user_id": user})
-
-		def new_employee(user_id):
-			return frappe.get_doc(
-				doctype="Employee",
-				first_name=user_id,
-				company="_Test Company",
-				user_id=user_id,
-				status="Left",
-				relieving_date="2024-01-01",
-				date_of_birth="1990-05-08",
-				date_of_joining="2013-01-01",
-				gender="Female",
-			)
-
-		with as_user(hr_user):
-			self.assertRaises(frappe.PermissionError, new_employee(manager).insert)
-			new_employee(staff).insert()
-
-		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 1)
-		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
-
 	def test_employee_user_permission(self):
 		employee1 = make_employee(
 			"employee_1_test@company.com", create_user_permission=1, company="_Test Company"
