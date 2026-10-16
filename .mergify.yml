@@ -84,7 +84,7 @@ pull_request_rules:
 queue_rules:
   - name: default
     batch_size: 5
-    batch_max_wait_time: 30 min
+    batch_max_wait_time: 15 min
     max_checks_retries: 1
     merge_method: merge
     queue_conditions:
