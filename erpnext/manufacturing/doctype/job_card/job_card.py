@@ -201,7 +201,7 @@ class JobCard(Document):
 	def validate_pending_qty(self):
 		precision = self.precision("total_completed_qty")
 		remaining_qty = flt(flt(self.for_quantity) - flt(self.total_completed_qty), precision)
-		if flt(self.for_quantity) and flt(self.pending_qty, precision) > remaining_qty:
+		if flt(self.pending_qty, precision) > 0 and flt(self.pending_qty, precision) > remaining_qty:
 			frappe.throw(
 				_("Pending Qty {0} cannot be more than the {1} left after the Total Completed Qty").format(
 					bold(self.get_qty_with_uom(self.pending_qty)), bold(self.get_qty_with_uom(remaining_qty))
