@@ -198,8 +198,16 @@ class AssetRepair(AccountsController):
 				enqueue_after_commit=True,
 				now=frappe.in_test,
 			)
-		elif frappe.db.get_value("Asset", self.asset, "status", for_update=True) != "Out of Order":
-			frappe.db.set_value("Asset", self.asset, "status", "Out of Order")
+		else:
+			self.mark_asset_out_of_order()
+
+	def mark_asset_out_of_order(self):
+		previous_status = frappe.db.get_value("Asset", self.asset, "status", for_update=True)
+		status_changed = previous_status != "Out of Order"
+		# Write even when unchanged, so on Postgres a status job that locks the asset after this
+		# commits fails with a serialization error and retries with a snapshot that sees this repair
+		frappe.db.set_value("Asset", self.asset, "status", "Out of Order", update_modified=status_changed)
+		if status_changed:
 			self.add_asset_activity(
 				_("Asset out of order due to Asset Repair {0}").format(
 					get_link_to_form("Asset Repair", self.name)
@@ -425,12 +433,13 @@ class AssetRepair(AccountsController):
 def update_asset_status_after_repair(asset: str, asset_repair: str) -> None:
 	"""Bring the asset back in service once no repair is pending.
 
-	Runs after the repair save commits, so repairs of the same asset completed concurrently
-	see each other's committed status."""
+	Runs after the repair save commits. The asset is locked before repairs are checked, so a
+	Pending repair save, which locks the asset after its own row, either commits before the check
+	or runs after this job and marks the asset out of order again."""
+	asset_doc = frappe.get_doc("Asset", asset, for_update=True)
 	if has_pending_repair(asset):
 		return
 
-	asset_doc = frappe.get_doc("Asset", asset, for_update=True)
 	previous_status = asset_doc.status
 	asset_doc.set_status(asset_doc.get_status())
 	if previous_status == "Out of Order" and asset_doc.status != "Out of Order":
@@ -443,13 +452,15 @@ def update_asset_status_after_repair(asset: str, asset_repair: str) -> None:
 
 
 def has_pending_repair(asset: str) -> bool:
-	# Locking read: waits for in-flight repair saves of this asset and reads their committed status
+	# Locking read sees the latest committed rows. Skipping rows locked by in-flight saves avoids a
+	# deadlock with them, as they wait for the asset lock held here and correct the status after.
 	return bool(
 		frappe.db.get_value(
 			"Asset Repair",
 			{"asset": asset, "repair_status": "Pending", "docstatus": ("<", 2)},
 			"name",
 			for_update=True,
+			skip_locked=True,
 		)
 	)
 

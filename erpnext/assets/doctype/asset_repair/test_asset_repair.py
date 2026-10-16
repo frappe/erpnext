@@ -162,6 +162,26 @@ class TestAssetRepair(ERPNextTestSuite):
 		)
 		self.assertEqual(len(back_in_service_logs), 1)
 
+	def test_status_job_keeps_asset_out_of_order_for_repair_pending_before_it_runs(self):
+		asset = create_asset(submit=1)
+		first_repair = create_asset_repair(asset=asset)
+		asset_modified = frappe.db.get_value("Asset", asset.name, "modified")
+
+		with patch(f"{asset_repair_module.__name__}.update_asset_status_after_repair") as deferred_job:
+			first_repair.repair_status = "Completed"
+			first_repair.completion_date = now_datetime()
+			first_repair.save()
+			create_asset_repair(asset=asset)
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "modified"), asset_modified)
+		asset_repair_module.update_asset_status_after_repair(**deferred_job.call_args.kwargs)
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		back_in_service_logs = frappe.get_all(
+			"Asset Activity", {"asset": asset.name, "subject": ("like", "%back in service%")}
+		)
+		self.assertFalse(back_in_service_logs)
+
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 
