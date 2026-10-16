@@ -4165,6 +4165,29 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertNotIn(restricted_card.name, str(error.exception))
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_patch_sets_the_rate_of_job_cards_moved_to_another_workstation(self):
+		from erpnext.patches.v16_0.set_job_card_hour_rate_of_moved_job_cards import execute
+
+		first_workstation = make_jc_review_workstation(hour_rate=600)
+		second_workstation = make_jc_review_workstation(hour_rate=1200)
+		operation = make_jc_review_operation(first_workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": first_workstation, "time_in_mins": 60}],
+			skip_transfer=1,
+		)
+
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		job_card.workstation = second_workstation
+		job_card.append("time_logs", jc_review_log("2031-03-17 08:00:00", 60, 10))
+		job_card.submit()
+		job_card.db_set("hour_rate", 600)
+
+		execute()
+		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "hour_rate"), 1200)
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
