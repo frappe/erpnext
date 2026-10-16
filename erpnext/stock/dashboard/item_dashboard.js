@@ -54,7 +54,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 				open_stock_entry(item, warehouse, entry_type);
 			} else {
 				if (action === "Add") {
-					let rate = unescape($(this).attr("data-rate"));
+					let rate = Number(element.attr("data-rate"));
 					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, stock_uom, function () {
 						me.refresh();
 					});
@@ -255,7 +255,7 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 		dialog.get_field("source").refresh();
 	}
 
-	if (rate) {
+	if (target) {
 		dialog.get_field("rate").set_value(rate);
 		dialog.get_field("rate").df.hidden = 0;
 		dialog.get_field("rate").refresh();
