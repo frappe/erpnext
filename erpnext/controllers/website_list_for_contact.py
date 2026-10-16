@@ -12,6 +12,25 @@ from frappe.query_builder.functions import Lower, Max
 from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
 
+# fields read by templates/includes/transaction_row.html
+PORTAL_ROW_FIELDS = (
+	"name",
+	"docstatus",
+	"status",
+	"modified",
+	"currency",
+	"grand_total",
+	"rounded_total",
+	"disable_rounded_total",
+)
+PORTAL_ROW_DISPLAY_KEYS = (
+	"indicator_color",
+	"indicator_title",
+	"status_percent",
+	"status_display",
+	"items_preview",
+)
+
 
 def get_list_context(context=None):
 	return {
@@ -224,9 +243,21 @@ def post_process(doctype, data):
 
 		doc.status_display = ", ".join(doc.status_display)
 		doc.items_preview = ", ".join(d.item_name for d in doc.items if d.item_name)
-		result.append(doc)
+		result.append(get_portal_row(doc))
 
 	return result
+
+
+def get_portal_row(doc):
+	"""Return a copy of `doc` with only the values the portal row shows.
+
+	The list is also returned as JSON, so the full document would expose cost and margin fields.
+	"""
+	row = frappe.get_doc({"doctype": doc.doctype, **{f: doc.get(f) for f in PORTAL_ROW_FIELDS}})
+	for key in PORTAL_ROW_DISPLAY_KEYS:
+		row.set(key, doc.get(key))
+
+	return row
 
 
 def get_customers_suppliers(doctype, user):
