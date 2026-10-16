@@ -1,3 +1,16 @@
+shared:
+  pr_checks: &pr_checks
+    - "#approved-reviews-by>=1"
+    - label!=dont-merge
+    - check-success=linters
+    - check-success=Check Commit Titles
+  suite_checks: &suite_checks
+    - check-success=Patch Test
+    - check-success=Python Unit Tests (1)
+    - check-success=Python Unit Tests (2)
+    - check-success=Python Unit Tests (3)
+    - check-success=Python Unit Tests (4)
+
 pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
@@ -59,6 +72,15 @@ pull_request_rules:
           - version-16-hotfix
         assignees:
           - "{{ author }}"
+  - name: Merge PRs tested alone
+    conditions:
+      - base=develop
+      - label=merge-alone
+      - and: *pr_checks
+      - and: *suite_checks
+    actions:
+      merge:
+        method: merge
 
 queue_rules:
   - name: default
@@ -68,16 +90,9 @@ queue_rules:
     merge_method: merge
     queue_conditions:
       - base=develop
-      - "#approved-reviews-by>=1"
-      - label!=dont-merge
-      - check-success=linters
-      - check-success=Check Commit Titles
-    merge_conditions:
-      - check-success=Patch Test
-      - check-success=Python Unit Tests (1)
-      - check-success=Python Unit Tests (2)
-      - check-success=Python Unit Tests (3)
-      - check-success=Python Unit Tests (4)
+      - label!=merge-alone
+      - and: *pr_checks
+    merge_conditions: *suite_checks
 
 merge_queue:
   skip_intermediate_results: true
