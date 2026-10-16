@@ -6,6 +6,7 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
 from pypika import Order
@@ -25,7 +26,7 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
 	items = get_items(filters)
-	if items == []:
+	if items == [] or not apply_permitted_warehouses(filters):
 		return columns, []
 
 	sl_entries = get_stock_ledger_entries(filters, items)
@@ -769,6 +770,16 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 		"valuation_rate": valuation_rate,
 		"stock_value": total_stock_value,
 	}
+
+
+def apply_permitted_warehouses(filters):
+	permitted = get_permitted_documents("Warehouse")
+	if not permitted or not filters.get("warehouse"):
+		return True
+
+	selected = set(get_matching_warehouses(filters.warehouse))
+	filters.warehouse = [warehouse for warehouse in permitted if warehouse in selected]
+	return bool(filters.warehouse)
 
 
 def get_matching_warehouses(warehouses):
