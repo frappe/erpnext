@@ -6,7 +6,9 @@ import math
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import add_days, getdate, parse_json
+from frappe.utils import add_days, get_link_to_form, getdate, parse_json
+
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
 
 
 class MasterProductionSchedule(Document):
@@ -62,6 +64,23 @@ class MasterProductionSchedule(Document):
 	def validate(self):
 		self.set_to_date()
 		self.validate_company()
+		self.validate_sales_forecast_not_used()
+
+	def validate_sales_forecast_not_used(self):
+		if not self.sales_forecast:
+			return
+
+		frappe.db.get_value("Sales Forecast", self.sales_forecast, "name", for_update=True)
+		existing = frappe.db.get_value(
+			"Master Production Schedule",
+			{"sales_forecast": self.sales_forecast, "name": ("!=", self.name or "")},
+		)
+		if existing:
+			frappe.throw(
+				_("Sales Forecast {0} already has Master Production Schedule {1}").format(
+					bold(self.sales_forecast), get_link_to_form("Master Production Schedule", existing)
+				)
+			)
 
 	def validate_company(self):
 		if self.sales_forecast:
@@ -434,6 +453,16 @@ class MasterProductionSchedule(Document):
 			return
 
 		return [d.item_code for d in self.select_items if d.item_code]
+
+	def on_update(self):
+		previous = self.get_doc_before_save()
+		if previous and previous.sales_forecast != self.sales_forecast:
+			update_sales_forecast_status(previous.sales_forecast)
+
+		update_sales_forecast_status(self.sales_forecast)
+
+	def after_delete(self):
+		update_sales_forecast_status(self.sales_forecast)
 
 	def on_submit(self):
 		self.enqueue_mrp_creation()

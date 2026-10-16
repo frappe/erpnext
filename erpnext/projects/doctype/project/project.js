@@ -274,8 +274,8 @@ frappe.ui.form.on("Project", {
 									project: frm.doc.name,
 								}
 							)
-							.then(() => {
-								frappe.set_route("List", "Task", "Kanban", frm.doc.project_name);
+							.then((r) => {
+								frappe.set_route("List", "Task", "Kanban", r.message);
 							});
 					},
 					__("View")
@@ -331,8 +331,8 @@ frappe.ui.form.on("Project", {
 					options: "Completed\nCancelled",
 				},
 			],
-			primary_action: function () {
-				frm.events.set_status(frm, dialog.get_values().status);
+			primary_action: function (values) {
+				frm.events.set_status(frm, values.status);
 				dialog.hide();
 			},
 			primary_action_label: __("Set Project Status"),

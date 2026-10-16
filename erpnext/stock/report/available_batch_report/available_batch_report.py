@@ -175,15 +175,14 @@ def get_query_based_on_filters(query, batch, table, filters):
 	if filters.batch_no:
 		query = query.where(batch.name == filters.batch_no)
 
-	if filters.to_date == today():
-		if not filters.include_expired_batches:
-			query = query.where((batch.expiry_date >= today()) | (batch.expiry_date.isnull()))
+	if not filters.include_expired_batches:
+		query = query.where((batch.expiry_date >= filters.to_date) | (batch.expiry_date.isnull()))
 
+	if filters.to_date == today():
 		query = query.where(batch.batch_qty > 0)
 
-	else:
-		to_date = get_datetime(str(filters.to_date) + " 23:59:59")
-		query = query.where(table.posting_datetime <= to_date)
+	to_date = get_datetime(str(filters.to_date) + " 23:59:59")
+	query = query.where(table.posting_datetime <= to_date)
 
 	if filters.warehouse:
 		lft, rgt = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"])

@@ -161,6 +161,9 @@ class OperationsService:
 		if sum(1 for d in self.doc.operations if d.operation == row.operation) > 1:
 			return []
 
+		if flt(self.get_scheduled_plan_row_qty(plan_row)) != flt(self.doc.qty):
+			return []
+
 		return frappe.get_all(
 			"Production Plan Schedule",
 			filters={
@@ -171,6 +174,12 @@ class OperationsService:
 			fields=["from_time", "to_time", "duration_mins", "workstation"],
 			order_by="from_time",
 		)
+
+	def get_scheduled_plan_row_qty(self, plan_row):
+		if self.doc.production_plan_item:
+			return frappe.db.get_value("Production Plan Item", plan_row, "planned_qty", cache=True)
+
+		return frappe.db.get_value("Production Plan Sub Assembly Item", plan_row, "qty", cache=True)
 
 	def _validate_capacity_window(self, row, plan_days):
 		from erpnext.manufacturing.doctype.work_order.work_order import CapacityError

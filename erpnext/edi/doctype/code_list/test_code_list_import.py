@@ -113,6 +113,18 @@ class TestCodeListImport(ERPNextTestSuite):
 			file_doc = frappe.get_doc("File", import_result["file"])
 			self.assertEqual(file_doc.get_content(encodings=()), SAMPLE_GENERICODE)
 
+	def test_uploaded_file_is_saved_under_a_plain_name(self):
+		cases = (("../../sub/list.xml", "_.._sub_list.xml"), ("..", "genericode.xml"))
+		for index, (file_name, expected) in enumerate(cases):
+			frappe.db.delete("Code List", "test-code-list-v1")
+			content = SAMPLE_GENERICODE + f"<!-- {index} {frappe.generate_hash()} -->".encode()
+			with self.upload_context(content=content, file_name=file_name):
+				import_result = code_list_import.import_genericode()
+
+			file_doc = frappe.get_doc("File", import_result["file"])
+			self.assertEqual(file_doc.file_name, expected)
+			self.assertEqual(file_doc.file_url, f"/private/files/{expected}")
+
 	def test_process_genericode_import_reads_file_doc_content(self):
 		with self.upload_context(content=SAMPLE_GENERICODE, file_name="uploaded_genericode.xml"):
 			import_result = code_list_import.import_genericode()
@@ -124,6 +136,14 @@ class TestCodeListImport(ERPNextTestSuite):
 			)
 
 			self.assertEqual(count, 3)
+			self.assertEqual(frappe.db.count("Common Code", {"code_list": import_result["code_list"]}), 3)
+
+			code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+			)
 			self.assertEqual(frappe.db.count("Common Code", {"code_list": import_result["code_list"]}), 3)
 			self.assertEqual(
 				frappe.db.get_value(
@@ -147,6 +167,83 @@ class TestCodeListImport(ERPNextTestSuite):
 			import_result = code_list_import.import_genericode()
 
 			self.assert_import_response(import_result)
+
+	def test_import_genericode_refuses_files_without_required_elements(self):
+		for element in (
+			b"<ShortName>Test Code List</ShortName>",
+			b"<CanonicalVersionUri>test-code-list-v1</CanonicalVersionUri>",
+		):
+			with self.upload_context(content=SAMPLE_GENERICODE.replace(element, b"")):
+				self.assertRaises(frappe.ValidationError, code_list_import.import_genericode)
+
+	def test_process_genericode_import_filters_on_values_with_special_characters(self):
+		content = SAMPLE_GENERICODE.replace(b"Group 1", b"R&amp;D").replace(
+			b"Group 2", "Côte d'Ivoire".encode()
+		)
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		def import_with(category: str) -> int:
+			return code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+				filters={"category": category},
+			)
+
+		offered = sorted(import_result["filterable_columns"]["category"])
+		self.assertEqual(offered, ["Côte d&apos;Ivoire", "R&amp;D"])
+		self.assertEqual([import_with(value) for value in offered], [1, 2])
+		self.assertEqual(import_with("Côte d'Ivoire"), 1)
+
+	def test_process_genericode_import_refuses_a_row_without_code(self):
+		content = SAMPLE_GENERICODE.replace(
+			b'<Value ColumnRef="code"><SimpleValue>B</SimpleValue></Value>', b""
+		)
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Row 2"):
+			code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+			)
+
+	def test_process_genericode_import_reports_the_source_row_when_filtered(self):
+		content = SAMPLE_GENERICODE.replace(
+			b'<Value ColumnRef="code"><SimpleValue>C</SimpleValue></Value>', b""
+		)
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Row 3"):
+			code_list_import.process_genericode_import(
+				code_list_name=import_result["code_list"],
+				file_name=import_result["file"],
+				code_column="code",
+				title_column="name",
+				filters={"category": "Group 1"},
+			)
+
+	def test_process_genericode_import_keeps_codes_that_differ_in_case(self):
+		content = SAMPLE_GENERICODE.replace(b"<SimpleValue>B</SimpleValue>", b"<SimpleValue>a</SimpleValue>")
+		with self.upload_context(content=content):
+			import_result = code_list_import.import_genericode()
+
+		code_list_import.process_genericode_import(
+			code_list_name=import_result["code_list"],
+			file_name=import_result["file"],
+			code_column="code",
+			title_column="name",
+		)
+
+		codes = frappe.get_all(
+			"Common Code", {"code_list": import_result["code_list"]}, ["common_code", "title"], as_list=True
+		)
+		self.assertCountEqual(codes, [("A", "Alpha"), ("a", "Beta"), ("C", "Gamma")])
 
 	@staticmethod
 	@contextmanager

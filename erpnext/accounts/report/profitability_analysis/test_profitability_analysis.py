@@ -105,3 +105,49 @@ class TestProfitabilityAnalysis(ERPNextTestSuite):
 		# and it includes this test's bookings
 		self.assertGreaterEqual(total_row["income"], 10000)
 		self.assertGreaterEqual(total_row["expense"], 4000)
+
+	def test_restricted_user_sees_only_permitted_cost_center_figures(self):
+		permitted = self.make_cc("_Test PA Permitted")
+		self.book_income(permitted, 400)
+		self.book_income(self.make_cc("_Test PA Restricted"), 1000)
+		user = make_user_restricted_to_cost_center(permitted)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(data[-1]["income"], 400)
+
+	def test_entries_of_other_finance_books_are_left_out(self):
+		cc = self.make_cc("_Test PA Finance Book")
+		self.book_expense(cc, 300)
+		journal_entry = make_journal_entry(
+			EXPENSE, BANK, 500, cost_center=cc, posting_date="2026-06-01", save=False
+		)
+		journal_entry.finance_book = (
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test PA Finance Book"})
+			.insert(ignore_if_duplicate=True)
+			.name
+		)
+		journal_entry.submit()
+
+		self.assertEqual(self.row(self.run_report(), cc)["expense"], 300)
+		data = self.run_report(finance_book=journal_entry.finance_book)
+		self.assertEqual(self.row(data, cc)["expense"], 800)
+
+
+def make_user_restricted_to_cost_center(cost_center):
+	user = "test_profitability_analysis@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Profitability Analysis",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Cost Center", cost_center, user)
+	return user

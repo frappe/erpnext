@@ -159,6 +159,24 @@ class ProductionPlan(Document):
 			validate_warehouse_company(self.for_warehouse, self.company)
 		self.enable_auto_reserve_stock()
 
+	def on_update(self):
+		self.clear_stale_schedule()
+
+	def clear_stale_schedule(self):
+		previous = self.get_doc_before_save()
+		if self.docstatus or not previous:
+			return
+
+		if get_schedule_signature(previous) == get_schedule_signature(self):
+			return
+
+		if frappe.db.exists("Production Plan Schedule", {"production_plan": self.name}):
+			self.delete_production_plan_schedule()
+			frappe.msgprint(
+				_("The items of the plan changed, so its schedule was cleared. Use Schedule Items again."),
+				alert=True,
+			)
+
 	def validate_raw_material_group_warehouse(self):
 		if not self.raw_material_group_warehouse:
 			return
@@ -353,6 +371,9 @@ class ProductionPlan(Document):
 		self.update_stock_reservation()
 		self.delete_sub_assembly_and_material_rows()
 
+	def on_trash(self):
+		self.delete_production_plan_schedule()
+
 	def delete_production_plan_schedule(self):
 		frappe.db.delete("Production Plan Schedule", {"production_plan": self.name})
 
@@ -460,6 +481,7 @@ class ProductionPlan(Document):
 		if close:
 			self.db_set("status", "Closed")
 			self.update_bin_qty()
+			self.delete_production_plan_schedule()
 			return
 
 		if self.total_produced_qty > 0:
@@ -583,3 +605,13 @@ class ProductionPlan(Document):
 
 	def all_items_completed(self):
 		return SubAssemblyService(self).all_items_completed()
+
+
+def get_schedule_signature(doc):
+	return (
+		sorted((row.name, row.item_code, row.bom_no, flt(row.planned_qty)) for row in doc.po_items),
+		sorted(
+			(row.name, row.production_item, row.bom_no, flt(row.qty), row.type_of_manufacturing)
+			for row in doc.sub_assembly_items
+		),
+	)

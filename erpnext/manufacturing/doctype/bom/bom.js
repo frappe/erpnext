@@ -1279,8 +1279,7 @@ frappe.ui.form.on("BOM", {
 			title: __("Add Raw Materials"),
 			fields: fields,
 			primary_action_label: __("Add"),
-			primary_action: () => {
-				let values = frm._bom_rm_dialog.get_values();
+			primary_action: (values) => {
 				if (values) {
 					frm.events._add_raw_materials(frm, values);
 					frm._bom_rm_dialog.hide();

@@ -127,8 +127,8 @@ class TestCallLog(ERPNextTestSuite):
 	def test_agent_can_save_summary_of_own_call(self):
 		user = "test_call_agent@example.com"
 		employee = make_employee(user, company="_Test Company")
-		call_type = frappe.get_doc({"doctype": "Telephony Call Type", "call_type": "_Test Call Type"})
-		call_type.insert(ignore_if_duplicate=True)
+		if not frappe.db.exists("Telephony Call Type", "_Test Call Type"):
+			frappe.get_doc({"doctype": "Telephony Call Type", "call_type": "_Test Call Type"}).submit()
 		call_log = self._make_call_log(
 			**{"from": "+919999999999", "type": "Outgoing"},
 			call_received_by=employee,

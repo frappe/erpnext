@@ -177,14 +177,19 @@ class TestCustomerOverview(ERPNextTestSuite):
 					"ageing_based_on": "Due Date",
 				}
 			)[1]
-			expected = next((r.get("advance") for r in rows if r.get("party") == CUSTOMER), None)
+			expected = next((r.get("advance") for r in rows if r.get("party") == CUSTOMER), 0)
 			self.assertEqual(
 				customer_overview.get_customer_receivables(CUSTOMER, COMPANY)["advances"]["value"], expected
 			)
 
-	def test_advances_missing_report_row_is_not_zero(self):
+	def test_advances_missing_report_row(self):
 		with patch(
 			"erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary.execute",
 			return_value=([], []),
 		):
-			self.assertIsNone(customer_overview.reported_advances(CUSTOMER, COMPANY, today()))
+			with patch.object(
+				customer_overview, "get_partywise_advanced_payment_amount", return_value={CUSTOMER: 500}
+			):
+				self.assertEqual(customer_overview.reported_advances(CUSTOMER, COMPANY, today()), 500)
+			with patch.object(customer_overview, "_unrestricted_read", return_value=False):
+				self.assertIsNone(customer_overview.reported_advances(CUSTOMER, COMPANY, today()))

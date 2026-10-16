@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import nowtime, random_string
 
+from erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log import BulkTransactionLog
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -74,3 +75,79 @@ class TestBulkTransactionLog(ERPNextTestSuite):
 			"target date has no rows; rows on another date must not leak in",
 		)
 		self.assertRaises(frappe.DoesNotExistError, self._make_log_doc(target_date).load_from_db)
+
+	def test_list_pages_through_dates_with_status_counts(self):
+		dates = ["2099-01-03", "2099-01-02", "2099-01-01"]
+		for date in dates:
+			self._insert_detail(date, "Success")
+		self._insert_detail(dates[0], "Failed")
+
+		first_page = get_list(start=0, page_length=2)
+		second_page = get_list(start=2, page_length=2)
+
+		self.assertEqual([str(log.date) for log in first_page], dates[:2])
+		self.assertEqual(str(second_page[0].date), dates[2])
+		self.assertEqual(
+			(first_page[0].log_entries, first_page[0].succeeded, first_page[0].failed), (2, 1, 1)
+		)
+
+		count = BulkTransactionLog.get_count(frappe._dict())
+		self.assertEqual(
+			count, len(frappe.get_all("Bulk Transaction Log Detail", pluck="date", distinct=True))
+		)
+
+	def test_list_requires_read_permission(self):
+		frappe.set_user("test1@example.com")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		self.assertRaises(frappe.PermissionError, get_list)
+		self.assertRaises(frappe.PermissionError, BulkTransactionLog.get_count, frappe._dict(filters=[]))
+
+	def test_list_accepts_each_filter_shape(self):
+		date = "2099-02-01"
+		self._insert_detail(date)
+		self._insert_detail("2099-02-02")
+
+		for filters in (
+			{"date": date},
+			{"date": ["=", date]},
+			[["date", date]],
+			[["date", "=", date]],
+			[["Bulk Transaction Log", "date", "=", date]],
+		):
+			args = frappe._dict(filters=filters)
+			self.assertEqual([str(log.date) for log in BulkTransactionLog.get_list(args)], [date], filters)
+			self.assertEqual(BulkTransactionLog.get_count(args), 1, filters)
+
+		self.assertTrue(BulkTransactionLog.get_list(frappe._dict()))
+
+	def test_list_and_count_keep_the_filter_operator(self):
+		self._insert_detail("2099-03-01")
+		self._insert_detail("2099-03-02")
+		self._insert_detail("2099-03-03")
+
+		for filters in (
+			{"date": ["!=", "2099-03-01"]},
+			[["date", "!=", "2099-03-01"]],
+		):
+			args = frappe._dict(filters=filters)
+			dates = [str(log.date) for log in BulkTransactionLog.get_list(args)]
+			self.assertNotIn("2099-03-01", dates)
+			self.assertIn("2099-03-02", dates)
+			self.assertEqual(BulkTransactionLog.get_count(args), count_dates(["!=", "2099-03-01"]))
+
+		args = frappe._dict(filters={"date": ["between", ["2099-03-02", "2099-03-03"]]})
+		self.assertEqual(
+			[str(log.date) for log in BulkTransactionLog.get_list(args)], ["2099-03-03", "2099-03-02"]
+		)
+		self.assertEqual(BulkTransactionLog.get_count(args), 2)
+
+
+def get_list(**args) -> list:
+	return BulkTransactionLog.get_list(frappe._dict(args))
+
+
+def count_dates(date_filter: list) -> int:
+	return len(
+		frappe.get_all("Bulk Transaction Log Detail", {"date": date_filter}, pluck="date", distinct=True)
+	)

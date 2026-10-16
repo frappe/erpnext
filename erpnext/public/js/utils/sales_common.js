@@ -292,7 +292,8 @@ erpnext.sales_common = {
 						.filter(
 							(item) =>
 								item.parent_detail_docname === cdn ||
-								parseInt(item.parent_detail_docname) === locals[cdt][cdn].idx
+								(/^\d+$/.test(String(item.parent_detail_docname)) &&
+									Number(item.parent_detail_docname) === locals[cdt][cdn].idx)
 						)
 						.forEach((item) => {
 							frappe.model.set_value(
@@ -521,6 +522,29 @@ erpnext.sales_common = {
 			}
 
 			project(doc, cdt, cdn) {
+				if (!cdt || !cdn) {
+					if (this.frm.doc.project) {
+						$.each(this.frm.doc["items"] || [], function (i, item) {
+							if (!item.project) {
+								frappe.model.set_value(item.doctype, item.name, "project", doc.project);
+							}
+						});
+					}
+				} else {
+					const item = frappe.get_doc(cdt, cdn);
+					if (item.project) {
+						$.each(this.frm.doc["items"] || [], function (i, other_item) {
+							if (!other_item.project) {
+								frappe.model.set_value(
+									other_item.doctype,
+									other_item.name,
+									"project",
+									item.project
+								);
+							}
+						});
+					}
+				}
 				let me = this;
 				if (["Delivery Note", "Sales Invoice", "Sales Order"].includes(this.frm.doc.doctype)) {
 					if (this.frm.doc.project) {
@@ -620,9 +644,7 @@ erpnext.pre_sales = {
 				var dialog = new frappe.ui.Dialog({
 					title: __("Set as Lost"),
 					fields: erpnext.pre_sales.lost_reason_fields(frm.doctype),
-					primary_action: function () {
-						let values = dialog.get_values();
-
+					primary_action: function (values) {
 						frm.call({
 							doc: frm.doc,
 							method: "declare_enquiry_lost",

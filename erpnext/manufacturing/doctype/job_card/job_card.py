@@ -653,16 +653,55 @@ class JobCard(Document):
 	def schedule_time_logs(self, row):
 		row.remaining_time_in_mins = row.time_in_mins
 		while row.remaining_time_in_mins > 0:
+			slot_end = self.place_row_start(row)
+			if not slot_end:
+				self.schedule_without_working_hours(row)
+				continue
+
+			self.consume_working_hour_slot(row, slot_end)
+			if row.remaining_time_in_mins > 0:
+				row.planned_start_time = row.planned_end_time
+
+	def place_row_start(self, row):
+		while True:
+			start = get_datetime(row.planned_start_time)
 			args = frappe._dict(
 				{
 					"from_time": row.planned_start_time,
-					"to_time": row.planned_end_time,
+					"to_time": add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins),
 					"remaining_time_in_mins": row.remaining_time_in_mins,
 				}
 			)
-
 			self.validate_overlap_for_workstation(args, row)
-			self.check_workstation_time(row)
+			slot_end = self.align_start_to_working_time(row)
+			if get_datetime(row.planned_start_time) == start:
+				return slot_end
+
+	def align_start_to_working_time(self, row):
+		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)
+		working_hours = get_sorted_working_hours(workstation_doc)
+		allow_overtime = cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime"))
+
+		for _day in range(366):
+			start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
+			if not working_hours or allow_overtime:
+				return None
+
+			if slot_end := self.move_start_into_working_slot(working_hours, row, start_date):
+				return slot_end
+
+			row.planned_start_time = datetime.datetime.combine(
+				add_days(start_date, 1), get_time(working_hours[0].start_time)
+			)
+
+	@staticmethod
+	def move_start_into_working_slot(working_hours, row, start_date):
+		for time_slot in working_hours:
+			slot_start = datetime.datetime.combine(start_date, get_time(time_slot.start_time))
+			slot_end = datetime.datetime.combine(start_date, get_time(time_slot.end_time))
+			if get_datetime(row.planned_start_time) < slot_end:
+				row.planned_start_time = max(get_datetime(row.planned_start_time), slot_start)
+				return slot_end
 
 	def validate_overlap_for_workstation(self, args, row):
 		# get the last record based on the to time from the job card
@@ -689,23 +728,6 @@ class JobCard(Document):
 
 			self.validate_overlap_for_workstation(args, row)
 
-	def check_workstation_time(self, row):
-		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)
-		if not workstation_doc.working_hours or cint(
-			frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")
-		):
-			self.schedule_without_working_hours(row)
-			return
-
-		start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
-		start_date = self.fit_row_in_working_hours(workstation_doc, row, start_date)
-
-		if row.remaining_time_in_mins > 0:
-			start_date = add_days(start_date, 1)
-			row.planned_start_time = datetime.datetime.combine(
-				start_date, get_time(workstation_doc.working_hours[0].start_time)
-			)
-
 	def schedule_without_working_hours(self, row):
 		if get_datetime(row.planned_end_time) <= get_datetime(row.planned_start_time):
 			row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.time_in_mins)
@@ -724,28 +746,6 @@ class JobCard(Document):
 		if new_start_date != start_date:
 			row.planned_start_time = datetime.datetime.combine(new_start_date, start_time)
 			start_date = new_start_date
-
-		return start_date
-
-	def fit_row_in_working_hours(self, workstation_doc, row, start_date):
-		total_idx = len(workstation_doc.working_hours)
-
-		for i, time_slot in enumerate(workstation_doc.working_hours):
-			workstation_start_time = datetime.datetime.combine(start_date, get_time(time_slot.start_time))
-			workstation_end_time = datetime.datetime.combine(start_date, get_time(time_slot.end_time))
-
-			if not (
-				get_datetime(row.planned_start_time) >= workstation_start_time
-				and get_datetime(row.planned_start_time) <= workstation_end_time
-			):
-				continue
-
-			self.consume_working_hour_slot(row, workstation_end_time)
-
-			if total_idx != (i + 1) and row.remaining_time_in_mins > 0:
-				row.planned_start_time = datetime.datetime.combine(
-					start_date, get_time(workstation_doc.working_hours[i + 1].start_time)
-				)
 
 		return start_date
 
@@ -2079,6 +2079,13 @@ def validate_job_card_submitted_for_manufacture(job_card):
 				get_link_to_form("Job Card", job_card.name)
 			)
 		)
+
+
+def get_sorted_working_hours(workstation_doc):
+	return sorted(
+		(row for row in workstation_doc.working_hours if row.enabled),
+		key=lambda row: get_time(row.start_time),
+	)
 
 
 @frappe.whitelist(methods=["POST"])
