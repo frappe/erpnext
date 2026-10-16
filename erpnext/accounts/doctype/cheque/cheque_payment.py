@@ -51,12 +51,13 @@ def get_next_cheque(account: str) -> str | None:
 
 @frappe.whitelist()
 def get_cheque_summary(cheque: str) -> dict:
-	"""The range and the free count of the cheque's book, for the Payment Entry form."""
+	"""The cheque number, and the range and free count of its book, for the Payment Entry form."""
 	frappe.has_permission("Cheque", "read", cheque, throw=True)
-	cheque_book = frappe.db.get_value("Cheque", cheque, "cheque_book")
+	cheque_no, cheque_book = frappe.db.get_value("Cheque", cheque, ["cheque_no", "cheque_book"])
 	summary = frappe.db.get_value(
 		"Cheque Book", cheque_book, ["cheque_start_no", "cheque_end_no"], as_dict=True
 	)
+	summary.cheque_no = cheque_no
 	summary.free = frappe.db.count("Cheque", {"cheque_book": cheque_book, "status": "Available"})
 	return summary
 

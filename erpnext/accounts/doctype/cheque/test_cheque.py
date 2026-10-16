@@ -133,7 +133,7 @@ class TestChequePayment(ERPNextTestSuite):
 		self.pay("000101")
 		self.assertEqual(
 			get_cheque_summary(self.name_of("000102")),
-			{"cheque_start_no": "000101", "cheque_end_no": "000105", "free": 4},
+			{"cheque_no": "000102", "cheque_start_no": "000101", "cheque_end_no": "000105", "free": 4},
 		)
 
 	def test_submit_records_the_payment_on_the_cheque(self):
