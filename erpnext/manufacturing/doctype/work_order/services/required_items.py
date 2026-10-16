@@ -262,11 +262,9 @@ class RequiredItemsService:
 
 	def update_requested_qty_for_required_items(self):
 		"""Refresh per-row qty requested via open Material Requests but not yet transferred."""
-		requested_by_row = distribute_over_rows(
-			self.doc.required_items, self._material_request_pending_qty_by_item()
-		)
+		requested_items = self._material_request_pending_qty_by_item()
 		for row in self.doc.required_items:
-			row.db_set("requested_qty", requested_by_row[row.name], update_modified=False)
+			row.db_set("requested_qty", (requested_items.get(row.item_code) or 0.0), update_modified=False)
 
 	def _material_request_pending_qty_by_item(self):
 		mr = frappe.qb.DocType("Material Request")
@@ -290,9 +288,9 @@ class RequiredItemsService:
 	def update_picked_qty_for_required_items(self):
 		"""Refresh per-row qty picked but not yet transferred. Rows of a live material
 		request count as requested_qty instead, until that request stops or cancels."""
-		picked_by_row = distribute_over_rows(self.doc.required_items, self._pick_list_pending_qty_by_item())
+		picked_items = self._pick_list_pending_qty_by_item()
 		for row in self.doc.required_items:
-			row.db_set("picked_qty", picked_by_row[row.name], update_modified=False)
+			row.db_set("picked_qty", (picked_items.get(row.item_code) or 0.0), update_modified=False)
 
 	def _pick_list_pending_qty_by_item(self):
 		pick_list = frappe.qb.DocType("Pick List")
