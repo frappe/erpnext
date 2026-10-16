@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
+from frappe.utils import cint
 
 
 def execute(filters: dict | None = None):
@@ -139,7 +140,7 @@ def get_linked_cancelled_sabb(filters):
 	return data
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def fix_sabb_entries(selected_rows: str | list):
 	frappe.has_permission("Serial and Batch Bundle", "write", throw=True)
 
@@ -149,24 +150,27 @@ def fix_sabb_entries(selected_rows: str | list):
 	for row in selected_rows:
 		doc = frappe.get_doc("Serial and Batch Bundle", row.get("name"))
 		doc.check_permission("write")
-		if doc.is_cancelled == 0 and not frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"serial_and_batch_bundle": doc.name, "is_cancelled": 0},
-			"name",
-		):
-			doc.db_set({"is_cancelled": 1, "docstatus": 2})
+		has_active_entry = frappe.db.exists(
+			"Stock Ledger Entry", {"serial_and_batch_bundle": doc.name, "is_cancelled": 0}
+		)
 
-			for row in doc.entries:
-				row.db_set("docstatus", 2)
-
-		elif doc.is_cancelled == 1 and frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"serial_and_batch_bundle": doc.name, "is_cancelled": 0},
-			"name",
-		):
-			doc.db_set({"is_cancelled": 0, "docstatus": 1})
-
-			for row in doc.entries:
-				row.db_set("docstatus", 1)
+		if doc.docstatus == 1 and not doc.is_cancelled and not has_active_entry:
+			if not is_pending_pos_invoice_bundle(doc):
+				set_bundle_docstatus(doc, 2)
+		elif doc.docstatus == 2 and doc.is_cancelled and has_active_entry:
+			set_bundle_docstatus(doc, 1)
 
 	frappe.msgprint(_("Selected Serial and Batch Bundle entries have been fixed."))
+
+
+def is_pending_pos_invoice_bundle(doc):
+	return (
+		doc.voucher_type == "POS Invoice"
+		and frappe.db.get_value("POS Invoice", doc.voucher_no, "docstatus") == 1
+	)
+
+
+def set_bundle_docstatus(doc, docstatus):
+	doc.db_set({"is_cancelled": cint(docstatus == 2), "docstatus": docstatus})
+	for entry in doc.entries:
+		entry.db_set("docstatus", docstatus)
