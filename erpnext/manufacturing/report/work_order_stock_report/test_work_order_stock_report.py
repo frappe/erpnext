@@ -130,3 +130,12 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 
 		self.assertIn(material, self.get_rows(wo.name, warehouse=STORES))
 		self.assertEqual(self.get_rows(wo.name, warehouse="_Test Warehouse 1 - _TC"), {})
+
+	def test_stock_is_shared_out_between_work_orders(self):
+		first, material = self.make_stocked_work_order()
+		second = make_wo_order_test_record(
+			item=first.production_item, bom_no=first.bom_no, qty=10, source_warehouse=STORES
+		)
+
+		self.assertEqual(self.get_rows(first.name, warehouse=STORES)[material].ready_to_build, "Y")
+		self.assertEqual(self.get_rows(second.name, warehouse=STORES)[material].ready_to_build, "N")
