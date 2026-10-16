@@ -6881,6 +6881,39 @@ class TestWorkOrder(ERPNextTestSuite):
 			[("_Test Warehouse - _TC", 4), ("_Test Warehouse 2 - _TC", 4)],
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_keeps_fixed_and_batch_operation_times(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		fixed_operation, workstation = make_review_operation()
+		batch_operation, _workstation = make_review_operation()
+		frappe.db.set_value("Operation", batch_operation, "create_job_card_based_on_batch_size", 1)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{
+					"operation": fixed_operation,
+					"workstation": workstation,
+					"time_in_mins": 30,
+					"fixed_time": 1,
+				},
+				{
+					"operation": batch_operation,
+					"workstation": _workstation,
+					"time_in_mins": 60,
+					"batch_size": 10,
+				},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 20)
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(
+			[(row.operation, row.time_in_mins, row.fixed_time, row.batch_size) for row in new_bom.operations],
+			[(fixed_operation, 30, 1, 1), (batch_operation, 60, 0, 10)],
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
