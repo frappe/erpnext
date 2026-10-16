@@ -268,6 +268,37 @@ class TestSalesPartnerSummaryReports(
 	def test_posting_date_column_label(self):
 		self.assert_posting_date_label()
 
+	def test_company_restriction_not_leaked(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(transaction_date="2026-01-14", do_not_save=1)
+		so.sales_partner = "_Test Sales Partner India - 1"
+		so.save()
+		so.submit()
+
+		filters = {
+			"company": "_Test Company",
+			"doctype": "Sales Order",
+			"from_date": "2026-01-01",
+			"to_date": "2026-01-31",
+		}
+
+		admin_rows = run(self.report_name, filters).get("result")[:-1]
+		self.assertTrue(any(row.get("name") == so.name for row in admin_rows))
+
+		user = create_user("sp_summary_restricted@example.com", "Sales Manager").name
+		add_user_permission("Company", "_Test Company 1", user)
+		try:
+			with self.set_user(user):
+				restricted_rows = run(self.report_name, filters).get("result")[:-1]
+		finally:
+			remove_user_permission("Company", "_Test Company 1", user)
+
+		self.assertFalse(any(row.get("name") == so.name for row in restricted_rows))
+
 	def test_sales_order_sp_summaries(self):
 		self.filters["doctype"] = "Sales Order"
 		self.create_transactions(self.filters["doctype"])
