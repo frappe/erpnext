@@ -141,3 +141,14 @@ class TestStockProjectedQty(ERPNextTestSuite):
 			row = self.run_report(item, warehouse=WAREHOUSE)[0]
 
 		self.assertEqual((row["projected_qty"], row["shortage_qty"]), (7, 3))
+
+	def test_include_uom_leaves_items_without_that_uom_blank(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		make_stock_entry(item_code=item, qty=24, to_warehouse=WAREHOUSE, basic_rate=100)
+
+		columns, data = execute(frappe._dict(company="_Test Company", item_code=item, include_uom="Box"))
+		row = dict(zip([column["fieldname"] for column in columns], data[0], strict=False))
+
+		self.assertEqual((row["actual_qty"], row["actual_qty_box"]), (24, None))

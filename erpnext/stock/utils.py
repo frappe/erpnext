@@ -635,14 +635,13 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		for key, value in data:
 			if key not in convertible_columns:
 				continue
-			# If no conversion factor for the UOM, defaults to 1
-			if not conversion_factors[row_idx]:
-				conversion_factors[row_idx] = 1
-
-			if convertible_columns.get(key) == "rate":
-				new_value = flt(value) * conversion_factors[row_idx]
+			conversion_factor = conversion_factors[row_idx]
+			if not conversion_factor:
+				new_value = None
+			elif convertible_columns.get(key) == "rate":
+				new_value = flt(value) * conversion_factor
 			else:
-				new_value = flt(value) / conversion_factors[row_idx]
+				new_value = flt(value) / conversion_factor
 
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
