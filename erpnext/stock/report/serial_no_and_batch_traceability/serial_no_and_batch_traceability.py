@@ -45,6 +45,7 @@ class ReportData:
 		self.filters = filters
 		self.doctype_name = self.get_doctype()
 		self.mapped_fg_entries = {}
+		self.forward_traced = set()
 
 	def validate_filters(self):
 		if not self.filters.item_code and not self.filters.batches and not self.filters.serial_nos:
@@ -422,6 +423,10 @@ class ReportData:
 		return materials
 
 	def set_forward_data(self, value, sabb_data):
+		if value in self.forward_traced:
+			return
+
+		self.forward_traced.add(value)
 		outward_entries = self.get_sabb_entries(value)
 
 		for row in outward_entries:
@@ -526,6 +531,8 @@ class ReportData:
 					}
 				)
 				batch_details[key] = fg_item
+				if serial_no or batch_no:
+					self.set_forward_data(serial_no or batch_no, fg_item.raw_materials)
 			else:
 				batch_details[key].raw_materials[
 					(row.item_code, row.reference_name, row.serial_no, row.batch_no)
