@@ -131,6 +131,19 @@ def get_tax_rate_map():
 	return rate_map
 
 
+def get_docs_with_entries(doctype):
+	# Documents posted on the new flow before this patch ran already have their own entries
+	twe = frappe.qb.DocType("Tax Withholding Entry")
+
+	return (
+		frappe.qb.from_(twe)
+		.select(twe.parent)
+		.where(twe.parenttype == doctype)
+		.where(twe.created_by_migration == 0)
+		.where(twe.parent.isnotnull())
+	)
+
+
 def get_tax_rate_for_date(tax_rate_map, category, posting_date):
 	if not category or category not in tax_rate_map or not posting_date:
 		return 0, False
@@ -380,6 +393,7 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(pi.docstatus == 1)
 			.where(ptc.account_head.isin(list(self.all_tds_accounts)))
+			.where(pi.name.notin(get_docs_with_entries("Purchase Invoice")))
 			.run(as_dict=True)
 		)
 
@@ -406,6 +420,7 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(twv.parenttype == "Purchase Invoice")
 			.where(pi.docstatus == 1)
+			.where(pi.name.notin(get_docs_with_entries("Purchase Invoice")))
 			.run(as_dict=True)
 		)
 
@@ -433,6 +448,7 @@ class PurchaseInvoiceMigrator:
 			.where(at.parenttype == "Purchase Invoice")
 			.where(at.reference_type == "Payment Entry")
 			.where(pi.docstatus == 1)
+			.where(pi.name.notin(get_docs_with_entries("Purchase Invoice")))
 			.run(as_dict=True)
 		)
 
@@ -461,6 +477,7 @@ class PurchaseInvoiceMigrator:
 			.where(pe.docstatus == 1)
 			.where(pe.apply_tds == 1)
 			.where(atc.account_head.isin(list(self.all_tds_accounts)))
+			.where(pe.name.notin(get_docs_with_entries("Payment Entry")))
 			.run(as_dict=True)
 		)
 
@@ -945,6 +962,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			Max(Case().when(gle.account.isin(tcs_accounts_list), gle.account).else_(None)).as_("account"),
 		)
 		.where(si.docstatus == 1)
+		.where(si.name.notin(get_docs_with_entries("Sales Invoice")))
 		.groupby(si.name)
 		.run(as_dict=True)
 	)
@@ -1092,6 +1110,7 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		.where(gle.is_cancelled == 0)
 		.where(je.docstatus == 1)
 		.where(gle.account.isin(list(all_tds_accounts)))
+		.where(je.name.notin(get_docs_with_entries("Journal Entry")))
 		.run(as_dict=True)
 	)
 
