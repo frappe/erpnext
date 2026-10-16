@@ -177,3 +177,20 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 		corrective_jc.db_set("serial_no", "COPQ-SHARED-01")
 
 		self.assertEqual(self.run_report(company="_Test Company", serial_no=other_serial.name), [])
+
+	def test_serial_filter_matches_whole_serial_nos(self):
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card()
+		item = make_item("_Test COPQ Whole Serial Item", {"has_serial_no": 1}).name
+		serial_nos = [
+			frappe.get_doc(
+				doctype="Serial No", item_code=item, serial_no=serial_no, company="_Test Company"
+			).insert()
+			for serial_no in ("COPQ_SN-1", "COPQ_SN-10")
+		]
+		corrective_jc.db_set({"serial_no": "COPQ_SN-10\nCOPQ_SN-2", "production_item": item})
+
+		self.assertEqual(self.run_report(company="_Test Company", serial_no=serial_nos[0].name), [])
+		self.assertEqual(
+			[row.name for row in self.run_report(company="_Test Company", serial_no=serial_nos[1].name)],
+			[corrective_jc.name],
+		)
