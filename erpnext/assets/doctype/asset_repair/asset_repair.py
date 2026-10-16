@@ -78,6 +78,7 @@ class AssetRepair(AccountsController):
 		self.set_downtime()
 
 	def on_update(self):
+		self.add_repair_status_activity()
 		self.update_status()
 
 	def validate_asset(self):
@@ -189,11 +190,22 @@ class AssetRepair(AccountsController):
 				)
 			)
 
+	def add_repair_status_activity(self):
+		# Logged in the save, as the status job only sees the final state of quick successive saves
+		if not self.has_value_changed("repair_status"):
+			return
+
+		subject = {
+			"Pending": _("Asset out of order due to Asset Repair {0}"),
+			"Completed": _("Asset Repair {0} marked as Completed"),
+			"Cancelled": _("Asset Repair {0} marked as Cancelled"),
+		}[self.repair_status]
+		self.add_asset_activity(subject.format(get_link_to_form("Asset Repair", self.name)))
+
 	def update_status(self):
 		frappe.enqueue(
 			update_asset_status_after_repair,
 			asset=self.asset,
-			asset_repair=self.name,
 			enqueue_after_commit=True,
 			now=frappe.in_test,
 		)
@@ -414,28 +426,13 @@ class AssetRepair(AccountsController):
 		add_asset_activity(self.asset, subject)
 
 
-def update_asset_status_after_repair(asset: str, asset_repair: str) -> None:
+def update_asset_status_after_repair(asset: str) -> None:
 	"""Set the asset status from its pending repairs, after a repair change commits.
 
 	Takes no repair row locks. Each committed repair change enqueues this job, and the job
 	started last sees every commit, so the status settles on the right value."""
-	asset_doc = frappe.get_doc("Asset", asset, for_update=True)
-	previous_status = asset_doc.status
 	# set_status always writes the row, so on Postgres an older job's lock fails and it retries
-	asset_doc.set_status()
-	log_repair_status_change(asset, asset_repair, previous_status, asset_doc.status)
-
-
-def log_repair_status_change(asset: str, asset_repair: str, previous_status: str, status: str) -> None:
-	if previous_status == status or "Out of Order" not in (previous_status, status):
-		return
-
-	subject = (
-		_("Asset out of order due to Asset Repair {0}")
-		if status == "Out of Order"
-		else _("Asset back in service after Asset Repair {0}")
-	)
-	add_asset_activity(asset, subject.format(get_link_to_form("Asset Repair", asset_repair)))
+	frappe.get_doc("Asset", asset, for_update=True).set_status()
 
 
 def check_asset_repair_access(company: str | None = None) -> None:

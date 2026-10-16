@@ -102,17 +102,39 @@ class TestAssetRepair(ERPNextTestSuite):
 		subjects = frappe.get_all(
 			"Asset Activity", {"asset": asset.name}, pluck="subject", order_by="creation"
 		)
-		self.assertIn("Asset back in service after Asset Repair", subjects[-3])
+		self.assertIn(f"{asset_repair.name}</a> marked as Completed", subjects[-3])
 		self.assertIn("submission", subjects[-2])
 		self.assertIn("cancellation", subjects[-1])
 
-	def test_resaving_pending_repair_does_not_log_back_in_service(self):
+	def test_resaving_pending_repair_does_not_log_again(self):
 		asset = create_asset(submit=1)
 		asset_repair = create_asset_repair(asset=asset)
 		asset_repair.save()
 
-		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
-		self.assertFalse([subject for subject in subjects if "back in service" in subject])
+		repair_logs = frappe.get_all(
+			"Asset Activity", {"asset": asset.name, "subject": ("like", f"%{asset_repair.name}%")}
+		)
+		self.assertEqual(len(repair_logs), 1)
+
+	def test_repair_events_are_logged_when_completed_before_status_jobs_run(self):
+		asset = create_asset(submit=1)
+
+		with patch(f"{asset_repair_module.__name__}.update_asset_status_after_repair") as deferred_job:
+			asset_repair = create_asset_repair(asset=asset)
+			asset_repair.repair_status = "Completed"
+			asset_repair.completion_date = now_datetime()
+			asset_repair.save()
+
+		subjects = frappe.get_all(
+			"Asset Activity", {"asset": asset.name}, pluck="subject", order_by="creation"
+		)
+		self.assertIn("Asset out of order due to Asset Repair", subjects[-2])
+		self.assertIn(f"{asset_repair.name}</a> marked as Completed", subjects[-1])
+
+		for call in deferred_job.call_args_list:
+			asset_repair_module.update_asset_status_after_repair(**call.kwargs)
+		self.assertEqual(deferred_job.call_count, 2)
+		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
 
 	def test_asset_stays_out_of_order_while_another_repair_is_pending(self):
 		asset = create_asset(submit=1)
@@ -124,22 +146,12 @@ class TestAssetRepair(ERPNextTestSuite):
 		first_repair.save()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
-		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
-		self.assertFalse([subject for subject in subjects if "back in service" in subject])
 
 		second_repair.repair_status = "Completed"
 		second_repair.completion_date = now_datetime()
 		second_repair.save()
 
 		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
-		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
-		self.assertTrue(
-			[
-				subject
-				for subject in subjects
-				if second_repair.name in subject and "back in service" in subject
-			]
-		)
 
 	def test_status_job_restores_asset_after_both_repairs_complete(self):
 		asset = create_asset(submit=1)
@@ -157,10 +169,6 @@ class TestAssetRepair(ERPNextTestSuite):
 
 		self.assertEqual(deferred_job.call_count, 2)
 		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
-		back_in_service_logs = frappe.get_all(
-			"Asset Activity", {"asset": asset.name, "subject": ("like", "%back in service%")}
-		)
-		self.assertEqual(len(back_in_service_logs), 1)
 
 	def test_status_job_keeps_asset_out_of_order_for_repair_pending_before_it_runs(self):
 		asset = create_asset(submit=1)
@@ -175,10 +183,6 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair_module.update_asset_status_after_repair(**deferred_job.call_args_list[0].kwargs)
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
-		back_in_service_logs = frappe.get_all(
-			"Asset Activity", {"asset": asset.name, "subject": ("like", "%back in service%")}
-		)
-		self.assertFalse(back_in_service_logs)
 
 	def test_failed_save_of_pending_repair_keeps_asset_out_of_order(self):
 		asset = create_asset(submit=1)
