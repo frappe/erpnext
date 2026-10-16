@@ -68,11 +68,7 @@ def get_columns(filters):
 
 def get_data(filters):
 	wo = frappe.qb.DocType("Work Order")
-	query = (
-		frappe.qb.from_(wo)
-		.select(wo.name.as_("work_order"), wo.qty, wo.produced_qty, wo.production_item, wo.bom_no)
-		.where((wo.produced_qty > 0) & (wo.docstatus == 1))
-	)
+	query = get_work_order_query(["name as work_order", "qty", "produced_qty", "production_item", "bom_no"])
 
 	if filters.get("bom_no") and not filters.get("work_order"):
 		query = query.where(wo.bom_no == filters.get("bom_no"))
@@ -80,22 +76,48 @@ def get_data(filters):
 	if filters.get("work_order"):
 		query = query.where(wo.name == filters.get("work_order"))
 
-	if condition := get_allowed_companies_condition(wo.company, "Work Order"):
-		query = query.where(condition)
+	work_orders = query.run(as_dict=True)
+	materials = get_materials_by_work_order([d.work_order for d in work_orders])
 
 	results = []
-	for d in query.run(as_dict=True):
+	for d in work_orders:
 		results.append(d)
-
-		for data in frappe.get_all(
-			"Work Order Item",
-			fields=["item_code as raw_material_code", "required_qty", "consumed_qty"],
-			filters={"parent": d.work_order, "parenttype": "Work Order"},
-		):
+		for data in materials.get(d.work_order, []):
 			data.required_qty = flt(data.required_qty) * flt(d.produced_qty) / flt(d.qty)
 			results.append(data)
 
 	return results
+
+
+def get_work_order_query(fields):
+	wo = frappe.qb.DocType("Work Order")
+	query = frappe.qb.get_query(
+		"Work Order",
+		fields=fields,
+		filters={"docstatus": 1, "produced_qty": [">", 0]},
+		ignore_permissions=False,
+	)
+
+	if condition := get_allowed_companies_condition(wo.company, "Work Order"):
+		query = query.where(condition)
+
+	return query
+
+
+def get_materials_by_work_order(work_orders):
+	if not work_orders:
+		return {}
+
+	materials = {}
+	for row in frappe.get_all(
+		"Work Order Item",
+		fields=["parent", "item_code as raw_material_code", "required_qty", "consumed_qty"],
+		filters={"parent": ["in", work_orders], "parenttype": "Work Order"},
+		order_by="idx",
+	):
+		materials.setdefault(row.pop("parent"), []).append(row)
+
+	return materials
 
 
 @frappe.whitelist()

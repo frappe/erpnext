@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -126,3 +128,20 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 		for item_code, per_unit_qty in self.raw_materials.items():
 			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
 			self.assertEqual(raw_material_rows[item_code].get("consumed_qty"), per_unit_qty * 2 + 1)
+
+	def test_material_rows_of_hidden_work_orders_are_left_out(self):
+		permitted = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
+		hidden = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
+
+		user = create_user("bom-variance-work-order@example.com", "Manufacturing User")
+		add_user_permission("Work Order", permitted.name, user.name)
+		with self.set_user(user.name):
+			data = self.run_report()
+
+		work_orders = [row.get("work_order") for row in data if row.get("work_order")]
+		self.assertIn(permitted.name, work_orders)
+		self.assertNotIn(hidden.name, work_orders)
+		self.assertEqual(
+			len([row for row in data if row.get("raw_material_code")]),
+			len(self.raw_materials) * len(work_orders),
+		)
