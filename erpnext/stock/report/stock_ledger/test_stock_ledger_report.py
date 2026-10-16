@@ -389,3 +389,36 @@ class TestStockLedgerReport(ERPNextTestSuite):
 			rows = self.run_report(item)
 
 		self.assertEqual(rows, [])
+
+	def test_batch_opening_includes_the_warehouses_of_a_group(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "item": item, "batch_id": frappe.generate_hash(length=10)}
+		).insert()
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 10,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 200,
+					"batch_no": batch.name,
+					"use_serial_batch_fields": 1,
+					"posting_date": add_days(today(), -9),
+				}
+			],
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			batch_no=batch.name,
+			warehouse=[frappe.db.get_value("Warehouse", WAREHOUSE, "parent_warehouse")],
+		)
+		rows = list(execute(filters)[1])
+
+		self.assertEqual(rows[0]["qty_after_transaction"], 10)
