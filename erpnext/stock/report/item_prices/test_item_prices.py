@@ -97,3 +97,19 @@ class TestItemPrices(ERPNextTestSuite):
 		columns, data = self.run_report()
 		row = self.row_for(columns, data, item)
 		self.assertEqual(self.cell(columns, row, "Valuation Rate"), 250)
+
+	def test_last_purchase_rate_is_per_stock_uom(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_purchase_receipt(
+			item_code=item, qty=2, rate=1200, uom="Box", stock_uom="Nos", conversion_factor=12
+		)
+
+		columns, data = self.run_report()
+
+		self.assertEqual(self.cell(columns, self.row_for(columns, data, item), "Last Purchase Rate"), 100)

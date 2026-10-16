@@ -151,7 +151,7 @@ def get_last_purchase_rate():
 			+ get_purchase_rate_query("Purchase Invoice", "posting_date")
 		)
 		.select("*")
-		.orderby("item_code", "posting_date")
+		.orderby("item_code", "posting_date", "creation")
 	)
 
 	for d in query.run(as_dict=True):
@@ -166,7 +166,12 @@ def get_purchase_rate_query(doctype, date_field):
 	query = (
 		frappe.qb.from_(parent)
 		.from_(child)
-		.select(child.item_code, parent[date_field].as_("posting_date"), child.base_rate)
+		.select(
+			child.item_code,
+			parent[date_field].as_("posting_date"),
+			(child.base_rate / child.conversion_factor).as_("base_rate"),
+			child.creation,
+		)
 		.where((parent.name == child.parent) & (parent.docstatus == 1))
 	)
 
