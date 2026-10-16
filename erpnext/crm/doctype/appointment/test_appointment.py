@@ -228,12 +228,12 @@ class TestAppointment(ERPNextTestSuite):
 		stored = frappe.db.get_value("Appointment", appointment.name, "verification_token")
 		self.assertEqual(stored, sha256_hash(params["key"]))
 
-	def test_verification_keeps_the_visitor_session(self):
+	def test_guest_verification_keeps_the_visitor_session(self):
 		appointment = self._create_portal_appointment("portal_visitor_session@example.com")
 		_parsed, params = parse_verify_url(appointment._get_verify_url())
 		self.addCleanup(frappe.set_user, frappe.session.user)
 
-		frappe.set_user("test@example.com")
+		frappe.set_user("Guest")
 		frappe.local.session.data = frappe._dict(csrf_token="token")
 		session = frappe.local.session
 		with patch.object(Appointment, "send_appointment_confirmed_email"):
@@ -243,7 +243,11 @@ class TestAppointment(ERPNextTestSuite):
 
 		self.assertTrue(context.success)
 		self.assertIs(frappe.local.session, session)
-		self.assertEqual((session.user, session.data.csrf_token), ("test@example.com", "token"))
+		self.assertEqual((session.user, session.data.csrf_token), ("Guest", "token"))
+		appointment.reload()
+		self.assertEqual(appointment.status, "Open")
+		self.assertTrue(appointment.party and appointment.calendar_event)
+		self.assertEqual(get_assignees(appointment.name), ["Administrator"])
 
 	def test_verify_url_ignores_the_request_host(self):
 		appointment = self._create_portal_appointment("portal_visitor_host@example.com")
