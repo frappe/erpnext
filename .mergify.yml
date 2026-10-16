@@ -93,5 +93,4 @@ queue_rules:
     merge_conditions: *suite_checks
 
 merge_queue:
-  queue_controls_comment: false
   skip_intermediate_results: true
