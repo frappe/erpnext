@@ -4135,6 +4135,36 @@ class TestJobCard(ERPNextTestSuite):
 		second_card.save()
 		self.assertEqual(len(second_card.time_logs), 1)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_employee_overlap_hides_a_job_card_the_user_cannot_read(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
+		fg_item = make_jc_review_item()
+		cards = []
+		for _idx in range(2):
+			workstation = make_jc_review_workstation()
+			operation = make_jc_review_operation(workstation)
+			operations = [{"operation": operation, "workstation": workstation, "time_in_mins": 60}]
+			wo = make_jc_review_work_order(fg_item, rows, operations, skip_transfer=1)
+			cards.append(get_jc_review_job_cards(wo.name)[0])
+
+		allowed_card, restricted_card = cards
+		employee = make_jc_review_employee()
+		restricted_card.append("time_logs", jc_review_log("2031-03-16 08:00:00", 60, 0, employee))
+		restricted_card.save()
+
+		user = create_user("jc-overlap-restricted@example.com", "Manufacturing User")
+		add_user_permission("Work Order", allowed_card.work_order, user.name)
+		with self.set_user(user.name):
+			card = frappe.get_doc("Job Card", allowed_card.name)
+			card.append("time_logs", jc_review_log("2031-03-16 08:30:00", 60, 0, employee))
+			with self.assertRaises(OverlapError) as error:
+				card.save()
+
+		self.assertNotIn(restricted_card.name, str(error.exception))
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

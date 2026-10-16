@@ -409,13 +409,18 @@ class JobCard(Document):
 			return
 
 		clash = self.get_employee_clash_in_card(d) or self.get_employee_clash_in_other_cards(d)
-		if clash:
-			frappe.throw(
-				_("Row {0}: Employee {1} is already working from {2} to {3} on Job Card {4}").format(
-					d.idx, d.employee, clash.from_time, clash.to_time, clash.name
-				),
-				OverlapError,
+		if not clash:
+			return
+
+		if clash.name == self.name or frappe.has_permission("Job Card", "read", doc=clash.name):
+			message = _("Row {0}: Employee {1} is already working from {2} to {3} on Job Card {4}").format(
+				d.idx, d.employee, clash.from_time, clash.to_time, clash.name
 			)
+		else:
+			message = _("Row {0}: Employee {1} is already working at this time on another Job Card").format(
+				d.idx, d.employee
+			)
+		frappe.throw(message, OverlapError)
 
 	def get_employee_clash_in_card(self, d):
 		for row in self.time_logs:
