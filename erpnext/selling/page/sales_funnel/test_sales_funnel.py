@@ -189,7 +189,7 @@ class TestSalesFunnel(ERPNextTestSuite):
 		lead.db_set("territory", territories[1])
 
 		roles = self.roles_that_read("Lead", "Opportunity", "Quotation", "Customer", "Company")
-		email = f"funnel-perm-{random_string(6)}@example.com"
+		email = f"funnel-perm-{random_string(6).lower()}@example.com"
 		frappe.get_doc(
 			{
 				"doctype": "User",
