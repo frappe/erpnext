@@ -113,3 +113,41 @@ class TestItemPrices(ERPNextTestSuite):
 		columns, data = self.run_report()
 
 		self.assertEqual(self.cell(columns, self.row_for(columns, data, item), "Last Purchase Rate"), 100)
+
+	def test_price_list_shows_current_prices_with_uom_and_party(self):
+		from frappe.utils import add_days, today
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		for rate, extra in (
+			(500, {}),
+			(450, {"customer": "_Test Customer"}),
+			(400, {"valid_from": add_days(today(), -60), "valid_upto": add_days(today(), -31)}),
+			(6000, {"uom": "Box"}),
+		):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item,
+					"price_list": "Standard Selling",
+					"price_list_rate": rate,
+					**extra,
+				}
+			).insert()
+
+		columns, data = self.run_report()
+		prices = sorted(self.cell(columns, self.row_for(columns, data, item), "Sales Price List").split(", "))
+
+		self.assertEqual(
+			[price.split(" ", 1)[1] for price in prices],
+			[
+				"450.0 - Standard Selling / Nos (_Test Customer)",
+				"500.0 - Standard Selling / Nos",
+				"6000.0 - Standard Selling / Box",
+			],
+		)
