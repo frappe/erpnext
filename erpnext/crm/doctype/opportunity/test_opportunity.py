@@ -376,12 +376,16 @@ class TestOpportunity(ERPNextTestSuite):
 		opp = make_opportunity(with_items=0)
 		opp.territory = "_Test Territory Maharashtra"
 		opp.customer_group = "_Test Customer Group 1"
+		opp.title = "_Test Opportunity Custom Title"
 		opp.save()
 
+		previous_customer_name = opp.customer_name
 		opp.party_name = "_Test Customer 1"
+		opp.title = previous_customer_name
 		opp.territory = "_Test Territory India"
 		opp.customer_group = "_Test Customer Group"
 		opp.save()
+		self.assertEqual(opp.title, previous_customer_name)
 		self.assertEqual(opp.territory, "_Test Territory India")
 		self.assertEqual(opp.customer_group, "_Test Customer Group")
 

@@ -446,7 +446,7 @@ class Opportunity(TransactionBase, CRMNote):
 			return
 
 		previous = self.get_doc_before_save()
-		if self.title == previous.customer_name:
+		if not self.has_value_changed("title") and self.title == previous.customer_name:
 			self.title = self.customer_name
 
 		party_meta = frappe.get_meta(self.opportunity_from)
