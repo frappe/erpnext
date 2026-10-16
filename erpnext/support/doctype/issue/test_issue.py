@@ -213,6 +213,24 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
+	def test_portal_list_ignores_contact_links(self):
+		from erpnext.support.doctype.issue.issue import get_issue_list
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user("test_issue_portal_list@example.com", ["Customer"])
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Portal",
+				"user": user,
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+		issue = make_issue(customer="_Test Customer")
+
+		with as_user(user):
+			self.assertNotIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
