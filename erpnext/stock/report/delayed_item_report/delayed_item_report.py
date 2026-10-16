@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import date_diff
+from frappe.utils.nestedset import get_descendants_of
 
 
 def execute(filters=None, consolidated=False):
@@ -59,13 +60,18 @@ class DelayedItemReport:
 		if doctype == "Sales Invoice":
 			query = query.where((parent.update_stock == 1) & (parent.is_pos == 0))
 
-		if self.filters.get("item_group"):
-			query = query.where(child.item_group == self.filters.get("item_group"))
+		if item_group := self.filters.get("item_group"):
+			query = query.where(child.item_group.isin(get_group_and_descendants("Item Group", item_group)))
+
+		if customer_group := self.filters.get("customer_group"):
+			query = query.where(
+				parent.customer_group.isin(get_group_and_descendants("Customer Group", customer_group))
+			)
 
 		if self.filters.get("sales_order"):
 			query = query.where(child[sales_order_field] == self.filters.get("sales_order"))
 
-		for field in ("customer", "customer_group", "company"):
+		for field in ("customer", "company"):
 			if self.filters.get(field):
 				query = query.where(parent[field] == self.filters.get(field))
 
@@ -165,3 +171,7 @@ class DelayedItemReport:
 			},
 			{"label": _("Customer PO"), "fieldname": "po_no", "fieldtype": "Data", "width": 100},
 		]
+
+
+def get_group_and_descendants(doctype, group):
+	return [group, *get_descendants_of(doctype, group)]

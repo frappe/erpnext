@@ -116,3 +116,12 @@ class TestDelayedItemReport(ERPNextTestSuite):
 		rows = self.run_report(sales_order=so.name)
 
 		self.assertEqual([row.name for row in rows], [delivery_notes[0].name])
+
+	def test_group_filters_include_child_groups(self):
+		so, delivery_notes = self.make_order_with_deliveries("2026-06-10")
+
+		rows = self.run_report(
+			sales_order=so.name, item_group="All Item Groups", customer_group="All Customer Groups"
+		)
+
+		self.assertEqual([row.name for row in rows], [delivery_notes[0].name])
