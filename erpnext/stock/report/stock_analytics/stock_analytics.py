@@ -5,6 +5,7 @@ from bisect import bisect_right
 
 import frappe
 from frappe import _, scrub
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
 from frappe.utils import get_first_day as get_first_day_of_month
 from frappe.utils.nestedset import get_descendants_of
@@ -346,6 +347,9 @@ def apply_conditions(query, filters):
 
 	if company := filters.get("company"):
 		query = query.where(sle.company == company)
+
+	if warehouses := get_permitted_documents("Warehouse"):
+		query = query.where(sle.warehouse.isin(warehouses))
 
 	if filters.get("warehouse"):
 		query = apply_warehouse_filter(query, sle, filters)
