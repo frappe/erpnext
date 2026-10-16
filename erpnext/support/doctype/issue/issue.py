@@ -262,21 +262,16 @@ def get_list_context(context=None):
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
 
+	from erpnext.controllers.website_list_for_contact import get_parents_for_user
+
 	user = frappe.session.user
-	contact = frappe.db.get_value("Contact", {"user": user}, "name")
-	customer = None
-
-	if contact:
-		contact_doc = frappe.get_doc("Contact", contact)
-		customer = contact_doc.get_link_for("Customer")
-
 	ignore_permissions = False
 	if is_website_user() and user != "Guest":
 		if not filters:
 			filters = {}
 
-		if customer:
-			filters["customer"] = customer
+		if customers := get_parents_for_user("Customer"):
+			filters["customer"] = ["in", customers]
 		else:
 			filters["raised_by"] = user
 
