@@ -559,6 +559,28 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual(sum(flt(row.adhoc_qty) for row in rows if row.item_code == plan.fg_item), 10)
 
+	def test_sub_assembly_work_order_uses_the_stock_uom(self):
+		plan = make_mrp_plan(self)
+		sub_assembly = frappe.get_doc("Item", plan.fg_item)
+		sub_assembly.append("uoms", {"uom": "Box", "conversion_factor": 12})
+		sub_assembly.purchase_uom = "Box"
+		sub_assembly.save()
+		parent_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
+			}
+		).name
+		make_bom(item=parent_item, raw_materials=[plan.fg_item], rate=100)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.items[0].item_code = parent_item
+		mps.save()
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		work_order = frappe.get_doc("Work Order", {"mps": plan.mps, "production_item": plan.fg_item})
+		self.assertEqual(work_order.stock_uom, sub_assembly.stock_uom)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
