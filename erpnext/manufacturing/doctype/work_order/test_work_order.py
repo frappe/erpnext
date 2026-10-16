@@ -6853,6 +6853,34 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, make_stock_entry, restricted.name, "Manufacture")
 			self.assertRaises(frappe.PermissionError, make_stock_return_entry, restricted.name)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_same_material_from_two_warehouses_keeps_its_rows(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": rm_item, "qty": 1, "operation": first_operation},
+				{"item_code": rm_item, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 4, submit=False)
+		wo.required_items[1].source_warehouse = "_Test Warehouse 2 - _TC"
+		wo.save()
+		wo.submit()
+
+		transfer = make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)
+		self.assertEqual(
+			sorted((row["s_warehouse"], row["qty"]) for row in transfer["items"]),
+			[("_Test Warehouse - _TC", 4), ("_Test Warehouse 2 - _TC", 4)],
+		)
+
 
 def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
 	suffix = f" {stock_uom}" if stock_uom else ""
