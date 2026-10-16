@@ -572,3 +572,30 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			sorted((row["batch_no"], row["qty"]) for row in rows if row.get("indent") == 1),
 			[(raw_batches[0], 4), (raw_batches[1], 6)],
 		)
+
+	def test_batch_filter_lists_serial_nos_of_a_serial_and_batch_item(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TRSB-.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRSBB-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=2, rate=100)
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": receipt.items[0].serial_and_batch_bundle},
+			fields=["serial_no", "batch_no"],
+		)
+
+		rows = self.run_report(
+			item_code=item, batches=[entries[0].batch_no], traceability_direction="Backward"
+		)
+
+		self.assertEqual(
+			sorted(row["serial_no"] for row in rows if row.get("serial_no")),
+			sorted(e.serial_no for e in entries),
+		)

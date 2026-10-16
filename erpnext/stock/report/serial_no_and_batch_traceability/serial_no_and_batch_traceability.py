@@ -260,7 +260,9 @@ class ReportData:
 			data = query.run(as_dict=True)
 			return data[0] if data else {}
 
-		if batches:
+		if batches and self.doctype_name == "Serial No":
+			query = query.where(doctype.batch_no.isin(batches))
+		elif batches:
 			query = query.where(doctype.name.isin(batches))
 		elif serial_nos:
 			query = query.where(doctype.name.isin(serial_nos))
