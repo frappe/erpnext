@@ -17,10 +17,12 @@ def execute(filters=None):
 
 class ExponentialSmoothingForecast:
 	def forecast_future_data(self):
+		from_date = getdate(self.filters.from_date)
 		for _key, value in self.period_wise_data.items():
 			forecast_data = []
 			for period in self.period_list:
 				forecast_key = "forecast_" + period.key
+				is_future = getdate(period.from_date) >= from_date
 
 				if value.get(period.key) and not forecast_data:
 					value[forecast_key] = flt(value.get("avg", 0)) or flt(value.get(period.key))
@@ -32,8 +34,8 @@ class ExponentialSmoothingForecast:
 					)
 
 				if value.get(forecast_key):
-					# will be use to forecaset next period
-					forecast_data.append([value.get(period.key), value.get(forecast_key)])
+					actual = value.get(forecast_key) if is_future else value.get(period.key)
+					forecast_data.append([actual, value.get(forecast_key)])
 
 
 class ForecastingReport(ExponentialSmoothingForecast):

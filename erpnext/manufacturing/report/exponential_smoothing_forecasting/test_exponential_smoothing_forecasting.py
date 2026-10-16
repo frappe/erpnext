@@ -72,6 +72,14 @@ class TestExponentialSmoothingForecasting(ERPNextTestSuite):
 		_columns, row = self.run_report()
 		self.assertEqual(flt(row.get("may_2026")), 6.0)
 
+	def test_future_forecast_stays_flat(self):
+		self.create_sales_orders({"2026-03-15": 100, "2026-04-15": 100, "2026-05-15": 100})
+
+		_columns, row = self.run_report(smoothing_constant=0.3)
+
+		for month in ("jun_2026", "jul_2026", "aug_2026"):
+			self.assertAlmostEqual(flt(row.get(f"forecast_{month}")), 100, places=6)
+
 	def create_sales_orders(self, date_to_qty):
 		for transaction_date, qty in date_to_qty.items():
 			make_sales_order(item_code=self.item, qty=qty, transaction_date=transaction_date)
