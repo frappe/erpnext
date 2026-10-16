@@ -4,16 +4,6 @@ on:
   repository_dispatch:
     types: [frappe-framework-change]
   pull_request:
-    paths-ignore:
-      - '**.js'
-      - '**.css'
-      - '**.svg'
-      - '**.md'
-      - '**.html'
-      - 'crowdin.yml'
-      - '.coderabbit.yml'
-      - '.mergify.yml'
-      - '**.po'
   schedule:
     # Run everday at midnight UTC / 5:30 IST
     - cron: "0 0 * * *"
