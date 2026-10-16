@@ -1848,7 +1848,7 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	gles = frappe.get_all(
 		"GL Entry",
-		filters={"posting_date": [">=", posting_date], "voucher_no": ["in", voucher_nos]},
+		filters={"is_cancelled": 0, "posting_date": [">=", posting_date], "voucher_no": ["in", voucher_nos]},
 		fields=["name", "account", "credit", "debit", "cost_center", "project", "voucher_type", "voucher_no"],
 		limit=0,
 	)
