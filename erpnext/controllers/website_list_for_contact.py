@@ -263,6 +263,11 @@ def get_parents_for_user(parenttype: str) -> list[str]:
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
+	# only portal users get access through their Customer / Supplier, everyone else
+	# goes through `has_permission`, which applies their User Permissions
+	if not has_common(["Supplier", "Customer"], frappe.get_roles(user)):
+		return False
+
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
 	if customers:

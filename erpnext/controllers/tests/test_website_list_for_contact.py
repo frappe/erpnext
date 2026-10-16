@@ -3,6 +3,8 @@
 
 import json
 
+import frappe
+
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -34,3 +36,13 @@ class TestWebsiteListForContact(ERPNextTestSuite):
 			"Request for Quotation Supplier", "Request for Quotation", [supplier], 0, 20
 		)
 		self.assertIn(rfq.name, [row.name for row in rows])
+
+	def test_website_permission_respects_user_permissions(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.tests.permission_test_utils import as_user, make_company_fenced_user
+
+		invoice = create_sales_invoice()
+		user = make_company_fenced_user("_test_fenced@example.com", ["Accounts User"], "_Test Company 1")
+
+		with as_user(user):
+			self.assertFalse(frappe.has_website_permission(invoice))
