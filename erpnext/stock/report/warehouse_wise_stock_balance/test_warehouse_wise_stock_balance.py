@@ -28,3 +28,18 @@ class TestWarehouseWiseStockBalance(ERPNextTestSuite):
 		self.assertEqual(self.row(data, child)["stock_balance"], 1000)
 		# the group warehouse rolls up its children
 		self.assertEqual(self.row(data, parent)["stock_balance"], 1000)
+
+	def test_disabled_warehouses_with_stock_stay_in_the_totals(self):
+		group = create_warehouse("_Test WWSB Disabled Group", properties={"is_group": 1})
+		child = create_warehouse("_Test WWSB Disabled Child", properties={"parent_warehouse": group})
+		make_stock_entry(item_code="_Test Item", to_warehouse=child, qty=5, rate=100)
+		frappe.db.set_value("Warehouse", group, "disabled", 1)
+		root = frappe.db.get_value("Warehouse", group, "parent_warehouse")
+
+		data = self.run_report()
+		with_disabled = self.run_report(show_disabled_warehouses=1)
+
+		self.assertEqual(
+			self.row(data, root)["stock_balance"], self.row(with_disabled, root)["stock_balance"]
+		)
+		self.assertEqual(self.row(data, child)["indent"], self.row(with_disabled, child)["indent"])
