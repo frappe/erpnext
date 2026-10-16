@@ -30,10 +30,6 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: post-review-${{ inputs.pr }}-${{ inputs.review == '' && inputs.review_id == '' && github.run_id || 'post' }}
-  cancel-in-progress: false
-
 jobs:
   post:
     runs-on: ubuntu-latest
