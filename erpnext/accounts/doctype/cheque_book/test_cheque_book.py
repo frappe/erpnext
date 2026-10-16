@@ -23,6 +23,10 @@ class TestChequeBook(ERPNextTestSuite):
 			(book.cheque_start_no, book.cheque_end_no, book.no_of_cheques), ("000201", "000205", 5)
 		)
 
+		# the API and Data Import can send numbers instead of text
+		book = make_cheque_book(self.bank_account, 301, 305, submit=False)
+		self.assertEqual((book.cheque_start_no, book.cheque_end_no), ("000301", "000305"))
+
 	def test_invalid_ranges_are_rejected(self):
 		for start, end in (
 			("110", "100"),
