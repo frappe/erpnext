@@ -59,37 +59,30 @@ pull_request_rules:
           - version-16-hotfix
         assignees:
           - "{{ author }}"
-  - name: Automatic merge on CI success and review
-    conditions:
-      - status-success=linters
-      - status-success=Sider
-      - status-success=Semantic Pull Request
-      - status-success=Patch Test
-      - status-success=Python Unit Tests (1)
-      - status-success=Python Unit Tests (2)
-      - status-success=Python Unit Tests (3)
-      - label!=dont-merge
-      - label!=squash
+
+queue_rules:
+  - name: default
+    batch_size: 5
+    batch_max_wait_time: 30 min
+    max_checks_retries: 1
+    merge_method: merge
+    queue_conditions:
+      - base=develop
       - "#approved-reviews-by>=1"
-    actions:
-      merge:
-        method: merge
-  - name: Automatic squash on CI success and review
-    conditions:
-      - status-success=linters
-      - status-success=Sider
-      - status-success=Patch Test
-      - status-success=Python Unit Tests (1)
-      - status-success=Python Unit Tests (2)
-      - status-success=Python Unit Tests (3)
       - label!=dont-merge
-      - label=squash
-      - "#approved-reviews-by>=1"
-    actions:
-      merge:
-        method: squash
-        commit_message_format:
-          title: pr-title
-          body: pr-body
+      - check-success=linters
+      - check-success=Patch Test
+      - check-success=Check Commit Titles
+    merge_conditions:
+      - check-success=Python Unit Tests (1)
+      - check-success=Python Unit Tests (2)
+      - check-success=Python Unit Tests (3)
+      - check-success=Python Unit Tests (4)
+
 merge_queue:
   queue_controls_comment: false
+  skip_intermediate_results: true
+
+merge_protections_settings:
+  auto_merge_conditions:
+    - base=develop
