@@ -57,7 +57,7 @@ class ReportData:
 		result_data = []
 
 		if self.filters.get("traceability_direction") in ["Backward", "Both"]:
-			data = self.get_serial_no_batches()
+			data = self.split_by_production_entries(self.get_serial_no_batches())
 			source_data = self.prepare_source_data(data)
 
 			# Prepare source data with raw materials
@@ -131,6 +131,58 @@ class ReportData:
 				self.parse_batch_details(raw_materials, data, direction, indent + 1)
 
 		return data
+
+	def split_by_production_entries(self, rows):
+		production_entries = self.get_production_entries([row.serial_no or row.batch_no for row in rows])
+
+		result = []
+		for row in rows:
+			entries = production_entries.get(row.serial_no or row.batch_no)
+			if not entries:
+				result.append(row)
+				continue
+
+			for stock_entry in entries:
+				result.append(frappe._dict(row, reference_doctype="Stock Entry", reference_name=stock_entry))
+
+		return result
+
+	def get_production_entries(self, values):
+		if not values:
+			return {}
+
+		sabb = frappe.qb.DocType("Serial and Batch Bundle")
+		sabe = frappe.qb.DocType("Serial and Batch Entry")
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		value_field = sabe.serial_no if self.doctype_name == "Serial No" else sabe.batch_no
+
+		query = (
+			frappe.qb.from_(sabb)
+			.inner_join(sabe)
+			.on(sabb.name == sabe.parent)
+			.inner_join(stock_entry)
+			.on(stock_entry.name == sabb.voucher_no)
+			.select(value_field.as_("value"), sabb.voucher_no)
+			.where(
+				(sabb.voucher_type == "Stock Entry")
+				& (sabb.type_of_transaction == "Inward")
+				& (sabb.is_cancelled == 0)
+				& (sabe.docstatus == 1)
+				& (stock_entry.purpose.isin(["Manufacture", "Repack"]))
+				& (value_field.isin(values))
+			)
+			.orderby(sabb.posting_datetime)
+		)
+
+		if condition := get_allowed_companies_condition(sabb.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
+
+		production_entries = defaultdict(list)
+		for row in query.run(as_dict=True):
+			if row.voucher_no not in production_entries[row.value]:
+				production_entries[row.value].append(row.voucher_no)
+
+		return production_entries
 
 	def prepare_source_data(self, data):
 		source_data = frappe._dict({})

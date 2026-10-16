@@ -599,3 +599,32 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			sorted(row["serial_no"] for row in rows if row.get("serial_no")),
 			sorted(e.serial_no for e in entries),
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_backward_trace_uses_the_entry_that_produced_the_batch(self):
+		raw_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRW-.#####",
+			}
+		).name
+		fg_item = self.make_fg_item(batch=True)
+		make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=4, rate=100)
+		repack = self.make_repack([(raw_item, 4, None)], [(fg_item, 2, None)])
+		repack.reload()
+		fg_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": repack.items[1].serial_and_batch_bundle}, "batch_no"
+		)
+		frappe.db.set_value(
+			"Batch", fg_batch, {"reference_doctype": "Work Order", "reference_name": "WO-0001"}
+		)
+
+		rows = self.run_report(item_code=fg_item, batches=[fg_batch], traceability_direction="Backward")
+
+		self.assertEqual(
+			[(row["item_code"], row["qty"]) for row in rows if row.get("indent") == 1], [(raw_item, 4)]
+		)
