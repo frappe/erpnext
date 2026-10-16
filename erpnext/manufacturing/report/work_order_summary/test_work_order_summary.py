@@ -71,3 +71,16 @@ class TestWorkOrderSummary(ERPNextTestSuite):
 
 		self.assertIn(wo.name, rows)
 		self.assertEqual(rows[wo.name]["age"], 0)
+
+	def test_work_order_ending_later_on_the_to_date_is_listed(self):
+		wo = make_wo_order_test_record(
+			production_item="_Test FG Item",
+			qty=10,
+			company="_Test Company",
+			planned_start_date=f"{today()} 08:00:00",
+		)
+		wo.db_set("planned_end_date", f"{today()} 18:00:00")
+
+		names = {row["name"] for row in self.run_report(based_on="Planned Date", from_date=today())}
+
+		self.assertIn(wo.name, names)

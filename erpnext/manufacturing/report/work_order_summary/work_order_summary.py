@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, flt, getdate, today
+from frappe.utils import add_days, date_diff, flt, getdate, today
 
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
@@ -57,10 +57,10 @@ def get_data(filters):
 
 	if filters.get("based_on") == "Planned Date":
 		query_filters["planned_start_date"] = (">=", filters.get("from_date"))
-		query_filters["planned_end_date"] = ("<=", filters.get("to_date"))
+		query_filters["planned_end_date"] = ("<", add_days(filters.get("to_date"), 1))
 	elif filters.get("based_on") == "Actual Date":
 		query_filters["actual_start_date"] = (">=", filters.get("from_date"))
-		query_filters["actual_end_date"] = ("<=", filters.get("to_date"))
+		query_filters["actual_end_date"] = ("<", add_days(filters.get("to_date"), 1))
 	else:
 		query_filters["creation"] = ("between", [filters.get("from_date"), filters.get("to_date")])
 
