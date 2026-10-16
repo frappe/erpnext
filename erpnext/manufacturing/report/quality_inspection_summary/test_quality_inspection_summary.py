@@ -89,3 +89,16 @@ class TestQualityInspectionSummary(ERPNextTestSuite):
 
 		_data, after = self.run_report_with_chart()
 		self.assertEqual(after, [before[0], before[1] - 1])
+
+	def test_draft_inspections_are_left_out(self):
+		_data, before = self.run_report_with_chart()
+		draft = create_quality_inspection(
+			item_code="_Test Item",
+			reference_type="Job Card",
+			reference_name=self.job_card,
+			do_not_submit=True,
+		)
+
+		data, after = self.run_report_with_chart()
+		self.assertNotIn(draft.name, [row.name for row in data])
+		self.assertEqual(after, before)
