@@ -1147,6 +1147,44 @@ class TestPickList(ERPNextTestSuite):
 			[2000, 2700],
 		)
 
+	def test_orders_with_different_taxes_or_terms_get_their_own_delivery_note(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		orders = []
+		for update in ({}, {"terms": "Deliver before noon"}, {"tax_rate": 10}):
+			order = make_sales_order(
+				item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=1000, do_not_submit=1
+			)
+			order.terms = update.get("terms")
+			if update.get("tax_rate"):
+				order.append(
+					"taxes",
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Service Tax - _TC",
+						"cost_center": "_Test Cost Center - _TC",
+						"description": "Service Tax",
+						"rate": update["tax_rate"],
+					},
+				)
+			order.submit()
+			orders.append(order)
+
+		pick_list = create_pick_list(orders[0].name)
+		for order in orders[1:]:
+			pick_list = create_pick_list(order.name, pick_list)
+		pick_list.submit()
+		create_delivery_note(pick_list.name)
+
+		delivery_notes = frappe.get_all(
+			"Delivery Note Item",
+			filters={"against_pick_list": pick_list.name},
+			pluck="parent",
+			distinct=True,
+		)
+		self.assertEqual(len(delivery_notes), 3)
+
 	def test_row_stock_qty_is_derived_on_the_server(self):
 		item = make_item(
 			properties={

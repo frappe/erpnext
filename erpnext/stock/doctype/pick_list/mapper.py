@@ -70,16 +70,36 @@ SALES_ORDER_HEADER_FIELDS = (
 	"additional_discount_percentage",
 	"discount_amount",
 	"tc_name",
+	"terms",
 	"payment_terms_template",
+)
+
+SALES_ORDER_TAX_KEY_FIELDS = (
+	"charge_type",
+	"account_head",
+	"rate",
+	"row_id",
+	"included_in_print_rate",
+	"cost_center",
 )
 
 
 def get_header_key(sales_order):
 	key = tuple(cstr(sales_order.get(field)) for field in SALES_ORDER_HEADER_FIELDS)
-	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+	key += tuple(
+		tuple(cstr(tax.get(field)) for field in SALES_ORDER_TAX_KEY_FIELDS) for tax in sales_order.taxes
+	)
+	if has_order_specific_amounts(sales_order):
 		key += (sales_order.sales_order,)
 
 	return key
+
+
+def has_order_specific_amounts(sales_order):
+	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+		return True
+
+	return any(tax.charge_type == "Actual" for tax in sales_order.taxes)
 
 
 def get_sales_order_headers(sales_orders):
@@ -87,11 +107,33 @@ def get_sales_order_headers(sales_orders):
 	if not sales_orders:
 		return []
 
-	return frappe.get_all(
+	headers = frappe.get_all(
 		"Sales Order",
 		filters={"name": ("in", sales_orders)},
 		fields=["name as sales_order", *SALES_ORDER_HEADER_FIELDS],
 	)
+	taxes = get_sales_order_taxes(sales_orders)
+	for header in headers:
+		header.taxes = taxes.get(header.sales_order, [])
+
+	return headers
+
+
+def get_sales_order_taxes(sales_orders):
+	tax = frappe.qb.DocType("Sales Taxes and Charges")
+	rows = (
+		frappe.qb.from_(tax)
+		.select(tax.parent, *[tax[field] for field in SALES_ORDER_TAX_KEY_FIELDS])
+		.where((tax.parenttype == "Sales Order") & (tax.parent.isin(sales_orders)))
+		.orderby(tax.parent)
+		.orderby(tax.idx)
+	).run(as_dict=True)
+
+	taxes = {}
+	for row in rows:
+		taxes.setdefault(row.parent, []).append(row)
+
+	return taxes
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
