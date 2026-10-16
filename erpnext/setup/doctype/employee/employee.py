@@ -4,6 +4,9 @@ import frappe
 from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
+	ALL_USER_ROLE,
+	GUEST_ROLE,
+	SYSTEM_USER_ROLE,
 	add_user_permission,
 	get_doc_permissions,
 	remove_user_permission,
@@ -163,6 +166,21 @@ class Employee(NestedSet):
 
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
+		if self.has_value_changed("user_id") or self.has_value_changed("status"):
+			self.validate_user_access()
+
+	def validate_user_access(self):
+		"""Only a System Manager may link or update a User holding roles the editor lacks."""
+		editor_roles = frappe.get_roles()
+		if "System Manager" in editor_roles:
+			return
+
+		ignored_roles = {GUEST_ROLE, ALL_USER_ROLE, SYSTEM_USER_ROLE, "Employee"}
+		if set(frappe.get_roles(self.user_id)) - set(editor_roles) - ignored_roles:
+			frappe.throw(
+				_("You are not permitted to link or update User {0}").format(frappe.bold(self.user_id)),
+				frappe.PermissionError,
+			)
 
 	def validate_auto_user_creation(self):
 		if self.create_user_automatically and not (
