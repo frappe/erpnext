@@ -1,5 +1,6 @@
 shared:
   pr_checks: &pr_checks
+    - base~=^(develop|version-15-hotfix|version-16-hotfix)$
     - label!=dont-merge
     - check-success=linters
     - check-success=Check Commit Titles
@@ -73,7 +74,6 @@ pull_request_rules:
           - "{{ author }}"
   - name: Merge PRs tested alone
     conditions:
-      - base=develop
       - label=merge-alone
       - "#approved-reviews-by>=1"
       - and: *pr_checks
@@ -89,7 +89,6 @@ queue_rules:
     max_checks_retries: 1
     merge_method: merge
     queue_conditions:
-      - base=develop
       - label!=merge-alone
       - and: *pr_checks
     merge_conditions: *suite_checks
