@@ -60,14 +60,7 @@
   "transferred_qty",
   "requested_qty",
   "status",
-<<<<<<< HEAD
   "column_break_20",
-  "operation_row_number",
-=======
-  "operation_row_id",
-  "amended_from",
-  "column_break_xhzg",
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
   "operation_id",
   "sequence_id",
   "remarks",
@@ -514,11 +507,7 @@
  ],
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-06-22 11:51:16.526778",
-=======
- "modified": "2026-07-23 12:00:00.000000",
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
+ "modified": "2026-10-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

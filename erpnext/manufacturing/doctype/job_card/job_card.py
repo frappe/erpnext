@@ -85,12 +85,6 @@ class JobCard(Document):
 		naming_series: DF.Literal["PO-JOB.#####"]
 		operation: DF.Link
 		operation_id: DF.Data | None
-<<<<<<< HEAD
-		operation_row_number: DF.Literal[None]
-=======
-		operation_row_id: DF.Int
-		pending_qty: DF.Float
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 		posting_date: DF.Date | None
 		process_loss_qty: DF.Float
 		production_item: DF.Link | None
@@ -1030,26 +1024,6 @@ class JobCard(Document):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-	def validate_operation_id(self):
-		if (
-			self.get("operation_id")
-			and self.get("operation_row_number")
-			and self.operation
-			and self.work_order
-			and frappe.get_cached_value("Work Order Operation", self.operation_row_number, "name")
-			!= self.operation_id
-		):
-			work_order = bold(get_link_to_form("Work Order", self.work_order))
-			frappe.throw(
-				_("Operation {0} does not belong to the work order {1}").format(
-					bold(self.operation), work_order
-				),
-				OperationMismatchError,
-			)
-=======
-=======
 	def set_operation_id(self):
 		if not (self.work_order and self.operation):
 			return
@@ -1078,36 +1052,6 @@ class JobCard(Document):
 					"Operation {0} is added multiple times in the work order {1}. Please select the operation row."
 				).format(bold(self.operation), get_link_to_form("Work Order", self.work_order))
 			)
-
->>>>>>> 553336f (fix: resolve or require operation_id server-side)
-	@frappe.whitelist()
-	def pause_job(self, **kwargs):
-		frappe.has_permission("Job Card", "write", doc=self, throw=True)
-
-		self.validate_docstatus()
-
-		if isinstance(kwargs, dict):
-			kwargs = frappe._dict(kwargs)
-
-		self.db_set("is_paused", 1)
-		self.add_time_logs(to_time=kwargs.end_time, completed_qty=0.0, employees=self.employee)
-
-	@frappe.whitelist()
-	def resume_job(self, **kwargs):
-		frappe.has_permission("Job Card", "write", doc=self, throw=True)
-
-		self.validate_docstatus()
-
-		if isinstance(kwargs, dict):
-			kwargs = frappe._dict(kwargs)
-
-		self.db_set("is_paused", 0)
-		self.add_time_logs(
-			from_time=kwargs.start_time,
-			employees=self.employee,
-			completed_qty=0.0,
-		)
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 
 	def validate_sequence_id(self):
 		if self.is_corrective_job_card:
