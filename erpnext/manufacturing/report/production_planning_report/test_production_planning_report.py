@@ -141,3 +141,24 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		).submit()
 		data = self.run_report("Work Order", [work_order.name])
 		self.assertEqual(self.required_qty(data, material), 0)
+
+	def test_arrival_qty_is_in_the_stock_uom(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		material = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		fg_item = self.make_fg_with_bom([(material, 3, None, 1)])
+		purchase_order = create_purchase_order(
+			item_code=material, qty=2, warehouse=WAREHOUSE, do_not_save=True
+		)
+		purchase_order.items[0].update({"uom": "Box", "conversion_factor": 12})
+		purchase_order.insert()
+		purchase_order.submit()
+		sales_order = make_sales_order(item_code=fg_item, qty=10, warehouse=WAREHOUSE)
+
+		data = self.run_report("Sales Order", [sales_order.name])
+
+		self.assertEqual(
+			[(d.required_qty, d.arrival_qty) for d in data if d.get("item_code") == material], [(30, 24)]
+		)

@@ -260,7 +260,7 @@ class ProductionPlanReport:
 			.select(
 				poi.item_code,
 				Min(poi.schedule_date).as_("arrival_date"),
-				Sum(poi.qty - poi.received_qty).as_("arrival_qty"),
+				Sum((poi.qty - poi.received_qty) * poi.conversion_factor).as_("arrival_qty"),
 				poi.warehouse,
 			)
 			.where(
