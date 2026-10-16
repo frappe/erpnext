@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import datetime
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
@@ -19,6 +19,15 @@ DateTime = datetime.date | datetime.datetime
 FilteredEntries = list[dict[str, str | float | DateTime | None]]
 ItemGroupsDict = dict[tuple[int, int], dict[str, str | int]]
 SVDList = list[frappe._dict]
+
+ITEM_ROW_DOCTYPES = {
+	"Delivery Note": "Delivery Note Item",
+	"Sales Invoice": "Sales Invoice Item",
+	"POS Invoice": "POS Invoice Item",
+	"Stock Entry": "Stock Entry Detail",
+	"Purchase Invoice": "Purchase Invoice Item",
+	"Purchase Receipt": "Purchase Receipt Item",
+}
 
 
 def execute(filters: Filters) -> tuple[Columns, Data]:
@@ -46,8 +55,9 @@ def get_columns() -> Columns:
 
 
 def get_data(filters: Filters) -> Data:
+	account = filters.account
 	filtered_entries = get_filtered_entries(filters)
-	svd_list = get_stock_value_difference_list(filtered_entries)
+	svd_list = get_stock_value_difference_list(filtered_entries, account)
 	leveled_dict = get_leveled_dict()
 
 	assign_self_values(leveled_dict, svd_list)
@@ -76,15 +86,36 @@ def get_filtered_entries(filters: Filters) -> FilteredEntries:
 	return filtered_entries
 
 
-def get_stock_value_difference_list(filtered_entries: FilteredEntries) -> SVDList:
+def get_stock_value_difference_list(filtered_entries: FilteredEntries, account: str) -> SVDList:
 	voucher_nos = [fe.get("voucher_no") for fe in filtered_entries]
 	svd_list = frappe.get_list(
 		"Stock Ledger Entry",
-		fields=["item_code", "stock_value_difference"],
+		fields=["item_code", "stock_value_difference", "voucher_type", "voucher_detail_no"],
 		filters=[("voucher_no", "in", voucher_nos), ("is_cancelled", "=", 0)],
 	)
+	cogs_rows = get_rows_booked_to_account(svd_list, account)
+	svd_list = [row for row in svd_list if row.voucher_detail_no in cogs_rows]
 	assign_item_groups_to_svd_list(svd_list)
 	return svd_list
+
+
+def get_rows_booked_to_account(svd_list: SVDList, account: str) -> set[str]:
+	rows_by_doctype = defaultdict(set)
+	for row in svd_list:
+		if row_doctype := ITEM_ROW_DOCTYPES.get(row.voucher_type):
+			rows_by_doctype[row_doctype].add(row.voucher_detail_no)
+
+	booked_rows = set()
+	for row_doctype, names in rows_by_doctype.items():
+		table = frappe.qb.DocType(row_doctype)
+		booked_rows.update(
+			frappe.qb.from_(table)
+			.select(table.name)
+			.where((table.name.isin(names)) & (table.expense_account == account))
+			.run(pluck=True)
+		)
+
+	return booked_rows
 
 
 def get_leveled_dict() -> OrderedDict:
