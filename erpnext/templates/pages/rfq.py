@@ -21,7 +21,14 @@ def get_context(context):
 	context.doc.rfq_links = get_link_quotation(context.doc.supplier, context.doc.name)
 	unauthorized_user(context.doc.supplier)
 	update_supplier_details(context)
+	context.portal_doc = get_portal_doc(context.doc)
 	context["title"] = frappe.form_dict.name
+
+
+def get_portal_doc(rfq) -> dict:
+	"""The RFQ fields the supplier's quotation form needs."""
+	items = [{"name": item.name, "idx": item.idx, "qty": item.qty} for item in rfq.items]
+	return {"name": rfq.name, "items": items}
 
 
 def get_supplier():
