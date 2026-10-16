@@ -24,6 +24,8 @@ class PaymentReconciliationInvoice(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		payment_term_exchange_rate: DF.Float
+		payment_term: DF.Link | None
 	# end: auto-generated types
 
 	@staticmethod

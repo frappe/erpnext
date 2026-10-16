@@ -4,7 +4,11 @@
 import frappe
 from frappe.utils import today
 
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+	create_payment_entry,
+	create_payment_terms_template_with_discount,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -67,6 +71,35 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 			transaction_date=today(),
 		)
 		return so
+
+	def test_unreconcile_discounted_payment_restores_payment_schedule(self):
+		create_payment_terms_template_with_discount()
+		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		si = self.create_sales_invoice(do_not_submit=True)
+		si.payment_terms_template = "Test Discount Template"
+		si.set("payment_schedule", [])
+		si.save().submit()
+		pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash)
+		pe.submit()
+		si.reload()
+		self.assertEqual(si.payment_schedule[0].paid_amount, 90)
+		self.assertEqual(si.payment_schedule[0].discounted_amount, 10)
+
+		unreconcile = frappe.get_doc(
+			doctype="Unreconcile Payment",
+			company=self.company,
+			voucher_type=pe.doctype,
+			voucher_no=pe.name,
+		)
+		unreconcile.add_references()
+		unreconcile.save().submit()
+		si.reload()
+		term = si.payment_schedule[0]
+		self.assertEqual(term.paid_amount, 0)
+		self.assertEqual(term.base_paid_amount, 0)
+		self.assertEqual(term.discounted_amount, 0)
+		self.assertEqual(term.outstanding, 100)
+		self.assertEqual(term.base_outstanding, 100)
 
 	def test_01_unreconcile_invoice(self):
 		si1 = self.create_sales_invoice()

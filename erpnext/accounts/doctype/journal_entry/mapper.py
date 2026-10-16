@@ -280,6 +280,8 @@ def map_reverse_journal_entry(
 					"credit": "debit",
 					"reference_type": "reference_type",
 					"reference_name": "reference_name",
+					"payment_term": "payment_term",
+					"payment_term_exchange_rate": "payment_term_exchange_rate",
 				},
 			},
 		},

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import json
+from collections import defaultdict
 from datetime import date
 from functools import reduce
 
@@ -255,6 +256,11 @@ class PaymentEntry(AccountsController):
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
 
+	def before_submit(self):
+		from erpnext.accounts.services.payment_schedule import clear_changed_payment_term_exchange_rates
+
+		clear_changed_payment_term_exchange_rates(self)
+
 	def on_submit(self):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
@@ -394,6 +400,9 @@ class PaymentEntry(AccountsController):
 	def validate_duplicate_entry(self):
 		reference_names = set()
 		for d in self.get("references"):
+			# Repeated reconciliation can append several allocations to the same term.
+			if d.is_payment_reconciliation:
+				continue
 			key = (d.reference_doctype, d.reference_name, d.payment_term, d.payment_request)
 			if key in reference_names:
 				frappe.throw(
@@ -906,22 +915,29 @@ class PaymentEntry(AccountsController):
 							)
 						)
 
-	def update_payment_schedule(self, cancel=0):
+	def update_payment_schedule(self, cancel=0, references=None):
 		invoice_payment_amount_map = {}
 		invoice_paid_amount_map = {}
+		term_outstanding_map = {}
 
-		for ref in self.get("references"):
+		for ref in self.get("references") if references is None else references:
 			if not ref.payment_term or not ref.reference_name:
 				continue
 
-			key = (ref.payment_term, ref.reference_name, ref.reference_doctype)
+			key = (
+				ref.payment_term,
+				ref.reference_name,
+				ref.reference_doctype,
+				ref.is_payment_reconciliation,
+				ref.payment_term_exchange_rate,
+			)
 			invoice_payment_amount_map.setdefault(key, 0.0)
 			invoice_payment_amount_map[key] += ref.allocated_amount
 
-			if not invoice_paid_amount_map.get(key):
+			if key not in invoice_paid_amount_map:
 				payment_schedule = frappe.get_all(
 					"Payment Schedule",
-					filters={"parent": ref.reference_name},
+					filters={"parent": ref.reference_name, "parenttype": ref.reference_doctype},
 					fields=[
 						"paid_amount",
 						"payment_amount",
@@ -932,10 +948,17 @@ class PaymentEntry(AccountsController):
 					],
 				)
 				for term in payment_schedule:
-					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
+					invoice_key = (
+						term.payment_term,
+						ref.reference_name,
+						ref.reference_doctype,
+						ref.is_payment_reconciliation,
+						ref.payment_term_exchange_rate,
+					)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
-					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
-					if not (term.discount_type and term.discount):
+					term_outstanding_map.setdefault(invoice_key[:3], term.outstanding)
+					# Reconciliation allocates an existing payment without booking a discount.
+					if ref.is_payment_reconciliation or not (term.discount_type and term.discount):
 						continue
 
 					if term.discount_type == "Percentage":
@@ -946,14 +969,17 @@ class PaymentEntry(AccountsController):
 						invoice_paid_amount_map[invoice_key]["discounted_amt"] = term.discount
 
 		for idx, (key, allocated_amount) in enumerate(invoice_payment_amount_map.items(), 1):
-			if not invoice_paid_amount_map.get(key):
+			if key not in invoice_paid_amount_map:
 				frappe.throw(_("Payment term {0} not used in {1}").format(key[0], key[1]))
 
-			allocated_amount = self.get_allocated_amount_in_transaction_currency(
-				allocated_amount, key[2], key[1]
-			)
+			if key[4]:
+				allocated_amount = flt(allocated_amount / key[4], self.precision("total_allocated_amount"))
+			else:
+				allocated_amount = self.get_allocated_amount_in_transaction_currency(
+					allocated_amount, key[2], key[1]
+				)
 
-			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
+			outstanding = flt(term_outstanding_map.get(key[:3]))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
 
 			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
@@ -978,7 +1004,7 @@ class PaymentEntry(AccountsController):
 					.set(ps.discounted_amount, ps.discounted_amount - discounted_amt)
 					.set(ps.outstanding, ps.outstanding + allocated_amount)
 					.set(ps.base_outstanding, ps.base_outstanding + base_outstanding)
-					.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
+					.where((ps.parent == key[1]) & (ps.parenttype == key[2]) & (ps.payment_term == key[0]))
 				).run()
 			else:
 				if allocated_amount > outstanding:
@@ -996,8 +1022,11 @@ class PaymentEntry(AccountsController):
 						.set(ps.discounted_amount, ps.discounted_amount + discounted_amt)
 						.set(ps.outstanding, ps.outstanding - allocated_amount)
 						.set(ps.base_outstanding, ps.base_outstanding - base_outstanding)
-						.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
+						.where(
+							(ps.parent == key[1]) & (ps.parenttype == key[2]) & (ps.payment_term == key[0])
+						)
 					).run()
+					term_outstanding_map[key[:3]] -= allocated_amount
 
 	def get_allocated_amount_in_transaction_currency(
 		self, allocated_amount, reference_doctype, reference_docname
@@ -2289,29 +2318,53 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	return data
 
 
-def split_refdocs_based_on_payment_terms(refdocs, company) -> list:
+def split_refdocs_based_on_payment_terms(refdocs, company, *, show_alert=True) -> list:
 	"""Split a list of invoices based on their payment terms."""
 	exc_rates = get_currency_data(refdocs, company)
+	templates = {
+		details.payment_terms_template for details in exc_rates.values() if details.payment_terms_template
+	}
+	allocated_templates = (
+		set(
+			frappe.get_all(
+				"Payment Terms Template",
+				filters={"name": ("in", templates), "allocate_payment_based_on_payment_terms": 1},
+				pluck="name",
+			)
+		)
+		if templates
+		else set()
+	)
+	allocated_invoices = {
+		key for key, details in exc_rates.items() if details.payment_terms_template in allocated_templates
+	}
+	payment_schedules = defaultdict(list)
+	if allocated_invoices:
+		for row in frappe.get_all(
+			"Payment Schedule",
+			filters={
+				"parenttype": ("in", {key[0] for key in allocated_invoices}),
+				"parent": ("in", {key[1] for key in allocated_invoices}),
+			},
+			fields=["parenttype", "parent", "payment_term", "payment_amount", "outstanding"],
+			order_by="due_date, idx",
+		):
+			payment_schedules[(row.parenttype, row.parent)].append(row)
 
 	outstanding_refdoc_after_split = []
 	for entry in refdocs:
-		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
-			if payment_term_template := frappe.db.get_value(
-				entry.voucher_type, entry.voucher_no, "payment_terms_template"
-			):
-				split_rows = get_split_invoice_rows(entry, payment_term_template, exc_rates)
-				if not split_rows:
-					continue
-
-				if len(split_rows) > 1:
-					frappe.msgprint(
-						_("Splitting {0} {1} into {2} rows as per Payment Terms").format(
-							_(entry.voucher_type), frappe.bold(entry.voucher_no), len(split_rows)
-						),
-						alert=True,
-					)
-				outstanding_refdoc_after_split += split_rows
-				continue
+		key = (entry.voucher_type, entry.voucher_no)
+		if key in allocated_invoices:
+			split_rows = get_split_invoice_rows(entry, exc_rates[key], payment_schedules[key])
+			if show_alert and len(split_rows) > 1:
+				frappe.msgprint(
+					_("Splitting {0} {1} into {2} rows as per Payment Terms").format(
+						_(entry.voucher_type), frappe.bold(entry.voucher_no), len(split_rows)
+					),
+					alert=True,
+				)
+			outstanding_refdoc_after_split += split_rows
+			continue
 
 		# If not an invoice or no payment terms template, add as it is
 		outstanding_refdoc_after_split.append(entry)
@@ -2326,45 +2379,51 @@ def get_currency_data(outstanding_refdocs: list, company: str | None = None) -> 
 
 	for doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
 		refdoc = [x.voucher_no for x in outstanding_refdocs if x.voucher_type == doctype]
+		if not refdoc:
+			continue
 		for x in frappe.db.get_all(
 			doctype,
 			filters={"name": ["in", refdoc]},
-			fields=["name", "currency", "conversion_rate", "party_account_currency"],
+			fields=[
+				"name",
+				"currency",
+				"conversion_rate",
+				"party_account_currency",
+				"payment_terms_template",
+			],
 		):
-			exc_rates[x.name] = frappe._dict(
+			exc_rates[(doctype, x.name)] = frappe._dict(
 				conversion_rate=x.conversion_rate,
 				currency=x.currency,
 				party_account_currency=x.party_account_currency,
 				company_currency=company_currency,
+				payment_terms_template=x.payment_terms_template,
 			)
 
 	return exc_rates
 
 
-def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates: dict) -> list:
+def get_split_invoice_rows(invoice: dict, doc_details: dict, payment_schedule: list) -> list:
 	"""Split invoice based on its payment schedule table."""
 	split_rows = []
-	allocate_payment_based_on_payment_terms = frappe.db.get_value(
-		"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
+	is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
+		doc_details.party_account_currency != doc_details.company_currency
 	)
-
-	if not allocate_payment_based_on_payment_terms:
-		return [invoice]
-
-	payment_schedule = frappe.get_all(
-		"Payment Schedule", filters={"parent": invoice.voucher_no}, fields=["*"], order_by="due_date"
+	conversion_rate = 1 if is_multi_currency_acc else doc_details.conversion_rate
+	precision = frappe.get_precision(
+		"Payment Entry Reference", "allocated_amount", currency=doc_details.party_account_currency
 	)
+	total_outstanding = converted_outstanding = 0.0
 	for payment_term in payment_schedule:
-		if payment_term.outstanding <= 0.1:
+		if payment_term.outstanding <= 0:
 			continue
-
-		doc_details = exc_rates.get(payment_term.parent, None)
-		is_multi_currency_acc = (doc_details.currency != doc_details.company_currency) and (
-			doc_details.party_account_currency != doc_details.company_currency
-		)
-		payment_term_outstanding = flt(payment_term.outstanding)
-		if not is_multi_currency_acc:
-			payment_term_outstanding = doc_details.conversion_rate * flt(payment_term.outstanding)
+		# Round the running total so converting terms does not lose a payable fraction.
+		total_outstanding += payment_term.outstanding
+		rounded_total = flt(total_outstanding * conversion_rate, precision)
+		payment_term_outstanding = flt(rounded_total - converted_outstanding, precision)
+		converted_outstanding = rounded_total
+		if payment_term_outstanding <= 0:
+			continue
 
 		split_rows.append(
 			frappe._dict(
@@ -2375,17 +2434,29 @@ def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates:
 					"voucher_type": invoice.voucher_type,
 					"posting_date": invoice.posting_date,
 					"invoice_amount": flt(invoice.invoice_amount),
-					"outstanding_amount": payment_term_outstanding
-					if payment_term_outstanding
-					else invoice.outstanding_amount,
+					"outstanding_amount": payment_term_outstanding,
 					"payment_term_outstanding": payment_term_outstanding,
 					"payment_amount": payment_term.payment_amount,
 					"payment_term": payment_term.payment_term,
+					"payment_term_exchange_rate": payment_term_outstanding / payment_term.outstanding,
 				}
 			)
 		)
 
-	return split_rows
+	if invoice.voucher_type in ("Sales Invoice", "Purchase Invoice"):
+		# Payments without term references settle the oldest unpaid terms first.
+		unallocated_payment = flt(
+			sum(row.outstanding_amount for row in split_rows) - invoice.outstanding_amount, precision
+		)
+		for row in split_rows:
+			if unallocated_payment <= 0:
+				break
+			settled = min(row.outstanding_amount, unallocated_payment)
+			row.outstanding_amount = flt(row.outstanding_amount - settled, precision)
+			row.payment_term_outstanding = row.outstanding_amount
+			unallocated_payment = flt(unallocated_payment - settled, precision)
+
+	return [row for row in split_rows if row.outstanding_amount > 0]
 
 
 def get_orders_to_be_billed(
