@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
@@ -70,7 +71,7 @@ def get_data(filters):
 	query = (
 		frappe.qb.from_(wo)
 		.select(wo.name.as_("work_order"), wo.qty, wo.produced_qty, wo.production_item, wo.bom_no)
-		.where((wo.produced_qty > wo.qty) & (wo.docstatus == 1))
+		.where((wo.produced_qty > 0) & (wo.docstatus == 1))
 	)
 
 	if filters.get("bom_no") and not filters.get("work_order"):
@@ -91,6 +92,7 @@ def get_data(filters):
 			fields=["item_code as raw_material_code", "required_qty", "consumed_qty"],
 			filters={"parent": d.work_order, "parenttype": "Work Order"},
 		):
+			data.required_qty = flt(data.required_qty) * flt(d.produced_qty) / flt(d.qty)
 			results.append(data)
 
 	return results
@@ -103,7 +105,7 @@ def get_work_orders(doctype: str, txt: str, searchfield: str, start: int, page_l
 	query = (
 		frappe.qb.from_(wo)
 		.select(wo.name)
-		.where((wo.name.like(f"{txt}%")) & (wo.produced_qty > wo.qty) & (wo.docstatus == 1))
+		.where((wo.name.like(f"{txt}%")) & (wo.produced_qty > 0) & (wo.docstatus == 1))
 		.orderby(wo.name)
 		.limit(page_len)
 		.offset(start)

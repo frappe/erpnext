@@ -31,7 +31,7 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 			)
 		}
 
-	def create_over_produced_work_order(self, ordered_qty=2, produced_qty=3):
+	def create_over_produced_work_order(self, ordered_qty=2, produced_qty=3, extra_consumption=0):
 		work_order = make_wo_order_test_record(
 			item=self.production_item,
 			qty=ordered_qty,
@@ -45,6 +45,9 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 			)
 
 		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", produced_qty))
+		for row in stock_entry.items:
+			if row.s_warehouse:
+				row.qty += extra_consumption
 		stock_entry.submit()
 
 		work_order.reload()
@@ -74,8 +77,7 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 		}
 		for item_code, per_unit_qty in self.raw_materials.items():
 			self.assertIn(item_code, raw_material_rows)
-			# planned/required qty scales with the ordered qty on the work order
-			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
+			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 3)
 
 	def test_bom_no_filter_returns_over_produced_orders(self):
 		work_order = self.create_over_produced_work_order(ordered_qty=2, produced_qty=3)
@@ -99,12 +101,28 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 		matched = [row for row in data if row.get("work_order") == work_order.name]
 		self.assertEqual(matched, [])
 
-	def test_work_order_produced_exactly_on_plan_is_excluded(self):
-		# the canonical no-variance case: produced qty equals the planned qty, so the
-		# report (which lists only over-produced orders) must not include it
+	def test_work_order_produced_exactly_on_plan_is_listed(self):
 		work_order = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2)
 
 		data = self.run_report(work_order=work_order.name)
 
 		matched = [row for row in data if row.get("work_order") == work_order.name]
-		self.assertEqual(matched, [])
+		self.assertEqual(len(matched), 1)
+		raw_material_rows = {
+			row.get("raw_material_code"): row for row in data if row.get("raw_material_code")
+		}
+		for item_code, per_unit_qty in self.raw_materials.items():
+			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
+			self.assertEqual(raw_material_rows[item_code].get("consumed_qty"), per_unit_qty * 2)
+
+	def test_work_order_consuming_more_than_bom_shows_variance(self):
+		work_order = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2, extra_consumption=1)
+
+		data = self.run_report(work_order=work_order.name)
+
+		raw_material_rows = {
+			row.get("raw_material_code"): row for row in data if row.get("raw_material_code")
+		}
+		for item_code, per_unit_qty in self.raw_materials.items():
+			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
+			self.assertEqual(raw_material_rows[item_code].get("consumed_qty"), per_unit_qty * 2 + 1)
