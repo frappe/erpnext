@@ -51,6 +51,16 @@ class TestFifoQueueVsQtyAfterTransactionComparison(ERPNextTestSuite):
 		flagged = {row.get("name") for row in data if row}
 		self.assertIn(sle, flagged)
 
+	def test_items_without_a_queue_are_not_flagged(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=10, rate=100)
+
+		data = self.run_report({"company": "_Test Company", "item_code": item})
+
+		self.assertEqual([row for row in data if row], [])
+
 	def test_requires_a_filter(self):
 		with self.assertRaises(frappe.ValidationError):
 			self.run_report({"company": "_Test Company"})
