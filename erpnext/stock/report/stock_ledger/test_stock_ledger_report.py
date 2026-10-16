@@ -555,3 +555,30 @@ class TestStockLedgerReport(ERPNextTestSuite):
 			rows = [row for row in execute(filters)[1] if row.get("voucher_no")]
 
 			self.assertEqual([row["valuation_rate"] for row in rows], [200, 200], f"segregate={segregate}")
+
+	def test_midnight_entry_on_from_date_is_not_in_the_opening(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 10,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -20),
+				},
+				{
+					"qty": 4,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -5),
+					"posting_time": "00:00:00",
+				},
+			],
+		)
+
+		rows = self.run_report(item, from_date=add_days(today(), -5))
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [10, 14])
