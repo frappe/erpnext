@@ -221,8 +221,17 @@ def get_stock_qty_by_item(filters):
 			)
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
+	else:
+		query = query.where(bin.warehouse.isin(get_permitted_warehouses(filters.get("bom"))))
 
 	return query
+
+
+def get_permitted_warehouses(bom):
+	company = frappe.db.get_value("BOM", bom, "company", cache=True)
+	return frappe.qb.get_query(
+		"Warehouse", fields=["name"], filters={"company": company}, ignore_permissions=False
+	)
 
 
 def get_bom_data(filters):
