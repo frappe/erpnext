@@ -50,7 +50,11 @@ def get_filter_conditions(filters):
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
-			if field == "voucher_no":
+			if field == "warehouse":
+				filter_conditions.append(
+					["Serial and Batch Bundle", field, "descendants of (inclusive)", filters.get(field)]
+				)
+			elif field == "voucher_no":
 				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
 			else:
 				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])

@@ -117,3 +117,14 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		self.assertEqual(row.incoming_rate, 50)
 		self.assertEqual(row.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(row.voucher_no, se.name)
+
+	def test_group_warehouse_includes_its_warehouses(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=2, basic_rate=100)
+		group = frappe.db.get_value("Warehouse", "Stores - _TC", "parent_warehouse")
+
+		data = self.run_report(voucher_no=[se.name], voucher_type="Stock Entry", warehouse=group)
+
+		self.assertEqual(len(data), 2)
