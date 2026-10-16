@@ -20,6 +20,8 @@ from erpnext.controllers.queries import get_filters_cond
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
+PORTAL_LIST_FIELDS = ["name", "project_name", "status", "percent_complete", "_assign", "modified"]
+
 
 class Project(Document):
 	# begin: auto-generated types
@@ -483,7 +485,7 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	return frappe.get_list(
 		doctype,
-		fields="*",
+		fields=PORTAL_LIST_FIELDS,
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
