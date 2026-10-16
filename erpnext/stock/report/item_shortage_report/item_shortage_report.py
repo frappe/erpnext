@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils.nestedset import get_descendants_of
 
 
 def execute(filters=None):
@@ -49,13 +50,21 @@ def get_data(filters):
 		.orderby(bin.projected_qty)
 	)
 
-	if filters.get("warehouse"):
-		query = query.where(bin.warehouse.isin(filters.get("warehouse")))
+	if warehouses := filters.get("warehouse"):
+		query = query.where(bin.warehouse.isin(get_warehouses_with_descendants(warehouses)))
 
 	if filters.get("company"):
 		query = query.where(wh.company == filters.get("company"))
 
 	return query.run(as_dict=True)
+
+
+def get_warehouses_with_descendants(warehouses):
+	result = set(warehouses)
+	for warehouse in warehouses:
+		result.update(get_descendants_of("Warehouse", warehouse))
+
+	return list(result)
 
 
 def get_chart_data(data):

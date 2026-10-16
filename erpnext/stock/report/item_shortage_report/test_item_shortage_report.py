@@ -49,3 +49,12 @@ class TestItemShortageReport(ERPNextTestSuite):
 		report_data = item_shortage_report(filters)[1]
 		item_code_list = [row.get("item_code") for row in report_data]
 		self.assertNotIn(item, item_code_list)
+
+	def test_group_warehouse_includes_its_warehouses(self):
+		item = make_item().name
+		so = make_sales_order(item_code=item, warehouse="Stores - _TC")
+		group = frappe.db.get_value("Warehouse", "Stores - _TC", "parent_warehouse")
+
+		report_data = item_shortage_report({"company": so.company, "warehouse": [group]})[1]
+
+		self.assertIn(item, [row.get("item_code") for row in report_data])
