@@ -15,6 +15,7 @@ from erpnext.manufacturing.report.material_requirements_planning_report.material
 	get_item_lead_time,
 	make_order,
 )
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -490,6 +491,20 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
 		self.assertEqual(rows[plan.rm_item].required_qty, 20)
 
+	def test_sales_order_in_the_mps_is_not_added_again(self):
+		plan = make_mrp_plan(self)
+		make_mrp_sales_order(plan.fg_item, 10, add_days(today(), 30))
+
+		rows = get_mrp_row_list(frappe.get_doc("Master Production Schedule", plan.mps))
+
+		fg_rows = [row for row in rows if row.item_code == plan.fg_item]
+		self.assertEqual([(row.planned_qty, row.required_qty) for row in fg_rows], [(10, 10)])
+		self.assertEqual(sum(row.required_qty for row in rows if row.item_code == plan.rm_item), 20)
+
+		make_mrp_sales_order(plan.fg_item, 5, add_days(today(), 30))
+		rows = get_mrp_row_list(frappe.get_doc("Master Production Schedule", plan.mps))
+		self.assertEqual(sum(row.required_qty for row in rows if row.item_code == plan.fg_item), 15)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
@@ -617,6 +632,10 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 
 
 def get_mrp_rows(mps):
+	return {row.item_code: row for row in get_mrp_row_list(mps)}
+
+
+def get_mrp_row_list(mps, **filters):
 	# Changing settings and refreshing the report happens in separate requests in Desk.
 	frappe.local.request_cache.clear()
 	_, rows, _, _ = execute(
@@ -630,10 +649,26 @@ def get_mrp_rows(mps):
 				"type_of_material": "All",
 				"bucket_size": "Daily",
 				"add_safety_stock": 0,
+				**filters,
 			}
 		)
 	)
-	return {row.item_code: row for row in rows if row.get("item_code")}
+	return [row for row in rows if row.get("item_code")]
+
+
+def make_mrp_sales_order(item_code, qty, delivery_date, transaction_date=None):
+	sales_order = make_sales_order(
+		item_code=item_code,
+		qty=qty,
+		warehouse=WAREHOUSE,
+		transaction_date=transaction_date or today(),
+		do_not_save=True,
+	)
+	sales_order.delivery_date = delivery_date
+	sales_order.items[0].delivery_date = delivery_date
+	sales_order.insert()
+	sales_order.submit()
+	return sales_order
 
 
 def get_ordered_items(doctype, order):

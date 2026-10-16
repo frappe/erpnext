@@ -68,7 +68,7 @@ class MaterialRequirementsPlanningReport:
 			.select(
 				so_item.item_code,
 				so_item.item_name,
-				so.delivery_date,
+				so_item.delivery_date,
 				so_item.warehouse,
 				((so_item.qty - so_item.delivered_qty) * so_item.conversion_factor).as_("adhoc_qty"),
 			)
@@ -100,7 +100,7 @@ class MaterialRequirementsPlanningReport:
 
 		data = query.run(as_dict=True)
 
-		for row in data:
+		for row in self.get_demand_beyond_mps(data):
 			self.mps_data.append(
 				frappe._dict(
 					{
@@ -113,6 +113,25 @@ class MaterialRequirementsPlanningReport:
 					}
 				)
 			)
+
+	def get_demand_beyond_mps(self, data):
+		planned = {}
+		for row in self.mps_data:
+			key = (row.item_code, getdate(row.delivery_date))
+			planned[key] = planned.get(key, 0.0) + flt(row.planned_qty)
+
+		demand = {}
+		for row in data:
+			key = (row.item_code, getdate(row.delivery_date))
+			if key in demand:
+				demand[key].adhoc_qty += flt(row.adhoc_qty)
+			else:
+				demand[key] = row
+
+		for key, row in demand.items():
+			row.adhoc_qty = flt(row.adhoc_qty) - planned.get(key, 0.0)
+			if row.adhoc_qty > 0:
+				yield row
 
 	def get_orders_to_skip(self):
 		return frappe.get_all(
