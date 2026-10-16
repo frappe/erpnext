@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Min, Sum
+from frappe.utils import flt
 from pypika import Order
 
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -46,6 +47,7 @@ class ProductionPlanReport:
 					parent.planned_start_date,
 					parent.stock_uom,
 					parent.qty.as_("qty_to_manufacture"),
+					parent.produced_qty,
 					parent.name,
 					parent.bom_no,
 					parent.fg_warehouse.as_("warehouse"),
@@ -83,6 +85,9 @@ class ProductionPlanReport:
 				query = query.select(
 					child.delivery_date,
 					parent.base_grand_total,
+					child.delivered_qty,
+					child.conversion_factor,
+					child.produced_qty,
 				).where(
 					(child.stock_qty > child.produced_qty)
 					& (parent.per_delivered < 100.0)
@@ -97,6 +102,7 @@ class ProductionPlanReport:
 			elif doctype == "Material Request":
 				query = query.select(
 					child.schedule_date,
+					child.ordered_qty,
 				).where(
 					(parent.per_ordered < 100)
 					& (parent.material_request_type == "Manufacture")
@@ -112,6 +118,16 @@ class ProductionPlanReport:
 			query = query.where(parent.company == self.filters.company)
 
 		self.orders = query.run(as_dict=True)
+		self.set_pending_qty()
+
+	def set_pending_qty(self):
+		for d in self.orders:
+			done_qty = max(
+				flt(d.produced_qty), flt(d.delivered_qty) * flt(d.conversion_factor), flt(d.ordered_qty)
+			)
+			d.qty_to_manufacture = flt(d.qty_to_manufacture) - done_qty
+
+		self.orders = [d for d in self.orders if d.qty_to_manufacture > 0]
 
 	def get_raw_materials(self):
 		"""Retrieve raw materials and source warehouses for production orders.
@@ -138,11 +154,15 @@ class ProductionPlanReport:
 						"item_name as raw_material_name",
 						"source_warehouse as warehouse",
 						"required_qty",
+						"transferred_qty",
+						"consumed_qty",
 					],
 					filters={"docstatus": 1, "parent": ("in", work_orders), "source_warehouse": ("!=", "")},
 				)
 				or []
 			)
+			for d in raw_materials:
+				d.required_qty = flt(d.required_qty) - max(flt(d.transferred_qty), flt(d.consumed_qty))
 			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:

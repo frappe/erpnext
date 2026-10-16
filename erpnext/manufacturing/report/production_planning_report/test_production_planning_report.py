@@ -2,10 +2,13 @@
 # See license.txt
 
 import frappe
+from frappe.utils import today
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_work_order_entry
+from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.production_planning_report.production_planning_report import execute
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.selling.doctype.sales_order.test_sales_order import create_dn_against_so, make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -95,3 +98,46 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[materials[0]], (other_warehouse, 0))
 		self.assertEqual(rows[materials[1]], (WAREHOUSE, 5))
 		self.assertEqual(rows[materials[2]], (WAREHOUSE, 5))
+
+	def required_qty(self, data, item_code):
+		return sum(d.required_qty for d in data if d.get("item_code") == item_code)
+
+	def test_only_pending_quantities_are_planned(self):
+		material = make_item(properties={"is_stock_item": 1}).name
+		fg_item = self.make_fg_with_bom([(material, 2, None, 1)])
+		make_stock_entry(item_code=fg_item, target=WAREHOUSE, qty=6, basic_rate=100)
+
+		sales_order = make_sales_order(item_code=fg_item, qty=10, warehouse=WAREHOUSE)
+		create_dn_against_so(sales_order.name, delivered_qty=6)
+		data = self.run_report("Sales Order", [sales_order.name])
+		self.assertEqual([d.qty_to_manufacture for d in data if d.get("production_item")], [4])
+		self.assertEqual(self.required_qty(data, material), 8)
+
+		material_request = frappe.get_doc(
+			{
+				"doctype": "Material Request",
+				"material_request_type": "Manufacture",
+				"company": COMPANY,
+				"schedule_date": today(),
+				"items": [
+					{"item_code": fg_item, "qty": 10, "schedule_date": today(), "warehouse": WAREHOUSE}
+				],
+			}
+		).insert()
+		material_request.submit()
+		work_order = make_wo_order_test_record(
+			item=fg_item, qty=7, source_warehouse=WAREHOUSE, do_not_submit=True
+		)
+		work_order.material_request = material_request.name
+		work_order.material_request_item = material_request.items[0].name
+		work_order.submit()
+		data = self.run_report("Material Request", [material_request.name])
+		self.assertEqual([d.qty_to_manufacture for d in data if d.get("production_item")], [3])
+		self.assertEqual(self.required_qty(data, material), 6)
+
+		make_stock_entry(item_code=material, target=WAREHOUSE, qty=14, basic_rate=10)
+		frappe.get_doc(
+			make_work_order_entry(work_order.name, "Material Transfer for Manufacture", 7)
+		).submit()
+		data = self.run_report("Work Order", [work_order.name])
+		self.assertEqual(self.required_qty(data, material), 0)
