@@ -119,7 +119,7 @@ class PickList(TransactionBase):
 		self.validate_with_previous_doc()
 
 	def set_stock_qty(self):
-		if self.docstatus != 0:
+		if not self.docstatus.is_draft() and getattr(self, "_action", None) != "submit":
 			return
 
 		conversion_factors = get_uom_conversion_factors(
