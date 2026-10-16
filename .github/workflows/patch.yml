@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   test:
-    if: github.event_name != 'pull_request' || (github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) || contains(github.event.pull_request.labels.*.name, 'merge-alone')
+    if: github.event_name != 'pull_request' || (github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) || contains(github.event.pull_request.labels.*.name, 'merge-alone') || !endsWith(github.base_ref, '-hotfix')
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
