@@ -152,3 +152,8 @@ class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
 
 		self.assertIn("Total Qty:Float:120", columns)
 		self.assertIn("Stores - _TC:Float:100", columns)
+
+	def test_group_warehouse_gets_no_column_of_its_own(self):
+		columns = self.run_report_with_columns(warehouse=["_Test Warehouse Group - _TC"])[0]
+
+		self.assertNotIn("_Test Warehouse Group - _TC:Float:100", columns)

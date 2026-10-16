@@ -155,7 +155,7 @@ def get_warehouse_list(filters):
 	return (
 		frappe.qb.from_(warehouse)
 		.select(warehouse.name)
-		.where(condition)
+		.where(condition & (warehouse.is_group == 0))
 		.orderby(warehouse.name)
 		.run(as_dict=True)
 	)
