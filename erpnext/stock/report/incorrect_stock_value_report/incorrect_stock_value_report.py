@@ -19,6 +19,9 @@ def execute(filters=None):
 			_("Perpetual inventory required for the company {0} to view this report.").format(filters.company)
 		)
 
+	if not filters.get("account"):
+		frappe.throw(_("Select the stock Account to compare with the stock value"), frappe.MandatoryError)
+
 	data = get_data(filters)
 	columns = get_columns(filters)
 

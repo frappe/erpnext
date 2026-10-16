@@ -54,3 +54,6 @@ class TestIncorrectStockValueReport(ERPNextTestSuite):
 
 		offending = [row for row in rows if row.get("warehouse") == warehouse or row.get("item_code") == item]
 		self.assertEqual(offending, [], f"Balanced perpetual account flagged as incorrect: {offending}")
+
+	def test_account_is_required(self):
+		self.assertRaises(frappe.MandatoryError, self.run_report)
