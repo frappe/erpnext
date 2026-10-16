@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils.data import add_to_date, now
+from frappe.utils.data import add_days, add_to_date, get_datetime, now, today
 
 from erpnext.manufacturing.doctype.job_card.mapper import make_corrective_job_card
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -20,7 +20,7 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("BOM")
 
-	def create_corrective_job_card(self, hour_rate=100):
+	def create_corrective_job_card(self, hour_rate=100, time_logs=None):
 		"""Produce a submitted corrective Job Card and return (corrective_jc, operation, workstation)."""
 		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
 
@@ -40,14 +40,15 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 		)
 		corrective_job_card.hour_rate = hour_rate
 		corrective_job_card.insert()
-		corrective_job_card.append(
-			"time_logs",
-			{
-				"from_time": add_to_date(now(), hours=2),
-				"to_time": add_to_date(now(), hours=2, minutes=30),
-				"completed_qty": 2,
-			},
-		)
+		for start, minutes, completed_qty in time_logs or [(add_to_date(now(), hours=2), 30, 2)]:
+			corrective_job_card.append(
+				"time_logs",
+				{
+					"from_time": start,
+					"to_time": add_to_date(start, minutes=minutes),
+					"completed_qty": completed_qty,
+				},
+			)
 		corrective_job_card.submit()
 
 		return corrective_job_card, corrective_operation.name, corrective_job_card.workstation
@@ -129,6 +130,26 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 			to_date=add_to_date(now(), days=6),
 		)
 		self.assertNotIn(corrective_jc.name, {r["name"] for r in outside})
+
+	def test_date_filter_costs_only_the_time_inside_the_range(self):
+		day = get_datetime(add_days(today(), -10))
+		corrective_jc, _operation, _workstation = self.create_corrective_job_card(
+			hour_rate=600,
+			time_logs=[(add_to_date(day, hours=10), 30, 1), (add_to_date(day, days=3, hours=10), 90, 1)],
+		)
+
+		def costed(from_date, to_date):
+			rows = self.run_report(
+				company="_Test Company",
+				name=corrective_jc.name,
+				from_date=from_date,
+				to_date=to_date,
+			)
+			return [(row.total_time_in_mins, row.operating_cost) for row in rows]
+
+		self.assertEqual(costed(add_days(day, -1), add_days(day, 1)), [(30, 300)])
+		self.assertEqual(costed(add_days(day, 2), add_days(day, 4)), [(90, 900)])
+		self.assertEqual(costed(add_to_date(day, hours=10, minutes=15), add_days(day, 1)), [(15, 150)])
 
 	def test_serial_and_batch_filters_match_physical_numbers(self):
 		corrective_jc, _operation, _workstation = self.create_corrective_job_card()
