@@ -48,3 +48,26 @@ class TestItemWiseConsumption(ERPNextTestSuite):
 		self.assertEqual(row[9], 700)  # total amount = consumed + delivered amount
 		self.assertEqual(row[9], row[5] + row[7])  # total aggregates the two amounts
 		self.assertIn("_Test Supplier", row[10])
+
+	def test_transfer_for_manufacture_is_not_consumption(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_receipt(item_code=item, qty=10, rate=100, warehouse=WH, posting_date="2026-06-01")
+		transfer = make_stock_entry(
+			item_code=item,
+			from_warehouse=WH,
+			to_warehouse="Work In Progress - _TC",
+			qty=4,
+			posting_date="2026-06-02",
+			do_not_save=True,
+		)
+		transfer.purpose = "Material Transfer for Manufacture"
+		transfer.stock_entry_type = "Material Transfer for Manufacture"
+		transfer.insert()
+		transfer.submit()
+		make_stock_entry(
+			item_code=item, from_warehouse="Work In Progress - _TC", qty=4, posting_date="2026-06-03"
+		)
+
+		row = next(r for r in self.run_report() if r[0] == item)
+
+		self.assertEqual((row[4], row[5]), (4, 400))
