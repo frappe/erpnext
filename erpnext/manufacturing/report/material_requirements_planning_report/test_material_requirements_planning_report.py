@@ -568,6 +568,18 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.rm_item].in_hand_qty, 0)
 		self.assertEqual(rows[plan.rm_item].required_qty, 10)
 
+	def test_raw_material_sales_orders_raise_the_requirement(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		make_mrp_sales_order(plan.rm_item, 7, add_days(today(), 25))
+
+		rm_row = get_mrp_rows(mps)[plan.rm_item]
+		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty, rm_row.required_qty), (17, 7, 17))
+
+		make_mrp_sales_order(plan.rm_item, 7, add_days(today(), 30))
+		rm_row = get_mrp_rows(mps)[plan.rm_item]
+		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty, rm_row.required_qty), (24, 14, 24))
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(

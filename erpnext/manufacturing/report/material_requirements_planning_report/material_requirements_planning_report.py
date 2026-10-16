@@ -527,10 +527,17 @@ class MaterialRequirementsPlanningReport:
 		return lead_time
 
 	def add_non_planned_so(self, row):
-		if so_details := self._so_details.get((row.item_code, row.delivery_date)):
-			row.adhoc_qty = so_details.qty
-			row.planned_qty += so_details.qty
-			del self._so_details[(row.item_code, row.delivery_date)]
+		keys = [
+			key
+			for key in self._so_details
+			if key[0] == row.item_code and getdate(key[1]) <= getdate(row.delivery_date)
+		]
+		if not keys:
+			return
+
+		qty = sum(flt(self._so_details.pop(key).qty) for key in keys)
+		row.adhoc_qty = flt(row.adhoc_qty) + qty
+		row.planned_qty = flt(row.planned_qty) + qty
 
 	def add_bin_details(self, row):
 		if bin_details := self._bin_details.get(row.item_code):
@@ -595,10 +602,10 @@ class MaterialRequirementsPlanningReport:
 						self._wo_details[key].qty = qty
 
 	def update_required_qty(self, row):
+		self.add_non_planned_so(row)
 		row.required_qty = flt(row.planned_qty)
 		row.in_hand_qty = 0.0
 
-		self.add_non_planned_so(row)
 		self.reserve_safety_stock(row)
 		self.add_bin_details(row)
 		self.add_po_details(row)
