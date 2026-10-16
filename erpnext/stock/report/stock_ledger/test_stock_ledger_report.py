@@ -347,3 +347,26 @@ class TestStockLedgerReport(ERPNextTestSuite):
 			opening_rows[0]["qty_after_transaction"],
 			sum(sle.qty_after_transaction for sle in sle_rows),
 		)
+
+	def test_opening_of_a_warehouse_the_user_may_not_read_is_hidden(self):
+		from frappe.permissions import add_user_permission
+
+		item = "_Test Item"
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 20,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -5),
+				}
+			],
+		)
+		user = create_user("stock-ledger-opening@example.com", "Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user.name)
+
+		with self.set_user(user.name):
+			rows = self.run_report(item)
+
+		self.assertEqual(rows, [])
