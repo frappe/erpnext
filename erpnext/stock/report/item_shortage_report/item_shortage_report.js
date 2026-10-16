@@ -19,7 +19,7 @@ frappe.query_reports["Item Shortage Report"] = {
 			options: "Warehouse",
 			width: "100",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Warehouse", txt);
+				return erpnext.utils.get_link_options("Warehouse", txt);
 			},
 		},
 	],

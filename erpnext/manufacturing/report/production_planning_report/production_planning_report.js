@@ -48,7 +48,7 @@ frappe.query_reports["Production Planning Report"] = {
 				let based_on = frappe.query_report.get_filter_value("based_on");
 				if (!based_on) return;
 
-				return frappe.db.get_link_options(based_on, txt);
+				return erpnext.utils.get_link_options(based_on, txt);
 			},
 			get_query: function () {
 				var company = frappe.query_report.get_filter_value("company");

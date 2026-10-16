@@ -383,7 +383,7 @@ $.extend(erpnext.utils, {
 							label: __(dimension["label"]),
 							fieldtype: "MultiSelectList",
 							get_data: function (txt) {
-								return frappe.db.get_link_options(dimension["document_type"], txt);
+								return erpnext.utils.get_link_options(dimension["document_type"], txt);
 							},
 						});
 					}
@@ -413,13 +413,13 @@ $.extend(erpnext.utils, {
 									? "eval:doc.show_dimension_wise_stock === 1"
 									: "",
 								get_data: function (txt) {
-									return frappe.db.get_link_options(dimension["doctype"], txt);
+									return erpnext.utils.get_link_options(dimension["doctype"], txt);
 								},
 							});
 						} else {
 							existing_filter[0]["fieldtype"] = "MultiSelectList";
 							existing_filter[0]["get_data"] = function (txt) {
-								return frappe.db.get_link_options(dimension["doctype"], txt);
+								return erpnext.utils.get_link_options(dimension["doctype"], txt);
 							};
 						}
 					});
@@ -573,6 +573,11 @@ $.extend(erpnext.utils, {
 				}
 			});
 		});
+	},
+
+	get_link_options: function (doctype, txt, filters) {
+		const page_length = cint(frappe.boot.sysdefaults?.link_field_results_limit) || 10;
+		return frappe.db.get_link_options(doctype, txt, filters, page_length);
 	},
 
 	get_fiscal_year: function (date, with_dates = false, raise_on_missing = true) {

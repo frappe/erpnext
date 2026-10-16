@@ -48,7 +48,7 @@ frappe.query_reports["Sales Analytics"] = {
 			get_data: function (txt) {
 				const tree_type = frappe.query_reports["Sales Analytics"].entity_tree_type();
 				if (!tree_type || tree_type === "Order Type") return [];
-				return frappe.db.get_link_options(tree_type, txt);
+				return erpnext.utils.get_link_options(tree_type, txt);
 			},
 			depends_on: "eval:doc.tree_type != 'Order Type'",
 		},
