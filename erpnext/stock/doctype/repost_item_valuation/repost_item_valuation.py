@@ -371,6 +371,7 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def restart_reposting(self):
+		self.load_from_db()
 		self.check_permission("write")
 		if self.docstatus != 1 or self.status != "Failed":
 			frappe.throw(_("Only a submitted Repost Item Valuation with status Failed can be restarted"))

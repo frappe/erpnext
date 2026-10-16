@@ -164,6 +164,18 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		repost.restart_reposting()
 		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost.name, "status"), "Queued")
 
+	def test_restart_checks_the_saved_status(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
+		repost.db_set({"status": "Completed", "current_index": 1})
+		repost.status = "Failed"
+
+		self.assertRaises(frappe.ValidationError, repost.restart_reposting)
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", repost.name, ["status", "current_index"]),
+			("Completed", 1),
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_repost_uses_allow_zero_rate(self):
