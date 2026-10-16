@@ -107,3 +107,23 @@ class TestWorkOrderSummary(ERPNextTestSuite):
 
 		self.assertEqual({row.production_item for row in data}, {"_Test FG Item"})
 		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), len(data))
+
+	def test_age_chart_puts_new_work_orders_in_the_first_bucket(self):
+		wo = make_wo_order_test_record(production_item="_Test FG Item", qty=10, company="_Test Company")
+
+		_columns, data, _message, chart = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"from_date": add_days(today(), -1),
+					"to_date": today(),
+					"production_item": ["_Test FG Item"],
+					"status": "Not Started",
+					"charts_based_on": "Age",
+				}
+			)
+		)
+
+		self.assertIn(wo.name, {row.name for row in data})
+		self.assertEqual(chart["data"]["datasets"][0]["values"][3], 0)
+		self.assertEqual(chart["data"]["datasets"][0]["values"][0], len(data))

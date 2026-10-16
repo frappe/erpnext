@@ -162,7 +162,10 @@ def get_chart_based_on_age(data):
 	age_wise_data = {"0-30 Days": 0, "30-60 Days": 0, "60-90 Days": 0, "90 Above": 0}
 
 	for d in data:
-		if d.age > 0 and d.age <= 30:
+		if d.status == "Completed":
+			continue
+
+		if d.age <= 30:
 			age_wise_data["0-30 Days"] += 1
 		elif d.age > 30 and d.age <= 60:
 			age_wise_data["30-60 Days"] += 1
