@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, IfNull, Min, Sum
+from frappe.query_builder.functions import Coalesce, Count, IfNull, Min, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -836,6 +836,26 @@ class WorkOrder(Document):
 			).run()
 		return len(serial_nos)
 
+	def get_batch_capacity(self):
+		batches = frappe.get_all(
+			"Batch",
+			filters={"reference_doctype": self.doctype, "reference_name": self.name},
+			fields=["name", "qty_to_produce"],
+			order_by="creation",
+		)
+		serial_no = frappe.qb.DocType("Serial No")
+		used = dict(
+			frappe.qb.from_(serial_no)
+			.select(serial_no.batch_no, Count(serial_no.name))
+			.where(
+				(serial_no.work_order == self.name)
+				& serial_no.batch_no.isin([d.name for d in batches] or [""])
+			)
+			.groupby(serial_no.batch_no)
+			.run()
+		)
+		return [[d.name, cint(d.qty_to_produce) - cint(used.get(d.name))] for d in batches]
+
 	def create_batch_for_finished_good(self, total_qty=None):
 		total_qty = total_qty or self.qty
 		if not self.batch_size:
@@ -879,11 +899,7 @@ class WorkOrder(Document):
 			"Item", self.production_item, ["serial_no_series", "item_name", "description"], as_dict=1
 		)
 
-		batches = []
-		if self.has_batch_no:
-			batches = frappe.get_all(
-				"Batch", filters={"reference_name": self.name}, order_by="creation", pluck="name"
-			)
+		batch_capacity = self.get_batch_capacity() if self.has_batch_no else []
 
 		serial_nos = []
 		if item_details.serial_no_series:
@@ -911,16 +927,14 @@ class WorkOrder(Document):
 		]
 
 		serial_nos_details = []
-		index = 0
 		serial_ids = SerialBatchIdentity("Serial No").get_new_names(len(serial_nos))
 		for serial_id, serial_no in zip(serial_ids, serial_nos, strict=True):
-			index += 1
 			batch_no = None
-			if batches and self.batch_size:
-				batch_no = batches[0]
-
-				if index % self.batch_size == 0:
-					batches.remove(batch_no)
+			for capacity in batch_capacity:
+				if capacity[1] > 0:
+					batch_no = capacity[0]
+					capacity[1] -= 1
+					break
 
 			serial_nos_details.append(
 				(
