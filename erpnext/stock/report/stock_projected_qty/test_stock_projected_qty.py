@@ -113,3 +113,31 @@ class TestStockProjectedQty(ERPNextTestSuite):
 
 		rows = self.run_report(item_a)
 		self.assertEqual({row["item_code"] for row in rows}, {item_a})
+
+	def test_shortage_qty_takes_off_pos_reserved_qty(self):
+		from unittest.mock import patch
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"reorder_levels": [
+					{
+						"warehouse": WAREHOUSE,
+						"warehouse_reorder_level": 10,
+						"warehouse_reorder_qty": 20,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+		make_stock_entry(item_code=item, qty=12, to_warehouse=WAREHOUSE, basic_rate=100)
+
+		with patch(
+			"erpnext.stock.report.stock_projected_qty.stock_projected_qty.get_pos_reserved_qty",
+			return_value=5,
+		):
+			row = self.run_report(item, warehouse=WAREHOUSE)[0]
+
+		self.assertEqual((row["projected_qty"], row["shortage_qty"]), (7, 3))
