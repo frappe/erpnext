@@ -88,3 +88,14 @@ class TestIncorrectSerialNoValuation(ERPNextTestSuite):
 		totals = [row for row in data if row.total_label]
 		self.assertEqual([row.serial_no_number for row in totals], ["Total", "Balance"])
 		self.assertTrue(all(not row.serial_no for row in totals))
+
+	def test_serials_received_before_from_date_are_not_flagged(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "ISNV-.#####"}
+		).name
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=3, rate=100, posting_date="2026-06-01")
+		make_stock_entry(item_code=item, from_warehouse=WAREHOUSE, qty=1, posting_date="2026-06-10")
+
+		data = self.run_report(item_code=item, from_date="2026-06-05", to_date="2026-06-30")
+
+		self.assertFalse([row for row in data if row.get("item_code") == item])

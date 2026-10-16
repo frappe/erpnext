@@ -22,9 +22,27 @@ def get_data(filters):
 	data = get_stock_ledger_entries(filters)
 	bundles = get_bundles(data)
 	serial_nos_data = prepare_serial_nos(data, bundles)
-	data = get_incorrect_serial_nos(serial_nos_data)
+	opening_balances = get_opening_balances(filters, data, serial_nos_data)
+	data = get_incorrect_serial_nos(serial_nos_data, opening_balances)
 
 	return data
+
+
+def get_opening_balances(filters, data, serial_nos_data):
+	if not (filters.get("from_date") and filters.get("to_date") and data):
+		return {}
+
+	earlier_data = get_stock_ledger_entries(
+		filters, before_date=filters.get("from_date"), item_codes={row.item_code for row in data}
+	)
+	opening_balances = {}
+	for serial_no, rows in prepare_serial_nos(earlier_data, get_bundles(earlier_data)).items():
+		if serial_no in serial_nos_data:
+			opening_balances[serial_no] = frappe._dict(
+				qty=sum(row.qty for row in rows), valuation_rate=sum(row.valuation_rate for row in rows)
+			)
+
+	return opening_balances
 
 
 def get_bundles(data):
@@ -67,13 +85,16 @@ def prepare_serial_nos(data, bundles):
 	return serial_no_wise_data
 
 
-def get_incorrect_serial_nos(serial_nos_data):
+def get_incorrect_serial_nos(serial_nos_data, opening_balances=None):
 	result = []
 
 	total_value = frappe._dict({"qty": 0, "valuation_rate": 0, "total_label": _("Balance")})
 
-	for _serial_no, data in serial_nos_data.items():
-		total_dict = frappe._dict({"qty": 0, "valuation_rate": 0, "total_label": _("Total")})
+	for serial_no, data in serial_nos_data.items():
+		opening = (opening_balances or {}).get(serial_no) or frappe._dict(qty=0, valuation_rate=0)
+		total_dict = frappe._dict(
+			{"qty": opening.qty, "valuation_rate": opening.valuation_rate, "total_label": _("Total")}
+		)
 
 		if check_incorrect_serial_data(data, total_dict):
 			result.extend(data)
@@ -104,7 +125,7 @@ def check_incorrect_serial_data(data, total_dict):
 	return incorrect_data
 
 
-def get_stock_ledger_entries(report_filters):
+def get_stock_ledger_entries(report_filters, before_date=None, item_codes=None):
 	fields = [
 		"name",
 		"voucher_type",
@@ -126,7 +147,10 @@ def get_stock_ledger_entries(report_filters):
 	if report_filters.get("item_code"):
 		filters["item_code"] = report_filters.get("item_code")
 
-	if report_filters.get("from_date") and report_filters.get("to_date"):
+	if before_date:
+		filters["posting_date"] = ("<", before_date)
+		filters["item_code"] = ("in", list(item_codes))
+	elif report_filters.get("from_date") and report_filters.get("to_date"):
 		filters["posting_date"] = (
 			"between",
 			[report_filters.get("from_date"), report_filters.get("to_date")],
