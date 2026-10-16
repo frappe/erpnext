@@ -96,10 +96,10 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(so.name.notin(skip_orders))
 
 		if self.filters.get("from_date"):
-			query = query.where(so.transaction_date >= self.filters.get("from_date"))
+			query = query.where(so_item.delivery_date >= self.filters.get("from_date"))
 
 		if self.filters.get("to_date"):
-			query = query.where(so.transaction_date <= self.filters.get("to_date"))
+			query = query.where(so_item.delivery_date <= self.filters.get("to_date"))
 
 		data = query.run(as_dict=True)
 

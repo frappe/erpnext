@@ -580,6 +580,15 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rm_row = get_mrp_rows(mps)[plan.rm_item]
 		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty, rm_row.required_qty), (24, 14, 24))
 
+	def test_open_orders_booked_before_from_date_are_demand(self):
+		plan = make_mrp_plan(self)
+		make_mrp_sales_order(plan.fg_item, 6, add_days(today(), 20), transaction_date=add_days(today(), -10))
+		make_mrp_sales_order(plan.fg_item, 4, add_days(today(), 20))
+
+		rows = get_mrp_row_list(frappe.get_doc("Master Production Schedule", plan.mps))
+
+		self.assertEqual(sum(flt(row.adhoc_qty) for row in rows if row.item_code == plan.fg_item), 10)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
