@@ -3,6 +3,8 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import get_first_day, get_last_day, today
 
 from erpnext.tests.utils import ERPNextTestSuite
@@ -64,3 +66,21 @@ class TestProductionAnalytics(ERPNextTestSuite):
 		statuses = {row["status"] for row in data}
 		for status in ("Not Started", "Overdue", "Pending", "Completed", "Closed", "Stopped"):
 			self.assertIn(_(status), statuses)
+
+	def test_counts_follow_user_permissions(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		from_date, to_date = get_first_day(today()), get_last_day(today())
+		user = create_user("production-analytics-user@example.com", "Manufacturing User")
+		add_user_permission("Item", "_Test FG Item", user.name)
+
+		def count():
+			with self.set_user(user.name):
+				columns, data = self.run_report(from_date=from_date, to_date=to_date)
+			return self.get_period_count(columns, data, "Not Started", columns[-1]["label"])
+
+		before = count()
+		make_wo_order_test_record(production_item="_Test FG Item", qty=10, company="_Test Company")
+		make_wo_order_test_record(production_item="_Test FG Item 2", qty=10, company="_Test Company")
+
+		self.assertEqual(count(), before + 1)

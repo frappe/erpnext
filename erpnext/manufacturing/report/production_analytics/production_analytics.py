@@ -38,15 +38,15 @@ def get_work_orders(filters):
 	WorkOrder = frappe.qb.DocType("Work Order")
 
 	return (
-		frappe.qb.from_(WorkOrder)
-		.select(WorkOrder.creation, WorkOrder.actual_end_date, WorkOrder.planned_end_date, WorkOrder.status)
+		frappe.qb.get_query(
+			"Work Order",
+			fields=["creation", "actual_end_date", "planned_end_date", "status"],
+			filters={"docstatus": 1, "company": filters.get("company")},
+			ignore_permissions=False,
+		)
 		.where(
-			(WorkOrder.docstatus == 1)
-			& (WorkOrder.company == filters.get("company"))
-			& (
-				(WorkOrder.creation.between(from_date, to_date))
-				| (WorkOrder.actual_end_date.between(from_date, to_date))
-			)
+			(WorkOrder.creation.between(from_date, to_date))
+			| (WorkOrder.actual_end_date.between(from_date, to_date))
 		)
 		.run(as_dict=True)
 	)
