@@ -104,4 +104,21 @@ class TestReservedStock(ERPNextTestSuite):
 			filters={"company": so.company, "from_date": today(), "to_date": today(), "item_code": item_code}
 		)
 
-		self.assertEqual([row[7] for row in data], [5])
+		self.assertEqual([row[9] for row in data], [5])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
+	def test_transferred_and_consumed_qty_are_shown(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target=self.warehouse, qty=30, basic_rate=100)
+		so = make_sales_order(item_code=item_code, qty=10, warehouse=self.warehouse)
+		so.create_stock_reservation_entries()
+		entry = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": so.name}, "name")
+		frappe.db.set_value("Stock Reservation Entry", entry, {"transferred_qty": 6, "consumed_qty": 4})
+
+		data = reserved_stock_report(
+			filters={"company": so.company, "from_date": today(), "to_date": today(), "item_code": item_code}
+		)
+
+		self.assertEqual([(row[7], row[8]) for row in data], [(6, 4)])

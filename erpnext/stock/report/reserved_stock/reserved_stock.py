@@ -7,7 +7,7 @@ from frappe.query_builder.functions import Date
 from frappe.utils import flt
 from pypika.terms import ValueWrapper
 
-AVAILABLE_QTY_INDEX = 7
+AVAILABLE_QTY_INDEX = 9
 
 
 def execute(filters=None):
@@ -45,6 +45,8 @@ def get_data(filters):
 			sre.voucher_qty,
 			sre.reserved_qty,
 			sre.delivered_qty,
+			sre.transferred_qty,
+			sre.consumed_qty,
 			ValueWrapper(0).as_("available_qty"),
 			sre.voucher_type,
 			sre.voucher_no,
@@ -153,6 +155,20 @@ def get_columns():
 		{
 			"fieldname": "delivered_qty",
 			"label": _("Delivered Qty"),
+			"fieldtype": "Float",
+			"width": 110,
+			"convertible": "qty",
+		},
+		{
+			"fieldname": "transferred_qty",
+			"label": _("Transferred Qty"),
+			"fieldtype": "Float",
+			"width": 110,
+			"convertible": "qty",
+		},
+		{
+			"fieldname": "consumed_qty",
+			"label": _("Consumed Qty"),
 			"fieldtype": "Float",
 			"width": 110,
 			"convertible": "qty",
