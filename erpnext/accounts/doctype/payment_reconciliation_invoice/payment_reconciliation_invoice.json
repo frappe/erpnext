@@ -8,6 +8,8 @@
   "invoice_type",
   "invoice_number",
   "invoice_date",
+  "payment_term",
+  "payment_term_exchange_rate",
   "col_break1",
   "amount",
   "outstanding_amount",
@@ -36,6 +38,21 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "label": "Payment Term",
+   "options": "Payment Term",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_term_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Payment Term Exchange Rate",
+   "precision": "9",
    "read_only": 1
   },
   {

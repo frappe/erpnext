@@ -23,11 +23,13 @@ class PaymentEntryReference(Document):
 		due_date: DF.Date | None
 		exchange_gain_loss: DF.Currency
 		exchange_rate: DF.Float
+		is_payment_reconciliation: DF.Check
 		outstanding_amount: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
 		payment_request: DF.Link | None
+		payment_term_exchange_rate: DF.Float
 		payment_term: DF.Link | None
 		payment_term_outstanding: DF.Float
 		payment_type: DF.Data | None

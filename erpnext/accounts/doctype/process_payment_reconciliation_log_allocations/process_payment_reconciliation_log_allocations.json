@@ -12,6 +12,8 @@
   "column_break_3",
   "invoice_type",
   "invoice_number",
+  "payment_term",
+  "payment_term_exchange_rate",
   "section_break_6",
   "allocated_amount",
   "unreconciled_amount",
@@ -72,6 +74,21 @@
    "options": "invoice_type",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "label": "Payment Term",
+   "options": "Payment Term",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_term_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Payment Term Exchange Rate",
+   "precision": "9",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_6",

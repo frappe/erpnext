@@ -27,6 +27,8 @@ class ProcessPaymentReconciliationLogAllocations(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		payment_term_exchange_rate: DF.Float
+		payment_term: DF.Link | None
 		reconciled: DF.Check
 		reference_name: DF.DynamicLink
 		reference_row: DF.Data | None
