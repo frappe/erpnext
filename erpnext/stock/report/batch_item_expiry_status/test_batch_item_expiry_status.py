@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.permissions import add_user_permission
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -90,3 +91,43 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 		)
 
 		self.assertEqual([row.batch for row in data], [batches["old"].name])
+
+	def test_quantity_counts_only_permitted_warehouses(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": item,
+				"batch_id": frappe.generate_hash(length=10),
+				"expiry_date": frappe.utils.add_days(frappe.utils.today(), 10),
+			}
+		).insert()
+		for warehouse, qty in (("Stores - _TC", 7), ("Finished Goods - _TC", 3)):
+			make_stock_entry(
+				item_code=item,
+				to_warehouse=warehouse,
+				qty=qty,
+				rate=100,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+
+		user = "batch-expiry-warehouse@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Batch Expiry", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc("User", user).add_roles("Stock Manager")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report(
+				item=item,
+				from_date=frappe.utils.today(),
+				to_date=frappe.utils.add_days(frappe.utils.today(), 30),
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch.name, 3)])
