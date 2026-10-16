@@ -486,7 +486,7 @@ class MaterialRequirementsPlanningReport:
 	def get_lead_time_from_raw_materials(self, raw_materials, qty=1):
 		lead_time = 0
 		for material in raw_materials:
-			material_qty = material.stock_qty * qty
+			material_qty = material.qty * qty
 			# Reuse descendant totals within this report, keeping different net quantities separate.
 			subtree_lead_times = material.setdefault("subtree_lead_times", {})
 			if material_qty not in subtree_lead_times:
@@ -802,7 +802,7 @@ class MaterialRequirementsPlanningReport:
 					"item_name": material.item_name,
 					"default_warehouse": material.default_warehouse,
 					"default_supplier": material.default_supplier,
-					"planned_qty": material.stock_qty * planned_qty,
+					"planned_qty": material.qty * planned_qty,
 					"projected_qty": 0,
 					"delivery_date": delivery_date,
 					"indent": material.indent + 1,

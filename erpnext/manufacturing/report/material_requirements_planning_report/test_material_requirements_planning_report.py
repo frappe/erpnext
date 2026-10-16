@@ -480,6 +480,16 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 						[formatdate(start, "MMM YYYY") for start in bucket_starts],
 					)
 
+	def test_raw_material_qty_uses_the_bom_quantity(self):
+		plan = make_mrp_plan(self)
+		bom = make_bom(item=plan.fg_item, quantity=10, raw_materials=[plan.rm_item], rm_qty=20, rate=100)
+		self.assertEqual(frappe.db.get_value("Item", plan.fg_item, "default_bom"), bom.name)
+
+		rows = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))
+
+		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
+		self.assertEqual(rows[plan.rm_item].required_qty, 20)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
