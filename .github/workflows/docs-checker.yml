@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   build:
+    if: ${{ !startsWith(github.event.pull_request.title, 'merge queue:') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

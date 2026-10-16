@@ -13,6 +13,7 @@ concurrency:
 jobs:
   commitlint:
     name: Check Commit Titles
+    if: ${{ !startsWith(github.event.pull_request.title, 'merge queue:') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
