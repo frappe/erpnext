@@ -20,7 +20,7 @@ def execute(filters=None):
 	avg_daily_outgoing = 0
 	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
 	if diff <= 0:
-		frappe.throw(_("'From Date' must be after 'To Date'"))
+		frappe.throw(_("From Date cannot be after To Date"))
 
 	columns = get_columns()
 	items = get_item_info(filters)

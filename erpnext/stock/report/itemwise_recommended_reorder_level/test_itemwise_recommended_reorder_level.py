@@ -93,3 +93,12 @@ class TestItemwiseRecommendedReorderLevel(ERPNextTestSuite):
 		row = self.find_row(self.run_report(), item)
 
 		self.assertEqual(flt(row[7]), 0)
+
+	def test_from_date_after_to_date_is_refused_with_the_right_message(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"From Date cannot be after To Date",
+			self.run_report,
+			from_date="2026-06-10",
+			to_date="2026-06-01",
+		)
