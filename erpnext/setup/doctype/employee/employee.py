@@ -166,7 +166,7 @@ class Employee(NestedSet):
 
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
-		if self.has_value_changed("user_id") or self.has_value_changed("status"):
+		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
 			self.validate_user_access()
 
 	def validate_user_access(self):

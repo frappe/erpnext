@@ -63,6 +63,33 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 1)
 		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
 
+	def test_hr_user_toggles_user_permission_only_for_users_without_extra_roles(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-manager@example.com", ["System Manager"])
+		staff = make_fenced_user("employee-staff@example.com", ["Employee"])
+		employees = {}
+		for user in (manager, staff):
+			frappe.db.set_value("User", user, "enabled", 1)
+			frappe.db.delete("Employee", {"user_id": user})
+			employees[user] = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		with as_user(hr_user):
+			manager_employee = frappe.get_doc("Employee", employees[manager])
+			manager_employee.create_user_permission = 0
+			self.assertRaises(frappe.PermissionError, manager_employee.save)
+
+			staff_employee = frappe.get_doc("Employee", employees[staff])
+			staff_employee.create_user_permission = 0
+			staff_employee.save()
+
+		for user, expected in ((manager, True), (staff, False)):
+			has_permission = frappe.db.exists(
+				"User Permission", {"allow": "Employee", "for_value": employees[user], "user": user}
+			)
+			self.assertEqual(bool(has_permission), expected)
+
 	def test_employee_user_permission(self):
 		employee1 = make_employee(
 			"employee_1_test@company.com", create_user_permission=1, company="_Test Company"
