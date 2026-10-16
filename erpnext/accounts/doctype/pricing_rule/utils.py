@@ -31,8 +31,18 @@ def get_pricing_rules(args, doc=None):
 	if not frappe.db.exists("Pricing Rule", {"disable": 0, args.transaction_type: 1}):
 		return
 
+	coupon_pricing_rule = (
+		frappe.get_cached_value("Coupon Code", args.coupon_code, "pricing_rule")
+		if args.get("coupon_code")
+		else None
+	)
 	for apply_on in ["Item Code", "Item Group", "Brand"]:
-		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
+		candidates = [
+			rule
+			for rule in _get_pricing_rules(apply_on, args, values)
+			if not rule.coupon_code_based or rule.name == coupon_pricing_rule
+		]
+		pricing_rules.extend(candidates)
 		if pricing_rules and pricing_rules[0].has_priority:
 			continue
 
