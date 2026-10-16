@@ -77,3 +77,15 @@ class TestQualityInspectionSummary(ERPNextTestSuite):
 			item_code=[other_item],
 		)
 		self.assertEqual(self._rows_for_qi(data), [])
+
+	def run_report_with_chart(self):
+		filters = frappe._dict(from_date=add_days(nowdate(), -1), to_date=add_days(nowdate(), 1))
+		_columns, data, _message, chart = execute(filters)
+		return data, chart["data"]["datasets"][0]["values"]
+
+	def test_cancelled_status_does_not_break_the_chart(self):
+		_data, before = self.run_report_with_chart()
+		self.qi.db_set("status", "Cancelled")
+
+		_data, after = self.run_report_with_chart()
+		self.assertEqual(after, [before[0], before[1] - 1])

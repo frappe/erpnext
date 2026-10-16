@@ -56,7 +56,8 @@ def get_chart_data(periodic_data, columns):
 	datasets = []
 
 	for d in periodic_data:
-		status_wise_data[d.status] += 1
+		if d.status in status_wise_data:
+			status_wise_data[d.status] += 1
 
 	datasets.append(
 		{
