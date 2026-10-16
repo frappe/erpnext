@@ -89,3 +89,19 @@ class TestReservedStock(ERPNextTestSuite):
 			}
 		)
 		self.assertEqual(len(data), len(items_details))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
+	def test_available_qty_is_the_current_free_stock(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target=self.warehouse, qty=30, basic_rate=100)
+		so = make_sales_order(item_code=item_code, qty=10, warehouse=self.warehouse)
+		so.create_stock_reservation_entries()
+		make_stock_entry(item_code=item_code, source=self.warehouse, qty=15)
+
+		data = reserved_stock_report(
+			filters={"company": so.company, "from_date": today(), "to_date": today(), "item_code": item_code}
+		)
+
+		self.assertEqual([row[7] for row in data], [5])

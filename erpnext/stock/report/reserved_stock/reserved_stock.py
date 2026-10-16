@@ -4,6 +4,10 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
+from frappe.utils import flt
+from pypika.terms import ValueWrapper
+
+AVAILABLE_QTY_INDEX = 7
 
 
 def execute(filters=None):
@@ -41,7 +45,7 @@ def get_data(filters):
 			sre.voucher_qty,
 			sre.reserved_qty,
 			sre.delivered_qty,
-			(sre.available_qty - sre.reserved_qty).as_("available_qty"),
+			ValueWrapper(0).as_("available_qty"),
 			sre.voucher_type,
 			sre.voucher_no,
 			sre.from_voucher_type,
@@ -76,8 +80,31 @@ def get_data(filters):
 		query = query.where(sre.name == value)
 
 	data = query.run(as_list=True)
+	set_available_qty(data)
 
 	return data
+
+
+def set_available_qty(data):
+	if not data:
+		return
+
+	bin = frappe.qb.DocType("Bin")
+	free_qty = {
+		(item_code, warehouse): flt(actual_qty) - flt(reserved_stock)
+		for item_code, warehouse, actual_qty, reserved_stock in (
+			frappe.qb.from_(bin)
+			.select(bin.item_code, bin.warehouse, bin.actual_qty, bin.reserved_stock)
+			.where(
+				(bin.item_code.isin({row[2] for row in data}))
+				& (bin.warehouse.isin({row[1] for row in data}))
+			)
+			.run()
+		)
+	}
+
+	for row in data:
+		row[AVAILABLE_QTY_INDEX] = free_qty.get((row[2], row[1]), 0.0)
 
 
 def get_columns():
