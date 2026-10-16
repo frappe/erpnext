@@ -63,3 +63,16 @@ class TestIncorrectBalanceQtyAfterTransaction(ERPNextTestSuite):
 		data = self.run_report(item_code=item)
 		flagged = [row for row in data if row.get("item_code") == item]
 		self.assertEqual(flagged, [])
+
+	def test_difference_below_half_a_unit_is_flagged(self):
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		entry = make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=10.5, rate=100, posting_date="2026-06-01"
+		)
+		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", sle_name, "qty_after_transaction", 10.9)
+
+		flagged = [row for row in self.run_report(item_code=item) if row.get("name") == sle_name]
+
+		self.assertEqual(len(flagged), 1)
+		self.assertAlmostEqual(flagged[0]["differnce"], 0.4)

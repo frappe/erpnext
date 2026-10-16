@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 
 def execute(filters=None):
@@ -27,8 +27,9 @@ def get_data(filters):
 
 def validate_data(itewise_balance_qty):
 	res = []
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
 	for _key, data in itewise_balance_qty.items():
-		row = get_incorrect_data(data)
+		row = get_incorrect_data(data, precision)
 		if row:
 			res.append(row)
 			res.append({})
@@ -36,7 +37,7 @@ def validate_data(itewise_balance_qty):
 	return res
 
 
-def get_incorrect_data(data):
+def get_incorrect_data(data, precision):
 	balance_qty = 0.0
 	for row in data:
 		balance_qty += row.actual_qty
@@ -45,8 +46,9 @@ def get_incorrect_data(data):
 			balance_qty = flt(row.qty_after_transaction)
 
 		row.expected_balance_qty = balance_qty
-		if abs(flt(row.expected_balance_qty) - flt(row.qty_after_transaction)) > 0.5:
-			row.differnce = abs(flt(row.expected_balance_qty) - flt(row.qty_after_transaction))
+		difference = abs(flt(flt(row.expected_balance_qty) - flt(row.qty_after_transaction), precision))
+		if difference:
+			row.differnce = difference
 			return row
 
 
