@@ -1,5 +1,7 @@
 ### Introduction (For First-Time Contributors)
 
+> Note: ERPNext only accepts pull requests from people who are explicitly in the [list of vouched users](https://github.com/frappe/erpnext/blob/develop/.github/VOUCHED.td).
+
 Thank you for your interest in raising an issue with ERPNext. An issue can be either a bug report or a feature request.
 
 By reporting bugs, you contribute directly to improving ERPNext. Bug reports help developers identify and fix issues quickly before they affect more users.
