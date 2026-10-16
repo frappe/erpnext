@@ -43,7 +43,7 @@ def get_data(filters):
 	if condition := get_allowed_companies_condition(company, "Quality Inspection"):
 		inspection_filters.append(condition)
 
-	return frappe.get_all(
+	return frappe.get_list(
 		"Quality Inspection", fields=fields, filters=inspection_filters, order_by="report_date asc"
 	)
 

@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
 from erpnext.manufacturing.report.quality_inspection_summary.quality_inspection_summary import execute
@@ -102,3 +104,20 @@ class TestQualityInspectionSummary(ERPNextTestSuite):
 		data, after = self.run_report_with_chart()
 		self.assertNotIn(draft.name, [row.name for row in data])
 		self.assertEqual(after, before)
+
+	def test_chart_counts_only_permitted_inspections(self):
+		other = create_quality_inspection(
+			item_code="_Test FG Item",
+			reference_type="Job Card",
+			reference_name=make_minimal_job_card(production_item="_Test FG Item"),
+			status="Rejected",
+		)
+		user = create_user("quality-inspection-summary@example.com", "Quality Manager")
+		add_user_permission("Item", "_Test Item", user.name)
+
+		with self.set_user(user.name):
+			data, chart = self.run_report_with_chart()
+
+		self.assertNotIn(other.name, [row.name for row in data])
+		statuses = [row.status for row in data]
+		self.assertEqual(chart, [statuses.count("Rejected"), statuses.count("Accepted")])
