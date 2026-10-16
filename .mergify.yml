@@ -71,9 +71,9 @@ queue_rules:
       - "#approved-reviews-by>=1"
       - label!=dont-merge
       - check-success=linters
-      - check-success=Patch Test
       - check-success=Check Commit Titles
     merge_conditions:
+      - check-success=Patch Test
       - check-success=Python Unit Tests (1)
       - check-success=Python Unit Tests (2)
       - check-success=Python Unit Tests (3)
