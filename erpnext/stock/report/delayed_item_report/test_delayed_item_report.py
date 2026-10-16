@@ -125,3 +125,10 @@ class TestDelayedItemReport(ERPNextTestSuite):
 		)
 
 		self.assertEqual([row.name for row in rows], [delivery_notes[0].name])
+
+	def test_deliveries_on_time_are_not_listed(self):
+		so, delivery_notes = self.make_order_with_deliveries("2026-06-03", "2026-06-10")
+
+		rows = self.run_report(sales_order=so.name)
+
+		self.assertEqual([row.name for row in rows], [delivery_notes[1].name])

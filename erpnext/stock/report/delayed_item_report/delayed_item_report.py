@@ -79,6 +79,7 @@ class DelayedItemReport:
 
 		if self.transactions:
 			self.filter_transactions_data(consolidated)
+			self.transactions = [row for row in self.transactions if row.delayed_days > 0]
 
 			return self.transactions
 
