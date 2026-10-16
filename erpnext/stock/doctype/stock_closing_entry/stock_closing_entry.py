@@ -44,6 +44,20 @@ def get_closing_entry_for_closed_period(company):
 	return _get_completed_closing_entry(company, str(closed_upto))
 
 
+def mark_closing_entries_outdated(company, posting_date):
+	for name in frappe.get_all(
+		"Stock Closing Entry",
+		filters={
+			"company": company,
+			"docstatus": 1,
+			"status": "Completed",
+			"to_date": (">=", posting_date),
+		},
+		pluck="name",
+	):
+		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
+
+
 @request_cache
 def _get_completed_closing_entry(company, closed_upto):
 	filters = apply_unscoped_filters(
@@ -77,7 +91,7 @@ class StockClosingEntry(Document):
 		company: DF.Link
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
-		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Outdated", "Failed", "Cancelled"]
 		to_date: DF.Date
 	# end: auto-generated types
 

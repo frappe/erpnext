@@ -26,7 +26,10 @@ import erpnext
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.services.gl_validator import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
-from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import get_closing_entry_for_closed_period
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+	get_closing_entry_for_closed_period,
+	mark_closing_entries_outdated,
+)
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
@@ -350,6 +353,8 @@ class RepostItemValuation(Document):
 
 		        These flags are useful for asserting real time behaviour like quantity updates.
 		"""
+
+		mark_closing_entries_outdated(self.company, self.posting_date)
 
 		if not frappe.in_test:
 			return

@@ -562,6 +562,25 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Failed")
 		self.assertFalse(frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": closing.name}))
 
+	def test_backdated_entry_outdates_open_closing_for_reports(self):
+		from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item, target=WAREHOUSE, qty=10, rate=100, posting_date=add_days(today(), -30)
+		)
+		closing = self.make_generated_closing(add_days(today(), -10))
+		make_stock_entry(
+			item_code=item, target=WAREHOUSE, qty=5, rate=100, posting_date=add_days(today(), -20)
+		)
+
+		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Outdated")
+		filters = frappe._dict(
+			company=COMPANY, from_date=add_days(today(), -5), to_date=today(), item_code=[item]
+		)
+		row = stock_balance(filters)[1][0]
+		self.assertEqual((row["opening_qty"], row["bal_qty"]), (15, 15))
+
 	def test_backdated_entry_before_open_closing_is_reposted(self):
 		item = make_item("_Test SCE Open Closing Item", {"is_stock_item": 1}).name
 		make_stock_entry(item_code=item, qty=10, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-15")
