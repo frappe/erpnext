@@ -36,7 +36,8 @@ def get_row(wo_details, item, descriptions, stock, filters):
 	warehouse = item.source_warehouse or filters.get("warehouse")
 	pending_qty = flt(wo_details.qty) - flt(wo_details.produced_qty)
 	qty_per_unit = flt(item.required_qty) / flt(wo_details.qty) if flt(wo_details.qty) else 0.0
-	available_qty = flt(stock.get((item.item_code, warehouse)))
+	in_wip_qty = max(flt(item.transferred_qty) - flt(item.consumed_qty), 0.0)
+	available_qty = flt(stock.get((item.item_code, warehouse))) + in_wip_qty
 	build_qty = available_qty / qty_per_unit if qty_per_unit else flt(wo_details.qty)
 	in_stock = 1 if build_qty >= pending_qty else 0
 
@@ -69,7 +70,7 @@ def get_work_order_items(wo_list):
 	for row in frappe.get_all(
 		"Work Order Item",
 		filters={"parent": ["in", [d.name for d in wo_list]], "parenttype": "Work Order"},
-		fields=["parent", "item_code", "source_warehouse", "required_qty"],
+		fields=["parent", "item_code", "source_warehouse", "required_qty", "transferred_qty", "consumed_qty"],
 		order_by="idx",
 	):
 		items_by_order.setdefault(row.parent, []).append(row)
