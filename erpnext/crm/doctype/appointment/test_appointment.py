@@ -313,6 +313,7 @@ class TestAppointment(ERPNextTestSuite):
 		self.addCleanup(setattr, frappe.local, "request", getattr(frappe.local, "request", None))
 		self.addCleanup(frappe.cache.delete_keys, "rl:")
 		set_request(method="GET", path="/api/method/erpnext.www.book_appointment.index.get_appointment_slots")
+		self.addCleanup(setattr, frappe.local, "request_ip", getattr(frappe.local, "request_ip", None))
 		frappe.local.request_ip = "127.0.0.9"
 
 		with self.set_user("Guest"):
