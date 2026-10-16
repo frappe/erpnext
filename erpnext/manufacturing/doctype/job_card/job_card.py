@@ -1315,33 +1315,11 @@ class JobCard(Document):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	def set_stock_uom(self):
 		item_code = self.finished_good or self.production_item
 		if item_code:
 			self.stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
 
-	def validate_operation_id(self):
-		if (
-			self.get("operation_id")
-			and self.get("operation_row_number")
-			and self.operation
-			and self.work_order
-			and frappe.get_cached_value("Work Order Operation", self.operation_row_number, "name")
-			!= self.operation_id
-		):
-			work_order = bold(get_link_to_form("Work Order", self.work_order))
-			frappe.throw(
-				_("Operation {0} does not belong to the work order {1}").format(
-					bold(self.operation), work_order
-				),
-				OperationMismatchError,
-			)
-
-=======
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
-=======
 	def set_operation_id(self):
 		if not (self.work_order and self.operation):
 			return
@@ -1371,7 +1349,6 @@ class JobCard(Document):
 				).format(bold(self.operation), get_link_to_form("Work Order", self.work_order))
 			)
 
->>>>>>> 553336f (fix: resolve or require operation_id server-side)
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)

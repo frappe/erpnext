@@ -11,11 +11,7 @@ from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
-<<<<<<< HEAD
-	OperationMismatchError,
 	OperationSequenceError,
-=======
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
 	OverlapError,
 	make_corrective_job_card,
 	make_material_request,

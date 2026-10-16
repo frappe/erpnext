@@ -623,11 +623,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "operation_row_number",
-   "fieldtype": "Select",
-   "label": "Operation Row Number"
-  },
-  {
    "fieldname": "secondary_items",
    "fieldtype": "Table",
    "label": "Secondary Items",
@@ -688,11 +683,7 @@
  "icon": "clipboard-list",
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-09-25 15:41:37.448982",
-=======
- "modified": "2026-07-23 12:00:00.000000",
->>>>>>> d71681a (refactor: drop unused operation_row_number field from Job Card)
+ "modified": "2026-10-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
