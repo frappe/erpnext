@@ -40,3 +40,31 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 
 		# Test 2: Since we have created a delivery note of 5 qty, we should have 5 serial nos
 		self.assertEqual(len(serial_nos), 5)
+
+	def test_balance_serial_nos_include_stock_before_from_date(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "AVS-.#####"}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		for qty, days in ((3, -10), (2, -8)):
+			make_stock_entry(
+				item_code=item,
+				target=warehouse,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), days),
+			)
+		make_stock_entry(item_code=item, source=warehouse, qty=1, posting_date=add_days(today(), -5))
+
+		filters = self.filters.copy()
+		filters.update(item_code=item, from_date=add_days(today(), -7), to_date=today())
+		data = frappe.get_doc("Report", "Available Serial No").get_data(filters=filters)[1]
+
+		in_stock = frappe.get_all(
+			"Serial No", filters={"item_code": item, "warehouse": warehouse}, pluck="name"
+		)
+		self.assertEqual(len(in_stock), 4)
+		self.assertEqual(sorted(data[-1]["balance_serial_no"].split("\n")), sorted(in_stock))

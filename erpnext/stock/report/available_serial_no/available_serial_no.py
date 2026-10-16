@@ -3,7 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
 from erpnext.stock.report.stock_ledger.stock_ledger import (
@@ -27,26 +28,53 @@ def execute(filters=None):
 	item_details = get_item_details(items, sl_entries, False)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
-	data = process_stock_ledger_entries(sl_entries, item_details, opening_row, precision)
+	data = process_stock_ledger_entries(filters, sl_entries, item_details, opening_row, precision)
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no", "balance_serial_no"))
 
 
-def process_stock_ledger_entries(sl_entries, item_details, opening_row, precision):
+def process_stock_ledger_entries(filters, sl_entries, item_details, opening_row, precision):
 	data = []
 
 	if opening_row:
 		data.append(opening_row)
 
-	available_serial_nos = {}
+	bundle_serial_nos = {}
 	if sabb_list := [sle.serial_and_batch_bundle for sle in sl_entries if sle.serial_and_batch_bundle]:
-		available_serial_nos = get_serial_nos_from_sle_list(sabb_list)
+		bundle_serial_nos = get_serial_nos_from_sle_list(sabb_list)
 
+	balance_serial_nos = get_serial_nos_in_stock(filters, sl_entries)
 	for sle in sl_entries:
 		update_stock_ledger_entry(sle, item_details, precision)
-		update_available_serial_nos(available_serial_nos, sle)
+		update_available_serial_nos(balance_serial_nos, bundle_serial_nos, sle)
 		data.append(sle)
 
 	return data
+
+
+def get_serial_nos_in_stock(filters, sl_entries):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	rows = (
+		frappe.qb.from_(sle)
+		.inner_join(entry)
+		.on(entry.parent == sle.serial_and_batch_bundle)
+		.select(sle.item_code, sle.warehouse, entry.serial_no)
+		.where(
+			(sle.is_cancelled == 0)
+			& (sle.posting_datetime < get_datetime(filters.from_date + " 00:00:00"))
+			& (sle.item_code.isin({row.item_code for row in sl_entries}))
+			& (sle.warehouse.isin({row.warehouse for row in sl_entries}))
+		)
+		.groupby(sle.item_code, sle.warehouse, entry.serial_no)
+		.having(Sum(entry.qty) > 0)
+		.orderby(entry.serial_no)
+	).run(as_dict=True)
+
+	balance_serial_nos = {}
+	for row in rows:
+		balance_serial_nos.setdefault((row.item_code, row.warehouse), {})[row.serial_no] = None
+
+	return balance_serial_nos
 
 
 def update_stock_ledger_entry(sle, item_details, precision):
@@ -61,27 +89,22 @@ def update_stock_ledger_entry(sle, item_details, precision):
 		sle["in_out_rate"] = sle.valuation_rate
 
 
-def update_available_serial_nos(available_serial_nos, sle):
+def update_available_serial_nos(balance_serial_nos, bundle_serial_nos, sle):
 	serial_nos = (
 		get_serial_nos(sle.serial_no)
 		if sle.serial_no
-		else available_serial_nos.get(sle.serial_and_batch_bundle, [])
+		else bundle_serial_nos.get(sle.serial_and_batch_bundle, [])
 	)
-	key = (sle.item_code, sle.warehouse)
-	sle.serial_no = "\n".join(serial_nos) if serial_nos else ""
-	if key not in available_serial_nos:
-		available_serial_nos[key] = serial_nos.copy()
-		sle.balance_serial_no = "\n".join(serial_nos) if serial_nos else ""
-		return
+	sle.serial_no = "\n".join(serial_nos)
 
-	existing_serial_no = available_serial_nos[key]
-	for sn in serial_nos:
-		if sn in existing_serial_no:
-			existing_serial_no.remove(sn)
+	balance = balance_serial_nos.setdefault((sle.item_code, sle.warehouse), {})
+	for serial_no in serial_nos:
+		if flt(sle.actual_qty) > 0:
+			balance[serial_no] = None
 		else:
-			existing_serial_no.append(sn)
+			balance.pop(serial_no, None)
 
-	sle.balance_serial_no = "\n".join(existing_serial_no)
+	sle.balance_serial_no = "\n".join(balance)
 
 
 def get_columns(filters):
