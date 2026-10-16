@@ -124,3 +124,9 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 
 		self.assertEqual(self.get_rows(closed.name, warehouse=STORES), {})
 		self.assertEqual(self.get_rows(stopped.name, warehouse=STORES), {})
+
+	def test_warehouse_filter_limits_the_rows(self):
+		wo, material = self.make_stocked_work_order()
+
+		self.assertIn(material, self.get_rows(wo.name, warehouse=STORES))
+		self.assertEqual(self.get_rows(wo.name, warehouse="_Test Warehouse 1 - _TC"), {})

@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
@@ -23,10 +24,13 @@ def get_item_list(wo_list, filters):
 	descriptions = get_bom_descriptions(wo_list)
 	items_by_order = get_work_order_items(wo_list)
 	stock = get_stock(items_by_order, filters)
+	warehouses = set(get_child_warehouses(filters.warehouse)) if filters.get("warehouse") else None
 
 	out = []
 	for wo_details in wo_list:
 		for item in items_by_order.get(wo_details.name, []):
+			if warehouses and item.source_warehouse and item.source_warehouse not in warehouses:
+				continue
 			out.append(get_row(wo_details, item, descriptions, stock, filters))
 
 	return out
