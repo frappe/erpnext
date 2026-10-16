@@ -21,6 +21,8 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.get_item_details import get_conversion_factor
+
 
 def execute(filters: dict | None = None):
 	obj = MaterialRequirementsPlanningReport(filters)
@@ -1404,28 +1406,7 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 
 def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 	for (supplier, release_date), items in purchase_orders.items():
-		po_items = []
-		for item in items:
-			uom = item.purchase_uom or item.uom
-			if not uom:
-				uom_details = get_item_uom(item.item_code)
-				uom = uom_details.purchase_uom or uom_details.stock_uom
-
-			if is_whole_number(uom):
-				item.required_qty = math.ceil(item.required_qty)
-
-			if flt(item.required_qty) < flt(item.min_order_qty):
-				item.required_qty = item.min_order_qty
-
-			po_items.append(
-				{
-					"item_code": item.item_code,
-					"qty": item.required_qty,
-					"uom": uom,
-					"schedule_date": item.delivery_date if item.delivery_date else today(),
-					"warehouse": warehouse or item.default_warehouse,
-				}
-			)
+		po_items = [get_purchase_order_item(item, warehouse) for item in items]
 
 		if not po_items:
 			continue
@@ -1444,6 +1425,27 @@ def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 			_("Purchase Order {0} created").format(frappe.bold(po.name)),
 			alert=True,
 		)
+
+
+def get_purchase_order_item(item, warehouse=None):
+	uom = item.purchase_uom or item.uom
+	if not uom:
+		uom_details = get_item_uom(item.item_code)
+		uom = uom_details.purchase_uom or uom_details.stock_uom
+
+	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
+	qty = max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor
+	if is_whole_number(uom):
+		qty = math.ceil(qty)
+
+	return {
+		"item_code": item.item_code,
+		"qty": qty,
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"schedule_date": item.delivery_date if item.delivery_date else today(),
+		"warehouse": warehouse or item.default_warehouse,
+	}
 
 
 def make_work_orders(work_orders, company, warehouse=None, mps=None):

@@ -505,6 +505,22 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rows = get_mrp_row_list(frappe.get_doc("Master Production Schedule", plan.mps))
 		self.assertEqual(sum(row.required_qty for row in rows if row.item_code == plan.fg_item), 15)
 
+	def test_purchase_order_qty_is_converted_to_the_purchase_uom(self):
+		plan = make_mrp_plan(self, planned_qty=12)
+		item = frappe.get_doc("Item", plan.rm_item)
+		item.append("uoms", {"uom": "Box", "conversion_factor": 12})
+		item.purchase_uom = "Box"
+		item.save()
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		purchase_order = get_created_order(plan.mps, "Purchase Order")
+		self.assertEqual(
+			[(row.qty, row.uom, row.conversion_factor, row.stock_qty) for row in purchase_order.items],
+			[(2, "Box", 12, 24)],
+		)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
