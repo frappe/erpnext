@@ -127,8 +127,8 @@ jobs:
           cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/ci/frappe-bench/hydrate.sh
           cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/ci/frappe-bench/start-db.sh
           mkdir -p /opt/ci-bench-staging
-          # self-clean: drop bench tars from runs older than 2h
-          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +120 -delete 2>/dev/null || true
+          # self-clean: drop bench tars from runs older than 24h
+          find /opt/ci-bench-staging -maxdepth 1 -name '*.tar.*' -mmin +1440 -delete 2>/dev/null || true
           # Exclude .git/node_modules; the mariadb-data datadir IS included (the pre-loaded DB).
           sha256=$(tar -I 'zstd -T0' -cpf - -C /home/ci \
             --exclude='.git' --exclude='node_modules' frappe-bench \
@@ -165,6 +165,10 @@ jobs:
       # GitHub download. -p preserves the ci (uid 1001) ownership so bench runs as ci cleanly.
       - name: Untar bench from node (hostPath)
         run: |
+          if [ ! -f "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" ]; then
+            echo "::error::Bench from the setup job has expired. Re-run all jobs, not only the failed ones."
+            exit 1
+          fi
           cp "/opt/ci-bench-staging/${GITHUB_RUN_ID}.tar.zst" /tmp/bench.tar.zst
           echo "${BENCH_SHA256}  /tmp/bench.tar.zst" | sha256sum --check --strict -
           tar -I zstd -xpf /tmp/bench.tar.zst -C /home/ci
