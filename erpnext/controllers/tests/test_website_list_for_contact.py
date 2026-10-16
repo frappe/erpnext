@@ -46,3 +46,19 @@ class TestWebsiteListForContact(ERPNextTestSuite):
 
 		with as_user(user):
 			self.assertFalse(frappe.has_website_permission(invoice))
+
+	def test_website_permission_for_customer_and_supplier_portal_user(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.website_list_for_contact import has_website_permission
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		invoice = make_purchase_invoice(supplier="_Test Supplier", do_not_submit=True)
+		user = make_fenced_user("_test_portal_party@example.com", ["Customer", "Supplier"])
+		for doctype, name in (("Supplier", "_Test Supplier"), ("Customer", "_Test Customer 1")):
+			party = frappe.get_doc(doctype, name)
+			party.append("portal_users", {"user": user})
+			party.save()
+
+		self.assertTrue(has_website_permission(invoice, "read", user))
+		with as_user(user):
+			self.assertTrue(has_website_permission(invoice, "read", user))
