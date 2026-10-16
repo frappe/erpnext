@@ -692,32 +692,55 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
 	def get_serial_no_wise_incoming_rate(self, serial_nos):
-		incoming_rates = frappe._dict()
+		latest_inward = {}
 		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
-			for serial_no, incoming_rate in self.get_inward_serial_no_rates(serial_nos_batch):
-				incoming_rates.setdefault(serial_no, incoming_rate)
+			entries = self.get_inward_serial_no_entries(serial_nos_batch)
+			bundles = self.get_inward_bundles({entry.parent for entry in entries})
+			for entry in entries:
+				bundle = bundles.get(entry.parent)
+				if not bundle:
+					continue
 
-		return incoming_rates
+				key = (bundle.posting_datetime, bundle.creation)
+				if entry.serial_no not in latest_inward or key > latest_inward[entry.serial_no][0]:
+					latest_inward[entry.serial_no] = (key, entry.incoming_rate)
 
-	def get_inward_serial_no_rates(self, serial_nos):
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		return frappe._dict({serial_no: rate for serial_no, (_key, rate) in latest_inward.items()})
+
+	def get_inward_serial_no_entries(self, serial_nos):
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
-		query = (
+		return (
 			frappe.qb.from_(bundle_child)
-			.inner_join(bundle)
-			.on(bundle.name == bundle_child.parent)
-			.select(bundle_child.serial_no, bundle_child.incoming_rate)
+			.select(bundle_child.serial_no, bundle_child.incoming_rate, bundle_child.parent)
 			.where(
 				(bundle_child.serial_no.isin(serial_nos))
 				& (bundle_child.warehouse == self.sle.warehouse)
 				& (bundle_child.qty > 0)
+				& (bundle_child.docstatus == 1)
+			)
+		).run(as_dict=True)
+
+	def get_inward_bundles(self, bundle_names):
+		bundles = {}
+		for bundle_names_batch in create_batch(list(bundle_names), SERIAL_NO_QUERY_BATCH_SIZE):
+			for bundle in self.get_inward_bundle_query(bundle_names_batch).run(as_dict=True):
+				bundles[bundle.name] = bundle
+
+		return bundles
+
+	def get_inward_bundle_query(self, bundle_names):
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		query = (
+			frappe.qb.from_(bundle)
+			.select(bundle.name, bundle.posting_datetime, bundle.creation)
+			.where(
+				(bundle.name.isin(bundle_names))
 				& (bundle.item_code == self.sle.item_code)
 				& (bundle.is_cancelled == 0)
 				& (bundle.docstatus == 1)
 				& (bundle.type_of_transaction == "Inward")
+				& (bundle.posting_datetime.isnotnull())
 			)
-			.orderby(bundle.posting_datetime, order=Order.desc)
-			.orderby(bundle.creation, order=Order.desc)
 		)
 
 		if self.sle.voucher_no:
@@ -726,7 +749,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 		if self.sle.posting_datetime:
 			query = query.where(bundle.posting_datetime <= self.sle.posting_datetime)
 
-		return query.run()
+		return query
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):
