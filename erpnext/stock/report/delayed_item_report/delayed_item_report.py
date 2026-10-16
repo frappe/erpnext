@@ -49,6 +49,7 @@ class DelayedItemReport:
 			.where(
 				(child.parent == parent.name)
 				& (parent.docstatus == 1)
+				& (parent.is_return == 0)
 				& (parent.posting_date.between(self.filters.get("from_date"), self.filters.get("to_date")))
 				& (child[sales_order_field].notnull())
 				& (child[sales_order_field] != "")
