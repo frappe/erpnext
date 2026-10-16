@@ -3,6 +3,8 @@
 
 """Cheques in Payment Entry: suggest, validate, issue and cancel."""
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.utils import get_link_to_form
@@ -12,72 +14,91 @@ from erpnext.accounts.doctype.cheque_book.cheque_book import format_cheque_no
 
 
 @frappe.whitelist()
-def get_next_cheque(account: str) -> str | None:
-	"""Suggest a cheque for a payment from the bank ledger.
+def get_next_cheque(account: str, cheque_book: str | None = None) -> dict:
+	"""Suggest a cheque book of the bank ledger and its next cheque number, with the free count.
 
-	It is the cheque after the highest used one, in the oldest active book that has such a cheque.
-	Cheques that a user skipped stay free for a manual pick.
+	The next number is the one after the highest used cheque, so cheques that a user skipped stay
+	free for a manual pick. Without a cheque book, take the oldest active book that has a next number.
 	"""
 	bank_accounts = frappe.get_all(
 		"Bank Account", filters={"account": account, "is_company_account": 1, "disabled": 0}, pluck="name"
 	)
 	if not bank_accounts:
-		return None
+		return {}
 
+	filters = {"bank_account": ("in", bank_accounts), "docstatus": 1, "status": "Submitted"}
+	if cheque_book:
+		filters["name"] = cheque_book
 	books = frappe.get_list(
 		"Cheque Book",
-		filters={"bank_account": ("in", bank_accounts), "docstatus": 1, "status": "Submitted"},
-		fields=["name", "cheque_start_no", "cheque_end_no"],
+		filters=filters,
+		fields=["name", "cheque_start_no", "cheque_end_no", "no_of_cheques"],
 		order_by="creation asc, name asc",
 	)
 	if not books:
-		return None
+		return {}
 
-	highest_used = {}
-	for cheque_book, cheque_no in frappe.get_all(
+	used = defaultdict(list)
+	for book_name, cheque_no in frappe.get_all(
 		"Cheque",
 		filters={"cheque_book": ("in", [book.name for book in books]), "status": ("!=", "Available")},
 		fields=["cheque_book", "cheque_no"],
 		as_list=True,
 	):
-		highest_used[cheque_book] = max(highest_used.get(cheque_book, 0), int(cheque_no))
+		used[book_name].append(int(cheque_no))
 
 	for book in books:
-		next_no = highest_used.get(book.name, int(book.cheque_start_no) - 1) + 1
-		if next_no <= int(book.cheque_end_no):
-			return f"{book.name}-{format_cheque_no(str(next_no))}"
-	return None
-
-
-@frappe.whitelist()
-def get_cheque_summary(cheque: str) -> dict:
-	"""The cheque number, and the range and free count of its book, for the Payment Entry form."""
-	frappe.has_permission("Cheque", "read", cheque, throw=True)
-	cheque_no, cheque_book = frappe.db.get_value("Cheque", cheque, ["cheque_no", "cheque_book"])
-	summary = frappe.db.get_value(
-		"Cheque Book", cheque_book, ["cheque_start_no", "cheque_end_no"], as_dict=True
-	)
-	summary.cheque_no = cheque_no
-	summary.free = frappe.db.count("Cheque", {"cheque_book": cheque_book, "status": "Available"})
-	return summary
+		next_no = max(used[book.name], default=int(book.cheque_start_no) - 1) + 1
+		has_next = next_no <= int(book.cheque_end_no)
+		if has_next or cheque_book:
+			suggestion = {
+				"cheque_book": book.name,
+				"free": book.no_of_cheques - len(used[book.name]),
+				"cheque_start_no": book.cheque_start_no,
+				"cheque_end_no": book.cheque_end_no,
+			}
+			if has_next:
+				suggestion["cheque_no"] = format_cheque_no(str(next_no))
+			return suggestion
+	return {}
 
 
 def validate_cheque(payment_entry):
-	"""Check the cheque of a payment and copy its number. Payment Entry validate calls this."""
+	"""Find the cheque from the cheque book and the cheque number, and check it.
+
+	Payment Entry validate calls this. The cheque link is set here, so an empty number gets the
+	suggestion and a typed number gets padded first.
+	"""
 	doc = payment_entry
+	doc.cheque = None
 	if not is_cheque_payment(doc):
-		doc.cheque = None
+		doc.cheque_book = None
 		return
-	if not doc.cheque:
+	if not doc.cheque_book:
 		return
 
-	cheque = get_cheque_for_payment(doc.cheque)
-	# Frappe's link check already refuses a cancelled cheque
+	if doc.docstatus == 0 and not doc.reference_no:
+		doc.reference_no = get_next_cheque(doc.paid_from, doc.cheque_book).get("cheque_no")
+	doc.reference_no = format_cheque_no(doc.reference_no)
+	if not doc.reference_no:
+		frappe.throw(_("Enter a cheque number of Cheque Book {0}").format(frappe.bold(doc.cheque_book)))
+
+	cheque = get_cheque_for_payment(f"{doc.cheque_book}-{doc.reference_no}")
 	if not cheque:
-		frappe.throw(_("Cheque {0} does not exist").format(frappe.bold(doc.cheque)))
+		frappe.throw(
+			_("Cheque No {0} is not in Cheque Book {1}").format(
+				frappe.bold(doc.reference_no), frappe.bold(doc.cheque_book)
+			)
+		)
+	if cheque.status == "Cancelled":
+		frappe.throw(
+			_("Cheque No {0} is cancelled. Enter another cheque number.").format(
+				frappe.bold(cheque.cheque_no)
+			)
+		)
 	if cheque.status == "Issued" and cheque.payment_entry != doc.name:
 		frappe.throw(
-			_("Cheque {0} is already used in {1}").format(
+			_("Cheque No {0} is already used in {1}").format(
 				frappe.bold(cheque.cheque_no), get_link_to_form("Payment Entry", cheque.payment_entry)
 			)
 		)
@@ -89,12 +110,12 @@ def validate_cheque(payment_entry):
 		)
 	if cheque.account != doc.paid_from:
 		frappe.throw(
-			_("Cheque {0} is for account {1}, but Account Paid From is {2}").format(
+			_("Cheque No {0} is for account {1}, but Account Paid From is {2}").format(
 				frappe.bold(cheque.cheque_no), frappe.bold(cheque.account), frappe.bold(doc.paid_from)
 			)
 		)
 
-	doc.reference_no = cheque.cheque_no
+	doc.cheque = cheque.name
 	doc.reference_date = doc.reference_date or doc.posting_date
 	if doc.docstatus == 0 and (
 		draft := frappe.db.get_value(
@@ -200,6 +221,7 @@ def get_cheque_for_payment(name: str):
 	rows = frappe.qb.get_query(
 		"Cheque",
 		fields=[
+			"name",
 			"cheque_no",
 			"status",
 			"payment_entry",
