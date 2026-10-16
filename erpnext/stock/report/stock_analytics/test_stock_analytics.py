@@ -182,3 +182,10 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [2])
+
+	def test_period_ranges_reach_the_to_date(self):
+		filters = _dict(range="Weekly", from_date="2026-03-30", to_date="2027-03-31")
+
+		ranges = get_period_date_ranges(filters)
+
+		self.assertEqual(getdate(ranges[-1][1]), getdate("2027-03-31"))

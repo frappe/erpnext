@@ -78,7 +78,7 @@ def get_period_date_ranges(filters):
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(filters.range, 1)
 
 	periodic_daterange = []
-	for _dummy in range(1, 53, increment):
+	while True:
 		if filters.range == "Weekly":
 			period_end_date = from_date + relativedelta(days=6)
 		else:
