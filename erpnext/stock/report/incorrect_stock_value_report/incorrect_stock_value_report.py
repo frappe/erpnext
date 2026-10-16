@@ -37,7 +37,7 @@ def get_unsync_date(filters):
 	if not date:
 		return
 
-	while getdate(date) < getdate(today()):
+	while getdate(date) <= getdate(today()):
 		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(
 			posting_date=date, company=filters.company, account=filters.account
 		)
