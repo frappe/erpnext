@@ -7,6 +7,7 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, flt, getdate
@@ -29,6 +30,8 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
+	if not apply_permitted_warehouses(filters):
+		return columns, []
 
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
@@ -85,6 +88,19 @@ def execute(filters=None):
 			data.append(row)
 	add_warehouse_column(columns, warehouse_list)
 	return columns, data
+
+
+def apply_permitted_warehouses(filters):
+	permitted = get_permitted_documents("Warehouse")
+	if not permitted:
+		return True
+
+	if filters.get("warehouse"):
+		selected = {warehouse.name for warehouse in get_warehouse_list(filters)}
+		permitted = [warehouse for warehouse in permitted if warehouse in selected]
+
+	filters["warehouse"] = permitted
+	return bool(permitted)
 
 
 def get_itemwise_brand(items):
