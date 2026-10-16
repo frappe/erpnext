@@ -2,15 +2,7 @@ name: Patch
 
 on:
   pull_request:
-    paths-ignore:
-      - '**.js'
-      - '**.css'
-      - '**.md'
-      - '**.html'
-      - '**.csv'
-      - 'crowdin.yml'
-      - '.coderabbit.yml'
-      - '.mergify.yml'
+    types: [opened, reopened, synchronize, labeled]
   workflow_dispatch:
 
 permissions:
@@ -22,6 +14,7 @@ concurrency:
 
 jobs:
   test:
+    if: github.event_name != 'pull_request' || (github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) || contains(github.event.pull_request.labels.*.name, 'merge-alone') || !(github.base_ref == 'develop' || endsWith(github.base_ref, '-hotfix'))
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
