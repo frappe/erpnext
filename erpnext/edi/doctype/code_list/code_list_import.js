@@ -88,14 +88,9 @@ function show_column_selection_dialog(context) {
 	for (let column in context.filterable_columns) {
 		fields.push({
 			fieldname: `filter_${column}`,
-			label: __("by {}", [frappe.utils.escape_html(column)]),
+			label: __("by {}", [column]),
 			fieldtype: "Select",
-			options: [null].concat(
-				context.filterable_columns[column].map((value) => ({
-					label: frappe.utils.escape_html(value),
-					value: value,
-				}))
-			),
+			options: [null].concat(context.filterable_columns[column]),
 		});
 	}
 
@@ -181,7 +176,7 @@ function update_preview(dialog, context) {
 	// Add headers for filterable columns
 	for (let column in context.filterable_columns) {
 		if (dialog.get_value(`filter_${column}`)) {
-			html += `<th>${frappe.utils.escape_html(column)}</th>`;
+			html += `<th>${__(column)}</th>`;
 		}
 	}
 
@@ -190,19 +185,23 @@ function update_preview(dialog, context) {
 	for (let i = 0; i < 3; i++) {
 		html += "<tr>";
 		if (title_column) {
-			html += preview_cell(context.example_values[title_column][i]);
+			let title = context.example_values[title_column][i] || "";
+			html += `<td title="${title}">${truncate(title)}</td>`;
 		}
 		if (code_column) {
-			html += preview_cell(context.example_values[code_column][i]);
+			let code = context.example_values[code_column][i] || "";
+			html += `<td title="${code}">${truncate(code)}</td>`;
 		}
 		if (description_column) {
-			html += preview_cell(context.example_values[description_column][i]);
+			let description = context.example_values[description_column][i] || "";
+			html += `<td title="${description}">${truncate(description)}</td>`;
 		}
 
 		// Add values for filterable columns
 		for (let column in context.filterable_columns) {
 			if (dialog.get_value(`filter_${column}`)) {
-				html += preview_cell(context.example_values[column][i]);
+				let value = context.example_values[column][i] || "";
+				html += `<td title="${value}">${truncate(value)}</td>`;
 			}
 		}
 
@@ -217,9 +216,4 @@ function update_preview(dialog, context) {
 function truncate(value, maxLength = 40) {
 	if (typeof value !== "string") return "";
 	return value.length > maxLength ? value.substring(0, maxLength - 3) + "..." : value;
-}
-
-function preview_cell(value) {
-	value = value || "";
-	return `<td title="${frappe.utils.escape_html(value)}">${frappe.utils.escape_html(truncate(value))}</td>`;
 }
