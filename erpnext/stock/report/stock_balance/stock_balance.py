@@ -598,11 +598,13 @@ class StockBalanceReport:
 		if self.filters.get("warehouse"):
 			query = apply_warehouse_filter(query, sle, self.filters)
 
-		elif warehouse_type := self.filters.get("warehouse_type"):
-			query = (
-				query.join(warehouse_table)
-				.on(warehouse_table.name == sle.warehouse)
-				.where(warehouse_table.warehouse_type == warehouse_type)
+		if warehouse_type := self.filters.get("warehouse_type"):
+			query = query.where(
+				sle.warehouse.isin(
+					frappe.qb.from_(warehouse_table)
+					.select(warehouse_table.name)
+					.where(warehouse_table.warehouse_type == warehouse_type)
+				)
 			)
 
 		return query

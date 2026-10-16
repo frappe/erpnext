@@ -282,6 +282,22 @@ class TestStockBalance(ERPNextTestSuite):
 			msg=f"Expected child warehouse balances \n{rows}",
 		)
 
+	def test_warehouse_type_applies_with_a_warehouse(self):
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10, to_warehouse="Stores - _TC")])
+		warehouse_type = (
+			frappe.get_doc(
+				doctype="Warehouse Type", name=f"_Test Unused Type {frappe.generate_hash(length=6)}"
+			)
+			.insert()
+			.name
+		)
+
+		rows = stock_balance(
+			self.filters.update({"warehouse": "All Warehouses - _TC", "warehouse_type": warehouse_type})
+		)
+
+		self.assertFalse([row for row in rows if row.item_code == self.item.name])
+
 	def test_show_item_attr(self):
 		from erpnext.controllers.item_variant import create_variant
 
