@@ -119,8 +119,12 @@ async function show_cheques(frm) {
 						: "",
 			},
 			{
+				// a render column goes into the page as HTML, so escape the text users typed
 				label: __("Reason"),
-				render: (row) => [row.cancellation_reason, row.remarks].filter(Boolean).join(": "),
+				render: (row) =>
+					frappe.utils.escape_html(
+						[row.cancellation_reason, row.remarks].filter(Boolean).join(": ")
+					),
 			},
 		],
 	});

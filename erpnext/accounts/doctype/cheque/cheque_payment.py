@@ -189,6 +189,8 @@ def is_cheque_payment(payment_entry) -> bool:
 def lock_cheque(name: str) -> Cheque:
 	"""Lock the book, then the cheque: the order that every cheque writer uses."""
 	cheque_book = frappe.db.get_value("Cheque", name, "cheque_book")  # never changes, so no lock
+	if not cheque_book:  # a lock query with no name would lock some other row
+		frappe.throw(_("Cheque {0} does not exist").format(frappe.bold(name)), frappe.DoesNotExistError)
 	frappe.db.get_value("Cheque Book", cheque_book, "name", for_update=True)
 	return frappe.get_doc("Cheque", name, for_update=True)
 
