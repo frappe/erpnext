@@ -27,8 +27,17 @@ on:
         required: false
         type: string
         default: ""
+      post_key:
+        description: Hash of the review input; runs with the same key wait for each other, so the same post never goes out twice
+        required: false
+        type: string
+        default: ""
 
 permissions: {}
+
+concurrency:
+  group: post-review-${{ inputs.pr }}-${{ inputs.post_key || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   post:
