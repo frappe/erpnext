@@ -250,7 +250,9 @@ class TestAppointment(ERPNextTestSuite):
 		self.addCleanup(setattr, frappe.local, "request", getattr(frappe.local, "request", None))
 		set_request(method="GET", path="/book_appointment", headers={"Host": "attacker.example"})
 
-		self.assertNotIn("attacker.example", appointment._get_verify_url())
+		# a configured host name would mask a regression to trusting the request host
+		with patch.dict(frappe.local.conf, {"host_name": None, "hostname": None}):
+			self.assertNotIn("attacker.example", appointment._get_verify_url())
 
 	def test_email_verification_within_expiry_window(self):
 		# Link used within the validity window - verification succeeds and the
