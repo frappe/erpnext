@@ -9,6 +9,7 @@ from frappe.utils import add_days, flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
 	MaterialRequirementsPlanningReport,
 	execute,
@@ -554,6 +555,18 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rows = get_mrp_row_list(mps, add_safety_stock=1)
 		self.assertEqual(required(rows, plan.fg_item), [0, 0, 0])
 		self.assertEqual(sum(required(rows, plan.rm_item)), 0)
+
+	def test_stock_committed_to_work_orders_is_not_on_hand(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		make_stock_entry(item_code=plan.rm_item, target=WAREHOUSE, qty=10, rate=100)
+		other_fg = make_item(properties={"is_stock_item": 1}).name
+		other_bom = make_bom(item=other_fg, raw_materials=[plan.rm_item], rm_qty=1, rate=100)
+		make_wo_order_test_record(item=other_fg, bom_no=other_bom.name, qty=10, source_warehouse=WAREHOUSE)
+
+		rows = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))
+
+		self.assertEqual(rows[plan.rm_item].in_hand_qty, 0)
+		self.assertEqual(rows[plan.rm_item].required_qty, 10)
 
 
 def make_chart_row(delivery_date, planned_qty=1):

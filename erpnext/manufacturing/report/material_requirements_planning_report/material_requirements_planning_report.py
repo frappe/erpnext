@@ -534,7 +534,7 @@ class MaterialRequirementsPlanningReport:
 
 	def add_bin_details(self, row):
 		if bin_details := self._bin_details.get(row.item_code):
-			current_qty = bin_details.get("actual_qty", 0.0) - flt(bin_details.get("reserved_stock", 0.0))
+			current_qty = get_free_stock(bin_details)
 			if current_qty > 0:
 				if row.required_qty > current_qty:
 					row.in_hand_qty = current_qty
@@ -615,7 +615,7 @@ class MaterialRequirementsPlanningReport:
 		bin_details = self._bin_details.setdefault(
 			row.item_code, frappe._dict({"actual_qty": 0.0, "reserved_stock": 0.0})
 		)
-		available = max(flt(bin_details.actual_qty) - flt(bin_details.reserved_stock), 0.0)
+		available = max(get_free_stock(bin_details), 0.0)
 		reserved = min(flt(row.safety_stock), available)
 		bin_details.actual_qty = flt(bin_details.actual_qty) - reserved
 		row.required_qty += flt(row.safety_stock) - reserved
@@ -1233,6 +1233,18 @@ class MaterialRequirementsPlanningReport:
 		sales_data = query.run(as_dict=True)
 
 		return convert_to_daily_bucket_data(sales_data)
+
+
+def get_free_stock(bin_details):
+	return flt(bin_details.get("actual_qty")) - sum(
+		flt(bin_details.get(field))
+		for field in (
+			"reserved_stock",
+			"reserved_qty_for_production",
+			"reserved_qty_for_sub_contract",
+			"reserved_qty_for_production_plan",
+		)
+	)
 
 
 def get_type_of_material(is_purchase_item, bom_no):
