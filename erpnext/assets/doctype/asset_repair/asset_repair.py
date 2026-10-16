@@ -78,7 +78,9 @@ class AssetRepair(AccountsController):
 		self.set_downtime()
 
 	def on_update(self):
-		self.add_repair_status_activity()
+		# Logged in the save, as the status job only sees the final state of quick successive saves
+		if self.has_value_changed("repair_status"):
+			self.add_repair_activity(self.repair_status)
 		self.update_status()
 
 	def validate_asset(self):
@@ -190,16 +192,14 @@ class AssetRepair(AccountsController):
 				)
 			)
 
-	def add_repair_status_activity(self):
-		# Logged in the save, as the status job only sees the final state of quick successive saves
-		if not self.has_value_changed("repair_status"):
-			return
-
+	def add_repair_activity(self, event: str):
 		subject = {
 			"Pending": _("Asset out of order due to Asset Repair {0}"),
 			"Completed": _("Asset Repair {0} marked as Completed"),
 			"Cancelled": _("Asset Repair {0} marked as Cancelled"),
-		}[self.repair_status]
+			"Discarded": _("Asset Repair {0} discarded"),
+			"Deleted": _("Asset Repair {0} deleted"),
+		}[event]
 		self.add_asset_activity(subject.format(get_link_to_form("Asset Repair", self.name)))
 
 	def update_status(self):
@@ -267,10 +267,16 @@ class AssetRepair(AccountsController):
 			frappe.get_doc("Stock Entry", stock_entry).cancel()
 
 	def after_delete(self):
+		self.close_pending_repair_activity("Deleted")
 		self.update_status()
 
 	def on_discard(self):
+		self.close_pending_repair_activity("Discarded")
 		self.update_status()
+
+	def close_pending_repair_activity(self, event: str):
+		if self.repair_status == "Pending":
+			self.add_repair_activity(event)
 
 	def check_repair_status(self):
 		if self.repair_status != "Completed" and self.docstatus == 1:

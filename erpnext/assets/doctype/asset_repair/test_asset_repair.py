@@ -204,6 +204,21 @@ class TestAssetRepair(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
 		self.assertEqual(frappe.db.get_value("Asset Repair", pending_repair.name, "repair_status"), "Pending")
 
+	def test_discarding_or_deleting_pending_repair_logs_closing_entry(self):
+		asset = create_asset(submit=1)
+		discarded_repair = create_asset_repair(asset=asset)
+		deleted_repair = create_asset_repair(asset=asset)
+
+		discarded_repair.discard()
+		deleted_repair.delete()
+
+		subjects = frappe.get_all("Asset Activity", {"asset": asset.name}, pluck="subject")
+		self.assertTrue(
+			[subject for subject in subjects if f"{discarded_repair.name}</a> discarded" in subject]
+		)
+		self.assertTrue([subject for subject in subjects if f"{deleted_repair.name}</a> deleted" in subject])
+		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 
