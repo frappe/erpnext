@@ -1819,9 +1819,9 @@ def get_price_list_currency_and_exchange_rate(ctx: ItemDetailsCtx):
 	if not ctx.price_list:
 		return {}
 
-	if ctx.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+	if ctx.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"]:
 		ctx.update({"exchange_rate": "for_selling"})
-	elif ctx.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+	elif ctx.doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 		ctx.update({"exchange_rate": "for_buying"})
 
 	price_list_details = get_price_list_details(ctx.price_list)
