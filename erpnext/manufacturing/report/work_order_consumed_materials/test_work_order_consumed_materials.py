@@ -146,3 +146,13 @@ class TestWorkOrderConsumedMaterials(ERPNextTestSuite):
 		rows = self.get_wo_rows(self.run_report(name=wo.name), wo.name)
 
 		self.assertEqual([(row.raw_material_item_code, row.returned_qty) for row in rows], [(material, 2)])
+
+	def test_consumed_qty_leaves_out_the_returned_qty(self):
+		wo, material = self.make_work_order_with_return()
+
+		rows = self.get_wo_rows(self.run_report(name=wo.name), wo.name)
+
+		self.assertEqual(
+			[(row.raw_material_item_code, row.consumed_qty, row.extra_consumed_qty) for row in rows],
+			[(material, 8, 0)],
+		)

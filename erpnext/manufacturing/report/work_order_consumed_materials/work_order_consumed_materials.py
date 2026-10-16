@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -22,6 +23,7 @@ def get_data(report_filters):
 	work_orders = frappe.get_all("Work Order", filters=filters, fields=fields)
 
 	for d in work_orders:
+		d.consumed_qty = flt(d.consumed_qty) - flt(d.returned_qty)
 		d.extra_consumed_qty = 0.0
 		if d.consumed_qty and d.consumed_qty > d.required_qty:
 			d.extra_consumed_qty = d.consumed_qty - d.required_qty
