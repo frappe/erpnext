@@ -1192,6 +1192,7 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.po_no = reference_doc.po_no
 		# The payment schedule is rebuilt from the template, relative to the new posting date.
