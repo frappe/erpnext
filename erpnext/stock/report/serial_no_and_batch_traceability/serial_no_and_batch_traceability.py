@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
+from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_companies_condition,
@@ -342,15 +342,8 @@ class ReportData:
 				stock_entry_detail.item_name,
 				stock_entry_detail.parenttype.as_("reference_doctype"),
 				stock_entry.name.as_("reference_name"),
-				(
-					(
-						stock_entry_detail.qty
-						/ Case()
-						.when(stock_entry.fg_completed_qty > 0, stock_entry.fg_completed_qty)
-						.else_(sabb_data.qty)
-					)
-					* sabb_data.qty
-				).as_("qty"),
+				stock_entry_detail.qty.as_("row_qty"),
+				stock_entry.fg_completed_qty,
 				sabb_entry.batch_no,
 				sabb_entry.serial_no,
 				sabb_entry.qty.as_("quantity"),
@@ -368,7 +361,11 @@ class ReportData:
 		if condition := get_allowed_companies_condition(stock_entry.company, "Stock Entry"):
 			query = query.where(condition)
 
-		return query.run(as_dict=True)
+		materials = query.run(as_dict=True)
+		for material in materials:
+			material.qty = get_material_qty(material, sabb_data.qty)
+
+		return materials
 
 	def set_forward_data(self, value, sabb_data):
 		outward_entries = self.get_sabb_entries(value)
@@ -693,3 +690,14 @@ class ReportData:
 			)
 
 		return columns
+
+
+def get_material_qty(material, fg_qty):
+	ratio = flt(fg_qty) / (flt(material.fg_completed_qty) or flt(fg_qty)) if fg_qty else 1.0
+	if material.serial_no or material.fg_serial_no or material.fg_batch_no:
+		return abs(flt(material.quantity))
+
+	if material.batch_no:
+		return abs(flt(material.quantity)) * ratio
+
+	return flt(material.row_qty) * ratio
