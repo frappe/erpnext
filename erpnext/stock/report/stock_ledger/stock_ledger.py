@@ -744,9 +744,7 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 	if opening_reco_vouchers:
 		sl_entries[:] = [sle for sle in sl_entries if sle.get("voucher_no") not in opening_reco_vouchers]
 
-	sle_cond = (sle_doctype.posting_date < filters.from_date) | (
-		(sle_doctype.posting_date == filters.from_date) & (sle_doctype.posting_time == "00:00:00")
-	)
+	sle_cond = sle_doctype.posting_date < filters.from_date
 	if opening_reco_vouchers:
 		sle_cond = sle_cond | (
 			(sle_doctype.posting_date == filters.from_date)
