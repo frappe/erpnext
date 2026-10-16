@@ -333,7 +333,7 @@ class SalesInvoice(SellingController):
 		)
 
 		if self.coupon_code:
-			validate_coupon_code(self.coupon_code)
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		if cint(self.is_pos):
 			self.validate_pos()
