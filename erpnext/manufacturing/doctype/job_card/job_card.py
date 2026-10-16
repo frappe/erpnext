@@ -992,7 +992,7 @@ class JobCard(Document):
 			not self.finished_good
 			and not self.is_corrective_job_card
 			and self.items
-			and self.transferred_qty < self.for_quantity
+			and (self.transferred_qty < self.for_quantity or self.has_short_transferred_material())
 		):
 			frappe.throw(
 				_(
@@ -1369,9 +1369,6 @@ class JobCard(Document):
 	def get_transferred_qty_from_stock_entry(self):
 		from frappe.query_builder.functions import Sum
 
-		if self.items:
-			return self.get_transferred_qty_from_items()
-
 		stock_entry = frappe.qb.DocType("Stock Entry")
 
 		result = (
@@ -1387,17 +1384,39 @@ class JobCard(Document):
 
 		return flt(result[0][0]) if result and result[0][0] else 0
 
-	def get_transferred_qty_from_items(self):
-		items = frappe.get_all(
-			"Job Card Item",
-			filters={"parent": self.name, "parenttype": "Job Card", "required_qty": (">", 0)},
-			fields=["required_qty", "transferred_qty"],
-		)
-		if not items:
-			return 0.0
+	def has_short_transferred_material(self):
+		if not (self.work_order and flt(self.for_quantity)):
+			return False
 
-		transferred_fraction = min(flt(d.transferred_qty) / flt(d.required_qty) for d in items)
-		return flt(transferred_fraction * flt(self.for_quantity), self.precision("transferred_qty"))
+		wo_qty = flt(frappe.db.get_value("Work Order", self.work_order, "qty"))
+		if not wo_qty:
+			return False
+
+		wo_items = frappe.get_all(
+			"Work Order Item",
+			filters={"parent": self.work_order, "parenttype": "Work Order"},
+			fields=["item_code", "required_qty", "operation", "operation_row_id"],
+		)
+		transferred = dict(
+			frappe.get_all(
+				"Job Card Item",
+				filters={"parent": self.name, "parenttype": "Job Card"},
+				fields=["item_code", "transferred_qty"],
+				as_list=True,
+			)
+		)
+		for row in wo_items:
+			if not self.is_own_material(row):
+				continue
+			expected = flt(row.required_qty) / wo_qty * flt(self.for_quantity)
+			if flt(transferred.get(row.item_code), 6) < flt(expected, 6):
+				return True
+		return False
+
+	def is_own_material(self, row):
+		if row.operation_row_id and self.operation_row_id:
+			return cint(row.operation_row_id) == cint(self.operation_row_id)
+		return row.operation == self.operation
 
 	def set_requested_qty(self):
 		mr = frappe.qb.DocType("Material Request")

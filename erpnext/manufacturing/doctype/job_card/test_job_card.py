@@ -3836,7 +3836,6 @@ class TestJobCard(ERPNextTestSuite):
 		transfer.submit()
 
 		job_card.reload()
-		self.assertEqual(job_card.transferred_qty, 0)
 		job_card.append("time_logs", jc_review_log("2031-03-07 08:00:00", 60, 10))
 		self.assertRaisesRegex(frappe.ValidationError, "Materials need to be transferred", job_card.submit)
 
