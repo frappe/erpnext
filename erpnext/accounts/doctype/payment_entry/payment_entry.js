@@ -21,7 +21,11 @@ frappe.ui.form.on("Payment Entry", {
 		if (frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
 			if (!frm.doc.paid_to) frm.set_value("paid_to_account_currency", null);
+			// an amendment copies the cheque that was cancelled with the original payment
+			if (frm.doc.amended_from) frm.doc.cheque = null;
 		}
+		// the form object is reused for the next payment, so start without an opt out
+		frm.cheque_cleared = false;
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
@@ -97,6 +101,18 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			};
 		});
+
+		frm.set_query("cheque", () => ({
+			filters: {
+				"bank_account.account": frm.doc.paid_from,
+				"bank_account.is_company_account": 1,
+				"bank_account.disabled": 0,
+				"cheque_book.status": "Submitted",
+				company: frm.doc.company,
+				docstatus: 1,
+				status: "Available",
+			},
+		}));
 
 		frm.set_query("contact_person", function () {
 			if (frm.doc.party) {
@@ -265,6 +281,11 @@ frappe.ui.form.on("Payment Entry", {
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
+		if (frm.is_new() && frm.cscript.is_onload) {
+			frm.events.set_cheque(frm);
+		} else if (frm.doc.docstatus === 0 && frm.doc.cheque) {
+			frm.events.cheque(frm);
+		}
 	},
 
 	validate: async function (frm) {
@@ -470,6 +491,57 @@ frappe.ui.form.on("Payment Entry", {
 			let payment_account_field = frm.doc.payment_type == "Receive" ? "paid_to" : "paid_from";
 			frm.set_value(payment_account_field, account);
 		});
+		frm.events.set_cheque(frm);
+	},
+
+	// Suggest a cheque for a cheque payment. A cheque that the user picked or cleared stays.
+	set_cheque: async function (frm, reset) {
+		if (frm.doc.docstatus !== 0) return;
+		if (!is_cheque_payment(frm) || !frm.doc.paid_from) {
+			// choosing a cheque mode again is a fresh start, so forget an earlier clear
+			frm.cheque_cleared = false;
+			return set_cheque_value(frm, "");
+		}
+		if (frm.cheque_cleared || (frm.doc.cheque && !reset)) return;
+
+		const account = frm.doc.paid_from;
+		const cheque = await frappe.xcall("erpnext.accounts.doctype.cheque.cheque_payment.get_next_cheque", {
+			account,
+		});
+		// the user can change the form while the server answers
+		if (
+			frm.doc.docstatus !== 0 ||
+			frm.cheque_cleared ||
+			account !== frm.doc.paid_from ||
+			!is_cheque_payment(frm)
+		)
+			return;
+		await set_cheque_value(frm, cheque || "");
+	},
+
+	cheque: async function (frm) {
+		// only the user emptying the field opts this payment out of a cheque
+		if (!frm.setting_cheque) frm.cheque_cleared = !frm.doc.cheque;
+		frm.set_df_property("cheque", "description", "");
+		const cheque = frm.doc.cheque;
+		if (!cheque) return;
+
+		const summary = await frappe.xcall(
+			"erpnext.accounts.doctype.cheque.cheque_payment.get_cheque_summary",
+			{ cheque }
+		);
+		if (cheque !== frm.doc.cheque) return;
+		frm.set_df_property(
+			"cheque",
+			"description",
+			__("Free: {0} · Start No: {1} · End No: {2}", [
+				summary.free,
+				summary.cheque_start_no,
+				summary.cheque_end_no,
+			])
+		);
+		frm.set_value("reference_no", summary.cheque_no);
+		if (!frm.doc.reference_date) frm.set_value("reference_date", frm.doc.posting_date);
 	},
 
 	party_type: function (frm) {
@@ -609,6 +681,7 @@ frappe.ui.form.on("Payment Entry", {
 		if (frm.set_party_account_based_on_party) return;
 
 		frm.events.set_company_bank_account(frm);
+		frm.events.set_cheque(frm, true);
 
 		frm.events.set_account_currency_and_balance(
 			frm,
@@ -1756,8 +1829,8 @@ frappe.ui.form.on("Payment Entry", {
 		});
 	},
 
-	before_cancel: function (frm) {
-		return new Promise((resolve, reject) => {
+	before_cancel: async function (frm) {
+		await new Promise((resolve, reject) => {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_linked_bank_transactions",
 				args: { payment_entry: frm.doc.name },
@@ -1783,6 +1856,22 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			});
 		});
+		if (!frm.doc.cheque) return;
+
+		// A cancelled payment cancels its cheque, so ask why and let the server cancel both
+		const { reason, remarks } = await ask_cheque_cancellation_reason(frm);
+		frappe.validated = false;
+		try {
+			await frappe.xcall("erpnext.accounts.doctype.cheque.cheque_payment.cancel_cheque_payment", {
+				name: frm.doc.name,
+				reason,
+				remarks,
+				ignore_doctypes_on_cancel_all: frm.ignore_doctypes_on_cancel_all,
+			});
+			await frm.reload_doc();
+		} catch {
+			// the server message already explains the failure
+		}
 	},
 });
 
@@ -1946,6 +2035,54 @@ function prompt_for_missing_account(frm, account) {
 			(values) => resolve(values?.[account]),
 			__("Please Specify Account")
 		);
+	});
+}
+
+// the form's own writes must not look like the user clearing the field
+async function set_cheque_value(frm, value) {
+	frm.setting_cheque = true;
+	try {
+		await frm.set_value("cheque", value);
+	} finally {
+		frm.setting_cheque = false;
+	}
+}
+
+function is_cheque_payment(frm) {
+	return (
+		["Pay", "Internal Transfer"].includes(frm.doc.payment_type) &&
+		["Cheque", "Check"].includes(frm.doc.mode_of_payment)
+	);
+}
+
+async function ask_cheque_cancellation_reason(frm) {
+	await frappe.model.with_doctype("Cheque");
+	return new Promise((resolve, reject) => {
+		let answered = false;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Cancel Cheque {0}", [frm.doc.reference_no]),
+			// the reason list would otherwise open by itself, as the first input
+			no_focus: true,
+			fields: [
+				{
+					fieldname: "reason",
+					fieldtype: "Autocomplete",
+					label: __("Cancellation Reason"),
+					options: frappe.meta.get_docfield("Cheque", "cancellation_reason").options,
+					reqd: 1,
+					description: __("Cancelling this payment also cancels its cheque."),
+				},
+				{ fieldname: "remarks", fieldtype: "Small Text", label: __("Remarks") },
+			],
+			primary_action_label: __("Cancel Payment and Cheque"),
+			primary_action(values) {
+				answered = true;
+				dialog.hide();
+				resolve(values);
+			},
+		});
+		dialog.onhide = () => answered || reject();
+		dialog.show();
 	});
 }
 
