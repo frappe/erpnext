@@ -112,3 +112,18 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 			(-10, add_to_date(today, months=5).replace(day=15)),
 		]
 		self.assert_single_item_report(movement, [100, 50, 50, 70, 70, 60])
+
+	def test_periods_before_the_first_movement_carry_the_opening_balance(self):
+		self.generate_stock([(10, datetime.date(2026, 4, 15)), (5, datetime.date(2026, 8, 10))])
+		filters = _dict(
+			range="Monthly",
+			from_date=datetime.date(2026, 6, 1),
+			to_date=datetime.date(2026, 8, 28),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		cols, data = stock_analytics(filters)
+
+		self.compare_analytics_row(frappe._dict(data[0]), cols, [10, 10, 15])

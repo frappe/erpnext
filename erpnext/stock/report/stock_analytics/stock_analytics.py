@@ -13,6 +13,8 @@ from erpnext.stock.doctype.company_restriction.company_restriction import get_al
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
+OPENING_KEY = "_opening"
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -160,6 +162,8 @@ def get_periodic_data(entry, filters):
 	for _start_date, end_date in expected_ranges:
 		expected_periods.append(get_period(end_date, filters))
 
+	range_start = getdate(expected_ranges[0][0]) if expected_ranges else None
+
 	periodic_data = {}
 	for d in entry:
 		period = get_period(d.posting_date, filters)
@@ -194,6 +198,8 @@ def get_periodic_data(entry, filters):
 
 		periodic_data[d.item_code]["balance"][d.warehouse] += value
 		periodic_data[d.item_code][period][d.warehouse] = periodic_data[d.item_code]["balance"][d.warehouse]
+		if range_start and getdate(d.posting_date) < range_start:
+			periodic_data[d.item_code][OPENING_KEY] = periodic_data[d.item_code]["balance"].copy()
 
 	return periodic_data
 
@@ -246,7 +252,7 @@ def get_data(filters):
 			"uom": item_data.stock_uom,
 			"brand": item_data.brand,
 		}
-		previous_period_value = 0.0
+		previous_period_value = sum(periodic_data.get(item_data.name, {}).get(OPENING_KEY, {}).values())
 		for start_date, end_date in ranges:
 			period = get_period(end_date, filters)
 			period_data = periodic_data.get(item_data.name, {}).get(period)
