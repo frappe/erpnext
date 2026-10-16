@@ -166,21 +166,19 @@ def get_columns(filters, data):
 		)
 
 	if not item_details or item_details.get("has_batch_no"):
-		columns.extend(
-			[
-				{
-					"label": _("Batch No"),
-					"fieldname": "batch_no",
-					"fieldtype": "Link",
-					"options": "Batch",
-					"width": 120,
-				},
-				{"label": _("Batch Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 120},
-			]
+		columns.append(
+			{
+				"label": _("Batch No"),
+				"fieldname": "batch_no",
+				"fieldtype": "Link",
+				"options": "Batch",
+				"width": 120,
+			}
 		)
 
 	columns.extend(
 		[
+			{"label": _("Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 120},
 			{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Float", "width": 120},
 			{
 				"label": _("Change in Stock Value"),
