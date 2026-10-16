@@ -96,3 +96,12 @@ class TestItemWiseConsumption(ERPNextTestSuite):
 		row = next(r for r in self.run_report() if r[0] == item)
 
 		self.assertEqual(row[4:8], [1, 100, 2, 200])
+
+	def test_items_never_purchased_are_listed(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, to_warehouse=WH, qty=5, rate=100, posting_date="2026-06-01")
+		create_delivery_note(item_code=item, qty=2, warehouse=WH, posting_date="2026-06-02")
+
+		row = next((r for r in self.run_report() if r[0] == item), None)
+
+		self.assertEqual(row and row[6:8], [2, 200])

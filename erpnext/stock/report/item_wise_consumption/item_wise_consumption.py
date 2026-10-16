@@ -19,38 +19,43 @@ def execute(filters=None):
 	supplier_details = get_suppliers_details(filters)
 	data = []
 
-	for item_code, suppliers in supplier_details.items():
-		consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
-		total_qty = total_amount = 0.0
-		if consumed_details.get(item_code):
-			for cd in consumed_details.get(item_code):
-				if cd.voucher_type in SALES_VOUCHER_TYPES:
-					delivered_qty -= flt(cd.actual_qty)
-					delivered_amount -= flt(cd.stock_value_difference)
-				elif cd.voucher_type not in PURCHASE_VOUCHER_TYPES:
-					consumed_qty -= flt(cd.actual_qty)
-					consumed_amount -= flt(cd.stock_value_difference)
+	for item_code, entries in consumed_details.items():
+		if filters.get("supplier") and item_code not in supplier_details:
+			continue
 
-			if consumed_qty or consumed_amount or delivered_qty or delivered_amount:
-				total_qty += delivered_qty + consumed_qty
-				total_amount += delivered_amount + consumed_amount
-
-				row = [
-					cd.item_code,
-					cd.item_name,
-					cd.description,
-					cd.stock_uom,
-					consumed_qty,
-					consumed_amount,
-					delivered_qty,
-					delivered_amount,
-					total_qty,
-					total_amount,
-					",".join(list(set(suppliers))),
-				]
-				data.append(row)
+		if row := get_item_row(entries, supplier_details.get(item_code, [])):
+			data.append(row)
 
 	return columns, data
+
+
+def get_item_row(entries, suppliers):
+	consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
+	for cd in entries:
+		if cd.voucher_type in SALES_VOUCHER_TYPES:
+			delivered_qty -= flt(cd.actual_qty)
+			delivered_amount -= flt(cd.stock_value_difference)
+		elif cd.voucher_type not in PURCHASE_VOUCHER_TYPES:
+			consumed_qty -= flt(cd.actual_qty)
+			consumed_amount -= flt(cd.stock_value_difference)
+
+	if not (consumed_qty or consumed_amount or delivered_qty or delivered_amount):
+		return
+
+	cd = entries[0]
+	return [
+		cd.item_code,
+		cd.item_name,
+		cd.description,
+		cd.stock_uom,
+		consumed_qty,
+		consumed_amount,
+		delivered_qty,
+		delivered_amount,
+		delivered_qty + consumed_qty,
+		delivered_amount + consumed_amount,
+		",".join(set(suppliers)),
+	]
 
 
 def get_columns(filters):
