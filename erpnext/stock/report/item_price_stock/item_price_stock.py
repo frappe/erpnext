@@ -11,6 +11,8 @@ from erpnext.stock.doctype.company_restriction.company_restriction import (
 
 
 def execute(filters=None):
+	frappe.has_permission("Item Price", "read", throw=True)
+
 	columns, data = [], []
 	columns = get_columns()
 	data = get_data(filters, columns)
