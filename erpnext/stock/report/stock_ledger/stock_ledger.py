@@ -128,13 +128,9 @@ def execute(filters=None):
 			and not sle.out_qty
 			and not sle.actual_qty
 		):
-			if prev_sle := item_wh_wise_prev_sle.get((sle.item_code, sle.warehouse)):
-				bal_qty = prev_sle.get("qty_after_transaction", 0)
-				qty = sle.qty_after_transaction - bal_qty
-				if qty > 0:
-					sle.in_qty = qty
-				elif qty < 0:
-					sle.out_qty = qty
+			set_reconciliation_in_out_qty(
+				sle, item_wh_wise_prev_sle.get((sle.item_code, sle.warehouse)), filters
+			)
 
 		item_wh_wise_prev_sle[(sle.item_code, sle.warehouse)] = sle
 		data.append(sle)
@@ -144,6 +140,38 @@ def execute(filters=None):
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no",))
+
+
+def set_reconciliation_in_out_qty(sle, prev_sle, filters):
+	if prev_sle:
+		bal_qty = prev_sle.get("qty_after_transaction", 0)
+	else:
+		bal_qty = get_qty_before_from_date(sle.item_code, sle.warehouse, filters.from_date)
+
+	qty = sle.qty_after_transaction - flt(bal_qty)
+	if qty > 0:
+		sle.in_qty = qty
+	elif qty < 0:
+		sle.out_qty = qty
+
+
+def get_qty_before_from_date(item_code, warehouse, from_date):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	result = (
+		frappe.qb.from_(sle)
+		.select(sle.qty_after_transaction)
+		.where(
+			(sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+			& (sle.is_cancelled == 0)
+			& (sle.posting_datetime < get_datetime(from_date + " 00:00:00"))
+		)
+		.orderby(sle.posting_datetime, order=Order.desc)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+	).run()
+
+	return result[0][0] if result else 0
 
 
 def get_opening_conversion_factor(filters, item_details):

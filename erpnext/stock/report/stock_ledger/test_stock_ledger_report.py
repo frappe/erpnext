@@ -514,3 +514,26 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		opening = execute(filters)[1][0]
 
 		self.assertEqual(opening["qty_after_transaction_box"], 1.7)
+
+	def test_reconciliation_first_in_the_range_shows_its_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+		create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=15, rate=100, posting_date=add_days(today(), -2)
+		)
+
+		rows = self.run_report(item, from_date=add_days(today(), -5))
+		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
+
+		self.assertEqual(reconciliation["in_qty"], 5)
