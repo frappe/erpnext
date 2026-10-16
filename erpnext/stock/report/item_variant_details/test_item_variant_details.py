@@ -57,3 +57,33 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		)
 
 		self.assertEqual(row.get("open_orders"), 1)
+
+	def test_average_prices_use_current_list_prices_in_the_company_currency(self):
+		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant.insert(ignore_if_duplicate=True)
+		frappe.get_doc(
+			{"doctype": "Price List", "price_list_name": "_Test USD Selling", "currency": "USD", "selling": 1}
+		).insert(ignore_if_duplicate=True)
+
+		for price_list, rate, extra in (
+			("Standard Selling", 100, {}),
+			("Standard Selling", 8300, {"customer": "_Test Customer"}),
+			("_Test USD Selling", 100, {}),
+		):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": variant.name,
+					"price_list": price_list,
+					"price_list_rate": rate,
+					**extra,
+				}
+			).insert()
+
+		row = next(
+			row
+			for row in self.run_report(item="_Test Variant Item")
+			if row.get("variant_name") == variant.name
+		)
+
+		self.assertEqual(row.get("avg_selling_price_list_rate"), 100)
