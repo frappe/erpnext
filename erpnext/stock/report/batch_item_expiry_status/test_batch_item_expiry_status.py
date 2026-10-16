@@ -60,3 +60,33 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 		# Expiry (In Days) column = days until expiry
 		expected_days = frappe.utils.date_diff(batch_expiry, frappe.utils.today())
 		self.assertEqual(row["expiry_(in_days)"], expected_days)
+
+	def test_batches_are_filtered_by_expiry_date(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batches = {}
+		for label, days in (("old", 2), ("later", 60)):
+			batches[label] = frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"item": item,
+					"batch_id": frappe.generate_hash(length=10),
+					"expiry_date": frappe.utils.add_days(frappe.utils.today(), days),
+				}
+			).insert()
+			make_stock_entry(
+				item_code=item,
+				to_warehouse="_Test Warehouse - _TC",
+				qty=5,
+				rate=100,
+				batch_no=batches[label].name,
+				use_serial_batch_fields=1,
+			)
+		frappe.db.set_value(
+			"Batch", batches["old"].name, "creation", frappe.utils.add_days(frappe.utils.now(), -400)
+		)
+
+		data = self.run_report(
+			item=item, from_date=frappe.utils.today(), to_date=frappe.utils.add_days(frappe.utils.today(), 30)
+		)
+
+		self.assertEqual([row.batch for row in data], [batches["old"].name])
