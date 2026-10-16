@@ -9,6 +9,9 @@ from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
+SALES_VOUCHER_TYPES = ("Delivery Note", "Sales Invoice")
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -21,12 +24,12 @@ def execute(filters=None):
 		total_qty = total_amount = 0.0
 		if consumed_details.get(item_code):
 			for cd in consumed_details.get(item_code):
-				if cd.voucher_type in ["Delivery Note", "Sales Invoice"]:
-					delivered_qty += abs(flt(cd.actual_qty))
-					delivered_amount += abs(flt(cd.stock_value_difference))
-				elif cd.voucher_type != "Delivery Note":
-					consumed_qty += abs(flt(cd.actual_qty))
-					consumed_amount += abs(flt(cd.stock_value_difference))
+				if cd.voucher_type in SALES_VOUCHER_TYPES:
+					delivered_qty -= flt(cd.actual_qty)
+					delivered_amount -= flt(cd.stock_value_difference)
+				elif cd.voucher_type not in PURCHASE_VOUCHER_TYPES:
+					consumed_qty -= flt(cd.actual_qty)
+					consumed_amount -= flt(cd.stock_value_difference)
 
 			if consumed_qty or consumed_amount or delivered_qty or delivered_amount:
 				total_qty += delivered_qty + consumed_qty
@@ -92,7 +95,7 @@ def get_consumed_details(filters):
 		.where(
 			(sle.is_cancelled == 0)
 			& (sle.item_code == item.name)
-			& (sle.actual_qty < 0)
+			& ((sle.actual_qty < 0) | (sle.voucher_type.isin(SALES_VOUCHER_TYPES)))
 			& (sle.is_adjustment_entry == 0)
 		)
 	)

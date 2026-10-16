@@ -71,3 +71,28 @@ class TestItemWiseConsumption(ERPNextTestSuite):
 		row = next(r for r in self.run_report() if r[0] == item)
 
 		self.assertEqual((row[4], row[5]), (4, 400))
+
+	def test_returns_are_netted(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_purchase_receipt(
+			item_code=item, qty=20, rate=100, warehouse=WH, posting_date="2026-06-01"
+		)
+		purchase_return = make_purchase_return(receipt.name)
+		purchase_return.items[0].qty = -3
+		purchase_return.posting_date = "2026-06-02"
+		purchase_return.set_posting_time = 1
+		purchase_return.submit()
+		make_stock_entry(item_code=item, from_warehouse=WH, qty=1, posting_date="2026-06-02")
+		delivery = create_delivery_note(item_code=item, qty=4, warehouse=WH, posting_date="2026-06-03")
+		sales_return = make_sales_return(delivery.name)
+		sales_return.items[0].qty = -2
+		sales_return.posting_date = "2026-06-04"
+		sales_return.set_posting_time = 1
+		sales_return.submit()
+
+		row = next(r for r in self.run_report() if r[0] == item)
+
+		self.assertEqual(row[4:8], [1, 100, 2, 200])
