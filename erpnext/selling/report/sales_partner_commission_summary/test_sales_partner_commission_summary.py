@@ -285,18 +285,24 @@ class TestSalesPartnerSummaryReports(
 			"from_date": "2026-01-01",
 			"to_date": "2026-01-31",
 		}
-
-		admin_rows = run(self.report_name, filters).get("result")[:-1]
-		self.assertTrue(any(row.get("name") == so.name for row in admin_rows))
-
 		user = create_user("sp_summary_restricted@example.com", "Sales Manager").name
+
+		# A user permitted on the order's company still sees it
+		add_user_permission("Company", "_Test Company", user)
+		try:
+			with self.set_user(user):
+				permitted_rows = run(self.report_name, filters).get("result")[:-1]
+		finally:
+			remove_user_permission("Company", "_Test Company", user)
+		self.assertTrue(any(row.get("name") == so.name for row in permitted_rows))
+
+		# A user restricted to another company does not see it
 		add_user_permission("Company", "_Test Company 1", user)
 		try:
 			with self.set_user(user):
 				restricted_rows = run(self.report_name, filters).get("result")[:-1]
 		finally:
 			remove_user_permission("Company", "_Test Company 1", user)
-
 		self.assertFalse(any(row.get("name") == so.name for row in restricted_rows))
 
 	def test_sales_order_sp_summaries(self):
