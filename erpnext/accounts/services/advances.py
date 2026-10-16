@@ -423,8 +423,8 @@ def get_advance_payment_entries(
 def get_common_query(
 	party_type: str,
 	party: str,
-	party_account: list,
-	default_advance_account: str | None,
+	party_account: str | list,
+	default_advance_account: str | list | None,
 	limit: int | None,
 	condition: dict | None,
 ):
@@ -432,6 +432,11 @@ def get_common_query(
 	account_type = frappe.db.get_value("Party Type", party_type, "account_type")
 	payment_type = "Receive" if account_type == "Receivable" else "Pay"
 	payment_entry = frappe.qb.DocType("Payment Entry")
+
+	if isinstance(party_account, str):
+		party_account = [party_account]
+	if isinstance(default_advance_account, str):
+		default_advance_account = [default_advance_account]
 
 	q = (
 		frappe.qb.from_(payment_entry)
@@ -456,7 +461,7 @@ def get_common_query(
 		q = q.where(
 			account_condition
 			| (
-				(payment_entry[field] == default_advance_account)
+				payment_entry[field].isin(default_advance_account)
 				& (payment_entry.book_advance_payments_in_separate_party_account == 1)
 			)
 		)

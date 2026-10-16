@@ -1875,16 +1875,13 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pr.party = "_Test Customer"
 		pr.receivable_payable_account = si.debit_to
 		pr.default_advance_account = advance_account
-		pr.payment_name = pe.name
-		pr.invoice_name = si.name
+		# `payment_name`/`invoice_name` removed — grid column-header search filters client-side.
 		pr.get_unreconciled_entries()
 
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
 
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocate_entries()
 		pr.allocation[0].allocated_amount = 400
 		pr.reconcile()
 
@@ -2148,24 +2145,32 @@ class TestPaymentEntry(ERPNextTestSuite):
 		)
 		reverse_pe.submit()
 
-		pr = frappe.get_doc("Payment Reconciliation")
-		pr.company = "_Test Company"
-		pr.party_type = "Customer"
-		pr.party = customer
-		pr.receivable_payable_account = "Debtors - _TC"
+		pr = frappe.get_doc(
+			{
+				"doctype": "Payment Reconciliation",
+				"company": "_Test Company",
+				"party_type": "Customer",
+				"party": customer,
+				"receivable_payable_account": "Debtors - _TC",
+			}
+		)
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-
-		self.assertEqual(reverse_pe.name, pr.invoices[0].invoice_number)
-		self.assertEqual(pe.name, pr.payments[0].reference_name)
-
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [pr.payments[0].as_dict()]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		pr.allocate_entries()
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+
+		# One-sided reference
+		# TODO: Improve UX
+		pe.reload()
+		reverse_pe.reload()
+		self.assertIn(reverse_pe.name, [r.reference_name for r in pe.references])
+		self.assertEqual(reverse_pe.references, [])
+
+		# Both PEs settle in subsequent fetches.
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 	def test_advance_reverse_payment_reconciliation(self):
 		company = "_Test Company"
@@ -2216,12 +2221,10 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pr.default_advance_account = advance_account
 		pr.get_unreconciled_entries()
 
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
 
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocate_entries()
 		pr.allocation[0].allocated_amount = 400
 		pr.reconcile()
 

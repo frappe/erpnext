@@ -678,8 +678,8 @@ def reconcile_payment_against_invoice(payment_entry, sales_invoice):
 	pr.allocate_entries(
 		frappe._dict(
 			{
-				"invoices": [d.as_dict() for d in pr.invoices if d.invoice_number == sales_invoice.name],
-				"payments": [d.as_dict() for d in pr.payments if d.reference_name == payment_entry.name],
+				"to_receive": [d.as_dict() for d in pr.to_receive if d.voucher_no == sales_invoice.name],
+				"to_pay": [d.as_dict() for d in pr.to_pay if d.voucher_no == payment_entry.name],
 			}
 		)
 	)

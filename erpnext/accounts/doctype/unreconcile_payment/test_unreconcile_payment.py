@@ -462,15 +462,13 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		pr.receivable_payable_account = accounts[0]
 		pr.default_advance_account = accounts[1]
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.get("invoices")), 1)
-		self.assertEqual(len(pr.get("payments")), 1)
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.get("to_receive")), 1)
+		self.assertEqual(len(pr.get("to_pay")), 1)
+		pr.allocate_entries()
 		pr.reconcile()
 
-		self.assertEqual(len(pr.get("invoices")), 0)
-		self.assertEqual(len(pr.get("payments")), 0)
+		self.assertEqual(len(pr.get("to_receive")), 0)
+		self.assertEqual(len(pr.get("to_pay")), 0)
 
 		so.reload()
 		self.assertEqual(so.advance_paid, 1000)

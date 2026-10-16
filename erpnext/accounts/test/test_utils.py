@@ -106,14 +106,9 @@ class TestUtils(ERPNextTestSuite):
 		payment_reconciliation.party = purchase_invoice.supplier
 		payment_reconciliation.receivable_payable_account = payment_entry.paid_to
 		payment_reconciliation.get_unreconciled_entries()
-		payment_reconciliation.allocate_entries(
-			{
-				"payments": [d.__dict__ for d in payment_reconciliation.payments],
-				"invoices": [d.__dict__ for d in payment_reconciliation.invoices],
-			}
-		)
-		for d in payment_reconciliation.invoices:
-			# Reset invoice outstanding_amount because allocate_entries will zero this value out.
+		payment_reconciliation.allocate_entries()
+		for d in payment_reconciliation.to_pay:
+			# Reset outstanding_amount because allocate_entries will zero this value out.
 			d.outstanding_amount = d.amount
 		for d in payment_reconciliation.allocation:
 			d.difference_account = "Exchange Gain/Loss - _TC"

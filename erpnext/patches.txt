@@ -531,6 +531,7 @@ erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost
 erpnext.patches.v16_0.move_sub_assembly_rate_setting_to_bom_item
 erpnext.patches.v16_0.convert_plain_text_line_breaks_to_html
 erpnext.patches.v16_0.disable_add_total_row_in_trends_reports
+erpnext.patches.v16_0.convert_legacy_reconciliation_journals
 erpnext.patches.v16_0.set_gle_processing_status_to_completed
 erpnext.patches.v16_0.mirror_select_perms_to_custom_docperm
 erpnext.patches.v16_0.mirror_release_perms_to_custom_docperm #2026-10-05
