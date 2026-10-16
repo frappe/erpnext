@@ -46,3 +46,49 @@ class TestLandedCostReport(ERPNextTestSuite):
 		self.assertEqual(row.get("landed_cost"), charges)
 		self.assertEqual(row.get("voucher_type"), "Purchase Receipt")
 		self.assertEqual(row.get("voucher_no"), pr.name)
+
+	def make_voucher_for_two_receipts(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			distribute_landed_cost_on_items,
+			get_expense_account,
+		)
+
+		receipts = [
+			make_purchase_receipt(item_code="_Test Item", qty=qty, rate=100, warehouse="Stores - _TC")
+			for qty in (10, 5)
+		]
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.distribute_charges_based_on = "Amount"
+		for receipt in receipts:
+			lcv.append(
+				"purchase_receipts",
+				{
+					"receipt_document_type": "Purchase Receipt",
+					"receipt_document": receipt.name,
+					"supplier": receipt.supplier,
+					"posting_date": receipt.posting_date,
+					"grand_total": receipt.base_grand_total,
+				},
+			)
+		lcv.append(
+			"taxes",
+			{
+				"description": "Freight",
+				"expense_account": get_expense_account("_Test Company"),
+				"amount": 300,
+			},
+		)
+		lcv.insert()
+		distribute_landed_cost_on_items(lcv)
+		lcv.submit()
+		return lcv, receipts
+
+	def test_receipt_rows_show_their_share_of_the_landed_cost(self):
+		lcv, receipts = self.make_voucher_for_two_receipts()
+
+		rows = self.run_report(raw_material_voucher_no=receipts[1].name)
+
+		self.assertEqual(
+			[(row.get("voucher_no"), row.get("landed_cost")) for row in rows], [(receipts[1].name, 100)]
+		)

@@ -3,6 +3,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
+from frappe.utils import flt
 
 import erpnext
 
@@ -23,7 +25,7 @@ def get_columns() -> list[dict]:
 			"options": "Landed Cost Voucher",
 		},
 		{
-			"label": _("Total Landed Cost"),
+			"label": _("Landed Cost"),
 			"fieldname": "landed_cost",
 			"fieldtype": "Currency",
 			"options": "currency",
@@ -77,20 +79,17 @@ def get_data(filters) -> list[list]:
 		last_index = 0
 		vendor_invoice_list = vendor_invoices.get(name, [])
 		for i, d in enumerate(vouchers):
-			if i == 0:
-				res.update(
-					{
-						"landed_cost": d.landed_cost,
-						"voucher_type": d.voucher_type,
-						"voucher_no": d.voucher_no,
-						"currency": company_currency,
-					}
-				)
-			else:
-				res = {
+			if i:
+				res = {}
+
+			res.update(
+				{
+					"landed_cost": d.landed_cost,
 					"voucher_type": d.voucher_type,
 					"voucher_no": d.voucher_no,
+					"currency": company_currency,
 				}
+			)
 
 			if len(vendor_invoice_list) > i:
 				res["vendor_invoice"] = vendor_invoice_list[i]
@@ -115,7 +114,6 @@ def get_landed_cost_vouchers(filters):
 		.on(lcv.name == lcv_voucher.parent)
 		.select(
 			lcv.name,
-			lcv.total_taxes_and_charges.as_("landed_cost"),
 			lcv_voucher.receipt_document_type.as_("voucher_type"),
 			lcv_voucher.receipt_document.as_("voucher_no"),
 		)
@@ -132,11 +130,28 @@ def get_landed_cost_vouchers(filters):
 		query = query.where(lcv_voucher.receipt_document == filters.raw_material_voucher_no)
 
 	data = query.run(as_dict=True) or []
+	allocations = get_receipt_allocations({row.name for row in data})
 	result = {}
 	for row in data:
+		row.landed_cost = allocations.get((row.name, row.voucher_type, row.voucher_no), 0.0)
 		result.setdefault((row.name), []).append(row)
 
 	return result
+
+
+def get_receipt_allocations(landed_vouchers):
+	if not landed_vouchers:
+		return {}
+
+	item = frappe.qb.DocType("Landed Cost Item")
+	rows = (
+		frappe.qb.from_(item)
+		.select(item.parent, item.receipt_document_type, item.receipt_document, Sum(item.applicable_charges))
+		.where(item.parent.isin(landed_vouchers))
+		.groupby(item.parent, item.receipt_document_type, item.receipt_document)
+	).run()
+
+	return {(parent, doctype, name): flt(amount) for parent, doctype, name, amount in rows}
 
 
 def get_vendor_invoices(landed_vouchers):
