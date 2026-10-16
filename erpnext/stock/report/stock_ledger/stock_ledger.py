@@ -85,7 +85,10 @@ def execute(filters=None):
 
 		sle.update(item_detail)
 		if bundle_info := bundle_details.get(sle.serial_and_batch_bundle):
-			data.extend(get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict, filters))
+			segregated_entries = get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict, filters)
+			data.extend(segregated_entries)
+			if include_uom:
+				conversion_factors.extend([item_detail.conversion_factor] * len(segregated_entries))
 			continue
 
 		if inv_dimension_key:
