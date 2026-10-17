@@ -53,6 +53,7 @@ def get_plan_rate(
 	party: str | None = None,
 ):
 	plan = frappe.get_doc("Subscription Plan", plan)
+	plan.check_permission("read")
 	if plan.price_determination == "Fixed Rate":
 		return plan.cost * prorate_factor
 
