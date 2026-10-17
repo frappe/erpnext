@@ -274,7 +274,8 @@
    "label": "Job Card",
    "options": "Job Card",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "warehouse_section",
@@ -381,7 +382,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-08 12:00:00.000000",
+ "modified": "2026-10-14 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
