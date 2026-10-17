@@ -317,6 +317,31 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 				frappe.PermissionError, tool.add_party, "Customer", "_Test Missing Opening Customer"
 			)
 
+	def test_temporary_opening_account_needs_company_read(self):
+		from erpnext.tests.permission_test_utils import (
+			OTHER_COMPANY,
+			as_user,
+			make_company_fenced_user,
+			make_fenced_user,
+		)
+
+		company = "_Test Opening Invoice Company"
+		expected = get_temporary_opening_account(company)
+		self.assertTrue(expected)
+
+		for role in ("System Manager", "Accounts User"):
+			with as_user(
+				make_company_fenced_user(f"opening-account-{frappe.scrub(role)}@example.com", [role], company)
+			):
+				self.assertEqual(get_temporary_opening_account(company), expected)
+
+		for outsider in (
+			make_fenced_user("opening-account-outsider@example.com", []),
+			make_company_fenced_user("opening-account-fenced@example.com", ["System Manager"], OTHER_COMPANY),
+		):
+			with as_user(outsider):
+				self.assertRaises(frappe.PermissionError, get_temporary_opening_account, company)
+
 	def test_quantity_rounding_preserves_opening_amount(self):
 		for invoice_type in ("Sales", "Purchase"):
 			for qty, amount in ((3, 100), (7, 1000), (2, 100), (1.234, 1000)):
