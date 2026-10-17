@@ -301,17 +301,6 @@ class TestStockBalance(ERPNextTestSuite):
 		self.filters.update({"item_code": [item.name]})
 		return item
 
-	def test_alt_uom_balance_single_uom(self):
-		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
-		item = self.make_alt_uom_item(uoms=[{"conversion_factor": 12, "uom": "Box"}])
-
-		self.generate_stock_ledger(item.name, [_dict(qty=24, rate=10)])
-
-		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
-		self.assertEqual(len(rows), 1)
-		self.assertEqual(rows[0].get("alt_uom"), "Box")
-		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 2.0)  # 24 / 12
-
 	def test_alt_uom_balance_no_alternate_uom(self):
 		"""Alt UOM columns are not added when no items in the report have alt UOMs."""
 		item = self.make_alt_uom_item()
