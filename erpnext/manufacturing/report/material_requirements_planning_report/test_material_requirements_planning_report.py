@@ -480,6 +480,22 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 						[formatdate(start, "MMM YYYY") for start in bucket_starts],
 					)
 
+	def test_mps_data_matches_any_selected_warehouse(self):
+		plan = make_mrp_plan(self)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		for warehouses, expected in (([WAREHOUSE, WIP_WAREHOUSE], [plan.fg_item]), ([WIP_WAREHOUSE], [])):
+			with self.subTest(warehouses=warehouses):
+				report = MaterialRequirementsPlanningReport(
+					{
+						"from_date": mps.from_date,
+						"to_date": mps.to_date,
+						"warehouse": warehouses,
+						"mps": mps.name,
+					}
+				)
+				self.assertEqual([row.item_code for row in report.get_mps_data()], expected)
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
