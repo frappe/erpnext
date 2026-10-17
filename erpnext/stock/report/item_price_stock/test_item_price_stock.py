@@ -90,3 +90,26 @@ class TestItemPriceStock(ERPNextTestSuite):
 			sorted((row["selling_rate"], row["uom"], row["customer"]) for row in rows),
 			[(450, "Nos", "_Test Customer"), (500, "Nos", None), (6000, "Box", None)],
 		)
+
+	def test_price_uom_and_stock_uom_are_shown_apart(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.report.item_price_stock.item_price_stock import execute
+
+		item = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item,
+				"price_list": "Standard Selling",
+				"price_list_rate": 6000,
+				"uom": "Box",
+			}
+		).insert()
+
+		columns, rows = execute(frappe._dict(item_code=item))
+		labels = {column["fieldname"]: column["label"] for column in columns}
+
+		self.assertEqual((labels["uom"], labels["stock_uom"]), ("Price UOM", "Stock UOM"))
+		self.assertEqual([(row["uom"], row["stock_uom"]) for row in rows], [("Box", "Nos")])

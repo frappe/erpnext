@@ -45,6 +45,13 @@ def get_columns():
 			"width": 120,
 		},
 		{
+			"label": _("Stock UOM"),
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 80,
+		},
+		{
 			"label": _("Buying Price List"),
 			"fieldname": "buying_price_list",
 			"fieldtype": "Link",
@@ -60,7 +67,7 @@ def get_columns():
 			"width": 120,
 		},
 		{"label": _("Selling Rate"), "fieldname": "selling_rate", "fieldtype": "Currency", "width": 120},
-		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 80},
+		{"label": _("Price UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 80},
 		{
 			"label": _("Customer"),
 			"fieldname": "customer",
@@ -87,6 +94,7 @@ def get_data(filters, columns):
 def get_item_price_qty_data(filters):
 	item_price = frappe.qb.DocType("Item Price")
 	bin = frappe.qb.DocType("Bin")
+	item = frappe.qb.DocType("Item")
 
 	bin_join = item_price.item_code == bin.item_code
 	if condition := get_allowed_warehouses_condition(bin.warehouse):
@@ -94,6 +102,8 @@ def get_item_price_qty_data(filters):
 
 	query = (
 		frappe.qb.from_(item_price)
+		.inner_join(item)
+		.on(item.name == item_price.item_code)
 		.left_join(bin)
 		.on(bin_join)
 		.select(
@@ -102,6 +112,7 @@ def get_item_price_qty_data(filters):
 			item_price.name.as_("price_list_name"),
 			item_price.brand.as_("brand"),
 			item_price.uom,
+			item.stock_uom,
 			item_price.customer,
 			item_price.supplier,
 			bin.warehouse.as_("warehouse"),
@@ -135,6 +146,7 @@ def get_item_price_qty_data(filters):
 				"brand": item_dict.brand,
 				"warehouse": item_dict.warehouse,
 				"stock_available": item_dict.actual_qty or 0,
+				"stock_uom": item_dict.stock_uom,
 				"buying_price_list": "",
 				"buying_rate": 0.0,
 				"selling_price_list": "",
