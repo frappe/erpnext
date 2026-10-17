@@ -8357,6 +8357,39 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		).run()[0][0]
 		return flt(balance)
 
+	def test_invoice_repost_replaces_legacy_receipt_owned_provisional_reversal(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			setup_provisional_accounting,
+			toggle_provisional_accounting_setting,
+		)
+		from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+			_repost_vouchers,
+		)
+		from erpnext.accounts.utils import _delete_accounting_ledger_entries
+
+		setup_provisional_accounting()
+		self.addCleanup(toggle_provisional_accounting_setting)
+		receipt = make_purchase_receipt(item_code="_Test Non Stock Item", qty=5, rate=200)
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.submit()
+		gle = frappe.qb.DocType("GL Entry")
+		(
+			frappe.qb.update(gle)
+			.set(gle.voucher_type, "Purchase Receipt")
+			.set(gle.voucher_no, receipt.name)
+			.where(
+				(gle.voucher_no == invoice.name)
+				& ((gle.account == "Provision Account - _TC") | (gle.against == "Provision Account - _TC"))
+			)
+		).run()
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), 0)
+
+		invoice.reload()
+		_delete_accounting_ledger_entries(invoice.doctype, invoice.name)
+		_repost_vouchers(invoice, 1)
+
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), 0)
+
 	def test_receipt_repost_keeps_invoice_provisional_reversal(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 			setup_provisional_accounting,

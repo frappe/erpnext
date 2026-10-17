@@ -780,6 +780,7 @@ class PurchaseInvoice(BuyingController):
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 		if self.docstatus == 1:
+			BillingStatusService(self).cancel_provisional_entries()
 			if not gl_entries:
 				gl_entries = self.get_gl_entries()
 
