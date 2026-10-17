@@ -1224,9 +1224,6 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 			& (ip.price_list == args.get("price_list"))
 			& (IfNull(ip.uom, "").isin(["", args.get("uom")]))
 		)
-		.orderby(ip.valid_from, order=frappe.qb.desc)
-		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
-		.orderby(ip.uom, order=frappe.qb.desc)
 	)
 
 	if force_batch_no:
@@ -1236,9 +1233,15 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 
 	if not ignore_party:
 		if args.get("customer"):
-			query = query.where(ip.customer == args.get("customer"))
+			query = query.where(
+				(ip.customer == args.get("customer"))
+				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+			).orderby(IfNull(ip.customer, ""), order=frappe.qb.desc)
 		elif args.get("supplier"):
-			query = query.where(ip.supplier == args.get("supplier"))
+			query = query.where(
+				(ip.supplier == args.get("supplier"))
+				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+			).orderby(IfNull(ip.supplier, ""), order=frappe.qb.desc)
 		else:
 			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
 
@@ -1248,7 +1251,12 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 			& (IfNull(ip.valid_upto, "2500-12-31") >= args["transaction_date"])
 		)
 
-	return query.run()
+	return (
+		query.orderby(ip.valid_from, order=frappe.qb.desc)
+		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
+		.orderby(ip.uom, order=frappe.qb.desc)
+		.run()
+	)
 
 
 @frappe.whitelist()
@@ -1303,9 +1311,6 @@ def get_price_list_rate_for(args, item_code):
 		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
-		for field in ["customer", "supplier"]:
-			del item_price_args[field]
-
 		general_price_list_rate = get_item_price(
 			item_price_args, item_code, ignore_party=args.get("ignore_party")
 		)
