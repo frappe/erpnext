@@ -454,22 +454,6 @@ class TestPutawayRule(ERPNextTestSuite):
 
 		self.assertUnchangedItemsOnResave(stock_entry)
 
-		stock_entry.load_from_db()
-		stock_entry.cancel()
-
-		rivs = frappe.get_all("Repost Item Valuation", filters={"voucher_no": stock_entry.name})
-		for row in rivs:
-			riv_doc = frappe.get_doc("Repost Item Valuation", row.name)
-			riv_doc.cancel()
-			riv_doc.delete()
-
-		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 1)
-
-		stock_entry.delete()
-		pr.cancel()
-		rule_1.delete()
-		rule_2.delete()
-
 	def test_putaway_rule_on_stock_entry_material_receipt(self):
 		"""Test if rules are applied in Stock Entry of type Receipt."""
 		rule_1 = create_putaway_rule(
