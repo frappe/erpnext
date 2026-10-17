@@ -159,6 +159,22 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 
 		self.assertEqual(len(labels), len(set(labels)))
 
+	@ERPNextTestSuite.change_settings("System Settings", {"first_day_of_the_week": "Sunday"})
+	def test_weeks_across_the_new_year_keep_their_own_balance(self):
+		self.generate_stock([(3, datetime.date(2023, 1, 1))])
+		filters = _dict(
+			range="Weekly",
+			from_date=datetime.date(2022, 12, 25),
+			to_date=datetime.date(2023, 1, 1),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		cols, data = stock_analytics(filters)
+
+		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 3])
+
 	def get_quantity_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
 
