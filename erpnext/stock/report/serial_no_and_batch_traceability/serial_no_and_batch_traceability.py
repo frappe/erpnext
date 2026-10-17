@@ -97,9 +97,6 @@ class ReportData:
 			if data and indent == 0:
 				data.append({})
 
-			if direction == "Forward" and row["qty"] > 0:
-				row["direction"] = "Backward"
-
 			if sabb.reference_doctype == "Purchase Receipt":
 				row["supplier"] = frappe.db.get_value(
 					"Purchase Receipt",
