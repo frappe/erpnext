@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
@@ -24,7 +25,7 @@ def get_item_list(wo_list, filters):
 	descriptions = get_bom_descriptions(wo_list)
 	items_by_order = get_work_order_items(wo_list)
 	stock = get_stock(items_by_order, filters)
-	set_aside_transferred_stock(wo_list, items_by_order, stock)
+	set_aside_transferred_stock(wo_list, stock)
 	warehouses = set(get_child_warehouses(filters.warehouse)) if filters.get("warehouse") else None
 
 	out = []
@@ -68,12 +69,42 @@ def get_in_wip_qty(item):
 	return max(flt(item.transferred_qty) - flt(item.consumed_qty), 0.0)
 
 
-def set_aside_transferred_stock(wo_list, items_by_order, stock):
-	for wo_details in wo_list:
-		for item in items_by_order.get(wo_details.name, []):
-			key = (item.item_code, wo_details.wip_warehouse)
-			if key in stock:
-				stock[key] = max(stock[key] - get_in_wip_qty(item), 0.0)
+def set_aside_transferred_stock(wo_list, stock):
+	for (item_code, warehouse), qty in get_stock_held_in_wip(wo_list).items():
+		if (item_code, warehouse) in stock:
+			stock[(item_code, warehouse)] = max(stock[(item_code, warehouse)] - qty, 0.0)
+
+
+def get_stock_held_in_wip(wo_list):
+	held = {}
+	for purpose, warehouse_field, sign in (
+		("Material Transfer for Manufacture", "t_warehouse", 1),
+		("Manufacture", "s_warehouse", -1),
+	):
+		for row in get_work_order_stock_moves(wo_list, purpose, warehouse_field):
+			key = (row.item_code, row.warehouse)
+			held[key] = held.get(key, 0.0) + sign * flt(row.qty)
+
+	return {key: qty for key, qty in held.items() if qty > 0}
+
+
+def get_work_order_stock_moves(wo_list, purpose, warehouse_field):
+	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	warehouse = sed[warehouse_field]
+	return (
+		frappe.qb.from_(sed)
+		.inner_join(se)
+		.on(se.name == sed.parent)
+		.select(sed.item_code, warehouse.as_("warehouse"), Sum(sed.transfer_qty).as_("qty"))
+		.where(
+			(se.docstatus == 1)
+			& (se.purpose == purpose)
+			& (se.work_order.isin([d.name for d in wo_list]))
+			& (IfNull(warehouse, "") != "")
+		)
+		.groupby(sed.item_code, warehouse)
+	).run(as_dict=True)
 
 
 def allocate_stock(stock, key, needed_qty):
@@ -135,7 +166,7 @@ def get_work_orders():
 	out = frappe.get_all(
 		"Work Order",
 		filters=work_order_filters,
-		fields=["name", "status", "bom_no", "qty", "produced_qty", "planned_start_date", "wip_warehouse"],
+		fields=["name", "status", "bom_no", "qty", "produced_qty", "planned_start_date"],
 		order_by="planned_start_date asc, name asc",
 	)
 

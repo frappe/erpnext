@@ -125,6 +125,38 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 		self.assertEqual(self.get_rows(first.name)[material].ready_to_build, "Y")
 		self.assertEqual(self.get_rows(second.name)[material].ready_to_build, "N")
 
+	def test_substitute_transfer_does_not_hide_the_original_item_in_wip(self):
+		wip = "_Test Warehouse 2 - _TC"
+		material = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 10, "allow_alternative_item": 1}
+		).name
+		substitute = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		frappe.get_doc(
+			{"doctype": "Item Alternative", "item_code": material, "alternative_item_code": substitute}
+		).insert()
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[material])
+		test_stock_entry.make_stock_entry(item_code=substitute, target=STORES, qty=10, basic_rate=10)
+		test_stock_entry.make_stock_entry(item_code=material, target=wip, qty=10, basic_rate=10)
+		first = make_wo_order_test_record(
+			item=fg_item,
+			bom_no=bom.name,
+			qty=10,
+			source_warehouse=STORES,
+			wip_warehouse=wip,
+			do_not_submit=True,
+		)
+		first.allow_alternative_item = 1
+		for row in first.required_items:
+			row.allow_alternative_item = 1
+		first.submit()
+		transfer = frappe.get_doc(make_stock_entry(first.name, "Material Transfer for Manufacture", 10))
+		transfer.items[0].update({"item_code": substitute, "original_item": material})
+		transfer.submit()
+		second = make_wo_order_test_record(item=fg_item, bom_no=bom.name, qty=10, source_warehouse=wip)
+
+		self.assertEqual(self.get_rows(second.name)[material].ready_to_build, "Y")
+
 	def test_closed_and_stopped_work_orders_are_left_out(self):
 		closed, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
 		frappe.get_doc(make_stock_entry(closed.name, "Material Transfer for Manufacture", 10)).submit()
