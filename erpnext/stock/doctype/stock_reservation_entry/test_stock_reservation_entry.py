@@ -176,7 +176,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			do_not_submit=True,
 		)
 		se.submit()
-		se.cancel()
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
