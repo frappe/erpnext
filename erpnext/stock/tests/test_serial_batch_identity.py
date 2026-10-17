@@ -135,11 +135,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				SerialBatchIdentity(doctype).resolve(self.item.name, ["Missing-001"])
 			self.assertEqual(frappe.db.count(doctype), count)
 
-	def test_empty_input(self):
+	def test_invalid_input(self):
 		for doctype in ("Serial No", "Batch"):
 			self.assertEqual(SerialBatchIdentity(doctype).resolve(self.item.name, []), [])
-
-	def test_invalid_input(self):
 		identity = SerialBatchIdentity("Serial No")
 		for numbers in ("Serial-001", [None], [1], [" "], None):
 			with self.subTest(numbers=numbers), self.assertRaises(frappe.ValidationError):
