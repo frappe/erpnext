@@ -6,7 +6,8 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
 from pypika import Order
@@ -134,9 +135,7 @@ def execute(filters=None):
 			and not sle.out_qty
 			and not sle.actual_qty
 		):
-			set_reconciliation_in_out_qty(
-				sle, item_wh_wise_prev_sle.get((sle.item_code, sle.warehouse)), filters
-			)
+			set_reconciliation_in_out_qty(sle, item_wh_wise_prev_sle.get((sle.item_code, sle.warehouse)))
 
 		item_wh_wise_prev_sle[(sle.item_code, sle.warehouse)] = sle
 		data.append(sle)
@@ -148,11 +147,8 @@ def execute(filters=None):
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no",))
 
 
-def set_reconciliation_in_out_qty(sle, prev_sle, filters):
-	if prev_sle:
-		bal_qty = prev_sle.get("qty_after_transaction", 0)
-	else:
-		bal_qty = get_qty_before_from_date(sle.item_code, sle.warehouse, filters.from_date)
+def set_reconciliation_in_out_qty(sle, prev_sle):
+	bal_qty = prev_sle.get("qty_after_transaction", 0) if prev_sle else get_qty_before_entry(sle)
 
 	qty = sle.qty_after_transaction - flt(bal_qty)
 	if qty > 0:
@@ -161,16 +157,19 @@ def set_reconciliation_in_out_qty(sle, prev_sle, filters):
 		sle.out_qty = qty
 
 
-def get_qty_before_from_date(item_code, warehouse, from_date):
+def get_qty_before_entry(entry):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	result = (
 		frappe.qb.from_(sle)
 		.select(sle.qty_after_transaction)
 		.where(
-			(sle.item_code == item_code)
-			& (sle.warehouse == warehouse)
+			(sle.item_code == entry.item_code)
+			& (sle.warehouse == entry.warehouse)
 			& (sle.is_cancelled == 0)
-			& (sle.posting_datetime < get_datetime(from_date + " 00:00:00"))
+			& (
+				(sle.posting_datetime < entry.date)
+				| ((sle.posting_datetime == entry.date) & (sle.creation < entry.creation))
+			)
 		)
 		.orderby(sle.posting_datetime, order=Order.desc)
 		.orderby(sle.creation, order=Order.desc)
@@ -491,6 +490,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.batch_no,
 			sle.serial_no,
 			sle.project,
+			sle.creation,
 		)
 		.where((sle.docstatus < 2) & (sle.is_cancelled == 0) & (sle.posting_datetime[from_date:to_date]))
 		.orderby(sle.posting_datetime)
@@ -802,12 +802,19 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 
 
 def apply_permitted_warehouses(filters):
-	permitted = get_permitted_documents("Warehouse")
-	if not permitted or not filters.get("warehouse"):
+	permitted = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
+	if not permitted:
 		return True
 
-	selected = set(get_matching_warehouses(filters.warehouse))
-	filters.warehouse = [warehouse for warehouse in permitted if warehouse in selected]
+	if filters.get("warehouse"):
+		selected = set(get_matching_warehouses(filters.warehouse))
+		permitted = [warehouse for warehouse in permitted if warehouse in selected]
+
+	filters.warehouse = frappe.get_all(
+		"Warehouse", filters={"name": ("in", permitted or [""]), "is_group": 0}, pluck="name"
+	)
 	return bool(filters.warehouse)
 
 

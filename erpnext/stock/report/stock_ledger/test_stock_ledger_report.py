@@ -582,3 +582,69 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		rows = self.run_report(item, from_date=add_days(today(), -5))
 
 		self.assertEqual([row["qty_after_transaction"] for row in rows], [10, 14])
+
+	def test_reconciliation_after_opening_stock_on_from_date_shows_its_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		from_date = add_days(today(), -2)
+		for qty, posting_time, purpose in ((25, "10:00:00", "Opening Stock"), (30, "12:00:00", None)):
+			create_stock_reconciliation(
+				item_code=item,
+				warehouse=WAREHOUSE,
+				qty=qty,
+				rate=100,
+				posting_date=from_date,
+				posting_time=posting_time,
+				purpose=purpose,
+			)
+
+		rows = self.run_report(item, from_date=from_date)
+		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
+
+		self.assertEqual(reconciliation["in_qty"], 5)
+
+	def test_project_opening_counts_only_permitted_warehouses(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": frappe.generate_hash(length=10),
+				"company": "_Test Company",
+			}
+		).insert()
+		for warehouse, qty in ((WAREHOUSE, 10), ("Finished Goods - _TC", 3)):
+			entry = make_stock_entry(
+				item_code=item,
+				to_warehouse=warehouse,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), -10),
+				do_not_submit=True,
+			)
+			entry.project = project.name
+			for row in entry.items:
+				row.project = project.name
+			entry.save()
+			entry.submit()
+
+		user = create_user("stock-ledger-project@example.com", "Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user.name)
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			project=project.name,
+		)
+		with self.set_user(user.name):
+			rows = list(execute(filters)[1])
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [3])
