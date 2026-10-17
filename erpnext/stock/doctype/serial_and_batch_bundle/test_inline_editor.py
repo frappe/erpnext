@@ -364,6 +364,15 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 				file.check_permission.assert_called_once_with("read")
 				file.insert.assert_not_called()
 
+	def test_csv_read_requires_file_permission(self):
+		file = Mock(file_type="CSV")
+		file.check_permission.side_effect = frappe.PermissionError
+		with patch("frappe.core.doctype.file.utils.find_file_by_url", return_value=file), self.assertRaises(
+			frappe.PermissionError
+		):
+			read_serial_batch_csv("/private/files/serials.csv")
+		file.get_content.assert_not_called()
+
 	def test_csv_rows_resolve_serial_batch_pairs(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
 		other = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name

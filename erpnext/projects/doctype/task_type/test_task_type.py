@@ -23,6 +23,16 @@ class TestTaskType(ERPNextTestSuite):
 		task.save()
 		self.assertEqual(task.task_weight, 0)
 
+	def test_zero_task_weight_is_kept(self):
+		task_type = frappe.get_doc(
+			{"doctype": "Task Type", "name": "_Test Zero Weight Type", "weight": 1}
+		).insert()
+		task = create_task("_Test Zero Weight Task", save=False)
+		task.type = task_type.name
+		task.task_weight = 0
+		task.insert()
+		self.assertEqual(task.task_weight, 0)
+
 	def test_type_change_fetches_weight_unless_weight_changes(self):
 		light = frappe.get_doc(
 			{"doctype": "Task Type", "name": "_Test Light Task Type", "weight": 1}
