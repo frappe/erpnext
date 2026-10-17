@@ -1456,7 +1456,6 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 		self.assertIn("AND", condition_str)
 		self.assertIn("OR", condition_str)
 
-	# 4. VALUE TYPES
 	def test_parse_deeply_nested_conditions(self):
 		parser = FilterExpressionParser()
 		from frappe.query_builder import DocType
@@ -1492,6 +1491,7 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 		self.assertIn("AND", condition_str)
 		self.assertIn("OR", condition_str)
 
+	# 4. VALUE TYPES
 	def test_parse_different_value_types(self):
 		"""Test different value types in conditions"""
 		parser = FilterExpressionParser()
