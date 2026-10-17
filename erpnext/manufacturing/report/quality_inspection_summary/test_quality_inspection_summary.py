@@ -118,6 +118,7 @@ class TestQualityInspectionSummary(ERPNextTestSuite):
 		with self.set_user(user.name):
 			data, chart = self.run_report_with_chart()
 
+		self.assertIn(self.qi.name, [row.name for row in data])
 		self.assertNotIn(other.name, [row.name for row in data])
 		statuses = [row.status for row in data]
 		self.assertEqual(chart, [statuses.count("Rejected"), statuses.count("Accepted")])
