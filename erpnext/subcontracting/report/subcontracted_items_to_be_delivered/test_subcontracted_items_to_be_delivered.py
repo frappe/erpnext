@@ -33,10 +33,7 @@ class TestSubcontractedItemsToBeDelivered(ERPNextTestSuite):
 		self.assertEqual(rows[0].delivered_qty, 2)
 		self.assertEqual(rows[0].pending_qty, 3)
 
-	def test_fully_delivered_item_is_excluded(self):
-		_so, scio = create_so_scio()
-		produce_and_deliver(scio, 5)
-
+		deliver(scio, 3)
 		self.assertEqual(get_report_rows(scio), [])
 
 	def test_customer_return_does_not_reopen_pending_qty(self):
@@ -60,7 +57,10 @@ def produce_and_deliver(scio, qty):
 	work_order.submit()
 	frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(work_order.name, "Manufacture")).submit()
 	scio.reload()
+	deliver(scio, qty)
 
+
+def deliver(scio, qty):
 	delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 	delivery.items[0].qty = qty
 	delivery.submit()

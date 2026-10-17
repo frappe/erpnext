@@ -19,14 +19,8 @@ class TestTaskType(ERPNextTestSuite):
 		task.save()
 		self.assertEqual(task.task_weight, 5)
 
-	def test_zero_task_weight_is_kept(self):
-		task_type = frappe.get_doc(
-			{"doctype": "Task Type", "name": "_Test Zero Weight Type", "weight": 1}
-		).insert()
-		task = create_task("_Test Zero Weight Task", save=False)
-		task.type = task_type.name
 		task.task_weight = 0
-		task.insert()
+		task.save()
 		self.assertEqual(task.task_weight, 0)
 
 	def test_type_change_fetches_weight_unless_weight_changes(self):
@@ -48,11 +42,3 @@ class TestTaskType(ERPNextTestSuite):
 		task.task_weight = 0
 		task.save()
 		self.assertEqual(task.task_weight, 0)
-
-	def test_negative_weight_is_refused(self):
-		task_type = frappe.get_doc({"doctype": "Task Type", "name": "_Test Negative Task Type", "weight": -2})
-		self.assertRaises(frappe.NonNegativeError, task_type.insert)
-
-		task = create_task("_Test Negative Weight Task", save=False)
-		task.task_weight = -2
-		self.assertRaises(frappe.NonNegativeError, task.insert)

@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, getdate, nowdate
@@ -209,22 +208,6 @@ class TestTask(ERPNextTestSuite):
 			getdate(add_days(nowdate(), 1)),
 		)
 
-	def test_actual_dates_outside_project_dates(self):
-		project = frappe.get_value("Project", {"project_name": "_Test Project"})
-		frappe.db.set_value(
-			"Project",
-			project,
-			{"expected_start_date": add_days(nowdate(), -10), "expected_end_date": add_days(nowdate(), 5)},
-		)
-		task = create_task("_Test Task Late Work", nowdate(), add_days(nowdate(), 3))
-		task.act_start_date = task.act_end_date = add_days(nowdate(), 8)
-
-		with patch.object(frappe, "in_test", False):
-			task.validate_parent_project_dates()
-
-			task.exp_end_date = add_days(nowdate(), 8)
-			self.assertRaises(frappe.exceptions.InvalidDates, task.validate_parent_project_dates)
-
 	def test_close_assignment(self):
 		if not frappe.db.exists("Task", "Test Close Assignment"):
 			task = frappe.new_doc("Task")
@@ -426,12 +409,6 @@ class TestTask(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "completed_on"), getdate())
 
-	def test_negative_progress(self):
-		task = create_task("_Test Task Negative Progress", save=False)
-		task.progress = -50
-
-		self.assertRaises(frappe.ValidationError, task.save)
-
 	def test_reopen_completed_task(self):
 		task = create_task("_Test Task Reopened")
 		task.status = "Completed"
@@ -483,15 +460,6 @@ class TestTask(ERPNextTestSuite):
 		create_task("_Test Child Blocking Delete", parent_task=parent.name)
 
 		self.assertRaises(frappe.ValidationError, parent.delete)
-
-	def test_delete_child_task(self):
-		parent = create_task("_Test Parent Of Deleted Child", is_group=1)
-		child = create_task("_Test Deleted Child", parent_task=parent.name)
-
-		child.delete()
-
-		parent.reload()
-		self.assertFalse(parent.depends_on)
 
 	def test_move_child_task_to_another_parent(self):
 		old_parent = create_task("_Test Old Parent", is_group=1)

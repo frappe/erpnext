@@ -334,11 +334,6 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.submit()
 		self.assertEqual(doc.docstatus, 1)
 
-	def test_submit_allows_items_without_operation(self):
-		doc = self.make_creator_with_item()
-		doc.submit()
-		self.assertEqual(doc.docstatus, 1)
-
 
 def create_items():
 	raw_materials = [

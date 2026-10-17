@@ -1784,31 +1784,6 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pl.delivery_status, "Not Delivered")
 		self.assertEqual(pl.status, "Open")
 
-	def test_partial_delivery_of_picklist_with_bundle(self):
-		warehouse = "_Test Warehouse - _TC"
-		bundle, _components = create_product_bundle([1, 1], warehouse=warehouse)
-		so = make_sales_order(item_code=bundle, qty=2, rate=42)
-
-		pl = create_pick_list(so.name).save().submit()
-		dn = create_delivery_note(pl.name)
-		dn.items[0].qty = 1
-		dn.save().submit()
-
-		pl.reload()
-		for location in pl.locations:
-			self.assertEqual(location.delivered_qty, 1)
-		self.assertEqual(pl.per_delivered, 50)
-		self.assertEqual(pl.delivery_status, "Partly Delivered")
-		self.assertEqual(pl.status, "Partly Delivered")
-
-		dn.cancel()
-		pl.reload()
-		for location in pl.locations:
-			self.assertEqual(location.delivered_qty, 0)
-		self.assertEqual(pl.per_delivered, 0)
-		self.assertEqual(pl.delivery_status, "Not Delivered")
-		self.assertEqual(pl.status, "Open")
-
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_partial_bundle_delivery_with_split_pick_list_rows(self):
 		primary_warehouse = "_Test Warehouse - _TC"

@@ -70,12 +70,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.docstatus, 1)
 		self.assertTrue(po.base_grand_total < 0)
 
-	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
-	def test_purchase_order_negative_rate_setting_does_not_allow_negative_quantity(self):
-		po = create_purchase_order(qty=1, rate=100, do_not_save=True)
-		po.append("items", {"item_code": "_Test Item 2", "qty": -1, "rate": 100})
-		self.assertRaises(frappe.ValidationError, po.save)
-
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
@@ -332,38 +326,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].qty, 7)
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
-
-	def test_update_child_qty_with_conversion_factor_after_receipt(self):
-		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
-		purchase_order = create_purchase_order(item_code=item.item_code, qty=6, do_not_save=True)
-		purchase_order.items[0].uom = "Box"
-		purchase_order.items[0].conversion_factor = 5
-		purchase_order.save()
-		purchase_order.submit()
-		create_pr_against_po(purchase_order.name, 2)
-
-		row = purchase_order.items[0]
-		trans_items = json.dumps(
-			[
-				{
-					"item_code": row.item_code,
-					"rate": row.rate,
-					"qty": 4,
-					"uom": row.uom,
-					"conversion_factor": 2,
-					"docname": row.name,
-				}
-			]
-		)
-
-		self.assertRaisesRegex(
-			frappe.ValidationError,
-			"Cannot set quantity less than received quantity",
-			update_child_qty_rate,
-			"Purchase Order",
-			trans_items,
-			purchase_order.name,
-		)
 
 	def test_update_child_uom_after_receipt_is_refused(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])

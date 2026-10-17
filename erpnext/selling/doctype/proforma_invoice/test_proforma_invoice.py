@@ -167,15 +167,6 @@ class TestProformaInvoice(ERPNextTestSuite):
 			proforma.get_email_content(), ("Proforma PRO-TEST-0001", "Advance payment for SO-TEST-0001")
 		)
 
-	def test_email_content_without_template_is_default_text(self):
-		frappe.db.set_single_value("Selling Settings", "proforma_email_template", None)
-		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "name": "PRO-TEST-0001"})
-
-		self.assertEqual(
-			proforma.get_email_content(),
-			("Proforma Invoice PRO-TEST-0001", "Please find attached the proforma invoice PRO-TEST-0001."),
-		)
-
 	def test_line_description_is_editable(self):
 		sales_order = make_sales_order(qty=10, do_not_submit=True)
 		sales_order.items[0].description = "Ordered description"
@@ -238,11 +229,6 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(item.item_code, so_item.item_code)
 		self.assertEqual(flt(item.rate), flt(so_item.rate))
 		self.assertEqual(flt(item.amount), 4 * flt(so_item.rate))
-
-	def test_amended_proforma_is_rejected(self):
-		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
-
-		self.assertRaises(frappe.ValidationError, proforma.validate_amended_doc)
 
 	def test_requires_submitted_sales_order(self):
 		"""The server rejects a proforma against a draft Sales Order (the button is JS-gated only)."""

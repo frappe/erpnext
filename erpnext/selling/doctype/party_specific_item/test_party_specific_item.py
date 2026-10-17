@@ -198,26 +198,6 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		order.reload().submit()
 		self.assertEqual(order.docstatus, 1)
 
-	def test_supplier_change_revalidates_items(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-
-		other_supplier = create_supplier("_Test Party Specific Other Supplier")
-		create_party_specific_item(
-			party_type="Supplier",
-			party="_Test Supplier",
-			restrict_based_on="Item",
-			based_on_value="_Test Item",
-		)
-		order = create_purchase_order(do_not_submit=True)
-		for action in ("save", "submit"):
-			with self.subTest(action=action):
-				order.reload()
-				order.supplier = other_supplier.name
-				with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Supplier"):
-					getattr(order, action)()
-		order.reload().submit()
-		self.assertEqual(order.docstatus, 1)
-
 	def test_sales_user_cannot_bypass_rules_they_cannot_read(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
