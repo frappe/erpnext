@@ -359,6 +359,15 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 
 		self.assertEqual(s_id, pending.name)
 
+	def test_visits_cannot_exceed_days_in_range(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			make_maintenance_schedule,
+			periodicity="Random",
+			end_date=add_days(today(), 4),
+			no_of_visits=10,
+		)
+
 	def test_holiday_shift_does_not_move_before_start_date(self):
 		from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
 
