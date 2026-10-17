@@ -1530,6 +1530,21 @@ class StockController(AccountsController):
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
+	def get_on_hold_or_closed_reference(self, ref_doctype, ref_fieldname):
+		names = [d.get(ref_fieldname) for d in self.get("items") if d.get(ref_fieldname)]
+		if not names:
+			return None
+
+		statuses = dict(
+			frappe.get_all(
+				ref_doctype,
+				filters={"name": ("in", list(set(names))), "status": ("in", ["Closed", "On Hold"])},
+				fields=["name", "status"],
+				as_list=True,
+			)
+		)
+		return next(((name, statuses[name]) for name in names if name in statuses), None)
+
 
 @frappe.whitelist()
 def show_accounting_ledger_preview(company: str, doctype: str, docname: str):

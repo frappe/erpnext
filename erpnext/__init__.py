@@ -3,7 +3,6 @@ import inspect
 
 import frappe
 from frappe.utils import cstr
-from frappe.utils.user import is_website_user
 
 __version__ = "15.112.0"
 
@@ -154,6 +153,8 @@ def allow_regional(fn):
 
 
 def check_app_permission():
+	from frappe.utils.user import is_website_user
+
 	if frappe.session.user == "Administrator":
 		return True
 

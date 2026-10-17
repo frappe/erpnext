@@ -50,6 +50,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -1137,23 +1138,17 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def update_current_stock(self):
+		bin_qty_map = get_bin_qty_map(self.get("items") + self.get("packed_items"))
+
 		for d in self.get("items"):
 			if d.item_code and d.warehouse:
-				bin = frappe.db.sql(
-					"select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
-					(d.item_code, d.warehouse),
-					as_dict=1,
-				)
-				d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
+				bin_data = bin_qty_map.get((d.item_code, d.warehouse))
+				d.actual_qty = flt(bin_data.actual_qty) if bin_data else 0
 
 		for d in self.get("packed_items"):
-			bin = frappe.db.sql(
-				"select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s",
-				(d.item_code, d.warehouse),
-				as_dict=1,
-			)
-			d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
-			d.projected_qty = bin and flt(bin[0]["projected_qty"]) or 0
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
+			d.actual_qty = flt(bin_data.actual_qty) if bin_data else 0
+			d.projected_qty = flt(bin_data.projected_qty) if bin_data else 0
 
 	def update_packing_list(self):
 		if self.doctype == "POS Invoice" or (
