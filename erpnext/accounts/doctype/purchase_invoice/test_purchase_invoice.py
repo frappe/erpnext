@@ -2787,87 +2787,13 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi.submit()
 		self.assertEqual(return_pi.docstatus, 1)
 
-	def test_internal_transfer_invoice_with_rejected_qty(self):
-		"""An invoice that updates stock moves rejected material out of the in-transit warehouse and
-		books it, like a receipt does."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.stock.doctype.item.test_item import create_item
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			get_gl_entries,
-			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
-		)
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-		prepare_data_for_internal_transfer()
-		company = "_Test Company with perpetual inventory"
-
-		from_warehouse = create_warehouse("_Test Invoice Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Invoice Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Invoice Transfer Rejected", company=company)
-
-		item_doc = create_item("Test Invoice Internal Transfer Item")
-
-		make_purchase_receipt(
-			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
-		)
-
-		si = create_sales_invoice(
-			company=company,
-			customer="_Test Internal Customer 2",
-			item_code=item_doc.name,
-			qty=10,
-			rate=100,
-			warehouse=from_warehouse,
-			update_stock=1,
-			cost_center="Main - TCP1",
-			debit_to="Debtors - TCP1",
-			income_account="Sales - TCP1",
-			do_not_save=1,
-		)
-		si.items[0].target_warehouse = transit_warehouse
-		si.insert()
-		si.submit()
-
-		pi = make_inter_company_purchase_invoice(si.name)
-		pi.update_stock = 1
-		pi.items[0].warehouse = to_warehouse
-		pi.items[0].qty = 7
-		pi.items[0].rejected_qty = 3
-		pi.items[0].received_qty = 10
-		pi.items[0].rejected_warehouse = rejected_warehouse
-		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
-		pi.submit()
-
-		sl_entries = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": pi.name, "is_cancelled": 0},
-			fields=["warehouse", "actual_qty", "stock_value_difference"],
-		)
-
-		stock_qty = {d.warehouse: d.actual_qty for d in sl_entries}
-		self.assertEqual(stock_qty[transit_warehouse], -10)
-		self.assertEqual(stock_qty[to_warehouse], 7)
-		self.assertEqual(stock_qty[rejected_warehouse], 3)
-
-		booked_value = {}
-		for entry in get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True):
-			booked_value.setdefault(entry.account, 0)
-			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
-
-		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
-		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], -1000)
-		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
-		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
-
 	def test_internal_transfer_invoice_with_rejected_batch_qty(self):
 		"""Batch material rejected on a stock updating internal transfer invoice gets its own package."""
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			get_gl_entries,
 			make_purchase_receipt,
 			prepare_data_for_internal_transfer,
 		)
@@ -2946,71 +2872,15 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(moved_value[to_warehouse]), 700)
 		self.assertEqual(flt(moved_value[rejected_warehouse]), 300)
 
-	def test_internal_transfer_invoice_with_every_unit_rejected(self):
-		"""An invoice may reject a whole row, and the in-transit warehouse is emptied all the same."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.stock.doctype.item.test_item import create_item
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
-		)
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		booked_value = {}
+		for entry in get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True):
+			booked_value.setdefault(entry.account, 0)
+			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
 
-		prepare_data_for_internal_transfer()
-		company = "_Test Company with perpetual inventory"
-
-		from_warehouse = create_warehouse("_Test Rejected Invoice From", company=company)
-		transit_warehouse = create_warehouse("_Test Rejected Invoice Transit", company=company)
-		to_warehouse = create_warehouse("_Test Rejected Invoice To", company=company)
-		rejected_warehouse = create_warehouse("_Test Rejected Invoice Rejected", company=company)
-
-		item_doc = create_item("Test Fully Rejected Transfer Item")
-
-		make_purchase_receipt(
-			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
-		)
-
-		si = create_sales_invoice(
-			company=company,
-			customer="_Test Internal Customer 2",
-			item_code=item_doc.name,
-			qty=10,
-			rate=100,
-			warehouse=from_warehouse,
-			update_stock=1,
-			cost_center="Main - TCP1",
-			debit_to="Debtors - TCP1",
-			income_account="Sales - TCP1",
-			do_not_save=1,
-		)
-		si.items[0].target_warehouse = transit_warehouse
-		si.insert()
-		si.submit()
-
-		pi = make_inter_company_purchase_invoice(si.name)
-		pi.update_stock = 1
-		pi.items[0].warehouse = to_warehouse
-		pi.items[0].qty = 0
-		pi.items[0].rejected_qty = 10
-		pi.items[0].received_qty = 10
-		pi.items[0].rejected_warehouse = rejected_warehouse
-		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
-		pi.submit()
-
-		sl_entries = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": pi.name, "is_cancelled": 0},
-			fields=["warehouse", "actual_qty", "stock_value_difference"],
-		)
-		moved_qty = {d.warehouse: d.actual_qty for d in sl_entries}
-		moved_value = {d.warehouse: d.stock_value_difference for d in sl_entries}
-
-		self.assertNotIn(to_warehouse, moved_qty)
-		self.assertEqual(moved_qty[transit_warehouse], -10)
-		self.assertEqual(moved_qty[rejected_warehouse], 10)
-		self.assertEqual(flt(moved_value[transit_warehouse]), -1000)
-		self.assertEqual(flt(moved_value[rejected_warehouse]), 1000)
+		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
+		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], -1000)
+		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
+		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
 
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
@@ -3065,6 +2935,20 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.items[0].rejected_warehouse = rejected_warehouse
 		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
 		pi.submit()
+
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["warehouse", "actual_qty", "stock_value_difference"],
+		)
+		moved_qty = {d.warehouse: d.actual_qty for d in sl_entries}
+		moved_value = {d.warehouse: d.stock_value_difference for d in sl_entries}
+
+		self.assertNotIn(to_warehouse, moved_qty)
+		self.assertEqual(moved_qty[transit_warehouse], -10)
+		self.assertEqual(moved_qty[rejected_warehouse], 10)
+		self.assertEqual(flt(moved_value[transit_warehouse]), -1000)
+		self.assertEqual(flt(moved_value[rejected_warehouse]), 1000)
 
 		returned = make_return_doc("Purchase Invoice", pi.name)
 		returned.update_stock = 1
