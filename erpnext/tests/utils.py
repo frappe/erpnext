@@ -170,6 +170,7 @@ class BootStrapTestData:
 		self.make_user()
 		self.make_cost_center()
 		self.make_warehouse()
+		self.make_transfer_warehouses()
 		self.make_uom()
 		self.make_item_tax_template()
 		self.make_item_group()
@@ -1013,6 +1014,32 @@ class BootStrapTestData:
 			},
 		]
 		self.make_records(["location_name"], records)
+
+	def make_transfer_warehouses(self):
+		company = "_Test Company with perpetual inventory"
+		names = [f"_Test Transfer {role}" for role in ("From", "Transit", "To", "Rejected")]
+		accounts = [
+			{
+				"doctype": "Account",
+				"account_name": name,
+				"parent_account": "Stock Assets - TCP1",
+				"account_type": "Stock",
+				"company": company,
+			}
+			for name in names
+		]
+		self.make_records(["account_name", "company"], accounts)
+		warehouses = [
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": name,
+				"parent_warehouse": "All Warehouses - TCP1",
+				"account": f"{name} - TCP1",
+				"company": company,
+			}
+			for name in names
+		]
+		self.make_records(["warehouse_name", "company"], warehouses)
 
 	def make_warehouse(self):
 		records = [

@@ -656,7 +656,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Empty Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -677,7 +677,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		issue.items[0].empty_serial_rack = "Rack 1"
+		issue.items[0].serial_rack = "Rack 1"
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
@@ -692,7 +692,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Required Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -705,7 +705,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		receipt.items[0].to_required_serial_rack = "Rack 1"
+		receipt.items[0].to_serial_rack = "Rack 1"
 		receipt.save()
 		receipt.submit()
 
@@ -737,7 +737,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Legacy Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -750,7 +750,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		receipt.items[0].to_legacy_serial_rack = "Rack 2"
+		receipt.items[0].to_serial_rack = "Rack 2"
 		receipt.save()
 		receipt.submit()
 		serial_id = frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "name")
@@ -769,7 +769,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		issue.items[0].legacy_serial_rack = "Rack 1"
+		issue.items[0].serial_rack = "Rack 1"
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
