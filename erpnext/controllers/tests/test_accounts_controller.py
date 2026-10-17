@@ -724,7 +724,7 @@ class TestAccountsController(ERPNextTestSuite):
 
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
-		target_warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
+		target_warehouse = "_Test Transfer From - TCP1"
 		warehouse = create_warehouse("_Test Internal Warehouse New 2", company=company)
 		arms_length_price = 40
 
