@@ -191,6 +191,7 @@ class BootStrapTestData:
 		self.make_workstation()
 		self.make_operation()
 		self.make_bom()
+		self.make_subcontracting_fixtures()
 		self.make_quality_inspection_param()
 		self.make_quality_inspection_template()
 		self.make_employees()
@@ -2643,6 +2644,154 @@ class BootStrapTestData:
 		# TODO: replace JSON source with hardcoded data
 		records = load_test_records_for("BOM")["BOM"]
 		self.make_records(["item", "company"], records)
+
+	def make_subcontracting_fixtures(self):
+		self.make_subcontracting_items()
+		self.make_subcontracting_item_boms()
+		self.make_subcontracting_boms()
+		self.make_customer_warehouse()
+
+	def make_subcontracting_items(self):
+		def serial(series):
+			return {"has_serial_no": 1, "serial_no_series": series}
+
+		def batch(series=None):
+			return {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": series}
+
+		subcontracted = {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		raw_material = {"is_stock_item": 1, "valuation_rate": 100}
+		customer_provided = {"is_stock_item": 1, "is_purchase_item": 0, "is_customer_provided_item": 1}
+		self_raw_material = {"is_stock_item": 1, "valuation_rate": 10}
+		service = {"is_stock_item": 0}
+
+		items = {
+			"Subcontracted Item SA1": subcontracted,
+			"Subcontracted Item SA2": subcontracted,
+			"Subcontracted Item SA3": subcontracted,
+			"Subcontracted Item SA4": {**subcontracted, **batch("SBAT.####")},
+			"Subcontracted Item SA5": subcontracted,
+			"Subcontracted Item SA6": subcontracted,
+			"Subcontracted Item SA7": subcontracted,
+			"Subcontracted Item SA8": subcontracted,
+			"Subcontracted Item SA9": {**subcontracted, "stock_uom": "Litre"},
+			"Subcontracted Item SA10": {**subcontracted, **batch("SBAT.####")},
+			"Subcontracted SRM Item 1": raw_material,
+			"Subcontracted SRM Item 2": {**raw_material, **serial("SRI.####")},
+			"Subcontracted SRM Item 3": {**raw_material, **batch("BAT.####")},
+			"Subcontracted SRM Item 4": {**raw_material, **serial("SRII.####")},
+			"Subcontracted SRM Item 5": {**raw_material, **serial("SRIID.####")},
+			"Subcontracted SRM Item 8": raw_material,
+			"Subcontracted SRM Item 9": {**raw_material, "stock_uom": "Litre"},
+			"Subcontracted SRM Item 10": raw_material,
+			**{f"Subcontracted Service Item {i}": service for i in range(1, 12)},
+			"Basic FG Item": subcontracted,
+			"FG Item with Serial": {**subcontracted, **serial("FGS.####")},
+			"FG Item with Batch": {**subcontracted, **batch()},
+			"FG Item with Serial and Batch": {**subcontracted, **serial("FGS.####"), **batch()},
+			"Basic RM": customer_provided,
+			"Basic RM 2": customer_provided,
+			"RM with Serial": {**customer_provided, **serial("RMS.####")},
+			"RM with Batch": {**customer_provided, **batch("RMB.####")},
+			"RM with Serial and Batch": {**customer_provided, **serial("RMS.####"), **batch("RMB.####")},
+			"Self RM": self_raw_material,
+			"Self RM 2": self_raw_material,
+			**{f"Service Item {i}": service for i in range(1, 5)},
+		}
+		records = [
+			{
+				"doctype": "Item",
+				"item_code": item_code,
+				"item_name": item_code,
+				"description": item_code,
+				"item_group": "Products",
+				**properties,
+			}
+			for item_code, properties in items.items()
+		]
+		self.make_records(["item_code"], records)
+
+	def make_subcontracting_item_boms(self):
+		inward_raw_materials = [
+			"Basic RM",
+			"RM with Serial",
+			"RM with Batch",
+			"RM with Serial and Batch",
+			"Self RM",
+		]
+		boms = {
+			"Subcontracted Item SA1": [
+				"Subcontracted SRM Item 1",
+				"Subcontracted SRM Item 2",
+				"Subcontracted SRM Item 3",
+			],
+			"Subcontracted Item SA2": ["Subcontracted SRM Item 2"],
+			"Subcontracted Item SA3": ["Subcontracted SRM Item 2"],
+			"Subcontracted Item SA4": [
+				"Subcontracted SRM Item 1",
+				"Subcontracted SRM Item 2",
+				"Subcontracted SRM Item 3",
+			],
+			"Subcontracted Item SA5": ["Subcontracted SRM Item 5"],
+			"Subcontracted Item SA6": ["Subcontracted SRM Item 3"],
+			"Subcontracted Item SA7": ["Subcontracted SRM Item 1"],
+			"Subcontracted Item SA8": ["Subcontracted SRM Item 8"],
+			"Subcontracted Item SA10": ["Subcontracted SRM Item 10"],
+			"Basic FG Item": inward_raw_materials,
+			"FG Item with Serial": inward_raw_materials,
+			"FG Item with Batch": inward_raw_materials,
+			"FG Item with Serial and Batch": inward_raw_materials,
+		}
+		records = [
+			{
+				"doctype": "BOM",
+				"item": item_code,
+				"company": "_Test Company",
+				"currency": "INR",
+				"quantity": 1,
+				"is_default": 1,
+				"docstatus": 1,
+				"items": [
+					{
+						"item_code": raw_material,
+						"qty": 1,
+						"rate": frappe.db.get_value("Item", raw_material, "valuation_rate") or 100,
+					}
+					for raw_material in raw_materials
+				],
+			}
+			for item_code, raw_materials in boms.items()
+		]
+		self.make_records(["item", "company"], records)
+
+	def make_subcontracting_boms(self):
+		service_items = {
+			"Basic FG Item": "Service Item 1",
+			"FG Item with Serial": "Service Item 2",
+			"FG Item with Batch": "Service Item 3",
+			"FG Item with Serial and Batch": "Service Item 4",
+		}
+		records = [
+			{
+				"doctype": "Subcontracting BOM",
+				"finished_good": finished_good,
+				"service_item": service_item,
+				"is_active": 1,
+			}
+			for finished_good, service_item in service_items.items()
+		]
+		self.make_records(["finished_good"], records)
+
+	def make_customer_warehouse(self):
+		records = [
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "_Test Customer Warehouse",
+				"company": "_Test Company",
+				"parent_warehouse": "_Test Warehouse Group - _TC",
+				"customer": "_Test Customer",
+			}
+		]
+		self.make_records(["warehouse_name", "company"], records)
 
 	def make_quality_inspection_param(self):
 		records = [{"doctype": "Quality Inspection Parameter", "parameter": "_Test Param"}]

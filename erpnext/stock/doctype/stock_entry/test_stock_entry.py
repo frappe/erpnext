@@ -70,6 +70,18 @@ def stock_entry_row(item_code, qty, **kwargs):
 	}
 
 
+def make_material_receipt(rows):
+	entries = [make_stock_entry(do_not_save=True, **row) for row in rows]
+	receipt = entries[0]
+	for entry in entries[1:]:
+		entry.items[0].idx = None
+		receipt.append("items", entry.items[0])
+	receipt.insert()
+	receipt.submit()
+	receipt.load_from_db()
+	return receipt
+
+
 class TestStockEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
