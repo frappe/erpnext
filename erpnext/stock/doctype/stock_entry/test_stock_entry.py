@@ -74,6 +74,7 @@ def make_material_receipt(rows):
 	entries = [make_stock_entry(do_not_save=True, **row) for row in rows]
 	receipt = entries[0]
 	for entry in entries[1:]:
+		entry.items[0].idx = None
 		receipt.append("items", entry.items[0])
 	receipt.insert()
 	receipt.submit()
