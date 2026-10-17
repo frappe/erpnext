@@ -7,7 +7,8 @@
 
 import frappe
 from frappe import _
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, flt, getdate
@@ -91,10 +92,13 @@ def execute(filters=None):
 
 
 def apply_permitted_warehouses(filters):
-	permitted = get_permitted_documents("Warehouse")
+	permitted = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
 	if not permitted:
 		return True
 
+	permitted = frappe.get_all("Warehouse", filters={"name": ("in", permitted), "is_group": 0}, pluck="name")
 	if filters.get("warehouse"):
 		selected = {warehouse.name for warehouse in get_warehouse_list(filters)}
 		permitted = [warehouse for warehouse in permitted if warehouse in selected]

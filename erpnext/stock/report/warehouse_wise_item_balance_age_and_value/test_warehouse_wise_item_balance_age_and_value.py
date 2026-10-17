@@ -122,13 +122,8 @@ class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
 		self.assertEqual(balances.get(item_b), 25)
 		self.assertNotIn(item_c, balances)
 
-	def test_only_permitted_warehouses_are_shown(self):
+	def get_rows_for_restricted_user(self, item_code, warehouse, **permission):
 		from frappe.permissions import add_user_permission
-
-		item_code = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(
-			item_code=item_code, to_warehouse="Stores - _TC", qty=7, rate=100, posting_date="2026-06-01"
-		)
 
 		user = "warehouse-age-value-user@example.com"
 		if not frappe.db.exists("User", user):
@@ -136,16 +131,46 @@ class TestWarehouseWiseItemBalanceAgeAndValue(ERPNextTestSuite):
 				{"doctype": "User", "email": user, "first_name": "Age Value", "send_welcome_email": 0}
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock User")
-		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+		add_user_permission("Warehouse", warehouse, user, **permission)
 
 		frappe.set_user(user)
 		try:
-			columns, data = self.run_report_with_columns(item_code=[item_code])
+			return self.run_report_with_columns(item_code=[item_code])
 		finally:
 			frappe.set_user("Administrator")
 
+	def make_stock_in_stores(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code, to_warehouse="Stores - _TC", qty=7, rate=100, posting_date="2026-06-01"
+		)
+		return item_code
+
+	def test_only_permitted_warehouses_are_shown(self):
+		item_code = self.make_stock_in_stores()
+
+		columns, data = self.get_rows_for_restricted_user(item_code, "Finished Goods - _TC")
+
 		self.assertNotIn("Stores - _TC:Float:100", columns)
 		self.assertEqual([row[4] for row in data if row[0] == item_code], [])
+
+	def test_hidden_descendants_of_a_permitted_group_are_not_shown(self):
+		item_code = self.make_stock_in_stores()
+		group = frappe.db.get_value("Warehouse", "Stores - _TC", "parent_warehouse")
+
+		columns, data = self.get_rows_for_restricted_user(item_code, group, hide_descendants=1)
+
+		self.assertNotIn("Stores - _TC:Float:100", columns)
+		self.assertEqual([row[4] for row in data if row[0] == item_code], [])
+
+	def test_permission_for_another_doctype_does_not_limit_warehouses(self):
+		item_code = self.make_stock_in_stores()
+
+		columns, data = self.get_rows_for_restricted_user(
+			item_code, "Finished Goods - _TC", applicable_for="Purchase Order"
+		)
+
+		self.assertEqual([row[4] for row in data if row[0] == item_code], [700])
 
 	def test_quantity_columns_keep_fractions(self):
 		columns = self.run_report_with_columns(warehouse=["Stores - _TC", "Finished Goods - _TC"])[0]
