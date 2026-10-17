@@ -64,58 +64,17 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
-		frappe.db.get_value(
-			"Stock Settings",
-			{ name: "Stock Settings" },
-			"sample_retention_warehouse",
-			(r) => {
-				if (r.sample_retention_warehouse) {
-					let filters = [
-						["Warehouse", "company", "=", frm.doc.company],
-						["Warehouse", "is_group", "=", 0],
-						["Warehouse", "name", "!=", r.sample_retention_warehouse],
-					];
-					frm.set_query("from_warehouse", function () {
-						return {
-							filters: filters,
-						};
-					});
-					frm.set_query("s_warehouse", "items", function () {
-						return {
-							filters: filters,
-						};
-					});
-				}
-			}
-		);
-
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
-			let filters = {};
 
 			if (!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
-				if (
-					in_list(
-						[
-							"Material Transfer for Manufacture",
-							"Manufacture",
-							"Repack",
-							"Send to Subcontractor",
-						],
-						doc.purpose
-					)
-				) {
-					filters = {
-						item_code: item.item_code,
-						posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
-					};
-				} else {
-					filters = {
-						item_code: item.item_code,
-					};
-				}
+				const filters = {
+					item_code: item.item_code,
+					posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
+					posting_time: frm.doc.posting_time || frappe.datetime.now_time(),
+				};
 
 				// User could want to select a manually created empty batch (no warehouse)
 				// or a pre-existing batch
@@ -886,11 +845,16 @@ frappe.ui.form.on("Stock Entry", {
 			!frm.doc.to_warehouse &&
 			frm.doc.from_warehouse
 		) {
-			let dt = frm.doc.from_warehouse ? "Warehouse" : "Company";
-			let dn = frm.doc.from_warehouse ? frm.doc.from_warehouse : frm.doc.company;
-			frappe.db.get_value(dt, dn, "default_in_transit_warehouse", (r) => {
+			// prefer the source warehouse's in-transit default, then the company's
+			frappe.db.get_value("Warehouse", frm.doc.from_warehouse, "default_in_transit_warehouse", (r) => {
 				if (r.default_in_transit_warehouse) {
 					frm.set_value("to_warehouse", r.default_in_transit_warehouse);
+				} else if (frm.doc.company) {
+					frappe.db.get_value("Company", frm.doc.company, "default_in_transit_warehouse", (res) => {
+						if (res.default_in_transit_warehouse) {
+							frm.set_value("to_warehouse", res.default_in_transit_warehouse);
+						}
+					});
 				}
 			});
 		}
@@ -1161,6 +1125,27 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		this.frm.set_query("to_warehouse", transit_warehouse_query);
 		this.frm.set_query("t_warehouse", "items", transit_warehouse_query);
+		this.set_source_warehouse_query();
+	}
+
+	set_source_warehouse_query() {
+		frappe.db.get_value(
+			"Stock Settings",
+			{ name: "Stock Settings" },
+			"sample_retention_warehouse",
+			(r) => {
+				const source_warehouse_query = () => {
+					const query = erpnext.queries.warehouse(this.frm.doc);
+					if (r?.sample_retention_warehouse) {
+						query.filters.push(["Warehouse", "name", "!=", r.sample_retention_warehouse]);
+					}
+					return query;
+				};
+
+				this.frm.set_query("from_warehouse", source_warehouse_query);
+				this.frm.set_query("s_warehouse", "items", source_warehouse_query);
+			}
+		);
 	}
 
 	setup() {
