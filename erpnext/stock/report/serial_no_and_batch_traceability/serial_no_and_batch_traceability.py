@@ -233,7 +233,10 @@ class ReportData:
 			query = query.where(condition)
 
 		results = query.run(as_dict=True)
-		return results[0] if results else {}
+		if not results:
+			return {}
+
+		return frappe._dict(results[0], qty=sum(flt(result.qty) for result in results))
 
 	def set_backward_data(self, sabb_data, qty=None):
 		if qty:

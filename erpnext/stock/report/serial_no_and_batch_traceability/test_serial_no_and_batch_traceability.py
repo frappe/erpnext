@@ -750,3 +750,41 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			[row.get("customer") for row in rows if row.get("reference_name") == delivery_note.name],
 			["_Test Customer", "_Test Customer"],
 		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 1})
+	def test_backward_trace_sums_every_output_row_of_the_batch(self):
+		raw_item, fg_item = self.make_batch_item("TRO-R"), self.make_batch_item("TRO-F")
+		raw_batch = self.get_batch(
+			make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=10, rate=100), 0
+		)
+		fg_batch = (
+			frappe.get_doc({"doctype": "Batch", "item": fg_item, "batch_id": frappe.generate_hash(length=10)})
+			.insert()
+			.name
+		)
+		repack = frappe.new_doc("Stock Entry")
+		repack.update({"purpose": "Repack", "stock_entry_type": "Repack", "company": "_Test Company"})
+		rows = [(raw_item, raw_batch, 10, "s_warehouse", "Stores - _TC")]
+		rows += [(fg_item, fg_batch, qty, "t_warehouse", "Finished Goods - _TC") for qty in (4, 6)]
+		for item_code, batch_no, qty, field, warehouse in rows:
+			repack.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": qty,
+					field: warehouse,
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
+					"set_basic_rate_manually": 1,
+					"basic_rate": 100,
+				},
+			)
+		repack.insert()
+		repack.submit()
+
+		data = self.run_report(item_code=fg_item, batches=[fg_batch], traceability_direction="Backward")
+
+		self.assertEqual(
+			[(row["item_code"], row["qty"]) for row in data if row.get("item_code")],
+			[(fg_item, 10), (raw_item, 10)],
+		)
