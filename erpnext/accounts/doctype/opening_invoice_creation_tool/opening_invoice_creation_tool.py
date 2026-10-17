@@ -381,6 +381,7 @@ def get_temporary_opening_account(company: str | None = None):
 	if not company:
 		return
 
+	frappe.has_permission("Company", "read", company, throw=True)
 	accounts = frappe.get_all("Account", filters={"company": company, "account_type": "Temporary"})
 	if not accounts:
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
