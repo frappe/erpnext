@@ -51,6 +51,26 @@ class TestFifoQueueVsQtyAfterTransactionComparison(ERPNextTestSuite):
 		flagged = {row.get("name") for row in data if row}
 		self.assertIn(sle, flagged)
 
+	def test_serial_item_valued_by_fifo_is_checked(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_method": "FIFO",
+				"has_serial_no": 1,
+				"serial_no_series": "FIFO-CMP-.#####",
+				"use_serial_no_wise_valuation": 0,
+			}
+		).name
+		entry = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=3, rate=100)
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name, "item_code": item}, "name")
+		frappe.db.set_value("Stock Ledger Entry", sle, "qty_after_transaction", 2, update_modified=False)
+
+		data = self.run_report({"company": "_Test Company", "item_code": item})
+
+		self.assertIn(sle, {row.get("name") for row in data if row})
+
 	def test_items_without_a_queue_are_not_flagged(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 

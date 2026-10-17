@@ -13,7 +13,7 @@ from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_ch
 	maintains_fifo_queue,
 )
 from erpnext.stock.report.utils import prepare_serial_batch_report
-from erpnext.stock.utils import get_valuation_method
+from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
 
 SLE_FIELDS = (
 	"name",
@@ -106,7 +106,7 @@ def find_first_bad_queue(sles):
 					"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
 				)
 
-			if not maintains_fifo_queue(sle, valuation_methods[key]):
+			if not keeps_fifo_queue(sle, valuation_methods[key]):
 				continue
 
 			set_queue_totals(sle)
@@ -118,6 +118,13 @@ def find_first_bad_queue(sles):
 				break
 
 	return data
+
+
+def keeps_fifo_queue(sle, valuation_method):
+	if valuation_method != "Moving Average" and is_serial_no_wise_valuation_disabled(sle.item_code):
+		return True
+
+	return maintains_fifo_queue(sle, valuation_method)
 
 
 def set_queue_totals(sle):
