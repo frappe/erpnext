@@ -58,5 +58,5 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 		self.assertIsNotNone(row.expires_on, "Expiry date should be set for a batch with shelf life")
 		self.assertEqual(frappe.utils.getdate(row.expires_on), frappe.utils.getdate(batch_expiry))
 		# Expiry (In Days) column = days until expiry
-		expected_days = max((frappe.utils.getdate(batch_expiry) - frappe.utils.datetime.date.today()).days, 0)
+		expected_days = frappe.utils.date_diff(batch_expiry, frappe.utils.today())
 		self.assertEqual(row["expiry_(in_days)"], expected_days)

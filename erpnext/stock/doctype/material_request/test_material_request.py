@@ -183,6 +183,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(remaining_po.items[0].uom, "Test UOM")
 		self.assertEqual(remaining_po.items[0].conversion_factor, 3)
 
+		# only the finished good without a Subcontracting BOM is reported
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertNotIn(mr.items[0].item_code, message)
+		self.assertIn(mr.items[1].item_code, message)
+
 	def test_subcontracting_material_request_item_validation(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -199,6 +204,29 @@ class TestMaterialRequest(ERPNextTestSuite):
 		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
 		mr.insert()
 		self.assertEqual(mr.items[0].item_code, stock_item.name)
+
+	def test_subcontracted_purchase_order_without_subcontracting_bom(self):
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		mr.submit()
+
+		frappe.clear_messages()
+		make_purchase_order(mr.name)
+		self.assertFalse(frappe.get_message_log())
+
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		for row in mr.items:
+			frappe.db.set_value("Item", row.item_code, "is_sub_contracted_item", 1)
+
+		mr.material_request_type = "Subcontracting"
+		mr.submit()
+
+		po = make_purchase_order(mr.name)
+		self.assertFalse(po.items[0].item_code)
+		self.assertEqual(po.items[0].fg_item, mr.items[0].item_code)
+
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertIn("No active Subcontracting BOM found", message)
+		self.assertIn(mr.items[0].item_code, message)
 
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()

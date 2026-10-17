@@ -211,7 +211,7 @@ class Issue(Document):
 			replicated_issue.service_level_agreement = None
 			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
-			replicated_issue.resolution_by = None
+			replicated_issue.sla_resolution_by = None
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -262,21 +262,16 @@ def get_list_context(context=None):
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
 
+	from erpnext.controllers.website_list_for_contact import get_parents_for_user
+
 	user = frappe.session.user
-	contact = frappe.db.get_value("Contact", {"user": user}, "name")
-	customer = None
-
-	if contact:
-		contact_doc = frappe.get_doc("Contact", contact)
-		customer = contact_doc.get_link_for("Customer")
-
 	ignore_permissions = False
 	if is_website_user() and user != "Guest":
 		if not filters:
 			filters = {}
 
-		if customer:
-			filters["customer"] = customer
+		if customers := get_parents_for_user("Customer"):
+			filters["customer"] = ["in", customers]
 		else:
 			filters["raised_by"] = user
 
@@ -415,7 +410,7 @@ def calculate_first_response_time(issue, first_responded_on):
 		"Service Level Agreement", issue.service_level_agreement
 	).support_and_resolution
 
-	if issue_creation_date.day == first_responded_on.day:
+	if getdate(issue_creation_date) == getdate(first_responded_on):
 		if is_work_day(issue_creation_date, support_hours):
 			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
 

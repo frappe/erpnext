@@ -233,12 +233,25 @@ class StatusService:
 				StockOverProductionError,
 			)
 
+		if purpose == "Manufacture":
+			self.validate_produced_qty_covers_disassembly(qty, precision)
+
 		self.doc.db_set(fieldname, qty)
 		if purpose == "Manufacture" and self.doc.production_plan:
 			ProductionPlanWorkOrderQuantities(self.doc.production_plan).validate_work_order(
 				self.doc, process_loss_qty=self.doc.process_loss_qty
 			)
 		self._update_produced_qty_in_so()
+
+	def validate_produced_qty_covers_disassembly(self, produced_qty, precision):
+		if flt(produced_qty, precision) >= flt(self.doc.disassembled_qty, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Manufactured Qty ({0}) cannot be less than the Disassembled Qty ({1}) of Work Order {2}. Cancel the disassembly first."
+			).format(flt(produced_qty, precision), flt(self.doc.disassembled_qty, precision), self.doc.name)
+		)
 
 	def _skip_transfer_purpose(self, purpose):
 		return bool(

@@ -62,3 +62,49 @@ class TestCustomerCreditBalance(ERPNextTestSuite):
 
 		rows = get_details(frappe._dict(company=company, customer=customer.name))
 		self.assertEqual(len(rows), 0)
+
+	def test_get_details_lists_customer_with_group_level_limit(self):
+		# limit on the group (not the customer) must still list the customer
+		company = "_Test Company"
+		group_name = "_Test Credit Group " + random_string(8)
+
+		group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": group_name,
+				"parent_customer_group": "All Customer Groups",
+				"credit_limits": [{"company": company, "credit_limit": 50000}],
+			}
+		).insert()
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Credit Balance " + random_string(8),
+				"customer_group": group.name,
+				"territory": "_Test Territory",
+			}
+		).insert()
+
+		rows = get_details(frappe._dict(company=company, customer=customer.name))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].name, customer.name)
+
+	def test_get_details_lists_customer_with_company_wide_limit(self):
+		# a company-wide limit (no customer or group limit) must still list the customer
+		company = "_Test Company"
+		frappe.db.set_value("Company", company, "credit_limit", 20000)
+		self.addCleanup(frappe.db.set_value, "Company", company, "credit_limit", 0)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Credit Balance " + random_string(8),
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+			}
+		).insert()
+
+		rows = get_details(frappe._dict(company=company, customer=customer.name))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].name, customer.name)

@@ -46,6 +46,11 @@ def get_bin_details(
 	return query.run(as_dict=True)
 
 
+@frappe.whitelist()
+def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
+	return aggregate_bin_details(get_bin_details(row, company, for_warehouse))
+
+
 def _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse):
 	wh = frappe.qb.DocType("Warehouse")
 	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)

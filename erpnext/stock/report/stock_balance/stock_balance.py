@@ -8,9 +8,12 @@ from typing import Any, TypedDict
 
 import frappe
 from frappe import _
+from frappe.query_builder import Tuple
 from frappe.query_builder.functions import Coalesce, Count
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
+from pypika import Order
+from pypika.analytics import RowNumber
 
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -62,6 +65,8 @@ class StockBalanceReport:
 		self.data = []
 		self.columns = []
 		self.sle_entries: list[SLEntry] = []
+		self.item_warehouse_balances = {}
+		self.latest_valuation_rates = {}
 		self.set_company_currency()
 
 	def set_company_currency(self) -> None:
@@ -78,6 +83,7 @@ class StockBalanceReport:
 		self.prepare_opening_stock()
 		self.prepare_sle_query()
 		self.prepare_item_warehouse_map_for_current_period()
+		self.set_pool_rate_on_dimension_rows()
 		self.prepare_new_data()
 
 		if not self.columns:
@@ -226,6 +232,7 @@ class StockBalanceReport:
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
 		adjustment_netting = AdjustmentNetting()
+		track_rates = self.shows_whole_pools
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
@@ -236,10 +243,127 @@ class StockBalanceReport:
 					self.initialize_data(group_by_key, entry)
 
 				self.prepare_item_warehouse_map(entry, group_by_key)
+				if track_rates:
+					self.latest_valuation_rates[entry.item_code, entry.warehouse] = entry.valuation_rate
 
 		self.item_warehouse_map = filter_items_with_no_transactions(
 			self.item_warehouse_map, self.float_precision, self.inventory_dimensions
 		)
+
+	def set_pool_rate_on_dimension_rows(self):
+		if not (self.filters.get("show_dimension_wise_stock") or self.has_dimension_filter):
+			return
+
+		items = self.get_pool_valuation_details({row.item_code for row in self.item_warehouse_map.values()})
+		rows = [row for row in self.item_warehouse_map.values() if self.is_valued_in_pool(row, items)]
+		rates = self.latest_valuation_rates
+		rates.update(
+			self.get_latest_valuation_rates(
+				[row for row in rows if (row.item_code, row.warehouse) not in rates]
+			)
+		)
+		pools = self.get_pool_balances(rows)
+		for row in rows:
+			row.val_rate = rates.get((row.item_code, row.warehouse), 0.0)
+			row.bal_val = row.bal_qty * row.val_rate
+
+		self.add_stranded_pool_values(pools, rates)
+
+	def get_pool_balances(self, rows) -> dict:
+		"""Whole item and warehouse balances, read before the rows are revalued."""
+		if not self.shows_whole_pools:
+			return {}
+
+		pools = {}
+		for row in rows:
+			key = (row.item_code, row.warehouse)
+			if key not in pools:
+				balance = self.item_warehouse_balances.get(key, row)
+				pools[key] = frappe._dict(row=row, bal_qty=balance.bal_qty, bal_val=balance.bal_val)
+
+		return pools
+
+	def add_stranded_pool_values(self, pools, rates):
+		"""Keep pool value its qty does not carry, like a residue at zero qty, on the row without dimensions."""
+		for key, pool in pools.items():
+			stranded_value = flt(pool.bal_val) - flt(pool.bal_qty) * rates.get(key, 0.0)
+			if not flt(stranded_value, self.float_precision):
+				continue
+
+			if key not in self.item_warehouse_map:
+				self.initialize_data(key, pool.row)
+
+			self.item_warehouse_map[key].bal_val += stranded_value
+
+	@property
+	def has_dimension_filter(self) -> bool:
+		return any(self.filters.get(field) for field in self.inventory_dimensions)
+
+	@property
+	def shows_whole_pools(self) -> bool:
+		return bool(self.filters.get("show_dimension_wise_stock")) and not self.has_dimension_filter
+
+	def get_pool_valuation_details(self, item_codes: set) -> dict:
+		if not item_codes:
+			return {}
+
+		items = frappe.get_all(
+			"Item",
+			filters={"name": ("in", list(item_codes))},
+			fields=[
+				"name",
+				"has_batch_no",
+				"has_serial_no",
+				"use_serial_no_wise_valuation",
+				"valuation_method",
+			],
+		)
+		return {item.name: item for item in items}
+
+	def is_valued_in_pool(self, row, items: dict) -> bool:
+		item = items[row.item_code]
+		if item.has_serial_no:
+			return not item.use_serial_no_wise_valuation
+
+		if item.has_batch_no:
+			valuation_method = item.valuation_method or frappe.get_cached_value(
+				"Company", row.company, "valuation_method"
+			)
+			return valuation_method == "Moving Average" and bool(
+				frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+			)
+
+		return True
+
+	def get_latest_valuation_rates(self, rows) -> dict:
+		if not rows:
+			return {}
+
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		ranked = (
+			frappe.qb.from_(sle)
+			.select(
+				sle.item_code,
+				sle.warehouse,
+				sle.valuation_rate,
+				RowNumber()
+				.over(sle.item_code, sle.warehouse)
+				.orderby(sle.posting_datetime, sle.creation, sle.name, order=Order.desc)
+				.as_("row_no"),
+			)
+			.where(
+				(sle.is_cancelled == 0)
+				& (sle.posting_date <= self.to_date)
+				& Tuple(sle.item_code, sle.warehouse).isin({(row.item_code, row.warehouse) for row in rows})
+			)
+		).as_("ranked")
+		entries = (
+			frappe.qb.from_(ranked)
+			.select(ranked.item_code, ranked.warehouse, ranked.valuation_rate)
+			.where(ranked.row_no == 1)
+			.run(as_dict=True)
+		)
+		return {(entry.item_code, entry.warehouse): flt(entry.valuation_rate) for entry in entries}
 
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()
@@ -352,6 +476,7 @@ class StockBalanceReport:
 
 	def prepare_item_warehouse_map(self, entry, group_by_key):
 		qty_dict = self.item_warehouse_map[group_by_key]
+		balance = self.get_item_warehouse_balance(entry, qty_dict)
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
@@ -368,17 +493,36 @@ class StockBalanceReport:
 			if entry.serial_no and entry.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0
+				balance.bal_qty = 0.0
 				qty_diff = flt(entry.actual_qty)
 				value_diff = flt(entry.stock_value_difference)
 			else:
-				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
-				value_diff = flt(entry.stock_value) - flt(qty_dict.bal_val)
+				qty_diff = flt(entry.qty_after_transaction) - flt(balance.bal_qty)
+				value_diff = flt(entry.stock_value) - flt(balance.bal_val)
 		else:
 			qty_diff = flt(entry.actual_qty)
 			value_diff = flt(entry.stock_value_difference)
 
 		qty_dict.val_rate = entry.valuation_rate
 		self.add_to_balance(qty_dict, entry, qty_diff, value_diff)
+		self.add_to_item_warehouse_balance(balance, qty_dict, qty_diff, value_diff)
+
+	def get_item_warehouse_balance(self, entry, qty_dict) -> frappe._dict:
+		"""Balance of the whole item and warehouse, which a dimension-wise row holds only part of."""
+		if not self.filters.get("show_dimension_wise_stock"):
+			return qty_dict
+
+		key = (entry.item_code, entry.warehouse)
+		if key not in self.item_warehouse_balances:
+			opening = self.item_warehouse_map.get(key) or frappe._dict(bal_qty=0.0, bal_val=0.0)
+			self.item_warehouse_balances[key] = frappe._dict(bal_qty=opening.bal_qty, bal_val=opening.bal_val)
+
+		return self.item_warehouse_balances[key]
+
+	def add_to_item_warehouse_balance(self, balance, qty_dict, qty_diff, value_diff):
+		if balance is not qty_dict:
+			balance.bal_qty += qty_diff
+			balance.bal_val += value_diff
 
 	def add_to_balance(self, qty_dict, entry, qty_diff, value_diff):
 		if entry.posting_date < self.from_date or entry.voucher_no in self.opening_vouchers.get(

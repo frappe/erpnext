@@ -232,6 +232,27 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(second_return.items[0].qty, -24)
 		second_return.save().submit()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_sales_invoice_return_rows_share_the_original_row_qty(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		self.assert_split_return_over_original_qty_is_rejected(create_sales_invoice(qty=10))
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_purchase_invoice_return_rows_share_the_original_row_qty(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		self.assert_split_return_over_original_qty_is_rejected(make_purchase_invoice(qty=10))
+
+	def assert_split_return_over_original_qty_is_rejected(self, original):
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+
+		return_doc = make_return_doc(original.doctype, original.name)
+		return_doc.items[0].qty = -6
+		return_doc.append("items", return_doc.items[0].as_dict(no_default_fields=True))
+
+		self.assertRaises(StockOverReturnError, return_doc.insert)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

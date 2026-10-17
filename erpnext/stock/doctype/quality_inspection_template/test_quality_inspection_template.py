@@ -36,15 +36,22 @@ class TestQualityInspectionTemplate(ERPNextTestSuite):
 			[{"specification": "_Test QIT Length", "numeric": 1, "min_value": 10, "max_value": 5}],
 			[{"specification": "_Test QIT Length", "numeric": 1, "min_value": 5}],
 			[{"specification": "_Test QIT Colour", "numeric": 0}],
-			[
-				{"specification": "_Test QIT Colour", "numeric": 0, "value": "Red"},
-				{"specification": "_Test QIT Colour", "numeric": 0, "value": "Blue"},
-			],
 		)
 
 		for rows in invalid_rows:
 			with self.subTest(rows=rows):
 				self.assertRaises(frappe.ValidationError, self.make_template(*rows).insert)
+
+	def test_duplicate_parameters_identify_row_and_parameter(self):
+		template = self.make_template(
+			{"specification": "_Test QIT Colour", "numeric": 0, "value": "Red"},
+			{"specification": "_Test QIT Colour", "numeric": 0, "value": "Blue"},
+		)
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "Row #2: Parameter .*_Test QIT Colour.* is added more than once"
+		):
+			template.insert()
 
 	def test_valid_rows_are_saved(self):
 		template = self.make_template(

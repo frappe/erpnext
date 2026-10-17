@@ -1,7 +1,10 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
+from frappe.tests import UnitTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -9,6 +12,42 @@ from erpnext.stock.report.product_bundle_balance.product_bundle_balance import e
 from erpnext.tests.utils import ERPNextTestSuite
 
 WH = "Stores - _TC"
+
+
+class TestProductBundleBalanceQuantity(UnitTestCase):
+	def test_bundle_qty_with_non_positive_component_stock(self):
+		parent = "Office Stationery Kit"
+		child_a = "Notebook"
+		child_b = "Pen"
+		items = (
+			{parent: frappe._dict(item_name=parent)},
+			{parent: [frappe._dict(item_code=child_a, qty=2), frappe._dict(item_code=child_b, qty=1)]},
+			[parent],
+			[child_a, child_b],
+		)
+		for actual_qty, expected_qty in ((-5, 0), (0, 0), (5, 2)):
+			with self.subTest(actual_qty=actual_qty):
+				stock_balance = {
+					child_a: {WH: frappe._dict(qty_after_transaction=actual_qty, company="_Test Company")},
+					child_b: {WH: frappe._dict(qty_after_transaction=10, company="_Test Company")},
+				}
+				with (
+					patch(
+						"erpnext.stock.report.product_bundle_balance.product_bundle_balance.get_items",
+						return_value=items,
+					),
+					patch(
+						"erpnext.stock.report.product_bundle_balance.product_bundle_balance.get_stock_balance",
+						return_value=stock_balance,
+					),
+				):
+					data = execute()[1]
+
+				self.assertEqual(len(data), 3)
+				self.assertEqual(data[0]["bundle_qty"], expected_qty)
+				self.assertEqual(data[1]["bundle_qty"], expected_qty)
+				self.assertEqual(data[1]["actual_qty"], actual_qty)
+				self.assertEqual(data[2]["bundle_qty"], 10)
 
 
 class TestProductBundleBalance(ERPNextTestSuite):

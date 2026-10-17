@@ -267,7 +267,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 	render_chart(title) {
 		let me = this;
-		let currency = frappe.defaults.get_default("currency");
+		let currency = erpnext.get_currency(me.company);
 
 		let chart_data = me.options.data ? me.options.data : null;
 

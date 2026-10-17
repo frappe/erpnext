@@ -659,8 +659,7 @@ frappe.ui.form.on("Asset", {
 			],
 		});
 
-		dialog.set_primary_action(__("Sell"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Sell"), function (dialog_data) {
 			const sell_qty = cint(dialog_data.sell_qty);
 			const asset_qty = cint(frm.doc.asset_quantity);
 
@@ -709,8 +708,7 @@ frappe.ui.form.on("Asset", {
 			fields: fields,
 		});
 
-		dialog.set_primary_action(__("Split"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Split"), function (dialog_data) {
 			frappe.call({
 				args: {
 					asset_name: frm.doc.name,

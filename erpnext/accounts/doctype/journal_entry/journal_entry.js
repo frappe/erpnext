@@ -212,6 +212,7 @@ frappe.ui.form.on("Journal Entry Account", {
 
 		erpnext.journal_entry.set_balancing_amount(row, frm.doc.difference);
 		erpnext.journal_entry.update_totals(frm);
+		erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, "accounts");
 	},
 
 	accounts_remove(frm) {
@@ -374,8 +375,8 @@ Object.assign(erpnext.journal_entry, {
 			],
 		});
 
-		dialog.set_primary_action(__("Save"), () => {
-			erpnext.journal_entry.save_quick_entry(frm, dialog.get_values());
+		dialog.set_primary_action(__("Save"), (values) => {
+			erpnext.journal_entry.save_quick_entry(frm, values);
 			dialog.hide();
 		});
 		dialog.show();

@@ -23,10 +23,33 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.permission_test_utils import make_bank_account
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
+	def test_payment_creation_excludes_disabled_bank_default(self):
+		bank_account = frappe.get_doc(
+			"Bank Account", make_bank_account("_Test Payment Bank Default", "_Test Company", "HDFC - _TC")
+		)
+		bank_account.disabled = 0
+		bank_account.is_default = 1
+		bank_account.save()
+
+		for make_document in (create_sales_invoice, make_sales_order):
+			doc = make_document()
+			with self.subTest(doctype=doc.doctype):
+				bank_account.db_set("disabled", 0)
+				self.assertEqual(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account,
+					bank_account.name,
+				)
+				# Preserve is_default to reproduce disabled accounts saved before the fix.
+				bank_account.db_set("disabled", 1)
+				self.assertIsNone(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account
+				)
+
 	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
 		journals = []
 		if voucher_type and voucher_no:
