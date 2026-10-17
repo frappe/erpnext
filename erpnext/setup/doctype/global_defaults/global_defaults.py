@@ -64,8 +64,12 @@ class GlobalDefaults(Document):
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
-		self.toggle_rounded_total()
-		self.toggle_in_words()
+		if self.has_value_changed("disable_rounded_total"):
+			self.toggle_rounded_total()
+
+		if self.has_value_changed("disable_in_words"):
+			self.toggle_in_words()
+
 		self.set_disable_rounded_total_on_pos_profiles()
 
 		frappe.clear_cache()
