@@ -389,6 +389,34 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual(get_free_stock(bin_details), 10)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_stock_reserved_in_wip_after_transfer_is_not_free(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
+			get_free_stock,
+		)
+
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[material])
+		make_stock_entry(item_code=material, target=WAREHOUSE, qty=20, basic_rate=10)
+		work_order = make_wo_order_test_record(
+			item=fg_item,
+			bom_no=bom.name,
+			qty=10,
+			source_warehouse=WAREHOUSE,
+			wip_warehouse=WIP_WAREHOUSE,
+			reserve_stock=1,
+		)
+		frappe.get_doc(make_wo_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report.fg_items, report.rm_items = [], [material]
+
+		bin_details = report.get_item_wise_bin_details()[material]
+
+		self.assertEqual(get_free_stock(bin_details), 10)
+
 	def test_make_order_skips_rows_that_are_already_covered(self):
 		"""
 		A row whose requirement is met by stock or by an order placed earlier has nothing left

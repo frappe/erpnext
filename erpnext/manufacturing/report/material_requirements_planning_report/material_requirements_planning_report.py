@@ -1232,6 +1232,7 @@ def get_stock_reserved_for_work_orders(items, warehouses=None):
 		frappe.qb.from_(sre)
 		.select(
 			sre.item_code,
+			sre.warehouse,
 			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty),
 		)
 		.where(
@@ -1240,12 +1241,31 @@ def get_stock_reserved_for_work_orders(items, warehouses=None):
 			& (sre.item_code.isin(items))
 			& (sre.status.notin(["Delivered", "Cancelled", "Closed"]))
 		)
-		.groupby(sre.item_code)
+		.groupby(sre.item_code, sre.warehouse)
 	)
 	if warehouses:
 		query = query.where(sre.warehouse.isin(warehouses))
 
-	return {item_code: flt(qty) for item_code, qty in query.run()}
+	reserved_for_production = get_reserved_for_production_by_warehouse(items, warehouses)
+	overlap = {}
+	for item_code, warehouse, qty in query.run():
+		counted = min(flt(qty), reserved_for_production.get((item_code, warehouse), 0.0))
+		overlap[item_code] = overlap.get(item_code, 0.0) + max(counted, 0.0)
+
+	return overlap
+
+
+def get_reserved_for_production_by_warehouse(items, warehouses=None):
+	filters = {"item_code": ("in", items)}
+	if warehouses:
+		filters["warehouse"] = ("in", warehouses)
+
+	return {
+		(row.item_code, row.warehouse): flt(row.reserved_qty_for_production)
+		for row in frappe.get_all(
+			"Bin", filters=filters, fields=["item_code", "warehouse", "reserved_qty_for_production"]
+		)
+	}
 
 
 def get_supply_cutoff_date(row):
