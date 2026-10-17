@@ -2071,13 +2071,14 @@ class JobCard(Document):
 
 
 def merge_time_logs_per_job_card(time_logs):
-	merged = []
-	for name in dict.fromkeys(log.name for log in time_logs):
+	time_logs = [frappe._dict(log) for log in time_logs]
+	merged = [log for log in time_logs if not log.name]
+	for name in dict.fromkeys(log.name for log in time_logs if log.name):
 		for log in sorted((log for log in time_logs if log.name == name), key=lambda log: log.from_time):
 			if merged and merged[-1].name == name and log.from_time < merged[-1].to_time:
 				merged[-1].to_time = max(merged[-1].to_time, log.to_time)
 			else:
-				merged.append(frappe._dict(log))
+				merged.append(log)
 	return merged
 
 
