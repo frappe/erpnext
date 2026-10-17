@@ -43,6 +43,7 @@ class TestCodeList(ERPNextTestSuite):
 
 	def test_canonical_uri_resolves_to_latest_version(self):
 		self.assertEqual(resolve_code_list(CANONICAL_URI), NEW_VERSION)
+		self.assertEqual(get_default_code(CANONICAL_URI), "XYZ")
 
 	def test_name_takes_precedence_over_canonical_uri(self):
 		"""A document named like a canonical URI must not redirect to another version."""
@@ -62,9 +63,6 @@ class TestCodeList(ERPNextTestSuite):
 		self.assertEqual(get_codes_for(UNKNOWN_URI, "UOM", "Nos"), ())
 		self.assertEqual(get_docnames_for(UNKNOWN_URI, "UOM", "XYZ"), ())
 		self.assertIsNone(get_default_code(UNKNOWN_URI))
-
-	def test_default_code_follows_latest_version(self):
-		self.assertEqual(get_default_code(CANONICAL_URI), "XYZ")
 
 	def test_default_common_code_must_belong_to_the_list(self):
 		new_version_code = frappe.db.get_value("Code List", NEW_VERSION, "default_common_code")
