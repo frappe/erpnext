@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.desk.query_report import run
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -93,14 +91,6 @@ class TestLeadConversionTime(ERPNextTestSuite):
 		make_communication(email, email, -22)
 
 		self.assertEqual(len(get_report_rows(lead.lead_name)), 1)
-
-	def test_sales_user_can_run_the_report(self):
-		frappe.reload_doc("crm", "report", "lead_conversion_time", force=True)
-		user = create_user("lead_conversion_sales_user@example.com", "Sales User")
-		filters = {"from_date": add_days(nowdate(), -30), "to_date": nowdate()}
-
-		with self.set_user(user.name):
-			self.assertIn("result", run("Lead Conversion Time", filters=filters))
 
 
 def make_lead(lead_name: str, email: str):

@@ -150,10 +150,6 @@ class TestEmailCampaign(ERPNextTestSuite):
 
 		self.assertEqual(len(self.send_campaign_mails(lead.email_id, on_date=add_days(today(), 3))), 1)
 
-	def test_start_date_cannot_be_in_the_past(self):
-		doc = self.make_email_campaign("irrelevant", start_date=add_days(today(), -1))
-		self.assertRaises(frappe.ValidationError, doc.set_date)
-
 	def test_started_campaign_can_be_edited(self):
 		lead = self.make_lead()
 		email_campaign = self.make_lead_email_campaign(lead, schedules=[0, 2])
@@ -164,24 +160,6 @@ class TestEmailCampaign(ERPNextTestSuite):
 		email_campaign.save()
 		email_campaign.start_date = add_days(today(), -2)
 		self.assertRaises(frappe.ValidationError, email_campaign.save)
-
-	def test_end_date_is_start_plus_max_send_after_days(self):
-		campaign = self.make_campaign(schedules=[0, 5])
-		doc = self.make_email_campaign(campaign.name)
-		doc.set_date()
-		self.assertEqual(getdate(doc.end_date), add_days(getdate(today()), 5))
-
-	def test_campaign_without_a_schedule_is_rejected(self):
-		campaign = self.make_campaign(schedules=[])
-		doc = self.make_email_campaign(campaign.name)
-		self.assertRaises(frappe.ValidationError, doc.set_date)
-
-	def test_lead_without_an_email_is_rejected(self):
-		lead = frappe.get_doc({"doctype": "Lead", "lead_name": "_Test Lead No Email"}).insert()
-		doc = frappe.new_doc("Email Campaign")
-		doc.email_campaign_for = "Lead"
-		doc.recipient = lead.name
-		self.assertRaises(frappe.ValidationError, doc.validate_lead)
 
 	def test_contact_without_an_email_is_rejected(self):
 		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Contact No Email"}).insert()

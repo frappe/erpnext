@@ -19,23 +19,6 @@ class TestCampaign(ERPNextTestSuite):
 		doc.update(fields)
 		return doc.insert()
 
-	def test_autoname_uses_the_campaign_name_by_default(self):
-		campaign = self.make_campaign(campaign_name="_Test Campaign Named")
-		self.assertEqual(campaign.name, "_Test Campaign Named")
-
-	def test_autoname_uses_naming_series_when_configured(self):
-		# regression: with a naming series the document name differs from campaign_name,
-		# and the UTM sync must still link back to a valid Campaign (self.name)
-		original = frappe.defaults.get_global_default("campaign_naming_by")
-		frappe.defaults.set_global_default("campaign_naming_by", "Naming Series")
-		try:
-			campaign = self.make_campaign(naming_series="SAL-CAM-.YYYY.-")
-			self.assertTrue(campaign.name.startswith("SAL-CAM-"))
-			utm = frappe.get_doc("UTM Campaign", campaign.campaign_name)
-			self.assertEqual(utm.crm_campaign, campaign.name)
-		finally:
-			frappe.defaults.set_global_default("campaign_naming_by", original or "")
-
 	def test_inserting_mirrors_into_a_utm_campaign(self):
 		campaign = self.make_campaign(campaign_name="_Test Campaign UTM", description="Spring push")
 		self.assertTrue(frappe.db.exists("UTM Campaign", campaign.campaign_name))

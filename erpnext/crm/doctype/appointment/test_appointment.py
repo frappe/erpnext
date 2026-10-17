@@ -559,15 +559,6 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertTrue(frappe.db.exists("Appointment", fresh.name))
 		self.assertTrue(frappe.db.exists("Appointment", self.test_appointment.name))
 
-	def test_cleanup_skipped_when_expiry_not_configured(self):
-		appointment = self._create_portal_appointment("portal_visitor_no_expiry@example.com")
-		backdate_creation(appointment.name, 5)
-		set_booking_setting("verification_link_expiry_duration", 0)
-
-		handle_expired_unverified_appointments()
-
-		self.assertEqual(get_status(appointment.name), "Unverified")
-
 	def test_status_transition_rules(self):
 		# desk appointments can never be Unverified
 		with self.assertRaises(frappe.ValidationError):

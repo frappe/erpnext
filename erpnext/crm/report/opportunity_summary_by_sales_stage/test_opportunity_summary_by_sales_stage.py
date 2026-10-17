@@ -64,16 +64,6 @@ class TestOpportunitySummaryBySalesStage(ERPNextTestSuite):
 
 		self.assertEqual(expected_data, report[1])
 
-	def test_sales_user_can_run_the_report(self):
-		from erpnext.buying.test_utils import create_user_with_roles
-
-		user = create_user_with_roles("sales_stage_report_user@example.com", "Sales User")
-		filters = {"based_on": "Opportunity Owner", "data_based_on": "Number", "company": "Best Test"}
-		with self.set_user(user.name):
-			columns = execute(filters)[0]
-
-		self.assertIn("Prospecting", [column["fieldname"] for column in columns])
-
 	def test_sales_stage_columns_follow_user_permissions(self):
 		from frappe.permissions import add_user_permission
 

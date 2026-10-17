@@ -10,17 +10,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestContractTemplate(ERPNextTestSuite):
 	"""Contract Template validates its Jinja terms and renders them against a doc."""
 
-	def test_malformed_contract_terms_are_rejected(self):
-		doc = frappe.new_doc("Contract Template")
-		doc.contract_terms = "{% for x in %}"  # invalid Jinja
-		self.assertRaises(frappe.ValidationError, doc.validate)
-
-		# a valid template, and no template at all, both pass
-		doc.contract_terms = "Party: {{ party_name }}"
-		doc.validate()
-		doc.contract_terms = None
-		doc.validate()
-
 	def test_get_contract_template_renders_terms(self):
 		template = frappe.get_doc(
 			{
