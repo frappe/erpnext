@@ -590,7 +590,13 @@ class AccountsController(TransactionBase):
 			).run()
 
 	def on_trash(self):
-		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+		from erpnext.accounts.utils import delete_exchange_gain_loss_journal, is_immutable_ledger_enabled
+
+		if self.docstatus == 2 and is_immutable_ledger_enabled():
+			frappe.throw(
+				_("Cancelled transactions cannot be deleted when Immutable Ledger is enabled."),
+				title=_("Immutable Ledger Enabled"),
+			)
 
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
@@ -1210,6 +1216,34 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = get_exchange_rate(
 					self.currency, self.company_currency, transaction_date, args
 				)
+
+	def on_recurring(self, reference_doc, auto_repeat_doc):
+		self.refresh_exchange_rates()
+
+	def refresh_exchange_rates(self):
+		if not self.meta.get_field("conversion_rate"):
+			return
+
+		transaction_date = self.get("posting_date") or self.get("transaction_date")
+		args = "for_buying" if self.meta.get_field("buying_price_list") else "for_selling"
+
+		for currency_field, rate_field in (
+			("currency", "conversion_rate"),
+			("price_list_currency", "plc_conversion_rate"),
+		):
+			currency = self.get(currency_field)
+			if not currency or currency == self.company_currency:
+				continue
+
+			exchange_rate = get_exchange_rate(currency, self.company_currency, transaction_date, args)
+			if not exchange_rate:
+				frappe.throw(
+					_(
+						"Cannot create recurring document: no exchange rate found for {0} to {1} on {2}. Please create a Currency Exchange record."
+					).format(currency, self.company_currency, transaction_date),
+					title=_("Exchange Rate Not Found"),
+				)
+			self.set(rate_field, exchange_rate)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
@@ -3585,7 +3619,7 @@ def validate_inclusive_tax(tax, doc):
 			# referred row should also be inclusive
 			_on_previous_row_error(tax.row_id)
 		elif tax.charge_type == "On Previous Row Total" and not all(
-			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id) - 1]]
+			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id)]]
 		):
 			# all rows about the referred tax should be inclusive
 			_on_previous_row_error("1 - %d" % (tax.row_id,))

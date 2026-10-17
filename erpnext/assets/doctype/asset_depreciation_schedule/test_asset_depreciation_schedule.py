@@ -11,6 +11,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
+	get_asset_depreciation_schedule,
 	get_depr_schedule,
 )
 from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
@@ -1181,3 +1182,28 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 			for d in get_depr_schedule(asset.name, "Active")
 		]
 		self.assertEqual(schedules, expected_depreciation_after_repair)
+
+	def test_schedule_is_read_only_with_asset_permission(self):
+		asset = create_monthly_asset()
+
+		for method in (get_depr_schedule, get_asset_depr_schedule_doc):
+			self.assertRaises(frappe.PermissionError, frappe.is_whitelisted, method)
+
+		self.assertEqual(get_asset_depreciation_schedule(asset.name, "Active").asset, asset.name)
+		with self.set_user("Guest"):
+			self.assertRaises(frappe.PermissionError, get_asset_depreciation_schedule, asset.name, "Active")
+
+
+def create_monthly_asset(**args):
+	defaults = {
+		"item_code": "Macbook Pro",
+		"net_purchase_amount": 1200,
+		"calculate_depreciation": 1,
+		"depreciation_method": "Straight Line",
+		"available_for_use_date": "2023-01-01",
+		"depreciation_start_date": "2023-01-31",
+		"frequency_of_depreciation": 1,
+		"total_number_of_depreciations": 12,
+		"submit": 1,
+	}
+	return create_asset(**{**defaults, **args})
