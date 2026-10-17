@@ -23,13 +23,10 @@ class TestContractTemplate(ERPNextTestSuite):
 		self.assertEqual(result["contract_terms"], "Party: Acme")
 		self.assertEqual(result["contract_template"].name, template.name)
 
-	def test_get_contract_template_without_terms_returns_none(self):
 		template = frappe.get_doc(
 			{"doctype": "Contract Template", "title": "_Test Empty Contract Template"}
 		).insert()
-
-		result = get_contract_template(template.name, {})
-		self.assertIsNone(result["contract_terms"])
+		self.assertIsNone(get_contract_template(template.name, {})["contract_terms"])
 
 	def test_single_line_terms_ending_in_a_file_extension_render_as_text(self):
 		terms = "Standard terms apply, see https://example.com/terms.html"
