@@ -39,6 +39,18 @@ class TestSubscriptionPlan(ERPNextTestSuite):
 		self.assertEqual(get_plan_rate(plan.name), 100)
 		self.assertEqual(get_plan_rate(plan.name, prorate_factor=0.5), 50)
 
+	def test_plan_rate_needs_plan_read(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		plan = self.make_plan(price_determination="Fixed Rate", cost=100)
+		plan.insert()
+
+		with as_user(make_fenced_user("plan-rate-reader@example.com", ["Accounts User"])):
+			self.assertEqual(get_plan_rate(plan.name), 100)
+
+		with as_user(make_fenced_user("plan-rate-outsider@example.com", [])):
+			self.assertRaises(frappe.PermissionError, get_plan_rate, plan.name)
+
 	def test_monthly_rate_within_year(self):
 		plan = self.make_plan(price_determination="Monthly Rate", cost=100)
 		plan.insert()
