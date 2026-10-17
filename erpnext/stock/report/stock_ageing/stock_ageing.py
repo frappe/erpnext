@@ -316,6 +316,7 @@ class FIFOSlots:
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.subcontracting_returns = self._get_subcontracting_returns()
 		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
@@ -835,7 +836,7 @@ class FIFOSlots:
 		index = -1 if from_end else 0
 		qty_to_pop = abs(row.actual_qty)
 		stock_value = abs(row.stock_value_difference)
-		if row.voucher_type in PURCHASE_VOUCHER_TYPES and qty_to_pop:
+		if qty_to_pop and self._is_return_entry(row):
 			qty_to_pop, stock_value = self._consume_slots_at_return_rate(
 				fifo_queue, transfer_key, qty_to_pop, stock_value, from_end
 			)
@@ -864,6 +865,21 @@ class FIFOSlots:
 				)
 				qty_to_pop = 0
 				stock_value = 0
+
+	def _get_subcontracting_returns(self) -> set:
+		return set(
+			frappe.get_all(
+				"Subcontracting Receipt",
+				filters={"is_return": 1, "docstatus": 1, "company": self.filters.get("company")},
+				pluck="name",
+			)
+		)
+
+	def _is_return_entry(self, row: dict) -> bool:
+		if row.voucher_type in PURCHASE_VOUCHER_TYPES:
+			return True
+
+		return row.voucher_type == "Subcontracting Receipt" and row.voucher_no in self.subcontracting_returns
 
 	def _consume_slots_at_return_rate(
 		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float, from_end: bool

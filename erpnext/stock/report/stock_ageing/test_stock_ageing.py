@@ -2460,6 +2460,18 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[5.0, "2021-11-01", 1000.0]])
 
+	def test_subcontracting_return_removes_the_returned_lot(self):
+		sle = [
+			self.make_sle(10, 1000, "2021-09-01", "Subcontracting Receipt", "001"),
+			self.make_sle(10, 2000, "2021-11-01", "Subcontracting Receipt", "002"),
+			self.make_sle(-10, -2000, "2021-12-01", "Subcontracting Receipt", "003"),
+		]
+
+		with patch.object(FIFOSlots, "_get_subcontracting_returns", return_value={"003"}):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
+
 	def test_lifo_purchase_return_removes_the_newest_matching_lot(self):
 		sle = [
 			self.make_sle(10, 1000, "2021-09-01", "Purchase Receipt", "001"),
