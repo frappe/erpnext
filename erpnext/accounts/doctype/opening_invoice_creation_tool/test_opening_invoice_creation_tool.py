@@ -235,6 +235,26 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 			with as_user(outsider):
 				self.assertRaises(frappe.PermissionError, get_temporary_opening_account, company)
 
+	def test_invoice_summary_shows_permitted_companies(self):
+		from erpnext.tests.permission_test_utils import OTHER_COMPANY, as_user, make_company_fenced_user
+
+		company = "_Test Opening Invoice Company"
+		self.make_invoices(company=company)
+		tool = frappe.get_single("Opening Invoice Creation Tool")
+
+		with as_user(
+			make_company_fenced_user("opening-summary-reader@example.com", ["System Manager"], company)
+		):
+			summary, _max_count = tool.get_opening_invoice_summary()
+		self.assertEqual(list(summary), [company])
+		self.assertEqual(summary[company]["Sales Invoice"].total_invoices, 2)
+
+		with as_user(
+			make_company_fenced_user("opening-summary-fenced@example.com", ["System Manager"], OTHER_COMPANY)
+		):
+			summary, _max_count = tool.get_opening_invoice_summary()
+		self.assertNotIn(company, summary)
+
 	@classmethod
 	def tearDownClass(cls):
 		disable_dimension()
