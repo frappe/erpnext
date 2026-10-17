@@ -9,7 +9,7 @@ import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.query_builder.functions import Sum
 from frappe.tests import change_settings
-from frappe.utils import add_days, flt, getdate, nowdate, today
+from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 from erpnext.accounts.party import get_party_details
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
@@ -346,6 +346,46 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(dn.doctype, "Delivery Note")
 		self.assertEqual(len(dn.get("items")), len(so.get("items")))
+
+	def test_make_delivery_note_from_multiple_sales_orders_merges_taxes(self):
+		def get_tax(account_head, charge_type, rate=0, tax_amount=0, row_id=None):
+			return {
+				"charge_type": charge_type,
+				"account_head": account_head,
+				"cost_center": "_Test Cost Center - _TC",
+				"description": account_head,
+				"rate": rate,
+				"tax_amount": tax_amount,
+				"row_id": row_id,
+			}
+
+		vat = get_tax("_Test Account Service Tax - _TC", "On Net Total", rate=10)
+		so1 = make_sales_order(qty=10, rate=100, do_not_save=True)
+		so1.append("taxes", vat)
+		so1.append("taxes", get_tax("_Test Account Shipping Charges - _TC", "Actual", tax_amount=100))
+		so1.insert().submit()
+
+		so2 = make_sales_order(qty=5, rate=200, do_not_save=True)
+		so2.append("taxes", vat)
+		so2.append("taxes", get_tax("_Test Account Shipping Charges - _TC", "Actual", tax_amount=50))
+		so2.append("taxes", get_tax("_Test Account Excise Duty - _TC", "On Previous Row Amount", 5, row_id="1"))
+		so2.insert().submit()
+
+		dn = make_delivery_note(so1.name)
+		dn = make_delivery_note(so2.name, target_doc=dn)
+
+		self.assertEqual({d.against_sales_order for d in dn.items}, {so1.name, so2.name})
+		self.assertEqual(dn.net_total, 2000)
+		self.assertEqual(
+			[(d.account_head, d.tax_amount, cint(d.row_id)) for d in dn.taxes],
+			[
+				("_Test Account Service Tax - _TC", 200, 0),
+				("_Test Account Shipping Charges - _TC", 150, 0),
+				("_Test Account Excise Duty - _TC", 10, 1),
+			],
+		)
+		self.assertEqual(dn.total_taxes_and_charges, 360)
+		self.assertEqual(dn.grand_total, 2360)
 
 	def test_over_delivery_of_fully_delivered_rows(self):
 		item_list = []
