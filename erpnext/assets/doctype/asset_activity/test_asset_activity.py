@@ -10,6 +10,24 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAssetActivity(ERPNextTestSuite):
+	def test_deleting_draft_asset_removes_its_activity(self):
+		asset = create_asset()
+		self.assertTrue(frappe.db.exists("Asset Activity", {"asset": asset.name}))
+
+		frappe.delete_doc("Asset", asset.name)
+
+		self.assertFalse(frappe.db.exists("Asset", asset.name))
+		self.assertFalse(frappe.db.exists("Asset Activity", {"asset": asset.name}))
+
+		reused = create_asset(do_not_save=True)
+		reused.name = asset.name
+		reused.flags.name_set = True
+		reused.insert()
+		self.assertEqual(reused.name, asset.name)
+
+		subjects = frappe.get_all("Asset Activity", {"asset": reused.name}, pluck="subject")
+		self.assertEqual(subjects, ["Asset created"])
+
 	def test_user_sees_only_the_activity_of_assets_they_can_read(self):
 		computer = create_asset(item_code="Macbook Pro").name
 		photocopier = create_asset(item_code="Photocopier").name
