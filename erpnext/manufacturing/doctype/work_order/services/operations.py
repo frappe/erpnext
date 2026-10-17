@@ -23,6 +23,7 @@ from frappe.utils import (
 )
 
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_capacity_planning_days,
 	get_mins_between_operations,
 )
 from erpnext.manufacturing.doctype.work_order.mapper import (
@@ -91,7 +92,7 @@ class OperationsService:
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
 
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
-		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
+		plan_days = get_capacity_planning_days()
 
 		for idx, row in enumerate(self.doc.operations):
 			qty = self.doc.qty
