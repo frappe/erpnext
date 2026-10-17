@@ -148,6 +148,7 @@ class BootStrapTestData:
 		self.make_holiday_list()
 		self.make_company()
 		self.make_test_account()
+		self.make_company_depreciation_settings()
 		self.make_supplier_group()
 		self.make_payment_term()
 		self.make_payment_terms_template()
@@ -2062,6 +2063,18 @@ class BootStrapTestData:
 					self.test_accounts.append(
 						frappe.get_doc("Account", {"account_name": account_name, "company": company})
 					)
+
+	def make_company_depreciation_settings(self):
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
+				"depreciation_expense_account": "_Test Depreciations - _TC",
+				"disposal_account": "_Test Gain/Loss on Asset Disposal - _TC",
+				"depreciation_cost_center": "Main - _TC",
+			},
+		)
 
 	def make_customer(self):
 		records = [
