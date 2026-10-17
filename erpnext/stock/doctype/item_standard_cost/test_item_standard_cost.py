@@ -524,6 +524,37 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", isc.revaluation_entry, "docstatus"), 2)
 
+	def test_frozen_period_rate_change_follows_caller_role(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		item = create_standard_cost_item()
+		create_item_standard_cost(
+			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -30)
+		)
+		make_stock_entry(
+			item_code=item.name,
+			to_warehouse=PI_STORES,
+			company=PI_COMPANY,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -20),
+		)
+		frappe.db.set_value(
+			"Company",
+			PI_COMPANY,
+			{"accounts_frozen_till_date": today(), "role_allowed_for_frozen_entries": "Accounts Manager"},
+		)
+
+		user = create_user("test_isc_accounts@example.com", "Accounts Manager")
+		user.add_roles("Accounts User")
+		frappe.set_user(user.name)
+		try:
+			isc = create_item_standard_cost(item.name, rate=110, company=PI_COMPANY, effective_date=today())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Stock Reconciliation", isc.revaluation_entry, "docstatus"), 1)
+
 	def test_negative_stock_gives_clear_message(self):
 		item = create_standard_cost_item(allow_negative_stock=1)
 		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -30))

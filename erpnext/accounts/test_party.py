@@ -1,5 +1,6 @@
 import frappe
 
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.party import get_default_price_list, set_price_list
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -95,6 +96,21 @@ class PartyTestCase(ERPNextTestSuite):
 			set_price_list(party_details, supplier, "Supplier", None, doctype="Purchase Order")
 
 		self.assertIsNone(party_details.buying_price_list)
+
+	def test_pos_price_list_should_be_kept(self):
+		permitted = [self.create_price_list(enabled=1), self.create_price_list(enabled=1)]
+		user = self.create_user_with_price_list_permissions(permitted)
+		pos_price_list = self.create_price_list(enabled=1)
+		pos_profile = make_pos_profile(selling_price_list=pos_price_list)
+		customer = self.create_customer()
+
+		party_details = frappe._dict()
+		with self.set_user(user):
+			set_price_list(
+				party_details, customer, "Customer", None, pos=pos_profile.name, doctype="POS Invoice"
+			)
+
+		self.assertEqual(party_details.selling_price_list, pos_price_list)
 
 	def test_disabled_permitted_price_lists_should_clear_the_price_list(self):
 		permitted = [self.create_price_list(enabled=0), self.create_price_list(enabled=0)]

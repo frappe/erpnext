@@ -25,6 +25,7 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	run_parallel_reposting,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError, get_combine_datetime
@@ -140,6 +141,15 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		repost(repost_doc)
 
 		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost_doc.name, "status"), "Completed")
+
+	def test_repost_refused_inside_stock_freeze(self):
+		frappe.db.set_single_value(
+			"Stock Settings", {"stock_frozen_upto": add_days(today(), -12), "stock_auth_role": ""}
+		)
+
+		self.assertRaises(
+			StockFreezeError, self.make_queued_item_repost, "_Test Item", add_days(today(), -20)
+		)
 
 	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_backdated_entry_refused_when_later_voucher_in_closed_period(self):
