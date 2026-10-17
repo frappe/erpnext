@@ -2039,6 +2039,8 @@ class BootStrapTestData:
 			# Advance Account
 			["Advance Received", "Current Liabilities", 0, "Receivable", None],
 			["Advance Paid", "Current Assets", 0, "Payable", None],
+			["Advance Received USD", "Current Liabilities", 0, "Receivable", "USD"],
+			["Advance Paid USD", "Current Assets", 0, "Payable", "USD"],
 			# Loyalty Account
 			["Loyalty", "Direct Expenses", 0, "Expense Account", None],
 		]
