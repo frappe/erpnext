@@ -284,16 +284,10 @@ class Asset(AccountsController):
 		add_asset_activity(self.name, _("Asset cancelled"))
 
 	def after_insert(self):
-		if not frappe.db.exists(
-			{
-				"doctype": "Asset Activity",
-				"asset": self.name,
-			}
-		):
-			add_asset_activity(self.name, _("Asset created"))
+		add_asset_activity(self.name, _("Asset created"))
 
 	def after_delete(self):
-		add_asset_activity(self.name, _("Asset deleted"))
+		frappe.db.delete("Asset Activity", {"asset": self.name})
 
 	def set_purchase_doc_row_item(self):
 		if self.asset_type == "Existing Asset" or self.asset_type == "Composite Asset":
