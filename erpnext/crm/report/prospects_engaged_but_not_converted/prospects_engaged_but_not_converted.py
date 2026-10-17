@@ -61,7 +61,7 @@ def get_columns():
 def get_data(filters):
 	lead_details = []
 	lead_filters = get_lead_filters(filters)
-	leads = frappe.get_all("Lead", fields=["name", "lead_name", "company_name"], filters=lead_filters)
+	leads = frappe.get_list("Lead", fields=["name", "lead_name", "company_name"], filters=lead_filters)
 	if not leads:
 		return lead_details
 
@@ -70,19 +70,19 @@ def get_data(filters):
 	# Collect the documents (and the lead itself) that communications may reference, for all leads in
 	# three bulk queries instead of three per lead.
 	reference_names = {name: {name} for name in lead_names}
-	for opp in frappe.get_all(
+	for opp in get_readable(
 		"Opportunity",
 		filters={"opportunity_from": "Lead", "party_name": ["in", lead_names]},
 		fields=["name", "party_name"],
 	):
 		reference_names[opp.party_name].add(opp.name)
-	for quotation in frappe.get_all(
+	for quotation in get_readable(
 		"Quotation",
 		filters={"quotation_to": "Lead", "party_name": ["in", lead_names]},
 		fields=["name", "party_name"],
 	):
 		reference_names[quotation.party_name].add(quotation.name)
-	for issue in frappe.get_all(
+	for issue in get_readable(
 		"Issue",
 		filters={"lead": ["in", lead_names], "status": ["!=", "Closed"]},
 		fields=["name", "lead"],
@@ -109,6 +109,12 @@ def get_data(filters):
 			lead_details.append(lead_data)
 
 	return lead_details
+
+
+def get_readable(doctype: str, filters: dict, fields: list) -> list:
+	if not frappe.has_permission(doctype, "read"):
+		return []
+	return frappe.get_list(doctype, filters=filters, fields=fields)
 
 
 def get_lead_filters(filters):
