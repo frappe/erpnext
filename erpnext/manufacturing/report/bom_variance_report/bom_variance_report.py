@@ -68,9 +68,7 @@ def get_columns(filters):
 
 def get_data(filters):
 	wo = frappe.qb.DocType("Work Order")
-	query = get_work_order_query(
-		["name as work_order", "qty", "produced_qty", "process_loss_qty", "production_item", "bom_no"]
-	)
+	query = get_work_order_query(["name as work_order", "qty", "produced_qty", "production_item", "bom_no"])
 
 	if filters.get("bom_no") and not filters.get("work_order"):
 		query = query.where(wo.bom_no == filters.get("bom_no"))
@@ -80,17 +78,28 @@ def get_data(filters):
 
 	work_orders = query.run(as_dict=True)
 	materials = get_materials_by_work_order([d.work_order for d in work_orders])
+	planned_loss = get_planned_loss_percentage({d.bom_no for d in work_orders})
 
 	results = []
 	for d in work_orders:
 		results.append(d)
+		expected_output = flt(d.qty) * (1 - flt(planned_loss.get(d.bom_no)) / 100)
 		for data in materials.get(d.work_order, []):
-			data.required_qty = (
-				flt(data.required_qty) * (flt(d.produced_qty) + flt(d.process_loss_qty)) / flt(d.qty)
-			)
+			data.required_qty = flt(data.required_qty) * flt(d.produced_qty) / (expected_output or flt(d.qty))
 			results.append(data)
 
 	return results
+
+
+def get_planned_loss_percentage(boms):
+	return frappe._dict(
+		frappe.get_all(
+			"BOM",
+			filters={"name": ("in", list(boms))},
+			fields=["name", "process_loss_percentage"],
+			as_list=True,
+		)
+	)
 
 
 def get_work_order_query(fields):

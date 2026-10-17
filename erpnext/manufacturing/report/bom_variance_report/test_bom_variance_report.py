@@ -117,9 +117,9 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
 			self.assertEqual(raw_material_rows[item_code].get("consumed_qty"), per_unit_qty * 2)
 
-	def test_planned_process_loss_is_not_excess_consumption(self):
+	def make_work_order_with_loss(self, bom_no, production_item):
 		work_order = make_wo_order_test_record(
-			item=self.production_item, qty=2, source_warehouse=self.warehouse, skip_transfer=1
+			item=production_item, bom_no=bom_no, qty=2, source_warehouse=self.warehouse, skip_transfer=1
 		)
 		for item_code in self.raw_materials:
 			test_stock_entry.make_stock_entry(
@@ -130,20 +130,35 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 			if row.is_finished_item:
 				row.qty = 1
 		stock_entry.submit()
-		work_order.reload()
-		self.assertEqual((work_order.produced_qty, work_order.process_loss_qty), (1, 1))
+		return work_order
 
+	def material_rows(self, work_order):
 		data = self.run_report(work_order=work_order.name)
+		return {row.get("raw_material_code"): row for row in data if row.get("raw_material_code")}
 
-		raw_material_rows = {
-			row.get("raw_material_code"): row for row in data if row.get("raw_material_code")
-		}
+	def test_planned_process_loss_is_not_excess_consumption(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		production_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(
+			item=production_item,
+			raw_materials=list(self.raw_materials),
+			process_loss_percentage=50,
+			quantity=2,
+		)
+		work_order = self.make_work_order_with_loss(bom.name, production_item)
+
+		for row in self.material_rows(work_order).values():
+			self.assertEqual(row.get("required_qty"), row.get("consumed_qty"))
+
+	def test_unplanned_process_loss_shows_as_variance(self):
+		work_order = self.make_work_order_with_loss(self.bom_no, self.production_item)
+
+		rows = self.material_rows(work_order)
 		for item_code, per_unit_qty in self.raw_materials.items():
-			self.assertEqual(
-				raw_material_rows[item_code].get("required_qty"),
-				raw_material_rows[item_code].get("consumed_qty"),
-			)
-			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
+			self.assertEqual(rows[item_code].get("required_qty"), per_unit_qty)
+			self.assertEqual(rows[item_code].get("consumed_qty"), per_unit_qty * 2)
 
 	def test_work_order_consuming_more_than_bom_shows_variance(self):
 		work_order = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2, extra_consumption=1)
