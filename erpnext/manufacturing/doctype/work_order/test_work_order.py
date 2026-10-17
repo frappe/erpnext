@@ -5804,12 +5804,8 @@ class TestWorkOrder(ERPNextTestSuite):
 			bom_no=fg_bom.name,
 			qty=1,
 			source_warehouse="_Test Warehouse - _TC",
+			skip_transfer=1,
 		)
-
-		# Transfer materials
-		se_transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
-		se_transfer.insert()
-		se_transfer.submit()
 
 		# Manufacture
 		se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
@@ -5836,15 +5832,6 @@ class TestWorkOrder(ERPNextTestSuite):
 			450,  # 300 (RM total) + 150 (packing material)
 			f"Total incoming value should be 450, got {se_manufacture.total_incoming_value}",
 		)
-
-		# Clean up
-		se_manufacture.submit()
-		se_manufacture.cancel()
-		se_transfer.cancel()
-		wo.reload()
-		wo.cancel()
-		fg_bom.cancel()
-		phantom_bom.cancel()
 
 	def test_phantom_bom_explosion(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
