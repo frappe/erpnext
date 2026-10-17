@@ -107,7 +107,7 @@ class ImportSupplierInvoice(Document):
 				file_doc.attached_to_name = pi_name
 				file_doc.content = encoded_content
 				file_doc.decode = False
-				file_doc.is_private = False
+				file_doc.is_private = True
 				file_doc.insert(ignore_permissions=True)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
