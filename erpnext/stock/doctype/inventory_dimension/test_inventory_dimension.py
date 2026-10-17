@@ -595,7 +595,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 		warehouse = create_warehouse("Serialized Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
-			apply_to_all_doctypes=1,
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
 			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
@@ -736,7 +737,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 		warehouse = create_warehouse("Serialized Legacy Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
-			apply_to_all_doctypes=1,
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
 			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
@@ -779,10 +781,10 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		inv_dimension = create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Inv Site",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="SE Site",
 			reference_document="Inv Site",
-			document_type="Inv Site",
 			validate_negative_stock=1,
 		)
 		inv_dimension.db_set("validate_negative_stock", 1)
@@ -793,7 +795,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			make_stock_entry(
 				item_code=item_code, target=warehouse, qty=20, posting_date=add_days(nowdate(), -10)
 			)
-			for qty, days, field in ((10, -5, "to_inv_site"), (-8, -1, "inv_site"), (-5, -3, "inv_site")):
+			for qty, days, field in ((10, -5, "to_se_site"), (-8, -1, "se_site"), (-5, -3, "se_site")):
 				kwargs = {"target": warehouse} if qty > 0 else {"source": warehouse}
 				doc = make_stock_entry(
 					item_code=item_code,
@@ -812,12 +814,15 @@ class TestInventoryDimension(ERPNextTestSuite):
 		from frappe.utils import add_days
 
 		item_code = make_item(properties={"is_stock_item": 1}).name
-		for dimension_name, validate_negative_stock in (("Inv Site", 1), ("Rack", 0)):
+		for dimension_name, reference_document, validate_negative_stock in (
+			("SE Site", "Inv Site", 1),
+			("SE Rack", "Rack", 0),
+		):
 			create_inventory_dimension(
-				apply_to_all_doctypes=1,
+				apply_to_all_doctypes=0,
+				document_type="Stock Entry Detail",
 				dimension_name=dimension_name,
-				reference_document=dimension_name,
-				document_type=dimension_name,
+				reference_document=reference_document,
 			).db_set("validate_negative_stock", validate_negative_stock)
 		frappe.clear_cache(doctype="Inventory Dimension")
 		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
@@ -831,7 +836,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 					posting_date=add_days(nowdate(), -10),
 					do_not_submit=True,
 				)
-				receipt.items[0].update({"to_inv_site": site, "to_rack": "Rack 1"})
+				receipt.items[0].update({"to_se_site": site, "to_se_rack": "Rack 1"})
 				receipt.submit()
 
 			issue = make_stock_entry(
@@ -841,7 +846,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 				posting_date=add_days(nowdate(), -1),
 				do_not_submit=True,
 			)
-			issue.items[0].update({"inv_site": "Site 1", "rack": "Rack 1"})
+			issue.items[0].update({"se_site": "Site 1", "se_rack": "Rack 1"})
 			issue.submit()
 
 			transfer = make_stock_entry(
@@ -853,7 +858,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 				do_not_submit=True,
 			)
 			transfer.items[0].update(
-				{"inv_site": "Site 1", "to_inv_site": "Site 1", "rack": "Rack 1", "to_rack": "Rack 2"}
+				{"se_site": "Site 1", "to_se_site": "Site 1", "se_rack": "Rack 1", "to_se_rack": "Rack 2"}
 			)
 			transfer.submit()
 

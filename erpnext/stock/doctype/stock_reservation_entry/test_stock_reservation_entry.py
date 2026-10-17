@@ -176,7 +176,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			do_not_submit=True,
 		)
 		se.submit()
-		se.cancel()
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -192,7 +191,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		items_details = create_items()
-		se = create_material_receipt(items_details, self.warehouse, qty=10)
+		create_material_receipt(items_details, self.warehouse, qty=1)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -200,7 +199,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": 80,
+					"qty": 8,
 					"uom": properties.stock_uom,
 					"rate": 100,
 				}
@@ -230,10 +229,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				self.assertEqual(sre_details.status, "Partially Reserved")
 
 			cancel_stock_reservation_entries("Sales Order", so.name)
-			se.cancel()
 
 			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
-			create_material_receipt(items_details, self.warehouse, qty=110)
+			create_material_receipt(items_details, self.warehouse, qty=10)
 			so.create_stock_reservation_entries()
 			so.load_from_db()
 
@@ -271,7 +269,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			)
 
 			for row in so.items:
-				row.qty = 80
+				row.qty = 8
 
 			so.save()
 			so.submit()
@@ -283,7 +281,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			item_wise_serial_nos = {}
 
 			for item in dn1.items:
-				item.qty = 10
+				item.qty = 1
 
 			dn1.save()
 			for row in dn1.items:
@@ -304,7 +302,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
-					item.qty = 70
+					item.qty = 7
 
 				dn2.save()
 				dn2.submit()
@@ -441,19 +439,13 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		# Spec #9 (cancellation): an auto-reserved serial/batch Sales Order reservation pins specific
 		# serial/batch entries on the SRE (`sb_entries`). Manually unreserving it must cancel the SRE
 		# (and its pinned entries) and free the stock for another order.
-		items_details = create_items()
-		create_material_receipt(items_details, self.warehouse, qty=10)
-
-		serial_item = next(
-			name for name, p in items_details.items() if p.get("has_serial_no") and not p.get("has_batch_no")
-		)
-		batch_item = next(
-			name for name, p in items_details.items() if p.get("has_batch_no") and not p.get("has_serial_no")
-		)
+		items_details = create_items("serial", "batch")
+		create_material_receipt(items_details, self.warehouse, qty=2)
+		serial_item, batch_item = items_details
 
 		item_list = [
-			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
-			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 2, "rate": 100},
+			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 2, "rate": 100},
 		]
 		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
 		so.create_stock_reservation_entries()
@@ -471,7 +463,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		for item in so.items:
 			rows = sre_row(item.name)
 			self.assertEqual(len(rows), 1)
-			self.assertEqual(rows[0].reserved_qty, 10)
+			self.assertEqual(rows[0].reserved_qty, 2)
 			self.assertEqual(rows[0].reservation_based_on, "Serial and Batch")
 			pinned = frappe.get_all(
 				"Serial and Batch Entry",
@@ -504,19 +496,13 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		# "Serial and Batch Bundle None not found" when the delivered serial/batch was carried in the
 		# row's serial_no/batch_no fields (use_serial_batch_fields) rather than a bundle. Delivery
 		# must mark the reservation delivered, and cancelling the Delivery Note must restore it.
-		items_details = create_items()
-		create_material_receipt(items_details, self.warehouse, qty=10)
-
-		serial_item = next(
-			name for name, p in items_details.items() if p.get("has_serial_no") and not p.get("has_batch_no")
-		)
-		batch_item = next(
-			name for name, p in items_details.items() if p.get("has_batch_no") and not p.get("has_serial_no")
-		)
+		items_details = create_items("serial", "batch")
+		create_material_receipt(items_details, self.warehouse, qty=2)
+		serial_item, batch_item = items_details
 
 		item_list = [
-			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
-			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 2, "rate": 100},
+			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 2, "rate": 100},
 		]
 		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
 		so.create_stock_reservation_entries()
@@ -535,7 +521,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		for item in so.items:
 			row = sre_row(item.name)
 			self.assertEqual(
-				row.delivered_qty, 10, "delivery should mark the serial/batch reservation delivered"
+				row.delivered_qty, 2, "delivery should mark the serial/batch reservation delivered"
 			)
 			self.assertEqual(row.status, "Delivered")
 
@@ -616,7 +602,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	)
 	def test_auto_reserve_serial_and_batch(self) -> None:
 		items_details = create_items()
-		create_material_receipt(items_details, self.warehouse, qty=100)
+		create_material_receipt(items_details, self.warehouse, qty=10)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -624,7 +610,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": 80,
+					"qty": 8,
 					"uom": properties.stock_uom,
 					"rate": 100,
 				}
@@ -944,7 +930,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": randint(11, 20),
 					"uom": properties.stock_uom,
 					"rate": randint(10, 400),
 				}
@@ -1011,7 +997,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	)
 	def test_consider_reserved_stock_while_cancelling_an_inward_transaction(self) -> None:
 		items_details = create_items()
-		se = create_material_receipt(items_details, self.warehouse, qty=100)
+		se = create_material_receipt(items_details, self.warehouse, qty=20)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -1019,7 +1005,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": randint(11, 20),
 					"uom": properties.stock_uom,
 					"rate": randint(10, 400),
 				}
@@ -1035,40 +1021,37 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, se.cancel)
 
 
-def create_items() -> dict:
-	items_properties = [
-		# SR STOCK ITEM
-		{"is_stock_item": 1, "valuation_rate": 100},
-		# SR SERIAL ITEM
-		{
-			"is_stock_item": 1,
-			"valuation_rate": 200,
-			"has_serial_no": 1,
-			"serial_no_series": "SRSI-.#####",
-		},
-		# SR BATCH ITEM
-		{
-			"is_stock_item": 1,
-			"valuation_rate": 300,
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SRBI-.#####.",
-		},
-		# SR SERIAL AND BATCH ITEM
-		{
-			"is_stock_item": 1,
-			"valuation_rate": 400,
-			"has_serial_no": 1,
-			"serial_no_series": "SRSBI-.#####",
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SRSBI-.#####.",
-		},
-	]
+SR_ITEM_PROPERTIES = {
+	"stock": {"is_stock_item": 1, "valuation_rate": 100},
+	"serial": {
+		"is_stock_item": 1,
+		"valuation_rate": 200,
+		"has_serial_no": 1,
+		"serial_no_series": "SRSI-.#####",
+	},
+	"batch": {
+		"is_stock_item": 1,
+		"valuation_rate": 300,
+		"has_batch_no": 1,
+		"create_new_batch": 1,
+		"batch_number_series": "SRBI-.#####.",
+	},
+	"serial_and_batch": {
+		"is_stock_item": 1,
+		"valuation_rate": 400,
+		"has_serial_no": 1,
+		"serial_no_series": "SRSBI-.#####",
+		"has_batch_no": 1,
+		"create_new_batch": 1,
+		"batch_number_series": "SRSBI-.#####.",
+	},
+}
 
+
+def create_items(*kinds: str) -> dict:
 	items = {}
-	for properties in items_properties:
-		item = make_item(properties=properties)
+	for kind in kinds or SR_ITEM_PROPERTIES:
+		item = make_item(properties=SR_ITEM_PROPERTIES[kind])
 		items[item.name] = item
 
 	return items
