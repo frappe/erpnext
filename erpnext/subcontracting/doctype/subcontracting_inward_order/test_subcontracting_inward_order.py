@@ -573,7 +573,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual(scio.items[0].produced_qty, 5)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_delivery_of_overproduced_qty": 1})
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 20}
 	)
@@ -596,16 +595,14 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(scio.items[0].produced_qty, 6)
 
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
-		self.assertEqual(delivery.items[0].qty, 6)
-		delivery.submit()
-
-		frappe.db.set_single_value("Selling Settings", "allow_delivery_of_overproduced_qty", 0)
-		delivery.cancel()
-		scio.reload()
-		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertEqual(delivery.items[0].qty, 5)
 		delivery.items[0].qty = 6
 		self.assertRaises(frappe.ValidationError, delivery.submit)
+
+		with self.change_settings("Selling Settings", allow_delivery_of_overproduced_qty=1):
+			delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+			self.assertEqual(delivery.items[0].qty, 6)
+			delivery.submit()
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
