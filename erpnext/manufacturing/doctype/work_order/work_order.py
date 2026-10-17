@@ -1058,7 +1058,7 @@ class WorkOrder(Document):
 			bom.with_operations = 1
 			source_operations = self.get_source_bom_operations()
 			for operation in self.operations:
-				source = source_operations.get(operation.operation)
+				source = source_operations.get((operation.bom or self.bom_no, operation.operation))
 				bom.append("operations", self.get_bom_operation_row(operation, bom.quantity, source))
 
 		bom.set_bom_material_details()
@@ -1084,10 +1084,11 @@ class WorkOrder(Document):
 		)
 
 	def get_source_bom_operations(self):
+		boms = list({operation.bom or self.bom_no for operation in self.operations})
 		operations = frappe.get_all(
 			"BOM Operation",
-			filters={"parent": self.bom_no, "parenttype": "BOM"},
-			fields=["operation", "time_in_mins", "fixed_time", "batch_size"],
+			filters={"parent": ("in", boms), "parenttype": "BOM"},
+			fields=["parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
 			order_by="idx",
 		)
 		batch_based = set(
@@ -1104,7 +1105,7 @@ class WorkOrder(Document):
 		source_operations = {}
 		for d in operations:
 			if d.fixed_time or (d.operation in batch_based and flt(d.batch_size)):
-				source_operations.setdefault(d.operation, d)
+				source_operations.setdefault((d.parent, d.operation), d)
 		return source_operations
 
 	def get_bom_operation_row(self, operation, bom_qty, source=None):

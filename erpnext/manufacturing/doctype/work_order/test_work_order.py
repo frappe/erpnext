@@ -6901,6 +6901,39 @@ class TestWorkOrder(ERPNextTestSuite):
 			[(fixed_operation, 30, 1, 1), (batch_operation, 60, 0, 10)],
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_matches_operations_of_their_own_bom(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		sub_bom = make_review_bom(
+			sub_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1}
+			],
+		)
+		wo = frappe.get_doc("Work Order", make_review_work_order(fg_item, bom.name, 2).name)
+		wo.append(
+			"operations",
+			{
+				"operation": operation,
+				"bom": sub_bom.name,
+				"workstation": workstation,
+				"time_in_mins": 20,
+			},
+		)
+
+		new_bom = wo.make_bom()
+
+		self.assertEqual([cint(row.fixed_time) for row in new_bom.operations], [1, 0])
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_amended_work_order_fills_reused_batches_before_new_ones(self):
