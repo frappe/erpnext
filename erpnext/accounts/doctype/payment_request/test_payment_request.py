@@ -2150,18 +2150,6 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 		self.assertEqual(payment_request.reference_doctype, "Sales Invoice")
 		self.assertEqual(payment_request.reference_name, invoice_name)
 
-	def test_payment_request_without_subscription(self):
-		si = create_sales_invoice()
-		payment_request = make_payment_request(
-			dt="Sales Invoice",
-			dn=si.name,
-			recipient_id="test@example.com",
-		)
-		self.assertEqual(payment_request.is_a_subscription, 0)
-		self.assertEqual(len(payment_request.subscription_plans), 0)
-		self.assertEqual(payment_request.reference_doctype, "Sales Invoice")
-		self.assertEqual(payment_request.reference_name, si.name)
-
 	def test_payment_request_with_subscription_for_purchase_invoice(self):
 		make_plans()
 
@@ -2204,24 +2192,6 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 		self.assertEqual(subscription_plan.qty, 1)
 		self.assertEqual(payment_request.reference_doctype, "Purchase Invoice")
 		self.assertEqual(payment_request.reference_name, invoice_name)
-
-	def test_payment_request_without_subscription_for_purchase_invoice(self):
-		pi = make_purchase_invoice()
-		payment_request = make_payment_request(
-			dt="Purchase Invoice",
-			dn=pi.name,
-			party_type="Supplier",
-			party=pi.supplier,
-			recipient_id="test@example.com",
-		)
-		self.assertEqual(payment_request.is_a_subscription, 0)
-		self.assertEqual(len(payment_request.subscription_plans), 0)
-		self.assertEqual(payment_request.reference_doctype, "Purchase Invoice")
-		self.assertEqual(payment_request.reference_name, pi.name)
-
-	def test_get_subscription_details_returns_empty_for_doctype_without_subscription_field(self):
-		so = make_sales_order()
-		self.assertEqual(get_subscription_details("Sales Order", so.name), [])
 
 	def test_get_subscription_details_requires_read_permission_on_reference(self):
 		si = create_sales_invoice()

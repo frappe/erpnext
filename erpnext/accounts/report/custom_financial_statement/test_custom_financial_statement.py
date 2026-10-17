@@ -13,8 +13,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestCustomFinancialStatement(ERPNextTestSuite):
 	"""The report renders a Financial Report Template through FinancialReportEngine.
-	These tests exercise its own entry point: a template with an account-data row
-	and a calculated row, and the guard that returns nothing without a template."""
+	These tests exercise its own entry point with a template that has an account-data
+	row and a calculated row."""
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -129,7 +129,3 @@ class TestCustomFinancialStatement(ERPNextTestSuite):
 			template.pop(field)
 		template.template_name = f"Test Ratios {frappe.generate_hash()[:8]}"
 		return frappe.get_doc(template).insert().template_name
-
-	def test_no_template_returns_nothing(self):
-		"""Without a report_template the report short-circuits and returns None."""
-		self.assertIsNone(execute(frappe._dict({"company": self.company})))

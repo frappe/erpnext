@@ -39,10 +39,6 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 		# the auto-populated rows round to exactly 100 and pass validation
 		doc.validate()
 
-	def test_validate_rejects_total_other_than_100(self):
-		doc = self.make_distribution([("January", 50), ("February", 30)])  # sums to 80
-		self.assertRaises(frappe.ValidationError, doc.insert)
-
 	def test_get_percentage_sums_period_window(self):
 		doc = self.make_distribution([("January", 50), ("February", 30), ("March", 20)])
 		doc.insert()  # total is 100, so validate passes

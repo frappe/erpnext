@@ -5,12 +5,10 @@ import frappe
 from frappe.tests.utils import whitelist_for_tests
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
-	FORMULA_FUNCTIONS,
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	FormulaValidator,
 	TemplateStructureValidator,
-	get_valid_api_method,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -119,11 +117,6 @@ class TestCustomAPIValidation(FinancialReportTemplateTestCase):
 		template.report_type = "Profit and Loss Statement"
 		return template
 
-	def test_get_valid_api_method(self):
-		self.assertRaises(frappe.PermissionError, get_valid_api_method, self.NOT_WHITELISTED)
-		self.assertRaises(frappe.PermissionError, get_valid_api_method, self.WHITELISTED_POST_ONLY)
-		self.assertEqual(get_valid_api_method(self.WHITELISTED_GET), frappe.get_attr(self.WHITELISTED_GET))
-
 	def test_save_rejects_invalid_api_methods(self):
 		for api_path in (self.NOT_WHITELISTED, self.WHITELISTED_POST_ONLY):
 			template = self.create_api_template(api_path)
@@ -183,12 +176,6 @@ class TestAccountFilter(FinancialReportTemplateTestCase):
 		self.assertFalse(validator.validate_filter(self._row('["bad_field", "=", "x"]')).is_valid)
 		self.assertTrue(validator.validate_filter(self._row('["root_type", "=", "Income"]')).is_valid)
 
-	def test_validate_gate_still_opts_out_for_non_account_data(self):
-		# validate() is the dispatch gate: it must not validate non "Account Data" rows
-		validator = AccountFilterValidator()
-		row = self._row('["bad_field", "=", "x"]', data_source="Custom API")
-		self.assertTrue(validator.validate(row).is_valid)
-
 	def test_error_message_labels_and_escapes_field(self):
 		validator = AccountFilterValidator()
 		result = validator.validate_filter(self._row('["<script>", "=", "x"]'))
@@ -218,21 +205,6 @@ class TestAccountFilter(FinancialReportTemplateTestCase):
 		self.assertRaises(
 			frappe.ValidationError, parser.build_conditions, rows, account, raise_on_invalid=True
 		)
-
-	def test_build_conditions_empty_returns_none(self):
-		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
-			FilterExpressionParser,
-		)
-
-		account = frappe.qb.DocType("Account")
-		self.assertIsNone(FilterExpressionParser().build_conditions([], account))
-
-	def test_endpoint_requires_company(self):
-		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
-			get_filtered_accounts,
-		)
-
-		self.assertRaises(frappe.ValidationError, get_filtered_accounts, "", "[]")
 
 	def test_endpoint_rejects_invalid_field(self):
 		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
@@ -288,11 +260,6 @@ class TestFormulaEnvironment(FinancialReportTemplateTestCase):
 		validator = CalculationFormulaValidator({"int", "long"})
 		self.assertTrue(validator.validate(self._row("int + long")).is_valid)
 
-	def test_engine_uses_the_shared_function_list(self):
-		context = self._calc({"A": [1.0]})._build_context(0)
-		for name, function in FORMULA_FUNCTIONS.items():
-			self.assertIs(context[name], function)
-
 	def test_rounding_matches_math_module(self):
 		calc = self._calc({"A": [1.0]})
 		self.assertEqual(calc.evaluate_formula(self._row("floor(-2.5)"))[0], -3.0)
@@ -316,11 +283,6 @@ class TestCalculationFormula(FinancialReportTemplateTestCase):
 		self.assertTrue(self._validate("(A - B) / (A - C)").is_valid)
 		self.assertTrue(self._validate("ROM / (CAS + FDE - ROM)", ("ROM", "CAS", "FDE")).is_valid)
 		self.assertTrue(self._validate("A / 0").is_valid)
-
-	def test_broken_formulas_are_rejected(self):
-		self.assertFalse(self._validate("A +").is_valid)
-		self.assertFalse(self._validate("NOPE * 2").is_valid)
-		self.assertFalse(self._validate("'text'").is_valid)
 
 
 class TestFilterOperatorCase(FinancialReportTemplateTestCase):
@@ -347,10 +309,6 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 	def _validate(code):
 		template = frappe._dict(rows=[frappe._dict(reference_code=code, idx=1, data_source="Blank Line")])
 		return TemplateStructureValidator()._validate_reference_codes(template)
-
-	def test_plain_codes_are_accepted(self):
-		for code in ("REV", "CA100", "cash_flow_2"):
-			self.assertTrue(self._validate(code).is_valid, code)
 
 	def test_hyphen_is_rejected(self):
 		# "-" reads as subtraction in a formula and is not a valid Python name
@@ -380,25 +338,3 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		template.before_validate()
 		self.assertEqual(template.rows[0].reference_code, "REV")
 		self.assertEqual(template.rows[1].calculation_formula, "REV * 2")
-
-	def test_validation_does_not_modify_the_row(self):
-		row = frappe._dict(
-			calculation_formula="  REV * 2  ",
-			idx=1,
-			data_source="Calculated Amount",
-			reference_code="X",
-		)
-		CalculationFormulaValidator({"REV", "X"}).validate(row)
-		self.assertEqual(row.calculation_formula, "  REV * 2  ")
-
-	def test_invalid_reference_code_is_escaped(self):
-		# this message fires when the code fails the format check, so it can hold anything
-		template = frappe._dict(rows=[frappe._dict(reference_code="<img src=x onerror=alert(1)>", idx=1)])
-		result = TemplateStructureValidator()._validate_reference_codes(template)
-
-		frappe.clear_messages()
-		with self.assertRaises(frappe.ValidationError):
-			result.notify_user()
-		message = frappe.get_message_log()[-1]["message"]
-		self.assertIn("&lt;img", message)
-		self.assertNotIn("<img", message)

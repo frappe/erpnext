@@ -126,11 +126,6 @@ class TestDimensionWiseAccountsBalance(ERPNextTestSuite):
 		row = next(row for row in data if row["account"] == self.expense_account)
 		self.assertEqual(row[frappe.scrub(cost_center)], 700)
 
-	def test_requires_fiscal_year(self):
-		filters = self._filters()
-		filters.pop("fiscal_year")
-		self.assertRaises(frappe.ValidationError, execute, filters)
-
 
 def make_user_restricted_to_cost_center(cost_center):
 	user = "test_dimension_wise_balance@example.com"

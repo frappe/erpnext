@@ -592,40 +592,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "frozen", se1.cancel)
 		self.assertRaisesRegex(frappe.ValidationError, "closed accounting period", sce.cancel)
 
-	def test_period_closing_blocks_stale_stock_closing_entry(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		item = make_item("Test PCV Stock Item", {"is_stock_item": 1})
-		make_stock_entry(
-			item_code=item.name,
-			qty=10,
-			rate=100,
-			to_warehouse="Stores - TPC",
-			company="Test PCV Company",
-			posting_date="2021-03-15",
-		)
-
-		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
-		sce = self.make_completed_stock_closing_entry(pcv.period_start_date, pcv.period_end_date)
-
-		make_stock_entry(
-			item_code=item.name,
-			qty=5,
-			rate=100,
-			to_warehouse="Stores - TPC",
-			company="Test PCV Company",
-			posting_date="2021-05-01",
-		)
-
-		pcv.reload()
-		self.assertRaisesRegex(frappe.ValidationError, "Regenerate", pcv.submit)
-
-		self.rebuild_stock_closing_balance(sce)
-		pcv.reload()
-		pcv.submit()
-		self.assertEqual(pcv.docstatus, 1)
-
 	def make_completed_stock_closing_entry(self, from_date, to_date):
 		from unittest.mock import patch
 

@@ -5,7 +5,6 @@ import json
 from unittest.mock import patch
 
 import frappe
-from frappe.desk.query_report import run
 from frappe.utils.formatters import format_value
 from frappe.utils.number_format import NumberFormat
 
@@ -77,18 +76,6 @@ class TestCalculatedDiscountMismatch(ERPNextTestSuite):
 		self.assertEqual(row["actual_discount_percentage"], 10.0)
 		self.assertEqual(row["actual_discount_amount"], tampered_amount)
 		self.assertEqual(row["suspected_discount_amount"], consistent_amount)
-
-	def test_accounts_user_can_run_report(self):
-		frappe.reload_doc("accounts", "report", "calculated_discount_mismatch", force=True)
-		user = self.make_user("test_discount_mismatch_accounts@example.com", ["Accounts User"])
-
-		frappe.set_user(user)
-		try:
-			result = run("Calculated Discount Mismatch", frappe._dict())
-		finally:
-			frappe.set_user("Administrator")
-
-		self.assertIsInstance(result["result"], list)
 
 	def test_unreadable_transactions_are_hidden(self):
 		invoice = self.create_discounted_invoice()

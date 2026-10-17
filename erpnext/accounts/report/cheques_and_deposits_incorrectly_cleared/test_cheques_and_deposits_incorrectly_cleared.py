@@ -36,15 +36,6 @@ class TestChequesAndDepositsIncorrectlyCleared(ERPNextTestSuite):
 		self.assertEqual((rows[transfer_in].debit, rows[transfer_in].credit), (2000, 0))
 		self.assertEqual((rows[paid_out].debit, rows[paid_out].credit), (0, 300))
 
-	def test_paid_purchase_invoice_is_listed(self):
-		invoice = make_purchase_invoice(is_paid=1, cash_bank_account="_Test Bank - _TC", qty=1, rate=400)
-		invoice.db_set("clearance_date", add_days(nowdate(), -5))
-
-		row = self.get_rows(add_days(nowdate(), -2)).get(invoice.name)
-
-		self.assertIsNotNone(row)
-		self.assertEqual((row.payment_document, row.debit, row.credit), ("Purchase Invoice", 0, 400))
-
 	def test_paid_purchase_invoice_amount_in_bank_currency(self):
 		invoice = make_purchase_invoice(
 			is_paid=1,

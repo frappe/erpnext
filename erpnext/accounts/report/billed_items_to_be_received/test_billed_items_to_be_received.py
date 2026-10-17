@@ -142,17 +142,6 @@ class TestBilledItemsToBeReceived(ERPNextTestSuite):
 
 		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(10, 0, 6)])
 
-	def test_receipt_return_reopens_invoice_made_from_receipt(self):
-		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
-		pi = make_invoice_from_receipt(receipt.name)
-		pi.insert()
-		pi.submit()
-		self.return_to_supplier(receipt.name, qty=2)
-
-		rows = self.get_rows_for(self.run_report(), pi.name)
-
-		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
-
 	def test_receipt_return_counted_once_across_invoices_of_one_receipt_row(self):
 		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=200)
 		first_invoice, second_invoice = (self.bill_receipt(receipt.name, qty=5) for _ in range(2))

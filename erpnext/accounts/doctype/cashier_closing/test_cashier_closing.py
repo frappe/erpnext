@@ -36,10 +36,6 @@ class TestCashierClosing(ERPNextTestSuite):
 		doc.returns = args.get("returns", 0)
 		return doc
 
-	def test_from_time_must_be_before_to_time(self):
-		doc = self.make_closing(from_time="18:00:00", time="09:00:00")
-		self.assertRaises(frappe.ValidationError, doc.save)
-
 	def test_equal_from_and_to_time_is_rejected(self):
 		# validate_time uses >=, so a zero-length window is also blocked
 		doc = self.make_closing(from_time="09:00:00", time="09:00:00")

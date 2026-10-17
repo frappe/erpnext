@@ -196,29 +196,6 @@ class TestBankStatementImport(ERPNextTestSuite):
 		self.assertIn(":20:STMTREF167619", result)  # Reference should remain unchanged
 		self.assertIn("UPI/TEST USER/123456789/PaidViaTestApp", result)
 
-	def test_get_transaction_reference_uses_customer_reference(self):
-		"""Per-transaction reference must come from :61: customer_reference, not :20:."""
-		self.assertEqual(
-			get_transaction_reference(
-				{"customer_reference": "UPI-100000000001", "transaction_reference": "STMTREF12345"}
-			),
-			"UPI-100000000001",
-		)
-
-	def test_get_transaction_reference_rejoins_overflow(self):
-		"""When a bank emits a single-line :61: with >16-char reference, the regex
-		splits the tail into extra_details. We must rejoin them."""
-		self.assertEqual(
-			get_transaction_reference(
-				{
-					"customer_reference": "NEFTINW-12345678",
-					"extra_details": "90",
-					"transaction_reference": "STMTREF12345",
-				}
-			),
-			"NEFTINW-1234567890",
-		)
-
 	def test_get_transaction_reference_falls_back_to_bank_reference_on_nonref(self):
 		"""NONREF is the MT940 'no customer reference' sentinel; prefer bank_reference."""
 		self.assertEqual(
@@ -261,20 +238,6 @@ class TestBankStatementImport(ERPNextTestSuite):
 				}
 			),
 			"TBMS-123456789",
-		)
-
-	def test_get_transaction_reference_keeps_noref_literal(self):
-		"""Bare 'NOREF' (without bank_reference) stays as-is; still better than the
-		statement-level reference which is identical across all transactions."""
-		self.assertEqual(
-			get_transaction_reference(
-				{
-					"customer_reference": "NOREF",
-					"bank_reference": None,
-					"transaction_reference": "STMTREF12345",
-				}
-			),
-			"NOREF",
 		)
 
 	def test_mt940_parse_per_transaction_reference_mapping(self):

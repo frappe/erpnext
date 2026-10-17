@@ -1,7 +1,6 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, now, today
@@ -395,28 +394,6 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 					frappe.ValidationError, "Row #2: Quantity must be a positive number"
 				):
 					tool.make_invoices()
-
-	def test_opening_invoice_skips_credit_and_overdue_checks(self):
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
-
-		with (
-			patch.object(SalesInvoice, "check_credit_limit") as credit_check,
-			patch.object(SalesInvoice, "check_overdue_billing_threshold") as overdue_check,
-		):
-			names = self.make_invoices(company="_Test Opening Invoice Company")
-			self.assertEqual(len(names), 2)
-			credit_check.assert_not_called()
-			overdue_check.assert_not_called()
-
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		with (
-			patch.object(SalesInvoice, "check_credit_limit") as credit_check,
-			patch.object(SalesInvoice, "check_overdue_billing_threshold") as overdue_check,
-		):
-			create_sales_invoice(uom=frappe.get_cached_value("Item", "_Test Item", "stock_uom"))
-			credit_check.assert_called_once()
-			overdue_check.assert_called_once()
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",

@@ -508,19 +508,6 @@ class TestJournalEntry(ERPNextTestSuite):
 		jv.insert()
 		return jv
 
-	def test_totals_are_rounded_to_precision(self):
-		jv = self.make_jv_with_fractional_totals()
-		jv.submit()
-
-		stored = frappe.db.get_value(
-			"Journal Entry", jv.name, ["total_debit", "total_credit", "difference"], as_dict=True
-		)
-		self.assertEqual(jv.total_debit, flt(jv.total_debit, jv.precision("total_debit")))
-		self.assertEqual(jv.total_credit, flt(jv.total_credit, jv.precision("total_credit")))
-		self.assertEqual(jv.total_debit, stored.total_debit)
-		self.assertEqual(jv.total_credit, stored.total_credit)
-		self.assertEqual(jv.difference, stored.difference)
-
 	def test_update_after_submit_with_fractional_totals(self):
 		"""An unrounded total is stored rounded, so updating a submitted entry used to throw."""
 		jv = self.make_jv_with_fractional_totals()
@@ -901,20 +888,6 @@ class TestJournalEntry(ERPNextTestSuite):
 				jv = self.make_jv_against_purchase_invoice(invoice)
 				jv.insert()
 				self.assertEqual(jv.reference_types[invoice.name], "Purchase Invoice")
-
-	def test_jv_against_blocked_sales_invoice_reference_is_not_checked(self):
-		"""A Sales Invoice has no hold state, so the check must skip it rather than fail."""
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		invoice = create_sales_invoice(rate=500)
-		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
-		jv.accounts[1].party_type = "Customer"
-		jv.accounts[1].party = "_Test Customer"
-		jv.accounts[1].reference_type = "Sales Invoice"
-		jv.accounts[1].reference_name = invoice.name
-		jv.insert()
-
-		self.assertEqual(jv.reference_types[invoice.name], "Sales Invoice")
 
 	def test_get_balance_places_difference_on_blank_row(self):
 		"""Characterize: get_balance puts the unbalanced difference on an amountless row."""

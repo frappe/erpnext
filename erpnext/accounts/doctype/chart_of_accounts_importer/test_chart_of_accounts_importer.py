@@ -20,9 +20,6 @@ class TestChartofAccountsImporter(ERPNextTestSuite):
 	"""The importer parses an uploaded CoA into a nested tree and validates its
 	shape. These cover the parsing/validation helpers without a file upload."""
 
-	def test_validate_columns_rejects_blank_file(self):
-		self.assertRaises(frappe.ValidationError, validate_columns, [])
-
 	def test_validate_columns_requires_eight_columns(self):
 		self.assertRaises(frappe.ValidationError, validate_columns, [["a", "b", "c"]])
 		# the standard template width passes

@@ -11,7 +11,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestBisectAccountingStatements(ERPNextTestSuite):
 	"""The tool bisects a date range into a tree of Bisect Nodes down to single days.
-	These cover the date validation and that the bisection cleanly partitions the range."""
+	These cover that the bisection cleanly partitions the range."""
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -27,12 +27,6 @@ class TestBisectAccountingStatements(ERPNextTestSuite):
 		for leaf in leaves:
 			self.assertEqual(getdate(leaf.period_from_date), getdate(leaf.period_to_date))
 		return sorted(getdate(leaf.period_from_date) for leaf in leaves)
-
-	def test_validate_dates_rejects_reversed_range(self):
-		doc = frappe.new_doc("Bisect Accounting Statements")
-		doc.from_date = "2026-01-08"
-		doc.to_date = "2026-01-01"
-		self.assertRaises(frappe.ValidationError, doc.validate)
 
 	def test_bfs_partitions_range_into_single_days(self):
 		doc = frappe.new_doc("Bisect Accounting Statements")

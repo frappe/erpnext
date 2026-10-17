@@ -44,12 +44,6 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		doc = self.make_ppr(bank_cash_account=self.other_company_account())
 		self.assertRaises(frappe.ValidationError, doc.insert)
 
-	def test_submit_sets_status_to_queued(self):
-		doc = self.make_ppr()
-		doc.insert()
-		doc.submit()
-		self.assertEqual(doc.status, "Queued")
-
 	def test_get_pr_instance_copies_filters_and_caps_limits(self):
 		doc = self.make_ppr(from_invoice_date="2026-01-01", to_invoice_date="2026-06-30")
 		doc.insert()

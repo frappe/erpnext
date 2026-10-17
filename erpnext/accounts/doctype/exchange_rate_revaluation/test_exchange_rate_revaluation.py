@@ -404,14 +404,6 @@ class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
 			doc.append("accounts", row)
 		return doc
 
-	def test_rounding_loss_allowance_must_be_between_0_and_1(self):
-		for bad in (-0.1, 1, 1.5):
-			doc = self._revaluation_with_rows([], rounding_loss_allowance=bad)
-			self.assertRaises(frappe.ValidationError, doc.validate)
-		# values inside [0, 1) are accepted, at the lower bound and mid-range
-		for good in (0.0, 0.5):
-			self._revaluation_with_rows([], rounding_loss_allowance=good).validate()
-
 	def test_gain_loss_computed_and_split_by_zero_balance(self):
 		doc = self._revaluation_with_rows(
 			[

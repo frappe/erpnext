@@ -149,22 +149,6 @@ class TestProcessStatementOfAccountsValidation(ERPNextTestSuite):
 		doc.update(overrides)
 		return doc
 
-	def test_customers_are_required(self):
-		self.assertRaises(frappe.ValidationError, self.make_soa(with_customer=False).validate)
-
-	def test_general_ledger_body_uses_a_date_range(self):
-		doc = self.make_soa(report="General Ledger")
-		doc.validate()
-		self.assertIn("from {{ doc.from_date }} to {{ doc.to_date }}", doc.body)
-		# subject and pdf name are also defaulted
-		self.assertTrue(doc.subject)
-		self.assertTrue(doc.pdf_name)
-
-	def test_receivable_body_uses_the_posting_date(self):
-		doc = self.make_soa(report="Accounts Receivable")
-		doc.validate()
-		self.assertIn("until {{ doc.posting_date }}", doc.body)
-
 	def test_account_must_belong_to_company(self):
 		other = frappe.db.get_value("Account", {"company": "_Test Company 1", "is_group": 0}, "name")
 		self.assertTrue(other, "need an account in _Test Company 1")

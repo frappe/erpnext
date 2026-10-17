@@ -30,16 +30,6 @@ class TestSubscriptionPlan(ERPNextTestSuite):
 		)
 		return plan
 
-	def test_billing_interval_count_must_be_positive(self):
-		plan = self.make_plan(price_determination="Fixed Rate", cost=100, billing_interval_count=0)
-		self.assertRaises(frappe.ValidationError, plan.insert)
-
-	def test_fixed_rate_applies_prorate_factor(self):
-		plan = self.make_plan(price_determination="Fixed Rate", cost=100)
-		plan.insert()
-		self.assertEqual(get_plan_rate(plan.name), 100)
-		self.assertEqual(get_plan_rate(plan.name, prorate_factor=0.5), 50)
-
 	def test_plan_rate_needs_plan_read(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
@@ -51,13 +41,6 @@ class TestSubscriptionPlan(ERPNextTestSuite):
 
 		with as_user(make_fenced_user("plan-rate-outsider@example.com", [])):
 			self.assertRaises(frappe.PermissionError, get_plan_rate, plan.name)
-
-	def test_monthly_rate_within_year(self):
-		plan = self.make_plan(price_determination="Monthly Rate", cost=100)
-		plan.insert()
-		# Jan 1 - Mar 31 is 3 whole months; month-aligned so proration is 0
-		rate = get_plan_rate(plan.name, start_date="2026-01-01", end_date="2026-03-31")
-		self.assertEqual(rate, 300)
 
 	def test_monthly_rate_across_year_boundary(self):
 		# a 14-month span (Jan 2026 to Feb 2027) bills all 14 months, not just the

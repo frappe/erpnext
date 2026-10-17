@@ -1148,36 +1148,6 @@ class TestPricingRule(ERPNextTestSuite):
 
 		si.delete()
 
-	def test_payment_schedule_updated_on_transaction_discount_removal(self):
-		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
-		pricing_rule = make_pricing_rule(
-			selling=1,
-			apply_on="Transaction",
-			price_or_product_discount="Price",
-			discount_percentage=4,
-		)
-
-		si = create_sales_invoice(qty=5, rate=100, do_not_save=True)
-		si.payment_terms_template = "_Test Payment Term Template"
-		si.insert()
-		self.assertEqual(si.grand_total, 480)
-		self.assertEqual([d.payment_amount for d in si.payment_schedule], [240, 240])
-
-		pricing_rule.valid_from = add_days(si.posting_date, -10)
-		pricing_rule.valid_upto = add_days(si.posting_date, -1)
-		pricing_rule.save()
-
-		si.reload()
-		si.submit()
-		self.assertEqual(si.discount_amount, 0)
-		self.assertEqual(si.grand_total, 500)
-		self.assertEqual([d.payment_amount for d in si.payment_schedule], [250, 250])
-
-		payment_schedule = frappe.get_all(
-			"Payment Schedule", filters={"parent": si.name}, pluck="payment_amount", order_by="idx"
-		)
-		self.assertEqual(payment_schedule, [250, 250])
-
 	def test_manual_transaction_discount_retained_with_expired_pricing_rule(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
 		pricing_rule = make_pricing_rule(

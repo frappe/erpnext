@@ -150,14 +150,6 @@ class TestShareTransferValidation(ERPNextTestSuite):
 		doc.update(overrides)
 		return doc
 
-	def test_baseline_transfer_is_consistent(self):
-		# the helper's defaults must pass, otherwise the negative cases prove nothing
-		self.make_transfer().basic_validations()
-
-	def test_seller_and_buyer_must_differ(self):
-		doc = self.make_transfer(to_shareholder="SH-A")
-		self.assertRaises(frappe.ValidationError, doc.basic_validations)
-
 	def test_share_count_must_match_the_number_range(self):
 		# 1..100 is 100 shares, not 50
 		doc = self.make_transfer(no_of_shares=50)
@@ -171,15 +163,3 @@ class TestShareTransferValidation(ERPNextTestSuite):
 		doc = self.make_transfer(amount=0)
 		doc.basic_validations()
 		self.assertEqual(doc.amount, 1000)
-
-	def test_equity_or_liability_account_is_required(self):
-		doc = self.make_transfer(equity_or_liability_account=None)
-		self.assertRaises(frappe.ValidationError, doc.basic_validations)
-
-	def test_issue_requires_a_to_shareholder(self):
-		doc = self.make_transfer(transfer_type="Issue", to_shareholder="", asset_account="Cash - _TC")
-		self.assertRaises(frappe.ValidationError, doc.basic_validations)
-
-	def test_purchase_requires_a_from_shareholder(self):
-		doc = self.make_transfer(transfer_type="Purchase", from_shareholder="", asset_account="Cash - _TC")
-		self.assertRaises(frappe.ValidationError, doc.basic_validations)

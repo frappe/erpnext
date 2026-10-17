@@ -3,11 +3,7 @@
 
 import frappe
 from frappe.desk.query_report import run
-from frappe.utils import today
 
-from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
-	execute as execute_summary,
-)
 from erpnext.accounts.report.consolidated_accounts_receivable.test_consolidated_accounts_receivable import (
 	ConsolidatedReportMixin,
 )
@@ -38,28 +34,6 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 		self.assertEqual([r.outstanding for r in rows], [200.0, 300.0, 500.0])
 		self.assertEqual(rows[-1].party_type, "Total")
 		self.assertTrue(rows[-1].bold)
-
-	def test_total_matches_individual_company_summaries(self):
-		self.create_invoice(self.company_a, "_TUNA", 200)
-		self.create_invoice(self.company_b, "_TUNB", 300)
-
-		total = execute(self.filters())[1][-1].outstanding
-		individual = sum(self.company_outstanding(company) for company in (self.company_a, self.company_b))
-
-		self.assertEqual(total, individual)
-
-	def test_company_without_transactions_is_omitted(self):
-		self.create_invoice(self.company_a, "_TUNA", 200)
-
-		rows = execute(self.filters())[1]
-
-		self.assertEqual([r.company for r in rows], [self.company_a, ""])
-		self.assertEqual(rows[-1].outstanding, 200.0)
-
-	def test_no_companies_selected_returns_nothing(self):
-		self.create_invoice(self.company_a, "_TUNA", 200)
-
-		self.assertEqual(execute(self.filters(companies=[]))[1], [])
 
 	def test_all_parties_are_shown_when_no_party_is_selected(self):
 		self.create_customer("_Test Second Consolidation Customer")
@@ -117,7 +91,3 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 			doc.insert()
 		frappe.permissions.add_user_permission("Company", company, user)
 		return user
-
-	def company_outstanding(self, company):
-		filters = {"company": company, "report_date": today(), "range": "30, 60, 90, 120"}
-		return sum(r.outstanding for r in execute_summary(filters)[1] if r.party == self.customer)

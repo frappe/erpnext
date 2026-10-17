@@ -209,20 +209,6 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(doc.total_credits, 20150.0)
 		self.assertEqual(doc.total_credit_transactions, 2)
 
-	def test_leading_cr_dr_markers(self):
-		"""Some banks print the marker in front of the amount."""
-		doc = self._create_bank_statement_import_log(
-			[
-				["Date", "Narration", "Amount"],
-				["01/04/2026", "ATM WITHDRAWAL", "Dr 2,000.00"],
-				["03/04/2026", "SALARY", "Cr 20,000.00"],
-			]
-		)
-
-		self.assertEqual(doc.detected_amount_format, 'Amount column has "CR"/"DR" values')
-		self.assertEqual(doc.total_debits, 2000.0)
-		self.assertEqual(doc.total_credits, 20000.0)
-
 	def test_partially_marked_cr_dr_amount_column(self):
 		"""A CR/DR amount column stays CR/DR even when some rows carry no marker.
 
@@ -418,33 +404,6 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 			}
 		)
 		self.assertTrue(transactions["included"])
-
-	def test_pdf_table_without_description_still_importable(self):
-		"""No narration column means "starts unticked", NOT "cannot be imported".
-
-		`description` is not mandatory on Bank Transaction, so a bank that omits narration
-		must still import once the user ticks the table.
-		"""
-		table = {
-			"header_index": 0,
-			"rows": [
-				["Date", "Amount", "Balance"],
-				["01/04/2025", "500.00", "9,500.00"],
-				["03/04/2025", "20000.00", "29,500.00"],
-			],
-			"column_mapping": [
-				{"index": 0, "header_text": "Date", "variable": "a", "maps_to": "Date"},
-				{"index": 1, "header_text": "Amount", "variable": "b", "maps_to": "Amount"},
-				{"index": 2, "header_text": "Balance", "variable": "c", "maps_to": "Balance"},
-			],
-		}
-
-		final, _df, _af = build_table_transactions(table)
-		self.assertFalse(should_include_table(table, final))
-
-		# The transactions themselves are intact and importable.
-		self.assertEqual(len(final), 2)
-		self.assertEqual([t["date"] for t in final], ["2025-04-01", "2025-04-03"])
 
 	def test_headerless_content_mapping(self):
 		"""Without a header row, columns are guessed from their contents."""

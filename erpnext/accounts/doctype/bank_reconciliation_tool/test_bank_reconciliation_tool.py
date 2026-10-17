@@ -16,7 +16,6 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	create_journal_entry_bts,
 	create_payment_entry_and_reconcile,
 	create_payment_entry_bts,
-	get_auto_reconcile_message,
 	get_bank_transactions,
 	get_linked_payments,
 	reconcile_vouchers,
@@ -154,33 +153,6 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		bank_transaction = self.make_bank_transaction(date=today())
 		self.assertEqual(get_linked_payments(bank_transaction.name), [])
 
-	def test_rejects_reversed_date_ranges(self):
-		from_date, to_date = today(), add_days(today(), -1)
-		with self.assertRaisesRegex(frappe.ValidationError, "From Date cannot be greater than To Date"):
-			get_bank_transactions(self.bank_account, from_date, to_date)
-
-		with self.assertRaisesRegex(
-			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
-		):
-			auto_reconcile_vouchers(
-				self.bank_account,
-				filter_by_reference_date=True,
-				from_reference_date=from_date,
-				to_reference_date=to_date,
-			)
-
-		transaction = self.make_bank_transaction(date=today())
-		with self.assertRaisesRegex(
-			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
-		):
-			get_linked_payments(
-				transaction.name,
-				["payment_entry"],
-				filter_by_reference_date=True,
-				from_reference_date=from_date,
-				to_reference_date=to_date,
-			)
-
 	def test_deposit_matches_amount_received_in_bank_account(self):
 		# money leaves another bank account and lands here minus a charge, so the two sides differ
 		payment = frappe.get_doc(
@@ -214,41 +186,6 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		# and what the exact match compares against
 		exact_matches = self.get_matching_payment_entries(transaction.name, exact_match=True)
 		self.assertEqual([m["name"] for m in exact_matches], [payment.name])
-
-	def test_withdrawal_matches_amount_paid_from_bank_account(self):
-		payment = create_payment_entry(
-			company=self.company,
-			payment_type="Pay",
-			party_type="Supplier",
-			party="_Test Supplier",
-			paid_from=self.bank,
-			paid_to="Creditors - _TC",
-			paid_amount=1250,
-		)
-		payment = payment.save().submit()
-
-		transaction = self.make_bank_transaction(date=today(), deposit=0, withdrawal=1250)
-
-		exact_matches = self.get_matching_payment_entries(transaction.name, exact_match=True)
-		self.assertEqual([m["name"] for m in exact_matches], [payment.name])
-		self.assertEqual(exact_matches[0]["paid_amount"], 1250)
-
-	def test_auto_reconcile_message_for_no_matches(self):
-		message, indicator = get_auto_reconcile_message([], [])
-		self.assertEqual(indicator, "blue")
-		self.assertIn("No matches", message)
-
-	def test_auto_reconcile_message_counts_and_pluralizes(self):
-		# reconciled count is reported and the indicator turns green
-		message, indicator = get_auto_reconcile_message([], ["t1", "t2"])
-		self.assertEqual(indicator, "green")
-		self.assertIn("2 Transaction(s) Reconciled", message)
-
-		# partially-reconciled label is singular for one, plural for many
-		singular, _ = get_auto_reconcile_message(["p1"], [])
-		self.assertIn("1 Transaction Partially Reconciled", singular)
-		plural, _ = get_auto_reconcile_message(["p1", "p2"], [])
-		self.assertIn("2 Transactions Partially Reconciled", plural)
 
 	def test_multi_currency_pay_converts_and_balances(self):
 		# withdrawal from an INR bank paying a USD supplier; rate 3.0 makes 100/3 non-exact

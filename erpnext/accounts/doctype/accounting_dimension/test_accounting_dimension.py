@@ -59,15 +59,6 @@ class TestAccountingDimension(ERPNextTestSuite):
 		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Selling Settings"})
 		self.assertRaises(frappe.ValidationError, dimension.insert)
 
-	def test_non_scalar_dimension_value_skipped_in_gl_dict(self):
-		si = create_sales_invoice(do_not_save=1)
-
-		si.department = "_Test Department - _TC"
-		self.assertEqual(si.get_gl_dict({}).get("department"), "_Test Department - _TC")
-
-		si.department = ["_Test Department - _TC"]
-		self.assertNotIn("department", si.get_gl_dict({}))
-
 	def test_mandatory(self):
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True

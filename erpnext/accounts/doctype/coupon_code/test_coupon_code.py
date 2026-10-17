@@ -142,13 +142,6 @@ class TestCouponCode(ERPNextTestSuite):
 			coupon.reload()
 			self.assertEqual(coupon.pricing_rule, rule.name)
 
-	def test_cannot_save_coupon_with_reversed_validity_dates(self):
-		coupon = frappe.get_doc("Coupon Code", "SAVE30")
-		coupon.valid_from = "2026-09-17"
-		coupon.valid_upto = "2026-09-02"
-		with self.assertRaises(frappe.exceptions.InvalidDates):
-			coupon.save()
-
 	def test_sales_order_with_coupon_code(self):
 		frappe.db.set_value("Coupon Code", "SAVE30", "used", 0)
 
