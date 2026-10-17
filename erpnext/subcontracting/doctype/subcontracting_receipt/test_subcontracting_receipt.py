@@ -859,9 +859,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
-		scr.reload()
-		scr.cancel()
-
 	def test_supplied_items_consumed_qty(self):
 		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
 		set_backflush_based_on("Material Transferred for Subcontract")
@@ -1441,6 +1438,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
 		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.items[0].qty = 2
 		scr1.save()
 
 		# Enable `Inspection Required before Purchase` in Item Master
@@ -1460,10 +1458,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		# SCR should be submitted successfully as Quality Inspection is set
 		scr1.submit()
-		scr1.reload()
-		scr1.cancel()
-		qa.reload()
-		qa.cancel()
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
