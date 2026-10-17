@@ -1817,6 +1817,7 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	voucher_nos = [d[1] for d in future_stock_vouchers]
 
+<<<<<<< HEAD
 	gles = frappe.db.sql(
 		"""
 		select name, account, credit, debit, cost_center, project, voucher_type, voucher_no
@@ -1825,6 +1826,13 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 			posting_date >= {} and voucher_no in ({})""".format("%s", ", ".join(["%s"] * len(voucher_nos))),
 		tuple([posting_date, *voucher_nos]),
 		as_dict=1,
+=======
+	gles = frappe.get_all(
+		"GL Entry",
+		filters={"is_cancelled": 0, "posting_date": [">=", posting_date], "voucher_no": ["in", voucher_nos]},
+		fields=["name", "account", "credit", "debit", "cost_center", "project", "voucher_type", "voucher_no"],
+		limit=0,
+>>>>>>> f95641a (fix(accounts): ignore cancelled gl entries when comparing voucher entries during repost)
 	)
 
 	for d in gles:
