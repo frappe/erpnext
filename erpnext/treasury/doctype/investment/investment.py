@@ -231,7 +231,7 @@ class Investment(Document):
 		}
 		self.db_set(values)
 
-	def get_ledger_balance(self, account, upto=None):
+	def get_ledger_balance(self, account, upto=None, in_account_currency=False):
 		if not account:
 			return 0
 
@@ -239,8 +239,13 @@ class Investment(Document):
 
 		ledger = get_investment_gl_query(include_revaluations=True)
 		gl_entry = ledger.gl_entry
+		debit, credit = (
+			(gl_entry.debit_in_account_currency, gl_entry.credit_in_account_currency)
+			if in_account_currency
+			else (gl_entry.debit, gl_entry.credit)
+		)
 		query = (
-			ledger.query.select(Sum(gl_entry.debit) - Sum(gl_entry.credit))
+			ledger.query.select(Sum(debit) - Sum(credit))
 			.where(gl_entry.account == account)
 			.where(gl_entry.is_cancelled == 0)
 			.where(ledger.investment == self.name)

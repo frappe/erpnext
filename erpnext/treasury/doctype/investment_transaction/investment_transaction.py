@@ -668,8 +668,13 @@ class InvestmentTransaction(AccountsController):
 		if not release:
 			return []
 
-		# amounts are in company currency; the investment currency amount converts back to exactly them
-		amount = release / flt(self.conversion_rate)
+		# the account currency side releases its own booked balance, not the company amount at today's rate,
+		# so a full exit leaves the account at zero in both currencies
+		amount = flt(
+			investment.get_ledger_balance(fair_value_account, self.posting_date, in_account_currency=True)
+			* share,
+			self.precision("net_amount"),
+		)
 		gain, loss = max(release, 0), max(-release, 0)
 		return [
 			get_gl_entry(self, fair_value_account, max(-amount, 0), max(amount, 0), loss, gain),

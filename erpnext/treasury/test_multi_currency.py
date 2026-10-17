@@ -36,6 +36,7 @@ from erpnext.treasury.report.cash_flow_forecast.cash_flow_forecast import get_in
 USD_BANK_ACCOUNT = "_Test Bank USD - _TC"
 EUR_BANK_ACCOUNT = "_Test Bank EUR - _TC"
 USD_INVESTMENT_ACCOUNT = "_Test Investments USD - _TC"
+USD_FAIR_VALUE_ACCOUNT = "_Test Fair Value USD - _TC"
 INVESTMENT_ACCOUNT = "Short-term Investments - _TC"
 BOND_TERMS = {
 	"investment_type": "_Test Corporate Bond",
@@ -54,6 +55,7 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		create_investment_type("_Test Corporate Bond", "Bond")
 		create_financial_institution("_Test Bank")
 		create_usd_investment_account()
+		create_usd_investment_account(USD_FAIR_VALUE_ACCOUNT)
 
 	def test_purchase_posts_company_currency_and_bank_currency(self):
 		investment = make_usd_investment()
@@ -177,6 +179,26 @@ class TestMultiCurrencyInvestment(ERPNextTestSuite):
 		self.assertEqual(
 			get_account_currency_entries(revaluation.name)[USD_INVESTMENT_ACCOUNT], ("USD", 224.39, 0)
 		)
+
+	def test_full_sale_clears_foreign_fair_value_account(self):
+		"""INR 18,400 is booked as USD 224.39 at 82; selling everything at 85 must release all USD 224.39,
+		not INR 18,400 / 85 = USD 216.47."""
+		investment = make_usd_investment(
+			investment_type="_Test Equity Fund",
+			measurement_category="FVTPL",
+			**{**REVALUATION_ACCOUNTS, "fair_value_adjustment_account": USD_FAIR_VALUE_ACCOUNT},
+		)
+		make_usd_transaction(investment.name, "Purchase", 80, units=100, rate=10).submit()
+		make_market_revaluation(investment.name, nav_per_unit=12, conversion_rate=82).submit()
+
+		sale = make_usd_transaction(
+			investment.name, "Sale", 85, units=100, rate=12, posting_date=add_days(nowdate(), 1)
+		).submit()
+
+		self.assertEqual(get_account_currency_entries(sale.name)[USD_FAIR_VALUE_ACCOUNT], ("USD", 0, 224.39))
+		investment.reload()
+		self.assertEqual(investment.get_ledger_balance(USD_FAIR_VALUE_ACCOUNT), 0)
+		self.assertEqual(investment.get_ledger_balance(USD_FAIR_VALUE_ACCOUNT, in_account_currency=True), 0)
 
 	def test_company_currency_ignores_exchange_rate(self):
 		"""An INR investment in an INR company has nothing to convert, whatever rate is typed in."""
@@ -411,14 +433,14 @@ def get_account_currency_entries(voucher_no):
 	}
 
 
-def create_usd_investment_account():
-	if frappe.db.exists("Account", USD_INVESTMENT_ACCOUNT):
+def create_usd_investment_account(account=USD_INVESTMENT_ACCOUNT):
+	if frappe.db.exists("Account", account):
 		return
 
 	frappe.get_doc(
 		{
 			"doctype": "Account",
-			"account_name": "_Test Investments USD",
+			"account_name": account.removesuffix(" - _TC"),
 			"parent_account": frappe.db.get_value("Account", INVESTMENT_ACCOUNT, "parent_account"),
 			"company": TEST_COMPANY,
 			"account_currency": "USD",
