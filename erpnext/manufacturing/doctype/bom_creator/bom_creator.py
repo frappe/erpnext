@@ -6,7 +6,7 @@ from collections import OrderedDict, defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import cint, flt, sbool
+from frappe.utils import cint, cstr, flt, sbool
 from pypika.terms import ValueWrapper
 
 import erpnext
@@ -180,10 +180,11 @@ class BOMCreator(Document):
 	def set_reference_id(self):
 		rows_by_name = {row.name: row for row in self.items}
 		rows_by_idx = {row.idx: row for row in self.items}
+		edited_rows = self.get_rows_with_edited_parent()
 
 		for row in self.items:
 			parent = rows_by_name.get(row.fg_reference_id)
-			if parent and parent.name != row.name:
+			if parent and parent.name != row.name and row.name not in edited_rows:
 				row.parent_row_no = str(parent.idx)
 				continue
 
@@ -247,6 +248,18 @@ class BOMCreator(Document):
 			rate = flt(rate) * flt(self.plc_conversion_rate or 1)
 
 		return flt(rate) / flt(self.conversion_rate or 1)
+
+	def get_rows_with_edited_parent(self):
+		before = self.get_doc_before_save()
+		if not before:
+			return set()
+
+		old_parent_row_no = {row.name: cstr(row.parent_row_no) for row in before.items}
+		return {
+			row.name
+			for row in self.items
+			if row.name in old_parent_row_no and cstr(row.parent_row_no) != old_parent_row_no[row.name]
+		}
 
 	def set_exchange_rates(self):
 		company_currency = erpnext.get_company_currency(self.company)

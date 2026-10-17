@@ -262,6 +262,18 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(child_items(doc, first_wheel), ["Rim", "Spokes"])
 		self.assertFalse([row for row in doc.items if row.item_code == "Hub"])
 
+	def test_parent_row_edit_moves_a_material_between_repeated_sub_assemblies(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Moved Material")
+		first_wheel_idx = next(row.idx for row in doc.items if row.name == first_wheel)
+		hub = next(row for row in doc.items if row.item_code == "Hub")
+
+		hub.parent_row_no = str(first_wheel_idx)
+		doc.save()
+		doc.reload()
+
+		self.assertEqual(child_items(doc, first_wheel), ["Hub", "Rim", "Spokes"])
+		self.assertEqual(child_items(doc, second_wheel), [])
+
 	def test_edit_and_delete_reject_unknown_item(self):
 		final_product = "Bicycle"
 		make_item(
