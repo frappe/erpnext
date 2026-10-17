@@ -464,21 +464,28 @@ def get_invoiced_qty_against_po_items(po_items: list) -> dict:
 	"""Invoiced qty per Purchase Order Item, leaving out returns that do not touch the order."""
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
+	purchase_order_item = frappe.qb.DocType("Purchase Order Item")
 
 	query = (
 		frappe.qb.from_(purchase_invoice_item)
 		.inner_join(purchase_invoice)
 		.on(purchase_invoice_item.parent == purchase_invoice.name)
-		.select(purchase_invoice_item.po_detail, fn.Sum(purchase_invoice_item.qty))
+		.inner_join(purchase_order_item)
+		.on(purchase_order_item.name == purchase_invoice_item.po_detail)
+		.select(
+			purchase_order_item.name,
+			fn.Sum(purchase_invoice_item.qty * purchase_invoice_item.conversion_factor)
+			/ purchase_order_item.conversion_factor,
+		)
 		.where(
-			(purchase_invoice_item.po_detail.isin(po_items))
+			(purchase_order_item.name.isin(po_items))
 			& (purchase_invoice.docstatus == 1)
 			& (
 				(purchase_invoice.is_return == 0)
 				| (purchase_invoice.update_billed_amount_in_purchase_order == 1)
 			)
 		)
-		.groupby(purchase_invoice_item.po_detail)
+		.groupby(purchase_order_item.name)
 	)
 
 	return frappe._dict(query.run())
