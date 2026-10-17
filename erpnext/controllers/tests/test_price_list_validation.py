@@ -22,14 +22,13 @@ class TestPriceListValidation(ERPNextTestSuite):
 			.name
 		)
 
-	def test_selling_transaction_should_reject_a_buying_price_list(self):
+	def test_transaction_should_reject_a_price_list_of_the_other_type(self):
 		invoice = create_sales_invoice(do_not_save=1)
 		invoice.selling_price_list = self.create_price_list(buying=1)
 
 		with self.assertRaisesRegex(frappe.ValidationError, "selling transaction"):
 			invoice.save()
 
-	def test_buying_transaction_should_reject_a_selling_price_list(self):
 		invoice = make_purchase_invoice(do_not_save=1)
 		invoice.buying_price_list = self.create_price_list(selling=1)
 
