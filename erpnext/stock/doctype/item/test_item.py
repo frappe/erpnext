@@ -811,14 +811,6 @@ class TestItem(ERPNextTestSuite):
 		factor = get_uom_conv_factor("Pound", "Gram")
 		self.assertAlmostEqual(factor, 453.592, 3)
 
-	def test_uom_conv_intermediate_with_shared_target(self):
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
-
-		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
-
-		self.assertEqual(factor, 0.12)
-
 	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
 		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
 		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)

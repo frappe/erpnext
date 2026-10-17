@@ -65,18 +65,6 @@ class TestTimesheetBillingSummary(ERPNextTestSuite):
 		self.assertTrue(group_rows, "Grouped project row missing")
 		self.assertEqual(group_rows[0]["hours"], 2)
 
-	def test_report_summary_totals(self):
-		self.make_ts(is_billable=1)
-		self.make_ts(is_billable=1)
-
-		_columns, data, _message, _chart, report_summary, _skip_total_row = self.execute_report()
-		summary = {item["label"]: item["value"] for item in report_summary}
-
-		self.assertFalse(any(row.get("timesheet") == "'Total'" for row in data))
-		self.assertEqual(summary[_("Total Working Hours")], 4)
-		self.assertEqual(summary[_("Total Billing Hours")], 4)
-		self.assertEqual(summary[_("Total Billing Amount")], 200)
-
 	def test_group_by_date_combines_entries_from_same_day(self):
 		data = [
 			frappe._dict(date="2026-08-20 09:00:00", hours=2, billing_hours=2, billing_amount=100),

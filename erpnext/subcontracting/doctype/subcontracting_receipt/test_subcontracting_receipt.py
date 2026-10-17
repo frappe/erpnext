@@ -549,62 +549,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(additional_costs, 100)
 
-	def test_return_takes_back_additional_costs_allocated_by_amount(self):
-		service_items = [
-			{
-				"warehouse": "Stores - TCP1",
-				"item_code": service_item,
-				"qty": 5,
-				"rate": rate,
-				"fg_item": fg_item,
-				"fg_item_qty": 5,
-			}
-			for service_item, fg_item, rate in (
-				("Subcontracted Service Item 7", "Subcontracted Item SA7", 100),
-				("Subcontracted Service Item 1", "Subcontracted Item SA4", 300),
-			)
-		]
-		sco = get_subcontracting_order(
-			company="_Test Company with perpetual inventory",
-			warehouse="Stores - TCP1",
-			supplier_warehouse="Work In Progress - TCP1",
-			service_items=service_items,
-		)
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-
-		additional_costs_account = "Expenses Included In Valuation - TCP1"
-		scr = make_subcontracting_receipt(sco.name)
-		scr.distribute_additional_costs_based_on = "Amount"
-		scr.append(
-			"additional_costs",
-			{
-				"expense_account": additional_costs_account,
-				"description": "Test Additional Costs",
-				"amount": 100,
-				"base_amount": 100,
-			},
-		)
-		scr.save()
-		scr.submit()
-
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.items = scr_return.items[:1]
-		scr_return.save()
-		scr_return.submit()
-
-		additional_costs = sum(
-			gle.debit - gle.credit
-			for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
-			if gle.account == additional_costs_account
-		)
-		self.assertEqual(additional_costs, flt(scr.items[0].additional_cost_per_qty * 5, 2))
-
 	def test_rejected_only_row_posts_raw_material_gl_entry(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",

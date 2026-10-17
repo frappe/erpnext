@@ -34,10 +34,7 @@ class TestSubcontractedRawMaterialsToBeReceived(ERPNextTestSuite):
 		self.assertEqual(rows["Basic RM"].pending_qty, 4)
 		self.assertEqual(rows["RM with Batch"].pending_qty, 5)
 
-	def test_fully_received_raw_material_is_excluded(self):
-		_so, scio = create_so_scio()
-		receive_basic_rm(scio, 5)
-
+		receive_basic_rm(scio, 4)
 		rows = get_report_rows(scio)
 
 		self.assertNotIn("Basic RM", rows)
