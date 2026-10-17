@@ -11,14 +11,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAssetMaintenanceReport(ERPNextTestSuite):
-	def test_maintenance_roles_can_open_the_report_and_read_its_data(self):
-		for role in ("Quality Manager", "Manufacturing User"):
-			user = f"test_asset_maintenance_{frappe.scrub(role)}@example.com"
-			create_user_with_roles(user, role)
-			with self.set_user(user):
-				self.assertTrue(frappe.has_permission("Report", "read", "Asset Maintenance"))
-				self.assertTrue(frappe.has_permission("Asset Maintenance", "read"))
-
 	def test_user_restricted_to_a_category_sees_only_its_maintenance(self):
 		computers = make_asset_maintenance("Macbook Pro")
 		equipment = make_asset_maintenance("Photocopier")

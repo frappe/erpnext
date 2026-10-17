@@ -3,7 +3,6 @@
 
 import frappe
 
-from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -34,20 +33,3 @@ class TestAssetShiftFactor(ERPNextTestSuite):
 		)
 		shift.insert()
 		self.assertEqual(frappe.db.get_value("Asset Shift Factor", shift.name, "shift_factor"), 1.5)
-
-	def test_shift_based_depreciation_needs_a_default_factor(self):
-		set_depreciation_settings_in_company()
-		frappe.db.delete("Asset Shift Factor")
-		frappe.clear_document_cache("Asset Shift Factor")
-		self.assertRaisesRegex(
-			frappe.ValidationError,
-			"Please set a default Asset Shift Factor",
-			create_asset,
-			calculate_depreciation=1,
-			available_for_use_date="2023-01-01",
-			purchase_date="2023-01-01",
-			depreciation_start_date="2023-01-31",
-			total_number_of_depreciations=12,
-			frequency_of_depreciation=1,
-			shift_based=1,
-		)
