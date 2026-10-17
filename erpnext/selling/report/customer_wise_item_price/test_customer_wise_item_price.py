@@ -76,11 +76,6 @@ class TestCustomerWiseItemPrice(ERPNextTestSuite):
 	def test_other_customers_special_price_is_not_shown(self):
 		other = self.create_customer("_Test CWIP Other")
 		self.make_item_price(customer=other, price_list_rate=700)
-
-		row = self.report_row()
-		self.assertEqual(row["selling_rate"], 250)  # the generic rate, not the other customer's 700
-
-	def test_expired_and_other_uom_prices_are_ignored(self):
 		self.make_item_price(
 			customer=self.customer, price_list_rate=500, valid_from="2000-01-01", valid_upto="2000-12-31"
 		)
@@ -90,7 +85,7 @@ class TestCustomerWiseItemPrice(ERPNextTestSuite):
 		self.make_item_price(price_list_rate=999, uom="Box")
 
 		row = self.report_row()
-		self.assertEqual(row["selling_rate"], 250)  # current, stock-uom rate
+		self.assertEqual(row["selling_rate"], 250)  # the generic rate, not the other customer's 700
 
 	def test_falls_back_to_selling_settings_price_list(self):
 		# customer's own list yields a zero rate -> must still fall back, as a transaction does
