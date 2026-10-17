@@ -132,6 +132,20 @@ class TestWorkOrderSummary(ERPNextTestSuite):
 		self.assertEqual(chart["data"]["datasets"][0]["values"][3], 0)
 		self.assertEqual(chart["data"]["datasets"][0]["values"][0], len(data))
 
+	def test_pending_qty_by_status_and_process_loss(self):
+		from erpnext.manufacturing.report.work_order_summary.work_order_summary import get_pending_qty
+
+		cases = {
+			"In Process": 3,
+			"Not Started": 3,
+			"Closed": 0,
+			"Stopped": 0,
+			"Completed": 0,
+		}
+		for status, expected in cases.items():
+			order = frappe._dict(status=status, qty=10, produced_qty=5, process_loss_qty=2)
+			self.assertEqual(get_pending_qty(order), expected, status)
+
 	def test_quantity_chart_has_nothing_pending_for_finished_orders(self):
 		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
