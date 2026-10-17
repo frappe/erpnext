@@ -260,6 +260,32 @@ class BootStrapTestData:
 	def make_stock_ledger_fixtures(self):
 		self.make_unrealized_profit_loss_account()
 		self.make_reposting_items()
+		self.make_item_valuation_warehouses()
+
+	def make_item_valuation_warehouses(self):
+		names = [f"IV - Test Warehouse {suffix}" for suffix in ("J", "K")]
+		accounts = [
+			{
+				"doctype": "Account",
+				"account_name": name,
+				"parent_account": "Stock Assets - _TC",
+				"account_type": "Stock",
+				"company": "_Test Company",
+			}
+			for name in names
+		]
+		self.make_records(["account_name", "company"], accounts)
+		warehouses = [
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": name,
+				"parent_warehouse": "_Test Warehouse Group - _TC",
+				"account": f"{name} - _TC",
+				"company": "_Test Company",
+			}
+			for name in names
+		]
+		self.make_records(["warehouse_name", "company"], warehouses)
 
 	def make_reposting_items(self):
 		properties = {

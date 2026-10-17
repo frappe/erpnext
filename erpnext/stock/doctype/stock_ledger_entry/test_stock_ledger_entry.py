@@ -2203,7 +2203,6 @@ def setup_item_valuation_test(
 	valuation_method="FIFO", suffix=None, use_batchwise_valuation=1, batches_list=None
 ):
 	from erpnext.stock.doctype.item.test_item import make_item
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	if batches_list is None:
 		batches_list = ["X", "Y"]
@@ -2214,7 +2213,7 @@ def setup_item_valuation_test(
 		f"IV - Test Item {valuation_method} {suffix}",
 		dict(valuation_method=valuation_method, has_batch_no=1, create_new_batch=1),
 	)
-	warehouses = [create_warehouse(f"IV - Test Warehouse {i}") for i in ["J", "K"]]
+	warehouses = [f"IV - Test Warehouse {i} - _TC" for i in ["J", "K"]]
 	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
 
 	for i, batch_id in enumerate(batches):
