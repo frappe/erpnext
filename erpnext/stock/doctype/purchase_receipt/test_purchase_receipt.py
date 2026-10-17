@@ -537,10 +537,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.load_from_db()
 		self.assertEqual(pr.per_billed, 0)
 
-		return_pr.cancel()
-		pr.load_from_db()
-		pr.cancel()
-
 	def test_purchase_return_full(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
@@ -1654,8 +1650,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		for sle in sl_entries:
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
-
-		pr.cancel()
 
 	def test_internal_transfer_on_half_cent_moves_no_value(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
@@ -7785,8 +7779,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			account_type = frappe.db.get_value("Account", entry.account, "account_type")
 			self.assertNotEqual(account_type, "Stock")
 
-		pr.cancel()
-
 	def test_purchase_receipt_gl_entries_with_mixed_asset_and_stock_items(self):
 		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 
@@ -7847,7 +7839,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# Stock Accounts should be used for Stock Items
 		self.assertIn(company.stock_received_but_not_billed, gl_accounts)
 		self.assertIn(company.default_inventory_account, gl_accounts)
-		pr.cancel()
 
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1, "maintain_same_rate": 0}

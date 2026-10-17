@@ -360,7 +360,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# -------------------------------
 
 		# Landed Cost Voucher to update the rate of incoming Purchase Return: Additional cost = 50
-		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		# check outgoing_rate for DN after reposting
 		outgoing_rate = abs(
@@ -388,12 +388,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		return_dn.reload()
 		self.assertEqual(return_dn.items[0].incoming_rate, 110)
-
-		# Cleanup data
-		return_dn.cancel()
-		dn.cancel()
-		lcv.cancel()
-		pr.cancel()
 
 	def test_reposting_of_sales_return_for_packed_item(self):
 		company = "_Test Company"
@@ -462,7 +456,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		# -------------------------------
 
 		# Landed Cost Voucher to update the rate of incoming Purchase Return: Additional cost = 50
-		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		# check outgoing_rate for DN after reposting
 		outgoing_rate = abs(
@@ -490,12 +484,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 
 		return_dn.reload()
 		self.assertEqual(return_dn.packed_items[0].incoming_rate, 101)
-
-		# Cleanup data
-		return_dn.cancel()
-		dn.cancel()
-		lcv.cancel()
-		pr.cancel()
 
 	def test_back_dated_entry_not_allowed(self):
 		# Back dated stock transactions are only allowed to stock managers
