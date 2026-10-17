@@ -3332,8 +3332,11 @@ class TestDeliveryNote(ERPNextTestSuite):
 			if item_code != "_Packed Service Item":
 				rm_items.append(item_code)
 
-				for rate in [100, 200]:
-					make_stock_entry(item=item_code, target="_Test Warehouse - _TC", qty=5, rate=rate)
+				se = make_stock_entry(
+					item=item_code, target="_Test Warehouse - _TC", qty=5, rate=100, do_not_submit=True
+				)
+				se.append("items", {**se.items[0].as_dict(no_default_fields=True), "basic_rate": 200})
+				se.submit()
 
 		make_product_bundle("_Packed Service Item", rm_items)
 		dn = create_delivery_note(
