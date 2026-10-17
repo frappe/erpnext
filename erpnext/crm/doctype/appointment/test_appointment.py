@@ -228,6 +228,36 @@ class TestAppointment(ERPNextTestSuite):
 		stored = frappe.db.get_value("Appointment", appointment.name, "verification_token")
 		self.assertEqual(stored, sha256_hash(params["key"]))
 
+	def test_guest_verification_keeps_the_visitor_session(self):
+		appointment = self._create_portal_appointment("portal_visitor_session@example.com")
+		_parsed, params = parse_verify_url(appointment._get_verify_url())
+		self.addCleanup(frappe.set_user, frappe.session.user)
+
+		frappe.set_user("Guest")
+		frappe.local.session.data = frappe._dict(csrf_token="token")
+		session = frappe.local.session
+		with patch.object(Appointment, "send_appointment_confirmed_email"):
+			frappe.local.form_dict = frappe._dict(params)
+			context = verify_index.get_context(frappe._dict())
+		frappe.local.flags.commit = False
+
+		self.assertTrue(context.success)
+		self.assertIs(frappe.local.session, session)
+		self.assertEqual((session.user, session.data.csrf_token), ("Guest", "token"))
+		appointment.reload()
+		self.assertEqual(appointment.status, "Open")
+		self.assertTrue(appointment.party and appointment.calendar_event)
+		self.assertEqual(get_assignees(appointment.name), ["Administrator"])
+
+	def test_verify_url_ignores_the_request_host(self):
+		appointment = self._create_portal_appointment("portal_visitor_host@example.com")
+		self.addCleanup(setattr, frappe.local, "request", getattr(frappe.local, "request", None))
+		set_request(method="GET", path="/book_appointment", headers={"Host": "attacker.example"})
+
+		# a configured host name would mask a regression to trusting the request host
+		with patch.dict(frappe.local.conf, {"host_name": None, "hostname": None}):
+			self.assertNotIn("attacker.example", appointment._get_verify_url())
+
 	def test_email_verification_within_expiry_window(self):
 		# Link used within the validity window - verification succeeds and the
 		# appointment gets linked, assigned and added to the calendar
