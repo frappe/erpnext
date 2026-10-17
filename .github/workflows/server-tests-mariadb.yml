@@ -4,7 +4,6 @@ on:
   repository_dispatch:
     types: [frappe-framework-change]
   pull_request:
-    types: [opened, reopened, synchronize, labeled]
   schedule:
     # Run everday at midnight UTC / 5:30 IST
     - cron: "0 0 * * *"
@@ -26,7 +25,7 @@ permissions:
   packages: read
 
 concurrency:
-  group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}${{ github.event.action == 'labeled' && github.event.label.name != 'merge-alone' && format('-{0}', github.run_id) || '' }}
+  group: server-mariadb-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
 # Shared across both jobs. Both run in the SAME CI image so the bench lives at the identical
@@ -51,10 +50,8 @@ jobs:
   setup:
     name: Build & reinstall (setup)
     if: >-
-      (github.event.action != 'labeled' || github.event.label.name == 'merge-alone')
-      && (github.event_name != 'pull_request'
+      (github.event_name != 'pull_request'
       || (github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/'))
-      || contains(github.event.pull_request.labels.*.name, 'merge-alone')
       || (startsWith(github.base_ref, 'version-') && !endsWith(github.base_ref, '-hotfix')))
     outputs:
       bench_sha256: ${{ steps.stage.outputs.sha256 }}
