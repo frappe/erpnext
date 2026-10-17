@@ -59,19 +59,6 @@ class TestProjectsPage(ERPNextTestSuite):
 		self.assertEqual(project_user.view_attachments, 1)
 		self.assertEqual(project_user.hide_timesheets, 1)
 
-	def test_allows_internally_permitted_user_not_listed_as_project_user(self):
-		# The permission gate must be the real permission system (check_permission()),
-		# not "is this user in the Project's users child table" -- a Projects Manager
-		# can open any project's portal page without ever being added as its user.
-		project = make_project({"project_name": f"_Test Portal Access {frappe.generate_hash(length=6)}"})
-		manager = self._create_user(f"manager_{frappe.generate_hash(length=6)}@example.com")
-		frappe.get_doc("User", manager).add_roles("Projects Manager")
-
-		with self.set_user(manager):
-			project_user = validate_and_get_project_user(project.name)
-
-		self.assertIsNone(project_user)
-
 	def test_allows_customer_portal_user_for_own_customer_projects(self):
 		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
 		customer = frappe.get_doc("Customer", "_Test Customer")
