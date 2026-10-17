@@ -11,6 +11,13 @@ shared:
     - check-success=Python Unit Tests (3)
     - check-success=Python Unit Tests (4)
 
+commands_restrictions:
+  queue:
+    conditions:
+      - or:
+          - sender=@erpnext-maintainers
+          - sender-permission=admin
+
 pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
@@ -75,6 +82,7 @@ pull_request_rules:
   - name: Merge PRs tested alone
     conditions:
       - label=merge-alone
+      - approved-reviews-by=@erpnext-maintainers
       - and: *pr_checks
       - and: *suite_checks
     actions:
