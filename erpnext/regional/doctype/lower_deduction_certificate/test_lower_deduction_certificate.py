@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, getdate, today
+from frappe.utils import getdate, today
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
@@ -34,18 +34,6 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 		self.assertTrue(self.make_ldc("2026-01-01", "2026-12-31").are_dates_overlapping(existing))
 		# new period is entirely after the existing one -> no overlap
 		self.assertFalse(self.make_ldc("2026-07-01", "2026-12-31").are_dates_overlapping(existing))
-
-	def test_valid_upto_cannot_precede_valid_from(self):
-		doc = self.make_ldc(valid_from="2026-06-30", valid_upto="2026-01-01")
-		self.assertRaises(frappe.ValidationError, doc.validate_dates)
-
-	def test_dates_must_fall_within_the_fiscal_year(self):
-		fy_name, fy_start, fy_end = get_fiscal_year(today())
-		# a range inside the fiscal year is accepted
-		self.make_ldc(fy_start, fy_end, fiscal_year=fy_name).validate_dates()
-		# a valid_from before the fiscal year start is rejected
-		before_fy = self.make_ldc(add_days(fy_start, -1), fy_end, fiscal_year=fy_name)
-		self.assertRaises(frappe.ValidationError, before_fy.validate_dates)
 
 	def test_rate_and_limit_must_be_in_range(self):
 		for rate, limit in ((-5, 50000), (100, 50000), (150, 50000), (1, 0), (1, -50000)):

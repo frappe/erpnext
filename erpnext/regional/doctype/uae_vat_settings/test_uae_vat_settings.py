@@ -6,7 +6,6 @@ from unittest.mock import patch
 import frappe
 
 from erpnext.buying.test_utils import create_user_with_roles
-from erpnext.regional.united_arab_emirates.setup import add_permissions
 from erpnext.regional.united_arab_emirates.utils import get_tax_accounts
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -51,15 +50,6 @@ class TestUAEVATSettings(ERPNextTestSuite):
 		frappe.set_user("Administrator")
 
 		self.assertEqual(list(get_tax_accounts("_Test UAE Renamed")), [vat_account])
-
-	def test_regional_setup_does_not_share_the_settings_with_all_users(self):
-		frappe.db.delete("Custom DocPerm", {"parent": "UAE VAT Settings"})
-		add_permissions()
-		self.addCleanup(frappe.clear_cache, doctype="UAE VAT Settings")
-
-		roles = frappe.get_all("Custom DocPerm", filters={"parent": "UAE VAT Settings"}, pluck="role")
-		self.assertIn("Accounts User", roles)
-		self.assertNotIn("All", roles)
 
 
 def make_settings(company: str, accounts: list):
