@@ -31,7 +31,7 @@ class TestTotalStockSummary(ERPNextTestSuite):
 
 		self.assertFalse([r for r in self.run_report() if r[0] == warehouse and r[1] == item])
 
-	def test_company_totals_count_only_permitted_warehouses(self):
+	def get_company_total_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
 
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -46,7 +46,7 @@ class TestTotalStockSummary(ERPNextTestSuite):
 				{"doctype": "User", "email": user, "first_name": "Stock Summary", "send_welcome_email": 0}
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock User")
-		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
 
 		frappe.set_user(user)
 		try:
@@ -54,4 +54,10 @@ class TestTotalStockSummary(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertEqual([row[3] for row in rows if row[1] == item], [7])
+		return [row[3] for row in rows if row[1] == item]
+
+	def test_company_totals_count_only_permitted_warehouses(self):
+		self.assertEqual(self.get_company_total_for_restricted_user(), [7])
+
+	def test_permission_for_another_doctype_does_not_limit_company_totals(self):
+		self.assertEqual(self.get_company_total_for_restricted_user(applicable_for="Purchase Order"), [47])
