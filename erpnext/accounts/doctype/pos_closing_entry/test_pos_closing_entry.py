@@ -180,12 +180,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pcv_doc.flags.in_test = True
 		self.assertRaises(frappe.ValidationError, pcv_doc.submit)
 
-		accounting_dimension_department = frappe.get_doc(
-			"Accounting Dimension Detail", {"parent": "Department"}
-		)
-		accounting_dimension_department.mandatory_for_bs = 0
-		accounting_dimension_department.save()
-
 	def test_merging_into_sales_invoice_for_batched_item(self):
 		frappe.flags.print_message = False
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
