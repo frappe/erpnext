@@ -73,3 +73,18 @@ class TestSalesTaxesandChargesTemplate(ERPNextTestSuite):
 				],
 				template,
 			)
+
+	def test_get_taxes_and_charges_allows_subcontracting_and_manufacturing_roles(self):
+		from erpnext.accounts.services.taxes import get_taxes_and_charges
+
+		template = self.get_template()
+		expected = len(frappe.get_doc(TEMPLATE_DOCTYPE, template).taxes)
+
+		for role in ("Purchase Manager", "Purchase User", "Manufacturing Manager", "Manufacturing User"):
+			user = make_fenced_user(f"taxes-{frappe.scrub(role).replace('_', '-')}@example.com", [role])
+			with as_user(user):
+				self.assertEqual(len(get_taxes_and_charges(TEMPLATE_DOCTYPE, template)), expected, role)
+
+		roleless = make_fenced_user("taxes-roleless@example.com", [])
+		with as_user(roleless):
+			assert_refused(self, get_taxes_and_charges, TEMPLATE_DOCTYPE, template)

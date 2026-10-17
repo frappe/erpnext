@@ -889,6 +889,20 @@ class TestJournalEntry(ERPNextTestSuite):
 				jv.insert()
 				self.assertEqual(jv.reference_types[invoice.name], "Purchase Invoice")
 
+	def test_jv_against_blocked_sales_invoice_reference_is_not_checked(self):
+		"""A Sales Invoice has no hold state, so the check must skip it rather than fail."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=500)
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = "_Test Customer"
+		jv.accounts[1].reference_type = "Sales Invoice"
+		jv.accounts[1].reference_name = invoice.name
+		jv.insert()
+
+		self.assertEqual(jv.reference_types[invoice.name], "Sales Invoice")
+
 	def test_get_balance_places_difference_on_blank_row(self):
 		"""Characterize: get_balance puts the unbalanced difference on an amountless row."""
 		jv = frappe.new_doc("Journal Entry")

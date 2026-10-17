@@ -84,6 +84,7 @@ class TestBOM(ERPNextTestSuite):
 				),
 			)
 
+	@timeout
 	def test_get_bom_diff_checks_both_boms(self):
 		from erpnext.manufacturing.doctype.bom.mapper import get_bom_diff
 

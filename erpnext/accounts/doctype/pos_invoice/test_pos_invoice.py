@@ -1061,6 +1061,15 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		frappe.set_user("test@example.com")
 
+	def test_make_merge_log_refuses_empty_and_malformed_names(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
+
+		with as_user(make_fenced_user("pos-names@example.com", ["Sales User"])):
+			for value in ("", None):
+				assert_refused(self, make_merge_log, [{"name": value}])
+			for value in (0, False, {"name": ["like", "%"]}, ["like", "%"]):
+				assert_not_found(self, make_merge_log, [{"name": value}])
+
 	def test_make_merge_log_fences_each_invoice(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
 
@@ -1078,10 +1087,6 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			assert_refused_for_names(
 				self, make_merge_log, merge_log_kwargs, [invoice.name], caller_supplied=True
 			)
-			for value in ("", None):
-				assert_refused(self, make_merge_log, [{"name": value}])
-			for value in (0, False):
-				assert_not_found(self, make_merge_log, [{"name": value}])
 		inside = make_fenced_user("pos-fenced@example.com", ["Sales User"], [("Customer", "_Test Customer")])
 		with as_user(inside):
 			merge_log = make_merge_log([{"name": invoice.name}])

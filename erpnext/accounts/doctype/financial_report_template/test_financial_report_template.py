@@ -173,6 +173,12 @@ class TestAccountFilter(FinancialReportTemplateTestCase):
 		self.assertFalse(validator.validate_filter(self._row('["bad_field", "=", "x"]')).is_valid)
 		self.assertTrue(validator.validate_filter(self._row('["root_type", "=", "Income"]')).is_valid)
 
+	def test_validate_gate_still_opts_out_for_non_account_data(self):
+		# validate() is the dispatch gate: it must not validate non "Account Data" rows
+		validator = AccountFilterValidator()
+		row = self._row('["bad_field", "=", "x"]', data_source="Custom API")
+		self.assertTrue(validator.validate(row).is_valid)
+
 	def test_error_message_labels_and_escapes_field(self):
 		validator = AccountFilterValidator()
 		result = validator.validate_filter(self._row('["<script>", "=", "x"]'))
@@ -202,6 +208,21 @@ class TestAccountFilter(FinancialReportTemplateTestCase):
 		self.assertRaises(
 			frappe.ValidationError, parser.build_conditions, rows, account, raise_on_invalid=True
 		)
+
+	def test_build_conditions_empty_returns_none(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			FilterExpressionParser,
+		)
+
+		account = frappe.qb.DocType("Account")
+		self.assertIsNone(FilterExpressionParser().build_conditions([], account))
+
+	def test_endpoint_requires_company(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			get_filtered_accounts,
+		)
+
+		self.assertRaises(frappe.ValidationError, get_filtered_accounts, "", "[]")
 
 	def test_endpoint_rejects_invalid_field(self):
 		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (

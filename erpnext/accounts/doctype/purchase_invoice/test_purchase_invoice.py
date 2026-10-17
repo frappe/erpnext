@@ -434,6 +434,21 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaisesRegex(frappe.ValidationError, "cannot be held", return_pi.block_invoice)
 
+	def test_return_purchase_invoice_is_not_affected_by_hold_validations(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pi = make_purchase_invoice()
+
+		# a return has a negative outstanding amount, which must not be mistaken
+		# for an invalid hold on a document that was never held
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.save()
+		return_pi.submit()
+
+		self.assertEqual(return_pi.docstatus, 1)
+		self.assertEqual(return_pi.on_hold, 0)
+		self.assertLess(return_pi.outstanding_amount, 0)
+
 	def test_settled_purchase_invoice_cannot_be_held(self):
 		pi = make_purchase_invoice()
 
@@ -454,6 +469,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
 		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", nowdate())
+
+	def test_rejected_hold_does_not_partially_update_invoice(self):
+		pi = make_purchase_invoice()
+
+		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
 
 		pi.reload()
 		self.assertEqual(pi.on_hold, 0)
@@ -484,6 +504,20 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 
 		self.assertIsNone(frappe.db.get_value("Purchase Invoice", pi.name, "release_date"))
+
+	def test_hold_methods_are_whitelisted_document_methods(self):
+		import erpnext.accounts.doctype.purchase_invoice.purchase_invoice as purchase_invoice_module
+
+		pi = frappe.new_doc("Purchase Invoice")
+
+		for method in ("block_invoice", "unblock_invoice", "change_release_date"):
+			# raises if the method is not whitelisted for client side calls
+			pi.is_whitelisted(method)
+
+			self.assertFalse(
+				hasattr(purchase_invoice_module, method),
+				f"{method} should only be exposed as a document method",
+			)
 
 	def test_hold_methods_require_write_permission(self):
 		pi = make_purchase_invoice()

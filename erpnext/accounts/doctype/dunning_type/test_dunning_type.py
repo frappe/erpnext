@@ -58,6 +58,16 @@ class TestDunningType(ERPNextTestSuite):
 		doc = make_dunning_type("_Test Dunning Group Account", income_account="Income - _TC")
 		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
 
+	def test_income_account_is_optional(self):
+		doc = make_dunning_type("_Test Dunning No Income Account", income_account=False)
+		doc.insert()
+		self.assertFalse(doc.income_account)
+
+	def test_valid_income_account_passes(self):
+		doc = make_dunning_type("_Test Dunning Valid Income Account", income_account="Sales - _TC")
+		doc.insert()
+		self.assertEqual(doc.income_account, "Sales - _TC")
+
 	def test_cost_center_must_belong_to_company(self):
 		doc = make_dunning_type("_Test Dunning Wrong Company CC", cost_center="Main - _TC1")
 		self.assertRaisesRegex(frappe.ValidationError, "doesn't belong to Company", doc.insert)
@@ -80,6 +90,16 @@ class TestDunningType(ERPNextTestSuite):
 		doc = make_dunning_type("_Test Dunning Group CC", cost_center="_Test Company - _TC")
 		self.assertRaisesRegex(frappe.ValidationError, "is a group Cost Center", doc.insert)
 
+	def test_cost_center_is_optional(self):
+		doc = make_dunning_type("_Test Dunning No CC", cost_center=False)
+		doc.insert()
+		self.assertFalse(doc.cost_center)
+
+	def test_valid_cost_center_passes(self):
+		doc = make_dunning_type("_Test Dunning Valid CC", cost_center="Main - _TC")
+		doc.insert()
+		self.assertEqual(doc.cost_center, "Main - _TC")
+
 	def test_duplicate_languages_not_allowed(self):
 		doc = make_dunning_type(
 			"_Test Dunning Duplicate Language",
@@ -89,6 +109,17 @@ class TestDunningType(ERPNextTestSuite):
 			],
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "Duplicate languages found", doc.insert)
+
+	def test_unique_languages_allowed(self):
+		doc = make_dunning_type(
+			"_Test Dunning Unique Languages",
+			dunning_letter_text=[
+				{"language": "en", "body_text": "Body one"},
+				{"language": "de", "body_text": "Body two"},
+			],
+		)
+		doc.insert()
+		self.assertEqual(len(doc.dunning_letter_text), 2)
 
 	def test_only_one_default_language_allowed(self):
 		doc = make_dunning_type(
@@ -120,6 +151,7 @@ class TestDunningType(ERPNextTestSuite):
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "Syntax error in template", doc.insert)
 
+	def test_invalid_jinja_template_in_closing_text_raises(self):
 		doc = make_dunning_type(
 			"_Test Dunning Invalid Closing Template",
 			dunning_letter_text=[
@@ -127,6 +159,20 @@ class TestDunningType(ERPNextTestSuite):
 			],
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "Syntax error in template", doc.insert)
+
+	def test_valid_jinja_template_passes(self):
+		doc = make_dunning_type(
+			"_Test Dunning Valid Template",
+			dunning_letter_text=[
+				{
+					"language": "en",
+					"body_text": "Outstanding amount is {{ outstanding_amount }}",
+					"closing_text": "Regards, {{ company }}",
+				}
+			],
+		)
+		doc.insert()
+		self.assertTrue(doc.name)
 
 	def test_set_default_dunning_type_unsets_previous_default(self):
 		first = make_dunning_type("_Test Dunning Default One", is_default=1)

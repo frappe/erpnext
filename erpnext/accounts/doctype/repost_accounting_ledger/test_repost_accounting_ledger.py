@@ -10,12 +10,14 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, nowdate, today
 from frappe.utils.logging import get_log_db
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	_lock_vouchers,
 	_record_repost_failure,
 	_repost_allowed_hook_doctypes,
+	_repost_job_id,
 	_repost_vouchers,
 	repost,
 )
@@ -278,6 +280,19 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		self.create_repost_doc([submitted_si])
 
+	def test_08_voucher_count_limit(self):
+		si, pe = self.make_invoice_and_payment()
+		another_si = self.make_invoice()
+
+		with patch(f"{REPOST_MODULE}.MAX_VOUCHERS_PER_REPOST", 2):
+			self.create_repost_doc([si, pe])
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"Cannot repost more than 2 vouchers",
+				self.create_repost_doc,
+				[si, pe, another_si],
+			)
+
 	def test_09_status_lifecycle(self):
 		si, pe = self.make_invoice_and_payment()
 
@@ -332,6 +347,20 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		ral.reload()
 		self.assertEqual(ral.status, "Completed")
+
+	def test_11_repost_job_is_tied_to_the_document(self):
+		si = self.make_invoice()
+		ral = self.create_repost_doc([si], submit=True)
+		ral.db_set("status", "Failed")
+
+		with patch(f"{REPOST_MODULE}.frappe.enqueue") as enqueue:
+			ral.start_repost()
+
+		kwargs = enqueue.call_args.kwargs
+		self.assertEqual(kwargs["repost_doc_name"], ral.name)
+		self.assertEqual(kwargs["job_id"], _repost_job_id(ral.name))
+		# a second start cannot queue a second job for the same document
+		self.assertTrue(kwargs["deduplicate"])
 
 	def test_12_voucher_failures_are_isolated_and_retried(self):
 		si, pe = self.make_invoice_and_payment()
@@ -453,6 +482,27 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			self.assertFalse(frappe.get_doc(si.doctype, si.name).is_locked)
 		finally:
 			locked_pe.unlock()
+
+	def test_17_journal_entry_repost(self):
+		je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, submit=True)
+		je = frappe.get_doc("Journal Entry", je.name)
+
+		self.assertEqual(self.get_gl_totals(je.name), (500.0, 500.0))
+
+		# without the deletion flag the 2 original entries are marked as cancelled,
+		# along with the 2 reverse entries booked against them
+		for delete_cancelled_entries, cancelled_entries in ((False, 4), (True, 0)):
+			with self.subTest(delete_cancelled_entries=delete_cancelled_entries):
+				ral = self.create_repost_doc(
+					[je], delete_cancelled_entries=delete_cancelled_entries, submit=True
+				)
+
+				self.assertEqual(ral.status, "Completed")
+				self.assertEqual(self.get_gl_totals(je.name), (500.0, 500.0))
+				self.assertEqual(
+					frappe.db.count("GL Entry", {"voucher_no": je.name, "is_cancelled": 1}),
+					cancelled_entries,
+				)
 
 	def test_18_hook_allowed_doctype_repost(self):
 		class VoucherWithCancelArg:

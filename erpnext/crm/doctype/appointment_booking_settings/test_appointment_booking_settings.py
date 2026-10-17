@@ -37,6 +37,12 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		)
 		return settings
 
+	def test_scheduling_requires_slots(self):
+		settings = self.get_valid_scheduling_settings()
+		settings.set("availability_of_slots", [])
+
+		self.assert_invalid(settings)
+
 	def test_validate_checks_every_slot(self):
 		settings = self.get_valid_scheduling_settings()
 		settings.append(
@@ -59,6 +65,33 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		)
 		settings.holiday_list = expired_list.name
 		self.assert_invalid(settings)
+
+	def test_scheduling_requires_advance_booking_days(self):
+		settings = self.get_valid_scheduling_settings()
+		settings.advance_booking_days = 0
+
+		self.assert_invalid(settings)
+
+	def test_portal_requires_scheduling(self):
+		settings = frappe.get_doc("Appointment Booking Settings")
+		settings.enable_scheduling = 0
+		settings.enable_appointment_portal = 1
+
+		self.assert_invalid(settings)
+
+	def test_portal_expiry_duration_bounds(self):
+		settings = self.get_valid_scheduling_settings()
+		settings.enable_appointment_portal = 1
+		settings.verification_link_expiry_duration = 5
+
+		self.assert_invalid(settings)
+
+	def test_number_of_agents_derived_from_agent_list(self):
+		settings = self.get_valid_scheduling_settings()
+		settings.number_of_agents = 99
+		settings.save()
+
+		self.assertEqual(frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents"), 1)
 
 	def test_appointment_duration_must_be_positive(self):
 		for duration in (0, -60):
