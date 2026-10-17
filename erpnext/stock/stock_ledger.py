@@ -2019,6 +2019,30 @@ class update_entries_after:
 		scr.db_update()
 		for d in scr.items:
 			d.db_update()
+			if not scr.is_return and not d.get("is_scrap_item") and d.get("warehouse"):
+				rate = d.rate
+				amount = d.amount
+				if get_valuation_method(d.item_code, scr.company) == "Standard Cost":
+					from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+						get_item_standard_rate,
+					)
+
+					standard_rate = get_item_standard_rate(d.item_code, scr.company, scr.posting_date)
+					if standard_rate is not None:
+						rate = standard_rate
+						amount = flt(d.qty) * flt(standard_rate)
+
+				if d.get("serial_and_batch_bundle"):
+					bundle = frappe.get_doc("Serial and Batch Bundle", d.serial_and_batch_bundle)
+					bundle.set_incoming_rate(
+						row=frappe._dict(d.as_dict(), rate=rate, valuation_rate=rate), save=True
+					)
+					bundle.calculate_qty_and_amount(save=True)
+				frappe.db.set_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": d.name, "warehouse": d.warehouse, "is_cancelled": 0},
+					{"incoming_rate": rate, "stock_value_difference": amount},
+				)
 
 	def update_rate_on_stock_reconciliation(self, sle):
 		# Refresh the reconciliation's difference amount and per-row current qty/rate from the reposted
