@@ -105,6 +105,9 @@ class TestBOMOperationsTime(ERPNextTestSuite):
 		cancelled = make_parent_bom(sub_assembly, sub_bom.name)
 		cancelled.submit()
 		cancelled.cancel()
+		inactive = make_parent_bom(sub_assembly, sub_bom.name)
+		inactive.submit()
+		inactive.db_set("is_active", 0)
 
 		rows = self.run_report(bom_id=[sub_bom.name])
 
