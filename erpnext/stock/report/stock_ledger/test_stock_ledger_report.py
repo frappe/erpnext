@@ -668,6 +668,18 @@ class TestStockLedgerReport(ERPNextTestSuite):
 
 		self.assertEqual([row["qty_after_transaction"] for row in rows], [4])
 
+	def test_item_group_filter_lists_only_permitted_items(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.report.stock_ledger.stock_ledger import get_items
+
+		user = create_user("stock-ledger-item-group@example.com", "Stock User")
+		add_user_permission("Item", "_Test Item", user.name)
+		with self.set_user(user.name):
+			items = get_items(frappe._dict(item_group="_Test Item Group"))
+
+		self.assertEqual(items, ["_Test Item"])
+
 	def test_project_opening_counts_only_permitted_warehouses(self):
 		from frappe.permissions import add_user_permission
 

@@ -552,7 +552,7 @@ def get_inventory_dimension_fields():
 
 def get_items(filters):
 	item = frappe.qb.DocType("Item")
-	query = frappe.qb.from_(item).select(item.name)
+	query = frappe.qb.get_query("Item", fields=["name"], ignore_permissions=False)
 	conditions = []
 
 	if item_codes := filters.get("item_code"):
@@ -631,6 +631,15 @@ def get_sle_conditions(filters):
 
 
 def get_opening_balance_from_batch(filters, columns, sl_entries):
+	batch_item = frappe.db.get_value("Batch", filters.batch_no, "item")
+	if batch_item and not frappe.has_permission("Item", "read", batch_item):
+		return {
+			"item_code": _("'Opening'"),
+			"qty_after_transaction": 0.0,
+			"valuation_rate": 0.0,
+			"stock_value": 0.0,
+		}
+
 	query_filters = {
 		"batch_no": filters.batch_no,
 		"docstatus": 1,
