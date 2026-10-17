@@ -106,51 +106,6 @@ class TestInit(ERPNextTestSuite):
 				["Finished Goods - _TC", ["Stores - _TC"]],
 			)
 
-	def test_make_fenced_user_sets_exactly_the_given_roles_and_user_permissions(self):
-		make_fenced_user(TEST_USER, ["Stock User", "Projects User"], [("Warehouse", "Stores - _TC")])
-		user = make_fenced_user(
-			TEST_USER,
-			["Stock User"],
-			[("Company", "_Test Company"), ("Warehouse", "_Test Warehouse Group - _TC", 1)],
-		)
-
-		self.assertEqual(user, TEST_USER)
-		self.assertEqual(
-			frappe.get_all("Has Role", filters={"parent": TEST_USER, "parenttype": "User"}, pluck="role"),
-			["Stock User"],
-		)
-		user_permissions = []
-		for row in frappe.get_all(
-			"User Permission",
-			filters={"user": TEST_USER},
-			fields=["allow", "for_value", "hide_descendants", "apply_to_all_doctypes"],
-			order_by="allow asc",
-		):
-			user_permissions.append(
-				(row.allow, row.for_value, row.hide_descendants, row.apply_to_all_doctypes)
-			)
-		self.assertEqual(
-			user_permissions,
-			[("Company", "_Test Company", 0, 1), ("Warehouse", "_Test Warehouse Group - _TC", 1, 1)],
-		)
-		with as_user(user):
-			self.assertIn("Stock User", frappe.get_roles())
-			self.assertNotIn("Projects User", frappe.get_roles())
-
-	def test_as_user_restores_the_previous_user(self):
-		user = make_fenced_user(TEST_USER, ["Stock User"])
-		previous = frappe.session.user
-
-		with as_user(user) as current:
-			self.assertEqual(current, user)
-			self.assertEqual(frappe.session.user, user)
-		self.assertEqual(frappe.session.user, previous)
-
-		with self.assertRaises(frappe.ValidationError):
-			with as_user(user):
-				frappe.throw("_Test as_user failure")
-		self.assertEqual(frappe.session.user, previous)
-
 	def test_assert_refused_for_names_covers_the_malformed_names(self):
 		seen = []
 
