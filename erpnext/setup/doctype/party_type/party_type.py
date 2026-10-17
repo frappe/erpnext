@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import DocType
 
@@ -20,7 +21,12 @@ class PartyType(Document):
 		party_type: DF.Link
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if not self.is_new() and self.has_value_changed("account_type"):
+			if frappe.db.exists("GL Entry", {"party_type": self.name}):
+				frappe.throw(
+					_("Cannot change Account Type for {0} after ledger entries exist").format(self.name)
+				)
 
 
 @frappe.whitelist()

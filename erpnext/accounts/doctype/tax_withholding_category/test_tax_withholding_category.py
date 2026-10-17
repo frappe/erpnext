@@ -621,8 +621,6 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		pe = create_payment_entry(
 			payment_type="Receive", party_type="Customer", party="Test TCS Customer", paid_amount=30000
 		)
-		pe.paid_from = "Debtors - _TC"
-		pe.paid_to = "Cash - _TC"
 		pe.apply_tds = 1
 		pe.tax_withholding_category = "Cumulative Threshold TCS"
 		pe.submit()
@@ -3882,8 +3880,8 @@ def create_payment_entry(**args):
 			"party_type": args.party_type,
 			"party": args.party,
 			"company": "_Test Company",
-			"paid_from": "Cash - _TC",
-			"paid_to": "Creditors - _TC",
+			"paid_from": "Debtors - _TC" if args.payment_type == "Receive" else "Cash - _TC",
+			"paid_to": "Cash - _TC" if args.payment_type == "Receive" else "Creditors - _TC",
 			"paid_amount": args.paid_amount or 10000,
 			"received_amount": args.paid_amount or 10000,
 			"reference_no": args.reference_no or "12345",
