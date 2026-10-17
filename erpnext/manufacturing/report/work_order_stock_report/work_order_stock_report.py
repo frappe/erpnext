@@ -24,6 +24,7 @@ def get_item_list(wo_list, filters):
 	descriptions = get_bom_descriptions(wo_list)
 	items_by_order = get_work_order_items(wo_list)
 	stock = get_stock(items_by_order, filters)
+	set_aside_transferred_stock(wo_list, items_by_order, stock)
 	warehouses = set(get_child_warehouses(filters.warehouse)) if filters.get("warehouse") else None
 
 	out = []
@@ -40,7 +41,7 @@ def get_row(wo_details, item, descriptions, stock, filters):
 	warehouse = item.source_warehouse or filters.get("warehouse")
 	pending_qty = flt(wo_details.qty) - flt(wo_details.produced_qty)
 	qty_per_unit = flt(item.required_qty) / flt(wo_details.qty) if flt(wo_details.qty) else 0.0
-	in_wip_qty = max(flt(item.transferred_qty) - flt(item.consumed_qty), 0.0)
+	in_wip_qty = get_in_wip_qty(item)
 	needed_qty = max(qty_per_unit * pending_qty - in_wip_qty, 0.0)
 	available_qty = allocate_stock(stock, (item.item_code, warehouse), needed_qty) + in_wip_qty
 	build_qty = available_qty / qty_per_unit if qty_per_unit else flt(wo_details.qty)
@@ -61,6 +62,18 @@ def get_row(wo_details, item, descriptions, stock, filters):
 			"ready_to_build": "Y" if in_stock else "N",
 		}
 	)
+
+
+def get_in_wip_qty(item):
+	return max(flt(item.transferred_qty) - flt(item.consumed_qty), 0.0)
+
+
+def set_aside_transferred_stock(wo_list, items_by_order, stock):
+	for wo_details in wo_list:
+		for item in items_by_order.get(wo_details.name, []):
+			key = (item.item_code, wo_details.wip_warehouse)
+			if key in stock:
+				stock[key] = max(stock[key] - get_in_wip_qty(item), 0.0)
 
 
 def allocate_stock(stock, key, needed_qty):
@@ -122,7 +135,7 @@ def get_work_orders():
 	out = frappe.get_all(
 		"Work Order",
 		filters=work_order_filters,
-		fields=["name", "status", "bom_no", "qty", "produced_qty", "planned_start_date"],
+		fields=["name", "status", "bom_no", "qty", "produced_qty", "planned_start_date", "wip_warehouse"],
 		order_by="planned_start_date asc, name asc",
 	)
 

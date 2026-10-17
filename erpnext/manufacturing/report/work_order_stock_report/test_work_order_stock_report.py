@@ -114,6 +114,17 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 
 		self.assertEqual((row.instock, row.buildable_qty, row.ready_to_build), (1, 10, "Y"))
 
+	def test_transferred_stock_is_not_counted_again_for_another_order(self):
+		wip = "_Test Warehouse 2 - _TC"
+		first, material = self.make_stocked_work_order(wip_warehouse=wip)
+		frappe.get_doc(make_stock_entry(first.name, "Material Transfer for Manufacture", 10)).submit()
+		second = make_wo_order_test_record(
+			item=first.production_item, bom_no=first.bom_no, qty=10, source_warehouse=wip
+		)
+
+		self.assertEqual(self.get_rows(first.name)[material].ready_to_build, "Y")
+		self.assertEqual(self.get_rows(second.name)[material].ready_to_build, "N")
+
 	def test_closed_and_stopped_work_orders_are_left_out(self):
 		closed, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
 		frappe.get_doc(make_stock_entry(closed.name, "Material Transfer for Manufacture", 10)).submit()
