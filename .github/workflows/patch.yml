@@ -2,6 +2,8 @@ name: Patch
 
 on:
   pull_request:
+    paths-ignore:
+      - '**/locale/main.pot'
   workflow_dispatch:
 
 permissions:
