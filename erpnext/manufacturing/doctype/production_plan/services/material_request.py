@@ -71,6 +71,8 @@ class MaterialRequestService:
 			)
 			if qty_to_request <= 0:
 				continue
+			if frappe.get_cached_value("UOM", item.uom, "must_be_whole_number"):
+				qty_to_request = ceil(qty_to_request)
 			self._add_item_to_material_request(
 				item, qty_to_request, material_request_map, material_request_list
 			)
