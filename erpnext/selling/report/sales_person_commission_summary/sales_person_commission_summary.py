@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 from frappe import _, msgprint, qb
 from frappe.query_builder import Criterion
 
@@ -148,6 +149,10 @@ def get_conditions(dt, st, filters, date_field):
 		conditions.append(condition)
 
 	if filters.get("sales_person"):
-		conditions.append(st["sales_person"].eq(filters.get("sales_person")))
+		lft, rgt = frappe.db.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
+		sp = qb.DocType("Sales Person")
+		conditions.append(
+			st.sales_person.isin(qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt)))
+		)
 
 	return conditions

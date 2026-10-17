@@ -78,6 +78,12 @@ class TestSalesPersonCommissionSummary(ERPNextTestSuite):
 		self.assertTrue(any(r[0] for r in rows[:-1]), "expected real data rows before the total row")
 		self.assertEqual(rows[-1], [""] * len(rows[0]))
 
+	def test_group_sales_person_filter_includes_members(self):
+		# filtering on a group (team) must include every descendant sales person's rows
+		si = self.make_invoice_with_commission()
+		rows = self.run_report(sales_person="Sales Team")
+		self.assertIn(si.name, {r[0] for r in rows if r[0]})
+
 	def test_sales_person_filter_scopes_rows(self):
 		si = self.make_invoice_with_commission()
 
