@@ -118,6 +118,10 @@ class SalesPartnerSummaryReport:
 			if self.filters.get(field):
 				self.query = self.query.where(Field(field, table=self.dt) == self.filters.get(field))
 
+		# Company is not a report column, so restrict allowed companies here
+		if condition := self._get_allowed_companies_condition():
+			self.query = self.query.where(condition)
+
 		if self.filters.get("from_date"):
 			self.query = self.query.where(
 				Field(self.date_field, table=self.dt) >= self.filters.get("from_date")
@@ -127,6 +131,17 @@ class SalesPartnerSummaryReport:
 			self.query = self.query.where(
 				Field(self.date_field, table=self.dt) <= self.filters.get("to_date")
 			)
+
+	def _get_allowed_companies_condition(self):
+		from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+		user_permissions = get_user_permissions(frappe.session.user)
+		if "Company" not in user_permissions:
+			return None
+
+		if allowed := get_allowed_docs_for_doctype(user_permissions["Company"], self.filters.get("doctype")):
+			return self.dt.company.isin(allowed)
+		return None
 
 	def apply_filters(self):
 		"""
