@@ -23,7 +23,7 @@ from erpnext.controllers.accounts_controller import InvalidQtyError, get_payment
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.stock.doctype.purchase_receipt.mapper import (
@@ -1267,20 +1267,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(expected_gl_entries[gle.account][2], gle.credit)
 
 	def test_auto_batch(self):
-		item_code = frappe.db.get_value("Item", {"has_batch_no": 1, "create_new_batch": 1}, "name")
-
-		if not item_code:
-			doc = frappe.get_doc(
-				{
-					"doctype": "Item",
-					"is_stock_item": 1,
-					"item_code": "test batch item",
-					"item_group": "Products",
-					"has_batch_no": 1,
-					"create_new_batch": 1,
-				}
-			).insert(ignore_permissions=True)
-			item_code = doc.name
+		item_code = make_item(
+			"test batch item", {"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}
+		).name
 
 		pi = make_purchase_invoice(
 			update_stock=1,
