@@ -17,8 +17,8 @@ class TestSerialNoWarrantyExpiry(ERPNextTestSuite):
 	def test_report_shows_the_warranty_expiry_date(self):
 		spec = self.get_report_spec()
 
-		self.assertIn(["warranty_expiry_date", "Serial No"], spec["columns"])
-		self.assertEqual(spec["sort_by"], "Serial No.warranty_expiry_date")
+		self.assertIn(["warranty_expiry_date", "Serial No"], spec["fields"])
+		self.assertEqual(spec["order_by"], "`tabSerial No`.`warranty_expiry_date` asc")
 
 	def test_consumed_serial_nos_are_not_listed(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
