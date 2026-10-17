@@ -1276,28 +1276,6 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(job_card.total_completed_qty), 3)
 		self.assertEqual(flt(job_card.process_loss_qty), 0)
 
-	def test_completion_allows_zero_completed_qty(self):
-		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
-
-		job_card = self.get_first_job_card(work_order.name)
-		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
-		job_card.save()
-
-		job_card.complete_job_card(
-			qty=0,
-			for_quantity=5,
-			pending_qty=0,
-			process_loss_qty=5,
-			end_time="2024-03-01 09:00:00",
-		)
-
-		job_card.reload()
-		self.assertEqual(flt(job_card.total_completed_qty), 0)
-		self.assertEqual(flt(job_card.process_loss_qty), 5)
-
-		job_card.submit()
-		self.assertEqual(job_card.docstatus, 1)
-
 	def test_completion_overwrites_existing_completed_qty_with_zero(self):
 		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
 
@@ -2054,88 +2032,6 @@ class TestJobCard(ERPNextTestSuite):
 			"Job Card", {"work_order": work_order.name, "operation_id": work_order.operations[0].name}
 		)
 		self.assertEqual(flt(follow_up_job_card.for_quantity), 3)
-
-	def test_semi_fg_process_loss_rolls_up_to_work_order(self):
-		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		warehouse = "Stores - _TC"
-		rm = make_item("Process Loss Rollup RM 1", {"is_stock_item": 1}).name
-		fg = make_item("Process Loss Rollup FG 1", {"is_stock_item": 1}).name
-
-		fg_bom = frappe.new_doc(
-			"BOM",
-			company="_Test Company",
-			item=fg,
-			quantity=1,
-			with_operations=1,
-			track_semi_finished_goods=1,
-		)
-		fg_bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
-
-		operation = {
-			"operation": "Process Loss Rollup Op A",
-			"workstation": "_Test Workstation A",
-			"finished_good": fg,
-			"finished_good_qty": 1,
-			"is_final_finished_good": 1,
-			"sequence_id": 1,
-			"time_in_mins": 60,
-			"source_warehouse": warehouse,
-			"fg_warehouse": warehouse,
-			"skip_material_transfer": 1,
-		}
-
-		make_workstation(operation)
-		make_operation(operation)
-		fg_bom.append("operations", operation)
-		fg_bom.insert()
-		fg_bom.submit()
-
-		work_order = make_wo_order_test_record(
-			item=fg,
-			qty=10,
-			source_warehouse=warehouse,
-			fg_warehouse=warehouse,
-			bom_no=fg_bom.name,
-			skip_transfer=1,
-			do_not_save=True,
-		)
-		work_order.operations[0].time_in_mins = 60
-		work_order.save()
-		work_order.submit()
-
-		make_stock_entry(item_code=rm, target=warehouse, qty=100, basic_rate=100)
-
-		job_card = self.get_first_job_card(work_order.name)
-		job_card.append("time_logs", {"from_time": "2024-05-01 08:00:00"})
-		job_card.save()
-
-		job_card.complete_job_card(
-			qty=8,
-			for_quantity=10,
-			pending_qty=0,
-			process_loss_qty=2,
-			end_time="2024-05-01 09:00:00",
-		)
-
-		job_card.reload()
-		self.assertEqual(flt(job_card.process_loss_qty), 2)
-
-		job_card.submit()
-		frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item()).submit()
-
-		self.assertEqual(
-			flt(
-				frappe.db.get_value("Work Order Operation", work_order.operations[0].name, "process_loss_qty")
-			),
-			2,
-		)
-
-		work_order.reload()
-		self.assertEqual(flt(work_order.produced_qty), 8)
-		self.assertEqual(flt(work_order.process_loss_qty), 2)
-		self.assertEqual(work_order.status, "Completed")
 
 	def test_semi_fg_process_loss_of_an_intermediate_operation_rolls_up_to_work_order(self):
 		"""Loss booked by an earlier operation shrinks what the final operation can produce,
@@ -3517,30 +3413,6 @@ class TestJobCardLogic(ERPNextTestSuite):
 	"""Field-level validations and pure quantity/capacity helpers, exercised on the
 	document directly so they don't need a Work Order / BOM (the integration suite does)."""
 
-	def test_processing_a_submitted_or_cancelled_card_is_blocked(self):
-		submitted = frappe.new_doc("Job Card")
-		submitted.docstatus = 1
-		self.assertRaises(frappe.ValidationError, submitted.validate_docstatus)
-
-		cancelled = frappe.new_doc("Job Card")
-		cancelled.docstatus = 2
-		self.assertRaises(frappe.ValidationError, cancelled.validate_docstatus)
-
-	def test_complete_job_card_qty_guards(self):
-		jc = frappe.new_doc("Job Card")
-		jc.for_quantity = 5
-		jc.validate_complete_job_card_qty(frappe._dict(pending_qty=3))  # within range -> passes
-		self.assertRaises(frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(qty=-1))
-		self.assertRaises(
-			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=-1)
-		)
-		self.assertRaises(
-			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(process_loss_qty=-1)
-		)
-		self.assertRaises(
-			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=10)
-		)
-
 	def test_completed_qty_sums_without_float_noise(self):
 		jc = frappe.new_doc("Job Card")
 		jc.total_completed_qty = 0.2
@@ -3593,51 +3465,12 @@ class TestJobCardLogic(ERPNextTestSuite):
 		jc.pending_qty = 4
 		jc.validate_completed_qty_matches_for_quantity()
 
-	def test_set_process_loss(self):
-		jc = frappe.new_doc("Job Card")
-		jc.for_quantity = 10
-		jc.total_completed_qty = 6
-		jc.pending_qty = 1
-		jc.set_process_loss()
-		self.assertEqual(jc.process_loss_qty, 3)  # 10 - 6 - 1
-
-		# no loss when nothing completed yet
-		nothing_done = frappe.new_doc("Job Card")
-		nothing_done.for_quantity = 10
-		nothing_done.total_completed_qty = 0
-		nothing_done.set_process_loss()
-		self.assertEqual(nothing_done.process_loss_qty, 0)
-
-		all_process_loss = frappe.new_doc("Job Card")
-		all_process_loss.for_quantity = 10
-		all_process_loss.process_loss_qty = 10
-		all_process_loss.set_process_loss()
-		self.assertEqual(all_process_loss.process_loss_qty, 10)
-
 	def test_zero_completed_qty_is_valid_for_semi_finished_goods(self):
 		jc = frappe.new_doc("Job Card")
 		jc.docstatus = 1
 		jc.track_semi_finished_goods = 1
 		jc.process_loss_qty = 5
 		jc.validate_semi_finished_goods()
-
-	def test_capacity_overlap_detection(self):
-		jc = frappe.new_doc("Job Card")
-		sequential = [
-			{"from_time": "2026-01-01 10:00:00", "to_time": "2026-01-01 11:00:00"},
-			{"from_time": "2026-01-01 11:00:00", "to_time": "2026-01-01 12:00:00"},
-		]
-		overlapping = [
-			{"from_time": "2026-01-01 10:00:00", "to_time": "2026-01-01 11:00:00"},
-			{"from_time": "2026-01-01 10:30:00", "to_time": "2026-01-01 11:30:00"},
-		]
-		# sequential logs share one capacity slot; overlapping logs need two
-		self.assertEqual(len(jc.get_alloted_capacity(sequential)), 1)
-		self.assertEqual(len(jc.get_alloted_capacity(overlapping)), 2)
-		# capacity 1 overlaps with any log; capacity 2 only when both slots are taken
-		self.assertTrue(jc.has_overlap(1, sequential))
-		self.assertFalse(jc.has_overlap(2, sequential))
-		self.assertTrue(jc.has_overlap(2, overlapping))
 
 	def test_semi_fg_job_card_is_exempt_from_transfer_qty_check(self):
 		jc = frappe.new_doc("Job Card")

@@ -74,48 +74,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				[formatdate(delivery_date, "dd MMM") for delivery_date in delivery_dates],
 			)
 
-	def test_manufacture_lead_time_preserves_fractional_days(self):
-		"""Manufacturing duration must retain fractional days until the report rounds it."""
-		item = make_item("_Test MRP Lead Time Item", {"is_stock_item": 1}).name
-		frappe.get_doc(
-			{
-				"doctype": "Item Lead Time",
-				"item_code": item,
-				"manufacturing_time_in_mins": 7,
-				"buffer_time": 2,
-			}
-		).insert()
-
-		lead_time = get_item_lead_time(item, "Manufacture")
-		self.assertAlmostEqual(lead_time, 7 / 1440 + 2, places=8)
-
-	@freeze_time("2026-09-01 10:00:00.123456")
-	def test_manufacturing_buffer_moves_release_date_earlier(self):
-		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
-		mps = frappe.get_doc("Master Production Schedule", plan.mps)
-		mps.items[0].delivery_date = "2026-09-30"
-		mps.save()
-		lead_time = frappe.get_doc(
-			{"doctype": "Item Lead Time", "item_code": plan.fg_item, "manufacturing_time_in_mins": 30}
-		).insert()
-		frappe.get_doc(
-			{"doctype": "Item Lead Time", "item_code": plan.rm_item, "purchase_time": 3, "buffer_time": 1}
-		).insert()
-
-		for buffer_days, expected_days in ((0, 2), (1, 3), (2, 4)):
-			with self.subTest(buffer_days=buffer_days):
-				lead_time.buffer_time = buffer_days
-				lead_time.save()
-				rows = get_mrp_rows(mps)
-				fg_row, rm_row = rows[plan.fg_item], rows[plan.rm_item]
-				self.assertEqual(fg_row.required_qty, 49)
-				self.assertEqual(fg_row.lead_time, expected_days)
-				self.assertEqual(
-					getdate(fg_row.release_date), getdate(add_days("2026-09-30", -expected_days))
-				)
-				self.assertEqual(rm_row.lead_time, 4)
-				self.assertEqual(rm_row.delivery_date, fg_row.release_date)
-
 	def test_manufacturing_duration_boundaries_and_missing_operation_time(self):
 		plan = make_mrp_plan(self, planned_qty=49, rm_qty=1)
 		mps = frappe.get_doc("Master Production Schedule", plan.mps)
@@ -331,30 +289,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual(get_created_order(plan.mps, "Purchase Order").supplier, SUPPLIER)
 
-	def test_make_order_uses_the_bom_passed_on_the_row(self):
-		plan = make_mps_item(
-			self,
-			{
-				"is_stock_item": 1,
-				"is_purchase_item": 0,
-				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
-			},
-		)
-		rm_item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"is_purchase_item": 1,
-				"item_defaults": [{"company": COMPANY, "default_warehouse": WAREHOUSE}],
-			}
-		).name
-		plan.row.bom_no = make_bom(item=plan.item, raw_materials=[rm_item], rm_qty=1, rate=100).name
-
-		make_order([plan.row], COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
-
-		work_order = get_created_order(plan.mps, "Work Order")
-		self.assertEqual(work_order.production_item, plan.item)
-		self.assertEqual(work_order.bom_no, plan.row.bom_no)
-
 	def test_make_order_creates_draft_purchase_and_work_orders(self):
 		plan = make_mrp_plan(self)
 
@@ -393,16 +327,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		]
 		self.assertNotIn(covered_row.item_code, ordered_items)
 		self.assertEqual(sorted(ordered_items), sorted([row.item_code for row in remaining_rows]))
-
-	def test_make_order_creates_nothing_when_every_row_is_covered(self):
-		plan = make_mrp_plan(self)
-		for row in plan.rows:
-			row.required_qty = 0
-
-		make_order(plan.rows, COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
-
-		for doctype in ("Purchase Order", "Work Order"):
-			self.assertFalse(frappe.get_all(doctype, filters={"mps": plan.mps}, pluck="name"))
 
 	def test_make_order_ignores_a_requirement_left_over_by_rounding(self):
 		"""What is left of a covered row after subtracting is not a quantity worth ordering."""

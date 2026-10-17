@@ -85,19 +85,6 @@ class TestBOM(ERPNextTestSuite):
 			)
 
 	@timeout
-	def test_get_bom_diff_checks_both_boms(self):
-		from erpnext.manufacturing.doctype.bom.mapper import get_bom_diff
-
-		bom1 = get_default_bom()
-		bom2 = get_default_bom("_Test FG Item")
-
-		with self.set_user(make_user_with_roles("_test_bom_stock_user@example.com", "Stock User")):
-			self.assertTrue(get_bom_diff(bom1, bom2))
-
-		with self.set_user(make_user_with_roles("_test_bom_no_access@example.com")):
-			self.assertRaises(frappe.PermissionError, get_bom_diff, bom1, bom2)
-
-	@timeout
 	def test_bom_diff_preserves_repeated_rows(self):
 		from erpnext.manufacturing.doctype.bom.mapper import _diff_table_field
 

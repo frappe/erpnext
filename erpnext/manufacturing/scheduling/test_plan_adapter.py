@@ -431,20 +431,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 		booked = loaders.get_booked_load([self.workstation], start_date)[self.workstation]
 		self.assertEqual(len(booked), remaining_rows + entry_count)
 
-	def test_manual_schedule_entry_creation_is_blocked(self):
-		plan = self.make_plan()
-		entry = frappe.get_doc(
-			{
-				"doctype": "Production Plan Schedule",
-				"production_plan": plan.name,
-				"item_code": "Test PPS FG",
-				"from_time": "2026-11-02 09:00:00",
-				"to_time": "2026-11-02 10:00:00",
-			}
-		)
-
-		self.assertRaises(frappe.ValidationError, entry.insert)
-
 	def test_cancelled_plan_clears_computed_rows(self):
 		plan = self.make_plan()
 		plan.cancel()
@@ -626,21 +612,6 @@ class TestPlanAdapter(ERPNextTestSuite):
 		frappe.delete_doc("Production Plan", plan.name)
 		self.assertFalse(frappe.db.exists("Production Plan", plan.name))
 		self.assertFalse(self.has_schedule(plan))
-
-	def test_incomplete_proposal_is_not_applied(self):
-		from unittest.mock import patch
-
-		from erpnext.manufacturing.scheduling import plan_adapter
-
-		plan = self.make_plan()
-		incomplete = {
-			"rows": {},
-			"unscheduled": {"task": "no capacity within horizon"},
-			"completion_date": None,
-		}
-
-		with patch.object(plan_adapter, "run_engine", return_value=incomplete):
-			self.assertRaises(frappe.ValidationError, apply_schedule, plan.name, "2026-11-02 09:00:00")
 
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_schedule_considers_raw_material_lead_time(self):

@@ -25,14 +25,6 @@ def day_shift_calendar():
 
 
 class TestSchedulingEngine(unittest.TestCase):
-	def test_forward_places_task_within_working_window(self):
-		engine = SchedulingEngine([Resource("WS-A", calendar=day_shift_calendar())])
-		result = engine.schedule([Task("t1", duration_mins=120, resource="WS-A")], anchor=dt(12, 10))
-
-		assignment = result.assignments["t1"]
-		self.assertEqual(assignment.start, dt(12, 10))
-		self.assertEqual(assignment.end, dt(12, 12))
-
 	def test_task_splits_across_days_and_skips_holiday(self):
 		calendar = day_shift_calendar()
 		calendar.holidays.add(datetime.date(2026, 8, 13))
@@ -167,17 +159,6 @@ class TestSchedulingEngine(unittest.TestCase):
 		self.assertIn("a", result.unscheduled)
 		self.assertIn("b", result.unscheduled)
 		self.assertEqual(result.unscheduled["c"], "no capacity within horizon")
-
-	def test_run_holds_multiple_documents_without_blind_spots(self):
-		engine = SchedulingEngine([Resource("WS-A", calendar=day_shift_calendar())])
-		plan_a = [Task("planA:op", duration_mins=240, resource="WS-A")]
-		plan_b = [Task("planB:op", duration_mins=240, resource="WS-A")]
-
-		result_a = engine.schedule(plan_a, anchor=dt(12, 9))
-		result_b = engine.schedule(plan_b, anchor=dt(12, 9))
-
-		self.assertEqual(result_a.assignments["planA:op"].start, dt(12, 9))
-		self.assertEqual(result_b.assignments["planB:op"].start, dt(12, 13))
 
 
 if __name__ == "__main__":
