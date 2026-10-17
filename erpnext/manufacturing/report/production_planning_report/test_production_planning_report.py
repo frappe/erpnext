@@ -142,6 +142,20 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		data = self.run_report("Work Order", [work_order.name])
 		self.assertEqual(self.required_qty(data, material), 0)
 
+	def test_extra_transfer_leaves_no_negative_demand(self):
+		material = make_item(properties={"is_stock_item": 1}).name
+		fg_item = self.make_fg_with_bom([(material, 2, None, 1)])
+		orders = [
+			make_wo_order_test_record(item=fg_item, qty=5, source_warehouse=WAREHOUSE) for _order in range(2)
+		]
+		frappe.db.set_value(
+			"Work Order Item", {"parent": orders[0].name, "item_code": material}, "transferred_qty", 12
+		)
+
+		data = self.run_report("Work Order", [order.name for order in orders])
+
+		self.assertEqual(self.required_qty(data, material), 10)
+
 	def test_arrival_qty_is_in_the_stock_uom(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 

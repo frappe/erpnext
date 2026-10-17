@@ -162,7 +162,9 @@ class ProductionPlanReport:
 				or []
 			)
 			for d in raw_materials:
-				d.required_qty = flt(d.required_qty) - max(flt(d.transferred_qty), flt(d.consumed_qty))
+				d.required_qty = max(
+					flt(d.required_qty) - max(flt(d.transferred_qty), flt(d.consumed_qty)), 0
+				)
 			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:
