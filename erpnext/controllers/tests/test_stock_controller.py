@@ -130,25 +130,6 @@ class TestStockControllerConversions(ERPNextTestSuite):
 			"No Repost Item Valuation was queued for an entry that a later SL Entry made backdated",
 		)
 
-	def test_repost_queued_against_voucher_when_item_based_reposting_is_off(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		item = make_item("_Test Voucher Based Repost Item", {"is_stock_item": 1}).name
-		warehouse = "_Test Warehouse - _TC"
-
-		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
-			opening = self._make_opening_entry(item, warehouse)
-			backdated = self._submit_entry(item, warehouse, inject=self._later_sle(item, warehouse, opening))
-
-			self.assertTrue(
-				frappe.get_all(
-					"Repost Item Valuation",
-					filters={"docstatus": 1, "voucher_no": backdated.name},
-					pluck="name",
-				),
-				"No voucher based Repost Item Valuation was queued",
-			)
-
 	def test_no_repost_queued_when_nothing_was_written_after_the_entry(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 

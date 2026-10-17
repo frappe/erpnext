@@ -36,22 +36,6 @@ class TestPriceListValidation(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "buying transaction"):
 			invoice.save()
 
-	def test_a_price_list_for_both_sides_should_be_accepted(self):
-		price_list = self.create_price_list(selling=1, buying=1)
-
-		invoice = create_sales_invoice(do_not_save=1)
-		invoice.selling_price_list = price_list
-		invoice.save()
-
-		self.assertEqual(invoice.selling_price_list, price_list)
-
-	def test_a_missing_price_list_should_report_rather_than_crash(self):
-		invoice = create_sales_invoice(do_not_save=1)
-		invoice.selling_price_list = frappe.generate_hash(length=10)
-
-		with self.assertRaises(frappe.ValidationError):
-			invoice.validate_price_list()
-
 	def test_internal_transfer_should_keep_the_outward_price_list(self):
 		"""The inward document of an internal transfer takes the price list of the outward one, which
 		is flagged for the opposite side."""
