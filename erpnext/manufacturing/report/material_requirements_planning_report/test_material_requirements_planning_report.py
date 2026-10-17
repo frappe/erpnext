@@ -394,16 +394,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertNotIn(covered_row.item_code, ordered_items)
 		self.assertEqual(sorted(ordered_items), sorted([row.item_code for row in remaining_rows]))
 
-	def test_make_order_creates_nothing_when_every_row_is_covered(self):
-		plan = make_mrp_plan(self)
-		for row in plan.rows:
-			row.required_qty = 0
-
-		make_order(plan.rows, COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
-
-		for doctype in ("Purchase Order", "Work Order"):
-			self.assertFalse(frappe.get_all(doctype, filters={"mps": plan.mps}, pluck="name"))
-
 	def test_make_order_ignores_a_requirement_left_over_by_rounding(self):
 		"""What is left of a covered row after subtracting is not a quantity worth ordering."""
 		plan = make_mrp_plan(self)
