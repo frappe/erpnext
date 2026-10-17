@@ -341,6 +341,22 @@ class TestCustomer(FrappeTestCase):
 		)
 		self.assertRaises(frappe.ValidationError, customer.save)
 
+	def test_credit_limit_error_shows_breakup(self):
+		outstanding_amt = self.get_customer_outstanding_amount()
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.credit_limits = []
+		customer.append(
+			"credit_limits", {"credit_limit": flt(outstanding_amt - 100), "company": "_Test Company"}
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			customer.save()
+
+		message = frappe.message_log[-1].get("message")
+		self.assertIn("Outstanding as per General Ledger", message)
+		self.assertIn("Pending Sales Orders", message)
+		self.assertIn("query-report/Customer Credit Balance", message)
+
 	def test_customer_payment_terms(self):
 		frappe.db.set_value(
 			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 3"

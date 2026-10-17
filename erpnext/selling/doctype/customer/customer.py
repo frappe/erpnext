@@ -3,6 +3,7 @@
 
 
 import json
+from urllib.parse import urlencode
 
 import frappe
 import frappe.defaults
@@ -14,7 +15,7 @@ from frappe.contacts.address_and_contact import (
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
-from frappe.utils import cint, cstr, flt, get_formatted_email, get_link_to_form, today
+from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, today
 from frappe.utils.deprecations import deprecated
 from frappe.utils.user import get_users_with_role
 
@@ -394,15 +395,39 @@ class Customer(TransactionBase):
 			else:
 				company_record.append(limit.company)
 
-			outstanding_amt = get_customer_outstanding(
+			breakup = get_customer_outstanding_breakup(
 				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
 			)
+			outstanding_amt = breakup.gle + breakup.sales_order + breakup.delivery_note
 			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(
-					_(
-						"""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"""
-					).format(outstanding_amt)
+					self.get_credit_limit_breakup_message(limit.company, breakup, outstanding_amt),
+					title=_("Credit Limit Too Low"),
 				)
+
+	def get_credit_limit_breakup_message(self, company, breakup, outstanding_amt):
+		currency = frappe.get_cached_value("Company", company, "default_currency")
+		rows = [
+			(_("Outstanding as per General Ledger"), breakup.gle),
+			(_("Pending Sales Orders (unbilled amount)"), breakup.sales_order),
+			(_("Pending Delivery Notes (not billed, without Sales Order)"), breakup.delivery_note),
+		]
+		rows_html = "".join(
+			f"<tr><td>{label}</td><td style='text-align: right'>{fmt_money(amount, currency=currency)}</td></tr>"
+			for label, amount in rows
+		)
+		report_url = get_url_to_report_with_filters(company, self.name)
+
+		return _(
+			"New credit limit is less than the current outstanding amount for the customer. "
+			"Credit limit has to be at least {0}."
+		).format(frappe.bold(fmt_money(outstanding_amt, currency=currency))) + (
+			f"<br><br><table class='table table-bordered'><tbody>{rows_html}"
+			f"<tr><td><b>{_('Total')}</b></td>"
+			f"<td style='text-align: right'><b>{fmt_money(outstanding_amt, currency=currency)}</b></td></tr>"
+			f"</tbody></table>"
+			f"<a href='{report_url}'>{_('View Customer Credit Balance report')}</a>"
+		)
 
 	def on_trash(self):
 		if self.customer_primary_contact:
@@ -659,7 +684,20 @@ def send_emails(args):
 	frappe.sendmail(recipients=args.get("credit_controller_users_list"), subject=subject, message=message)
 
 
+def get_url_to_report_with_filters(company, customer):
+	return "/app/query-report/Customer Credit Balance?" + urlencode(
+		{"company": company, "customer": customer}
+	)
+
+
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
+	breakup = get_customer_outstanding_breakup(customer, company, ignore_outstanding_sales_order, cost_center)
+	return breakup.gle + breakup.sales_order + breakup.delivery_note
+
+
+def get_customer_outstanding_breakup(
+	customer, company, ignore_outstanding_sales_order=False, cost_center=None
+):
 	# Outstanding based on GL Entries
 	cond = ""
 	if cost_center:
@@ -715,7 +753,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	)
 
 	if not unmarked_delivery_note_items:
-		return outstanding_based_on_gle + outstanding_based_on_so
+		return frappe._dict(
+			gle=outstanding_based_on_gle, sales_order=outstanding_based_on_so, delivery_note=0
+		)
 
 	si_amounts = frappe.db.sql(
 		"""
@@ -740,7 +780,11 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 				(dn_amount - si_amount) / dn_item.base_net_total
 			) * dn_item.base_grand_total
 
-	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
+	return frappe._dict(
+		gle=outstanding_based_on_gle,
+		sales_order=outstanding_based_on_so,
+		delivery_note=outstanding_based_on_dn,
+	)
 
 
 def get_credit_limit(customer, company):
