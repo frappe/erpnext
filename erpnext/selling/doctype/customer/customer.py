@@ -399,15 +399,16 @@ class Customer(TransactionBase):
 				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
 			)
 			outstanding_amt = breakup.gle + breakup.sales_order + breakup.delivery_note
-			if flt(limit.credit_limit) < flt(outstanding_amt, limit.precision("credit_limit")):
+			precision = limit.precision("credit_limit")
+			outstanding_amt = flt(outstanding_amt, precision)
+			if flt(limit.credit_limit, precision) < outstanding_amt:
 				frappe.throw(
-					self.get_credit_limit_breakup_message(limit.company, breakup, outstanding_amt),
+					self.get_credit_limit_breakup_message(limit.company, breakup, precision),
 					title=_("Credit Limit Too Low"),
 				)
 
-	def get_credit_limit_breakup_message(self, company, breakup, outstanding_amt):
+	def get_credit_limit_breakup_message(self, company, breakup, precision):
 		currency = frappe.get_cached_value("Company", company, "default_currency")
-		precision = cint(frappe.get_system_settings("currency_precision")) or 2
 		breakup = frappe._dict({key: flt(value, precision) for key, value in breakup.items()})
 		outstanding_amt = flt(breakup.gle + breakup.sales_order + breakup.delivery_note, precision)
 		rows = [
