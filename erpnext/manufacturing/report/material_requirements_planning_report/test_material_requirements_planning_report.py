@@ -59,6 +59,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			report.update_sales_forecast_data()
 
 		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
+		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
 
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
