@@ -145,6 +145,10 @@ def get_conditions(dt, st, filters, date_field):
 			conditions.append(dt[field].eq(filters.get(field)))
 
 	if filters.get("sales_person"):
-		conditions.append(st["sales_person"].eq(filters.get("sales_person")))
+		lft, rgt = frappe.db.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
+		sp = qb.DocType("Sales Person")
+		conditions.append(
+			st.sales_person.isin(qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt)))
+		)
 
 	return conditions
