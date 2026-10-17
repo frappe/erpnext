@@ -483,6 +483,12 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self._build_required_item_row(item_dict, d, consider_job_card, wip_warehouse, work_order)
 
 	def _build_required_item_row(self, item_dict, d, consider_job_card, wip_warehouse, work_order):
+		key = (d.item_code, d.source_warehouse)
+		if existing_row := item_dict.get(key):
+			existing_row["required_qty"] = flt(existing_row["required_qty"]) + flt(d.required_qty)
+			existing_row["transferred_qty"] = flt(existing_row["transferred_qty"]) + flt(d.transferred_qty)
+			return
+
 		item_row = d.as_dict()
 		item_row["idx"] = len(item_dict) + 1
 		if consider_job_card:
@@ -494,7 +500,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			work_order.allow_alternative_item
 			and frappe.get_cached_value("Item", d.item_code, "allow_alternative_item")
 		)
-		item_dict.setdefault(d.item_code, item_row)
+		item_dict.setdefault(key, item_row)
 
 	def _get_job_card_item(self, item_code):
 		return (

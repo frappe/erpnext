@@ -309,7 +309,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				first.submit()
 				stop_unstop(first.name, "Stopped")
 				self.assert_pending_qty(plan, field, 0)
-				stop_unstop(first.name, "Not Started")
+				stop_unstop(first.name, "Resumed")
 				close_work_order(first.name, "Closed")
 				self.assert_pending_qty(plan, field, 0)
 

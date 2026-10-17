@@ -215,6 +215,37 @@ class OperationsService:
 		self.calculate_time()
 		self.set_operation_warehouses()
 
+	def sync_operations_with_bom(self, previous):
+		if previous is None:
+			return
+
+		if previous.bom_no != self.doc.bom_no or previous.use_multi_level_bom != self.doc.use_multi_level_bom:
+			self.doc.get_items_and_operations_from_bom()
+		elif flt(previous.qty) != flt(self.doc.qty) and flt(previous.qty):
+			self._scale_saved_operation_time(previous)
+
+	def _scale_saved_operation_time(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		fixed_operations = self._get_fixed_time_operations()
+		for d in self.doc.get("operations"):
+			saved = saved_rows.get(d.name)
+			is_fixed = (d.bom or self.doc.bom_no, d.operation) in fixed_operations
+			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
+				continue
+			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
+		self.calculate_operating_cost()
+
+	def _get_fixed_time_operations(self):
+		boms = {d.bom or self.doc.bom_no for d in self.doc.get("operations")}
+		return set(
+			frappe.get_all(
+				"BOM Operation",
+				filters={"parent": ["in", list(boms)], "parenttype": "BOM", "fixed_time": 1},
+				fields=["parent", "operation"],
+				as_list=True,
+			)
+		)
+
 	def set_operation_warehouses(self):
 		"""For semi-finished goods tracking, default each operation's warehouses from the Work
 		Order and chain them: the first operation pulls from the WO source warehouse and every
@@ -244,18 +275,18 @@ class OperationsService:
 			for node in reversed(bom_tree.level_order_traversal()):
 				if node.is_bom:
 					qty = node.exploded_qty / node.bom_qty
-					groups.append((self._bom_operations(node.name), qty, True))
+					groups.append((self._bom_operations(node.name), qty, node.exploded_qty, True))
 
 		bom_qty = frappe.get_cached_value("BOM", self.doc.bom_no, "quantity")
-		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, False))
+		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, 1, False))
 
-		all_rows = [d for rows, qty, exploded in groups for d in rows]
+		all_rows = [d for rows, _qty, _units, _exploded in groups for d in rows]
 		batch_size_flags = self._get_batch_size_flags(d.operation for d in all_rows)
 
 		operations = []
-		for rows, qty, exploded in groups:
+		for rows, qty, units, exploded in groups:
 			for d in rows:
-				self._adjust_operation_row(d, qty, exploded, batch_size_flags)
+				self._adjust_operation_row(d, qty, units, exploded, batch_size_flags)
 				operations.append(d)
 		return operations
 
@@ -278,11 +309,9 @@ class OperationsService:
 			)
 		)
 
-	def _adjust_operation_row(self, d, qty, exploded, batch_size_flags):
+	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
 		if not d.fixed_time:
-			if batch_size_flags.get(d.operation):
-				qty = d.batch_size
-			d.time_in_mins = d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
+			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 		d.status = "Pending"
 		if self.doc.track_semi_finished_goods and not d.sequence_id:
@@ -378,11 +407,11 @@ class OperationsService:
 			)
 			.run(as_dict=True)
 		)
+		start_date = data[0].start_date
+		end_date = data[0].end_date if self.doc.status == "Completed" else None
+		lead_time = flt(time_diff_in_hours(end_date, start_date) * 60) if start_date and end_date else 0
 		self.doc.db_set(
-			{
-				"actual_start_date": data[0].start_date,
-				"actual_end_date": data[0].end_date if self.doc.status == "Completed" else None,
-			}
+			{"actual_start_date": start_date, "actual_end_date": end_date, "lead_time": lead_time}
 		)
 
 	def set_lead_time(self):
@@ -390,6 +419,12 @@ class OperationsService:
 			self.doc.lead_time = flt(
 				time_diff_in_hours(self.doc.actual_end_date, self.doc.actual_start_date) * 60
 			)
+
+
+def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
+	if batch_size_flags.get(d.operation) and flt(d.batch_size):
+		return d.time_in_mins * flt(units) / flt(d.batch_size)
+	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
 
 
 @frappe.request_cache
