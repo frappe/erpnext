@@ -470,11 +470,8 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 
 def init_user_and_profile(**args):
-	user = "test@example.com"
+	user = "test-pos@example.com"
 	test_user = frappe.get_doc("User", user)
-
-	roles = ("Accounts Manager", "Accounts User", "Sales Manager", "Stock User", "Item Manager")
-	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
 	if args.get("do_not_create_pos_profile"):

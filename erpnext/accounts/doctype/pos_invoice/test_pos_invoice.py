@@ -1059,7 +1059,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_inv_insufficient.save()
 		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
 
-		frappe.set_user("test@example.com")
+		frappe.set_user(self.test_user.name)
 
 	def test_make_merge_log_refuses_empty_and_malformed_names(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log

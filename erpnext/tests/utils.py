@@ -168,6 +168,7 @@ class BootStrapTestData:
 		self.make_customer_group()
 		self.make_customer()
 		self.make_user()
+		self.make_pos_fixtures()
 		self.make_cost_center()
 		self.make_warehouse()
 		self.make_transfer_warehouses()
@@ -549,6 +550,27 @@ class BootStrapTestData:
 				"new_password": "password",
 				"roles": [{"doctype": "Has Role", "role": "Technician"}],
 			},
+		]
+		self.make_records(["email"], records)
+
+	def make_pos_fixtures(self):
+		roles = (
+			"System Manager",
+			"Accounts User",
+			"Accounts Manager",
+			"Sales Manager",
+			"Stock User",
+			"Item Manager",
+		)
+		records = [
+			{
+				"doctype": "User",
+				"email": "test-pos@example.com",
+				"enabled": 1,
+				"first_name": "_Test POS",
+				"new_password": "Eastern_43A1W",
+				"roles": [{"doctype": "Has Role", "parentfield": "roles", "role": role} for role in roles],
+			}
 		]
 		self.make_records(["email"], records)
 
