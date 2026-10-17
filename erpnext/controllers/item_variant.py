@@ -8,6 +8,7 @@ import json
 import frappe
 from frappe import _
 from frappe.query_builder import Case
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import cstr, flt
 
 from erpnext.utilities.product import get_item_codes_by_attributes
@@ -25,7 +26,7 @@ class ItemTemplateCannotHaveStock(frappe.ValidationError):
 	pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_variant(
 	template: str,
 	args: dict | str | None = None,
@@ -64,6 +65,9 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	manufacturer part no"""
 	from frappe.model.naming import append_number_if_name_exists
 
+	if existing_variant := get_manufacturer_variant(template.name, manufacturer, manufacturer_part_no):
+		return frappe.get_doc("Item", existing_variant)
+
 	variant = frappe.new_doc("Item")
 
 	copy_attributes_to_variant(template, variant)
@@ -92,6 +96,25 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	return variant
 
 
+def get_manufacturer_variant(template, manufacturer, manufacturer_part_no):
+	item = frappe.qb.DocType("Item")
+	item_manufacturer = frappe.qb.DocType("Item Manufacturer")
+	variant = (
+		frappe.qb.from_(item_manufacturer)
+		.join(item)
+		.on(item.name == item_manufacturer.item_code)
+		.select(item.name)
+		.where(
+			(item.variant_of == template)
+			& (item_manufacturer.manufacturer == manufacturer)
+			& (Coalesce(item_manufacturer.manufacturer_part_no, "") == (manufacturer_part_no or ""))
+		)
+		.limit(1)
+	).run(pluck=True)
+
+	return variant[0] if variant else None
+
+
 def validate_item_variant_attributes(item, args=None):
 	if isinstance(item, str):
 		item = frappe.get_doc("Item", item)
@@ -118,6 +141,17 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 	from_range = numeric_attribute.from_range
 	to_range = numeric_attribute.to_range
 	increment = numeric_attribute.increment
+
+	try:
+		float(cstr(value).replace(",", ""))
+	except (TypeError, ValueError):
+		frappe.throw(
+			_("Value {0} for Attribute {1} must be a number for Item {2}").format(
+				frappe.bold(value), attribute, item
+			),
+			InvalidItemAttributeValueError,
+			title=_("Invalid Attribute"),
+		)
 
 	if increment == 0:
 		# defensive validation to prevent ZeroDivisionError
@@ -290,21 +324,23 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 def get_attribute_values(item):
 	if not frappe.flags.attribute_values:
 		attribute_values = {}
-		numeric_values = {}
 		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
 			attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
 
-		for t in frappe.get_all(
-			"Item Variant Attribute",
-			fields=["attribute", "from_range", "to_range", "increment"],
-			filters={"numeric_values": 1, "parent": item.variant_of},
-		):
-			numeric_values[t.attribute.lower()] = t
-
 		frappe.flags.attribute_values = attribute_values
-		frappe.flags.numeric_values = numeric_values
+		frappe.flags.numeric_values = {}
 
-	return frappe.flags.attribute_values, frappe.flags.numeric_values
+	if item.variant_of not in frappe.flags.numeric_values:
+		frappe.flags.numeric_values[item.variant_of] = {
+			t.attribute.lower(): t
+			for t in frappe.get_all(
+				"Item Variant Attribute",
+				fields=["attribute", "from_range", "to_range", "increment"],
+				filters={"numeric_values": 1, "parent": item.variant_of},
+			)
+		}
+
+	return frappe.flags.attribute_values, frappe.flags.numeric_values[item.variant_of]
 
 
 def find_variant(template, args, variant_item_code=None):
