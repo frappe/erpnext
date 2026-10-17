@@ -399,6 +399,7 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 		first = self.submit_closing(self.make_closing("2026-03-31"))
 		later = self.submit_closing(self.make_closing("2026-06-30"))
 
+		self.assertRaises(frappe.ValidationError, first.regenerate_closing_balance)
 		self.assertRaises(frappe.ValidationError, first.cancel)
 
 		later.cancel()
@@ -440,12 +441,6 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 		rows = stock_balance(filters.copy().update(item_group=item_group.name))[1]
 		self.assertEqual({row["item_code"] for row in rows}, {item})
-
-	def test_cannot_regenerate_closing_with_later_closing(self):
-		first = self.submit_closing(self.make_closing("2026-03-31"))
-		self.submit_closing(self.make_closing("2026-06-30"))
-
-		self.assertRaises(frappe.ValidationError, first.regenerate_closing_balance)
 
 	def test_closing_balance_is_generated_only_for_submitted_entry(self):
 		draft = self.make_closing("2026-03-31")

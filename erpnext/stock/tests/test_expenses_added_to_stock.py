@@ -69,15 +69,14 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 
 		return balances, debits, credits
 
-	def test_material_receipt_books_expenses_added_to_stock(self):
-		se = make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
-
-		_balances, debits, credits = self.get_gl_balances("Stock Entry", se.name)
+	def test_material_issue_books_reverse_pair(self):
+		receipt = make_stock_entry(
+			item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY
+		)
+		_balances, debits, credits = self.get_gl_balances("Stock Entry", receipt.name)
 		self.assertEqual(debits[self.eats_account], 1000)
 		self.assertEqual(credits[self.eats_contra_account], 1000)
 
-	def test_material_issue_books_reverse_pair(self):
-		make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
 		se = make_stock_entry(item_code=self.item, from_warehouse=WAREHOUSE, qty=5, company=COMPANY)
 
 		_balances, debits, credits = self.get_gl_balances("Stock Entry", se.name)

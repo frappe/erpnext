@@ -208,40 +208,25 @@ class TestItemPrice(ERPNextTestSuite):
 			}
 		).insert()
 
-	def test_customer_price_wins_over_newer_general_price(self):
+	def test_party_price_wins_over_newer_general_price(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		item_code = make_item(properties={"is_stock_item": 1}).name
-		self.make_price(item_code, 900, add_days(today(), -200), customer="_Test Customer")
-		self.make_price(item_code, 1000, add_days(today(), -30))
+		for price_list, party, party_rate in (
+			("_Test Price List", {"customer": "_Test Customer"}, 900),
+			("_Test Buying Price List", {"supplier": "_Test Supplier"}, 800),
+		):
+			self.make_price(item_code, party_rate, add_days(today(), -200), price_list=price_list, **party)
+			self.make_price(item_code, 1000, add_days(today(), -30), price_list=price_list)
 
-		ctx = frappe._dict(
-			price_list="_Test Price List",
-			customer="_Test Customer",
-			uom=frappe.db.get_value("Item", item_code, "stock_uom"),
-			transaction_date=today(),
-			qty=1,
-		)
-		self.assertEqual(get_price_list_rate_for(ctx, item_code), 900)
-
-	def test_supplier_price_wins_over_newer_general_price(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		item_code = make_item(properties={"is_stock_item": 1}).name
-		price_list = "_Test Buying Price List"
-		self.make_price(
-			item_code, 800, add_days(today(), -200), price_list=price_list, supplier="_Test Supplier"
-		)
-		self.make_price(item_code, 1000, add_days(today(), -30), price_list=price_list)
-
-		ctx = frappe._dict(
-			price_list=price_list,
-			supplier="_Test Supplier",
-			uom=frappe.db.get_value("Item", item_code, "stock_uom"),
-			transaction_date=today(),
-			qty=1,
-		)
-		self.assertEqual(get_price_list_rate_for(ctx, item_code), 800)
+			ctx = frappe._dict(
+				price_list=price_list,
+				uom=frappe.db.get_value("Item", item_code, "stock_uom"),
+				transaction_date=today(),
+				qty=1,
+				**party,
+			)
+			self.assertEqual(get_price_list_rate_for(ctx, item_code), party_rate)
 
 	def test_batch_price_wins_over_newer_general_price(self):
 		from erpnext.stock.doctype.item.test_item import make_item

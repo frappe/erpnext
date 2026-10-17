@@ -552,17 +552,8 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			entries=json.dumps([{"serial_no": "SBIE-PT-0001"}]),
 		)
 
-	def test_upsert_rejects_unsupported_voucher_type(self):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
-		pr = self.make_draft_pr(item)
-
-		child_row = pr.items[0].as_dict()
-		child_row["is_rejected"] = 0
-		child_row["parenttype"] = "Task"
-
 		doc = pr.as_dict()
 		doc["doctype"] = "Task"
-
 		self.assertRaises(
 			frappe.ValidationError,
 			upsert_bundle_entries,

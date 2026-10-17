@@ -185,13 +185,12 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 		return delivery_note, make_delivery_trip(delivery_note.name, trip)
 
-	def test_mapping_drops_placeholder_stop(self):
+	def test_mapping_drops_only_the_placeholder_stop(self):
 		delivery_note, trip = self.map_delivery_note_onto_trip({})
 
 		self.assertEqual(len(trip.delivery_stops), 1)
 		self.assertEqual(trip.delivery_stops[0].delivery_note, delivery_note.name)
 
-	def test_mapping_keeps_partially_filled_stop(self):
 		_, trip = self.map_delivery_note_onto_trip({"customer": "_Test Customer"})
 
 		self.assertEqual(len(trip.delivery_stops), 2)

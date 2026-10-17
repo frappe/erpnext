@@ -28,32 +28,23 @@ class TestItemVariantSettings(ERPNextTestSuite):
 		return template, variant
 
 	@ERPNextTestSuite.change_settings("Item Variant Settings", {"allow_different_uom": 1})
-	def test_template_save_keeps_variant_uom_when_different_uom_allowed(self):
-		template, variant = self.make_template_with_variant("Kg")
-		make_stock_entry(item_code=variant.name, target="_Test Warehouse - _TC", qty=3, rate=100)
-
-		template.reload()
-		template.description = "Updated template description"
-		template.save()
-
-		variant.reload()
-		self.assertEqual(variant.stock_uom, "Kg")
-		self.assertEqual([row.uom for row in variant.uoms], ["Kg"])
-
-	@ERPNextTestSuite.change_settings("Item Variant Settings", {"allow_different_uom": 1})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1})
-	def test_template_save_keeps_variant_default_uoms_when_different_uom_allowed(self):
+	def test_template_save_keeps_variant_uom_when_different_uom_allowed(self):
 		self.copy_fields_to_variants("sales_uom", "purchase_uom")
 		template, variant = self.make_template_with_variant("Kg")
+		make_stock_entry(item_code=variant.name, target="_Test Warehouse - _TC", qty=3, rate=100)
 		variant.reload()
 		variant.sales_uom = variant.purchase_uom = "Kg"
 		variant.save()
 
 		template.reload()
+		template.description = "Updated template description"
 		template.sales_uom = template.purchase_uom = "Nos"
 		template.save()
 
 		variant.reload()
+		self.assertEqual(variant.stock_uom, "Kg")
+		self.assertEqual([row.uom for row in variant.uoms], ["Kg"])
 		self.assertEqual(variant.sales_uom, "Kg")
 		self.assertEqual(variant.purchase_uom, "Kg")
 

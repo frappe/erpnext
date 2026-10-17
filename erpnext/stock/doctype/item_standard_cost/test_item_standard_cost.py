@@ -269,39 +269,6 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", isc2.revaluation_entry, "docstatus"), 2)
 		self.assertEqual(stock_value(), 1000)
 
-	def test_stock_reconciliation_rate_change_creates_standard_cost(self):
-		# Editing the rate on a reconciliation creates a new Item Standard Cost and revalues on-hand
-		# stock to it - the reconciliation is a shortcut into the standard cost, not a manual override.
-		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
-			create_stock_reconciliation,
-		)
-
-		item = create_standard_cost_item()
-		create_item_standard_cost(
-			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -10)
-		)
-		make_stock_entry(
-			item_code=item.name,
-			to_warehouse=PI_STORES,
-			company=PI_COMPANY,
-			qty=10,
-			basic_rate=100,
-			posting_date=add_days(today(), -5),
-		)
-
-		# Same quantity, new rate 130: a new standard cost is set and the 10 on-hand units revalue to 1300.
-		reco = create_stock_reconciliation(
-			item_code=item.name, warehouse=PI_STORES, qty=10, rate=130, company=PI_COMPANY
-		)
-		self.assertEqual(reco.docstatus, 1)
-
-		self.assertEqual(flt(get_item_standard_rate(item.name, PI_COMPANY)), 130)
-		stock_value = frappe.db.get_value(
-			"Bin", {"item_code": item.name, "warehouse": PI_STORES}, "stock_value"
-		)
-		self.assertEqual(flt(stock_value), 1300)
-
 	def test_stock_reconciliation_qty_change_allowed(self):
 		# A reconciliation may adjust the quantity of a Standard Cost item: stock stays valued at the
 		# standard rate and the value difference is booked to the Stock Adjustment account.
@@ -377,18 +344,6 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(flt(bin_data.actual_qty), 5)
 		self.assertEqual(flt(bin_data.stock_value), 500)
 
-	def test_opening_reconciliation_points_standard_cost_to_itself(self):
-		# The captured Item Standard Cost records the reconciliation as its revaluation entry (the reco is
-		# the revaluation) instead of spawning a second one.
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
-			create_stock_reconciliation,
-		)
-
-		item = create_standard_cost_item()
-		reco = create_stock_reconciliation(
-			item_code=item.name, warehouse=PI_STORES, qty=5, rate=100, company=PI_COMPANY
-		)
-
 		isc = frappe.db.get_value(
 			"Item Standard Cost",
 			{"item_code": item.name, "company": PI_COMPANY, "docstatus": 1},
@@ -443,9 +398,14 @@ class TestItemStandardCost(ERPNextTestSuite):
 		reco = create_stock_reconciliation(
 			item_code=item.name, warehouse=PI_STORES, qty=10, rate=130, company=PI_COMPANY
 		)
+		self.assertEqual(reco.docstatus, 1)
 		isc_name = frappe.db.get_value("Item Standard Cost", {"revaluation_entry": reco.name}, "name")
 		self.assertTrue(isc_name)
 		self.assertEqual(flt(get_item_standard_rate(item.name, PI_COMPANY)), 130)
+		stock_value = frappe.db.get_value(
+			"Bin", {"item_code": item.name, "warehouse": PI_STORES}, "stock_value"
+		)
+		self.assertEqual(flt(stock_value), 1300)
 
 		reco.cancel()
 
@@ -701,34 +661,7 @@ class TestItemStandardCost(ERPNextTestSuite):
 		# The additional cost is credited out of its source account (it flowed into the variance).
 		self.assertEqual(gl_net(additional_cost_account), -30)
 
-	def test_manufacturing_variance_no_stock_adjustment_entry(self):
-		# With an additional cost in the mix, the net-zero Stock Adjustment reclassification must not
-		# survive as a debit == credit entry: only the real accounts (variance, additional cost source,
-		# stock) should be booked.
-		ensure_mfg_variance_account(PI_COMPANY)
-		additional_cost_account = "Expenses Included In Valuation - TCP1"
 		stock_adjustment = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
-		rm = create_standard_cost_item()
-		fg = create_standard_cost_item()
-		create_item_standard_cost(rm.name, rate=50, company=PI_COMPANY)
-		create_item_standard_cost(fg.name, rate=200, company=PI_COMPANY)
-
-		make_stock_entry(item_code=rm.name, to_warehouse=PI_STORES, company=PI_COMPANY, qty=10, basic_rate=50)
-
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Repack"
-		se.stock_entry_type = "Repack"
-		se.company = PI_COMPANY
-		se.append("items", {"item_code": rm.name, "s_warehouse": PI_STORES, "qty": 5})
-		se.append("items", {"item_code": fg.name, "t_warehouse": PI_FG, "qty": 1, "is_finished_item": 1})
-		se.append(
-			"additional_costs",
-			{"expense_account": additional_cost_account, "description": "Freight", "amount": 30},
-		)
-		se.insert()
-		se.submit()
-
-		# No Stock Adjustment entry at all - the difference is entirely the manufacturing variance.
 		self.assertFalse(
 			frappe.db.exists(
 				"GL Entry", {"voucher_no": se.name, "account": stock_adjustment, "is_cancelled": 0}

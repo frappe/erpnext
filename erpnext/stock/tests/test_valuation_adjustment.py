@@ -744,11 +744,6 @@ class TestRepost(ValuationFixTestCase):
 		self.assertEqual(len(preview), 1)
 		self.assertEqual(str(preview[0]["posting_date"]), last_year(50))
 		self.assertIsNone(preview[0]["pending_repost"])
-
-	def test_repost_warns_of_a_past_fiscal_year(self):
-		item = self.make_fifo_issue_at_wrong_value()
-
-		preview = get_repost_preview(COMPANY, self.get_differences(item))
 		self.assertTrue(preview[0]["is_past_fiscal_year"])
 		self.assertEqual(preview[0]["fiscal_year"], get_fiscal_year(last_year(50), company=COMPANY)[0])
 

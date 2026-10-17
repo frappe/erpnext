@@ -2235,16 +2235,6 @@ class TestStockEntry(ERPNextTestSuite):
 
 		assert_finished_good_value(200)
 
-	def test_manufacture_takes_manually_rated_finished_good_value_out_of_cost(self):
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		rm_item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-
-		entry = self.make_manufacture_entry_with_manually_rated_row(rm_item, fg_item)
-		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 150])
-		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
-		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 750])
-
 	def test_manufacture_never_gives_finished_good_row_a_negative_rate(self):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
 
@@ -2260,6 +2250,9 @@ class TestStockEntry(ERPNextTestSuite):
 		entry = self.make_manufacture_entry_with_manually_rated_row(
 			rm_item, fg_item, posting_date=add_days(today(), -5)
 		)
+		self.assertEqual([row.basic_rate for row in entry.items[1:]], [50, 150])
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+		self.assertEqual(self.get_finished_good_sle_values(entry), [250, 750])
 
 		make_stock_entry(
 			item_code=rm_item,
@@ -5026,16 +5019,14 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual([(d.transfer_qty, d.basic_rate) for d in entry.items if d.t_warehouse], [(1, 100)])
 
 	def test_bom_disassembly_refuses_component_qty_not_in_the_bom(self):
-		self.assertRaises(frappe.ValidationError, self.make_bom_disassembly, component_qty=10)
-
-	def test_bom_disassembly_checks_secondary_rows_too(self):
-		self.assertRaisesRegex(
-			frappe.ValidationError,
-			"does not match the BOM quantity",
-			self.make_bom_disassembly,
-			component_qty=10,
-			secondary_item_type="Scrap",
-		)
+		for secondary_item_type in (None, "Scrap"):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"does not match the BOM quantity",
+				self.make_bom_disassembly,
+				component_qty=10,
+				secondary_item_type=secondary_item_type,
+			)
 
 	def make_bom_disassembly(self, component_qty=None, secondary_item_type=None):
 		rm_item = make_item(

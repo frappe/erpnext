@@ -137,41 +137,23 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		self.assertEqual(len(opening_rows), 1)
 		self.assertEqual(opening_rows[0]["qty_after_transaction"], 15)
 
-	def test_multi_warehouse_opening_balance_aggregation(self):
-		item = "_Test Item"
-		warehouse_1 = "Stores - _TC"
-		warehouse_2 = "Finished Goods - _TC"
-
 		self.make_movements(
-			item,
+			item_a,
 			[
 				{
-					"qty": 10,
-					"to_warehouse": warehouse_1,
-					"basic_rate": 100,
-					"posting_date": add_days(today(), -10),
-				},
-				{
 					"qty": 20,
-					"to_warehouse": warehouse_2,
+					"to_warehouse": "Finished Goods - _TC",
 					"basic_rate": 100,
 					"posting_date": add_days(today(), -10),
-				},
+				}
 			],
 		)
-
-		filters = frappe._dict(
-			company="_Test Company",
-			from_date=add_days(today(), -5),
-			to_date=today(),
-			item_code=[item],
-			warehouse=[warehouse_1, warehouse_2],
-		)
+		filters.warehouse = [WAREHOUSE, "Finished Goods - _TC"]
 		columns, rows = execute(filters)
 
 		opening_rows = [row for row in rows if row.get("item_code") == "'Opening'"]
 		self.assertEqual(len(opening_rows), 1)
-		self.assertEqual(opening_rows[0]["qty_after_transaction"], 30)
+		self.assertEqual(opening_rows[0]["qty_after_transaction"], 35)
 
 	def test_opening_stock_reconciliation_on_from_date_non_midnight_time(self):
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
