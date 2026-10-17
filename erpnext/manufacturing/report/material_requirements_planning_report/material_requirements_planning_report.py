@@ -205,29 +205,29 @@ class MaterialRequirementsPlanningReport:
 		if not sales_forecast_data:
 			return
 
+		rows_by_key = {}
+		for d in self.mps_data:
+			d.sales_forecast_qty = flt(d.sales_forecast_qty)
+			rows_by_key.setdefault((d.item_code, getdate(d.delivery_date)), []).append(d)
+
 		for row in sales_forecast_data:
-			record_exists = False
-			for d in self.mps_data:
-				if not d.sales_forecast_qty:
-					d.sales_forecast_qty = 0
+			key = (row.item_code, getdate(row.delivery_date))
+			if rows := rows_by_key.get(key):
+				split_forecast_qty(rows, flt(row.qty))
+				continue
 
-				if row.item_code == d.item_code and getdate(row.delivery_date) == getdate(d.delivery_date):
-					d.sales_forecast_qty += row.qty
-					record_exists = True
-
-			if not record_exists:
-				self.mps_data.append(
-					frappe._dict(
-						{
-							"item_code": row.item_code,
-							"item_name": row.item_code,
-							"delivery_date": row.delivery_date,
-							"projected_qty": 0,
-							"sales_forecast_qty": row.qty,
-							"warehouse": self.filters.get("warehouse"),
-						}
-					)
-				)
+			new_row = frappe._dict(
+				{
+					"item_code": row.item_code,
+					"item_name": row.item_code,
+					"delivery_date": row.delivery_date,
+					"projected_qty": 0,
+					"sales_forecast_qty": row.qty,
+					"warehouse": self.filters.get("warehouse"),
+				}
+			)
+			self.mps_data.append(new_row)
+			rows_by_key[key] = [new_row]
 
 	def get_mrp_data(self):
 		data = self.get_detailed_view_data()
@@ -1464,3 +1464,14 @@ def get_item_uom(item_code):
 @frappe.request_cache
 def is_whole_number(uom):
 	return frappe.get_cached_value("UOM", uom, "must_be_whole_number")
+
+
+def split_forecast_qty(rows, qty):
+	total_planned_qty = sum(flt(d.planned_qty) for d in rows)
+	for idx, d in enumerate(rows):
+		if total_planned_qty:
+			share = flt(d.planned_qty) / total_planned_qty
+		else:
+			share = 1 if idx == 0 else 0
+
+		d.sales_forecast_qty += qty * share
