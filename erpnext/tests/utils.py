@@ -59,24 +59,16 @@ def execute_script_report(
 
 def if_lending_app_installed(function):
 	"""Decorator to check if lending app is installed"""
-
-	def wrapper(*args, **kwargs):
-		if "lending" in frappe.get_installed_apps():
-			return function(*args, **kwargs)
-		return
-
-	return wrapper
+	return unittest.skipUnless(is_lending_app_installed(), "Lending app is not installed")(function)
 
 
 def if_lending_app_not_installed(function):
 	"""Decorator to check if lending app is not installed"""
+	return unittest.skipIf(is_lending_app_installed(), "Lending app is installed")(function)
 
-	def wrapper(*args, **kwargs):
-		if "lending" not in frappe.get_installed_apps():
-			return function(*args, **kwargs)
-		return
 
-	return wrapper
+def is_lending_app_installed():
+	return "lending" in frappe.get_installed_apps()
 
 
 class BootStrapTestData:
@@ -156,6 +148,7 @@ class BootStrapTestData:
 		self.make_holiday_list()
 		self.make_company()
 		self.make_test_account()
+		self.make_company_depreciation_settings()
 		self.make_supplier_group()
 		self.make_payment_term()
 		self.make_payment_terms_template()
@@ -168,6 +161,7 @@ class BootStrapTestData:
 		self.make_customer_group()
 		self.make_customer()
 		self.make_user()
+		self.make_pos_fixtures()
 		self.make_cost_center()
 		self.make_warehouse()
 		self.make_transfer_warehouses()
@@ -617,6 +611,27 @@ class BootStrapTestData:
 				"new_password": "password",
 				"roles": [{"doctype": "Has Role", "role": "Technician"}],
 			},
+		]
+		self.make_records(["email"], records)
+
+	def make_pos_fixtures(self):
+		roles = (
+			"System Manager",
+			"Accounts User",
+			"Accounts Manager",
+			"Sales Manager",
+			"Stock User",
+			"Item Manager",
+		)
+		records = [
+			{
+				"doctype": "User",
+				"email": "test-pos@example.com",
+				"enabled": 1,
+				"first_name": "_Test POS",
+				"new_password": "Eastern_43A1W",
+				"roles": [{"doctype": "Has Role", "parentfield": "roles", "role": role} for role in roles],
+			}
 		]
 		self.make_records(["email"], records)
 
@@ -2127,6 +2142,8 @@ class BootStrapTestData:
 			# Advance Account
 			["Advance Received", "Current Liabilities", 0, "Receivable", None],
 			["Advance Paid", "Current Assets", 0, "Payable", None],
+			["Advance Received USD", "Current Liabilities", 0, "Receivable", "USD"],
+			["Advance Paid USD", "Current Assets", 0, "Payable", "USD"],
 			# Loyalty Account
 			["Loyalty", "Direct Expenses", 0, "Expense Account", None],
 		]
@@ -2156,6 +2173,18 @@ class BootStrapTestData:
 					self.test_accounts.append(
 						frappe.get_doc("Account", {"account_name": account_name, "company": company})
 					)
+
+	def make_company_depreciation_settings(self):
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			{
+				"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
+				"depreciation_expense_account": "_Test Depreciations - _TC",
+				"disposal_account": "_Test Gain/Loss on Asset Disposal - _TC",
+				"depreciation_cost_center": "Main - _TC",
+			},
+		)
 
 	def make_customer(self):
 		records = [

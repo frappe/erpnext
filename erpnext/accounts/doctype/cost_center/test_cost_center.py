@@ -80,7 +80,9 @@ class TestCostCenter(ERPNextTestSuite):
 
 		for number in ("300", "1.1", "4100-01", "A100"):
 			with self.subTest(number=number):
-				name = update_cost_center(name, "Projects", number, "_Test Company", False)
+				frappe.db.set_value(
+					"Cost Center", name, {"cost_center_name": "Projects", "cost_center_number": number}
+				)
 				name = frappe.rename_doc("Cost Center", name, "Sales - East", force=True)
 				cost_center = frappe.get_doc("Cost Center", name)
 				self.assertEqual(cost_center.name, f"{number} - Sales - East - _TC")
