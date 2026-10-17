@@ -303,12 +303,74 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 			if self.check_invalid_serial_batch_nos_for_finished_good_item(row):
 				self.reset_serial_batch_on_fg_row(row)
+				if not row.serial_and_batch_bundle:
+					self.throw_missing_serial_batch_series_error(row)
+
 				frappe.msgprint(
 					_(
-						"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
-						" because the previously selected serial/batch does not belong to this Work Order."
-					).format(row.idx, frappe.bold(self.doc.work_order))
+						"Row {0}: The Serial No / Batch No selected for item {1} was not created from "
+						"Work Order {2}, so it has been replaced with the Serial No / Batch No created from "
+						"this Work Order."
+					).format(row.idx, frappe.bold(row.item_code), frappe.bold(self.doc.work_order))
 				)
+
+	def throw_missing_serial_batch_series_error(self, row):
+		item = frappe.get_cached_value(
+			"Item",
+			row.item_code,
+			["serial_no_series", "batch_number_series", "create_new_batch"],
+			as_dict=True,
+		)
+		item_link = get_link_to_form("Item", row.item_code)
+		setting = frappe.bold(_("Make Serial No / Batch from Work Order"))
+
+		if self.wo_doc.has_serial_no:
+			missing = _("Serial Nos")
+			series_label = _("Serial Number Series")
+			has_series = bool(item.serial_no_series)
+			fix = _("set the {0} in Item {1} (for example: {2}), then create a new Work Order").format(
+				frappe.bold(_("Serial Number Series")), item_link, frappe.bold("SN-.#####")
+			)
+		else:
+			missing = _("Batches")
+			series_label = _("Batch Number Series")
+			has_series = bool(item.create_new_batch and item.batch_number_series)
+			fix = _(
+				"enable {0} and set the {1} in Item {2} (for example: {3}), then create a new Work Order"
+			).format(
+				frappe.bold(_("Automatically Create New Batch")),
+				frappe.bold(_("Batch Number Series")),
+				item_link,
+				frappe.bold("BATCH-.#####"),
+			)
+
+		if has_series:
+			reason = _("All {0} created from this Work Order have already been used.").format(missing)
+			fix = _("check the quantity being manufactured against the Work Order quantity")
+		else:
+			reason = _(
+				"Since {0} is enabled in Manufacturing Settings, the {1} for the finished good are created "
+				"automatically when the Work Order is submitted. This did not happen because the item does "
+				"not have a {2} in Item."
+			).format(setting, missing, series_label)
+
+		frappe.throw(
+			_(
+				"Row {0}: No {1} were found for item {2} from Work Order {3}.<br><br>{4}<br><br>"
+				"<b>To fix this</b>, {5}.<br>"
+				"Or, disable {6} in {7} to select the {1} manually."
+			).format(
+				row.idx,
+				missing,
+				frappe.bold(row.item_code),
+				frappe.bold(self.doc.work_order),
+				reason,
+				fix,
+				setting,
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			),
+			title=_("{0} Not Found").format(missing),
+		)
 
 	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
 		if self.wo_doc.has_serial_no:
