@@ -112,3 +112,20 @@ class TestProjectsPage(ERPNextTestSuite):
 			projects = get_project_list("Project", None, None, 0)
 
 		self.assertEqual([row.name for row in projects], [project.name])
+
+	def test_portal_project_list_returns_display_columns_only(self):
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", portal_user).add_roles("Customer")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		project = make_project({"project_name": f"_Test Portal Columns {frappe.generate_hash(length=6)}"})
+		project.db_set({"customer": "_Test Customer", "estimated_costing": 5000})
+
+		with self.set_user(portal_user):
+			rows = get_project_list("Project", None, None, 0)
+
+		row = next(row for row in rows if row.name == project.name)
+		self.assertEqual(row.project_name, project.project_name)
+		self.assertNotIn("estimated_costing", row)
+		self.assertNotIn("gross_margin", row)

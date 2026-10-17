@@ -337,6 +337,7 @@ class Quotation(SellingController):
 		return print_lst
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.valid_till = None
 
 	def get_rows_with_alternatives(self):
