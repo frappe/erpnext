@@ -117,7 +117,7 @@ def clip_to_date_range(data, report_filters):
 
 	for row in data:
 		row.total_time_in_mins = flt(minutes[row.name], 2)
-		row.operating_cost = flt(row.hour_rate) * row.total_time_in_mins / 60.0
+		row.operating_cost = flt(row.hour_rate) * minutes[row.name] / 60.0
 
 
 def get_minutes_in_range(log, start, end):

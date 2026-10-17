@@ -151,6 +151,32 @@ class TestCostOfPoorQualityReport(ERPNextTestSuite):
 		self.assertEqual(costed(add_days(day, 2), add_days(day, 4)), [(90, 900)])
 		self.assertEqual(costed(add_to_date(day, hours=10, minutes=15), add_days(day, 1)), [(15, 150)])
 
+	def test_costs_of_split_ranges_add_up_to_the_whole_log(self):
+		from unittest.mock import patch
+
+		from erpnext.manufacturing.report.cost_of_poor_quality_report.cost_of_poor_quality_report import (
+			clip_to_date_range,
+		)
+
+		log = frappe._dict(
+			parent="JC-SPLIT", from_time="2026-01-01 10:00:00", to_time="2026-01-01 10:01:00", time_in_mins=1
+		)
+		total = 0
+		for start, end in (("00", "20"), ("20", "40"), ("40", "60")):
+			row = frappe._dict(name="JC-SPLIT", hour_rate=600)
+			filters = {
+				"from_date": f"2026-01-01 10:00:{start}" if start != "60" else "2026-01-01 10:01:00",
+				"to_date": f"2026-01-01 10:00:{end}" if end != "60" else "2026-01-01 10:01:00",
+			}
+			with patch(
+				"erpnext.manufacturing.report.cost_of_poor_quality_report.cost_of_poor_quality_report.frappe.get_all",
+				return_value=[log],
+			):
+				clip_to_date_range([row], filters)
+			total += row.operating_cost
+
+		self.assertAlmostEqual(total, 10)
+
 	def test_serial_and_batch_filters_match_physical_numbers(self):
 		corrective_jc, _operation, _workstation = self.create_corrective_job_card()
 		item = make_item("_Test COPQ Serial Batch Item", {"has_serial_no": 1, "has_batch_no": 1})
