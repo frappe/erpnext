@@ -1304,6 +1304,9 @@ class update_entries_after:
 		elif self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
+		if self.is_produced_row(sle) and not self.has_bundle_valuation(sle):
+			sle.incoming_rate = self.get_produced_row_rate(sle)
+
 		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
@@ -1553,6 +1556,11 @@ class update_entries_after:
 				amount = outward_value
 				sle.incoming_rate = outward_value / flt(sle.actual_qty)
 
+		if self.is_produced_row(sle):
+			sle.incoming_rate = self.get_produced_row_rate(sle)
+			self.update_bundle_rate(doc, sle.incoming_rate)
+			amount = sle.incoming_rate * flt(sle.actual_qty)
+
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + amount)
 		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
 		# total_qty. A valuation repost must never rewrite physical quantities; if the bundle's child
@@ -1727,6 +1735,74 @@ class update_entries_after:
 			return sle.incoming_rate
 
 		return outward_value / flt(sle.actual_qty)
+
+	def is_produced_row(self, sle):
+		return bool(
+			sle.voucher_type == "Stock Entry"
+			and flt(sle.actual_qty) > 0
+			and is_manufacture_or_repack_entry(sle.voucher_no)
+		)
+
+	def update_bundle_rate(self, bundle, rate):
+		"""Write the rate onto the bundle, so later withdrawals of its serials and batches take the same value."""
+		for entry in bundle.entries:
+			if entry.incoming_rate != rate:
+				entry.db_set({"incoming_rate": rate, "stock_value_difference": flt(entry.qty) * rate})
+
+		bundle.calculate_qty_and_amount(save=True)
+
+	def get_produced_row_rate(self, sle):
+		"""Outputs carry exactly the consumed value plus additional and landed costs. Each output row is
+		rounded on its own, so the largest finished good takes what the rounding left over."""
+		rows = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": sle.voucher_no},
+			fields=[
+				"name",
+				"s_warehouse",
+				"t_warehouse",
+				"amount",
+				"is_finished_item",
+				"set_basic_rate_manually",
+				"allow_zero_valuation_rate",
+				"landed_cost_voucher_amount",
+			],
+			order_by="amount desc, idx asc",
+		)
+		outputs = [row for row in rows if row.t_warehouse and not row.s_warehouse]
+		row = next((row for row in outputs if row.name == sle.voucher_detail_no), None)
+		absorbers = [
+			output for output in outputs if output.is_finished_item and not output.allow_zero_valuation_rate
+		]
+		if not row or not absorbers or any(output.set_basic_rate_manually for output in outputs):
+			return sle.incoming_rate
+
+		value = flt(row.amount)
+		if row.name == absorbers[0].name:
+			consumed = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_type": "Stock Entry",
+					"voucher_no": sle.voucher_no,
+					"actual_qty": ("<", 0),
+					"is_cancelled": 0,
+				},
+				pluck="stock_value_difference",
+			)
+			if not consumed:
+				return sle.incoming_rate
+
+			additional_cost = frappe.db.get_value("Stock Entry", sle.voucher_no, "total_additional_costs")
+			landed_cost = sum(flt(r.landed_cost_voucher_amount) for r in outputs)
+			value += (
+				-sum(flt(v) for v in consumed)
+				+ flt(additional_cost)
+				+ landed_cost
+				- sum(flt(r.amount) for r in outputs)
+			)
+			value = max(value, 0)
+
+		return value / flt(sle.actual_qty)
 
 	def get_outward_leg_value(self, sle):
 		"""Value that left the source warehouse for this transfer row, plus the row's additional cost."""
