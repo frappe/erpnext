@@ -86,8 +86,10 @@ SALES_ORDER_TAX_KEY_FIELDS = (
 
 def get_header_key(sales_order):
 	key = tuple(cstr(sales_order.get(field)) for field in SALES_ORDER_HEADER_FIELDS)
-	key += tuple(
-		tuple(cstr(tax.get(field)) for field in SALES_ORDER_TAX_KEY_FIELDS) for tax in sales_order.taxes
+	key += (
+		tuple(
+			tuple(cstr(tax.get(field)) for field in SALES_ORDER_TAX_KEY_FIELDS) for tax in sales_order.taxes
+		),
 	)
 	if has_order_specific_amounts(sales_order):
 		key += (sales_order.sales_order,)
