@@ -978,22 +978,6 @@ def prepare_data_for_internal_transfer():
 	pr_doc.items[0].store = "Inter Transfer Store 1"
 	pr_doc.submit()
 
-	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
-		account = "Unrealized Profit and Loss - TCP1"
-		if not frappe.db.exists("Account", account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "Unrealized Profit and Loss",
-					"parent_account": "Direct Income - TCP1",
-					"company": company,
-					"is_group": 0,
-					"account_type": "Income Account",
-				}
-			).insert()
-
-		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
-
 	cost_center = frappe.db.get_value("Company", company, "cost_center") or frappe.db.get_value(
 		"Cost Center", {"company": company}, "name"
 	)

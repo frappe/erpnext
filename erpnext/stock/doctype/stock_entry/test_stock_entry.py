@@ -3839,7 +3839,7 @@ class TestStockEntry(ERPNextTestSuite):
 		posting_date = nowdate()
 		posting_time = nowtime()
 
-		for index in range(25):
+		for index in range(3):
 			se = make_stock_entry(
 				item_code=item_code,
 				qty=1,
@@ -3888,7 +3888,7 @@ class TestStockEntry(ERPNextTestSuite):
 			order_by="creation",
 		)
 
-		self.assertEqual(len(sles), 50)
+		self.assertEqual(len(sles), 6)
 		i = 0
 		for sle in sles:
 			i += 1

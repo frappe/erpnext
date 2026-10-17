@@ -2281,22 +2281,6 @@ def prepare_data_for_internal_transfer():
 
 	make_purchase_receipt(company=company, warehouse=warehouse, qty=2, rate=100)
 
-	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
-		account = "Unrealized Profit and Loss - TCP1"
-		if not frappe.db.exists("Account", account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "Unrealized Profit and Loss",
-					"parent_account": "Direct Income - TCP1",
-					"company": company,
-					"is_group": 0,
-					"account_type": "Income Account",
-				}
-			).insert()
-
-		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
-
 
 def make_internal_purchase_order(**args):
 	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
