@@ -1621,8 +1621,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
-
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -1664,7 +1662,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-		prepare_data_for_internal_transfer()
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
 		make_stock_entry(item_code=item, target="Stores - TCP1", qty=2, basic_rate=10.005)
 
@@ -1730,8 +1727,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
-
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -1763,8 +1758,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
 		)
-
-		prepare_data_for_internal_transfer()
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
@@ -1861,8 +1854,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		from erpnext.stock.get_item_details import _get_valuation_rate
 		from erpnext.stock.utils import get_stock_balance
-
-		prepare_data_for_internal_transfer()
 
 		frappe.db.set_value("Account", "_Test Account Stock In Hand - TCP1", "account_type", "Stock")
 		create_warehouse(
@@ -2440,7 +2431,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -2528,7 +2518,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -2637,7 +2626,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -2707,7 +2695,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -2805,7 +2792,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
 		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
@@ -2860,7 +2846,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -2956,7 +2941,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3012,7 +2996,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3083,7 +3066,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			create_landed_cost_voucher,
 		)
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3165,7 +3147,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			create_landed_cost_voucher,
 		)
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3274,7 +3255,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3360,7 +3340,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3454,7 +3433,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -3518,7 +3496,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3583,7 +3560,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		wh = frappe._dict(
 			source=create_warehouse("_Test Transfer From", company=company),
@@ -3720,7 +3696,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.stock_ledger import update_entries_after
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -3809,7 +3784,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -3994,7 +3968,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(res.get("last_purchase_rate"), 100)
 
 	def test_validate_received_qty_for_internal_pr(self):
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
@@ -4071,7 +4044,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			create_stock_reconciliation,
 		)
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
@@ -5005,8 +4977,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
-
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -5143,8 +5113,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
-
-		prepare_data_for_internal_transfer()
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
@@ -5799,8 +5767,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
-		prepare_data_for_internal_transfer()
-
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
@@ -5914,8 +5880,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
-
-		prepare_data_for_internal_transfer()
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
@@ -6593,8 +6557,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_internal_pr_qty_change_only_single_batch(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
-		prepare_data_for_internal_transfer()
 
 		def get_sabb_qty(sabb):
 			return frappe.get_value("Serial and Batch Bundle", sabb, "total_qty")
@@ -7512,7 +7474,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 		item_doc = create_item("_Test Internal PR LCV Item")
@@ -8233,26 +8194,6 @@ def create_asset_category_for_pr_test():
 		}
 	).insert()
 	return asset_category
-
-
-def prepare_data_for_internal_transfer():
-	company = "_Test Company with perpetual inventory"
-
-	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
-		account = "Unrealized Profit and Loss - TCP1"
-		if not frappe.db.exists("Account", account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "Unrealized Profit and Loss",
-					"parent_account": "Direct Income - TCP1",
-					"company": company,
-					"is_group": 0,
-					"account_type": "Income Account",
-				}
-			).insert()
-
-		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
 
 
 def get_sl_entries(voucher_type, voucher_no):

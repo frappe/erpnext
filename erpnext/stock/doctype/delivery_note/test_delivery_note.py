@@ -4105,10 +4105,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
 		)
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		receipt = make_purchase_receipt(warehouse="Stores - TCP1", company=company, qty=10)
 		kwargs = {
@@ -4139,10 +4137,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
 		)
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		transit_warehouse = "Work In Progress - TCP1"
 		component = make_item(properties={"is_stock_item": 1}).name

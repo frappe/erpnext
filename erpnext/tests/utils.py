@@ -207,6 +207,7 @@ class BootStrapTestData:
 		self.make_contact()
 		self.update_support_settings()
 		self.update_selling_settings()
+		self.make_stock_ledger_fixtures()
 
 		frappe.db.commit()  # nosemgrep
 
@@ -255,6 +256,23 @@ class BootStrapTestData:
 		stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 		stock_settings.enable_serial_and_batch_no_for_item = 1
 		stock_settings.save()
+
+	def make_stock_ledger_fixtures(self):
+		self.make_unrealized_profit_loss_account()
+
+	def make_unrealized_profit_loss_account(self):
+		company = "_Test Company with perpetual inventory"
+		account = {
+			"doctype": "Account",
+			"account_name": "Unrealized Profit and Loss",
+			"parent_account": "Direct Income - TCP1",
+			"account_type": "Income Account",
+			"company": company,
+		}
+		self.make_records(["account_name", "company"], [account])
+		frappe.db.set_value(
+			"Company", company, "unrealized_profit_loss_account", "Unrealized Profit and Loss - TCP1"
+		)
 
 	def make_records(self, key, records):
 		doctype = records[0].get("doctype")
