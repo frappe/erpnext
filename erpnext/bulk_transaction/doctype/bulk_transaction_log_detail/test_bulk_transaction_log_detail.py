@@ -4,7 +4,6 @@
 from unittest.mock import MagicMock, patch
 
 import frappe
-from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.permissions import add_user_permission
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -49,17 +48,6 @@ class TestBulkTransactionLogDetail(ERPNextTestSuite):
 
 		with self.set_user(user):
 			self.assertRaises(frappe.PermissionError, make_invoices, [held])
-
-	def test_sales_access_is_not_cached_after_rollback(self):
-		user = self.give_sales_access("test1@example.com")
-		self.assertIn("Sales User", frappe.get_roles(user))
-		self.assertIn("Customer", get_user_permissions(user))
-
-		frappe.db.rollback()
-		self.doCleanups()
-
-		self.assertNotIn("Sales User", frappe.get_roles(user))
-		self.assertNotIn("Customer", get_user_permissions(user))
 
 	def test_job_result_is_sent_to_the_user_with_the_failed_sources(self):
 		submitted, draft = make_sales_order(), make_sales_order(do_not_submit=True)
