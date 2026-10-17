@@ -32,12 +32,33 @@ class TaxWithholdingDetailsReport:
 
 	def get_data(self):
 		self.entries = self.get_entries_query().run(as_dict=True)
+		self.remove_entries_of_restricted_parties()
 		if not self.entries:
 			return []
 
 		self.doc_info = self.fetch_additional_doc_info()
 		self.party_details = self.fetch_party_details()
 		return self.build_rows()
+
+	def remove_entries_of_restricted_parties(self):
+		permitted = self.get_permitted_parties()
+		self.entries = [
+			entry for entry in self.entries if not entry.party or (entry.party_type, entry.party) in permitted
+		]
+
+	def get_permitted_parties(self) -> set[tuple[str, str]]:
+		parties_by_type = {}
+		for entry in self.entries:
+			if entry.party:
+				parties_by_type.setdefault(entry.party_type, set()).add(entry.party)
+
+		permitted = set()
+		for party_type, parties in parties_by_type.items():
+			if not frappe.has_permission(party_type, "read"):
+				continue
+			names = frappe.get_list(party_type, filters={"name": ["in", list(parties)]}, pluck="name")
+			permitted.update((party_type, name) for name in names)
+		return permitted
 
 	def build_rows(self):
 		rows = []
@@ -244,7 +265,7 @@ class TaxWithholdingDetailsReport:
 			},
 			{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Currency", "width": 120},
 			{
-				"label": _("Grand Total (Company Currency)"),
+				"label": _("Total (Company Currency)"),
 				"fieldname": "base_total",
 				"fieldtype": "Currency",
 				"width": 150,

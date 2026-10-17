@@ -46,6 +46,14 @@ class TestQualityReview(ERPNextTestSuite):
 		quality_review.goal = other_goal.name
 		self.assertRaises(frappe.ValidationError, quality_review.save)
 
+	def test_objectives_follow_unchanged_goal(self):
+		quality_goal = get_quality_goal()
+		quality_review = frappe.get_doc(doctype="Quality Review", goal=quality_goal.name).insert()
+
+		quality_review.reviews[0].objective = "Anything"
+		quality_review.reviews[0].status = "Passed"
+		self.assertRaises(frappe.ValidationError, quality_review.save)
+
 	def test_review_job_runs_once_a_day(self):
 		quality_goal = get_quality_goal()
 		review()

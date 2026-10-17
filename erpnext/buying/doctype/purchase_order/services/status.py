@@ -24,13 +24,15 @@ class StatusService:
 		doc = self.doc
 		self.check_modified_date()
 
-		if status != "Closed" and doc.status == "Closed":
+		was_closed = doc.status == "Closed"
+		if status != "Closed" and was_closed:
 			validate_parent_reopen(doc)
 
 		doc.set_status(update=True, status=status)
 		doc.update_requested_qty()
 		doc.update_ordered_qty()
-		SubcontractingService(doc).update_subcontracting_order_status()
+		if status == "Closed" or was_closed:
+			SubcontractingService(doc).update_subcontracting_order_status()
 		doc.update_blanket_order()
 		doc.notify_update()
 		clear_doctype_notifications(doc)

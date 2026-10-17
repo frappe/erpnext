@@ -217,8 +217,14 @@ frappe.ui.form.on("Customer", {
 				);
 			}
 
-			// indicator
-			erpnext.utils.set_party_dashboard_indicators(frm);
+			const loyalty = (frm.doc.__onload?.dashboard_info || []).filter((d) => d.loyalty_points);
+			loyalty.forEach((info) => {
+				const label =
+					loyalty.length > 1
+						? __("Loyalty Points ({0}): {1}", [info.company, info.loyalty_points])
+						: __("Loyalty Points: {0}", [info.loyalty_points]);
+				frm.dashboard.add_indicator(label, "blue");
+			});
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}

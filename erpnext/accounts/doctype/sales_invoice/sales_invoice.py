@@ -282,6 +282,8 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and (is_return=0 or update_billed_amount_in_sales_order=1))""",
 			}
 		]
 		self.closed_source_links = [
@@ -364,6 +366,8 @@ class SalesInvoice(SellingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
+		self.validate_delivery_note_rows_billed_by_invoice()
+		self.validate_closed_delivery_notes()
 		BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 
 		if self.is_return and self.return_against:
@@ -484,8 +488,9 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.check_credit_limit()
-			self.check_overdue_billing_threshold()
+			if self.is_opening != "Yes":
+				self.check_credit_limit()
+				self.check_overdue_billing_threshold()
 
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -594,6 +599,7 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
 
@@ -649,6 +655,11 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "against_pick_list",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "pick_list_item",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 				},
 			]
 		)
@@ -847,6 +858,42 @@ class SalesInvoice(SellingController):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
 			)
+
+	def validate_closed_delivery_notes(self):
+		delivery_notes = {d.delivery_note for d in self.items if d.delivery_note}
+		if self.is_return or not delivery_notes:
+			return
+
+		if closed := frappe.get_all(
+			"Delivery Note", filters={"name": ("in", list(delivery_notes)), "status": "Closed"}, pluck="name"
+		):
+			frappe.throw(
+				_("Delivery Note {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
+			)
+
+	def validate_delivery_note_rows_billed_by_invoice(self):
+		dn_details = [d.dn_detail for d in self.items if d.dn_detail]
+		if self.is_return or not dn_details:
+			return
+
+		billing_invoices = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", dn_details), "against_sales_invoice": ("is", "set")},
+				fields=["name", "against_sales_invoice"],
+				as_list=True,
+			)
+		)
+		for d in self.items:
+			invoice = billing_invoices.get(d.dn_detail)
+			if invoice and invoice != self.name:
+				frappe.throw(
+					_(
+						"Row #{0}: Delivery Note {1} was created from Sales Invoice {2}, which already bills it"
+					).format(d.idx, frappe.bold(d.delivery_note), get_link_to_form("Sales Invoice", invoice))
+				)
 
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
@@ -1146,6 +1193,7 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.po_no = reference_doc.po_no
 		# The payment schedule is rebuilt from the template, relative to the new posting date.

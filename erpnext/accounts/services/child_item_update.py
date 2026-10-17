@@ -34,6 +34,7 @@ class ChildItemUpdater:
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
 		self._transacted_stock_qty: dict | None = None
+		self._rfqs_before_update: set[str] = set()
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
@@ -43,6 +44,7 @@ class ChildItemUpdater:
 		from erpnext.selling.doctype.quotation.mapper import get_ordered_items
 
 		data = frappe.parse_json(trans_items)
+		had_mapped_discount = self.parent.has_mapped_discount
 		any_qty_changed = False
 		items_added_or_removed = False
 		any_conversion_factor_changed = False
@@ -57,6 +59,7 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		elif self.parent_doctype == "Supplier Quotation":
+			self._rfqs_before_update = self.parent.get_request_for_quotations()
 			self._transacted_stock_qty = get_ordered_supplier_quotation_items(self.parent.name)
 			items_added_or_removed |= validate_and_delete_children(
 				self.parent, data, self._transacted_stock_qty
@@ -133,13 +136,22 @@ class ChildItemUpdater:
 			else:
 				child_item.save(ignore_permissions=True)
 
-		self._post_update(any_qty_changed, items_added_or_removed, any_conversion_factor_changed)
+		self._post_update(
+			any_qty_changed, items_added_or_removed, any_conversion_factor_changed, had_mapped_discount
+		)
 
 	def _post_update(
-		self, any_qty_changed: bool, items_added_or_removed: bool, any_conversion_factor_changed: bool
+		self,
+		any_qty_changed: bool,
+		items_added_or_removed: bool,
+		any_conversion_factor_changed: bool,
+		had_mapped_discount: bool,
 	) -> None:
 		parent = self.parent
 		parent.reload()
+		if had_mapped_discount:
+			parent.clear_stale_mapped_discount_total()
+
 		parent.flags.ignore_validate_update_after_submit = True
 		parent.set_qty_as_per_stock_uom()
 		parent.calculate_taxes_and_totals()
@@ -206,7 +218,7 @@ class ChildItemUpdater:
 			parent.update_delivery_status()
 
 		elif self.parent_doctype == "Supplier Quotation":
-			parent.update_rfq_supplier_status(parent.docstatus.is_submitted())
+			parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), self._rfqs_before_update)
 			parent.set_status(update=True)
 
 		parent.reload()

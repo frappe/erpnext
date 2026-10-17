@@ -21,6 +21,7 @@ from erpnext.controllers.website_list_for_contact import (
 	add_role_for_portal_user,
 	link_portal_users_to_contacts,
 )
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -159,6 +160,7 @@ class Supplier(TransactionBase):
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
 		validate_party_accounts(self)
+		validate_default_price_list_side(self.default_price_list, "buying")
 		self.validate_internal_supplier()
 		self.validate_primary_contact_and_address()
 		self.add_role_for_user()

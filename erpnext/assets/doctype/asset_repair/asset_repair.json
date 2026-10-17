@@ -40,6 +40,7 @@
   "column_break_spre",
   "capitalize_repair_cost",
   "increase_in_asset_life",
+  "asset_value_updated",
   "column_break_xebe",
   "total_repair_cost",
   "accounting_dimensions_section",
@@ -199,6 +200,16 @@
    "no_copy": 1
   },
   {
+   "default": "0",
+   "fieldname": "asset_value_updated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Asset Value Updated",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fetch_from": "asset.company",
    "fieldname": "company",
    "fieldtype": "Link",
@@ -278,7 +289,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2026-09-30 13:13:52.023971",
+ "modified": "2026-10-09 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

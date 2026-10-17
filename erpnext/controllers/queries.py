@@ -579,7 +579,7 @@ def get_delivery_notes_to_be_billed(
 	query = (
 		query.where(
 			(DeliveryNote.docstatus == 1)
-			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
+			& (DeliveryNote.status.notin(["Stopped", "Closed", "Return Issued"]))
 			& (DeliveryNote[searchfield].like(f"%{txt}%"))
 			& (
 				((DeliveryNote.is_return == 0) & (DeliveryNote.per_billed < 100))

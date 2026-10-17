@@ -11,12 +11,15 @@ from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Locate, Lower, Sum, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.user import is_website_user
 from pypika import Order
 
 from erpnext import get_default_company
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+
+PORTAL_LIST_FIELDS = ["name", "project_name", "status", "percent_complete", "_assign", "modified"]
 
 
 class Project(Document):
@@ -543,11 +546,11 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 			else:
 				filters.append([doctype, "name", "like", "%" + txt + "%"])
 
-	# No distinct=True: it never dedupes here (single table, fields="*" carries PK `name`) but makes
+	# No distinct=True: it never dedupes here (single table, the fields carry PK `name`) but makes
 	# frappe drop ORDER BY on Postgres, leaving the portal list unordered there.
 	return frappe.get_list(
 		doctype,
-		fields="*",
+		fields=PORTAL_LIST_FIELDS,
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
@@ -653,7 +656,7 @@ def daily_reminder():
 	projects = get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.daily_time_to_send):
+		if get_due_project_updates(project.name, project.daily_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
@@ -661,7 +664,7 @@ def twice_daily_reminder():
 	projects = get_projects_for_collect_progress("Twice Daily", ["first_email", "second_email"])
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.first_email, project.second_email):
+		for _due in range(get_due_project_updates(project.name, project.first_email, project.second_email)):
 			send_project_update_email_to_users(project.name)
 
 
@@ -674,15 +677,15 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if allow_to_make_project_update(project.name, project.weekly_time_to_send):
+		if get_due_project_updates(project.name, project.weekly_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
-def allow_to_make_project_update(project, *times):
-	"""Whether fewer updates were made today than there are send times already passed."""
+def get_due_project_updates(project: str, *times) -> int:
+	"""Send times already passed today that have no Project Update yet."""
 	now = get_time(nowtime())
 	times_passed = sum(now >= get_time(time) for time in times)
-	return frappe.db.count("Project Update", {"project": project, "date": today()}) < times_passed
+	return max(times_passed - frappe.db.count("Project Update", {"project": project, "date": today()}), 0)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -829,8 +832,9 @@ def get_project_update_replies(project_update):
 				"user": user_data.name,
 				"full_name": user_data.full_name,
 				"image": user_data.user_image,
-				"project_status": frappe.utils.md_to_html(
-					EmailReplyParser.parse_reply(d.text_content) or d.content
+				"project_status": sanitize_html(
+					frappe.utils.md_to_html(EmailReplyParser.parse_reply(d.text_content) or d.content),
+					linkify=True,
 				),
 			}
 		)
@@ -872,15 +876,27 @@ def update_project_sales_billing():
 
 
 @frappe.whitelist()
-def create_kanban_board_if_not_exists(project: str):
+def create_kanban_board_if_not_exists(project: str) -> str:
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+	from frappe.model.naming import append_number_if_name_exists
 
 	project = frappe.get_doc("Project", project)
 	project.check_permission("read")
-	if not frappe.db.exists("Kanban Board", project.project_name):
-		quick_kanban_board("Task", project.project_name, "status", project.name)
 
-	return True
+	if board := get_project_kanban_board(project.name):
+		return board
+
+	board_name = append_number_if_name_exists("Kanban Board", project.project_name)
+	return quick_kanban_board("Task", board_name, "status", project.name).name
+
+
+def get_project_kanban_board(project: str) -> str | None:
+	for board in frappe.get_list(
+		"Kanban Board", filters={"reference_doctype": "Task"}, fields=["name", "filters"]
+	):
+		filters = frappe.parse_json(board.filters or "[]")
+		if any(isinstance(f, list) and f[1:4] == ["project", "=", project] for f in filters):
+			return board.name
 
 
 @frappe.whitelist(methods=["POST"])
@@ -897,6 +913,7 @@ def set_project_status(project: str, status: str):
 	for task_name in get_tasks_in_dependency_order(project.name, status):
 		task = frappe.get_doc("Task", task_name)
 		task.status = status
+		task.flags.ignore_reschedule = True
 		task.save(ignore_permissions=True)
 
 	project.status = status

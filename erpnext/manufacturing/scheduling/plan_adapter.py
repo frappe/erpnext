@@ -454,9 +454,6 @@ def get_daily_working_mins(lead_time, no_of_shifts):
 
 def get_daily_capacity(lead_time, no_of_shifts):
 	capacity = flt(lead_time.capacity_per_day)
-	if capacity and lead_time.daily_yield:
-		capacity = capacity * flt(lead_time.daily_yield) / 100
-
 	if capacity and no_of_shifts:
 		capacity = capacity * no_of_shifts / (cint(lead_time.no_of_shift) or 1)
 

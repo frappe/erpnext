@@ -159,6 +159,17 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, so.submit)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_last_fraction_of_blanket_order_can_be_ordered(self):
+		item = make_item(properties={"stock_uom": "Kg"}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=1, item_code=item)
+
+		make_purchase_order_against(bo, 0.9).submit()
+		make_purchase_order_against(bo, 0.1).submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 1)
+
 	def test_status_follows_close_reopen_and_cancel(self):
 		bo = make_blanket_order(blanket_order_type="Selling")
 		self.assertEqual(bo.status, "Submitted")

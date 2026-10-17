@@ -7,6 +7,15 @@ import frappe
 from frappe import _, bold
 from frappe.utils import cint, flt
 
+COUNTERPART_REFERENCE = {
+	"Sales Invoice": ("inter_company_invoice_reference", "Purchase Invoice"),
+	"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
+	"Sales Order": ("inter_company_order_reference", "Purchase Order"),
+	"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+	"Delivery Note": ("inter_company_reference", "Purchase Receipt"),
+	"Purchase Receipt": ("inter_company_reference", "Delivery Note"),
+}
+
 
 class InternalTransferService:
 	"""Handles validation and setup for inter-company / internal transfer transactions."""
@@ -29,6 +38,7 @@ class InternalTransferService:
 	def validate(self) -> None:
 		"""Run all inter-company validations and apply internal-transfer field overrides."""
 		self.validate_reference()
+		self.validate_currency()
 		self.validate_transaction()
 		self.disable_pricing_rule()
 		self.disable_tax_included_prices()
@@ -93,13 +103,30 @@ class InternalTransferService:
 		field = frappe.scrub(label)
 
 		for row in self.doc.get("items"):
-			if not row.get(field):
+			if not row.get(field) and not row.get("delivery_note_packed_item"):
 				frappe.throw(
 					_("At Row {0}: The field {1} is mandatory for internal transfer").format(
 						row.idx, bold(label)
 					),
 					title=_("Internal Transfer Reference Missing"),
 				)
+
+	def validate_currency(self) -> None:
+		if self.doc.doctype not in COUNTERPART_REFERENCE:
+			return
+
+		reference_field, counterpart_doctype = COUNTERPART_REFERENCE[self.doc.doctype]
+		counterpart = self.doc.get(reference_field)
+		if not counterpart:
+			return
+
+		currency = frappe.db.get_value(counterpart_doctype, counterpart, "currency")
+		if currency and self.doc.currency != currency:
+			frappe.throw(
+				_("Currency must be {0} to match {1} {2}").format(
+					bold(currency), counterpart_doctype, bold(counterpart)
+				)
+			)
 
 	def validate_transaction(self) -> None:
 		if not cint(frappe.get_single_value("Accounts Settings", "maintain_same_internal_transaction_rate")):

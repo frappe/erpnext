@@ -136,10 +136,7 @@ frappe.ui.form.on("Payment Order", {
 			],
 		});
 
-		dialog.set_primary_action(__("Submit"), function () {
-			var args = dialog.get_values();
-			if (!args) return;
-
+		dialog.set_primary_action(__("Submit"), function (args) {
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_order.payment_order.make_payment_records",
 				args: {

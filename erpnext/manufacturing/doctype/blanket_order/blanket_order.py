@@ -314,8 +314,11 @@ def validate_against_blanket_order(order_doc):
 				bo_doc.validate_items_are_open(list(item_data))
 				for item in bo_doc.get("items"):
 					if item.item_code in item_data:
-						allowed_qty = item.qty + (item.qty * allowance / 100) - item.ordered_qty
-						if item.qty and allowed_qty < item_data[item.item_code]:
+						precision = item.precision("qty")
+						allowed_qty = flt(
+							item.qty + (item.qty * allowance / 100) - item.ordered_qty, precision
+						)
+						if item.qty and allowed_qty < flt(item_data[item.item_code], precision):
 							frappe.throw(
 								_(
 									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."

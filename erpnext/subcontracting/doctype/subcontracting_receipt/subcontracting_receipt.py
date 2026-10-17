@@ -121,11 +121,20 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
 		)
 
+		if self.docstatus == 1:
+			self.set_onload(
+				"allow_to_make_qc_after_submission",
+				frappe.get_single_value(
+					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+				),
+			)
+
 	def before_validate(self):
 		self.save_inventory_dimensions()
 		super().before_validate()
 		self.validate_items_qty()
 		self.set_items_bom()
+		self.set_items_received_qty()
 		self.set_items_cost_center()
 
 		if self.company:
@@ -216,6 +225,7 @@ class SubcontractingReceipt(SubcontractingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 		self.validate_closed_subcontracting_order()
 		self.update_status_updater_args()
@@ -316,6 +326,12 @@ class SubcontractingReceipt(SubcontractingController):
 						"bom",
 					)
 
+	def set_items_received_qty(self):
+		"""Set before the supplied items are built from it."""
+		for item in self.items:
+			if item.bom:
+				item.received_qty = self.get_qty_for_costing(item)
+
 	def set_items_cost_center(self):
 		if self.company:
 			cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
@@ -403,7 +419,7 @@ class SubcontractingReceipt(SubcontractingController):
 				self.add_secondary_items_of_fg_row(item)
 
 		if recalculate_rate:
-			self.calculate_additional_costs()
+			self.set_additional_costs()
 			self.calculate_items_qty_and_amount()
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
@@ -520,9 +536,8 @@ class SubcontractingReceipt(SubcontractingController):
 		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
 
 	def get_percentage_secondary_rate(self, fg_row, cost_allocation_per, qty, own_cost):
-		lcv_cost_per_qty = (
-			flt(fg_row.landed_cost_voucher_amount) / flt(fg_row.qty) if flt(fg_row.qty) else 0.0
-		)
+		received_qty = flt(fg_row.received_qty) or flt(fg_row.qty)
+		lcv_cost_per_qty = flt(fg_row.landed_cost_voucher_amount) / received_qty if received_qty else 0.0
 		fg_item_cost = (
 			flt(fg_row.rm_cost_per_qty)
 			+ flt(fg_row.additional_cost_per_qty)
@@ -541,22 +556,48 @@ class SubcontractingReceipt(SubcontractingController):
 	@frappe.whitelist()
 	def set_missing_values(self):
 		self.set_available_qty_for_consumption()
+		self.set_additional_costs()
+		self.calculate_items_qty_and_amount()
+
+	def set_additional_costs(self):
 		if self.is_return and self.return_against:
 			self.set_additional_costs_for_return()
-		self.calculate_additional_costs()
-		self.calculate_items_qty_and_amount()
+		else:
+			self.set_additional_costs_base_amount()
+			self.calculate_additional_costs()
 
 	def set_additional_costs_for_return(self):
 		"""Take back the original receipt's additional costs allocated to the accepted qty returned."""
 		original = frappe.get_doc("Subcontracting Receipt", self.return_against, check_permission="read")
 		original_rows = {row.name: row for row in original.items if row.bom}
-		returned_cost = 0.0
+		basis = "amount" if original.distribute_additional_costs_based_on == "Amount" else "qty"
+		total_basis = sum(flt(row.get(basis)) for row in original_rows.values())
+		total_cost = sum(
+			self.get_qty_for_costing(row) * flt(row.additional_cost_per_qty) for row in original_rows.values()
+		)
+		returned_basis = returned_cost = 0.0
 		for row in self.items:
 			original_row = original_rows.get(row.subcontracting_receipt_item)
-			if original_row and row.warehouse and row.warehouse != original_row.rejected_warehouse:
-				returned_cost += flt(row.qty) * flt(original_row.additional_cost_per_qty)
-		total_cost = flt(original.total_additional_costs)
-		ratio = returned_cost / total_cost if total_cost else 0.0
+			if not original_row:
+				continue
+
+			row.additional_cost_per_qty = 0.0
+			if flt(original_row.qty) and row.warehouse and row.warehouse != original_row.rejected_warehouse:
+				row_returned_cost = (
+					flt(row.qty)
+					* flt(original_row.additional_cost_per_qty)
+					* self.get_qty_for_costing(original_row)
+					/ flt(original_row.qty)
+				)
+				costing_qty = self.get_qty_for_costing(row)
+				row.additional_cost_per_qty = row_returned_cost / costing_qty if costing_qty else 0.0
+				returned_cost += row_returned_cost
+				returned_basis += flt(row.qty) * flt(original_row.get(basis)) / flt(original_row.qty)
+
+		if total_cost:
+			ratio = returned_cost / total_cost
+		else:
+			ratio = returned_basis / total_basis if total_basis else 0.0
 
 		self.set("additional_costs", [])
 		for row in original.additional_costs:
@@ -570,6 +611,13 @@ class SubcontractingReceipt(SubcontractingController):
 					"amount": flt(row.amount * ratio, row.precision("amount")),
 					"base_amount": flt(row.base_amount * ratio, row.precision("base_amount")),
 				},
+			)
+		self.total_additional_costs = sum(flt(row.amount) for row in self.additional_costs)
+
+	def set_additional_costs_base_amount(self):
+		for row in self.get("additional_costs"):
+			row.base_amount = flt(
+				flt(row.amount) * (flt(row.exchange_rate) or 1), row.precision("base_amount")
 			)
 
 	def set_available_qty_for_consumption(self):
@@ -640,6 +688,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
 
+		received_qty_ratios = self.get_received_qty_ratios_for_return()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.secondary_item_type and not item.valuation_type:
@@ -650,14 +699,16 @@ class SubcontractingReceipt(SubcontractingController):
 						rm_cost_map.pop(item.name)
 
 					if item.name in secondary_items_cost_map:
-						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / item.qty
+						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / (
+							item.received_qty or item.qty
+						)
 						secondary_items_cost_map.pop(item.name)
 					else:
 						item.secondary_items_cost_per_qty = 0
 
 				lcv_cost_per_qty = 0.0
 				if item.landed_cost_voucher_amount:
-					lcv_cost_per_qty = item.landed_cost_voucher_amount / item.qty
+					lcv_cost_per_qty = item.landed_cost_voucher_amount / (item.received_qty or item.qty)
 
 				item.rate = (
 					flt(item.rm_cost_per_qty)
@@ -668,12 +719,18 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 			if item.bom:
-				item.received_qty = flt(item.qty) + flt(item.rejected_qty) + flt(item.process_loss_qty)
-				item.amount = (
-					flt(item.received_qty)
-					* flt(item.rate)
-					* (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
-				)
+				item.received_qty = self.get_qty_for_costing(item)
+				if item.name in received_qty_ratios:
+					additional_cost = flt(item.received_qty) * flt(item.additional_cost_per_qty)
+					amount = (
+						flt(item.qty)
+						* received_qty_ratios[item.name]
+						* (flt(item.rate) - flt(item.additional_cost_per_qty))
+						+ additional_cost
+					)
+				else:
+					amount = flt(item.received_qty) * flt(item.rate)
+				item.amount = amount * (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
 				item.rate = item.amount / (item.qty or item.rejected_qty)
 			else:
 				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
@@ -683,6 +740,28 @@ class SubcontractingReceipt(SubcontractingController):
 			total_amount += item.amount
 		self.total_qty = total_qty
 		self.total = total_amount
+
+	def get_received_qty_ratios_for_return(self) -> dict[str, float]:
+		"""Received qty per accepted qty of the original row, for each return row of accepted qty."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		original_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
+				fields=["name", "qty", "received_qty", "rejected_warehouse"],
+			)
+		}
+
+		ratios = {}
+		for item in self.items:
+			original_row = original_rows.get(item.subcontracting_receipt_item)
+			if original_row and flt(original_row.qty) and item.warehouse != original_row.rejected_warehouse:
+				ratios[item.name] = flt(original_row.received_qty) / flt(original_row.qty)
+
+		return ratios
 
 	def validate_secondary_items(self):
 		for item in self.items:
@@ -731,37 +810,45 @@ class SubcontractingReceipt(SubcontractingController):
 			return
 
 		rm_consumed_dict = self.get_rm_wise_consumed_qty()
+		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")
+
+		for rm_item_code, required in self.get_rm_wise_required_qty().items():
+			consumed_qty = rm_consumed_dict.get(rm_item_code, 0)
+			diff = flt(consumed_qty, precision) - flt(required.qty, precision)
+
+			if diff < 0:
+				msg = _(
+					"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
+				).format(
+					frappe.bold(abs(diff)),
+					frappe.bold(required.stock_uom),
+					frappe.bold(rm_item_code),
+				)
+
+				frappe.throw(
+					msg,
+					exc=BOMQuantityError,
+				)
+
+	def get_rm_wise_required_qty(self):
+		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped."""
+		rm_dict = {}
 
 		for row in self.items:
-			precision = row.precision("qty")
-
-			# if allow alternative item, ignore the validation as per BOM required qty
-			is_allow_alternative_item = frappe.db.get_value("BOM", row.bom, "allow_alternative_item")
-			if is_allow_alternative_item:
+			if frappe.db.get_value("BOM", row.bom, "allow_alternative_item"):
 				continue
 
 			for bom_item in self._get_materials_from_bom(
 				row.item_code, row.bom, row.get("include_exploded_items")
 			):
-				required_qty = flt(
-					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, precision
+				required = rm_dict.setdefault(
+					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
 				)
-				consumed_qty = rm_consumed_dict.get(bom_item.rm_item_code, 0)
-				diff = flt(consumed_qty, precision) - flt(required_qty, precision)
+				required.qty += flt(
+					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, row.precision("qty")
+				)
 
-				if diff < 0:
-					msg = _(
-						"""Additional {0} {1} of item {2} required as per BOM to complete this transaction"""
-					).format(
-						frappe.bold(abs(diff)),
-						frappe.bold(bom_item.stock_uom),
-						frappe.bold(bom_item.rm_item_code),
-					)
-
-					frappe.throw(
-						msg,
-						exc=BOMQuantityError,
-					)
+		return rm_dict
 
 	def get_rm_wise_consumed_qty(self):
 		rm_dict = defaultdict(float)

@@ -400,7 +400,7 @@
  "icon": "ticket",
  "idx": 7,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-05 17:10:00.000000",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
@@ -432,6 +432,7 @@
   }
  ],
  "quick_entry": 1,
+ "recipient_account_field": "email_account",
  "row_format": "Dynamic",
  "search_fields": "status,customer,subject,raised_by",
  "sender_field": "raised_by",

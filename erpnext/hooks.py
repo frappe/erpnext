@@ -63,7 +63,8 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
-	"Customer": "public/js/customer_overview.js",
+	"Customer": ["public/js/party_overview.js", "public/js/customer_overview.js"],
+	"Supplier": ["public/js/party_overview.js", "public/js/supplier_overview.js"],
 	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
@@ -129,10 +130,6 @@ demo_master_doctypes = [
 	"supplier_group",
 	"customer",
 	"supplier",
-]
-demo_transaction_doctypes = [
-	"purchase_order",
-	"sales_order",
 ]
 
 jinja = {
@@ -346,6 +343,7 @@ permission_query_conditions = {
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.get_inherited_permission_query_conditions",
 }
 
@@ -353,6 +351,7 @@ has_permission = {
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission",
 }
 
@@ -457,8 +456,11 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": ["erpnext.crm.utils.update_lead_phone_numbers"],
+	},
+	"Lead": {
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"

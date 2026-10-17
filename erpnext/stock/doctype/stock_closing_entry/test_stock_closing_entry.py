@@ -15,6 +15,7 @@ from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.utils import PendingRepostingError
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -64,6 +65,49 @@ class TestStockClosingEntry(ERPNextTestSuite):
 				balance = entries[("Closing Test", WAREHOUSE)]
 				self.assertEqual(balance.actual_qty, expected_qty)
 				self.assertEqual(balance.stock_value_difference, expected_qty * 10)
+
+	def test_closing_includes_non_submitted_ledger_entries(self):
+		"""A legacy docstatus=0 SLE is live stock (is_cancelled=0) and must be counted in the closing."""
+		from erpnext.stock.utils import get_combine_datetime
+
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		item = make_item("_Test Closing Draft SLE", {"is_stock_item": 1, "has_serial_no": 0}).name
+
+		sle = frappe.new_doc("Stock Ledger Entry")
+		sle.update(
+			{
+				"item_code": item,
+				"warehouse": WAREHOUSE,
+				"posting_date": "2026-01-01",
+				"posting_time": "10:00:00",
+				"actual_qty": 100,
+				"qty_after_transaction": 100,
+				"stock_value_difference": 1000,
+				"stock_value": 1000,
+				"valuation_rate": 10,
+				"company": COMPANY,
+				"voucher_type": "Stock Entry",
+				"voucher_no": "_T-DRAFT-SLE",
+				"is_cancelled": 0,
+				"has_batch_no": 0,
+				"stock_uom": "Nos",
+				"docstatus": 0,  # legacy, un-submitted but live ledger entry
+			}
+		)
+		sle.posting_datetime = get_combine_datetime(sle.posting_date, sle.posting_time)
+		sle.name = frappe.generate_hash(length=10)
+		sle.db_insert()
+
+		try:
+			with (
+				patch(f"{module}.get_inventory_dimensions", return_value=[]),
+				patch.object(StockClosing, "get_last_stock_closing_entry", return_value=None),
+			):
+				entries = StockClosing(COMPANY, "1900-01-01", "2026-01-02").get_stock_closing_entries()
+
+			self.assertEqual(entries[(item, WAREHOUSE)].actual_qty, 100)
+		finally:
+			frappe.db.delete("Stock Ledger Entry", {"name": sle.name})
 
 	def test_batch_zero_values_in_closing_balance(self):
 		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
@@ -481,6 +525,33 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 			{"doctype": "Repost Item Valuation", "company": COMPANY, "posting_date": add_days(today(), -1)}
 		)
 		self.assertFalse(repost.get_closing_stock_balance())
+
+	def test_closing_balance_waits_for_pending_reposts(self):
+		repost = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": make_item("_Test SCE Pending Repost Item", {"is_stock_item": 1}).name,
+				"warehouse": WAREHOUSE,
+				"company": COMPANY,
+				"posting_date": "2026-03-10",
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
+
+		self.assertRaises(PendingRepostingError, self.submit_closing, self.make_closing("2026-03-31"))
+
+	def test_backdated_entry_before_open_closing_is_reposted(self):
+		item = make_item("_Test SCE Open Closing Item", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-15")
+		self.make_generated_closing("2026-03-31")
+
+		backdated = make_stock_entry(
+			item_code=item, qty=5, rate=50, to_warehouse=WAREHOUSE, posting_date="2026-03-10"
+		)
+
+		self.assertEqual(backdated.docstatus, 1)
 
 	def test_future_to_date_is_rejected(self):
 		self.assertRaises(frappe.ValidationError, self.make_closing(add_days(today(), 30)).insert)

@@ -3,6 +3,7 @@
 
 
 from typing import Literal
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import flt, random_string
@@ -1457,6 +1458,7 @@ class TestJobCard(ERPNextTestSuite):
 			routing=routing_doc.name,
 			raw_materials=[item_code + "RM 1", item_code + "RM 2"],
 			source_warehouse=warehouse,
+			currency="INR",
 		)
 
 		for row in bom_doc.items:
@@ -3197,6 +3199,7 @@ class TestJobCard(ERPNextTestSuite):
 			routing=routing_doc.name,
 			raw_materials=[rm.name],
 			source_warehouse=warehouse,
+			currency="INR",
 		)
 
 		for row in bom_doc.items:
@@ -3692,6 +3695,18 @@ class TestJobCardLogic(ERPNextTestSuite):
 		self.assertRaises(
 			frappe.ValidationError, jc.validate_complete_job_card_qty, frappe._dict(pending_qty=10)
 		)
+
+	def test_completed_qty_sums_without_float_noise(self):
+		jc = frappe.new_doc("Job Card")
+		jc.total_completed_qty = 0.2
+		with patch.object(jc, "get_current_operation_data", return_value=[frappe._dict(completed_qty=0.1)]):
+			self.assertEqual(jc.get_current_operation_completed_qty(), 0.3)
+
+		jc.update(
+			{"for_quantity": 0.8, "total_completed_qty": 0.7, "process_loss_qty": 0.1, "manufactured_qty": 0}
+		)
+		jc.set_finished_good_status()
+		self.assertEqual(jc.status, "To Manufacture")
 
 	def test_qty_in_messages_carries_the_uom(self):
 		jc = frappe.new_doc("Job Card")

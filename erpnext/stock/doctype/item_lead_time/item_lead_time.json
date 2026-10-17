@@ -71,6 +71,7 @@
    "description": "In Days",
    "fieldname": "buffer_time",
    "fieldtype": "Int",
+   "non_negative": 1,
    "in_list_view": 1,
    "label": "Buffer Time"
   },
@@ -83,6 +84,7 @@
    "default": "1",
    "fieldname": "no_of_shift",
    "fieldtype": "Int",
+   "non_negative": 1,
    "label": "No of Shift"
   },
   {
@@ -93,6 +95,7 @@
    "description": "Per Unit Time in Mins",
    "fieldname": "manufacturing_time_in_mins",
    "fieldtype": "Int",
+   "non_negative": 1,
    "label": "Manufacturing Time"
   },
   {
@@ -106,6 +109,7 @@
    "description": "(Good Units Produced / Total Units Produced) \u00d7 100",
    "fieldname": "daily_yield",
    "fieldtype": "Percent",
+   "non_negative": 1,
    "label": "Daily Yield (%)"
   },
   {
@@ -125,6 +129,7 @@
    "description": "In Days",
    "fieldname": "purchase_time",
    "fieldtype": "Int",
+   "non_negative": 1,
    "in_list_view": 1,
    "label": "Purchase Time"
   },
@@ -132,6 +137,7 @@
    "description": "Per Day",
    "fieldname": "shift_time_in_hours",
    "fieldtype": "Int",
+   "non_negative": 1,
    "label": "Shift Time (In Hours)"
   },
   {
@@ -151,6 +157,7 @@
    "description": "Similar types of workstations where the same operations run in parallel.",
    "fieldname": "no_of_workstations",
    "fieldtype": "Int",
+   "non_negative": 1,
    "label": "No of Workstations"
   },
   {
@@ -193,7 +200,7 @@
  "icon": "clock",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-22 11:00:00.000000",
+ "modified": "2026-10-07 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Lead Time",
@@ -211,6 +218,48 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

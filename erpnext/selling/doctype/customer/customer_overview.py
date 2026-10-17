@@ -4,6 +4,7 @@ from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Coalesce, Count, Sum
 from frappe.utils import add_days, add_months, add_to_date, cint, date_diff, flt, getdate, today
 
+from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
@@ -263,7 +264,16 @@ def reported_advances(customer, company, report_date):
 			"range": "30, 60, 90",
 		}
 	)[1]
-	return next((row.get("advance") for row in rows if row.get("party") == customer), None)
+	row = next((row for row in rows if row.get("party") == customer), None)
+	if row:
+		return row.get("advance")
+	if not _unrestricted_read("Payment Ledger Entry"):
+		return None
+	return flt(
+		get_partywise_advanced_payment_amount(["Customer"], report_date, company=company, party=customer).get(
+			customer
+		)
+	)
 
 
 def ageing(ar):
@@ -300,7 +310,9 @@ def trend(customer, company, from_date, to_date, as_of, accounts):
 	while cursor <= last:
 		is_mtd = cursor == current_month
 		value = by_month.get(cursor, 0.0)
-		points.append({"label": cursor.strftime("%b"), "value": value, "mtd": is_mtd})
+		points.append(
+			{"label": cursor.strftime("%b"), "title": cursor.strftime("%b %Y"), "value": value, "mtd": is_mtd}
+		)
 		if not is_mtd:
 			closed.append(value)
 		cursor = add_months(cursor, 1)

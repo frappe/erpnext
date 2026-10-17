@@ -65,7 +65,7 @@ class StockInternalTransferService:
 			frappe.throw(_("Internal transfers can only be done in company's default currency"))
 
 	def validate_packed_items(self):
-		if self.doc.doctype in ("Sales Invoice", "Delivery Note Item") and self.doc.get("packed_items"):
+		if self.doc.doctype == "Sales Invoice" and self.doc.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
 
 	def validate_internal_transfer_qty(self):
@@ -73,9 +73,9 @@ class StockInternalTransferService:
 			return
 
 		inter_company_reference = (
-			self.doc.get("inter_company_reference")
+			self.doc.get("inter_company_invoice_reference")
 			if self.doc.doctype == "Purchase Invoice"
-			else self.doc.get("inter_company_invoice_reference")
+			else self.doc.get("inter_company_reference")
 		)
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty(inter_company_reference)
@@ -100,13 +100,16 @@ class StockInternalTransferService:
 				)
 
 			if recevied_qty > flt(transferred_qty, precision):
+				from erpnext.controllers.status_updater import OverAllowanceError
+
 				frappe.throw(
 					_("Item {0} cannot be received in more than {1} qty against the {2} {3}").format(
 						bold(key[1]),
 						bold(flt(transferred_qty, precision)),
 						bold(parent_doctype),
 						get_link_to_form(parent_doctype, inter_company_reference),
-					)
+					),
+					OverAllowanceError,
 				)
 
 	def get_item_wise_inter_transfer_qty(self, inter_company_reference):
@@ -131,13 +134,34 @@ class StockInternalTransferService:
 			)
 			.where((parent_tab.name == inter_company_reference) & (parent_tab.docstatus == 1))
 		)
+		if parent_doctype == "Delivery Note":
+			query = query.select(child_tab.returned_qty, child_tab.stock_qty)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - flt(row.get("returned_qty"))
+
+		if parent_doctype == "Delivery Note":
+			self.add_component_transfer_qty(item_wise_transfer_qty, inter_company_reference, data)
 
 		return item_wise_transfer_qty
+
+	def add_component_transfer_qty(self, item_wise_transfer_qty, delivery_note, bundle_rows):
+		"""Components of a bundle row travel on their own, net of the share of the bundle returned."""
+		from erpnext.stock.doctype.delivery_note.mapper import get_pending_component_qty
+
+		bundle_rows = {row.name: row for row in bundle_rows}
+		for packed in frappe.get_all(
+			"Packed Item",
+			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
+			fields=["name", "item_code", "qty", "parent_detail_docname"],
+		):
+			if bundle_row := bundle_rows.get(packed.parent_detail_docname):
+				item_wise_transfer_qty.pop((bundle_row.name, bundle_row.item_code), None)
+				item_wise_transfer_qty[(packed.name, packed.item_code)] += get_pending_component_qty(
+					packed, bundle_row
+				)
 
 	def get_item_wise_inter_received_qty(self):
 		child_doctype = self.doc.doctype + " Item"
@@ -167,13 +191,23 @@ class StockInternalTransferService:
 		else:
 			query = query.select(
 				child_tab.delivery_note_item.as_("name"),
+				child_tab.delivery_note_packed_item,
 			)
 
 			query = query.where(parent_tab.inter_company_reference == self.doc.inter_company_reference)
 
-		data = query.run(as_dict=True)
-		item_wise_transfer_qty = defaultdict(float)
-		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+		query = query.where(parent_tab.name != self.doc.name)
+		item_wise_received_qty = defaultdict(float)
+		for row in query.run(as_dict=True):
+			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
+				row.qty
+			)
 
-		return item_wise_transfer_qty
+		reference_field = (
+			"sales_invoice_item" if self.doc.doctype == "Purchase Invoice" else "delivery_note_item"
+		)
+		for row in self.doc.items:
+			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
+
+		return item_wise_received_qty

@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, session
 from frappe.model.document import Document
-from frappe.utils import escape_html, now_datetime
+from frappe.utils import escape_html, getdate, now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -52,15 +52,37 @@ class WarrantyClaim(TransactionBase):
 
 	def validate(self):
 		self.validate_serial_no()
+		if self.status == "Cancelled" and self.has_value_changed("status"):
+			self.validate_no_active_visits()
 		if session["user"] != "Guest" and not self.customer:
 			frappe.throw(_("Customer is required"))
 
-		if (
-			self.status == "Closed"
-			and not self.resolution_date
-			and frappe.db.get_value("Warranty Claim", self.name, "status") != "Closed"
-		):
+		self.set_resolution()
+		self.set_warranty_amc_status()
+
+	def set_resolution(self):
+		previous_status = frappe.db.get_value("Warranty Claim", self.name, "status")
+		if self.status == "Closed" and not self.resolution_date and previous_status != "Closed":
 			self.resolution_date = now_datetime()
+		elif self.status != "Closed" and previous_status == "Closed":
+			self.resolution_date = None
+			self.resolved_by = None
+
+	def set_warranty_amc_status(self):
+		"""Warranty / AMC status on the complaint date, ranked as on Serial No."""
+		if not (self.warranty_expiry_date or self.amc_expiry_date):
+			return
+
+		complaint_date = getdate(self.complaint_date)
+		warranty_expiry = self.warranty_expiry_date and getdate(self.warranty_expiry_date)
+		amc_expiry = self.amc_expiry_date and getdate(self.amc_expiry_date)
+
+		if warranty_expiry and warranty_expiry >= complaint_date:
+			self.warranty_amc_status = "Under Warranty"
+		elif amc_expiry:
+			self.warranty_amc_status = "Under AMC" if amc_expiry >= complaint_date else "Out of AMC"
+		else:
+			self.warranty_amc_status = "Out of Warranty"
 
 	def validate_serial_no(self):
 		if not self.serial_no or not self.item_code:
@@ -73,7 +95,7 @@ class WarrantyClaim(TransactionBase):
 				)
 			)
 
-	def on_cancel(self):
+	def validate_no_active_visits(self):
 		mv = frappe.qb.DocType("Maintenance Visit")
 		mvp = frappe.qb.DocType("Maintenance Visit Purpose")
 		# filter the parent Maintenance Visit's docstatus (as the original SQL did), not the child row's
@@ -89,8 +111,6 @@ class WarrantyClaim(TransactionBase):
 		if visits:
 			lst1 = ",".join(x[0] for x in visits)
 			frappe.throw(_("Cancel Material Visit {0} before cancelling this Warranty Claim").format(lst1))
-		else:
-			self.db_set("status", "Cancelled")
 
 	def on_update(self):
 		pass

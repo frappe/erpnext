@@ -490,8 +490,9 @@ class TestProject(ERPNextTestSuite):
 
 		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
 		copied_tasks = frappe.get_all(
-			"Task", filters={"project": copy}, fields=["name", "parent_task", "depends_on_tasks"]
+			"Task", filters={"project": copy}, fields=["name", "subject", "parent_task", "depends_on_tasks"]
 		)
+		copied = {task.subject: task.name for task in copied_tasks}
 		links = {
 			link
 			for task in copied_tasks
@@ -501,8 +502,8 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(len(copied_tasks), 3)
 		self.assertFalse(links & {group.name, design.name, build.name})
 		self.assertEqual(
-			set(frappe.get_all("Task Depends On", filters={"parent": group.name}, pluck="task")),
-			{design.name, build.name},
+			set(frappe.get_all("Task Depends On", filters={"parent": copied["Phase 1"]}, pluck="task")),
+			{copied["Design"], copied["Build"]},
 		)
 
 	def test_create_duplicate_project_detaches_parents_outside_the_project(self):
@@ -570,6 +571,37 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Task", tasks[0], "status"), "Cancelled")
 
+	def test_set_project_status_by_projects_manager_reschedules_dependent_task(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 2)
+		frappe.db.set_value("Task", tasks[0], "exp_end_date", add_days(nowdate(), 5))
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+		user = create_user("projects-manager-only@example.com", "Projects Manager")
+
+		with self.set_user(user.name):
+			set_project_status(project.name, "Cancelled")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[1], "status"), "Cancelled")
+
+	def test_set_project_status_keeps_dependent_task_dates(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 2)
+		frappe.db.set_value("Task", tasks[0], "exp_end_date", add_days(nowdate(), 5))
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+		planned = frappe.db.get_value("Task", tasks[1], ["exp_start_date", "exp_end_date"])
+
+		set_project_status(project.name, "Completed")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[1], ["exp_start_date", "exp_end_date"]), planned)
+
 	def test_set_project_status_rejects_invalid_status(self):
 		from erpnext.projects.doctype.project.project import set_project_status
 
@@ -608,6 +640,18 @@ class TestProject(ERPNextTestSuite):
 			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
 				twice_daily_reminder()
 			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
+	def test_twice_daily_reminder_sends_both_overdue_updates(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="22:10:00", second_email="22:40:00"
+		)
+		with freeze_time("2026-01-05 23:00:00"), patch("frappe.sendmail") as sendmail:
+			twice_daily_reminder()
+
+		self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), 2)
+		self.assertEqual(sendmail.call_count, 2)
 
 	def test_costing_rollup_from_sales_documents(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -719,6 +763,44 @@ class TestProject(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, create_kanban_board_if_not_exists, project.name)
 
 		self.assertFalse(frappe.db.exists("Kanban Board", project.project_name))
+
+	def test_kanban_board_is_found_by_project_not_by_name(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		name = f"_Test Kanban {frappe.generate_hash(length=6)}"
+		renamed = make_project({"project_name": name})
+		renamed_board = create_kanban_board_if_not_exists(renamed.name)
+		renamed.db_set("project_name", f"{name} old")
+
+		project = make_project({"project_name": name})
+		board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, renamed_board)
+		self.assertEqual(create_kanban_board_if_not_exists(renamed.name), renamed_board)
+		self.assertIn(project.name, frappe.db.get_value("Kanban Board", board, "filters"))
+
+		lead_board = quick_kanban_board("Lead", f"{name} lead", "status").name
+		quick_kanban_board("Lead", f"{lead_board}-1", "status")
+		lead_named_project = make_project({"project_name": lead_board})
+		board = create_kanban_board_if_not_exists(lead_named_project.name)
+
+		self.assertEqual(board, f"{lead_board}-2")
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
+
+	def test_kanban_board_skips_another_users_private_board(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		project = make_project({"project_name": f"_Test Kanban Private {frappe.generate_hash(length=6)}"})
+		private_board = quick_kanban_board("Task", f"{project.project_name} private", "status", project.name)
+		private_board.db_set("private", 1)
+
+		user = self._create_portal_user(f"kanban_private_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", user).add_roles("Projects User")
+		with self.set_user(user):
+			board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, private_board.name)
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "owner"), user)
 
 	def test_cost_center_name_needs_project_access(self):
 		project = make_project({"project_name": f"_Test Cost Center Access {frappe.generate_hash(length=6)}"})

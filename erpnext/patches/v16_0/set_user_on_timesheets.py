@@ -1,6 +1,6 @@
 import frappe
-from frappe.query_builder.functions import Coalesce, NullIf
-from pypika.terms import Bracket
+from frappe.query_builder.functions import NullIf
+from pypika.terms import Bracket, Case
 
 
 def execute():
@@ -9,9 +9,14 @@ def execute():
 	employee_user = (
 		frappe.qb.from_(employee).select(employee.user_id).where(employee.name == timesheet.employee)
 	)
+	user = (
+		Case()
+		.when(timesheet.employee.isnull() | (timesheet.employee == ""), timesheet.owner)
+		.else_(NullIf(Bracket(employee_user), ""))
+	)
 
 	(
 		frappe.qb.update(timesheet)
-		.set(timesheet.user, Coalesce(NullIf(Bracket(employee_user), ""), timesheet.owner))
+		.set(timesheet.user, user)
 		.where(timesheet.user.isnull() | (timesheet.user == ""))
 	).run()

@@ -153,14 +153,15 @@ class BuyingController(SubcontractingController):
 				):
 					bundle_ids[bundle.name] = bundle.serial_and_batch_bundle
 
+			bundle_ids.update(self.get_component_packages())
+
 			if not bundle_ids:
 				return
 
 			for item in self.get("items"):
-				if item.get(field) and not item.serial_and_batch_bundle and bundle_ids.get(item.get(field)):
-					item.serial_and_batch_bundle = self.make_accepted_package(
-						item, bundle_ids.get(item.get(field))
-					)
+				reference = item.get(field) or item.get("delivery_note_packed_item")
+				if reference and not item.serial_and_batch_bundle and bundle_ids.get(reference):
+					item.serial_and_batch_bundle = self.make_accepted_package(item, bundle_ids.get(reference))
 
 				elif (
 					not self.is_new()
@@ -220,10 +221,48 @@ class BuyingController(SubcontractingController):
 		"""Package of the material the delivery note put in the in-transit warehouse."""
 		field = "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
 		doctype = "Delivery Note Item" if self.doctype == "Purchase Receipt" else "Sales Invoice Item"
+		if row.get("delivery_note_packed_item"):
+			return frappe.db.get_value(
+				"Packed Item", row.delivery_note_packed_item, "serial_and_batch_bundle"
+			)
+
 		if not row.get(field):
 			return None
 
 		return frappe.db.get_value(doctype, row.get(field), "serial_and_batch_bundle")
+
+	def get_component_incoming_rates(self) -> dict:
+		packed_items = [
+			d.delivery_note_packed_item for d in self.get("items") if d.get("delivery_note_packed_item")
+		]
+		if not packed_items:
+			return {}
+
+		return frappe._dict(
+			frappe.get_all(
+				"Packed Item",
+				filters={"name": ("in", packed_items)},
+				fields=["name", "incoming_rate"],
+				as_list=True,
+			)
+		)
+
+	def get_component_packages(self) -> dict:
+		"""Packages of the bundle components the delivery note put in the in-transit warehouse."""
+		packed_items = [
+			d.delivery_note_packed_item for d in self.get("items") if d.get("delivery_note_packed_item")
+		]
+		if not packed_items:
+			return {}
+
+		return frappe._dict(
+			frappe.get_all(
+				"Packed Item",
+				filters={"name": ("in", packed_items)},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
 
 	def set_rejected_package(self, row, package) -> None:
 		"""Package of the material the row rejects.
@@ -634,9 +673,11 @@ class BuyingController(SubcontractingController):
 				):
 					net_rate = item.rejected_qty * item.net_rate
 
-				qty_in_stock_uom = flt(self.get_valued_qty(item) * item.conversion_factor)
-				if not qty_in_stock_uom and item.get("rejected_qty"):
-					qty_in_stock_uom = flt(item.rejected_qty * item.conversion_factor)
+				qty_in_stock_uom = (
+					self.get_valued_stock_qty(item)
+					or get_stock_qty(item, item.rejected_qty)
+					or flt(item.qty) * flt(item.conversion_factor)
+				)
 
 				item.valuation_rate = (
 					net_rate
@@ -649,13 +690,13 @@ class BuyingController(SubcontractingController):
 
 		update_regional_item_valuation_rate(self)
 
-	def get_valued_qty(self, row):
-		"""Quantity the net amount of the row was billed for, which is what its valuation spreads
-		over."""
+	def get_valued_stock_qty(self, row):
+		"""Stock qty the net amount of the row was billed for, which is what its valuation spreads
+		over. Each part is rounded as the stock ledger posts it."""
 		if not flt(row.get("rejected_qty")) or not bills_rejected_quantity(self):
-			return flt(row.qty)
+			return get_stock_qty(row, row.qty)
 
-		return flt(row.qty) + flt(row.rejected_qty)
+		return get_stock_qty(row, row.qty) + get_stock_qty(row, row.rejected_qty)
 
 	def get_tax_details(self):
 		tax_accounts = []
@@ -828,10 +869,15 @@ class BuyingController(SubcontractingController):
 
 		ref_doctype = ref_doctype_map.get(self.doctype)
 		returned_field = frappe.scrub(self.doctype) + "_item"
+		component_rates = self.get_component_incoming_rates()
 		for d in self.get("items"):
 			if self.get("is_return") and d.get(returned_field):
 				d.sales_incoming_rate = flt(
 					frappe.db.get_value(self.doctype + " Item", d.get(returned_field), "sales_incoming_rate")
+				)
+			elif d.get("delivery_note_packed_item") in component_rates:
+				d.sales_incoming_rate = flt(
+					component_rates[d.delivery_note_packed_item] * (d.conversion_factor or 1)
 				)
 			elif not d.get(frappe.scrub(ref_doctype)):
 				posting_time = self.get("posting_time")
@@ -1029,7 +1075,7 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
+			pr_qty = get_stock_qty(d, d.qty)
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
 			if source_qty and (d.warehouse or not pr_qty):
@@ -1142,9 +1188,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": flt(
-								flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("stock_qty")
-							),
+							"actual_qty": get_stock_qty(d, d.rejected_qty),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
@@ -1560,3 +1604,8 @@ def get_purchase_expense_account(item_code, company):
 		)
 
 	return details or frappe._dict({})
+
+
+def get_stock_qty(row, qty) -> float:
+	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
+	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))

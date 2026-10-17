@@ -9,6 +9,9 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_sales_orders,
 	get_warehouse_list,
 )
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_pooled_bin_details,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
@@ -2346,6 +2349,16 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(flt(rm_rows[0].get("projected_qty")), 7.0)
 		# the group is only an availability scope; the row targets For Warehouse
 		self.assertEqual(rm_rows[0].get("warehouse"), data.for_wh)
+
+	def test_pooled_bin_details_sum_group_warehouse_children(self):
+		data = self._setup_group_rm_warehouse()
+
+		bin_details = get_pooled_bin_details(
+			{"item_code": data.rm_item}, "_Test Company", data.group_warehouse
+		)
+
+		self.assertEqual(flt(bin_details["actual_qty"]), 7.0)
+		self.assertEqual(flt(bin_details["projected_qty"]), 7.0)
 
 	def test_group_raw_material_warehouse_transfers_from_child_warehouses(self):
 		"Material is transferred only from actual child warehouses, never the group node."

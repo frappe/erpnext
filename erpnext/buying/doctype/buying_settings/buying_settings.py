@@ -6,6 +6,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class BuyingSettings(Document):
@@ -119,3 +120,14 @@ def bills_rejected_quantity(doc) -> bool:
 		return False
 
 	return is_rejected_material_valued(doc.doctype)
+
+
+def get_billed_qty(doc, item) -> float:
+	if not flt(item.get("rejected_qty")) or not bills_rejected_quantity(doc):
+		return flt(item.qty)
+
+	return flt(item.qty) + flt(item.rejected_qty)
+
+
+def get_billed_stock_qty(doc, item) -> float:
+	return get_billed_qty(doc, item) * (flt(item.get("conversion_factor")) or 1)
