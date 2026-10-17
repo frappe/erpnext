@@ -1924,26 +1924,10 @@ def create_stock_reservation_entries_for_so_items(
 			sre.from_voucher_detail_no = item.from_voucher_detail_no
 
 		if item.get("serial_and_batch_bundle"):
-			sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 			sre.reservation_based_on = "Serial and Batch"
-
-			index, picked_qty = 0, 0
-			while index < len(sbb.entries) and picked_qty < qty_to_be_reserved:
-				entry = sbb.entries[index]
-				qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_be_reserved - picked_qty)
-
-				sre.append(
-					"sb_entries",
-					{
-						"serial_no": entry.serial_no,
-						"batch_no": entry.batch_no,
-						"qty": qty,
-						"warehouse": entry.warehouse,
-					},
-				)
-
-				index += 1
-				picked_qty += qty
+			set_reserved_serial_batch_entries(
+				sre, item.serial_and_batch_bundle, qty_to_be_reserved, has_serial_no, has_batch_no
+			)
 
 		sre.save()
 		sre.submit()
@@ -1954,6 +1938,68 @@ def create_stock_reservation_entries_for_so_items(
 		frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
 	return sre_count
+
+
+def set_reserved_serial_batch_entries(sre, bundle, qty_to_reserve, has_serial_no, has_batch_no):
+	picked_qty = 0
+	for entry in frappe.get_doc("Serial and Batch Bundle", bundle).entries:
+		if picked_qty >= qty_to_reserve:
+			break
+
+		qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_reserve - picked_qty)
+		sre.append(
+			"sb_entries",
+			{
+				"serial_no": entry.serial_no,
+				"batch_no": entry.batch_no,
+				"qty": qty,
+				"warehouse": entry.warehouse,
+			},
+		)
+		picked_qty += qty
+
+	if picked_qty < qty_to_reserve:
+		add_available_serial_batch_entries(sre, qty_to_reserve - picked_qty, has_serial_no, has_batch_no)
+
+
+def add_available_serial_batch_entries(sre, qty_needed, has_serial_no, has_batch_no):
+	if has_serial_no:
+		add_available_serial_entries(sre, qty_needed, has_batch_no)
+	else:
+		add_available_batch_entries(sre, qty_needed)
+
+
+def add_available_serial_entries(sre, qty_needed, has_batch_no):
+	taken = {row.serial_no for row in sre.sb_entries}
+	for serial in get_available_serial_nos_to_reserve(sre.item_code, sre.warehouse, has_batch_no):
+		if qty_needed <= 0:
+			return
+		if serial[0] in taken:
+			continue
+
+		batch_no = serial[2] if has_batch_no and len(serial) > 2 else None
+		sre.append(
+			"sb_entries", {"serial_no": serial[0], "batch_no": batch_no, "qty": 1, "warehouse": sre.warehouse}
+		)
+		qty_needed -= 1
+
+
+def add_available_batch_entries(sre, qty_needed):
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+
+	taken = {}
+	for row in sre.sb_entries:
+		taken[row.batch_no] = taken.get(row.batch_no, 0) + flt(row.qty)
+
+	for batch in get_auto_batch_nos(frappe._dict(item_code=sre.item_code, warehouse=sre.warehouse)):
+		qty = min(flt(batch.qty) - taken.get(batch.batch_no, 0), qty_needed)
+		if qty <= 0:
+			continue
+
+		sre.append("sb_entries", {"batch_no": batch.batch_no, "qty": qty, "warehouse": sre.warehouse})
+		qty_needed -= qty
+		if qty_needed <= 0:
+			return
 
 
 def cancel_stock_reservation_entries(

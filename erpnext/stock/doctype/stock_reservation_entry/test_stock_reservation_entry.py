@@ -1553,6 +1553,69 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 			"auto_reserve_stock_for_sales_order_on_purchase": 1,
 		},
 	)
+	def test_split_batch_receipts_reserve_batches_for_the_whole_sales_unit(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRE-SPLIT-.#####",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		sales_order = make_sales_order(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, uom="Box", do_not_submit=1
+		)
+		sales_order.items[0].conversion_factor = 12
+		sales_order.submit()
+
+		for _receipt in range(2):
+			frappe.get_doc(
+				{
+					"doctype": "Purchase Receipt",
+					"company": "_Test Company",
+					"supplier": "_Test Supplier",
+					"items": [
+						{
+							"item_code": item_code,
+							"qty": 6,
+							"rate": 100,
+							"warehouse": "_Test Warehouse - _TC",
+							"sales_order": sales_order.name,
+							"sales_order_item": sales_order.items[0].name,
+						}
+					],
+				}
+			).insert().submit()
+
+		entries = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": sales_order.name, "docstatus": 1},
+			fields=["name", "reserved_qty"],
+		)
+		batch_qty = sum(
+			frappe.get_all(
+				"Serial and Batch Entry",
+				filters={
+					"parent": ("in", [d.name for d in entries]),
+					"parenttype": "Stock Reservation Entry",
+				},
+				pluck="qty",
+			)
+		)
+		self.assertEqual((sum(d.reserved_qty for d in entries), batch_qty), (12, 12))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_stock_for_sales_order_on_purchase": 1,
+		},
+	)
 	def test_split_receipts_reserve_the_completed_sales_unit(self):
 		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
 		item_code = make_item(
