@@ -13,6 +13,7 @@ from frappe.utils.deprecations import deprecated
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule_margin
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 from erpnext.controllers.accounts_controller import (
 	get_qty_in_stock_uom,
@@ -186,6 +187,56 @@ class calculate_taxes_and_totals:
 
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
+<<<<<<< HEAD
+=======
+	def calculate_item_rate(self, item):
+		if not item.price_list_rate:
+			remove_margin(item)
+			remove_discount(item)
+			item.rate_with_margin = 0
+			return
+
+		has_pricing_rules = item.pricing_rules and not self.doc.ignore_pricing_rule
+		if has_pricing_rules:
+			remove_margin(item)
+
+			for d in get_applied_pricing_rules(item.pricing_rules):
+				pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
+				apply_pricing_rule_margin(pricing_rule, item, self.doc)
+
+		item.rate_with_margin = get_rate_with_margin(item)
+		if item.discount_percentage > 0:
+			item.discount_amount = flt(
+				item.rate_with_margin * item.discount_percentage / 100.0, item.precision("discount_amount")
+			)
+
+		calculated_rate = flt(item.rate_with_margin - item.discount_amount, item.precision("rate"))
+
+		# if rate is 0 or pricing rules are applicable, calculated rate is preferred
+		if has_pricing_rules or not item.rate:
+			item.rate = calculated_rate
+			return
+
+		# discount and margin are correct, exit early
+		if item.rate == calculated_rate:
+			return
+
+		# item rate does not match calculated rate. prefer item rate, reset margin / discount
+		if item.rate > item.price_list_rate:
+			item.margin_type = "Amount"
+			item.margin_rate_or_amount = flt(
+				item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
+			)
+			item.rate_with_margin = item.rate
+			remove_discount(item)
+			return
+
+		item.rate_with_margin = item.price_list_rate
+		item.discount_amount = flt(item.rate_with_margin - item.rate, item.precision("discount_amount"))
+		item.discount_percentage = 0
+		remove_margin(item)
+
+>>>>>>> 718b9da (fix(accounts): preserve pricing discounts on quantity changes)
 	def calculate_item_values(self):
 		if self.doc.get("is_consolidated"):
 			return
