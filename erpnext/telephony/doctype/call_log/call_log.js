@@ -16,12 +16,7 @@ frappe.ui.form.on("Call Log", {
 			recording_wrapper.empty();
 		} else {
 			recording_wrapper.addClass("input-max-width");
-			recording_wrapper.html(`
-				<audio
-					controls
-					src="${frm.doc.recording_url}">
-				</audio>
-			`);
+			recording_wrapper.empty().append($("<audio controls>").attr("src", frm.doc.recording_url));
 		}
 	},
 });
