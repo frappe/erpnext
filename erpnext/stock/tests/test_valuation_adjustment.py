@@ -425,6 +425,21 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.assertEqual([(row.qty, row.valuation_rate) for row in adjustment.items], [(6, 100)])
 		self.assertEqual(adjustment.difference_amount, 30)
 
+	def test_each_wrong_ledger_is_fixed_by_repost(self):
+		fixtures = (
+			self.make_moving_average_value_drift,
+			self.make_batch_issued_at_wrong_value,
+			lambda: self.make_batch_holding_value_with_no_qty()[0],
+			self.make_pooled_batches_from_wrong_layer,
+			self.make_pool_value_no_batch_holds,
+			self.make_serial_no_issued_at_wrong_value,
+			self.make_standard_cost_balance_qty_wrong,
+			self.make_standard_cost_serial_no_issued_at_wrong_value,
+		)
+		for make_wrong_ledger in fixtures:
+			with self.subTest(fixture=make_wrong_ledger):
+				self.fix_by_repost(make_wrong_ledger())
+
 	def test_wrong_balance_qty_fixed_by_repost(self):
 		item = self.make_wrong_balance_qty()
 		self.fix_by_repost(item)
