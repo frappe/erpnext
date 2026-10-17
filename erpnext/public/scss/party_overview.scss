@@ -1,4 +1,7 @@
-.customer-overview {
+.party-overview {
+	--co-series-1: var(--blue-800);
+	--co-series-2: var(--blue-400);
+
 	.co-period,
 	.co-subtitle,
 	.co-note,
@@ -101,12 +104,31 @@
 		margin: 0 calc(-1 * var(--padding-sm));
 	}
 
+	.co-chart .chart-container,
+	.co-age-chart .chart-container {
+		--charts-label-color: var(--ink-gray-5);
+		--charts-muted-color: var(--ink-gray-5);
+		--charts-legend-label: var(--ink-gray-7);
+		--charts-tooltip-title: var(--ink-gray-5);
+		--charts-tooltip-label: var(--ink-gray-7);
+		--charts-tooltip-value: var(--ink-gray-9);
+		--charts-tooltip-bg: var(--surface-elevation-2);
+		--charts-tooltip-border: var(--outline-elevation-2);
+	}
+
 	.co-panel .co-chart,
 	.co-panel .co-age-chart {
 		padding-top: var(--margin-md);
 	}
 
+	.co-two-col .co-panel > .co-chart:last-child {
+		margin-top: auto;
+	}
+
 	.co-age-chart {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
 		margin-top: var(--margin-sm);
 	}
 
@@ -126,6 +148,7 @@
 
 	.co-empty {
 		display: flex;
+		flex: 1;
 		align-items: center;
 		justify-content: center;
 		font-size: var(--text-sm);
@@ -145,4 +168,9 @@
 			text-align: right;
 		}
 	}
+}
+
+[data-theme="dark"] .party-overview {
+	--co-series-1: var(--blue-300);
+	--co-series-2: var(--blue-600);
 }

@@ -98,6 +98,30 @@ class TestBOM(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_bom_diff, bom1, bom2)
 
 	@timeout
+	def test_bom_diff_preserves_repeated_rows(self):
+		from erpnext.manufacturing.doctype.bom.mapper import _diff_table_field
+
+		for old_qtys, new_qtys, added, removed, changed in (
+			([1, 2], [2, 1], [], [], []),
+			([1, 2], [2], [], [1], []),
+			([1], [1, 1], [1], [], []),
+			([1, 2], [2, 3], [], [], [1]),
+		):
+			with self.subTest(old_qtys=old_qtys, new_qtys=new_qtys):
+				old, new = (
+					frappe.get_doc(
+						{"doctype": "BOM", "items": [{"item_code": "_Test Item", "qty": qty} for qty in qtys]}
+					)
+					for qtys in (old_qtys, new_qtys)
+				)
+				out = frappe._dict(added=[], removed=[], row_changed=[])
+				_diff_table_field(old.meta.get_field("items"), old, new, out)
+
+				self.assertEqual([row.qty for _, row in out.added], added)
+				self.assertEqual([row.qty for _, row in out.removed], removed)
+				self.assertEqual([index for _, index, _, _ in out.row_changed], changed)
+
+	@timeout
 	def test_get_items_keeps_bom_no_phantom_pair_coherent(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import DocType
+from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Abs, NullIf, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
@@ -148,6 +148,7 @@ def validate_returned_items(doc):
 				validate_quantity(doc, key, d, ref, valid_items, already_returned_items)
 				if doc.doctype == "Delivery Note":
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
+				add_returned_row(doc, key, d, already_returned_items)
 
 				if (
 					ref.rate
@@ -228,9 +229,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-		if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
-			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
+		bundle_stock_qty = get_returned_stock_qty(doc, row)
 		for component in components[bundle]:
 			ref = valid_items.get(component.item_code)
 			if not ref:
@@ -275,6 +274,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			fields.extend(["received_qty"])
 
 	already_returned_data = already_returned_items.get(key) or {}
+	returns_nothing = not (flt(args.get("qty")) or flt(args.get("rejected_qty")))
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	field_precision = get_field_precision(
@@ -285,8 +285,12 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 	)
 
 	for column in fields:
+		returned_column = column
+		if args.get("return_qty_from_rejected_warehouse") and doc.doctype == "Purchase Receipt":
+			returned_column = "rejected_qty"
+
 		returned_qty = (
-			flt(already_returned_data.get(column, 0), field_precision)
+			flt(already_returned_data.get(returned_column, 0), field_precision)
 			if len(already_returned_data) > 0
 			else 0
 		)
@@ -313,7 +317,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if reference_qty:
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and flt(current_stock_qty) >= 0:
+			elif returned_qty >= reference_qty and returns_nothing:
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
@@ -327,18 +331,40 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
-	"""Hold all returns of an item, with or without dn_detail and across rows, to its total delivered qty."""
+	"""Hold all returns of an item, with or without dn_detail, to its total delivered qty."""
 	if key != row.item_code:
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
+		add_returned_row(doc, row.item_code, row, already_returned_items)
 
+
+def add_returned_row(doc, key, row, already_returned_items):
+	"""Count a validated row so that the next rows of the same return see it."""
+	conversion_factor = flt(row.conversion_factor or 1)
+	stock_qty = get_returned_stock_qty(doc, row)
+	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	if doc.doctype == "Purchase Receipt" and row.get("return_qty_from_rejected_warehouse"):
+		rejected_qty += stock_qty
+		stock_qty = 0
+
+	returned = already_returned_items.setdefault(key, frappe._dict())
+	returned.qty = flt(returned.qty) + abs(flt(row.qty))
+	returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
+	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+
+
+def get_returned_stock_qty(doc, row):
+	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
 	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+	setting = (
+		"allow_to_edit_stock_uom_qty_for_sales"
+		if doc.doctype in ("Delivery Note", "Sales Invoice", "POS Invoice")
+		else "allow_to_edit_stock_uom_qty_for_purchase"
+	)
+	if frappe.get_single_value("Stock Settings", setting):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
-	for returned_key in {key, row.item_code}:
-		returned = already_returned_items.setdefault(returned_key, frappe._dict(qty=0, stock_qty=0))
-		returned.qty = flt(returned.qty) + abs(flt(row.qty))
-		returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	return stock_qty
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
@@ -392,6 +418,13 @@ def get_already_returned_items(doc):
 		else "dn_detail"
 	)
 
+	stock_qty = Abs(child.stock_qty)
+	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
+	if doc.doctype == "Purchase Receipt":
+		from_rejected_warehouse = child.return_qty_from_rejected_warehouse == 1
+		rejected_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
+		stock_qty = Case().when(from_rejected_warehouse, 0).else_(stock_qty)
+
 	query = (
 		frappe.qb.from_(child)
 		.inner_join(par)
@@ -399,7 +432,7 @@ def get_already_returned_items(doc):
 		.select(
 			child.item_code,
 			Sum(Abs(child.qty)).as_("qty"),
-			Sum(Abs(child.stock_qty)).as_("stock_qty"),
+			Sum(stock_qty).as_("stock_qty"),
 			child[field],
 		)
 		.where((par.docstatus == 1) & (par.is_return == 1) & (par.return_against == doc.return_against))
@@ -407,7 +440,7 @@ def get_already_returned_items(doc):
 	)
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		query = query.select(
-			Sum(Abs(child.rejected_qty) * child.conversion_factor).as_("rejected_qty"),
+			Sum(rejected_qty).as_("rejected_qty"),
 			Sum(Abs(child.received_qty) * child.conversion_factor).as_("received_qty"),
 		)
 

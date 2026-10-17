@@ -54,3 +54,22 @@ class TestTemplateUtils(ERPNextTestSuite):
 		)
 		self.assertTrue(lead)
 		self.assertFalse(lead.lead_owner)
+
+	def test_contact_us_subject_is_stored_as_plain_text(self):
+		frappe.db.set_single_value("CRM Settings", "enable_opportunity_creation_from_contact_us", 1)
+		self.addCleanup(frappe.db.set_default, "company", frappe.db.get_default("company"))
+		frappe.db.set_default("company", "_Test Company")
+		sender = "_test_contact_us_subject@example.com"
+		with self.set_user("Guest"):
+			send_message(sender, "<script>alert(1)</script>", 'Sales & Support<img src=x onerror="alert(1)">')
+
+		opportunity = frappe.db.get_value(
+			"Opportunity", {"contact_email": sender}, ["name", "title"], as_dict=True
+		)
+		communication = frappe.db.get_value(
+			"Communication", {"reference_name": opportunity.name}, ["subject", "content"], as_dict=True
+		)
+		self.assertEqual(opportunity.title, "Sales & Support")
+		self.assertEqual(communication.subject, "Sales & Support")
+		self.assertNotIn("<script>", communication.content)
+		self.assertIn("&lt;script&gt;", communication.content)

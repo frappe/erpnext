@@ -1251,6 +1251,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1325,6 +1326,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1461,6 +1463,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1542,6 +1545,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -3056,6 +3060,34 @@ class TestSalesInvoice(ERPNextTestSuite):
 			),
 			(getdate("2025-03-01"), getdate("2025-03-31")),
 		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
+	def test_on_recurring_refreshes_exchange_rate(self):
+		for date, exchange_rate in (("2025-01-01", 80), ("2025-02-01", 85)):
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": date,
+					"from_currency": "USD",
+					"to_currency": "INR",
+					"exchange_rate": exchange_rate,
+					"for_selling": 1,
+				}
+			).insert()
+
+		reference = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			posting_date="2025-01-01",
+			do_not_submit=True,
+		)
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(new_invoice.conversion_rate, 85)
+		self.assertEqual(new_invoice.base_grand_total, new_invoice.grand_total * 85)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -5536,6 +5568,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(stock_ledger_entry.valuation_rate, 0.0)
 		self.assertEqual(stock_ledger_entry.qty, 2.0)
 		self.assertEqual(stock_ledger_entry.stock_value_difference, 0.0)
+
+	def test_stand_alone_credit_note_uses_current_valuation_rate(self):
+		item_code = "_Test Item for Credit Note Current Valuation"
+		make_item_for_si(item_code, {"valuation_method": "FIFO"})
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		si = create_sales_invoice(item=item_code, qty=-2, rate=1200, is_return=1, update_stock=1)
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_type": "Sales Invoice", "voucher_no": si.name}, "incoming_rate"
+		)
+		self.assertEqual(incoming_rate, 100.0)
 
 	def test_system_generated_exchange_gain_or_loss_je_after_repost(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry

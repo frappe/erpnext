@@ -641,6 +641,18 @@ class TestProject(ERPNextTestSuite):
 				twice_daily_reminder()
 			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
 
+	def test_twice_daily_reminder_sends_both_overdue_updates(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="22:10:00", second_email="22:40:00"
+		)
+		with freeze_time("2026-01-05 23:00:00"), patch("frappe.sendmail") as sendmail:
+			twice_daily_reminder()
+
+		self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), 2)
+		self.assertEqual(sendmail.call_count, 2)
+
 	def test_costing_rollup_from_sales_documents(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.projects.doctype.project.project import update_costing_and_billing
@@ -751,6 +763,44 @@ class TestProject(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, create_kanban_board_if_not_exists, project.name)
 
 		self.assertFalse(frappe.db.exists("Kanban Board", project.project_name))
+
+	def test_kanban_board_is_found_by_project_not_by_name(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		name = f"_Test Kanban {frappe.generate_hash(length=6)}"
+		renamed = make_project({"project_name": name})
+		renamed_board = create_kanban_board_if_not_exists(renamed.name)
+		renamed.db_set("project_name", f"{name} old")
+
+		project = make_project({"project_name": name})
+		board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, renamed_board)
+		self.assertEqual(create_kanban_board_if_not_exists(renamed.name), renamed_board)
+		self.assertIn(project.name, frappe.db.get_value("Kanban Board", board, "filters"))
+
+		lead_board = quick_kanban_board("Lead", f"{name} lead", "status").name
+		quick_kanban_board("Lead", f"{lead_board}-1", "status")
+		lead_named_project = make_project({"project_name": lead_board})
+		board = create_kanban_board_if_not_exists(lead_named_project.name)
+
+		self.assertEqual(board, f"{lead_board}-2")
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
+
+	def test_kanban_board_skips_another_users_private_board(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		project = make_project({"project_name": f"_Test Kanban Private {frappe.generate_hash(length=6)}"})
+		private_board = quick_kanban_board("Task", f"{project.project_name} private", "status", project.name)
+		private_board.db_set("private", 1)
+
+		user = self._create_portal_user(f"kanban_private_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", user).add_roles("Projects User")
+		with self.set_user(user):
+			board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, private_board.name)
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "owner"), user)
 
 	def test_cost_center_name_needs_project_access(self):
 		project = make_project({"project_name": f"_Test Cost Center Access {frappe.generate_hash(length=6)}"})

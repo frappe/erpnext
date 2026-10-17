@@ -80,6 +80,7 @@ class POSProfile(Document):
 		self.validate_disabled()
 		self.validate_default_profile()
 		self.validate_all_link_fields()
+		self.validate_write_off_settings()
 		self.validate_duplicate_groups()
 		self.validate_payment_methods()
 		self.validate_accounting_dimensions()
@@ -163,6 +164,25 @@ class POSProfile(Document):
 					{"doctype": link_dt, "company": self.company, "name": link_dn}
 				):
 					frappe.throw(_("{0} does not belong to Company {1}").format(link_dn, self.company))
+
+	def validate_write_off_settings(self):
+		for fieldname, doctype in (
+			("write_off_account", "Account"),
+			("write_off_cost_center", "Cost Center"),
+		):
+			if not (value := self.get(fieldname)):
+				continue
+
+			company, is_group = frappe.db.get_value(doctype, value, ["company", "is_group"])
+			if company != self.company:
+				frappe.throw(_("{0} does not belong to Company {1}").format(value, self.company))
+			if is_group:
+				frappe.throw(_("{0} cannot be a group").format(_(self.meta.get_label(fieldname))))
+			if (
+				doctype == "Account"
+				and frappe.get_cached_value("Account", value, "report_type") != "Profit and Loss"
+			):
+				frappe.throw(_("Write Off Account must be a Profit and Loss account"))
 
 	def validate_duplicate_groups(self):
 		item_groups = [d.item_group for d in self.item_groups]

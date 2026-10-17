@@ -827,6 +827,9 @@ frappe.ui.form.on("Stock Entry", {
 		frm.fields_dict.items.grid.refresh();
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
+	cost_center(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
+	},
 	validate_purpose_consumption: function (frm) {
 		frappe
 			.call({
@@ -864,6 +867,11 @@ frappe.ui.form.on("Stock Entry", {
 	set_basic_rate: function (frm, cdt, cdn) {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
+
+		if (item.set_basic_rate_manually) {
+			frm.events.calculate_basic_amount(frm, item);
+			return;
+		}
 
 		let args = {
 			item_code: item.item_code,
@@ -1188,6 +1196,18 @@ frappe.ui.form.on("Stock Entry Detail", {
 		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
 	},
 
+	qty(frm, cdt, cdn) {
+		const item = locals[cdt][cdn];
+		if (item.s_warehouse) {
+			frm.events.set_basic_rate(frm, cdt, cdn);
+			return;
+		}
+
+		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
+		frm.events.calculate_basic_amount(frm, item);
+		refresh_field("items");
+	},
+
 	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
 	},
@@ -1307,6 +1327,10 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	expense_account(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
+	},
+
+	cost_center(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
 	},
 
 	sample_quantity(frm, cdt, cdn) {
@@ -1734,8 +1758,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	items_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 
-		if (!row.expense_account) {
-			this.frm.script_manager.copy_from_first_row("items", row, ["expense_account"]);
+		if (!(row.expense_account && row.cost_center)) {
+			this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "cost_center"]);
 		}
 
 		if (this.frm.doc.from_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;

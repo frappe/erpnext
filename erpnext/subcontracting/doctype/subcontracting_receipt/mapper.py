@@ -82,7 +82,6 @@ def make_purchase_receipt(
 				"subcontracting_receipt": source_doc.name,
 				"supplier_warehouse": source_doc.supplier_warehouse,
 				"is_subcontracted": 1,
-				"currency": frappe.get_cached_value("Company", target.company, "default_currency"),
 			}
 		)
 

@@ -254,6 +254,34 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		unchanged = ms.validate_schedule_date_for_holiday_list(getdate(non_holiday), sp.name, today())
 		self.assertEqual(getdate(unchanged), getdate(non_holiday))
 
+	def test_schedule_refused_when_every_day_is_a_holiday(self):
+		from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
+
+		start_date, end_date = add_days(today(), 1), add_days(today(), 3)
+		holiday_list = make_holiday_list(
+			"_Test MS Holidays " + frappe.generate_hash("", 6),
+			from_date=today(),
+			to_date=add_days(today(), 10),
+			holiday_dates=[
+				{"holiday_date": add_days(today(), day), "description": "Test Holiday"} for day in range(1, 4)
+			],
+		)
+		ms = make_maintenance_schedule()
+		sales_person = frappe.get_doc(
+			{"doctype": "Sales Person", "sales_person_name": "_Test MS SP " + frappe.generate_hash("", 5)}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Company", ms.company, "default_holiday_list", holiday_list.name)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is a holiday",
+			ms.create_schedule_list,
+			start_date,
+			end_date,
+			1,
+			sales_person.name,
+		)
+
 	def test_cancelling_renewal_restores_earlier_amc_date(self):
 		item_code = "_Test Serial Item"
 		make_serial_item_with_serial(self, item_code)
@@ -387,6 +415,28 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 				start_date=start_date, end_date=end_date, periodicity=periodicity, no_of_visits=1
 			)
 			self.assertEqual(len(ms.schedules), 1)
+
+	def test_start_date_checked_against_delivery_before_bundles(self):
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(self, item_code)
+		serial = frappe.db.get_value(
+			"Serial No", {"item_code": item_code, "status": "Active"}, ["name", "serial_no"], as_dict=True
+		)
+		delivery = deliver_serial_nos(item_code, [serial.serial_no])
+
+		ledger_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": delivery.name, "is_cancelled": 0},
+			["name", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		frappe.db.set_value("Stock Ledger Entry", ledger_entry.name, "serial_no", serial.name)
+		frappe.db.set_value(
+			"Serial and Batch Entry", {"parent": ledger_entry.serial_and_batch_bundle}, "is_cancelled", 1
+		)
+
+		ms = make_maintenance_schedule(item_code=item_code, serial_no=serial.serial_no, start_date=today())
+		self.assertRaisesRegex(frappe.ValidationError, "before delivery date", ms.submit)
 
 	def test_serial_in_stock_is_refused(self):
 		item_code = "_Test Serial Item"
