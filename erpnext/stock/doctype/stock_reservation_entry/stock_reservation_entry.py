@@ -1996,7 +1996,10 @@ def add_available_batch_entries(sre, qty_needed):
 		if qty <= 0:
 			continue
 
-		sre.append("sb_entries", {"batch_no": batch.batch_no, "qty": qty, "warehouse": sre.warehouse})
+		if existing := next((row for row in sre.sb_entries if row.batch_no == batch.batch_no), None):
+			existing.qty = flt(existing.qty) + qty
+		else:
+			sre.append("sb_entries", {"batch_no": batch.batch_no, "qty": qty, "warehouse": sre.warehouse})
 		qty_needed -= qty
 		if qty_needed <= 0:
 			return
