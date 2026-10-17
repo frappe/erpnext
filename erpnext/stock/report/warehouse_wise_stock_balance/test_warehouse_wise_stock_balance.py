@@ -43,3 +43,10 @@ class TestWarehouseWiseStockBalance(ERPNextTestSuite):
 			self.row(data, root)["stock_balance"], self.row(with_disabled, root)["stock_balance"]
 		)
 		self.assertEqual(self.row(data, child)["indent"], self.row(with_disabled, child)["indent"])
+
+	def test_empty_disabled_warehouse_shows_only_when_asked(self):
+		empty = create_warehouse("_Test WWSB Empty Disabled")
+		frappe.db.set_value("Warehouse", empty, "disabled", 1)
+
+		self.assertNotIn(empty, [row["name"] for row in self.run_report()])
+		self.assertIn(empty, [row["name"] for row in self.run_report(show_disabled_warehouses=1)])
