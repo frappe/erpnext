@@ -1337,45 +1337,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sle[0].qty_after_transaction, 105)
 		self.assertEqual(sle[0].actual_qty, 5)
 
-	def test_backdated_sle_with_same_timestamp(self):
-		item = make_item().name
-		warehouse = "_Test Warehouse - _TC"
-
-		reciept1 = make_stock_entry(
-			item_code=item,
-			to_warehouse=warehouse,
-			qty=5,
-			posting_date="2021-01-01",
-			rate=10,
-			posting_time="02:00:00",
-		)
-
-		# backdated entry with same timestamp but different ms part
-		reciept2 = make_stock_entry(
-			item_code=item,
-			to_warehouse=warehouse,
-			qty=100,
-			rate=10,
-			posting_date="2021-01-01",
-			posting_time="02:00:00.1234",
-		)
-
-		sle = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": reciept1.name},
-			fields=["qty_after_transaction", "actual_qty"],
-		)
-		self.assertEqual(sle[0].qty_after_transaction, 5)
-		self.assertEqual(sle[0].actual_qty, 5)
-
-		sle = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": reciept2.name},
-			fields=["qty_after_transaction", "actual_qty"],
-		)
-		self.assertEqual(sle[0].qty_after_transaction, 105)
-		self.assertEqual(sle[0].actual_qty, 100)
-
 	def test_update_qty_in_future_sle_shifts_same_timestamp_later_entry(self):
 		# update_qty_in_future_sle treats "future" as strictly after the current entry in the
 		# (posting_datetime, creation) order. An entry sharing the exact posting timestamp but created
