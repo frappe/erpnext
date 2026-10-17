@@ -328,7 +328,9 @@ def _collect_item_details(doc, po_items):
 	for row in doc.get("sub_assembly_items") or []:
 		row = frappe._dict(row)
 		if row.type_of_manufacturing == "Material Request":
-			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(row.production_item)
+			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
+				(row.production_item, row.bom_no)
+			)
 
 	all_requested = set().union(*requested_sub_assemblies.values())
 	for data in po_items:

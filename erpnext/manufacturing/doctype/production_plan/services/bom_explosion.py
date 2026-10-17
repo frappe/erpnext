@@ -235,10 +235,10 @@ def _subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items):
 def _process_subitem(
 	doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 ):
-	if d.item_code in (data.get("requested_sub_assemblies") or ()):
+	child_bom = d.line_bom_no or d.default_bom
+	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 		return
 
-	child_bom = d.line_bom_no or d.default_bom
 	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
 	explode = explodable and _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0
 	if not data.get("include_exploded_items") or not child_bom or not explode:

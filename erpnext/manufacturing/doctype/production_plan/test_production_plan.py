@@ -1452,6 +1452,52 @@ class TestProductionPlan(ERPNextTestSuite):
 		items = get_items_for_material_requests(plan.as_dict())
 		self.assertNotIn("_Test PP Comb SA RM", [row.get("item_code") for row in items])
 
+	def test_combined_bought_sub_assembly_keeps_in_house_rows_of_another_bom(self):
+		for item in (
+			"_Test PP CombB SA",
+			"_Test PP CombB RM 1",
+			"_Test PP CombB RM 2",
+			"_Test PP CombB FG 1",
+			"_Test PP CombB FG 2",
+		):
+			make_item(item, {"is_stock_item": 1})
+		bought_bom = make_bom(item="_Test PP CombB SA", raw_materials=["_Test PP CombB RM 1"], currency="INR")
+		in_house_bom = make_bom(
+			item="_Test PP CombB SA", raw_materials=["_Test PP CombB RM 2"], currency="INR"
+		)
+		for fg, sa_bom in (("_Test PP CombB FG 1", bought_bom), ("_Test PP CombB FG 2", in_house_bom)):
+			fg_bom = make_bom(item=fg, raw_materials=["_Test PP CombB SA"], currency="INR", do_not_save=1)
+			fg_bom.items[0].bom_no = sa_bom.name
+			fg_bom.insert()
+			fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code="_Test PP CombB FG 1",
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				**plan.po_items[0].as_dict(),
+				"name": None,
+				"item_code": "_Test PP CombB FG 2",
+				"bom_no": frappe.db.get_value("BOM", {"item": "_Test PP CombB FG 2", "docstatus": 1}),
+			},
+		)
+		plan.combine_sub_items = 1
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.bom_no == bought_bom.name:
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = [row.get("item_code") for row in get_items_for_material_requests(plan.as_dict())]
+		self.assertIn("_Test PP CombB RM 2", items)
+		self.assertNotIn("_Test PP CombB RM 1", items)
+
 	def test_exploded_branch_follows_the_bom_selected_on_the_line(self):
 		for item in (
 			"_Test PP Line SA",
