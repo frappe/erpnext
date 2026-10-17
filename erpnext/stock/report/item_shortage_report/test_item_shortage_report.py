@@ -66,10 +66,14 @@ class TestItemShortageReport(ERPNextTestSuite):
 		so = make_sales_order(item_code=item, warehouse="Stores - _TC", qty=12)
 		make_material_request(item_code=item, warehouse="Stores - _TC", qty=4)
 
-		row = next(
-			row for row in item_shortage_report({"company": so.company})[1] if row.get("item_code") == item
-		)
+		columns, data = item_shortage_report({"company": so.company})[:2]
+		row = next(row for row in data if row.get("item_code") == item)
 
 		self.assertEqual(
 			(row.get("indented_qty"), row.get("reserved_qty"), row.get("projected_qty")), (4, 12, -8)
+		)
+		self.assertTrue(
+			{"indented_qty", "reserved_qty_for_sub_contract", "reserved_qty_for_production_plan"}.issubset(
+				column["fieldname"] for column in columns
+			)
 		)
