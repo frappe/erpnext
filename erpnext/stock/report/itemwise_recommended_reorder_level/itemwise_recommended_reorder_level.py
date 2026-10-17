@@ -108,11 +108,14 @@ def get_consumed_items(filters):
 	]
 
 	se = frappe.qb.DocType("Stock Entry")
+	scr = frappe.qb.DocType("Subcontracting Receipt")
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
 		.left_join(se)
 		.on(sle.voucher_no == se.name)
+		.left_join(scr)
+		.on((sle.voucher_type == "Subcontracting Receipt") & (sle.voucher_no == scr.name))
 		.select(sle.item_code, Abs(Sum(sle.actual_qty)).as_("consumed_qty"))
 		.where(
 			(sle.actual_qty < 0)
@@ -121,16 +124,11 @@ def get_consumed_items(filters):
 			& (sle.is_adjustment_entry == 0)
 			& (
 				sle.voucher_type.notin(
-					[
-						"Delivery Note",
-						"Sales Invoice",
-						"Purchase Receipt",
-						"Purchase Invoice",
-						"Subcontracting Receipt",
-					]
+					["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"]
 				)
 			)
 			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))
+			& ((scr.is_return.isnull()) | (scr.is_return == 0))
 		)
 		.groupby(sle.item_code)
 	)
