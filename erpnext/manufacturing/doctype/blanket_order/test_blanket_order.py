@@ -434,6 +434,37 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_purchase_order_row_qty(po, row, 100)
 		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 100)
 
+	def test_cancelled_receipt_frees_the_qty_of_a_closed_row(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		bo = make_two_row_purchasing_blanket_order()
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.schedule_date = today()
+		for row in po.items:
+			row.warehouse = "_Test Warehouse - _TC"
+		po.submit()
+		receipt = make_purchase_receipt(po.name)
+		receipt.items = [row for row in receipt.items if row.item_code == "_Test Item"]
+		receipt.items[0].qty = 80
+		receipt.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 80)
+
+		receipt.cancel()
+
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 0)
+
+	def test_closing_an_unbilled_receipt_row_works(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		receipt = make_purchase_receipt(item_code="_Test Item", qty=5, rate=100)
+
+		update_closed_status("Purchase Receipt", receipt.name, [receipt.items[0].name], 1)
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt Item", receipt.items[0].name, "closed"), 1)
+
 	def test_closing_every_row_closes_the_blanket_order(self):
 		bo = make_blanket_order(blanket_order_type="Selling")
 		row = bo.items[0].name

@@ -443,3 +443,29 @@ def validate_reopen_against_blanket_order(order_doc, rows=None):
 	for bo_name, item_data in sorted(order_data.items()):
 		bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 		bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
+
+
+def refresh_blanket_orders_of_fulfilled_rows(doc):
+	order_rows = {}
+	for args in doc.status_updater:
+		if args.get("target_field") not in ("delivered_qty", "received_qty"):
+			continue
+
+		if args.get("target_dt") not in ("Sales Order Item", "Purchase Order Item"):
+			continue
+
+		rows = order_rows.setdefault(args["target_dt"], set())
+		rows.update(d.get(args["join_field"]) for d in doc.get_all_children(args["source_dt"]))
+
+	for order_item_doctype, rows in order_rows.items():
+		rows.discard(None)
+		if not rows:
+			continue
+
+		for blanket_order in frappe.get_all(
+			order_item_doctype,
+			filters={"name": ("in", list(rows)), "blanket_order": ("is", "set")},
+			pluck="blanket_order",
+			distinct=True,
+		):
+			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
