@@ -143,7 +143,7 @@ def get_columns(filters, data):
 			]
 		)
 
-	if not filters.get("warehouse"):
+	if not filters.get("warehouse") or frappe.get_cached_value("Warehouse", filters.warehouse, "is_group"):
 		columns.append(
 			{
 				"label": _("Warehouse"),
