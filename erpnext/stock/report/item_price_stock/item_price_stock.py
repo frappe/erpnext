@@ -48,7 +48,21 @@ def get_columns():
 			"options": "Price List",
 			"width": 120,
 		},
-		{"label": _("Buying Rate"), "fieldname": "buying_rate", "fieldtype": "Currency", "width": 120},
+		{
+			"label": _("Buying Rate"),
+			"fieldname": "buying_rate",
+			"fieldtype": "Currency",
+			"options": "buying_currency",
+			"width": 120,
+		},
+		{
+			"label": _("Buying Currency"),
+			"fieldname": "buying_currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"width": 50,
+			"hidden": 1,
+		},
 		{
 			"label": _("Selling Price List"),
 			"fieldname": "selling_price_list",
@@ -56,7 +70,21 @@ def get_columns():
 			"options": "Price List",
 			"width": 120,
 		},
-		{"label": _("Selling Rate"), "fieldname": "selling_rate", "fieldtype": "Currency", "width": 120},
+		{
+			"label": _("Selling Rate"),
+			"fieldname": "selling_rate",
+			"fieldtype": "Currency",
+			"options": "selling_currency",
+			"width": 120,
+		},
+		{
+			"label": _("Selling Currency"),
+			"fieldname": "selling_currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"width": 50,
+			"hidden": 1,
+		},
 	]
 
 
@@ -112,17 +140,21 @@ def get_item_price_qty_data(filters):
 				"stock_available": item_dict.actual_qty or 0,
 				"buying_price_list": "",
 				"buying_rate": 0.0,
+				"buying_currency": "",
 				"selling_price_list": "",
 				"selling_rate": 0.0,
+				"selling_currency": "",
 			}
 
 			price_list = item_dict["price_list_name"]
 			if buying_price_map.get(price_list):
 				data["buying_price_list"] = buying_price_map.get(price_list)["Buying Price List"] or ""
 				data["buying_rate"] = buying_price_map.get(price_list)["Buying Rate"] or 0
+				data["buying_currency"] = buying_price_map.get(price_list)["Buying Currency"] or ""
 			if selling_price_map.get(price_list):
 				data["selling_price_list"] = selling_price_map.get(price_list)["Selling Price List"] or ""
 				data["selling_rate"] = selling_price_map.get(price_list)["Selling Rate"] or 0
+				data["selling_currency"] = selling_price_map.get(price_list)["Selling Currency"] or ""
 
 			result.append(data)
 
@@ -137,6 +169,7 @@ def get_price_map(price_list_names, buying=0, selling=0):
 
 	rate_key = "Buying Rate" if buying else "Selling Rate"
 	price_list_key = "Buying Price List" if buying else "Selling Price List"
+	currency_key = "Buying Currency" if buying else "Selling Currency"
 
 	filters = {"name": ("in", price_list_names)}
 	if buying:
@@ -145,11 +178,15 @@ def get_price_map(price_list_names, buying=0, selling=0):
 		filters["selling"] = 1
 
 	pricing_details = frappe.get_all(
-		"Item Price", fields=["name", "price_list", "price_list_rate"], filters=filters
+		"Item Price", fields=["name", "price_list", "price_list_rate", "currency"], filters=filters
 	)
 
 	for d in pricing_details:
 		name = d["name"]
-		price_map[name] = {price_list_key: d["price_list"], rate_key: d["price_list_rate"]}
+		price_map[name] = {
+			price_list_key: d["price_list"],
+			rate_key: d["price_list_rate"],
+			currency_key: d["currency"],
+		}
 
 	return price_map
