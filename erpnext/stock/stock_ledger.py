@@ -609,6 +609,7 @@ class update_entries_after:
 
 		self.new_items_found = False
 		self.reposted_dependant_item_wh = {}
+		self.recalculated_stock_entries = set()
 		self.reserved_stock = {}
 
 		self.data = frappe._dict()
@@ -1684,12 +1685,16 @@ class update_entries_after:
 
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
+		self.recalculated_stock_entries.discard(sle.voucher_no)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
 		if not self.args.get("sle_id") and not sle.dependant_sle_voucher_detail_no:
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
+		if voucher_no in self.recalculated_stock_entries:
+			return
+
 		stock_entry = frappe.get_lazy_doc("Stock Entry", voucher_no, for_update=True)
 		stock_entry.flags.via_repost = True
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
@@ -1704,6 +1709,9 @@ class update_entries_after:
 				or (update_additional_cost_rows and d.t_warehouse)
 			):
 				d.db_update()
+
+		if update_additional_cost_rows and all(d.s_warehouse for d in stock_entry.items if d.t_warehouse):
+			self.recalculated_stock_entries.add(voucher_no)
 
 	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):
 		# Update item's incoming rate on transaction

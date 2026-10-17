@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cstr, flt, now, nowdate, nowtime
 
@@ -152,35 +153,31 @@ def get_reserved_qty(item_code, warehouse):
 
 def get_indented_qty(item_code, warehouse):
 	# Ordered Qty is always maintained in stock UOM
-	inward_qty = frappe.db.sql(
-		"""
-		select sum(mr_item.stock_qty - mr_item.ordered_qty)
-		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-		where mr_item.item_code=%s and mr_item.warehouse=%s
-			and mr.material_request_type in ('Purchase', 'Manufacture', 'Customer Provided', 'Material Transfer')
-			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1
-	""",
-		(item_code, warehouse),
+	mr_item = frappe.qb.DocType("Material Request Item")
+	mr = frappe.qb.DocType("Material Request")
+	base_conditions = (
+		(mr_item.item_code == item_code)
+		& (mr_item.warehouse == warehouse)
+		& (mr_item.stock_qty > mr_item.ordered_qty)
+		& (mr.status != "Stopped")
+		& (mr.docstatus == 1)
 	)
-	inward_qty = flt(inward_qty[0][0]) if inward_qty else 0
 
-	outward_qty = frappe.db.sql(
-		"""
-		select sum(mr_item.stock_qty - mr_item.ordered_qty)
-		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-		where mr_item.item_code=%s and mr_item.warehouse=%s
-			and mr.material_request_type = 'Material Issue'
-			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1
-	""",
-		(item_code, warehouse),
+	pending_qty = mr_item.stock_qty - mr_item.ordered_qty
+	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
+	quantities = (
+		frappe.qb.from_(mr_item)
+		.inner_join(mr)
+		.on(mr_item.parent == mr.name)
+		.select(
+			Sum(Case().when(mr.material_request_type.isin(inward_types), pending_qty).else_(0)),
+			Sum(Case().when(mr.material_request_type == "Material Issue", pending_qty).else_(0)),
+		)
+		.where(base_conditions)
+		.run()
 	)
-	outward_qty = flt(outward_qty[0][0]) if outward_qty else 0
 
-	requested_qty = inward_qty - outward_qty
-
-	return requested_qty
+	return flt(quantities[0][0]) - flt(quantities[0][1]) if quantities else 0
 
 
 def get_ordered_qty(item_code, warehouse):
