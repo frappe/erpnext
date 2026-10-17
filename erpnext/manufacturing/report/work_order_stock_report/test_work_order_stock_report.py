@@ -217,6 +217,27 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 
 		self.assertEqual(held, {("RM", "WIP"): 10})
 
+	def test_rows_are_listed_by_work_order_name(self):
+		from frappe.utils import add_days, now_datetime
+
+		later, material = self.make_stocked_work_order()
+		earlier = make_wo_order_test_record(
+			item=later.production_item,
+			bom_no=later.bom_no,
+			qty=10,
+			source_warehouse=STORES,
+			planned_start_date=add_days(now_datetime(), -5),
+		)
+
+		names = [
+			row.work_order
+			for row in execute(frappe._dict())[1]
+			if row.work_order in (later.name, earlier.name)
+		]
+
+		self.assertEqual(names, sorted(names))
+		self.assertEqual(self.get_rows(earlier.name)[material].ready_to_build, "Y")
+
 	def test_closed_and_stopped_work_orders_are_left_out(self):
 		closed, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
 		frappe.get_doc(make_stock_entry(closed.name, "Material Transfer for Manufacture", 10)).submit()

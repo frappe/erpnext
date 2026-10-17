@@ -35,7 +35,7 @@ def get_item_list(wo_list, filters):
 				continue
 			out.append(get_row(wo_details, item, descriptions, stock, filters))
 
-	return out
+	return sorted(out, key=lambda row: row.work_order)
 
 
 def get_row(wo_details, item, descriptions, stock, filters):
