@@ -2345,7 +2345,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(fifo_slots.batchwise_valuation_by_batch.get(batch_no), 1)
 		self.assertEqual(slots[item_code]["total_qty"], 5.0)
 
-	def test_item_rows_count_only_permitted_warehouses(self):
+	def get_available_qty_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
 
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -2362,7 +2362,7 @@ class TestStockAgeing(ERPNextTestSuite):
 				{"doctype": "User", "email": user, "first_name": "Ageing", "send_welcome_email": 0}
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock User")
-		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
 
 		frappe.set_user(user)
 		try:
@@ -2377,7 +2377,13 @@ class TestStockAgeing(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertEqual([row[5] for row in data if row[0] == item_code], [2])
+		return [row[5] for row in data if row[0] == item_code]
+
+	def test_item_rows_count_only_permitted_warehouses(self):
+		self.assertEqual(self.get_available_qty_for_restricted_user(), [2])
+
+	def test_permission_for_another_doctype_does_not_limit_item_rows(self):
+		self.assertEqual(self.get_available_qty_for_restricted_user(applicable_for="Purchase Order"), [9])
 
 	def test_age_ranges_default_and_are_sorted(self):
 		from erpnext.stock.report.stock_ageing.stock_ageing import get_age_ranges

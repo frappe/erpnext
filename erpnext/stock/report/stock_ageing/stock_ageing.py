@@ -7,7 +7,8 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
@@ -1144,7 +1145,7 @@ class FIFOSlots:
 			)
 		)
 
-		if warehouses := get_permitted_documents("Warehouse"):
+		if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
 			sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
 		if self.filters.get("warehouse"):
