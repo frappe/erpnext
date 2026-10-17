@@ -50,9 +50,15 @@ frappe.query_reports["Warehouse wise Item Balance Age and Value"] = {
 			options: "Warehouse",
 			get_query: function () {
 				const company = frappe.query_report.get_filter_value("company");
+<<<<<<< HEAD
 				return {
 					filters: { company: company },
 				};
+=======
+				return erpnext.utils.get_link_options("Warehouse", txt, {
+					...(company && { company }),
+				});
+>>>>>>> 34c0472 (fix: bound link option results in report filters)
 			},
 		},
 		{

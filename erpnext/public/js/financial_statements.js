@@ -260,8 +260,13 @@ function get_filters() {
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
+<<<<<<< HEAD
 				return frappe.db.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
+=======
+				return erpnext.utils.get_link_options("Cost Center", txt, {
+					company: get_filter_value("company"),
+>>>>>>> 34c0472 (fix: bound link option results in report filters)
 				});
 			},
 			options: "Cost Center",
@@ -271,8 +276,13 @@ function get_filters() {
 			label: __("Project"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
+<<<<<<< HEAD
 				return frappe.db.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
+=======
+				return erpnext.utils.get_link_options("Project", txt, {
+					company: get_filter_value("company"),
+>>>>>>> 34c0472 (fix: bound link option results in report filters)
 				});
 			},
 			options: "Project",
