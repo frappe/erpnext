@@ -219,21 +219,15 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
 		self.assertEqual(next_sco.items[0].qty, 1)
 
-	def test_project_is_carried_over_from_purchase_order(self):
-		project = make_project({"project_name": "_Test SCO Project"}).name
-		po = make_subcontracted_purchase_order(project)
-
-		sco = get_mapped_subcontracting_order(source_name=po.name)
-
-		self.assertEqual(sco.project, project)
-		self.assertEqual(sco.items[0].project, project)
-
 	def test_project_cannot_differ_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name
 		other_project = make_project({"project_name": "_Test SCO Project 2"}).name
 		po = make_subcontracted_purchase_order(project)
 
 		sco = get_mapped_subcontracting_order(source_name=po.name)
+		self.assertEqual(sco.project, project)
+		self.assertEqual(sco.items[0].project, project)
+
 		sco.items[0].project = other_project
 		self.assertRaises(frappe.ValidationError, sco.save)
 

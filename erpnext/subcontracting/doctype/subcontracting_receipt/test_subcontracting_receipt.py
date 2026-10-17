@@ -57,16 +57,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		make_service_items()
 		make_bom_for_subcontracted_items()
 
-	def test_project_is_carried_over_from_subcontracting_order(self):
-		project = make_project({"project_name": "_Test SCR Project"}).name
-		po = make_subcontracted_purchase_order(project)
-		sco = get_subcontracting_order(po_name=po.name)
-
-		scr = make_subcontracting_receipt(sco.name)
-
-		self.assertEqual(scr.project, project)
-		self.assertEqual(scr.items[0].project, project)
-
 	def test_project_cannot_differ_from_subcontracting_order(self):
 		project = make_project({"project_name": "_Test SCR Project"}).name
 		other_project = make_project({"project_name": "_Test SCR Project 2"}).name
@@ -74,6 +64,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		sco = get_subcontracting_order(po_name=po.name)
 
 		scr = make_subcontracting_receipt(sco.name)
+		self.assertEqual(scr.project, project)
+		self.assertEqual(scr.items[0].project, project)
+
 		scr.items[0].project = other_project
 		self.assertRaises(frappe.ValidationError, scr.save)
 
