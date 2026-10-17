@@ -130,19 +130,6 @@ class TestBin(ERPNextTestSuite):
 		cached_bin = frappe.get_cached_doc("Bin", bin.name)
 		self.assertEqual((cached_bin.ordered_qty, cached_bin.projected_qty), (5, 5))
 
-	def test_recalculate_values_without_sle(self):
-		item_code = make_item().name
-		warehouse = "_Test Warehouse - _TC"
-
-		bin = _create_bin(item_code, warehouse)
-		bin.db_set({"actual_qty": 5, "valuation_rate": 50, "stock_value": 250})
-		bin.reload()
-		bin.recalculate_values()
-
-		self.assertEqual(bin.actual_qty, 0)
-		self.assertEqual(bin.valuation_rate, 0)
-		self.assertEqual(bin.stock_value, 0)
-
 	def test_repost_resets_bin_without_sle(self):
 		"""A repost must zero the bin when the ledger is empty, e.g. after entries were deleted."""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry

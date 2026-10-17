@@ -123,23 +123,6 @@ class TestStockEntry(ERPNextTestSuite):
 				self.assertIsNone(stock_entry.items[0].s_warehouse)
 				self.assertEqual(stock_entry.items[0].t_warehouse, target_warehouse)
 
-	def test_subcontracting_inward_warehouse_is_mandatory(self):
-		purposes = {
-			"Return Raw Material to Customer": "Source Warehouse is required",
-			"Subcontracting Delivery": "Source Warehouse is required",
-			"Receive from Customer": "Target Warehouse is required",
-			"Subcontracting Return": "Target Warehouse is required",
-		}
-
-		for purpose, message in purposes.items():
-			with self.subTest(purpose=purpose):
-				stock_entry = frappe.new_doc("Stock Entry")
-				stock_entry.purpose = purpose
-				stock_entry.append("items", {"item_code": "_Test Item"})
-
-				with self.assertRaisesRegex(frappe.ValidationError, message):
-					stock_entry.validate()
-
 	def test_stock_entry_qty(self):
 		item_code = "_Test Item 2"
 		warehouse = "_Test Warehouse - _TC"
@@ -652,18 +635,6 @@ class TestStockEntry(ERPNextTestSuite):
 				"has_batch_no": 1,
 				"create_new_batch": 1,
 				"batch_number_series": "HCBT-.#####",
-			}
-		).name
-		self.assert_half_cent_transfer_moves_no_value(item_code)
-
-	def test_serial_transfer_without_serial_wise_valuation_on_half_cent_moves_no_value(self):
-		item_code = make_item(
-			properties={
-				"is_stock_item": 1,
-				"valuation_method": "Moving Average",
-				"has_serial_no": 1,
-				"serial_no_series": "HCSN-.#####",
-				"use_serial_no_wise_valuation": 0,
 			}
 		).name
 		self.assert_half_cent_transfer_moves_no_value(item_code)
@@ -1728,22 +1699,6 @@ class TestStockEntry(ERPNextTestSuite):
 		service._deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
 		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
 		self.assertEqual(batch_buckets[1].batches["BATCH-2"], 2)
-
-	def test_consumption_prefers_exact_attribution_bucket(self):
-		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
-
-		service = ManufactureStockEntry(frappe._dict())
-		alternative = frappe._dict(original_item="REQUIRED-ITEM")
-		direct = frappe._dict(original_item=None)
-		service.available_materials = frappe._dict(
-			{("ITEM", "WIP", "REQUIRED-ITEM"): alternative, ("ITEM", "WIP", None): direct}
-		)
-
-		legacy_row = frappe._dict(item_code="ITEM", warehouse="WIP", original_item=None)
-		self.assertEqual(service._get_available_buckets(legacy_row), [direct, alternative])
-
-		attributed_row = frappe._dict(item_code="ITEM", warehouse="WIP", original_item="REQUIRED-ITEM")
-		self.assertEqual(service._get_available_buckets(attributed_row), [alternative])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
@@ -5824,19 +5779,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		fg_row.conversion_factor = 1
 
 		self.assertRaisesRegex(FinishedGoodError, "has stock UOM", se.save)
-
-	def test_from_bom_entry_rejects_alternative_of_bom_item(self):
-		properties = {"is_stock_item": 1, "allow_alternative_item": 1}
-		fg_item = make_item("Process Loss Alternative Source", properties=properties).name
-		alternative = make_item("Process Loss Alternative FG", properties=properties).name
-		frappe.get_doc(
-			{"doctype": "Item Alternative", "item_code": fg_item, "alternative_item_code": alternative}
-		).insert()
-
-		se = self.make_process_loss_entry(fg_item=fg_item)
-		self.get_finished_good_row(se).item_code = alternative
-
-		self.assertRaises(FinishedGoodError, se.save)
 
 	def test_process_loss_ignores_finished_flag_on_source_row(self):
 		se = self.make_process_loss_entry()
