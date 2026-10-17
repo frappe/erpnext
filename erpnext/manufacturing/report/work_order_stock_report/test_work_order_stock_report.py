@@ -157,6 +157,66 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 
 		self.assertEqual(self.get_rows(second.name)[material].ready_to_build, "Y")
 
+	def held_in_wip(self, work_order):
+		from erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report import (
+			get_stock_held_in_wip,
+		)
+
+		return get_stock_held_in_wip([frappe._dict(name=work_order.name)])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
+	def test_separately_consumed_stock_is_no_longer_held(self):
+		wip = "_Test Warehouse 2 - _TC"
+		wo, material = self.make_stocked_work_order(wip_warehouse=wip)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Material Consumption for Manufacture", 6)).submit()
+
+		self.assertEqual(self.held_in_wip(wo), {(material, wip): 4})
+
+	def test_returned_stock_is_no_longer_held(self):
+		from unittest.mock import patch
+
+		from erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report import (
+			get_stock_held_in_wip,
+		)
+
+		def moves(wo_list, purpose, is_return, field):
+			if purpose != "Material Transfer for Manufacture":
+				return []
+			qty, warehouse = (4, "WIP") if is_return else (10, "WIP")
+			return [frappe._dict(work_order="A", item_code="RM", warehouse=warehouse, qty=qty)]
+
+		with patch(
+			"erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report.get_work_order_stock_moves",
+			side_effect=moves,
+		):
+			held = get_stock_held_in_wip([frappe._dict(name="A")])
+
+		self.assertEqual(held, {("RM", "WIP"): 6})
+
+	def test_one_order_consumption_does_not_release_another_order_stock(self):
+		from unittest.mock import patch
+
+		from erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report import (
+			get_stock_held_in_wip,
+		)
+
+		moves = {
+			"Material Transfer for Manufacture": [
+				frappe._dict(work_order="A", item_code="RM", warehouse="WIP", qty=10)
+			],
+			"Manufacture": [frappe._dict(work_order="B", item_code="RM", warehouse="WIP", qty=10)],
+		}
+		with patch(
+			"erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report.get_work_order_stock_moves",
+			side_effect=lambda wo_list, purpose, is_return, field: moves.get(purpose, [])
+			if not is_return
+			else [],
+		):
+			held = get_stock_held_in_wip([frappe._dict(name="A"), frappe._dict(name="B")])
+
+		self.assertEqual(held, {("RM", "WIP"): 10})
+
 	def test_closed_and_stopped_work_orders_are_left_out(self):
 		closed, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
 		frappe.get_doc(make_stock_entry(closed.name, "Material Transfer for Manufacture", 10)).submit()

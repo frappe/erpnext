@@ -75,36 +75,50 @@ def set_aside_transferred_stock(wo_list, stock):
 			stock[(item_code, warehouse)] = max(stock[(item_code, warehouse)] - qty, 0.0)
 
 
+WIP_STOCK_MOVES = (
+	("Material Transfer for Manufacture", 0, "t_warehouse", 1),
+	("Material Transfer for Manufacture", 1, "s_warehouse", -1),
+	("Manufacture", None, "s_warehouse", -1),
+	("Material Consumption for Manufacture", None, "s_warehouse", -1),
+)
+
+
 def get_stock_held_in_wip(wo_list):
+	held_by_order = {}
+	for purpose, is_return, warehouse_field, sign in WIP_STOCK_MOVES:
+		for row in get_work_order_stock_moves(wo_list, purpose, is_return, warehouse_field):
+			key = (row.work_order, row.item_code, row.warehouse)
+			held_by_order[key] = held_by_order.get(key, 0.0) + sign * flt(row.qty)
+
 	held = {}
-	for purpose, warehouse_field, sign in (
-		("Material Transfer for Manufacture", "t_warehouse", 1),
-		("Manufacture", "s_warehouse", -1),
-	):
-		for row in get_work_order_stock_moves(wo_list, purpose, warehouse_field):
-			key = (row.item_code, row.warehouse)
-			held[key] = held.get(key, 0.0) + sign * flt(row.qty)
+	for (_work_order, item_code, warehouse), qty in held_by_order.items():
+		if qty > 0:
+			held[(item_code, warehouse)] = held.get((item_code, warehouse), 0.0) + qty
 
-	return {key: qty for key, qty in held.items() if qty > 0}
+	return held
 
 
-def get_work_order_stock_moves(wo_list, purpose, warehouse_field):
+def get_work_order_stock_moves(wo_list, purpose, is_return, warehouse_field):
 	se = frappe.qb.DocType("Stock Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
 	warehouse = sed[warehouse_field]
-	return (
+	query = (
 		frappe.qb.from_(sed)
 		.inner_join(se)
 		.on(se.name == sed.parent)
-		.select(sed.item_code, warehouse.as_("warehouse"), Sum(sed.transfer_qty).as_("qty"))
+		.select(se.work_order, sed.item_code, warehouse.as_("warehouse"), Sum(sed.transfer_qty).as_("qty"))
 		.where(
 			(se.docstatus == 1)
 			& (se.purpose == purpose)
 			& (se.work_order.isin([d.name for d in wo_list]))
 			& (IfNull(warehouse, "") != "")
 		)
-		.groupby(sed.item_code, warehouse)
-	).run(as_dict=True)
+		.groupby(se.work_order, sed.item_code, warehouse)
+	)
+	if is_return is not None:
+		query = query.where(IfNull(se.is_return, 0) == is_return)
+
+	return query.run(as_dict=True)
 
 
 def allocate_stock(stock, key, needed_qty):
