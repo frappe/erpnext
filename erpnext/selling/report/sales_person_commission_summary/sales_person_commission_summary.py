@@ -16,14 +16,18 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	data = []
 
+	seen_documents = set()
 	for d in entries:
+		# amount is the document total, so show it once per document to keep the total row correct
+		amount = None if d.name in seen_documents else d.base_net_amount
+		seen_documents.add(d.name)
 		data.append(
 			[
 				d.name,
 				d.customer,
 				d.territory,
 				d.posting_date,
-				d.base_net_amount,
+				amount,
 				d.sales_person,
 				d.allocated_percentage,
 				d.commission_rate,
@@ -31,10 +35,6 @@ def execute(filters=None):
 				d.incentives,
 			]
 		)
-
-	if data:
-		total_row = [""] * len(data[0])
-		data.append(total_row)
 
 	return columns, data
 
