@@ -855,6 +855,28 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual(scio.get_production_items()[0]["qty"], 2)
 
+	def test_status_api_allows_only_close_and_reopen(self):
+		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
+			update_subcontracting_inward_order_status,
+		)
+
+		so, scio = create_so_scio()
+		self.assertRaises(
+			frappe.ValidationError, update_subcontracting_inward_order_status, scio.name, "Delivered"
+		)
+		update_subcontracting_inward_order_status(scio.name, "Closed")
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Closed")
+
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+		draft = make_subcontracting_inward_order(
+			make_sales_order(is_subcontracted=1, item_list=item_list).name
+		)
+		draft.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		draft.insert()
+		self.assertRaises(
+			frappe.ValidationError, update_subcontracting_inward_order_status, draft.name, "Closed"
+		)
+
 	def test_closing_sales_order_closes_all_inward_orders(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status
 
@@ -874,6 +896,20 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		for name in scio_names:
 			self.assertEqual(frappe.db.get_value("Subcontracting Inward Order", name, "status"), "Closed")
+
+	def test_inward_order_from_closed_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": "Basic FG Item", "fg_item_qty": 5}]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.insert()
+
+		update_status("Closed", so.name)
+
+		self.assertRaises(frappe.ValidationError, make_subcontracting_inward_order, so.name)
+		self.assertRaises(frappe.ValidationError, scio.submit)
 
 	def test_delivery_mapper_qty(self):
 		so, scio = create_so_scio()
