@@ -68,7 +68,9 @@ def get_columns(filters):
 
 def get_data(filters):
 	wo = frappe.qb.DocType("Work Order")
-	query = get_work_order_query(["name as work_order", "qty", "produced_qty", "production_item", "bom_no"])
+	query = get_work_order_query(
+		["name as work_order", "qty", "produced_qty", "process_loss_qty", "production_item", "bom_no"]
+	)
 
 	if filters.get("bom_no") and not filters.get("work_order"):
 		query = query.where(wo.bom_no == filters.get("bom_no"))
@@ -83,7 +85,9 @@ def get_data(filters):
 	for d in work_orders:
 		results.append(d)
 		for data in materials.get(d.work_order, []):
-			data.required_qty = flt(data.required_qty) * flt(d.produced_qty) / flt(d.qty)
+			data.required_qty = (
+				flt(data.required_qty) * (flt(d.produced_qty) + flt(d.process_loss_qty)) / flt(d.qty)
+			)
 			results.append(data)
 
 	return results

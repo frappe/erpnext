@@ -117,6 +117,34 @@ class TestBOMVarianceReport(ERPNextTestSuite):
 			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
 			self.assertEqual(raw_material_rows[item_code].get("consumed_qty"), per_unit_qty * 2)
 
+	def test_planned_process_loss_is_not_excess_consumption(self):
+		work_order = make_wo_order_test_record(
+			item=self.production_item, qty=2, source_warehouse=self.warehouse, skip_transfer=1
+		)
+		for item_code in self.raw_materials:
+			test_stock_entry.make_stock_entry(
+				item_code=item_code, target=self.warehouse, qty=100, basic_rate=100
+			)
+		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 2))
+		for row in stock_entry.items:
+			if row.is_finished_item:
+				row.qty = 1
+		stock_entry.submit()
+		work_order.reload()
+		self.assertEqual((work_order.produced_qty, work_order.process_loss_qty), (1, 1))
+
+		data = self.run_report(work_order=work_order.name)
+
+		raw_material_rows = {
+			row.get("raw_material_code"): row for row in data if row.get("raw_material_code")
+		}
+		for item_code, per_unit_qty in self.raw_materials.items():
+			self.assertEqual(
+				raw_material_rows[item_code].get("required_qty"),
+				raw_material_rows[item_code].get("consumed_qty"),
+			)
+			self.assertEqual(raw_material_rows[item_code].get("required_qty"), per_unit_qty * 2)
+
 	def test_work_order_consuming_more_than_bom_shows_variance(self):
 		work_order = self.create_over_produced_work_order(ordered_qty=2, produced_qty=2, extra_consumption=1)
 
