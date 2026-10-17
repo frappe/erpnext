@@ -243,6 +243,17 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 		self.issue(3, batch_no=batch)
 		self.assert_snapshot_matches()
 
+	def test_ageing_columns_are_refused(self):
+		filters = frappe._dict(self.filters, show_stock_ageing_data=1)
+		with patch(LATEST_SYNC, side_effect=AssertionError("Sync opened")):
+			self.assertRaises(frappe.ValidationError, stock_balance.execute_snapshot_report, filters)
+
+	def test_requires_a_sync(self):
+		with patch(LATEST_SYNC, return_value=None):
+			self.assertRaises(
+				frappe.ValidationError, stock_balance.execute_snapshot_report, deepcopy(self.filters)
+			)
+
 
 @patch.object(live_tests, "execute", execute_from_snapshot)
 class TestStockBalanceFromSnapshot(live_tests.TestStockBalance):

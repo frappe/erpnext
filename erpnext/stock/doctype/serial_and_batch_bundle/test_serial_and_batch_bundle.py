@@ -94,6 +94,15 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
 		)
 
+	def test_submitted_bundle_rejects_number_entry(self):
+		bundle = self.make_bundle()
+		bundle.docstatus = 1
+		with self.assertRaisesRegex(frappe.ValidationError, "draft bundle"):
+			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
+		self.assertFalse(
+			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
+		)
+
 
 class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_naming_for_sabb(self):
