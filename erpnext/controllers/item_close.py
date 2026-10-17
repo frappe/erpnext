@@ -87,8 +87,8 @@ def update_closed_status(doctype: str, name: str, item_names: str | list[str], c
 	if recalculate:
 		recalculate()
 
-	if update_blanket_order := getattr(doc, "update_blanket_order", None):
-		update_blanket_order()
+	if doc.doctype in ("Sales Order", "Purchase Order"):
+		doc.update_blanket_order()
 
 	doc.reload()
 
