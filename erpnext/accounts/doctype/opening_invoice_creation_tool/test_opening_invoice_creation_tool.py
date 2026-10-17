@@ -210,6 +210,31 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 		self.assertEqual(sales_invoice_1.items[0].project, project_1.name)
 		self.assertEqual(sales_invoice_2.items[0].project, project_2.name)
 
+	def test_temporary_opening_account_needs_company_read(self):
+		from erpnext.tests.permission_test_utils import (
+			OTHER_COMPANY,
+			as_user,
+			make_company_fenced_user,
+			make_fenced_user,
+		)
+
+		company = "_Test Opening Invoice Company"
+		expected = get_temporary_opening_account(company)
+		self.assertTrue(expected)
+
+		for role in ("System Manager", "Accounts User"):
+			with as_user(
+				make_company_fenced_user(f"opening-account-{frappe.scrub(role)}@example.com", [role], company)
+			):
+				self.assertEqual(get_temporary_opening_account(company), expected)
+
+		for outsider in (
+			make_fenced_user("opening-account-outsider@example.com", []),
+			make_company_fenced_user("opening-account-fenced@example.com", ["System Manager"], OTHER_COMPANY),
+		):
+			with as_user(outsider):
+				self.assertRaises(frappe.PermissionError, get_temporary_opening_account, company)
+
 	@classmethod
 	def tearDownClass(cls):
 		disable_dimension()
