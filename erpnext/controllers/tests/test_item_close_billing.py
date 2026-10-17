@@ -139,6 +139,7 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		# nothing was billed, and writing every row off must not claim otherwise
 		self.assertEqual(note.per_billed, 0)
+		self.assertEqual(note.per_returned, 0)
 		self.assertEqual(note.status, "Closed")
 
 	def test_closed_row_is_not_mapped_to_sales_invoice(self):
@@ -157,14 +158,6 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		invoice.insert()
 		self.assertRaises(frappe.ValidationError, invoice.submit)
-
-	def test_closing_a_row_does_not_mark_it_returned(self):
-		note = self.make_delivery_note()
-
-		self.close_items(note, note.items)
-
-		self.assertEqual(note.per_returned, 0)
-		self.assertEqual(note.status, "Closed")
 
 	def test_unbilled_return_row_can_be_closed(self):
 		"""Return rows carry negative amounts and must still be closable."""

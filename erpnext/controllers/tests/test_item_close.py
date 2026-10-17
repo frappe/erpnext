@@ -55,6 +55,12 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		self.assertEqual(get_ordered_qty(self.second_item), 0)
 		self.assertEqual(get_ordered_qty(self.first_item), 10)
 
+		self.close_items(po, [po.items[1]], closed=0)
+
+		self.assertEqual(get_ordered_qty(self.second_item), 10)
+		self.assertEqual(po.per_received, 0)
+		self.assertEqual(po.status, "To Receive and Bill")
+
 	def test_closing_row_settles_receiving_percentage(self):
 		po = self.make_purchase_order()
 
@@ -71,6 +77,8 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 
 		self.assertEqual(po.per_received, 100)
 		self.assertEqual(po.status, "To Bill")
+		self.assertFalse(po.has_pending_receivable_qty())
+		self.assertFalse(make_purchase_receipt(po.name).get("items"))
 
 	def test_closing_every_row_closes_the_order(self):
 		po = self.make_purchase_order()
@@ -136,21 +144,6 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		self.assertEqual(po.per_received, 100)
 		self.assertEqual(po.status, "Closed")
 
-	def test_receipt_is_not_offered_when_the_rest_is_closed(self):
-		po = self.make_purchase_order()
-
-		receipt = make_purchase_receipt(po.name)
-		receipt.items = [item for item in receipt.items if item.item_code == self.first_item]
-		receipt.insert()
-		receipt.submit()
-
-		po.reload()
-		self.close_items(po, [po.items[1]])
-
-		self.assertEqual(po.status, "To Bill")
-		self.assertFalse(po.has_pending_receivable_qty())
-		self.assertFalse(make_purchase_receipt(po.name).get("items"))
-
 	def test_reopening_partly_closed_order_keeps_row_flags(self):
 		po = self.make_purchase_order()
 		self.close_items(po, [po.items[1]])
@@ -183,17 +176,6 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 
 		receipt.insert()
 		self.assertRaises(frappe.ValidationError, receipt.submit)
-
-	def test_reopening_a_row_restores_pending_qty(self):
-		po = self.make_purchase_order()
-		self.close_items(po, [po.items[1]])
-		self.assertEqual(get_ordered_qty(self.second_item), 0)
-
-		self.close_items(po, [po.items[1]], closed=0)
-
-		self.assertEqual(get_ordered_qty(self.second_item), 10)
-		self.assertEqual(po.per_received, 0)
-		self.assertEqual(po.status, "To Receive and Bill")
 
 	def test_amending_clears_closed_rows(self):
 		"""Frappe keeps no_copy fields when amending, so the flag must be cleared."""
