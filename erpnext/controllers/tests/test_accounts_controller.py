@@ -127,17 +127,6 @@ class TestAccountsController(ERPNextTestSuite):
 		)
 		supplier.save()
 
-	def remove_advance_accounts_from_party_master(self):
-		company = frappe.get_doc("Company", self.company)
-		company.book_advance_payments_in_separate_party_account = 0
-		company.save()
-		customer = frappe.get_doc("Customer", self.customer)
-		customer.accounts = []
-		customer.save()
-		supplier = frappe.get_doc("Supplier", self.supplier)
-		supplier.accounts = []
-		supplier.save()
-
 	def create_sales_invoice(
 		self,
 		qty=1,
@@ -1950,8 +1939,6 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(len(exc_je_for_si), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
 
-		self.remove_advance_accounts_from_party_master()
-
 	def test_71_advance_payment_against_purchase_invoice_in_foreign_currency(self):
 		"""
 		Supplier advance booked under Asset
@@ -2018,8 +2005,6 @@ class TestAccountsController(ERPNextTestSuite):
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
 		self.assertEqual(len(exc_je_for_pi), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
-
-		self.remove_advance_accounts_from_party_master()
 
 	def test_difference_posting_date_in_pi_and_si(self):
 		self.setup_advance_accounts_in_party_master()
