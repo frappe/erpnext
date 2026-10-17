@@ -69,9 +69,81 @@ class TestItemGroup(ERPNextTestSuite):
 		group_b.parent_item_group = "All Item Groups"
 		group_b.save()
 
+	def test_duplicate_company_defaults(self):
+		group = frappe.get_doc("Item Group", "_Test Item Group")
+		group.set("item_group_defaults", [])
+		for _ in range(2):
+			group.append(
+				"item_group_defaults",
+				{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"},
+			)
+		with self.assertRaisesRegex(frappe.ValidationError, "multiple Item Defaults"):
+			group.save()
+
+	def test_company_resolved_defaults_require_company_read(self):
+		from erpnext.setup.doctype.item_group.item_group import get_company_resolved_defaults
+
+		user = frappe.get_doc(
+			doctype="User",
+			email="item-group-reader@example.com",
+			first_name="Item Group Reader",
+			user_type="Website User",
+			send_welcome_email=0,
+		).insert()
+		for username in ("Guest", user.name):
+			with self.subTest(user=username), self.set_user(username):
+				with self.assertRaises(frappe.PermissionError):
+					get_company_resolved_defaults("_Test Company")
+
+		defaults = get_company_resolved_defaults("_Test Company")
+		self.assertEqual(
+			defaults["income_account"],
+			frappe.get_cached_value("Company", "_Test Company", "default_income_account"),
+		)
+		self.assertEqual(get_company_resolved_defaults(""), {})
+
 	def test_rebuild_tree(self):
 		rebuild_tree("Item Group")
 		self.test_basic_tree()
+
+	def test_group_defaults_copy_all_populated_fields(self):
+		group = frappe.get_doc("Item Group", "_Test Item Group")
+		group.set(
+			"item_group_defaults",
+			[
+				{
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"default_discount_account": "_Test Account Sales - _TC",
+					"deferred_revenue_account": "_Test Account Sales - _TC",
+				}
+			],
+		)
+		group.set("taxes", [{"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"}])
+		group.save()
+		item = frappe.get_doc(
+			doctype="Item", item_code="_Test Copied Group Defaults", item_group=group.name, stock_uom="Nos"
+		).insert()
+		defaults = item.item_defaults[0]
+		self.assertEqual(defaults.default_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(defaults.default_discount_account, "_Test Account Sales - _TC")
+		self.assertEqual(defaults.deferred_revenue_account, "_Test Account Sales - _TC")
+		self.assertNotEqual(defaults.name, group.item_group_defaults[0].name)
+		self.assertEqual(item.taxes[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+
+		group.item_group_defaults[0].default_discount_account = "_Test Account Stock Expenses - _TC"
+		group.taxes[0].item_tax_template = "_Test Account Excise Duty @ 12 - _TC"
+		group.save()
+		item.save()
+		self.assertEqual(item.item_defaults[0].default_discount_account, "_Test Account Sales - _TC")
+		self.assertEqual(item.taxes[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+		new_item = frappe.get_doc(
+			doctype="Item", item_code="_Test Updated Group Defaults", item_group=group.name, stock_uom="Nos"
+		).insert()
+		self.assertEqual(
+			new_item.item_defaults[0].default_discount_account, "_Test Account Stock Expenses - _TC"
+		)
+		self.assertEqual(new_item.taxes[0].item_tax_template, "_Test Account Excise Duty @ 12 - _TC")
 
 	def test_move_group_into_another(self):
 		# before move
@@ -157,6 +229,31 @@ class TestItemGroup(ERPNextTestSuite):
 	def test_delete_group(self):
 		# cannot delete group with child, but can delete leaf
 		self.assertRaises(NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B")
+
+	def test_merge_group_into_descendant(self):
+		with self.assertRaises(NestedSetInvalidMergeError):
+			frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group B - 1", merge=True)
+		self.assertEqual(
+			frappe.db.get_value("Item Group", "_Test Item Group B - 1", "parent_item_group"),
+			"_Test Item Group B",
+		)
+		self.test_basic_tree()
+
+	def test_insert_under_leaf(self):
+		group = frappe.get_doc(
+			doctype="Item Group",
+			item_group_name="_Test Invalid Child Group",
+			parent_item_group="_Test Item Group B - 3",
+			is_group=1,
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "must be a group node"):
+			group.insert()
+
+	def test_move_under_leaf(self):
+		group = frappe.get_doc("Item Group", "_Test Item Group B - 2")
+		group.parent_item_group = "_Test Item Group B - 3"
+		with self.assertRaisesRegex(frappe.ValidationError, "must be a group node"):
+			group.save()
 
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
