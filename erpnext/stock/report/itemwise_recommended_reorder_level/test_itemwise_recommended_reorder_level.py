@@ -110,21 +110,13 @@ class TestItemwiseRecommendedReorderLevel(ERPNextTestSuite):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_rm_items,
 			get_subcontracting_order,
-			make_bom_for_subcontracted_items,
-			make_raw_materials,
-			make_service_items,
 			make_stock_in_entry,
 			make_stock_transfer_entry,
-			make_subcontracted_items,
 		)
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			make_subcontracting_receipt,
 		)
 
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
