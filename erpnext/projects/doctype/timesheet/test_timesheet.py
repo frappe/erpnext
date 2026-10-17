@@ -561,14 +561,7 @@ class TestTimesheet(FrappeTestCase):
 	def test_portal_lists_only_submitted_timesheets(self):
 		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
 
-		frappe.get_doc(
-			{
-				"doctype": "Contact",
-				"first_name": "_Test Timesheet Portal Contact",
-				"user": "Administrator",
-				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
-			}
-		).insert(ignore_permissions=True)
+		portal_user = make_portal_user("_Test Customer")
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
@@ -581,7 +574,8 @@ class TestTimesheet(FrappeTestCase):
 		draft = make_timesheet(emp, simulate=True, project=project.name, do_not_submit=True)
 		submitted = make_timesheet(emp, simulate=True, project=project.name)
 
-		names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
+		with as_user(portal_user):
+			names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
 		self.assertIn(submitted.name, names)
 		self.assertNotIn(draft.name, names)
 
@@ -641,6 +635,14 @@ class TestTimesheet(FrappeTestCase):
 
 		execute()
 		self.assertFalse(frappe.db.get_value("Timesheet", timesheet.name, "user"))
+
+
+def make_portal_user(customer):
+	user = make_fenced_user("_test_timesheet_portal_user@example.com", ["Customer"])
+	customer = frappe.get_doc("Customer", customer)
+	customer.append("portal_users", {"user": user})
+	customer.save()
+	return user
 
 
 def make_timesheet_without_employee(start, hours):

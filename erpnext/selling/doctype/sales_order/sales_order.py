@@ -1562,6 +1562,7 @@ def make_purchase_order_for_default_supplier(
 						"item_tax_template",
 						"discount_percentage",
 						"discount_amount",
+						"mapped_additional_discount_amount",
 						"pricing_rules",
 						"margin_type",
 						"margin_rate_or_amount",
@@ -1695,6 +1696,7 @@ def make_purchase_order(
 					"item_tax_template",
 					"discount_percentage",
 					"discount_amount",
+					"mapped_additional_discount_amount",
 					"supplier",
 					"pricing_rules",
 				],
@@ -1971,6 +1973,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 	"""Returns items with BOM that already do not have a linked work order"""
 	if sales_order:
 		so = frappe.get_doc("Sales Order", sales_order)
+		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
 

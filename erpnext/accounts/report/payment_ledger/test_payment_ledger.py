@@ -1,10 +1,13 @@
 import frappe
 from frappe import qb
+from frappe.permissions import add_user_permission
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.payment_ledger.payment_ledger import execute
+from erpnext.tests.permission_test_utils import make_company_fenced_user, make_fenced_user
 
 
 class TestPaymentLedger(FrappeTestCase):
@@ -61,3 +64,81 @@ class TestPaymentLedger(FrappeTestCase):
 		columns, data = execute(filters=filters)
 		outstanding = [x for x in data if x.get("against_voucher_no") == "Outstanding:"]
 		self.assertEqual(outstanding[0].get("amount"), 0)
+
+	def test_user_permission_on_company(self):
+		own = create_sales_invoice(
+			company=self.company,
+			debit_to=self.debit_to,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			income_account=self.income_account,
+			warehouse=self.warehouse,
+		)
+		other = create_sales_invoice()
+
+		user = make_company_fenced_user(
+			"test_payment_ledger_user@example.com", ["Accounts User"], self.company
+		)
+
+		with self.set_user(user):
+			columns, data = execute(filters=frappe._dict())
+
+		vouchers = [x.get("voucher_no") for x in data]
+		self.assertIn(own.name, vouchers)
+		self.assertNotIn(other.name, vouchers)
+
+	def test_user_permission_on_party(self):
+		args = dict(
+			company=self.company,
+			debit_to=self.debit_to,
+			expense_account=self.expense_account,
+			cost_center=self.cost_center,
+			income_account=self.income_account,
+			warehouse=self.warehouse,
+		)
+		own = create_sales_invoice(customer="_Test Customer", **args)
+		other = create_sales_invoice(customer="_Test Customer 1", **args)
+		partyless = make_journal_entry(
+			self.debit_to,
+			self.income_account,
+			100,
+			cost_center=self.cost_center,
+			save=False,
+			company=self.company,
+		)
+		partyless.party_not_required = 1
+		partyless.submit()
+		no_party = make_journal_entry(
+			self.debit_to,
+			self.income_account,
+			100,
+			cost_center=self.cost_center,
+			save=False,
+			company=self.company,
+		)
+		no_party.party_not_required = 1
+		no_party.accounts[0].party_type = "Customer"
+		no_party.submit()
+
+		user = make_fenced_user(
+			"test_payment_ledger_party_user@example.com", ["Accounts User"], [("Customer", "_Test Customer")]
+		)
+
+		with self.set_user(user):
+			columns, data = execute(filters=frappe._dict())
+
+		vouchers = [x.get("voucher_no") for x in data]
+		self.assertIn(own.name, vouchers)
+		self.assertNotIn(other.name, vouchers)
+		self.assertIn(partyless.name, vouchers)
+		self.assertIn(no_party.name, vouchers)
+
+		scoped = make_fenced_user("test_payment_ledger_scoped_user@example.com", ["Accounts User"])
+		add_user_permission("Customer", "_Test Customer", scoped, applicable_for="Payment Ledger Entry")
+
+		with self.set_user(scoped):
+			columns, data = execute(filters=frappe._dict())
+
+		vouchers = [x.get("voucher_no") for x in data]
+		self.assertIn(own.name, vouchers)
+		self.assertNotIn(other.name, vouchers)
