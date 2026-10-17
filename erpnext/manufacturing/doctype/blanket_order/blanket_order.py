@@ -462,10 +462,11 @@ def refresh_blanket_orders_of_fulfilled_rows(doc):
 		if not rows:
 			continue
 
-		for blanket_order in frappe.get_all(
+		blanket_orders = frappe.get_all(
 			order_item_doctype,
 			filters={"name": ("in", list(rows)), "blanket_order": ("is", "set")},
 			pluck="blanket_order",
 			distinct=True,
-		):
-			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
+		)
+		for blanket_order in sorted(blanket_orders):
+			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
