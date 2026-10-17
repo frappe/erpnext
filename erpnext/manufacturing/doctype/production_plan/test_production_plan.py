@@ -2299,31 +2299,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(flt(bin_details["actual_qty"]), 7.0)
 		self.assertEqual(flt(bin_details["projected_qty"]), 7.0)
 
-	def test_group_raw_material_warehouse_transfers_from_child_warehouses(self):
-		"Material is transferred only from actual child warehouses, never the group node."
-		data = self._setup_group_rm_warehouse()
-
-		plan = create_production_plan(
-			item_code=data.fg_item,
-			planned_qty=10,
-			ignore_existing_ordered_qty=1,
-			for_warehouse=data.for_wh,
-			raw_material_group_warehouse=data.group_warehouse,
-			do_not_save=1,
-			skip_getting_mr_items=1,
-		)
-		mr_items = get_items_for_material_requests(
-			plan.as_dict(), warehouses=[{"warehouse": data.group_warehouse}]
-		)
-
-		transfer_rows = [d for d in mr_items if d.get("material_request_type") == "Material Transfer"]
-		self.assertTrue(transfer_rows)
-		for row in transfer_rows:
-			self.assertIn(row.get("from_warehouse"), data.children)
-		for row in mr_items:
-			# a group warehouse must never be a Material Request target
-			self.assertNotEqual(row.get("warehouse"), data.group_warehouse)
-
 	def test_group_transfer_buys_shortage_of_for_warehouse(self):
 		data = self._setup_group_rm_warehouse()
 
@@ -2345,26 +2320,17 @@ class TestProductionPlan(ERPNextTestSuite):
 
 			quantities = {row.get("material_request_type"): flt(row.get("quantity")) for row in mr_items}
 			self.assertEqual(quantities, {"Material Transfer": 4, "Purchase": 3})
-
-	def test_for_warehouse_must_be_child_of_group(self):
-		"A For Warehouse outside the chosen group warehouse is rejected on save."
-		data = self._setup_group_rm_warehouse()
-
-		plan = create_production_plan(
-			item_code=data.fg_item,
-			planned_qty=10,
-			for_warehouse="_Test Warehouse - _TC",  # outside the group
-			raw_material_group_warehouse=data.group_warehouse,
-			do_not_save=1,
-			skip_getting_mr_items=1,
-		)
-		self.assertRaises(frappe.ValidationError, plan.save)
+			for row in mr_items:
+				self.assertNotEqual(row.get("warehouse"), data.group_warehouse)
+				if row.get("material_request_type") == "Material Transfer":
+					self.assertIn(row.get("from_warehouse"), data.children)
 
 	def test_group_warehouse_itself_or_of_another_company_is_rejected(self):
 		data = self._setup_group_rm_warehouse()
 
 		for for_warehouse, group_warehouse in (
 			(data.group_warehouse, data.group_warehouse),
+			("_Test Warehouse - _TC", data.group_warehouse),
 			(None, "All Warehouses - _TC1"),
 		):
 			plan = create_production_plan(

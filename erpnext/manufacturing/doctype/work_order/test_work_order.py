@@ -6311,6 +6311,10 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_fg_conversion_entry, wo_order.name, alt_item, 0)
 
+		with self.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 0}):
+			disabled_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
+			self.assertRaises(frappe.ValidationError, disabled_entry.insert)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
 	def test_last_fraction_of_produced_qty_can_be_converted(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry
@@ -6319,15 +6323,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 0.1)).submit()
 		frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 0.2)).submit()
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 0})
-	def test_fg_conversion_not_allowed_when_setting_is_disabled(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry
-
-		wo_order, alt_item, _ = prepare_data_for_fg_conversion_test()
-
-		conversion_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 2))
-		self.assertRaises(frappe.ValidationError, conversion_entry.insert)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
