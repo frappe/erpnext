@@ -45,7 +45,7 @@ class ReportData:
 		self.filters = filters
 		self.doctype_name = self.get_doctype()
 		self.mapped_fg_entries = {}
-		self.forward_traced = set()
+		self.forward_trace_path = set()
 
 	def validate_filters(self):
 		if not self.filters.item_code and not self.filters.batches and not self.filters.serial_nos:
@@ -418,22 +418,33 @@ class ReportData:
 
 		materials = query.run(as_dict=True)
 		for material in materials:
-			material.qty = get_material_qty(material, sabb_data.qty)
+			material.qty = get_material_qty(material, sabb_data.qty, self.get_mapped_fg_batch_qty(material))
 
 		return materials
 
+	def get_mapped_fg_batch_qty(self, material):
+		if not material.fg_batch_no or material.fg_serial_no:
+			return 0
+
+		return sum(
+			abs(flt(entry.qty))
+			for entry in self.get_mapped_fg_entries(material.reference_name, material.item_code)
+			if entry.batch_no == material.fg_batch_no and not entry.serial_no
+		)
+
 	def set_forward_data(self, value, sabb_data):
-		if value in self.forward_traced:
+		if value in self.forward_trace_path:
 			return
 
-		self.forward_traced.add(value)
-		outward_entries = self.get_sabb_entries(value)
-
-		for row in outward_entries:
-			if row.reference_doctype == "Stock Entry":
-				self.process_manufacture_or_repack_entry(row, sabb_data)
-			else:
-				self.add_direct_outward_entry(row, sabb_data)
+		self.forward_trace_path.add(value)
+		try:
+			for row in self.get_sabb_entries(value):
+				if row.reference_doctype == "Stock Entry":
+					self.process_manufacture_or_repack_entry(row, sabb_data)
+				else:
+					self.add_direct_outward_entry(row, sabb_data)
+		finally:
+			self.forward_trace_path.discard(value)
 
 	def add_direct_outward_entry(self, row, batch_details):
 		key = (row.item_code, row.reference_name, row.serial_no, row.batch_no)
@@ -753,10 +764,16 @@ class ReportData:
 		return columns
 
 
-def get_material_qty(material, fg_qty):
-	ratio = flt(fg_qty) / (flt(material.fg_completed_qty) or flt(fg_qty)) if fg_qty else 1.0
-	if material.serial_no or material.fg_serial_no or material.fg_batch_no:
+def get_material_qty(material, fg_qty, mapped_fg_qty=0):
+	if material.serial_no or material.fg_serial_no:
 		return abs(flt(material.quantity))
+
+	if material.fg_batch_no:
+		return abs(flt(material.quantity)) * (
+			flt(fg_qty) / mapped_fg_qty if fg_qty and mapped_fg_qty else 1.0
+		)
+
+	ratio = flt(fg_qty) / (flt(material.fg_completed_qty) or flt(fg_qty)) if fg_qty else 1.0
 
 	if material.batch_no:
 		return abs(flt(material.quantity)) * ratio
