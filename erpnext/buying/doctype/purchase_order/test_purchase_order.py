@@ -1307,10 +1307,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	def test_update_items_for_subcontracting_purchase_order(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_subcontracting_order,
-			make_bom_for_subcontracted_items,
-			make_raw_materials,
-			make_service_items,
-			make_subcontracted_items,
 		)
 
 		def update_items(po, qty):
@@ -1324,11 +1320,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 				trans_items,
 				po.name,
 			)
-
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 
 		service_items = [
 			{
@@ -1438,18 +1429,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
 	def test_auto_create_subcontracting_order(self):
-		from erpnext.controllers.tests.test_subcontracting_controller import (
-			make_bom_for_subcontracted_items,
-			make_raw_materials,
-			make_service_items,
-			make_subcontracted_items,
-		)
-
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
@@ -1914,18 +1893,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 0)
 
 	def test_cancelling_subcontracted_po_keeps_material_request_ordered_qty_in_fg(self):
-		from erpnext.controllers.tests.test_subcontracting_controller import (
-			make_bom_for_subcontracted_items,
-			make_raw_materials,
-			make_service_items,
-			make_subcontracted_items,
-		)
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 		material_request = make_material_request(
 			item_code="Subcontracted Item SA1", qty=10, material_request_type="Subcontracting"
 		)
@@ -2141,9 +2110,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_subcontracting_order_qty_is_limited_in_po_uom(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
-		from erpnext.controllers.tests.test_subcontracting_controller import make_service_items
 
-		make_service_items()
 		service_item = frappe.get_doc("Item", "Subcontracted Service Item 1")
 		service_item.append("uoms", {"uom": "Box", "conversion_factor": 12})
 		service_item.save()
@@ -2241,18 +2208,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 
 def create_po_for_sc_testing():
-	from erpnext.controllers.tests.test_subcontracting_controller import (
-		make_bom_for_subcontracted_items,
-		make_raw_materials,
-		make_service_items,
-		make_subcontracted_items,
-	)
-
-	make_subcontracted_items()
-	make_raw_materials()
-	make_service_items()
-	make_bom_for_subcontracted_items()
-
 	service_items = [
 		{
 			"warehouse": "_Test Warehouse - _TC",
@@ -2288,18 +2243,6 @@ def create_po_for_sc_testing():
 
 
 def create_subcontracted_po(rm_items=None, **args):
-	from erpnext.controllers.tests.test_subcontracting_controller import (
-		make_bom_for_subcontracted_items,
-		make_raw_materials,
-		make_service_items,
-		make_subcontracted_items,
-	)
-
-	make_subcontracted_items()
-	make_raw_materials()
-	make_service_items()
-	make_bom_for_subcontracted_items()
-
 	return create_purchase_order(
 		rm_items=rm_items
 		or [
