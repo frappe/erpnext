@@ -13,6 +13,9 @@ class TestItemsToBeRequested(ERPNextTestSuite):
 	def test_disabled_items_are_not_listed(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_sales_order(item_code=item, qty=3, warehouse="Stores - _TC")
+		data = execute(frappe._dict())[1]
+		self.assertIn(item, [row.get("item_code") for row in data])
+
 		frappe.db.set_value("Item", item, "disabled", 1)
 
 		data = execute(frappe._dict())[1]
