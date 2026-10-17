@@ -192,7 +192,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		items_details = create_items()
-		se = create_material_receipt(items_details, self.warehouse, qty=10)
+		create_material_receipt(items_details, self.warehouse, qty=1)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -200,7 +200,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": 80,
+					"qty": 8,
 					"uom": properties.stock_uom,
 					"rate": 100,
 				}
@@ -230,10 +230,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				self.assertEqual(sre_details.status, "Partially Reserved")
 
 			cancel_stock_reservation_entries("Sales Order", so.name)
-			se.cancel()
 
 			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
-			create_material_receipt(items_details, self.warehouse, qty=110)
+			create_material_receipt(items_details, self.warehouse, qty=10)
 			so.create_stock_reservation_entries()
 			so.load_from_db()
 
@@ -271,7 +270,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			)
 
 			for row in so.items:
-				row.qty = 80
+				row.qty = 8
 
 			so.save()
 			so.submit()
@@ -283,7 +282,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			item_wise_serial_nos = {}
 
 			for item in dn1.items:
-				item.qty = 10
+				item.qty = 1
 
 			dn1.save()
 			for row in dn1.items:
@@ -304,7 +303,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
-					item.qty = 70
+					item.qty = 7
 
 				dn2.save()
 				dn2.submit()
@@ -616,7 +615,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	)
 	def test_auto_reserve_serial_and_batch(self) -> None:
 		items_details = create_items()
-		create_material_receipt(items_details, self.warehouse, qty=100)
+		create_material_receipt(items_details, self.warehouse, qty=10)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -624,7 +623,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": 80,
+					"qty": 8,
 					"uom": properties.stock_uom,
 					"rate": 100,
 				}
@@ -944,7 +943,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": randint(11, 20),
 					"uom": properties.stock_uom,
 					"rate": randint(10, 400),
 				}
@@ -1011,7 +1010,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	)
 	def test_consider_reserved_stock_while_cancelling_an_inward_transaction(self) -> None:
 		items_details = create_items()
-		se = create_material_receipt(items_details, self.warehouse, qty=100)
+		se = create_material_receipt(items_details, self.warehouse, qty=20)
 
 		item_list = []
 		for item_code, properties in items_details.items():
@@ -1019,7 +1018,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				{
 					"item_code": item_code,
 					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
+					"qty": randint(11, 20),
 					"uom": properties.stock_uom,
 					"rate": randint(10, 400),
 				}
