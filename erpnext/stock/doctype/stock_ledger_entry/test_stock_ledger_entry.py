@@ -2248,14 +2248,9 @@ def create_purchase_receipt_entries_for_batchwise_item_valuation_test(pr_entry_l
 
 
 def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list):
-	from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
-	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
 	dns = []
 	for item, warehouse, batch_no, qty, rate in dn_entry_list:
-		so = make_sales_order(rate=rate, qty=qty, item=item, warehouse=warehouse, against_blanket_order=0)
-
-		dn = make_delivery_note(so.name)
+		dn = create_delivery_note(item=item, warehouse=warehouse, qty=qty, rate=rate, do_not_save=True)
 
 		dn.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
 			frappe._dict(
