@@ -668,19 +668,18 @@ class InvestmentTransaction(AccountsController):
 		if not release:
 			return []
 
-		# the account currency side releases its own booked balance, not the company amount at today's rate,
-		# so a full exit leaves the account at zero in both currencies
-		amount = flt(
-			investment.get_ledger_balance(fair_value_account, self.posting_date, in_account_currency=True)
-			* share,
-			self.precision("net_amount"),
-		)
+		# each account releases its share of its own booked balance in its own currency, not the company
+		# amount at today's rate, so a full exit leaves both accounts at zero in every currency
+		def booked_share(account):
+			balance = investment.get_ledger_balance(account, self.posting_date, in_account_currency=True)
+			return flt(balance * share, self.precision("net_amount"))
+
+		gain_account = investment.get_fair_value_gain_account()
+		amount, gain_amount = booked_share(fair_value_account), -booked_share(gain_account)
 		gain, loss = max(release, 0), max(-release, 0)
 		return [
 			get_gl_entry(self, fair_value_account, max(-amount, 0), max(amount, 0), loss, gain),
-			get_gl_entry(
-				self, investment.get_fair_value_gain_account(), max(amount, 0), max(-amount, 0), gain, loss
-			),
+			get_gl_entry(self, gain_account, max(gain_amount, 0), max(-gain_amount, 0), gain, loss),
 		]
 
 	def get_opening_gl_entries(self):
