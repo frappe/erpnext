@@ -406,24 +406,8 @@ class TestPickList(ERPNextTestSuite):
 		"""
 		from erpnext.stock.doctype.batch.test_batch import make_new_batch
 
-		batch_company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "Batch Company",
-				"default_currency": "INR",
-				"country": "India",
-			}
-		)
-		batch_company.insert()
-
-		batch_warehouse = frappe.get_doc(
-			{
-				"doctype": "Warehouse",
-				"warehouse_name": "Batch Warehouse",
-				"company": batch_company.name,
-			}
-		)
-		batch_warehouse.insert()
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
 
 		batch_item = frappe.db.exists("Item", "Batch Warehouse Item")
 		if not batch_item:
@@ -439,8 +423,8 @@ class TestPickList(ERPNextTestSuite):
 		make_stock_entry(
 			item_code=batch_item.name,
 			qty=5,
-			company=batch_company.name,
-			to_warehouse=batch_warehouse.name,
+			company=company,
+			to_warehouse=warehouse,
 			batch_no=batch_no.name,
 			rate=100.0,
 		)
@@ -455,7 +439,7 @@ class TestPickList(ERPNextTestSuite):
 		pick_list = frappe.get_doc(
 			{
 				"doctype": "Pick List",
-				"company": batch_company.name,
+				"company": company,
 				"purpose": "Material Transfer",
 				"locations": [
 					{
@@ -472,7 +456,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(len(pick_list.locations), 1)
 		self.assertEqual(pick_list.locations[0].qty, 5)
 		self.assertEqual(pick_list.locations[0].batch_no, batch_no.name)
-		self.assertEqual(pick_list.locations[0].warehouse, batch_warehouse.name)
+		self.assertEqual(pick_list.locations[0].warehouse, warehouse)
 
 	def test_pick_list_warehouse_validation(self):
 		"""check if the warehouse validations are triggered"""
@@ -482,24 +466,14 @@ class TestPickList(ERPNextTestSuite):
 		)
 
 		warehouse_item = create_item("Warehouse Item")
-		temp_company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "Temp Company",
-				"default_currency": "INR",
-				"country": "India",
-			}
-		).insert()
-		temp_warehouse = frappe.get_doc(
-			{"doctype": "Warehouse", "warehouse_name": "Temp Warehouse", "company": temp_company.name}
-		).insert()
+		warehouse = "Stores - TCP1"
 
-		make_stock_entry(item_code=warehouse_item.name, qty=10, rate=100.0, to_warehouse=temp_warehouse.name)
+		make_stock_entry(item_code=warehouse_item.name, qty=10, rate=100.0, to_warehouse=warehouse)
 
 		pick_list = frappe.get_doc(
 			{
 				"doctype": "Pick List",
-				"company": temp_company.name,
+				"company": "_Test Company with perpetual inventory",
 				"purpose": "Material Transfer",
 				"pick_manually": 1,
 				"locations": [
@@ -516,7 +490,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertRaises(MissingWarehouseValidationError, pick_list.insert)
 		pick_list.locations[0].warehouse = "_Test Warehouse - _TC"
 		self.assertRaises(IncorrectWarehouseValidationError, pick_list.insert)
-		pick_list.locations[0].warehouse = temp_warehouse.name
+		pick_list.locations[0].warehouse = warehouse
 		pick_list.insert()
 
 	def test_pick_list_for_batched_and_serialised_item(self):
