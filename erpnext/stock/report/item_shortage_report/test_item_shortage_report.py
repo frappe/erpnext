@@ -49,3 +49,31 @@ class TestItemShortageReport(ERPNextTestSuite):
 		report_data = item_shortage_report(filters)[1]
 		item_code_list = [row.get("item_code") for row in report_data]
 		self.assertNotIn(item, item_code_list)
+
+	def test_group_warehouse_includes_its_warehouses(self):
+		item = make_item().name
+		so = make_sales_order(item_code=item, warehouse="Stores - _TC")
+		group = frappe.db.get_value("Warehouse", "Stores - _TC", "parent_warehouse")
+
+		report_data = item_shortage_report({"company": so.company, "warehouse": [group]})[1]
+
+		self.assertIn(item, [row.get("item_code") for row in report_data])
+
+	def test_quantity_columns_add_up_to_the_projected_qty(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		so = make_sales_order(item_code=item, warehouse="Stores - _TC", qty=12)
+		make_material_request(item_code=item, warehouse="Stores - _TC", qty=4)
+
+		columns, data = item_shortage_report({"company": so.company})[:2]
+		row = next(row for row in data if row.get("item_code") == item)
+
+		self.assertEqual(
+			(row.get("indented_qty"), row.get("reserved_qty"), row.get("projected_qty")), (4, 12, -8)
+		)
+		self.assertTrue(
+			{"indented_qty", "reserved_qty_for_sub_contract", "reserved_qty_for_production_plan"}.issubset(
+				column["fieldname"] for column in columns
+			)
+		)
