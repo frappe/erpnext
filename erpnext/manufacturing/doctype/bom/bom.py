@@ -327,9 +327,9 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
+		self.update_stock_qty()
 		self.calculate_cost()
 		self.update_exploded_items(save=False)
-		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate=False, save=False)
 
 	def _validate_uoms_and_goods(self):
@@ -729,9 +729,19 @@ class BOM(WebsiteGenerator):
 
 	def _unset_default_bom(self):
 		self.db_set("is_default", 0)
-		item = frappe.get_doc("Item", self.item)
-		if item.default_bom == self.name:
-			frappe.db.set_value("Item", self.item, "default_bom", None)
+		if frappe.db.get_value("Item", self.item, "default_bom") != self.name:
+			return
+
+		next_default = frappe.db.get_value(
+			"BOM",
+			{"item": self.item, "docstatus": 1, "is_active": 1, "name": ("!=", self.name)},
+			"name",
+			order_by="creation desc",
+		)
+		if next_default:
+			frappe.db.set_value("BOM", next_default, "is_default", 1)
+
+		frappe.db.set_value("Item", self.item, "default_bom", next_default)
 
 	def clear_operations(self):
 		if not self.with_operations:
@@ -871,7 +881,19 @@ class BOM(WebsiteGenerator):
 	def set_plc_conversion_rate(self):
 		if self.rm_cost_as_per in ["Valuation Rate", "Last Purchase Rate"]:
 			self.plc_conversion_rate = 1
-		elif not self.plc_conversion_rate and self.price_list_currency:
+			return
+
+		if self.buying_price_list:
+			self.price_list_currency = frappe.get_cached_value(
+				"Price List", self.buying_price_list, "currency"
+			)
+
+		if not self.price_list_currency:
+			return
+
+		if self.price_list_currency == self.company_currency():
+			self.plc_conversion_rate = 1
+		elif flt(self.plc_conversion_rate) in (0, 1) or self.has_value_changed("buying_price_list"):
 			self.plc_conversion_rate = get_exchange_rate(
 				self.price_list_currency, self.company_currency(), args="for_buying"
 			)
@@ -1059,27 +1081,50 @@ class BOM(WebsiteGenerator):
 	def company_currency(self):
 		return erpnext.get_company_currency(self.company)
 
-	def validate_bom_links(self):
-		if not self.is_active:
-			bom_item = frappe.qb.DocType("BOM Item")
-			bom = frappe.qb.DocType("BOM")
-			act_pbom = (
-				frappe.qb.from_(bom_item)
-				.join(bom)
-				.on(bom.name == bom_item.parent)
-				.select(bom_item.parent)
-				.distinct()
-				.where(
-					(bom_item.bom_no == self.name)
-					& (bom_item.docstatus == 1)
-					& (bom_item.parenttype == "BOM")
-					& (bom.docstatus == 1)
-					& (bom.is_active == 1)
-				)
-			).run()
+	def validate_child_boms_on_reactivation(self):
+		if not self.is_active or not self.has_value_changed("is_active"):
+			return
 
-			if act_pbom and act_pbom[0][0]:
-				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+		child_boms = {row.bom_no for row in self.items + self.operations if row.get("bom_no")}
+		if not child_boms:
+			return
+
+		unusable = frappe.get_all(
+			"BOM",
+			filters={"name": ("in", list(child_boms))},
+			or_filters={"is_active": 0, "docstatus": ("!=", 1)},
+			pluck="name",
+		)
+		if unusable:
+			frappe.throw(
+				_("Cannot activate BOM {0} because sub-assembly BOMs {1} are not active").format(
+					frappe.bold(self.name), ", ".join(frappe.bold(bom) for bom in unusable)
+				)
+			)
+
+	def validate_bom_links(self):
+		self.validate_child_boms_on_reactivation()
+		if not self.is_active:
+			bom = frappe.qb.DocType("BOM")
+			for doctype in ("BOM Item", "BOM Operation"):
+				child = frappe.qb.DocType(doctype)
+				act_pbom = (
+					frappe.qb.from_(child)
+					.join(bom)
+					.on(bom.name == child.parent)
+					.select(child.parent)
+					.where(
+						(child.bom_no == self.name)
+						& (child.docstatus == 1)
+						& (child.parenttype == "BOM")
+						& (bom.docstatus == 1)
+						& (bom.is_active == 1)
+					)
+					.limit(1)
+				).run()
+
+				if act_pbom and act_pbom[0][0]:
+					frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
 	def validate_transfer_against(self):
 		if not self.with_operations:
@@ -1181,11 +1226,15 @@ class BOM(WebsiteGenerator):
 		update_hour_rate: bool = True,
 		save: bool = True,
 	):
+		if cint(save) and not self.is_new():
+			self.load_from_db()
+			self.check_permission("write")
+
 		return BOMCostingService(self).update_cost(
-			update_parent=update_parent,
+			update_parent=cint(update_parent) and cint(save),
 			from_child_bom=from_child_bom,
 			update_hour_rate=update_hour_rate,
-			save=save,
+			save=cint(save),
 		)
 
 	def update_parent_cost(self):
