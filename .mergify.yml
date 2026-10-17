@@ -79,15 +79,6 @@ pull_request_rules:
           - version-16-hotfix
         assignees:
           - "{{ author }}"
-  - name: Merge PRs tested alone
-    conditions:
-      - label=merge-alone
-      - approved-reviews-by=@erpnext-maintainers
-      - and: *pr_checks
-      - and: *suite_checks
-    actions:
-      merge:
-        method: merge
 
 queue_rules:
   - name: default
@@ -95,9 +86,13 @@ queue_rules:
     batch_max_wait_time: 15 min
     max_checks_retries: 1
     merge_method: merge
-    queue_conditions:
-      - label!=merge-alone
-      - and: *pr_checks
+    queue_conditions: *pr_checks
+    merge_conditions: *suite_checks
+  - name: alone
+    batch_size: 1
+    max_checks_retries: 1
+    merge_method: merge
+    queue_conditions: *pr_checks
     merge_conditions: *suite_checks
 
 merge_queue:
