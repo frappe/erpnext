@@ -169,9 +169,8 @@ def get_query_based_on_filters(query, batch, table, filters):
 
 		query = query.where(batch.batch_qty > 0)
 
-	else:
-		to_date = get_datetime(str(filters.to_date) + " 23:59:59")
-		query = query.where(table.posting_datetime <= to_date)
+	to_date = get_datetime(str(filters.to_date) + " 23:59:59")
+	query = query.where(table.posting_datetime <= to_date)
 
 	if filters.warehouse:
 		lft, rgt = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"])
