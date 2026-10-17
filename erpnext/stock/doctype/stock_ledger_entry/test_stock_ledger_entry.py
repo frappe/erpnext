@@ -6,7 +6,6 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import frappe
-from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import add_days, add_to_date, flt, today
 
@@ -31,10 +30,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
-	def setUp(self):
-		create_items()
-		reset("Stock Entry")
-
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_fifo_rate_survives_a_balance_below_qty_precision(self):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Third"}).insert(ignore_if_duplicate=True)
@@ -2200,23 +2195,9 @@ def create_product_bundle_item(new_item_code, packed_items):
 		item.submit()
 
 
-def create_items(items=None, uoms=None):
-	if not items:
-		items = [
-			"_Test Item for Reposting",
-			"_Test Finished Item for Reposting",
-			"_Test Subcontracted Item for Reposting",
-			"_Test Bundled Item for Reposting",
-		]
-
+def create_items(items, uoms=None):
 	for d in items:
-		properties = {"valuation_method": "FIFO"}
-		if d == "_Test Bundled Item for Reposting":
-			properties.update({"is_stock_item": 0})
-		elif d == "_Test Subcontracted Item for Reposting":
-			properties.update({"is_sub_contracted_item": 1})
-
-		make_item(d, properties=properties, uoms=uoms)
+		make_item(d, properties={"valuation_method": "FIFO"}, uoms=uoms)
 
 	return items
 

@@ -259,6 +259,28 @@ class BootStrapTestData:
 
 	def make_stock_ledger_fixtures(self):
 		self.make_unrealized_profit_loss_account()
+		self.make_reposting_items()
+
+	def make_reposting_items(self):
+		properties = {
+			"_Test Item for Reposting": {},
+			"_Test Finished Item for Reposting": {},
+			"_Test Subcontracted Item for Reposting": {"is_sub_contracted_item": 1},
+			"_Test Bundled Item for Reposting": {"is_stock_item": 0},
+		}
+		records = [
+			{
+				"doctype": "Item",
+				"item_code": item_code,
+				"item_name": item_code,
+				"description": item_code,
+				"item_group": "Products",
+				"valuation_method": "FIFO",
+				**extra,
+			}
+			for item_code, extra in properties.items()
+		]
+		self.make_records(["item_code"], records)
 
 	def make_unrealized_profit_loss_account(self):
 		company = "_Test Company with perpetual inventory"
