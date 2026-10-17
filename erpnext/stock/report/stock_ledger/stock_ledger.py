@@ -917,6 +917,9 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value, ite
 
 	if items:
 		query = query.where(sl_doctype.item_code.isin(items))
+	else:
+		permitted_items = frappe.qb.get_query("Item", fields=["name"], ignore_permissions=False)
+		query = query.where(sl_doctype.item_code.isin(permitted_items))
 
 	if warehouses := get_matching_warehouses(filters.get("warehouse")):
 		query = query.where(sl_doctype.warehouse.isin(warehouses))

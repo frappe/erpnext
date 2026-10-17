@@ -627,6 +627,47 @@ class TestStockLedgerReport(ERPNextTestSuite):
 
 		self.assertEqual(reconciliation["in_qty"], 5)
 
+	def test_project_opening_counts_only_permitted_items(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		items = [make_item(properties={"is_stock_item": 1}).name for _item in range(2)]
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": frappe.generate_hash(length=10),
+				"company": "_Test Company",
+			}
+		).insert()
+		for item, qty in zip(items, (4, 9), strict=True):
+			entry = make_stock_entry(
+				item_code=item,
+				to_warehouse=WAREHOUSE,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), -10),
+				do_not_submit=True,
+			)
+			entry.project = project.name
+			for row in entry.items:
+				row.project = project.name
+			entry.save()
+			entry.submit()
+
+		user = create_user("stock-ledger-project-item@example.com", "Stock User")
+		add_user_permission("Item", items[0], user.name)
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			project=project.name,
+		)
+		with self.set_user(user.name):
+			rows = list(execute(filters)[1])
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [4])
+
 	def test_project_opening_counts_only_permitted_warehouses(self):
 		from frappe.permissions import add_user_permission
 
