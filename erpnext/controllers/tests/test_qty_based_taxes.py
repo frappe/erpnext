@@ -11,15 +11,7 @@ def uuid4():
 
 class TestTaxes(ERPNextTestSuite):
 	def setUp(self):
-		self.company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": uuid4(),
-				"abbr": "".join(s[0] for s in uuid4().split("-")),
-				"default_currency": "USD",
-				"country": "United States",
-			}
-		).insert()
+		self.company = frappe.get_doc("Company", "_Test Company 1")
 		self.account = frappe.get_doc(
 			{
 				"doctype": "Account",

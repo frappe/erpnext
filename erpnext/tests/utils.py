@@ -179,6 +179,7 @@ class BootStrapTestData:
 		self.make_asset_category()
 		self.update_stock_settings()
 		self.make_item()
+		self.make_putaway_rule_masters()
 		self.make_product_bundle()
 		self.make_location()
 		self.make_price_list()
@@ -1103,6 +1104,48 @@ class BootStrapTestData:
 				"parent_warehouse": "All Warehouses - TCP1",
 				"account": f"{name} - TCP1",
 				"company": company,
+			}
+			for name in names
+		]
+		self.make_records(["warehouse_name", "company"], warehouses)
+
+	def make_putaway_rule_masters(self):
+		self.make_records(["uom_name"], [{"doctype": "UOM", "uom_name": "Bag"}])
+		self.make_records(
+			["item_code"],
+			[
+				{
+					"doctype": "Item",
+					"item_code": "_Rice",
+					"item_name": "_Rice",
+					"description": "_Rice",
+					"item_group": "Products",
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"stock_uom": "Kg",
+				}
+			],
+		)
+		names = ["Rack 1", "Rack 2"]
+		accounts = [
+			{
+				"doctype": "Account",
+				"account_name": name,
+				"parent_account": "Stock Assets - _TC",
+				"account_type": "Stock",
+				"company": "_Test Company",
+			}
+			for name in names
+		]
+		self.make_records(["account_name", "company"], accounts)
+		warehouses = [
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": name,
+				"parent_warehouse": "_Test Warehouse Group - _TC",
+				"account": f"{name} - _TC",
+				"company": "_Test Company",
 			}
 			for name in names
 		]
