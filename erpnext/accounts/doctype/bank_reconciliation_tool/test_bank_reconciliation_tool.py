@@ -16,6 +16,8 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	create_journal_entry_bts,
 	create_payment_entry_and_reconcile,
 	create_payment_entry_bts,
+	get_account_balance,
+	get_account_opening_balance,
 	get_auto_reconcile_message,
 	get_bank_transactions,
 	get_linked_payments,
@@ -232,6 +234,32 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		exact_matches = self.get_matching_payment_entries(transaction.name, exact_match=True)
 		self.assertEqual([m["name"] for m in exact_matches], [payment.name])
 		self.assertEqual(exact_matches[0]["paid_amount"], 1250)
+
+	def test_opening_balance_includes_uncleared_entries(self):
+		def opening():
+			return get_account_opening_balance(self.bank_account, today())
+
+		def cleared():
+			return get_account_balance(self.bank_account, today(), self.company)
+
+		opening_before, cleared_before = opening(), cleared()
+
+		# customer pays 12,700 in, a 240 bank charge goes out, neither is cleared yet
+		create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=12700,
+			save=1,
+			submit=1,
+		)
+		create_payment_entry(paid_from=self.bank, paid_amount=240, save=1, submit=1)
+
+		# the opening balance is the ledger balance, while the cleared balance ignores uncleared entries
+		self.assertEqual(opening() - opening_before, 12460)
+		self.assertEqual(cleared() - cleared_before, 0)
 
 	def test_auto_reconcile_message_for_no_matches(self):
 		message, indicator = get_auto_reconcile_message([], [])
