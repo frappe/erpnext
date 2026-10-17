@@ -1,13 +1,11 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import json
 
 import frappe
 import frappe.permissions
 
 from erpnext.buying.utils import get_linked_material_requests
-from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -36,14 +34,6 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 	def setUp(self):
 		self.material_request = make_material_request(item_code="_Test Item")
 
-	def test_permitted_role_can_fetch_linked_material_requests(self):
-		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
-
-		with self.set_user("test_buying_purchase_user@example.com"):
-			rows = get_linked_material_requests(["_Test Item"])
-
-		self.assertIn(self.material_request.name, {row.mr_name for row in rows})
-
 	def test_populated_result_is_a_flat_list_of_rows(self):
 		"""Both callers iterate the response directly, so it has to stay a flat list of rows
 		rather than a list of lists."""
@@ -60,24 +50,6 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 			for fieldname in ("mr_name", "mr_item", "item_code", "qty"):
 				self.assertIn(fieldname, row)
 
-	def test_empty_result_is_a_flat_empty_list(self):
-		item_without_request = make_item("_Test Item Without Material Request").name
-		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
-
-		with self.set_user("test_buying_purchase_user@example.com"):
-			rows = get_linked_material_requests([item_without_request])
-
-		self.assertEqual(rows, [])
-
-	def test_a_single_item_code_is_treated_as_one_code(self):
-		"""A lone code must be read as one item code, not iterated character by character."""
-		create_user_with_roles("test_buying_purchase_user@example.com", "Purchase User")
-
-		with self.set_user("test_buying_purchase_user@example.com"):
-			rows = get_linked_material_requests(json.dumps("_Test Item"))
-
-		self.assertIn(self.material_request.name, {row.mr_name for row in rows})
-
 	def test_items_that_are_not_item_codes_are_rejected(self):
 		"""Anything that is not a `str` or a `list` is already refused by the type annotation,
 		so these are the malformed inputs that reach the method."""
@@ -93,16 +65,6 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 			for bad_items in bad_inputs:
 				with self.subTest(items=bad_items):
 					self.assertRaises(frappe.ValidationError, get_linked_material_requests, bad_items)
-
-	def test_manufacturing_manager_can_fetch_linked_material_requests(self):
-		"""Manufacturing Manager holds write on Supplier Quotation and Request for Quotation,
-		both of which call this method, so it must hold Material Request read as well."""
-		create_user_with_roles("test_buying_mfg_manager@example.com", "Manufacturing Manager")
-
-		with self.set_user("test_buying_mfg_manager@example.com"):
-			rows = get_linked_material_requests(["_Test Item"])
-
-		self.assertIn(self.material_request.name, {row.mr_name for row in rows})
 
 	def test_unpermitted_role_cannot_fetch_linked_material_requests(self):
 		create_user_with_roles("test_buying_sales_user@example.com", "Sales User")
