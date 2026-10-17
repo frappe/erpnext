@@ -2422,11 +2422,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		to_warehouse = "_Test Transfer To - TCP1"
 		item_doc = create_item("Test Internal Transfer Item")
 
-		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
+		target_warehouse = "_Test Transfer Transit - TCP1"
 
 		make_purchase_receipt(
 			item_code=item_doc.name,
@@ -2509,11 +2509,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		to_warehouse = "_Test Transfer To - TCP1"
 		item_doc = create_item("Test Internal Transfer Item")
 
-		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
+		target_warehouse = "_Test Transfer Transit - TCP1"
 
 		make_purchase_receipt(
 			item_code=item_doc.name,
@@ -3775,11 +3775,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		to_warehouse = "_Test Transfer To - TCP1"
 		item_doc = create_item("Test Internal Transfer Item")
 
-		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
+		target_warehouse = "_Test Transfer Transit - TCP1"
 
 		make_purchase_invoice_for_si(
 			item_code=item_doc.name,
@@ -3958,9 +3958,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_validate_received_qty_for_internal_pr(self):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
-		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		target_warehouse = "_Test Transfer Transit - TCP1"
+		to_warehouse = "_Test Transfer To - TCP1"
 
 		# Step 1: Create Item
 		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
@@ -4034,9 +4034,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
-		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		target_warehouse = "_Test Transfer Transit - TCP1"
+		to_warehouse = "_Test Transfer To - TCP1"
 
 		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		make_stock_entry(
@@ -4109,9 +4109,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Internal From Warehouse New 1", company=company)
-		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New 1", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse New 1", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		target_warehouse = "_Test Transfer Transit - TCP1"
+		to_warehouse = "_Test Transfer To - TCP1"
 
 		# Step 2: Create Stock Entry (Material Receipt)
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -7299,8 +7299,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		item_doc = create_item("_Test Internal PR LCV Item")
 		lcv_expense_account = "Expenses Included In Valuation - TCP1"
 
-		from_warehouse = create_warehouse("_Test Internal From Warehouse LCV", company=company)
-		to_warehouse = create_warehouse("_Test Internal To Warehouse LCV", company=company)
+		from_warehouse = "_Test Transfer From - TCP1"
+		to_warehouse = "_Test Transfer Transit - TCP1"
 
 		# inward qty for internal transactions
 		make_purchase_receipt(
