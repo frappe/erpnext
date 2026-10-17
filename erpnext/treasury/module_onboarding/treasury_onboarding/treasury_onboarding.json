@@ -1,0 +1,55 @@
+{
+ "allow_roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "creation": "2026-10-15 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 1,
+ "is_complete": 0,
+ "modified": "2026-10-15 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Treasury Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "is_optional": 0,
+   "step": "Create Financial Institution"
+  },
+  {
+   "is_optional": 0,
+   "step": "Create Investment Type"
+  },
+  {
+   "is_optional": 0,
+   "step": "Set Investment Accounts"
+  },
+  {
+   "is_optional": 0,
+   "step": "Create Investment"
+  },
+  {
+   "is_optional": 0,
+   "step": "Create Investment Purchase"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Investment Interest Accrual"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Portfolio Statement"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Cash Flow Forecast"
+  }
+ ],
+ "title": "Make your first investment"
+}

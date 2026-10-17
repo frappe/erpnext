@@ -1,0 +1,20 @@
+{
+ "creation": "2026-10-07 15:28:35.489453",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "dynamic_filters_json": "{\"company\": \"frappe.defaults.get_user_default(\\\"Company\\\")\"}",
+ "filters_json": "{}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Interest Earned (This Year)",
+ "method": "erpnext.treasury.dashboard.get_interest_earned",
+ "modified": "2026-10-07 15:28:35.498886",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Interest Earned (This Year)",
+ "owner": "Administrator",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "type": "Custom"
+}

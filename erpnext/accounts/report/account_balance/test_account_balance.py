@@ -21,50 +21,19 @@ class TestAccountBalance(ERPNextTestSuite):
 
 		report = execute(filters)
 
-		expected_data = [
-			{
-				"account": "Direct Income - _TC2",
-				"currency": "EUR",
-				"balance": -100.0,
-			},
-			{
-				"account": "Exchange Gain - _TC2",
-				"currency": "EUR",
-				"balance": 0.0,
-			},
-			{
-				"account": "Income - _TC2",
-				"currency": "EUR",
-				"balance": -100.0,
-			},
-			{
-				"account": "Indirect Income - _TC2",
-				"currency": "EUR",
-				"balance": 0.0,
-			},
-			{
-				"account": "Interest Income - _TC2",
-				"currency": "EUR",
-				"balance": 0.0,
-			},
-			{
-				"account": "Interest on Fixed Deposits - _TC2",
-				"currency": "EUR",
-				"balance": 0.0,
-			},
-			{
-				"account": "Sales - _TC2",
-				"currency": "EUR",
-				"balance": -100.0,
-			},
-			{
-				"account": "Service - _TC2",
-				"currency": "EUR",
-				"balance": 0.0,
-			},
-		]
+		expected_balances = {
+			"Income - _TC2": -100.0,
+			"Direct Income - _TC2": -100.0,
+			"Sales - _TC2": -100.0,
+			"Service - _TC2": 0.0,
+			"Indirect Income - _TC2": 0.0,
+		}
+		rows = {row["account"]: row for row in report[1]}
 
-		self.assertEqual(expected_data, report[1])
+		for account, balance in expected_balances.items():
+			with self.subTest(account=account):
+				self.assertEqual(rows[account]["balance"], balance)
+				self.assertEqual(rows[account]["currency"], "EUR")
 
 	def test_income_balance_starts_at_fiscal_year(self):
 		filters = {"company": "_Test Company 2", "report_date": getdate(), "root_type": "Income"}

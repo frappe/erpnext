@@ -1,0 +1,246 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-10-07 15:58:37.382824",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "details_section",
+  "naming_series",
+  "original_investment",
+  "instrument_class",
+  "renewal_date",
+  "company",
+  "column_break_details",
+  "currency",
+  "renewal_type",
+  "new_investment",
+  "new_terms_changed",
+  "reason_for_change",
+  "amounts_section",
+  "principal_renewed",
+  "interest_renewed",
+  "column_break_amounts",
+  "total_renewed",
+  "remarks_section",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "default": "INV-RENEW-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "INV-RENEW-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "original_investment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Original Investment",
+   "options": "Investment",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "original_investment.instrument_class",
+   "fieldname": "instrument_class",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Instrument Class",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "renewal_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Renewal Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "original_investment.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "original_investment.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "renewal_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Renewal Type",
+   "options": "\nAuto Renewal\nSwitch Scheme\nReinvestment",
+   "read_only": 1
+  },
+  {
+   "description": "Draft created when this Renewal is submitted",
+   "fieldname": "new_investment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "New Investment",
+   "no_copy": 1,
+   "options": "Investment",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.new_investment",
+   "description": "Ticked when the new investment's rate, tenure or payout terms differ from the original",
+   "fieldname": "new_terms_changed",
+   "fieldtype": "Check",
+   "label": "New Terms Changed",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.new_terms_changed",
+   "description": "What changed and why, e.g. \"Bank cut the rate from 7.5% to 7.0%\". Needed before the new investment can be submitted.",
+   "fieldname": "reason_for_change",
+   "fieldtype": "Small Text",
+   "label": "Reason for Change",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "principal_renewed",
+   "fieldtype": "Currency",
+   "label": "Principal Renewed",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:in_list(['Deposit', 'Bond'], doc.instrument_class)",
+   "fieldname": "interest_renewed",
+   "fieldtype": "Currency",
+   "label": "Interest Renewed",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_amounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Principal + Interest Renewed; becomes the new investment's Approved Amount",
+   "fieldname": "total_renewed",
+   "fieldtype": "Currency",
+   "label": "Total Renewed",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Investment Renewal",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-07 15:58:37.693158",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Renewal",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "original_investment,new_investment,renewal_type",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

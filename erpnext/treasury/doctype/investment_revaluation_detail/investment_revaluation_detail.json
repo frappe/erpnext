@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "creation": "2026-10-07 15:58:35.478804",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "investment",
+  "instrument_class",
+  "investment_currency",
+  "units_held",
+  "nav_per_unit",
+  "market_price",
+  "column_break_inputs",
+  "measurement_category",
+  "conversion_rate",
+  "posts_to_ledger",
+  "values_section",
+  "book_value",
+  "market_value",
+  "previous_gain_loss",
+  "column_break_values",
+  "unrealised_gain_loss",
+  "adjustment_amount"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "description": "The investment you are valuing",
+   "fieldname": "investment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Investment",
+   "options": "Investment",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "investment.instrument_class",
+   "fieldname": "instrument_class",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Instrument Class",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "investment.currency",
+   "fieldname": "investment_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Investment Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:in_list(['Units', 'Bond'], doc.instrument_class)",
+   "description": "How many units you own on the revaluation date. Filled in for you",
+   "fieldname": "units_held",
+   "fieldtype": "Float",
+   "label": "Units Held",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.instrument_class=='Units'",
+   "description": "Today's price of one unit of the fund. Type it in",
+   "fieldname": "nav_per_unit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "NAV per Unit",
+   "options": "investment_currency"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.instrument_class=='Bond'",
+   "description": "Today's price of one bond. Type it in",
+   "fieldname": "market_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Market Price",
+   "options": "investment_currency"
+  },
+  {
+   "fieldname": "column_break_inputs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "How this investment is accounted for. It decides whether this change goes into the books",
+   "fetch_from": "investment.measurement_category",
+   "fieldname": "measurement_category",
+   "fieldtype": "Data",
+   "label": "Measurement Category",
+   "read_only": 1
+  },
+  {
+   "description": "How much one unit of the investment's currency is worth in your company's currency. It is 1 when both are the same",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9"
+  },
+  {
+   "default": "0",
+   "description": "Ticked when this row makes an entry in the books",
+   "fieldname": "posts_to_ledger",
+   "fieldtype": "Check",
+   "label": "Posts to Ledger",
+   "read_only": 1
+  },
+  {
+   "fieldname": "values_section",
+   "fieldtype": "Section Break",
+   "label": "Values"
+  },
+  {
+   "description": "What your books say this investment is worth right now",
+   "fieldname": "book_value",
+   "fieldtype": "Currency",
+   "label": "Book Value",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "description": "What it is really worth today: units x price x exchange rate",
+   "fieldname": "market_value",
+   "fieldtype": "Currency",
+   "label": "Market Value",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "description": "The unrealised gain or loss recorded the last time you valued this investment",
+   "fieldname": "previous_gain_loss",
+   "fieldtype": "Currency",
+   "label": "Previous Gain / Loss",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_values",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "description": "Market Value minus Book Value. It becomes real only when you sell",
+   "fieldname": "unrealised_gain_loss",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Unrealised Gain / Loss",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "description": "Only the change since the last valuation. This is the amount that goes into the books",
+   "fieldname": "adjustment_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Adjustment Amount",
+   "options": "currency",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-07 15:58:35.674462",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Revaluation Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

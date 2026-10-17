@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Investment Transaction",
+ "creation": "2026-10-15 12:00:00.000000",
+ "description": "Record the money going out to buy it. This moves cash from your bank into the investment.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-15 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Create Investment Purchase",
+ "owner": "Administrator",
+ "reference_document": "Investment Transaction",
+ "route_options": "{\n    \"transaction_type\": \"Purchase\"\n}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Pay for the investment",
+ "validate_action": 1
+}

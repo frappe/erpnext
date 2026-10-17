@@ -70,6 +70,11 @@ doctype_js = {
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
+	"Investment": "public/js/treasury_form.js",
+	"Investment Settings": "public/js/treasury_form.js",
+	"Investment Transaction": "public/js/treasury_form.js",
+	"Investment Interest Accrual": "public/js/treasury_form.js",
+	"Investment Revaluation": "public/js/treasury_form.js",
 }
 doctype_list_js = {
 	"Code List": [
@@ -389,6 +394,9 @@ period_closing_doctypes = [
 	"Purchase Receipt",
 	"Stock Reconciliation",
 	"Subcontracting Receipt",
+	"Investment Transaction",
+	"Investment Interest Accrual",
+	"Investment Revaluation",
 ]
 
 sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
@@ -551,6 +559,7 @@ scheduler_events = {
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.auto_update_latest_price_in_all_boms",
 		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
+		"erpnext.treasury.doctype.investment_interest_accrual.investment_interest_accrual.make_draft_accruals",
 	],
 	"weekly": [
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
@@ -652,6 +661,9 @@ accounting_dimension_doctypes = [
 	"Asset Movement Item",
 	"Asset Depreciation Schedule",
 	"Advance Taxes and Charges",
+	"Investment Transaction",
+	"Investment Interest Accrual",
+	"Investment Revaluation",
 ]
 
 subscription_doctypes = ["Sales Invoice", "Purchase Invoice", "Payment Request", "POS Invoice"]

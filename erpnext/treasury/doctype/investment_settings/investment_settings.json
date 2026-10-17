@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-10-07 15:28:33.911436",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "general_section",
+  "company",
+  "accounts_section",
+  "company_accounts"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "description": "Company shown by default everywhere in the Treasury module: dashboard, reports, lists and new documents. Leave empty to use each user's default company.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "Used for an Investment of that company whenever its own account is left empty",
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Default Ledger Accounts"
+  },
+  {
+   "fieldname": "company_accounts",
+   "fieldtype": "Table",
+   "label": "Accounts per Company",
+   "options": "Investment Default Account"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Investment Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

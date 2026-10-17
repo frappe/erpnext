@@ -32,6 +32,7 @@ def get():
 					_("Earnest Money"): {"account_category": "Other Current Assets"}
 				},
 				_("Prepaid Expenses"): {"account_category": "Other Current Assets"},
+				_("Accrued Interest Receivable"): {"account_category": "Other Current Assets"},
 				_("Short-term Investments"): {"account_category": "Short-term Investments"},
 				_("Stock Assets"): {
 					_("Stock In Hand"): {"account_type": "Stock", "account_category": "Stock Assets"},
@@ -42,7 +43,11 @@ def get():
 					"account_type": "Stock",
 					"account_category": "Stock Assets",
 				},
-				_("Tax Assets"): {"is_group": 1, "account_category": "Other Current Assets"},
+				_("Tax Assets"): {
+					_("Tax Withheld Receivable"): {"account_category": "Other Current Assets"},
+					"is_group": 1,
+					"account_category": "Other Current Assets",
+				},
 			},
 			_("Fixed Assets"): {
 				_("Capital Equipment"): {
@@ -73,7 +78,12 @@ def get():
 					"account_category": "Tangible Assets",
 				},
 			},
-			_("Investments"): {"is_group": 1, "account_category": "Long-term Investments"},
+			_("Investments"): {
+				_("Investments at Cost"): {"account_category": "Long-term Investments"},
+				_("Fair Value Adjustment"): {"account_category": "Long-term Investments"},
+				"is_group": 1,
+				"account_category": "Long-term Investments",
+			},
 			_("Temporary Accounts"): {
 				_("Temporary Opening"): {
 					"account_type": "Temporary",
@@ -139,6 +149,7 @@ def get():
 				_("Impairment"): {"account_category": "Operating Expenses"},
 				_("Tax Expense"): {"account_category": "Tax Expense"},
 				_("Exchange Loss"): {"account_category": "Operating Expenses"},
+				_("Investment Charges"): {"account_category": "Finance Costs"},
 			},
 			"root_type": "Expense",
 		},
@@ -151,6 +162,9 @@ def get():
 				_("Interest Income"): {"account_category": "Investment Income"},
 				_("Interest on Fixed Deposits"): {"account_category": "Investment Income"},
 				_("Exchange Gain"): {"account_category": "Other Operating Income"},
+				_("Dividend Income"): {"account_category": "Investment Income"},
+				_("Realised Gain/Loss on Investments"): {"account_category": "Investment Income"},
+				_("Unrealised Gain/Loss on Investments"): {"account_category": "Investment Income"},
 				"is_group": 1,
 			},
 			"root_type": "Income",

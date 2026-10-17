@@ -1,0 +1,20 @@
+{
+ "creation": "2026-10-07 15:28:35.593772",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "dynamic_filters_json": "{\"company\": \"frappe.defaults.get_user_default(\\\"Company\\\")\"}",
+ "filters_json": "{}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Realised Gain or Loss (This Year)",
+ "method": "erpnext.treasury.dashboard.get_realised_gain_loss",
+ "modified": "2026-10-07 15:28:35.599489",
+ "modified_by": "Administrator",
+ "module": "Treasury",
+ "name": "Realised Gain or Loss (This Year)",
+ "owner": "Administrator",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "type": "Custom"
+}
