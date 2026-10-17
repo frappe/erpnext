@@ -224,7 +224,9 @@ def get_stock_qty_by_item(filters):
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
 	else:
-		query = query.where(bin.warehouse.isin(get_permitted_warehouses(filters.get("bom"))))
+		query = query.where(
+			bin.warehouse.isin(get_permitted_warehouses(filters.get("top_bom") or filters.get("bom")))
+		)
 
 	return query
 
@@ -297,6 +299,7 @@ def get_bom_data(filters):
 
 def explode_phantom_boms(data, filters):
 	original_bom = filters.get("bom")
+	filters.setdefault("top_bom", original_bom)
 	replacements = []
 
 	for idx, item in enumerate(data):

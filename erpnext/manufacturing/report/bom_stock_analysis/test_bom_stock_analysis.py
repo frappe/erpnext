@@ -311,6 +311,43 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		self.assertEqual(items[material]["available_qty"], fmt_qty(10))
 		self.assertEqual(footer["description"], 10)
 
+	def test_phantom_bom_of_another_company_uses_the_top_company_stock(self):
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		component = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		other_company = "_Test Company 1"
+		phantom = make_bom(item=component, raw_materials=[material], company=other_company, do_not_save=True)
+		phantom.is_phantom_bom = 1
+		phantom.save()
+		phantom.submit()
+		top = make_bom(item=fg_item, raw_materials=[component], do_not_save=True)
+		top.items[0].bom_no = phantom.name
+		top.save()
+		top.submit()
+		create_stock_reconciliation(
+			item_code=material,
+			warehouse=create_warehouse("_Test BOM Stock Analysis Phantom Company", company=other_company),
+			company=other_company,
+			qty=50,
+			rate=10,
+		)
+
+		data = bom_stock_analysis_report(filters={"qty_to_make": 1, "bom": top.name})[1]
+
+		self.assertEqual(
+			[row.get("available_qty") for row in data if row and row.get("item") == material], [fmt_qty(0)]
+		)
+
+	def test_fractional_requirement_counts_every_unit(self):
+		from unittest.mock import patch
+
+		rows = [frappe._dict(qty_per_unit=0.1, actual_qty=1)]
+		with patch(
+			"erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis.get_bom_data",
+			return_value=rows,
+		):
+			self.assertEqual(get_producible_fg_items({})[0].producible_qty, 10)
+
 	def test_default_view_without_warehouse(self):
 		bom, material, permitted = self.build_bom_with_stock_in_many_warehouses()
 
