@@ -7,9 +7,9 @@ from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
-from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue, Order
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimension_filter_condition
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
 	apply_common_conditions,
@@ -510,11 +510,9 @@ def get_invoices(filters, additional_query_columns):
 		query = query.where(si.customer == filters.customer)
 
 	if filters.get("customer_group"):
-		customer_groups = [
-			filters.customer_group,
-			*get_descendants_of("Customer Group", filters.customer_group, ignore_permissions=True),
-		]
-		query = query.where(si.customer_group.isin(customer_groups))
+		query = query.where(
+			get_dimension_filter_condition(si.customer_group, filters.customer_group, "Customer Group")
+		)
 
 	query = get_conditions(filters, query, "Sales Invoice")
 	query = apply_common_conditions(
