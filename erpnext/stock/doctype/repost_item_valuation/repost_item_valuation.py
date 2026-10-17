@@ -649,6 +649,7 @@ def repost(doc):
 
 		doc.flags.repost_started_at = doc.get_saved_repost_started_at() or now()
 		doc.set_status("In Progress")
+		mark_closing_entries_outdated(doc.company, doc.posting_date)
 		if not frappe.in_test:
 			frappe.db.commit()
 
