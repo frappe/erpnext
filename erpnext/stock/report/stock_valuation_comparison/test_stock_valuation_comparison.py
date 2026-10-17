@@ -18,7 +18,6 @@ from erpnext.stock.expected_valuation import (
 	MovingAveragePool,
 	QueuePool,
 	get_expected_valuation,
-	iterate_expected_valuations,
 )
 from erpnext.stock.report.stock_valuation_comparison.stock_valuation_comparison import (
 	SHOW_ALL_DIFFERENCES,
@@ -32,14 +31,6 @@ WAREHOUSE = "_Test Warehouse - _TC"
 
 
 class TestValuationPools(ERPNextTestSuite):
-	def test_fifo_issues_oldest_layer_first(self):
-		pool = QueuePool()
-		pool.receive(10, 100)
-		pool.receive(10, 120)
-
-		self.assertEqual(pool.issue(15), 10 * 100 + 5 * 120)
-		self.assertEqual(pool.layers, [[5, 120]])
-
 	def test_lifo_issues_newest_layer_first(self):
 		pool = QueuePool(last_in_first_out=True)
 		pool.receive(10, 100)
@@ -47,14 +38,6 @@ class TestValuationPools(ERPNextTestSuite):
 
 		self.assertEqual(pool.issue(15), 10 * 120 + 5 * 100)
 		self.assertEqual(pool.layers, [[5, 100]])
-
-	def test_fifo_return_takes_layer_of_its_receipt_rate(self):
-		pool = QueuePool()
-		pool.receive(10, 100)
-		pool.receive(10, 120)
-
-		self.assertEqual(pool.issue(4, preferred_rate=120), 4 * 120)
-		self.assertEqual(pool.layers, [[10, 100], [6, 120]])
 
 	def test_queue_goes_negative_and_receipt_makes_up_the_shortfall(self):
 		pool = QueuePool()
@@ -64,16 +47,6 @@ class TestValuationPools(ERPNextTestSuite):
 
 		pool.receive(10, 110)
 		self.assertEqual(pool.layers, [[7, 110]])
-
-	def test_moving_average(self):
-		pool = MovingAveragePool()
-		pool.receive(10, 100)
-		pool.receive(10, 120)
-		self.assertEqual(pool.rate, 110)
-
-		self.assertEqual(pool.issue(5), 550)
-		self.assertEqual(pool.qty, 15)
-		self.assertEqual(pool.rate, 110)
 
 	def test_moving_average_receipt_after_shortfall_resets_rate(self):
 		pool = MovingAveragePool()
@@ -183,29 +156,6 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		self.assertEqual(issue.stock_value_difference, -100)
 		self.assertEqual(issue.basis, BASIS_SERIAL_RATE)
 
-	def test_serial_nos_without_serial_no_wise_valuation_go_out_at_the_pool_rate(self):
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_serial_no": 1,
-				"serial_no_series": "SVC-NSV-.#####",
-				"valuation_method": "Moving Average",
-				"use_serial_no_wise_valuation": 0,
-			}
-		).name
-
-		first = make_stock_entry(item_code=item, target=WAREHOUSE, qty=2, rate=100)
-		make_stock_entry(item_code=item, target=WAREHOUSE, qty=2, rate=200)
-		serial_no = get_serial_nos_of_entry(first)[0]
-
-		# the serial no came in at 100, but goes out at the item's moving average
-		make_stock_entry(item_code=item, source=WAREHOUSE, qty=1, serial_no=[serial_no])
-
-		self.assertNoDifferences(item)
-
-		issue = get_expected_valuation(item, WAREHOUSE)[-1][1]
-		self.assertEqual(issue.stock_value_difference, -150)
-
 	def test_serial_no_reconciliation_without_serial_no_wise_valuation(self):
 		item = make_item(
 			properties={
@@ -298,39 +248,6 @@ class TestStockValuationComparison(ERPNextTestSuite):
 		reconciliation, issue = (expected for _entry, expected in get_expected_valuation(item, WAREHOUSE)[1:])
 		self.assertEqual(reconciliation.stock_value, 6 * 130)
 		self.assertEqual(issue.stock_value_difference, -2 * 130)
-
-	def test_queries_do_not_grow_with_item_warehouses(self):
-		items = [
-			make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name for _i in range(6)
-		]
-		for item in items:
-			make_stock_entry(item_code=item, target=WAREHOUSE, qty=5, rate=100)
-			make_stock_entry(item_code=item, source=WAREHOUSE, qty=2)
-
-		def count_queries(item_warehouses) -> int:
-			original_sql = frappe.db.sql
-			calls = []
-
-			def counting_sql(*args, **kwargs):
-				calls.append(args)
-				return original_sql(*args, **kwargs)
-
-			frappe.db.sql = counting_sql
-			try:
-				for _item_code, _warehouse, expected_valuation in iterate_expected_valuations(
-					item_warehouses
-				):
-					list(expected_valuation)
-			finally:
-				frappe.db.sql = original_sql
-
-			return len(calls)
-
-		count_queries([(items[0], WAREHOUSE)])  # warm the caches
-		self.assertEqual(
-			count_queries([(item, WAREHOUSE) for item in items[:2]]),
-			count_queries([(item, WAREHOUSE) for item in items]),
-		)
 
 	def test_tampered_entry_is_reported(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name

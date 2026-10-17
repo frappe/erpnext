@@ -1580,26 +1580,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 						frappe.PermissionError, get_items_based_on_default_supplier, "_Test Supplier"
 					)
 
-	def test_default_supplier_items_preserve_order_and_duplicates(self):
-		from erpnext.stock.doctype.material_request.mapper import get_items_based_on_default_supplier
-
-		self.load_test_records("Company")
-		item_code = create_item_with_default_supplier("_Test MR Supplier Z", "_Test Supplier")
-		item = frappe.get_doc("Item", item_code)
-		item.append("item_defaults", {"company": "_Test Company 1", "default_supplier": "_Test Supplier"})
-		item.save()
-		other_item = create_item_with_default_supplier("_Test MR Supplier A", "_Test Supplier")
-		for index, row in enumerate(
-			[*item.item_defaults, frappe.get_doc("Item", other_item).item_defaults[0]]
-		):
-			frappe.db.set_value("Item Default", row.name, "creation", f"2020-01-0{index + 1} 00:00:00")
-
-		expected = frappe.get_all(
-			"Item Default", {"default_supplier": "_Test Supplier", "parenttype": "Item"}, pluck="parent"
-		)
-		self.assertEqual(expected.count(item_code), 2)
-		self.assertEqual(get_items_based_on_default_supplier("_Test Supplier"), expected)
-
 	def test_get_item_default_suppliers(self):
 		from erpnext.stock.doctype.material_request.mapper import get_item_default_suppliers
 

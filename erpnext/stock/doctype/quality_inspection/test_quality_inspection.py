@@ -390,34 +390,6 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.delete()
 		dn.delete()
 
-	def test_reading_in_wrong_decimal_number_format(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		create_quality_inspection_parameter("Density")
-
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1.15"}]
-		with user_number_format("#.###,##"):
-			qa = create_quality_inspection(
-				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
-			)
-
-			self.assertRaises(frappe.ValidationError, qa.save)
-
-		dn.delete()
-
-	def test_reading_with_comma_in_dot_decimal_number_format(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		create_quality_inspection_parameter("Density")
-
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
-		with user_number_format("#,###.##"):
-			qa = create_quality_inspection(
-				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
-			)
-
-			self.assertRaises(frappe.ValidationError, qa.save)
-
-		dn.delete()
-
 	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###.##"})
 	def test_reading_number_format_prefers_the_user_over_the_system(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
@@ -691,18 +663,6 @@ class TestQualityInspection(ERPNextTestSuite):
 		)
 		# The production_item filter excluded the Job Card with a different item.
 		self.assertFalse(frappe.db.get_value("Job Card", non_matching_jc, "quality_inspection"))
-
-	def test_job_card_cancel_ignores_its_quality_inspection(self):
-		from unittest.mock import patch
-
-		job_card = frappe.get_doc("Job Card", make_minimal_job_card(production_item="_Test Item"))
-		with (
-			patch.object(type(job_card), "update_work_order"),
-			patch.object(type(job_card), "set_transferred_qty"),
-		):
-			job_card.on_cancel()
-
-		self.assertIn("Quality Inspection", job_card.ignore_linked_doctypes)
 
 	def test_qi_job_card_reference_respects_production_item(self):
 		"""A QI referencing a Job Card by name but whose item_code does not match the

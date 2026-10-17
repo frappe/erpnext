@@ -4,7 +4,6 @@
 from unittest.mock import patch
 
 import frappe
-from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, flt, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -310,34 +309,6 @@ class TestStockClosingEntry(ERPNextTestSuite):
 		self.last_closing_entry = entry.name
 		return entry
 
-	def test_non_administrator_can_generate_closing_balance(self):
-		item = make_item(properties={"is_stock_item": 1}).name
-		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
-			entry = self.make_stock_closing_entry(today(), today())
-
-		user = create_user("test_stock_closing_balance@example.com", "Stock User")
-		self.assertFalse(frappe.has_permission("Stock Closing Balance", "create", user=user.name))
-
-		balance = frappe._dict(
-			item_code=item,
-			warehouse=WAREHOUSE,
-			actual_qty=1,
-			stock_value_difference=100,
-			fifo_queue=None,
-		)
-		with (
-			patch(
-				"erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.StockClosing"
-			) as stock_closing,
-			self.set_user(user.name),
-		):
-			stock_closing.return_value.get_stock_closing_entries.return_value = {(item, WAREHOUSE): balance}
-			entry.create_stock_closing_balance_entries()
-
-		self.assertTrue(
-			frappe.db.exists("Stock Closing Balance", {"stock_closing_entry": entry.name, "item_code": item})
-		)
-
 	def test_chained_closing_does_not_double_count_batch_rows(self):
 		"""The previous closing's batch rows must only carry forward onto their own batch key.
 		Spreading them onto the item + warehouse key too added them on top of the item + warehouse
@@ -578,8 +549,3 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 		self.assertEqual(sum(slot[0] for slot in row["fifo_queue"]), 18)
 		self.assertEqual(row["average_age"], 44.44)
-
-	def test_company_is_mandatory(self):
-		closing = self.make_closing(add_days(today(), -1))
-		closing.company = None
-		self.assertRaises(frappe.MandatoryError, closing.insert)

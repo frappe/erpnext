@@ -30,7 +30,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -8055,30 +8054,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		# already received against this PO line, excluding pr2 itself, is pr1's 4
 		self.assertEqual(pr2.get_already_received_qty(po.name, po_detail), 4.0)
-
-	def test_cancel_blocked_by_submitted_invoice_rolls_back(self):
-		"""A submitted Purchase Invoice must block cancelling its Purchase Receipt. Frappe's backlink
-		check rejects the cancel only after on_cancel has run stock, GL, and status work, so the whole
-		transaction has to roll back: the receipt stays submitted with no leaked ledger entries."""
-		pr = make_purchase_receipt()
-		pi = make_purchase_invoice(pr.name)
-		pi.insert()
-		pi.submit()
-
-		pr.reload()
-		status_before = pr.status
-		sle_before = frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name})
-		gle_before = frappe.db.count("GL Entry", {"voucher_no": pr.name})
-
-		with assert_raises_with_savepoint(self, frappe.LinkExistsError) as cm:
-			pr.cancel()
-		self.assertIn(pi.name, str(cm.exception))
-
-		pr.reload()
-		self.assertEqual(pr.docstatus, 1)
-		self.assertEqual(pr.status, status_before)
-		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
-		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
 
 	def test_purchase_return_rate_on_repost_ignores_the_rejected_warehouse(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc

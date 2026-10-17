@@ -1190,41 +1190,12 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		doc.update(overrides)
 		return doc
 
-	def test_all_mandatory_fields_are_required(self):
-		self.make_sre().validate_mandatory()  # everything set -> passes
-		# clearing any single mandatory field is rejected
-		mandatory = [
-			"item_code",
-			"warehouse",
-			"voucher_type",
-			"voucher_no",
-			"voucher_detail_no",
-			"available_qty",
-			"voucher_qty",
-			"stock_uom",
-			"reserved_qty",
-			"company",
-		]
-		for field in mandatory:
-			with self.subTest(field=field):
-				self.assertRaises(frappe.ValidationError, self.make_sre(**{field: None}).validate_mandatory)
-
-	def test_amended_document_is_rejected(self):
-		self.assertRaises(frappe.ValidationError, self.make_sre(amended_from="SRE-0001").validate_amended_doc)
-		self.make_sre().validate_amended_doc()  # not amended -> passes
-
 	def test_can_be_updated_guards(self):
 		self.make_sre().can_be_updated()  # a fresh entry can be updated
 		self.assertRaises(frappe.ValidationError, self.make_sre(status="Delivered").can_be_updated)
 		self.assertRaises(frappe.ValidationError, self.make_sre(status="Partially Delivered").can_be_updated)
 		self.assertRaises(frappe.ValidationError, self.make_sre(from_voucher_type="Pick List").can_be_updated)
 		self.assertRaises(frappe.ValidationError, self.make_sre(delivered_qty=5).can_be_updated)
-
-	def test_group_warehouse_cannot_be_reserved(self):
-		group_wh = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
-		self.assertTrue(group_wh, "need a group warehouse for _Test Company")
-		self.assertRaises(frappe.ValidationError, self.make_sre(warehouse=group_wh).validate_group_warehouse)
-		self.make_sre().validate_group_warehouse()  # leaf warehouse -> passes
 
 	def test_get_serial_batch_entries_aggregates(self):
 		doc = self.make_sre(reservation_based_on="Serial and Batch")

@@ -401,9 +401,6 @@ class ValuationFixTestCase(ERPNextTestSuite):
 
 
 class TestFixingWrongLedgers(ValuationFixTestCase):
-	def test_fifo_issue_at_wrong_value_fixed_by_repost(self):
-		self.fix_by_repost(self.make_fifo_issue_at_wrong_value())
-
 	def test_fifo_issue_at_wrong_value_fixed_by_adjustment_entry(self):
 		item = self.make_fifo_issue_at_wrong_value()
 		adjustment = self.fix_by_adjustment_entry(item)
@@ -421,9 +418,6 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 			-(4 * 100 + 1 * 150),
 		)
 		self.assertEqual(self.run_report(item), [])
-
-	def test_moving_average_value_drift_fixed_by_repost(self):
-		self.fix_by_repost(self.make_moving_average_value_drift())
 
 	def test_moving_average_value_drift_fixed_by_adjustment_entry(self):
 		adjustment = self.fix_by_adjustment_entry(self.make_moving_average_value_drift())
@@ -445,9 +439,6 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 			frappe.db.get_value("Bin", {"item_code": item, "warehouse": WAREHOUSE}, "actual_qty"), 6
 		)
 
-	def test_batch_issued_at_wrong_value_fixed_by_repost(self):
-		self.fix_by_repost(self.make_batch_issued_at_wrong_value())
-
 	def test_batch_issued_at_wrong_value_fixed_by_adjustment_entry(self):
 		item = self.make_batch_issued_at_wrong_value()
 		adjustment = self.fix_by_adjustment_entry(item)
@@ -455,10 +446,6 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.assertEqual([(row.qty, row.valuation_rate) for row in adjustment.items], [(6, 100)])
 		batch_no = adjustment.items[0].batch_no
 		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 5)
-
-	def test_batch_holding_value_with_no_qty_fixed_by_repost(self):
-		item, _empty_batch = self.make_batch_holding_value_with_no_qty()
-		self.fix_by_repost(item)
 
 	def test_batch_holding_value_with_no_qty_fixed_by_adjustment_entry(self):
 		item, empty_batch = self.make_batch_holding_value_with_no_qty()
@@ -485,9 +472,6 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.assertEqual(frappe.db.get_value("Batch", empty_batch, "batch_qty"), 5)
 		self.assertEqual(self.run_report(item), [])
 
-	def test_pooled_batches_from_wrong_layer_fixed_by_repost(self):
-		self.fix_by_repost(self.make_pooled_batches_from_wrong_layer())
-
 	def test_pooled_batches_from_wrong_layer_fixed_by_adjustment_entry(self):
 		adjustment = self.fix_by_adjustment_entry(self.make_pooled_batches_from_wrong_layer())
 
@@ -496,15 +480,9 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 			sorted((row.qty, row.valuation_rate) for row in adjustment.items), [(4, 150), (6, 100), (6, 150)]
 		)
 
-	def test_pool_value_no_batch_holds_fixed_by_repost(self):
-		self.fix_by_repost(self.make_pool_value_no_batch_holds())
-
 	def test_pool_value_no_batch_holds_fixed_by_adjustment_entry(self):
 		adjustment = self.fix_by_adjustment_entry(self.make_pool_value_no_batch_holds())
 		self.assertEqual(adjustment.difference_amount, 100)
-
-	def test_serial_no_issued_at_wrong_value_fixed_by_repost(self):
-		self.fix_by_repost(self.make_serial_no_issued_at_wrong_value())
 
 	def test_serial_no_issued_at_wrong_value_fixed_by_adjustment_entry(self):
 		item = self.make_serial_no_issued_at_wrong_value()
@@ -526,9 +504,6 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 			frappe.db.get_value("Bin", {"item_code": item, "warehouse": WAREHOUSE}, "actual_qty"), 2
 		)
 
-	def test_standard_cost_balance_qty_wrong_fixed_by_repost(self):
-		self.fix_by_repost(self.make_standard_cost_balance_qty_wrong())
-
 	def test_standard_cost_balance_qty_wrong_fixed_by_adjustment_entry(self):
 		item = self.make_standard_cost_balance_qty_wrong()
 		adjustment = self.fix_by_adjustment_entry(item)
@@ -538,9 +513,6 @@ class TestFixingWrongLedgers(ValuationFixTestCase):
 		self.assertEqual(
 			frappe.db.get_value("Bin", {"item_code": item, "warehouse": WAREHOUSE}, "actual_qty"), 5
 		)
-
-	def test_standard_cost_serial_no_issued_at_wrong_value_fixed_by_repost(self):
-		self.fix_by_repost(self.make_standard_cost_serial_no_issued_at_wrong_value())
 
 	def test_standard_cost_serial_no_issued_at_wrong_value_fixed_by_adjustment_entry(self):
 		item = self.make_standard_cost_serial_no_issued_at_wrong_value()

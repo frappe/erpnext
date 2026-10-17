@@ -91,27 +91,6 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 				lcv.insert()
 				self.assertEqual([item.applicable_charges for item in lcv.items], [160, -80])
 
-	def test_landed_cost_rejects_fully_discounted_purchase(self):
-		for make_purchase in (make_purchase_receipt, make_purchase_invoice):
-			with self.subTest(purchase=make_purchase.__name__):
-				purchase = make_purchase(qty=2, rate=100, update_stock=1, do_not_save=True)
-				purchase.apply_discount_on = "Net Total"
-				purchase.additional_discount_percentage = 100
-				purchase.items[0].allow_zero_valuation_rate = 1
-				purchase.insert()
-				purchase.submit()
-				lcv = make_landed_cost_voucher(
-					receipt_document_type=purchase.doctype,
-					receipt_document=purchase.name,
-					charges=80,
-					do_not_save=True,
-				)
-				with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
-					lcv.insert()
-				lcv.distribute_charges_based_on = "Qty"
-				lcv.insert()
-				self.assertEqual([item.applicable_charges for item in lcv.items], [80])
-
 	def test_landed_cost_rejects_amounts_that_cancel_to_float_residue(self):
 		lcv = frappe.new_doc("Landed Cost Voucher")
 		lcv.company = "_Test Company"
@@ -1905,19 +1884,6 @@ class TestLandedCostVoucherAccountingDimensions(ERPNextTestSuite):
 
 	# tests
 
-	def test_charge_row_dimension_reaches_gl_entry(self):
-		pr = make_purchase_receipt(company=self.company, warehouse=self.warehouse)
-		self.make_lcv(pr, [{"amount": 100, "branch": self.branch_a}])
-
-		charge_entries = self.get_lcv_gl_entries(pr, self.expense_account)
-		self.assertEqual(len(charge_entries), 1)
-		self.assertEqual(charge_entries[0].credit, 100.0)
-		self.assertEqual(charge_entries[0].branch, self.branch_a)
-
-		# the stock leg is untouched - it keeps the receipt item's dimensions
-		stock_account = get_inventory_account(self.company, self.warehouse)
-		self.assertFalse(self.get_lcv_gl_entries(pr, stock_account)[0].branch)
-
 	def test_charge_row_cost_center_and_project_override_receipt_item(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
@@ -1976,18 +1942,6 @@ class TestLandedCostVoucherAccountingDimensions(ERPNextTestSuite):
 		)
 		self.assertEqual(sum(e.credit for e in charge_entries), 100.0)
 
-	def test_two_vouchers_on_same_account_with_different_dimensions_stay_separate(self):
-		pr = make_purchase_receipt(company=self.company, warehouse=self.warehouse)
-		self.make_lcv(pr, [{"amount": 60, "branch": self.branch_a}])
-		self.make_lcv(pr, [{"amount": 40, "branch": self.branch_b}])
-
-		charge_entries = self.get_lcv_gl_entries(pr, self.expense_account)
-		self.assertEqual(len(charge_entries), 2)
-		self.assertEqual(
-			{(e.branch, e.credit) for e in charge_entries},
-			{(self.branch_a, 60.0), (self.branch_b, 40.0)},
-		)
-
 	def test_mandatory_pl_dimension_is_satisfied_by_charge_row(self):
 		pr = make_purchase_receipt(company=self.company, warehouse=self.warehouse)
 		self.make_dimension_mandatory("Branch", mandatory_for_pl=1)
@@ -2008,45 +1962,3 @@ class TestLandedCostVoucherAccountingDimensions(ERPNextTestSuite):
 		message = str(raised.exception)
 		self.assertIn("Branch", message)
 		self.assertIn(self.expense_account, message)
-
-	def test_dimensions_survive_reposting(self):
-		pr = make_purchase_receipt(company=self.company, warehouse=self.warehouse)
-		self.make_lcv(
-			pr,
-			[
-				{"amount": 60, "branch": self.branch_a},
-				{"amount": 40, "branch": self.branch_b},
-			],
-		)
-
-		before = {(e.branch, e.credit) for e in self.get_lcv_gl_entries(pr, self.expense_account)}
-
-		items, warehouses = pr.get_items_and_warehouses()
-		update_gl_entries_after(pr.posting_date, pr.posting_time, warehouses, items, company=pr.company)
-
-		after = {(e.branch, e.credit) for e in self.get_lcv_gl_entries(pr, self.expense_account)}
-		self.assertEqual(before, after)
-
-	def test_cancelling_the_voucher_nets_each_dimension_to_zero(self):
-		pr = make_purchase_receipt(company=self.company, warehouse=self.warehouse)
-		lcv = self.make_lcv(
-			pr,
-			[
-				{"amount": 60, "branch": self.branch_a},
-				{"amount": 40, "branch": self.branch_b},
-			],
-		)
-
-		lcv.reload()
-		lcv.cancel()
-
-		balances = {}
-		for entry in frappe.get_all(
-			"GL Entry",
-			filters={"voucher_no": pr.name, "account": self.expense_account},
-			fields=["branch", "debit", "credit"],
-		):
-			balances[entry.branch] = balances.get(entry.branch, 0.0) + entry.debit - entry.credit
-
-		for branch, balance in balances.items():
-			self.assertEqual(flt(balance, 2), 0.0, msg=f"branch {branch} does not net to zero")

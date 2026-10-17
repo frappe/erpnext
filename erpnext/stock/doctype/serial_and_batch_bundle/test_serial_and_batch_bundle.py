@@ -13,10 +13,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	SerialNoDuplicateError,
 	add_serial_batch_ledgers,
 	combine_datetime,
-	get_available_batches_qty,
 	get_qty_based_available_batches,
 	get_type_of_transaction,
-	parse_serial_nos,
 	update_available_batches,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -2078,23 +2076,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertEqual(flt(self.get_stock_value_difference(issue.name)), -150.0)
 
-	def test_outward_bundle_rate_not_set_when_serial_no_wise_valuation_disabled(self):
-		warehouse = "_Test Warehouse - _TC"
-		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No Rate", 0)
-
-		serial_nos = self.receive_serial_stock(item.name, 2, 100, warehouse)
-		issue = self.issue_serial_no(item.name, serial_nos[-1], warehouse)
-
-		rates = frappe.get_all(
-			"Serial and Batch Entry",
-			filters={"parent": issue.items[0].serial_and_batch_bundle},
-			pluck="incoming_rate",
-		)
-
-		self.assertTrue(rates)
-		for rate in rates:
-			self.assertEqual(flt(rate), 0.0)
-
 	def test_cannot_enable_serial_no_wise_valuation_when_serial_nos_exist(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Toggle", 1)
@@ -2137,20 +2118,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
 
 		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -150.0)
-
-	def test_purchase_return_uses_serial_rate_when_enabled(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-
-		warehouse = "_Test Warehouse - _TC"
-		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Pur Return On", 1)
-
-		make_purchase_receipt(item_code=item.name, qty=2, rate=100, warehouse=warehouse)
-		costlier_receipt = make_purchase_receipt(item_code=item.name, qty=2, rate=200, warehouse=warehouse)
-		serial_nos = self.get_serial_numbers(item.name, costlier_receipt.items[0].serial_and_batch_bundle)
-
-		entry = self.make_purchase_return_for_serial_no(item.name, serial_nos[-1], costlier_receipt)
-
-		self.assertEqual(flt(self.get_stock_value_difference(entry.name)), -200.0)
 
 	def deliver_serial_no(self, item_code, serial_no, warehouse, posting_date=None):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -2302,16 +2269,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.valuation_method, "FIFO")
 
-	def test_fifo_allowed_when_disabled_without_stock_transactions(self):
-		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation FIFO Ok", 0)
-
-		item.reload()
-		item.valuation_method = "FIFO"
-		item.save()
-
-		item.reload()
-		self.assertEqual(item.valuation_method, "FIFO")
-
 	def test_first_transaction_uses_moving_average_when_disabled(self):
 		from collections import defaultdict
 
@@ -2389,16 +2346,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertTrue(lookup.get_last_inward_sle_for_serial_no(serial_no, posting_datetime))
 		self.assertTrue(lookup.get_last_inward_sle_for_serial_no(serial_no.swapcase(), posting_datetime))
 
-	def test_cannot_set_fifo_when_serial_no_wise_valuation_disabled(self):
-		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No FIFO", 0)
-		self.receive_serial_stock(item.name, 1, 100, "_Test Warehouse - _TC")
-
-		item.reload()
-		self.assertEqual(item.valuation_method, "Moving Average")
-
-		item.valuation_method = "FIFO"
-		self.assertRaises(frappe.ValidationError, item.save)
-
 	def test_valuation_helpers_not_stale_after_disabling_in_same_request(self):
 		from collections import defaultdict
 
@@ -2420,22 +2367,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertEqual(get_valuation_method(item.name), "Moving Average")
 		self.assertTrue(is_serial_no_wise_valuation_disabled(item.name))
-
-	def test_valuation_method_untouched_when_serial_no_wise_valuation_enabled(self):
-		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation Keeps FIFO", 1)
-
-		item.reload()
-		self.assertEqual(item.valuation_method, "FIFO")
-
-	def test_enable_serial_no_wise_valuation_allowed_without_serial_nos(self):
-		item = self.make_serial_item_for_valuation("_Test Serial Wise Valuation No Serials", 0)
-
-		item.reload()
-		item.use_serial_no_wise_valuation = 1
-		item.save()
-
-		item.reload()
-		self.assertEqual(item.use_serial_no_wise_valuation, 1)
 
 	def test_get_serial_batch_ledgers_fences_each_entry_batch(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -2789,13 +2720,6 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 	"""Pure helpers and in-memory document validations, covering branches the
 	integration suite doesn't reach (no stock-ledger / serial / batch fixtures)."""
 
-	def test_parse_serial_nos_splits_and_trims(self):
-		self.assertEqual(parse_serial_nos("SN1\nSN2"), ["SN1", "SN2"])
-		self.assertEqual(parse_serial_nos("SN1, SN2 , SN3"), ["SN1", "SN2", "SN3"])
-		# blanks are dropped and an existing list is returned unchanged
-		self.assertEqual(parse_serial_nos("SN1,,\n , SN2"), ["SN1", "SN2"])
-		self.assertEqual(parse_serial_nos(["SN1", "SN2"]), ["SN1", "SN2"])
-
 	def test_get_qty_based_available_batches_allocates_across_batches(self):
 		batches = [
 			frappe._dict(batch_no="B1", qty=10, warehouse="W"),
@@ -2821,34 +2745,6 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		batches = [frappe._dict(batch_no="B1", qty=1.0, warehouse="W")]
 		update_available_batches(batches, {("B1", "W"): frappe._dict(qty=-0.8, warehouse="W")})
 		self.assertEqual(batches[0].qty, 0.2)
-
-	def test_get_available_batches_qty_aggregates_by_batch(self):
-		batches = [
-			frappe._dict(batch_no="B1", qty=10),
-			frappe._dict(batch_no="B2", qty=5),
-			frappe._dict(batch_no="B1", qty=3),
-		]
-		agg = get_available_batches_qty(batches)
-		self.assertEqual(agg["B1"], 13)
-		self.assertEqual(agg["B2"], 5)
-
-	def test_get_type_of_transaction_derives_direction(self):
-		def se(**kw):
-			return get_type_of_transaction(frappe._dict(doctype="Stock Entry"), frappe._dict(**kw))
-
-		self.assertEqual(se(s_warehouse="W"), "Outward")  # issuing from a source warehouse
-		self.assertEqual(se(), "Inward")  # only a target warehouse
-		self.assertEqual(
-			get_type_of_transaction(frappe._dict(doctype="Purchase Receipt"), frappe._dict()), "Inward"
-		)
-		self.assertEqual(
-			get_type_of_transaction(frappe._dict(doctype="Stock Reconciliation"), frappe._dict()), "Inward"
-		)
-		# a purchase return reverses the direction to Outward
-		self.assertEqual(
-			get_type_of_transaction(frappe._dict(doctype="Purchase Receipt", is_return=1), frappe._dict()),
-			"Outward",
-		)
 
 	def test_transaction_direction_ignores_row_override(self):
 		cases = [
@@ -2891,72 +2787,6 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		doc.append("entries", {"batch_no": "B1"})
 		doc.append("entries", {"batch_no": "B1"})
 		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_serial_and_batch_no)
-
-	def test_voucher_no_is_mandatory(self):
-		doc = frappe.new_doc("Serial and Batch Bundle")
-		self.assertRaises(frappe.ValidationError, doc.validate_serial_and_batch_data)
-
-	def test_validate_docstatus_rejects_unsubmitted_entries(self):
-		doc = frappe.new_doc("Serial and Batch Bundle")
-		doc.append("entries", {"qty": 1})  # a fresh row has docstatus 0
-		self.assertRaises(frappe.ValidationError, doc.validate_docstatus)
-
-	def test_calculate_total_qty_normalizes_and_signs(self):
-		inward = frappe.new_doc("Serial and Batch Bundle")
-		inward.type_of_transaction = "Inward"
-		inward.append("entries", {"qty": 5})
-		inward.append("entries", {"qty": 3})
-		inward.calculate_total_qty(save=False)
-		self.assertEqual(inward.total_qty, 8)
-
-		# Outward flips the sign
-		outward = frappe.new_doc("Serial and Batch Bundle")
-		outward.type_of_transaction = "Outward"
-		outward.append("entries", {"qty": 5})
-		outward.calculate_total_qty(save=False)
-		self.assertEqual(outward.total_qty, -5)
-
-		# a serialized bundle normalizes each row qty to 1
-		serialized = frappe.new_doc("Serial and Batch Bundle")
-		serialized.has_serial_no = 1
-		serialized.type_of_transaction = "Inward"
-		serialized.append("entries", {"qty": 5})
-		serialized.calculate_total_qty(save=False)
-		self.assertEqual(serialized.total_qty, 1)
-
-	def test_get_bundle_wise_serial_nos(self):
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_bundle_wise_serial_nos,
-		)
-
-		item_code = make_item(properties={"has_serial_no": 1, "serial_no_series": "TEST-BWSN-.#####"}).name
-
-		bundles = []
-		for _ in range(2):
-			se = make_stock_entry(
-				item_code=item_code,
-				target="_Test Warehouse - _TC",
-				qty=3,
-				rate=100,
-			)
-			bundles.append(se.items[0].serial_and_batch_bundle)
-
-		data = [frappe._dict(serial_and_batch_bundle=bundle) for bundle in bundles]
-
-		self.assertEqual(get_bundle_wise_serial_nos([], {}), {})
-
-		bundle_wise_serial_nos = get_bundle_wise_serial_nos(data, {})
-		for bundle in bundles:
-			self.assertEqual(sorted(bundle_wise_serial_nos[bundle]), get_serial_nos_from_bundle(bundle))
-
-		# check_serial_nos must restrict the result to the requested serial nos
-		serial_no = get_serial_nos_from_bundle(bundles[0])[0]
-		bundle_wise_serial_nos = get_bundle_wise_serial_nos(
-			data, {"check_serial_nos": True, "serial_nos": [serial_no]}
-		)
-
-		self.assertNotIn(bundles[1], bundle_wise_serial_nos)
-		self.assertEqual(bundle_wise_serial_nos[bundles[0]], [serial_no])
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}

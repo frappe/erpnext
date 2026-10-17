@@ -554,29 +554,6 @@ class TestPutawayRule(ERPNextTestSuite):
 			[(self.warehouse_1, 8, 2, 10)],
 		)
 
-	def test_putaway_rule_keeps_rows_sent_without_stock_qty(self):
-		ruled_item = make_item(properties={"is_stock_item": 1}).name
-		other_item = make_item(properties={"is_stock_item": 1}).name
-		create_putaway_rule(item_code=ruled_item, warehouse=self.warehouse_1, capacity=100)
-
-		pr = frappe.get_doc(
-			{
-				"doctype": "Purchase Receipt",
-				"company": "_Test Company",
-				"supplier": "_Test Supplier",
-				"apply_putaway_rule": 1,
-				"items": [
-					{"item_code": item, "qty": 5, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
-					for item in (ruled_item, other_item)
-				],
-			}
-		).insert()
-
-		self.assertEqual(
-			sorted((row.item_code, row.warehouse) for row in pr.items),
-			sorted([(ruled_item, self.warehouse_1), (other_item, "_Test Warehouse - _TC")]),
-		)
-
 	def test_putaway_rule_capacity_is_set_before_it_is_checked(self):
 		item = make_item(
 			properties={

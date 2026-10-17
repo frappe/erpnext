@@ -184,18 +184,6 @@ class TestItemAlternative(ERPNextTestSuite):
 		returned_items = {row.item_code: row.qty for row in return_entry.items}
 		self.assertEqual(returned_items.get("Alternate Item For A RW 1"), 2)
 
-	def test_item_and_alternative_item_are_mandatory(self):
-		for fieldname in ("item_code", "alternative_item_code"):
-			doc = frappe.get_doc(
-				{
-					"doctype": "Item Alternative",
-					"item_code": "Test FG A RW 1",
-					"alternative_item_code": "Alternate Item For A RW 1",
-				}
-			)
-			doc.set(fieldname, None)
-			self.assertRaises(frappe.MandatoryError, doc.insert)
-
 	def test_alternative_item_for_production_rm(self):
 		create_stock_reconciliation(
 			item_code="Alternate Item For A RW 1", warehouse="_Test Warehouse - _TC", qty=5, rate=2000

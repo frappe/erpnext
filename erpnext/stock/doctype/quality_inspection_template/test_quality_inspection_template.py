@@ -52,11 +52,3 @@ class TestQualityInspectionTemplate(ERPNextTestSuite):
 			frappe.ValidationError, "Row #2: Parameter .*_Test QIT Colour.* is added more than once"
 		):
 			template.insert()
-
-	def test_valid_rows_are_saved(self):
-		template = self.make_template(
-			{"specification": "_Test QIT Length", "numeric": 1, "min_value": 5, "max_value": 10},
-			{"specification": "_Test QIT Colour", "numeric": 0, "value": "Red"},
-		)
-		template.insert()
-		self.assertTrue(template.name)

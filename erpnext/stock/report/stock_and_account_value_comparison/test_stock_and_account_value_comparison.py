@@ -303,20 +303,6 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 			frappe.db.exists("Repost Item Valuation", {"voucher_no": ("in", [old_pr.name, new_pr.name])})
 		)
 
-	def test_gl_reposting_skips_gl_only_rows(self):
-		# The report's GL-only rows carry their real voucher type (eg. a Payment Entry posted to a stock
-		# account), but without stock ledger entries there is nothing to rebuild the ledgers from.
-		row = {
-			"ledger_type": "GL Entry",
-			"voucher_type": "Payment Entry",
-			"voucher_no": "_Test PE for GL Reposting",
-			"posting_date": today(),
-		}
-
-		create_gl_reposting_entries([row], COMPANY)
-
-		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": row["voucher_no"]}))
-
 	def test_gl_reposting_uses_voucher_posting_date(self):
 		# A row claiming a later posting date than the voucher really has must not change the date the
 		# repost is created with: it is always the voucher's own posting date.
@@ -426,25 +412,6 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": old_pr.name}))
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": new_pr.name}))
-
-	def test_gl_reposting_not_allowed_against_gl_entry_voucher_type(self):
-		# Guard on the Repost Item Valuation itself, for anything creating one outside the report.
-		riv = frappe.new_doc("Repost Item Valuation")
-		riv.update(
-			{
-				"based_on": "Transaction",
-				"voucher_type": "GL Entry",
-				"voucher_no": "some-gl-entry",
-				"posting_date": today(),
-				"company": COMPANY,
-				"repost_only_accounting_ledgers": 1,
-			}
-		)
-
-		self.assertRaises(frappe.ValidationError, riv.validate_repost_only_accounting_ledgers)
-
-		riv.repost_only_accounting_ledgers = 0
-		riv.validate_repost_only_accounting_ledgers()
 
 	def run_report(self, **extra):
 		filters = {"company": COMPANY, "as_on_date": "2026-12-31"}

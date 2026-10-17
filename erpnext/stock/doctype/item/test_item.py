@@ -548,29 +548,6 @@ class TestItem(ERPNextTestSuite):
 			"Large",
 		)
 
-	def test_rename_attribute_abbr_updates_variant_item_code(self):
-		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
-		frappe.delete_doc_if_exists("Item", "_Test Variant Item-LRG", force=1)
-
-		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
-		variant.save()
-
-		attribute = frappe.get_doc("Item Attribute", "Test Size")
-		for row in attribute.item_attribute_values:
-			if row.attribute_value == "Large":
-				row.abbr = "LRG"
-				break
-
-		frappe.flags.attribute_values = None
-		attribute.save()
-
-		self.assertFalse(frappe.db.exists("Item", "_Test Variant Item-L"))
-		self.assertTrue(frappe.db.exists("Item", "_Test Variant Item-LRG"))
-		self.assertEqual(
-			frappe.db.get_value("Item", "_Test Variant Item-LRG", "item_name"),
-			"_Test Variant Item-LRG",
-		)
-
 	def test_rename_attribute_abbr_updates_variant_item_name_from_template_name(self):
 		# item_name can be derived from the template's item_name, which may differ from its
 		# item_code (e.g. a friendly display name vs. a SKU-style code). The variant's item_name

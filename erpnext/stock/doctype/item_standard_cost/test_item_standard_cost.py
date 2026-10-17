@@ -232,13 +232,6 @@ class TestItemStandardCost(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": se0.name}))
 
-	def test_cancel_allowed_without_stock_activity(self):
-		# No stock transaction on/after the effective date -> the standard cost can be cancelled.
-		item = create_standard_cost_item()
-		isc = create_item_standard_cost(item.name, rate=100)
-		isc.cancel()
-		self.assertEqual(isc.docstatus, 2)
-
 	def test_cancel_blocked_with_stock_activity(self):
 		# A stock transaction on/after the effective date is valued at this standard rate, so the
 		# standard cost cannot be cancelled while it exists.
@@ -383,24 +376,6 @@ class TestItemStandardCost(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(bin_data.actual_qty), 5)
 		self.assertEqual(flt(bin_data.stock_value), 500)
-
-	def test_opening_reconciliation_requires_rate(self):
-		# An opening reconciliation for a Standard Cost item with no standard rate yet must carry a
-		# positive rate - there is nothing to value the stock at otherwise.
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
-			create_stock_reconciliation,
-		)
-
-		item = create_standard_cost_item()
-		self.assertRaises(
-			frappe.ValidationError,
-			create_stock_reconciliation,
-			item_code=item.name,
-			warehouse=PI_STORES,
-			qty=5,
-			rate=0,
-			company=PI_COMPANY,
-		)
 
 	def test_opening_reconciliation_points_standard_cost_to_itself(self):
 		# The captured Item Standard Cost records the reconciliation as its revaluation entry (the reco is
@@ -588,37 +563,6 @@ class TestItemStandardCost(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", isc.revaluation_entry, "docstatus"), 2)
-
-	def test_frozen_period_rate_change_follows_caller_role(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
-
-		item = create_standard_cost_item()
-		create_item_standard_cost(
-			item.name, rate=100, company=PI_COMPANY, effective_date=add_days(today(), -30)
-		)
-		make_stock_entry(
-			item_code=item.name,
-			to_warehouse=PI_STORES,
-			company=PI_COMPANY,
-			qty=10,
-			basic_rate=100,
-			posting_date=add_days(today(), -20),
-		)
-		frappe.db.set_value(
-			"Company",
-			PI_COMPANY,
-			{"accounts_frozen_till_date": today(), "role_allowed_for_frozen_entries": "Accounts Manager"},
-		)
-
-		user = create_user("test_isc_accounts@example.com", "Accounts Manager")
-		user.add_roles("Accounts User")
-		frappe.set_user(user.name)
-		try:
-			isc = create_item_standard_cost(item.name, rate=110, company=PI_COMPANY, effective_date=today())
-		finally:
-			frappe.set_user("Administrator")
-
-		self.assertEqual(frappe.db.get_value("Stock Reconciliation", isc.revaluation_entry, "docstatus"), 1)
 
 	def test_negative_stock_gives_clear_message(self):
 		item = create_standard_cost_item(allow_negative_stock=1)

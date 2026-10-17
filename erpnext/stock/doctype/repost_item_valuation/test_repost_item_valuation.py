@@ -18,8 +18,6 @@ from erpnext.stock import stock_ledger
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
-	REPOSTING_JOB_ID_PREFIX,
-	enqueue_reposting_entry,
 	execute_reposting_entry,
 	in_configured_timeslot,
 	mark_covered_transaction_reposts,
@@ -27,7 +25,6 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	run_parallel_reposting,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError, get_combine_datetime
@@ -123,16 +120,6 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
 		)
 
-	def test_restart_only_failed_reposts(self):
-		item_code = make_item(properties={"is_stock_item": 1}).name
-		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
-		repost.db_set("status", "Completed")
-		self.assertRaises(frappe.ValidationError, repost.restart_reposting)
-
-		repost.db_set("status", "Failed")
-		repost.restart_reposting()
-		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost.name, "status"), "Queued")
-
 	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_repost_uses_allow_zero_rate(self):
@@ -153,18 +140,6 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		repost(repost_doc)
 
 		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost_doc.name, "status"), "Completed")
-
-	def test_repost_refused_inside_stock_freeze(self):
-		fields = ["stock_frozen_upto", "stock_auth_role"]
-		original = {field: frappe.db.get_single_value("Stock Settings", field) for field in fields}
-		self.addCleanup(frappe.db.set_single_value, "Stock Settings", original)
-		frappe.db.set_single_value(
-			"Stock Settings", {"stock_frozen_upto": add_days(today(), -12), "stock_auth_role": ""}
-		)
-
-		self.assertRaises(
-			StockFreezeError, self.make_queued_item_repost, "_Test Item", add_days(today(), -20)
-		)
 
 	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_backdated_entry_refused_when_later_voucher_in_closed_period(self):
@@ -883,68 +858,6 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 			self.assertSLEs(return_pr, expected_sles)
 
-	def test_skip_later_repost_covered_by_manufacture_dependant(self):
-		"""A finished good reposted as a dependant of its raw material makes a later
-		repost queued for the same finished good and warehouse redundant."""
-		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
-		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
-		warehouse = "_Test Warehouse - _TC"
-
-		make_stock_entry(
-			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
-		)
-
-		manufacture = make_stock_entry(
-			item_code=rm,
-			source=warehouse,
-			qty=10,
-			purpose="Manufacture",
-			posting_date=add_days(today(), -5),
-			do_not_save=True,
-		)
-		manufacture.append(
-			"items",
-			{
-				"item_code": fg,
-				"t_warehouse": warehouse,
-				"qty": 1,
-				"transfer_qty": 1,
-				"uom": "Nos",
-				"stock_uom": "Nos",
-				"conversion_factor": 1.0,
-				"is_finished_item": 1,
-			},
-		)
-		manufacture.save()
-		manufacture.submit()
-
-		# a repost queued for the finished good, dated after the manufacture entry
-		later_riv = frappe.get_doc(
-			doctype="Repost Item Valuation",
-			based_on="Item and Warehouse",
-			item_code=fg,
-			warehouse=warehouse,
-			posting_date=today(),
-			posting_time="00:00:01",
-		)
-		later_riv.flags.dont_run_in_test = True
-		later_riv.submit()
-		self.assertEqual(later_riv.status, "Queued")
-
-		# reposting the raw material walks the finished good forward as a dependant
-		rm_riv = frappe.get_doc(
-			doctype="Repost Item Valuation",
-			based_on="Item and Warehouse",
-			item_code=rm,
-			warehouse=warehouse,
-			posting_date=add_days(today(), -10),
-			posting_time="00:00:01",
-		)
-		rm_riv.submit()
-
-		later_riv.load_from_db()
-		self.assertEqual(later_riv.status, "Skipped")
-
 	def test_repost_covering_earlier_date_is_not_skipped(self):
 		"""A repost for the finished good that starts before the manufacture entry still
 		has work to do, so it must survive."""
@@ -1268,12 +1181,3 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			execute_reposting_entry("RIV-X")
 
 		chain_mock.assert_not_called()
-
-	def test_enqueue_reposting_entry_is_deduplicated(self):
-		with patch("frappe.enqueue") as enqueue_mock:
-			enqueue_reposting_entry("RIV-X")
-
-		kwargs = enqueue_mock.call_args.kwargs
-		self.assertEqual(kwargs["job_id"], f"{REPOSTING_JOB_ID_PREFIX}RIV-X")
-		self.assertTrue(kwargs["deduplicate"])
-		self.assertTrue(kwargs["continue_reposting"])

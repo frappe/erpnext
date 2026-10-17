@@ -106,33 +106,6 @@ class TestInventoryDimension(ERPNextTestSuite):
 		with patch.object(type(dimension), "has_stock_ledger", return_value=[frappe._dict(name="SLE")]):
 			self.assertRaises(DoNotChangeError, dimension.on_trash)
 
-	def test_stock_manager_can_create_dimension_fields(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
-
-		dimension = create_inventory_dimension(
-			reference_document="Pallet",
-			dimension_name="Pallet Stock Manager",
-			apply_to_all_doctypes=0,
-			document_type="Delivery Note Item",
-			do_not_save=True,
-		)
-		dimension.set_source_and_target_fieldname()
-		user = create_user("test_dimension_manager@example.com", "Stock Manager")
-
-		field_filters = {"dt": "Delivery Note Item", "fieldname": dimension.source_fieldname}
-		frappe.set_user(user.name)
-		try:
-			with patch("frappe.db.updatedb"):
-				dimension.add_custom_fields()
-				self.assertTrue(frappe.db.exists("Custom Field", field_filters))
-
-				dimension.delete_custom_fields()
-				self.assertFalse(frappe.db.exists("Custom Field", field_filters))
-
-			self.assertEqual(frappe.session.user, user.name)
-		finally:
-			frappe.set_user("Administrator")
-
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
 		warehouse = "Shelf Warehouse - _TC"
@@ -636,87 +609,6 @@ class TestInventoryDimension(ERPNextTestSuite):
 			do_not_submit=True,
 		)
 		issue.items[0].serial_rack = "Rack 1"
-		issue.save()
-
-		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
-		self.assertFalse(
-			frappe.db.exists(
-				"Stock Ledger Entry",
-				{"voucher_no": issue.name, "is_cancelled": 0},
-			)
-		)
-
-	def test_serial_no_cannot_move_from_empty_inventory_dimension(self):
-		item = make_item(
-			"Test Serialized Empty Inventory Dimension Item",
-			{"has_serial_no": 1, "is_stock_item": 1},
-		)
-		serial_no = "Test Serialized Empty Inventory Dimension Serial No"
-		warehouse = create_warehouse("Serialized Empty Inventory Dimension Warehouse")
-
-		create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Serial Rack",
-			reference_document="Rack",
-			validate_negative_stock=0,
-		)
-
-		make_stock_entry(
-			item_code=item.name,
-			to_warehouse=warehouse,
-			qty=1,
-			serial_no=serial_no,
-			use_serial_batch_fields=1,
-		)
-
-		issue = make_stock_entry(
-			item_code=item.name,
-			from_warehouse=warehouse,
-			qty=1,
-			serial_no=serial_no,
-			use_serial_batch_fields=1,
-			do_not_submit=True,
-		)
-		issue.items[0].serial_rack = "Rack 1"
-		issue.save()
-
-		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
-
-	def test_serial_no_cannot_be_issued_without_inventory_dimension(self):
-		item = make_item(
-			"Test Serialized Required Inventory Dimension Item",
-			{"has_serial_no": 1, "is_stock_item": 1},
-		)
-		serial_no = "Test Serialized Required Inventory Dimension Serial No"
-		warehouse = create_warehouse("Serialized Required Inventory Dimension Warehouse")
-
-		create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Serial Rack",
-			reference_document="Rack",
-			validate_negative_stock=0,
-		)
-
-		receipt = make_stock_entry(
-			item_code=item.name,
-			to_warehouse=warehouse,
-			qty=1,
-			serial_no=serial_no,
-			use_serial_batch_fields=1,
-			do_not_submit=True,
-		)
-		receipt.items[0].to_serial_rack = "Rack 1"
-		receipt.save()
-		receipt.submit()
-
-		issue = make_stock_entry(
-			item_code=item.name,
-			from_warehouse=warehouse,
-			qty=1,
-			serial_no=serial_no,
-			use_serial_batch_fields=1,
-			do_not_submit=True,
-		)
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)

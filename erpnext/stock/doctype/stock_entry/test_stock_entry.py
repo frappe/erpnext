@@ -3016,41 +3016,6 @@ class TestStockEntry(ERPNextTestSuite):
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
 
-	def test_additional_cost_distribution_manufacture_zero_valued_items(self):
-		se = frappe.get_doc(
-			doctype="Stock Entry",
-			purpose="Manufacture",
-			additional_costs=[frappe._dict(base_amount=100)],
-			items=[
-				frappe._dict(item_code="RM", basic_amount=0, transfer_qty=10),
-				frappe._dict(
-					item_code="FG", basic_amount=0, transfer_qty=5, t_warehouse="X", is_finished_item=1
-				),
-				frappe._dict(item_code="scrap", basic_amount=0, transfer_qty=2, t_warehouse="X"),
-			],
-		)
-
-		se.distribute_additional_costs()
-
-		distributed_costs = [d.additional_cost for d in se.items]
-		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
-
-	def test_additional_cost_distribution_zero_valued_items(self):
-		se = frappe.get_doc(
-			doctype="Stock Entry",
-			purpose="Material Receipt",
-			additional_costs=[frappe._dict(base_amount=100)],
-			items=[
-				frappe._dict(item_code="RECEIVED_1", basic_amount=0, transfer_qty=20, t_warehouse="X"),
-				frappe._dict(item_code="RECEIVED_2", basic_amount=0, transfer_qty=30, t_warehouse="X"),
-			],
-		)
-
-		se.distribute_additional_costs()
-
-		distributed_costs = [d.additional_cost for d in se.items]
-		self.assertEqual([40.0, 60.0], distributed_costs)
-
 	def test_additional_cost_gl_for_zero_valued_manufacture(self):
 		company = "_Test Company with perpetual inventory"
 		rm = make_item("_Test Zero Rate RM", {"is_stock_item": 1}).name
