@@ -43,7 +43,8 @@ class AccountingDimension(Document):
 	def validate(self):
 		self.validate_doctype()
 		validate_column_name(self.fieldname)
-		self.validate_fieldname_conflict()
+		if self.has_value_changed("fieldname"):
+			self.validate_fieldname_conflict()
 		self.validate_dimension_defaults()
 
 	def validate_doctype(self):
