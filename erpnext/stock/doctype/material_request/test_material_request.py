@@ -1910,17 +1910,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 	def test_subcontracting_request_is_counted_in_indented_qty(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-		from erpnext.controllers.tests.test_subcontracting_controller import (
-			make_bom_for_subcontracted_items,
-			make_raw_materials,
-			make_service_items,
-			make_subcontracted_items,
-		)
 
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 		existing_qty = self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC")
 
 		mr = make_material_request(
