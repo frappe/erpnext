@@ -3,7 +3,16 @@
 
 import frappe
 
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
+from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import close_work_order, stop_unstop
+from erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report import execute
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
+
+STORES = "_Test Warehouse - _TC"
 
 
 class TestWorkOrderStockReport(ERPNextTestSuite):
@@ -67,3 +76,66 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 		# the duplicated raw item must be counted once per work order item, not once per BOM line
 		for row in wo_rows:
 			self.assertEqual(row["req_items"], 1)
+
+	def get_rows(self, work_order, **filters):
+		data = execute(frappe._dict(filters))[1]
+		return {row.item_code: row for row in data if row.work_order == work_order}
+
+	def make_stocked_work_order(self, qty=10, stock_qty=10, **kwargs):
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[material])
+		if stock_qty:
+			test_stock_entry.make_stock_entry(item_code=material, target=STORES, qty=stock_qty, basic_rate=10)
+		wo = make_wo_order_test_record(
+			item=fg_item, bom_no=bom.name, qty=qty, source_warehouse=STORES, **kwargs
+		)
+		return wo, material
+
+	def test_multi_level_materials_are_checked_against_stock(self):
+		sub_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=sub_assembly, raw_materials=[sub_material], rm_qty=2)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[sub_assembly])
+		wo = make_wo_order_test_record(
+			item=fg_item, bom_no=bom.name, qty=10, source_warehouse=STORES, use_multi_level_bom=1
+		)
+
+		row = self.get_rows(wo.name, warehouse=STORES)[sub_material]
+
+		self.assertEqual((row.instock, row.buildable_qty, row.ready_to_build), (0, 0, "N"))
+
+	def test_material_in_wip_counts_as_available(self):
+		wo, material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+
+		row = self.get_rows(wo.name, warehouse=STORES)[material]
+
+		self.assertEqual((row.instock, row.buildable_qty, row.ready_to_build), (1, 10, "Y"))
+
+	def test_closed_and_stopped_work_orders_are_left_out(self):
+		closed, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
+		frappe.get_doc(make_stock_entry(closed.name, "Material Transfer for Manufacture", 10)).submit()
+		close_work_order(closed.name, "Closed")
+		stopped, _material = self.make_stocked_work_order(wip_warehouse="_Test Warehouse 2 - _TC")
+		frappe.get_doc(make_stock_entry(stopped.name, "Material Transfer for Manufacture", 10)).submit()
+		stop_unstop(stopped.name, "Stopped")
+
+		self.assertEqual(self.get_rows(closed.name, warehouse=STORES), {})
+		self.assertEqual(self.get_rows(stopped.name, warehouse=STORES), {})
+
+	def test_warehouse_filter_limits_the_rows(self):
+		wo, material = self.make_stocked_work_order()
+
+		self.assertIn(material, self.get_rows(wo.name, warehouse=STORES))
+		self.assertEqual(self.get_rows(wo.name, warehouse="_Test Warehouse 1 - _TC"), {})
+
+	def test_stock_is_shared_out_between_work_orders(self):
+		first, material = self.make_stocked_work_order()
+		second = make_wo_order_test_record(
+			item=first.production_item, bom_no=first.bom_no, qty=10, source_warehouse=STORES
+		)
+
+		self.assertEqual(self.get_rows(first.name, warehouse=STORES)[material].ready_to_build, "Y")
+		self.assertEqual(self.get_rows(second.name, warehouse=STORES)[material].ready_to_build, "N")
