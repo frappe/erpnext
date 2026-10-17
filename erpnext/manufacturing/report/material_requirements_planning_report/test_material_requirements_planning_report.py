@@ -62,6 +62,22 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
 		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
 
+	def test_daily_share_of_a_weekly_forecast_keeps_its_total(self):
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		dates = [add_days(today(), offset) for offset in range(7)]
+		report.mps_data = [
+			frappe._dict(item_code="_Test Item", delivery_date=date, planned_qty=1, warehouse="Stores - _TC")
+			for date in dates
+		]
+		forecast = [frappe._dict(item_code="_Test Item", delivery_date=date, qty=10 / 7) for date in dates]
+
+		with patch.object(
+			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
+		):
+			report.update_sales_forecast_data()
+
+		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
+
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
 			delivery_dates = ["2026-08-15", "2027-08-15"]

@@ -1551,7 +1551,7 @@ def split_forecast_qty(rows, qty):
 		qty * flt(d.planned_qty) / total_planned_qty if total_planned_qty else (qty if idx == 0 else 0)
 		for idx, d in enumerate(rows)
 	]
-	if is_whole_number_item(rows[0].item_code):
+	if flt(qty) == round(qty) and is_whole_number_item(rows[0].item_code):
 		shares = round_shares_keeping_total(shares, round(qty))
 
 	for d, share in zip(rows, shares, strict=True):
