@@ -425,9 +425,16 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	return query
 
 
-def get_with_descendants(doctype: str, name: str) -> list[str]:
-	"""The tree node and all nodes under it."""
-	return [name, *get_descendants_of(doctype, name, ignore_permissions=True)]
+def get_with_descendants(doctype: str, names: str | list[str] | tuple[str, ...]) -> list[str]:
+	"""The selected tree nodes and all nodes under them."""
+	if isinstance(names, str):
+		names = frappe.parse_json(names) if names.startswith("[") else [names]
+
+	values = []
+	for name in names:
+		values.extend([name, *get_descendants_of(doctype, name, ignore_permissions=True)])
+
+	return list(dict.fromkeys(values))
 
 
 def get_advance_taxes_and_charges(invoice_list):

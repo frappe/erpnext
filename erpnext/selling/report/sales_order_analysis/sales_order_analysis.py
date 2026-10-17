@@ -118,7 +118,9 @@ def get_data(filters):
 	)
 
 	if filters.get("warehouse"):
-		warehouses = [*get_descendants_of("Warehouse", filters.get("warehouse")), filters.get("warehouse")]
+		warehouses = set()
+		for warehouse in get_filter_values(filters.get("warehouse")):
+			warehouses.update([*get_descendants_of("Warehouse", warehouse), warehouse])
 		query = query.where(soi.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
@@ -146,6 +148,16 @@ def get_permitted_sales_orders(filters):
 		filters=so_filters,
 		ignore_permissions=False,
 	).run(pluck="name")
+
+
+def get_filter_values(value):
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return value
+
+	return [value]
 
 
 def get_so_elapsed_time(data):
