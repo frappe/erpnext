@@ -1644,7 +1644,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[0].tax_amount, 10)
 		self.assertEqual(so.taxes[0].total, 110)
 
-		old_default_warehouse = frappe.db.get_value("Company", "_Test Company", "default_warehouse")
 		frappe.db.set_value("Company", "_Test Company", "default_warehouse", "_Test Warehouse - _TC")
 
 		items = json.dumps(
@@ -1670,20 +1669,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[1].account_head, "_Test Account Service Tax - _TC")
 		self.assertEqual(so.taxes[1].tax_amount, 40)
 		self.assertEqual(so.taxes[1].total, 480)
-
-		# teardown
-		frappe.db.set_value(
-			"Item Tax",
-			{"parent": item, "item_tax_template": tax_template},
-			"valid_from",
-			None,
-			update_modified=False,
-		)
-		so.cancel()
-		so.delete()
-		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
-		frappe.db.set_value("Company", "_Test Company", "default_warehouse", old_default_warehouse)
 
 	def test_warehouse_user(self):
 		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")

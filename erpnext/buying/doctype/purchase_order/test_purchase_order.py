@@ -1224,7 +1224,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
 	def test_internal_transfer_flow(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.doctype.sales_invoice.mapper import (
 			make_inter_company_purchase_invoice,
 		)
@@ -1237,23 +1236,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
 
-		create_cost_center(
-			cost_center_name="_Test Cost Center for perpetual inventory Account",
-			company="_Test Company with perpetual inventory",
-		)
-
 		mr = make_material_request(
 			qty=2,
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			cost_center="_Test Cost Center for perpetual inventory Account - TCP1",
+			cost_center="Main - TCP1",
 		)
 
 		po = create_purchase_order(
 			company="_Test Company with perpetual inventory",
 			supplier=supplier,
 			warehouse="Stores - TCP1",
-			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
+			from_warehouse="_Test Transfer From - TCP1",
 			qty=2,
 			rate=1,
 			material_request=mr.name,
@@ -1262,14 +1256,14 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		so = make_inter_company_sales_order(po.name)
 		so.items[0].delivery_date = today()
-		self.assertEqual(so.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
+		self.assertEqual(so.items[0].warehouse, "_Test Transfer From - TCP1")
 		self.assertTrue(so.items[0].purchase_order)
 		self.assertTrue(so.items[0].purchase_order_item)
 		so.submit()
 
 		dn = make_delivery_note(so.name)
-		dn.items[0].target_warehouse = "_Test Internal Warehouse GIT - TCP1"
-		self.assertEqual(dn.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
+		dn.items[0].target_warehouse = "_Test Transfer Transit - TCP1"
+		self.assertEqual(dn.items[0].warehouse, "_Test Transfer From - TCP1")
 		self.assertTrue(dn.items[0].purchase_order)
 		self.assertTrue(dn.items[0].purchase_order_item)
 
@@ -1284,7 +1278,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pr.submit()
 
 		si = make_sales_invoice(so.name)
-		self.assertEqual(si.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
+		self.assertEqual(si.items[0].warehouse, "_Test Transfer From - TCP1")
 		self.assertTrue(si.items[0].purchase_order)
 		self.assertTrue(si.items[0].purchase_order_item)
 		si.submit()
@@ -1963,7 +1957,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		so = make_sales_order(
 			company=po.company,
 			customer="_Test Internal Customer 2",
-			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			warehouse="_Test Transfer From - TCP1",
 			selling_price_list=po.buying_price_list,
 			qty=2,
 			rate=1,
@@ -1988,7 +1982,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		so = make_sales_order(
 			company=po.company,
 			customer="_Test Internal Customer 2",
-			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			warehouse="_Test Transfer From - TCP1",
 			selling_price_list=po.buying_price_list,
 			qty=2,
 			rate=1,
@@ -2028,7 +2022,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		so = make_sales_order(
 			company=po.company,
 			customer="_Test Internal Customer 2",
-			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			warehouse="_Test Transfer From - TCP1",
 			selling_price_list=po.buying_price_list,
 			qty=20,
 			rate=1,
@@ -2271,30 +2265,19 @@ def create_subcontracted_po(rm_items=None, **args):
 
 def prepare_data_for_internal_transfer():
 	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
 
-	warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
-
-	create_warehouse("_Test Internal Warehouse GIT", company=company)
-
-	make_purchase_receipt(company=company, warehouse=warehouse, qty=2, rate=100)
+	make_purchase_receipt(company=company, warehouse="_Test Transfer From - TCP1", qty=2, rate=100)
 
 
 def make_internal_purchase_order(**args):
-	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
 	prepare_data_for_internal_transfer()
-	create_cost_center(
-		cost_center_name="_Test Cost Center for perpetual inventory Account",
-		company="_Test Company with perpetual inventory",
-	)
 	return create_purchase_order(
 		company="_Test Company with perpetual inventory",
 		supplier="_Test Internal Supplier 2",
 		warehouse="Stores - TCP1",
-		from_warehouse="_Test Internal Warehouse New 1 - TCP1",
+		from_warehouse="_Test Transfer From - TCP1",
 		qty=2,
 		rate=1,
 		**args,
