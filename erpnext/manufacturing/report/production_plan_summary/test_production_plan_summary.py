@@ -133,6 +133,18 @@ class TestProductionPlanSummary(ERPNextTestSuite):
 		self.assertEqual(self.get_work_order_row(data, "_Test FG Item").get("pending_qty"), 0)
 		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 0)
 
+	def test_pending_qty_is_rounded_to_the_qty_precision(self):
+		from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
+			get_document_row,
+		)
+
+		row = get_document_row(
+			frappe._dict(qty=11.4, produced_qty=11.2, process_loss_qty=0.2, item_code="_Test FG Item"),
+			indent=1,
+		)
+
+		self.assertEqual(row["pending_qty"], 0)
+
 	def test_summary_scoped_to_its_own_plan(self):
 		"""Each plan's report only reports its own work order documents."""
 		plan_a = self.make_plan(planned_qty=2)

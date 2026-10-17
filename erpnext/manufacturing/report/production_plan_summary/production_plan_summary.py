@@ -42,7 +42,7 @@ def get_finished_good_row(row, fg_work_orders):
 		"bom_level": 0,
 		"qty": flt(row.planned_qty),
 		"produced_qty": produced_qty,
-		"pending_qty": flt(row.planned_qty) - produced_qty - process_loss_qty,
+		"pending_qty": get_pending_qty(row.planned_qty, produced_qty, process_loss_qty),
 	}
 
 
@@ -64,7 +64,7 @@ def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
 				"bom_level": item.bom_level,
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
-				"pending_qty": flt(item.qty) - produced_qty - process_loss_qty,
+				"pending_qty": get_pending_qty(item.qty, produced_qty, process_loss_qty),
 			}
 		)
 		data.extend(get_document_row(d, indent=indent + 1) for d in documents)
@@ -81,8 +81,14 @@ def get_document_row(doc, indent):
 		"status": doc.status,
 		"qty": flt(doc.qty),
 		"produced_qty": flt(doc.produced_qty),
-		"pending_qty": flt(doc.qty) - flt(doc.produced_qty) - flt(doc.get("process_loss_qty")),
+		"pending_qty": get_pending_qty(doc.qty, doc.produced_qty, doc.get("process_loss_qty")),
 	}
+
+
+def get_pending_qty(qty, produced_qty, process_loss_qty):
+	return flt(
+		flt(qty) - flt(produced_qty) - flt(process_loss_qty), frappe.get_precision("Work Order", "qty")
+	)
 
 
 def get_work_orders(filters):
