@@ -43,6 +43,24 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			)
 			self.assertEqual(chart["data"]["datasets"][0]["values"], [1] * 11 + [3])
 
+	def test_forecast_is_counted_once_across_warehouse_rows(self):
+		delivery_date = add_days(today(), 5)
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report.mps_data = [
+			frappe._dict(
+				item_code="_Test Item", delivery_date=delivery_date, planned_qty=qty, warehouse=warehouse
+			)
+			for qty, warehouse in ((3, "Stores - _TC"), (4, "Finished Goods - _TC"))
+		]
+		forecast = [frappe._dict(item_code="_Test Item", delivery_date=delivery_date, qty=10)]
+
+		with patch.object(
+			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
+		):
+			report.update_sales_forecast_data()
+
+		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
+
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
 			delivery_dates = ["2026-08-15", "2027-08-15"]
