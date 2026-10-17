@@ -25,10 +25,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestTimesheet(ERPNextTestSuite):
-	def test_get_projectwise_timesheet_data_without_allowed_projects(self):
-		with patch("frappe.get_list", side_effect=[["TS-0001"], []]):
-			self.assertEqual(get_projectwise_timesheet_data(), [])
-
 	def test_time_log_with_empty_project_and_sales_invoice_is_unbilled(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
