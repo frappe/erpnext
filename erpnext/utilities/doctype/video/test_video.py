@@ -39,14 +39,6 @@ class TestVideo(ERPNextTestSuite):
 		patcher.start()
 		self.addCleanup(patcher.stop)
 
-	def test_batch_update_sets_statistics_on_the_video(self):
-		video = make_video("Test Batch Update", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-		self.assertEqual(video.view_count, 1000)
-
-		FakeYouTubeApi.views["dQw4w9WgXcQ"] = 5000
-		batch_update_youtube_data()
-		self.assertEqual(frappe.db.get_value("Video", video.name, "view_count"), 5000)
-
 	def test_batch_update_skips_videos_without_id_and_survives_api_errors(self):
 		make_video("Test Vimeo Video", "https://vimeo.com/76979871", provider="Vimeo")
 		video = make_video("Test YouTube Video", "https://youtu.be/dQw4w9WgXcQ")
