@@ -21,12 +21,13 @@ ItemGroupsDict = dict[tuple[int, int], dict[str, str | int]]
 SVDList = list[frappe._dict]
 
 ITEM_ROW_DOCTYPES = {
-	"Delivery Note": "Delivery Note Item",
-	"Sales Invoice": "Sales Invoice Item",
-	"POS Invoice": "POS Invoice Item",
-	"Stock Entry": "Stock Entry Detail",
-	"Purchase Invoice": "Purchase Invoice Item",
-	"Purchase Receipt": "Purchase Receipt Item",
+	"Delivery Note": ("Delivery Note Item",),
+	"Sales Invoice": ("Sales Invoice Item",),
+	"POS Invoice": ("POS Invoice Item",),
+	"Stock Entry": ("Stock Entry Detail",),
+	"Purchase Invoice": ("Purchase Invoice Item",),
+	"Purchase Receipt": ("Purchase Receipt Item",),
+	"Subcontracting Receipt": ("Subcontracting Receipt Item", "Subcontracting Receipt Supplied Item"),
 }
 
 
@@ -90,19 +91,30 @@ def get_stock_value_difference_list(filtered_entries: FilteredEntries, account: 
 	voucher_nos = [fe.get("voucher_no") for fe in filtered_entries]
 	svd_list = frappe.get_list(
 		"Stock Ledger Entry",
-		fields=["item_code", "stock_value_difference", "voucher_type", "voucher_detail_no"],
+		fields=["item_code", "stock_value_difference", "voucher_type", "voucher_no", "voucher_detail_no"],
 		filters=[("voucher_no", "in", voucher_nos), ("is_cancelled", "=", 0)],
 	)
-	cogs_rows = get_rows_booked_to_account(svd_list, account)
-	svd_list = [row for row in svd_list if row.voucher_detail_no in cogs_rows]
+	booked_rows = get_rows_booked_to_account(svd_list, account)
+	booked_reconciliations = get_reconciliations_booked_to_account(svd_list, account)
+	svd_list = [row for row in svd_list if is_booked_to_account(row, booked_rows, booked_reconciliations)]
 	assign_item_groups_to_svd_list(svd_list)
 	return svd_list
+
+
+def is_booked_to_account(row: frappe._dict, booked_rows: set[str], booked_reconciliations: set[str]) -> bool:
+	if row.voucher_type == "Stock Reconciliation":
+		return row.voucher_no in booked_reconciliations
+
+	if row.voucher_type in ITEM_ROW_DOCTYPES:
+		return row.voucher_detail_no in booked_rows
+
+	return True
 
 
 def get_rows_booked_to_account(svd_list: SVDList, account: str) -> set[str]:
 	rows_by_doctype = defaultdict(set)
 	for row in svd_list:
-		if row_doctype := ITEM_ROW_DOCTYPES.get(row.voucher_type):
+		for row_doctype in ITEM_ROW_DOCTYPES.get(row.voucher_type, ()):
 			rows_by_doctype[row_doctype].add(row.voucher_detail_no)
 
 	booked_rows = set()
@@ -116,6 +128,20 @@ def get_rows_booked_to_account(svd_list: SVDList, account: str) -> set[str]:
 		)
 
 	return booked_rows
+
+
+def get_reconciliations_booked_to_account(svd_list: SVDList, account: str) -> set[str]:
+	names = {row.voucher_no for row in svd_list if row.voucher_type == "Stock Reconciliation"}
+	if not names:
+		return set()
+
+	return set(
+		frappe.get_all(
+			"Stock Reconciliation",
+			filters={"name": ("in", list(names)), "expense_account": account},
+			pluck="name",
+		)
+	)
 
 
 def get_leveled_dict() -> OrderedDict:

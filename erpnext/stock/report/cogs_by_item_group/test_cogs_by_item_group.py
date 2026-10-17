@@ -115,6 +115,36 @@ class TestCogsByItemGroup(ERPNextTestSuite):
 		}
 		self.assertEqual(values, {cogs_group: [200], other_group: []})
 
+	def test_reconciliation_booked_to_cogs_is_counted(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item_group = make_item_group(f"_Test COGS Item Group {frappe.generate_hash(length=6)}")
+		item = make_item(properties={"is_stock_item": 1, "item_group": item_group}).name
+		make_stock_entry(
+			item_code=item,
+			to_warehouse="Stores - TCP1",
+			qty=10,
+			rate=100,
+			company=COMPANY,
+			posting_date="2026-06-01",
+		)
+		create_stock_reconciliation(
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=7,
+			rate=100,
+			company=COMPANY,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			posting_date="2026-06-02",
+		)
+
+		data = self.run_report()
+
+		self.assertEqual([row.cogs_debit for row in data if item_group in row.item_group], [300])
+
 
 def make_item_group(name: str) -> str:
 	if not frappe.db.exists("Item Group", name):
