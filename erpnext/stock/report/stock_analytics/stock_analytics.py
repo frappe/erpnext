@@ -124,7 +124,8 @@ def get_period(posting_date, filters):
 	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 	if filters.range == "Weekly":
-		period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
+		iso_date = posting_date.isocalendar()
+		period = _("Week {0} {1}").format(str(iso_date.week), str(iso_date.year))
 	elif filters.range == "Monthly":
 		period = _(str(months[posting_date.month - 1])) + " " + str(posting_date.year)
 	elif filters.range == "Quarterly":

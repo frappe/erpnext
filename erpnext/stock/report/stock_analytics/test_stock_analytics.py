@@ -128,9 +128,8 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [10, 10, 15])
 
+	@ERPNextTestSuite.change_settings("System Settings", {"first_day_of_the_week": "Sunday"})
 	def test_weekly_entries_fall_in_the_week_that_contains_them(self):
-		from unittest.mock import patch
-
 		self.generate_stock([(3, datetime.date(2026, 8, 16))])
 		filters = _dict(
 			range="Weekly",
@@ -141,14 +140,24 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 			item_code=self.item,
 		)
 
-		with patch(
-			"erpnext.stock.report.stock_analytics.stock_analytics.get_first_day_of_week",
-			side_effect=lambda date: getdate(date)
-			- datetime.timedelta(days=(getdate(date).weekday() + 1) % 7),
-		):
-			cols, data = stock_analytics(filters)
+		cols, data = stock_analytics(filters)
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 0, 3, 3])
+
+	@ERPNextTestSuite.change_settings("System Settings", {"first_day_of_the_week": "Sunday"})
+	def test_weekly_columns_across_a_year_have_unique_labels(self):
+		filters = _dict(
+			range="Weekly",
+			from_date=datetime.date(2022, 1, 1),
+			to_date=datetime.date(2022, 12, 31),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		labels = [column["label"] for column in stock_analytics(filters)[0][5:]]
+
+		self.assertEqual(len(labels), len(set(labels)))
 
 	def get_quantity_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
