@@ -493,6 +493,295 @@ class TestStockBalancePermissions(ERPNextTestSuite, StockTestMixin):
 		self.assertIn(self.item, group_scoped)
 		self.assertNotIn(grouped_item, group_scoped)
 
+	def reconciliation_manager(self, allow, for_value, applicable_for):
+		if applicable_for:
+			return self.scoped_user("Stock Manager", allow, for_value, applicable_for)
+		return self.user("Stock Manager", [(allow, for_value)])
+
+	def make_batch(self, item_code, warehouse, qty, rate):
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": item_code}
+		)
+		batch.insert()
+		make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=qty, rate=rate, batch_no=batch.name)
+		return batch.name
+
+	def listed_rows(self, warehouse, company="_Test Company"):
+		rows = []
+		for row in get_items(warehouse, nowdate(), nowtime(), company):
+			rows.append((row["item_code"], row["warehouse"], row["batch_no"]))
+		return rows
+
+	def test_reconciliation_lookups_follow_reconciliation_user_permissions(self):
+		other_company_warehouse = "Stores - _TC1"
+		make_stock_entry(item_code=self.item, to_warehouse=other_company_warehouse, qty=4, rate=77)
+		grouped_item = self.make_item(properties={"item_group": "_Test Item Group Desktops"}).name
+		make_stock_entry(item_code=grouped_item, to_warehouse=WAREHOUSE, qty=1, rate=10)
+		uom_item = self.make_item(properties={"stock_uom": "_Test UOM 1"}).name
+		make_stock_entry(item_code=uom_item, to_warehouse=WAREHOUSE, qty=1, rate=10)
+		batch_item = self.make_item(properties={"has_batch_no": 1}).name
+		batch = self.make_batch(batch_item, WAREHOUSE, 4, 17)
+		other_batch = self.make_batch(batch_item, WAREHOUSE, 6, 19)
+		item_group, stock_uom = frappe.db.get_value("Item", self.item, ["item_group", "stock_uom"])
+		args = (nowdate(), nowtime())
+
+		cells = [
+			("Company", "_Test Company", (self.item, WAREHOUSE), (self.item, other_company_warehouse)),
+			("Warehouse", WAREHOUSE, (self.item, WAREHOUSE), (self.item, OTHER_WAREHOUSE)),
+			("Item", self.item, (self.item, WAREHOUSE), (self.other_item, OTHER_WAREHOUSE)),
+			("Item Group", item_group, (self.item, WAREHOUSE), (grouped_item, WAREHOUSE)),
+			("UOM", stock_uom, (self.item, WAREHOUSE), (uom_item, WAREHOUSE)),
+		]
+		for allow, for_value, permitted, outside in cells:
+			for applicable_for in (None, "Stock Reconciliation", "Sales Order"):
+				with self.subTest(allow=allow, applicable_for=applicable_for):
+					with as_user(self.reconciliation_manager(allow, for_value, applicable_for)):
+						self.assertEqual(get_stock_balance_for(*permitted, *args)["qty"], 7)
+						self.assertEqual(
+							get_items(permitted[1], *args, "_Test Company", permitted[0])[0]["qty"], 7
+						)
+						company = frappe.db.get_value("Warehouse", outside[1], "company")
+						if applicable_for == "Sales Order":
+							get_stock_balance_for(*outside, *args)
+							get_items(outside[1], *args, company, outside[0])
+						elif applicable_for:
+							assert_refused(self, get_stock_balance_for, *outside, *args)
+							assert_refused(self, get_items, outside[1], *args, company, outside[0])
+						else:
+							self.assertRaises(frappe.PermissionError, get_stock_balance_for, *outside, *args)
+							self.assertRaises(
+								frappe.PermissionError, get_items, outside[1], *args, company, outside[0]
+							)
+
+		for applicable_for in (None, "Stock Reconciliation", "Sales Order"):
+			with self.subTest(allow="Batch", applicable_for=applicable_for):
+				with as_user(self.reconciliation_manager("Batch", batch, applicable_for)):
+					self.assertEqual(get_stock_balance_for(batch_item, WAREHOUSE, *args, batch)["qty"], 4)
+					rows = self.listed_rows(WAREHOUSE)
+					self.assertIn((batch_item, WAREHOUSE, batch), rows)
+					if applicable_for == "Sales Order":
+						self.assertEqual(
+							get_stock_balance_for(batch_item, WAREHOUSE, *args, other_batch)["qty"], 6
+						)
+						self.assertIn((batch_item, WAREHOUSE, other_batch), rows)
+					else:
+						assert_refused(self, get_stock_balance_for, batch_item, WAREHOUSE, *args, other_batch)
+						self.assertNotIn((batch_item, WAREHOUSE, other_batch), rows)
+
+		for allow, for_value, outside in (
+			("Item Group", item_group, grouped_item),
+			("UOM", stock_uom, uom_item),
+		):
+			with self.subTest(allow=allow, listed=True):
+				with as_user(self.reconciliation_manager(allow, for_value, "Stock Reconciliation")):
+					rows = self.listed_rows(WAREHOUSE)
+				with as_user(self.reconciliation_manager(allow, for_value, "Sales Order")):
+					unrestricted_rows = self.listed_rows(WAREHOUSE)
+				self.assertIn((self.item, WAREHOUSE, None), rows)
+				self.assertNotIn((outside, WAREHOUSE, None), rows)
+				self.assertIn((outside, WAREHOUSE, None), unrestricted_rows)
+
+		with as_user(self.user("Stock Manager")):
+			self.assertEqual(get_stock_balance_for(self.item, other_company_warehouse, *args)["qty"], 4)
+			self.assertEqual(get_stock_balance_for(batch_item, WAREHOUSE, *args, other_batch)["qty"], 6)
+			rows = self.listed_rows(WAREHOUSE)
+			for item_code in (self.item, grouped_item, uom_item):
+				self.assertIn((item_code, WAREHOUSE, None), rows)
+			self.assertIn((batch_item, WAREHOUSE, other_batch), rows)
+
+	def test_reconciliation_lookups_check_the_entry_company(self):
+		other_company_warehouse = "Stores - _TC1"
+		make_stock_entry(item_code=self.item, to_warehouse=other_company_warehouse, qty=4, rate=77)
+		group = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "TSBP Group",
+				"company": "_Test Company",
+				"is_group": 1,
+			}
+		).insert()
+		child = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "TSBP Child",
+				"company": "_Test Company 1",
+				"parent_warehouse": group.name,
+			}
+		).insert()
+		make_stock_entry(item_code=self.item, to_warehouse=child.name, qty=5, rate=31)
+		args = (nowdate(), nowtime())
+
+		for applicable_for in ("Stock Reconciliation", "Sales Order"):
+			with self.subTest(applicable_for=applicable_for):
+				with as_user(self.reconciliation_manager("Company", "_Test Company", applicable_for)):
+					self.assertEqual(
+						get_stock_balance_for(self.item, WAREHOUSE, *args, company="_Test Company")["qty"], 7
+					)
+					calls = [
+						(
+							get_stock_balance_for,
+							(self.item, WAREHOUSE, *args),
+							{"company": "_Test Company 1"},
+						),
+						(get_stock_balance_for, (self.item, other_company_warehouse, *args), {}),
+						(
+							get_stock_balance_for,
+							(self.item, other_company_warehouse, *args),
+							{"company": "_Test Company"},
+						),
+						(get_items, (WAREHOUSE, *args, "_Test Company 1"), {}),
+						(get_items, (group.name, *args, "_Test Company"), {}),
+					]
+					for fn, fn_args, kwargs in calls:
+						if applicable_for == "Sales Order":
+							fn(*fn_args, **kwargs)
+						else:
+							assert_refused(self, fn, *fn_args, **kwargs)
+
+		with as_user(self.user("Stock Manager")):
+			self.assertIn((self.item, child.name, None), self.listed_rows(group.name))
+
+	def test_reconciliation_balance_checks_the_row_it_is_given(self):
+		batch_item = self.make_item(properties={"has_batch_no": 1}).name
+		batch = self.make_batch(batch_item, WAREHOUSE, 4, 17)
+		other_batch = self.make_batch(batch_item, WAREHOUSE, 6, 19)
+		args = (nowdate(), nowtime())
+
+		def balance(row_batch):
+			row = {
+				"item_code": batch_item,
+				"warehouse": WAREHOUSE,
+				"batch_no": row_batch,
+				"use_serial_batch_fields": 1,
+				"current_qty": 1,
+			}
+			return get_stock_balance_for(batch_item, WAREHOUSE, *args, batch, row=row)
+
+		for applicable_for in (None, "Stock Reconciliation"):
+			with as_user(self.reconciliation_manager("Batch", batch, applicable_for)):
+				self.assertEqual(balance(batch)["rate"], 17)
+				assert_refused(self, balance, other_batch)
+
+		with as_user(self.user("Stock Manager")):
+			self.assertEqual(balance(other_batch)["rate"], 19)
+
+		item_group = frappe.db.get_value("Item", self.item, "item_group")
+		self.make_item(properties={"item_group": "_Test Item Group Desktops"})
+		with as_user(self.reconciliation_manager("Item Group", item_group, "Stock Reconciliation")):
+			row = {"item_code": {"item_group": "_Test Item Group Desktops"}, "warehouse": WAREHOUSE}
+			self.assertEqual(get_stock_balance_for(self.item, WAREHOUSE, *args, row=row)["qty"], 7)
+
+		with as_user(self.reconciliation_manager("Company", "_Test Company", "Stock Reconciliation")):
+			row = {"item_code": self.item, "warehouse": {"company": "_Test Company 1"}}
+			self.assertEqual(get_stock_balance_for(self.item, WAREHOUSE, *args, row=row)["qty"], 7)
+
+		with as_user(self.reconciliation_manager("Item", self.item, "Stock Reconciliation")):
+			row = {"item_code": self.item, "warehouse": OTHER_WAREHOUSE}
+			assert_refused(self, get_stock_balance_for, self.other_item, OTHER_WAREHOUSE, *args, row=row)
+
+	def test_reconciliation_lookups_follow_strict_user_permissions(self):
+		batch_item = self.make_item(properties={"has_batch_no": 1}).name
+		batch = self.make_batch(batch_item, WAREHOUSE, 4, 17)
+		args = (nowdate(), nowtime())
+
+		frappe.db.set_single_value("System Settings", "apply_strict_user_permissions", 1)
+		self.addCleanup(frappe.db.set_single_value, "System Settings", "apply_strict_user_permissions", 0)
+
+		with as_user(self.reconciliation_manager("Batch", batch, "Stock Reconciliation")):
+			assert_refused(self, get_stock_balance_for, self.item, WAREHOUSE, *args)
+			self.assertEqual(get_stock_balance_for(batch_item, WAREHOUSE, *args, batch)["qty"], 4)
+
+		with as_user(self.reconciliation_manager("Batch", batch, None)):
+			self.assertEqual(get_stock_balance_for(self.item, WAREHOUSE, *args)["qty"], 7)
+
+		user = self.reconciliation_manager("Item", self.item, "Stock Reconciliation")
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Item",
+				"for_value": self.other_item,
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Stock Reconciliation",
+			}
+		).insert(ignore_permissions=True)
+		with as_user(user):
+			listed = set()
+			for row in get_items(OTHER_WAREHOUSE, *args, "_Test Company"):
+				listed.add(row["item_code"])
+		self.assertEqual(listed, {self.item, self.other_item})
+
+	def test_reconciliation_balance_checks_inventory_dimensions(self):
+		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
+			create_inventory_dimension,
+		)
+
+		if not frappe.db.exists("DocType", "Plant"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Plant",
+					"module": "Stock",
+					"custom": 1,
+					"fields": [
+						{"fieldname": "plant_name", "fieldtype": "Data", "label": "Plant Name", "reqd": 1}
+					],
+					"autoname": "field:plant_name",
+				}
+			).insert(ignore_permissions=True)
+		dimension = create_inventory_dimension(dimension_name="ID-Plant", reference_document="Plant")
+		plants = []
+		for name in ("TSBP Plant A", "TSBP Plant B"):
+			frappe.get_doc({"doctype": "Plant", "plant_name": name}).insert(ignore_permissions=True)
+			plants.append(name)
+		args = (nowdate(), nowtime())
+
+		for applicable_for in (None, "Stock Reconciliation", "Sales Order"):
+			with self.subTest(applicable_for=applicable_for):
+				with as_user(self.reconciliation_manager("Plant", plants[0], applicable_for)):
+					get_stock_balance_for(
+						self.item,
+						WAREHOUSE,
+						*args,
+						inventory_dimensions_dict={dimension.target_fieldname: plants[0]},
+					)
+					outside = {dimension.target_fieldname: plants[1]}
+					if applicable_for == "Sales Order":
+						get_stock_balance_for(self.item, WAREHOUSE, *args, inventory_dimensions_dict=outside)
+					else:
+						assert_refused(
+							self,
+							get_stock_balance_for,
+							self.item,
+							WAREHOUSE,
+							*args,
+							inventory_dimensions_dict=outside,
+						)
+
+		frappe.get_doc({"doctype": "Plant", "plant_name": "TSBP Plant C"}).insert(ignore_permissions=True)
+		frappe.db.set_single_value("System Settings", "apply_strict_user_permissions", 1)
+		self.addCleanup(frappe.db.set_single_value, "System Settings", "apply_strict_user_permissions", 0)
+		user = self.reconciliation_manager("Plant", plants[0], "Stock Reconciliation")
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Plant",
+				"for_value": plants[1],
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Stock Reconciliation",
+			}
+		).insert(ignore_permissions=True)
+
+		def form_balance(plant):
+			row = {"item_code": self.item, "warehouse": WAREHOUSE, dimension.source_fieldname: plant}
+			return get_stock_balance_for(self.item, WAREHOUSE, *args, None, row=row, company="_Test Company")
+
+		with as_user(user):
+			self.assertEqual(form_balance(plants[0])["qty"], 7)
+			self.assertEqual(form_balance(plants[1])["qty"], 7)
+			assert_refused(self, form_balance, "TSBP Plant C")
+
 	def test_apply_putaway_rule_requires_form_write(self):
 		rule = self.make_putaway_rule()
 
