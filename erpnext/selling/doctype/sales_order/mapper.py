@@ -499,8 +499,9 @@ def make_sales_invoice(
 			invoice = frappe.qb.DocType("Sales Invoice")
 			invoice_item = frappe.qb.DocType("Sales Invoice Item")
 			sales_order_item = frappe.qb.DocType("Sales Order Item")
+			qty_in_stock_uom = invoice_item.qty * invoice_item.conversion_factor
 			credit_note_qty = (
-				Case().when(get_credit_note_return_criterion(invoice), -invoice_item.qty).else_(0)
+				Case().when(get_credit_note_return_criterion(invoice), -qty_in_stock_uom).else_(0)
 			)
 			rows = (
 				frappe.qb.from_(invoice_item)
@@ -509,12 +510,14 @@ def make_sales_invoice(
 				.inner_join(invoice)
 				.on(invoice.name == invoice_item.parent)
 				.select(
-					invoice_item.so_detail,
-					Sum(invoice_item.qty).as_("billed_qty"),
-					Sum(credit_note_qty).as_("credit_note_returned_qty"),
+					sales_order_item.name.as_("so_detail"),
+					(Sum(qty_in_stock_uom) / sales_order_item.conversion_factor).as_("billed_qty"),
+					(Sum(credit_note_qty) / sales_order_item.conversion_factor).as_(
+						"credit_note_returned_qty"
+					),
 				)
 				.where((invoice_item.docstatus == 1) & (sales_order_item.parent == source_name))
-				.groupby(invoice_item.so_detail)
+				.groupby(sales_order_item.name)
 			).run(as_dict=True)
 			invoiced_qty_by_item = {row.so_detail: row for row in rows}
 
