@@ -18,7 +18,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_material_receipt, make_stock_entry
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
@@ -1293,29 +1293,25 @@ def get_supplied_items(scr_doc):
 
 
 def make_stock_in_entry(**args):
-	args = frappe._dict(args)
+	doc = make_material_receipt([get_rm_receipt_row(frappe._dict(row)) for row in args["rm_items"]])
 
 	items = {}
-	for row in args.rm_items:
-		row = frappe._dict(row)
-
-		doc = make_stock_entry(
-			target=row.warehouse or "_Test Warehouse - _TC",
-			item_code=row.item_code,
-			qty=row.qty or 1,
-			basic_rate=row.rate or 100,
+	for child_row in doc.items:
+		details = items.setdefault(
+			child_row.item_code, frappe._dict({"qty": 0, "serial_no": [], "batch_no": defaultdict(float)})
 		)
-
-		if row.item_code not in items:
-			items.setdefault(
-				row.item_code, frappe._dict({"qty": 0, "serial_no": [], "batch_no": defaultdict(float)})
-			)
-
-		child_row = doc.items[0]
-		details = items[child_row.item_code]
 		update_item_details(child_row, details)
 
 	return items
+
+
+def get_rm_receipt_row(row):
+	return {
+		"target": row.warehouse or "_Test Warehouse - _TC",
+		"item_code": row.item_code,
+		"qty": row.qty or 1,
+		"basic_rate": row.rate or 100,
+	}
 
 
 def update_item_details(child_row, details):
