@@ -1238,6 +1238,34 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(expected_gl_entries[gle.account][1], gle.debit)
 			self.assertEqual(expected_gl_entries[gle.account][2], gle.credit)
 
+	def test_is_paid_cash_bank_account_currency(self):
+		pi = make_purchase_invoice(
+			is_paid=1,
+			cash_bank_account="_Test Bank USD - _TC",
+			do_not_save=True,
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Account Currency must be INR", pi.save)
+
+		pi = make_purchase_invoice(
+			currency="USD",
+			conversion_rate=80,
+			is_paid=1,
+			cash_bank_account="_Test Bank USD - _TC",
+			do_not_save=True,
+		)
+		pi.paid_amount = 250
+		pi.insert()
+		pi.submit()
+
+		bank_gle = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pi.name, "account": "_Test Bank USD - _TC"},
+			["credit", "credit_in_account_currency"],
+			as_dict=True,
+		)
+		self.assertEqual(bank_gle.credit, 20000)
+		self.assertEqual(bank_gle.credit_in_account_currency, 250)
+
 	def test_purchase_invoice_for_is_paid_and_update_stock_gl_entry_with_perpetual_inventory(self):
 		pi = make_purchase_invoice(
 			update_stock=1,
