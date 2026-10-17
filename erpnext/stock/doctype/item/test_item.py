@@ -726,6 +726,225 @@ class TestItem(ERPNextTestSuite):
 		variant.item_name = "_Test Numeric Variant Large 1.5m"
 		variant.save()
 
+	def test_numeric_range_is_read_per_template(self):
+		from erpnext.controllers.item_variant import validate_item_variant_attributes
+
+		template = self.make_numeric_template()
+		validate_item_variant_attributes(create_variant("_Test Variant Item", {"Test Size": "Small"}))
+		frappe.delete_doc_if_exists("Item", f"{template}-L-20", force=1)
+
+		variant = create_variant(template, {"Test Size": "Large", "Test Item Depth": 20})
+		variant.save()
+
+	def test_numeric_attribute_refuses_text(self):
+		template = self.make_numeric_template()
+		variant = create_variant(template, {"Test Size": "Large", "Test Item Depth": "abc"})
+		self.assertRaises(InvalidItemAttributeValueError, variant.save)
+
+		from erpnext.controllers.item_variant import validate_is_incremental
+
+		depth = frappe._dict(from_range=0, to_range=2000, increment=10)
+		validate_is_incremental(depth, "Test Item Depth", "1,000", template)
+
+	def test_manufacturer_variant_is_reused(self):
+		from erpnext.controllers.item_variant import get_variant
+
+		if not frappe.db.exists("Manufacturer", "_Test Variant Manufacturer"):
+			frappe.get_doc({"doctype": "Manufacturer", "short_name": "_Test Variant Manufacturer"}).insert()
+
+		template = make_item(
+			"_Test Manufacturer Template Item", {"has_variants": 1, "variant_based_on": "Manufacturer"}
+		).name
+		variants = [
+			get_variant(
+				template, manufacturer="_Test Variant Manufacturer", manufacturer_part_no="P-100"
+			).name
+			for _call in range(2)
+		]
+
+		self.assertEqual(variants[0], variants[1])
+
+	def test_standard_rate_price_goes_to_a_selling_list(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 500,
+				"item_defaults": [{"company": "_Test Company", "default_price_list": "Standard Buying"}],
+			}
+		).name
+		self.assertFalse(frappe.db.exists("Item Price", {"item_code": item, "price_list": "Standard Buying"}))
+		self.assertTrue(frappe.db.exists("Item Price", {"item_code": item, "selling": 1}))
+
+		if not frappe.db.exists("Price List", "_Test Second Buying List"):
+			frappe.get_doc(
+				{
+					"doctype": "Price List",
+					"price_list_name": "_Test Second Buying List",
+					"buying": 1,
+					"currency": "INR",
+				}
+			).insert()
+		shared = make_item(
+			properties={
+				"is_stock_item": 0,
+				"standard_rate": 300,
+				"item_defaults": [
+					{"company": "_Test Company", "default_price_list": "Standard Buying"},
+					{"company": "_Test Company 1", "default_price_list": "_Test Second Buying List"},
+				],
+			}
+		).name
+		self.assertEqual(frappe.db.count("Item Price", {"item_code": shared}), 1)
+
+		template = make_item(
+			properties={"has_variants": 1, "standard_rate": 700, "attributes": [{"attribute": "Test Size"}]}
+		)
+		self.assertFalse(frappe.db.exists("Item Price", {"item_code": template.name}))
+
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
+	def test_standard_rate_price_uses_the_selling_exchange_rate(self):
+		from frappe.utils import add_days, today
+
+		if not frappe.db.exists("Currency", "TSR"):
+			frappe.get_doc({"doctype": "Currency", "currency_name": "TSR", "enabled": 1}).insert()
+
+		if not frappe.db.exists("Price List", "_Test Selling TSR Standard Rate List"):
+			frappe.get_doc(
+				{
+					"doctype": "Price List",
+					"price_list_name": "_Test Selling TSR Standard Rate List",
+					"selling": 1,
+					"currency": "TSR",
+				}
+			).insert()
+
+		for days, rate, for_buying, for_selling in ((-5, 80, 0, 1), (-1, 90, 1, 0)):
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": add_days(today(), days),
+					"from_currency": "TSR",
+					"to_currency": "INR",
+					"exchange_rate": rate,
+					"for_buying": for_buying,
+					"for_selling": for_selling,
+				}
+			).insert()
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 800,
+				"item_defaults": [
+					{"company": "_Test Company", "default_price_list": "_Test Selling TSR Standard Rate List"}
+				],
+			}
+		).name
+		price = frappe.db.get_value(
+			"Item Price",
+			{"item_code": item, "price_list": "_Test Selling TSR Standard Rate List"},
+			"price_list_rate",
+		)
+		self.assertEqual(price, 10)
+
+	def test_maintain_stock_cannot_be_turned_on_after_an_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = make_item(properties={"is_stock_item": 0})
+		make_purchase_invoice(item_code=item.name, qty=4, rate=250)
+
+		item.reload()
+		item.is_stock_item = 1
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_stock_uom_cannot_change_while_a_work_order_reserves_it(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"})
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material.name], rm_qty=1)
+		make_wo_order_test_record(
+			production_item=finished_good, bom_no=bom.name, qty=10, source_warehouse="_Test Warehouse - _TC"
+		)
+
+		raw_material.reload()
+		raw_material.stock_uom = "Kg"
+		self.assertRaises(frappe.ValidationError, raw_material.save)
+
+	def test_item_default_accounts_follow_the_company_and_type(self):
+		for field, account in (
+			("default_cogs_account", "Cost of Goods Sold - _TC1"),
+			("default_inventory_account", "Sales - _TC"),
+		):
+			item = make_item(properties={"is_stock_item": 1})
+			item.append("item_defaults", {"company": "_Test Company", field: account})
+			self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_edited_variant_is_checked_for_duplicates_and_range(self):
+		template = self.make_numeric_template()
+		variants = []
+		for size in ("Small", "Large"):
+			variant = create_variant(template, {"Test Size": size, "Test Item Depth": 20})
+			variant.save()
+			variants.append(variant)
+
+		for attribute, value in (("Test Size", "Small"), ("Test Item Depth", 999)):
+			variant = frappe.get_doc("Item", variants[1].name)
+			next(row for row in variant.attributes if row.attribute == attribute).attribute_value = value
+			self.assertRaises(frappe.ValidationError, variant.save)
+
+	def test_merge_keeps_the_target_bin_reservations(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.utils import get_bin
+
+		old_item = make_item(properties={"is_stock_item": 1}).name
+		target_item = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=old_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=target_item, target="_Test Warehouse - _TC", qty=5, basic_rate=300)
+		bom = make_bom(item=finished_good, raw_materials=[target_item], rm_qty=1)
+		make_wo_order_test_record(
+			production_item=finished_good, bom_no=bom.name, qty=6, source_warehouse="_Test Warehouse - _TC"
+		)
+
+		frappe.rename_doc("Item", old_item, target_item, merge=True)
+
+		self.assertEqual(get_bin(target_item, "_Test Warehouse - _TC").reserved_qty_for_production, 6)
+
+	def make_numeric_template(self):
+		frappe.flags.attribute_values = None
+		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
+			frappe.get_doc(
+				{
+					"doctype": "Item Attribute",
+					"attribute_name": "Test Item Depth",
+					"numeric_values": 1,
+					"from_range": 0,
+					"to_range": 50,
+					"increment": 10,
+				}
+			).insert()
+
+		return make_item(
+			"_Test Depth Template Item",
+			{
+				"has_variants": 1,
+				"attributes": [
+					{"attribute": "Test Size"},
+					{
+						"attribute": "Test Item Depth",
+						"numeric_values": 1,
+						"from_range": 0,
+						"to_range": 50,
+						"increment": 10,
+					},
+				],
+			},
+		).name
+
 	def test_item_merging(self):
 		old = create_item(frappe.generate_hash(length=20)).name
 		new = create_item(frappe.generate_hash(length=20)).name
@@ -873,6 +1092,47 @@ class TestItem(ERPNextTestSuite):
 			item_doc.has_variants = 1
 			self.assertRaises(StockExistsForTemplate, item_doc.save)
 
+	def test_invalid_upc_a_barcode_is_refused(self):
+		from erpnext.stock.doctype.item.item import InvalidBarcode
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("barcodes", {"barcode": "036000291453", "barcode_type": "UPC-A"})
+		self.assertRaises(InvalidBarcode, item.save)
+
+	def test_reorder_group_change_is_checked(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		other_group = create_warehouse("_Test Reorder Other Group", {"is_group": 1})
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"reorder_levels": [
+					{
+						"warehouse_group": "_Test Warehouse Group - _TC",
+						"warehouse": "_Test Warehouse Group-C1 - _TC",
+						"warehouse_reorder_level": 10,
+						"warehouse_reorder_qty": 5,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		)
+
+		item.reorder_levels[0].warehouse_group = other_group
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_item_cannot_be_merged_into_a_template(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+			}
+		).name
+
+		self.assertRaises(frappe.ValidationError, frappe.rename_doc, "Item", item, template, merge=True)
+
 	def test_add_item_barcode(self):
 		# Clean up
 		item_code = "Test Item Barcode"
@@ -886,7 +1146,7 @@ class TestItem(ERPNextTestSuite):
 			{
 				"barcode": "ARBITRARY_TEXT",
 			},
-			{"barcode": "72527273070", "barcode_type": "UPC-A"},
+			{"barcode": "036000291452", "barcode_type": "UPC-A"},
 			{"barcode": "123456", "barcode_type": "CODE-39"},
 			{"barcode": "401268452363", "barcode_type": "EAN"},
 			{"barcode": "90311017", "barcode_type": "EAN"},
