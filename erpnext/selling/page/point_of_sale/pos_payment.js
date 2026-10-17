@@ -137,6 +137,12 @@ erpnext.PointOfSale.Payment = class {
 		this.numpad_value = "";
 	}
 
+	get_payment_precision() {
+		const format = get_number_format(this.events.get_frm().doc.currency);
+		const info = get_number_format_info(format);
+		return info.decimal_str ? frappe.sys_defaults.currency_precision || info.precision : 0;
+	}
+
 	on_numpad_clicked($btn, from_numpad = true) {
 		const button_value = from_numpad ? $btn.attr("data-button-value") : $btn;
 
@@ -149,8 +155,7 @@ erpnext.PointOfSale.Payment = class {
 			return;
 		}
 
-		const number_format_details = get_number_format_info(frappe.sys_defaults.number_format);
-		const precision = frappe.sys_defaults.currency_precision || number_format_details.precision;
+		const precision = this.get_payment_precision();
 		this.numpad_value = "0";
 		if (this.selected_mode.get_value()) {
 			this.numpad_value = (this.selected_mode.get_value() * 10 ** precision).toFixed(0).toString();
@@ -536,6 +541,7 @@ erpnext.PointOfSale.Payment = class {
 				df: {
 					label: p.mode_of_payment,
 					fieldtype: "Currency",
+					options: "currency",
 					placeholder: __("Enter {0} amount.", [__(p.mode_of_payment)]),
 					onchange: function () {
 						const current_value = frappe.model.get_value(p.doctype, p.name, "amount");
