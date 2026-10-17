@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import math
+
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Max, Min, Sum
@@ -347,6 +349,8 @@ def get_producible_fg_items(filters):
 	for row in rows:
 		row.qty_per_unit = flt(row.qty_per_unit)
 		row.available_qty = flt(row.actual_qty)
-		row.producible_qty = int(row.available_qty // row.qty_per_unit) if row.qty_per_unit > 0 else None
+		row.producible_qty = (
+			math.floor(flt(row.available_qty / row.qty_per_unit, 9)) if row.qty_per_unit > 0 else None
+		)
 
 	return rows
