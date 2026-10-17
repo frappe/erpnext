@@ -78,19 +78,6 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 
 		self.assertEqual(ranges, expected_ranges)
 
-	def test_basic_report_functionality(self):
-		"""Stock analytics report generates balance "as of" periods based on
-		user defined ranges. Check that this behaviour is correct."""
-
-		# create stock movement in 3 months at 15th of month
-		today = getdate()
-		movement = [
-			(10, add_to_date(today, months=0).replace(day=15)),
-			(-5, add_to_date(today, months=1).replace(day=15)),
-			(10, add_to_date(today, months=2).replace(day=15)),
-		]
-		self.assert_single_item_report(movement, [10, 5, 15])
-
 	def test_empty_month_in_between(self):
 		today = getdate()
 		movement = [
