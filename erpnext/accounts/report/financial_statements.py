@@ -141,7 +141,7 @@ def build_period_list(filters: frappe._dict) -> list[dict]:
 	- If `group_by_dimension` is set, returns a dimension * period cross-product via `get_dimension_period_list`.
 	- Otherwise, returns plain time buckets via `get_period_list`.
 	"""
-	if filters.group_by_dimension and not filters.report_template:
+	if filters.group_by_dimension:
 		return get_dimension_period_list(filters)
 
 	return get_period_list(
