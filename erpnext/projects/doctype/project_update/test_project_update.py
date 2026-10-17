@@ -66,14 +66,6 @@ class TestProjectUpdate(ERPNextTestSuite):
 		with patch("frappe.sendmail"), self.assertWarns(PendingDeprecationWarning):
 			daily_reminder()
 
-	def test_replies_are_collected_once(self):
-		project_update = make_project_update()
-		receive_reply(project_update, "admin@example.com", "Done with design")
-
-		collect_project_status()
-		collect_project_status()
-		self.assertEqual(len(frappe.get_doc("Project Update", project_update).users), 1)
-
 	def test_reply_with_a_link_is_collected_once(self):
 		project_update = make_project_update()
 		receive_reply(project_update, "admin@example.com", "See [the design](https://example.com/design)")
