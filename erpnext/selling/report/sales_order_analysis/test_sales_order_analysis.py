@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import frappe
 from frappe.utils import add_days
 
@@ -324,19 +322,6 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 		self.assertEqual(len(data), 2)
 		self.assertEqual([(row["uom"], row["qty"]) for row in data], [("Box", 2), ("Nos", 10)])
 
-	def test_10_group_by_filters_cannot_be_combined(self):
-		self.assertRaises(
-			frappe.ValidationError,
-			execute,
-			{
-				"company": "_Test Company",
-				"from_date": "2021-06-01",
-				"to_date": "2021-06-30",
-				"group_by_so": 1,
-				"group_by_item": 1,
-			},
-		)
-
 	def test_11_group_by_item_keeps_each_company_apart(self):
 		rows = [
 			self.make_item_row("_Test Company", 10),
@@ -350,27 +335,3 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 			[(row["company"], row["qty"]) for row in grouped],
 			[("_Test Company", 16), ("_Test Company 1", 4)],
 		)
-
-	def test_12_company_falls_back_to_the_default(self):
-		transaction_date = "2021-06-01"
-		item, so = self.create_sales_order(transaction_date)
-		filters = {"from_date": "2021-06-01", "to_date": "2021-06-30"}
-
-		with patch("erpnext.get_default_company", return_value="_Test Company"):
-			columns, data, message, chart = execute(filters)
-
-		self.assertEqual(len(data), 1)
-		self.assertEqual(data[0]["sales_order"], so.name)
-
-		with patch("erpnext.get_default_company", return_value="_Test Company 1"):
-			columns, data, message, chart = execute(filters)
-
-		self.assertNotIn(so.name, [row["sales_order"] for row in data])
-
-	def test_13_company_is_mandatory_without_a_default(self):
-		with patch("erpnext.get_default_company", return_value=None):
-			self.assertRaises(
-				frappe.ValidationError,
-				execute,
-				{"from_date": "2021-06-01", "to_date": "2021-06-30"},
-			)

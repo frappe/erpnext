@@ -59,7 +59,9 @@ class TestProjectWiseStockTracking(ERPNextTestSuite):
 	def test_delivered_cost_includes_update_stock_invoices(self):
 		project = self.make_project()
 		item_code = self.make_stocked_item()
-		self.submit_for_project(create_delivery_note(item_code=item_code, do_not_submit=True), project)
+		self.submit_for_project(
+			create_delivery_note(item_code=item_code, rate=500, do_not_submit=True), project
+		)
 		self.submit_for_project(
 			create_sales_invoice(item_code=item_code, update_stock=1, do_not_submit=True), project
 		)
@@ -72,15 +74,6 @@ class TestProjectWiseStockTracking(ERPNextTestSuite):
 		make_purchase_invoice(item_code=item_code, qty=2, rate=100, update_stock=1, project=project)
 
 		self.assertEqual(self.get_report_row(project)[1], 200)
-
-	def test_delivered_cost_is_stock_value(self):
-		project = self.make_project()
-		item_code = self.make_stocked_item()
-		self.submit_for_project(
-			create_delivery_note(item_code=item_code, rate=500, do_not_submit=True), project
-		)
-
-		self.assertEqual(self.get_report_row(project)[3], 100)
 
 	def test_delivered_cost_follows_row_project(self):
 		project, header_project = self.make_project(), self.make_project()

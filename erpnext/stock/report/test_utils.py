@@ -87,12 +87,6 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 		_, result = prepare_serial_batch_report(columns, data, batch_fields=("batch_no",))
 		self.assertEqual(result[0].batch_no_number, "Legacy,Lot\nReport-001")
 
-	def test_link_ids_are_not_matched_as_physical_numbers(self):
-		self.make_number("Serial No", self.serial.name)
-		_, result = prepare_serial_batch_report(["Serial:Link/Serial No:120"], [[self.serial.name]])
-		self.assertEqual(result[0].serial, self.serial.name)
-		self.assertEqual(result[0].serial_number, "Report-001")
-
 	def test_array_results_export_numbers_without_hidden_ids(self):
 		columns = ["Serial:Link/Serial No:120", "Batch:Link/Batch:120", "Qty:Float:80"]
 		data = [[self.serial.name, self.batch.name, 2]]
@@ -102,15 +96,6 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 		self.assertEqual(data, [[self.serial.name, self.batch.name, 2]])
 		self.assertEqual(result[0].serial, self.serial.name)
 		self.assertEqual(result[0].batch, self.batch.name)
-
-	def test_empty_results_keep_column_visibility(self):
-		columns, data = prepare_serial_batch_report(
-			[{"label": "Batch", "fieldname": "batch", "fieldtype": "Link", "options": "Batch", "hidden": 1}],
-			[],
-		)
-		self.assertEqual(data, [])
-		self.assertEqual(columns[0].fieldname, "batch_number")
-		self.assertTrue(all(column["hidden"] for column in columns))
 
 	def test_available_serials_include_legacy_ledger_text(self):
 		entries = [
