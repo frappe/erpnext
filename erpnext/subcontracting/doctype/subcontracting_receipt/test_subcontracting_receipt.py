@@ -2085,11 +2085,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2149,11 +2149,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt_with_tax_withholding_row(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2216,11 +2216,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
