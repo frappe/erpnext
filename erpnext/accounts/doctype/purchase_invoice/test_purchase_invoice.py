@@ -2795,11 +2795,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			get_gl_entries,
 			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
 		)
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Batch Invoice Transfer From", company=company)
@@ -2891,11 +2889,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		from erpnext.stock.doctype.item.test_item import create_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
 		)
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
 		from_warehouse = create_warehouse("_Test Returned Transfer From", company=company)

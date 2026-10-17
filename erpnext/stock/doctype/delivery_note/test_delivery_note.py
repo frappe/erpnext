@@ -3332,8 +3332,11 @@ class TestDeliveryNote(ERPNextTestSuite):
 			if item_code != "_Packed Service Item":
 				rm_items.append(item_code)
 
-				for rate in [100, 200]:
-					make_stock_entry(item=item_code, target="_Test Warehouse - _TC", qty=5, rate=rate)
+				se = make_stock_entry(
+					item=item_code, target="_Test Warehouse - _TC", qty=5, rate=100, do_not_submit=True
+				)
+				se.append("items", {**se.items[0].as_dict(no_default_fields=True), "basic_rate": 200})
+				se.submit()
 
 		make_product_bundle("_Packed Service Item", rm_items)
 		dn = create_delivery_note(
@@ -4105,10 +4108,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
 		)
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		receipt = make_purchase_receipt(warehouse="Stores - TCP1", company=company, qty=10)
 		kwargs = {
@@ -4139,10 +4140,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			make_purchase_receipt,
-			prepare_data_for_internal_transfer,
 		)
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		transit_warehouse = "Work In Progress - TCP1"
 		component = make_item(properties={"is_stock_item": 1}).name

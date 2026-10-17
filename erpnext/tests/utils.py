@@ -207,6 +207,7 @@ class BootStrapTestData:
 		self.make_contact()
 		self.update_support_settings()
 		self.update_selling_settings()
+		self.make_stock_ledger_fixtures()
 
 		frappe.db.commit()  # nosemgrep
 
@@ -255,6 +256,71 @@ class BootStrapTestData:
 		stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 		stock_settings.enable_serial_and_batch_no_for_item = 1
 		stock_settings.save()
+
+	def make_stock_ledger_fixtures(self):
+		self.make_unrealized_profit_loss_account()
+		self.make_reposting_items()
+		self.make_item_valuation_warehouses()
+
+	def make_item_valuation_warehouses(self):
+		names = [f"IV - Test Warehouse {suffix}" for suffix in ("J", "K")]
+		accounts = [
+			{
+				"doctype": "Account",
+				"account_name": name,
+				"parent_account": "Stock Assets - _TC",
+				"account_type": "Stock",
+				"company": "_Test Company",
+			}
+			for name in names
+		]
+		self.make_records(["account_name", "company"], accounts)
+		warehouses = [
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": name,
+				"parent_warehouse": "_Test Warehouse Group - _TC",
+				"account": f"{name} - _TC",
+				"company": "_Test Company",
+			}
+			for name in names
+		]
+		self.make_records(["warehouse_name", "company"], warehouses)
+
+	def make_reposting_items(self):
+		properties = {
+			"_Test Item for Reposting": {},
+			"_Test Finished Item for Reposting": {},
+			"_Test Subcontracted Item for Reposting": {"is_sub_contracted_item": 1},
+			"_Test Bundled Item for Reposting": {"is_stock_item": 0},
+		}
+		records = [
+			{
+				"doctype": "Item",
+				"item_code": item_code,
+				"item_name": item_code,
+				"description": item_code,
+				"item_group": "Products",
+				"valuation_method": "FIFO",
+				**extra,
+			}
+			for item_code, extra in properties.items()
+		]
+		self.make_records(["item_code"], records)
+
+	def make_unrealized_profit_loss_account(self):
+		company = "_Test Company with perpetual inventory"
+		account = {
+			"doctype": "Account",
+			"account_name": "Unrealized Profit and Loss",
+			"parent_account": "Direct Income - TCP1",
+			"account_type": "Income Account",
+			"company": company,
+		}
+		self.make_records(["account_name", "company"], [account])
+		frappe.db.set_value(
+			"Company", company, "unrealized_profit_loss_account", "Unrealized Profit and Loss - TCP1"
+		)
 
 	def make_records(self, key, records):
 		doctype = records[0].get("doctype")
