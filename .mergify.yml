@@ -94,5 +94,6 @@ queue_rules:
     merge_conditions: *suite_checks
 
 merge_queue:
+  max_parallel_checks: 1
   queue_controls_comment: false
   skip_intermediate_results: true
