@@ -6,7 +6,8 @@
 import frappe
 from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 from erpnext.controllers.item_close import validate_parent_reopen
@@ -42,6 +43,8 @@ class BillingStatusService:
 			dn_doc = doc if (dn == doc.name) else frappe.get_lazy_doc("Delivery Note", dn)
 			update_dn_modified = update_modified and dn != doc.return_against
 			dn_doc.update_billing_percentage(update_modified=update_dn_modified)
+			# Deliveries and returns of the same Sales Order row can shift which returns are settled.
+			update_billing_percentage_of_returns(dn)
 
 		doc.load_from_db()
 
@@ -79,11 +82,13 @@ def get_creditable_qty(return_doc) -> dict:
 
 	billed_qty = get_billed_qty(set(original_rows.values()))
 	credited_qty = get_credited_qty(set(original_rows.values()), return_doc.name)
+	settled_qty = get_settled_return_qty(return_doc.return_against)
 	creditable_qty = {}
 	for row in return_doc.items:
 		original = original_rows.get(row.name)
 		available = flt(billed_qty.get(original)) - flt(credited_qty.get(original))
-		creditable_qty[row.name] = max(min(abs(flt(row.qty)), available), 0)
+		unsettled = abs(flt(row.qty)) - flt(settled_qty.get(row.name))
+		creditable_qty[row.name] = max(min(unsettled, available), 0)
 		credited_qty[original] = flt(credited_qty.get(original)) + creditable_qty[row.name]
 
 	return creditable_qty
@@ -131,6 +136,124 @@ def get_credited_qty(original_rows: set, current_return: str) -> dict:
 		credited_qty[original] = flt(credited_qty.get(original)) + abs(flt(qty))
 
 	return credited_qty
+
+
+def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
+	"""Qty of each return row against `delivery_note` that its invoices already deducted.
+
+	An invoice made from a Delivery Note leaves out the returned qty. Once the original row is
+	invoiced up to its net qty, these returns are settled and need no credit note. Earlier
+	returns are settled first.
+	"""
+	dn = frappe.qb.DocType("Delivery Note")
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	return_rows = (
+		frappe.qb.from_(dn_item)
+		.join(dn)
+		.on(dn.name == dn_item.parent)
+		.select(dn_item.name, dn_item.dn_detail, dn_item.qty)
+		.where(
+			(dn.return_against == delivery_note)
+			& (dn.is_return == 1)
+			& (dn.docstatus == 1)
+			& (dn_item.dn_detail.isnotnull())
+		)
+		.orderby(dn.posting_date, dn.posting_time, dn.name)
+		.run(as_dict=True)
+	)
+	if not return_rows:
+		return {}
+
+	original_rows = {
+		row.name: row
+		for row in frappe.get_all(
+			"Delivery Note Item",
+			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
+			fields=["name", "qty", "so_detail"],
+		)
+	}
+	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
+	so_overbilled_qty = get_so_overbilled_qty(
+		{row.so_detail for row in original_rows.values() if row.so_detail}
+	)
+	returned_qty = {}
+	for row in return_rows:
+		returned_qty[row.dn_detail] = flt(returned_qty.get(row.dn_detail)) + abs(flt(row.qty))
+
+	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
+	settleable_qty = {}
+	for original, returned in returned_qty.items():
+		returned = flt(returned, qty_precision)
+		net_invoiced = flt(invoiced_qty.get(original))
+		uninvoiced = flt(flt(original_rows[original].qty) - net_invoiced, qty_precision)
+		# Until the net qty is fully invoiced, the next invoice still deducts the returns.
+		fully_invoiced = net_invoiced > 0 and returned >= uninvoiced
+		settleable = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
+		# Billing of the Sales Order row above its net delivered qty covers returned qty.
+		overbilled = flt(so_overbilled_qty.get(original_rows[original].so_detail))
+		settleable_qty[original] = max(settleable - overbilled, 0)
+
+	settled_qty = {}
+	for row in return_rows:
+		settled = min(abs(flt(row.qty)), settleable_qty[row.dn_detail])
+		settleable_qty[row.dn_detail] -= settled
+		settled_qty[row.name] = settled
+
+	return settled_qty
+
+
+def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
+	"""Qty of each Sales Order row invoiced above its net delivered qty (deliveries less returns),
+	limited to the qty invoiced directly against the Sales Order."""
+	if not so_details:
+		return {}
+
+	si = frappe.qb.DocType("Sales Invoice")
+	si_item = frappe.qb.DocType("Sales Invoice Item")
+	billed = (
+		frappe.qb.from_(si_item)
+		.join(si)
+		.on(si.name == si_item.parent)
+		.select(
+			si_item.so_detail,
+			Sum(si_item.qty),
+			Sum(Case().when(IfNull(si_item.dn_detail, "") == "", si_item.qty).else_(0)),
+		)
+		.where(si_item.so_detail.isin(list(so_details)) & (si_item.docstatus == 1) & (si.is_return == 0))
+		.groupby(si_item.so_detail)
+		.run()
+	)
+	billed_qty = {so_detail: qty for so_detail, qty, _so_qty in billed}
+	# Invoices made from a Delivery Note leave out its returns, so they do not cover them.
+	billed_against_so_qty = {so_detail: so_qty for so_detail, _qty, so_qty in billed}
+
+	# Return rows have a negative qty, so the sum is the net delivered qty.
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	delivered_qty = dict(
+		frappe.qb.from_(dn_item)
+		.select(dn_item.so_detail, Sum(dn_item.qty))
+		.where(dn_item.so_detail.isin(list(so_details)) & (dn_item.docstatus == 1))
+		.groupby(dn_item.so_detail)
+		.run()
+	)
+
+	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
+	overbilled_qty = {}
+	for so_detail in so_details:
+		overbilled = flt(flt(billed_qty.get(so_detail)) - flt(delivered_qty.get(so_detail)), qty_precision)
+		overbilled_qty[so_detail] = max(min(overbilled, flt(billed_against_so_qty.get(so_detail))), 0)
+
+	return overbilled_qty
+
+
+def update_billing_percentage_of_returns(delivery_note: str) -> None:
+	# Side effect on other documents, like for `return_against`: keep their modified timestamp.
+	for name in frappe.get_all(
+		"Delivery Note",
+		filters={"return_against": delivery_note, "is_return": 1, "docstatus": 1},
+		pluck="name",
+	):
+		frappe.get_lazy_doc("Delivery Note", name).update_billing_percentage(update_modified=False)
 
 
 def limit_to_creditable_qty(return_invoice, creditable_qty: dict) -> None:

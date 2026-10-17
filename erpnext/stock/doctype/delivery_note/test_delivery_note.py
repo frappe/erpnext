@@ -4177,6 +4177,152 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -2)
 
+	def test_return_deducted_on_original_invoice_is_billed(self):
+		from erpnext.controllers.queries import get_delivery_notes_to_be_billed
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=10, rate=500)
+
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+
+		invoice = make_sales_invoice(delivery_note.name)
+		self.assertEqual(invoice.items[0].qty, 8)
+		invoice.submit()
+
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertEqual(deducted_return.status, "Completed")
+		to_bill = get_delivery_notes_to_be_billed(
+			"Delivery Note", deducted_return.name, "name", 0, 20, {"is_return": 1}
+		)
+		self.assertFalse(to_bill)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
+		# A return made after the full invoice still needs a credit note.
+		later_return = make_sales_return(delivery_note.name)
+		later_return.items[0].qty = -3
+		later_return.submit()
+		self.assertEqual(later_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(later_return.name).items[0].qty, -3)
+
+		invoice.reload()
+		invoice.cancel()
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 0)
+
+	def test_fractional_return_deducted_on_original_invoice_is_billed(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(properties={"stock_uom": "Kg"}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		delivery_note = create_delivery_note(item_code=item, qty=1, rate=500)
+
+		returns = []
+		for qty in (-0.1, -0.7):
+			deducted_return = make_sales_return(delivery_note.name)
+			deducted_return.items[0].qty = qty
+			deducted_return.submit()
+			returns.append(deducted_return)
+
+		invoice = make_sales_invoice(delivery_note.name)
+		self.assertEqual(invoice.items[0].qty, 0.2)
+		invoice.submit()
+
+		for deducted_return in returns:
+			deducted_return.reload()
+			self.assertEqual(deducted_return.per_billed, 100)
+
+	def test_return_after_mixed_dn_and_so_billing_is_not_settled(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		delivery_note = create_dn_against_so(so.name, delivered_qty=10)
+
+		dn_invoice = make_sales_invoice(delivery_note.name)
+		dn_invoice.items[0].qty = 8
+		dn_invoice.submit()
+		so_invoice = make_si_from_so(so.name)
+		self.assertEqual(so_invoice.items[0].qty, 2)
+		so_invoice.submit()
+
+		# All 10 were billed, so the return needs a credit note for its full qty.
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -2
+		sales_return.submit()
+		self.assertEqual(sales_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(sales_return.name).items[0].qty, -2)
+
+	def test_return_settled_on_split_delivery_with_so_billing(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		first_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(first_delivery.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		dn_invoice = make_sales_invoice(first_delivery.name)
+		self.assertEqual(dn_invoice.items[0].qty, 3)
+		dn_invoice.submit()
+
+		create_dn_against_so(so.name, delivered_qty=5)
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.items[0].qty = 5
+		so_invoice.submit()
+
+		# Billing through the Sales Order covers the second delivery, not the deducted return.
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
+	def test_return_stays_settled_when_sibling_delivery_has_unsettled_return(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		first_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(first_delivery.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		make_sales_invoice(first_delivery.name).submit()
+
+		second_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		make_sales_invoice(second_delivery.name).submit()
+		billed_return = make_sales_return(second_delivery.name)
+		billed_return.items[0].qty = -2
+		billed_return.submit()
+
+		# Only the return after the full invoice needs a credit note.
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+		self.assertEqual(make_sales_invoice(billed_return.name).items[0].qty, -2)
+
+	def test_return_settled_again_when_sibling_delivery_is_submitted(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		first_delivery = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(first_delivery.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		make_sales_invoice(first_delivery.name).submit()
+
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.items[0].qty = 5
+		so_invoice.submit()
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 0)
+
+		# The second delivery takes up the Sales Order billing, so the return is settled again.
+		create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+
 	def test_inter_company_receipt_excludes_returned_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import (
 			make_inter_company_purchase_receipt,
