@@ -17,13 +17,9 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 	make_subcontracted_item,
-	make_subcontracted_items,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -51,12 +47,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingReceipt(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_project_is_carried_over_from_subcontracting_order(self):
 		project = make_project({"project_name": "_Test SCR Project"}).name
 		po = make_subcontracted_purchase_order(project)
@@ -869,9 +859,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
-		scr.reload()
-		scr.cancel()
-
 	def test_supplied_items_consumed_qty(self):
 		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
 		set_backflush_based_on("Material Transferred for Subcontract")
@@ -1451,6 +1438,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
 		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.items[0].qty = 2
 		scr1.save()
 
 		# Enable `Inspection Required before Purchase` in Item Master
@@ -1470,10 +1458,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		# SCR should be submitted successfully as Quality Inspection is set
 		scr1.submit()
-		scr1.reload()
-		scr1.cancel()
-		qa.reload()
-		qa.cancel()
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
@@ -2101,11 +2085,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2165,11 +2149,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt_with_tax_withholding_row(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2232,11 +2216,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,

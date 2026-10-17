@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 )
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_material_receipt, make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
@@ -3731,12 +3731,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
-
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
 		bom_tree = {
 			"Finished Good For SR": {
@@ -3748,21 +3747,22 @@ class TestProductionPlan(ERPNextTestSuite):
 		parent_bom = create_nested_bom(bom_tree, prefix="")
 
 		warehouse = "_Test Warehouse - _TC"
-
-		for item_code in [
+		item_codes = [
 			"SN Sub Assembly For SR 1",
 			"SN Sub Assembly For SR 2",
 			"SN Sub Assembly For SR 3",
 			"SN Raw Material For SR 1",
 			"SN Raw Material For SR 2",
 			"SN Raw Material For SR 3",
-		]:
+		]
+
+		for item_code in item_codes:
 			doc = frappe.get_doc("Item", item_code)
 			doc.has_serial_no = 1
 			doc.serial_no_series = f"SNN-{item_code}.-.#####"
 			doc.save()
 
-			make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+		receive_items_for_reservation(item_codes, warehouse)
 
 		plan = create_production_plan(
 			item_code=parent_bom.item,
@@ -3812,17 +3812,8 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 
 		additional_serial_nos = []
-
-		for item_code in [
-			"SN Sub Assembly For SR 1",
-			"SN Sub Assembly For SR 2",
-			"SN Sub Assembly For SR 3",
-			"SN Raw Material For SR 1",
-			"SN Raw Material For SR 2",
-			"SN Raw Material For SR 3",
-		]:
-			se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
-			additional_serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+		for row in receive_items_for_reservation(item_codes, warehouse).items:
+			additional_serial_nos.extend(get_serial_nos_from_bundle(row.serial_and_batch_bundle))
 
 		self.assertTrue(additional_serial_nos)
 
@@ -3876,14 +3867,12 @@ class TestProductionPlan(ERPNextTestSuite):
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertEqual(len(reserved_entries), 0)
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reservation_of_batch_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
-
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
 		bom_tree = {
 			"Finished Good For SR": {
@@ -3895,22 +3884,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		parent_bom = create_nested_bom(bom_tree, prefix="")
 
 		warehouse = "_Test Warehouse - _TC"
-
-		for item_code in [
+		item_codes = [
 			"Batch Sub Assembly For SR 1",
 			"Batch Sub Assembly For SR 2",
 			"Batch Sub Assembly For SR 3",
 			"Batch Raw Material For SR 1",
 			"Batch Raw Material For SR 2",
 			"Batch Raw Material For SR 3",
-		]:
+		]
+
+		for item_code in item_codes:
 			doc = frappe.get_doc("Item", item_code)
 			doc.has_batch_no = 1
 			doc.create_new_batch = 1
 			doc.batch_number_series = f"BCH-{item_code}.-.#####"
 			doc.save()
 
-			make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+		receive_items_for_reservation(item_codes, warehouse)
 
 		plan = create_production_plan(
 			item_code=parent_bom.item,
@@ -3959,19 +3949,10 @@ class TestProductionPlan(ERPNextTestSuite):
 			"Material Request", filters={"production_plan": plan.name}, pluck="name"
 		)
 
-		additional_batches = []
-
-		for item_code in [
-			"Batch Sub Assembly For SR 1",
-			"Batch Sub Assembly For SR 2",
-			"Batch Sub Assembly For SR 3",
-			"Batch Raw Material For SR 1",
-			"Batch Raw Material For SR 2",
-			"Batch Raw Material For SR 3",
-		]:
-			se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
-			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
-			additional_batches.append(batch_no)
+		additional_batches = [
+			get_batch_from_bundle(row.serial_and_batch_bundle)
+			for row in receive_items_for_reservation(item_codes, warehouse).items
+		]
 
 		self.assertTrue(additional_batches)
 
@@ -4025,7 +4006,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertEqual(len(reserved_entries), 0)
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_production_plan_for_partial_sub_assembly_items(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
@@ -4411,6 +4391,15 @@ def make_plan_with_sub_assembly():
 	for item in work_order.required_items:
 		item.source_warehouse = warehouse
 	return plan, work_order
+
+
+def receive_items_for_reservation(item_codes, warehouse):
+	return make_material_receipt(
+		[
+			{"item_code": item_code, "target": warehouse, "qty": 5, "basic_rate": 100}
+			for item_code in item_codes
+		]
+	)
 
 
 def make_bom(**args):
