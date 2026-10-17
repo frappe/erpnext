@@ -128,23 +128,17 @@ class TestEmailDigestDates(ERPNextTestSuite):
 		doc.to_date = getdate(from_date)
 		return doc
 
-	def test_set_dates_daily_looks_back_one_day(self):
-		doc = self.make_digest("Daily")
-		doc.set_dates()
-		self.assertEqual(doc.past_from_date, getdate("2026-06-14"))
-		self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
-
-	def test_set_dates_weekly_looks_back_one_week(self):
-		doc = self.make_digest("Weekly")
-		doc.set_dates()
-		self.assertEqual(doc.past_from_date, getdate("2026-06-08"))
-		self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
-
-	def test_set_dates_monthly_looks_back_one_month(self):
-		doc = self.make_digest("Monthly")
-		doc.set_dates()
-		self.assertEqual(doc.past_from_date, getdate("2026-05-15"))
-		self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
+	def test_set_dates_looks_back_one_period(self):
+		for frequency, past_from_date in (
+			("Daily", "2026-06-14"),
+			("Weekly", "2026-06-08"),
+			("Monthly", "2026-05-15"),
+		):
+			with self.subTest(frequency=frequency):
+				doc = self.make_digest(frequency)
+				doc.set_dates()
+				self.assertEqual(doc.past_from_date, getdate(past_from_date))
+				self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
 
 	def test_weekly_window_is_the_previous_monday_to_sunday(self):
 		from_date, to_date = self.make_digest("Weekly").get_from_to_date()
