@@ -50,7 +50,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class AssetSetup(ERPNextTestSuite):
 	def setUp(self):
-		set_depreciation_settings_in_company()
 		enable_cwip_accounting("Computers")
 		make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
@@ -2436,9 +2435,7 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 	return item
 
 
-def set_depreciation_settings_in_company(company=None):
-	if not company:
-		company = "_Test Company"
+def set_depreciation_settings_in_company(company):
 	company = frappe.get_doc("Company", company)
 	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - " + company.abbr
 	company.depreciation_expense_account = "_Test Depreciations - " + company.abbr
