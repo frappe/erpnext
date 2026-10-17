@@ -19,7 +19,7 @@ def get_columns(filters, trans):
 	# get conditions for periodic filter cond
 	period_cols, period_select = period_wise_columns_query(filters, trans)
 	# get conditions for grouping filter cond
-	group_by_cols = group_wise_column(filters.get("group_by"))
+	group_by_cols = group_wise_column(filters.get("group_by"), trans)
 
 	columns = (
 		based_on_details["based_on_cols"]
@@ -98,9 +98,6 @@ def get_data(filters, conditions):
 		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
 			cond += " and t1.status != 'Closed'"
 
-	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
-		cond += " and t1.quotation_to = 'Customer'"
-
 	cond += get_permission_condition(conditions["trans"])
 
 	year_start_date, year_end_date = frappe.get_cached_value(
@@ -114,7 +111,12 @@ def get_data(filters, conditions):
 		if filters.get("group_by") == "Item":
 			sel_col = "t2.item_code"
 		elif filters.get("group_by") == "Customer":
-			sel_col = "t1.party_name" if conditions.get("trans") == "Quotation" else "t1.customer"
+			# A Quotation's party spans Customer/Lead/Prospect, so key the breakdown by type and party
+			# (as based_on Customer does); otherwise same-named parties of different types would merge.
+			if conditions.get("trans") == "Quotation":
+				sel_col = "concat(t1.quotation_to, ': ', t1.party_name)"
+			else:
+				sel_col = "t1.customer"
 		elif filters.get("group_by") == "Supplier":
 			sel_col = "t1.supplier"
 
@@ -564,16 +566,21 @@ def based_wise_columns_query(based_on, trans):
 	return based_on_details
 
 
-def group_wise_column(group_by):
-	if group_by:
-		return [
-			{
-				"label": _(group_by),
-				"fieldtype": "Link",
-				"options": group_by,
-				"width": 120,
-				"fieldname": frappe.scrub(group_by),
-			}
-		]
-	else:
+def group_wise_column(group_by, trans=None):
+	if not group_by:
 		return []
+
+	# A Quotation's customer breakdown spans Customer/Lead/Prospect parties, so it can't link to a
+	# single master; show the party as plain data under a neutral label.
+	if trans == "Quotation" and group_by == "Customer":
+		return [{"label": _("Party"), "fieldtype": "Data", "width": 120, "fieldname": "party"}]
+
+	return [
+		{
+			"label": _(group_by),
+			"fieldtype": "Link",
+			"options": group_by,
+			"width": 120,
+			"fieldname": frappe.scrub(group_by),
+		}
+	]
