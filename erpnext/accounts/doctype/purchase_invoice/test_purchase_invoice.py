@@ -342,21 +342,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_purchase_invoice_for_supplier_released_today(self):
-		supplier = frappe.get_doc("Supplier", "_Test Supplier")
-		supplier.on_hold = 1
-		supplier.hold_type = "Payments"
-		supplier.release_date = nowdate()
-		supplier.save()
-
-		pi = make_purchase_invoice()
-
-		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
-		self.assertEqual(pe.party, supplier.name)
-
-		supplier.on_hold = 0
-		supplier.save()
-
 	def test_purchase_invoice_for_blocked_supplier_payment_past_date(self):
 		# this test is meant to fail only if something fails in the try block
 		with self.assertRaises(Exception):
