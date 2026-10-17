@@ -876,7 +876,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		batch_no = create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
 		item = frappe.get_doc("Item", "_BATCH ITEM")
 
-		se = make_stock_entry(
+		make_stock_entry(
 			target="_Test Warehouse - _TC",
 			item_code="_BATCH ITEM",
 			qty=2,
@@ -909,14 +909,6 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 
 		self.assertRaises(BatchNegativeStockError, sn_doc.make_serial_and_batch_bundle)
-
-		# teardown
-		pos_inv1.reload()
-		pos_inv1.cancel()
-		pos_inv1.delete()
-		pos_inv2.reload()
-		pos_inv2.delete()
-		se.cancel()
 
 	def test_ignore_pricing_rule(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
