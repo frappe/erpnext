@@ -112,11 +112,14 @@ class TestLandedCostReport(ERPNextTestSuite):
 		start = next(idx for idx, row in enumerate(rows) if row.get("name") == lcv.name)
 
 		self.assertEqual(
-			[(row.get("voucher_no"), row.get("vendor_invoice")) for row in rows[start : start + 4]],
 			[
-				(receipts[0].name, None),
-				(receipts[1].name, None),
-				(None, "FREIGHT-INV"),
-				(None, "CUSTOMS-INV"),
+				(row.get("voucher_no"), row.get("landed_cost"), row.get("vendor_invoice"))
+				for row in rows[start : start + 4]
+			],
+			[
+				(receipts[0].name, 200, None),
+				(receipts[1].name, 100, None),
+				(None, None, "FREIGHT-INV"),
+				(None, None, "CUSTOMS-INV"),
 			],
 		)
