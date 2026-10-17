@@ -1040,10 +1040,13 @@ def remove_ref_doc_link_from_pe(
 
 	linked_pe = set()
 	row_names = set()
+	advance_vouchers = set()
 
 	for row in reference_rows:
 		linked_pe.add(row.parent)
 		row_names.add(row.name)
+		if row.advance_voucher_type and row.advance_voucher_no:
+			advance_vouchers.add((row.advance_voucher_type, row.advance_voucher_no))
 
 	from erpnext.accounts.doctype.payment_request.payment_request import (
 		update_payment_requests_as_per_pe_references,
@@ -1080,6 +1083,9 @@ def remove_ref_doc_link_from_pe(
 			msg += _("Please cancel payment entry manually first")
 			frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
 
+		if pe_doc.docstatus == 1 and not pe_doc.book_advance_payments_in_separate_party_account:
+			repost_advance_payment_ledger(pe_doc)
+
 		(
 			qb.update(pay)
 			.set(pay.total_allocated_amount, pe_doc.total_allocated_amount)
@@ -1090,7 +1096,20 @@ def remove_ref_doc_link_from_pe(
 			.where(pay.name == pe)
 			.run()
 		)
+
+	for voucher_type, voucher_no in advance_vouchers:
+		update_voucher_outstanding(voucher_type, voucher_no, None, None, None)
+
 	frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
+
+
+def repost_advance_payment_ledger(doc):
+	_delete_adv_pl_entries(doc.doctype, doc.name)
+	for entry in get_payment_ledger_entries(doc.build_gl_map()):
+		if entry.doctype == "Advance Payment Ledger Entry":
+			adv = frappe.get_doc(entry)
+			adv.flags.ignore_permissions = 1
+			adv.submit()
 
 
 @frappe.whitelist()
