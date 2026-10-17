@@ -387,7 +387,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
 			return
 
-		if not self.doc.fg_completed_qty:
+		consumes_transferred_qty = self.backflush_based_on == "Material Transferred for Manufacture" and not (
+			self.wo_doc and self.wo_doc.skip_transfer
+		)
+		if not self.doc.fg_completed_qty or consumes_transferred_qty:
 			return
 
 		rm_items = [item for item in self.doc.items if item.s_warehouse]
