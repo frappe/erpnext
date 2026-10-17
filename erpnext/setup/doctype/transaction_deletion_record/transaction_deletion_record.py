@@ -978,7 +978,13 @@ class TransactionDeletionRecord(Document):
 		else:
 			last = 0
 
-		frappe.db.set_value("Series", prefix, "current", last, update_modified=False)
+		frappe.db.set_value(
+			"Series",
+			{"name": prefix, "doctype": ["in", [doctype_name, ""]]},
+			"current",
+			last,
+			update_modified=False,
+		)
 
 	def delete_version_log(self, doctype, docnames):
 		versions = qb.DocType("Version")
