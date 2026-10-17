@@ -198,32 +198,18 @@ class TestBankStatementImport(ERPNextTestSuite):
 
 	def test_get_transaction_reference_falls_back_to_bank_reference_on_nonref(self):
 		"""NONREF is the MT940 'no customer reference' sentinel; prefer bank_reference."""
-		self.assertEqual(
-			get_transaction_reference(
-				{
-					"customer_reference": "NONREF",
-					"bank_reference": "1234567890123456",
-					"transaction_reference": "STMTREF12345",
-				}
-			),
-			"1234567890123456",
-		)
-
-	def test_get_transaction_reference_falls_back_to_bank_reference_on_nonref_with_extra_details(self):
-		"""NONREF sentinel must trigger the bank_reference fallback even when
-		extra_details is populated. Without the 16-char gate, the old naive concat
-		would produce a junk reference like 'NONREFsome info' and bypass the check."""
-		self.assertEqual(
-			get_transaction_reference(
-				{
-					"customer_reference": "NONREF",
-					"extra_details": "some info",
-					"bank_reference": "1234567890123456",
-					"transaction_reference": "STMTREF12345",
-				}
-			),
-			"1234567890123456",
-		)
+		for extra_details in (None, "some info"):
+			self.assertEqual(
+				get_transaction_reference(
+					{
+						"customer_reference": "NONREF",
+						"extra_details": extra_details,
+						"bank_reference": "1234567890123456",
+						"transaction_reference": "STMTREF12345",
+					}
+				),
+				"1234567890123456",
+			)
 
 	def test_get_transaction_reference_does_not_append_extra_details_below_16_chars(self):
 		"""When customer_reference is below the 16-char cap, extra_details is a

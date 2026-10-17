@@ -40,7 +40,6 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		doc = self.make_ppr(receivable_payable_account=self.other_company_account(account_type="Receivable"))
 		self.assertRaises(frappe.ValidationError, doc.insert)
 
-	def test_bank_cash_account_must_belong_to_company(self):
 		doc = self.make_ppr(bank_cash_account=self.other_company_account())
 		self.assertRaises(frappe.ValidationError, doc.insert)
 

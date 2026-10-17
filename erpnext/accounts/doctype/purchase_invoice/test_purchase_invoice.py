@@ -455,11 +455,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
 		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", nowdate())
 
-	def test_rejected_hold_does_not_partially_update_invoice(self):
-		pi = make_purchase_invoice()
-
-		self.assertRaises(frappe.ValidationError, pi.block_invoice, "Hold", add_days(nowdate(), -1))
-
 		pi.reload()
 		self.assertEqual(pi.on_hold, 0)
 		self.assertIsNone(pi.release_date)

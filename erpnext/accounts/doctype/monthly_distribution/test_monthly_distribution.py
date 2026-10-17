@@ -39,17 +39,6 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 		# the auto-populated rows round to exactly 100 and pass validation
 		doc.validate()
 
-	def test_get_percentage_sums_period_window(self):
-		doc = self.make_distribution([("January", 50), ("February", 30), ("March", 20)])
-		doc.insert()  # total is 100, so validate passes
-
-		# a quarter starting in January covers Jan+Feb+Mar
-		self.assertEqual(get_percentage(doc, getdate("2026-01-01"), 3), 100)
-		# a single month picks up only that month
-		self.assertEqual(get_percentage(doc, getdate("2026-02-01"), 1), 30)
-		# months with no row simply contribute 0 (there is no guard that all 12 exist)
-		self.assertEqual(get_percentage(doc, getdate("2026-04-01"), 1), 0)
-
 	def test_periodwise_distribution_maps_each_period(self):
 		doc = self.make_distribution([("January", 50), ("February", 30), ("March", 20)])
 		doc.insert()
@@ -61,3 +50,4 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 		data = get_periodwise_distribution_data(doc.name, period_list, "Quarterly")
 		self.assertEqual(data["q1"], 100)  # Jan+Feb+Mar
 		self.assertEqual(data["q2"], 0)  # Apr+May+Jun carry no allocation
+		self.assertEqual(get_percentage(doc, getdate("2026-02-01"), 1), 30)

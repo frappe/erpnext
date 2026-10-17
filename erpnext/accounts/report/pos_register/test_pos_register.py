@@ -31,17 +31,6 @@ class TestPOSRegister(ERPNextTestSuite):
 		self.assertTrue(columns)
 		self.assertIsInstance(data, list)
 
-	def test_sales_invoices_made_at_the_pos_are_listed(self):
-		invoice = self.make_pos_sales_invoice({"Cash": 1000})
-		consolidated = self.make_pos_sales_invoice({"Cash": 1000})
-		frappe.db.set_value("Sales Invoice", consolidated.name, "is_consolidated", 1)
-
-		rows = self.run_report(group_by="")
-		self.assertEqual(
-			[(row.invoice_type, row.pos_invoice, row.paid_amount) for row in rows],
-			[("Sales Invoice", invoice.name, 1000)],
-		)
-
 	def test_payment_method_grouping_counts_each_grand_total_once(self):
 		self.make_pos_sales_invoice({"Cash": 600, "_Test POS Register Card": 400})
 		self.make_pos_sales_invoice({"Cash": 500}, rate=500)
@@ -83,6 +72,8 @@ class TestPOSRegister(ERPNextTestSuite):
 	def test_pos_invoices_are_listed_with_sales_invoices(self):
 		pos_invoice = self.make_pos_invoice({"Cash": 300, "_Test POS Register Card": 200}, rate=500)
 		sales_invoice = self.make_pos_sales_invoice({"Cash": 1000})
+		consolidated = self.make_pos_sales_invoice({"Cash": 1000})
+		frappe.db.set_value("Sales Invoice", consolidated.name, "is_consolidated", 1)
 
 		rows = self.run_report(group_by="")
 		self.assertEqual(

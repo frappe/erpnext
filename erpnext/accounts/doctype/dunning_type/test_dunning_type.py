@@ -120,7 +120,6 @@ class TestDunningType(ERPNextTestSuite):
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "Syntax error in template", doc.insert)
 
-	def test_invalid_jinja_template_in_closing_text_raises(self):
 		doc = make_dunning_type(
 			"_Test Dunning Invalid Closing Template",
 			dunning_letter_text=[

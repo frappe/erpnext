@@ -51,13 +51,10 @@ class TestAccountingDimension(ERPNextTestSuite):
 		self.assertEqual(gle.get("department"), "_Test Department - _TC")
 		self.assertEqual(gle1.get("department"), "_Test Department - _TC")
 
-	def test_child_table_not_allowed_as_dimension(self):
-		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Sales Team"})
-		self.assertRaises(frappe.ValidationError, dimension.insert)
-
-	def test_single_doctype_not_allowed_as_dimension(self):
-		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Selling Settings"})
-		self.assertRaises(frappe.ValidationError, dimension.insert)
+	def test_child_table_or_single_not_allowed_as_dimension(self):
+		for document_type in ("Sales Team", "Selling Settings"):
+			dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": document_type})
+			self.assertRaises(frappe.ValidationError, dimension.insert)
 
 	def test_mandatory(self):
 		location = frappe.get_doc("Accounting Dimension", "Location")

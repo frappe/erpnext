@@ -433,7 +433,6 @@ class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
 		self.assertEqual(len(doc.accounts), 1)
 		self.assertEqual(doc.accounts[0].gain_loss, 100)
 
-	def test_before_submit_requires_at_least_one_gain_loss_row(self):
 		doc = self._revaluation_with_rows(
 			[{"zero_balance": 0, "balance_in_base_currency": 500, "new_balance_in_base_currency": 500}]
 		)

@@ -30,7 +30,6 @@ class TestJournalEntryTemplate(ERPNextTestSuite):
 		doc = self.make_template([{"account": "Cash - _TC", "party_type": "Customer"}])
 		self.assertRaises(frappe.ValidationError, doc.validate)
 
-	def test_party_requires_party_type(self):
 		doc = self.make_template([{"account": "Debtors - _TC", "party": "_Test Customer"}])
 		self.assertRaises(frappe.ValidationError, doc.validate)
 

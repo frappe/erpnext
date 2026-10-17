@@ -122,10 +122,7 @@ class TestCustomAPIValidation(FinancialReportTemplateTestCase):
 			template = self.create_api_template(api_path)
 			self.assertRaises(frappe.ValidationError, template.insert)
 
-	def test_save_allows_get_whitelisted_method(self):
-		template = self.create_api_template(self.WHITELISTED_GET)
-		template.insert()
-		template.delete()
+		self.create_api_template(self.WHITELISTED_GET).insert()
 
 	def test_engine_rejects_invalid_api_methods(self):
 		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
@@ -296,9 +293,6 @@ class TestFilterOperatorCase(FinancialReportTemplateTestCase):
 		validator = AccountFilterValidator()
 		self.assertFalse(validator.validate_filter(self._row('["root_type", "IN", "Income"]')).is_valid)
 		self.assertFalse(validator.validate_filter(self._row('["root_type", "NOT IN", "Income"]')).is_valid)
-
-	def test_uppercase_in_accepts_a_list_value(self):
-		validator = AccountFilterValidator()
 		self.assertTrue(validator.validate_filter(self._row('["root_type", "IN", ["Income"]]')).is_valid)
 
 
@@ -314,13 +308,8 @@ class TestLineReferenceNames(FinancialReportTemplateTestCase):
 		# "-" reads as subtraction in a formula and is not a valid Python name
 		self.assertFalse(self._validate("REV-COGS").is_valid)
 
-	def test_python_keyword_is_rejected(self):
-		for code in ("if", "None", "class"):
-			self.assertFalse(self._validate(code).is_valid, code)
-
-	def test_formula_function_name_is_rejected(self):
-		# these would be overwritten by the function of the same name
-		for code in ("sum", "round", "abs"):
+	def test_python_keyword_or_formula_function_is_rejected(self):
+		for code in ("if", "None", "class", "sum", "round", "abs"):
 			self.assertFalse(self._validate(code).is_valid, code)
 
 	def test_surrounding_spaces_are_normalised_before_validation(self):

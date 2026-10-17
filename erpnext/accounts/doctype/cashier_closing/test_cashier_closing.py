@@ -51,12 +51,6 @@ class TestCashierClosing(ERPNextTestSuite):
 		# net = payments + outstanding + expense - custody + returns
 		self.assertEqual(doc.net_amount, 500 + si.outstanding_amount + 50 - 30 + 20)
 
-	def test_outstanding_is_scoped_to_the_invoice_owner(self):
-		# The invoice is created by Administrator; a closing for a different user does
-		# not see it. NOTE: get_outstanding keys on Sales Invoice.owner (the document
-		# creator) rather than an explicit cashier/POS-user field, which is fragile when
-		# invoices are created by a shared or system user.
-		self.make_invoice_in_window(rate=100)
 		doc = self.make_closing(user="Guest", payments=[500])
 		doc.save()
 		self.assertEqual(doc.outstanding_amount, 0)
