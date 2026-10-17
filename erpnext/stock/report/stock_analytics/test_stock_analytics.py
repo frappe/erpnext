@@ -150,7 +150,7 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 0, 3, 3])
 
-	def test_rows_count_only_permitted_warehouses(self):
+	def get_quantity_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
 
 		make_stock_entry(
@@ -165,7 +165,7 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 				{"doctype": "User", "email": user, "first_name": "Analytics", "send_welcome_email": 0}
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock User")
-		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
 
 		filters = _dict(
 			range="Monthly",
@@ -181,7 +181,15 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.compare_analytics_row(frappe._dict(data[0]), cols, [2])
+		return cols, frappe._dict(data[0])
+
+	def test_rows_count_only_permitted_warehouses(self):
+		cols, row = self.get_quantity_for_restricted_user()
+		self.compare_analytics_row(row, cols, [2])
+
+	def test_permission_for_another_doctype_does_not_limit_rows(self):
+		cols, row = self.get_quantity_for_restricted_user(applicable_for="Purchase Order")
+		self.compare_analytics_row(row, cols, [12])
 
 	def test_period_ranges_reach_the_to_date(self):
 		filters = _dict(range="Weekly", from_date="2026-03-30", to_date="2027-03-31")
