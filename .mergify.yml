@@ -17,6 +17,8 @@ commands_restrictions:
       - or:
           - sender=@erpnext-maintainers
           - sender-permission=admin
+          - sender=barredterra
+          - sender=vorasmit
 
 pull_request_rules:
   - name: Auto-close PRs on stable branch
