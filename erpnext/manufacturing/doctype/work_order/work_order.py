@@ -1083,10 +1083,9 @@ class WorkOrder(Document):
 		)
 
 	def get_source_bom_operations(self):
-		boms = list({operation.bom or self.bom_no for operation in self.operations})
 		operations = frappe.get_all(
 			"BOM Operation",
-			filters={"parent": ("in", boms), "parenttype": "BOM"},
+			filters={"parent": self.bom_no, "parenttype": "BOM"},
 			fields=["parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
 			order_by="idx",
 		)

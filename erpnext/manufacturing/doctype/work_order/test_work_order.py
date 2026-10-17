@@ -7108,7 +7108,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		sub_bom = make_review_bom(
 			sub_item,
 			[{"item_code": rm_item, "qty": 1}],
-			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10, "fixed_time": 1}
+			],
 		)
 		bom = make_review_bom(
 			fg_item,
@@ -7125,12 +7127,15 @@ class TestWorkOrder(ERPNextTestSuite):
 				"bom": sub_bom.name,
 				"workstation": workstation,
 				"time_in_mins": 20,
+				"batch_size": 1,
 			},
 		)
 
 		new_bom = wo.make_bom()
 
-		self.assertEqual([cint(row.fixed_time) for row in new_bom.operations], [1, 0])
+		self.assertEqual(
+			[(cint(row.fixed_time), row.time_in_mins) for row in new_bom.operations], [(1, 30), (0, 20)]
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
