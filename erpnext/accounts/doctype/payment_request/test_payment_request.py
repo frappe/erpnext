@@ -1012,6 +1012,130 @@ class TestPaymentRequest(ERPNextTestSuite):
 				schedules=schedules,
 			)
 
+	def test_payment_request_company_must_match_reference_company(self):
+		po = create_purchase_order()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": "_Test Company 1",
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"does not match the company"),
+			pr.insert,
+		)
+
+	def test_payment_request_requires_read_permission_on_reference(self):
+		po = create_purchase_order()
+
+		accounts_user = "accounts-user@example.com"
+		if not frappe.db.exists("User", accounts_user):
+			user = frappe.new_doc("User")
+			user.email = accounts_user
+			user.first_name = "Accounts"
+			user.send_welcome_email = 0
+			user.add_roles("Accounts User")
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": po.company,
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+			}
+		)
+
+		with self.set_user(accounts_user):
+			self.assertRaises(frappe.PermissionError, pr.insert)
+
+	def test_payment_request_reference_doctype_must_be_allowed(self):
+		todo = frappe.get_doc({"doctype": "ToDo", "description": "_Test Payment Request Reference"}).insert()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"company": "_Test Company",
+				"reference_doctype": "ToDo",
+				"reference_name": todo.name,
+				"grand_total": 100,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Requests cannot be created against"),
+			pr.insert,
+		)
+
+	def test_payment_request_print_format_must_match_reference(self):
+		print_format = frappe.get_doc(
+			{
+				"doctype": "Print Format",
+				"name": "_Test Sales Invoice Print Format",
+				"doc_type": "Sales Invoice",
+				"module": "Accounts",
+				"standard": "No",
+				"custom_format": 1,
+				"print_format_type": "Jinja",
+				"html": "{{ doc.name }}",
+			}
+		).insert()
+		po = create_purchase_order()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": po.company,
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+				"print_format": print_format.name,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"is not valid for"),
+			pr.insert,
+		)
+
+	def test_resend_payment_email_uses_saved_values(self):
+		so = make_sales_order()
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="customer@example.com",
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		pr.email_to = "someone-else@example.com"
+		pr.resend_payment_email()
+
+		self.send_email.assert_called_once()
+		self.assertEqual(pr.email_to, "customer@example.com")
+
 
 class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 	"""Tests for PaymentController v2 gateway integration."""

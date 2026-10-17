@@ -297,8 +297,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			fields: fields,
 		});
 
-		this.dialog.set_primary_action(__("Save"), function () {
-			const dialog_data = me.dialog.get_values();
+		this.dialog.set_primary_action(__("Save"), function (dialog_data) {
 			me.frm.call(
 				"block_invoice",
 				{
@@ -334,8 +333,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			fields: fields,
 		});
 
-		this.dialog.set_primary_action(__("Save"), function () {
-			me.dialog_data = me.dialog.get_values();
+		this.dialog.set_primary_action(__("Save"), function (values) {
+			me.dialog_data = values;
 			if (me.can_change_release_date(me.dialog_data.release_date)) {
 				me.dialog_data.name = me.frm.doc.name;
 				me.set_release_date(me.dialog_data);

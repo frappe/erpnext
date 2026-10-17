@@ -46,7 +46,7 @@ from erpnext.accounts.utils import (
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
-	get_billed_qty,
+	get_billed_stock_qty,
 )
 from erpnext.controllers.item_close import clear_closed_rows_on_amend
 from erpnext.controllers.print_settings import (
@@ -528,7 +528,13 @@ class AccountsController(TransactionBase):
 			).run()
 
 	def on_trash(self):
-		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+		from erpnext.accounts.utils import delete_exchange_gain_loss_journal, is_immutable_ledger_enabled
+
+		if self.docstatus == 2 and is_immutable_ledger_enabled():
+			frappe.throw(
+				_("Cancelled transactions cannot be deleted when Immutable Ledger is enabled."),
+				title=_("Immutable Ledger Enabled"),
+			)
 
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
@@ -846,6 +852,34 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
+	def on_recurring(self, reference_doc, auto_repeat_doc):
+		self.refresh_exchange_rates()
+
+	def refresh_exchange_rates(self):
+		if not self.meta.get_field("conversion_rate"):
+			return
+
+		transaction_date = self.get("posting_date") or self.get("transaction_date")
+		args = "for_buying" if self.meta.get_field("buying_price_list") else "for_selling"
+
+		for currency_field, rate_field in (
+			("currency", "conversion_rate"),
+			("price_list_currency", "plc_conversion_rate"),
+		):
+			currency = self.get(currency_field)
+			if not currency or currency == self.company_currency:
+				continue
+
+			exchange_rate = get_exchange_rate(currency, self.company_currency, transaction_date, args)
+			if not exchange_rate:
+				frappe.throw(
+					_(
+						"Cannot create recurring document: no exchange rate found for {0} to {1} on {2}. Please create a Currency Exchange record."
+					).format(currency, self.company_currency, transaction_date),
+					title=_("Exchange Rate Not Found"),
+				)
+			self.set(rate_field, exchange_rate)
+
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -999,7 +1033,10 @@ class AccountsController(TransactionBase):
 
 				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
 				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
-				if pricing_rule_args.get("pricing_rule_for") == "Rate":
+				if (
+					pricing_rule_args.get("has_pricing_rule_for_rate")
+					or pricing_rule_args.get("pricing_rule_for") == "Rate"
+				):
 					item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
 
 				if item.get("price_list_rate"):
@@ -1662,10 +1699,10 @@ class AccountsController(TransactionBase):
 			return
 
 		for item in self.items:
-			billed_qty = get_billed_qty(self, item)
-			if billed_qty:
+			billed_stock_qty = get_billed_stock_qty(self, item)
+			if billed_stock_qty:
 				item.mapped_additional_discount_amount = flt(
-					flt(item.distributed_discount_amount) / billed_qty,
+					flt(item.distributed_discount_amount) / billed_stock_qty,
 					item.precision("mapped_additional_discount_amount"),
 				)
 
@@ -1686,8 +1723,13 @@ class AccountsController(TransactionBase):
 		if not source_doc.discount_amount:
 			return
 
+		if source_doc.has_mapped_discount:
+			self.clear_stale_mapped_discount_total()
+			self.calculate_taxes_and_totals()
+			return
+
 		# ensure additional_discount_percentage is not set in the source doc
-		if source_doc.get("additional_discount_percentage") or source_doc.has_mapped_discount:
+		if source_doc.get("additional_discount_percentage"):
 			return
 
 		item_doctype = self.meta.get_field("items").options
@@ -1777,7 +1819,13 @@ class AccountsController(TransactionBase):
 			.where(item_table.mapped_additional_discount_amount != 0)
 		)
 		applied = flt(
-			linked_rows.select(Sum(item_table.mapped_additional_discount_amount * item_table.qty)).run()[0][0]
+			linked_rows.select(
+				Sum(
+					item_table.mapped_additional_discount_amount
+					* item_table.qty
+					* item_table.conversion_factor
+				)
+			).run()[0][0]
 		)
 		if self.doctype == "Purchase Invoice":
 			applied += self.get_mapped_discount_on_billed_rejected_qty(linked_rows, item_table)
@@ -1802,7 +1850,11 @@ class AccountsController(TransactionBase):
 			.where(item_table.rejected_qty != 0)
 			.select(
 				*invoice_fields,
-				Sum(item_table.mapped_additional_discount_amount * item_table.rejected_qty).as_("discount"),
+				Sum(
+					item_table.mapped_additional_discount_amount
+					* item_table.rejected_qty
+					* item_table.conversion_factor
+				).as_("discount"),
 			)
 			.groupby(invoice.name, *invoice_fields)
 		).run(as_dict=True)

@@ -147,7 +147,7 @@ class TestProcessLossReport(ERPNextTestSuite):
 		job_card = job_card_tests.get_semi_fg_job_card(wo_order, "_Test PLR Op A")
 		job_card.append(
 			"time_logs",
-			{"from_time": f"{nowdate()} 08:00:00", "to_time": f"{nowdate()} 09:00:00", "completed_qty": 3},
+			{"from_time": "2024-01-01 08:00:00", "to_time": "2024-01-01 09:00:00", "completed_qty": 3},
 		)
 		job_card.pending_qty = 0
 		job_card.process_loss_qty = 2

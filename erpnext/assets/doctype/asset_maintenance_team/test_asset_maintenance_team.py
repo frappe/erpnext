@@ -43,7 +43,7 @@ def make_asset_maintenance(team: str):
 	asset = frappe.get_doc("Asset", {"purchase_receipt": receipt.name})
 	asset.available_for_use_date = nowdate()
 	asset.purchase_date = nowdate()
-	asset.save()
+	asset.submit()
 	return frappe.get_doc(
 		{
 			"doctype": "Asset Maintenance",

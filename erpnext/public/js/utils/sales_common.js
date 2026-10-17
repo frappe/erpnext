@@ -292,7 +292,8 @@ erpnext.sales_common = {
 						.filter(
 							(item) =>
 								item.parent_detail_docname === cdn ||
-								parseInt(item.parent_detail_docname) === locals[cdt][cdn].idx
+								(/^\d+$/.test(String(item.parent_detail_docname)) &&
+									Number(item.parent_detail_docname) === locals[cdt][cdn].idx)
 						)
 						.forEach((item) => {
 							frappe.model.set_value(
@@ -643,9 +644,7 @@ erpnext.pre_sales = {
 				var dialog = new frappe.ui.Dialog({
 					title: __("Set as Lost"),
 					fields: erpnext.pre_sales.lost_reason_fields(frm.doctype),
-					primary_action: function () {
-						let values = dialog.get_values();
-
+					primary_action: function (values) {
 						frm.call({
 							doc: frm.doc,
 							method: "declare_enquiry_lost",

@@ -803,6 +803,7 @@ def reset_service_level_agreement(doctype: str, docname: str, reason: str, user:
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
 
 	doc = frappe.get_doc(doctype, docname)
+	doc.check_permission("write")
 	frappe.get_doc(
 		{
 			"doctype": "Comment",
