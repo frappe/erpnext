@@ -94,6 +94,9 @@ class TestProspectsEngagedButNotConverted(ERPNextTestSuite):
 			{"doctype": "Issue", "subject": "_Test Prospect Issue", "lead": own_lead}
 		).insert(ignore_permissions=True)
 		add_received_communication("Issue", issue.name, "_Test Prospect Issue")
+		same_name_issue = frappe.get_doc({"doctype": "Issue", "subject": "_Test Prospect Same Name"})
+		same_name_issue.insert(set_name=own_lead, ignore_permissions=True)
+		add_received_communication("Issue", same_name_issue.name, "_Test Prospect Same Name")
 
 		filters = frappe._dict(no_of_interaction=5, lead_age=60)
 		expected_own_rows = [row for row in execute(filters)[1] if row[0] == own_lead and row[3] == "Lead"]
@@ -106,6 +109,7 @@ class TestProspectsEngagedButNotConverted(ERPNextTestSuite):
 		self.assertEqual([row for row in rows if row[0] == own_lead and row[3] == "Lead"], expected_own_rows)
 		self.assertNotIn(other_lead, {row[0] for row in rows})
 		self.assertNotIn("Issue", {row[3] for row in rows})
+		self.assertNotIn("_Test Prospect Same Name", {row[5] for row in rows})
 
 		with as_user(make_fenced_user("prospects-website@example.com", [])):
 			self.assertRaises(frappe.PermissionError, execute, frappe._dict(filters))
