@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import frappe
 
 from erpnext import encode_company_abbr, require_permission, require_user_permission
@@ -24,6 +26,14 @@ def require_warehouse_user_permission(name):
 
 def name_kwargs(name):
 	return {"name": name}
+
+
+def get_files_without_translatable_strings(app):
+	return {
+		str(path)
+		for path in Path(frappe.get_app_path(app)).rglob("*")
+		if path.suffix in (".py", ".html", ".js", ".vue") and "_(" not in path.read_text(errors="ignore")
+	}
 
 
 class TestInit(ERPNextTestSuite):
@@ -62,6 +72,7 @@ class TestInit(ERPNextTestSuite):
 	def test_translation_files(self):
 		from frappe.tests.test_translate import verify_translation_files
 
+		frappe.flags.scanned_files = get_files_without_translatable_strings("erpnext")
 		verify_translation_files("erpnext")
 
 	def test_patches(self):
