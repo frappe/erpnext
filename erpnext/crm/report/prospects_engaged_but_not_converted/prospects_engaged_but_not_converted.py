@@ -61,30 +61,24 @@ def get_columns():
 def get_data(filters):
 	lead_details = []
 	lead_filters = get_lead_filters(filters)
+	leads = frappe.get_list("Lead", fields=["name", "lead_name", "company_name"], filters=lead_filters)
+	if not leads:
+		return lead_details
 
-	for lead in frappe.get_all("Lead", fields=["name", "lead_name", "company_name"], filters=lead_filters):
-		data = frappe.db.sql(
-			"""
-			select
-				`tabCommunication`.reference_doctype, `tabCommunication`.reference_name,
-				`tabCommunication`.content, `tabCommunication`.communication_date
-			from
-				(
-					(select name, party_name as lead from `tabOpportunity` where opportunity_from='Lead' and party_name = %(lead)s)
-				union
-					(select name, party_name as lead from `tabQuotation` where quotation_to = 'Lead' and party_name = %(lead)s)
-				union
-					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed')
-				union
-					(select %(lead)s, %(lead)s)
-				)
-				as ref_document, `tabCommunication`
-			where
-				`tabCommunication`.reference_name = ref_document.name and
-				`tabCommunication`.sent_or_received = 'Received'
-			order by
-				ref_document.lead, `tabCommunication`.creation desc limit %(limit)s""",
-			{"lead": lead.name, "limit": filters.get("no_of_interaction")},
+	reference_names = get_reference_names([lead.name for lead in leads])
+	for lead in leads:
+		data = frappe.get_all(
+			"Communication",
+			filters={
+				# names are unique only within a doctype
+				"reference_doctype": ["in", ["Lead", "Opportunity", "Quotation", "Issue"]],
+				"reference_name": ["in", list(reference_names[lead.name])],
+				"sent_or_received": "Received",
+			},
+			fields=["reference_doctype", "reference_name", "content", "communication_date"],
+			order_by="creation desc",
+			limit=filters.get("no_of_interaction"),
+			as_list=True,
 		)
 
 		for lead_info in data:
@@ -92,6 +86,36 @@ def get_data(filters):
 			lead_details.append(lead_data)
 
 	return lead_details
+
+
+def get_reference_names(lead_names: list) -> dict:
+	"""Map each lead to itself and the documents of it the user can read."""
+	reference_names = {name: {name} for name in lead_names}
+	for opportunity in get_readable(
+		"Opportunity",
+		filters={"opportunity_from": "Lead", "party_name": ["in", lead_names]},
+		fields=["name", "party_name"],
+	):
+		reference_names[opportunity.party_name].add(opportunity.name)
+	for quotation in get_readable(
+		"Quotation",
+		filters={"quotation_to": "Lead", "party_name": ["in", lead_names]},
+		fields=["name", "party_name"],
+	):
+		reference_names[quotation.party_name].add(quotation.name)
+	for issue in get_readable(
+		"Issue",
+		filters={"lead": ["in", lead_names], "status": ["!=", "Closed"]},
+		fields=["name", "lead"],
+	):
+		reference_names[issue.lead].add(issue.name)
+	return reference_names
+
+
+def get_readable(doctype: str, filters: dict, fields: list) -> list:
+	if not frappe.has_permission(doctype, "read"):
+		return []
+	return frappe.get_list(doctype, filters=filters, fields=fields)
 
 
 def get_lead_filters(filters):
