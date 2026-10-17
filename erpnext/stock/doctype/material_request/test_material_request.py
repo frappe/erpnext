@@ -2001,8 +2001,32 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		from unittest.mock import patch
 
+		hidden_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-parent-only@example.com",
+				"first_name": "Reorder Parent Only",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": hidden_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Material Request",
+				"hide_descendants": 1,
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Company", "_Test Company 1", "parent_company", "_Test Company")
+
 		with patch("erpnext.stock.reorder_item.get_ancestors_of", return_value=["_Test Company"]):
-			self.assertIn(user.email, get_email_list("_Test Company 1"))
+			recipients = get_email_list("_Test Company 1")
+			self.assertIn(user.email, recipients)
+			self.assertNotIn(hidden_user.email, recipients)
 
 		message = frappe.render_template(
 			"templates/emails/reorder_item.html",

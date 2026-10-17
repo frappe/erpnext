@@ -356,18 +356,13 @@ def get_comapny_wise_users(company):
 	if frappe.db.count("Company") == 1:
 		return []
 
-	companies = [company]
-
-	if parent_company := frappe.db.get_value("Company", company, "parent_company"):
-		companies.append(parent_company)
-
-	return frappe.get_all(
+	permissions = frappe.get_all(
 		"User Permission",
-		filters={"allow": "Company", "for_value": ("in", companies)},
+		filters={"allow": "Company", "for_value": ("in", [company, *get_ancestors_of("Company", company)])},
 		or_filters={"apply_to_all_doctypes": 1, "applicable_for": "Material Request"},
-		pluck="user",
-		distinct=True,
+		fields=["user", "for_value", "hide_descendants"],
 	)
+	return list({d.user for d in permissions if d.for_value == company or not d.hide_descendants})
 
 
 def get_company_restricted_users(company):
