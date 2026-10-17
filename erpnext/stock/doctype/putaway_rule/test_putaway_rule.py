@@ -19,23 +19,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPutawayRule(ERPNextTestSuite):
 	def setUp(self):
-		if not frappe.db.exists("Item", "_Rice"):
-			make_item(
-				"_Rice", {"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1, "stock_uom": "Kg"}
-			)
-
-		if not frappe.db.exists("Warehouse", {"warehouse_name": "Rack 1"}):
-			create_warehouse("Rack 1")
-		if not frappe.db.exists("Warehouse", {"warehouse_name": "Rack 2"}):
-			create_warehouse("Rack 2")
-
-		self.warehouse_1 = frappe.db.get_value("Warehouse", {"warehouse_name": "Rack 1"})
-		self.warehouse_2 = frappe.db.get_value("Warehouse", {"warehouse_name": "Rack 2"})
-
-		if not frappe.db.exists("UOM", "Bag"):
-			new_uom = frappe.new_doc("UOM")
-			new_uom.uom_name = "Bag"
-			new_uom.save()
+		self.warehouse_1 = "Rack 1 - _TC"
+		self.warehouse_2 = "Rack 2 - _TC"
 
 	def assertUnchangedItemsOnResave(self, doc):
 		"""Check if same items remain even after reapplication of rules.
