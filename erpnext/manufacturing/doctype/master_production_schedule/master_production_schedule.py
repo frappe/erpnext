@@ -266,16 +266,13 @@ class MasterProductionSchedule(Document):
 		return query
 
 	def get_sales_orders_data(self):
-		sales_order_schedules = self.get_sales_order_schedules()
-		ignore_orders = []
-		if sales_order_schedules:
-			for row in sales_order_schedules:
-				if row.sales_order_item and row.sales_order_item not in ignore_orders:
-					ignore_orders.append(row.sales_order_item)
+		schedules = self.get_sales_order_schedules()
+		scheduled_rows = list({row.sales_order_item for row in schedules if row.sales_order_item})
+		sales_order_schedules = [
+			row for row in deduct_delivered_qty(schedules) if self.is_in_date_range(row.delivery_date)
+		]
 
-		sales_orders = self.get_items_from_sales_orders(ignore_orders)
-
-		return sales_orders + sales_order_schedules
+		return self.get_items_from_sales_orders(scheduled_rows) + sales_order_schedules
 
 	def get_items_from_sales_orders(self, ignore_orders=None):
 		doctype = frappe.qb.DocType("Sales Order Item")
@@ -354,8 +351,7 @@ class MasterProductionSchedule(Document):
 			names = [s.sales_order for s in self.sales_orders if s.sales_order]
 			query = query.where(doctype.sales_order.isin(names))
 
-		schedules = self.filter_selected_items(query, doctype).run(as_dict=True)
-		return [row for row in deduct_delivered_qty(schedules) if self.is_in_date_range(row.delivery_date)]
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
 
 	def is_in_date_range(self, delivery_date):
 		if self.from_date and getdate(delivery_date) < getdate(self.from_date):
