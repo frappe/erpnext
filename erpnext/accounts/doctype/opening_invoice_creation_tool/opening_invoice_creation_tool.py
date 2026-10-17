@@ -75,7 +75,7 @@ class OpeningInvoiceCreationTool(Document):
 
 		invoices_summary = {}
 		max_count = {}
-		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])
+		companies = frappe.get_list("Company", fields=["name as company", "default_currency as currency"])
 		if not companies:
 			return None, None
 
@@ -97,7 +97,11 @@ class OpeningInvoiceCreationTool(Document):
 					Count(invoice.name).as_("total_invoices"),
 					Sum(outstanding).as_("outstanding_amount"),
 				)
-				.where((invoice.is_opening == "Yes") & (invoice.docstatus == 1))
+				.where(
+					(invoice.is_opening == "Yes")
+					& (invoice.docstatus == 1)
+					& (invoice.company.isin(list(company_wise_currency)))
+				)
 				.groupby(invoice.company)
 			).run(as_dict=True)
 			prepare_invoice_summary(doctype, invoices)
