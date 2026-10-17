@@ -5,7 +5,6 @@ from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_inward_order.test_subcontracting_inward_order import (
 	create_so_scio,
-	create_test_data,
 )
 from erpnext.subcontracting.report.subcontracted_items_to_be_delivered.subcontracted_items_to_be_delivered import (
 	execute,
@@ -15,7 +14,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestSubcontractedItemsToBeDelivered(ERPNextTestSuite):
 	def setUp(self):
-		create_test_data()
 		make_stock_entry(
 			item_code="Self RM", qty=100, to_warehouse="Stores - _TC", purpose="Material Receipt"
 		)

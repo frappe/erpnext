@@ -3,7 +3,6 @@ from frappe.utils import today
 
 from erpnext.subcontracting.doctype.subcontracting_inward_order.test_subcontracting_inward_order import (
 	create_so_scio,
-	create_test_data,
 )
 from erpnext.subcontracting.report.subcontracted_raw_materials_to_be_received.test_subcontracted_raw_materials_to_be_received import (
 	receive_basic_rm,
@@ -16,9 +15,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingInwardOrderSummary(ERPNextTestSuite):
-	def setUp(self):
-		create_test_data()
-
 	def test_finished_good_is_listed_with_customer_provided_raw_materials(self):
 		_so, scio = create_so_scio()
 		receive_basic_rm(scio, 2)

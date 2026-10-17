@@ -16,13 +16,9 @@ from erpnext.controllers.subcontracting_controller import (
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 	make_subcontracted_item,
-	make_subcontracted_items,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -41,12 +37,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingOrder(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}

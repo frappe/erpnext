@@ -17,13 +17,9 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 	make_subcontracted_item,
-	make_subcontracted_items,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -51,12 +47,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingReceipt(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_project_is_carried_over_from_subcontracting_order(self):
 		project = make_project({"project_name": "_Test SCR Project"}).name
 		po = make_subcontracted_purchase_order(project)

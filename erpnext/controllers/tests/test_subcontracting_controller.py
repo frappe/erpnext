@@ -27,12 +27,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingController(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_remove_empty_rows(self):
 		sco = get_subcontracting_order()
 		len_before = len(sco.service_items)
@@ -1163,6 +1157,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 	def test_phantom_bom_explosion(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
 
+		make_item("Top Level Parent", {"is_stock_item": 1, "is_sub_contracted_item": 1})
 		expected = create_tree_for_phantom_bom_tests()
 		service_items = [
 			{
@@ -1412,110 +1407,12 @@ def make_stock_transfer_entry(**args):
 	return doc
 
 
-def make_subcontracted_items():
-	sub_contracted_items = {
-		"Subcontracted Item SA1": {},
-		"Subcontracted Item SA2": {},
-		"Subcontracted Item SA3": {},
-		"Subcontracted Item SA4": {
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SBAT.####",
-		},
-		"Subcontracted Item SA5": {},
-		"Subcontracted Item SA6": {},
-		"Subcontracted Item SA7": {},
-		"Subcontracted Item SA8": {},
-		"Subcontracted Item SA9": {"stock_uom": "Litre"},
-		"Subcontracted Item SA10": {
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SBAT.####",
-		},
-		"Top Level Parent": {},
-	}
-
-	for item, properties in sub_contracted_items.items():
-		if not frappe.db.exists("Item", item):
-			properties.update({"is_stock_item": 1, "is_sub_contracted_item": 1})
-			make_item(item, properties)
-
-
-def make_raw_materials():
-	raw_materials = {
-		"Subcontracted SRM Item 1": {},
-		"Subcontracted SRM Item 2": {"has_serial_no": 1, "serial_no_series": "SRI.####"},
-		"Subcontracted SRM Item 3": {
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "BAT.####",
-		},
-		"Subcontracted SRM Item 4": {"has_serial_no": 1, "serial_no_series": "SRII.####"},
-		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRIID.####"},
-		"Subcontracted SRM Item 8": {},
-		"Subcontracted SRM Item 9": {"stock_uom": "Litre"},
-		"Subcontracted SRM Item 10": {},
-	}
-
-	for item, properties in raw_materials.items():
-		if not frappe.db.exists("Item", item):
-			properties.update({"is_stock_item": 1})
-			properties.update({"valuation_rate": 100})
-			make_item(item, properties)
-
-
 def make_service_item(item, properties=None):
 	if properties is None:
 		properties = {}
 	if not frappe.db.exists("Item", item):
 		properties.update({"is_stock_item": 0})
 		make_item(item, properties)
-
-
-def make_service_items():
-	service_items = {
-		"Subcontracted Service Item 1": {},
-		"Subcontracted Service Item 2": {},
-		"Subcontracted Service Item 3": {},
-		"Subcontracted Service Item 4": {},
-		"Subcontracted Service Item 5": {},
-		"Subcontracted Service Item 6": {},
-		"Subcontracted Service Item 7": {},
-		"Subcontracted Service Item 8": {},
-		"Subcontracted Service Item 9": {},
-		"Subcontracted Service Item 10": {},
-		"Subcontracted Service Item 11": {},
-	}
-
-	for item, properties in service_items.items():
-		make_service_item(item, properties)
-
-
-def make_bom_for_subcontracted_items():
-	boms = {
-		"Subcontracted Item SA1": [
-			"Subcontracted SRM Item 1",
-			"Subcontracted SRM Item 2",
-			"Subcontracted SRM Item 3",
-		],
-		"Subcontracted Item SA2": ["Subcontracted SRM Item 2"],
-		"Subcontracted Item SA3": ["Subcontracted SRM Item 2"],
-		"Subcontracted Item SA4": [
-			"Subcontracted SRM Item 1",
-			"Subcontracted SRM Item 2",
-			"Subcontracted SRM Item 3",
-		],
-		"Subcontracted Item SA5": ["Subcontracted SRM Item 5"],
-		"Subcontracted Item SA6": ["Subcontracted SRM Item 3"],
-		"Subcontracted Item SA7": ["Subcontracted SRM Item 1"],
-		"Subcontracted Item SA8": ["Subcontracted SRM Item 8"],
-		"Subcontracted Item SA10": ["Subcontracted SRM Item 10"],
-		"Subcontracted Service Item 11": ["Top Level Parent"],
-	}
-
-	for item_code, raw_materials in boms.items():
-		if not frappe.db.exists("BOM", {"item": item_code}):
-			make_bom(item=item_code, raw_materials=raw_materials, rate=100, currency="INR")
 
 
 def set_backflush_based_on(based_on):
