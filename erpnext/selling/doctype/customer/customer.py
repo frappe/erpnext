@@ -399,7 +399,7 @@ class Customer(TransactionBase):
 				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
 			)
 			outstanding_amt = breakup.gle + breakup.sales_order + breakup.delivery_note
-			if flt(limit.credit_limit) < outstanding_amt:
+			if flt(limit.credit_limit) < flt(outstanding_amt, limit.precision("credit_limit")):
 				frappe.throw(
 					self.get_credit_limit_breakup_message(limit.company, breakup, outstanding_amt),
 					title=_("Credit Limit Too Low"),
@@ -407,13 +407,16 @@ class Customer(TransactionBase):
 
 	def get_credit_limit_breakup_message(self, company, breakup, outstanding_amt):
 		currency = frappe.get_cached_value("Company", company, "default_currency")
+		precision = cint(frappe.get_system_settings("currency_precision")) or 2
+		breakup = frappe._dict({key: flt(value, precision) for key, value in breakup.items()})
+		outstanding_amt = flt(breakup.gle + breakup.sales_order + breakup.delivery_note, precision)
 		rows = [
 			(_("Outstanding as per General Ledger"), breakup.gle),
 			(_("Pending Sales Orders (unbilled amount)"), breakup.sales_order),
 			(_("Pending Delivery Notes (not billed, without Sales Order)"), breakup.delivery_note),
 		]
 		rows_html = "".join(
-			f"<tr><td>{label}</td><td style='text-align: right'>{fmt_money(amount, currency=currency)}</td></tr>"
+			f"<tr><td>{label}</td><td style='text-align: right'>{fmt_money(amount, precision=precision, currency=currency)}</td></tr>"
 			for label, amount in rows
 		)
 		report_url = get_url_to_report_with_filters(company, self.name)
@@ -421,10 +424,10 @@ class Customer(TransactionBase):
 		return _(
 			"New credit limit is less than the current outstanding amount for the customer. "
 			"Credit limit has to be at least {0}."
-		).format(frappe.bold(fmt_money(outstanding_amt, currency=currency))) + (
+		).format(frappe.bold(fmt_money(outstanding_amt, precision=precision, currency=currency))) + (
 			f"<br><br><table class='table table-bordered'><tbody>{rows_html}"
 			f"<tr><td><b>{_('Total')}</b></td>"
-			f"<td style='text-align: right'><b>{fmt_money(outstanding_amt, currency=currency)}</b></td></tr>"
+			f"<td style='text-align: right'><b>{fmt_money(outstanding_amt, precision=precision, currency=currency)}</b></td></tr>"
 			f"</tbody></table>"
 			f"<a href='{report_url}'>{_('View Customer Credit Balance report')}</a>"
 		)
@@ -685,7 +688,7 @@ def send_emails(args):
 
 
 def get_url_to_report_with_filters(company, customer):
-	return "/app/query-report/Customer Credit Balance?" + urlencode(
+	return "/app/query-report/Customer%20Credit%20Balance?" + urlencode(
 		{"company": company, "customer": customer}
 	)
 
