@@ -92,21 +92,11 @@ class GlobalDefaults(Document):
 		)
 
 	def sync_property_setters(self, properties, value):
-		existing = {
-			(row.doc_type, row.field_name, row.property): row.value
-			for row in frappe.get_all(
-				"Property Setter",
-				filters={
-					"doctype_or_field": "DocField",
-					"doc_type": ("in", ROUNDED_TOTAL_DOCTYPES),
-					"field_name": ("in", [fieldname for fieldname, _, _ in properties]),
-				},
-				fields=["doc_type", "field_name", "property", "value"],
-			)
-		}
 		for doctype in ROUNDED_TOTAL_DOCTYPES:
+			meta = frappe.get_meta(doctype)
 			for fieldname, property, property_type in properties:
-				if existing.get((doctype, fieldname, property)) != str(value):
+				field = meta.get_field(fieldname)
+				if field and cint(field.get(property)) != value:
 					make_property_setter(
 						doctype,
 						fieldname,
