@@ -11,6 +11,15 @@ shared:
     - check-success=Python Unit Tests (3)
     - check-success=Python Unit Tests (4)
 
+commands_restrictions:
+  queue:
+    conditions:
+      - or:
+          - sender=@erpnext-maintainers
+          - sender-permission=admin
+          - sender=barredterra
+          - sender=vorasmit
+
 pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
@@ -72,26 +81,21 @@ pull_request_rules:
           - version-16-hotfix
         assignees:
           - "{{ author }}"
-  - name: Merge PRs tested alone
-    conditions:
-      - label=merge-alone
-      - and: *pr_checks
-      - and: *suite_checks
-    actions:
-      merge:
-        method: merge
 
 queue_rules:
   - name: default
     batch_size: 5
     batch_max_wait_time: 15 min
-    max_checks_retries: 1
     merge_method: merge
-    queue_conditions:
-      - label!=merge-alone
-      - and: *pr_checks
+    queue_conditions: *pr_checks
+    merge_conditions: *suite_checks
+  - name: alone
+    batch_size: 1
+    merge_method: merge
+    queue_conditions: *pr_checks
     merge_conditions: *suite_checks
 
 merge_queue:
+  max_parallel_checks: 2
   queue_controls_comment: false
   skip_intermediate_results: true

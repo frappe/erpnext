@@ -133,8 +133,12 @@ class PaymentRequest(Document):
 		if self.get("__islocal"):
 			self.status = "Draft"
 		self.validate_reference_document()
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		ref_doc.check_permission("read")
+		self.validate_reference_company(ref_doc)
+		self.validate_print_format()
 		self.validate_against_payment_reference()
-		self.validate_payment_request_amount()
+		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
 
@@ -160,7 +164,38 @@ class PaymentRequest(Document):
 		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
-	def validate_payment_request_amount(self):
+		if self.reference_doctype not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
+			frappe.throw(
+				_("Payment Requests cannot be created against: {0}").format(
+					frappe.bold(self.reference_doctype)
+				)
+			)
+
+	def validate_print_format(self):
+		if not self.print_format or self.print_format == "Standard":
+			return
+
+		if frappe.db.get_value("Print Format", self.print_format, "doc_type") != self.reference_doctype:
+			frappe.throw(
+				_("Print Format {0} is not valid for {1}").format(
+					frappe.bold(self.print_format), _(self.reference_doctype)
+				),
+				title=_("Invalid Print Format"),
+			)
+
+	def validate_reference_company(self, ref_doc):
+		if self.company != ref_doc.company:
+			frappe.throw(
+				_("Company {0} does not match the company {1} of {2} {3}").format(
+					frappe.bold(self.company),
+					frappe.bold(ref_doc.company),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Company"),
+			)
+
+	def validate_payment_request_amount(self, ref_doc):
 		if self.payment_reference:
 			return
 		if self.grand_total == 0:
@@ -169,7 +204,6 @@ class PaymentRequest(Document):
 				title=_("Invalid Amount"),
 			)
 
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if not hasattr(ref_doc, "order_type") or ref_doc.order_type != "Shopping Cart":
 			ref_amount = get_amount(ref_doc, self.payment_account)
 			if not ref_amount:
@@ -591,6 +625,11 @@ class PaymentRequest(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def resend_payment_email(self):
+		# the caller can supply this document's values, so only the saved ones are trusted
+		self.reload()
+		self.check_permission("email")
+		frappe.has_permission(self.reference_doctype, "read", self.reference_name, throw=True)
+
 		if not (
 			self.docstatus == 1
 			and self.payment_request_type == "Inward"

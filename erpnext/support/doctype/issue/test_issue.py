@@ -374,6 +374,24 @@ class TestIssue(TestSetUp):
 			frappe.db.get_value("Issue", issue.name, ["customer", "status"]), ("_Test Customer", "Open")
 		)
 
+	def test_portal_list_ignores_contact_links(self):
+		from erpnext.support.doctype.issue.issue import get_issue_list
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user("test_issue_portal_list@example.com", ["Customer"])
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Portal",
+				"user": user,
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+		issue = make_issue(customer="_Test Customer")
+
+		with as_user(user):
+			self.assertNotIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
+
 	def test_split_of_closed_issue_keeps_parent_metrics(self):
 		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
 		frappe.flags.current_time = get_datetime("2019-03-04 16:00")

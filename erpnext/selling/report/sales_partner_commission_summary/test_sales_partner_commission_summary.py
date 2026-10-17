@@ -81,23 +81,17 @@ class SalesPartnerSummaryReportTestMixin(ERPNextTestSuite):
 
 			from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 
-			pos_opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=1)
+			create_opening_entry(self.pos_profile, self.test_user.name)
 
 		self.transaction_doc_with_7pc_commision()
 		self.transaction_doc_with_5pc_commission()
+		if doctype != "Sales Order":
+			self.transaction_doc_returned()
 		self.transaction_doc_with_no_sales_partner()
-		self.transaction_doc_date_out_of_range_of_filters()
 		self.transaction_doc_with_revoked_commission()
 		self.transaction_doc_not_submitted()
 		self.transaction_doc_cancelled()
-
-		if doctype == "Sales Order":
-			return
-
-		self.transaction_doc_returned()
-
-		if doctype == "POS Invoice":
-			pos_opening_entry.cancel()
+		self.transaction_doc_date_out_of_range_of_filters()
 
 	def transaction_doc_with_7pc_commision(self):
 		args = {"rate": 100, "qty": 10, self.date_field: "2026-01-14", "do_not_save": 1}

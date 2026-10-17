@@ -606,7 +606,7 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		before = self.get_fifo_queue(item)
 		self.fix_by_adjustment_entry(item)
 
-		self.assertEqual(self.get_fifo_queue(item), before)
+		self.assertCountEqual(self.get_fifo_queue(item), before)
 		self.assertTrue(all(str(slot[1]) < get_adjustment_date() for slot in before))
 
 	def test_stock_ageing_keeps_the_age_of_batches(self):

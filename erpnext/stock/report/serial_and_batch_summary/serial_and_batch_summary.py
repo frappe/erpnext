@@ -223,6 +223,19 @@ def get_serial_batch_options(doctype, txt, start, page_len, filters):
 	if not filters.get("item_code") and not filters.get("voucher_no"):
 		return []
 
+	if filters.get("voucher_no") and not filters.get("voucher_type"):
+		return []
+
+	voucher_nos = filters.get("voucher_no") or []
+	if isinstance(voucher_nos, str):
+		voucher_nos = [voucher_nos]
+
+	for voucher_no in voucher_nos:
+		frappe.has_permission(filters["voucher_type"], "read", voucher_no, throw=True)
+
+	if filters.get("item_code"):
+		frappe.has_permission("Item", "read", filters["item_code"], throw=True)
+
 	identity = SerialBatchIdentity(doctype)
 	query = frappe.qb.get_query(
 		doctype,
@@ -236,19 +249,17 @@ def get_serial_batch_options(doctype, txt, start, page_len, filters):
 		limit=page_len,
 		offset=start,
 	)
-	if filters.get("voucher_no"):
-		bundle_filters = {
-			"voucher_no": ("in", filters["voucher_no"]),
-			"docstatus": 1,
-			"is_cancelled": 0,
-		}
-		if filters.get("voucher_type"):
-			bundle_filters["voucher_type"] = filters["voucher_type"]
+	if voucher_nos:
 		entry_field = "serial_no" if doctype == "Serial No" else "batch_no"
 		used_ids = frappe.qb.get_query(
 			"Serial and Batch Bundle",
 			fields=[f"entries.{entry_field}"],
-			filters=bundle_filters,
+			filters={
+				"voucher_type": filters["voucher_type"],
+				"voucher_no": ("in", voucher_nos),
+				"docstatus": 1,
+				"is_cancelled": 0,
+			},
 		)
 		query = query.where(frappe.qb.DocType(doctype).name.isin(used_ids))
 	return query.run(as_list=True)

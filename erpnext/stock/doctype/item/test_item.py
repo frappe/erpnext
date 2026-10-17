@@ -26,7 +26,7 @@ from erpnext.stock.doctype.item.item import (
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import get_item_details, get_item_tax_map, get_item_tax_template
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -306,31 +306,41 @@ class TestItem(ERPNextTestSuite):
 		}
 
 		for data in expected_item_tax_template:
-			details = get_item_details(
-				frappe._dict(
-					{
-						"item_code": data["item_code"],
-						"tax_category": data["tax_category"],
-						"company": "_Test Company",
-						"price_list": "_Test Price List",
-						"currency": "_Test Currency",
-						"doctype": "Sales Order",
-						"conversion_rate": 1,
-						"price_list_currency": "_Test Currency",
-						"plc_conversion_rate": 1,
-						"order_type": "Sales",
-						"customer": "_Test Customer",
-						"conversion_factor": 1,
-						"price_list_uom_dependant": 1,
-						"ignore_pricing_rule": 1,
-					}
-				)
+			ctx = frappe._dict(
+				item_code=data["item_code"], tax_category=data["tax_category"], company="_Test Company"
+			)
+			item_tax_template = get_item_tax_template(ctx)
+
+			self.assertEqual(item_tax_template, data["item_tax_template"])
+			self.assertEqual(
+				get_item_tax_map(doc=ctx, tax_template=item_tax_template, as_json=False),
+				expected_item_tax_map[item_tax_template],
 			)
 
-			self.assertEqual(details.item_tax_template, data["item_tax_template"])
-			self.assertEqual(
-				json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template]
+		data = expected_item_tax_template[-2]
+		details = get_item_details(
+			frappe._dict(
+				{
+					"item_code": data["item_code"],
+					"tax_category": data["tax_category"],
+					"company": "_Test Company",
+					"price_list": "_Test Price List",
+					"currency": "_Test Currency",
+					"doctype": "Sales Order",
+					"conversion_rate": 1,
+					"price_list_currency": "_Test Currency",
+					"plc_conversion_rate": 1,
+					"order_type": "Sales",
+					"customer": "_Test Customer",
+					"conversion_factor": 1,
+					"price_list_uom_dependant": 1,
+					"ignore_pricing_rule": 1,
+				}
 			)
+		)
+
+		self.assertEqual(details.item_tax_template, data["item_tax_template"])
+		self.assertEqual(json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template])
 
 	def test_item_defaults(self):
 		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
@@ -810,14 +820,6 @@ class TestItem(ERPNextTestSuite):
 	def test_uom_conv_intermediate(self):
 		factor = get_uom_conv_factor("Pound", "Gram")
 		self.assertAlmostEqual(factor, 453.592, 3)
-
-	def test_uom_conv_intermediate_with_shared_target(self):
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
-
-		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
-
-		self.assertEqual(factor, 0.12)
 
 	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
 		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)

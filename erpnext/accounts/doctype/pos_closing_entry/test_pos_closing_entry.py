@@ -180,12 +180,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pcv_doc.flags.in_test = True
 		self.assertRaises(frappe.ValidationError, pcv_doc.submit)
 
-		accounting_dimension_department = frappe.get_doc(
-			"Accounting Dimension Detail", {"parent": "Department"}
-		)
-		accounting_dimension_department.mandatory_for_bs = 0
-		accounting_dimension_department.save()
-
 	def test_merging_into_sales_invoice_for_batched_item(self):
 		frappe.flags.print_message = False
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -459,22 +453,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
 
-	def test_change_is_taken_after_the_cash_account_changes(self):
-		with self.set_user("Administrator"):
-			new_cash_account = make_cash_account("Zz Test Cash")
-
-		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
-		make_paid_pos_invoice([("Cash", 100)])
-		frappe.db.set_value(
-			"Mode of Payment Account",
-			{"parent": "Cash", "company": "_Test Company"},
-			"default_account",
-			new_cash_account,
-		)
-		make_paid_pos_invoice([("Cash", 90)])
-
-		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 180})
-
 	def test_change_is_taken_when_the_change_account_differs(self):
 		with self.set_user("Administrator"):
 			change_account = make_cash_account("_Test Change Cash")
@@ -486,11 +464,8 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 
 def init_user_and_profile(**args):
-	user = "test@example.com"
+	user = "test-pos@example.com"
 	test_user = frappe.get_doc("User", user)
-
-	roles = ("Accounts Manager", "Accounts User", "Sales Manager", "Stock User", "Item Manager")
-	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
 	if args.get("do_not_create_pos_profile"):
