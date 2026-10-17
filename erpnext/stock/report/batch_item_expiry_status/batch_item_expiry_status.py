@@ -6,7 +6,8 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, today
 
@@ -101,7 +102,9 @@ def get_batch_details(filters):
 
 
 def set_permitted_batch_qty(batches):
-	warehouses = get_permitted_documents("Warehouse")
+	warehouses = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
 	if not batches or not warehouses:
 		return
 

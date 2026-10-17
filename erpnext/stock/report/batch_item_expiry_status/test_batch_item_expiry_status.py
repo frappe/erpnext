@@ -92,7 +92,7 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 
 		self.assertEqual([row.batch for row in data], [batches["old"].name])
 
-	def test_quantity_counts_only_permitted_warehouses(self):
+	def make_batch_in_two_warehouses(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
 		batch = frappe.get_doc(
 			{
@@ -112,17 +112,20 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 				use_serial_batch_fields=1,
 			)
 
+		return item, batch.name
+
+	def run_report_as_restricted_user(self, item, applicable_for=None):
 		user = "batch-expiry-warehouse@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
 				{"doctype": "User", "email": user, "first_name": "Batch Expiry", "send_welcome_email": 0}
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock Manager")
-		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
 
 		frappe.set_user(user)
 		try:
-			data = self.run_report(
+			return self.run_report(
 				item=item,
 				from_date=frappe.utils.today(),
 				to_date=frappe.utils.add_days(frappe.utils.today(), 30),
@@ -130,4 +133,16 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch.name, 3)])
+	def test_quantity_counts_only_permitted_warehouses(self):
+		item, batch = self.make_batch_in_two_warehouses()
+
+		data = self.run_report_as_restricted_user(item)
+
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch, 3)])
+
+	def test_permission_for_another_doctype_does_not_limit_the_quantity(self):
+		item, batch = self.make_batch_in_two_warehouses()
+
+		data = self.run_report_as_restricted_user(item, applicable_for="Purchase Order")
+
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch, 10)])
