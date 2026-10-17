@@ -1879,31 +1879,17 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in mr.items:
 			self.assertEqual(row.qty, required_qty[row.item_code])
 
-	def test_material_request_rejects_nonpositive_qty(self):
-		work_order = make_wo_order_test_record(
-			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
-		)
-
-		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=0)
-		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=-1)
-		self.assertRaises(
-			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("inf")
-		)
-		self.assertRaises(
-			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("nan")
-		)
-
-	def test_pick_list_rejects_nonpositive_qty(self):
+	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
 
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
 		)
 
-		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=0)
-		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=-1)
-		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=float("inf"))
-		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name, for_qty=float("nan"))
+		for make in (make_material_request, create_pick_list):
+			for for_qty in (0, -1, float("inf"), float("nan")):
+				with self.subTest(make=make.__name__, for_qty=for_qty):
+					self.assertRaises(frappe.ValidationError, make, work_order.name, for_qty=for_qty)
 		self.assertRaises(frappe.ValidationError, create_pick_list, work_order.name)
 
 	def submit_material_request(self, work_order_name, for_qty=None):
