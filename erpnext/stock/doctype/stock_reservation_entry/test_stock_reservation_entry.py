@@ -1368,16 +1368,8 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 	def test_read_only_users_cannot_reserve_stock(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_subcontracting_order,
-			make_bom_for_subcontracted_items,
-			make_raw_materials,
-			make_service_items,
-			make_subcontracted_items,
 		)
 
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
 		sales_order = make_sales_order(item_code="_Test Item", warehouse="_Test Warehouse - _TC", qty=1)
 		subcontracting_order = get_subcontracting_order()
