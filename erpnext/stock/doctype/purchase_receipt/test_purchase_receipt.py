@@ -2642,10 +2642,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Rejected Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Rejected Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Rejected Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Rejected Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = create_item("Test Rejected Internal Transfer Item")
 
@@ -2712,10 +2712,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Serial Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Serial Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Serial Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Serial Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Serial Item For Rejected Transfer",
@@ -2808,10 +2808,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Typed Serial Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Typed Serial Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Typed Serial Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Typed Serial Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 		item_code = make_item(
 			"_Test Typed Serial Item For Rejected Transfer",
 			{"has_serial_no": 1, "serial_no_series": "SN-TSIFRT-.####"},
@@ -2865,10 +2865,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Batch Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Batch Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Batch Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Batch Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Batch Item For Rejected Transfer",
@@ -2960,9 +2960,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Box Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Box Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Box Transfer To", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
 
 		item_doc = make_item(
 			"_Test Box Batch Item For Transfer",
@@ -3016,10 +3016,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Box Reject From", company=company)
-		transit_warehouse = create_warehouse("_Test Box Reject Transit", company=company)
-		to_warehouse = create_warehouse("_Test Box Reject To", company=company)
-		rejected_warehouse = create_warehouse("_Test Box Reject Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Box Batch Item For Rejection",
@@ -3087,10 +3087,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test LCV Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test LCV Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test LCV Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test LCV Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Batch Item For LCV Transfer",
@@ -3169,10 +3169,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Charge Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Charge Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Charge Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Charge Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Batch Item For Charged Transfer",
@@ -3278,10 +3278,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Return Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Return Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Return Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Return Transfer Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Batch Item For Returned Transfer",
@@ -3364,10 +3364,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Top Up From", company=company)
-		transit_warehouse = create_warehouse("_Test Top Up Transit", company=company)
-		to_warehouse = create_warehouse("_Test Top Up To", company=company)
-		rejected_warehouse = create_warehouse("_Test Top Up Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = make_item(
 			"_Test Serial Item For Topped Up Package",
@@ -3459,10 +3459,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test All Rejected From", company=company)
-		transit_warehouse = create_warehouse("_Test All Rejected Transit", company=company)
-		to_warehouse = create_warehouse("_Test All Rejected To", company=company)
-		rejected_warehouse = create_warehouse("_Test All Rejected Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = create_item("Test All Rejected Internal Transfer Item")
 
@@ -3522,10 +3522,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Rejected Return From", company=company)
-		transit_warehouse = create_warehouse("_Test Rejected Return Transit", company=company)
-		to_warehouse = create_warehouse("_Test Rejected Return To", company=company)
-		rejected_warehouse = create_warehouse("_Test Rejected Return Rejected", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
 
 		item_doc = create_item("Test Rejected Return Internal Transfer Item")
 
@@ -3580,17 +3580,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], 1000)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], -1000)
 
-	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
+	def make_transfer_receipt(self, item_doc, qty, rejected):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		wh = frappe._dict(
-			source=create_warehouse(f"_Test {tag} Transfer From", company=company),
-			transit=create_warehouse(f"_Test {tag} Transfer Transit", company=company),
-			accepted=create_warehouse(f"_Test {tag} Transfer To", company=company),
-			rejected=create_warehouse(f"_Test {tag} Transfer Rejected", company=company),
+			source=create_warehouse("_Test Transfer From", company=company),
+			transit=create_warehouse("_Test Transfer Transit", company=company),
+			accepted=create_warehouse("_Test Transfer To", company=company),
+			rejected=create_warehouse("_Test Transfer Rejected", company=company),
 		)
 		seed = make_purchase_receipt(
 			item_code=item_doc.name, company=company, warehouse=wh.source, qty=qty + rejected, rate=100
@@ -3626,7 +3626,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFRR-.####"},
 		)
 
-		pr, warehouses, company, batch_no = self.make_transfer_receipt("Removed", item_doc, 7, 3)
+		pr, warehouses, company, batch_no = self.make_transfer_receipt(item_doc, 7, 3)
 		pr.items[0].rejected_serial_and_batch_bundle = make_serial_batch_bundle(
 			frappe._dict(
 				{
@@ -3683,7 +3683,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFBR-.####"},
 		)
 
-		pr, warehouses, company, batch_no = self.make_transfer_receipt("Built", item_doc, 7, 3)
+		pr, warehouses, company, batch_no = self.make_transfer_receipt(item_doc, 7, 3)
 		pr.save()
 
 		self.assertTrue(pr.items[0].rejected_serial_and_batch_bundle)
@@ -3725,9 +3725,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		from_warehouse = create_warehouse("_Test Drift From", company=company)
-		transit_warehouse = create_warehouse("_Test Drift Transit", company=company)
-		to_warehouse = create_warehouse("_Test Drift Receiver", company=company)
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
 		item_doc = create_item("Test Internal Drift Item")
 
 		make_purchase_receipt(
