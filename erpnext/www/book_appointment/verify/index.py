@@ -58,13 +58,7 @@ def get_context(context):
 
 
 def verify_appointment(appointment):
-	# the signed link is the authorization; materializing the appointment
-	# (agent assignment) needs system privileges the Guest visitor lacks
-	visitor = frappe.session.user
-	try:
-		frappe.set_user("Administrator")
-		appointment.email_verified = True
-		appointment.status = "Open"
-		appointment.save(ignore_permissions=True)
-	finally:
-		frappe.set_user(visitor)
+	# the signed link is the authorization for the Guest visitor
+	appointment.email_verified = True
+	appointment.status = "Open"
+	appointment.save(ignore_permissions=True)
