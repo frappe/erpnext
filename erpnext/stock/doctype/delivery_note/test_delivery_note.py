@@ -4147,6 +4147,35 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -5)
 
+	def test_invoice_credit_in_another_unit_counts_in_the_delivery_unit(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=50, basic_rate=10)
+		delivery_note = create_delivery_note(item_code=item, qty=50, rate=50)
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.insert()
+		invoice.submit()
+
+		invoice_credit = make_return_doc("Sales Invoice", invoice.name)
+		invoice_credit.items[0].update({"uom": "Box", "conversion_factor": 10, "qty": -1, "rate": 500})
+		invoice_credit.update_billed_amount_in_delivery_note = 1
+		invoice_credit.insert()
+		invoice_credit.submit()
+
+		goods_return = make_sales_return(delivery_note.name)
+		goods_return.issue_credit_note = 1
+		goods_return.submit()
+
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": goods_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -40)
+
 	def test_return_credit_leaves_out_credits_made_from_the_invoice(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
