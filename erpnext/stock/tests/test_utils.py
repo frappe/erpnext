@@ -137,6 +137,18 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(selected["serial_no"], number)
 		self.assertEqual(scan_barcode(first_serial.name), {})
 
+	def test_shared_batch_scan_returns_internal_links(self):
+		items = [self.make_item(properties={"has_batch_no": 1}) for _ in range(2)]
+		number = f"Lot-{frappe.generate_hash()}"
+		batches = [
+			frappe.get_doc(doctype="Batch", item=item.name, batch_id=number).insert() for item in items
+		]
+		candidates = scan_barcode(number.lower())["candidates"]
+		self.assertEqual({row["batch_no"] for row in candidates}, {batch.name for batch in batches})
+		selected = scan_barcode(number, item_code=items[0].name)
+		self.assertEqual(selected["batch_no"], batches[0].name)
+		self.assertEqual(selected["batch_id"], number)
+
 	def test_item_barcode_does_not_hide_a_matching_serial(self):
 		number = f"Barcode-{frappe.generate_hash()}"
 		barcode_item = self.make_item(properties={"barcodes": [{"barcode": number}]})
