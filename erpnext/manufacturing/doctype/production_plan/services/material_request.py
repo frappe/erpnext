@@ -330,10 +330,15 @@ def _collect_item_details(doc, po_items):
 		if row.type_of_manufacturing == "Material Request":
 			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(row.production_item)
 
+	all_requested = set().union(*requested_sub_assemblies.values())
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
-		data["requested_sub_assemblies"] = requested_sub_assemblies.get(data.get("name"), set())
+		data["requested_sub_assemblies"] = (
+			all_requested
+			if doc.get("combine_sub_items")
+			else requested_sub_assemblies.get(data.get("name"), set())
+		)
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
