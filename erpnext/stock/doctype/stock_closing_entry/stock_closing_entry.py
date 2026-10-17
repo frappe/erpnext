@@ -13,6 +13,7 @@ from frappe.utils import (
 	get_date_str,
 	get_link_to_form,
 	getdate,
+	now_datetime,
 	nowdate,
 	nowtime,
 	parse_json,
@@ -270,6 +271,20 @@ class StockClosingEntry(Document):
 
 		return check_pending_reposting(self.to_date, self.company, throw_error=False)
 
+	def has_ledger_changes_since(self, started_at):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return bool(
+			frappe.qb.from_(sle)
+			.select(sle.name)
+			.where(
+				(sle.company == self.company)
+				& (sle.posting_date <= self.to_date)
+				& (sle.modified >= started_at)
+			)
+			.limit(1)
+			.run()
+		)
+
 	def get_pending_reposts_message(self):
 		return _(
 			"Cannot generate the closing balance of Stock Closing Entry {0} while Repost Item Valuation entries dated on or before {1} are pending. Try again once they are completed."
@@ -357,6 +372,7 @@ def prepare_closing_stock_balance(name):
 		return
 
 	doc.db_set("status", "In Progress")
+	started_at = now_datetime()
 
 	try:
 		doc.create_stock_closing_balance_entries()
@@ -365,7 +381,8 @@ def prepare_closing_stock_balance(name):
 			doc.db_set("status", "Cancelled")
 			return
 
-		doc.db_set("status", "Completed")
+		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts()
+		doc.db_set("status", "Outdated" if is_outdated else "Completed")
 	except Exception:
 		frappe.db.rollback()
 		doc.db_set("status", "Failed")
