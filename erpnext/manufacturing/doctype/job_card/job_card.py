@@ -1141,9 +1141,7 @@ class JobCard(Document):
 		if wo.track_semi_finished_goods:
 			wo.set_process_loss_qty()
 
-		if time_data:
-			wo.status = "In Process"
-
+		wo.status = wo.get_status()
 		wo.save()
 
 	def get_operation_time_data(self):
