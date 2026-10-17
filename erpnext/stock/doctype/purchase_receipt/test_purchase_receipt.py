@@ -4681,85 +4681,48 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		posting_date = today()
 		posting_time = nowtime()
 
-		# Step 1: Create Purchase Receipt
-		pr = make_purchase_receipt(
-			item_code=item,
-			qty=1,
-			rate=100,
-			posting_date=posting_date,
-			posting_time=posting_time,
-			do_not_save=1,
-		)
-
-		for _i in range(9):
-			pr.append(
-				"items",
-				{
-					"item_code": item,
-					"qty": 1,
-					"rate": 100,
-					"warehouse": pr.items[0].warehouse,
-					"cost_center": pr.items[0].cost_center,
-					"expense_account": pr.items[0].expense_account,
-					"uom": pr.items[0].uom,
-					"stock_uom": pr.items[0].stock_uom,
-					"conversion_factor": pr.items[0].conversion_factor,
-				},
+		def make_receipt_of_three_rows():
+			pr = make_purchase_receipt(
+				item_code=item,
+				qty=1,
+				rate=100,
+				posting_date=posting_date,
+				posting_time=posting_time,
+				do_not_save=1,
 			)
 
-		self.assertEqual(len(pr.items), 10)
-		pr.save()
-		pr.submit()
+			for _i in range(2):
+				pr.append(
+					"items",
+					{
+						"item_code": item,
+						"qty": 1,
+						"rate": 100,
+						"warehouse": pr.items[0].warehouse,
+						"cost_center": pr.items[0].cost_center,
+						"expense_account": pr.items[0].expense_account,
+						"uom": pr.items[0].uom,
+						"stock_uom": pr.items[0].stock_uom,
+						"conversion_factor": pr.items[0].conversion_factor,
+					},
+				)
 
-		data = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["qty_after_transaction", "creation", "posting_datetime"],
-			filters={"voucher_no": pr.name, "is_cancelled": 0},
-			order_by="creation",
-		)
+			self.assertEqual(len(pr.items), 3)
+			pr.save()
+			pr.submit()
 
-		for index, d in enumerate(data):
+			return frappe.get_all(
+				"Stock Ledger Entry",
+				fields=["qty_after_transaction", "creation", "posting_datetime"],
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				order_by="creation",
+			)
+
+		for index, d in enumerate(make_receipt_of_three_rows()):
 			self.assertEqual(d.qty_after_transaction, 1 + index)
 
-		# Step 2: Create Purchase Receipt
-		pr = make_purchase_receipt(
-			item_code=item,
-			qty=1,
-			rate=100,
-			posting_date=posting_date,
-			posting_time=posting_time,
-			do_not_save=1,
-		)
-
-		for _i in range(9):
-			pr.append(
-				"items",
-				{
-					"item_code": item,
-					"qty": 1,
-					"rate": 100,
-					"warehouse": pr.items[0].warehouse,
-					"cost_center": pr.items[0].cost_center,
-					"expense_account": pr.items[0].expense_account,
-					"uom": pr.items[0].uom,
-					"stock_uom": pr.items[0].stock_uom,
-					"conversion_factor": pr.items[0].conversion_factor,
-				},
-			)
-
-		self.assertEqual(len(pr.items), 10)
-		pr.save()
-		pr.submit()
-
-		data = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["qty_after_transaction", "creation", "posting_datetime"],
-			filters={"voucher_no": pr.name, "is_cancelled": 0},
-			order_by="creation",
-		)
-
-		for index, d in enumerate(data):
-			self.assertEqual(d.qty_after_transaction, 11 + index)
+		for index, d in enumerate(make_receipt_of_three_rows()):
+			self.assertEqual(d.qty_after_transaction, 4 + index)
 
 	def test_auto_set_batch_based_on_bundle(self):
 		item_code = make_item(
