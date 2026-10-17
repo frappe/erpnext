@@ -173,7 +173,8 @@ class AssetDepreciationSchedule(Document):
 
 		self.set_draft_asset_depr_schedule_details(asset_doc, row)
 
-		if self.should_prepare_depreciation_schedule(
+		# schedule must always be truncated at the disposal date, even for unchanged manual schedules
+		if date_of_disposal or self.should_prepare_depreciation_schedule(
 			have_asset_details_been_modified, not_manual_depr_or_have_manual_depr_details_been_modified
 		):
 			self.make_depr_schedule(asset_doc, row, date_of_disposal, update_asset_finance_book_row)
@@ -243,9 +244,49 @@ class AssetDepreciationSchedule(Document):
 
 		start = self.clear_depr_schedule()
 
+		if date_of_disposal and row.depreciation_method == "Manual":
+			self.truncate_manual_depr_schedule(asset_doc, row, date_of_disposal)
+			return
+
 		self._make_depr_schedule(
 			asset_doc, row, start, date_of_disposal, update_asset_finance_book_row, value_after_depreciation
 		)
+
+	def truncate_manual_depr_schedule(self, asset_doc, row, date_of_disposal):
+		start = len(self.depreciation_schedule)
+		for idx, schedule in enumerate(self.schedules_before_clearing[start:], start):
+			if getdate(schedule.schedule_date) < getdate(date_of_disposal):
+				self.add_depr_schedule_row(schedule.schedule_date, schedule.depreciation_amount, idx)
+				continue
+
+			from_date = self.get_disposal_period_start_date(asset_doc, row)
+			depreciation_amount = flt(
+				schedule.depreciation_amount
+				* (date_diff(date_of_disposal, from_date) + 1)
+				/ (date_diff(schedule.schedule_date, from_date) + 1),
+				asset_doc.precision("gross_purchase_amount"),
+			)
+
+			if depreciation_amount > 0:
+				self.add_depr_schedule_row(date_of_disposal, depreciation_amount, idx)
+
+			break
+
+	def get_disposal_period_start_date(self, asset_doc, row):
+		if self.depreciation_schedule:
+			return add_days(self.depreciation_schedule[-1].schedule_date, 1)
+
+		if asset_doc.opening_number_of_booked_depreciations:
+			# day after the period of the last opening depreciation, which ends one
+			# frequency before depreciation_start_date (not on the purchase anniversary)
+			prev_schedule_date = add_months(
+				row.depreciation_start_date, -1 * cint(row.frequency_of_depreciation)
+			)
+			if is_last_day_of_the_month(row.depreciation_start_date):
+				prev_schedule_date = get_last_day(prev_schedule_date)
+			return add_days(prev_schedule_date, 1)
+
+		return getdate(asset_doc.available_for_use_date)
 
 	def clear_depr_schedule(self):
 		start = 0
@@ -352,14 +393,7 @@ class AssetDepreciationSchedule(Document):
 
 			# if asset is being sold or scrapped
 			if date_of_disposal and getdate(schedule_date) >= getdate(date_of_disposal):
-				from_date = add_months(
-					getdate(asset_doc.available_for_use_date),
-					(asset_doc.opening_number_of_booked_depreciations * row.frequency_of_depreciation),
-				)
-				if is_last_day_of_the_month(getdate(asset_doc.available_for_use_date)):
-					from_date = get_last_day(from_date)
-				if self.depreciation_schedule:
-					from_date = add_days(self.depreciation_schedule[-1].schedule_date, 1)
+				from_date = self.get_disposal_period_start_date(asset_doc, row)
 
 				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
