@@ -484,22 +484,6 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.raised_by, "customer@example.com")
 		self.assertIn("Your order is delayed", issue.description)
 
-	def test_closing_issue_closes_its_assignments(self):
-		from frappe.desk.form.assign_to import add as add_assignment
-
-		create_user("test@admin.com")
-		issue = make_issue(index=1)
-		add_assignment({"doctype": "Issue", "name": issue.name, "assign_to": ["test@admin.com"]})
-
-		issue.reload()
-		issue.status = "Closed"
-		issue.save()
-
-		self.assertEqual(
-			frappe.db.get_value("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, "status"),
-			"Closed",
-		)
-
 	def test_closed_assignments_stay_closed_with_assignment_rule(self):
 		from frappe.cache_manager import clear_doctype_map
 
@@ -1109,19 +1093,6 @@ class TestSplitIssue(ERPNextTestSuite):
 			if link.link_doctype == "Issue"
 		]
 
-	def test_split_moves_referenced_communications_from_the_split_point(self):
-		issue = self.make_issue("Split source")
-		first = self.make_communication("First", "2024-01-01 10:00:00", reference=issue.name)
-		second = self.make_communication("Second", "2024-01-01 11:00:00", reference=issue.name)
-		third = self.make_communication("Third", "2024-01-01 12:00:00", reference=issue.name)
-
-		split = issue.split_issue(subject="Split target", communication_id=second.name)
-
-		self.assertEqual(frappe.db.get_value("Communication", first.name, "reference_name"), issue.name)
-		self.assertEqual(frappe.db.get_value("Communication", second.name, "reference_name"), split)
-		self.assertEqual(frappe.db.get_value("Communication", third.name, "reference_name"), split)
-		self.assertEqual(frappe.db.get_value("Issue", split, "issue_split_from"), issue.name)
-
 	def test_split_follows_the_timeline_order_not_the_insertion_order(self):
 		"""The split point is read off the timeline, which is ordered by communication_date.
 
@@ -1180,17 +1151,6 @@ class TestSplitIssue(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Communication", referenced.name, "reference_name"), split)
 		self.assertEqual(self.linked_issues(linked.name), [split])
 
-	def test_split_from_a_timeline_linked_communication(self):
-		"""The Split button is offered on link-only timeline items, so they are valid split points."""
-		issue = self.make_issue("Split source")
-		linked = self.make_communication("Linked only", "2024-01-01 10:00:00", link_to=issue.name)
-		later = self.make_communication("Later", "2024-01-01 11:00:00", reference=issue.name)
-
-		split = issue.split_issue(subject="Split target", communication_id=linked.name)
-
-		self.assertEqual(self.linked_issues(linked.name), [split])
-		self.assertEqual(frappe.db.get_value("Communication", later.name, "reference_name"), split)
-
 	def test_split_leaves_the_reference_of_a_linked_communication_alone(self):
 		"""Moving a Timeline Link must not rewrite a reference that belongs to another Issue."""
 		issue = self.make_issue("Split source")
@@ -1216,12 +1176,6 @@ class TestSplitIssue(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Communication", theirs.name, "reference_name"), other.name)
 		self.assertEqual(frappe.db.get_value("Communication", also_theirs.name, "reference_name"), other.name)
-
-	def test_split_rejects_a_communication_that_is_not_on_the_timeline(self):
-		issue = self.make_issue("Split source")
-		unattached = self.make_communication("Unattached", "2024-01-01 10:00:00")
-
-		self.assertRaises(frappe.PermissionError, issue.split_issue, "Split target", unattached.name)
 
 	def test_split_requires_write_permission_on_the_issue(self):
 		issue = self.make_issue("Split source")

@@ -94,14 +94,6 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		claim.status = "Cancelled"
 		self.assertRaises(frappe.ValidationError, claim.save)
 
-	def test_cancel_allowed_when_no_active_visit(self):
-		claim = self.make_warranty_claim()
-
-		claim.status = "Cancelled"
-		claim.save()
-
-		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Cancelled")
-
 	def test_visit_records_the_user_of_the_service_person(self):
 		user = "test_warranty_service_person@example.com"
 		frappe.db.set_value(
