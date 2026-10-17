@@ -27,7 +27,7 @@ def get_data(filters):
 
 def validate_data(itewise_balance_qty):
 	res = []
-	precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
+	precision = cint(frappe.db.get_default("float_precision")) or 2
 	reconciled_qty = get_reconciled_qty(itewise_balance_qty)
 	for _key, data in itewise_balance_qty.items():
 		row = get_incorrect_data(data, precision, reconciled_qty)
