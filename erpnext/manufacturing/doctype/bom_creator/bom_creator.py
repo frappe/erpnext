@@ -264,7 +264,9 @@ class BOMCreator(Document):
 		self.price_list_currency = frappe.get_cached_value("Price List", self.buying_price_list, "currency")
 		if self.price_list_currency == company_currency:
 			self.plc_conversion_rate = 1
-		elif flt(self.plc_conversion_rate) in (0, 1):
+		elif flt(self.plc_conversion_rate) in (0, 1) or (
+			not self.is_new() and self.has_value_changed("price_list_currency")
+		):
 			self.plc_conversion_rate = get_exchange_rate(
 				self.price_list_currency, company_currency, args="for_buying"
 			)
