@@ -88,7 +88,7 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		self.assertEqual(row.get("avg_selling_price_list_rate"), 100)
 
-	def test_current_stock_counts_only_permitted_warehouses(self):
+	def get_current_stock_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
 
 		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
@@ -102,7 +102,7 @@ class TestItemVariantDetails(ERPNextTestSuite):
 				{"doctype": "User", "email": user, "first_name": "Variant Details", "send_welcome_email": 0}
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock Manager", "Sales User")
-		add_user_permission("Warehouse", "Finished Goods - _TC", user)
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
 
 		frappe.set_user(user)
 		try:
@@ -110,5 +110,10 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
-		row = next(row for row in rows if row.get("variant_name") == variant.name)
-		self.assertEqual(row.get("current_stock"), 7)
+		return next(row for row in rows if row.get("variant_name") == variant.name).get("current_stock")
+
+	def test_current_stock_counts_only_permitted_warehouses(self):
+		self.assertEqual(self.get_current_stock_for_restricted_user(), 7)
+
+	def test_permission_for_another_doctype_does_not_limit_current_stock(self):
+		self.assertEqual(self.get_current_stock_for_restricted_user(applicable_for="Purchase Order"), 25)
