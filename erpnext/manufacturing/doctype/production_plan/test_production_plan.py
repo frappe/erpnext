@@ -1413,6 +1413,89 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertNotEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Material Requested")
 
+	def test_combined_bought_sub_assembly_skips_components_for_every_finished_good(self):
+		for item in (
+			"_Test PP Comb SA RM",
+			"_Test PP Comb RM 2",
+			"_Test PP Comb SA",
+			"_Test PP Comb FG 1",
+			"_Test PP Comb FG 2",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Comb SA", raw_materials=["_Test PP Comb SA RM"], currency="INR")
+		for fg in ("_Test PP Comb FG 1", "_Test PP Comb FG 2"):
+			make_bom(item=fg, raw_materials=["_Test PP Comb SA", "_Test PP Comb RM 2"], currency="INR")
+
+		plan = create_production_plan(
+			item_code="_Test PP Comb FG 1",
+			planned_qty=2,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				**plan.po_items[0].as_dict(),
+				"name": None,
+				"item_code": "_Test PP Comb FG 2",
+				"bom_no": frappe.db.get_value("Item", "_Test PP Comb FG 2", "default_bom"),
+				"planned_qty": 3,
+			},
+		)
+		plan.combine_sub_items = 1
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertNotIn("_Test PP Comb SA RM", [row.get("item_code") for row in items])
+
+	def test_exploded_branch_follows_the_bom_selected_on_the_line(self):
+		for item in (
+			"_Test PP Line SA",
+			"_Test PP Line SA RM",
+			"_Test PP Line SA2",
+			"_Test PP Line RM A",
+			"_Test PP Line RM B",
+			"_Test PP Line FG",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Line SA", raw_materials=["_Test PP Line SA RM"], currency="INR")
+		selected_bom = make_bom(
+			item="_Test PP Line SA2", raw_materials=["_Test PP Line RM B"], currency="INR"
+		)
+		make_bom(item="_Test PP Line SA2", raw_materials=["_Test PP Line RM A"], currency="INR")
+		fg_bom = make_bom(
+			item="_Test PP Line FG",
+			raw_materials=["_Test PP Line SA", "_Test PP Line SA2"],
+			currency="INR",
+			do_not_save=1,
+		)
+		fg_bom.items[1].bom_no = selected_bom.name
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code="_Test PP Line FG",
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			include_subcontracted_items=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.po_items[0].bom_no = fg_bom.name
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.production_item == "_Test PP Line SA":
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = [row.get("item_code") for row in get_items_for_material_requests(plan.as_dict())]
+		self.assertIn("_Test PP Line RM B", items)
+		self.assertNotIn("_Test PP Line RM A", items)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
