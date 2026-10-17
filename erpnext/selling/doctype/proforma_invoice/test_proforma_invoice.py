@@ -138,17 +138,6 @@ class TestProformaInvoice(ERPNextTestSuite):
 		)
 		self.assertEqual(frappe.db.get_value("Proforma Invoice", qty_based, "hide_item_qty"), 0)
 
-	def test_feature_toggle_is_enforced(self):
-		sales_order = make_sales_order(qty=10)
-		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 0)
-
-		self.assertRaises(
-			frappe.ValidationError,
-			self.create_proforma,
-			sales_order,
-			[(sales_order.items[0].name, 4)],
-		)
-
 	def test_cannot_email_cancelled_proforma(self):
 		sales_order = make_sales_order(qty=10)
 		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])

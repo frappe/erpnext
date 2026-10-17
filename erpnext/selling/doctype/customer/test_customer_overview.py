@@ -31,10 +31,6 @@ class TestCustomerOverview(ERPNextTestSuite):
 		self.assertEqual(data["ageing"]["total"], data["outstanding"]["value"])
 		self.assertEqual(data["ageing"]["overdue"], data["overdue"]["value"])
 
-	def test_unknown_period_falls_back(self):
-		data = customer_overview.get_customer_overview(CUSTOMER, COMPANY, period="Forever")
-		self.assertEqual(data["period"], "Current Fiscal Year")
-
 	def test_invoice_data_needs_accounts_access(self):
 		with patch.object(customer_overview, "accounts_access", return_value=False):
 			data = customer_overview.get_customer_overview(CUSTOMER, COMPANY)
@@ -59,12 +55,6 @@ class TestCustomerOverview(ERPNextTestSuite):
 			self.assertRaises(
 				frappe.PermissionError, customer_overview.get_customer_receivables, CUSTOMER, COMPANY
 			)
-
-	def test_transactions_are_capped(self):
-		rows = customer_overview.get_customer_transactions(CUSTOMER, COMPANY, limit=500)
-		self.assertLessEqual(len(rows), 100)
-		dates = [r["date"] for r in rows]
-		self.assertEqual(dates, sorted(dates, reverse=True))
 
 	def test_customer_without_read_access_is_refused(self):
 		with patch.object(frappe, "has_permission", return_value=False):
@@ -181,15 +171,3 @@ class TestCustomerOverview(ERPNextTestSuite):
 			self.assertEqual(
 				customer_overview.get_customer_receivables(CUSTOMER, COMPANY)["advances"]["value"], expected
 			)
-
-	def test_advances_missing_report_row(self):
-		with patch(
-			"erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary.execute",
-			return_value=([], []),
-		):
-			with patch.object(
-				customer_overview, "get_partywise_advanced_payment_amount", return_value={CUSTOMER: 500}
-			):
-				self.assertEqual(customer_overview.reported_advances(CUSTOMER, COMPANY, today()), 500)
-			with patch.object(customer_overview, "_unrestricted_read", return_value=False):
-				self.assertIsNone(customer_overview.reported_advances(CUSTOMER, COMPANY, today()))

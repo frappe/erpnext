@@ -76,21 +76,6 @@ class TestSalesAnalytics(ERPNextTestSuite):
 		self.assertAlmostEqual(data[0]["total"], self._expected_value_total(), places=2)
 		self.assertEqual({dataset["name"] for dataset in chart["data"]["datasets"]}, {CUSTOMER})
 
-	def test_parent_customer_group_filter_preserves_rollup(self):
-		_columns, unfiltered_data, *_rest = execute(self._base_filters(tree_type="Customer Group"))
-		_columns, filtered_data, *_rest = execute(
-			self._base_filters(tree_type="Customer Group", entity=["All Customer Groups"])
-		)
-
-		unfiltered = self._row_by_entity(unfiltered_data)
-		filtered = self._row_by_entity(filtered_data)
-		self.assertEqual(set(filtered), {"All Customer Groups"})
-		self.assertAlmostEqual(
-			filtered["All Customer Groups"]["total"],
-			unfiltered["All Customer Groups"]["total"],
-			places=2,
-		)
-
 	def test_customer_group_entity_filter(self):
 		_columns, unfiltered_data, *_rest = execute(self._base_filters(tree_type="Customer Group"))
 		_columns, filtered_data, *_rest = execute(

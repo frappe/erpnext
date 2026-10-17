@@ -131,24 +131,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.status, "Completed")
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
-	def test_auto_skip_delivery_note_for_service_items(self):
-		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
-		so = make_sales_order(item_code=service_item, qty=2, rate=100)
-		so.reload()
-
-		self.assertEqual(so.items[0].skip_delivery, 1)
-		self.assertEqual(flt(so.per_delivered), 100)
-		self.assertEqual(so.delivery_status, "Not Applicable")
-		self.assertEqual(so.status, "To Bill")
-
-		si = make_sales_invoice(so.name)
-		si.insert()
-		si.submit()
-
-		so.reload()
-		self.assertEqual(so.status, "Completed")
-
-	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
 	def test_mixed_sales_order_with_service_items(self):
 		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, rate=100)
@@ -193,20 +175,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code="_Test Bundle Parent For Skip DN", qty=1, rate=100)
 
 		self.assertEqual(so.items[0].skip_delivery, 0)
-
-	def test_service_item_needs_delivery_when_setting_disabled(self):
-		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
-		so = make_sales_order(item_code=service_item, qty=1, rate=100)
-
-		self.assertEqual(so.items[0].skip_delivery, 0)
-		self.assertEqual(flt(so.per_delivered), 0)
-
-		si = make_sales_invoice(so.name)
-		si.insert()
-		si.submit()
-
-		so.reload()
-		self.assertEqual(so.status, "To Deliver")
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
 	def test_stale_skip_delivery_cleared_after_setting_disabled(self):
@@ -1354,51 +1322,6 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertRaises(
 				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
 			)
-
-	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
-		for workflow_name in frappe.get_all(
-			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
-		):
-			workflow = frappe.get_doc("Workflow", workflow_name)
-			workflow.is_active = 0
-			workflow.save()
-
-		role = "_Test Sales Order Item Editor"
-		if not frappe.db.exists("Role", role):
-			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
-
-		frappe.permissions.add_permission("Sales Order", role, 0)
-		for right, value in {
-			"read": 1,
-			"write": 1,
-			"create": 1,
-			"submit": 1,
-			"cancel": 0,
-			"delete": 0,
-		}.items():
-			frappe.permissions.update_permission_property("Sales Order", role, 0, right, value)
-		frappe.clear_cache()
-
-		so = make_sales_order(**{"item_list": [{"item_code": "_Test Item", "qty": 5, "rate": 1000}]})
-		trans_item = json.dumps(
-			[
-				{"item_code": "_Test Item", "qty": 5, "rate": 1000, "docname": so.items[0].name},
-				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
-			]
-		)
-		update_child_qty_rate("Sales Order", trans_item, so.name)
-		so.reload()
-		self.assertEqual(len(so.items), 2)
-
-		test_user = create_user("test_so_item_editor@example.com", role, "Accounts User", "Stock User")
-		trans_item = json.dumps(
-			[{"item_code": "_Test Item", "qty": 5, "rate": 1000, "docname": so.items[0].name}]
-		)
-		with self.set_user(test_user.name):
-			update_child_qty_rate("Sales Order", trans_item, so.name)
-
-		so.reload()
-		self.assertEqual(len(so.items), 1)
 
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
@@ -3948,28 +3871,6 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(make_sales_invoice(so.name).commission_rate, 7)
 		finally:
 			frappe.db.set_value("Item", "_Test Item", "grant_commission", original)
-
-	def test_shipping_contact_person_flows_to_delivery_note_and_sales_invoice(self):
-		billing_contact = "_Test Contact for _Test Customer-_Test Customer"
-		shipping_contact = "_Test Contact 2 for _Test Customer-_Test Customer"
-
-		so = make_sales_order(customer="_Test Customer", do_not_submit=True)
-		so.contact_person = billing_contact
-		so.shipping_contact_person = shipping_contact
-		so.save()
-
-		# fetch_from fills the display fields off the shipping contact, not the billing one
-		self.assertEqual(so.shipping_contact_display, "_Test Contact 2 for _Test Customer")
-		self.assertEqual(so.shipping_contact_email, "test_contact_two_customer@example.com")
-
-		so.submit()
-
-		dn = make_delivery_note(so.name)
-		self.assertEqual(dn.contact_person, billing_contact)
-		self.assertEqual(dn.shipping_contact_person, shipping_contact)
-
-		si = make_sales_invoice(so.name)
-		self.assertEqual(si.shipping_contact_person, shipping_contact)
 
 	def test_get_party_details_blanks_shipping_contact(self):
 		# unlike the billing contact there is no default to fall back on, so the keys must

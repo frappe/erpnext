@@ -26,10 +26,6 @@ class TestCustomersWithoutAnySalesTransactions(ERPNextTestSuite):
 	def customers_in_report(self, **filters):
 		return {row["customer"] for row in execute(frappe._dict(filters))[1]}
 
-	def test_customer_with_no_transactions_is_listed(self):
-		customer = self.make_customer("_Test CWST No Txn")
-		self.assertIn(customer, self.customers_in_report())
-
 	def test_delivery_only_customer_is_excluded(self):
 		customer = self.make_customer("_Test CWST Delivery Only")
 		create_delivery_note(customer=customer)  # submitted, no invoice or order

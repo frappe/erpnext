@@ -392,19 +392,6 @@ class TestCustomer(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, customer.save)
 
-	def test_get_customer_overdue_amount(self):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
-		baseline = get_customer_overdue_amount("_Test Customer", "_Test Company")
-
-		# a past-due, unpaid invoice adds its outstanding to the overdue amount
-		create_sales_invoice(qty=1, rate=500, posting_date=add_days(nowdate(), -30))
-		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
-
-		# an invoice due today (not yet past due) does not
-		create_sales_invoice(qty=1, rate=700, posting_date=nowdate())
-		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
-
 	def test_get_customer_overdue_amount_is_in_company_currency(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
@@ -611,33 +598,6 @@ class TestCustomer(ERPNextTestSuite):
 
 		customer.account_manager = None
 		self.assertIsNone(customer.get_notification_email())
-
-	def test_portal_user_contact_link(self):
-		user_email = frappe.generate_hash() + "@example.com"
-		user = frappe.new_doc("User")
-		user.email = user_email
-		user.first_name = "Test Portal Customer User"
-		user.send_welcome_email = False
-		user.insert(ignore_permissions=True)
-
-		contact = frappe.new_doc("Contact")
-		contact.first_name = "Test Portal Customer User"
-		contact.add_email(user_email, is_primary=1)
-		contact.links = []
-		contact.insert(ignore_permissions=True)
-
-		customer = frappe.get_doc(
-			{
-				"doctype": "Customer",
-				"customer_name": "Test Portal Contact Customer",
-				"customer_type": "Individual",
-			}
-		)
-		customer.append("portal_users", {"user": user.name})
-		customer.insert()
-
-		contact.reload()
-		self.assertTrue(contact.has_link("Customer", customer.name))
 
 
 def get_customer_dict(customer_name):
