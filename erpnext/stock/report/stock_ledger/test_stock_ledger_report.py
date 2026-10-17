@@ -367,6 +367,7 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		opening = execute(filters)[1][0]
 
 		self.assertEqual(opening["qty_after_transaction_nos"], 17)
+
 	def test_opening_of_a_warehouse_the_user_may_not_read_is_hidden(self):
 		from frappe.permissions import add_user_permission
 
