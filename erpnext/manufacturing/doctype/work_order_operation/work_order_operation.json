@@ -21,6 +21,7 @@
   "section_break_insy",
   "bom_no",
   "finished_good",
+  "qty_to_produce",
   "is_subcontracted",
   "skip_material_transfer",
   "backflush_from_wip_warehouse",
@@ -255,6 +256,14 @@
    "in_list_view": 1,
    "label": "Semi Finished Goods / Finished Goods",
    "options": "Item",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "fieldname": "qty_to_produce",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty to Produce",
    "read_only": 1
   },
   {
