@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import flt, fmt_money
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -232,6 +234,89 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		self.assertEqual(len(rows), 1)
 		self.assertEqual(flt(rows[0].qty_per_unit), 5.0)
 		self.assertEqual(flt(rows[0].producible_qty), 2.0)
+
+	def build_bom_with_shared_material(self):
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		phantom_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		phantom_bom = make_bom(item=phantom_item, raw_materials=[material], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		parent = make_bom(item=fg_item, raw_materials=[material, phantom_item], do_not_save=True)
+		parent.items[1].bom_no = phantom_bom.name
+		parent.save()
+		parent.submit()
+
+		warehouse = create_warehouse("_Test BOM Stock Analysis Shared")
+		create_stock_reconciliation(item_code=material, warehouse=warehouse, qty=10, rate=10)
+		return parent.name, material, warehouse
+
+	def test_material_used_directly_and_in_phantom_is_counted_once(self):
+		bom, material, warehouse = self.build_bom_with_shared_material()
+
+		for exploded in (False, True):
+			with self.subTest(exploded=exploded):
+				items, footer = run_report(bom, warehouse, exploded, qty_to_make=1)
+				self.assertEqual(list(items), [material])
+				self.assertEqual(items[material]["qty_per_unit"], fmt_qty(2))
+				self.assertEqual(footer["description"], 5)
+
+	def test_default_view_explodes_phantom_boms(self):
+		bom, material, warehouse = self.build_bom_with_shared_material()
+
+		for exploded in (False, True):
+			with self.subTest(exploded=exploded):
+				items, footer = run_report(bom, warehouse, exploded, qty_to_make=0)
+				self.assertEqual(list(items), [material])
+				self.assertEqual(items[material]["qty_per_unit"], fmt_qty(2))
+				self.assertEqual(items[material]["available_qty"], fmt_qty(10))
+				self.assertEqual(footer["description"], 5)
+
+	def build_bom_with_stock_in_many_warehouses(self):
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(item=fg_item, raw_materials=[material])
+
+		permitted = create_warehouse("_Test BOM Stock Analysis Permitted")
+		for warehouse, qty in (
+			(permitted, 10),
+			(create_warehouse("_Test BOM Stock Analysis Restricted"), 90),
+		):
+			create_stock_reconciliation(item_code=material, warehouse=warehouse, qty=qty, rate=10)
+
+		other_company = "_Test Company 1"
+		create_stock_reconciliation(
+			item_code=material,
+			warehouse=create_warehouse("_Test BOM Stock Analysis Other Company", company=other_company),
+			company=other_company,
+			qty=1000,
+			rate=10,
+		)
+		return bom.name, material, permitted
+
+	def test_stock_without_warehouse_is_limited_to_permitted_company_warehouses(self):
+		bom, material, permitted = self.build_bom_with_stock_in_many_warehouses()
+
+		items, footer = run_report(bom, None, exploded=False, qty_to_make=1)
+		self.assertEqual(items[material]["available_qty"], fmt_qty(100))
+		self.assertEqual(footer["description"], 100)
+
+		user = create_user("bom-stock-analysis-warehouse@example.com", "Manufacturing User")
+		add_user_permission("Warehouse", permitted, user.name)
+		with self.set_user(user.name):
+			items, footer = run_report(bom, None, exploded=False, qty_to_make=1)
+
+		self.assertEqual(items[material]["available_qty"], fmt_qty(10))
+		self.assertEqual(footer["description"], 10)
+
+	def test_default_view_without_warehouse(self):
+		bom, material, permitted = self.build_bom_with_stock_in_many_warehouses()
+
+		items, footer = run_report(bom, None, exploded=False, qty_to_make=0)
+		self.assertEqual(items[material]["available_qty"], fmt_qty(100))
+		self.assertEqual(footer["description"], 100)
 
 
 def run_report(bom, warehouse, exploded, qty_to_make):
