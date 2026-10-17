@@ -2100,8 +2100,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			voucher_type="Purchase Receipt",
 		)
 
-		toggle_provisional_accounting_setting()
-
 	def test_provisional_accounting_entry_for_over_billing(self):
 		setup_provisional_accounting()
 
@@ -2160,8 +2158,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			voucher_type="Purchase Receipt",
 		)
 
-		toggle_provisional_accounting_setting()
-
 	def test_provisional_accounting_entry_for_partial_billing(self):
 		setup_provisional_accounting()
 
@@ -2200,8 +2196,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		check_gl_entries(
 			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"
 		)
-
-		toggle_provisional_accounting_setting()
 
 	def test_provisional_accounting_entry_multi_currency(self):
 		setup_provisional_accounting()
@@ -2261,8 +2255,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			pi.posting_date,
 			voucher_type="Purchase Receipt",
 		)
-
-		toggle_provisional_accounting_setting()
 
 	def test_adjust_incoming_rate(self):
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
