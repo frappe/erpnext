@@ -92,18 +92,20 @@ class MaterialRequirementsPlanningReport:
 
 			query = query.where(so_item.warehouse.isin(warehouses))
 
-		if skip_orders := self.get_orders_to_skip():
-			query = query.where(so.name.notin(skip_orders))
-
 		if self.filters.get("from_date"):
 			query = query.where(so_item.delivery_date >= self.filters.get("from_date"))
 
 		if self.filters.get("to_date"):
 			query = query.where(so_item.delivery_date <= self.filters.get("to_date"))
 
+		skipped_data = []
+		if skip_orders := self.get_orders_to_skip():
+			skipped_data = query.where(so.name.isin(skip_orders)).run(as_dict=True)
+			query = query.where(so.name.notin(skip_orders))
+
 		data = query.run(as_dict=True)
 
-		for row in self.get_demand_beyond_mps(data):
+		for row in self.get_demand_beyond_mps(data, skipped_data):
 			self.mps_data.append(
 				frappe._dict(
 					{
@@ -117,11 +119,15 @@ class MaterialRequirementsPlanningReport:
 				)
 			)
 
-	def get_demand_beyond_mps(self, data):
+	def get_demand_beyond_mps(self, data, skipped_data=None):
 		planned = {}
 		for row in self.mps_data:
 			key = (row.item_code, getdate(row.delivery_date))
 			planned[key] = planned.get(key, 0.0) + flt(row.planned_qty)
+
+		for row in skipped_data or []:
+			key = (row.item_code, getdate(row.delivery_date))
+			planned[key] = max(planned.get(key, 0.0) - flt(row.adhoc_qty), 0.0)
 
 		demand = {}
 		for row in data:
@@ -168,6 +174,7 @@ class MaterialRequirementsPlanningReport:
 			.groupby(doctype.item_code)
 		)
 
+		warehouses = None
 		if self.filters.get("warehouse"):
 			warehouses = [self.filters.get("warehouse")]
 			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
@@ -176,8 +183,12 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.warehouse.isin(warehouses))
 
 		bin_data = query.run(as_dict=True)
+		work_order_reserved = get_stock_reserved_for_work_orders(items, warehouses)
 
 		for row in bin_data:
+			row.reserved_stock = max(
+				flt(row.reserved_stock) - work_order_reserved.get(row.item_code, 0.0), 0.0
+			)
 			if row.item_code not in _bin_details:
 				_bin_details[row.item_code] = row
 
@@ -510,6 +521,7 @@ class MaterialRequirementsPlanningReport:
 		qty = sum(flt(self._so_details.pop(key).qty) for key in keys)
 		row.adhoc_qty = flt(row.adhoc_qty) + qty
 		row.planned_qty = flt(row.planned_qty) + qty
+		row.supply_cutoff_date = min(getdate(key[1]) for key in keys)
 
 	def add_bin_details(self, row):
 		if bin_details := self._bin_details.get(row.item_code):
@@ -528,7 +540,7 @@ class MaterialRequirementsPlanningReport:
 		if row.required_qty > 0 and self._po_details:
 			dict_update = {}
 			for (item_code, delivery_date), po_data in self._po_details.items():
-				if row.item_code == item_code and getdate(delivery_date) <= getdate(row.delivery_date):
+				if row.item_code == item_code and getdate(delivery_date) <= get_supply_cutoff_date(row):
 					po_ordered_qty = po_data.qty
 					if row.required_qty > po_ordered_qty:
 						row.po_ordered_qty = flt(row.po_ordered_qty) + po_ordered_qty
@@ -552,7 +564,7 @@ class MaterialRequirementsPlanningReport:
 		if row.required_qty > 0 and self._wo_details:
 			dict_update = {}
 			for (item_code, delivery_date), wo_data in self._wo_details.items():
-				if row.item_code == item_code and getdate(delivery_date) <= getdate(row.delivery_date):
+				if row.item_code == item_code and getdate(delivery_date) <= get_supply_cutoff_date(row):
 					wo_ordered_qty = wo_data.qty
 					if row.required_qty > wo_ordered_qty:
 						row.wo_ordered_qty = flt(row.wo_ordered_qty) + wo_ordered_qty
@@ -1212,6 +1224,32 @@ class MaterialRequirementsPlanningReport:
 		sales_data = query.run(as_dict=True)
 
 		return convert_to_daily_bucket_data(sales_data)
+
+
+def get_stock_reserved_for_work_orders(items, warehouses=None):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(
+			sre.item_code,
+			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Work Order")
+			& (sre.item_code.isin(items))
+			& (sre.status.notin(["Delivered", "Cancelled", "Closed"]))
+		)
+		.groupby(sre.item_code)
+	)
+	if warehouses:
+		query = query.where(sre.warehouse.isin(warehouses))
+
+	return {item_code: flt(qty) for item_code, qty in query.run()}
+
+
+def get_supply_cutoff_date(row):
+	return getdate(row.get("supply_cutoff_date") or row.delivery_date)
 
 
 def get_free_stock(bin_details):

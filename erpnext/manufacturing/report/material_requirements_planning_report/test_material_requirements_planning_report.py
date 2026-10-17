@@ -345,6 +345,50 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(work_order.bom_no, plan.bom)
 		self.assertEqual(work_order.qty, plan.planned_qty)
 
+	def test_order_outside_the_mps_is_kept_beside_its_planned_orders(self):
+		delivery_date = add_days(today(), 5)
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report.mps_data = [frappe._dict(item_code="_Test Item", delivery_date=delivery_date, planned_qty=10)]
+		other_order = frappe._dict(item_code="_Test Item", delivery_date=delivery_date, adhoc_qty=5)
+		planned_order = frappe._dict(item_code="_Test Item", delivery_date=delivery_date, adhoc_qty=10)
+
+		rows = list(report.get_demand_beyond_mps([other_order], [planned_order]))
+
+		self.assertEqual([row.adhoc_qty for row in rows], [5])
+
+	def test_supply_after_an_earlier_sale_does_not_cover_it(self):
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report._so_details = {("_Test Item", add_days(today(), 25)): frappe._dict(qty=7)}
+		report._po_details = {("_Test Item", add_days(today(), 28)): frappe._dict(qty=7)}
+		row = frappe._dict(item_code="_Test Item", delivery_date=add_days(today(), 30), planned_qty=0)
+
+		report.add_non_planned_so(row)
+		row.required_qty = flt(row.planned_qty)
+		report.add_po_details(row)
+
+		self.assertEqual(row.required_qty, 7)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_free_stock_counts_a_work_order_reservation_once(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
+			get_free_stock,
+		)
+
+		material = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[material])
+		make_stock_entry(item_code=material, target=WAREHOUSE, qty=20, basic_rate=10)
+		make_wo_order_test_record(
+			item=fg_item, bom_no=bom.name, qty=10, source_warehouse=WAREHOUSE, reserve_stock=1
+		)
+		report = MaterialRequirementsPlanningReport(frappe._dict(warehouse=WAREHOUSE))
+		report.fg_items, report.rm_items = [], [material]
+
+		bin_details = report.get_item_wise_bin_details()[material]
+
+		self.assertEqual(get_free_stock(bin_details), 10)
+
 	def test_make_order_skips_rows_that_are_already_covered(self):
 		"""
 		A row whose requirement is met by stock or by an order placed earlier has nothing left
