@@ -210,6 +210,51 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 		self.assertEqual(sales_invoice_1.items[0].project, project_1.name)
 		self.assertEqual(sales_invoice_2.items[0].project, project_2.name)
 
+	def test_temporary_opening_account_needs_company_read(self):
+		from erpnext.tests.permission_test_utils import (
+			OTHER_COMPANY,
+			as_user,
+			make_company_fenced_user,
+			make_fenced_user,
+		)
+
+		company = "_Test Opening Invoice Company"
+		expected = get_temporary_opening_account(company)
+		self.assertTrue(expected)
+
+		for role in ("System Manager", "Accounts User"):
+			with as_user(
+				make_company_fenced_user(f"opening-account-{frappe.scrub(role)}@example.com", [role], company)
+			):
+				self.assertEqual(get_temporary_opening_account(company), expected)
+
+		for outsider in (
+			make_fenced_user("opening-account-outsider@example.com", []),
+			make_company_fenced_user("opening-account-fenced@example.com", ["System Manager"], OTHER_COMPANY),
+		):
+			with as_user(outsider):
+				self.assertRaises(frappe.PermissionError, get_temporary_opening_account, company)
+
+	def test_invoice_summary_shows_permitted_companies(self):
+		from erpnext.tests.permission_test_utils import OTHER_COMPANY, as_user, make_company_fenced_user
+
+		company = "_Test Opening Invoice Company"
+		self.make_invoices(company=company)
+		tool = frappe.get_single("Opening Invoice Creation Tool")
+
+		with as_user(
+			make_company_fenced_user("opening-summary-reader@example.com", ["System Manager"], company)
+		):
+			summary, _max_count = tool.get_opening_invoice_summary()
+		self.assertEqual(list(summary), [company])
+		self.assertEqual(summary[company]["Sales Invoice"].total_invoices, 2)
+
+		with as_user(
+			make_company_fenced_user("opening-summary-fenced@example.com", ["System Manager"], OTHER_COMPANY)
+		):
+			summary, _max_count = tool.get_opening_invoice_summary()
+		self.assertNotIn(company, summary)
+
 	@classmethod
 	def tearDownClass(cls):
 		disable_dimension()
