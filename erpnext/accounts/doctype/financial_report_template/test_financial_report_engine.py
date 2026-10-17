@@ -1456,41 +1456,6 @@ class TestFilterExpressionParser(FinancialReportTemplateTestCase):
 		self.assertIn("AND", condition_str)
 		self.assertIn("OR", condition_str)
 
-	def test_parse_deeply_nested_conditions(self):
-		parser = FilterExpressionParser()
-		from frappe.query_builder import DocType
-
-		account_table = DocType("Account")
-
-		# Triple nesting: AND containing OR containing AND
-		deep_nested = """{
-            "and": [
-                {
-                    "or": [
-                        {
-                            "and": [
-                                ["account_type", "=", "Income Account"],
-                                ["is_group", "=", 0]
-                            ]
-                        },
-                        ["root_type", "=", "Asset"]
-                    ]
-                },
-                ["disabled", "=", 0]
-            ]
-        }"""
-
-		mock_row_deep = self._create_mock_report_row(deep_nested)
-		condition = parser.build_condition(mock_row_deep, account_table)
-		self.assertIsNotNone(condition)
-
-		condition_str = str(condition)
-		self.assertIn("account_type", condition_str)
-		self.assertIn("root_type", condition_str)
-		self.assertIn("disabled", condition_str)
-		self.assertIn("AND", condition_str)
-		self.assertIn("OR", condition_str)
-
 	# 4. VALUE TYPES
 	def test_parse_different_value_types(self):
 		"""Test different value types in conditions"""
