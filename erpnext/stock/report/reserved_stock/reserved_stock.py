@@ -31,9 +31,9 @@ def validate_filters(filters):
 
 def get_data(filters):
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	query = (
-		frappe.qb.from_(sre)
-		.select(
+	query = frappe.qb.get_query(
+		"Stock Reservation Entry",
+		fields=[
 			sre.creation,
 			sre.warehouse,
 			sre.item_code,
@@ -50,15 +50,12 @@ def get_data(filters):
 			sre.status,
 			sre.project,
 			sre.company,
-		)
-		.where(
-			(sre.docstatus == 1)
-			& (sre.company == filters.get("company"))
-			& (
-				(Date(sre.creation) >= filters.get("from_date"))
-				& (Date(sre.creation) <= filters.get("to_date"))
-			)
-		)
+		],
+		ignore_permissions=False,
+	).where(
+		(sre.docstatus == 1)
+		& (sre.company == filters.get("company"))
+		& ((Date(sre.creation) >= filters.get("from_date")) & (Date(sre.creation) <= filters.get("to_date")))
 	)
 
 	for field in [

@@ -73,10 +73,22 @@ class Timesheet(Document):
 		self.validate_dates()
 		self.calculate_hours()
 		self.validate_time_logs()
+		self.validate_tasks_not_cancelled()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
+
+	def validate_tasks_not_cancelled(self):
+		tasks = [log.task for log in self.time_logs if log.task]
+		if not tasks:
+			return
+
+		cancelled_tasks = frappe.get_all(
+			"Task", filters={"name": ["in", tasks], "status": "Cancelled"}, pluck="name"
+		)
+		if cancelled_tasks:
+			frappe.throw(_("Cannot log time against cancelled Tasks: {0}").format(", ".join(cancelled_tasks)))
 
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
@@ -196,12 +208,20 @@ class Timesheet(Document):
 			time_log.validate_dates()
 
 	def validate_time_logs(self):
+		previous = self.get_doc_before_save()
+		saved_activity_types = (
+			{row.name: row.activity_type for row in previous.time_logs}
+			if previous and previous.docstatus == 1
+			else {}
+		)
 		for time_log in self.time_logs:
 			time_log.set_to_time()
 			self.validate_overlap(time_log)
 			time_log.set_project()
 			time_log.validate_parent_project(self.parent_project)
 			time_log.validate_task_project()
+			if time_log.activity_type != saved_activity_types.get(time_log.name):
+				time_log.validate_activity_type()
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single("Projects Settings")
@@ -464,6 +484,7 @@ def get_timesheet_data(name, project=None):
 def make_sales_invoice(source_name, item_code=None, customer=None, currency=None):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc("Timesheet", source_name)
+	timesheet.check_permission("read")
 
 	if not timesheet.total_billable_hours:
 		frappe.throw(_("Invoice can't be made for zero billing hour"))
@@ -599,23 +620,18 @@ def get_events(start, end, filters=None):
 
 
 def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="creation"):
-	user = frappe.session.user
-	# find customer name from contact.
-	customer = ""
+	from frappe.utils.user import is_website_user
 
-	contact = frappe.db.exists("Contact", {"user": user})
-	if contact:
-		# find customer
-		contact = frappe.get_doc("Contact", contact)
-		customer = contact.get_link_for("Customer")
+	from erpnext.controllers.website_list_for_contact import get_parents_for_user
 
-	if customer:
+	customers = get_parents_for_user("Customer") if is_website_user() else []
+	if customers:
 		sales_invoices = frappe.get_all(
 			"Sales Invoice",
-			filters={"customer": customer, "docstatus": ["!=", 2]},
+			filters={"customer": ["in", customers], "docstatus": ["!=", 2]},
 			pluck="name",
 		)
-		projects = frappe.get_all("Project", filters={"customer": customer}, pluck="name")
+		projects = frappe.get_all("Project", filters={"customer": ["in", customers]}, pluck="name")
 		if not (sales_invoices or projects):
 			return []
 

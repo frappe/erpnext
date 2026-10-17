@@ -112,6 +112,16 @@ force_item_fields = (
 )
 
 
+COUNTERPART_REFERENCE = {
+	"Sales Invoice": ("inter_company_invoice_reference", "Purchase Invoice"),
+	"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice"),
+	"Sales Order": ("inter_company_order_reference", "Purchase Order"),
+	"Purchase Order": ("inter_company_order_reference", "Sales Order"),
+	"Delivery Note": ("inter_company_reference", "Purchase Receipt"),
+	"Purchase Receipt": ("inter_company_reference", "Delivery Note"),
+}
+
+
 class AccountsController(TransactionBase):
 	def get_print_settings(self):
 		print_setting_fields = []
@@ -310,6 +320,7 @@ class AccountsController(TransactionBase):
 				self.validate_deferred_start_and_end_date()
 
 		self.validate_inter_company_reference()
+		self.validate_inter_company_currency()
 		# validate inter  company transaction rate
 		self.validate_internal_transaction()
 
@@ -579,7 +590,13 @@ class AccountsController(TransactionBase):
 			).run()
 
 	def on_trash(self):
-		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+		from erpnext.accounts.utils import delete_exchange_gain_loss_journal, is_immutable_ledger_enabled
+
+		if self.docstatus == 2 and is_immutable_ledger_enabled():
+			frappe.throw(
+				_("Cancelled transactions cannot be deleted when Immutable Ledger is enabled."),
+				title=_("Immutable Ledger Enabled"),
+			)
 
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
@@ -1011,6 +1028,23 @@ class AccountsController(TransactionBase):
 					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
 					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
 
+	def validate_inter_company_currency(self):
+		if self.doctype not in COUNTERPART_REFERENCE:
+			return
+
+		reference_field, counterpart_doctype = COUNTERPART_REFERENCE[self.doctype]
+		counterpart = self.get(reference_field)
+		if not counterpart:
+			return
+
+		currency = frappe.db.get_value(counterpart_doctype, counterpart, "currency")
+		if currency and self.currency != currency:
+			frappe.throw(
+				_("Currency must be {0} to match {1} {2}").format(
+					bold(currency), counterpart_doctype, bold(counterpart)
+				)
+			)
+
 	def validate_internal_transaction(self):
 		if not cint(frappe.get_single_value("Accounts Settings", "maintain_same_internal_transaction_rate")):
 			return
@@ -1182,6 +1216,34 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = get_exchange_rate(
 					self.currency, self.company_currency, transaction_date, args
 				)
+
+	def on_recurring(self, reference_doc, auto_repeat_doc):
+		self.refresh_exchange_rates()
+
+	def refresh_exchange_rates(self):
+		if not self.meta.get_field("conversion_rate"):
+			return
+
+		transaction_date = self.get("posting_date") or self.get("transaction_date")
+		args = "for_buying" if self.meta.get_field("buying_price_list") else "for_selling"
+
+		for currency_field, rate_field in (
+			("currency", "conversion_rate"),
+			("price_list_currency", "plc_conversion_rate"),
+		):
+			currency = self.get(currency_field)
+			if not currency or currency == self.company_currency:
+				continue
+
+			exchange_rate = get_exchange_rate(currency, self.company_currency, transaction_date, args)
+			if not exchange_rate:
+				frappe.throw(
+					_(
+						"Cannot create recurring document: no exchange rate found for {0} to {1} on {2}. Please create a Currency Exchange record."
+					).format(currency, self.company_currency, transaction_date),
+					title=_("Exchange Rate Not Found"),
+				)
+			self.set(rate_field, exchange_rate)
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
@@ -3545,7 +3607,7 @@ def validate_inclusive_tax(tax, doc):
 			# referred row should also be inclusive
 			_on_previous_row_error(tax.row_id)
 		elif tax.charge_type == "On Previous Row Total" and not all(
-			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id) - 1]]
+			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id)]]
 		):
 			# all rows about the referred tax should be inclusive
 			_on_previous_row_error("1 - %d" % (tax.row_id,))

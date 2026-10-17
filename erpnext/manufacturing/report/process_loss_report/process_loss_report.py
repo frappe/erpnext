@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Coalesce, Sum
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -23,42 +24,71 @@ def execute(filters: Filters) -> tuple[Columns, Data]:
 def get_data(filters: Filters) -> Data:
 	wo = frappe.qb.DocType("Work Order")
 	se = frappe.qb.DocType("Stock Entry")
+	finished_items = get_finished_items(filters)
 
 	query = (
 		frappe.qb.from_(wo)
 		.inner_join(se)
 		.on(wo.name == se.work_order)
+		.left_join(finished_items)
+		.on(finished_items.stock_entry == se.name)
 		.select(
 			wo.name,
 			wo.status,
 			wo.production_item,
-			wo.produced_qty,
-			wo.process_loss_qty,
+			Coalesce(Sum(finished_items.produced_qty), 0).as_("produced_qty"),
+			Coalesce(Sum(finished_items.output_qty), 0).as_("output_qty"),
+			Sum(se.process_loss_qty).as_("process_loss_qty"),
 			wo.qty.as_("qty_to_manufacture"),
 			Sum(se.total_incoming_value).as_("total_fg_value"),
 			Sum(se.total_outgoing_value).as_("total_rm_value"),
 		)
-		.where(
-			(wo.process_loss_qty > 0)
-			& (wo.company == filters.company)
-			& (se.docstatus == 1)
-			& (se.purpose == "Manufacture")
-			& (se.posting_date.between(filters.from_date, filters.to_date))
-		)
+		.where(get_stock_entry_conditions(se, filters))
 		.groupby(se.work_order)
+		.having(Sum(se.process_loss_qty) > 0)
 	)
 
-	if "item" in filters:
-		query.where(wo.production_item == filters.item)
+	if filters.get("item"):
+		query = query.where(wo.production_item == filters.item)
 
-	if "work_order" in filters:
-		query.where(wo.name == filters.work_order)
+	if filters.get("work_order"):
+		query = query.where(wo.name == filters.work_order)
 
 	data = query.run(as_dict=True)
 
 	update_data_with_total_pl_value(data)
 
 	return data
+
+
+def get_finished_items(filters: Filters):
+	wo = frappe.qb.DocType("Work Order")
+	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	production_item_qty = Case().when(sed.item_code == wo.production_item, sed.transfer_qty).else_(0)
+	return (
+		frappe.qb.from_(sed)
+		.inner_join(se)
+		.on(sed.parent == se.name)
+		.inner_join(wo)
+		.on(se.work_order == wo.name)
+		.select(
+			sed.parent.as_("stock_entry"),
+			Sum(production_item_qty).as_("produced_qty"),
+			Sum(sed.transfer_qty).as_("output_qty"),
+		)
+		.where((sed.is_finished_item == 1) & get_stock_entry_conditions(se, filters))
+		.groupby(sed.parent)
+	).as_("finished_items")
+
+
+def get_stock_entry_conditions(se, filters: Filters):
+	return (
+		(se.company == filters.company)
+		& (se.docstatus == 1)
+		& (se.purpose == "Manufacture")
+		& se.posting_date.between(filters.from_date, filters.to_date)
+	)
 
 
 def get_columns() -> Columns:
@@ -119,5 +149,5 @@ def get_columns() -> Columns:
 
 def update_data_with_total_pl_value(data: Data) -> None:
 	for row in data:
-		value_per_unit_fg = row["total_fg_value"] / row["qty_to_manufacture"]
-		row["total_pl_value"] = row["process_loss_qty"] * value_per_unit_fg
+		processed_qty = row["output_qty"] + row["process_loss_qty"]
+		row["total_pl_value"] = row["process_loss_qty"] * row["total_fg_value"] / processed_qty

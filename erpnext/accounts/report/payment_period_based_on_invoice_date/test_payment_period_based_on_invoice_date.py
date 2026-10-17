@@ -32,15 +32,15 @@ class TestPaymentPeriodBasedOnInvoiceDate(ERPNextTestSuite):
 			}
 		)
 		filters.update(extra)
-		return execute(filters)
+		columns, data = execute(filters)
+		fieldnames = [c["fieldname"] for c in columns]
+		# Map each positional row to a dict keyed by column fieldname so assertions
+		# stay correct even if a column is inserted or reordered.
+		return columns, [dict(zip(fieldnames, row, strict=False)) for row in data]
 
 	def find_payment_row(self, data, payment_name):
-		# Row shape (positional): payment_document, payment_entry(voucher_no),
-		# party_type, party, posting_date, invoice(against_voucher_no),
-		# invoice_posting_date, due_date, amount, remarks, age,
-		# range1, range2, range3, range4, [delay_in_payment]
 		for row in data:
-			if row[1] == payment_name:
+			if row["payment_entry"] == payment_name:
 				return row
 		return None
 
@@ -57,42 +57,60 @@ class TestPaymentPeriodBasedOnInvoiceDate(ERPNextTestSuite):
 		invoice = create_sales_invoice(customer="_Test Customer", rate=1000, posting_date="2026-06-01")
 		payment = self.pay_invoice(invoice, "2026-06-20")
 
-		columns, data = self.run_report()
+		_columns, data = self.run_report()
 
 		row = self.find_payment_row(data, payment.name)
 		self.assertIsNotNone(row, "Payment row not found in report output")
 
-		# Positional assertions on the row shape.
-		self.assertEqual(row[2], "Customer")
-		self.assertEqual(row[4], getdate("2026-06-20"))  # payment posting date
-		self.assertEqual(row[5], invoice.name)  # against invoice
-		self.assertEqual(row[6], getdate("2026-06-01"))  # invoice posting date
-		self.assertEqual(row[8], 1000)  # amount
-		self.assertEqual(row[10], 19)  # age = payment date - invoice date
+		self.assertEqual(row["party_type"], "Customer")
+		self.assertEqual(row["posting_date"], getdate("2026-06-20"))
+		self.assertEqual(row["invoice"], invoice.name)
+		self.assertEqual(row["invoice_posting_date"], getdate("2026-06-01"))
+		self.assertEqual(row["amount"], 1000)
+		self.assertEqual(row["age"], 19)  # age = payment date - invoice date
 
 		# Buckets: 0-30 filled, others empty.
-		self.assertEqual(row[11], 1000)  # range1 (0-30)
-		self.assertEqual(row[12], 0)  # range2 (30-60)
-		self.assertEqual(row[13], 0)  # range3 (60-90)
-		self.assertEqual(row[14], 0)  # range4 (90 Above)
+		self.assertEqual(row["range1"], 1000)  # 0-30
+		self.assertEqual(row["range2"], 0)  # 30-60
+		self.assertEqual(row["range3"], 0)  # 60-90
+		self.assertEqual(row["range4"], 0)  # 90 Above
 
 	def test_paid_amount_lands_in_30_60_bucket(self):
 		# invoice 2026-06-01, paid 2026-07-16 -> 45 days after -> 30-60 bucket
 		invoice = create_sales_invoice(customer="_Test Customer 1", rate=1000, posting_date="2026-06-01")
 		payment = self.pay_invoice(invoice, "2026-07-16")
 
-		columns, data = self.run_report()
+		_columns, data = self.run_report()
 
 		row = self.find_payment_row(data, payment.name)
 		self.assertIsNotNone(row, "Payment row not found in report output")
 
-		self.assertEqual(row[8], 1000)  # amount
-		self.assertEqual(row[10], 45)  # age = payment date - invoice date
+		self.assertEqual(row["amount"], 1000)
+		self.assertEqual(row["age"], 45)
 		# Buckets: 30-60 filled, others empty.
-		self.assertEqual(row[11], 0)  # range1 (0-30)
-		self.assertEqual(row[12], 1000)  # range2 (30-60)
-		self.assertEqual(row[13], 0)  # range3 (60-90)
-		self.assertEqual(row[14], 0)  # range4 (90 Above)
+		self.assertEqual(row["range1"], 0)
+		self.assertEqual(row["range2"], 1000)
+		self.assertEqual(row["range3"], 0)
+		self.assertEqual(row["range4"], 0)
+
+	def test_payment_over_90_days_lands_in_90_above_bucket(self):
+		# invoice 2026-01-01, paid 2026-06-01 -> 151 days after -> "90 Above" bucket.
+		# Regression guard: with four range columns, a payment older than the last
+		# threshold must fall into range4 rather than an unread range5 (showing 0).
+		invoice = create_sales_invoice(customer="_Test Customer 2", rate=1000, posting_date="2026-01-01")
+		payment = self.pay_invoice(invoice, "2026-06-01")
+
+		_columns, data = self.run_report()
+
+		row = self.find_payment_row(data, payment.name)
+		self.assertIsNotNone(row, "Payment row not found in report output")
+
+		self.assertEqual(row["amount"], 1000)
+		self.assertEqual(row["age"], 151)
+		self.assertEqual(row["range1"], 0)
+		self.assertEqual(row["range2"], 0)
+		self.assertEqual(row["range3"], 0)
+		self.assertEqual(row["range4"], 1000)  # 90 Above captures the full amount
 
 	def test_columns_expose_expected_age_buckets(self):
 		columns, _data = self.run_report()

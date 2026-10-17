@@ -21,7 +21,12 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	invoice_details = get_invoice_posting_date_map(filters)
 
-	report = ReceivablePayableReport(filters)
+	# Only four range columns are defined (range1-range4, the last being "90 Above").
+	# Three thresholds yield exactly four buckets, so payments more than 90 days after
+	# the invoice land in range4 instead of an unread range5.
+	report_filters = frappe._dict(filters)
+	report_filters.range = "30, 60, 90"
+	report = ReceivablePayableReport(report_filters)
 
 	data = []
 	for d in entries:

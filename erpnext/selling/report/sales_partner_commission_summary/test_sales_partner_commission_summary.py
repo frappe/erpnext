@@ -262,6 +262,39 @@ class TestSalesPartnerCommissionSummary(SalesPartnerSummaryReportTestMixin):
 	def test_posting_date_column_label(self):
 		self.assert_posting_date_label()
 
+	def test_company_restriction_not_leaked(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(transaction_date="2026-01-14", do_not_save=1)
+		so.sales_partner = "_Test Sales Partner India - 1"
+		so.save()
+		so.submit()
+
+		user = create_user("sp_summary_restricted@example.com", "Sales Manager").name
+
+		# A user permitted on the order's company still sees it
+		add_user_permission("Company", "_Test Company", user)
+		try:
+			frappe.set_user(user)
+			permitted_rows = run(self.report_name, self.filters).get("result")[:-1]
+		finally:
+			frappe.set_user("Administrator")
+			remove_user_permission("Company", "_Test Company", user)
+		self.assertTrue(any(row.get("name") == so.name for row in permitted_rows))
+
+		# A user restricted to another company does not see it
+		add_user_permission("Company", "_Test Company 1", user)
+		try:
+			frappe.set_user(user)
+			restricted_rows = run(self.report_name, self.filters).get("result")[:-1]
+		finally:
+			frappe.set_user("Administrator")
+			remove_user_permission("Company", "_Test Company 1", user)
+		self.assertFalse(any(row.get("name") == so.name for row in restricted_rows))
+
 	def test_sales_order_sp_commission_summary(self):
 		self.filters["doctype"] = "Sales Order"
 		self.create_transactions(self.filters["doctype"])

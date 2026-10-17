@@ -1969,6 +1969,7 @@ class PurchaseInvoice(BuyingController):
 		return pr_details_billed_amt
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.due_date = None
 		self.shift_service_dates(reference_doc, auto_repeat_doc)
 

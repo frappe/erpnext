@@ -17,7 +17,7 @@ def execute(filters=None):
 
 def get_data(filters):
 	conditions = get_conditions(filters)
-	tasks = frappe.get_all(
+	tasks = frappe.get_list(
 		"Task",
 		filters=conditions,
 		fields=[

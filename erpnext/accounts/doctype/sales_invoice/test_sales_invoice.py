@@ -1247,6 +1247,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1321,6 +1322,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1362,6 +1364,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1443,6 +1446,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -2866,6 +2870,34 @@ class TestSalesInvoice(ERPNextTestSuite):
 			(getdate("2025-03-01"), getdate("2025-03-31")),
 		)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
+	def test_on_recurring_refreshes_exchange_rate(self):
+		for date, exchange_rate in (("2025-01-01", 80), ("2025-02-01", 85)):
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": date,
+					"from_currency": "USD",
+					"to_currency": "INR",
+					"exchange_rate": exchange_rate,
+					"for_selling": 1,
+				}
+			).insert()
+
+		reference = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			posting_date="2025-01-01",
+			do_not_submit=True,
+		)
+
+		new_invoice = make_recurring_invoice(reference, "2025-02-01", "2025-02-28")
+
+		self.assertEqual(new_invoice.conversion_rate, 85)
+		self.assertEqual(new_invoice.base_grand_total, new_invoice.grand_total * 85)
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
@@ -3054,6 +3086,73 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def make_cross_currency_inter_company_purchase_invoice(self):
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": today(),
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 62.9,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+
+		for doctype, party, company in (
+			("Customer", "_Test Internal Customer 3", "Wind Power LLC"),
+			("Supplier", "_Test Internal Supplier", "_Test Company"),
+		):
+			party_doc = frappe.get_doc(doctype, party)
+			party_doc.append("companies", {"company": company})
+			party_doc.save()
+
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer 3",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			rate=100,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		draft_pi = frappe.new_doc(
+			"Purchase Invoice", company="_Test Company", conversion_rate=1, plc_conversion_rate=1
+		)
+		pi = make_inter_company_transaction("Sales Invoice", si.name, draft_pi)
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"warehouse": "Stores - _TC",
+			}
+		)
+		return pi
+
+	def test_inter_company_purchase_invoice_uses_buying_company_exchange_rate(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
+		pi.save()
+
+		self.assertEqual(pi.company, "_Test Company")
+		self.assertEqual(pi.currency, "USD")
+		self.assertEqual(pi.conversion_rate, 62.9)
+		self.assertEqual(pi.base_net_total, 6290)
+
+	def test_inter_company_purchase_invoice_keeps_sales_invoice_currency(self):
+		pi = self.make_cross_currency_inter_company_purchase_invoice()
+		pi.currency = "INR"
+		pi.credit_to = "Creditors - _TC"
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Currency must be"):
+			pi.save()
 
 	def test_inter_company_transaction_does_not_inherit_party_fields(self):
 		"""
@@ -5165,6 +5264,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(stock_ledger_entry.valuation_rate, 0.0)
 		self.assertEqual(stock_ledger_entry.qty, 2.0)
 		self.assertEqual(stock_ledger_entry.stock_value_difference, 0.0)
+
+	def test_stand_alone_credit_note_uses_current_valuation_rate(self):
+		item_code = "_Test Item for Credit Note Current Valuation"
+		make_item_for_si(item_code, {"valuation_method": "FIFO"})
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		si = create_sales_invoice(item=item_code, qty=-2, rate=1200, is_return=1, update_stock=1)
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_type": "Sales Invoice", "voucher_no": si.name}, "incoming_rate"
+		)
+		self.assertEqual(incoming_rate, 100.0)
 
 	def test_system_generated_exchange_gain_or_loss_je_after_repost(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry

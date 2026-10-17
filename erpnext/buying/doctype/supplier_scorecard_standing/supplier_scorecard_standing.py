@@ -34,20 +34,13 @@ class SupplierScorecardStanding(Document):
 @frappe.whitelist()
 def get_scoring_standing(standing_name):
 	standing = frappe.get_doc("Supplier Scorecard Standing", standing_name)
+	standing.check_permission("read")
 
 	return standing
 
 
 @frappe.whitelist()
 def get_standings_list():
-	standings = frappe.db.sql(
-		"""
-		SELECT
-			scs.name
-		FROM
-			`tabSupplier Scorecard Standing` scs""",
-		{},
-		as_dict=1,
-	)
+	standings = frappe.get_list("Supplier Scorecard Standing", fields=["name"])
 
 	return standings

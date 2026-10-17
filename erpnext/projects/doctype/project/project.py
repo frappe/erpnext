@@ -1,6 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import Counter
 from graphlib import TopologicalSorter
 
 import frappe
@@ -11,12 +12,15 @@ from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimestamp
 from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, get_url, nowtime, today
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.user import is_website_user
 
 from erpnext import get_default_company
 from erpnext.controllers.queries import get_filters_cond
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+
+PORTAL_LIST_FIELDS = ["name", "project_name", "status", "percent_complete", "_assign", "modified"]
 
 
 class Project(Document):
@@ -92,6 +96,7 @@ class Project(Document):
 		self.onload()
 
 	def validate(self):
+		self.validate_project_template()
 		if not self.is_new():
 			self.control_access_for_project_users()
 		self.send_welcome_email()
@@ -99,6 +104,14 @@ class Project(Document):
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
+
+	def validate_project_template(self):
+		if (
+			self.project_template
+			and self.has_value_changed("project_template")
+			and frappe.db.get_value("Project Template", self.project_template, "disabled")
+		):
+			frappe.throw(_("Project Template {0} is disabled").format(frappe.bold(self.project_template)))
 
 	def copy_from_template(self):  # nosemgrep
 		"""
@@ -472,7 +485,7 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 	return frappe.get_list(
 		doctype,
-		fields="*",
+		fields=PORTAL_LIST_FIELDS,
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
@@ -532,6 +545,7 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_cost_center_name(project):
+	frappe.has_permission("Project", "select", project, throw=True)
 	return frappe.db.get_value("Project", project, "cost_center")
 
 
@@ -563,7 +577,7 @@ def daily_reminder():
 	projects = get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.daily_time_to_send):
+		if get_due_project_updates(project.name, project.daily_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
@@ -571,7 +585,7 @@ def twice_daily_reminder():
 	projects = get_projects_for_collect_progress("Twice Daily", ["first_email", "second_email"])
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.first_email, project.second_email):
+		for _due in range(get_due_project_updates(project.name, project.first_email, project.second_email)):
 			send_project_update_email_to_users(project.name)
 
 
@@ -584,15 +598,15 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if allow_to_make_project_update(project.name, project.weekly_time_to_send):
+		if get_due_project_updates(project.name, project.weekly_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
-def allow_to_make_project_update(project, *times):
-	"""Whether fewer updates were made today than there are send times already passed."""
+def get_due_project_updates(project: str, *times) -> int:
+	"""Send times already passed today that have no Project Update yet."""
 	now = get_time(nowtime())
 	times_passed = sum(now >= get_time(time) for time in times)
-	return frappe.db.count("Project Update", {"project": project, "date": today()}) < times_passed
+	return max(times_passed - frappe.db.count("Project Update", {"project": project, "date": today()}), 0)
 
 
 @frappe.whitelist()
@@ -693,37 +707,59 @@ def send_project_update_email_to_users(project):
 
 def collect_project_status():
 	for data in frappe.get_all("Project Update", {"date": today(), "sent": 0}):
-		replies = frappe.get_all(
-			"Communication",
-			fields=["content", "text_content", "sender"],
-			filters=dict(
-				reference_doctype="Project Update",
-				reference_name=data.name,
-				communication_type="Communication",
-				sent_or_received="Received",
-			),
-			order_by="creation asc",
-		)
-
-		for d in replies:
-			doc = frappe.get_doc("Project Update", data.name)
-			user_data = frappe.db.get_values(
-				"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
-			)[0]
-
-			doc.append(
-				"users",
-				{
-					"user": user_data.name,
-					"full_name": user_data.full_name,
-					"image": user_data.user_image,
-					"project_status": frappe.utils.md_to_html(
-						EmailReplyParser.parse_reply(d.text_content) or d.content
-					),
-				},
-			)
-
+		doc = frappe.get_doc("Project Update", data.name)
+		new_replies = get_uncollected_replies(doc)
+		if new_replies:
+			for reply in new_replies:
+				doc.append("users", reply)
 			doc.save(ignore_permissions=True)
+
+
+def get_uncollected_replies(project_update):
+	collected = Counter((row.user, row.project_status) for row in project_update.users)
+	new_replies = []
+	for reply in get_project_update_replies(project_update.name):
+		key = (reply["user"], reply["project_status"])
+		if collected[key]:
+			collected[key] -= 1
+		else:
+			new_replies.append(reply)
+	return new_replies
+
+
+def get_project_update_replies(project_update):
+	replies = frappe.get_all(
+		"Communication",
+		fields=["content", "text_content", "sender"],
+		filters=dict(
+			reference_doctype="Project Update",
+			reference_name=project_update,
+			communication_type="Communication",
+			sent_or_received="Received",
+		),
+		order_by="creation asc",
+	)
+
+	users = []
+	for d in replies:
+		user_data = frappe.db.get_value(
+			"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
+		)
+		if not user_data:
+			continue
+
+		users.append(
+			{
+				"user": user_data.name,
+				"full_name": user_data.full_name,
+				"image": user_data.user_image,
+				"project_status": sanitize_html(
+					frappe.utils.md_to_html(EmailReplyParser.parse_reply(d.text_content) or d.content),
+					linkify=True,
+				),
+			}
+		)
+	return users
 
 
 def send_project_status_email_to_users():
@@ -761,14 +797,27 @@ def update_project_sales_billing():
 
 
 @frappe.whitelist()
-def create_kanban_board_if_not_exists(project):
+def create_kanban_board_if_not_exists(project: str) -> str:
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+	from frappe.model.naming import append_number_if_name_exists
 
 	project = frappe.get_doc("Project", project)
-	if not frappe.db.exists("Kanban Board", project.project_name):
-		quick_kanban_board("Task", project.project_name, "status", project.name)
+	project.check_permission("read")
 
-	return True
+	if board := get_project_kanban_board(project.name):
+		return board
+
+	board_name = append_number_if_name_exists("Kanban Board", project.project_name)
+	return quick_kanban_board("Task", board_name, "status", project.name).name
+
+
+def get_project_kanban_board(project: str) -> str | None:
+	for board in frappe.get_list(
+		"Kanban Board", filters={"reference_doctype": "Task"}, fields=["name", "filters"]
+	):
+		filters = frappe.parse_json(board.filters or "[]")
+		if any(isinstance(f, list) and f[1:4] == ["project", "=", project] for f in filters):
+			return board.name
 
 
 @frappe.whitelist()

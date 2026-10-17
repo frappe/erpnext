@@ -297,7 +297,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:04.257508",
+ "modified": "2026-10-05 17:12:54.576793",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit",
@@ -315,6 +315,13 @@
    "report": 1,
    "role": "Maintenance User",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Maintenance Manager",
    "submit": 1,
    "write": 1
   }

@@ -107,14 +107,14 @@ class TestTimesheet(ERPNextTestSuite):
 		log_time().cancel()
 		self.assertEqual(task_status(), "Open")
 
-		log_time(completed=1)
+		completed = log_time(completed=1)
 		later = log_time()
 		self.assertEqual(task_status(), "Completed")
 		later.cancel()
 		self.assertEqual(task_status(), "Completed")
 
 		frappe.db.set_value("Task", task.name, "status", "Cancelled")
-		log_time()
+		completed.cancel()
 		self.assertEqual(task_status(), "Cancelled")
 
 	def test_timesheet_base_amount(self):
@@ -200,6 +200,14 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(item.qty, 2.00)
 		self.assertEqual(item.rate, 50.00)
 
+	def test_sales_invoice_from_timesheet_needs_timesheet_read(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+		sales_user = make_fenced_user("timesheet-invoice-sales@example.com", ["Sales User"])
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, timesheet.name)
+
 	@ERPNextTestSuite.change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
 	def test_timesheet_billing_based_on_project(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
@@ -225,6 +233,8 @@ class TestTimesheet(ERPNextTestSuite):
 		sales_invoice.submit()
 		timesheet.reload()
 		self.assertEqual(sales_invoice.timesheets[0].timesheet_detail, timesheet.time_logs[0].name)
+		self.assertEqual(sales_invoice.timesheets[0].from_time, timesheet.time_logs[0].from_time)
+		self.assertEqual(sales_invoice.timesheets[0].to_time, timesheet.time_logs[0].to_time)
 		self.assertEqual(sales_invoice.total_billing_amount, 100)
 		self.assertEqual(timesheet.status, "Billed")
 
@@ -643,6 +653,27 @@ class TestTimesheet(ERPNextTestSuite):
 			"activity_cost_fenced@example.com", ["Projects User"], "_Test Company"
 		)
 
+	def test_portal_lists_only_submitted_timesheets(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
+
+		portal_user = make_portal_user("_Test Customer")
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": "_Test Timesheet Portal Project",
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+			}
+		).insert()
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		draft = make_timesheet(emp, simulate=True, project=project.name, do_not_submit=True)
+		submitted = make_timesheet(emp, simulate=True, project=project.name)
+
+		with as_user(portal_user):
+			names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
+		self.assertIn(submitted.name, names)
+		self.assertNotIn(draft.name, names)
+
 	def assert_rates(self, rate, costing_rate, billing_rate):
 		self.assertEqual(rate.costing_rate, costing_rate)
 		self.assertEqual(rate.billing_rate, billing_rate)
@@ -828,32 +859,13 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(rate["billing_rate"], 80)
 		self.assertEqual(rate["costing_rate"], 40)
 
-	def test_portal_lists_only_submitted_timesheets(self):
-		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
 
-		frappe.get_doc(
-			{
-				"doctype": "Contact",
-				"first_name": "_Test Timesheet Portal Contact",
-				"user": "Administrator",
-				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
-			}
-		).insert(ignore_permissions=True)
-		project = frappe.get_doc(
-			{
-				"doctype": "Project",
-				"project_name": "_Test Timesheet Portal Project",
-				"company": "_Test Company",
-				"customer": "_Test Customer",
-			}
-		).insert()
-		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
-		draft = make_timesheet(emp, simulate=True, project=project.name, do_not_submit=True)
-		submitted = make_timesheet(emp, simulate=True, project=project.name)
-
-		names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
-		self.assertIn(submitted.name, names)
-		self.assertNotIn(draft.name, names)
+def make_portal_user(customer):
+	user = make_fenced_user("_test_timesheet_portal_user@example.com", ["Customer"])
+	customer = frappe.get_doc("Customer", customer)
+	customer.append("portal_users", {"user": user})
+	customer.save()
+	return user
 
 
 def make_timesheet_without_employee(start, hours):
