@@ -36,6 +36,11 @@ def get_source_item_for_qty(item, qty):
 	return source_item
 
 
+def validate_request_not_stopped(source_name):
+	if frappe.db.get_value("Material Request", source_name, "status") == "Stopped":
+		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
+
+
 def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 
@@ -82,6 +87,7 @@ def notify_missing_service_items(purchase_order):
 def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
+	validate_request_not_stopped(source_name)
 	if args is None:
 		args = frappe.flags.args or {}
 	args = frappe.parse_json(args)
@@ -160,6 +166,8 @@ def make_purchase_order(
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = obj.ordered_qty or obj.received_qty
 		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
@@ -326,6 +334,8 @@ def get_items_based_on_default_supplier(supplier: str):
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
 
@@ -344,6 +354,7 @@ def make_supplier_quotation(source_name: str, target_doc: str | dict | Document 
 					"parent": "material_request",
 					"sales_order": "sales_order",
 				},
+				"condition": lambda doc: flt(doc.ordered_qty or doc.received_qty) < flt(doc.stock_qty),
 			},
 		},
 		target_doc,
@@ -356,6 +367,8 @@ def make_supplier_quotation(source_name: str, target_doc: str | dict | Document 
 
 @frappe.whitelist()
 def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
@@ -462,10 +475,16 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 	return doclist
 
 
+def get_pending_pick_qty(row):
+	return flt(row.stock_qty) - max(flt(row.ordered_qty), flt(row.picked_qty))
+
+
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
-		qty = flt((obj.stock_qty - obj.picked_qty) / target.conversion_factor, obj.precision("qty"))
+		qty = flt(get_pending_pick_qty(obj) / target.conversion_factor, obj.precision("qty"))
 		target.qty = qty
 		target.stock_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
@@ -477,7 +496,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 			"Material Request": {
 				"doctype": "Pick List",
 				"field_map": {"material_request_type": "purpose"},
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Material Transfer"]},
 			},
 			"Material Request Item": {
 				"doctype": "Pick List Item",
@@ -487,10 +506,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 					"from_warehouse": "warehouse",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: (
-					flt(doc.picked_qty, doc.precision("picked_qty"))
-					< flt(doc.stock_qty, doc.precision("stock_qty"))
-				),
+				"condition": lambda doc: flt(get_pending_pick_qty(doc), doc.precision("stock_qty")) > 0,
 			},
 		},
 		target_doc,
