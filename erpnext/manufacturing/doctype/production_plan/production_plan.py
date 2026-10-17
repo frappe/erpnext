@@ -469,6 +469,22 @@ class ProductionPlan(Document):
 		):
 			frappe.delete_doc("Work Order", d.name)
 
+	def cancel_untouched_stock_reservations(self):
+		sre_list = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"docstatus": 1,
+				"status": ("in", ["Reserved", "Partially Reserved"]),
+			},
+			pluck="name",
+		)
+		for sre_name in sre_list:
+			sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+			sre_doc.flags.ignore_permissions = True
+			sre_doc.cancel()
+
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
@@ -480,6 +496,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
+			self.cancel_untouched_stock_reservations()
 			self.update_bin_qty()
 			self.delete_production_plan_schedule()
 			return
