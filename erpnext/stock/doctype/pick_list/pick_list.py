@@ -207,7 +207,8 @@ class PickList(TransactionBase):
 		held_qty = {}
 		for holder in holders:
 			key = (holder.item_code, holder.warehouse, holder.batch_no or "")
-			held_qty[key] = held_qty.get(key, 0.0) + flt(holder.holding_qty)
+			unreserved_qty = max(flt(holder.holding_qty) - flt(holder.stock_reserved_qty), 0.0)
+			held_qty[key] = held_qty.get(key, 0.0) + unreserved_qty
 
 		return held_qty
 
@@ -1326,6 +1327,7 @@ def get_pick_list_holders(item_codes, warehouses=None, exclude_pick_list=None):
 			pi_item.batch_no,
 			batch.batch_id,
 			Sum(get_holding_qty_case(pi_item)).as_("holding_qty"),
+			Sum(pi_item.stock_reserved_qty).as_("stock_reserved_qty"),
 		)
 		.groupby(pi.name, pi.status, pi_item.item_code, pi_item.warehouse, pi_item.batch_no, batch.batch_id)
 	)
