@@ -1185,6 +1185,61 @@ class TestPickList(ERPNextTestSuite):
 		)
 		self.assertEqual(len(delivery_notes), 3)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_batch_pick_counts_unreserved_rows_after_partial_delivery(self):
+		from erpnext.stock.doctype.pick_list.mapper import create_delivery_note
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": f"{item}-P1"}).insert()
+		make_stock_entry(
+			item=item,
+			to_warehouse="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			batch_no=batch.name,
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=4, rate=100, do_not_submit=1
+		)
+		sales_order.append("items", {**sales_order.items[0].as_dict(), "name": None})
+		sales_order.submit()
+		reserving_pick = create_pick_list(sales_order.name)
+		reserving_pick.submit()
+		reserving_pick.create_stock_reservation_entries(notify=False)
+		frappe.get_doc(
+			"Stock Reservation Entry",
+			{"from_voucher_no": reserving_pick.name, "voucher_detail_no": sales_order.items[1].name},
+		).cancel()
+		delivery_note = create_delivery_note(reserving_pick.name)
+		delivery_note.items = [
+			row for row in delivery_note.items if row.so_detail == sales_order.items[0].name
+		]
+		delivery_note.items[0].qty = 2
+		delivery_note.submit()
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 3,
+						"picked_qty": 3,
+						"batch_no": batch.name,
+						"use_serial_batch_fields": 1,
+					}
+				],
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, pick_list.insert)
+
 	def test_discounted_orders_with_different_tax_rows_get_their_own_delivery_note(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)

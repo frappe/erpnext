@@ -204,11 +204,12 @@ class PickList(TransactionBase):
 			exclude_pick_list=self.name,
 		)
 
+		reserved_qty = get_remaining_pick_list_reservations({holder.pick_list for holder in holders})
 		held_qty = {}
 		for holder in holders:
 			key = (holder.item_code, holder.warehouse, holder.batch_no or "")
-			unreserved_qty = max(flt(holder.holding_qty) - flt(holder.stock_reserved_qty), 0.0)
-			held_qty[key] = held_qty.get(key, 0.0) + unreserved_qty
+			unreserved_qty = flt(holder.holding_qty) - reserved_qty.get((holder.pick_list, *key), 0.0)
+			held_qty[key] = held_qty.get(key, 0.0) + max(unreserved_qty, 0.0)
 
 		return held_qty
 
@@ -1327,7 +1328,6 @@ def get_pick_list_holders(item_codes, warehouses=None, exclude_pick_list=None):
 			pi_item.batch_no,
 			batch.batch_id,
 			Sum(get_holding_qty_case(pi_item)).as_("holding_qty"),
-			Sum(pi_item.stock_reserved_qty).as_("stock_reserved_qty"),
 		)
 		.groupby(pi.name, pi.status, pi_item.item_code, pi_item.warehouse, pi_item.batch_no, batch.batch_id)
 	)
@@ -1336,6 +1336,37 @@ def get_pick_list_holders(item_codes, warehouses=None, exclude_pick_list=None):
 		query = query.where(pi_item.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
+
+
+def get_remaining_pick_list_reservations(pick_lists):
+	if not pick_lists:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	rows = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on((sb_entry.parent == sre.name) & (sb_entry.parenttype == "Stock Reservation Entry"))
+		.select(
+			sre.from_voucher_no,
+			sre.item_code,
+			sre.warehouse,
+			sb_entry.batch_no,
+			Sum(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.from_voucher_type == "Pick List")
+			& (sre.from_voucher_no.isin(list(pick_lists)))
+			& (sre.status.notin(["Closed", "Delivered", "Cancelled"]))
+		)
+		.groupby(sre.from_voucher_no, sre.item_code, sre.warehouse, sb_entry.batch_no)
+	).run(as_dict=True)
+
+	return {
+		(row.from_voucher_no, row.item_code, row.warehouse, row.batch_no or ""): flt(row.qty) for row in rows
+	}
 
 
 def get_reservation_holders(item_codes, warehouses):
