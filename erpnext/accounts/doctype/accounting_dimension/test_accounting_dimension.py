@@ -68,6 +68,11 @@ class TestAccountingDimension(ERPNextTestSuite):
 		si.department = ["_Test Department - _TC"]
 		self.assertNotIn("department", si.get_gl_dict({}))
 
+	def test_resave_does_not_warn_about_its_own_fields(self):
+		frappe.clear_messages()
+		frappe.get_doc("Accounting Dimension", "Location").save()
+		self.assertFalse([m for m in frappe.message_log if m.get("title") == "Fieldname Conflict"])
+
 	def test_mandatory(self):
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True
