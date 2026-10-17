@@ -31,7 +31,7 @@ BATCH_SLOT_DATE_INDEX = 3
 BATCH_SLOT_VALUE_INDEX = 4
 
 AVERAGE_AGE_COLUMN = 6
-PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt")
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
 MAX_CHART_ITEMS = 10
 
 
@@ -836,7 +836,7 @@ class FIFOSlots:
 		stock_value = abs(row.stock_value_difference)
 		if row.voucher_type in PURCHASE_VOUCHER_TYPES and qty_to_pop:
 			qty_to_pop, stock_value = self._consume_slots_at_return_rate(
-				fifo_queue, transfer_key, qty_to_pop, stock_value
+				fifo_queue, transfer_key, qty_to_pop, stock_value, from_end
 			)
 
 		while qty_to_pop:
@@ -865,10 +865,10 @@ class FIFOSlots:
 				stock_value = 0
 
 	def _consume_slots_at_return_rate(
-		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float
+		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float, from_end: bool
 	) -> tuple[float, float]:
 		return_rate = stock_value / qty_to_pop
-		for slot in list(fifo_queue):
+		for slot in list(reversed(fifo_queue)) if from_end else list(fifo_queue):
 			slot_qty = flt(slot[FIFO_QTY_INDEX])
 			if slot_qty <= 0 or abs(flt(slot[FIFO_VALUE_INDEX]) / slot_qty - return_rate) > 0.01:
 				continue

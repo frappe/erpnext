@@ -2429,6 +2429,43 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
 
+	def make_sle(self, qty, value, posting_date, voucher_type, voucher_no):
+		return frappe._dict(
+			name="Flask Item",
+			actual_qty=qty,
+			stock_value_difference=value,
+			warehouse="WH 1",
+			posting_date=posting_date,
+			voucher_type=voucher_type,
+			voucher_no=voucher_no,
+			has_serial_no=False,
+			serial_no=None,
+		)
+
+	def test_subcontracting_consumption_takes_stock_in_queue_order(self):
+		sle = [
+			self.make_sle(5, 500, "2021-09-01", "Stock Entry", "001"),
+			self.make_sle(5, 1500, "2021-10-01", "Stock Entry", "002"),
+			self.make_sle(5, 1000, "2021-11-01", "Stock Entry", "003"),
+			self.make_sle(-10, -2000, "2021-12-01", "Subcontracting Receipt", "004"),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[5.0, "2021-11-01", 1000.0]])
+
+	def test_lifo_purchase_return_removes_the_newest_matching_lot(self):
+		sle = [
+			self.make_sle(10, 1000, "2021-09-01", "Purchase Receipt", "001"),
+			self.make_sle(10, 1000, "2021-11-01", "Purchase Receipt", "002"),
+			self.make_sle(-10, -1000, "2021-12-01", "Purchase Receipt", "003"),
+		]
+
+		with patch.object(FIFOSlots, "_get_item_valuation_method", return_value="LIFO"):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
+
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"
