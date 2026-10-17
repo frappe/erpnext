@@ -2763,14 +2763,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 	def test_fifo_batch_keeps_its_own_rate_without_batchwise_setting(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-		setting = "do_not_use_batchwise_valuation"
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Stock Settings",
-			setting,
-			frappe.db.get_single_value("Stock Settings", setting),
-		)
-		frappe.db.set_single_value("Stock Settings", setting, 1)
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
 		item = create_item("_Test Reco FIFO Batch Own Rate")
 		item.update({"has_batch_no": 1, "valuation_method": "FIFO"})
 		item.save()
