@@ -98,6 +98,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 					value["avg"] = flt(sum(list_of_period_value)) / flt(sum(total_qty))
 
 	def get_data_for_forecast(self):
+		frappe.has_permission(self.doctype, "read", throw=True)
 		parent = frappe.qb.DocType(self.doctype)
 		child = frappe.qb.DocType(self.child_doctype)
 
