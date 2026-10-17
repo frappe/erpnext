@@ -26,13 +26,22 @@ def execute(filters=None):
 		return prepare_serial_batch_report(columns, [], serial_fields=("serial_no", "balance_serial_no"))
 
 	item_details = get_item_details(items, sl_entries, False)
+	all_entries = list(sl_entries)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
+	kept_entries = {id(sle) for sle in sl_entries}
+	opening_entries = [
+		frappe._dict(sle, is_opening_entry=1) for sle in all_entries if id(sle) not in kept_entries
+	]
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
-	data = process_stock_ledger_entries(filters, sl_entries, item_details, opening_row, precision)
+	data = process_stock_ledger_entries(
+		sl_entries, item_details, opening_row, precision, filters=filters, opening_entries=opening_entries
+	)
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no", "balance_serial_no"))
 
 
-def process_stock_ledger_entries(filters, sl_entries, item_details, opening_row, precision):
+def process_stock_ledger_entries(
+	sl_entries, item_details, opening_row, precision, filters=None, opening_entries=None
+):
 	data = []
 
 	if opening_row:
@@ -42,7 +51,9 @@ def process_stock_ledger_entries(filters, sl_entries, item_details, opening_row,
 	if sabb_list := [sle.serial_and_batch_bundle for sle in sl_entries if sle.serial_and_batch_bundle]:
 		bundle_serial_nos = get_serial_nos_from_sle_list(sabb_list)
 
-	balance_serial_nos = get_serial_nos_in_stock(filters, sl_entries)
+	balance_serial_nos = {}
+	if filters and filters.get("from_date"):
+		balance_serial_nos = get_serial_nos_in_stock(filters, sl_entries + (opening_entries or []))
 	for sle in sl_entries:
 		update_stock_ledger_entry(sle, item_details, precision)
 		update_available_serial_nos(balance_serial_nos, bundle_serial_nos, sle)
@@ -54,6 +65,14 @@ def process_stock_ledger_entries(filters, sl_entries, item_details, opening_row,
 def get_serial_nos_in_stock(filters, sl_entries):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	entry = frappe.qb.DocType("Serial and Batch Entry")
+	before_from_date = sle.posting_datetime < get_datetime(filters.from_date + " 00:00:00")
+	if opening_bundles := [
+		row.serial_and_batch_bundle
+		for row in sl_entries
+		if row.is_opening_entry and row.serial_and_batch_bundle
+	]:
+		before_from_date |= sle.serial_and_batch_bundle.isin(opening_bundles)
+
 	rows = (
 		frappe.qb.from_(sle)
 		.inner_join(entry)
@@ -61,7 +80,7 @@ def get_serial_nos_in_stock(filters, sl_entries):
 		.select(sle.item_code, sle.warehouse, entry.serial_no)
 		.where(
 			(sle.is_cancelled == 0)
-			& (sle.posting_datetime < get_datetime(filters.from_date + " 00:00:00"))
+			& (before_from_date)
 			& (sle.item_code.isin({row.item_code for row in sl_entries}))
 			& (sle.warehouse.isin({row.warehouse for row in sl_entries}))
 		)

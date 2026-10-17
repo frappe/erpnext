@@ -82,3 +82,44 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 		data = frappe.get_doc("Report", "Available Serial No").get_data(filters=filters)[1]
 
 		self.assertEqual(data, [])
+
+	def test_opening_stock_on_from_date_is_in_the_balance(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "AVO-.#####"}
+		).name
+		opening_serials = [
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": f"AVO-OPEN-{frappe.generate_hash(length=6)}",
+					"item_code": item,
+					"company": "_Test Company",
+				}
+			)
+			.insert()
+			.name
+			for _serial in range(5)
+		]
+		create_stock_reconciliation(
+			item_code=item,
+			warehouse="_Test Warehouse - _TC",
+			qty=5,
+			rate=100,
+			serial_no=opening_serials,
+			posting_date=today(),
+			posting_time="10:30:00",
+			purpose="Opening Stock",
+		)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		filters = self.filters.copy()
+		filters.update(item_code=item, warehouse="_Test Warehouse - _TC", from_date=today(), to_date=today())
+		data = frappe.get_doc("Report", "Available Serial No").get_data(filters=filters)[1]
+
+		self.assertEqual(len(data[-1]["balance_serial_no"].split("\n")), 6)
