@@ -1900,8 +1900,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		si.insert()
 		self.assertTrue(si.get("payment_schedule"))
 
-<<<<<<< HEAD
-=======
 	def test_work_order_items_need_sales_order_read(self):
 		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
 		from erpnext.tests.permission_test_utils import (
@@ -1925,8 +1923,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			with as_user(outsider):
 				self.assertRaises(frappe.PermissionError, get_work_order_items, so.name)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
->>>>>>> 6ff8ea2 (fix(selling): check sales order read in get_work_order_items)
 	def test_make_work_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
 
