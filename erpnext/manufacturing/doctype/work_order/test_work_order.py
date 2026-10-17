@@ -6539,6 +6539,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		next_transfer = make_stock_entry(wo.name, "Material Transfer for Manufacture", 2)
 		self.assertEqual(sum(flt(row["qty"]) for row in next_transfer["items"]), 4)
 
+		from erpnext.manufacturing.doctype.work_order.mapper import make_material_request
+
+		request = make_material_request(wo.name)
+		self.assertEqual(sum(flt(row.qty) for row in request.items), 4)
+
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 1, "allow_editing_of_items_and_quantities_in_work_order": 0},
