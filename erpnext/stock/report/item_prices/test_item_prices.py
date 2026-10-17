@@ -114,6 +114,15 @@ class TestItemPrices(ERPNextTestSuite):
 
 		self.assertEqual(self.cell(columns, self.row_for(columns, data, item), "Last Purchase Rate"), 100)
 
+	def test_later_purchase_on_the_same_day_sets_the_last_purchase_rate(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		for rate in (350, 300, 325):
+			make_purchase_receipt(item_code=item, qty=1, rate=rate, posting_date="2026-06-01")
+
+		columns, data = self.run_report()
+
+		self.assertEqual(self.cell(columns, self.row_for(columns, data, item), "Last Purchase Rate"), 325)
+
 	def test_price_list_shows_current_prices_with_uom_and_party(self):
 		from frappe.utils import add_days, today
 
