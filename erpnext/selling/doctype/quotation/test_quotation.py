@@ -475,6 +475,10 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
 		self.assertEqual(second_revision.revision_of, quotation.name)
 
+		third_revision = make_revision(quotation.name).insert()
+
+		self.assertEqual(third_revision.name, f"{quotation.name}-R3")
+
 	def test_every_version_lists_the_other_versions(self):
 		quotation = make_quotation()
 		first_revision = make_revision(quotation.name)
@@ -541,16 +545,6 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
 		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
 
-	def test_setting_a_revision_as_lost_sets_other_versions_as_lost(self):
-		quotation = make_quotation()
-		revision = make_revision(quotation.name)
-		revision.insert()
-		revision.submit()
-
-		revision.declare_enquiry_lost([], [])
-
-		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
-
 	def test_version_cannot_be_set_as_lost_when_another_version_is_ordered(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
@@ -587,15 +581,13 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, revision.submit)
 
-	def test_revision_keeps_the_company_of_the_original(self):
+	def test_revision_keeps_the_party_and_company_of_the_original(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
 		revision.company = "_Test Company 1"
 
 		self.assertRaisesRegex(frappe.ValidationError, "same company", revision.insert)
 
-	def test_revision_keeps_the_customer_of_the_original(self):
-		quotation = make_quotation()
 		revision = make_revision(quotation.name)
 		revision.update(
 			{"party_name": "_Test Customer 1", "customer_address": None, "shipping_address_name": None}
@@ -633,7 +625,9 @@ class TestQuotation(ERPNextTestSuite):
 
 		quotation.declare_enquiry_lost([], [])
 
-		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 1)
+		self.assertEqual(
+			frappe.db.get_value("Quotation", quotation.name, ["status", "is_active"]), ("Lost", 1)
+		)
 		self.assertEqual(
 			frappe.db.get_value("Quotation", revision.name, ["status", "is_active"]), ("Lost", 0)
 		)
@@ -668,16 +662,6 @@ class TestQuotation(ERPNextTestSuite):
 		revision.transaction_date = add_days(quotation.transaction_date, -1)
 
 		self.assertRaises(frappe.ValidationError, revision.insert)
-
-	def test_an_older_version_can_be_revised(self):
-		quotation = make_quotation()
-		first_revision = make_revision(quotation.name)
-		first_revision.insert()
-		first_revision.submit()
-
-		second_revision = make_revision(quotation.name).insert()
-
-		self.assertEqual(second_revision.name, f"{quotation.name}-R2")
 
 	def test_is_active_is_locked_on_a_lost_quotation(self):
 		quotation = make_quotation()
