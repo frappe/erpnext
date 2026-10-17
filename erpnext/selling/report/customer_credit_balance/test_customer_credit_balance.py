@@ -5,7 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import random_string
 
-from erpnext.selling.report.customer_credit_balance.customer_credit_balance import get_details
+from erpnext.selling.report.customer_credit_balance.customer_credit_balance import get_columns, get_details
 
 
 class TestCustomerCreditBalance(FrappeTestCase):
@@ -108,3 +108,11 @@ class TestCustomerCreditBalance(FrappeTestCase):
 		rows = get_details(frappe._dict(company=company, customer=customer.name))
 		self.assertEqual(len(rows), 1)
 		self.assertEqual(rows[0].name, customer.name)
+
+	def test_breakup_columns_only_when_requested(self):
+		without_breakup = get_columns("Customer Name")
+		with_breakup = get_columns("Customer Name", show_breakup=True)
+
+		self.assertEqual(len(with_breakup), len(without_breakup) + 3)
+		self.assertTrue(any("Pending Sales Orders" in col for col in with_breakup))
+		self.assertFalse(any("Pending Sales Orders" in col for col in without_breakup))

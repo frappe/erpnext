@@ -17,5 +17,10 @@ frappe.query_reports["Customer Credit Balance"] = {
 			fieldtype: "Link",
 			options: "Customer",
 		},
+		{
+			fieldname: "show_breakup",
+			label: __("Show Outstanding Breakup"),
+			fieldtype: "Check",
+		},
 	],
 };
