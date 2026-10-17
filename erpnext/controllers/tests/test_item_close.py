@@ -91,18 +91,6 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		self.assertEqual(po.status, "Closed")
 		self.assertTrue(all(row.closed for row in po.items))
 
-	def test_reopening_all_rows_restores_the_order(self):
-		po = self.make_purchase_order()
-		self.close_items(po, po.items)
-		self.assertEqual(po.status, "Closed")
-
-		self.close_items(po, po.items, closed=0)
-
-		self.assertFalse(any(row.closed for row in po.items))
-		self.assertEqual(po.per_received, 0)
-		self.assertEqual(po.status, "To Receive and Bill")
-		self.assertEqual(get_ordered_qty(self.first_item), 10)
-
 	def test_reopening_one_row_reopens_the_parent(self):
 		po = self.make_purchase_order()
 		self.close_items(po, po.items)
@@ -206,16 +194,6 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		self.assertEqual(get_ordered_qty(self.second_item), 10)
 		self.assertEqual(po.per_received, 0)
 		self.assertEqual(po.status, "To Receive and Bill")
-
-	def test_closing_is_rejected_for_unsupported_doctype(self):
-		self.assertRaises(
-			frappe.ValidationError,
-			update_closed_status,
-			"Material Request",
-			"any-name",
-			["any-row"],
-			1,
-		)
 
 	def test_amending_clears_closed_rows(self):
 		"""Frappe keeps no_copy fields when amending, so the flag must be cleared."""

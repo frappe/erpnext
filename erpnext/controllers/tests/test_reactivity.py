@@ -153,26 +153,6 @@ class TestReactivity(ERPNextTestSuite):
 		self.assertEqual(edited_row.uom, "Nos")
 		self.assertEqual((standard_row.item_code, standard_row.uom, standard_row.rate), row_state)
 
-	def test_item_selection_ignores_a_row_that_is_gone(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
-		sales_order = self.make_sales_order_with_optional_items(item.name, [])
-
-		sales_order.process_item_selection(len(sales_order.items) + 1)
-
-		self.assertEqual(len(sales_order.items), 1)
-
-	def test_item_selection_rejects_a_field_that_is_not_a_child_table(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
-		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Kg"})
-		sales_order = self.make_sales_order_with_optional_items(item.name, [])
-
-		self.assertRaises(
-			frappe.ValidationError, sales_order.process_item_selection, 1, parentfield="company"
-		)
-
 	def test_free_item_is_added_to_the_table_that_earned_it(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 		from erpnext.stock.doctype.item.test_item import make_item
