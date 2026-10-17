@@ -1547,10 +1547,25 @@ def is_whole_number(uom):
 
 def split_forecast_qty(rows, qty):
 	total_planned_qty = sum(flt(d.planned_qty) for d in rows)
-	for idx, d in enumerate(rows):
-		if total_planned_qty:
-			share = flt(d.planned_qty) / total_planned_qty
-		else:
-			share = 1 if idx == 0 else 0
+	shares = [
+		qty * flt(d.planned_qty) / total_planned_qty if total_planned_qty else (qty if idx == 0 else 0)
+		for idx, d in enumerate(rows)
+	]
+	if is_whole_number_item(rows[0].item_code):
+		shares = round_shares_keeping_total(shares, round(qty))
 
-		d.sales_forecast_qty += qty * share
+	for d, share in zip(rows, shares, strict=True):
+		d.sales_forecast_qty += share
+
+
+def is_whole_number_item(item_code):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	return bool(stock_uom and frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"))
+
+
+def round_shares_keeping_total(shares, total):
+	rounded = [math.floor(share) for share in shares]
+	by_remainder = sorted(range(len(shares)), key=lambda idx: shares[idx] - rounded[idx], reverse=True)
+	for idx in by_remainder[: max(total - sum(rounded), 0)]:
+		rounded[idx] += 1
+	return rounded
