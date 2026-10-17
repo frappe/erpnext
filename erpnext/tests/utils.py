@@ -59,24 +59,16 @@ def execute_script_report(
 
 def if_lending_app_installed(function):
 	"""Decorator to check if lending app is installed"""
-
-	def wrapper(*args, **kwargs):
-		if "lending" in frappe.get_installed_apps():
-			return function(*args, **kwargs)
-		return
-
-	return wrapper
+	return unittest.skipUnless(is_lending_app_installed(), "Lending app is not installed")(function)
 
 
 def if_lending_app_not_installed(function):
 	"""Decorator to check if lending app is not installed"""
+	return unittest.skipIf(is_lending_app_installed(), "Lending app is installed")(function)
 
-	def wrapper(*args, **kwargs):
-		if "lending" not in frappe.get_installed_apps():
-			return function(*args, **kwargs)
-		return
 
-	return wrapper
+def is_lending_app_installed():
+	return "lending" in frappe.get_installed_apps()
 
 
 class BootStrapTestData:
