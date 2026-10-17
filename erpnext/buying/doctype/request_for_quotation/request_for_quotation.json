@@ -9,6 +9,7 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/request-for-quotation",
  "engine": "InnoDB",
  "field_order": [
+  "details_tab",
   "naming_series",
   "company",
   "vendor",
@@ -18,9 +19,8 @@
   "status",
   "has_unit_price_items",
   "amended_from",
-  "suppliers_section",
-  "suppliers",
   "items_section",
+  "suppliers",
   "items",
   "supplier_response_section",
   "email_template",
@@ -45,6 +45,9 @@
   "more_info",
   "opportunity",
   "title",
+  "quotations_tab",
+  "quotations_section",
+  "quotations_html",
   "address_and_contact_tab",
   "billing_address",
   "billing_address_display",
@@ -53,6 +56,11 @@
   "shipping_address_display"
  ],
  "fields": [
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -108,10 +116,6 @@
    "oldfieldtype": "Date",
    "reqd": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "suppliers_section",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "suppliers",
@@ -382,6 +386,21 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "quotations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Quotations"
+  },
+  {
+   "fieldname": "quotations_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "quotations_html",
+   "fieldtype": "HTML",
+   "label": "Quotations Content"
   }
  ],
  "grid_page_length": 50,
@@ -389,7 +408,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-28 12:28:46.606963",
+ "modified": "2026-09-30 14:48:34.114065",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
