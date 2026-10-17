@@ -43,6 +43,7 @@ def get_data(item):
 	stock_details_map = get_stock_details_map(variant_list)
 	buying_price_map = get_buying_price_map(variant_list)
 	selling_price_map = get_selling_price_map(variant_list)
+	currency = get_report_currency()
 	attr_val_map = get_attribute_values_map(variant_list)
 
 	attributes = frappe.db.get_all(
@@ -72,6 +73,7 @@ def get_data(item):
 			item_dict["current_stock"] = item_dict["in_production"] = 0
 
 		item_dict["avg_buying_price_list_rate"] = buying_price_map.get(name) or 0
+		item_dict["currency"] = currency
 		item_dict["avg_selling_price_list_rate"] = selling_price_map.get(name) or 0
 
 		item_dicts.append(item_dict)
@@ -107,12 +109,14 @@ def get_columns(item):
 			"fieldname": "avg_buying_price_list_rate",
 			"label": _("Avg. Buying Price List Rate"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{
 			"fieldname": "avg_selling_price_list_rate",
 			"label": _("Avg. Selling Price List Rate"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{"fieldname": "current_stock", "label": _("Current Stock"), "fieldtype": "Float", "width": 120},

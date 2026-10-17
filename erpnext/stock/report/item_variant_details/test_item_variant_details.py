@@ -117,3 +117,15 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 	def test_permission_for_another_doctype_does_not_limit_current_stock(self):
 		self.assertEqual(self.get_current_stock_for_restricted_user(applicable_for="Purchase Order"), 25)
+
+	def test_average_prices_carry_their_currency(self):
+		from erpnext.stock.report.item_variant_details.item_variant_details import get_report_currency
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant.insert(ignore_if_duplicate=True)
+		columns, data = execute(frappe._dict(item="_Test Variant Item"))
+
+		row = next(row for row in data if row.get("variant_name") == variant.name)
+		price_columns = [column for column in columns if column["fieldname"].startswith("avg_")]
+		self.assertEqual({column.get("options") for column in price_columns}, {"currency"})
+		self.assertEqual(row.get("currency"), get_report_currency())
