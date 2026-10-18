@@ -7127,7 +7127,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"bom": sub_bom.name,
 				"workstation": workstation,
 				"time_in_mins": 20,
-				"batch_size": 1,
+				"batch_size": 10,
 			},
 		)
 
@@ -7136,6 +7136,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(
 			[(cint(row.fixed_time), row.time_in_mins) for row in new_bom.operations], [(1, 30), (0, 20)]
 		)
+		self.assertEqual(new_bom.operations[1].batch_size, 2)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
