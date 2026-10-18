@@ -137,8 +137,11 @@ def issue_cheque(payment_entry):
 		return
 
 	cheque = lock_cheque(payment_entry.cheque)
-	if cheque.status != "Available":  # another payment took it after this one was validated
+	# Validate ran before the lock, so read both again: another user may have changed them since
+	if cheque.status != "Available":
 		frappe.throw(_("Cheque {0} is no longer available").format(frappe.bold(cheque.cheque_no)))
+	if frappe.db.get_value("Cheque Book", cheque.cheque_book, "status", for_update=True) == "Disabled":
+		frappe.throw(_("Cheque Book {0} is disabled").format(frappe.bold(cheque.cheque_book)))
 	cheque.issue(payment_entry.name)
 
 
