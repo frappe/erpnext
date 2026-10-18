@@ -90,6 +90,27 @@ class ChequeBook(Document):
 			doc.flags.cancelling_book = True  # this book is locked and needs no status update
 			doc.void(remarks=_("Cheque Book {0} cancelled").format(self.name))
 
+	@frappe.whitelist()
+	def set_cheque_range(self):
+		"""Pad the range and count its cheques while the user enters it. Save checks the range."""
+		self.cheque_start_no = format_cheque_no(self.cheque_start_no)
+		self.cheque_end_no = format_cheque_no(self.cheque_end_no)
+		numbers = (self.cheque_start_no, self.cheque_end_no)
+		if all(number.isascii() and number.isdigit() for number in numbers):
+			self.no_of_cheques = max(int(self.cheque_end_no) - int(self.cheque_start_no) + 1, 0)
+		else:
+			self.no_of_cheques = 0
+
+	@frappe.whitelist(methods=["POST"])
+	def disable(self):
+		self.status = "Disabled"
+		self.save()
+
+	@frappe.whitelist(methods=["POST"])
+	def enable(self):
+		self.status = "Submitted"  # on_update_after_submit sets Finished when no cheque is free
+		self.save()
+
 	def update_status(self):
 		"""Set Finished when no cheque is free. The caller must hold the book lock."""
 		if self.status not in ("Submitted", "Finished"):

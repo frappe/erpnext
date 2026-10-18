@@ -4,10 +4,11 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.handler import run_doc_method
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.cheque_book.cheque_book import MAX_CHEQUES_PER_BOOK
-from erpnext.tests.permission_test_utils import make_fenced_user
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -121,17 +122,44 @@ class TestChequeBook(ERPNextTestSuite):
 		lock_book(self.book).update_status()
 		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "status"), "Submitted")
 
+	def test_form_gets_the_padded_range_and_count_from_the_server(self):
+		book = frappe.new_doc("Cheque Book")
+		for start, end, expected in (
+			(" 201", "0205", ("000201", "000205", 5)),
+			("201", "", ("000201", "", 0)),  # still entering the range
+			("205", "201", ("000205", "000201", 0)),
+			("20a", "205", ("20a", "000205", 0)),
+		):
+			with self.subTest(start=start, end=end):
+				book.update({"cheque_start_no": start, "cheque_end_no": end})
+				book.set_cheque_range()
+				self.assertEqual((book.cheque_start_no, book.cheque_end_no, book.no_of_cheques), expected)
+
+		# the form calls it on an unsaved book, the way frm.call does
+		book.update({"bank_account": self.bank_account, "cheque_start_no": "301", "cheque_end_no": "310"})
+		with (
+			patch.object(frappe.local, "request", frappe._dict(method="POST"), create=True),
+			patch.dict(frappe.response, {"docs": []}),
+		):
+			run_doc_method("set_cheque_range", docs=book.as_json())
+			returned = frappe.response.docs[0]
+		self.assertEqual((returned.cheque_start_no, returned.no_of_cheques), ("000301", 10))
+		self.assertFalse(frappe.db.exists("Cheque Book", {"cheque_start_no": "000301"}))  # nothing saved
+
 	def test_book_can_be_disabled_and_enabled(self):
-		self.book.status = "Disabled"
-		self.book.save()
+		user = make_fenced_user("cheque.user@example.com", ["Accounts User"])
+		with as_user(user):
+			self.assertRaises(frappe.PermissionError, frappe.get_doc("Cheque Book", self.book.name).disable)
+
+		self.book.disable()
 		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "status"), "Disabled")
 
 		# enabling a book without a free cheque makes it Finished
 		frappe.db.set_value("Cheque", {"cheque_book": self.book.name}, "status", "Issued")
-		self.book.status = "Submitted"
-		self.book.save()
+		self.book.enable()
 		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "status"), "Finished")
 
+		# an API caller that sets the status itself is still checked
 		for status in ("Draft", "Submitted", "Cancelled"):
 			with self.subTest(status=status):
 				self.book.reload()
