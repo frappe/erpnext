@@ -527,7 +527,6 @@ frappe.ui.form.on("Payment Entry", {
 	cheque_book: async function (frm) {
 		// only the user emptying the field opts this payment out of a cheque book
 		if (!frm.setting_cheque_book) frm.cheque_book_cleared = !frm.doc.cheque_book;
-		frm.doc.cheque = null; // the server finds the cheque again from the book and the number
 		frm.set_df_property("cheque_book", "description", "");
 		const { name, cheque_book, paid_from: account } = frm.doc;
 		if (!cheque_book) {
@@ -572,10 +571,6 @@ frappe.ui.form.on("Payment Entry", {
 				frm.set_value("reference_date", frm.doc.posting_date);
 			}
 		}
-	},
-
-	reference_no: function (frm) {
-		frm.doc.cheque = null; // the server finds the cheque again from the book and the number
 	},
 
 	party_type: function (frm) {
