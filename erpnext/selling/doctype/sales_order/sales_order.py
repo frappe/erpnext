@@ -1211,13 +1211,32 @@ def make_project(source_name, target_doc=None):
 	return doc
 
 
+def set_reserved_serial_batch(dn_item, sre, use_serial_batch_fields):
+	"""Carry the reserved serial/batch to the row fields, or a bundle when they cannot hold it."""
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_serial_batch_entries_for_voucher,
+		get_ssb_bundle_for_voucher,
+	)
+
+	if use_serial_batch_fields:
+		entries = get_serial_batch_entries_for_voucher(sre.name)
+		batch_nos = list({d.batch_no for d in entries if d.batch_no})
+		if len(batch_nos) < 2:
+			dn_item.use_serial_batch_fields = 1
+			dn_item.serial_no = "\n".join(d.serial_no for d in entries if d.serial_no) or None
+			dn_item.batch_no = batch_nos[0] if batch_nos else None
+			return
+
+	dn_item.use_serial_batch_fields = 0
+	dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+
+
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_sre_details_for_voucher,
 		get_sre_reserved_qty_details_for_voucher,
-		get_ssb_bundle_for_voucher,
 	)
 
 	if not kwargs:
@@ -1337,6 +1356,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				update_item(source, target, so)
 
 			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
+			use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 			for sre in sre_list:
 				if not condition(so_items[sre.voucher_detail_no]):
@@ -1362,14 +1382,8 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				dn_item.qty = flt(sre.reserved_qty) / flt(dn_item.get("conversion_factor", 1))
 				dn_item.warehouse = sre.warehouse
 
-				use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
-
-				if (
-					not use_serial_batch_fields
-					and sre.reservation_based_on == "Serial and Batch"
-					and (sre.has_serial_no or sre.has_batch_no)
-				):
-					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					set_reserved_serial_batch(dn_item, sre, use_serial_batch_fields)
 
 				target_doc.append("items", dn_item)
 			else:
