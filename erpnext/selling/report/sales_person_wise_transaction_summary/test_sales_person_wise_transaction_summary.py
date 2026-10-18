@@ -7,6 +7,8 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.selling.report.sales_person_wise_transaction_summary.sales_person_wise_transaction_summary import (
 	execute,
 )
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -25,6 +27,23 @@ class TestSalesPersonWiseTransactionSummary(ERPNextTestSuite):
 		si.insert()
 		si.submit()
 		return si
+
+	def make_closed_delivery_note_in_box_uom(self, qty=1, rate=1000):
+		# Box = 10 Nos; base rate is per Box, so the delivered amount must stay per Box
+		item = make_item(
+			properties={"is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		)
+		dn = create_delivery_note(
+			item=item.name, qty=qty, rate=rate, do_not_save=True, posting_date="2026-06-01"
+		)
+		dn.items[0].uom = "Box"
+		dn.items[0].conversion_factor = 10
+		dn.append("sales_team", {"sales_person": self.sales_person, "allocated_percentage": 100})
+		dn.insert()
+		dn.submit()
+		dn.db_set("status", "Closed")
+		return dn
 
 	def run_report(self, **extra):
 		filters = frappe._dict(
@@ -61,6 +80,14 @@ class TestSalesPersonWiseTransactionSummary(ERPNextTestSuite):
 		self.assertEqual(row[11], 100)
 		self.assertEqual(row[12], item.stock_qty * 100 / 100)  # contributed qty
 		self.assertEqual(row[13], item.base_net_amount * 100 / 100)  # contribution amount
+
+	def test_closed_document_amount_not_scaled_by_conversion_factor(self):
+		dn = self.make_closed_delivery_note_in_box_uom(qty=1, rate=1000)
+		rows = self.run_report(doc_type="Delivery Note")
+		row = next((r for r in rows if r[0] == dn.name), None)
+		self.assertIsNotNone(row, "Closed delivery note missing from report")
+		self.assertEqual(row[8], 10)  # stock qty: 1 Box = 10 Nos
+		self.assertEqual(row[9], 1000)  # amount stays per Box, not multiplied by the conversion factor
 
 	def test_appends_total_row(self):
 		self.make_invoice_with_commission()
