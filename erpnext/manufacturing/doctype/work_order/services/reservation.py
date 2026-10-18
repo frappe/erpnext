@@ -129,10 +129,8 @@ class WorkOrderStockReservation:
 
 	@staticmethod
 	def _split_transferred_qty(doc, transferred_qty):
-		if transferred_qty > flt(doc.reserved_qty - doc.consumed_qty):
-			qty_to_update = doc.reserved_qty - doc.transferred_qty
-			return qty_to_update, transferred_qty - qty_to_update
-		return transferred_qty, 0.0
+		qty_to_update = min(flt(transferred_qty), flt(doc.reserved_qty - doc.consumed_qty))
+		return qty_to_update, flt(transferred_qty) - qty_to_update
 
 	@staticmethod
 	def _apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch):
