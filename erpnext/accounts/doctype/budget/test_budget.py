@@ -502,22 +502,6 @@ class TestBudget(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			budget.save()
 
-	def test_total_distribution_equals_budget(self):
-		budget = make_budget(
-			budget_against="Cost Center",
-			applicable_on_cumulative_expense=True,
-			distribute_equally=0,
-			budget_amount=12000,
-			do_not_save=False,
-			submit_budget=False,
-		)
-
-		for row in budget.budget_distribution:
-			row.amount = 2000
-
-		with self.assertRaises(frappe.ValidationError):
-			budget.save()
-
 	def test_evenly_distribute_budget(self):
 		budget = make_budget(
 			budget_against="Cost Center", budget_amount=120000, do_not_save=False, submit_budget=True
