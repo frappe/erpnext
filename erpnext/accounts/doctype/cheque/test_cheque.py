@@ -215,6 +215,17 @@ class TestChequePayment(ERPNextTestSuite):
 		first.submit()
 		self.assertRaisesRegex(frappe.ValidationError, "already used", second.submit)
 
+	def test_draft_with_a_cancelled_cheque_link_takes_another_number(self):
+		first = self.pay("000101", submit=False)
+		second = self.pay("000101", submit=False)
+		first.submit()
+		first.cancel()  # cancels cheque 000101, which the second draft still links to
+
+		second.reload()  # as an API caller sees it: the hidden link still points to 000101
+		second.reference_no = "000102"
+		second.save()
+		self.assertEqual(second.cheque, self.name_of("000102"))
+
 	def test_other_payment_modes_drop_the_cheque(self):
 		payment = self.pay("000101", submit=False)
 		payment.mode_of_payment = "Cash"
@@ -274,7 +285,6 @@ class TestChequePayment(ERPNextTestSuite):
 		amended = frappe.copy_doc(payment)
 		amended.docstatus = 0  # copy_doc keeps the cancelled docstatus in tests
 		amended.amended_from = payment.name
-		amended.cheque = None  # the form drops the copied link on load, before the link check
 		self.assertRaisesRegex(frappe.ValidationError, "is cancelled", amended.insert)
 
 		amended.reference_no = None  # the form replaces the copied number with the suggestion
