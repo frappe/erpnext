@@ -18,7 +18,6 @@ class TestSalesPartnerTransactionSummary(
 			"doctype": "Sales Order",
 			"from_date": "2026-01-01",
 			"to_date": "2026-01-31",
-			"show_return_entries": 1,
 		}
 		self.report_name = "Sales Partner Transaction Summary"
 
