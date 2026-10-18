@@ -97,6 +97,15 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 		self.assertEqual(result[0].serial, self.serial.name)
 		self.assertEqual(result[0].batch, self.batch.name)
 
+	def test_empty_results_keep_column_visibility(self):
+		columns, data = prepare_serial_batch_report(
+			[{"label": "Batch", "fieldname": "batch", "fieldtype": "Link", "options": "Batch", "hidden": 1}],
+			[],
+		)
+		self.assertEqual(data, [])
+		self.assertEqual(columns[0].fieldname, "batch_number")
+		self.assertTrue(all(column["hidden"] for column in columns))
+
 	def test_available_serials_include_legacy_ledger_text(self):
 		entries = [
 			frappe._dict(
