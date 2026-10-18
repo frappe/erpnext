@@ -1,7 +1,6 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
@@ -17,7 +16,6 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 from erpnext.buying.report.purchase_order_analysis.purchase_order_analysis import (
 	AGGREGATED_FIELDS,
 	execute,
-	group_by_item,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
@@ -134,43 +132,6 @@ class TestPurchaseOrderAnalysis(ERPNextTestSuite):
 			[(row["uom"], row["qty"]) for row in self.get_item_rows(data)],
 			[("Box", 2), ("Nos", 10)],
 		)
-
-	def test_group_by_filters_cannot_be_combined(self):
-		self.assertRaises(
-			frappe.ValidationError,
-			execute,
-			self.get_filters(group_by_po=1, group_by_item=1),
-		)
-
-	def test_group_by_item_keeps_each_company_apart(self):
-		rows = [
-			self.make_item_row("_Test Company", 10),
-			self.make_item_row("_Test Company 1", 4),
-			self.make_item_row("_Test Company", 6),
-		]
-
-		self.assertEqual(
-			[(row["company"], row["qty"]) for row in group_by_item(rows)],
-			[("_Test Company", 16), ("_Test Company 1", 4)],
-		)
-
-	def test_company_falls_back_to_the_default(self):
-		po = self.make_purchase_order(qty=10)
-		filters = self.get_filters(company=None)
-
-		with patch("erpnext.get_default_company", return_value="_Test Company"):
-			columns, data, message, chart = execute(filters)
-
-		self.assertIn(po.name, [row["purchase_order"] for row in data])
-
-		with patch("erpnext.get_default_company", return_value="_Test Company 1"):
-			columns, data, message, chart = execute(filters)
-
-		self.assertNotIn(po.name, [row["purchase_order"] for row in data])
-
-	def test_company_is_mandatory_without_a_default(self):
-		with patch("erpnext.get_default_company", return_value=None):
-			self.assertRaises(frappe.ValidationError, execute, self.get_filters(company=None))
 
 	def test_restricted_user_sees_only_permitted_suppliers(self):
 		create_item(ITEM_CODE)

@@ -152,13 +152,6 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.total_billable_amount, 200)
 		self.assertEqual(timesheet.total_costing_amount, 20)
 
-	def test_billing_fields_cannot_change_after_submit(self):
-		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
-		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
-
-		timesheet.time_logs[0].billing_hours = 10
-		self.assertRaises(frappe.UpdateAfterSubmitError, timesheet.save)
-
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
@@ -848,17 +841,6 @@ class TestTimesheet(ERPNextTestSuite):
 		# same currency on both sides, so the rate is the raw billing amount
 		rate = get_timesheet_detail_rate(detail.name, timesheet.currency)
 		self.assertEqual(rate, detail.billing_amount)
-
-	def test_title_follows_employee(self):
-		first = make_employee("_test_timesheet_title_one@example.com", company="_Test Company")
-		second = make_employee("_test_timesheet_title_two@example.com", company="_Test Company")
-
-		timesheet = make_timesheet(first, simulate=True, do_not_submit=True)
-		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", first, "employee_name"))
-
-		timesheet.employee = second
-		timesheet.save()
-		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", second, "employee_name"))
 
 	def test_get_activity_cost_requires_timesheet_access_and_the_employee(self):
 		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost

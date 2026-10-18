@@ -21,6 +21,8 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.get_item_details import get_conversion_factor
+
 
 def execute(filters: dict | None = None):
 	obj = MaterialRequirementsPlanningReport(filters)
@@ -45,6 +47,7 @@ class MaterialRequirementsPlanningReport:
 		self.item_rm_details = self.get_raw_materials_data(items)
 
 		self._bin_details = self.get_item_wise_bin_details()
+		self._safety_stock_reserved = set()
 		self.add_non_planned_orders(items)
 
 		self._wo_details = self.get_work_order_data()
@@ -68,7 +71,7 @@ class MaterialRequirementsPlanningReport:
 			.select(
 				so_item.item_code,
 				so_item.item_name,
-				so.delivery_date,
+				so_item.delivery_date,
 				so_item.warehouse,
 				((so_item.qty - so_item.delivered_qty) * so_item.conversion_factor).as_("adhoc_qty"),
 			)
@@ -89,18 +92,20 @@ class MaterialRequirementsPlanningReport:
 
 			query = query.where(so_item.warehouse.isin(warehouses))
 
-		if skip_orders := self.get_orders_to_skip():
-			query = query.where(so.name.notin(skip_orders))
-
 		if self.filters.get("from_date"):
-			query = query.where(so.transaction_date >= self.filters.get("from_date"))
+			query = query.where(so_item.delivery_date >= self.filters.get("from_date"))
 
 		if self.filters.get("to_date"):
-			query = query.where(so.transaction_date <= self.filters.get("to_date"))
+			query = query.where(so_item.delivery_date <= self.filters.get("to_date"))
+
+		skipped_data = []
+		if skip_orders := self.get_orders_to_skip():
+			skipped_data = query.where(so.name.isin(skip_orders)).run(as_dict=True)
+			query = query.where(so.name.notin(skip_orders))
 
 		data = query.run(as_dict=True)
 
-		for row in data:
+		for row in self.get_demand_beyond_mps(data, skipped_data):
 			self.mps_data.append(
 				frappe._dict(
 					{
@@ -113,6 +118,29 @@ class MaterialRequirementsPlanningReport:
 					}
 				)
 			)
+
+	def get_demand_beyond_mps(self, data, skipped_data=None):
+		planned = {}
+		for row in self.mps_data:
+			key = (row.item_code, getdate(row.delivery_date))
+			planned[key] = planned.get(key, 0.0) + flt(row.planned_qty)
+
+		for row in skipped_data or []:
+			key = (row.item_code, getdate(row.delivery_date))
+			planned[key] = max(planned.get(key, 0.0) - flt(row.adhoc_qty), 0.0)
+
+		demand = {}
+		for row in data:
+			key = (row.item_code, getdate(row.delivery_date))
+			if key in demand:
+				demand[key].adhoc_qty += flt(row.adhoc_qty)
+			else:
+				demand[key] = row
+
+		for key, row in demand.items():
+			row.adhoc_qty = flt(row.adhoc_qty) - planned.get(key, 0.0)
+			if row.adhoc_qty > 0:
+				yield row
 
 	def get_orders_to_skip(self):
 		return frappe.get_all(
@@ -146,6 +174,7 @@ class MaterialRequirementsPlanningReport:
 			.groupby(doctype.item_code)
 		)
 
+		warehouses = None
 		if self.filters.get("warehouse"):
 			warehouses = [self.filters.get("warehouse")]
 			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
@@ -154,8 +183,12 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.warehouse.isin(warehouses))
 
 		bin_data = query.run(as_dict=True)
+		work_order_reserved = get_stock_reserved_for_work_orders(items, warehouses)
 
 		for row in bin_data:
+			row.reserved_stock = max(
+				flt(row.reserved_stock) - work_order_reserved.get(row.item_code, 0.0), 0.0
+			)
 			if row.item_code not in _bin_details:
 				_bin_details[row.item_code] = row
 
@@ -462,7 +495,7 @@ class MaterialRequirementsPlanningReport:
 			if rm_details.raw_materials:
 				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
 
-			self.set_lead_time(row, rm_details.raw_materials)
+			self.set_lead_time(row)
 			data.append(row)
 			if rm_details.raw_materials:
 				self.update_rm_details(
@@ -471,48 +504,28 @@ class MaterialRequirementsPlanningReport:
 
 		return data
 
-	def set_lead_time(self, row, raw_materials=None):
+	def set_lead_time(self, row):
 		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
-		if (
-			raw_materials
-			and row.required_qty > 0
-			and flt(get_item_lead_time_details(row.item_code).manufacturing_time_in_mins) <= 0
-		):
-			lead_time += self.get_lead_time_from_raw_materials(raw_materials, row.required_qty)
-
 		row.lead_time = math.ceil(lead_time)
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
 
-	def get_lead_time_from_raw_materials(self, raw_materials, qty=1):
-		lead_time = 0
-		for material in raw_materials:
-			material_qty = material.stock_qty * qty
-			# Reuse descendant totals within this report, keeping different net quantities separate.
-			subtree_lead_times = material.setdefault("subtree_lead_times", {})
-			if material_qty not in subtree_lead_times:
-				type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
-				material_lead_time = math.ceil(
-					get_item_lead_time(material.item_code, type_of_material, material_qty)
-				)
-				if material.raw_materials:
-					material_lead_time += self.get_lead_time_from_raw_materials(
-						material.raw_materials, material_qty
-					)
-				subtree_lead_times[material_qty] = material_lead_time
-
-			lead_time += subtree_lead_times[material_qty]
-
-		return lead_time
-
 	def add_non_planned_so(self, row):
-		if so_details := self._so_details.get((row.item_code, row.delivery_date)):
-			row.adhoc_qty = so_details.qty
-			row.planned_qty += so_details.qty
-			del self._so_details[(row.item_code, row.delivery_date)]
+		keys = [
+			key
+			for key in self._so_details
+			if key[0] == row.item_code and getdate(key[1]) <= getdate(row.delivery_date)
+		]
+		if not keys:
+			return
+
+		qty = sum(flt(self._so_details.pop(key).qty) for key in keys)
+		row.adhoc_qty = flt(row.adhoc_qty) + qty
+		row.planned_qty = flt(row.planned_qty) + qty
+		row.supply_cutoff_date = min(getdate(key[1]) for key in keys)
 
 	def add_bin_details(self, row):
 		if bin_details := self._bin_details.get(row.item_code):
-			current_qty = bin_details.get("actual_qty", 0.0) - flt(bin_details.get("reserved_stock", 0.0))
+			current_qty = get_free_stock(bin_details)
 			if current_qty > 0:
 				if row.required_qty > current_qty:
 					row.in_hand_qty = current_qty
@@ -527,14 +540,14 @@ class MaterialRequirementsPlanningReport:
 		if row.required_qty > 0 and self._po_details:
 			dict_update = {}
 			for (item_code, delivery_date), po_data in self._po_details.items():
-				if row.item_code == item_code and getdate(delivery_date) <= getdate(row.delivery_date):
+				if row.item_code == item_code and getdate(delivery_date) <= get_supply_cutoff_date(row):
 					po_ordered_qty = po_data.qty
 					if row.required_qty > po_ordered_qty:
-						row.po_ordered_qty = po_ordered_qty
+						row.po_ordered_qty = flt(row.po_ordered_qty) + po_ordered_qty
 						row.required_qty -= po_ordered_qty
 						dict_update[(item_code, delivery_date)] = 0.0
 					else:
-						row.po_ordered_qty = row.required_qty
+						row.po_ordered_qty = flt(row.po_ordered_qty) + row.required_qty
 						dict_update[(item_code, delivery_date)] = flt(po_data.qty) - flt(row.required_qty)
 						row.required_qty = 0.0
 
@@ -551,14 +564,14 @@ class MaterialRequirementsPlanningReport:
 		if row.required_qty > 0 and self._wo_details:
 			dict_update = {}
 			for (item_code, delivery_date), wo_data in self._wo_details.items():
-				if row.item_code == item_code and getdate(delivery_date) <= getdate(row.delivery_date):
+				if row.item_code == item_code and getdate(delivery_date) <= get_supply_cutoff_date(row):
 					wo_ordered_qty = wo_data.qty
 					if row.required_qty > wo_ordered_qty:
-						row.wo_ordered_qty = wo_ordered_qty
+						row.wo_ordered_qty = flt(row.wo_ordered_qty) + wo_ordered_qty
 						row.required_qty -= wo_ordered_qty
 						dict_update[(item_code, delivery_date)] = 0.0
 					else:
-						row.wo_ordered_qty = row.required_qty
+						row.wo_ordered_qty = flt(row.wo_ordered_qty) + row.required_qty
 						dict_update[(item_code, delivery_date)] = flt(wo_data.qty) - flt(row.required_qty)
 						row.required_qty = 0.0
 
@@ -573,18 +586,30 @@ class MaterialRequirementsPlanningReport:
 						self._wo_details[key].qty = qty
 
 	def update_required_qty(self, row):
+		self.add_non_planned_so(row)
 		row.required_qty = flt(row.planned_qty)
 		row.in_hand_qty = 0.0
 
-		self.add_non_planned_so(row)
+		self.reserve_safety_stock(row)
 		self.add_bin_details(row)
 		self.add_po_details(row)
 		self.add_wo_details(row)
-		self.add_safety_stock(row)
 
-	def add_safety_stock(self, row):
-		if self.filters.add_safety_stock:
-			row.required_qty += flt(row.safety_stock)
+	def reserve_safety_stock(self, row):
+		if not self.filters.add_safety_stock or not flt(row.safety_stock):
+			return
+
+		if row.item_code in self._safety_stock_reserved:
+			return
+
+		self._safety_stock_reserved.add(row.item_code)
+		bin_details = self._bin_details.setdefault(
+			row.item_code, frappe._dict({"actual_qty": 0.0, "reserved_stock": 0.0})
+		)
+		available = max(get_free_stock(bin_details), 0.0)
+		reserved = min(flt(row.safety_stock), available)
+		bin_details.actual_qty = flt(bin_details.actual_qty) - reserved
+		row.required_qty += flt(row.safety_stock) - reserved
 
 	def get_work_order_data(self):
 		wo_details = frappe._dict({})
@@ -802,7 +827,7 @@ class MaterialRequirementsPlanningReport:
 					"item_name": material.item_name,
 					"default_warehouse": material.default_warehouse,
 					"default_supplier": material.default_supplier,
-					"planned_qty": material.stock_qty * planned_qty,
+					"planned_qty": material.qty * planned_qty,
 					"projected_qty": 0,
 					"delivery_date": delivery_date,
 					"indent": material.indent + 1,
@@ -821,7 +846,7 @@ class MaterialRequirementsPlanningReport:
 				row.capacity = get_item_capacity(material.item_code, self.filters.bucket_size)
 
 			self.update_required_qty(row)
-			self.set_lead_time(row, material.raw_materials)
+			self.set_lead_time(row)
 
 			data.append(row)
 
@@ -1201,6 +1226,64 @@ class MaterialRequirementsPlanningReport:
 		return convert_to_daily_bucket_data(sales_data)
 
 
+def get_stock_reserved_for_work_orders(items, warehouses=None):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(
+			sre.item_code,
+			sre.warehouse,
+			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Work Order")
+			& (sre.item_code.isin(items))
+			& (sre.status.notin(["Delivered", "Cancelled", "Closed"]))
+		)
+		.groupby(sre.item_code, sre.warehouse)
+	)
+	if warehouses:
+		query = query.where(sre.warehouse.isin(warehouses))
+
+	reserved_for_production = get_reserved_for_production_by_warehouse(items, warehouses)
+	overlap = {}
+	for item_code, warehouse, qty in query.run():
+		counted = min(flt(qty), reserved_for_production.get((item_code, warehouse), 0.0))
+		overlap[item_code] = overlap.get(item_code, 0.0) + max(counted, 0.0)
+
+	return overlap
+
+
+def get_reserved_for_production_by_warehouse(items, warehouses=None):
+	filters = {"item_code": ("in", items)}
+	if warehouses:
+		filters["warehouse"] = ("in", warehouses)
+
+	return {
+		(row.item_code, row.warehouse): flt(row.reserved_qty_for_production)
+		for row in frappe.get_all(
+			"Bin", filters=filters, fields=["item_code", "warehouse", "reserved_qty_for_production"]
+		)
+	}
+
+
+def get_supply_cutoff_date(row):
+	return getdate(row.get("supply_cutoff_date") or row.delivery_date)
+
+
+def get_free_stock(bin_details):
+	return flt(bin_details.get("actual_qty")) - sum(
+		flt(bin_details.get(field))
+		for field in (
+			"reserved_stock",
+			"reserved_qty_for_production",
+			"reserved_qty_for_sub_contract",
+			"reserved_qty_for_production_plan",
+		)
+	)
+
+
 def get_type_of_material(is_purchase_item, bom_no):
 	return "Purchase" if is_purchase_item and not bom_no else "Manufacture"
 
@@ -1385,28 +1468,7 @@ def make_order(selected_rows: str | list, company: str, warehouse: str | None = 
 
 def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 	for (supplier, release_date), items in purchase_orders.items():
-		po_items = []
-		for item in items:
-			uom = item.purchase_uom or item.uom
-			if not uom:
-				uom_details = get_item_uom(item.item_code)
-				uom = uom_details.purchase_uom or uom_details.stock_uom
-
-			if is_whole_number(uom):
-				item.required_qty = math.ceil(item.required_qty)
-
-			if flt(item.required_qty) < flt(item.min_order_qty):
-				item.required_qty = item.min_order_qty
-
-			po_items.append(
-				{
-					"item_code": item.item_code,
-					"qty": item.required_qty,
-					"uom": uom,
-					"schedule_date": item.delivery_date if item.delivery_date else today(),
-					"warehouse": warehouse or item.default_warehouse,
-				}
-			)
+		po_items = [get_purchase_order_item(item, warehouse) for item in items]
 
 		if not po_items:
 			continue
@@ -1427,13 +1489,30 @@ def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 		)
 
 
+def get_purchase_order_item(item, warehouse=None):
+	uom = item.purchase_uom or item.uom
+	if not uom:
+		uom_details = get_item_uom(item.item_code)
+		uom = uom_details.purchase_uom or uom_details.stock_uom
+
+	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
+	qty = max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor
+	if is_whole_number(uom):
+		qty = math.ceil(qty)
+
+	return {
+		"item_code": item.item_code,
+		"qty": qty,
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"schedule_date": item.delivery_date if item.delivery_date else today(),
+		"warehouse": warehouse or item.default_warehouse,
+	}
+
+
 def make_work_orders(work_orders, company, warehouse=None, mps=None):
 	for item in work_orders:
-		uom = item.uom
-		if not uom:
-			uom_details = get_item_uom(item.item_code)
-			uom = uom_details.purchase_uom or uom_details.stock_uom
-
+		uom = get_item_uom(item.item_code).stock_uom
 		if is_whole_number(uom):
 			item.required_qty = math.ceil(item.required_qty)
 

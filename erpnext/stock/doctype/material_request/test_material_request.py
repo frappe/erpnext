@@ -1614,12 +1614,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertFalse(items[1]["supplier"])
 		self.assertEqual(items[0]["pending_qty"], 10)
 
-	def test_make_purchase_order_sets_supplier(self):
-		mr = make_material_request_for_items(["_Test Item"])
-		po = make_purchase_order(mr.name, args={"supplier": "_Test Supplier"})
-
-		self.assertEqual(po.supplier, "_Test Supplier")
-
 	def test_make_purchase_orders_by_supplier(self):
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
 

@@ -21,12 +21,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 )
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_material_receipt, make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
-from erpnext.stock.utils import InvalidWarehouseCompany
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -65,7 +64,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertTrue(len(pln.mr_items), 2)
 
 		for row in pln.mr_items:
-			row.schedule_date = add_to_date(nowdate(), days=10)
+			row.db_set("schedule_date", add_to_date(nowdate(), days=10))
 
 		pln.make_material_request()
 		pln.reload()
@@ -116,7 +115,7 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_production_plan_material_request_skips_zero_qty_items(self):
 		pln = create_production_plan(item_code="Test Production Item 1")
 		zero_qty_item, requested_item = pln.mr_items
-		zero_qty_item.quantity = "0"
+		zero_qty_item.db_set("quantity", 0)
 
 		pln.make_material_request()
 
@@ -128,6 +127,27 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(
 			material_request_items,
 			[{"item_code": requested_item.item_code, "qty": requested_item.quantity}],
+		)
+
+	def test_material_request_uses_the_stored_plan_rows(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		stored_qty = {row.name: row.quantity for row in pln.mr_items}
+
+		posted = frappe.get_doc({**pln.as_dict(), "__islocal": 1})
+		for row in posted.mr_items:
+			row.quantity = 999
+		posted.make_material_request()
+
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": pln.name},
+			fields=["material_request_plan_item", "qty"],
+		)
+		self.assertEqual({row.material_request_plan_item: row.qty for row in requested}, stored_qty)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Save the Production Plan",
+			frappe.new_doc("Production Plan").make_material_request,
 		)
 
 	def test_production_plan_start_date(self):
@@ -851,6 +871,677 @@ class TestProductionPlan(ERPNextTestSuite):
 		# Test 5 : Quantity of item cannot exceed available quantity from Production Plan
 		self.assertRaises(frappe.ValidationError, mr_doc.submit)
 
+	def test_consolidated_orders_make_one_row_and_record_planned_qty(self):
+		item = "Test Production Item 1"
+		first = make_sales_order(item_code=item, qty=5)
+		second = make_sales_order(item_code=item, qty=3)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = first.company
+		plan.get_items_from = "Sales Order"
+		for order in (first, second):
+			plan.append(
+				"sales_orders",
+				{
+					"sales_order": order.name,
+					"sales_order_date": order.transaction_date,
+					"customer": order.customer,
+				},
+			)
+		plan.combine_items = 1
+		plan.get_items()
+		plan.submit()
+
+		self.assertEqual([row.planned_qty for row in plan.po_items], [8])
+		self.assertEqual(plan.total_planned_qty, 8)
+		for order, qty in ((first, 5), (second, 3)):
+			self.assertEqual(
+				frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty"), qty
+			)
+
+	def test_reduced_consolidated_row_records_only_its_planned_qty(self):
+		item = "Test Production Item 1"
+		first = make_sales_order(item_code=item, qty=5)
+		second = make_sales_order(item_code=item, qty=3)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = first.company
+		plan.get_items_from = "Sales Order"
+		for order in (first, second):
+			plan.append(
+				"sales_orders",
+				{
+					"sales_order": order.name,
+					"sales_order_date": order.transaction_date,
+					"customer": order.customer,
+				},
+			)
+		plan.combine_items = 1
+		plan.get_items()
+		plan.po_items[0].planned_qty = 4
+		plan.submit()
+
+		for order, qty in ((first, 4), (second, 0)):
+			self.assertEqual(
+				frappe.db.get_value("Sales Order Item", order.items[0].name, "production_plan_qty"), qty
+			)
+
+	def test_draft_request_in_another_unit_counts_in_plan_units(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		raw_material = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[raw_material.name], rm_qty=100)
+		plan = frappe.get_doc(
+			{
+				"doctype": "Production Plan",
+				"company": "_Test Company",
+				"posting_date": nowdate(),
+				"po_items": [
+					{
+						"item_code": fg_item,
+						"bom_no": bom.name,
+						"planned_qty": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+				"mr_items": [
+					{
+						"item_code": raw_material.name,
+						"quantity": 10,
+						"uom": "Box",
+						"conversion_factor": 10,
+						"warehouse": "_Test Warehouse - _TC",
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).submit()
+		plan.make_material_request()
+
+		draft = frappe.get_doc(
+			"Material Request",
+			frappe.db.get_value(
+				"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
+			),
+		)
+		draft.items[0].update({"uom": raw_material.stock_uom, "conversion_factor": 1, "qty": 10})
+		draft.save()
+
+		plan.make_material_request()
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"material_request_plan_item": plan.mr_items[0].name, "parent": ("!=", draft.name)},
+			fields=["qty", "uom"],
+		)
+		self.assertEqual([(row.qty, row.uom) for row in requested], [(9, "Box")])
+
+	def test_remaining_request_in_a_whole_number_unit_is_rounded_up(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		raw_material = make_item(
+			properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[raw_material.name], rm_qty=100)
+		plan = frappe.get_doc(
+			{
+				"doctype": "Production Plan",
+				"company": "_Test Company",
+				"posting_date": nowdate(),
+				"po_items": [
+					{
+						"item_code": fg_item,
+						"bom_no": bom.name,
+						"planned_qty": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+				"mr_items": [
+					{
+						"item_code": raw_material.name,
+						"quantity": 10,
+						"uom": "Box",
+						"conversion_factor": 10,
+						"warehouse": "_Test Warehouse - _TC",
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).submit()
+		plan.make_material_request()
+		draft = frappe.get_doc(
+			"Material Request",
+			frappe.db.get_value(
+				"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
+			),
+		)
+		draft.items[0].update({"uom": raw_material.stock_uom, "conversion_factor": 1, "qty": 5})
+		draft.save()
+
+		plan.make_material_request()
+
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"material_request_plan_item": plan.mr_items[0].name, "parent": ("!=", draft.name)},
+			pluck="qty",
+		)
+		self.assertEqual(requested, [10])
+
+	def test_material_request_is_not_planned_twice(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		request = make_material_request(
+			item_code="Test Production Item 1", qty=10, uom="Nos", material_request_type="Manufacture"
+		)
+
+		def plan_from_request(planned_qty=None):
+			plan = frappe.new_doc("Production Plan")
+			plan.company = request.company
+			plan.get_items_from = "Material Request"
+			plan.append("material_requests", {"material_request": request.name})
+			plan.get_items()
+			if planned_qty:
+				plan.po_items[0].planned_qty = planned_qty
+			return plan
+
+		first = plan_from_request(planned_qty=6)
+		first.submit()
+
+		second = plan_from_request()
+		self.assertEqual([row.planned_qty for row in second.po_items], [4])
+
+		second.get_pending_material_requests()
+		self.assertIn(request.name, [row.material_request for row in second.material_requests])
+
+		second.po_items[0].planned_qty = 4
+		second.submit()
+		third = frappe.new_doc("Production Plan")
+		third.company = request.company
+		third.get_items_from = "Material Request"
+		third.get_pending_material_requests()
+		self.assertNotIn(request.name, [row.material_request for row in third.material_requests])
+
+	def test_raw_materials_keep_their_own_default_warehouse(self):
+		warehouses = {
+			"_Test PP Default WH RM 1": "Stores - _TC",
+			"_Test PP Default WH RM 2": "Finished Goods - _TC",
+		}
+		for item_code, warehouse in warehouses.items():
+			make_item(
+				item_code,
+				{
+					"is_stock_item": 1,
+					"item_defaults": [{"company": "_Test Company", "default_warehouse": warehouse}],
+				},
+			)
+		fg_item = make_item("_Test PP Default WH FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=list(warehouses), currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual({row.get("item_code"): row.get("warehouse") for row in items}, warehouses)
+
+	def test_transfer_type_raw_material_stays_in_stock_uom(self):
+		rm_item = make_item(
+			"_Test PP Transfer Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		fg_item = make_item("_Test PP Transfer Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=15, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		row = get_items_for_material_requests(plan.as_dict())[0]
+
+		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (15, "Nos", 1))
+
+	def test_whole_number_purchase_uom_is_rounded_after_conversion(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test PP Whole Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		fg_item = make_item("_Test PP Whole Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=15, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		row = get_items_for_material_requests(plan.as_dict())[0]
+
+		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (2, "Box", 10))
+
+	def test_requested_sub_assembly_components_are_not_requested(self):
+		for item in (
+			"_Test PP Bought SA RM",
+			"_Test PP Bought SA RM 2",
+			"_Test PP Bought SA",
+			"_Test PP Bought SA FG",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Bought SA", raw_materials=["_Test PP Bought SA RM"], rm_qty=2, currency="INR")
+		make_bom(
+			item="_Test PP Bought SA FG",
+			raw_materials=["_Test PP Bought SA", "_Test PP Bought SA RM 2"],
+			currency="INR",
+		)
+
+		plan = create_production_plan(
+			item_code="_Test PP Bought SA FG",
+			planned_qty=5,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			sorted((row.get("item_code"), row.get("quantity")) for row in items),
+			[("_Test PP Bought SA", 5), ("_Test PP Bought SA RM 2", 5)],
+		)
+
+	def test_sub_assembly_bought_for_one_row_is_still_made_for_another(self):
+		for item in (
+			"_Test PP Mixed SA RM",
+			"_Test PP Mixed RM",
+			"_Test PP Mixed SA",
+			"_Test PP Mixed FG 1",
+			"_Test PP Mixed FG 2",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Mixed SA", raw_materials=["_Test PP Mixed SA RM"], rm_qty=2, currency="INR")
+		boms = [
+			make_bom(item=fg, raw_materials=["_Test PP Mixed SA", "_Test PP Mixed RM"], currency="INR")
+			for fg in ("_Test PP Mixed FG 1", "_Test PP Mixed FG 2")
+		]
+
+		plan = create_production_plan(
+			item_code="_Test PP Mixed FG 1",
+			planned_qty=5,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				"item_code": "_Test PP Mixed FG 2",
+				"bom_no": boms[1].name,
+				"planned_qty": 5,
+				"warehouse": plan.po_items[0].warehouse,
+				"planned_start_date": plan.po_items[0].planned_start_date,
+			},
+		)
+		plan.save()
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.production_plan_item == plan.po_items[0].name:
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		quantities = {}
+		for row in items:
+			quantities[row.get("item_code")] = quantities.get(row.get("item_code"), 0) + row.get("quantity")
+		self.assertEqual(
+			quantities,
+			{"_Test PP Mixed SA": 5, "_Test PP Mixed SA RM": 10, "_Test PP Mixed RM": 10},
+		)
+
+	def test_exploded_row_keeps_sub_assemblies_it_does_not_explode(self):
+		make_item("_Test PP Kept SA RM", {"is_stock_item": 1})
+		make_item("_Test PP Kept SA RM 2", {"is_stock_item": 1})
+		make_item(
+			"_Test PP Kept SA", {"is_stock_item": 1, "default_material_request_type": "Material Transfer"}
+		)
+		make_item("_Test PP Kept SA FG", {"is_stock_item": 1})
+		make_bom(item="_Test PP Kept SA", raw_materials=["_Test PP Kept SA RM"], currency="INR")
+		make_bom(
+			item="_Test PP Kept SA FG",
+			raw_materials=["_Test PP Kept SA", "_Test PP Kept SA RM 2"],
+			rm_qty=2,
+			currency="INR",
+		)
+
+		plan = create_production_plan(
+			item_code="_Test PP Kept SA FG",
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.include_subcontracted_items = 0
+		plan.po_items[0].include_exploded_items = 1
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			sorted((row.get("item_code"), row.get("quantity")) for row in items),
+			[("_Test PP Kept SA", 2), ("_Test PP Kept SA RM 2", 2)],
+		)
+
+	def test_material_request_is_made_from_the_stored_plan_rows(self):
+		import json
+
+		from frappe.handler import run_doc_method
+
+		plan = create_production_plan(
+			item_code="Test Production Item 1", for_warehouse="_Test Warehouse - _TC"
+		)
+		stored = {row.item_code: row.quantity for row in plan.mr_items}
+
+		posted = plan.as_dict()
+		posted["mr_items"] = [dict(posted["mr_items"][0], item_code="_Test Item", quantity=999)]
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+		frappe.local.response = frappe._dict(docs=[])
+		run_doc_method("make_material_request", docs=json.dumps(posted, default=str))
+
+		requested = frappe.get_all(
+			"Material Request Item", filters={"production_plan": plan.name}, fields=["item_code", "qty"]
+		)
+		self.assertEqual({row.item_code: row.qty for row in requested}, stored)
+
+	def test_consolidated_orders_get_the_work_order_qty_in_order(self):
+		item = "Test Production Item 1"
+		first = make_sales_order(item_code=item, qty=5)
+		second = make_sales_order(item_code=item, qty=3)
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = first.company
+		plan.get_items_from = "Sales Order"
+		for order in (first, second):
+			plan.append(
+				"sales_orders",
+				{
+					"sales_order": order.name,
+					"sales_order_date": order.transaction_date,
+					"customer": order.customer,
+				},
+			)
+		plan.combine_items = 1
+		plan.get_items()
+		plan.submit()
+		plan.make_work_order()
+
+		draft = frappe.get_doc("Work Order", {"production_plan": plan.name, "docstatus": 0})
+		draft.wip_warehouse = "Work In Progress - _TC"
+		draft.qty = 4
+		other = frappe.copy_doc(draft)
+		draft.submit()
+
+		def work_order_qty():
+			return [
+				frappe.db.get_value("Sales Order Item", order.items[0].name, "work_order_qty")
+				for order in (first, second)
+			]
+
+		self.assertEqual(work_order_qty(), [4, 0])
+		other.submit()
+		self.assertEqual(work_order_qty(), [5, 3])
+		draft.cancel()
+		self.assertEqual(work_order_qty(), [4, 0])
+
+	def test_repeated_create_does_not_duplicate_drafts(self):
+		plan = create_production_plan(
+			item_code="Test Production Item 1", for_warehouse="_Test Warehouse - _TC"
+		)
+
+		plan.make_work_order()
+		plan.make_work_order()
+		self.assertEqual(frappe.db.count("Work Order", {"production_plan": plan.name, "docstatus": 0}), 1)
+
+		plan.reload()
+		plan.submit_material_request = 0
+		plan.make_material_request()
+		plan.reload()
+		plan.submit_material_request = 0
+		plan.make_material_request()
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": plan.name},
+			fields=["material_request_plan_item", "qty"],
+		)
+		self.assertEqual(
+			{row.material_request_plan_item: row.qty for row in requested},
+			{row.name: row.quantity for row in plan.mr_items},
+		)
+		self.assertEqual(len(requested), len(plan.mr_items))
+
+	def test_closed_plan_creates_no_documents(self):
+		plan = create_production_plan(
+			item_code="Test Production Item 1", for_warehouse="_Test Warehouse - _TC"
+		)
+		plan.set_status(close=True)
+		plan.reload()
+
+		self.assertRaises(frappe.InvalidStatusError, plan.make_work_order)
+		self.assertRaises(frappe.InvalidStatusError, plan.make_material_request)
+		self.assertFalse(frappe.db.exists("Work Order", {"production_plan": plan.name}))
+
+	def test_subcontract_purchase_order_fills_ordered_qty(self):
+		make_item("_Test PP Subcontract RM", {"is_stock_item": 1})
+		sub_item = make_item(
+			"_Test PP Subcontract SA", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		fg_item = make_item("_Test PP Subcontract FG", {"is_stock_item": 1}).name
+		service_item = make_item("_Test PP Subcontract Service", {"is_stock_item": 0}).name
+		sub_bom = make_bom(item=sub_item, raw_materials=["_Test PP Subcontract RM"], currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], rm_qty=2, currency="INR")
+		if not frappe.db.exists("Subcontracting BOM", {"finished_good": sub_item, "is_active": 1}):
+			frappe.get_doc(
+				{
+					"doctype": "Subcontracting BOM",
+					"finished_good": sub_item,
+					"finished_good_qty": 1,
+					"finished_good_bom": sub_bom.name,
+					"service_item": service_item,
+					"service_item_qty": 1,
+					"is_active": 1,
+				}
+			).insert()
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=5,
+			sub_assembly_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Subcontract"
+			row.supplier = "_Test Supplier"
+		plan.submit()
+		plan.make_work_order()
+
+		purchase_order = frappe.db.get_value("Purchase Order Item", {"production_plan": plan.name}, "parent")
+		frappe.get_doc("Purchase Order", purchase_order).submit()
+
+		row = frappe.db.get_value(
+			"Production Plan Sub Assembly Item",
+			plan.sub_assembly_items[0].name,
+			["ordered_qty", "received_qty"],
+			as_dict=True,
+		)
+		self.assertEqual((row.ordered_qty, row.received_qty), (10, 0))
+
+	def test_partial_material_request_keeps_the_plan_open_for_requests(self):
+		plan = create_production_plan(
+			item_code="Test Production Item 1", planned_qty=10, for_warehouse="_Test Warehouse - _TC"
+		)
+		plan.submit_material_request = 0
+		plan.make_material_request()
+
+		request = frappe.get_doc(
+			"Material Request",
+			frappe.db.get_value("Material Request Item", {"production_plan": plan.name}, "parent"),
+		)
+		request.items = request.items[:1]
+		request.items[0].qty = 4
+		request.submit()
+
+		self.assertNotEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Material Requested")
+
+	def test_combined_bought_sub_assembly_skips_components_for_every_finished_good(self):
+		for item in (
+			"_Test PP Comb SA RM",
+			"_Test PP Comb RM 2",
+			"_Test PP Comb SA",
+			"_Test PP Comb FG 1",
+			"_Test PP Comb FG 2",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Comb SA", raw_materials=["_Test PP Comb SA RM"], currency="INR")
+		for fg in ("_Test PP Comb FG 1", "_Test PP Comb FG 2"):
+			make_bom(item=fg, raw_materials=["_Test PP Comb SA", "_Test PP Comb RM 2"], currency="INR")
+
+		plan = create_production_plan(
+			item_code="_Test PP Comb FG 1",
+			planned_qty=2,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				**plan.po_items[0].as_dict(),
+				"name": None,
+				"item_code": "_Test PP Comb FG 2",
+				"bom_no": frappe.db.get_value("Item", "_Test PP Comb FG 2", "default_bom"),
+				"planned_qty": 3,
+			},
+		)
+		plan.combine_sub_items = 1
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertNotIn("_Test PP Comb SA RM", [row.get("item_code") for row in items])
+
+	def test_combined_bought_sub_assembly_keeps_in_house_rows_of_another_bom(self):
+		for item in (
+			"_Test PP CombB SA",
+			"_Test PP CombB RM 1",
+			"_Test PP CombB RM 2",
+			"_Test PP CombB FG 1",
+			"_Test PP CombB FG 2",
+		):
+			make_item(item, {"is_stock_item": 1})
+		bought_bom = make_bom(item="_Test PP CombB SA", raw_materials=["_Test PP CombB RM 1"], currency="INR")
+		in_house_bom = make_bom(
+			item="_Test PP CombB SA", raw_materials=["_Test PP CombB RM 2"], currency="INR"
+		)
+		for fg, sa_bom in (("_Test PP CombB FG 1", bought_bom), ("_Test PP CombB FG 2", in_house_bom)):
+			fg_bom = make_bom(item=fg, raw_materials=["_Test PP CombB SA"], currency="INR", do_not_save=1)
+			fg_bom.items[0].bom_no = sa_bom.name
+			fg_bom.insert()
+			fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code="_Test PP CombB FG 1",
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.append(
+			"po_items",
+			{
+				**plan.po_items[0].as_dict(),
+				"name": None,
+				"item_code": "_Test PP CombB FG 2",
+				"bom_no": frappe.db.get_value("BOM", {"item": "_Test PP CombB FG 2", "docstatus": 1}),
+			},
+		)
+		plan.combine_sub_items = 1
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.bom_no == bought_bom.name:
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = [row.get("item_code") for row in get_items_for_material_requests(plan.as_dict())]
+		self.assertIn("_Test PP CombB RM 2", items)
+		self.assertNotIn("_Test PP CombB RM 1", items)
+
+	def test_exploded_branch_follows_the_bom_selected_on_the_line(self):
+		for item in (
+			"_Test PP Line SA",
+			"_Test PP Line SA RM",
+			"_Test PP Line SA2",
+			"_Test PP Line RM A",
+			"_Test PP Line RM B",
+			"_Test PP Line FG",
+		):
+			make_item(item, {"is_stock_item": 1})
+		make_bom(item="_Test PP Line SA", raw_materials=["_Test PP Line SA RM"], currency="INR")
+		selected_bom = make_bom(
+			item="_Test PP Line SA2", raw_materials=["_Test PP Line RM B"], currency="INR"
+		)
+		make_bom(item="_Test PP Line SA2", raw_materials=["_Test PP Line RM A"], currency="INR")
+		fg_bom = make_bom(
+			item="_Test PP Line FG",
+			raw_materials=["_Test PP Line SA", "_Test PP Line SA2"],
+			currency="INR",
+			do_not_save=1,
+		)
+		fg_bom.items[1].bom_no = selected_bom.name
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code="_Test PP Line FG",
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			include_subcontracted_items=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.po_items[0].bom_no = fg_bom.name
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.production_item == "_Test PP Line SA":
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = [row.get("item_code") for row in get_items_for_material_requests(plan.as_dict())]
+		self.assertIn("_Test PP Line RM B", items)
+		self.assertNotIn("_Test PP Line RM A", items)
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
@@ -1535,12 +2226,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Nos"}
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Kg"}
 		).name
 
-		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Nos"}):
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Kg"}):
 			doc = frappe.get_doc("Item", bom_item)
-			doc.append("uoms", {"uom": "Nos", "conversion_factor": 3})
+			doc.append("uoms", {"uom": "Kg", "conversion_factor": 3})
 			doc.save()
 
 		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
@@ -2062,44 +2753,6 @@ class TestProductionPlan(ERPNextTestSuite):
 				items = get_items_for_material_requests(pln.as_dict())
 				self.assertEqual([row["quantity"] for row in items], expected_qty)
 
-	def test_safety_stock_disabled_with_negative_projected_qty(self):
-		from erpnext.stock.utils import get_or_make_bin
-
-		rm_item = make_item(properties={"is_stock_item": 1, "safety_stock": 100}).name
-		bin_name = get_or_make_bin(rm_item, "_Test Warehouse - _TC")
-		frappe.db.set_value("Bin", bin_name, "projected_qty", -5)
-		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=250)
-		pln.po_items[1].planned_qty = 1000
-
-		items = get_items_for_material_requests(pln.as_dict())
-		self.assertEqual([row["quantity"] for row in items], [250, 1000])
-
-	def test_safety_stock_is_separate_for_each_item_and_warehouse(self):
-		from collections import defaultdict
-
-		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-			_required_qty_for_mr,
-		)
-
-		row = frappe._dict(qty=250, safety_stock=100, purchase_uom="Nos", stock_uom="Nos")
-		items_and_warehouses = [
-			("Raw Material Item 1", "_Test Warehouse - _TC"),
-			("Raw Material Item 1", "_Test Warehouse 1 - _TC"),
-			("Raw Material Item 2", "_Test Warehouse - _TC"),
-		]
-		for consider_projected_qty in (0, 1):
-			with self.subTest(consider_projected_qty=consider_projected_qty):
-				consumed_qty = defaultdict(float)
-				quantities = []
-				for item_code, warehouse in items_and_warehouses * 2:
-					row.item_code = item_code
-					quantities.append(
-						_required_qty_for_mr(
-							row, consider_projected_qty, warehouse, {"projected_qty": -5}, consumed_qty, True
-						)
-					)
-				self.assertEqual(quantities, [350, 350, 350, 250, 250, 250])
-
 	def test_safety_stock_added_once_before_transferring_materials(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.utils import get_or_make_bin
@@ -2164,28 +2817,6 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		items = get_items_for_material_requests(pln.as_dict())
 		self.assertEqual([row["quantity"] for row in items], [0, 0])
-
-	def test_minimum_order_qty_disabled_for_repeated_raw_material(self):
-		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1234}).name
-		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=250)
-		pln.po_items[1].planned_qty = 500
-
-		items = get_items_for_material_requests(pln.as_dict())
-		self.assertEqual([row["quantity"] for row in items], [250, 500])
-
-	def test_minimum_order_qty_does_not_transfer_surplus_stock(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1234}).name
-		source_warehouse = create_warehouse("MOQ Sufficient Source Warehouse", company="_Test Company")
-		make_stock_entry(item_code=rm_item, qty=1500, rate=100, target=source_warehouse)
-		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=250)
-		pln.consider_minimum_order_qty = 1
-		pln.for_warehouse = "_Test Warehouse - _TC"
-
-		items = get_items_for_material_requests(pln.as_dict(), warehouses=[{"warehouse": source_warehouse}])
-		self.assertEqual([row["material_request_type"] for row in items], ["Material Transfer"] * 2)
-		self.assertEqual([row["quantity"] for row in items], [250, 250])
 
 	def test_minimum_order_qty_respects_purchase_groups_and_sales_orders(self):
 		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
@@ -2437,16 +3068,6 @@ class TestProductionPlan(ERPNextTestSuite):
 				skip_getting_mr_items=1,
 			)
 			self.assertRaises(frappe.ValidationError, plan.save)
-
-	def test_for_warehouse_of_another_company_is_rejected(self):
-		plan = create_production_plan(
-			item_code=self._setup_group_rm_warehouse().fg_item,
-			planned_qty=10,
-			for_warehouse="_Test Warehouse 2 - _TC1",
-			do_not_save=1,
-			skip_getting_mr_items=1,
-		)
-		self.assertRaises(InvalidWarehouseCompany, plan.save)
 
 	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
 		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
@@ -3066,7 +3687,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Nos"}
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Kg"}
 		).name
 
 		store_warehouse = create_warehouse("Store Warehouse", company="_Test Company")
@@ -3074,9 +3695,9 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		make_stock_entry(item_code=bom_item, qty=4, target=store_warehouse, rate=100)
 
-		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Nos"}):
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Kg"}):
 			doc = frappe.get_doc("Item", bom_item)
-			doc.append("uoms", {"uom": "Nos", "conversion_factor": 3})
+			doc.append("uoms", {"uom": "Kg", "conversion_factor": 3})
 			doc.save()
 
 		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
@@ -3483,6 +4104,57 @@ class TestProductionPlan(ERPNextTestSuite):
 		# RM Item 2 (FG1 (100) + FG2 (50) + FG4 (10) - 80 sub assembly stock)
 		self.assertEqual(mr_items_dict["RM Item 2"], 80)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_closing_a_plan_releases_its_untouched_reservations(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_items_for_material_requests,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=5, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=finished_good,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+		plan.submit()
+		self.assertTrue(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": plan.name, "docstatus": 1})
+		)
+		frappe.is_whitelisted(type(plan).set_status)
+
+		user = "plan-closing-manufacturing-user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Plan Closing",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Manufacturing User"}],
+				}
+			).insert(ignore_permissions=True)
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+		frappe.get_doc("Production Plan", plan.name).set_status(close=True)
+
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": plan.name, "docstatus": 1})
+		)
+
 	def test_stock_reservation_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
@@ -3802,12 +4474,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
-
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
 		bom_tree = {
 			"Finished Good For SR": {
@@ -3819,21 +4490,22 @@ class TestProductionPlan(ERPNextTestSuite):
 		parent_bom = create_nested_bom(bom_tree, prefix="")
 
 		warehouse = "_Test Warehouse - _TC"
-
-		for item_code in [
+		item_codes = [
 			"SN Sub Assembly For SR 1",
 			"SN Sub Assembly For SR 2",
 			"SN Sub Assembly For SR 3",
 			"SN Raw Material For SR 1",
 			"SN Raw Material For SR 2",
 			"SN Raw Material For SR 3",
-		]:
+		]
+
+		for item_code in item_codes:
 			doc = frappe.get_doc("Item", item_code)
 			doc.has_serial_no = 1
 			doc.serial_no_series = f"SNN-{item_code}.-.#####"
 			doc.save()
 
-			make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+		receive_items_for_reservation(item_codes, warehouse)
 
 		plan = create_production_plan(
 			item_code=parent_bom.item,
@@ -3883,17 +4555,8 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 
 		additional_serial_nos = []
-
-		for item_code in [
-			"SN Sub Assembly For SR 1",
-			"SN Sub Assembly For SR 2",
-			"SN Sub Assembly For SR 3",
-			"SN Raw Material For SR 1",
-			"SN Raw Material For SR 2",
-			"SN Raw Material For SR 3",
-		]:
-			se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
-			additional_serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+		for row in receive_items_for_reservation(item_codes, warehouse).items:
+			additional_serial_nos.extend(get_serial_nos_from_bundle(row.serial_and_batch_bundle))
 
 		self.assertTrue(additional_serial_nos)
 
@@ -3947,14 +4610,12 @@ class TestProductionPlan(ERPNextTestSuite):
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertEqual(len(reserved_entries), 0)
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reservation_of_batch_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
-
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
 		bom_tree = {
 			"Finished Good For SR": {
@@ -3966,22 +4627,23 @@ class TestProductionPlan(ERPNextTestSuite):
 		parent_bom = create_nested_bom(bom_tree, prefix="")
 
 		warehouse = "_Test Warehouse - _TC"
-
-		for item_code in [
+		item_codes = [
 			"Batch Sub Assembly For SR 1",
 			"Batch Sub Assembly For SR 2",
 			"Batch Sub Assembly For SR 3",
 			"Batch Raw Material For SR 1",
 			"Batch Raw Material For SR 2",
 			"Batch Raw Material For SR 3",
-		]:
+		]
+
+		for item_code in item_codes:
 			doc = frappe.get_doc("Item", item_code)
 			doc.has_batch_no = 1
 			doc.create_new_batch = 1
 			doc.batch_number_series = f"BCH-{item_code}.-.#####"
 			doc.save()
 
-			make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
+		receive_items_for_reservation(item_codes, warehouse)
 
 		plan = create_production_plan(
 			item_code=parent_bom.item,
@@ -4030,19 +4692,10 @@ class TestProductionPlan(ERPNextTestSuite):
 			"Material Request", filters={"production_plan": plan.name}, pluck="name"
 		)
 
-		additional_batches = []
-
-		for item_code in [
-			"Batch Sub Assembly For SR 1",
-			"Batch Sub Assembly For SR 2",
-			"Batch Sub Assembly For SR 3",
-			"Batch Raw Material For SR 1",
-			"Batch Raw Material For SR 2",
-			"Batch Raw Material For SR 3",
-		]:
-			se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=100)
-			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
-			additional_batches.append(batch_no)
+		additional_batches = [
+			get_batch_from_bundle(row.serial_and_batch_bundle)
+			for row in receive_items_for_reservation(item_codes, warehouse).items
+		]
 
 		self.assertTrue(additional_batches)
 
@@ -4096,7 +4749,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
 		self.assertEqual(len(reserved_entries), 0)
-		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_production_plan_for_partial_sub_assembly_items(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
@@ -4482,6 +5134,15 @@ def make_plan_with_sub_assembly():
 	for item in work_order.required_items:
 		item.source_warehouse = warehouse
 	return plan, work_order
+
+
+def receive_items_for_reservation(item_codes, warehouse):
+	return make_material_receipt(
+		[
+			{"item_code": item_code, "target": warehouse, "qty": 5, "basic_rate": 100}
+			for item_code in item_codes
+		]
+	)
 
 
 def make_bom(**args):

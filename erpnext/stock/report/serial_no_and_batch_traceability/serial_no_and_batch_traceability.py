@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case
+from frappe.utils import flt
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_companies_condition,
@@ -45,6 +45,7 @@ class ReportData:
 		self.filters = filters
 		self.doctype_name = self.get_doctype()
 		self.mapped_fg_entries = {}
+		self.forward_trace_path = set()
 
 	def validate_filters(self):
 		if not self.filters.item_code and not self.filters.batches and not self.filters.serial_nos:
@@ -57,7 +58,7 @@ class ReportData:
 		result_data = []
 
 		if self.filters.get("traceability_direction") in ["Backward", "Both"]:
-			data = self.get_serial_no_batches()
+			data = self.split_by_production_entries(self.get_serial_no_batches())
 			source_data = self.prepare_source_data(data)
 
 			# Prepare source data with raw materials
@@ -132,6 +133,58 @@ class ReportData:
 
 		return data
 
+	def split_by_production_entries(self, rows):
+		production_entries = self.get_production_entries([row.serial_no or row.batch_no for row in rows])
+
+		result = []
+		for row in rows:
+			entries = production_entries.get(row.serial_no or row.batch_no)
+			if not entries:
+				result.append(row)
+				continue
+
+			for stock_entry in entries:
+				result.append(frappe._dict(row, reference_doctype="Stock Entry", reference_name=stock_entry))
+
+		return result
+
+	def get_production_entries(self, values):
+		if not values:
+			return {}
+
+		sabb = frappe.qb.DocType("Serial and Batch Bundle")
+		sabe = frappe.qb.DocType("Serial and Batch Entry")
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		value_field = sabe.serial_no if self.doctype_name == "Serial No" else sabe.batch_no
+
+		query = (
+			frappe.qb.from_(sabb)
+			.inner_join(sabe)
+			.on(sabb.name == sabe.parent)
+			.inner_join(stock_entry)
+			.on(stock_entry.name == sabb.voucher_no)
+			.select(value_field.as_("value"), sabb.voucher_no)
+			.where(
+				(sabb.voucher_type == "Stock Entry")
+				& (sabb.type_of_transaction == "Inward")
+				& (sabb.is_cancelled == 0)
+				& (sabe.docstatus == 1)
+				& (stock_entry.purpose.isin(["Manufacture", "Repack"]))
+				& (value_field.isin(values))
+			)
+			.orderby(sabb.posting_datetime)
+		)
+
+		if condition := get_allowed_companies_condition(sabb.company, "Serial and Batch Bundle"):
+			query = query.where(condition)
+
+		production_entries = defaultdict(list)
+		for row in query.run(as_dict=True):
+			if row.voucher_no not in production_entries[row.value]:
+				production_entries[row.value].append(row.voucher_no)
+
+		return production_entries
+
 	def prepare_source_data(self, data):
 		source_data = frappe._dict({})
 		for row in data:
@@ -180,7 +233,10 @@ class ReportData:
 			query = query.where(condition)
 
 		results = query.run(as_dict=True)
-		return results[0] if results else {}
+		if not results:
+			return {}
+
+		return frappe._dict(results[0], qty=sum(flt(result.qty) for result in results))
 
 	def set_backward_data(self, sabb_data, qty=None):
 		if qty:
@@ -260,7 +316,9 @@ class ReportData:
 			data = query.run(as_dict=True)
 			return data[0] if data else {}
 
-		if batches:
+		if batches and self.doctype_name == "Serial No":
+			query = query.where(doctype.batch_no.isin(batches))
+		elif batches:
 			query = query.where(doctype.name.isin(batches))
 		elif serial_nos:
 			query = query.where(doctype.name.isin(serial_nos))
@@ -342,15 +400,8 @@ class ReportData:
 				stock_entry_detail.item_name,
 				stock_entry_detail.parenttype.as_("reference_doctype"),
 				stock_entry.name.as_("reference_name"),
-				(
-					(
-						stock_entry_detail.qty
-						/ Case()
-						.when(stock_entry.fg_completed_qty > 0, stock_entry.fg_completed_qty)
-						.else_(sabb_data.qty)
-					)
-					* sabb_data.qty
-				).as_("qty"),
+				stock_entry_detail.qty.as_("row_qty"),
+				stock_entry.fg_completed_qty,
 				sabb_entry.batch_no,
 				sabb_entry.serial_no,
 				sabb_entry.qty.as_("quantity"),
@@ -368,16 +419,35 @@ class ReportData:
 		if condition := get_allowed_companies_condition(stock_entry.company, "Stock Entry"):
 			query = query.where(condition)
 
-		return query.run(as_dict=True)
+		materials = query.run(as_dict=True)
+		for material in materials:
+			material.qty = get_material_qty(material, sabb_data.qty, self.get_mapped_fg_batch_qty(material))
+
+		return materials
+
+	def get_mapped_fg_batch_qty(self, material):
+		if not material.fg_batch_no or material.fg_serial_no:
+			return 0
+
+		return sum(
+			abs(flt(entry.qty))
+			for entry in self.get_mapped_fg_entries(material.reference_name, material.item_code)
+			if entry.batch_no == material.fg_batch_no and not entry.serial_no
+		)
 
 	def set_forward_data(self, value, sabb_data):
-		outward_entries = self.get_sabb_entries(value)
+		if value in self.forward_trace_path:
+			return
 
-		for row in outward_entries:
-			if row.reference_doctype == "Stock Entry":
-				self.process_manufacture_or_repack_entry(row, sabb_data)
-			else:
-				self.add_direct_outward_entry(row, sabb_data)
+		self.forward_trace_path.add(value)
+		try:
+			for row in self.get_sabb_entries(value):
+				if row.reference_doctype == "Stock Entry":
+					self.process_manufacture_or_repack_entry(row, sabb_data)
+				else:
+					self.add_direct_outward_entry(row, sabb_data)
+		finally:
+			self.forward_trace_path.discard(value)
 
 	def add_direct_outward_entry(self, row, batch_details):
 		key = (row.item_code, row.reference_name, row.serial_no, row.batch_no)
@@ -475,6 +545,8 @@ class ReportData:
 					}
 				)
 				batch_details[key] = fg_item
+				if serial_no or batch_no:
+					self.set_forward_data(serial_no or batch_no, fg_item.raw_materials)
 			else:
 				batch_details[key].raw_materials[
 					(row.item_code, row.reference_name, row.serial_no, row.batch_no)
@@ -693,3 +765,20 @@ class ReportData:
 			)
 
 		return columns
+
+
+def get_material_qty(material, fg_qty, mapped_fg_qty=0):
+	if material.serial_no or material.fg_serial_no:
+		return abs(flt(material.quantity))
+
+	if material.fg_batch_no:
+		return abs(flt(material.quantity)) * (
+			flt(fg_qty) / mapped_fg_qty if fg_qty and mapped_fg_qty else 1.0
+		)
+
+	ratio = flt(fg_qty) / (flt(material.fg_completed_qty) or flt(fg_qty)) if fg_qty else 1.0
+
+	if material.batch_no:
+		return abs(flt(material.quantity)) * ratio
+
+	return flt(material.row_qty) * ratio

@@ -54,7 +54,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 	def _test_reco_sle_gle(self, valuation_method):
 		item_code = self.make_item(properties={"valuation_method": valuation_method}).name
 
-		se1, se2, se3 = insert_existing_sle(warehouse="Stores - TCP1", item_code=item_code)
+		insert_existing_sle(warehouse="Stores - TCP1", item_code=item_code)
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 		# [[qty, valuation_rate, posting_date,
 		# 		posting_time, expected_stock_value, bin_qty, bin_valuation]]
@@ -122,10 +122,6 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				self.assertEqual(flt(acc_bal, 1), flt(stock_bal, 1))
 
 				stock_reco.cancel()
-
-		se3.cancel()
-		se2.cancel()
-		se1.cancel()
 
 	def test_get_items(self):
 		create_warehouse(
@@ -466,11 +462,6 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			do_not_submit=True,
 		)
 		self.assertRaises(NegativeStockError, sr3.submit)
-
-		# teardown
-		sr3.cancel()
-		dn2.cancel()
-		pr1.cancel()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_stock_reco_cancellation_future_negative_stock(self):
@@ -2772,14 +2763,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 	def test_fifo_batch_keeps_its_own_rate_without_batchwise_setting(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-		setting = "do_not_use_batchwise_valuation"
-		self.addCleanup(
-			frappe.db.set_single_value,
-			"Stock Settings",
-			setting,
-			frappe.db.get_single_value("Stock Settings", setting),
-		)
-		frappe.db.set_single_value("Stock Settings", setting, 1)
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
 		item = create_item("_Test Reco FIFO Batch Own Rate")
 		item.update({"has_batch_no": 1, "valuation_method": "FIFO"})
 		item.save()

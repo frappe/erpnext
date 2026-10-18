@@ -21,7 +21,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAssetCapitalization(ERPNextTestSuite):
 	def setUp(self):
-		set_depreciation_settings_in_company()
 		create_asset_capitalization_data()
 
 	def test_capitalization_with_perpetual_inventory(self):

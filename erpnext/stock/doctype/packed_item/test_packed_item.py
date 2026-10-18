@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from functools import cached_property
 
 import frappe
 from frappe.utils import add_to_date, nowdate
@@ -48,9 +49,14 @@ class TestPackedItem(ERPNextTestSuite):
 		self.warehouse = "_Test Warehouse - _TC"
 
 		self.bundle, self.bundle_items = create_product_bundle(warehouse=self.warehouse)
-		self.bundle2, self.bundle2_items = create_product_bundle(warehouse=self.warehouse)
 
-		self.normal_item = make_item().name
+	@cached_property
+	def bundle2(self):
+		return create_product_bundle(warehouse=self.warehouse)[0]
+
+	@cached_property
+	def normal_item(self):
+		return make_item().name
 
 	def test_adding_bundle_item(self):
 		"Test impact on packed items if bundle item row is added."

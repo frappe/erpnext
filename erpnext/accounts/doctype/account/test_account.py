@@ -49,8 +49,6 @@ class TestAccount(ERPNextTestSuite):
 		self.assertEqual(new_acc.account_name, "Debtors 1 - Test -")
 		self.assertEqual(new_acc.account_number, "1211-11-4 - 6 -")
 
-		frappe.delete_doc("Account", "1211-11-4 - 6 - Debtors 1 - Test - - _TC")
-
 	def test_merge_account(self):
 		create_account(
 			account_name="Current Assets",
@@ -194,10 +192,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC3")
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
-
 	def test_account_currency_sync(self):
 		"""
 		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
@@ -245,9 +239,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
-		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
-
 	def test_child_company_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
@@ -280,16 +271,6 @@ class TestAccount(ERPNextTestSuite):
 				"Account", {"name": "Test Modified Account - _TC5", "company": "_Test Company 5"}
 			)
 		)
-
-		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 0)
-
-		to_delete = [
-			"Test Group Account - _TC3",
-			"Test Group Account - _TC4",
-			"Test Modified Account - _TC5",
-		]
-		for doc in to_delete:
-			frappe.delete_doc("Account", doc)
 
 	def test_validate_account_currency(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

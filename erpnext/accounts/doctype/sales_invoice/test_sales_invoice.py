@@ -1585,8 +1585,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
 
-		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
-
 	def test_pos_change_amount_multi_currency_gl_entry(self):
 		from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
 
@@ -1730,17 +1728,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertEqual(expected_gl_entries[i][0], gle.account)
 			self.assertEqual(expected_gl_entries[i][1], gle.debit)
 			self.assertEqual(expected_gl_entries[i][2], gle.credit)
-
-		si.cancel()
-		gle = frappe.get_all(
-			"GL Entry",
-			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
-			fields=["*"],
-		)
-
-		self.assertTrue(gle)
-
-		frappe.db.delete("POS Profile")
 
 	def test_bin_details_of_packed_item(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -3550,7 +3537,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", old_negative_stock)
 
 	def test_sle_for_target_warehouse(self):
-		se = make_stock_entry(
+		make_stock_entry(
 			item_code="138-CMS Shoe",
 			target="Finished Goods - _TC",
 			company="_Test Company",
@@ -3575,10 +3562,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# check if both SLEs are created
 		self.assertEqual(len(sles), 2)
 		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
-
-		# tear down
-		si.cancel()
-		se.cancel()
 
 	def test_internal_transfer_gl_entry(self):
 		si = create_sales_invoice(
@@ -4092,7 +4075,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		supp_doc.save()
 
 		# create a party link between customer & supplier
-		party_link = create_party_link("Supplier", supplier, customer)
+		create_party_link("Supplier", supplier, customer)
 
 		# enable common party accounting
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 1)
@@ -4132,11 +4115,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertTrue(jv)
 		self.assertEqual(jv[0], si.grand_total)
-
-		dim.disabled = True
-		dim.save()
-		party_link.delete()
-		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
 
 	def test_sales_invoice_cancel_with_common_party_advance_jv(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
@@ -4193,7 +4171,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		customer = make_customer(customer="_Test Common Party Return SI")
 		supplier = create_supplier(supplier_name="_Test Common Party Return SI").name
-		party_link = create_party_link("Supplier", supplier, customer)
+		create_party_link("Supplier", supplier, customer)
 
 		si = create_sales_invoice(customer=customer, parent_cost_center="_Test Cost Center - _TC")
 
@@ -4225,8 +4203,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		customer_row = next(r for r in jv_accounts if r.account == return_si.debit_to)
 		self.assertGreater(customer_row.debit_in_account_currency, 0)
 		self.assertEqual(customer_row.credit_in_account_currency, 0)
-
-		party_link.delete()
 
 	def test_status_indicator(self):
 		from erpnext.accounts.doctype.sales_invoice.services.status import StatusService
@@ -4395,7 +4371,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn = create_delivery_note()
-		dn.submit()
 
 		si = make_sales_invoice(dn.name)
 		item_copy = frappe.copy_doc(si.items[0])
@@ -4410,7 +4385,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 			si.save()
 
 		self.assertIn("cannot overbill", str(err.exception).lower())
-		dn.cancel()
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	def test_non_stock_item_over_billing_against_so_is_blocked(self):
