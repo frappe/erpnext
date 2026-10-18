@@ -351,6 +351,7 @@ class SellingController(StockController):
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
 									or get_serial_and_batch_bundle(p, self, d),
 									"name": d.name,
+									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
 									"voucher_type": self.doctype,
@@ -376,6 +377,7 @@ class SellingController(StockController):
 							"conversion_factor": d.conversion_factor,
 							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"name": d.name,
+							"project": d.get("project"),
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,
 							"voucher_type": self.doctype,

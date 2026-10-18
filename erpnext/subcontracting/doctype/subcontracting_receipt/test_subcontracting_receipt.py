@@ -74,6 +74,49 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.items[0].project = other_project
 		self.assertRaises(frappe.ValidationError, scr.save)
 
+	def test_supplied_items_ledger_takes_project_of_finished_good_row(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA7",
+					"fg_item_qty": 10,
+				},
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=1,
+		)
+		po.items[0].project = project
+		po.submit()
+		sco = get_subcontracting_order(po_name=po.name)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		self.assertFalse(scr.project)
+		self.assertEqual(scr.items[0].project, project)
+		supplied_item_projects = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": scr.name, "warehouse": scr.supplier_warehouse},
+			pluck="project",
+		)
+		self.assertTrue(supplied_item_projects)
+		self.assertEqual(set(supplied_item_projects), {project})
+
 	def test_subcontracting(self):
 		set_backflush_based_on("BOM")
 		make_stock_entry(item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100)
