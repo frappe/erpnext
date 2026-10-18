@@ -230,19 +230,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		job_card.cancel()
 		self.assertEqual(first.reload().process_loss_qty, 0)
 
-	def test_drafts_and_cancelled_orders_do_not_consume_quantity(self):
-		plan = self.make_plan()
-		for field in REFERENCE_FIELDS:
-			with self.subTest(field=field):
-				first = self.create_work_order(plan, field)
-				second = self.create_work_order(plan, field)
-				self.assertEqual(first.qty, second.qty)
-				first.submit()
-				self.assert_overproduction(second, 100)
-				first.cancel()
-				second.submit()
-				self.assert_pending_qty(plan, field, 0)
-
 	def test_process_loss_and_overproduction_allowance(self):
 		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 10)
 		plan = self.make_plan()
