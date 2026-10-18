@@ -6705,6 +6705,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_transfer_takes_only_its_operation_rows(self):
+		from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_job_card_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": rm_item, "qty": 1, "operation": first_operation},
+				{"item_code": rm_item, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 4, transfer_material_against="Job Card")
+		job_card = frappe.get_doc("Job Card", {"work_order": wo.name, "operation": first_operation})
+
+		entry = frappe.get_doc(make_job_card_entry(job_card.name))
+		entry.get_items()
+
+		self.assertEqual(sum(flt(row.qty) for row in entry.items if row.item_code == rm_item), 4)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_same_material_in_two_operations_splits_transferred_qty(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
