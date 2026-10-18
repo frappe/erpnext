@@ -1432,6 +1432,54 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			frappe.ValidationError, "Close the Work Order", unreserve_stock_for_work_order, wo, reservations
 		)
 
+	def test_source_reservations_in_different_modes_are_recounted_separately(self):
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			unreserve_stock_for_work_order,
+		)
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		batch_row = next(item for item in rm_in.items if item.item_code == "RM with Batch")
+		batch_row.qty = 3
+		rm_in.submit()
+		with self.change_settings("Stock Settings", auto_reserve_serial_and_batch=0):
+			qty_reservation = frappe.get_doc(
+				doctype="Stock Reservation Entry",
+				company=scio.company,
+				voucher_type="Subcontracting Inward Order",
+				voucher_no=scio.name,
+				voucher_detail_no=batch_row.scio_detail,
+				item_code="RM with Batch",
+				warehouse="Stores - _TC",
+				stock_uom="Nos",
+				voucher_qty=2,
+				reserved_qty=2,
+				available_qty=2,
+				has_batch_no=1,
+				reservation_based_on="Qty",
+			).submit()
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 2
+		wo.submit()
+		unreserve_stock_for_work_order(
+			wo,
+			frappe.get_all("Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}, pluck="name"),
+		)
+
+		delivered_qty = frappe.get_all(
+			"Stock Reservation Entry",
+			{"voucher_detail_no": batch_row.scio_detail, "docstatus": 1},
+			pluck="delivered_qty",
+		)
+		self.assertEqual(delivered_qty, [0, 0])
+		self.assertEqual(
+			frappe.db.get_value("Stock Reservation Entry", qty_reservation.name, "status"), "Reserved"
+		)
+
 	def test_used_work_order_reservation_cannot_be_cancelled_directly(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
