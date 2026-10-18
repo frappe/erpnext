@@ -724,7 +724,7 @@ def get_due_date(
 	party_type: str | None,
 	party: str | None,
 	company: str | None = None,
-	bill_date: str | None = None,
+	bill_date: str | date | None = None,
 	template_name: str | None = None,
 ):
 	"""Get due date from `Payment Terms Template`"""

@@ -40,7 +40,10 @@ def _get_inter_company_party_config(doctype: str) -> "frappe._dict":
 def _validate_against_reference(config, party: str, company: str, inter_company_reference: str) -> None:
 	doc = frappe.get_doc(config.ref_doc, inter_company_reference)
 	ref_party = doc.supplier if config.partytype == "Customer" else doc.customer
-	if frappe.db.get_value(config.partytype, {"represents_company": doc.company}, "name") != party:
+	if (
+		frappe.db.get_value(config.partytype, {"represents_company": doc.company, "disabled": 0}, "name")
+		!= party
+	):
 		frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(config.partytype)))
 	if frappe.get_cached_value(config.ref_partytype, ref_party, "represents_company") != company:
 		frappe.throw(_("Invalid Company for Inter Company Transaction."))

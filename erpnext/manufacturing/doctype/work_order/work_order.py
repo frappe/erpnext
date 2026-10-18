@@ -180,7 +180,6 @@ class WorkOrder(Document):
 		total_operating_cost: DF.Currency
 		track_semi_finished_goods: DF.Check
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
-		update_consumed_material_cost_in_project: DF.Check
 		use_multi_level_bom: DF.Check
 		wip_warehouse: DF.Link | None
 	# end: auto-generated types
@@ -698,6 +697,16 @@ class WorkOrder(Document):
 
 		self.update_subcontracting_inward_order_received_items()
 
+		self.discard_draft_job_cards()
+
+	def discard_draft_job_cards(self):
+		for name in frappe.get_all(
+			"Job Card", filters={"work_order": self.name, "docstatus": 0}, pluck="name"
+		):
+			job_card = frappe.get_doc("Job Card", name)
+			job_card.flags.ignore_permissions = True
+			job_card.discard()
+
 	def set_qty_change(self):
 		"""Excess received qty to move into this Work Order's reservation on submit."""
 		if scio_item_name := self.get("subcontracting_inward_order_item"):
@@ -1150,6 +1159,7 @@ def set_work_order_ops(name: str):
 
 @frappe.whitelist()
 def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | None = None) -> float:
+	frappe.has_permission("Stock Entry", "read", doc=stock_entry_name, throw=True)
 	se = frappe.db.get_value("Stock Entry", stock_entry_name, ["fg_completed_qty"], as_dict=True)
 	if not se:
 		return 0.0

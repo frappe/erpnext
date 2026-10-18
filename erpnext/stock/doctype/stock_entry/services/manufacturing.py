@@ -387,7 +387,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
 			return
 
-		if not self.doc.fg_completed_qty:
+		consumes_transferred_qty = self.backflush_based_on == "Material Transferred for Manufacture" and not (
+			self.wo_doc and self.wo_doc.skip_transfer
+		)
+		if not self.doc.fg_completed_qty or consumes_transferred_qty:
 			return
 
 		rm_items = [item for item in self.doc.items if item.s_warehouse]
@@ -1411,10 +1414,13 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.valuation_type,
 			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
-	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
-		return query.select(doctype.allow_alternative_item, doctype.bom_no)
-	return query
+		return query.select(
+			(doctype.base_rate / NullIf(doctype.conversion_factor, 0)).as_("basic_rate"),
+			doctype.allow_alternative_item,
+			doctype.bom_no,
+		)
+	return query.select(doctype.rate.as_("basic_rate"))
 
 
 def _deduplicate_bom_items(items, by_type=False):

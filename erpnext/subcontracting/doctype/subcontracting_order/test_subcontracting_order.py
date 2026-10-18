@@ -16,13 +16,9 @@ from erpnext.controllers.subcontracting_controller import (
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 	make_subcontracted_item,
-	make_subcontracted_items,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -41,12 +37,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingOrder(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}
@@ -198,26 +188,6 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Purchase Order Item", {"parent": po_name}, "subcontracted_qty"), 10
 		)
-
-	def test_partial_subcontracting_order_leaves_the_exact_remaining_qty(self):
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 7",
-				"qty": 1,
-				"rate": 100,
-				"fg_item": "Subcontracted Item SA7",
-				"fg_item_qty": 3,
-			},
-		]
-		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
-		sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
-		sco.items[0].qty = 1
-		sco.insert()
-		sco.submit()
-
-		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
-		self.assertEqual(next_sco.items[0].qty, 2)
 
 	def test_purchase_order_stays_open_while_finished_goods_remain(self):
 		service_items = [

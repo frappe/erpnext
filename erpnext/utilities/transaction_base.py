@@ -371,6 +371,9 @@ class TransactionBase(StatusUpdater):
 			):
 				item_obj.set(fieldname, None)
 
+			if item_obj.get("mapped_additional_discount_amount"):
+				self.drop_mapped_discount(item_obj)
+
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
 
@@ -527,7 +530,7 @@ class TransactionBase(StatusUpdater):
 		# Field order precedance
 		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
 		if item_obj.parenttype in ["Sales Order", "Quotation"] and item_obj.blanket_order_rate:
-			effective_item_rate = item_obj.blanket_order_rate
+			effective_item_rate = flt(item_obj.blanket_order_rate) * (flt(item_obj.conversion_factor) or 1)
 
 		if item_obj.margin_type == "Percentage":
 			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (

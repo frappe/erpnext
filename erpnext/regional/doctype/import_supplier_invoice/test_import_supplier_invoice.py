@@ -170,9 +170,13 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.addCleanup(frappe.clear_cache, doctype="Import Supplier Invoice")
 		frappe.clear_cache(doctype="Import Supplier Invoice")
 		user = frappe.get_doc(
-			{"doctype": "User", "email": "isi-accounts-user@example.com", "first_name": "ISI"}
+			{
+				"doctype": "User",
+				"email": "isi-accounts-user@example.com",
+				"first_name": "ISI",
+				"roles": [{"role": "Accounts User"}],
+			}
 		).insert()
-		user.add_roles("Accounts User")
 
 		lines = [make_line("Bolts", "10.00", "50.00", qty="5.00", uom="_Test ISI Box")]
 		xml = make_invoice_xml("ISI-ACC-USER", lines, supplier="_Test ISI New Seller", vat_code="11111111111")

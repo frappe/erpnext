@@ -85,9 +85,7 @@ class DisassembleStockEntry(BaseStockEntry):
 		"""Every non-finished-good row's posted stock qty must equal the source qty x scale."""
 		scale_factor = self._get_disassembly_scale_factor()
 		if not scale_factor:
-			# Standalone BOM disassembly: no source entry to scale against. The finished-good
-			# invariant above still applies; raw-material amounts come from the BOM.
-			return
+			return self.validate_materials_against_bom()
 
 		source_rows = self.get_items_from_manufacture_stock_entry()
 		source_by_name = {row.name: row for row in source_rows if row.get("name")}
@@ -129,6 +127,40 @@ class DisassembleStockEntry(BaseStockEntry):
 					),
 					title=_("Invalid Disassembly Quantity"),
 				)
+
+	def validate_materials_against_bom(self):
+		if not self.doc.bom_no:
+			return
+
+		expected_qty = {
+			row.item_code: flt(row.qty) * flt(self.doc.fg_completed_qty)
+			for row in get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom)
+		}
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		for item_code, qty in self.get_received_component_qty().items():
+			if item_code not in expected_qty:
+				frappe.throw(
+					_("Item {0} is not part of the BOM {1} and cannot be added to this disassembly.").format(
+						frappe.bold(item_code), frappe.bold(self.doc.bom_no)
+					),
+					title=_("Invalid Disassembly Item"),
+				)
+
+			if abs(flt(qty, precision) - flt(expected_qty[item_code], precision)) > _qty_tolerance(precision):
+				frappe.throw(
+					_("Item {0} quantity ({1} in stock UOM) does not match the BOM quantity {2}.").format(
+						frappe.bold(item_code), flt(qty, precision), flt(expected_qty[item_code], precision)
+					),
+					title=_("Invalid Disassembly Quantity"),
+				)
+
+	def get_received_component_qty(self) -> dict:
+		received_qty = defaultdict(float)
+		for row in self.doc.items:
+			if row.t_warehouse and not row.is_finished_item:
+				received_qty[row.item_code] += flt(row.transfer_qty)
+
+		return received_qty
 
 	def _get_disassembly_scale_factor(self) -> float:
 		disassemble_qty = flt(self.doc.fg_completed_qty)

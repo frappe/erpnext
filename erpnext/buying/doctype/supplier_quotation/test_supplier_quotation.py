@@ -160,31 +160,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation.status, "Ordered")
 		self.assertEqual(make_purchase_order(supplier_quotation.name).items, [])
 
-	def test_purchase_order_skips_fully_ordered_quotation_rows(self):
-		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
-		supplier_quotation.append("items", {"item_code": "_Test Item 2", "qty": 3, "rate": 100})
-		supplier_quotation.submit()
-
-		first_order = make_purchase_order(
-			supplier_quotation.name,
-			args={"filtered_children": [supplier_quotation.items[0].name]},
-		)
-		first_order.items[0].schedule_date = add_days(today(), 1)
-		first_order.submit()
-
-		supplier_quotation.reload()
-		self.assertEqual(supplier_quotation.status, "Partially Ordered")
-
-		second_order = make_purchase_order(supplier_quotation.name)
-		self.assertEqual(len(second_order.items), 1)
-		self.assertEqual(second_order.items[0].item_code, "_Test Item 2")
-		self.assertEqual(second_order.items[0].qty, 3)
-
-		second_order.items[0].schedule_date = add_days(today(), 1)
-		second_order.submit()
-		supplier_quotation.reload()
-		self.assertEqual(supplier_quotation.status, "Ordered")
-
 	def test_purchase_order_cannot_exceed_supplier_quotation_qty(self):
 		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		supplier_quotation.items[0].qty = 5

@@ -76,7 +76,12 @@ class TimesheetDetail(Document):
 		from erpnext.projects.doctype.timesheet.timesheet import _get_activity_cost
 
 		self.update_billing_hours()
-		rate = _get_activity_cost(employee, self.activity_type, currency) if self.activity_type else {}
+		needs_rate = not flt(self.costing_rate) or (self.is_billable and not flt(self.billing_rate))
+		rate = (
+			_get_activity_cost(employee, self.activity_type, currency)
+			if self.activity_type and needs_rate
+			else {}
+		)
 		self.billing_rate = flt(self.billing_rate) or flt(rate.get("billing_rate"))
 		self.costing_rate = flt(self.costing_rate) or flt(rate.get("costing_rate"))
 

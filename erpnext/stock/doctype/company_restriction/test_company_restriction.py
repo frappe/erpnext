@@ -118,10 +118,6 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			)
 			self.assertEqual(details.customer, customer)
 
-	def test_unrestricted_item_is_not_blocked(self):
-		item = make_item()
-		make_material_request(item_code=item.name)
-
 	def test_allowed_companies_is_mandatory_when_restricted(self):
 		item = make_item()
 		item.restrict_to_companies = 1

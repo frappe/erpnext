@@ -5,8 +5,6 @@
 # replaying a SQL dump (the ~60s hydrate restore). Each shard gets its own copy → isolation kept.
 #
 # CI_DB_DATADIR picks the path:
-#   - setup job:  /home/ci/db-data  (OUTSIDE the bench, so install.sh's `rm -rf ~/frappe-bench`
-#                 doesn't wipe it; it's moved into the bench just before packaging)
 #   - test shard: ~/frappe-bench/mariadb-data  (where the artifact untar'd it)
 #
 # Idempotent: inits a fresh datadir if absent (setup), else starts on the existing one (shards).

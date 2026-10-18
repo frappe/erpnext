@@ -622,6 +622,12 @@ class StatusUpdater(Document):
 			if "percent_join_field" in args or "percent_join_field_parent" in args:
 				self._update_percent_field_in_targets(args, update_modified)
 
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			refresh_blanket_orders_of_fulfilled_rows,
+		)
+
+		refresh_blanket_orders_of_fulfilled_rows(self)
+
 	def _update_children(self, args, update_modified):
 		"""Update quantities or amount in child table"""
 		for d in self.get_all_children():
@@ -670,10 +676,14 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
+				target_value = args["source_dt_value"]
+				if args.get("target_conversion_factor"):
+					target_value = f"{target_value} / {args['target_conversion_factor']}"
+
 				frappe.db.sql(
 					"""update `tab{target_dt}`
-					set {target_field} = {source_dt_value} {update_modified}
-					where name=%(detail_id)s""".format(**args),
+					set {target_field} = {target_value} {update_modified}
+					where name=%(detail_id)s""".format(target_value=target_value, **args),
 					{"detail_id": args["detail_id"]},
 				)
 
