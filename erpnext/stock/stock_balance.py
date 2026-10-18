@@ -164,7 +164,7 @@ def get_indented_qty(item_code, warehouse):
 	)
 
 	pending_qty = mr_item.stock_qty - mr_item.ordered_qty
-	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
+	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer", "Subcontracting"]
 	quantities = (
 		frappe.qb.from_(mr_item)
 		.inner_join(mr)
