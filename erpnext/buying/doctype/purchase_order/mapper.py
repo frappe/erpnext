@@ -14,6 +14,7 @@ from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_invoiced_qty_against_po_items
 
 
 def set_missing_values(source, target):
@@ -145,22 +146,14 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		PaymentScheduleService(target).set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
-	def get_billed_qty(po_item):
-		from frappe.query_builder.functions import Sum
-
-		table = frappe.qb.DocType("Purchase Invoice Item")
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.qty * table.conversion_factor).as_("qty"))
-			.where((table.docstatus == 1) & (table.po_detail == po_item.name))
-		)
-		return flt(flt(query.run(pluck="qty")[0]) / po_item.conversion_factor, po_item.precision("qty"))
-
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+	po_items = frappe.get_all("Purchase Order Item", filters={"parent": source_name}, pluck="name")
+	billed_qty_by_item = get_invoiced_qty_against_po_items(po_items) if po_items else {}
 
 	def get_billed_and_mapped_qty(po_item):
-		return get_billed_qty(po_item) + flt(mapped_qty_by_item.get(po_item.name, 0))
+		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
+		return billed_qty + flt(mapped_qty_by_item.get(po_item.name, 0))
 
 	def update_item(obj, target, source_parent):
 		target.qty = (
