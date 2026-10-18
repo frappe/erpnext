@@ -4,6 +4,8 @@ import frappe
 
 from erpnext.tests.utils import ReportFilters, ReportName, execute_script_report
 
+test_dependencies = ["BOM"]
+
 
 class TestManufacturingReports(unittest.TestCase):
 	def setUp(self):
