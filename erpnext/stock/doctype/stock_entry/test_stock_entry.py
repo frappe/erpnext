@@ -5121,6 +5121,32 @@ class TestStockEntry(ERPNextTestSuite):
 			issue = make_stock_entry(item_code=output, source=warehouse, qty=5)
 			self.assertEqual(self.get_value_change(issue, output), -389.46)
 
+	def test_repack_output_leaves_out_warehouse_moves(self):
+		raw_material, moved, output = (
+			make_item(properties={"valuation_method": "FIFO"}).name for _ in range(3)
+		)
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=1, rate=100)
+		make_stock_entry(item_code=moved, target=warehouse, qty=1, rate=200)
+		repack = make_stock_entry(
+			item_code=raw_material, source=warehouse, qty=1, purpose="Repack", do_not_save=True
+		)
+		repack.append(
+			"items",
+			{
+				"item_code": moved,
+				"s_warehouse": warehouse,
+				"t_warehouse": "_Test Warehouse 1 - _TC",
+				"qty": 1,
+			},
+		)
+		repack.append(
+			"items", {"item_code": output, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1}
+		)
+		repack.submit()
+
+		self.assertEqual(self.get_value_change(repack, output), 100)
+
 	def test_manufacture_outputs_split_the_consumed_value_without_a_remainder(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_manufacture_entry
 
