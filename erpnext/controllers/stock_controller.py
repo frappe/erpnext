@@ -395,6 +395,7 @@ class StockController(AccountsController):
 		from erpnext.stock.doctype.delivery_note.services.billing_status import (
 			get_invoiced_qty_against_dn,
 			get_invoiced_qty_based_on_so,
+			get_settled_return_qty,
 		)
 
 		# Direct Delivery Note -> Sales Invoice billing
@@ -404,6 +405,11 @@ class StockController(AccountsController):
 		# so_detail using the same FIFO distribution as update_billed_amount_based_on_so.
 		for so_detail in {item.so_detail for item in self.items if item.so_detail}:
 			qty_map.update(get_invoiced_qty_based_on_so(so_detail))
+
+		# A return deducted on the original's invoice counts as credited.
+		if self.is_return and self.return_against:
+			for row, qty in get_settled_return_qty(self.return_against).items():
+				qty_map[row] = qty_map.get(row, 0) - qty
 
 		return qty_map
 
