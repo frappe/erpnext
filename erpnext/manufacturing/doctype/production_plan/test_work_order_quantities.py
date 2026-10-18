@@ -230,6 +230,19 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		job_card.cancel()
 		self.assertEqual(first.reload().process_loss_qty, 0)
 
+	def test_drafts_and_cancelled_orders_do_not_consume_quantity(self):
+		plan = self.make_plan()
+		for field in REFERENCE_FIELDS:
+			with self.subTest(field=field):
+				first = self.create_work_order(plan, field)
+				second = self.create_work_order(plan, field)
+				self.assertEqual(first.qty, second.qty)
+				first.submit()
+				self.assert_overproduction(second, 100)
+				first.cancel()
+				second.submit()
+				self.assert_pending_qty(plan, field, 0)
+
 	def test_process_loss_and_overproduction_allowance(self):
 		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 10)
 		plan = self.make_plan()
@@ -302,6 +315,14 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		first.submit()
 		second = self.create_work_order(plan, "production_plan_item")
 		self.assertEqual(second.qty, 50)
+
+	def test_reference_must_belong_to_plan(self):
+		plan = self.make_plan()
+		other_plan = self.make_plan()
+		work_order = self.create_work_order(plan, "production_plan_item")
+		work_order.production_plan = other_plan.name
+		with self.assertRaisesRegex(frappe.ValidationError, "must reference a row"):
+			work_order.submit()
 
 	def test_missing_or_ambiguous_plan_reference(self):
 		plan = self.make_plan()

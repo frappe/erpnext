@@ -3092,6 +3092,19 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(wo.disassembled_qty, 0.3)
 
+	def test_disassembly_available_qty_has_no_float_noise(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
+
+		real_get_value = frappe.db.get_value
+
+		def get_value(doctype, filters=None, *args, **kwargs):
+			if doctype != "Stock Entry":
+				return real_get_value(doctype, filters, *args, **kwargs)
+			return frappe._dict(fg_completed_qty=0.3) if isinstance(filters, str) else 0.1
+
+		with patch.object(frappe.db, "get_value", side_effect=get_value):
+			self.assertEqual(get_disassembly_available_qty("Manufacture Entry"), 0.2)
+
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
@@ -6376,6 +6389,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		# B transferred as a substitute for A -> credited to A; B transferred for itself -> credited to B.
 		self.assertEqual(flt(qty_by_item.get(item_a)), 10.0)
 		self.assertEqual(flt(qty_by_item.get(item_b)), 10.0)
+
+	def test_wip_warehouse_required_when_tracking_semi_finished_goods(self):
+		wo = frappe.new_doc("Work Order")
+		wo.track_semi_finished_goods = 1
+		wo.skip_transfer = 0
+		wo.fg_warehouse = "_Test Warehouse 1 - _TC"
+
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
+
+		wo.wip_warehouse = "_Test Warehouse - _TC"
+		wo.validate_warehouse()
+
+		# the top-level target warehouse stays optional; operations may carry their own
+		wo.fg_warehouse = None
+		wo.validate_warehouse()
+
+		wo.track_semi_finished_goods = 0
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
 	def test_change_finished_item_to_alternative_finished_good(self):
