@@ -4130,6 +4130,112 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(repack.items[0].basic_rate, 329)
 		self.assertEqual(repack.items[1].amount, 987)
 
+	@change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_manufacture_keeps_the_cost_of_its_consumption_entry(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_stock_entry_from_wo,
+		)
+
+		raw_material, finished_good = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		warehouse = "_Test Warehouse - _TC"
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": finished_good, "quantity": 10, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": raw_material, "qty": 10})
+		bom.insert()
+		bom.submit()
+
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			bom_no=bom.name,
+			qty=10,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+		)
+		frappe.get_doc(
+			make_stock_entry_from_wo(work_order.name, "Material Consumption for Manufacture", 10)
+		).submit()
+		manufacture = frappe.get_doc(make_stock_entry_from_wo(work_order.name, "Manufacture", 10))
+		manufacture.submit()
+
+		self.assertEqual(self.get_value_change(manufacture, finished_good), 1000)
+
+	def test_manufacture_output_stays_non_negative_after_repost(self):
+		raw_material, output = (
+			make_item(properties={"valuation_method": "Moving Average"}).name for _ in range(2)
+		)
+		scrap = make_item(properties={"valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=raw_material, target=warehouse, qty=1, rate=100, posting_date=add_days(today(), -3)
+		)
+		manufacture = make_stock_entry(
+			item_code=raw_material,
+			source=warehouse,
+			qty=1,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -1),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items", {"item_code": output, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1}
+		)
+		manufacture.append(
+			"items", {"item_code": scrap, "t_warehouse": warehouse, "qty": 1, "is_scrap_item": 1}
+		)
+		manufacture.submit()
+		self.assertEqual(self.get_value_change(manufacture, output), 20)
+
+		make_stock_entry(
+			item_code=raw_material,
+			target=warehouse,
+			qty=1,
+			rate=10,
+			posting_date=add_days(today(), -5),
+		)
+
+		self.assertEqual(self.get_value_change(manufacture, output), 0)
+
+	def test_repack_output_takes_the_consumed_value(self):
+		warehouse = "_Test Warehouse - _TC"
+		for properties in (
+			{},
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "RPB-.#####"},
+			{"has_serial_no": 1, "serial_no_series": "RPS-.#####"},
+		):
+			raw_material = make_item(properties={"valuation_method": "Moving Average"}).name
+			output = make_item(properties={"valuation_method": "Moving Average", **properties}).name
+			make_stock_entry(item_code=raw_material, target=warehouse, qty=8, rate=209.416)
+			make_stock_entry(item_code=raw_material, target=warehouse, qty=2, rate=19.14)
+
+			repack = self.make_repack(raw_material, 5, warehouse, output, 11)
+
+			self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
+			self.assertEqual(self.get_value_change(repack, output), 856.81)
+
+			issue = make_stock_entry(item_code=output, source=warehouse, qty=5)
+			self.assertEqual(self.get_value_change(issue, output), -389.46)
+
+	def make_repack(self, raw_material, qty, warehouse, output, output_qty):
+		repack = make_stock_entry(
+			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
+		)
+		repack.append(
+			"items", {"item_code": output, "t_warehouse": warehouse, "qty": output_qty, "is_finished_item": 1}
+		)
+		repack.submit()
+		return repack
+
+	def get_value_change(self, stock_entry, item_code):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": stock_entry.name, "item_code": item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
