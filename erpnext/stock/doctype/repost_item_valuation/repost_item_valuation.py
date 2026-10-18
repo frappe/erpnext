@@ -15,6 +15,7 @@ from rq.timeouts import JobTimeoutException
 import erpnext
 from erpnext.accounts.general_ledger import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
+from erpnext.projects.doctype.project.project import update_consumed_material_cost_for_vouchers
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
@@ -355,7 +356,9 @@ def repost(doc):
 			doc.recreate_stock_ledger_entries()
 
 		repost_sl_entries(doc)
-		repost_gl_entries(doc)
+		vouchers = get_reposted_vouchers(doc)
+		repost_gl_entries(doc, vouchers)
+		update_consumed_material_cost_for_vouchers(vouchers)
 
 		doc.set_status("Completed")
 		doc.db_set("reposting_data_file", None)
@@ -446,19 +449,20 @@ def repost_sl_entries(doc):
 		)
 
 
-def repost_gl_entries(doc):
+def repost_gl_entries(doc, transactions: list):
 	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 		return
 
-	# directly modified transactions
-	directly_dependent_transactions = _get_directly_dependent_vouchers(doc)
-	repost_affected_transaction = get_affected_transactions(doc)
 	repost_gle_for_stock_vouchers(
-		directly_dependent_transactions + list(repost_affected_transaction),
+		transactions,
 		doc.posting_date,
 		doc.company,
 		repost_doc=doc,
 	)
+
+
+def get_reposted_vouchers(doc):
+	return _get_directly_dependent_vouchers(doc) + list(get_affected_transactions(doc))
 
 
 def _get_directly_dependent_vouchers(doc):
