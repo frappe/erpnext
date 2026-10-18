@@ -113,7 +113,7 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 			rate=100,
 			serial_no=opening_serials,
 			posting_date=today(),
-			posting_time="10:30:00",
+			posting_time="00:00:00",
 			purpose="Opening Stock",
 		)
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
