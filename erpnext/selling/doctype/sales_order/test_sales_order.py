@@ -272,6 +272,17 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.docstatus, 1)
 		self.assertTrue(so.base_grand_total < 0)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
+	def test_sales_order_negative_rate_error_links_to_selling_settings(self):
+		so = make_sales_order(qty=1, rate=100, do_not_save=True)
+		so.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -10})
+		so.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			so.submit()
+
+		self.assertIn("selling-settings", frappe.local.message_log[-1]["message"])
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_order_qty(self):
 		so = make_sales_order(qty=1, do_not_save=True)
