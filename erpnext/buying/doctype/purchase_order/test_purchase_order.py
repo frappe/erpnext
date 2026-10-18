@@ -1369,7 +1369,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		debit_note.submit()
 
 		pi = make_pi_from_po(po.name)
-		pi.items[0].qty = 4
+		self.assertEqual(pi.items[0].qty, 4)
 		pi.submit()
 
 		po.reload()
