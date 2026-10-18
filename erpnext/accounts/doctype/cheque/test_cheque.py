@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.cheque.cheque import Cheque
 from erpnext.accounts.doctype.cheque.cheque_payment import (
 	cancel_cheque_payment,
 	get_next_cheque,
+	issue_cheque,
 	lock_cheque,
 	validate_cheque,
 )
@@ -192,6 +193,14 @@ class TestChequePayment(ERPNextTestSuite):
 		self.book.save()
 		frappe.db.set_value("Bank Account", self.bank_account, "disabled", 1)
 		self.assertRaisesRegex(frappe.ValidationError, "enabled Company Account", self.pay, "000101")
+
+	def test_book_disabled_after_validation_issues_no_cheque(self):
+		payment = self.pay("000101", submit=False)
+		# another user disables the book after this payment passed validation
+		frappe.db.set_value("Cheque Book", self.book.name, "status", "Disabled")
+
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", issue_cheque, payment)
+		self.assertEqual(frappe.db.get_value("Cheque", self.name_of("000101"), "status"), "Available")
 
 	def test_used_or_cancelled_cheque_is_rejected(self):
 		self.pay("000101")
