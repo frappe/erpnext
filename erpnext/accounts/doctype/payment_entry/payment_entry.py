@@ -256,6 +256,15 @@ class PaymentEntry(AccountsController):
 					_("Row #{0}: Dunning charges must have a negative deduction amount.").format(row.idx)
 				)
 
+	def get_invalid_links(self, is_submittable=False, link_value_cache=None):
+		invalid, cancelled = super().get_invalid_links(is_submittable, link_value_cache)
+		# Frappe checks links before validate, which rebuilds and checks the cheque link.
+		# So a link left by an earlier save must not stop this save.
+		return (
+			[link for link in invalid if link[0] != "cheque"],
+			[link for link in cancelled if link[0] != "cheque"],
+		)
+
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
 
