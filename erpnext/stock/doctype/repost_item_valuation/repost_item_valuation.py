@@ -663,13 +663,13 @@ def repost(doc):
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
 
-		if not doc.repost_only_accounting_ledgers:
+		if doc.repost_only_accounting_ledgers:
+			repost_gl_entries(doc)
+		else:
 			repost_sl_entries(doc)
-
-		repost_gl_entries(doc)
-
-		if not doc.repost_only_accounting_ledgers:
-			update_consumed_material_cost_for_vouchers(get_reposted_vouchers(doc))
+			vouchers = get_reposted_vouchers(doc)
+			repost_gl_entries(doc, vouchers)
+			update_consumed_material_cost_for_vouchers(vouchers)
 
 		doc.skip_reposts_covered_by_dependents()
 
@@ -758,7 +758,7 @@ def repost_sl_entries(doc):
 		)
 
 
-def repost_gl_entries(doc):
+def repost_gl_entries(doc, transactions: list | None = None):
 	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 		return
 
@@ -772,7 +772,8 @@ def repost_gl_entries(doc):
 		)
 		return
 
-	transactions = get_reposted_vouchers(doc)
+	if transactions is None:
+		transactions = get_reposted_vouchers(doc)
 
 	# handle stock delivered but not billed ledger entries
 	if frappe.get_cached_value("Company", doc.company, "enable_stock_delivered_but_not_billed"):
