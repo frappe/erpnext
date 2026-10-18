@@ -6735,6 +6735,55 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(sum(flt(row.qty) for row in entry.items if row.item_code == rm_item), 4)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 1, "material_consumption": 1}
+	)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_consumption_is_shared_over_row_reservations_of_one_material(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": rm_item, "qty": 1, "operation": first_operation},
+				{"item_code": rm_item, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=8, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 4, reserve_stock=1, skip_transfer=1)
+
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": wo.name}, order_by="sequence_id, creation", pluck="name"
+		)
+		for idx, name in enumerate(job_cards):
+			job_card = frappe.get_doc("Job Card", name)
+			job_card.for_quantity = 2
+			start = add_to_date(now(), hours=idx - len(job_cards) - 1)
+			job_card.append(
+				"time_logs",
+				{"from_time": start, "to_time": add_to_date(start, minutes=30), "completed_qty": 2},
+			)
+			job_card.submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Material Consumption for Manufacture", 2)).submit()
+
+		consumed = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": wo.name, "item_code": rm_item, "docstatus": 1},
+			fields=["reserved_qty", "consumed_qty"],
+		)
+		self.assertEqual(sum(row.reserved_qty for row in consumed), 8)
+		self.assertEqual(sum(row.consumed_qty for row in consumed), 4)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_same_material_in_two_operations_splits_transferred_qty(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
