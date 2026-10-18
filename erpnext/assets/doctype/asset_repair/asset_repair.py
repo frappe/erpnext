@@ -81,7 +81,9 @@ class AssetRepair(AccountsController):
 		# Logged in the save, as the status job only sees the final state of quick successive saves
 		if self.has_value_changed("repair_status"):
 			self.add_repair_activity(self.repair_status)
-		self.update_status()
+		# On submit the job is queued from on_submit, after this repair saves its asset
+		if self.docstatus.is_draft():
+			self.update_status()
 
 	def validate_asset(self):
 		if self.asset_doc.status in ("Sold", "Scrapped"):
@@ -237,6 +239,7 @@ class AssetRepair(AccountsController):
 			self.make_gl_entries()
 
 		self.add_asset_activity()
+		self.update_status()
 
 	def cancel_sabb(self):
 		for row in self.stock_items:
@@ -437,8 +440,9 @@ def update_asset_status_after_repair(asset: str) -> None:
 
 	Takes no repair row locks. Each committed repair change enqueues this job, and the job
 	started last sees every commit, so the status settles on the right value."""
-	# set_status always writes the row, so on Postgres an older job's lock fails and it retries
-	frappe.get_doc("Asset", asset, for_update=True).set_status()
+	# Always writes the row, so on Postgres an older job's lock fails and it retries.
+	# Keeps modified, so an Asset loaded before this job can still be saved.
+	frappe.get_doc("Asset", asset, for_update=True).set_status(update_modified=False)
 
 
 def check_asset_repair_access(company: str | None = None) -> None:

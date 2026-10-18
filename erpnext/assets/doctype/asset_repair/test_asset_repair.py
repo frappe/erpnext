@@ -219,6 +219,16 @@ class TestAssetRepair(ERPNextTestSuite):
 		self.assertTrue([subject for subject in subjects if f"{deleted_repair.name}</a> deleted" in subject])
 		self.assertNotEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
 
+	def test_asset_loaded_before_status_job_can_still_be_saved(self):
+		asset = create_asset(submit=1)
+		held_asset = frappe.get_doc("Asset", asset.name)
+
+		create_asset_repair(asset=asset)
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Out of Order")
+		held_asset.flags.ignore_validate_update_after_submit = True
+		held_asset.save()
+
 	def test_stock_item_total_value(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 

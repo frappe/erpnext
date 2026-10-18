@@ -799,11 +799,11 @@ class Asset(AccountsController):
 				(flt(self.net_purchase_amount) - flt(self.opening_accumulated_depreciation)),
 			)
 
-	def set_status(self, status=None):
+	def set_status(self, status=None, update_modified: bool = True):
 		"""Get and update status"""
 		if not status:
 			status = "Out of Order" if self.has_pending_repair() else self.get_status()
-		self.db_set("status", status)
+		self.db_set("status", status, update_modified=update_modified)
 
 	def has_pending_repair(self) -> bool:
 		if self.docstatus != 1 or self.disposal_date:
