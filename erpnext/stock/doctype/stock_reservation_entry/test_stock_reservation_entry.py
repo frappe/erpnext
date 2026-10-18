@@ -757,6 +757,65 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		dn.save()
 		self.assertRaisesRegex(frappe.ValidationError, "is reserved for", dn.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_deliver_batch_reserved_stock_with_serial_batch_fields(self) -> None:
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=5)
+
+		so = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=5, rate=100)
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		dn.save()
+		dn.submit()
+
+		sre = _get_stock_reservation_entries_for_voucher(
+			"Sales Order", so.name, fields=["status", "delivered_qty"]
+		)[0]
+		self.assertEqual(sre.status, "Delivered")
+		self.assertEqual(sre.delivered_qty, 5)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_deliver_remaining_reserved_serial_nos_with_serial_batch_fields(self) -> None:
+		item_doc = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SRPD-.#####"}
+		)
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
+
+		so = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=2, rate=100)
+		so.create_stock_reservation_entries()
+
+		first_dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		delivered_serial_no, remaining_serial_no = first_dn.items[0].serial_no.split("\n")
+		first_dn.items[0].qty = 1
+		first_dn.items[0].serial_no = delivered_serial_no
+		first_dn.submit()
+
+		second_dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		self.assertEqual(second_dn.items[0].serial_no, remaining_serial_no)
+		second_dn.submit()
+
+		sre = _get_stock_reservation_entries_for_voucher("Sales Order", so.name, fields=["status"])[0]
+		self.assertEqual(sre.status, "Delivered")
+
 
 def create_items() -> dict:
 	items_properties = [
