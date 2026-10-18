@@ -1677,11 +1677,14 @@ class AccountsController(TransactionBase):
 		)
 
 	def apply_source_discount_to_mapped_items(self, source_doc, existing_item_count):
-		with self.mapped_items_only(existing_item_count):
-			self.update({field: source_doc.get(field) for field in ADDITIONAL_DISCOUNT_FIELDS})
-			self.set_discount_amount_after_mapping(source_doc)
-			self.calculate_taxes_and_totals()
-			self.move_additional_discount_to_items()
+		if len(self.items) == existing_item_count:
+			self.update({"additional_discount_percentage": 0, "discount_amount": 0})
+		else:
+			with self.mapped_items_only(existing_item_count):
+				self.update({field: source_doc.get(field) for field in ADDITIONAL_DISCOUNT_FIELDS})
+				self.set_discount_amount_after_mapping(source_doc)
+				self.calculate_taxes_and_totals()
+				self.move_additional_discount_to_items()
 
 		self.calculate_taxes_and_totals()
 
