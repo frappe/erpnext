@@ -219,6 +219,14 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			self.upsert(pr, batch_numbers=[{"batch_number": "Missing-Batch", "qty": 1}])
 		self.assertFalse(frappe.db.exists("Batch", {"item": item, "batch_id": "Missing-Batch"}))
 
+	def test_batch_scan_requires_positive_quantity(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		pr = self.make_draft_pr(item, qty=1)
+		for qty in (0, -1):
+			with self.assertRaisesRegex(frappe.ValidationError, "greater than zero"):
+				self.upsert(pr, batch_numbers=[{"batch_number": "Missing-Batch", "qty": qty}])
+		self.assertFalse(frappe.db.exists("Batch", {"item": item, "batch_id": "Missing-Batch"}))
+
 	def test_batch_rescan_preserves_outward_quantity_sign(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
 		batch = frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": "Scan-Batch"}).insert()
@@ -228,6 +236,13 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		)
 		self.assertEqual(new_entries, [])
 		self.assertEqual(entry.qty, -6)
+
+	def test_batch_rescan_of_a_zero_qty_row_sets_the_scanned_qty(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": "Zero-Batch"}).insert()
+		entry = frappe._dict(batch_no=batch.name, qty=0)
+		append_scanned_batches([], [{"batch_number": "Zero-Batch", "qty": 2}], item, "Inward", [entry])
+		self.assertEqual(entry.qty, 2)
 
 	def test_batch_qty_update(self):
 		item = make_item(
@@ -265,6 +280,30 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Serial and Batch Entry", entry_name, "serial_no"), new_serial)
 		self.assertTrue(frappe.db.exists("Serial No", new_serial))
+
+	def test_link_values_do_not_create_missing_records(self):
+		for doctype, field, item_field, number_field, item_properties in (
+			("Serial No", "serial_no", "item_code", "serial_no", {"has_serial_no": 1}),
+			("Batch", "batch_no", "item", "batch_id", {"has_batch_no": 1}),
+		):
+			item = make_item(properties={"is_stock_item": 1, **item_properties}).name
+			pr = self.make_draft_pr(item, qty=1)
+			number = f"Missing-{frappe.generate_hash(length=8)}"
+			with self.assertRaises(frappe.LinkValidationError):
+				self.upsert(pr, entries=[{field: number, "qty": 1}])
+			self.assertFalse(frappe.db.exists(doctype, {item_field: item, number_field: number}))
+
+			master = frappe.get_doc(
+				{"doctype": doctype, item_field: item, number_field: number, "company": pr.company}
+			).insert()
+			with self.assertRaises(frappe.LinkValidationError):
+				self.upsert(pr, entries=[{field: number, "qty": 1}])
+			summary = self.upsert(pr, entries=[{field: master.name, "qty": 1}])
+			pr.items[0].serial_and_batch_bundle = summary.bundle
+			entry_name = frappe.db.get_value("Serial and Batch Entry", {"parent": summary.bundle})
+			with self.assertRaises(frappe.LinkValidationError):
+				self.upsert(pr, entries=[{"name": entry_name, field: number}])
+			self.assertEqual(frappe.db.get_value("Serial and Batch Entry", entry_name, field), master.name)
 
 	def test_update_batch_no_of_existing_entry(self):
 		item = make_item(
@@ -396,6 +435,13 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(serial.company, pr.company)
 		self.assertEqual(rows, [{"serial_no": "CSV-Serial", "batch_no": "CSV-Batch", "qty": 1}])
 
+	def test_csv_resolution_keeps_the_source_rows_unchanged(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		rows = [{"serial_no": "CSV-Serial", "qty": 1}]
+		resolved = resolve_csv_entries(rows, item, "Inward", "_Test Company")
+		self.assertNotEqual(resolved[0].serial_no, rows[0]["serial_no"])
+		self.assertEqual(rows, [{"serial_no": "CSV-Serial", "qty": 1}])
+
 	def test_csv_reselection_preserves_link_ids(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": 1}).name
 		batch = frappe.get_doc(doctype="Batch", item=item, batch_id="Selected-Batch").insert()
@@ -505,6 +551,15 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Serial No", updated.entries[0].serial_no, "serial_no"), "Replacement-Serial"
 		)
+
+	def test_selector_outward_save_cannot_create_records(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		pr = self.make_draft_pr(item, qty=1)
+		pr.is_return = 1
+		pr.items[0].type_of_transaction = "Inward"
+		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
+			self.save_selector(pr, csv_entries=[{"serial_no": "Missing-Serial", "qty": 1}])
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
 
 	def test_selector_rejects_mismatched_bundle_context(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name

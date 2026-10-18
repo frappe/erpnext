@@ -26,6 +26,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.utils import InvalidWarehouseCompany
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -2753,6 +2754,32 @@ class TestProductionPlan(ERPNextTestSuite):
 				items = get_items_for_material_requests(pln.as_dict())
 				self.assertEqual([row["quantity"] for row in items], expected_qty)
 
+	def test_safety_stock_is_separate_for_each_item_and_warehouse(self):
+		from collections import defaultdict
+
+		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+			_required_qty_for_mr,
+		)
+
+		row = frappe._dict(qty=250, safety_stock=100, purchase_uom="Nos", stock_uom="Nos")
+		items_and_warehouses = [
+			("Raw Material Item 1", "_Test Warehouse - _TC"),
+			("Raw Material Item 1", "_Test Warehouse 1 - _TC"),
+			("Raw Material Item 2", "_Test Warehouse - _TC"),
+		]
+		for consider_projected_qty in (0, 1):
+			with self.subTest(consider_projected_qty=consider_projected_qty):
+				consumed_qty = defaultdict(float)
+				quantities = []
+				for item_code, warehouse in items_and_warehouses * 2:
+					row.item_code = item_code
+					quantities.append(
+						_required_qty_for_mr(
+							row, consider_projected_qty, warehouse, {"projected_qty": -5}, consumed_qty, True
+						)
+					)
+				self.assertEqual(quantities, [350, 350, 350, 250, 250, 250])
+
 	def test_safety_stock_added_once_before_transferring_materials(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.utils import get_or_make_bin
@@ -2817,6 +2844,20 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		items = get_items_for_material_requests(pln.as_dict())
 		self.assertEqual([row["quantity"] for row in items], [0, 0])
+
+	def test_minimum_order_qty_does_not_transfer_surplus_stock(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1234}).name
+		source_warehouse = create_warehouse("MOQ Sufficient Source Warehouse", company="_Test Company")
+		make_stock_entry(item_code=rm_item, qty=1500, rate=100, target=source_warehouse)
+		pln = self._plan_with_shared_raw_material(rm_item, qty_per_order=250)
+		pln.consider_minimum_order_qty = 1
+		pln.for_warehouse = "_Test Warehouse - _TC"
+
+		items = get_items_for_material_requests(pln.as_dict(), warehouses=[{"warehouse": source_warehouse}])
+		self.assertEqual([row["material_request_type"] for row in items], ["Material Transfer"] * 2)
+		self.assertEqual([row["quantity"] for row in items], [250, 250])
 
 	def test_minimum_order_qty_respects_purchase_groups_and_sales_orders(self):
 		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
@@ -3068,6 +3109,16 @@ class TestProductionPlan(ERPNextTestSuite):
 				skip_getting_mr_items=1,
 			)
 			self.assertRaises(frappe.ValidationError, plan.save)
+
+	def test_for_warehouse_of_another_company_is_rejected(self):
+		plan = create_production_plan(
+			item_code=self._setup_group_rm_warehouse().fg_item,
+			planned_qty=10,
+			for_warehouse="_Test Warehouse 2 - _TC1",
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
 
 	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
 		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
