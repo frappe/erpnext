@@ -356,9 +356,9 @@ def repost(doc):
 			doc.recreate_stock_ledger_entries()
 
 		repost_sl_entries(doc)
-		repost_gl_entries(doc)
-
-		update_consumed_material_cost_for_vouchers(get_reposted_vouchers(doc))
+		vouchers = get_reposted_vouchers(doc)
+		repost_gl_entries(doc, vouchers)
+		update_consumed_material_cost_for_vouchers(vouchers)
 
 		doc.set_status("Completed")
 		doc.db_set("reposting_data_file", None)
@@ -449,12 +449,12 @@ def repost_sl_entries(doc):
 		)
 
 
-def repost_gl_entries(doc):
+def repost_gl_entries(doc, transactions: list):
 	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 		return
 
 	repost_gle_for_stock_vouchers(
-		get_reposted_vouchers(doc),
+		transactions,
 		doc.posting_date,
 		doc.company,
 		repost_doc=doc,
