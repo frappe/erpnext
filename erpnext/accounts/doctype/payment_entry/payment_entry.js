@@ -552,16 +552,9 @@ frappe.ui.form.on("Payment Entry", {
 		)
 			return;
 
+		// the book name already shows its range
 		if (cheque.cheque_book) {
-			frm.set_df_property(
-				"cheque_book",
-				"description",
-				__("Free: {0} · Start No: {1} · End No: {2}", [
-					cheque.free,
-					cheque.cheque_start_no,
-					cheque.cheque_end_no,
-				])
-			);
+			frm.set_df_property("cheque_book", "description", __("Free: {0}", [cheque.free]));
 		}
 		// never overwrite a number that the user typed
 		if (!frm.doc.reference_no || frm.doc.reference_no === frm.suggested_cheque_no) {
