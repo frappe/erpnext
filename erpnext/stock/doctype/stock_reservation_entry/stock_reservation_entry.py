@@ -688,7 +688,7 @@ class StockReservationEntry(Document):
 				if entry.serial_no in data.serial_nos:
 					entry.delivered_qty = flt(1)
 
-				elif entry.batch_no in data.batch_nos:
+				elif not entry.serial_no and entry.batch_no in data.batch_nos:
 					entry.delivered_qty = flt(data.batch_nos[entry.batch_no])
 
 			entry.db_update()
