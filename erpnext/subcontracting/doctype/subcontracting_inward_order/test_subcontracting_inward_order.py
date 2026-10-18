@@ -1381,6 +1381,21 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			frappe.ValidationError, "Close the Work Order", unreserve_stock_for_work_order, wo, reservations
 		)
 
+	def test_used_work_order_reservation_cannot_be_cancelled_directly(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 2)).submit()
+
+		reservation = frappe.get_doc(
+			"Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1, "consumed_qty": (">", 0)}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Close the Work Order", reservation.cancel)
+
 	def test_plain_rm_return_cancel_allowed_after_later_work_order(self):
 		so, scio = create_so_scio()
 		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
