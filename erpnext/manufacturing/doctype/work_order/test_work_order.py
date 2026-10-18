@@ -7138,6 +7138,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(new_bom.operations[1].batch_size, 2)
 
+		wo.qty = 2.5
+		self.assertEqual(wo.make_bom().operations[1].batch_size, 2.5)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_amended_work_order_fills_reused_batches_before_new_ones(self):
