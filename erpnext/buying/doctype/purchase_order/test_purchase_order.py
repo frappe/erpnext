@@ -1618,6 +1618,25 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_returned_qty_from_invoice_return_ignores_receipts(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
+
+		po = create_purchase_order(qty=2)
+		pr = make_purchase_receipt(po.name)
+		pr.items[0].update({"qty": 1, "received_qty": 1})
+		pr.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.update_stock = 1
+		pi.items[0].update({"qty": 1, "received_qty": 1})
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].returned_qty, 1)
+
 	def test_order_neutral_debit_note_stays_out_of_later_billing(self):
 		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 
