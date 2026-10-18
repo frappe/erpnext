@@ -2107,10 +2107,17 @@ def move_serial_batch_delivered_qty(
 	if not limits:
 		return
 
+	entries = get_open_serial_batch_entries(list(limits), release)
+	moved_qty = allocate_serial_batch_qty(entries, limits, serial_batch)
+	add_serial_batch_delivered_qty({name: -qty if release else qty for name, qty in moved_qty.items()})
+
+
+def get_open_serial_batch_entries(sre_names: list[str], release: bool) -> list[dict]:
+	"""Rows of these reservations with qty still to deliver, oldest reservation first, or to give back, newest first."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	open_qty = sb_entry.delivered_qty if release else sb_entry.qty - sb_entry.delivered_qty
-	entries = (
+	return (
 		frappe.qb.from_(sb_entry)
 		.inner_join(sre)
 		.on(sre.name == sb_entry.parent)
@@ -2119,21 +2126,26 @@ def move_serial_batch_delivered_qty(
 			sb_entry.parent,
 			sb_entry.serial_no,
 			sb_entry.batch_no,
-			sb_entry.delivered_qty,
 			open_qty.as_("open_qty"),
 		)
 		.where(
 			(sb_entry.parenttype == "Stock Reservation Entry")
-			& sb_entry.parent.isin(list(limits))
+			& sb_entry.parent.isin(sre_names)
 			& (open_qty > 0)
 		)
 		.orderby(sre.creation, order=Order.desc if release else Order.asc)
 		.orderby(sb_entry.idx)
 	).run(as_dict=True)
 
+
+def allocate_serial_batch_qty(
+	entries: list[dict], limits: dict[str, float], serial_batch: frappe._dict
+) -> dict[str, float]:
+	"""Qty to move on each row, within its open qty, the serial and batch qty to move and its reservation's limit."""
 	limits = defaultdict(float, limits)
 	serial_nos = set(serial_batch.get("serial_nos") or [])
 	batches = defaultdict(float, serial_batch.get("batches") or {})
+	moved_qty = {}
 	for entry in entries:
 		qty = 0
 		if entry.serial_no and entry.serial_no in serial_nos and limits[entry.parent] >= entry.open_qty:
@@ -2144,37 +2156,23 @@ def move_serial_batch_delivered_qty(
 			batches[entry.batch_no] -= qty
 
 		limits[entry.parent] -= qty
-
 		if qty > 0:
-			frappe.db.set_value(
-				"Serial and Batch Entry",
-				entry.name,
-				"delivered_qty",
-				entry.delivered_qty + (-qty if release else qty),
-			)
+			moved_qty[entry.name] = qty
+
+	return moved_qty
 
 
-def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
-	if row.serial_nos:
-		doctype = frappe.qb.DocType("Serial and Batch Entry")
-		query = (
-			frappe.qb.update(doctype)
-			.set(doctype.delivered_qty, (doctype.delivered_qty + (1 if not is_cancelled else -1)))
-			.where((doctype.parent == name) & (doctype.serial_no.isin(row.serial_nos)))
-		)
+def add_serial_batch_delivered_qty(deltas: dict[str, float]) -> None:
+	"""Add each delta to its row's delivered qty, one statement per distinct delta."""
+	rows_by_delta = defaultdict(list)
+	for name, delta in deltas.items():
+		rows_by_delta[delta].append(name)
 
-		query.run()
-
-	elif row.batches:
-		for batch_no, qty in row.batches.items():
-			doctype = frappe.qb.DocType("Serial and Batch Entry")
-			query = (
-				frappe.qb.update(doctype)
-				.set(doctype.delivered_qty, (doctype.delivered_qty + (qty if not is_cancelled else -1 * qty)))
-				.where((doctype.parent == name) & (doctype.batch_no == batch_no))
-			)
-
-			query.run()
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	for delta, names in rows_by_delta.items():
+		frappe.qb.update(sb_entry).set(sb_entry.delivered_qty, sb_entry.delivered_qty + delta).where(
+			sb_entry.name.isin(names)
+		).run()
 
 
 def get_reserved_materials(voucher_no):
