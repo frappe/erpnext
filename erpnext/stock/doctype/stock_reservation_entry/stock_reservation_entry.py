@@ -182,19 +182,26 @@ class StockReservationEntry(Document):
 		self.update_delivered_qty_in_from_voucher_reservations()
 
 	def update_delivered_qty_in_from_voucher_reservations(self):
-		"""Recount the delivered qty of the reservations this one was taken from."""
+		"""Recount the delivered qty of the reservations this one was taken from, each by its own reservation mode."""
 		sres = self.get_from_voucher_reservation_entries()
-		if open_qty := get_serial_batch_open_qty([row.name for row in sres]):
-			for row in sres:
-				set_delivered_qty(row.name, row.reserved_qty, row.reserved_qty - open_qty.get(row.name, 0))
-		else:
-			self.spread_used_qty(sres)
+		open_qty = get_serial_batch_open_qty([row.name for row in sres])
+		counted_qty = 0.0
+		for row in sres:
+			if row.name in open_qty:
+				delivered_qty = row.reserved_qty - open_qty[row.name]
+				set_delivered_qty(row.name, row.reserved_qty, delivered_qty)
+				counted_qty += delivered_qty
+
+		self.spread_used_qty([row for row in sres if row.name not in open_qty], counted_qty)
 
 		for warehouse in {row.warehouse for row in sres}:
 			frappe.get_cached_doc("Bin", get_or_make_bin(self.item_code, warehouse)).update_reserved_stock()
 
-	def spread_used_qty(self, sres: list) -> None:
-		"""Spread the qty still used by reservations taken from the source row over its reservations, oldest first."""
+	def spread_used_qty(self, sres: list, counted_qty: float = 0) -> None:
+		"""Spread the used qty of reservations taken from the source row, less `counted_qty`, over these reservations oldest first."""
+		if not sres:
+			return
+
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		used_qty = sre.delivered_qty + sre.transferred_qty + sre.consumed_qty
 		delivered_qty = (
@@ -208,6 +215,7 @@ class StockReservationEntry(Document):
 				& (sre.from_voucher_detail_no == self.from_voucher_detail_no)
 			)
 		).run(as_list=True)[0][0] or 0
+		delivered_qty = max(delivered_qty - counted_qty, 0)
 
 		for row in sres:
 			qty = min(row.reserved_qty, delivered_qty)
