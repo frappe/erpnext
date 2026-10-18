@@ -1502,6 +1502,50 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_billed_qty_after_debit_note_in_stock_uom(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.buying.report.purchase_order_analysis.purchase_order_analysis import (
+			get_billed_qty_data,
+		)
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 4}])
+		po = create_purchase_order(item_code=item.name, qty=2, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 4})
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.update_billed_amount_in_purchase_order = 1
+		debit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -2})
+		debit_note.submit()
+
+		self.assertEqual(make_pi_from_po(po.name).items[0].qty, 0.5)
+		self.assertEqual(get_billed_qty_data(po.items)[po.items[0].name], 1.5)
+
+	def test_fully_billed_row_with_recurring_conversion_factor_is_not_billed_again(self):
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 0.333333333}]
+		)
+		po = create_purchase_order(item_code=item.name, qty=15, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 0.333333333})
+		po.append(
+			"items",
+			{
+				"item_code": make_item().name,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.remove(pi.items[1])
+		pi.submit()
+
+		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
+
 	def test_order_neutral_debit_note_stays_out_of_later_billing(self):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
 
