@@ -239,7 +239,7 @@ def make_stock_entry(
 ):
 	frappe.has_permission("Stock Entry", "create", throw=True)
 
-	work_order = frappe.get_doc("Work Order", work_order_id)
+	work_order = frappe.get_doc("Work Order", work_order_id, check_permission="read")
 	stock_entry = _new_manufacture_stock_entry(work_order, purpose, qty)
 	_set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehouse, source_stock_entry)
 
@@ -608,10 +608,8 @@ def _allocate_material_demand(work_order, fraction):
 	required_by_group = {}
 	for row in work_order.required_items:
 		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
-		covered_by_item.setdefault(
-			row.item_code,
-			flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty),
-		)
+		covered_by_item.setdefault(row.item_code, flt(row.requested_qty) + flt(row.picked_qty))
+		covered_by_item[row.item_code] += flt(row.transferred_qty)
 		key = _allocation_key(row)
 		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
 
@@ -744,7 +742,7 @@ def make_stock_return_entry(work_order: str):
 
 	frappe.has_permission("Stock Entry", "create", throw=True)
 
-	wo_doc = frappe.get_cached_doc("Work Order", work_order)
+	wo_doc = frappe.get_doc("Work Order", work_order, check_permission="read")
 
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.from_bom = 1

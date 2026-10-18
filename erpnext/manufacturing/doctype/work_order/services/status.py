@@ -10,6 +10,7 @@ callers (job cards, sales orders, production plans, patches) keep working.
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
@@ -53,12 +54,11 @@ class StatusService:
 		wo = frappe.qb.DocType("Work Order")
 		return (
 			frappe.qb.from_(wo)
-			.select(Sum(wo.qty - wo.process_loss_qty))
+			.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
 			.where(
 				(wo.production_item == self.doc.production_item)
 				& (wo.sales_order == self.doc.sales_order)
 				& (wo.docstatus == 1)
-				& (wo.status != "Closed")
 				& (wo.name != self.doc.name)
 			)
 		).run()[0][0]
@@ -111,7 +111,7 @@ class StatusService:
 		"""Return the status based on stock entries against this work order"""
 		status = status or self.doc.status
 
-		if self.doc.docstatus == 1 and status == "Closed":
+		if self.doc.docstatus == 1 and status in ("Closed", "Stopped"):
 			return status
 
 		if self.doc.docstatus == 0:
@@ -264,10 +264,11 @@ class StatusService:
 		allowance = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		if not allowance and purpose == "Material Transfer for Manufacture":
-			allowance = flt(
+		if purpose == "Material Transfer for Manufacture":
+			transfer_extra = flt(
 				frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
 			)
+			allowance = transfer_extra or allowance
 		return allowance
 
 	def _update_produced_qty_in_so(self):
@@ -470,13 +471,16 @@ class StatusService:
 		wo = frappe.qb.DocType("Work Order")
 		query = (
 			frappe.qb.from_(wo)
-			.select(Sum(wo.qty))
-			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1) & (wo.status != "Closed"))
+			.select(Sum(qty_against_sales_order(wo, wo.qty)))
+			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1))
 		)
 		if self.doc.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.doc.product_bundle_item)
 		else:
-			query = query.where(wo.production_item == self.doc.production_item)
+			query = query.where(
+				(wo.production_item == self.doc.production_item)
+				& (wo.sales_order_item == self.doc.sales_order_item)
+			)
 
 		qty = query.run(as_list=1)
 		return qty[0][0] if qty and qty[0][0] else 0
@@ -530,3 +534,7 @@ class StatusService:
 			frappe.get_doc("Material Request", self.doc.material_request).update_completed_qty(
 				[self.doc.material_request_item]
 			)
+
+
+def qty_against_sales_order(wo, open_qty):
+	return Case().when(wo.status == "Closed", wo.produced_qty).else_(open_qty)
