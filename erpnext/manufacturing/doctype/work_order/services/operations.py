@@ -227,25 +227,30 @@ class OperationsService:
 
 	def _scale_saved_operation_time(self, previous):
 		saved_rows = {row.name: row for row in previous.get("operations")}
-		fixed_operations = self._get_fixed_time_operations()
+		fixed_flags = self._get_fixed_time_flags()
+		occurrence = {}
 		for d in self.doc.get("operations"):
+			key = (d.bom or self.doc.bom_no, d.operation)
+			idx = occurrence[key] = occurrence.get(key, -1) + 1
+			flags = fixed_flags.get(key, [])
+			is_fixed = flags[idx] if idx < len(flags) else False
 			saved = saved_rows.get(d.name)
-			is_fixed = (d.bom or self.doc.bom_no, d.operation) in fixed_operations
 			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue
 			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
 		self.calculate_operating_cost()
 
-	def _get_fixed_time_operations(self):
+	def _get_fixed_time_flags(self):
 		boms = {d.bom or self.doc.bom_no for d in self.doc.get("operations")}
-		return set(
-			frappe.get_all(
-				"BOM Operation",
-				filters={"parent": ["in", list(boms)], "parenttype": "BOM", "fixed_time": 1},
-				fields=["parent", "operation"],
-				as_list=True,
-			)
-		)
+		flags = {}
+		for row in frappe.get_all(
+			"BOM Operation",
+			filters={"parent": ["in", list(boms)], "parenttype": "BOM"},
+			fields=["parent", "operation", "fixed_time"],
+			order_by="idx",
+		):
+			flags.setdefault((row.parent, row.operation), []).append(cint(row.fixed_time))
+		return flags
 
 	def set_operation_warehouses(self):
 		"""For semi-finished goods tracking, default each operation's warehouses from the Work

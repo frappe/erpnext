@@ -7069,6 +7069,28 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, make_stock_return_entry, restricted.name)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_qty_change_scales_a_normal_row_of_a_repeated_fixed_operation(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1},
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		before = [row.time_in_mins for row in wo.operations]
+
+		wo.qty = 4
+		wo.save()
+
+		self.assertEqual(before, [30, 20])
+		self.assertEqual([row.time_in_mins for row in wo.operations], [30, 40])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_same_material_from_two_warehouses_keeps_its_rows(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
