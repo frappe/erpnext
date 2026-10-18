@@ -308,26 +308,13 @@ def get_balance_on(
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company)))
 		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
 
+	finance_books = [""]
 	if finance_book:
-		if default_finance_book and include_default_fb_balances:
-			cond.append(
-				f"""(gle.finance_book IN (
-						{frappe.db.escape(finance_book)},
-						{frappe.db.escape(default_finance_book)}
-					) OR gle.finance_book IS NULL
-				)"""
-			)
-		else:
-			cond.append(f"(gle.finance_book = {frappe.db.escape(finance_book)} OR gle.finance_book IS NULL)")
+		finance_books.append(finance_book)
+	if default_finance_book and include_default_fb_balances:
+		finance_books.append(default_finance_book)
 
-	elif default_finance_book and include_default_fb_balances:
-		# No finance book passed → fall back to default
-		cond.append(
-			f"""(
-				gle.finance_book = {frappe.db.escape(default_finance_book)}
-				OR gle.finance_book IS NULL
-			)"""
-		)
+	cond.append("(gle.finance_book IS NULL OR gle.finance_book IN %s)")
 
 	if account or (party_type and party) or account_type:
 		precision = get_currency_precision()
@@ -338,12 +325,13 @@ def get_balance_on(
 		else:
 			select_field = "sum(round(debit, %s)) - sum(round(credit, %s))"
 
-		bal = frappe.db.sql(
+		# Conditions escape values or come from framework permissions; finance books use bound parameters.
+		bal = frappe.db.sql(  # nosemgrep: frappe-sql-format-injection
 			"""
 			SELECT {}
 			FROM `tabGL Entry` gle
 			WHERE {}""".format(select_field, " and ".join(cond)),
-			(precision, precision),
+			(precision, precision, tuple(finance_books)),
 		)[0][0]
 		# if bal is None, return 0
 		return flt(bal)
@@ -1466,8 +1454,10 @@ def get_account_balances_coa(company: str, include_default_fb_balances: bool = F
 	if include_default_fb_balances:
 		default_finance_book = frappe.get_cached_value("Company", company, "default_finance_book")
 
+	finance_books = [""]
 	if default_finance_book:
-		conditions.append((GLEntry.finance_book == default_finance_book) | (GLEntry.finance_book.isnull()))
+		finance_books.append(default_finance_book)
+	conditions.append(GLEntry.finance_book.isnull() | GLEntry.finance_book.isin(finance_books))
 
 	get_ledger_balances_query = get_ledger_balances_query.where(Criterion.all(conditions))
 
