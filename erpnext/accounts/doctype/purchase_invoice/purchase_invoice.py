@@ -806,6 +806,8 @@ class PurchaseInvoice(BuyingController):
 						"overflow_type": "receipt",
 						"extra_cond": """ and exists (select name from `tabPurchase Invoice`
 						where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)""",
+						"second_source_extra_cond": """ and exists (select name from `tabPurchase Receipt`
+						where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
 					}
 				)
 
