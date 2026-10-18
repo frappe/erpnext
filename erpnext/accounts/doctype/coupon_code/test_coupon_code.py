@@ -175,6 +175,116 @@ class TestCouponCode(ERPNextTestSuite):
 		so.submit()
 		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
 
+	def test_invoice_from_order_consumes_coupon_once(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		for maximum_use in (1, 5):
+			with self.subTest(maximum_use=maximum_use):
+				frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": maximum_use})
+				order = self.make_coupon_order()
+				invoice = make_sales_invoice(order.name)
+				invoice.insert().submit()
+				self.assertEqual(invoice.coupon_code, "SAVE30")
+				self.assertEqual(invoice.items[0].rate, 3500)
+				self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+				invoice.reload().cancel()
+				self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+				order.reload().cancel()
+				self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 0)
+
+	def test_partial_invoices_do_not_consume_coupon_again(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		order = self.make_coupon_order(qty=2)
+		first_invoice = make_sales_invoice(order.name)
+		first_invoice.items[0].qty = 1
+		first_invoice.insert().submit()
+		second_invoice = make_sales_invoice(order.name)
+		self.assertEqual(second_invoice.items[0].qty, 1)
+		second_invoice.insert().submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+	def test_new_invoice_items_cannot_reuse_exhausted_order_coupon(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		order = self.make_coupon_order()
+		invoice = make_sales_invoice(order.name)
+		new_item = invoice.append("items", invoice.items[0].as_dict())
+		new_item.name = None
+		new_item.sales_order = None
+		new_item.so_detail = None
+		with self.assertRaisesRegex(frappe.ValidationError, "coupon code is no longer valid"):
+			invoice.insert()
+
+	def test_mismatched_order_detail_cannot_reuse_exhausted_coupon(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		coupon_order = self.make_coupon_order()
+		other_order = self.make_coupon_order(coupon_code=None)
+		invoice = make_sales_invoice(coupon_order.name)
+		invoice.items[0].so_detail = other_order.items[0].name
+		with self.assertRaisesRegex(frappe.ValidationError, "coupon code is no longer valid"):
+			invoice.insert()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+	def test_mixed_orders_cannot_reuse_exhausted_coupon(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		coupon_order = self.make_coupon_order()
+		other_order = self.make_coupon_order(coupon_code=None)
+		invoice = make_sales_invoice(coupon_order.name)
+		invoice = make_sales_invoice(other_order.name, target_doc=invoice)
+		with self.assertRaisesRegex(frappe.ValidationError, "coupon code is no longer valid"):
+			invoice.insert()
+
+	def test_order_without_coupon_does_not_exempt_invoice(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		order = self.make_coupon_order(coupon_code=None)
+		invoice = make_sales_invoice(order.name)
+		invoice.coupon_code = "SAVE30"
+		invoice.insert().submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		invoice.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 0)
+
+	def test_credit_note_does_not_consume_coupon_again(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		invoice = create_sales_invoice(
+			item_code="_Test Tesla Car",
+			warehouse="Stores - _TC",
+			rate=5000,
+			price_list_rate=5000,
+			do_not_save=True,
+		)
+		invoice.selling_price_list = "_Test Price List"
+		invoice.coupon_code = "SAVE30"
+		invoice.insert().submit()
+		self.assertEqual(invoice.items[0].rate, 3500)
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "coupon code is no longer valid"):
+			frappe.copy_doc(invoice).insert()
+
+		credit_note = make_sales_return(invoice.name)
+		credit_note.insert().submit()
+		self.assertEqual(credit_note.coupon_code, "SAVE30")
+		self.assertEqual(credit_note.items[0].rate, 3500)
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		credit_note.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		invoice.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 0)
+
 	def test_coupon_without_max_use(self):
 		from erpnext.accounts.doctype.pricing_rule.utils import (
 			update_coupon_code_count,
@@ -273,3 +383,17 @@ class TestCouponCode(ERPNextTestSuite):
 		update_coupon_code_count("_Test Coupon Count", "used")
 		self.assertEqual(frappe.db.get_value("Coupon Code", "_Test Coupon Count", "used"), 2)
 		self.assertRaises(frappe.ValidationError, update_coupon_code_count, "_Test Coupon Count", "used")
+
+	def make_coupon_order(self, qty=1, coupon_code="SAVE30"):
+		order = make_sales_order(
+			company="_Test Company",
+			warehouse="Stores - _TC",
+			customer="_Test Customer",
+			selling_price_list="_Test Price List",
+			item_code="_Test Tesla Car",
+			rate=5000,
+			qty=qty,
+			do_not_save=True,
+		)
+		order.coupon_code = coupon_code
+		return order.insert().submit()
