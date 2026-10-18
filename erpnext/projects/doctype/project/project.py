@@ -32,12 +32,12 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
 
-LANDED_COST_RECEIPT_ITEMS = {
-	"Purchase Receipt": ("Purchase Receipt Item", "purchase_receipt_item"),
-	"Purchase Invoice": ("Purchase Invoice Item", "purchase_receipt_item"),
-	"Subcontracting Receipt": ("Subcontracting Receipt Item", "purchase_receipt_item"),
-	"Stock Entry": ("Stock Entry Detail", "stock_entry_item"),
-}
+LANDED_COST_RECEIPT_ITEMS = (
+	"Purchase Receipt Item",
+	"Purchase Invoice Item",
+	"Subcontracting Receipt Item",
+	"Stock Entry Detail",
+)
 
 PORTAL_LIST_FIELDS = ["name", "project_name", "status", "percent_complete", "_assign", "modified"]
 
@@ -435,23 +435,13 @@ class Project(Document):
 		return flt(amount[0][0])
 
 	def get_capitalised_landed_cost(self) -> float:
-		voucher = qb.DocType("Landed Cost Voucher")
-		voucher_item = qb.DocType("Landed Cost Item")
 		amount = 0
-		for receipt_type, (receipt_item_doctype, link_field) in LANDED_COST_RECEIPT_ITEMS.items():
-			receipt_item = qb.DocType(receipt_item_doctype)
+		for doctype in LANDED_COST_RECEIPT_ITEMS:
+			receipt_item = qb.DocType(doctype)
 			charges = (
-				qb.from_(voucher_item)
-				.join(voucher)
-				.on(voucher.name == voucher_item.parent)
-				.join(receipt_item)
-				.on(receipt_item.name == voucher_item[link_field])
-				.select(Sum(voucher_item.applicable_charges))
-				.where(
-					(voucher.docstatus == 1)
-					& (voucher_item.receipt_document_type == receipt_type)
-					& (receipt_item.project == self.name)
-				)
+				qb.from_(receipt_item)
+				.select(Sum(receipt_item.landed_cost_voucher_amount))
+				.where((receipt_item.project == self.name) & (receipt_item.docstatus == 1))
 			).run()
 			amount += flt(charges[0][0])
 		return amount
