@@ -529,7 +529,7 @@ frappe.ui.form.on("Payment Entry", {
 		if (!frm.setting_cheque_book) frm.cheque_book_cleared = !frm.doc.cheque_book;
 		frm.doc.cheque = null; // the server finds the cheque again from the book and the number
 		frm.set_df_property("cheque_book", "description", "");
-		const { cheque_book, paid_from: account } = frm.doc;
+		const { name, cheque_book, paid_from: account } = frm.doc;
 		if (!cheque_book) {
 			// a number suggested from the removed book no longer belongs to this payment
 			if (frm.suggested_cheque_no && frm.doc.reference_no === frm.suggested_cheque_no) {
@@ -543,7 +543,14 @@ frappe.ui.form.on("Payment Entry", {
 			account,
 			cheque_book,
 		});
-		if (cheque_book !== frm.doc.cheque_book || account !== frm.doc.paid_from || !is_cheque_payment(frm))
+		// the user can submit the payment or open another one while the server answers
+		if (
+			name !== frm.doc.name ||
+			frm.doc.docstatus !== 0 ||
+			cheque_book !== frm.doc.cheque_book ||
+			account !== frm.doc.paid_from ||
+			!is_cheque_payment(frm)
+		)
 			return;
 
 		if (cheque.cheque_book) {
