@@ -167,13 +167,16 @@ class StockReservationEntry(Document):
 			)
 
 	def update_unreserved_qty_in_sre(self):
-		if self.voucher_type == "Delivery Note" or not (
-			self.from_voucher_type and self.from_voucher_detail_no
-		):
+		if self.voucher_type != "Delivery Note":
+			self.give_back_to_from_voucher(self.get_serial_batch_entries())
+
+	def give_back_to_from_voucher(self, released: frappe._dict) -> None:
+		"""Return `released` serial and batch qty to the reservations this one was taken from and recount them."""
+		if not (self.from_voucher_type and self.from_voucher_detail_no):
 			return
 
 		if self.has_batch_no or self.has_serial_no:
-			self.give_back_serial_batch(self.get_serial_batch_entries())
+			self.give_back_serial_batch(released)
 
 		self.update_delivered_qty_in_from_voucher_reservations()
 
