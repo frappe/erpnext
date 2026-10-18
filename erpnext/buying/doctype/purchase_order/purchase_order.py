@@ -530,7 +530,7 @@ class PurchaseOrder(BuyingController):
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Production Plan Sub Assembly Item",
 				"join_field": "production_plan_sub_assembly_item",
-				"target_field": "received_qty",
+				"target_field": "ordered_qty",
 				"target_parent_dt": "Production Plan",
 				"target_parent_field": "",
 				"target_ref_field": "qty",
