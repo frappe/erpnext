@@ -102,6 +102,16 @@ class TestChequeBook(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "not a Company Account"):
 			make_cheque_book(self.bank_account, "000201", "000205")
 
+	def test_bank_account_name_leaves_room_for_cheque_names(self):
+		# A cheque name adds "-CHQ-000101-000105-000105" (25 characters) to the bank account name,
+		# and a bank account name adds " - _Test Cheque Bank" (20 characters) to its account name.
+		fits = make_company_bank_account("_Test Fitting Cheque Bank", "F" * 95)
+		make_cheque_book(fits, "000101", "000105")  # cheque names of exactly 140 characters
+
+		too_long = make_company_bank_account("_Test Long Cheque Bank", "L" * 96)
+		with self.assertRaisesRegex(frappe.ValidationError, "by 1 characters"):
+			make_cheque_book(too_long, "000101", "000105")
+
 	def test_book_is_finished_when_no_cheque_is_free(self):
 		frappe.db.set_value("Cheque", {"cheque_book": self.book.name}, "status", "Issued")
 		lock_book(self.book).update_status()
