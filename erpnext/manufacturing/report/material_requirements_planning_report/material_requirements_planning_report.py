@@ -238,29 +238,36 @@ class MaterialRequirementsPlanningReport:
 		if not sales_forecast_data:
 			return
 
+		rows_by_key = {}
+		for d in self.mps_data:
+			d.sales_forecast_qty = flt(d.sales_forecast_qty)
+			rows_by_key.setdefault((d.item_code, getdate(d.delivery_date)), []).append(d)
+
+		forecast_by_key = {}
 		for row in sales_forecast_data:
-			record_exists = False
-			for d in self.mps_data:
-				if not d.sales_forecast_qty:
-					d.sales_forecast_qty = 0
+			key = (row.item_code, getdate(row.delivery_date))
+			if key in forecast_by_key:
+				forecast_by_key[key].qty = flt(forecast_by_key[key].qty) + flt(row.qty)
+			else:
+				forecast_by_key[key] = frappe._dict(row)
 
-				if row.item_code == d.item_code and getdate(row.delivery_date) == getdate(d.delivery_date):
-					d.sales_forecast_qty += row.qty
-					record_exists = True
+		for key, row in forecast_by_key.items():
+			if rows := rows_by_key.get(key):
+				split_forecast_qty(rows, flt(row.qty))
+				continue
 
-			if not record_exists:
-				self.mps_data.append(
-					frappe._dict(
-						{
-							"item_code": row.item_code,
-							"item_name": row.item_code,
-							"delivery_date": row.delivery_date,
-							"projected_qty": 0,
-							"sales_forecast_qty": row.qty,
-							"warehouse": self.filters.get("warehouse"),
-						}
-					)
-				)
+			new_row = frappe._dict(
+				{
+					"item_code": row.item_code,
+					"item_name": row.item_code,
+					"delivery_date": row.delivery_date,
+					"projected_qty": 0,
+					"sales_forecast_qty": row.qty,
+					"warehouse": self.filters.get("warehouse"),
+				}
+			)
+			self.mps_data.append(new_row)
+			rows_by_key[key] = [new_row]
 
 	def get_mrp_data(self):
 		data = self.get_detailed_view_data()
@@ -1543,3 +1550,29 @@ def get_item_uom(item_code):
 @frappe.request_cache
 def is_whole_number(uom):
 	return frappe.get_cached_value("UOM", uom, "must_be_whole_number")
+
+
+def split_forecast_qty(rows, qty):
+	total_planned_qty = sum(flt(d.planned_qty) for d in rows)
+	shares = [
+		qty * flt(d.planned_qty) / total_planned_qty if total_planned_qty else (qty if idx == 0 else 0)
+		for idx, d in enumerate(rows)
+	]
+	if flt(qty) == round(qty) and is_whole_number_item(rows[0].item_code):
+		shares = round_shares_keeping_total(shares, round(qty))
+
+	for d, share in zip(rows, shares, strict=True):
+		d.sales_forecast_qty += share
+
+
+def is_whole_number_item(item_code):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	return bool(stock_uom and frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"))
+
+
+def round_shares_keeping_total(shares, total):
+	rounded = [math.floor(share) for share in shares]
+	by_remainder = sorted(range(len(shares)), key=lambda idx: shares[idx] - rounded[idx], reverse=True)
+	for idx in by_remainder[: max(total - sum(rounded), 0)]:
+		rounded[idx] += 1
+	return rounded

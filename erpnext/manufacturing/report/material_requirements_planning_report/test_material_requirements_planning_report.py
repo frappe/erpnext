@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, flt, formatdate, getdate, today
@@ -42,6 +44,61 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				[formatdate(delivery_date, "dd MMM") for delivery_date in delivery_dates],
 			)
 			self.assertEqual(chart["data"]["datasets"][0]["values"], [1] * 11 + [3])
+
+	def test_forecast_is_counted_once_across_warehouse_rows(self):
+		delivery_date = add_days(today(), 5)
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report.mps_data = [
+			frappe._dict(
+				item_code="_Test Item", delivery_date=delivery_date, planned_qty=qty, warehouse=warehouse
+			)
+			for qty, warehouse in ((3, "Stores - _TC"), (4, "Finished Goods - _TC"))
+		]
+		forecast = [frappe._dict(item_code="_Test Item", delivery_date=delivery_date, qty=10)]
+
+		with patch.object(
+			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
+		):
+			report.update_sales_forecast_data()
+
+		self.assertEqual(sum(max(row.planned_qty, row.sales_forecast_qty) for row in report.mps_data), 10)
+		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [4, 6])
+
+	def test_forecasts_of_one_date_are_added_before_splitting(self):
+		delivery_date = add_days(today(), 5)
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report.mps_data = [
+			frappe._dict(
+				item_code="_Test Item", delivery_date=delivery_date, planned_qty=1, warehouse=warehouse
+			)
+			for warehouse in ("Stores - _TC", "Finished Goods - _TC")
+		]
+		forecast = [
+			frappe._dict(item_code="_Test Item", delivery_date=delivery_date, qty=1) for _row in range(2)
+		]
+
+		with patch.object(
+			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
+		):
+			report.update_sales_forecast_data()
+
+		self.assertEqual([row.sales_forecast_qty for row in report.mps_data], [1, 1])
+
+	def test_daily_share_of_a_weekly_forecast_keeps_its_total(self):
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		dates = [add_days(today(), offset) for offset in range(7)]
+		report.mps_data = [
+			frappe._dict(item_code="_Test Item", delivery_date=date, planned_qty=1, warehouse="Stores - _TC")
+			for date in dates
+		]
+		forecast = [frappe._dict(item_code="_Test Item", delivery_date=date, qty=10 / 7) for date in dates]
+
+		with patch.object(
+			MaterialRequirementsPlanningReport, "get_sales_forecast_data", return_value=forecast
+		):
+			report.update_sales_forecast_data()
+
+		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
