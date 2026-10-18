@@ -53,6 +53,7 @@ class ChequeBook(Document):
 
 		self.validate_bank_account()
 		self.validate_cheque_range()
+		self.validate_name_length()
 		self.validate_amendment()
 		self.validate_overlapping_range()
 		self.validate_name_is_free()
@@ -127,6 +128,16 @@ class ChequeBook(Document):
 			frappe.throw(_("Cheque End No cannot be less than Cheque Start No"))
 		if self.no_of_cheques > MAX_CHEQUES_PER_BOOK:
 			frappe.throw(_("A Cheque Book can have at most {0} cheques").format(MAX_CHEQUES_PER_BOOK))
+
+	def validate_name_length(self):
+		# Each cheque is named "<book>-<cheque no>", and the end number is the longest one
+		excess = len(f"{self.name}-{self.cheque_end_no}") - frappe.db.VARCHAR_LEN
+		if excess > 0:
+			frappe.throw(
+				_(
+					"Cheque names of this book would be longer than {0} characters. Shorten the name of Company Bank Account {1} by {2} characters."
+				).format(frappe.db.VARCHAR_LEN, frappe.bold(self.bank_account), excess)
+			)
 
 	def validate_amendment(self):
 		"""An amendment takes the name of the cancelled book, so it keeps its bank account and range."""
