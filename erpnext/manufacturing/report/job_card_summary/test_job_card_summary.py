@@ -11,6 +11,8 @@ from frappe.utils import add_days, today
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.job_card_summary.job_card_summary import execute, get_chart_data
 
+test_dependencies = ["BOM"]
+
 
 class TestJobCardSummary(FrappeTestCase):
 	def setUp(self):
