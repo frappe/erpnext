@@ -119,9 +119,7 @@ class BillingValidationService:
 
 			billed_before = flt(already_billed.pop(key, 0))
 			if based_on == "qty":
-				current_amount = flt(
-					flt(item.qty) * flt(item.conversion_factor) / reference.conversion_factor, precision
-				)
+				current_amount = flt(item.qty) * flt(item.conversion_factor) / reference.conversion_factor
 				billed_before /= reference.conversion_factor
 
 			ref_wise_billed_amount.setdefault(
