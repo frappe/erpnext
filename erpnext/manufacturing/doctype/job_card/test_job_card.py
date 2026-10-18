@@ -3423,14 +3423,14 @@ class TestJobCard(ERPNextTestSuite):
 				"Job Card", {"work_order": work_order.name, "operation": "Lowered Allowance Op A"}
 			)
 			job_card_a.for_quantity = 4
-			complete(job_card_a, 4, 1)
+			complete(job_card_a, 4, -4)
 			job_card_a.submit()
 
 		with self.change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 0}):
 			job_card_b = frappe.get_last_doc(
 				"Job Card", {"work_order": work_order.name, "operation": "Lowered Allowance Op B"}
 			)
-			complete(job_card_b, 2, 3)
+			complete(job_card_b, 2, -2)
 			job_card_b.submit()
 
 			operation_a = work_order.operations[0]
