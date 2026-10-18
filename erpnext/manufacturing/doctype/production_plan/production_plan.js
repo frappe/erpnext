@@ -194,8 +194,8 @@ frappe.ui.form.on("Production Plan", {
 
 				if (
 					frm.doc.mr_items &&
-					frm.doc.mr_items.length &&
-					!["Material Requested", "Closed"].includes(frm.doc.status)
+					frm.doc.mr_items.some((row) => flt(row.quantity) > flt(row.requested_qty)) &&
+					frm.doc.status !== "Closed"
 				) {
 					frm.add_custom_button(
 						__("Material Request"),
