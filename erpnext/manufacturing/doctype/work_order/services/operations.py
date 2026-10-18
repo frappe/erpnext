@@ -233,7 +233,7 @@ class OperationsService:
 			key = (d.bom or self.doc.bom_no, d.operation)
 			idx = occurrence[key] = occurrence.get(key, -1) + 1
 			flags = fixed_flags.get(key, [])
-			is_fixed = flags[idx] if idx < len(flags) else False
+			is_fixed = flags[idx % len(flags)] if flags else False
 			saved = saved_rows.get(d.name)
 			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue

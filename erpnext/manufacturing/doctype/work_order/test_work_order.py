@@ -7091,6 +7091,43 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([row.time_in_mins for row in wo.operations], [30, 40])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_qty_change_keeps_every_copy_of_a_shared_child_fixed_operation(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		child_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		child_bom = make_review_bom(
+			child_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 15, "fixed_time": 1}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		for _copy in range(2):
+			wo.append(
+				"operations",
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"bom": child_bom.name,
+					"time_in_mins": 15,
+					"sequence_id": len(wo.operations) + 1,
+				},
+			)
+		wo.save()
+
+		wo.qty = 4
+		wo.save()
+
+		self.assertEqual([row.time_in_mins for row in wo.operations], [40, 15, 15])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_same_material_from_two_warehouses_keeps_its_rows(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
