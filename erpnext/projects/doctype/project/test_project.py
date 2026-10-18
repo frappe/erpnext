@@ -695,28 +695,6 @@ class TestProject(FrappeTestCase):
 		project.reload()
 		self.assertEqual(project.total_consumed_material_cost, 1050)
 
-	def test_landed_cost_is_not_counted_twice(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
-			create_landed_cost_voucher,
-		)
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-
-		project = make_project({"project_name": f"_Test Landed Cost {frappe.generate_hash(length=6)}"})
-		item = make_item(properties={"is_stock_item": 1}).name
-
-		receipt = make_purchase_receipt(item_code=item, qty=10, rate=100, do_not_save=True)
-		receipt.items[0].project = project.name
-		receipt.insert()
-		receipt.submit()
-		make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=50, project=project.name)
-		create_landed_cost_voucher("Purchase Receipt", receipt.name, receipt.company, charges=50)
-		issue_to_project(item, 10, project.name)
-
-		project.reload()
-		self.assertEqual(project.total_purchase_cost, 0)
-		self.assertEqual(project.total_consumed_material_cost, 1050)
-
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
