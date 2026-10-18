@@ -343,7 +343,12 @@ class TestSalesOrderAnalysis(FrappeTestCase):
 		credit_note.submit()
 
 		columns, data, message, chart = execute(
-			{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"sales_order": [so.name],
+			}
 		)
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data[0]["billed_qty"], 1.8)
