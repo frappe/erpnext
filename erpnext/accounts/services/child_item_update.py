@@ -3,6 +3,8 @@
 
 """Child item update service: ChildItemUpdater class and helpers for the update_child_qty_rate API."""
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.workflow import get_workflow_name
@@ -33,6 +35,7 @@ class ChildItemUpdater:
 		self.child_docname = child_docname
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
+		self._blanket_order_change = defaultdict(float)
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
 
@@ -67,74 +70,81 @@ class ChildItemUpdater:
 		else:
 			items_added_or_removed |= validate_and_delete_children(self.parent, data)
 
-		for d in data:
-			new_child_flag = False
-			rate_unchanged = None
+		frappe.db.savepoint("update_child_items")
+		try:
+			for d in data:
+				new_child_flag = False
+				rate_unchanged = None
 
-			if not d.get("item_code"):
-				continue
-
-			if not d.get("docname"):
-				new_child_flag = True
-				items_added_or_removed = True
-				self._check_permissions("create")
-				child_item = self._get_new_child_item(d)
-			else:
-				self._check_permissions("write")
-				child_item = frappe.get_doc(self.parent_doctype + " Item", d.get("docname"))
-				d["conversion_factor"] = self._get_new_conversion_factor(child_item, d)
-
-				change_state = get_child_item_change_state(self.parent_doctype, child_item, d)
-				rate_unchanged = change_state.rate_unchanged
-				any_conversion_factor_changed |= not change_state.conversion_factor_unchanged
-				if is_child_item_unchanged(change_state):
+				if not d.get("item_code"):
 					continue
 
-				if child_item.get("closed"):
-					frappe.throw(
-						_(
-							"Row #{0}: Cannot change item {1} because it is closed. Reopen the row first."
-						).format(child_item.idx, child_item.item_code)
-					)
+				if not d.get("docname"):
+					new_child_flag = True
+					items_added_or_removed = True
+					self._check_permissions("create")
+					child_item = self._get_new_child_item(d)
+				else:
+					self._check_permissions("write")
+					child_item = frappe.get_doc(self.parent_doctype + " Item", d.get("docname"))
+					d["conversion_factor"] = self._get_new_conversion_factor(child_item, d)
 
-				self._validate_blanket_order_is_open(child_item, d)
+					change_state = get_child_item_change_state(self.parent_doctype, child_item, d)
+					rate_unchanged = change_state.rate_unchanged
+					any_conversion_factor_changed |= not change_state.conversion_factor_unchanged
+					if is_child_item_unchanged(change_state):
+						continue
 
-			self._validate_quantity_and_rate(child_item, d, rate_unchanged)
-			if not new_child_flag:
-				self._validate_uom_unchanged_after_fulfilment(child_item, d, change_state)
+					if child_item.get("closed"):
+						frappe.throw(
+							_(
+								"Row #{0}: Cannot change item {1} because it is closed. Reopen the row first."
+							).format(child_item.idx, child_item.item_code)
+						)
 
-			if flt(child_item.get("qty")) != flt(d.get("qty")):
-				any_qty_changed = True
+					self._track_blanket_order_change(child_item, d)
 
-			if self.parent.doctype in ("Sales Order", "Purchase Order") and self.parent.is_subcontracted:
-				self._validate_fg_item_for_subcontracting(d, new_child_flag)
-				child_item.fg_item_qty = flt(d["fg_item_qty"])
+				self._validate_quantity_and_rate(child_item, d, rate_unchanged)
+				if not new_child_flag:
+					self._validate_uom_unchanged_after_fulfilment(child_item, d, change_state)
+
+				if flt(child_item.get("qty")) != flt(d.get("qty")):
+					any_qty_changed = True
+
+				if self.parent.doctype in ("Sales Order", "Purchase Order") and self.parent.is_subcontracted:
+					self._validate_fg_item_for_subcontracting(d, new_child_flag)
+					child_item.fg_item_qty = flt(d["fg_item_qty"])
+					if new_child_flag:
+						child_item.fg_item = d["fg_item"]
+
+				child_item.qty = flt(d.get("qty"))
+				child_item.description = d.get("description")
+				update_child_item_rate_and_discount(
+					self.parent_doctype, child_item, d, self.allow_zero_qty, rate_unchanged=rate_unchanged
+				)
+				update_child_item_uom_and_weight(child_item, d)
+
+				if d.get("delivery_date") and self.parent_doctype == "Sales Order":
+					child_item.delivery_date = d.get("delivery_date")
+
+				if d.get("schedule_date") and self.parent_doctype == "Purchase Order":
+					child_item.schedule_date = d.get("schedule_date")
+
+				if d.get("bom_no") and self.parent_doctype == "Sales Order":
+					child_item.bom_no = d.get("bom_no")
+
+				child_item.flags.ignore_validate_update_after_submit = True
 				if new_child_flag:
-					child_item.fg_item = d["fg_item"]
+					self.parent.load_from_db()
+					child_item.idx = len(self.parent.items) + 1
+					child_item.insert()
+				else:
+					child_item.save(ignore_permissions=True)
 
-			child_item.qty = flt(d.get("qty"))
-			child_item.description = d.get("description")
-			update_child_item_rate_and_discount(
-				self.parent_doctype, child_item, d, self.allow_zero_qty, rate_unchanged=rate_unchanged
-			)
-			update_child_item_uom_and_weight(child_item, d)
-
-			if d.get("delivery_date") and self.parent_doctype == "Sales Order":
-				child_item.delivery_date = d.get("delivery_date")
-
-			if d.get("schedule_date") and self.parent_doctype == "Purchase Order":
-				child_item.schedule_date = d.get("schedule_date")
-
-			if d.get("bom_no") and self.parent_doctype == "Sales Order":
-				child_item.bom_no = d.get("bom_no")
-
-			child_item.flags.ignore_validate_update_after_submit = True
-			if new_child_flag:
-				self.parent.load_from_db()
-				child_item.idx = len(self.parent.items) + 1
-				child_item.insert()
-			else:
-				child_item.save(ignore_permissions=True)
+			self._validate_blanket_order_changes()
+		except Exception:
+			frappe.db.rollback(save_point="update_child_items")
+			raise
 
 		self._post_update(
 			any_qty_changed, items_added_or_removed, any_conversion_factor_changed, had_mapped_discount
@@ -321,7 +331,7 @@ class ChildItemUpdater:
 
 		return flt(get_conversion_factor(child_item.item_code, uom).get("conversion_factor")) or 1
 
-	def _validate_blanket_order_is_open(self, child_item, new_data: dict) -> None:
+	def _track_blanket_order_change(self, child_item, new_data: dict) -> None:
 		if not child_item.get("blanket_order"):
 			return
 
@@ -329,10 +339,18 @@ class ChildItemUpdater:
 			flt(new_data.get("qty")) * flt(new_data.get("conversion_factor")),
 			child_item.precision("stock_qty"),
 		)
-		if new_stock_qty > flt(child_item.stock_qty):
-			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
+		key = (child_item.blanket_order, child_item.item_code)
+		self._blanket_order_change[key] += new_stock_qty - flt(child_item.stock_qty)
+
+	def _validate_blanket_order_changes(self) -> None:
+		for (blanket_order_name, item_code), change in sorted(self._blanket_order_change.items()):
+			if change <= 0:
+				continue
+
+			blanket_order = frappe.get_doc("Blanket Order", blanket_order_name, for_update=True)
 			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
-			blanket_order.validate_items_are_open([child_item.item_code])
+			blanket_order.validate_items_are_open([item_code])
+			blanket_order.validate_qty_can_be_ordered({item_code: change}, self.parent_doctype)
 
 	def _validate_uom_unchanged_after_fulfilment(self, child_item, new_data: dict, change_state) -> None:
 		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
