@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
 )
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
 	validate_coupon_code,
@@ -1260,6 +1261,11 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_pos(self):
+		# Consolidation posts payments already accepted on submitted POS invoices.
+		if not self.get("is_consolidated"):
+			for payment in self.get("payments") or []:
+				validate_enabled_mode_of_payment(payment.mode_of_payment)
+
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
 			if abs(flt(self.paid_amount)) + abs(flt(self.write_off_amount)) - abs(
