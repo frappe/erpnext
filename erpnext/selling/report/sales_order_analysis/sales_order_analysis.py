@@ -93,7 +93,10 @@ def get_data(filters):
 			soi.qty,
 			soi.delivered_qty,
 			Case().when(is_closed, 0).else_(soi.qty - soi.delivered_qty).as_("pending_qty"),
-			Coalesce(Sum(Case().when(counts_as_billed, sii.qty).else_(0)), 0).as_("billed_qty"),
+			(
+				Coalesce(Sum(Case().when(counts_as_billed, sii.qty * sii.conversion_factor).else_(0)), 0)
+				/ soi.conversion_factor
+			).as_("billed_qty"),
 			soi.base_amount.as_("amount"),
 			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
 			(soi.billed_amt * conversion_rate).as_("billed_amount"),
