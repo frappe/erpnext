@@ -477,8 +477,6 @@ class JobCard(Document):
 
 		time_logs = sorted(time_logs, key=lambda x: x.get("to_time"))
 
-		self.validate_employee_overlap(args)
-
 		if not self.has_overlap(self.get_production_capacity(), time_logs):
 			return {}
 

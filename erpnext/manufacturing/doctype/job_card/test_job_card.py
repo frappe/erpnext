@@ -4373,6 +4373,35 @@ class TestJobCardLogic(ERPNextTestSuite):
 		jc.process_loss_qty = 5
 		jc.validate_semi_finished_goods()
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_employee_with_an_earlier_draft_card_can_log_on_a_shared_workstation(self):
+		shared_workstation = make_jc_review_workstation(capacity=2)
+		other_workstation = make_jc_review_workstation()
+		shared_operation = make_jc_review_operation(shared_workstation)
+		other_operation = make_jc_review_operation(other_workstation)
+		employee, colleague = make_jc_review_employee(), make_jc_review_employee()
+
+		def make_card(operation, workstation):
+			wo = make_jc_review_work_order(
+				make_jc_review_item(),
+				[{"item_code": make_jc_review_item(), "qty": 1}],
+				[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			)
+			return get_jc_review_job_cards(wo.name)[0]
+
+		earlier_card = make_card(other_operation, other_workstation)
+		earlier_card.append("time_logs", jc_review_log("2031-04-01 08:00:00", 60, 0, employee))
+		earlier_card.save()
+		colleague_card = make_card(shared_operation, shared_workstation)
+		colleague_card.append("time_logs", jc_review_log("2031-04-01 10:00:00", 60, 0, colleague))
+		colleague_card.save()
+
+		job_card = make_card(shared_operation, shared_workstation)
+		job_card.append("time_logs", jc_review_log("2031-04-01 10:30:00", 60, 0, employee))
+		job_card.save()
+
+		self.assertEqual(len(job_card.time_logs), 1)
+
 	def test_capacity_overlap_detection(self):
 		jc = frappe.new_doc("Job Card")
 		sequential = [
