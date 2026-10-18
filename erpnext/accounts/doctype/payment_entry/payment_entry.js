@@ -530,7 +530,14 @@ frappe.ui.form.on("Payment Entry", {
 		frm.doc.cheque = null; // the server finds the cheque again from the book and the number
 		frm.set_df_property("cheque_book", "description", "");
 		const { cheque_book, paid_from: account } = frm.doc;
-		if (!cheque_book) return;
+		if (!cheque_book) {
+			// a number suggested from the removed book no longer belongs to this payment
+			if (frm.suggested_cheque_no && frm.doc.reference_no === frm.suggested_cheque_no) {
+				frm.suggested_cheque_no = null;
+				await frm.set_value("reference_no", "");
+			}
+			return;
+		}
 
 		const cheque = await frappe.xcall("erpnext.accounts.doctype.cheque.cheque_payment.get_next_cheque", {
 			account,
