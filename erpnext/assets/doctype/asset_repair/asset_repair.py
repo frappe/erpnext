@@ -440,9 +440,8 @@ def update_asset_status_after_repair(asset: str) -> None:
 
 	Takes no repair row locks. Each committed repair change enqueues this job, and the job
 	started last sees every commit, so the status settles on the right value."""
-	# Always writes the row, so on Postgres an older job's lock fails and it retries.
-	# Keeps modified, so an Asset loaded before this job can still be saved.
-	frappe.get_doc("Asset", asset, for_update=True).set_status(update_modified=False)
+	# set_status always writes the row, so on Postgres an older job's lock fails and it retries
+	frappe.get_doc("Asset", asset, for_update=True).set_status()
 
 
 def check_asset_repair_access(company: str | None = None) -> None:
