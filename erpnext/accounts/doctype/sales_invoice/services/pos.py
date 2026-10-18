@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
+
 
 class PartialPaymentValidationError(frappe.ValidationError):
 	pass
@@ -195,8 +197,13 @@ class POSService:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def validate_pos(self) -> None:
-		"""On a POS return, paid amount plus write-off cannot exceed the grand total."""
+		"""Validate payment modes and the amount paid on POS returns."""
 		doc = self.doc
+		# Consolidation posts payments already accepted on submitted POS invoices.
+		if not doc.get("is_consolidated"):
+			for payment in doc.get("payments") or []:
+				validate_enabled_mode_of_payment(payment.mode_of_payment)
+
 		if doc.is_return:
 			invoice_total = doc.rounded_total or doc.grand_total
 			if abs(flt(doc.paid_amount)) + abs(flt(doc.write_off_amount)) - abs(flt(invoice_total)) > 1.0 / (
