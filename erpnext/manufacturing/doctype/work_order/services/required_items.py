@@ -412,7 +412,8 @@ class RequiredItemsService:
 		if self.doc.skip_transfer and not self.doc.from_wip_warehouse:
 			wip_warehouse = None
 
-		consumed_by_row = distribute_over_rows(self.doc.required_items, self._consumed_qty_by_item())
+		consumed_by_item = self._consumed_qty_by_item()
+		consumed_by_row = distribute_over_rows(self.doc.required_items, consumed_by_item)
 		for item in self.doc.required_items:
 			consumed_qty = consumed_by_row[item.name] + flt(item.returned_qty)
 			item.db_set("consumed_qty", flt(consumed_qty), update_modified=False)
@@ -422,7 +423,7 @@ class RequiredItemsService:
 
 			warehouse = wip_warehouse or item.source_warehouse
 			WorkOrderStockReservation(self.doc).update_consumed_qty_in_stock_reservation(
-				item, consumed_qty, warehouse
+				item, flt(consumed_by_item.get(item.item_code)) + flt(item.returned_qty), warehouse
 			)
 
 	def _consumed_qty_by_item(self):

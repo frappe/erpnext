@@ -4536,6 +4536,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_send_to_subcontractor_can_consume_work_order_reserved_stock(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
