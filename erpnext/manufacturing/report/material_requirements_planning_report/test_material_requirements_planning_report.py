@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, flt, formatdate, getdate, today
