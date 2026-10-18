@@ -45,6 +45,16 @@ class TestSalesPersonWiseTransactionSummary(ERPNextTestSuite):
 		dn.db_set("status", "Closed")
 		return dn
 
+	def make_invoice_split_between_two_sales_persons(self, qty=5, rate=200):
+		si = create_sales_invoice(
+			item="_Test Item", qty=qty, rate=rate, do_not_save=True, posting_date="2026-06-01"
+		)
+		si.append("sales_team", {"sales_person": "_Test Sales Person", "allocated_percentage": 60})
+		si.append("sales_team", {"sales_person": "_Test Sales Person 1", "allocated_percentage": 40})
+		si.insert()
+		si.submit()
+		return si
+
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{"company": "_Test Company", "doc_type": "Sales Invoice", "sales_person": self.sales_person}
@@ -89,8 +99,21 @@ class TestSalesPersonWiseTransactionSummary(ERPNextTestSuite):
 		self.assertEqual(row[8], 10)  # stock qty: 1 Box = 10 Nos
 		self.assertEqual(row[9], 1000)  # amount stays per Box, not multiplied by the conversion factor
 
-	def test_appends_total_row(self):
+	def test_qty_and_amount_shown_once_per_item_line(self):
+		si = self.make_invoice_split_between_two_sales_persons(qty=5, rate=200)
+		item = si.items[0]
+		rows = [
+			r for r in self.run_report(sales_person="Sales Team") if r[0] == si.name and r[5] == "_Test Item"
+		]
+		self.assertEqual(len(rows), 2)
+		# qty and amount on the first row of the line only; the rest are blank
+		self.assertEqual(rows[0][8], item.stock_qty)
+		self.assertEqual(rows[0][9], item.base_net_amount)
+		self.assertIsNone(rows[1][8])
+		self.assertIsNone(rows[1][9])
+
+	def test_no_blank_row_appended(self):
 		self.make_invoice_with_commission()
 		rows = self.run_report()
 		self.assertTrue(rows)
-		self.assertEqual(rows[-1], [""] * len(rows[0]))
+		self.assertTrue(all(r[0] for r in rows), "execute should not append a blank row")
