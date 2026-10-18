@@ -303,6 +303,14 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		second = self.create_work_order(plan, "production_plan_item")
 		self.assertEqual(second.qty, 50)
 
+	def test_reference_must_belong_to_plan(self):
+		plan = self.make_plan()
+		other_plan = self.make_plan()
+		work_order = self.create_work_order(plan, "production_plan_item")
+		work_order.production_plan = other_plan.name
+		with self.assertRaisesRegex(frappe.ValidationError, "must reference a row"):
+			work_order.submit()
+
 	def test_missing_or_ambiguous_plan_reference(self):
 		plan = self.make_plan()
 		work_order = self.create_work_order(plan, "production_plan_item")

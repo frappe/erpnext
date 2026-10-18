@@ -177,6 +177,16 @@ class TestPurchaseOrderItemClose(ERPNextTestSuite):
 		receipt.insert()
 		self.assertRaises(frappe.ValidationError, receipt.submit)
 
+	def test_closing_is_rejected_for_unsupported_doctype(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			update_closed_status,
+			"Material Request",
+			"any-name",
+			["any-row"],
+			1,
+		)
+
 	def test_amending_clears_closed_rows(self):
 		"""Frappe keeps no_copy fields when amending, so the flag must be cleared."""
 		po = self.make_purchase_order()
