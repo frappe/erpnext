@@ -233,7 +233,7 @@ def get_period_list(
 	for i in range(cint(math.ceil(months / months_to_add))):
 		period = frappe._dict({"from_date": start_date})
 
-		if i == 0 and filter_based_on == "Date Range":
+		if i == 0 and filter_based_on == "Date Range" and periodicity == "Monthly":
 			to_date = add_months(get_first_day(start_date), months_to_add)
 		else:
 			to_date = add_months(start_date, months_to_add)
