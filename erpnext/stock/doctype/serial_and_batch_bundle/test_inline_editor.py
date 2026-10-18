@@ -266,6 +266,30 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Serial and Batch Entry", entry_name, "serial_no"), new_serial)
 		self.assertTrue(frappe.db.exists("Serial No", new_serial))
 
+	def test_link_values_do_not_create_missing_records(self):
+		for doctype, field, item_field, number_field, item_properties in (
+			("Serial No", "serial_no", "item_code", "serial_no", {"has_serial_no": 1}),
+			("Batch", "batch_no", "item", "batch_id", {"has_batch_no": 1}),
+		):
+			item = make_item(properties={"is_stock_item": 1, **item_properties}).name
+			pr = self.make_draft_pr(item, qty=1)
+			number = f"Missing-{frappe.generate_hash(length=8)}"
+			with self.assertRaises(frappe.LinkValidationError):
+				self.upsert(pr, entries=[{field: number, "qty": 1}])
+			self.assertFalse(frappe.db.exists(doctype, {item_field: item, number_field: number}))
+
+			master = frappe.get_doc(
+				{"doctype": doctype, item_field: item, number_field: number, "company": pr.company}
+			).insert()
+			with self.assertRaises(frappe.LinkValidationError):
+				self.upsert(pr, entries=[{field: number, "qty": 1}])
+			summary = self.upsert(pr, entries=[{field: master.name, "qty": 1}])
+			pr.items[0].serial_and_batch_bundle = summary.bundle
+			entry_name = frappe.db.get_value("Serial and Batch Entry", {"parent": summary.bundle})
+			with self.assertRaises(frappe.LinkValidationError):
+				self.upsert(pr, entries=[{"name": entry_name, field: number}])
+			self.assertEqual(frappe.db.get_value("Serial and Batch Entry", entry_name, field), master.name)
+
 	def test_update_batch_no_of_existing_entry(self):
 		item = make_item(
 			properties={

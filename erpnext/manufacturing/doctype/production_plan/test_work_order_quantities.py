@@ -112,6 +112,27 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 					replacement.submit()
 					self.assert_pending_qty(plan, field, 0)
 
+	def test_cumulative_manufacture_loss_respects_allowance(self):
+		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 10)
+		plan = self.make_plan()
+		for field in REFERENCE_FIELDS:
+			with self.subTest(field=field):
+				first = self.create_work_order(plan, field)
+				first.submit()
+				self.manufacture_with_loss(first, qty=50)
+				self.manufacture_with_loss(first, qty=50)
+				last_entry = self.manufacture_with_loss(first, qty=10)
+				self.assertEqual(first.reload().produced_qty, 99)
+				self.assertEqual(first.process_loss_qty, 11)
+				self.assert_pending_qty(plan, field, 1)
+				excess = self.manufacture_with_loss(first, qty=1, submit=False)
+				self.assert_manufacture_rejected(excess, StockOverProductionError)
+				excess.delete()
+				last_entry.cancel()
+				self.assertEqual(first.reload().produced_qty, 90)
+				self.assertEqual(first.process_loss_qty, 10)
+				self.manufacture_with_loss(first, qty=10)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 6})
 	def test_cumulative_fractional_manufacture_loss(self):
 		plan = self.make_plan(qty=0.3)
