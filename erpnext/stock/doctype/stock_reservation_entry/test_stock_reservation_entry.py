@@ -1211,8 +1211,10 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 
 	def test_get_serial_batch_entries_aggregates(self):
 		doc = self.make_sre(reservation_based_on="Serial and Batch")
-		doc.append("sb_entries", {"serial_no": "SN1"})
-		doc.append("sb_entries", {"serial_no": "SN2"})
+		doc.append("sb_entries", {"serial_no": "SN1", "qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN2", "qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN3", "qty": 1, "delivered_qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN4", "qty": 0})
 		doc.append("sb_entries", {"batch_no": "B1", "qty": 5})
 		doc.append("sb_entries", {"batch_no": "B1", "qty": 3})
 
