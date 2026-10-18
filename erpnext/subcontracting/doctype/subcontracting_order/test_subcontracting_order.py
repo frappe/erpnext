@@ -1432,7 +1432,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		def get_serial_batch_entries(voucher_type, voucher_no):
 			return [
 				sorted(
-					get_serial_batch_entries_for_voucher(sre.name),
+					get_serial_batch_entries_for_voucher([sre.name]),
 					key=lambda x: x.get("serial_no") or x.get("batch_no") or "",
 				)
 				for sre in get_sre_details_for_voucher(voucher_type, voucher_no)
@@ -1611,9 +1611,7 @@ def make_reserved_production_plan():
 	plan.sub_assembly_items[0].supplier = "_Test Supplier"
 	for d in get_items_for_material_requests(plan.as_dict()):
 		plan.append("mr_items", d)
-
-	for item_code in ("Subcontracted SRM Item 1", "Subcontracted SRM Item 2", "Subcontracted SRM Item 3"):
-		make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=d["item_code"], qty=10, basic_rate=100)
 	plan.submit()
 	return plan
 
