@@ -97,6 +97,7 @@
    "set_only_once": 1
   },
   {
+   "default": "0",
    "fieldname": "no_of_cheques",
    "fieldtype": "Int",
    "label": "Number of Cheques",
@@ -133,7 +134,7 @@
    "link_fieldname": "cheque_book"
   }
  ],
- "modified": "2026-10-15 16:00:00.000000",
+ "modified": "2026-10-18 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Book",
