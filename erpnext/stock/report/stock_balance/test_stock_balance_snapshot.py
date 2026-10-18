@@ -203,6 +203,16 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 		with ledger_snapshot(ledger):
 			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
 
+	def test_inventory_dimension_filter_and_grouping(self):
+		for entry in (
+			self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10)),
+			self.make_movement(qty=5, basic_rate=100),
+		):
+			self.set_ledger_values(entry.name, {"project": "DuckDB Project"})
+		dimensions = [frappe._dict(fieldname="project", doctype="Project")]
+		with patch.object(stock_balance, "get_inventory_dimensions", return_value=dimensions):
+			self.assert_snapshot_matches(project=["DuckDB Project"], show_dimension_wise_stock=1)
+
 	def test_sparse_inventory_dimensions_group_like_the_live_key(self):
 		values = (("A", ""), ("", "A"), ("B", "A"), (None, None), ("", ""))
 		for index, (project, detail) in enumerate(values):
