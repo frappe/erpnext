@@ -904,24 +904,25 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			100,
 		)
 
-	def test_purchase_receipt_keeps_charges_of_every_order(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
-			make_purchase_receipt,
-		)
-
+	def make_receipt_with_taxed_freight(self, cost_centers, freight_rows=1):
+		"""Subcontracting Receipt of one order per cost center, each with freight and a tax on the first row."""
 		set_backflush_based_on("BOM")
-		orders = [get_subcontracting_order(), get_subcontracting_order()]
-		for idx, sco in enumerate(orders):
-			for charge in (
+		orders = [get_subcontracting_order() for _ in cost_centers]
+		for idx, (sco, cost_center) in enumerate(zip(orders, cost_centers, strict=True)):
+			freights = [
 				{
-					"idx": 1,
+					"idx": row + 1,
 					"charge_type": "Actual",
 					"account_head": "_Test Account Shipping Charges - _TC",
 					"description": f"Freight {idx}",
-					"tax_amount": 10 * (idx + 1),
-				},
+					"tax_amount": 10 ** (row + 1) * (idx + 1),
+				}
+				for row in range(freight_rows)
+			]
+			for charge in (
+				*freights,
 				{
-					"idx": 2,
+					"idx": freight_rows + 1,
 					"charge_type": "On Previous Row Amount",
 					"row_id": "1",
 					"rate": 10,
@@ -937,7 +938,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 						"parentfield": "taxes",
 						"category": "Total",
 						"add_deduct_tax": "Add",
-						"cost_center": "Main - _TC",
+						"cost_center": cost_center,
 						**charge,
 					}
 				).db_insert()
@@ -950,13 +951,33 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			)
 
 		scr = make_subcontracting_receipt(orders[0].name)
-		scr = make_subcontracting_receipt(orders[1].name, scr)
-		scr.save()
+		return make_subcontracting_receipt(orders[1].name, scr)
+
+	def test_purchase_receipt_keeps_charges_of_every_order(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		scr = self.make_receipt_with_taxed_freight(["Main - _TC", "Main - _TC"])
 		scr.submit()
 
 		pr = make_purchase_receipt(scr.name)
 		self.assertEqual(
 			[(t.description, t.tax_amount) for t in pr.taxes], [("Freight 0", 30), ("Freight Tax 0", 3)]
+		)
+
+	def test_purchase_receipt_merges_repeated_charges_by_position(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_purchase_receipt,
+		)
+
+		scr = self.make_receipt_with_taxed_freight(["Main - _TC", "Main - _TC"], freight_rows=2)
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(
+			[t.tax_amount for t in pr.taxes],
+			[30, 300, 3],
 		)
 
 	def test_return_of_accepted_qty_values_goods_at_receipt_rate(self):
