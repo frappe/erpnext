@@ -165,7 +165,8 @@ def get_entries(filters):
 	st = frappe.qb.DocType("Sales Team")
 
 	calc_qty = dt_item[qty_field] * dt_item.conversion_factor
-	calc_net_amount = dt_item.base_net_rate * calc_qty
+	# base_net_rate is per transaction UOM, so the amount must use the transaction-UOM qty, not the stock qty
+	calc_net_amount = dt_item.base_net_rate * dt_item[qty_field]
 
 	stock_qty_case = Case().when(dt.status == "Closed", calc_qty).else_(dt_item.stock_qty).as_("stock_qty")
 
