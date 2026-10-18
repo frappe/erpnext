@@ -2543,28 +2543,7 @@ def cancel_stock_reservation_entries(doc, sre_list):
 	if isinstance(sre_list, str):
 		sre_list = parse_json(sre_list)
 
-	validate_unused_reservations(doc, sre_list)
 	unreserve_stock_for_work_order(doc, sre_list)
-
-
-def validate_unused_reservations(doc, sre_list):
-	"""Refuse to unreserve stock that the Work Order has already transferred or consumed."""
-	filters = {"voucher_type": "Work Order", "voucher_no": doc.name, "docstatus": 1}
-	if sre_list:
-		filters["name"] = ("in", sre_list)
-
-	if used := frappe.get_all(
-		"Stock Reservation Entry",
-		filters=filters,
-		or_filters={"transferred_qty": (">", 0), "consumed_qty": (">", 0)},
-		pluck="name",
-		limit=1,
-	):
-		frappe.throw(
-			_(
-				"Stock Reservation Entry {0} is already used by Work Order {1}. Close the Work Order to release the unused stock."
-			).format(frappe.bold(used[0]), frappe.bold(doc.name))
-		)
 
 
 def unreserve_stock_for_work_order(doc, sre_list):
