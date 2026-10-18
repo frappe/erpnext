@@ -1783,7 +1783,7 @@ class update_entries_after:
 			filters={
 				"voucher_type": "Stock Entry",
 				"voucher_no": sle.voucher_no,
-				"actual_qty": ("<", 0),
+				"voucher_detail_no": ("in", [d.name for d in rows if d.s_warehouse and not d.t_warehouse]),
 				"is_cancelled": 0,
 			},
 			pluck="stock_value_difference",
