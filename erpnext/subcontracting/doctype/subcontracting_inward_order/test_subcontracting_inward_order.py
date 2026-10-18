@@ -1081,6 +1081,10 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			"Stock Reservation Entry", {"voucher_no": wo.name, "docstatus": 1}, pluck="name"
 		)
 		unreserve_stock_for_work_order(wo, reservations)
+		self.assertNotIn(
+			frappe.db.get_value("Work Order", wo.name, "status"),
+			("Stock Reserved", "Stock Partially Reserved"),
+		)
 
 		wo.reload()
 		make_stock_reservation_entries(frappe.as_json({"name": wo.name}))
