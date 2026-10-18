@@ -1769,40 +1769,33 @@ class update_entries_after:
 			],
 			order_by="amount desc, idx asc",
 		)
-		outputs = [row for row in rows if row.t_warehouse and not row.s_warehouse]
-		row = next((row for row in outputs if row.name == sle.voucher_detail_no), None)
-		absorbers = [
-			output for output in outputs if output.is_finished_item and not output.allow_zero_valuation_rate
-		]
-		if not row or not absorbers or any(output.set_basic_rate_manually for output in outputs):
+		outputs = [d for d in rows if d.t_warehouse and not d.s_warehouse]
+		row = next((d for d in outputs if d.name == sle.voucher_detail_no), None)
+		absorber = next((d for d in outputs if d.is_finished_item and not d.allow_zero_valuation_rate), None)
+		if not row or not absorber or any(d.set_basic_rate_manually for d in outputs):
 			return sle.incoming_rate
 
-		value = flt(row.amount)
-		if row.name == absorbers[0].name:
-			consumed = frappe.get_all(
-				"Stock Ledger Entry",
-				filters={
-					"voucher_type": "Stock Entry",
-					"voucher_no": sle.voucher_no,
-					"actual_qty": ("<", 0),
-					"is_cancelled": 0,
-				},
-				pluck="stock_value_difference",
-			)
-			if not consumed:
-				return sle.incoming_rate
+		if row.name != absorber.name:
+			return flt(row.amount) / flt(sle.actual_qty)
 
-			additional_cost = frappe.db.get_value("Stock Entry", sle.voucher_no, "total_additional_costs")
-			landed_cost = sum(flt(r.landed_cost_voucher_amount) for r in outputs)
-			value += (
-				-sum(flt(v) for v in consumed)
-				+ flt(additional_cost)
-				+ landed_cost
-				- sum(flt(r.amount) for r in outputs)
-			)
-			value = max(value, 0)
+		consumed = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"voucher_type": "Stock Entry",
+				"voucher_no": sle.voucher_no,
+				"actual_qty": ("<", 0),
+				"is_cancelled": 0,
+			},
+			pluck="stock_value_difference",
+		)
+		if not consumed:
+			return sle.incoming_rate
 
-		return value / flt(sle.actual_qty)
+		additional_cost = frappe.db.get_value("Stock Entry", sle.voucher_no, "total_additional_costs")
+		landed_cost = sum(flt(d.landed_cost_voucher_amount) for d in outputs)
+		other_outputs = sum(flt(d.amount) for d in outputs if d.name != row.name)
+		value = -sum(flt(v) for v in consumed) + flt(additional_cost) + landed_cost - other_outputs
+		return max(value, 0) / flt(sle.actual_qty)
 
 	def get_outward_leg_value(self, sle):
 		"""Value that left the source warehouse for this transfer row, plus the row's additional cost."""
