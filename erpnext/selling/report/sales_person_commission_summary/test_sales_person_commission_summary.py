@@ -34,6 +34,31 @@ class TestSalesPersonCommissionSummary(ERPNextTestSuite):
 		si.reload()  # reflect any values recomputed on submit
 		return si
 
+	def make_invoice_split_between_two_sales_persons(self):
+		si = create_sales_invoice(rate=1000, qty=1, do_not_save=True, posting_date="2026-06-01")
+		si.append(
+			"sales_team",
+			{
+				"sales_person": "_Test Sales Person",
+				"allocated_percentage": 60,
+				"commission_rate": 5,
+				"incentives": 60,
+			},
+		)
+		si.append(
+			"sales_team",
+			{
+				"sales_person": "_Test Sales Person 1",
+				"allocated_percentage": 40,
+				"commission_rate": 5,
+				"incentives": 20,
+			},
+		)
+		si.insert()
+		si.submit()
+		si.reload()
+		return si
+
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{
@@ -70,13 +95,20 @@ class TestSalesPersonCommissionSummary(ERPNextTestSuite):
 		self.assertEqual(row[8], team.allocated_amount)
 		self.assertEqual(row[9], team.incentives)
 
-	def test_appends_total_row(self):
-		self.make_invoice_with_commission()
-		rows = self.run_report()
-		# the report appends a blank total row after one or more real data rows
-		self.assertGreaterEqual(len(rows), 2)
-		self.assertTrue(any(r[0] for r in rows[:-1]), "expected real data rows before the total row")
-		self.assertEqual(rows[-1], [""] * len(rows[0]))
+	def test_amount_shown_once_per_document(self):
+		# amount is the whole document total; it must appear on only the first row of each
+		# document so the total row doesn't count it once per sales person
+		si = self.make_invoice_split_between_two_sales_persons()
+		doc_rows = [r for r in self.run_report(sales_person="Sales Team") if r[0] == si.name]
+		self.assertEqual(len(doc_rows), 2)
+		self.assertEqual(doc_rows[0][4], si.base_net_total)
+		self.assertIsNone(doc_rows[1][4])
+
+	def test_group_sales_person_filter_includes_members(self):
+		# filtering on a group (team) must include every descendant sales person's rows
+		si = self.make_invoice_with_commission()
+		rows = self.run_report(sales_person="Sales Team")
+		self.assertIn(si.name, {r[0] for r in rows if r[0]})
 
 	def test_sales_person_filter_scopes_rows(self):
 		si = self.make_invoice_with_commission()
