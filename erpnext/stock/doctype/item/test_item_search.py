@@ -2,7 +2,7 @@ import sqlite3
 from unittest.mock import MagicMock, patch
 
 import frappe
-from frappe.search.sqlite_search import index_docs_in_queue, update_doc_index
+from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
@@ -27,6 +27,15 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		self.assertIsNone(build_match_query("ab\\_cd"))
 
 
+class TestItemSearchSetting(ERPNextTestSuite):
+	def test_the_global_defaults_checkbox_drives_the_index(self):
+		with self.change_settings("Global Defaults", enable_item_search_index=0):
+			self.assertFalse(ItemSearch().is_search_enabled())
+
+		with self.change_settings("Global Defaults", enable_item_search_index=1):
+			self.assertTrue(ItemSearch().is_search_enabled())
+
+
 class TestItemSearchIndex(ERPNextTestSuite):
 	@classmethod
 	def setUpClass(cls):
@@ -43,6 +52,10 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		cls.search.drop_index()
 		cls.enabled.stop()
 		super().tearDownClass()
+
+	def test_item_search_is_registered_for_the_lifecycle(self):
+		"""Without the sqlite_search hook nothing syncs the index and it silently rots."""
+		self.assertIn(ItemSearch, get_search_classes())
 
 	def test_a_barcode_added_after_the_build_is_searchable(self):
 		"""A barcode edit changes no Item field, so the Item save is the only signal there is."""
@@ -79,6 +92,20 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		self.assertIn("ZZ-QUEUE-PROBE-4471", self.candidates("4471"))
 		self.assertEqual(self.run_query("4471", None), self.run_query("4471", None, False))
+
+	def test_vocabulary_is_not_built(self):
+		"""item_query matches search_fts directly and never asks for a spelling correction."""
+		self.assertFalse(ItemSearch.BUILD_VOCABULARY)
+		connection = self.search._get_connection(read_only=True)
+		try:
+			self.assertEqual(connection.execute("SELECT count(*) FROM search_vocabulary").fetchone()[0], 0)
+			self.assertEqual(connection.execute("SELECT count(*) FROM search_trigrams").fetchone()[0], 0)
+		finally:
+			connection.close()
+
+	def test_tokenizer_folds_accents(self):
+		"""MariaDB's utf8mb4_unicode_ci LIKE is accent insensitive, so the index must be too."""
+		self.assertEqual(self.search.schema["tokenizer"], "trigram remove_diacritics 1")
 
 	def test_an_accented_item_is_found_by_an_unaccented_term(self):
 		item = frappe.get_doc(
