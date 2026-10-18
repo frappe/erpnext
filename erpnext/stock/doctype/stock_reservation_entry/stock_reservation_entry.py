@@ -189,7 +189,7 @@ class StockReservationEntry(Document):
 		for row in sres:
 			if row.name in open_qty:
 				delivered_qty = row.reserved_qty - open_qty[row.name]
-				set_delivered_qty(row.name, row.reserved_qty, delivered_qty)
+				set_delivered_qty(row.name, delivered_qty)
 				counted_qty += delivered_qty
 
 		self.spread_used_qty([row for row in sres if row.name not in open_qty], counted_qty)
@@ -219,7 +219,7 @@ class StockReservationEntry(Document):
 
 		for row in sres:
 			qty = min(row.reserved_qty, delivered_qty)
-			set_delivered_qty(row.name, row.reserved_qty, qty)
+			set_delivered_qty(row.name, qty)
 			delivered_qty -= qty
 
 	def release_reversed_usage(self, field: str, row_wise_serial_batch: dict) -> None:
@@ -2090,11 +2090,10 @@ def get_serial_batch_open_qty(sre_names: list[str]) -> dict[str, float]:
 	)
 
 
-def set_delivered_qty(sre_name: str, reserved_qty: float, delivered_qty: float) -> None:
-	status = "Delivered" if delivered_qty >= reserved_qty else "Reserved"
-	frappe.db.set_value(
-		"Stock Reservation Entry", sre_name, {"delivered_qty": delivered_qty, "status": status}
-	)
+def set_delivered_qty(sre_name: str, delivered_qty: float) -> None:
+	sre = frappe.get_doc("Stock Reservation Entry", sre_name)
+	sre.db_set("delivered_qty", delivered_qty)
+	sre.update_status()
 
 
 def move_serial_batch_delivered_qty(
