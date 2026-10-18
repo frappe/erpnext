@@ -1128,6 +1128,8 @@ class WorkOrder(Document):
 			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 
 		row["time_in_mins"] = time_per_unit * flt(bom_qty)
+		if operation.bom and operation.bom != self.bom_no:
+			row["batch_size"] = max(cint(bom_qty), 1)
 		return row
 
 	def calculate_operating_cost(self):
