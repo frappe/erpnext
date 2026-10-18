@@ -261,7 +261,7 @@ class StockReservationEntry(Document):
 		batches = defaultdict(float)
 		for entry in self.sb_entries:
 			if entry.serial_no:
-				if not flt(entry.delivered_qty):
+				if flt(entry.qty) and not flt(entry.delivered_qty):
 					serial_nos.append(entry.serial_no)
 			elif entry.batch_no:
 				batches[entry.batch_no] += flt(entry.qty) - flt(entry.delivered_qty)
