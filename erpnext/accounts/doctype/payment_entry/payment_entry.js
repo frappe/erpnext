@@ -504,14 +504,14 @@ frappe.ui.form.on("Payment Entry", {
 		if (frm.cheque_book_cleared) return;
 		if (frm.doc.cheque_book && !reset) return frm.events.cheque_book(frm);
 
-		const account = frm.doc.paid_from;
-		const previous_book = frm.doc.cheque_book;
+		const { name, paid_from: account, cheque_book: previous_book } = frm.doc;
 		const { cheque_book } = await frappe.xcall(
 			"erpnext.accounts.doctype.cheque.cheque_payment.get_next_cheque",
 			{ account }
 		);
-		// the user can change the form while the server answers
+		// the user can change the form, submit it or open another payment while the server answers
 		if (
+			name !== frm.doc.name ||
 			frm.doc.docstatus !== 0 ||
 			frm.cheque_book_cleared ||
 			account !== frm.doc.paid_from ||
