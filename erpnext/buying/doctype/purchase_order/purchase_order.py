@@ -915,9 +915,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
-	billed_qty_by_item = get_billed_qty_data(
-		frappe.get_all("Purchase Order Item", filters={"parent": source_name}, fields=["name"])
-	)
+	po_items = frappe.get_all("Purchase Order Item", filters={"parent": source_name}, fields=["name"])
+	billed_qty_by_item = get_billed_qty_data(po_items) if po_items else {}
 
 	def get_billed_and_mapped_qty(po_item):
 		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
