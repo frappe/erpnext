@@ -83,11 +83,11 @@ class ChequeBook(Document):
 				)
 			)
 
-		# Set first, so the status update of each cheque cancel below skips this book
 		self.db_set("status", "Cancelled")
 		for cheque in cheques:
 			doc = frappe.get_doc("Cheque", cheque.name, for_update=True)
 			doc.flags.ignore_permissions = True
+			doc.flags.cancelling_book = True  # this book is locked and needs no status update
 			doc.void(remarks=_("Cheque Book {0} cancelled").format(self.name))
 
 	def update_status(self):
