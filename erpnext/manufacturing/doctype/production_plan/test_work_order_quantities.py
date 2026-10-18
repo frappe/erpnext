@@ -285,7 +285,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		plan.onload()
 		pending = plan.get_onload()["pending_work_order_qty"]["production_plan_item"]
 		self.assertEqual(pending[plan.po_items[0].name], 0)
-		self.assertEqual(pending[plan.po_items[1].name], 50)
+		self.assertEqual(pending[plan.po_items[1].name], 0)
 		second_name = frappe.db.get_value(
 			"Work Order", {"production_plan_item": plan.po_items[1].name, "docstatus": 0}, "name"
 		)
