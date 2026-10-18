@@ -159,6 +159,15 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 		invoice.insert()
 		self.assertRaises(frappe.ValidationError, invoice.submit)
 
+	def test_noncanonical_closed_value_is_normalised(self):
+		"""A truthy non-1 value must not slip past the exact-match submission guard."""
+		note = self.make_delivery_note()
+
+		update_closed_status("Delivery Note", note.name, [note.items[1].name], 2)
+
+		note.reload()
+		self.assertEqual(note.items[1].closed, 1)
+
 	def test_unbilled_return_row_can_be_closed(self):
 		"""Return rows carry negative amounts and must still be closable."""
 		note = self.make_delivery_note()
