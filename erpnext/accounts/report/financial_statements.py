@@ -260,8 +260,13 @@ def get_period_list(
 			break
 
 	# common processing
+	used_keys = set()
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
+		if key in used_keys:
+			key = f"{key}_{opts['to_date'].day}"
+		used_keys.add(key)
+
 		if periodicity == "Monthly" and not accumulated_values:
 			label = formatdate(opts["to_date"], "MMM YYYY")
 		else:

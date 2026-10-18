@@ -225,6 +225,12 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(len(period_list), 1)
 		self.assertEqual(period_list[0].to_date, getdate("2026-07-16"))
 
+	def test_periods_ending_in_same_month_have_unique_keys(self):
+		period_list = get_period_list(
+			None, None, "2025-07-17", "2026-07-31", "Date Range", "Yearly", ignore_fiscal_year=True
+		)
+		self.assertEqual([period.key for period in period_list], ["jul_2026", "jul_2026_31"])
+
 
 def get_profit_loss_rows(filters):
 	rows = {row.get("account"): flt(row.get("total")) for row in execute(frappe._dict(filters))[1]}
