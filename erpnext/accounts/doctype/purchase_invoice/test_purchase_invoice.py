@@ -2846,7 +2846,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			pi.submit()
 			invoices.append(pi)
 
-		make_return_doc("Purchase Invoice", invoices[0].name).submit()
+		debit_note = make_return_doc("Purchase Invoice", invoices[0].name)
+		debit_note.update_billed_amount_in_purchase_order = 1
+		debit_note.submit()
 
 		po.reload()
 		po.update_status("Closed")
