@@ -415,7 +415,9 @@ class RequiredItemsService:
 		consumed_by_item = self._consumed_qty_by_item()
 		consumed_by_row = distribute_over_rows(self.doc.required_items, consumed_by_item)
 		reserved_consumption = (
-			self._split_consumption_over_reservations(consumed_by_item) if self.doc.reserve_stock else {}
+			self._split_consumption_over_reservations(consumed_by_item, wip_warehouse)
+			if self.doc.reserve_stock
+			else {}
 		)
 		for item in self.doc.required_items:
 			consumed_qty = consumed_by_row[item.name] + flt(item.returned_qty)
@@ -429,20 +431,24 @@ class RequiredItemsService:
 				item, flt(reserved_consumption.get(item.name)) + flt(item.returned_qty), warehouse
 			)
 
-	def _split_consumption_over_reservations(self, consumed_by_item):
+	def _split_consumption_over_reservations(self, consumed_by_item, wip_warehouse):
 		sre = frappe.qb.DocType("Stock Reservation Entry")
-		reserved_by_row = frappe._dict(
-			(
-				frappe.qb.from_(sre)
-				.select(sre.voucher_detail_no, fn.Sum(sre.reserved_qty))
-				.where(
-					(sre.voucher_type == "Work Order")
-					& (sre.voucher_no == self.doc.name)
-					& (sre.docstatus == 1)
-				)
-				.groupby(sre.voucher_detail_no)
-			).run()
+		query = (
+			frappe.qb.from_(sre)
+			.select(sre.voucher_detail_no, sre.warehouse, fn.Sum(sre.reserved_qty).as_("qty"))
+			.where(
+				(sre.voucher_type == "Work Order") & (sre.voucher_no == self.doc.name) & (sre.docstatus == 1)
+			)
+			.groupby(sre.voucher_detail_no, sre.warehouse)
 		)
+		if not self.doc.skip_transfer:
+			query = query.where(fn.Coalesce(sre.from_voucher_no, "") != "")
+
+		reserved = {(row.voucher_detail_no, row.warehouse): flt(row.qty) for row in query.run(as_dict=True)}
+		reserved_by_row = {
+			row.name: reserved.get((row.name, wip_warehouse or row.source_warehouse), 0.0)
+			for row in self.doc.required_items
+		}
 
 		remaining = {item_code: flt(qty) for item_code, qty in consumed_by_item.items()}
 		consumption_by_row = {}

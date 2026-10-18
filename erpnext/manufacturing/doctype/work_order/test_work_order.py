@@ -6742,6 +6742,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
 	def test_consumption_is_shared_over_row_reservations_of_one_material(self):
+		consumed = self.consume_two_row_reservations(skip_transfer=1)
+
+		self.assertEqual(sum(row.reserved_qty for row in consumed), 8)
+		self.assertEqual(sum(row.consumed_qty for row in consumed), 4)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 1, "material_consumption": 1}
+	)
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_consumption_reaches_the_wip_reservation_after_transfer(self):
+		consumed = self.consume_two_row_reservations(skip_transfer=0)
+
+		self.assertEqual(sum(row.reserved_qty for row in consumed), 8)
+		self.assertEqual(sum(row.consumed_qty for row in consumed), 4)
+
+	def consume_two_row_reservations(self, skip_transfer):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		first_operation, workstation = make_review_operation()
@@ -6760,7 +6778,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		test_stock_entry.make_stock_entry(
 			item_code=rm_item, target="_Test Warehouse - _TC", qty=8, basic_rate=100
 		)
-		wo = make_review_work_order(fg_item, bom.name, 4, reserve_stock=1, skip_transfer=1)
+		wo = make_review_work_order(fg_item, bom.name, 4, reserve_stock=1, skip_transfer=skip_transfer)
+		if not skip_transfer:
+			frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
 
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": wo.name}, order_by="sequence_id, creation", pluck="name"
@@ -6776,13 +6796,12 @@ class TestWorkOrder(ERPNextTestSuite):
 			job_card.submit()
 		frappe.get_doc(make_stock_entry(wo.name, "Material Consumption for Manufacture", 2)).submit()
 
-		consumed = frappe.get_all(
-			"Stock Reservation Entry",
-			filters={"voucher_no": wo.name, "item_code": rm_item, "docstatus": 1},
-			fields=["reserved_qty", "consumed_qty"],
+		filters = {"voucher_no": wo.name, "item_code": rm_item, "docstatus": 1}
+		if not skip_transfer:
+			filters["warehouse"] = wo.wip_warehouse
+		return frappe.get_all(
+			"Stock Reservation Entry", filters=filters, fields=["reserved_qty", "consumed_qty"]
 		)
-		self.assertEqual(sum(row.reserved_qty for row in consumed), 8)
-		self.assertEqual(sum(row.consumed_qty for row in consumed), 4)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_same_material_in_two_operations_splits_transferred_qty(self):
