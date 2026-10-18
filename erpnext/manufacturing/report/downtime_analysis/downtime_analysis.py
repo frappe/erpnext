@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_datetime, time_diff_in_hours
 
 
 def execute(filters=None):
@@ -29,16 +29,22 @@ def get_data(filters):
 		"remarks",
 	]
 
-	query_filters["from_time"] = (">=", filters.get("from_date"))
-	query_filters["to_time"] = ("<=", filters.get("to_date"))
+	from_date = get_datetime(filters.get("from_date"))
+	to_date = get_datetime(filters.get("to_date"))
+	if from_date > to_date:
+		frappe.throw(_("From Date must be before To Date"))
+
+	query_filters["from_time"] = ("<", to_date)
+	query_filters["to_time"] = (">", from_date)
 
 	if filters.get("workstation"):
 		query_filters["workstation"] = filters.get("workstation")
 
 	data = frappe.get_list("Downtime Entry", fields=fields, filters=query_filters, limit_page_length=0) or []
 	for d in data:
-		if d.downtime:
-			d.downtime = d.downtime / 60
+		d.downtime = time_diff_in_hours(
+			min(get_datetime(d.to_time), to_date), max(get_datetime(d.from_time), from_date)
+		)
 
 	return data
 
