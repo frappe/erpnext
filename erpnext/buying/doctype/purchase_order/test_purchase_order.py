@@ -1601,7 +1601,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
 	@ERPNextTestSuite.change_settings(
-		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1}
+		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1, "allow_multiple_items": 1}
 	)
 	def test_qty_billing_split_across_rows_in_another_conversion_factor(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 6}])
