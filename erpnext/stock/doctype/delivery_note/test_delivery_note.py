@@ -4162,7 +4162,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		invoice.submit()
 
 		invoice_credit = make_return_doc("Sales Invoice", invoice.name)
-		invoice_credit.items[0].update({"uom": "Box", "conversion_factor": 10, "qty": -1, "rate": 500})
+		invoice_credit.items[0].update({"uom": "Box", "conversion_factor": 10, "qty": -1, "rate": 50})
 		invoice_credit.update_billed_amount_in_delivery_note = 1
 		invoice_credit.insert()
 		invoice_credit.submit()
