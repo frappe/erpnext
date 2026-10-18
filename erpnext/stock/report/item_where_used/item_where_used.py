@@ -131,9 +131,6 @@ def get_data(filters):
 	if not filters.get("section") or filters.section == REFERENCES_SECTION:
 		data.extend(get_reference_data(filters))
 
-<<<<<<< HEAD
-	return data
-=======
 	allowed_items = set(
 		get_permitted_list(
 			"Item",
@@ -142,7 +139,6 @@ def get_data(filters):
 		)
 	)
 	return [row for row in data if row.related_item in allowed_items]
->>>>>>> d401f0b (fix(stock): apply read permissions in Item Where Used report)
 
 
 def get_where_used_data(filters):
