@@ -10,7 +10,7 @@ frappe.ui.form.on("Cheque Book", {
 	},
 
 	onload_post_render(frm) {
-		// Cheque numbers keep their leading zeros, so pad them to six digits
+		// cheque numbers are digits only
 		["cheque_start_no", "cheque_end_no"].forEach((fieldname) =>
 			frm.fields_dict[fieldname].$input
 				?.attr({ inputmode: "numeric", pattern: "[0-9]*" })
@@ -18,20 +18,15 @@ frappe.ui.form.on("Cheque Book", {
 				.on("input.cheque_number", (e) => {
 					e.target.value = e.target.value.replace(/\D/g, "");
 				})
-				.on("blur.cheque_number", (e) => {
-					if (/^\d+$/.test(e.target.value)) {
-						frm.set_value(fieldname, BigInt(e.target.value).toString().padStart(6, "0"));
-					}
-				})
 		);
 	},
 
 	cheque_start_no(frm) {
-		set_no_of_cheques(frm);
+		return set_cheque_range(frm, "cheque_start_no");
 	},
 
 	cheque_end_no(frm) {
-		set_no_of_cheques(frm);
+		return set_cheque_range(frm, "cheque_end_no");
 	},
 
 	refresh(frm) {
@@ -42,10 +37,7 @@ frappe.ui.form.on("Cheque Book", {
 			const disabled = frm.doc.status === "Disabled";
 			frm.add_custom_button(
 				disabled ? __("Enable") : __("Disable"),
-				() =>
-					frm
-						.set_value("status", disabled ? "Submitted" : "Disabled")
-						.then(() => frm.save("Update")),
+				() => frm.call(disabled ? "enable" : "disable").then(() => frm.reload_doc()),
 				__("Actions")
 			);
 		}
@@ -54,11 +46,11 @@ frappe.ui.form.on("Cheque Book", {
 	},
 });
 
-function set_no_of_cheques(frm) {
-	const { cheque_start_no: start, cheque_end_no: end } = frm.doc;
-	const valid = /^\d+$/.test(start || "") && /^\d+$/.test(end || "");
-	const count = valid ? Number(BigInt(end) - BigInt(start) + 1n) : 0;
-	frm.set_value("no_of_cheques", count > 0 ? count : 0);
+// The server pads the range and counts its cheques. A field also changes while the user
+// types, so wait until the user leaves it.
+function set_cheque_range(frm, fieldname) {
+	if (frm.fields_dict[fieldname].$input?.is(":focus")) return;
+	return frm.call("set_cheque_range");
 }
 
 async function show_cheques(frm) {
