@@ -23,7 +23,7 @@ frappe.ui.form.on("Stock Closing Entry", {
 	},
 
 	regenerate_closing_balance(frm) {
-		if (frm.doc.status == "Completed") {
+		if (["Completed", "Outdated"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Regenerate Stock Closing Entry"), () => {
 				frm.call({
 					method: "regenerate_closing_balance",
