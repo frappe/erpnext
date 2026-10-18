@@ -167,7 +167,9 @@ class RequiredItemsService:
 		if self.doc.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name)
 
-		transferred_by_row = distribute_over_rows(self.doc.required_items, transferred_items)
+		transferred_by_row = distribute_transfers_over_rows(
+			self.doc.required_items, self._material_transfer_qty_by_item_and_warehouse()
+		)
 		for row in self.doc.required_items:
 			transferred_qty = transferred_by_row[row.name]
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
@@ -355,6 +357,33 @@ class RequiredItemsService:
 
 		return qty_by_item
 
+	def _material_transfer_qty_by_item_and_warehouse(self):
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
+		query = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
+			.select(
+				ste_child.item_code,
+				ste_child.original_item,
+				ste_child.s_warehouse,
+				fn.Sum(ste_child.transfer_qty).as_("qty"),
+			)
+			.where(self._material_transfer_filter(ste, 0))
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
+			.groupby(ste_child.item_code, ste_child.original_item, ste_child.s_warehouse)
+		)
+		qty_by_key = {}
+		for d in query.run(as_dict=1) or []:
+			key = (d.original_item or d.item_code, d.s_warehouse)
+			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
+
+		return qty_by_key
+
 	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
 		# Work Order returns combine regular and corrective stock without a Job Card link.
 		# Cap each return at the regular transfer total so corrective quantities stay neutral.
@@ -471,6 +500,26 @@ def _find_bom_item(item_dict, row):
 	for key in ((row.item_code, row.operation), (row.item_code, row.operation_row_id), row.item_code):
 		if key in item_dict:
 			return item_dict[key]
+
+
+def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
+	rows_by_item = {}
+	for row in rows:
+		rows_by_item.setdefault(row.item_code, []).append(row)
+
+	qty_by_row = {row.name: 0.0 for row in rows}
+	for (item_code, warehouse), qty in qty_by_item_and_warehouse.items():
+		item_rows = rows_by_item.get(item_code)
+		if not item_rows:
+			continue
+
+		share_by_row = {}
+		matching_rows = [row for row in item_rows if row.source_warehouse == warehouse] or item_rows
+		_split_item_qty(matching_rows, flt(qty), share_by_row)
+		for name, share in share_by_row.items():
+			qty_by_row[name] += share
+
+	return qty_by_row
 
 
 def distribute_over_rows(rows, qty_by_item):

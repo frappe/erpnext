@@ -7096,6 +7096,21 @@ class TestWorkOrder(ERPNextTestSuite):
 			[("_Test Warehouse - _TC", 4), ("_Test Warehouse 2 - _TC", 4)],
 		)
 
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=4, basic_rate=100
+		)
+		first_warehouse_transfer = frappe.get_doc(transfer)
+		first_warehouse_transfer.items = [
+			row for row in first_warehouse_transfer.items if row.s_warehouse == "_Test Warehouse - _TC"
+		]
+		first_warehouse_transfer.submit()
+
+		wo.reload()
+		self.assertEqual(
+			[(row.source_warehouse, row.transferred_qty) for row in wo.required_items],
+			[("_Test Warehouse - _TC", 4), ("_Test Warehouse 2 - _TC", 0)],
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_create_bom_keeps_fixed_and_batch_operation_times(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
