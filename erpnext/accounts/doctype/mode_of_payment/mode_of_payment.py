@@ -81,3 +81,8 @@ class ModeofPayment(Document):
 					"POS Profile {} contains Mode of Payment {}. Please remove them to disable this mode."
 				).format(frappe.bold(", ".join(pos_profiles)), frappe.bold(str(self.name)))
 				frappe.throw(message, title=_("Not Allowed"))
+
+
+def validate_enabled_mode_of_payment(mode_of_payment):
+	if mode_of_payment and not frappe.get_cached_value("Mode of Payment", mode_of_payment, "enabled"):
+		frappe.throw(_("Mode of Payment {0} is disabled.").format(frappe.bold(mode_of_payment)))
