@@ -14,6 +14,7 @@ from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_invoiced_qty_against_po_items
 
 
 def set_missing_values(source, target):
@@ -145,28 +146,20 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		PaymentScheduleService(target).set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
-	def get_billed_qty(po_item_name):
-		from frappe.query_builder.functions import Sum
-
-		table = frappe.qb.DocType("Purchase Invoice Item")
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.qty).as_("qty"))
-			.where((table.docstatus == 1) & (table.po_detail == po_item_name))
-		)
-		return query.run(pluck="qty")[0] or 0
-
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+	po_items = frappe.get_all("Purchase Order Item", filters={"parent": source_name}, pluck="name")
+	billed_qty_by_item = get_invoiced_qty_against_po_items(po_items) if po_items else {}
 
-	def get_billed_and_mapped_qty(po_item_name):
-		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
+	def get_billed_and_mapped_qty(po_item):
+		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
+		return billed_qty + flt(mapped_qty_by_item.get(po_item.name, 0))
 
 	def update_item(obj, target, source_parent):
 		target.qty = (
 			0
 			if is_unit_price_row(obj, has_unit_price_items)
-			else flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+			else flt(obj.qty) - get_billed_and_mapped_qty(obj)
 		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
@@ -208,7 +201,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"condition": lambda doc: (
 				doc.name not in mapped_qty_by_item
 				if is_unit_price_row(doc, has_unit_price_items)
-				else doc.qty > get_billed_and_mapped_qty(doc.name)
+				else doc.qty > get_billed_and_mapped_qty(doc)
 			)
 			and not doc.closed
 			and select_item(doc),
