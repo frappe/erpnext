@@ -1196,6 +1196,49 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.cancel()
 
+	def test_receipt_progress_after_return_in_stock_uom(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt as make_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		po = create_purchase_order(item_code=item.name, qty=1, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 12})
+		po.submit()
+
+		pr = make_receipt(po.name)
+		pr.submit()
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items[0].update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": -6, "received_qty": -6}
+		)
+		pr_return.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].received_qty, 0.5)
+		self.assertEqual(po.items[0].returned_qty, 0.5)
+
+	def test_receipt_progress_with_another_conversion_factor(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt as make_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		po = create_purchase_order(item_code=item.name, qty=1, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 12})
+		po.submit()
+
+		pr = make_receipt(po.name)
+		pr.items[0].conversion_factor = 10
+		pr.submit()
+
+		po.reload()
+		self.assertAlmostEqual(po.items[0].received_qty, 10 / 12)
+		self.assertAlmostEqual(po.per_received, 83.33, places=2)
+
+		pr.cancel()
+		po.reload()
+		self.assertEqual(po.items[0].received_qty, 0)
+
 	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
