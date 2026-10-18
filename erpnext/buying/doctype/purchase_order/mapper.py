@@ -154,7 +154,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			.select(Sum(table.qty * table.conversion_factor).as_("qty"))
 			.where((table.docstatus == 1) & (table.po_detail == po_item.name))
 		)
-		return flt(query.run(pluck="qty")[0]) / po_item.conversion_factor
+		return flt(flt(query.run(pluck="qty")[0]) / po_item.conversion_factor, po_item.precision("qty"))
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
