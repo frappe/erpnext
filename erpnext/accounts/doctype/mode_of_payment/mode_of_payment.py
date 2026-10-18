@@ -42,11 +42,29 @@ class ModeofPayment(Document):
 
 	def validate_accounts(self):
 		for entry in self.accounts:
-			"""Error when Company of Ledger account doesn't match with Company Selected"""
-			if frappe.get_cached_value("Account", entry.default_account, "company") != entry.company:
+			account = frappe.get_cached_value(
+				"Account",
+				entry.default_account,
+				["company", "is_group", "account_type", "disabled"],
+				as_dict=True,
+			)
+			if not account or account.company != entry.company:
 				frappe.throw(
 					_("Account {0} does not match with Company {1} in Mode of Account: {2}").format(
 						entry.default_account, entry.company, self.name
+					)
+				)
+
+			if account.is_group or account.account_type not in ("Bank", "Cash", "Receivable"):
+				frappe.throw(
+					_(
+						"Row {0}: Account {1} must be a ledger account of type Bank, Cash or Receivable."
+					).format(entry.idx, frappe.bold(entry.default_account))
+				)
+			if account.disabled:
+				frappe.throw(
+					_("Row {0}: Account {1} is disabled.").format(
+						entry.idx, frappe.bold(entry.default_account)
 					)
 				)
 
