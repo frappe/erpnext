@@ -38,9 +38,9 @@ class Cheque(Document):
 			return frappe.db.get_value("Payment Entry", self.payment_entry, "clearance_date")
 
 	def check_if_latest(self):
-		# Every cheque writer locks the book, then the cheque.
-		# Frappe locks this cheque in the parent method, so lock the book first.
-		if self.cheque_book:
+		# Every cheque writer locks the book, then the cheque. Frappe locks this cheque in the
+		# parent method, so lock the book first, unless the book is cancelling and holds its lock.
+		if self.cheque_book and not self.flags.cancelling_book:
 			frappe.db.get_value("Cheque Book", self.cheque_book, "name", for_update=True)
 		super().check_if_latest()
 
@@ -59,7 +59,8 @@ class Cheque(Document):
 		self.status = "Cancelled"
 
 	def on_cancel(self):
-		frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).update_status()
+		if not self.flags.cancelling_book:
+			frappe.get_doc("Cheque Book", self.cheque_book, for_update=True).update_status()
 
 	@frappe.whitelist(methods=["POST"])
 	def cancel_with_reason(self, reason: str, remarks: str | None = None):
