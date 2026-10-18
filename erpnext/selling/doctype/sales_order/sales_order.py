@@ -1214,13 +1214,12 @@ def make_project(source_name, target_doc=None):
 def set_reserved_serial_batch(dn_item, sre, use_serial_batch_fields):
 	"""Carry the reserved serial/batch to the row fields, or a bundle when they cannot hold it."""
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_serial_batch_entries_for_voucher,
 		get_ssb_bundle_for_voucher,
 	)
 
 	if use_serial_batch_fields:
-		entries = frappe.get_all(
-			"Serial and Batch Entry", filters={"parent": sre.name}, fields=["serial_no", "batch_no"]
-		)
+		entries = get_serial_batch_entries_for_voucher(sre.name)
 		batch_nos = list({d.batch_no for d in entries if d.batch_no})
 		if len(batch_nos) < 2:
 			dn_item.use_serial_batch_fields = 1
