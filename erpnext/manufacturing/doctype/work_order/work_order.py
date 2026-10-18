@@ -180,7 +180,6 @@ class WorkOrder(Document):
 		total_operating_cost: DF.Currency
 		track_semi_finished_goods: DF.Check
 		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
-		update_consumed_material_cost_in_project: DF.Check
 		use_multi_level_bom: DF.Check
 		wip_warehouse: DF.Link | None
 	# end: auto-generated types
