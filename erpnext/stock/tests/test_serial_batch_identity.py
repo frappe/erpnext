@@ -639,6 +639,12 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				)
 				self.assertEqual(row.serial_no, "SELECTED-001\nselected-001")
 
+	def test_serial_filter_does_not_interpret_physical_numbers_as_ids(self):
+		first = self.make_number("Serial No", "Selected-001")
+		second = self.make_number("Serial No", first.name)
+		doc = frappe._dict(items=[{"item_code": self.item.name, "serial_no": first.name}])
+		self.assertEqual(get_filtered_serial_nos([first.name, second.name], doc), [first.name])
+
 	def test_sales_automatic_selection_returns_physical_serial_text(self):
 		selected = self.make_number("Serial No", "Selected-001")
 		first = self.make_number("Serial No", "Automatic-001")

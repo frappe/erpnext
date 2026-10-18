@@ -453,6 +453,22 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
 
+	def test_change_is_taken_after_the_cash_account_changes(self):
+		with self.set_user("Administrator"):
+			new_cash_account = make_cash_account("Zz Test Cash")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 100)])
+		frappe.db.set_value(
+			"Mode of Payment Account",
+			{"parent": "Cash", "company": "_Test Company"},
+			"default_account",
+			new_cash_account,
+		)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 180})
+
 	def test_change_is_taken_when_the_change_account_differs(self):
 		with self.set_user("Administrator"):
 			change_account = make_cash_account("_Test Change Cash")
