@@ -570,7 +570,7 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 
 		self.assertEqual(
 			sorted((row["batch_no"], row["qty"]) for row in rows if row.get("indent") == 1),
-			[(raw_batches[0], 4), (raw_batches[1], 6)],
+			sorted([(raw_batches[0], 4), (raw_batches[1], 6)]),
 		)
 
 	def test_batch_filter_lists_serial_nos_of_a_serial_and_batch_item(self):
