@@ -58,7 +58,13 @@ def get_columns():
 			"options": "Price List",
 			"width": 120,
 		},
-		{"label": _("Buying Rate"), "fieldname": "buying_rate", "fieldtype": "Currency", "width": 120},
+		{
+			"label": _("Buying Rate"),
+			"fieldname": "buying_rate",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		},
 		{
 			"label": _("Selling Price List"),
 			"fieldname": "selling_price_list",
@@ -66,7 +72,20 @@ def get_columns():
 			"options": "Price List",
 			"width": 120,
 		},
-		{"label": _("Selling Rate"), "fieldname": "selling_rate", "fieldtype": "Currency", "width": 120},
+		{
+			"label": _("Selling Rate"),
+			"fieldname": "selling_rate",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		},
+		{
+			"label": _("Currency"),
+			"fieldname": "currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1,
+		},
 		{"label": _("Price UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 80},
 		{
 			"label": _("Customer"),
@@ -112,6 +131,7 @@ def get_item_price_qty_data(filters):
 			item_price.name.as_("price_list_name"),
 			item_price.brand.as_("brand"),
 			item_price.uom,
+			item_price.currency,
 			item.stock_uom,
 			item_price.customer,
 			item_price.supplier,
@@ -152,6 +172,7 @@ def get_item_price_qty_data(filters):
 				"selling_price_list": "",
 				"selling_rate": 0.0,
 				"uom": item_dict.uom,
+				"currency": item_dict.currency,
 				"customer": item_dict.customer,
 				"supplier": item_dict.supplier,
 			}
