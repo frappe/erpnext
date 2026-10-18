@@ -130,7 +130,7 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "payment_entry.paid_amount",
+   "fetch_from": "payment_entry.paid_amount_after_tax",
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -187,7 +187,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-16 18:00:00.000000",
+ "modified": "2026-10-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque",
