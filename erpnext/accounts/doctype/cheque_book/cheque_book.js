@@ -41,9 +41,10 @@ frappe.ui.form.on("Cheque Book", {
 
 // The server pads the range and counts its cheques when the user leaves a range field.
 // Frappe may not have stored the last keystrokes yet, so store the typed value first.
+// The reply replaces the whole form, so freeze it until then.
 async function set_cheque_range(frm, fieldname, value) {
 	await frm.set_value(fieldname, value);
-	return frm.call("set_cheque_range");
+	return frm.call({ method: "set_cheque_range", doc: frm.doc, freeze: true });
 }
 
 async function show_cheques(frm) {
