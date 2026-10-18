@@ -55,6 +55,29 @@ class TestMappedDiscounts(ERPNextTestSuite):
 								receipt.grand_total, discounted.grand_total + regular.grand_total
 							)
 
+	def test_fixed_discount_consumption_survives_partial_mixed_receipts(self):
+		for inclusive in (False, True):
+			for discounted_first in (False, True):
+				with self.subTest(inclusive=inclusive, discounted_first=discounted_first):
+					rate = 110 if inclusive else 100
+					discounted = self.make_order(
+						qty=10, rate=rate, fixed=100, inclusive=inclusive, apply_discount_on="Grand Total"
+					)
+					regular = self.make_order(item="_Test Item 2", qty=5, rate=rate, inclusive=inclusive)
+					sources = (discounted, regular) if discounted_first else (regular, discounted)
+					first = self.combine(*sources)
+					for item in first.items:
+						if item.purchase_order == discounted.name:
+							item.qty = 5
+					first.save().submit()
+					second = make_purchase_receipt(discounted.name).save()
+					self.assertEqual(second.discount_amount, 50)
+					self.assertEqual(
+						first.grand_total + second.grand_total, discounted.grand_total + regular.grand_total
+					)
+					first.cancel()
+					self.assertEqual(make_purchase_receipt(discounted.name).discount_amount, 100)
+
 	def test_fixed_discount_remainder_after_multiple_partial_receipts(self):
 		for apply_discount_on in ("Net Total", "Grand Total"):
 			for inclusive in (False, True):
@@ -452,6 +475,16 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		invoice = make_sales_invoice(sales_order.name)
 		self.assertEqual(invoice.discount_amount, 0)
 		self.assertEqual(invoice.grand_total, 100)
+
+	def test_adding_a_fully_received_order_keeps_the_receipt_undiscounted(self):
+		received = self.make_order(percentage=10)
+		make_purchase_receipt(received.name).submit()
+		regular = self.make_order(item="_Test Item 2")
+
+		receipt = self.combine(regular, received).save()
+		self.assertEqual(len(receipt.items), 1)
+		self.assertEqual(receipt.discount_amount, 0)
+		self.assertEqual(receipt.grand_total, regular.grand_total)
 
 	def test_update_items_uom_change_keeps_the_carried_discount(self):
 		from erpnext.accounts.services.child_item_update import update_child_qty_rate

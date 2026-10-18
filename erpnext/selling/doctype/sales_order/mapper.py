@@ -27,6 +27,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, make_packing_list
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_serial_batch_entries_for_voucher,
 	get_sre_details_for_voucher,
 	get_sre_reserved_qty_details_for_voucher,
 	get_ssb_bundle_for_voucher,
@@ -415,11 +416,7 @@ def make_delivery_note(
 						# Carry the reserved serial/batch in the row fields. A single field can't hold
 						# multiple batches, so fall back to a bundle in that case.
 						dn_item.use_serial_batch_fields = 1
-						sb_entries = frappe.get_all(
-							"Serial and Batch Entry",
-							filters={"parent": sre.name},
-							fields=["serial_no", "batch_no"],
-						)
+						sb_entries = get_serial_batch_entries_for_voucher([sre.name])
 						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
 						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
 						if serial_nos:
@@ -499,8 +496,9 @@ def make_sales_invoice(
 			invoice = frappe.qb.DocType("Sales Invoice")
 			invoice_item = frappe.qb.DocType("Sales Invoice Item")
 			sales_order_item = frappe.qb.DocType("Sales Order Item")
+			qty_in_stock_uom = invoice_item.qty * invoice_item.conversion_factor
 			credit_note_qty = (
-				Case().when(get_credit_note_return_criterion(invoice), -invoice_item.qty).else_(0)
+				Case().when(get_credit_note_return_criterion(invoice), -qty_in_stock_uom).else_(0)
 			)
 			rows = (
 				frappe.qb.from_(invoice_item)
@@ -509,12 +507,14 @@ def make_sales_invoice(
 				.inner_join(invoice)
 				.on(invoice.name == invoice_item.parent)
 				.select(
-					invoice_item.so_detail,
-					Sum(invoice_item.qty).as_("billed_qty"),
-					Sum(credit_note_qty).as_("credit_note_returned_qty"),
+					sales_order_item.name.as_("so_detail"),
+					(Sum(qty_in_stock_uom) / sales_order_item.conversion_factor).as_("billed_qty"),
+					(Sum(credit_note_qty) / sales_order_item.conversion_factor).as_(
+						"credit_note_returned_qty"
+					),
 				)
 				.where((invoice_item.docstatus == 1) & (sales_order_item.parent == source_name))
-				.groupby(invoice_item.so_detail)
+				.groupby(sales_order_item.name)
 			).run(as_dict=True)
 			invoiced_qty_by_item = {row.so_detail: row for row in rows}
 

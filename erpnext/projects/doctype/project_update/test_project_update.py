@@ -66,14 +66,6 @@ class TestProjectUpdate(ERPNextTestSuite):
 		with patch("frappe.sendmail"), self.assertWarns(PendingDeprecationWarning):
 			daily_reminder()
 
-	def test_replies_are_collected_once(self):
-		project_update = make_project_update()
-		receive_reply(project_update, "admin@example.com", "Done with design")
-
-		collect_project_status()
-		collect_project_status()
-		self.assertEqual(len(frappe.get_doc("Project Update", project_update).users), 1)
-
 	def test_reply_with_a_link_is_collected_once(self):
 		project_update = make_project_update()
 		receive_reply(project_update, "admin@example.com", "See [the design](https://example.com/design)")
@@ -91,6 +83,19 @@ class TestProjectUpdate(ERPNextTestSuite):
 		collect_project_status()
 		collect_project_status()
 		self.assertEqual(len(frappe.get_doc("Project Update", project_update).users), 2)
+
+	def test_reply_is_added_next_to_a_hand_entered_status(self):
+		project_update = make_project_update()
+		doc = frappe.get_doc("Project Update", project_update)
+		doc.append("users", {"user": "Administrator", "project_status": "Entered by hand"})
+		doc.save()
+		receive_reply(project_update, "admin@example.com", "Done with design")
+
+		collect_project_status()
+		statuses = [row.project_status for row in frappe.get_doc("Project Update", project_update).users]
+		self.assertEqual(len(statuses), 2)
+		self.assertIn("Entered by hand", statuses)
+		self.assertTrue(any("Done with design" in status for status in statuses))
 
 	def test_reply_from_unknown_sender_is_skipped(self):
 		project_update = make_project_update()

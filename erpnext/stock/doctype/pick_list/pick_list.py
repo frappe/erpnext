@@ -119,7 +119,7 @@ class PickList(TransactionBase):
 		self.validate_with_previous_doc()
 
 	def set_stock_qty(self):
-		if self.docstatus != 0:
+		if not self.docstatus.is_draft() and getattr(self, "_action", None) != "submit":
 			return
 
 		conversion_factors = get_uom_conversion_factors(
@@ -155,20 +155,33 @@ class PickList(TransactionBase):
 	def get_picked_qty_by_location(self) -> dict:
 		picked_qty = {}
 		for row in self.get("locations"):
-			if not row.picked_qty:
+			row_qty = self.get_qty_to_pick(row)
+			if not row_qty:
 				continue
 
 			key = (row.item_code, row.warehouse, row.batch_no or "")
 			qty, first_row = picked_qty.get(key, (0.0, row))
-			picked_qty[key] = (qty + flt(row.picked_qty), first_row)
+			picked_qty[key] = (qty + row_qty, first_row)
 
 		return picked_qty
+
+	def get_qty_to_pick(self, row):
+		if row.picked_qty or self.scan_mode or not self.docstatus.is_submitted():
+			return flt(row.picked_qty)
+
+		return flt(row.stock_qty)
 
 	def validate_batch_stock_qty(self, picked_qty):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
+		if not picked_qty:
+			return
+
+		held_qty = self.get_qty_held_by_other_picks(picked_qty)
 		for (item_code, warehouse, batch_no), (qty, row) in picked_qty.items():
-			batch_qty = get_batch_qty(batch_no, warehouse, item_code)
+			batch_qty = flt(get_batch_qty(batch_no, warehouse, item_code)) - flt(
+				held_qty.get((item_code, warehouse, batch_no))
+			)
 			if qty > batch_qty:
 				frappe.throw(
 					_(
@@ -183,6 +196,22 @@ class PickList(TransactionBase):
 					),
 					title=_("Insufficient Stock"),
 				)
+
+	def get_qty_held_by_other_picks(self, picked_qty):
+		holders = get_pick_list_holders(
+			list({key[0] for key in picked_qty}),
+			warehouses=list({key[1] for key in picked_qty}),
+			exclude_pick_list=self.name,
+		)
+
+		reserved_qty = get_remaining_pick_list_reservations({holder.pick_list for holder in holders})
+		held_qty = {}
+		for holder in holders:
+			key = (holder.item_code, holder.warehouse, holder.batch_no or "")
+			unreserved_qty = flt(holder.holding_qty) - reserved_qty.get((holder.pick_list, *key), 0.0)
+			held_qty[key] = held_qty.get(key, 0.0) + max(unreserved_qty, 0.0)
+
+		return held_qty
 
 	def validate_free_stock_qty(self, picked_qty):
 		if not picked_qty:
@@ -632,9 +661,12 @@ class PickList(TransactionBase):
 				so_items_details_map.setdefault(location.sales_order, []).append(item_details)
 
 		if so_items_details_map:
+			from erpnext.selling.doctype.sales_order.services.reservation import SalesOrderStockReservation
+
 			for so, items_details in so_items_details_map.items():
-				so_doc = frappe.get_doc("Sales Order", so)
-				so_doc.create_stock_reservation_entries(
+				SalesOrderStockReservation(
+					frappe.get_doc("Sales Order", so)
+				).create_stock_reservation_entries(
 					items_details=items_details,
 					from_voucher_type="Pick List",
 					notify=notify,
@@ -1307,6 +1339,37 @@ def get_pick_list_holders(item_codes, warehouses=None, exclude_pick_list=None):
 		query = query.where(pi_item.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
+
+
+def get_remaining_pick_list_reservations(pick_lists):
+	if not pick_lists:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	rows = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on((sb_entry.parent == sre.name) & (sb_entry.parenttype == "Stock Reservation Entry"))
+		.select(
+			sre.from_voucher_no,
+			sre.item_code,
+			sre.warehouse,
+			sb_entry.batch_no,
+			Sum(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.from_voucher_type == "Pick List")
+			& (sre.from_voucher_no.isin(list(pick_lists)))
+			& (sre.status.notin(["Closed", "Delivered", "Cancelled"]))
+		)
+		.groupby(sre.from_voucher_no, sre.item_code, sre.warehouse, sb_entry.batch_no)
+	).run(as_dict=True)
+
+	return {
+		(row.from_voucher_no, row.item_code, row.warehouse, row.batch_no or ""): flt(row.qty) for row in rows
+	}
 
 
 def get_reservation_holders(item_codes, warehouses):

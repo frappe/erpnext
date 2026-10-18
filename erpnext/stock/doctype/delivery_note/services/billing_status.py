@@ -90,15 +90,43 @@ def get_creditable_qty(return_doc) -> dict:
 
 
 def get_billed_qty(original_rows: set) -> dict:
+	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	invoiced = {
+		row.dn_detail: row
+		for row in (
+			frappe.qb.from_(sii)
+			.join(si)
+			.on(si.name == sii.parent)
+			.select(sii.dn_detail, Sum(sii.stock_qty).as_("stock_qty"), Sum(sii.amount).as_("amount"))
+			.where(
+				sii.dn_detail.isin(list(original_rows))
+				& (sii.docstatus == 1)
+				& ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
+			)
+			.groupby(sii.dn_detail)
+		).run(as_dict=True)
+	}
+
 	billed_qty = {}
 	for row in frappe.get_all(
 		"Delivery Note Item",
 		filters={"name": ("in", list(original_rows))},
-		fields=["name", "billed_amt", "rate", "qty"],
+		fields=["name", "billed_amt", "rate", "qty", "conversion_factor"],
 	):
-		billed_qty[row.name] = flt(row.billed_amt) / flt(row.rate) if flt(row.rate) else flt(row.qty)
+		billed_qty[row.name] = get_row_billed_qty(row, invoiced.get(row.name))
 
 	return billed_qty
+
+
+def get_row_billed_qty(row, invoiced) -> float:
+	direct_qty = flt(invoiced.stock_qty) / (flt(row.conversion_factor) or 1) if invoiced else 0.0
+	if not flt(row.rate):
+		return direct_qty if invoiced else flt(row.qty)
+
+	direct_amount = flt(invoiced.amount) if invoiced else 0.0
+	order_billed_amount = max(flt(row.billed_amt) - direct_amount, 0.0)
+	return direct_qty + flt(order_billed_amount / flt(row.rate), 6)
 
 
 def get_credited_qty(original_rows: set, current_return: str) -> dict:
@@ -117,18 +145,27 @@ def get_credited_qty(original_rows: set, current_return: str) -> dict:
 	if not return_rows:
 		return {}
 
+	conversion_factors = frappe._dict(
+		frappe.get_all(
+			"Delivery Note Item",
+			filters={"name": ("in", list(original_rows))},
+			fields=["name", "conversion_factor"],
+			as_list=True,
+		)
+	)
 	sii = frappe.qb.DocType("Sales Invoice Item")
 	credited = (
 		frappe.qb.from_(sii)
-		.select(sii.dn_detail, Sum(sii.qty))
+		.select(sii.dn_detail, Sum(sii.stock_qty))
 		.where(sii.dn_detail.isin(list(return_rows)) & (sii.docstatus == 1) & (sii.qty < 0))
 		.groupby(sii.dn_detail)
 	).run()
 
 	credited_qty = {}
-	for return_row, qty in credited:
+	for return_row, stock_qty in credited:
 		original = return_rows[return_row]
-		credited_qty[original] = flt(credited_qty.get(original)) + abs(flt(qty))
+		qty = abs(flt(stock_qty)) / (flt(conversion_factors.get(original)) or 1)
+		credited_qty[original] = flt(credited_qty.get(original)) + qty
 
 	return credited_qty
 

@@ -26,6 +26,7 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -170,6 +171,7 @@ class PaymentEntry(AccountsController):
 			self.party_account_currency = self.paid_to_account_currency
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
@@ -680,8 +682,11 @@ class PaymentEntry(AccountsController):
 
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
+			self.set(field, flt(self.get(field)))
 			if not self.get(field):
 				frappe.throw(_("{0} is mandatory").format(self.meta.get_translated_label(field)))
+			if self.get(field) < 0:
+				frappe.throw(_("{0} must be greater than zero").format(self.meta.get_translated_label(field)))
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -894,7 +899,7 @@ class PaymentEntry(AccountsController):
 					.set(ps.base_paid_amount, ps.base_paid_amount - base_paid_amount)
 					.set(ps.discounted_amount, ps.discounted_amount - discounted_amt)
 					.set(ps.outstanding, ps.outstanding + allocated_amount)
-					.set(ps.base_outstanding, ps.base_outstanding - base_outstanding)
+					.set(ps.base_outstanding, ps.base_outstanding + base_outstanding)
 					.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
 				).run()
 			else:

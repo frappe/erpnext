@@ -3092,6 +3092,19 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(wo.disassembled_qty, 0.3)
 
+	def test_disassembly_available_qty_has_no_float_noise(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_disassembly_available_qty
+
+		real_get_value = frappe.db.get_value
+
+		def get_value(doctype, filters=None, *args, **kwargs):
+			if doctype != "Stock Entry":
+				return real_get_value(doctype, filters, *args, **kwargs)
+			return frappe._dict(fg_completed_qty=0.3) if isinstance(filters, str) else 0.1
+
+		with patch.object(frappe.db, "get_value", side_effect=get_value):
+			self.assertEqual(get_disassembly_available_qty("Manufacture Entry"), 0.2)
+
 	def test_disassembly_order_with_qty_from_wo_behavior(self):
 		# Create raw material and FG item
 		raw_item = make_item("Test Raw for Disassembly", {"is_stock_item": 1}).name
@@ -4289,6 +4302,173 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertEqual(reserved_in(wip), 0)
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
+	)
+	def test_staged_transfers_do_not_bring_back_the_store_reservation(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		store, wip = "Stores - _TC", "Work In Progress - _TC"
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse=store)
+		make_stock_entry_test_record(item_code=rm, target=store, qty=6, basic_rate=100)
+		wo = make_wo_order_test_record(
+			production_item=fg,
+			qty=10,
+			bom_no=bom.name,
+			reserve_stock=1,
+			source_warehouse=store,
+			wip_warehouse=wip,
+			fg_warehouse=wip,
+		)
+		make_stock_entry_test_record(item_code=rm, target=store, qty=14, basic_rate=100)
+
+		for qty in (4, 6):
+			frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", qty)).submit()
+
+		self.assertEqual(
+			frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": wo.name, "warehouse": store, "docstatus": 1},
+				pluck="transferred_qty",
+			),
+			[6],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_manufacturing_user_can_submit_a_work_order_that_reserves_stock(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=10, basic_rate=100)
+		user = make_fenced_user("test-wo-reserve-stock@example.com", ["Manufacturing User"])
+
+		with as_user(user):
+			work_order = make_wo_order_test_record(
+				production_item=fg, bom_no=bom.name, qty=5, reserve_stock=1, source_warehouse="Stores - _TC"
+			)
+
+		self.assertTrue(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
+		with as_user(user):
+			frappe.get_doc("Work Order", work_order.name).cancel()
+
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 0, "allow_negative_stock": 0},
+	)
+	def test_work_order_reservation_respects_allow_partial_reservation(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=6, basic_rate=100)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=10, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+
+		self.assertFalse(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"enable_serial_and_batch_no_for_item": 1,
+		},
+	)
+	def test_work_order_serial_reservation_cannot_take_serials_reserved_elsewhere(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(
+			item_code=rm,
+			target="Stores - _TC",
+			qty=4,
+			basic_rate=100,
+			serial_no="\n".join(f"{rm}-{i}" for i in range(4)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=rm, warehouse="Stores - _TC", qty=2)
+		sales_order.create_stock_reservation_entries(notify=False)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=2, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+
+		order_reservation = frappe.get_last_doc("Stock Reservation Entry", {"voucher_no": sales_order.name})
+		work_order_reservation = frappe.get_last_doc(
+			"Stock Reservation Entry", {"voucher_no": work_order.name}
+		)
+		work_order_reservation.set(
+			"sb_entries",
+			[
+				{"serial_no": entry.serial_no, "qty": 1, "warehouse": "Stores - _TC"}
+				for entry in order_reservation.sb_entries
+			],
+		)
+		self.assertRaises(frappe.ValidationError, work_order_reservation.save)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 0,
+			"enable_serial_and_batch_no_for_item": 1,
+		},
+	)
+	def test_work_order_reserves_serial_items_by_qty_without_auto_selection(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(
+			item_code=rm,
+			target="Stores - _TC",
+			qty=2,
+			basic_rate=100,
+			serial_no="\n".join(f"{rm}-{i}" for i in range(2)),
+			use_serial_batch_fields=1,
+		)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=2, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+
+		self.assertEqual(
+			frappe.db.get_value("Stock Reservation Entry", {"voucher_no": work_order.name}, "reserved_qty"), 2
+		)
 
 	def test_sales_order_linked_work_order_reserves_finished_good(self):
 		# Spec #8: when a Work Order is linked to a Sales Order, manufacturing the finished good must
@@ -6209,6 +6389,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		# B transferred as a substitute for A -> credited to A; B transferred for itself -> credited to B.
 		self.assertEqual(flt(qty_by_item.get(item_a)), 10.0)
 		self.assertEqual(flt(qty_by_item.get(item_b)), 10.0)
+
+	def test_wip_warehouse_required_when_tracking_semi_finished_goods(self):
+		wo = frappe.new_doc("Work Order")
+		wo.track_semi_finished_goods = 1
+		wo.skip_transfer = 0
+		wo.fg_warehouse = "_Test Warehouse 1 - _TC"
+
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
+
+		wo.wip_warehouse = "_Test Warehouse - _TC"
+		wo.validate_warehouse()
+
+		# the top-level target warehouse stays optional; operations may carry their own
+		wo.fg_warehouse = None
+		wo.validate_warehouse()
+
+		wo.track_semi_finished_goods = 0
+		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
 	def test_change_finished_item_to_alternative_finished_good(self):
