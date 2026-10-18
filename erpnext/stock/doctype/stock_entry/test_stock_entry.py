@@ -5091,20 +5091,9 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(se.items[2].amount, 5)
 
 	def test_repack_output_takes_the_consumed_value(self):
-		raw_material = make_item(properties={"valuation_method": "Moving Average"}).name
-		output = make_item(properties={"valuation_method": "Moving Average"}).name
-		warehouse = "_Test Warehouse - _TC"
-		make_stock_entry(item_code=raw_material, target=warehouse, qty=8, rate=209.416)
-		make_stock_entry(item_code=raw_material, target=warehouse, qty=2, rate=19.14)
-
-		repack = self.make_repack(raw_material, 5, warehouse, [(output, 11)])
-
-		self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
-		self.assertEqual(self.get_value_change(repack, output), 856.81)
-
-	def test_batched_and_serialized_repack_outputs_take_the_consumed_value(self):
 		warehouse = "_Test Warehouse - _TC"
 		for properties in (
+			{},
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "RPB-.#####"},
 			{"has_serial_no": 1, "serial_no_series": "RPS-.#####"},
 		):
@@ -5113,7 +5102,7 @@ class TestStockEntry(ERPNextTestSuite):
 			make_stock_entry(item_code=raw_material, target=warehouse, qty=8, rate=209.416)
 			make_stock_entry(item_code=raw_material, target=warehouse, qty=2, rate=19.14)
 
-			repack = self.make_repack(raw_material, 5, warehouse, [(output, 11)])
+			repack = self.make_repack(raw_material, 5, warehouse, output, 11)
 
 			self.assertEqual(self.get_value_change(repack, raw_material), -856.81)
 			self.assertEqual(self.get_value_change(repack, output), 856.81)
@@ -5212,7 +5201,7 @@ class TestStockEntry(ERPNextTestSuite):
 		raw_material, output = (make_item(properties={"valuation_method": "FIFO"}).name for _ in range(2))
 		warehouse = "_Test Warehouse - _TC"
 		make_stock_entry(item_code=raw_material, target=warehouse, qty=1, rate=100)
-		repack = self.make_repack(raw_material, 1, warehouse, [(output, 1)])
+		repack = self.make_repack(raw_material, 1, warehouse, output, 1)
 
 		lcv = make_landed_cost_voucher(
 			receipt_document_type="Stock Entry", receipt_document=repack.name, charges=20, do_not_save=True
@@ -5293,22 +5282,13 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual(self.get_value_change(repack, output), 0)
 
-	def make_repack(self, raw_material, qty, warehouse, outputs):
+	def make_repack(self, raw_material, qty, warehouse, output, output_qty):
 		repack = make_stock_entry(
 			item_code=raw_material, source=warehouse, qty=qty, purpose="Repack", do_not_save=True
 		)
-		for item_code, output_qty in outputs:
-			repack.append(
-				"items",
-				{
-					"item_code": item_code,
-					"t_warehouse": warehouse,
-					"qty": output_qty,
-					"transfer_qty": output_qty,
-					"is_finished_item": 1,
-				},
-			)
-		repack.save()
+		repack.append(
+			"items", {"item_code": output, "t_warehouse": warehouse, "qty": output_qty, "is_finished_item": 1}
+		)
 		repack.submit()
 		return repack
 
