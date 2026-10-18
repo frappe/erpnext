@@ -1600,6 +1600,24 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi.items[0].qty = 2
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_qty_billing_split_across_rows_in_another_conversion_factor(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 6}])
+		po = create_purchase_order(item_code=item.name, qty=1, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 6})
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.items[0].update({"qty": 1, "conversion_factor": 1})
+		for _ in range(5):
+			pi.append("items", pi.items[0].as_dict(no_default_fields=True))
+		pi.submit()
+
+		po.reload()
+		self.assertEqual(po.per_billed, 100)
+
 	def test_order_neutral_debit_note_stays_out_of_later_billing(self):
 		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 
