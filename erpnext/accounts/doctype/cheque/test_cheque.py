@@ -93,13 +93,15 @@ class TestChequePayment(ERPNextTestSuite):
 	def name_of(self, cheque_no, book=None):
 		return f"{(book or self.book).name}-{cheque_no}"
 
-	def pay(self, cheque_no=None, submit=True, book=None, **args):
+	def pay(self, cheque_no=None, submit=True, book=None, taxes=(), **args):
 		"""Make a cheque payment from the test bank ledger. With no cheque number, the server suggests one."""
 		args.setdefault("paid_from", BANK_LEDGER)
 		payment = create_payment_entry(**args)
 		payment.mode_of_payment = "Cheque"
 		payment.cheque_book = (book or self.book).name
 		payment.reference_no = cheque_no
+		for tax in taxes:
+			payment.append("taxes", tax)
 		payment.save()
 		if submit:
 			payment.submit()
@@ -167,6 +169,21 @@ class TestChequePayment(ERPNextTestSuite):
 		# the form gets this through as_dict, and the status shows Cleared from it
 		cheque = frappe.get_doc("Cheque", self.name_of("000101")).as_dict()
 		self.assertEqual(getdate(cheque.clearance_date), getdate("2026-01-31"))
+
+	def test_cheque_amount_is_what_the_bank_pays(self):
+		# a tax outside the paid amount also moves money from the bank, so it is on the cheque
+		for add_deduct, bank_pays in (("Add", 1100), ("Deduct", 900)):
+			with self.subTest(add_deduct=add_deduct):
+				tax = {
+					"account_head": "_Test Account Service Tax - _TC",
+					"charge_type": "Actual",
+					"tax_amount": 100,
+					"add_deduct_tax": add_deduct,
+					"description": "Test",
+				}
+				payment = self.pay(paid_amount=1000, taxes=[tax])
+				self.assertEqual(payment.paid_amount_after_tax, bank_pays)
+				self.assertEqual(frappe.db.get_value("Cheque", payment.cheque, "amount"), bank_pays)
 
 	def test_typed_number_is_padded_and_must_be_in_the_book(self):
 		payment = self.pay("102", submit=False)
