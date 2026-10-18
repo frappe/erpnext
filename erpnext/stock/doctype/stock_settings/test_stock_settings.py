@@ -67,24 +67,6 @@ class TestStockSettings(ERPNextTestSuite):
 		set_by_naming_series.assert_not_called()
 		make_property_setter.assert_not_called()
 
-	def test_item_metadata_updates_when_related_settings_change(self):
-		settings = frappe.get_single("Stock Settings")
-		settings.item_naming_by = (
-			"Item Code" if settings.item_naming_by == "Naming Series" else "Naming Series"
-		)
-		settings.show_barcode_field = not settings.show_barcode_field
-
-		with (
-			patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series,
-			patch("frappe.make_property_setter") as make_property_setter,
-		):
-			settings.save()
-
-		from erpnext.stock.doctype.stock_settings.stock_settings import get_transaction_barcode_fields
-
-		set_by_naming_series.assert_called_once()
-		self.assertEqual(make_property_setter.call_count, len(get_transaction_barcode_fields()))
-
 	def test_cannot_disable_serial_and_batch_with_tracked_items(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 

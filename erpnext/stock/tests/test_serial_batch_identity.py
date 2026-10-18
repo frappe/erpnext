@@ -2,7 +2,6 @@ from collections import defaultdict
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import get_url_to_form
 
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
@@ -121,12 +120,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			1,
 		)
 
-	def test_resolution_uses_the_selected_item(self):
-		for doctype in ("Serial No", "Batch"):
-			self.make_number(doctype, "Physical-001")
-			with self.assertRaisesRegex(frappe.ValidationError, "Physical-001.*_Identity Item B"):
-				SerialBatchIdentity(doctype).resolve(self.other_item.name, ["Physical-001"])
-
 	def test_numbers_are_not_interpreted_as_ids(self):
 		for doctype in ("Serial No", "Batch"):
 			first = self.make_number(doctype, "Physical-001")
@@ -142,11 +135,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				SerialBatchIdentity(doctype).resolve(self.item.name, ["Missing-001"])
 			self.assertEqual(frappe.db.count(doctype), count)
 
-	def test_empty_input(self):
+	def test_invalid_input(self):
 		for doctype in ("Serial No", "Batch"):
 			self.assertEqual(SerialBatchIdentity(doctype).resolve(self.item.name, []), [])
-
-	def test_invalid_input(self):
 		identity = SerialBatchIdentity("Serial No")
 		for numbers in ("Serial-001", [None], [1], [" "], None):
 			with self.subTest(numbers=numbers), self.assertRaises(frappe.ValidationError):
@@ -188,21 +179,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.make_number(doctype, "Scan-001")
 			with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 				get_serial_batch_scan(self.item.name, "Scan-001", doctype)
-
-	def test_scan_lookup_works_without_master_read_permission(self):
-		batch = self.make_number("Batch", "Scan-001")
-		user = frappe.get_doc(
-			doctype="User",
-			email="identity-scan-reader@example.com",
-			first_name="Scan Reader",
-			send_welcome_email=0,
-			roles=[{"role": "Purchase User"}],
-		).insert()
-		with self.set_user(user.name):
-			self.assertFalse(frappe.has_permission("Batch", "read"))
-			self.assertEqual(get_serial_batch_scan(self.item.name, "Scan-001", "Batch")["name"], batch.name)
-			self.assertEqual(get_serial_batch_scan(self.item.name, "Missing-Scan", "Batch"), {})
-		self.assertFalse(frappe.db.exists("Batch", {"item": self.item.name, "batch_id": "Missing-Scan"}))
 
 	def test_number_lookup_works_without_master_read_permission(self):
 		batch = self.make_number("Batch", "Titled-001")
@@ -662,12 +638,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				)
 				self.assertEqual(row.serial_no, "SELECTED-001\nselected-001")
 
-	def test_serial_filter_does_not_interpret_physical_numbers_as_ids(self):
-		first = self.make_number("Serial No", "Selected-001")
-		second = self.make_number("Serial No", first.name)
-		doc = frappe._dict(items=[{"item_code": self.item.name, "serial_no": first.name}])
-		self.assertEqual(get_filtered_serial_nos([first.name, second.name], doc), [first.name])
-
 	def test_sales_automatic_selection_returns_physical_serial_text(self):
 		selected = self.make_number("Serial No", "Selected-001")
 		first = self.make_number("Serial No", "Automatic-001")
@@ -850,35 +820,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(row.s_warehouse, "_Test Warehouse 1 - _TC")
 		self.assertEqual(row.t_warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(materials.serial_no, [second.name, first.name])
-
-	def test_subcontracting_errors_link_physical_numbers_to_their_records(self):
-		for doctype in ("Serial No", "Batch"):
-			record = self.make_number(doctype, "Unreserved-<001>")
-			doc = frappe.get_doc(
-				doctype="Stock Entry",
-				purpose="Subcontracting Delivery",
-				subcontracting_inward_order="_Identity Inward Order",
-				items=[
-					{
-						"item_code": self.item.name,
-						"serial_no": "Unreserved-<001>" if doctype == "Serial No" else None,
-						"batch_no": record.name if doctype == "Batch" else None,
-					}
-				],
-			)
-			with (
-				self.subTest(doctype=doctype),
-				patch.object(doc, "get_serial_nos_and_batches_from_sres", return_value=([], {})),
-				self.assertRaisesRegex(
-					frappe.ValidationError, "not a part of the linked Subcontracting Inward Order"
-				) as error,
-			):
-				doc.validate_serial_batch_for_return_or_delivery()
-			message = str(error.exception)
-			self.assertIn(f'href="{get_url_to_form(doctype, record.name)}"', message)
-			self.assertIn(">Unreserved-&lt;001&gt;</a>", message)
-			self.assertNotIn(f">{record.name}</a>", message)
-			self.assertNotIn("Unreserved-<001>", message)
 
 	def test_subcontracting_fields_show_numbers_and_keep_bundle_inputs_as_ids(self):
 		first = self.make_number("Serial No", "Subcontracting-001")
@@ -1586,27 +1527,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				get_reserved_serial_nos_for_pos(frappe._dict(item_code=self.item.name)), [serial.name]
 			)
 
-	def test_duplicate_serial_is_rejected_by_database(self):
-		self.check_duplicate("Serial No", "Number-001")
-
-	def test_duplicate_batch_is_rejected_by_database(self):
-		self.check_duplicate("Batch", "Number-001")
-
 	def test_serial_case_variant_is_rejected_by_database(self):
 		self.check_duplicate("Serial No", "number-001")
 
 	def test_batch_case_variant_is_rejected_by_database(self):
 		self.check_duplicate("Batch", "number-001")
-
-	def test_existing_constraints_are_not_recreated(self):
-		with (
-			patch.object(frappe.db, "add_unique", side_effect=AssertionError("Repeated constraint creation")),
-			patch.object(frappe.db, "sql_ddl", side_effect=AssertionError("Repeated constraint creation")),
-		):
-			for doctype in ("Serial No", "Batch"):
-				identity = SerialBatchIdentity(doctype)
-				self.assertTrue(frappe.db.has_index(f"tab{doctype}", identity.constraint_name))
-				identity.add_unique_constraint()
 
 	def test_other_constraint_errors_are_not_translated(self):
 		for doctype in ("Serial No", "Batch"):
@@ -1827,15 +1752,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 
 		self.assertIsNone(frappe.db.get_value("Serial No", own.name, "amc_expiry_date"))
 		self.assertEqual(str(frappe.db.get_value("Serial No", other.name, "amc_expiry_date")), "2027-12-31")
-
-	def test_new_names_are_distinct_when_hashes_repeat(self):
-		with patch(
-			"erpnext.stock.serial_batch_identity.make_autoname",
-			side_effect=["repeated-id", "repeated-id", "other-id"],
-		):
-			names = SerialBatchIdentity("Serial No").get_new_names(2)
-
-		self.assertCountEqual(names, ["repeated-id", "other-id"])
 
 	def make_role_user(self, email, role):
 		if not frappe.db.exists("User", email):

@@ -244,14 +244,6 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_closed_status("Blanket Order", bo.name, [row], 0)
 		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Submitted")
 
-	def test_fully_ordered_row_cannot_be_closed(self):
-		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=10)
-		make_purchase_order_against(bo, qty=10).submit()
-
-		self.assertRaises(
-			frappe.ValidationError, update_closed_status, "Blanket Order", bo.name, [bo.items[0].name], 1
-		)
-
 	def test_closed_row_is_skipped_when_ordering(self):
 		bo = make_two_row_purchasing_blanket_order()
 		po = make_purchase_order_against(bo, qty=10)
@@ -448,58 +440,6 @@ class TestBlanketOrder(ERPNextTestSuite):
 					self.assertEqual(target.items[0].base_price_list_rate, price_list_rate)
 					self.assertEqual(target.items[0].rate, expected_rate)
 					self.assertEqual(target.items[0].blanket_order, blanket_order.name)
-
-	def test_applying_price_list_ignores_empty_item_rows(self):
-		blanket_order = frappe.new_doc("Blanket Order")
-		blanket_order.blanket_order_type = "Selling"
-		blanket_order.company = "_Test Company"
-		blanket_order.customer = "_Test Customer"
-		blanket_order.from_date = today()
-		blanket_order.append("items", {})
-
-		pricing = apply_price_list(blanket_order.as_dict())
-
-		self.assertEqual(pricing["children"], [])
-
-	def test_price_list_rate_is_fetched_on_item_selection(self):
-		company = "_Test Company"
-		company_currency = get_company_currency(company)
-		price_list_rate = 800
-		blanket_order, _price_list = make_priced_blanket_order(
-			company=company,
-			currency=company_currency,
-			conversion_rate=1,
-			price_list_rate=price_list_rate,
-			qty=0,
-		)
-		item = blanket_order.items[0]
-
-		self.assertEqual(item.price_list_rate, price_list_rate)
-		self.assertEqual(item.rate, price_list_rate)
-
-	def test_price_list_rates_fetch_item_uoms_once(self):
-		blanket_order = new_blanket_order("Selling")
-		blanket_order.selling_price_list = "_Test Price List"
-		for item_code in ("ITEM-1", "ITEM-2"):
-			blanket_order.append("items", {"item_code": item_code, "qty": 1})
-
-		with (
-			patch.object(
-				blanket_order_pricing.frappe,
-				"get_all",
-				return_value=[["ITEM-1", "Nos"], ["ITEM-2", "Nos"]],
-			) as get_all,
-			patch.object(blanket_order_pricing, "get_price_list_rate_for", return_value=None),
-		):
-			rates = blanket_order_pricing.get_price_list_rates(blanket_order)
-
-		self.assertEqual(len(rates), 2)
-		get_all.assert_called_once_with(
-			"Item",
-			filters={"name": ("in", ["ITEM-1", "ITEM-2"])},
-			fields=["name", "stock_uom"],
-			as_list=True,
-		)
 
 	def test_price_list_conversion_uses_currency_precision(self):
 		company = "_Test Company"

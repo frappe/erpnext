@@ -2,10 +2,14 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Date
-from frappe.utils import date_diff, today
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
+from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import date_diff, flt, today
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.report.utils import prepare_serial_batch_report
@@ -78,8 +82,10 @@ def get_batch_details(filters):
 		.where(
 			(batch.disabled == 0)
 			& (batch.batch_qty > 0)
-			& ((Date(batch.creation) >= filters["from_date"]) & (Date(batch.creation) <= filters["to_date"]))
+			& (batch.expiry_date >= filters["from_date"])
+			& (batch.expiry_date <= filters["to_date"])
 		)
+		.orderby(batch.expiry_date)
 		.orderby(batch.creation)
 	)
 
@@ -89,4 +95,47 @@ def get_batch_details(filters):
 	if condition := get_allowed_masters_condition(batch.item, "Item"):
 		query = query.where(condition)
 
-	return query.run(as_dict=True)
+	batches = query.run(as_dict=True)
+	set_permitted_batch_qty(batches)
+
+	return [batch for batch in batches if flt(batch.batch_qty) > 0]
+
+
+def set_permitted_batch_qty(batches):
+	warehouses = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
+	if not batches or not warehouses:
+		return
+
+	batch_qty = get_batch_qty_in_warehouses([batch.name for batch in batches], warehouses)
+	for batch in batches:
+		batch.batch_qty = batch_qty.get(batch.name, 0.0)
+
+
+def get_batch_qty_in_warehouses(batch_nos, warehouses):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	condition = (sle.is_cancelled == 0) & (sle.warehouse.isin(warehouses))
+
+	bundle_qty = (
+		frappe.qb.from_(sle)
+		.inner_join(entry)
+		.on(entry.parent == sle.serial_and_batch_bundle)
+		.select(entry.batch_no, Sum(entry.qty))
+		.where(condition & (entry.batch_no.isin(batch_nos)))
+		.groupby(entry.batch_no)
+	).run()
+
+	ledger_qty = (
+		frappe.qb.from_(sle)
+		.select(sle.batch_no, Sum(sle.actual_qty))
+		.where(condition & (sle.batch_no.isin(batch_nos)) & (IfNull(sle.serial_and_batch_bundle, "") == ""))
+		.groupby(sle.batch_no)
+	).run()
+
+	batch_qty = defaultdict(float)
+	for batch_no, qty in [*bundle_qty, *ledger_qty]:
+		batch_qty[batch_no] += flt(qty)
+
+	return batch_qty

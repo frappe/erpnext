@@ -488,12 +488,31 @@ class StatusService:
 			"Production Plan Item", self.doc.production_plan_item, "sales_order_item"
 		)
 
+		work_order = frappe.qb.DocType("Work Order")
+		ordered_qty = flt(
+			(
+				frappe.qb.from_(work_order)
+				.select(Sum(work_order.qty))
+				.where(
+					(work_order.production_plan_item == self.doc.production_plan_item)
+					& (work_order.docstatus == 1)
+					& (work_order.status != "Closed")
+				)
+			).run()[0][0]
+		)
+
 		for plan_reference in prod_plan.prod_plan_references:
 			if plan_reference.item_reference != item_reference:
 				continue
 
-			qty = flt(plan_reference.qty) / total_bundle_qty if self.doc.docstatus == 1 else 0.0
-			frappe.db.set_value("Sales Order Item", plan_reference.sales_order_item, "work_order_qty", qty)
+			allocated_qty = min(flt(plan_reference.qty), ordered_qty)
+			ordered_qty -= allocated_qty
+			frappe.db.set_value(
+				"Sales Order Item",
+				plan_reference.sales_order_item,
+				"work_order_qty",
+				allocated_qty / total_bundle_qty,
+			)
 
 	def _total_bundle_qty(self):
 		if not self.doc.product_bundle_item:
