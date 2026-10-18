@@ -33,7 +33,6 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_scrap_items_from_sub_assemblies,
 	validate_bom_no,
 )
-from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -545,7 +544,7 @@ class StockEntry(StockController):
 		self.make_gl_entries()
 
 		self.repost_future_sle_and_gle()
-		self.update_cost_in_project()
+		self.update_project_consumed_material_cost()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 
@@ -577,7 +576,7 @@ class StockEntry(StockController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
-		self.update_cost_in_project()
+		self.update_project_consumed_material_cost()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
@@ -692,9 +691,6 @@ class StockEntry(StockController):
 				frappe.throw(
 					_("Row {0}: Qty in Stock UOM can not be zero.").format(item.idx), title=_("Zero quantity")
 				)
-
-	def update_cost_in_project(self):
-		update_consumed_material_cost({self.project, *(item.project for item in self.items)} - {None, ""})
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()

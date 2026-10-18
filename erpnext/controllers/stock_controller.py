@@ -23,6 +23,7 @@ from erpnext.controllers.sales_and_purchase_return import (
 	filter_serial_batches,
 	make_serial_batch_bundle_for_return,
 )
+from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
@@ -1486,6 +1487,10 @@ class StockController(AccountsController):
 				)
 			else:
 				create_repost_item_valuation_entry(args)
+
+	def update_project_consumed_material_cost(self):
+		projects = {self.get("project"), *(d.get("project") for d in self.get("items"))}
+		update_consumed_material_cost(projects - {None, ""})
 
 	def add_gl_entry(
 		self,
