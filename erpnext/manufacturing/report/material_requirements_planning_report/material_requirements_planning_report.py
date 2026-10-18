@@ -243,8 +243,15 @@ class MaterialRequirementsPlanningReport:
 			d.sales_forecast_qty = flt(d.sales_forecast_qty)
 			rows_by_key.setdefault((d.item_code, getdate(d.delivery_date)), []).append(d)
 
+		forecast_by_key = {}
 		for row in sales_forecast_data:
 			key = (row.item_code, getdate(row.delivery_date))
+			if key in forecast_by_key:
+				forecast_by_key[key].qty = flt(forecast_by_key[key].qty) + flt(row.qty)
+			else:
+				forecast_by_key[key] = frappe._dict(row)
+
+		for key, row in forecast_by_key.items():
 			if rows := rows_by_key.get(key):
 				split_forecast_qty(rows, flt(row.qty))
 				continue
