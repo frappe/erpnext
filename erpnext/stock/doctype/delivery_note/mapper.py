@@ -424,6 +424,16 @@ def make_inter_company_purchase_receipt(source_name: str, target_doc: str | dict
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 
+def has_pending_inter_company_qty(item, doctype: str, accepted_returns: dict | None = None) -> bool:
+	if item.closed:
+		return False
+
+	if doctype == "Purchase Receipt":
+		return flt(item.qty) - flt((accepted_returns or {}).get(item.name)) > 0
+
+	return get_pending_receipt_qty(item) > 0
+
+
 def make_inter_company_transaction(doctype: str, source_name: str, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import (
 		get_inter_company_details,
@@ -446,6 +456,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
+	accepted_returns = get_accepted_returned_qty(source_doc) if doctype == "Purchase Receipt" else {}
 
 	def set_missing_values(source, target):
 		target.conversion_rate = target.plc_conversion_rate = 0
@@ -462,6 +473,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				target.append("taxes", tax)
 
 		if not target.get("items"):
+			if target.doctype == "Delivery Note":
+				frappe.throw(_("All items have already been delivered"))
+
 			frappe.throw(_("All items have already been received"))
 
 	def update_details(source_doc, target_doc, source_parent):
@@ -565,6 +579,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		if source_parent.doctype == "Delivery Note":
 			target.qty = get_pending_receipt_qty(source)
 
+		if source_parent.doctype == "Purchase Receipt":
+			target.qty = flt(source.qty) - flt(accepted_returns.get(source.name))
+
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
 
@@ -576,6 +593,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	table_maps = {
 		doctype: {
 			"doctype": target_doctype,
+			"validation": {"docstatus": ["=", 1]},
 			"postprocess": update_details,
 			"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 		},
@@ -590,8 +608,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				"Material_request_item": "material_request_item",
 			},
 			"field_no_map": ["warehouse"],
-			"condition": lambda item: get_pending_receipt_qty(item) > 0
-			and not item.closed
+			"condition": lambda item: has_pending_inter_company_qty(item, doctype, accepted_returns)
 			and item.name not in bundle_rows,
 			"postprocess": update_item,
 		},
@@ -602,6 +619,12 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	doclist = get_mapped_doc(doctype, source_name, table_maps, target_doc, set_missing_values)
 
 	return doclist
+
+
+def get_accepted_returned_qty(receipt) -> dict:
+	from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_item_wise_returned_qty
+
+	return get_item_wise_returned_qty([d.name for d in receipt.items])
 
 
 def get_pending_receipt_qty(item) -> float:
