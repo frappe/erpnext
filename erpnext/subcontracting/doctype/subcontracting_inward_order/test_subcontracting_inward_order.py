@@ -376,6 +376,63 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(rm_return.items[0].transfer_qty, 2)
 
+	def test_rm_return_cancel_allowed_when_closed_work_order_used_another_batch(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.stock.serial_batch_bundle import get_batch_nos
+
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		batch_row = next(item for item in rm_in.items if item.item_code == "RM with Batch")
+		batch_row.qty = 3
+		rm_in.submit()
+		returned_batch = next(iter(get_batch_nos(batch_row.serial_and_batch_bundle)))
+
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
+		rm_return.items[0].update(
+			{
+				"qty": 1,
+				"use_serial_batch_fields": 1,
+				"batch_no": returned_batch,
+				"serial_and_batch_bundle": None,
+			}
+		)
+		rm_return.submit()
+
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+		rm_in.submit()
+		used_batch = next(iter(get_batch_nos(rm_in.items[0].serial_and_batch_bundle)))
+
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.qty = 4
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Manufacture", 1)
+		)
+		batch_rows = [item for item in manufacture.items if item.item_code == "RM with Batch"]
+		batch_rows[0].update(
+			{
+				"qty": 1,
+				"use_serial_batch_fields": 1,
+				"batch_no": used_batch,
+				"serial_and_batch_bundle": None,
+			}
+		)
+		for item in batch_rows[1:]:
+			manufacture.remove(item)
+		manufacture.submit()
+		close_work_order(wo.name, "Closed")
+
+		rm_return.reload()
+		rm_return.cancel()
+		self.assertEqual(rm_return.docstatus, 2)
+
 	def test_rm_return_of_batch_received_twice(self):
 		from erpnext.stock.serial_batch_bundle import get_batch_nos
 
