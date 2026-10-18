@@ -26,12 +26,16 @@ import erpnext
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.services.gl_validator import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
-from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import get_closing_entry_for_closed_period
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+	get_closing_entry_for_closed_period,
+	mark_closing_entries_outdated,
+)
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_item_wh_first_reposted_from_reposting_data,
 	get_items_to_be_repost,
+	get_reposting_data,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -350,6 +354,8 @@ class RepostItemValuation(Document):
 		        These flags are useful for asserting real time behaviour like quantity updates.
 		"""
 
+		mark_closing_entries_outdated(self.company, self.posting_date)
+
 		if not frappe.in_test:
 			return
 		if self.flags.dont_run_in_test or frappe.flags.dont_execute_stock_reposts:
@@ -370,6 +376,7 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def restart_reposting(self):
+		self.load_from_db()
 		self.check_permission("write")
 		if self.docstatus != 1 or self.status != "Failed":
 			frappe.throw(_("Only a submitted Repost Item Valuation with status Failed can be restarted"))
@@ -442,6 +449,10 @@ class RepostItemValuation(Document):
 
 	def get_repost_started_at(self):
 		return self.flags.repost_started_at or now()
+
+	def get_saved_repost_started_at(self):
+		if self.reposting_data_file:
+			return get_reposting_data(self.reposting_data_file).get("repost_started_at")
 
 	def skip_reposts_covered_by_dependents(self):
 		if self.repost_only_accounting_ledgers:
@@ -636,8 +647,9 @@ def repost(doc):
 		# This is to avoid TooManyWritesError in case of large reposts
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
-		doc.flags.repost_started_at = now()
+		doc.flags.repost_started_at = doc.get_saved_repost_started_at() or now()
 		doc.set_status("In Progress")
+		mark_closing_entries_outdated(doc.company, doc.posting_date)
 		if not frappe.in_test:
 			frappe.db.commit()
 
