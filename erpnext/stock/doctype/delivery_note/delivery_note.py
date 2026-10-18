@@ -899,13 +899,16 @@ def get_list_context(context=None):
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
 	sii = DocType("Sales Invoice Item")
+	dni = DocType("Delivery Note Item")
 
 	invoiced_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(sii)
-			.select(sii.dn_detail, Sum(sii.qty).as_("qty"))
+			.join(dni)
+			.on(dni.name == sii.dn_detail)
+			.select(dni.name, (Sum(sii.qty * sii.conversion_factor) / dni.conversion_factor).as_("qty"))
 			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
-			.groupby(sii.dn_detail)
+			.groupby(dni.name)
 		).run()
 	)
 
@@ -916,20 +919,26 @@ def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
 	dn = DocType("Delivery Note")
 	dni = DocType("Delivery Note Item")
+	returned_against = DocType("Delivery Note Item").as_("returned_against")
 
 	returned_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(dni)
 			.join(dn)
 			.on(dn.name == dni.parent)
-			.select(dni.dn_detail, Sum(Abs(dni.qty)).as_("qty"))
+			.join(returned_against)
+			.on(returned_against.name == dni.dn_detail)
+			.select(
+				returned_against.name,
+				(Sum(Abs(dni.qty) * dni.conversion_factor) / returned_against.conversion_factor).as_("qty"),
+			)
 			.where(
 				(dn.docstatus == 1)
 				& (dn.is_return == 1)
 				& (dn.return_against == delivery_note)
 				& (dni.qty <= 0)
 			)
-			.groupby(dni.dn_detail)
+			.groupby(returned_against.name)
 		).run()
 	)
 
