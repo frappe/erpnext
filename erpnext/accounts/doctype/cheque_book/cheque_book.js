@@ -18,15 +18,8 @@ frappe.ui.form.on("Cheque Book", {
 				.on("input.cheque_number", (e) => {
 					e.target.value = e.target.value.replace(/\D/g, "");
 				})
+				.on("blur.cheque_number", (e) => set_cheque_range(frm, fieldname, e.target.value))
 		);
-	},
-
-	cheque_start_no(frm) {
-		return set_cheque_range(frm, "cheque_start_no");
-	},
-
-	cheque_end_no(frm) {
-		return set_cheque_range(frm, "cheque_end_no");
 	},
 
 	refresh(frm) {
@@ -46,10 +39,10 @@ frappe.ui.form.on("Cheque Book", {
 	},
 });
 
-// The server pads the range and counts its cheques. A field also changes while the user
-// types, so wait until the user leaves it.
-function set_cheque_range(frm, fieldname) {
-	if (frm.fields_dict[fieldname].$input?.is(":focus")) return;
+// The server pads the range and counts its cheques when the user leaves a range field.
+// Frappe may not have stored the last keystrokes yet, so store the typed value first.
+async function set_cheque_range(frm, fieldname, value) {
+	await frm.set_value(fieldname, value);
 	return frm.call("set_cheque_range");
 }
 
