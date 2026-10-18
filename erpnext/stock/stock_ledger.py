@@ -183,6 +183,18 @@ def validate_stock_frozen_by_closing_entry(sl_entries):
 			)
 
 
+def mark_stock_closing_outdated(sl_entries):
+	from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import mark_closing_entries_outdated
+
+	company = sl_entries[0].get("company")
+	if not company:
+		company = frappe.get_cached_value("Warehouse", sl_entries[0].get("warehouse"), "company")
+
+	posting_dates = [getdate(sle.get("posting_date")) for sle in sl_entries if sle.get("posting_date")]
+	if posting_dates:
+		mark_closing_entries_outdated(company, min(posting_dates))
+
+
 def make_sl_entries(
 	sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False, defer_dimension_checks=False
 ):
@@ -201,6 +213,7 @@ def make_sl_entries(
 	if sl_entries:
 		acquire_sle_processing_gates(sl_entries)
 		validate_stock_frozen_by_closing_entry(sl_entries)
+		mark_stock_closing_outdated(sl_entries)
 
 		cancelled = sl_entries[0].get("is_cancelled")
 		validate_standard_cost_posting_date(sl_entries)
@@ -523,6 +536,7 @@ def skip_reposts_covered_by_dependant_repost(doc, reposted_dependant_item_wh):
 				& (riv.status == "Queued")
 				& (riv.based_on == "Item and Warehouse")
 				& (CombineDatetime(riv.posting_date, riv.posting_time) >= posting_datetime)
+				& (riv.creation <= doc.get_repost_started_at())
 			)
 		).run()
 
@@ -576,6 +590,7 @@ def update_args_in_repost_item_valuation(
 			"item_wh_wise_last_posted_sle": {str(k): v for k, v in item_wh_wise_last_posted_sle.items()}
 			or {},
 			"item_wh_first_reposted": {str(k): v for k, v in item_wh_first_reposted.items()},
+			"repost_started_at": doc.flags.repost_started_at,
 		},
 		doc,
 		file_name,
@@ -2845,6 +2860,8 @@ def get_datetime_limit_condition(sle, detail):
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
+		if not allow_negative_stock and is_reserved_stock_drawn(args):
+			validate_reserved_stock(args)
 		return
 
 	if (
@@ -2889,6 +2906,15 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 
 	if args.reserved_stock:
 		validate_reserved_stock(args)
+
+
+def is_reserved_stock_drawn(sle):
+	return bool(
+		flt(sle.reserved_stock)
+		and flt(sle.actual_qty) < 0
+		and not sle.get("is_cancelled")
+		and not frappe.get_cached_doc("Stock Settings").allow_negative_stock
+	)
 
 
 def is_negative_with_precision(neg_sle, is_batch=False):

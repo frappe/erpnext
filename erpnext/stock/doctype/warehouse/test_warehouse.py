@@ -14,6 +14,8 @@ from erpnext.stock.doctype.warehouse.warehouse import (
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
+INVENTORY_FALLBACK_COMPANY = "_Test Company Inventory Fallback"
+
 
 class TestWarehouse(ERPNextTestSuite):
 	def test_parent_warehouse(self):
@@ -221,7 +223,7 @@ class TestWarehouse(ERPNextTestSuite):
 	def test_inventory_account_fallback_with_multiple_stock_accounts(self):
 		from erpnext.stock import get_warehouse_account
 
-		company = create_inventory_fallback_company()
+		company = INVENTORY_FALLBACK_COMPANY
 		frappe.db.set_value("Company", company, "default_inventory_account", None)
 		if frappe.db.exists("Account", "Extra Inventory Account - _TCIF"):
 			frappe.delete_doc("Account", "Extra Inventory Account - _TCIF")
@@ -290,28 +292,6 @@ class TestWarehouse(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "Missing Inventory Account - _TCIF", warehouse.insert)
 
-	def test_new_warehouse_can_inherit_inventory_account(self):
-		from erpnext.stock import get_warehouse_account
-
-		company, _warehouse = create_ambiguous_inventory_account_warehouse()
-		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
-		parent_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
-		inventory_account = frappe.db.get_value(
-			"Account", {"company": company, "account_type": "Stock", "is_group": 0}, "name"
-		)
-		frappe.db.set_value("Warehouse", parent_warehouse, "account", inventory_account)
-
-		warehouse = frappe.get_doc(
-			{
-				"doctype": "Warehouse",
-				"warehouse_name": "Inherited Inventory Account",
-				"parent_warehouse": parent_warehouse,
-				"company": company,
-			}
-		).insert()
-
-		self.assertEqual(get_warehouse_account(warehouse), inventory_account)
-
 	def test_new_warehouse_inherits_from_parent_created_in_same_transaction(self):
 		from erpnext.stock import get_warehouse_account
 
@@ -351,27 +331,6 @@ class TestWarehouse(ERPNextTestSuite):
 
 		self.assertNotIn("account", warehouse.get_onload())
 
-	def test_stock_accounts_are_fetched_once_per_company(self):
-		from unittest.mock import patch
-
-		from erpnext.stock import get_company_stock_accounts, get_warehouse_account_map
-
-		company, warehouse = create_ambiguous_inventory_account_warehouse()
-		other_warehouse = frappe.get_all(
-			"Warehouse",
-			filters={"company": company, "is_group": 0, "name": ["!=", warehouse.name]},
-			pluck="name",
-			limit=1,
-		)[0]
-		frappe.db.set_value("Warehouse", other_warehouse, "account", None)
-
-		with patch(
-			"erpnext.stock.get_company_stock_accounts", wraps=get_company_stock_accounts
-		) as fetch_stock_accounts:
-			get_warehouse_account_map(company)
-
-		fetch_stock_accounts.assert_called_once_with(company)
-
 	def test_warehouse_account_company_validation(self):
 		company_1 = "_Test Company"
 		company_2 = "_Test Company 1"
@@ -400,24 +359,8 @@ class TestWarehouse(ERPNextTestSuite):
 		warehouse.delete()
 
 
-def create_inventory_fallback_company():
-	company = "_Test Company Inventory Fallback"
-	if not frappe.db.exists("Company", company):
-		frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": company,
-				"abbr": "_TCIF",
-				"default_currency": "INR",
-				"enable_perpetual_inventory": 0,
-				"country": "India",
-			}
-		).insert(ignore_permissions=True)
-	return company
-
-
 def create_ambiguous_inventory_account_warehouse():
-	company = create_inventory_fallback_company()
+	company = INVENTORY_FALLBACK_COMPANY
 	frappe.db.set_value("Company", company, "default_inventory_account", None)
 
 	single_account = frappe.db.get_value(

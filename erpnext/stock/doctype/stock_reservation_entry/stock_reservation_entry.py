@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import cint, flt, now_datetime, nowdate, nowtime, parse_json
+from frappe.utils import ceil, cint, floor, flt, now_datetime, nowdate, nowtime, parse_json
 
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_stock_balance, get_or_make_bin
@@ -80,10 +80,42 @@ class StockReservationEntry(Document):
 
 		self.validate_amended_doc()
 		self.validate_mandatory()
+		self.validate_voucher()
 		self.validate_group_warehouse()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
 		self.validate_uom_is_integer()
+
+	def before_insert(self) -> None:
+		self.delivered_qty = self.consumed_qty = self.transferred_qty = 0
+
+	def validate_voucher(self) -> None:
+		if self.voucher_type == "Sales Order" and not frappe.get_single_value(
+			"Stock Settings", "enable_stock_reservation"
+		):
+			frappe.throw(
+				_("Please enable {0} in the {1}.").format(
+					frappe.bold(_("Stock Reservation")), frappe.bold(_("Stock Settings"))
+				)
+			)
+
+		if frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") != 1:
+			frappe.throw(
+				_("{0} {1} must be submitted to reserve stock against it.").format(
+					_(self.voucher_type), frappe.bold(self.voucher_no)
+				)
+			)
+
+		if self.voucher_type == "Sales Order" and not self.is_row_of_voucher():
+			frappe.throw(
+				_("Item {0} is not a row of {1} {2}.").format(
+					frappe.bold(self.item_code), _(self.voucher_type), frappe.bold(self.voucher_no)
+				)
+			)
+
+	def is_row_of_voucher(self) -> bool:
+		filters = {"name": self.voucher_detail_no, "parent": self.voucher_no, "item_code": self.item_code}
+		return bool(frappe.db.exists("Sales Order Item", filters) or frappe.db.exists("Packed Item", filters))
 
 	def before_submit(self) -> None:
 		self.set_reservation_based_on()
@@ -219,6 +251,7 @@ class StockReservationEntry(Document):
 				"voucher_no": self.from_voucher_no,
 				"voucher_detail_no": self.from_voucher_detail_no,
 				"item_code": self.item_code,
+				"docstatus": 1,
 			},
 		)
 
@@ -348,10 +381,14 @@ class StockReservationEntry(Document):
 
 	def validate_reservation_based_on_serial_and_batch(self) -> None:
 		"""Validates `Reserved Qty`, `Serial and Batch Nos` when `Reservation Based On` is `Serial and Batch`."""
-		if self.voucher_type in ["Work Order", "Subcontracting Order"]:
-			if not self.from_voucher_type:
-				self.validate_with_allowed_qty(self.reserved_qty)
-			return
+		is_production_voucher = self.voucher_type in ["Work Order", "Subcontracting Order"]
+		if is_production_voucher:
+			if self.from_voucher_type:
+				return
+
+			self.validate_with_allowed_qty(self.reserved_qty)
+			if not self.sb_entries:
+				return
 
 		if self.reservation_based_on == "Serial and Batch":
 			allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
@@ -462,6 +499,9 @@ class StockReservationEntry(Document):
 				msg = _("Please select Serial/Batch Nos to reserve or change Reservation Based On to Qty.")
 				frappe.throw(msg)
 
+			if is_production_voucher:
+				return
+
 			# Should be called after validating Serial and Batch Nos.
 			if self.voucher_type != "Subcontracting Inward Order":
 				self.validate_with_allowed_qty(qty_to_be_reserved)
@@ -550,10 +590,12 @@ class StockReservationEntry(Document):
 					if self.transferred_qty < self.reserved_qty:
 						status = "Partially Used"
 
-				elif self.reserved_qty == (self.delivered_qty or self.consumed_qty):
+				elif flt(self.delivered_qty) + flt(self.consumed_qty) >= flt(self.reserved_qty):
 					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+				elif self.delivered_qty:
 					status = "Partially Delivered"
+				elif self.consumed_qty:
+					status = "Partially Used"
 				elif self.reserved_qty >= self.voucher_qty:
 					status = "Reserved"
 				else:
@@ -1122,6 +1164,10 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre_list[0][field])
 
+		bundle.company = sre_list[0].get("company") or frappe.get_cached_value(
+			"Stock Reservation Entry", sre_list[0]["name"], "company"
+		)
+
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
@@ -1131,6 +1177,17 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		bundle.save()
 
 		return bundle
+
+
+def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = None) -> float:
+	conversion_factor = flt(item.get("conversion_factor")) or 1
+	if conversion_factor == 1 or not frappe.get_cached_value("UOM", item.get("uom"), "must_be_whole_number"):
+		return stock_qty
+
+	if max_qty is not None:
+		stock_qty = min(ceil(flt(flt(stock_qty) / conversion_factor, 6)) * conversion_factor, max_qty)
+
+	return floor(flt(flt(stock_qty) / conversion_factor, 6)) * conversion_factor
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
@@ -1201,6 +1258,7 @@ class StockReservation:
 		if sre_names:
 			for sre_name in sre_names:
 				sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name.name)
+				sre_doc.flags.ignore_permissions = True
 				sre_doc.cancel()
 
 		if sre_names and names:
@@ -1215,10 +1273,12 @@ class StockReservation:
 			items = self.doc.get(self.table_name)
 
 		child_doctype = frappe.scrub(self.doc.doctype + " Item")
+		allow_partial_reservation = frappe.get_single_value("Stock Settings", "allow_partial_reservation")
 
 		is_sre_created = False
 		for item in items:
 			sre = frappe.new_doc("Stock Reservation Entry")
+			sre.flags.ignore_permissions = True
 			if isinstance(item, dict):
 				item = frappe._dict(item)
 
@@ -1254,6 +1314,14 @@ class StockReservation:
 			)
 
 			if not self.qty_to_be_reserved:
+				continue
+
+			if self.qty_to_be_reserved < qty and not allow_partial_reservation:
+				frappe.msgprint(
+					_("Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."),
+					title=_("Partial Stock Reservation"),
+					indicator="yellow",
+				)
 				continue
 
 			sre.item_code = item_code
@@ -1454,6 +1522,7 @@ class StockReservation:
 				)
 				continue
 			sre = frappe.new_doc("Stock Reservation Entry")
+			sre.flags.ignore_permissions = True
 			sre.company = self.doc.company
 			sre.voucher_type = entry.voucher_type
 			sre.voucher_no = entry.voucher_no
@@ -1499,6 +1568,7 @@ class StockReservation:
 		]
 
 		sre = frappe.new_doc("Stock Reservation Entry")
+		sre.flags.ignore_permissions = True
 		for row_field in fields:
 			sre.set(row_field, row.get(row_field))
 
@@ -1800,6 +1870,16 @@ def create_stock_reservation_entries_for_so_items(
 			else:
 				qty_to_be_reserved = min(qty_to_be_reserved, item.qty_to_reserve)
 
+		qty_to_be_reserved = get_whole_sales_unit_qty(
+			item,
+			qty_to_be_reserved,
+			min(unreserved_qty, available_qty_to_reserve)
+			if from_voucher_type == "Purchase Receipt"
+			else None,
+		)
+		if not qty_to_be_reserved:
+			continue
+
 		# Partial Reservation
 		if qty_to_be_reserved < unreserved_qty:
 			if not from_voucher_type and (
@@ -1844,26 +1924,10 @@ def create_stock_reservation_entries_for_so_items(
 			sre.from_voucher_detail_no = item.from_voucher_detail_no
 
 		if item.get("serial_and_batch_bundle"):
-			sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 			sre.reservation_based_on = "Serial and Batch"
-
-			index, picked_qty = 0, 0
-			while index < len(sbb.entries) and picked_qty < qty_to_be_reserved:
-				entry = sbb.entries[index]
-				qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_be_reserved - picked_qty)
-
-				sre.append(
-					"sb_entries",
-					{
-						"serial_no": entry.serial_no,
-						"batch_no": entry.batch_no,
-						"qty": qty,
-						"warehouse": entry.warehouse,
-					},
-				)
-
-				index += 1
-				picked_qty += qty
+			set_reserved_serial_batch_entries(
+				sre, item.serial_and_batch_bundle, qty_to_be_reserved, has_serial_no, has_batch_no
+			)
 
 		sre.save()
 		sre.submit()
@@ -1874,6 +1938,71 @@ def create_stock_reservation_entries_for_so_items(
 		frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
 	return sre_count
+
+
+def set_reserved_serial_batch_entries(sre, bundle, qty_to_reserve, has_serial_no, has_batch_no):
+	picked_qty = 0
+	for entry in frappe.get_doc("Serial and Batch Bundle", bundle).entries:
+		if picked_qty >= qty_to_reserve:
+			break
+
+		qty = 1 if has_serial_no else min(abs(entry.qty), qty_to_reserve - picked_qty)
+		sre.append(
+			"sb_entries",
+			{
+				"serial_no": entry.serial_no,
+				"batch_no": entry.batch_no,
+				"qty": qty,
+				"warehouse": entry.warehouse,
+			},
+		)
+		picked_qty += qty
+
+	if picked_qty < qty_to_reserve:
+		add_available_serial_batch_entries(sre, qty_to_reserve - picked_qty, has_serial_no, has_batch_no)
+
+
+def add_available_serial_batch_entries(sre, qty_needed, has_serial_no, has_batch_no):
+	if has_serial_no:
+		add_available_serial_entries(sre, qty_needed, has_batch_no)
+	else:
+		add_available_batch_entries(sre, qty_needed)
+
+
+def add_available_serial_entries(sre, qty_needed, has_batch_no):
+	taken = {row.serial_no for row in sre.sb_entries}
+	for serial in get_available_serial_nos_to_reserve(sre.item_code, sre.warehouse, has_batch_no):
+		if qty_needed <= 0:
+			return
+		if serial[0] in taken:
+			continue
+
+		batch_no = serial[2] if has_batch_no and len(serial) > 2 else None
+		sre.append(
+			"sb_entries", {"serial_no": serial[0], "batch_no": batch_no, "qty": 1, "warehouse": sre.warehouse}
+		)
+		qty_needed -= 1
+
+
+def add_available_batch_entries(sre, qty_needed):
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+
+	taken = {}
+	for row in sre.sb_entries:
+		taken[row.batch_no] = taken.get(row.batch_no, 0) + flt(row.qty)
+
+	for batch in get_auto_batch_nos(frappe._dict(item_code=sre.item_code, warehouse=sre.warehouse)):
+		qty = min(flt(batch.qty) - taken.get(batch.batch_no, 0), qty_needed)
+		if qty <= 0:
+			continue
+
+		if existing := next((row for row in sre.sb_entries if row.batch_no == batch.batch_no), None):
+			existing.qty = flt(existing.qty) + qty
+		else:
+			sre.append("sb_entries", {"batch_no": batch.batch_no, "qty": qty, "warehouse": sre.warehouse})
+		qty_needed -= qty
+		if qty_needed <= 0:
+			return
 
 
 def cancel_stock_reservation_entries(

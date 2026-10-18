@@ -473,6 +473,16 @@ class PurchaseReceipt(BuyingController):
 	def before_cancel(self):
 		super().before_cancel()
 		self.remove_amount_difference_with_purchase_invoice()
+		self.cancel_stock_reservations_made_by_receipt()
+
+	def cancel_stock_reservations_made_by_receipt(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			from_voucher_type="Purchase Receipt", from_voucher_no=self.name, notify=False
+		)
 
 	def remove_amount_difference_with_purchase_invoice(self):
 		for item in self.items:

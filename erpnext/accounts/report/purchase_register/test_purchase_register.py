@@ -306,11 +306,7 @@ class TestPurchaseRegister(ERPNextTestSuite):
 	def test_ledger_view_shows_nothing_payable_for_internal_transfer_invoices(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			prepare_data_for_internal_transfer,
-		)
 
-		prepare_data_for_internal_transfer()
 		si = create_sales_invoice(
 			company="_Test Company with perpetual inventory",
 			customer="_Test Internal Customer 2",

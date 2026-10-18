@@ -40,7 +40,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestAssetRepair(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
-		set_depreciation_settings_in_company()
 
 	def test_asset_status(self):
 		date = nowdate()

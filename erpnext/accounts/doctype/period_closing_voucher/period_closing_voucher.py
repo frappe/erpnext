@@ -276,6 +276,9 @@ class PeriodClosingVoucher(AccountsController):
 				title=_("Stock Closing Entry Required"),
 			)
 
+		if closing_entry.status == "Outdated":
+			self.throw_outdated_stock_closing_entry(closing_entry)
+
 		if closing_entry.status != "Completed":
 			frappe.throw(
 				_(
@@ -295,12 +298,15 @@ class PeriodClosingVoucher(AccountsController):
 		).run()
 
 		if last_change and last_change[0][0] and last_change[0][0] > closing_entry.modified:
-			frappe.throw(
-				_(
-					"Stock transactions were created or modified after the Stock Closing Entry {0} was generated. Regenerate it before submitting the Period Closing Voucher."
-				).format(get_link_to_form("Stock Closing Entry", closing_entry.name)),
-				title=_("Stock Closing Entry Outdated"),
-			)
+			self.throw_outdated_stock_closing_entry(closing_entry)
+
+	def throw_outdated_stock_closing_entry(self, closing_entry):
+		frappe.throw(
+			_(
+				"Stock transactions were created or modified after the Stock Closing Entry {0} was generated. Regenerate it before submitting the Period Closing Voucher."
+			).format(get_link_to_form("Stock Closing Entry", closing_entry.name)),
+			title=_("Stock Closing Entry Outdated"),
+		)
 
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")

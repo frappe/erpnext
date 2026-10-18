@@ -327,7 +327,10 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate_component_and_quantities(self):
 		if self.doc.fg_completed_qty:
-			if frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
+			if (
+				frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom")
+				and self.backflush_based_on != "Material Transferred for Manufacture"
+			):
 				_check_bom_component_qty(
 					self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom)
 				)
