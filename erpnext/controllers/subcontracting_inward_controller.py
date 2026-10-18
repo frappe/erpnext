@@ -1097,7 +1097,7 @@ class SubcontractingInwardController:
 				)
 
 	def get_later_work_order_reservations(self, scio_details: list[str]) -> list:
-		"""Work Order reservations taken from these inward order rows after this entry was submitted, including closed ones that used stock."""
+		"""Work Order reservations taken from these inward order rows after this entry was submitted; a cancelled one counts for the batches it still holds."""
 		submitted_on = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_type": self.doctype, "voucher_no": self.name},
@@ -1123,6 +1123,7 @@ class SubcontractingInwardController:
 						)
 					)
 				)
+				& ((reservation.docstatus == 1) | (entry.delivered_qty > 0))
 				& (reservation.voucher_type == "Work Order")
 				& reservation.from_voucher_detail_no.isin(scio_details)
 				& (reservation.creation > submitted_on[0])
