@@ -27,18 +27,18 @@ class TestMappedDiscounts(ERPNextTestSuite):
 		self.enterContext(self.change_settings("Stock Settings", auto_insert_price_list_rate_if_missing=0))
 
 	def test_inclusive_taxes_and_full_discounts(self):
-		for apply_discount_on in ("Net Total", "Grand Total"):
-			for percentage in (10, 100):
-				for inclusive in (False, True):
+		for inclusive in (False, True):
+			rate = 110 if inclusive else 100
+			regular = self.make_order(item="_Test Item 2", rate=rate, inclusive=inclusive)
+			for apply_discount_on in ("Net Total", "Grand Total"):
+				for percentage in (10, 100):
 					with self.subTest(basis=apply_discount_on, percentage=percentage, inclusive=inclusive):
-						rate = 110 if inclusive else 100
 						discounted = self.make_order(
 							rate=rate,
 							percentage=percentage,
 							inclusive=inclusive,
 							apply_discount_on=apply_discount_on,
 						)
-						regular = self.make_order(item="_Test Item 2", rate=rate, inclusive=inclusive)
 						for sources in ((discounted, regular), (regular, discounted)):
 							receipt = self.combine(*sources).save()
 							self.assertEqual(
@@ -54,29 +54,6 @@ class TestMappedDiscounts(ERPNextTestSuite):
 							self.assertEqual(
 								receipt.grand_total, discounted.grand_total + regular.grand_total
 							)
-
-	def test_fixed_discount_consumption_survives_partial_mixed_receipts(self):
-		for inclusive in (False, True):
-			for discounted_first in (False, True):
-				with self.subTest(inclusive=inclusive, discounted_first=discounted_first):
-					rate = 110 if inclusive else 100
-					discounted = self.make_order(
-						qty=10, rate=rate, fixed=100, inclusive=inclusive, apply_discount_on="Grand Total"
-					)
-					regular = self.make_order(item="_Test Item 2", qty=5, rate=rate, inclusive=inclusive)
-					sources = (discounted, regular) if discounted_first else (regular, discounted)
-					first = self.combine(*sources)
-					for item in first.items:
-						if item.purchase_order == discounted.name:
-							item.qty = 5
-					first.save().submit()
-					second = make_purchase_receipt(discounted.name).save()
-					self.assertEqual(second.discount_amount, 50)
-					self.assertEqual(
-						first.grand_total + second.grand_total, discounted.grand_total + regular.grand_total
-					)
-					first.cancel()
-					self.assertEqual(make_purchase_receipt(discounted.name).discount_amount, 100)
 
 	def test_fixed_discount_remainder_after_multiple_partial_receipts(self):
 		for apply_discount_on in ("Net Total", "Grand Total"):
@@ -117,6 +94,8 @@ class TestMappedDiscounts(ERPNextTestSuite):
 							first.grand_total + second.grand_total + third.grand_total,
 							discounted.grand_total + regular.grand_total,
 						)
+						third.cancel()
+						self.assertEqual(make_purchase_receipt(discounted.name).discount_amount, 50)
 
 	def test_three_fixed_sources_keep_their_own_discounts(self):
 		third_item = make_item("_Test Third Mapped Discount Item").name
@@ -435,12 +414,11 @@ class TestMappedDiscounts(ERPNextTestSuite):
 	def test_update_items_removing_the_last_discounted_row_clears_the_header(self):
 		from erpnext.accounts.services.child_item_update import update_child_qty_rate
 
-		sales_order = self.make_combined_sales_order()
-		regular = sales_order.items[1]
-		update_child_qty_rate(
-			"Sales Order",
-			frappe.as_json(
-				[
+		for replace in (False, True):
+			with self.subTest(replace=replace):
+				sales_order = self.make_combined_sales_order()
+				regular = sales_order.items[1]
+				rows = [
 					{
 						"docname": regular.name,
 						"item_code": regular.item_code,
@@ -448,43 +426,20 @@ class TestMappedDiscounts(ERPNextTestSuite):
 						"rate": regular.rate,
 					}
 				]
-			),
-			sales_order.name,
-		)
+				if replace:
+					rows.append(
+						{
+							"item_code": "_Test Item",
+							"qty": 1,
+							"rate": 100,
+							"delivery_date": sales_order.delivery_date,
+						}
+					)
+				update_child_qty_rate("Sales Order", frappe.as_json(rows), sales_order.name)
 
-		sales_order.reload()
-		self.assertEqual(sales_order.discount_amount, 0)
-		self.assertEqual(sales_order.grand_total, 100)
-
-	def test_update_items_replacing_the_last_discounted_row_clears_the_header(self):
-		from erpnext.accounts.services.child_item_update import update_child_qty_rate
-
-		sales_order = self.make_combined_sales_order()
-		regular = sales_order.items[1]
-		update_child_qty_rate(
-			"Sales Order",
-			frappe.as_json(
-				[
-					{
-						"docname": regular.name,
-						"item_code": regular.item_code,
-						"qty": regular.qty,
-						"rate": 100,
-					},
-					{
-						"item_code": "_Test Item",
-						"qty": 1,
-						"rate": 100,
-						"delivery_date": sales_order.delivery_date,
-					},
-				]
-			),
-			sales_order.name,
-		)
-
-		sales_order.reload()
-		self.assertEqual(sales_order.discount_amount, 0)
-		self.assertEqual(sales_order.grand_total, 200)
+				sales_order.reload()
+				self.assertEqual(sales_order.discount_amount, 0)
+				self.assertEqual(sales_order.grand_total, 200 if replace else 100)
 
 	def test_invoice_of_the_undiscounted_row_takes_no_discount(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice

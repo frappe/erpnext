@@ -5,7 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
@@ -414,21 +415,19 @@ class ProductionPlan(Document):
 				)
 
 	def update_sales_order(self):
-		sales_orders = [row.sales_order for row in self.po_items if row.sales_order]
-		if sales_orders:
-			so_wise_planned_qty = self.get_so_wise_planned_qty(sales_orders)
+		so_items = {
+			(row.sales_order, row.sales_order_item)
+			for row in self.po_items + self.prod_plan_references
+			if row.sales_order and row.sales_order_item
+		}
+		if not so_items:
+			return
 
-			for row in self.po_items:
-				if not row.sales_order and not row.sales_order_item:
-					continue
-
-				key = (row.sales_order, row.sales_order_item)
-				frappe.db.set_value(
-					"Sales Order Item",
-					row.sales_order_item,
-					"production_plan_qty",
-					flt(so_wise_planned_qty.get(key)),
-				)
+		so_wise_planned_qty = self.get_so_wise_planned_qty(list({key[0] for key in so_items}))
+		for key in so_items:
+			frappe.db.set_value(
+				"Sales Order Item", key[1], "production_plan_qty", flt(so_wise_planned_qty.get(key))
+			)
 
 	@staticmethod
 	def get_so_wise_planned_qty(sales_orders):
@@ -444,9 +443,11 @@ class ProductionPlan(Document):
 			group_by="sales_order, sales_order_item",
 		)
 
+		data += get_planned_qty_of_references(sales_orders)
+
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
-			so_wise_planned_qty[key] = row.qty
+			so_wise_planned_qty[key] = flt(so_wise_planned_qty.get(key)) + flt(row.qty)
 
 		return so_wise_planned_qty
 
@@ -469,6 +470,22 @@ class ProductionPlan(Document):
 		):
 			frappe.delete_doc("Work Order", d.name)
 
+	def cancel_untouched_stock_reservations(self):
+		sre_list = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"docstatus": 1,
+				"status": ("in", ["Reserved", "Partially Reserved"]),
+			},
+			pluck="name",
+		)
+		for sre_name in sre_list:
+			sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+			sre_doc.flags.ignore_permissions = True
+			sre_doc.cancel()
+
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
@@ -480,6 +497,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
+			self.cancel_untouched_stock_reservations()
 			self.update_bin_qty()
 			self.delete_production_plan_schedule()
 			return
@@ -507,17 +525,26 @@ class ProductionPlan(Document):
 					return
 
 	def update_requested_status(self):
-		for d in self.mr_items:
-			if d.requested_qty:
-				self.status = "Material Requested"
-				break
+		if self.mr_items and all(flt(d.requested_qty) >= flt(d.quantity) for d in self.mr_items):
+			self.status = "Material Requested"
 
 	def get_production_items(self):
 		return WorkOrderCreationService(self).get_production_items()
 
 	@frappe.whitelist()
 	def make_work_order(self):
+		self.validate_plan_is_open()
 		return WorkOrderCreationService(self).make_work_order()
+
+	def validate_plan_is_open(self):
+		status = (
+			frappe.db.get_value("Production Plan", self.name, "status") if not self.is_new() else self.status
+		)
+		if status in ("Closed", "Completed"):
+			frappe.throw(
+				_("Production Plan {0} is {1}").format(frappe.bold(self.name), _(status)),
+				frappe.InvalidStatusError,
+			)
 
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
 		return WorkOrderCreationService(self).make_work_order_for_finished_goods(wo_list, default_warehouses)
@@ -586,6 +613,15 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def make_material_request(self):
+		submit_material_request = cint(self.get("submit_material_request"))
+		if not (self.name and frappe.db.exists("Production Plan", self.name)):
+			frappe.throw(_("Save the Production Plan before creating Material Requests"))
+
+		self.load_from_db()
+		self.check_permission("write")
+		self.submit_material_request = submit_material_request
+		self.validate_plan_is_open()
+
 		return MaterialRequestService(self).make_material_request()
 
 	@frappe.whitelist()
@@ -615,3 +651,58 @@ def get_schedule_signature(doc):
 			for row in doc.sub_assembly_items
 		),
 	)
+
+
+def get_planned_qty_of_references(sales_orders):
+	plans = get_plans_with_references(sales_orders)
+	if not plans:
+		return []
+
+	reference = frappe.qb.DocType("Production Plan Item Reference")
+	references = (
+		frappe.qb.from_(reference)
+		.select(
+			reference.parent,
+			reference.item_reference,
+			reference.sales_order,
+			reference.sales_order_item,
+			reference.qty,
+		)
+		.where(reference.parent.isin(plans))
+		.orderby(reference.idx)
+	).run(as_dict=True)
+	planned_qty = get_planned_qty_by_order_row(plans)
+
+	allocated = []
+	for row in references:
+		key = (row.parent, row.item_reference)
+		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
+		planned_qty[key] = planned_qty.get(key, 0) - qty
+		allocated.append(
+			frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+		)
+	return allocated
+
+
+def get_plans_with_references(sales_orders):
+	reference = frappe.qb.DocType("Production Plan Item Reference")
+	plan = frappe.qb.DocType("Production Plan")
+	return (
+		frappe.qb.from_(reference)
+		.join(plan)
+		.on(plan.name == reference.parent)
+		.select(reference.parent)
+		.distinct()
+		.where(reference.sales_order.isin(sales_orders) & (plan.docstatus == 1))
+	).run(pluck=True)
+
+
+def get_planned_qty_by_order_row(plans):
+	plan_item = frappe.qb.DocType("Production Plan Item")
+	rows = (
+		frappe.qb.from_(plan_item)
+		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
+		.where(plan_item.parent.isin(plans))
+		.groupby(plan_item.parent, plan_item.sales_order_item)
+	).run(as_dict=True)
+	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}

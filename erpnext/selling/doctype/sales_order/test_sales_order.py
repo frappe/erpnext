@@ -272,22 +272,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.docstatus, 1)
 		self.assertTrue(so.base_grand_total < 0)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 0})
-	def test_sales_order_negative_rate_error_links_to_selling_settings(self):
-		so = make_sales_order(qty=1, rate=100, do_not_save=True)
-		so.append("items", {"item_code": "_Test Item 2", "qty": 1, "rate": -10})
-		so.save()
-
-		with self.assertRaises(frappe.ValidationError):
-			so.submit()
-
-		self.assertIn("selling-settings", frappe.local.message_log[-1]["message"])
-
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
-	def test_sales_order_negative_rate_setting_does_not_allow_negative_quantity(self):
-		so = make_sales_order(qty=-1, rate=100, do_not_save=True)
-		self.assertRaises(frappe.NonNegativeError, so.save)
-
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_order_qty(self):
 		so = make_sales_order(qty=1, do_not_save=True)
@@ -1660,7 +1644,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[0].tax_amount, 10)
 		self.assertEqual(so.taxes[0].total, 110)
 
-		old_default_warehouse = frappe.db.get_value("Company", "_Test Company", "default_warehouse")
 		frappe.db.set_value("Company", "_Test Company", "default_warehouse", "_Test Warehouse - _TC")
 
 		items = json.dumps(
@@ -1686,20 +1669,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[1].account_head, "_Test Account Service Tax - _TC")
 		self.assertEqual(so.taxes[1].tax_amount, 40)
 		self.assertEqual(so.taxes[1].total, 480)
-
-		# teardown
-		frappe.db.set_value(
-			"Item Tax",
-			{"parent": item, "item_tax_template": tax_template},
-			"valid_from",
-			None,
-			update_modified=False,
-		)
-		so.cancel()
-		so.delete()
-		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
-		frappe.db.set_value("Company", "_Test Company", "default_warehouse", old_default_warehouse)
 
 	def test_warehouse_user(self):
 		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")

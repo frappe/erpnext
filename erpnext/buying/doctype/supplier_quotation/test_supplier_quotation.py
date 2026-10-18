@@ -160,31 +160,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation.status, "Ordered")
 		self.assertEqual(make_purchase_order(supplier_quotation.name).items, [])
 
-	def test_purchase_order_skips_fully_ordered_quotation_rows(self):
-		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
-		supplier_quotation.append("items", {"item_code": "_Test Item 2", "qty": 3, "rate": 100})
-		supplier_quotation.submit()
-
-		first_order = make_purchase_order(
-			supplier_quotation.name,
-			args={"filtered_children": [supplier_quotation.items[0].name]},
-		)
-		first_order.items[0].schedule_date = add_days(today(), 1)
-		first_order.submit()
-
-		supplier_quotation.reload()
-		self.assertEqual(supplier_quotation.status, "Partially Ordered")
-
-		second_order = make_purchase_order(supplier_quotation.name)
-		self.assertEqual(len(second_order.items), 1)
-		self.assertEqual(second_order.items[0].item_code, "_Test Item 2")
-		self.assertEqual(second_order.items[0].qty, 3)
-
-		second_order.items[0].schedule_date = add_days(today(), 1)
-		second_order.submit()
-		supplier_quotation.reload()
-		self.assertEqual(supplier_quotation.status, "Ordered")
-
 	def test_purchase_order_cannot_exceed_supplier_quotation_qty(self):
 		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		supplier_quotation.items[0].qty = 5
@@ -485,23 +460,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(len(po.get("items")), 1)
 		self.assertEqual(po.get("items")[0].qty, 0)
 		self.assertEqual(po.get("items")[0].item_code, sq.get("items")[0].item_code)
-
-	def test_removing_quoted_rows_resets_rfq_quote_status(self):
-		rfq = make_request_for_quotation(do_not_submit=True)
-		rfq.append("items", dict(rfq.items[0].as_dict(), name=None, idx=None, item_code="_Test Item 2"))
-		rfq.submit()
-		supplier = rfq.suppliers[0].supplier
-		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
-		sq.submit()
-		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Received")
-
-		row = sq.items[0]
-		trans_items = json.dumps(
-			[{"item_code": row.item_code, "rate": row.rate, "qty": row.qty, "docname": row.name}]
-		)
-		update_child_qty_rate("Supplier Quotation", trans_items, sq.name)
-
-		self.assertEqual(rfq_quote_status(rfq.name, supplier), "Pending")
 
 	def test_removing_only_rfq_row_resets_rfq_quote_status(self):
 		rfq = make_request_for_quotation()

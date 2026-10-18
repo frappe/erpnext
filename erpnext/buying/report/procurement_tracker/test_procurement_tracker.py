@@ -12,12 +12,6 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 )
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
-from erpnext.controllers.tests.test_subcontracting_controller import (
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
-	make_subcontracted_items,
-)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import (
@@ -57,10 +51,6 @@ class TestProcurementTracker(ERPNextTestSuite):
 		self.assertEqual(sum(row["estimated_cost"] for row in rows), mr.items[0].amount)
 
 	def test_subcontracted_estimate_is_shared_by_finished_good_qty(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 		mr = self.make_priced_request(
 			material_request_type="Subcontracting", item_code="Subcontracted Item SA7"
 		)

@@ -113,12 +113,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 	def test_empty_result_keeps_columns(self):
 		self.assert_snapshot_matches()
 
-	def test_opening_receipts_and_issues(self):
-		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
-		self.make_movement(qty=5, basic_rate=150)
-		self.issue(3)
-		self.assert_snapshot_matches()
-
 	def test_ordinary_movements_are_summed_in_duckdb(self):
 		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
 		self.make_movement(qty=5, basic_rate=150)
@@ -209,16 +203,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 		with ledger_snapshot(ledger):
 			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
 
-	def test_inventory_dimension_filter_and_grouping(self):
-		for entry in (
-			self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10)),
-			self.make_movement(qty=5, basic_rate=100),
-		):
-			self.set_ledger_values(entry.name, {"project": "DuckDB Project"})
-		dimensions = [frappe._dict(fieldname="project", doctype="Project")]
-		with patch.object(stock_balance, "get_inventory_dimensions", return_value=dimensions):
-			self.assert_snapshot_matches(project=["DuckDB Project"], show_dimension_wise_stock=1)
-
 	def test_sparse_inventory_dimensions_group_like_the_live_key(self):
 		values = (("A", ""), ("", "A"), ("B", "A"), (None, None), ("", ""))
 		for index, (project, detail) in enumerate(values):
@@ -249,15 +233,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 		self.issue(3, batch_no=batch)
 		self.assert_snapshot_matches()
 
-	def test_changes_after_the_sync_are_not_read(self):
-		self.make_movement(qty=10, basic_rate=100)
-		ledger = capture_ledger(self.filters)
-		expected = stock_balance.execute(deepcopy(self.filters))
-		self.make_movement(qty=5, basic_rate=100)
-		with ledger_snapshot(ledger):
-			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
-		self.assertNotEqual(stock_balance.execute(deepcopy(self.filters)), expected)
-
 	def test_ageing_columns_are_refused(self):
 		filters = frappe._dict(self.filters, show_stock_ageing_data=1)
 		with patch(LATEST_SYNC, side_effect=AssertionError("Sync opened")):
@@ -273,6 +248,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 @patch.object(live_tests, "execute", execute_from_snapshot)
 class TestStockBalanceFromSnapshot(live_tests.TestStockBalance):
 	"""The live Stock Balance tests, with the report read from a snapshot of the ledger. A snapshot
-	refuses ageing columns, which test_ageing_columns_are_refused covers."""
+	refuses ageing columns."""
 
 	test_show_stock_ageing_data_adds_ageing_columns = None

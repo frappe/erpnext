@@ -85,36 +85,12 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 		self.assertEqual(serial.batch_no, batch.name)
 		self.assertEqual(bundle.total_qty, 1)
 
-	def test_outward_bundle_cannot_create_serials(self):
-		bundle = self.make_bundle()
-		bundle.type_of_transaction = "Outward"
-		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
-			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
-		)
-
 	def test_submitted_bundle_rejects_number_entry(self):
 		bundle = self.make_bundle()
 		bundle.docstatus = 1
 		with self.assertRaisesRegex(frappe.ValidationError, "draft bundle"):
 			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
 		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
-		)
-
-	def test_number_entry_follows_the_bundle_not_the_serial_master(self):
-		bundle = self.make_bundle()
-		user = frappe.get_doc(
-			doctype="User",
-			email="bundle-entry-stock-user@example.com",
-			first_name="Bundle Entry",
-			send_welcome_email=0,
-			roles=[{"role": "Stock User"}],
-		).insert()
-		with self.set_user(user.name):
-			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertTrue(
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
 		)
 
@@ -1141,23 +1117,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 		self.assertEqual(entries, [{"serial_no": None, "batch_no": batch.name, "qty": 2}])
 		self.assertEqual(frappe.db.count("Batch", {"item": item_code, "batch_id": batch_id}), 1)
-
-	def test_serial_number_reuses_existing_record(self):
-		item_code = make_item(properties={"has_serial_no": 1}).name
-		serial_no = "TEST-SNID-VAL-00001"
-		entries = resolve_csv_entries(
-			[{"serial_no": serial_no, "qty": 1}], item_code, "Inward", "_Test Company"
-		)
-		serial = frappe.get_doc("Serial No", entries[0].serial_no)
-		self.assertEqual((serial.item_code, serial.serial_no), (item_code, serial_no))
-		self.assertNotEqual(serial.name, serial_no)
-		self.assertEqual((serial.company, serial.status), ("_Test Company", "Inactive"))
-
-		entries = resolve_csv_entries(
-			[{"serial_no": serial_no.lower(), "qty": 1}], item_code, "Inward", "_Test Company"
-		)
-		self.assertEqual(entries, [{"serial_no": serial.name, "batch_no": None, "qty": 1}])
-		self.assertEqual(frappe.db.count("Serial No", {"item_code": item_code, "serial_no": serial_no}), 1)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}

@@ -19,23 +19,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPutawayRule(ERPNextTestSuite):
 	def setUp(self):
-		if not frappe.db.exists("Item", "_Rice"):
-			make_item(
-				"_Rice", {"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1, "stock_uom": "Kg"}
-			)
-
-		if not frappe.db.exists("Warehouse", {"warehouse_name": "Rack 1"}):
-			create_warehouse("Rack 1")
-		if not frappe.db.exists("Warehouse", {"warehouse_name": "Rack 2"}):
-			create_warehouse("Rack 2")
-
-		self.warehouse_1 = frappe.db.get_value("Warehouse", {"warehouse_name": "Rack 1"})
-		self.warehouse_2 = frappe.db.get_value("Warehouse", {"warehouse_name": "Rack 2"})
-
-		if not frappe.db.exists("UOM", "Bag"):
-			new_uom = frappe.new_doc("UOM")
-			new_uom.uom_name = "Bag"
-			new_uom.save()
+		self.warehouse_1 = "Rack 1 - _TC"
+		self.warehouse_2 = "Rack 2 - _TC"
 
 	def assertUnchangedItemsOnResave(self, doc):
 		"""Check if same items remain even after reapplication of rules.
@@ -453,22 +438,6 @@ class TestPutawayRule(ERPNextTestSuite):
 		self.assertEqual(get_batch_from_bundle(stock_entry.items[1].serial_and_batch_bundle), batch_no)
 
 		self.assertUnchangedItemsOnResave(stock_entry)
-
-		stock_entry.load_from_db()
-		stock_entry.cancel()
-
-		rivs = frappe.get_all("Repost Item Valuation", filters={"voucher_no": stock_entry.name})
-		for row in rivs:
-			riv_doc = frappe.get_doc("Repost Item Valuation", row.name)
-			riv_doc.cancel()
-			riv_doc.delete()
-
-		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 1)
-
-		stock_entry.delete()
-		pr.cancel()
-		rule_1.delete()
-		rule_2.delete()
 
 	def test_putaway_rule_on_stock_entry_material_receipt(self):
 		"""Test if rules are applied in Stock Entry of type Receipt."""

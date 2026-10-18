@@ -10,7 +10,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	restore_asset,
 	scrap_asset,
 )
-from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
+from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_asset_value_adjustment,
@@ -19,9 +19,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAssetDepreciationLedger(ERPNextTestSuite):
-	def setUp(self):
-		set_depreciation_settings_in_company()
-
 	def test_report_executes(self):
 		# Smoke-guards the raw-SQL -> query-builder port: the report query must compile and run on
 		# both MariaDB and postgres.
