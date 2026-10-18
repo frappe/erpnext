@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt
 
 from erpnext.controllers.item_close import validate_parent_reopen
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import validate_reopen_against_blanket_order
 from erpnext.selling.doctype.sales_order.services.subcontracting import SubcontractingService
 
 
@@ -32,6 +33,7 @@ class StatusService:
 
 		if status != "Closed" and doc.status == "Closed":
 			validate_parent_reopen(doc)
+			validate_reopen_against_blanket_order(doc)
 
 		doc.set_status(update=True, status=status)
 		# Upon Sales Order Re-open, check for credit limit.
