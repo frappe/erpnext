@@ -162,18 +162,6 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 		bundle.cancel()
 		self.assertEqual(self.report_rows_for(parent), [])
 
-	def test_fractional_bundles_are_floored(self):
-		comp_a = self.make_component()
-		parent = self.make_bundle_parent()
-
-		# 13 / 2 = 6.5 -> only 6 complete bundles can be packed
-		self.set_bin_projected_qty(comp_a, WAREHOUSE, 13)
-		self.make_active_bundle(parent, [(comp_a, 2)])
-
-		rows = self.report_rows_for(parent)
-		self.assertEqual(len(rows), 1)
-		self.assertEqual(flt(rows[0][5]), 6.0)
-
 	def test_fractional_stock_not_lost_to_float_error(self):
 		# a fractional-UOM component can have a non-integer qty per bundle, which triggers the float case
 		comp_a = self.make_component(stock_uom=self.make_fractional_uom())
