@@ -816,6 +816,20 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		sre = _get_stock_reservation_entries_for_voucher("Sales Order", so.name, fields=["status"])[0]
 		self.assertEqual(sre.status, "Delivered")
 
+	def test_get_serial_batch_entries_aggregates(self) -> None:
+		doc = frappe.new_doc("Stock Reservation Entry")
+		doc.reservation_based_on = "Serial and Batch"
+		doc.append("sb_entries", {"serial_no": "SN1", "qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN2", "qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN3", "qty": 1, "delivered_qty": 1})
+		doc.append("sb_entries", {"serial_no": "SN4", "qty": 0})
+		doc.append("sb_entries", {"batch_no": "B1", "qty": 5})
+		doc.append("sb_entries", {"batch_no": "B1", "qty": 3})
+
+		result = doc.get_serial_batch_entries()
+		self.assertEqual(result.serial_nos, ["SN1", "SN2"])
+		self.assertEqual(result.batches["B1"], 8)
+
 
 def create_items() -> dict:
 	items_properties = [
