@@ -58,6 +58,7 @@ class ShareTransfer(Document):
 					"current_state": "Issued",
 				},
 			)
+			shareholder.flags.from_share_transfer = True
 			shareholder.save()
 
 			doc = self.get_shareholder_doc(self.to_shareholder)
@@ -72,6 +73,7 @@ class ShareTransfer(Document):
 					"no_of_shares": self.no_of_shares,
 				},
 			)
+			doc.flags.from_share_transfer = True
 			doc.save()
 
 		elif self.transfer_type == "Purchase":
@@ -92,6 +94,7 @@ class ShareTransfer(Document):
 					"no_of_shares": self.no_of_shares,
 				},
 			)
+			doc.flags.from_share_transfer = True
 			doc.save()
 
 	def on_cancel(self):
@@ -116,6 +119,7 @@ class ShareTransfer(Document):
 				},
 			)
 
+			from_shareholder.flags.from_share_transfer = True
 			from_shareholder.save()
 
 			compnay_shareholder.append(
@@ -130,6 +134,7 @@ class ShareTransfer(Document):
 				},
 			)
 
+			compnay_shareholder.flags.from_share_transfer = True
 			compnay_shareholder.save()
 
 		elif self.transfer_type == "Transfer":
@@ -146,6 +151,7 @@ class ShareTransfer(Document):
 					"no_of_shares": self.no_of_shares,
 				},
 			)
+			from_shareholder.flags.from_share_transfer = True
 			from_shareholder.save()
 
 	def validate(self):
@@ -301,6 +307,7 @@ class ShareTransfer(Document):
 		doc.share_balance = []
 		for entry in new_entries:
 			doc.append("share_balance", entry)
+		doc.flags.from_share_transfer = True
 		doc.save()
 
 	def return_share_balance_entry(self, from_no, to_no, rate):
