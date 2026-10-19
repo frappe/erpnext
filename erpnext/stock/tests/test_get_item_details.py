@@ -665,6 +665,42 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 3)
 			self.assertEqual({d.batch_no for d in entries}, {batches[1]})
 
+	def test_reserved_serial_nos_picked_for_sales_order_delivery(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_numbers_from_bundle,
+		)
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2], has_serial_no=1, serial_no_series="SRV-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"pick_serial_and_batch_based_on": "FIFO",
+				"auto_create_serial_and_batch_bundle_for_outward": 1,
+				"enable_stock_reservation": 1,
+				"allow_negative_stock": 0,
+			},
+		):
+			so = make_sales_order(
+				item_code=item_code, warehouse="_Test Warehouse - _TC", qty=2, rate=100, do_not_submit=True
+			)
+			so.reserve_stock = 1
+			so.items[0].reserve_stock = 1
+			so.submit()
+
+			dn = make_delivery_note(so.name)
+			dn.items[0].use_serial_batch_fields = 1
+			dn.items[0].serial_no = None
+			dn.insert()
+			self.assertFalse(dn.items[0].serial_no)
+
+			dn.submit()
+			self.assertEqual(len(get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle)), 2)
+
 	def test_same_document_rows_reduce_batch_by_stock_qty(self):
 		item_code, batches = self.make_batched_item_with_stock(
 			[10], uoms=[{"uom": "Box", "conversion_factor": 5}]
