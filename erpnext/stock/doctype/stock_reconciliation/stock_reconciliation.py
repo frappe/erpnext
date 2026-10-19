@@ -22,6 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
 
@@ -1604,7 +1605,7 @@ def get_stock_balance_for(
 	batch_no: str | None = None,
 	with_valuation_rate: bool = True,
 	inventory_dimensions_dict: dict | None = None,
-	row: str | dict | None = None,
+	row: StockReconciliationItem | str | dict | None = None,
 	company: str | None = None,
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
