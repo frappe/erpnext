@@ -58,8 +58,10 @@ class AssetValueAdjustment(Document):
 		self.validate_asset_not_split()
 
 	def validate_asset_not_split(self):
+		# self.modified is already the cancel time here; the stored value is the submission time
+		submitted_on = frappe.db.get_value(self.doctype, self.name, "modified")
 		split_asset = frappe.db.get_value(
-			"Asset", {"split_from": self.asset, "creation": (">", self.modified)}, "name"
+			"Asset", {"split_from": self.asset, "creation": (">", submitted_on)}, "name"
 		)
 		if split_asset:
 			frappe.throw(
