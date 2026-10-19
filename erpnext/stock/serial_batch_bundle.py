@@ -53,7 +53,7 @@ def get_serial_no_status(sle):
 
 def get_status_for_serial_nos(sle):
 	status = "Inactive"
-	if sle.actual_qty < 0:
+	if sle.actual_qty < 0 and sle.voucher_type not in ["Purchase Invoice", "Purchase Receipt"]:
 		status = "Delivered"
 		if sle.voucher_type == "Stock Entry":
 			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
@@ -61,11 +61,22 @@ def get_status_for_serial_nos(sle):
 				status = "Consumed"
 
 		if sle.is_cancelled == 1 and (
-			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"] or status == "Consumed"
+			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt", "Stock Reconciliation"]
+			or status == "Consumed"
 		):
 			status = "Inactive"
 
 	return status
+
+
+def get_serial_no_status_term(sn_table, sle, warehouse, status):
+	if warehouse:
+		return "Active"
+
+	if not sle.is_cancelled:
+		return status
+
+	return Case().when(sn_table.reference_name == sle.voucher_no, "Inactive").else_(status)
 
 
 class SerialBatchBundle:
@@ -534,14 +545,7 @@ class SerialBatchBundle:
 		query = (
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
-			.set(
-				sn_table.status,
-				"Active"
-				if warehouse
-				else status
-				if (sn_table.reference_name != sle.voucher_no or sle.is_cancelled != 1)
-				else "Inactive",
-			)
+			.set(sn_table.status, get_serial_no_status_term(sn_table, sle, warehouse, status))
 			.set(sn_table.company, sle.company)
 			.set(sn_table.customer, customer)
 			.where(sn_table.name.isin(serial_nos))
