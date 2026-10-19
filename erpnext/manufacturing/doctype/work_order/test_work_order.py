@@ -29,6 +29,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
 	close_work_order,
+	get_reserved_qty_for_production,
 	make_job_card,
 	make_material_request,
 	make_stock_entry,
@@ -3945,6 +3946,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.save()
 		wo.submit()
 
+		# The Work Order makes the Stitched Shirt itself, so it is no demand on the warehouse.
+		self.assertEqual(get_reserved_qty_for_production(stitched, warehouse), 0)
+
 		# Complete the internal Stitching job card -> Stitched Shirt is produced into WIP and reserved.
 		stitching_jc = frappe.get_doc(
 			"Job Card",
@@ -3997,12 +4001,59 @@ class TestWorkOrder(ERPNextTestSuite):
 		sre = frappe.get_doc("Stock Reservation Entry", sre_name)
 		self.assertEqual(sre.transferred_qty, 10)
 		self.assertEqual(sre.status, "Closed")
+		self.assertEqual(get_reserved_qty_for_production(stitched, warehouse), 0)
 
 		# Cancelling the transfer restores the reservation.
 		ste.cancel()
 		sre.reload()
 		self.assertEqual(sre.transferred_qty, 0)
 		self.assertEqual(sre.status, "Reserved")
+
+	def test_rework_keeps_the_reworked_item_reserved(self):
+		warehouse = "Stores - _TC"
+		item = make_item("Test Rework Item", {"is_stock_item": 1}).name
+		polish = make_item("Test Rework Polish", {"is_stock_item": 1}).name
+
+		if not frappe.db.exists("Workstation", "Test Rework Workstation"):
+			make_workstation(workstation="Test Rework Workstation", production_capacity=1)
+		if not frappe.db.exists("Operation", "Test Rework"):
+			make_operation(operation="Test Rework", workstation="Test Rework Workstation")
+
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = item
+		bom.quantity = 1
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		bom.append(
+			"operations",
+			{
+				"operation": "Test Rework",
+				"workstation": "Test Rework Workstation",
+				"finished_good": item,
+				"finished_good_qty": 1,
+				"is_final_finished_good": 1,
+				"time_in_mins": 60,
+				"sequence_id": 1,
+			},
+		)
+		bom.append("items", {"item_code": item, "qty": 1, "do_not_explode": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": polish, "qty": 1, "operation_row_id": 1})
+		bom.insert()
+		bom.submit()
+
+		make_wo_order_test_record(
+			production_item=item,
+			qty=10,
+			bom_no=bom.name,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+			wip_warehouse=warehouse,
+			fg_warehouse=warehouse,
+		)
+
+		# The item to rework comes from the warehouse, though the operation makes it again.
+		self.assertEqual(get_reserved_qty_for_production(item, warehouse), 10)
 
 	def test_stock_reservation_for_batched_raw_material(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
