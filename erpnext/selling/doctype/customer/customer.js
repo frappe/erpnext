@@ -225,6 +225,8 @@ frappe.ui.form.on("Customer", {
 						: __("Loyalty Points: {0}", [info.loyalty_points]);
 				frm.dashboard.add_indicator(label, "blue");
 			});
+
+			frm.trigger("render_items_tab");
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
@@ -254,6 +256,32 @@ frappe.ui.form.on("Customer", {
 	validate: function (frm) {
 		if (frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 	},
+
+	render_items_tab(frm) {
+		frm.party_items ??= new erpnext.PartyItems(frm, {
+			party_type: "Customer",
+			order_doctype: "Sales Order",
+			labels: {
+				frequent_description: __("The items this customer orders most often."),
+				frequent_empty: __("No sales orders from this customer yet."),
+				orders_title: __("Submitted sales orders that include this item"),
+				reserved_description: __(
+					"Items you sell only to this customer. They won't appear when selling to other customers."
+				),
+				reserved_empty: __("No items are reserved for this customer."),
+				item_hint: __("Items this customer orders most often are listed first."),
+				this_party: __("This customer"),
+				reserved: (item) => __("{0} is now reserved for this customer", [item]),
+				remove_reserved: (item) => __("Remove {0} from this customer's reserved items?", [item]),
+			},
+		});
+		frm.party_items.refresh();
+	},
+
+	on_tab_change(frm) {
+		frm.party_items?.show();
+	},
+
 	get_customer_group_details: function (frm) {
 		frappe.call({
 			method: "get_customer_group_details",
