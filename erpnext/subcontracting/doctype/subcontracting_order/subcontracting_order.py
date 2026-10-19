@@ -327,6 +327,18 @@ class SubcontractingOrder(SubcontractingController):
 				stock_bin = get_bin(item.rm_item_code, item.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
+	def update_reserved_qty_for_production(self):
+		"""A Work Order keeps the input of a subcontracted operation reserved until this order takes it."""
+		job_cards = [d.job_card for d in self.items if d.job_card]
+		if not job_cards:
+			return
+
+		work_orders = frappe.get_all(
+			"Job Card", filters={"name": ("in", job_cards)}, pluck="work_order", distinct=True
+		)
+		for work_order in work_orders:
+			frappe.get_doc("Work Order", work_order).update_reserved_qty_for_production()
+
 	def populate_items_table(self):
 		items = []
 
@@ -431,6 +443,7 @@ class SubcontractingOrder(SubcontractingController):
 		if update_bin:
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
+			self.update_reserved_qty_for_production()
 
 	def update_subcontracted_quantity_in_po(self):
 		po_items = [d.purchase_order_item for d in self.service_items if d.purchase_order_item]

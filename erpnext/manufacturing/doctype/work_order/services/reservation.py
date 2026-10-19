@@ -698,14 +698,22 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
+	operation = frappe.qb.DocType("Work Order Operation")
 
-	query = (
+	rows = (
 		frappe.qb.from_(wo)
-		.from_(wo_item)
-		.select(Sum(_production_reserved_qty_field(wo, wo_item)))
+		.inner_join(wo_item)
+		.on(wo_item.parent == wo.name)
+		.left_join(operation)
+		.on((operation.parent == wo.name) & (operation.idx == wo_item.operation_row_id))
+		.select(
+			wo.name.as_("work_order"),
+			wo_item.operation_row_id,
+			operation.is_subcontracted,
+			_production_reserved_qty_field(wo, wo_item).as_("qty"),
+		)
 		.where(
 			(wo_item.item_code == item_code)
-			& (wo_item.parent == wo.name)
 			& (wo.docstatus == 1)
 			& (wo_item.source_warehouse == warehouse)
 			& (wo.status.notin(["Stopped", "Completed", "Closed"]))
@@ -715,8 +723,15 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 			)
 			& ExistsCriterion(_earlier_operation_making_item(wo, wo_item)).negate()
 		)
+	).run(as_dict=True)
+
+	subcontracted = _qty_taken_over_by_subcontracting(
+		item_code, warehouse, {row.work_order for row in rows if row.is_subcontracted}
 	)
-	return query.run()[0][0] or 0.0
+	return sum(
+		max(flt(row.qty) - subcontracted.get((row.work_order, row.operation_row_id), 0.0), 0.0)
+		for row in rows
+	)
 
 
 def _earlier_operation_making_item(wo, wo_item):
@@ -731,6 +746,43 @@ def _earlier_operation_making_item(wo, wo_item):
 			& (operation.idx < wo_item.operation_row_id)
 		)
 	)
+
+
+def _qty_taken_over_by_subcontracting(item_code, warehouse, work_orders) -> dict:
+	"""Qty of the item that submitted Subcontracting Orders of each subcontracted operation reserve
+	from the warehouse instead of the Work Order, by (Work Order, operation row): all of it, or what a
+	closed one supplied."""
+	if not work_orders:
+		return {}
+
+	job_card = frappe.qb.DocType("Job Card")
+	order = frappe.qb.DocType("Subcontracting Order")
+	order_item = frappe.qb.DocType("Subcontracting Order Item")
+	supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
+	qty = (
+		Case()
+		.when(order.status == "Closed", supplied_item.total_supplied_qty)
+		.else_(supplied_item.required_qty)
+	)
+
+	rows = (
+		frappe.qb.from_(supplied_item)
+		.inner_join(order)
+		.on(order.name == supplied_item.parent)
+		.inner_join(order_item)
+		.on(order_item.name == supplied_item.reference_name)
+		.inner_join(job_card)
+		.on(job_card.name == order_item.job_card)
+		.select(job_card.work_order, job_card.operation_row_id, Sum(qty).as_("qty"))
+		.where(
+			(supplied_item.rm_item_code == item_code)
+			& (supplied_item.reserve_warehouse == warehouse)
+			& (order.docstatus == 1)
+			& job_card.work_order.isin(list(work_orders))
+		)
+		.groupby(job_card.work_order, job_card.operation_row_id)
+	).run(as_dict=True)
+	return {(row.work_order, row.operation_row_id): flt(row.qty) for row in rows}
 
 
 def _production_reserved_qty_field(wo, wo_item):
