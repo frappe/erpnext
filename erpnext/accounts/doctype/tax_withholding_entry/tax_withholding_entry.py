@@ -528,22 +528,27 @@ class TaxWithholdingController:
 		return bool(self.doc.get("is_return") and self.doc.get("return_against"))
 
 	def _process_return_ldc_entries(self, under_entries: deque, category: dict) -> list:
-		"""Reverse a return at the certificate rate applied on the original invoice, up to the
-		amount deducted under the certificate, so that the certificate limit is given back."""
-		ldc_entry = self._get_original_ldc_entry(category)
+		"""Reverse a return at each certificate rate applied on the original invoice, up to the
+		amount deducted under that certificate, so that its limit is given back."""
 		current_entry = under_entries[0] if under_entries else None
-		if not (ldc_entry and current_entry and current_entry.taxable_name == self.doc.name):
+		if not (current_entry and current_entry.taxable_name == self.doc.name):
 			return []
 
-		taxable_amount = max(current_entry.taxable_amount, -ldc_entry.taxable_amount)
-		if taxable_amount >= 0:
-			return []
+		entries = []
+		for ldc_entry in self._get_original_ldc_entries(category):
+			if flt(current_entry.taxable_amount, self.precision) >= 0:
+				break
+			entries.extend(self._reverse_ldc_entry(current_entry, ldc_entry, category))
 
-		ldc_part = current_entry.copy()
-		ldc_part.taxable_amount = taxable_amount
-		current_entry.taxable_amount -= taxable_amount
 		if not flt(current_entry.taxable_amount, self.precision):
 			under_entries.popleft()
+
+		return entries
+
+	def _reverse_ldc_entry(self, current_entry: dict, ldc_entry: dict, category: dict) -> list:
+		ldc_part = current_entry.copy()
+		ldc_part.taxable_amount = max(current_entry.taxable_amount, -ldc_entry.taxable_amount)
+		current_entry.taxable_amount -= ldc_part.taxable_amount
 
 		return self._merge_entries(
 			deque([ldc_part]),
@@ -556,16 +561,18 @@ class TaxWithholdingController:
 			},
 		)
 
-	def _get_original_ldc_entry(self, category: dict) -> dict | None:
+	def _get_original_ldc_entries(self, category: dict) -> list:
 		"""Certificate, rate and net taxable amount deducted under it for the original invoice
 		and its earlier returns, including deductions made through later documents."""
 		entry = frappe.qb.DocType(DOCTYPE)
-		rows = (
+		taxable_amount = Sum(entry.taxable_amount)
+
+		return (
 			frappe.qb.from_(entry)
 			.select(
 				entry.lower_deduction_certificate,
 				entry.tax_rate,
-				Sum(entry.taxable_amount).as_("taxable_amount"),
+				taxable_amount.as_("taxable_amount"),
 			)
 			.where(entry.taxable_doctype == self.doc.doctype)
 			.where(entry.taxable_name.isin(self._get_original_and_return_names()))
@@ -574,10 +581,11 @@ class TaxWithholdingController:
 			.where(entry.status == "Settled")
 			.where(entry.docstatus == 1)
 			.groupby(entry.lower_deduction_certificate, entry.tax_rate)
+			.having(taxable_amount > 0)
+			.orderby(entry.lower_deduction_certificate)
+			.orderby(entry.tax_rate)
 			.run(as_dict=True)
 		)
-
-		return next((row for row in rows if row.taxable_amount > 0), None)
 
 	def _get_original_and_return_names(self) -> list[str]:
 		returns = frappe.get_all(

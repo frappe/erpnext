@@ -1687,6 +1687,69 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		self.cleanup_invoices([pi1, pi2, pi_return])
 
+	def test_return_reverses_each_certificate_at_its_own_rate(self):
+		supplier = "Test LDC Supplier"
+		category = "Test Service Category"
+		frappe.db.set_value("Supplier", supplier, {"tax_withholding_category": category, "pan": "ABCTY1234D"})
+
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		older_certificate_upto = add_days(fiscal_year[1], 1)
+		for certificate_no, tax_rate, valid_from, valid_upto in (
+			("TEST-LDC-A", 1, fiscal_year[1], older_certificate_upto),
+			("TEST-LDC-B", 2, add_days(older_certificate_upto, 1), fiscal_year[2]),
+		):
+			create_lower_deduction_certificate(
+				supplier=supplier,
+				certificate_no=certificate_no,
+				tax_withholding_category=category,
+				tax_rate=tax_rate,
+				limit=50000,
+				valid_from=valid_from,
+				valid_upto=valid_upto,
+			)
+
+		# advance of 6,000 at 1% under the older certificate
+		pe = create_payment_entry(payment_type="Pay", party_type="Supplier", party=supplier, paid_amount=6000)
+		pe.update({"posting_date": fiscal_year[1], "apply_tds": 1, "tax_withholding_category": category})
+		pe.save()
+		pe.submit()
+
+		# the advance is adjusted at 1% and the remaining 9,000 is deducted at 2% under the newer one
+		pi = create_purchase_invoice(
+			supplier=supplier,
+			rate=15000,
+			posting_date=add_days(older_certificate_upto, 1),
+			set_posting_time=True,
+		)
+		advance = pi.get_advance_entries()[0]
+		pi.append(
+			"advances",
+			{
+				"reference_type": advance.reference_type,
+				"reference_name": advance.reference_name,
+				"advance_amount": advance.amount,
+				"allocated_amount": 6000,
+			},
+		)
+		pi.save()
+		pi.submit()
+		self.assertEqual(pi.taxes_and_charges_deducted, 180)
+
+		pi_return = create_purchase_invoice(
+			supplier=supplier,
+			is_return=1,
+			qty=-1,
+			rate=15000,
+			posting_date=pi.posting_date,
+			set_posting_time=True,
+		)
+		pi_return.return_against = pi.name
+		pi_return.save()
+		pi_return.submit()
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -240)
+
+		self.cleanup_invoices([pe, pi, pi_return])
+
 	def test_ldc_at_0_rate(self):
 		frappe.db.set_value(
 			"Supplier",
