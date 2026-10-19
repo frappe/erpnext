@@ -72,24 +72,58 @@ class BillingStatusService:
 
 
 def get_creditable_qty(return_doc) -> dict:
-	"""Qty of each return row that may still be credited: billed on the original row, less earlier credits."""
-	original_rows = {d.name: d.dn_detail for d in return_doc.items if d.dn_detail}
-	if not original_rows:
+	sources = get_credit_sources(return_doc)
+	originals = {name for names in sources.values() for name in names}
+	if not originals:
 		return {}
 
-	billed_qty = get_billed_qty(set(original_rows.values()))
-	credited_qty = get_credited_qty(set(original_rows.values()), return_doc.name)
+	available = get_creditable_stock_qty(originals, return_doc.name)
 	creditable_qty = {}
 	for row in return_doc.items:
-		original = original_rows.get(row.name)
-		available = flt(billed_qty.get(original)) - flt(credited_qty.get(original))
-		creditable_qty[row.name] = max(min(abs(flt(row.qty)), available), 0)
-		credited_qty[original] = flt(credited_qty.get(original)) + creditable_qty[row.name]
+		factor = flt(row.conversion_factor) or 1
+		needed = abs(flt(row.stock_qty) or flt(row.qty) * factor)
+		taken = 0.0
+		for original in sources.get(row.name, []):
+			take = min(needed - taken, max(flt(available.get(original)), 0))
+			available[original] = flt(available.get(original)) - take
+			taken += take
+
+		creditable_qty[row.name] = flt(taken / factor, 6)
 
 	return creditable_qty
 
 
-def get_billed_qty(original_rows: set) -> dict:
+def get_credit_sources(return_doc) -> dict:
+	sources = {d.name: [d.dn_detail] for d in return_doc.items if d.dn_detail}
+	unlinked = [d for d in return_doc.items if not d.dn_detail]
+	if not (unlinked and return_doc.return_against):
+		return sources
+
+	rows_by_item = {}
+	for row in frappe.get_all(
+		"Delivery Note Item",
+		filters={
+			"parent": return_doc.return_against,
+			"item_code": ("in", list({d.item_code for d in unlinked})),
+		},
+		fields=["name", "item_code"],
+		order_by="idx",
+	):
+		rows_by_item.setdefault(row.item_code, []).append(row.name)
+
+	for row in unlinked:
+		sources[row.name] = rows_by_item.get(row.item_code, [])
+
+	return sources
+
+
+def get_creditable_stock_qty(original_rows: set, current_return: str) -> dict:
+	billed = get_billed_stock_qty(original_rows)
+	credited = get_credited_stock_qty(original_rows, current_return)
+	return {row: flt(billed.get(row)) - flt(credited.get(row)) for row in original_rows}
+
+
+def get_billed_stock_qty(original_rows: set) -> dict:
 	si = frappe.qb.DocType("Sales Invoice")
 	sii = frappe.qb.DocType("Sales Invoice Item")
 	invoiced = {
@@ -114,7 +148,8 @@ def get_billed_qty(original_rows: set) -> dict:
 		filters={"name": ("in", list(original_rows))},
 		fields=["name", "billed_amt", "rate", "qty", "conversion_factor"],
 	):
-		billed_qty[row.name] = get_row_billed_qty(row, invoiced.get(row.name))
+		factor = flt(row.conversion_factor) or 1
+		billed_qty[row.name] = get_row_billed_qty(row, invoiced.get(row.name)) * factor
 
 	return billed_qty
 
@@ -129,7 +164,7 @@ def get_row_billed_qty(row, invoiced) -> float:
 	return direct_qty + flt(order_billed_amount / flt(row.rate), 6)
 
 
-def get_credited_qty(original_rows: set, current_return: str) -> dict:
+def get_credited_stock_qty(original_rows: set, current_return: str) -> dict:
 	return_rows = frappe._dict(
 		frappe.get_all(
 			"Delivery Note Item",
@@ -145,14 +180,6 @@ def get_credited_qty(original_rows: set, current_return: str) -> dict:
 	if not return_rows:
 		return {}
 
-	conversion_factors = frappe._dict(
-		frappe.get_all(
-			"Delivery Note Item",
-			filters={"name": ("in", list(original_rows))},
-			fields=["name", "conversion_factor"],
-			as_list=True,
-		)
-	)
 	sii = frappe.qb.DocType("Sales Invoice Item")
 	credited = (
 		frappe.qb.from_(sii)
@@ -164,8 +191,7 @@ def get_credited_qty(original_rows: set, current_return: str) -> dict:
 	credited_qty = {}
 	for return_row, stock_qty in credited:
 		original = return_rows[return_row]
-		qty = abs(flt(stock_qty)) / (flt(conversion_factors.get(original)) or 1)
-		credited_qty[original] = flt(credited_qty.get(original)) + qty
+		credited_qty[original] = flt(credited_qty.get(original)) + abs(flt(stock_qty))
 
 	return credited_qty
 
