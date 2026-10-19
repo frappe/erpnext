@@ -569,7 +569,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		return item_code, batches
 
-	def get_item_details_for_row(self, item_code, qty, items=None):
+	def get_item_details_for_row(self, item_code, qty, items=None, batch_no=None):
 		ctx = frappe._dict(
 			{
 				"doctype": "Delivery Note",
@@ -577,6 +577,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 				"company": "_Test Company",
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": qty,
+				"batch_no": batch_no,
 				"use_serial_batch_fields": 1,
 				"price_list": "_Test Price List",
 				"currency": "INR",
@@ -630,16 +631,39 @@ class TestGetItemDetail(ERPNextTestSuite):
 		):
 			details = self.get_item_details_for_row(item_code, 5)
 			self.assertIsNone(details.get("batch_no"))
-			serial_nos = details.serial_no.split("\n")
-			self.assertEqual(len(serial_nos), 5)
+			self.assertFalse(details.get("serial_no"))
+
+			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
+			dn.reload()
+			self.assertEqual(len(get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle)), 5)
+
+	def test_serial_nos_auto_picked_from_selected_batch(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 3], has_serial_no=1, serial_no_series="SBP-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			details = self.get_item_details_for_row(item_code, 3, batch_no=batches[1])
+			self.assertFalse(details.get("serial_no"))
 
 			dn = create_delivery_note(
-				item_code=item_code, qty=5, use_serial_batch_fields=1, serial_no=details.serial_no
+				item_code=item_code, qty=3, use_serial_batch_fields=1, batch_no=batches[1]
 			)
 			dn.reload()
-			self.assertEqual(
-				get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
+			self.assertFalse(dn.items[0].serial_no)
+
+			entries = frappe.get_all(
+				"Serial and Batch Entry",
+				{"parent": dn.items[0].serial_and_batch_bundle},
+				["serial_no", "batch_no"],
 			)
+			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 3)
+			self.assertEqual({d.batch_no for d in entries}, {batches[1]})
 
 	def test_same_document_rows_reduce_batch_by_stock_qty(self):
 		item_code, batches = self.make_batched_item_with_stock(
