@@ -32,8 +32,7 @@ def get_data(filters):
 
 
 def get_finished_good_row(row, fg_work_orders):
-	produced_qty = sum(flt(d.produced_qty) for d in fg_work_orders)
-	process_loss_qty = sum(flt(d.get("process_loss_qty")) for d in fg_work_orders)
+	produced_qty, pending_qty = get_produced_and_pending_qty(row.planned_qty, fg_work_orders)
 	return {
 		"indent": 0,
 		"item_code": row.item_code,
@@ -42,8 +41,14 @@ def get_finished_good_row(row, fg_work_orders):
 		"bom_level": 0,
 		"qty": flt(row.planned_qty),
 		"produced_qty": produced_qty,
-		"pending_qty": get_pending_qty(row.planned_qty, produced_qty, process_loss_qty),
+		"pending_qty": pending_qty,
 	}
+
+
+def get_produced_and_pending_qty(qty, documents):
+	produced_qty = sum(flt(d.produced_qty) for d in documents)
+	process_loss_qty = flt(documents[-1].get("process_loss_qty")) if documents else 0.0
+	return produced_qty, get_pending_qty(qty, produced_qty, process_loss_qty)
 
 
 def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
@@ -54,8 +59,7 @@ def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
 			documents = [d for d in work_orders if d.production_plan_sub_assembly_item == item.name]
 
 		indent = 1 + (item.indent or 0)
-		produced_qty = sum(flt(d.produced_qty) for d in documents)
-		process_loss_qty = sum(flt(d.get("process_loss_qty")) for d in documents)
+		produced_qty, pending_qty = get_produced_and_pending_qty(item.qty, documents)
 		data.append(
 			{
 				"indent": indent,
@@ -64,7 +68,7 @@ def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
 				"bom_level": item.bom_level,
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
-				"pending_qty": get_pending_qty(item.qty, produced_qty, process_loss_qty),
+				"pending_qty": pending_qty,
 			}
 		)
 		data.extend(get_document_row(d, indent=indent + 1) for d in documents)
@@ -107,6 +111,7 @@ def get_work_orders(filters):
 			"production_plan_item",
 			"production_plan_sub_assembly_item",
 		],
+		order_by="creation",
 	)
 
 	for row in work_orders:
