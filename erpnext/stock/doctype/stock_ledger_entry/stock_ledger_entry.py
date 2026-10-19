@@ -128,27 +128,61 @@ class StockLedgerEntry(Document):
 		if diff < 0 and abs(diff) > 0.0001:
 			self.throw_validation_error(diff, dimensions)
 
+		if not self.flags.defer_future_dimension_check:
+			self.validate_future_inventory_dimension_balance(diff, dimensions, flt_precision)
+
+	def validate_future_dimension_balance_after_voucher(self):
+		if self.is_cancelled or self.actual_qty >= 0:
+			return
+
+		dimensions = self._get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		balance = flt(self.get_available_qty_after_prev_transaction(dimensions), flt_precision)
+		self.validate_future_inventory_dimension_balance(balance, dimensions, flt_precision)
+
+	def validate_future_inventory_dimension_balance(self, balance, dimensions, precision):
+		for actual_qty in self.get_future_dimension_qty(dimensions):
+			balance = flt(balance + flt(actual_qty), precision)
+			if balance < 0 and abs(balance) > 0.0001:
+				self.throw_validation_error(balance, dimensions)
+
 	def get_available_qty_after_prev_transaction(self, dimensions):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		available_qty_query = (
-			frappe.qb.from_(sle)
+		available_qty = (
+			self.get_dimension_sle_query(sle, dimensions)
 			.select(Sum(sle.actual_qty))
-			.where(
-				(sle.item_code == self.item_code)
-				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime <= self.posting_datetime)
-				& (sle.company == self.company)
-				& (sle.is_cancelled == 0)
-			)
+			.where(sle.posting_datetime <= self.posting_datetime)
+			.run()
+		)
+
+		return available_qty[0][0] or 0
+
+	def get_future_dimension_qty(self, dimensions):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return (
+			self.get_dimension_sle_query(sle, dimensions)
+			.select(sle.actual_qty)
+			.where(sle.posting_datetime > self.posting_datetime)
+			.orderby(sle.posting_datetime)
+			.orderby(sle.creation)
+			.run(pluck=True)
+		)
+
+	def get_dimension_sle_query(self, sle, dimensions):
+		query = frappe.qb.from_(sle).where(
+			(sle.item_code == self.item_code)
+			& (sle.warehouse == self.warehouse)
+			& (sle.company == self.company)
+			& (sle.is_cancelled == 0)
 		)
 
 		for dimension, values in dimensions.items():
-			dimension_value = values.get("value")
-			available_qty_query = available_qty_query.where(sle[dimension] == dimension_value)
+			query = query.where(sle[dimension] == values.get("value"))
 
-		available_qty = available_qty_query.run()
-
-		return available_qty[0][0] or 0
+		return query
 
 	def throw_validation_error(self, diff, dimensions):
 		msg = _(
