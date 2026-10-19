@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Min, NullIf, Sum
+from frappe.query_builder.functions import IfNull, Min, NullIf, Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -719,7 +719,7 @@ def _apply_stock_entry_purpose_filter(query, se, sed, stock_entry_doc):
 			["Manufacture", "Material Consumption for Manufacture", "Material Transfer for Manufacture"]
 		)
 	)
-	return query.where(sed.s_warehouse.isnotnull())
+	return query.where(IfNull(sed.s_warehouse, "") != "")
 
 
 def _enrich_with_bundle_data(data, stock_entry_doc):
