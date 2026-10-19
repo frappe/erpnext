@@ -309,7 +309,6 @@ frappe.ui.form.on("Job Card", {
 
 	get_job_steps(frm, has_items) {
 		const { doc } = frm;
-		const escape = frappe.utils.escape_html;
 		const needs_move = has_items && !doc.skip_material_transfer && !doc.is_corrective_job_card;
 		const steps = [];
 
@@ -317,26 +316,13 @@ frappe.ui.form.on("Job Card", {
 			steps.push({
 				label: __("Move Materials"),
 				done: !doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty)),
-				hint: __("Move the raw materials to {0}. Click Move Materials.", [escape(doc.wip_warehouse)]),
 			});
 		}
 
-		const submit_hint = doc.finished_good
-			? __("Click Submit. Then click Record Output to put {0} into stock.", [escape(doc.finished_good)])
-			: __("Click Submit to finish this Job Card.");
-
 		steps.push(
-			{
-				label: __("Start Job"),
-				done: !!doc.time_logs?.length,
-				hint: __("Click Start Job when the work begins."),
-			},
-			{
-				label: __("Complete Job"),
-				done: frm.events.is_job_done(frm),
-				hint: __("Click Complete Job when the work is done and enter the quantity made."),
-			},
-			{ label: __("Submit"), done: false, hint: submit_hint }
+			{ label: __("Start Job"), done: !!doc.time_logs?.length },
+			{ label: __("Complete Job"), done: frm.events.is_job_done(frm) },
+			{ label: __("Submit"), done: false }
 		);
 
 		return steps;
@@ -367,9 +353,7 @@ frappe.ui.form.on("Job Card", {
 			})
 			.join(`<span class="text-muted" style="flex-shrink:0;">›</span>`);
 
-		return `
-			<div style="display:flex;align-items:center;gap:6px;overflow-x:auto;margin-bottom:8px;">${pills}</div>
-			<div class="text-muted ellipsis" style="margin-bottom:12px;">${current ? current.hint : ""}</div>`;
+		return `<div style="display:flex;align-items:center;gap:6px;overflow-x:auto;margin-bottom:16px;">${pills}</div>`;
 	},
 
 	move_materials(frm) {
