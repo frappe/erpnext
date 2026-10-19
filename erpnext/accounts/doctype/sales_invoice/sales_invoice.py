@@ -11,7 +11,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
-from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate, strip_html
 from frappe.utils.data import comma_and
 
 import erpnext
@@ -1324,15 +1324,28 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_mandatory_pos_fields(self):
-		if frappe.db.get_single_value("POS Settings", "invoice_type") != self.doctype:
+		if frappe.db.get_single_value("POS Settings", "invoice_type") != self.doctype or (
+			self.doctype == "Sales Invoice" and self.flags.is_consolidated
+		):
 			return
 
 		mandatory_fields = frappe.get_all(
 			"POS Field",
 			filters={"parent": "POS Settings", "parenttype": "POS Settings", "reqd": 1},
-			fields=["fieldname", "label"],
+			fields=["fieldname", "label", "fieldtype"],
 		)
-		missing_fields = [_(field.label) for field in mandatory_fields if not self.get(field.fieldname)]
+		missing_fields = []
+		for field in mandatory_fields:
+			if field.fieldtype == "Check" or not self.meta.has_field(field.fieldname):
+				continue
+
+			value = self.get(field.fieldname)
+			value = "" if value in (None, []) else cstr(value)
+			if field.fieldtype == "Text Editor" and "<img" in value:
+				continue
+
+			if not strip_html(value).strip():
+				missing_fields.append(_(field.label))
 		if not missing_fields:
 			return
 
