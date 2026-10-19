@@ -18,6 +18,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, parse_json
 from pypika import functions as fn
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
@@ -712,9 +713,24 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 				(wo_item.required_qty > wo_item.transferred_qty)
 				| (wo_item.required_qty > wo_item.consumed_qty)
 			)
+			& ExistsCriterion(_earlier_operation_making_item(wo, wo_item)).negate()
 		)
 	)
 	return query.run()[0][0] or 0.0
+
+
+def _earlier_operation_making_item(wo, wo_item):
+	"""An earlier operation of the Work Order that makes the row's item for the operation using it."""
+	operation = frappe.qb.DocType("Work Order Operation")
+	return (
+		frappe.qb.from_(operation)
+		.select(operation.name)
+		.where(
+			(operation.parent == wo.name)
+			& (operation.finished_good == wo_item.item_code)
+			& (operation.idx < wo_item.operation_row_id)
+		)
+	)
 
 
 def _production_reserved_qty_field(wo, wo_item):
