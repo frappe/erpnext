@@ -47,18 +47,18 @@ def get_closing_entry_for_closed_period(company):
 
 
 def mark_closing_entries_outdated(company, posting_date):
-	closing = frappe.qb.DocType("Stock Closing Entry")
-	names = (
-		frappe.qb.from_(closing)
-		.select(closing.name)
-		.where(
-			(closing.company == company)
-			& (closing.docstatus == 1)
-			& (closing.status == "Completed")
-			& (closing.to_date >= posting_date)
-		)
-		.for_update()
-		.run(pluck=True)
+	names = frappe.db.get_values(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": "Completed",
+			"to_date": (">=", posting_date),
+		},
+		"name",
+		for_update=True,
+		skip_locked=True,
+		pluck=True,
 	)
 	for name in names:
 		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")

@@ -672,7 +672,7 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 			and "Completed" in str(call.args[1:])
 		]
 		self.assertTrue(lookups)
-		self.assertTrue(all("FOR UPDATE" in query.upper() for query in lookups))
+		self.assertTrue(all("FOR UPDATE SKIP LOCKED" in query.upper() for query in lookups))
 		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Outdated")
 
 	def test_posting_into_an_open_closing_takes_the_company_lock(self):
