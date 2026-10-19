@@ -735,11 +735,11 @@ def _earlier_operation_making_item(wo, wo_item):
 
 def _production_reserved_qty_field(wo, wo_item):
 	qty_field = Case()
-	qty_field = qty_field.when(
-		(wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty), 0.0
-	)
 	qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-	return qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+	qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+	# what Subcontracting Orders took over is their demand, not the Work Order's
+	still_needed = qty_field - wo_item.subcontracted_qty
+	return Case().when(still_needed > 0, still_needed).else_(0.0)
 
 
 def get_row_wise_serial_batch(work_order, purpose=None):

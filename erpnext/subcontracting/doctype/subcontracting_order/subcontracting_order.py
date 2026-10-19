@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
@@ -327,6 +328,16 @@ class SubcontractingOrder(SubcontractingController):
 				stock_bin = get_bin(item.rm_item_code, item.reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
+	def update_subcontracted_qty_in_work_orders(self):
+		job_cards = [d.job_card for d in self.items if d.job_card]
+		if not job_cards:
+			return
+
+		for work_order in frappe.get_all(
+			"Job Card", filters={"name": ("in", job_cards)}, pluck="work_order", distinct=True
+		):
+			update_subcontracted_qty(work_order)
+
 	def populate_items_table(self):
 		items = []
 
@@ -431,6 +442,7 @@ class SubcontractingOrder(SubcontractingController):
 		if update_bin:
 			self.update_ordered_qty_for_subcontracting()
 			self.update_reserved_qty_for_subcontracting()
+			self.update_subcontracted_qty_in_work_orders()
 
 	def update_subcontracted_quantity_in_po(self):
 		po_items = [d.purchase_order_item for d in self.service_items if d.purchase_order_item]
@@ -589,6 +601,43 @@ class SubcontractingOrder(SubcontractingController):
 		cancel_stock_reservation_entries(
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
+
+
+def update_subcontracted_qty(work_order: str):
+	"""Set on each required item of the Work Order the qty its Subcontracting Orders took over:
+	all they require, or what a closed one supplied."""
+	job_card = frappe.qb.DocType("Job Card")
+	order = frappe.qb.DocType("Subcontracting Order")
+	order_item = frappe.qb.DocType("Subcontracting Order Item")
+	supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
+	qty = (
+		Case()
+		.when(order.status == "Closed", supplied_item.total_supplied_qty)
+		.else_(supplied_item.required_qty)
+	)
+
+	subcontracted = (
+		frappe.qb.from_(supplied_item)
+		.inner_join(order)
+		.on(order.name == supplied_item.parent)
+		.inner_join(order_item)
+		.on(order_item.name == supplied_item.reference_name)
+		.inner_join(job_card)
+		.on(job_card.name == order_item.job_card)
+		.select(
+			job_card.operation_row_id, supplied_item.rm_item_code, supplied_item.reserve_warehouse, Sum(qty)
+		)
+		.where((job_card.work_order == work_order) & (order.docstatus == 1))
+		.groupby(job_card.operation_row_id, supplied_item.rm_item_code, supplied_item.reserve_warehouse)
+	).run()
+	subcontracted = {tuple(row[:3]): flt(row[3]) for row in subcontracted}
+
+	doc = frappe.get_doc("Work Order", work_order)
+	for row in doc.required_items:
+		qty = subcontracted.get((row.operation_row_id, row.item_code, row.source_warehouse), 0.0)
+		if flt(row.subcontracted_qty) != qty:
+			row.db_set("subcontracted_qty", qty)
+	doc.update_reserved_qty_for_production()
 
 
 def get_finished_good_bom_for_row(item: Document, purchase_order_bom: str | None) -> str | None:
