@@ -602,7 +602,7 @@ def get_reposting_data(file_path) -> dict:
 
 	attached_file = frappe.get_doc("File", file_name)
 
-	content = attached_file.get_content()
+	content = attached_file.get_content(encodings=())
 	if isinstance(content, str):
 		content = content.encode("utf-8")
 

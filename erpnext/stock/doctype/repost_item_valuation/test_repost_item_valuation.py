@@ -151,6 +151,27 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
 		)
 
+	def test_reposting_data_file_is_read_as_bytes(self):
+		from erpnext.stock.stock_ledger import get_reposting_data
+
+		data, content = get_text_decodable_gzip_payload()
+		self.assertTrue(content)
+
+		repost = self.make_queued_item_repost(make_item(properties={"is_stock_item": 1}).name, today())
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"repost_item_valuation-{repost.name}.json.gz",
+				"attached_to_doctype": repost.doctype,
+				"attached_to_name": repost.name,
+				"attached_to_field": "reposting_data_file",
+				"is_private": 1,
+				"content": content,
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertEqual(get_reposting_data(file.file_url), data)
+
 	def test_restart_only_failed_reposts(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
@@ -1091,3 +1112,20 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(kwargs["job_id"], f"{REPOSTING_JOB_ID_PREFIX}RIV-X")
 		self.assertTrue(kwargs["deduplicate"])
 		self.assertTrue(kwargs["continue_reposting"])
+
+
+def get_text_decodable_gzip_payload():
+	import gzip
+	import json
+
+	for idx in range(10000):
+		data = {"repost_affected_transaction": [["Stock Entry", f"MAT-STE-{idx}"]]}
+		content = gzip.compress(json.dumps(data).encode(), mtime=0)
+		for encoding in ("windows-1250", "windows-1252"):
+			try:
+				content.decode(encoding)
+				return data, content
+			except UnicodeDecodeError:
+				continue
+
+	return None, None
