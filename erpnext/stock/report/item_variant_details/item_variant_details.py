@@ -37,7 +37,9 @@ def get_data(templates, filters):
 	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
 		variant_filters.append(condition)
 
-	variant_results = frappe.db.get_all("Item", fields=["name", "variant_of"], filters=variant_filters)
+	variant_results = frappe.db.get_all(
+		"Item", fields=["name", "variant_of", "stock_uom"], filters=variant_filters
+	)
 
 	if not variant_results:
 		frappe.msgprint(_("There are no item variants for the selected item"))
@@ -78,6 +80,7 @@ def get_variant_rows(variant_results, warehouses, open_orders):
 				frappe.scrub(attribute): value
 				for attribute, value in attr_val_map.get(variant.name, {}).items()
 			},
+			"stock_uom": variant.stock_uom,
 			"current_stock": stock_details.get("Inventory") or 0,
 			"in_production": stock_details.get("In Production") or 0,
 			"open_orders": len(open_orders.get(variant.name, ())),
@@ -90,15 +93,20 @@ def get_variant_rows(variant_results, warehouses, open_orders):
 
 
 def get_template_row(template, rows, open_orders):
-	"""Template subtotal. Orders with several of its variants count once."""
+	"""Template subtotal. Orders with several of its variants count once.
+	Stock is totalled only when all variants share a stock UOM."""
 	orders = set().union(*(open_orders.get(row["variant_name"], ()) for row in rows))
-	return {
-		"variant_name": template,
-		"indent": 0,
-		"current_stock": sum(row["current_stock"] for row in rows),
-		"in_production": sum(row["in_production"] for row in rows),
-		"open_orders": len(orders),
-	}
+	template_row = {"variant_name": template, "indent": 0, "open_orders": len(orders)}
+
+	stock_uoms = {row["stock_uom"] for row in rows}
+	if len(stock_uoms) == 1:
+		template_row.update(
+			stock_uom=stock_uoms.pop(),
+			current_stock=sum(row["current_stock"] for row in rows),
+			in_production=sum(row["in_production"] for row in rows),
+		)
+
+	return template_row
 
 
 def get_columns(templates):
@@ -143,6 +151,13 @@ def get_columns(templates):
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 150,
+		},
+		{
+			"fieldname": "stock_uom",
+			"label": _("Stock UOM"),
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 100,
 		},
 		{"fieldname": "current_stock", "label": _("Current Stock"), "fieldtype": "Float", "width": 120},
 		{"fieldname": "in_production", "label": _("In Production"), "fieldtype": "Float", "width": 150},
