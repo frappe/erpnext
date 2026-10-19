@@ -63,13 +63,13 @@ def mark_closing_entries_outdated(company, posting_date):
 		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
 
 
-def has_open_closing_entry(company, posting_date):
+def has_closing_entry_to_coordinate(company, posting_date):
 	return frappe.db.exists(
 		"Stock Closing Entry",
 		{
 			"company": company,
 			"docstatus": 1,
-			"status": ("in", ["Queued", "In Progress"]),
+			"status": ("in", ["Queued", "In Progress", "Completed"]),
 			"to_date": (">=", posting_date),
 		},
 	)
