@@ -230,7 +230,7 @@ class SerialBatchBundleService:
 			parent_details = self.get_parent_details_for_packed_items()
 
 		auto_pick_outward = self.auto_picks_outward_serial_batch()
-		picked_serial_nos = self.get_serial_nos_in_fields(table_name) if auto_pick_outward else None
+		picked_serial_nos = self.get_serial_nos_used_in_rows() if auto_pick_outward else None
 
 		for row in self.doc.get(table_name):
 			item_code = row.get("rm_item_code") or row.get("item_code")
@@ -285,22 +285,37 @@ class SerialBatchBundleService:
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
 
-	def get_serial_nos_in_fields(self, table_name):
+	def get_serial_nos_used_in_rows(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		numbers_by_item = defaultdict(list)
-		for row in self.doc.get(table_name):
-			if row.get("serial_no"):
-				numbers_by_item[row.get("rm_item_code") or row.item_code].extend(
-					get_serial_nos(row.serial_no)
-				)
+		bundle_items = {}
+		for table_name in ("items", "packed_items"):
+			for row in self.doc.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.item_code
+				if row.get("serial_no"):
+					numbers_by_item[item_code].extend(get_serial_nos(row.serial_no))
+				elif row.get("serial_and_batch_bundle"):
+					bundle_items[row.serial_and_batch_bundle] = item_code
 
 		picked_serial_nos = defaultdict(list)
 		for item_code, numbers in numbers_by_item.items():
 			records = SerialBatchIdentity("Serial No").get_records(item_code, numbers, ["name"])
 			picked_serial_nos[item_code].extend(record.name for record in records)
 
+		self.add_serial_nos_in_bundles(picked_serial_nos, bundle_items)
 		return picked_serial_nos
+
+	def add_serial_nos_in_bundles(self, picked_serial_nos, bundle_items):
+		if not bundle_items:
+			return
+
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ("in", list(bundle_items)), "serial_no": ("is", "set")},
+			fields=["parent", "serial_no"],
+		):
+			picked_serial_nos[bundle_items[entry.parent]].append(entry.serial_no)
 
 	def create_auto_picked_bundle(self, bundle_details, row, picked_serial_nos):
 		if picked_serial_nos is None or row.serial_no:
