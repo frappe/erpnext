@@ -1650,7 +1650,6 @@ def update_regional_item_valuation_rate(doc):
 	pass
 
 
-@frappe.request_cache
 def get_linked_asset_qty(detail_field, details):
 	asset = frappe.qb.DocType("Asset")
 	return dict(
@@ -1663,6 +1662,7 @@ def get_linked_asset_qty(detail_field, details):
 	)
 
 
+@frappe.request_cache
 def get_purchase_expense_account(item_code, company):
 	defaults = get_item_defaults(item_code, company)
 
