@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import today
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -145,7 +145,12 @@ class TestVATAuditReport(FrappeTestCase):
 		debit_note = self.make_reverse_charge_purchase(is_return=1)
 		self.assertEqual(self.get_figures(debit_note), [(-1000, -150, -1150), (-1000, 150, -850)])
 
-	def make_reverse_charge_purchase(self, is_return: int = 0):
+	@change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_reverse_charge_credit_line_reduces_supplies(self):
+		pi = self.make_reverse_charge_purchase(credit_amount=100)
+		self.assertEqual(self.get_figures(pi), [(900, -135, 765), (900, 135, 1035)])
+
+	def make_reverse_charge_purchase(self, is_return: int = 0, credit_amount: float = 0):
 		output_vat_account = create_account(
 			account_name="VAT Reverse Charge",
 			account_type="Tax",
@@ -158,6 +163,17 @@ class TestVATAuditReport(FrappeTestCase):
 			settings.save()
 
 		pi = make_sa_purchase_invoice(1000, qty=-1 if is_return else 1, is_return=is_return)
+		if credit_amount:
+			make_item("_Test SA VAT Item 2")
+			pi.append(
+				"items",
+				{
+					**pi.items[0].as_dict(),
+					"name": None,
+					"item_code": "_Test SA VAT Item 2",
+					"rate": -credit_amount,
+				},
+			)
 		for account, add_deduct_tax in (("VAT - 15% - _TCSV", "Add"), (output_vat_account, "Deduct")):
 			pi.append(
 				"taxes",
