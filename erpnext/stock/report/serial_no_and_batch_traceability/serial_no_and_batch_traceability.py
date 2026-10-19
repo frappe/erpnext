@@ -46,6 +46,7 @@ class ReportData:
 		self.doctype_name = self.get_doctype()
 		self.mapped_fg_entries = {}
 		self.forward_trace_path = set()
+		self.backward_trace_path = set()
 
 	def validate_filters(self):
 		if not self.filters.item_code and not self.filters.batches and not self.filters.serial_nos:
@@ -245,46 +246,73 @@ class ReportData:
 		if "raw_materials" not in sabb_data:
 			sabb_data.raw_materials = frappe._dict({})
 
-		materials = self.get_materials(sabb_data)
-		for material in materials:
-			# raw material mapped to a different finished good serial / batch of the same entry
-			if material.fg_serial_no and material.fg_serial_no != sabb_data.serial_no:
-				continue
-
-			if material.fg_batch_no and material.fg_batch_no != sabb_data.batch_no:
-				continue
-
-			# Recursive: batch has sub-components
-			if material.serial_no or material.batch_no:
-				value = material.serial_no or material.batch_no
-				key = (material.item_code, material.reference_name, material.name, value)
-
-				if key not in sabb_data.raw_materials:
-					details = self.get_serial_no_batches(value)
-					if not details:
-						inward_data = self.get_sabb_entries(value, "Inward")
-						if inward_data:
-							details = inward_data[-1]
-
-					if details:
-						details.update(self.get_data_from_sabb(details))
-						sabb_data.raw_materials[key] = details
-
-				if sabb_data.raw_materials.get(key):
-					self.set_backward_data(sabb_data.raw_materials[key], material.qty)
-			else:
-				sub_key = (material.item_code, material.name)
-				if sub_key not in sabb_data.raw_materials:
-					sabb_data.raw_materials[sub_key] = frappe._dict(
-						{
-							"item_code": material.item_code,
-							"item_name": material.item_name,
-							"qty": material.qty or material.quantity,
-							"warehouse": material.warehouse,
-						}
-					)
+		self.backward_trace_path.add(sabb_data.reference_name)
+		try:
+			for material in self.get_materials(sabb_data):
+				self.add_backward_material(sabb_data, material)
+		finally:
+			self.backward_trace_path.discard(sabb_data.reference_name)
 
 		return sabb_data
+
+	def add_backward_material(self, sabb_data, material):
+		# raw material mapped to a different finished good serial / batch of the same entry
+		if material.fg_serial_no and material.fg_serial_no != sabb_data.serial_no:
+			return
+
+		if material.fg_batch_no and material.fg_batch_no != sabb_data.batch_no:
+			return
+
+		# Recursive: batch has sub-components
+		if material.serial_no or material.batch_no:
+			self.set_backward_data_for_component(sabb_data, material)
+			return
+
+		sub_key = (material.item_code, material.name)
+		if sub_key not in sabb_data.raw_materials:
+			sabb_data.raw_materials[sub_key] = frappe._dict(
+				{
+					"item_code": material.item_code,
+					"item_name": material.item_name,
+					"qty": material.qty or material.quantity,
+					"warehouse": material.warehouse,
+				}
+			)
+
+	def set_backward_data_for_component(self, sabb_data, material):
+		value = material.serial_no or material.batch_no
+		key = (material.item_code, material.reference_name, material.name, value)
+		if key not in sabb_data.raw_materials:
+			for idx, details in enumerate(self.get_component_sources(value)):
+				sabb_data.raw_materials[key if idx == 0 else (*key, details.reference_name)] = details
+
+		sources = [details for node_key, details in sabb_data.raw_materials.items() if node_key[:4] == key]
+		produced_qty = sum(abs(flt(details.qty)) for details in sources)
+		for details in sources:
+			share = abs(flt(details.qty)) / produced_qty if produced_qty else 1 / len(sources)
+			self.set_backward_data(details, flt(material.qty) * share)
+
+	def get_component_sources(self, value):
+		details = self.get_serial_no_batches(value)
+		if not details:
+			inward_data = self.get_sabb_entries(value, "Inward")
+			details = inward_data[-1] if inward_data else None
+
+		if not details:
+			return []
+
+		sources = [
+			source
+			for source in self.split_by_production_entries([details])
+			if source.reference_name not in self.backward_trace_path
+		]
+		if not sources and details.reference_name not in self.backward_trace_path:
+			sources = [details]
+
+		for source in sources:
+			source.update(self.get_data_from_sabb(source))
+
+		return sources
 
 	def get_serial_no_batches(self, name=None):
 		batches = self.filters.get("batches", [])
