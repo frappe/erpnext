@@ -47,26 +47,30 @@ def get_closing_entry_for_closed_period(company):
 
 
 def mark_closing_entries_outdated(company, posting_date):
-	for name in frappe.get_all(
+	names = frappe.db.get_values(
 		"Stock Closing Entry",
-		filters={
+		{
 			"company": company,
 			"docstatus": 1,
 			"status": "Completed",
 			"to_date": (">=", posting_date),
 		},
-		pluck="name",
-	):
+		"name",
+		for_update=True,
+		skip_locked=True,
+		pluck=True,
+	)
+	for name in names:
 		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
 
 
-def has_open_closing_entry(company, posting_date):
+def has_closing_entry_to_coordinate(company, posting_date):
 	return frappe.db.exists(
 		"Stock Closing Entry",
 		{
 			"company": company,
 			"docstatus": 1,
-			"status": ("in", ["Queued", "In Progress"]),
+			"status": ("in", ["Queued", "In Progress", "Completed"]),
 			"to_date": (">=", posting_date),
 		},
 	)
