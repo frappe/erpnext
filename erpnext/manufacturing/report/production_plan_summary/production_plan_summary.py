@@ -76,7 +76,9 @@ def get_production_plan_item_details(filters, data, order_details):
 				"indent": 0,
 				"qty": row.planned_qty,
 				"produced_qty": total_produced_qty,
-				"pending_qty": pending_qty,
+				"pending_qty": get_summary_pending_qty(row, work_orders, order_details)
+				if work_orders
+				else pending_qty,
 			}
 		)
 
@@ -127,6 +129,15 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 				remaining_qty = get_pending_qty(remaining_qty, produced_qty, 0)
 
 
+def get_summary_pending_qty(row, work_orders, order_details):
+	details = [order_details.get((work_order, row.item_code), {}) for work_order in work_orders]
+	produced_qty = sum(flt(d.get("produced_qty")) for d in details)
+	ordered_beyond_plan = max(sum(flt(d.get("qty")) for d in details) - flt(row.planned_qty), 0)
+	process_loss_qty = sum(flt(d.get("process_loss_qty")) for d in details)
+	unreplaced_loss_qty = max(process_loss_qty - ordered_beyond_plan, 0)
+	return get_pending_qty(row.planned_qty, produced_qty, unreplaced_loss_qty)
+
+
 def get_pending_qty(qty, produced_qty, process_loss_qty):
 	return flt(
 		flt(qty) - flt(produced_qty) - flt(process_loss_qty), frappe.get_precision("Work Order", "qty")
@@ -139,6 +150,7 @@ def get_work_order_details(filters, order_details):
 		filters={"production_plan": filters.get("production_plan"), "docstatus": 1},
 		fields=[
 			"name",
+			"qty",
 			"produced_qty",
 			"process_loss_qty",
 			"production_plan",

@@ -253,7 +253,7 @@ def get_bom_data(filters):
 			bom_item.item_code,
 			bom_item.description,
 			bom_item.parent.as_("from_bom_no"),
-			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
+			Sum(bom_item.stock_qty).as_("bom_stock_qty"),
 			IfNull(Max(stock_qty.actual_qty), 0).as_("actual_qty"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
@@ -265,6 +265,10 @@ def get_bom_data(filters):
 		query = query.select(bom_item.bom_no, bom_item.is_phantom_item)
 
 	data = query.run(as_dict=True)
+	bom_quantity = flt(frappe.db.get_value("BOM", filters.get("bom"), "quantity")) or 1.0
+	for row in data:
+		row.qty_per_unit = flt(row.pop("bom_stock_qty")) / bom_quantity
+
 	return explode_phantom_boms(data, filters) if bom_item_table == "BOM Item" else data
 
 
@@ -331,4 +335,4 @@ def get_producible_fg_items(filters):
 
 
 def get_producible_qty(available_qty, qty_per_unit):
-	return math.floor(flt(flt(available_qty) / flt(qty_per_unit), 6))
+	return math.floor(flt(flt(available_qty) / flt(qty_per_unit), 9))
