@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form, strip_html
 
 from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 
@@ -204,6 +204,9 @@ class POSService:
 			for payment in doc.get("payments") or []:
 				validate_enabled_mode_of_payment(payment.mode_of_payment)
 
+		if doc.doctype == "POS Invoice":
+			self.validate_mandatory_invoice_fields()
+
 		if doc.is_return:
 			invoice_total = doc.rounded_total or doc.grand_total
 			if abs(flt(doc.paid_amount)) + abs(flt(doc.write_off_amount)) - abs(flt(invoice_total)) > 1.0 / (
@@ -211,7 +214,28 @@ class POSService:
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
+	def validate_mandatory_invoice_fields(self):
+		doc = self.doc
+		if doc.docstatus != 1 or (doc.doctype == "Sales Invoice" and doc.flags.is_consolidated):
+			return
+
+		for field in frappe.get_cached_doc("POS Settings").invoice_fields:
+			if not field.reqd or field.fieldtype == "Check" or not doc.meta.has_field(field.fieldname):
+				continue
+
+			value = doc.get(field.fieldname)
+			value = "" if value in (None, []) else cstr(value)
+			if field.fieldtype == "Text Editor" and "<img" in value:
+				continue
+
+			if not strip_html(value).strip():
+				frappe.throw(
+					_("Value missing for {0}: {1}").format(_(doc.doctype), _(field.label)),
+					exc=frappe.MandatoryError,
+				)
+
 	def validate_created_using_pos(self) -> None:
+		self.validate_mandatory_invoice_fields()
 		doc = self.doc
 		if doc.is_created_using_pos and not doc.pos_profile:
 			frappe.throw(_("POS Profile is mandatory to mark this invoice as POS Transaction."))

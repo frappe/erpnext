@@ -54,7 +54,7 @@
  "icon": "settings",
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:19.677217",
+ "modified": "2026-10-19 17:15:58.556054",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",
@@ -72,15 +72,19 @@
    "email": 1,
    "print": 1,
    "read": 1,
-   "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "role": "Accounts User"
   },
   {
    "email": 1,
    "print": 1,
    "read": 1,
-   "role": "Sales User",
+   "role": "Sales User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
    "share": 1,
    "write": 1
   }

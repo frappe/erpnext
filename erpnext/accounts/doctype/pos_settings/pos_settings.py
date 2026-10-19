@@ -87,6 +87,14 @@ class POSSettings(Document):
 				title=_("Invoice Document Type Selection Error"),
 			)
 
+		if self.invoice_type == "Sales Invoice" and frappe.db.exists(
+			"POS Invoice", {"docstatus": 1, "consolidated_invoice": ["is", "not set"]}
+		):
+			frappe.throw(
+				_("Consolidate all submitted POS Invoices before switching to Sales Invoice."),
+				title=_("Invoice Document Type Selection Error"),
+			)
+
 	def validate_duplicate_invoice_fields(self):
 		invoice_fields = [field.fieldname for field in self.invoice_fields]
 		duplicate_invoice_fields = {key for key, value in Counter(invoice_fields).items() if value > 1}
