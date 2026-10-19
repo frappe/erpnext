@@ -838,3 +838,13 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 		)
 
 		self.assertIn(raw, [row["item_code"] for row in rows if row.get("indent") == 2])
+
+	def test_backward_trace_of_a_batch_repacked_into_itself(self):
+		item = self.make_batch_item("TRP")
+		receipt = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=4, rate=100)
+		batch = self.get_batch(receipt, 0)
+		self.make_batch_repack((item, batch, 4), (item, batch, 4), 4)
+
+		rows = self.run_report(item_code=item, batches=[batch], traceability_direction="Backward")
+
+		self.assertIn(receipt.name, [row.get("reference_name") for row in rows])
