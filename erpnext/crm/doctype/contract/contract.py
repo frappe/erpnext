@@ -5,7 +5,11 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.permissions import filter_allowed_docs_for_doctype, get_user_permissions, get_valid_perms
 from frappe.utils import get_datetime, getdate, nowdate
+from pypika.terms import Criterion
+
+ROLE_PARTY_TYPES = {"Sales Manager": "Customer", "Purchase Manager": "Supplier", "HR Manager": "Employee"}
 
 
 class Contract(Document):
@@ -175,6 +179,61 @@ class Contract(Document):
 		return len([term for term in self.fulfilment_terms if term.fulfilled])
 
 
+class ContractPartyAccess:
+	"""Limits contracts to the party types of the user's roles and to the parties in their User Permissions."""
+
+	def __init__(self, user: str | None = None):
+		self.user = user or frappe.session.user
+		self.meta = frappe.get_meta("Contract")
+		self.all_party_types = self.meta.get_field("party_type").options.split("\n")
+		self.party_types = self.get_party_types()
+		self.allowed_parties = {
+			party_type: self.get_allowed_parties(party_type) for party_type in self.party_types
+		}
+
+	def has_access(self, party_type: str | None, party_name: str | None) -> bool:
+		if not party_type:
+			return True
+
+		if party_type not in self.party_types:
+			return False
+
+		allowed_parties = self.allowed_parties[party_type]
+		return not (allowed_parties and party_name) or party_name in allowed_parties
+
+	def get_criterion(self) -> Criterion | None:
+		if self.party_types == self.all_party_types and not any(self.allowed_parties.values()):
+			return None
+
+		contract = frappe.qb.DocType("Contract")
+		return Criterion.any(
+			[self.get_party_criterion(contract, party_type) for party_type in self.party_types]
+		)
+
+	def get_party_criterion(self, contract, party_type: str) -> Criterion:
+		criterion = contract.party_type == party_type
+		if allowed_parties := self.allowed_parties[party_type]:
+			criterion &= contract.party_name.isin(allowed_parties)
+
+		return criterion
+
+	def get_party_types(self) -> list[str]:
+		"""Roles not mapped in ROLE_PARTY_TYPES, like System Manager, give access to all party types."""
+		roles = {permission.role for permission in get_valid_perms("Contract", user=self.user)}
+		if self.user == "Administrator" or not roles or roles - ROLE_PARTY_TYPES.keys():
+			return self.all_party_types
+
+		party_types = {ROLE_PARTY_TYPES[role] for role in roles}
+		return [party_type for party_type in self.all_party_types if party_type in party_types]
+
+	def get_allowed_parties(self, party_type: str) -> list[str]:
+		if self.meta.get_field("party_name").ignore_user_permissions:
+			return []
+
+		user_permissions = get_user_permissions(self.user).get(party_type, [])
+		return filter_allowed_docs_for_doctype(user_permissions, "Contract", with_default_doc=False)
+
+
 def get_status(start_date, end_date):
 	"""
 	Get a Contract's status based on the start, current and end dates
@@ -231,3 +290,11 @@ def set_lapsed_fulfilment_status():
 		"fulfilment_status",
 		"Lapsed",
 	)
+
+
+def has_permission(doc: Contract, ptype: str | None = None, user: str | None = None) -> bool:
+	return ContractPartyAccess(user).has_access(doc.party_type, doc.party_name)
+
+
+def get_permission_query_conditions(user: str | None = None, doctype: str | None = None) -> Criterion | None:
+	return ContractPartyAccess(user).get_criterion()
