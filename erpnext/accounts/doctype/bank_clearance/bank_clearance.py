@@ -41,6 +41,7 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def get_payment_entries(self):
+<<<<<<< HEAD
 		if not (self.from_date and self.to_date):
 			frappe.throw(_("From Date and To Date are Mandatory"))
 
@@ -62,6 +63,10 @@ class BankClearance(Document):
 				)
 				or []
 			)
+=======
+		entries = self.get_entries_for_account()
+		precision = cint(frappe.db.get_default("currency_precision")) or 2
+>>>>>>> 3c49e8b (fix(accounts): validate bank clearance voucher updates)
 
 		entries = sorted(
 			entries,
@@ -88,8 +93,34 @@ class BankClearance(Document):
 			d.pop("account_currency")
 			row.update(d)
 
+	def get_entries_for_account(self):
+		if not (self.from_date and self.to_date):
+			frappe.throw(_("From Date and To Date are Mandatory"))
+
+		if not self.account:
+			frappe.throw(_("Account is mandatory to get payment entries"))
+
+		entries = []
+
+		# get entries from all the apps
+		for method_name in frappe.get_hooks("get_payment_entries_for_bank_clearance"):
+			entries += (
+				frappe.get_attr(method_name)(
+					self.from_date,
+					self.to_date,
+					self.account,
+					self.bank_account,
+					self.include_reconciled_entries,
+					self.include_pos_transactions,
+				)
+				or []
+			)
+
+		return entries
+
 	@frappe.whitelist()
 	def update_clearance_date(self):
+<<<<<<< HEAD
 		payment_docs = []
 		for d in self.get("payment_entries"):
 			if d.payment_document not in payment_docs:
@@ -118,6 +149,58 @@ class BankClearance(Document):
 					d.clearance_date = None
 
 				if d.payment_document == "Sales Invoice":
+=======
+		self.check_permission("write")
+		frappe.get_doc("Account", self.account).check_permission("read")
+		available_entries = {
+			(entry.payment_document, entry.payment_entry): entry for entry in self.get_entries_for_account()
+		}
+		entries_to_update = []
+		for row in self.get("payment_entries"):
+			if not (row.clearance_date or self.include_reconciled_entries):
+				continue
+
+			entry = available_entries.get((row.payment_document, row.payment_entry))
+			if not entry:
+				frappe.throw(
+					_("Row {0}: Voucher is not eligible for clearance with the selected filters.").format(
+						row.idx
+					)
+				)
+
+			voucher = frappe.get_doc(row.payment_document, row.payment_entry)
+			voucher.check_permission("read")
+			voucher.check_permission("write")
+			if voucher.docstatus != 1:
+				frappe.throw(_("Row {0}: Only submitted vouchers can be cleared.").format(row.idx))
+
+			if row.clearance_date:
+				if getdate(row.clearance_date) < getdate(entry.posting_date):
+					frappe.throw(_("Row {0}: Clearance date cannot be before posting date.").format(row.idx))
+				if entry.get("cheque_date") and getdate(row.clearance_date) < getdate(entry.cheque_date):
+					frappe.throw(_("Row {0}: Clearance date cannot be before cheque date.").format(row.idx))
+			else:
+				row.clearance_date = None
+
+			entries_to_update.append(row)
+
+		if not entries_to_update:
+			msgprint(_("Clearance Date not mentioned"))
+			return
+
+		for d in entries_to_update:
+			if d.payment_document == "Sales Invoice":
+				old_clearance_date = frappe.db.get_value(
+					"Sales Invoice Payment",
+					{
+						"parent": d.payment_entry,
+						"account": self.account,
+						"amount": [">", 0],
+					},
+					"clearance_date",
+				)
+				if d.clearance_date or old_clearance_date:
+>>>>>>> 3c49e8b (fix(accounts): validate bank clearance voucher updates)
 					frappe.db.set_value(
 						"Sales Invoice Payment",
 						{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
