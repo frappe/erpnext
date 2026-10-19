@@ -22,9 +22,15 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		});
 	},
 	render_heatmap(frm) {
-		const { from_date, to_date, current_from_date, current_to_date } = frm.doc;
+		const day = (value) => value?.slice(0, 10);
+		const [from_date, to_date, current_from_date, current_to_date] = [
+			frm.doc.from_date,
+			frm.doc.to_date,
+			frm.doc.current_from_date,
+			frm.doc.current_to_date,
+		].map(day);
 		const days = [];
-		for (let date = from_date; date <= to_date; date = frappe.datetime.add_days(date, 1)) {
+		for (let date = from_date; date <= to_date; date = day(frappe.datetime.add_days(date, 1))) {
 			days.push({ date, bisecting: current_from_date <= date && date <= current_to_date ? 1 : 0 });
 		}
 
