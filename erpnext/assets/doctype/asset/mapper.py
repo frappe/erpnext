@@ -251,12 +251,14 @@ def set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset,
 		existing_asset.opening_accumulated_depreciation * scaling_factor
 	)
 	asset_doc.value_after_depreciation = existing_asset.value_after_depreciation * scaling_factor
+	asset_doc.value_adjustment_amount = flt(existing_asset.value_adjustment_amount) * scaling_factor
 	asset_doc.asset_quantity = split_qty
 	asset_doc.split_from = existing_asset.name if is_new_asset else None
 
 	for row in asset_doc.get("finance_books"):
 		row.value_after_depreciation = row.value_after_depreciation * scaling_factor
 		row.expected_value_after_useful_life = row.expected_value_after_useful_life * scaling_factor
+		row.value_adjustment_amount = flt(row.value_adjustment_amount) * scaling_factor
 
 	if not is_new_asset:
 		asset_doc.flags.ignore_validate_update_after_submit = True
