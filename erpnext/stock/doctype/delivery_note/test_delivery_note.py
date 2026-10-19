@@ -2982,7 +2982,16 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 			if row.item_code == batch_serial_item.name:
 				self.assertTrue(row.batch_no)
-				self.assertTrue(row.serial_no)
+				self.assertFalse(row.serial_no)
+
+		dn.submit()
+		dn.reload()
+		row = next(row for row in dn.items if row.item_code == batch_serial_item.name)
+		entries = frappe.get_all(
+			"Serial and Batch Entry", {"parent": row.serial_and_batch_bundle}, ["serial_no", "batch_no"]
+		)
+		self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 5)
+		self.assertEqual({d.batch_no for d in entries}, {row.batch_no})
 
 	def test_delivery_note_return_for_batch_item_with_different_warehouse(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
