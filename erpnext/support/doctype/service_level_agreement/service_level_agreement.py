@@ -973,10 +973,12 @@ class SLADeadline:
 		if not previous_deadline or not self.previous_doc.get("total_hold_time"):
 			return 0
 
-		deadline_without_hold = self.get_previous_deadline_without_hold()
+		# earlier holds are measured in the working hours of the SLA they were made under
+		previous_calendar = self.get_previous_calendar()
+		deadline_without_hold = self.get_previous_deadline_without_hold(previous_calendar)
 		if not deadline_without_hold:
 			return 0
-		return get_working_seconds_between(deadline_without_hold, previous_deadline, self.priority)
+		return get_working_seconds_between(deadline_without_hold, previous_deadline, previous_calendar)
 
 	def get_resumed_hold_seconds(self) -> float:
 		"""Working time of the hold that ends with this save, if it began before the deadline."""
@@ -994,7 +996,19 @@ class SLADeadline:
 		deadline = self.previous_doc and self.previous_doc.get(self.fieldname)
 		return get_datetime(deadline) if deadline else None
 
-	def get_previous_deadline_without_hold(self) -> datetime | None:
+	def get_previous_calendar(self) -> dict:
+		previous_sla = self.previous_doc.get("service_level_agreement")
+		if (
+			not previous_sla
+			or previous_sla == self.doc.get("service_level_agreement")
+			or not frappe.db.exists("Service Level Agreement", previous_sla)
+		):
+			return self.priority
+
+		sla = frappe.get_doc("Service Level Agreement", previous_sla)
+		return frappe._dict(support_and_resolution=sla.support_and_resolution, holiday_list=sla.holiday_list)
+
+	def get_previous_deadline_without_hold(self, previous_calendar: dict) -> datetime | None:
 		previous_doc = self.previous_doc
 		allotted_seconds = frappe.db.get_value(
 			"Service Level Priority",
@@ -1007,7 +1021,7 @@ class SLADeadline:
 		start_date_time = get_datetime(
 			previous_doc.get("service_level_agreement_creation") or previous_doc.creation
 		)
-		return add_working_seconds(start_date_time, allotted_seconds, self.priority)
+		return add_working_seconds(start_date_time, allotted_seconds, previous_calendar)
 
 
 def get_hold_start(doc) -> datetime | None:

@@ -575,6 +575,39 @@ class TestIssue(TestSetUp):
 		issue.save()
 		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-08 11:00"))
 
+	def test_switching_sla_keeps_hold_in_working_hours(self):
+		late_shift_sla = create_service_level_agreement(
+			default_service_level_agreement=0,
+			holiday_list="__Test Holiday List",
+			entity_type=None,
+			entity=None,
+			response_time=14400,
+			resolution_time=21600,
+			service_level="__Test Late Shift SLA",
+			start_time="12:00:00",
+			end_time="20:00:00",
+			condition="doc.issue_type == 'Late Shift'",
+		)
+		if not frappe.db.exists("Issue Type", "Late Shift"):
+			issue_type = frappe.new_doc("Issue Type")
+			issue_type.name = "Late Shift"
+			issue_type.insert()
+		issue = make_issue(get_datetime("2019-03-04 10:00"), index=1)
+
+		# 10:00 to 18:00: Resolution By 16:00, and 17:00 after the hold from 13:00 to 14:00
+		for status, time in (("Replied", "13:00"), ("Open", "14:00")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 17:00"))
+
+		# 12:00 to 20:00: Resolution By 18:00, and the held working hour still counts
+		issue.issue_type = "Late Shift"
+		issue.service_level_agreement = late_shift_sla.name
+		issue.save()
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
+
 	def test_overdue_agreement_fails_unless_on_hold(self):
 		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
 			fail_overdue_agreements,
