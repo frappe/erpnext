@@ -8,21 +8,25 @@ from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
-from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import CombineDatetime, Max, Now
+from frappe.query_builder import DocType, Interval, Tuple
+from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Now
 from frappe.utils import cint, get_link_to_form, get_weekday, getdate, now, nowtime, to_timedelta
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
 import erpnext
+from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.general_ledger import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.projects.doctype.project.project import update_consumed_material_cost_for_vouchers
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import get_closing_entry_for_closed_period
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
 	repost_future_sle,
 )
+from erpnext.stock.utils import get_combine_datetime
 
 RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
@@ -88,9 +92,11 @@ class RepostItemValuation(Document):
 		self.set_company()
 		self.validate_update_stock()
 		self.validate_period_closing_voucher()
+		self.validate_later_vouchers_in_closed_period()
 		self.set_status(write=False)
 		self.reset_field_values()
 		self.validate_accounts_freeze()
+		check_stock_frozen_date(self.posting_date)
 		self.reset_recreate_stock_ledgers()
 		self.validate_recreate_stock_ledgers()
 
@@ -187,17 +193,78 @@ class RepostItemValuation(Document):
 		if self.recreate_stock_ledgers and self.based_on != "Transaction":
 			self.recreate_stock_ledgers = 0
 
-	def get_closing_stock_balance(self):
-		filters = {
-			"company": self.company,
-			"to_date": (">=", self.posting_date),
-			"status": "Completed",
-			"docstatus": 1,
-		}
+	def validate_later_vouchers_in_closed_period(self):
+		if self.repost_only_accounting_ledgers or not cint(
+			erpnext.is_perpetual_inventory_enabled(self.company)
+		):
+			return
 
-		return frappe.get_all(
-			"Stock Closing Entry", fields=["name", "to_date as posting_date"], filters=filters, limit=1
+		item_warehouses = self.get_item_warehouses_to_repost()
+		if not item_warehouses:
+			return
+
+		if voucher := self.get_later_voucher_in_closed_period(item_warehouses):
+			frappe.throw(
+				_(
+					"Cannot repost item valuation from {0} because {1} {2} falls in the closed Accounting Period {3}"
+				).format(
+					frappe.bold(frappe.format(self.posting_date, "Date")),
+					voucher.voucher_type,
+					get_link_to_form(voucher.voucher_type, voucher.voucher_no),
+					frappe.bold(voucher.accounting_period),
+				),
+				ClosedAccountingPeriod,
+			)
+
+	def get_item_warehouses_to_repost(self):
+		if self.based_on == "Transaction":
+			rows = get_items_to_be_repost(self.voucher_type, self.voucher_no)
+			return list({(row.item_code, row.warehouse) for row in rows})
+
+		if self.item_code and self.warehouse:
+			return [(self.item_code, self.warehouse)]
+
+		return []
+
+	def get_later_voucher_in_closed_period(self, item_warehouses):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		period = frappe.qb.DocType("Accounting Period")
+		closed_document = frappe.qb.DocType("Closed Document")
+
+		query = (
+			frappe.qb.from_(sle)
+			.inner_join(period)
+			.on(
+				(period.company == sle.company)
+				& (sle.posting_date.between(period.start_date, period.end_date))
+			)
+			.inner_join(closed_document)
+			.on((closed_document.parent == period.name) & (closed_document.document_type == sle.voucher_type))
+			.select(sle.voucher_type, sle.voucher_no, period.name.as_("accounting_period"))
+			.where(
+				(sle.is_cancelled == 0)
+				& (sle.company == self.company)
+				& (sle.posting_datetime >= get_combine_datetime(self.posting_date, self.posting_time))
+				& (Tuple(sle.item_code, sle.warehouse).isin(item_warehouses))
+				& (period.disabled == 0)
+				& (closed_document.closed == 1)
+				& (IfNull(period.exempted_role, "").notin(frappe.get_roles()))
+			)
+			.limit(1)
 		)
+
+		if self.voucher_no:
+			query = query.where(sle.voucher_no != self.voucher_no)
+
+		result = query.run(as_dict=True)
+		return result[0] if result else None
+
+	def get_closing_stock_balance(self):
+		closing_entry = get_closing_entry_for_closed_period(self.company)
+		if not closing_entry or getdate(self.posting_date) > getdate(closing_entry.to_date):
+			return []
+
+		return [frappe._dict(name=closing_entry.name, posting_date=closing_entry.to_date)]
 
 	@staticmethod
 	def get_max_period_closing_date(company):
@@ -293,9 +360,11 @@ class RepostItemValuation(Document):
 		msg += "<br>" + _("Please try again in an hour.")
 		frappe.throw(msg, title=_("Pending processing"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def restart_reposting(self):
 		self.check_permission("write")
+		if self.docstatus != 1 or self.status != "Failed":
+			frappe.throw(_("Only a submitted Repost Item Valuation with status Failed can be restarted"))
 
 		self.set_status("Queued", write=False)
 		self.current_index = 0
@@ -347,6 +416,7 @@ class RepostItemValuation(Document):
 			"name": self.name,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
+			"repost_started_at": self.get_repost_started_at(),
 		}
 
 		frappe.db.sql(
@@ -360,9 +430,13 @@ class RepostItemValuation(Document):
 				and docstatus = 1
 				and status = 'Queued'
 				and based_on = 'Item and Warehouse'
+				and creation <= %(repost_started_at)s
 				""",
 			filters,
 		)
+
+	def get_repost_started_at(self):
+		return self.flags.repost_started_at or now()
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
@@ -415,6 +489,7 @@ def repost(doc):
 		# This is to avoid TooManyWritesError in case of large reposts
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
+		doc.flags.repost_started_at = now()
 		doc.set_status("In Progress")
 		if not frappe.in_test:
 			frappe.db.commit()
@@ -506,6 +581,7 @@ def repost_sl_entries(doc):
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
 			doc=doc,
+			allow_zero_rate=doc.allow_zero_rate,
 		)
 	else:
 		repost_future_sle(
@@ -522,6 +598,7 @@ def repost_sl_entries(doc):
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
 			doc=doc,
+			allow_zero_rate=doc.allow_zero_rate,
 		)
 
 
