@@ -10,8 +10,6 @@ from frappe.utils import flt
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
 
-MAX_STORED_QTY_PER_UNIT_ERROR = 0.5e-9
-
 
 def execute(filters=None):
 	filters = filters or {}
@@ -256,7 +254,7 @@ def get_bom_data(filters):
 			bom_item.item_code,
 			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
 			Max(bom_item.parent).as_("from_bom_no"),
-			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
+			Sum(bom_item.stock_qty).as_("bom_stock_qty"),
 			IfNull(Max(stock_qty.actual_qty), 0).as_("actual_qty"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
@@ -265,6 +263,9 @@ def get_bom_data(filters):
 	)
 
 	data = query.run(as_dict=True)
+	bom_quantity = flt(frappe.db.get_value("BOM", filters.get("bom"), "quantity")) or 1.0
+	for row in data:
+		row.qty_per_unit = flt(row.pop("bom_stock_qty")) / bom_quantity
 
 	# description belongs to a BOM line, not to the item, so a component listed more than once holds
 	# several values per group. Max() over text is a sort and the engines sort text differently
@@ -364,10 +365,4 @@ def get_producible_fg_items(filters):
 
 
 def get_producible_qty(available_qty, qty_per_unit):
-	available_qty, qty_per_unit = flt(available_qty), flt(qty_per_unit)
-	producible_qty = math.floor(available_qty / qty_per_unit)
-	next_qty = producible_qty + 1
-	if next_qty * qty_per_unit - available_qty <= next_qty * MAX_STORED_QTY_PER_UNIT_ERROR:
-		return next_qty
-
-	return producible_qty
+	return math.floor(flt(flt(available_qty) / flt(qty_per_unit), 9))

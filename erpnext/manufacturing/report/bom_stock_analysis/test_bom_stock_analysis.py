@@ -348,16 +348,22 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		):
 			self.assertEqual(get_producible_fg_items({})[0].producible_qty, 10)
 
-	def test_stored_per_unit_qty_does_not_lose_a_unit(self):
-		from unittest.mock import patch
+	def test_producible_qty_uses_the_bom_quantities(self):
+		for bom_quantity, rm_qty, stock, producible_qty in (
+			(7, 1, 1, 7),
+			(7, 1, 100, 700),
+			(7, 1, 0.99, 6),
+			(1000, 0.001, 0.01, 10000),
+		):
+			rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10, "stock_uom": "Kg"}).name
+			fg = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+			bom = make_bom(item=fg, raw_materials=[rm], rm_qty=rm_qty, quantity=bom_quantity)
+			warehouse = create_warehouse("_Test BOM Stock Analysis Precision")
+			create_stock_reconciliation(item_code=rm, warehouse=warehouse, qty=stock, rate=10)
 
-		for actual_qty, producible_qty in ((1, 7), (100, 700), (0.99, 6)):
-			rows = [frappe._dict(qty_per_unit=0.142857143, actual_qty=actual_qty)]
-			with patch(
-				"erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis.get_bom_data",
-				return_value=rows,
-			):
-				self.assertEqual(get_producible_fg_items({})[0].producible_qty, producible_qty)
+			rows = get_producible_fg_items({"bom": bom.name, "warehouse": warehouse})
+
+			self.assertEqual(rows[0].producible_qty, producible_qty)
 
 	def test_default_view_without_warehouse(self):
 		bom, material, permitted = self.build_bom_with_stock_in_many_warehouses()
