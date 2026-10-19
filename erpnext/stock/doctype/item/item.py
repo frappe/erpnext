@@ -191,7 +191,6 @@ class Item(Document):
 				alert=True,
 			)
 
-		self.opening_stock = flt(self.opening_stock)
 		if self.opening_stock:
 			if self.opening_stock > 10000 and self.has_serial_no:
 				frappe.enqueue(
@@ -213,6 +212,7 @@ class Item(Document):
 				self.set_opening_stock()
 
 	def validate(self):
+		self.opening_stock = flt(self.opening_stock)
 		if not self.item_name:
 			self.item_name = self.item_code
 
