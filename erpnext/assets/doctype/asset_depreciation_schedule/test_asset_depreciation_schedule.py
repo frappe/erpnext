@@ -1395,6 +1395,18 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 
 		self.assertEqual(rates, [38.1, 36.9])
 
+	def test_reschedule_recomputes_derived_wdv_rate_after_salvage_adjustment(self):
+		asset = create_yearly_wdv_asset(expected_value_after_useful_life=12000, salvage_value_percentage=10)
+		finance_book = asset.finance_books[0]
+		initial_rate = finance_book.rate_of_depreciation
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-12-31")
+		current_value = frappe.db.get_value("Asset", asset.name, "value_after_depreciation")
+
+		adjust_asset_value(asset.name, "2024-01-15", current_value, 70000)
+
+		rate = frappe.db.get_value(finance_book.doctype, finance_book.name, "rate_of_depreciation")
+		self.assertNotEqual(flt(rate, 2), flt(initial_rate, 2))
+
 
 def create_monthly_asset(**args):
 	defaults = {
@@ -1425,15 +1437,15 @@ def get_depreciation_entry_count(asset_name: str) -> int:
 
 
 def create_yearly_wdv_asset(**args):
-	return create_monthly_asset(
-		net_purchase_amount=120000,
-		depreciation_method="Written Down Value",
-		expected_value_after_useful_life=10000,
-		depreciation_start_date="2023-12-31",
-		frequency_of_depreciation=12,
-		total_number_of_depreciations=5,
-		**args,
-	)
+	defaults = {
+		"net_purchase_amount": 120000,
+		"depreciation_method": "Written Down Value",
+		"expected_value_after_useful_life": 10000,
+		"depreciation_start_date": "2023-12-31",
+		"frequency_of_depreciation": 12,
+		"total_number_of_depreciations": 5,
+	}
+	return create_monthly_asset(**{**defaults, **args})
 
 
 def adjust_asset_value(asset_name: str, date: str, current_value: float, new_value: float):

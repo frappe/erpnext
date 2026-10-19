@@ -282,23 +282,29 @@ def set_modified_depreciation_rate(asset_doc, row, new_schedule):
 
 
 def is_depreciation_rate_entered(asset_doc, row) -> bool:
-	"""Finance books saved before the flag existed are judged by the rate of their first schedule."""
+	"""Finance books saved before the flag existed are judged by their first schedule."""
 	if row.is_rate_of_depreciation_entered:
 		return True
 
-	first_rate = get_first_depreciation_rate(asset_doc.name, row.finance_book)
-	return asset_doc.is_entered_depreciation_rate(row, first_rate)
+	first_schedule = get_first_depreciation_schedule(asset_doc.name, row.finance_book)
+	return bool(first_schedule) and asset_doc.is_entered_depreciation_rate(first_schedule)
 
 
-def get_first_depreciation_rate(asset: str, finance_book: str | None) -> float:
+def get_first_depreciation_schedule(asset: str, finance_book: str | None) -> dict | None:
 	schedules = frappe.get_all(
 		"Asset Depreciation Schedule",
 		filters={"asset": asset, "finance_book": finance_book or ["is", "not set"]},
-		fields=["rate_of_depreciation"],
+		fields=[
+			"depreciation_method",
+			"rate_of_depreciation",
+			"expected_value_after_useful_life",
+			"total_number_of_depreciations",
+			"frequency_of_depreciation",
+		],
 		order_by="creation asc",
 		limit=1,
 	)
-	return flt(schedules[0].rate_of_depreciation) if schedules else 0
+	return schedules[0] if schedules else None
 
 
 def get_temp_depr_schedule_doc(asset_doc, fb_row, disposal_date=None, updated_depr_schedule=None):
