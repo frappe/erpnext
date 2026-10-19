@@ -72,8 +72,8 @@ def get_phone_number_key(number: str | None) -> str | None:
 
 
 def get_phone_number_like_pattern(key: str) -> str:
-	"""Return a LIKE pattern for stored numbers ending in the key's last digits, in any format."""
-	return "%" + "%".join(key[-MINIMUM_PHONE_NUMBER_LENGTH:])
+	"""Return a broad LIKE pattern for stored numbers containing the key's last digits, in any format."""
+	return "%" + "%".join(key[-MINIMUM_PHONE_NUMBER_LENGTH:]) + "%"
 
 
 def get_contacts_with_phone_number(number: str | None) -> list[str]:
