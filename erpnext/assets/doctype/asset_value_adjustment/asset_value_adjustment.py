@@ -55,6 +55,19 @@ class AssetValueAdjustment(Document):
 
 	def before_cancel(self):
 		self.validate_asset_not_disposed()
+		self.validate_asset_not_split()
+
+	def validate_asset_not_split(self):
+		split_asset = frappe.db.get_value(
+			"Asset", {"split_from": self.asset, "creation": (">", self.modified)}, "name"
+		)
+		if split_asset:
+			frappe.throw(
+				_(
+					"Asset {0} was split into Asset {1} after this adjustment, so it cannot be cancelled. Adjust the value of each asset instead."
+				).format(get_link_to_form("Asset", self.asset), get_link_to_form("Asset", split_asset)),
+				title=_("Asset Split"),
+			)
 
 	def validate_asset_not_disposed(self):
 		status, disposal_date = frappe.db.get_value("Asset", self.asset, ["status", "disposal_date"])

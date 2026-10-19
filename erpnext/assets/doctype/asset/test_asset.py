@@ -1011,6 +1011,30 @@ class TestAsset(AssetSetup):
 				),
 			)
 
+	def test_value_adjustment_before_split_cannot_be_cancelled(self):
+		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+			make_asset_value_adjustment,
+		)
+
+		asset = create_asset(
+			asset_quantity=2, purchase_date="2025-04-01", available_for_use_date="2025-04-01", submit=1
+		)
+		adjustment_before_split = make_asset_value_adjustment(
+			asset=asset.name, date="2025-06-15", current_asset_value=100000, new_asset_value=120000
+		)
+		adjustment_before_split.submit()
+		split_asset(asset.name, 1)
+
+		adjustment_after_split = make_asset_value_adjustment(
+			asset=asset.name, date="2025-07-15", current_asset_value=60000, new_asset_value=70000
+		)
+		adjustment_after_split.submit()
+
+		self.assertRaises(frappe.ValidationError, adjustment_before_split.cancel)
+		adjustment_after_split.cancel()
+		asset.load_from_db()
+		self.assertEqual(asset.value_adjustment_amount, 10000)
+
 	def test_sold_status_survives_status_recompute(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
