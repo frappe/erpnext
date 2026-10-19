@@ -652,31 +652,26 @@ def make_reverse_gl_entries(
 		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
 
 		if partial_cancel:
-			# Partial cancel is only used by `Advance` in separate account feature.
-			# Only cancel GL entries for unlinked reference using `voucher_detail_no`
-			gle = frappe.qb.DocType("GL Entry")
-			for x in gl_entries:
-				query = (
-					frappe.qb.update(gle)
-					.set(gle.modified, now())
-					.set(gle.modified_by, frappe.session.user)
-					.where(
-						(gle.company == x.company)
-						& (gle.account == x.account)
-						& (gle.party_type == x.party_type)
-						& (gle.party == x.party)
-						& (gle.voucher_type == x.voucher_type)
-						& (gle.voucher_no == x.voucher_no)
-						& (gle.against_voucher_type == x.against_voucher_type)
-						& (gle.against_voucher == x.against_voucher)
-						& (gle.voucher_detail_no == x.voucher_detail_no)
-					)
-				)
-
-				if not immutable_ledger_enabled:
-					query = query.set(gle.is_cancelled, 1)  # smallint column; postgres rejects boolean true
-
-				query.run()
+			if not immutable_ledger_enabled:
+				gle = frappe.qb.DocType("GL Entry")
+				for x in gl_entries:
+					(
+						frappe.qb.update(gle)
+						.set(gle.modified, now())
+						.set(gle.modified_by, frappe.session.user)
+						.set(gle.is_cancelled, 1)  # smallint column; postgres rejects boolean true
+						.where(
+							(gle.company == x.company)
+							& (gle.account == x.account)
+							& (gle.party_type == x.party_type)
+							& (gle.party == x.party)
+							& (gle.voucher_type == x.voucher_type)
+							& (gle.voucher_no == x.voucher_no)
+							& (gle.against_voucher_type == x.against_voucher_type)
+							& (gle.against_voucher == x.against_voucher)
+							& (gle.voucher_detail_no == x.voucher_detail_no)
+						)
+					).run()
 		else:
 			if not immutable_ledger_enabled:
 				gle_names = [x.get("name") for x in gl_entries]
