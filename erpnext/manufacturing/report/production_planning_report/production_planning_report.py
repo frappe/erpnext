@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Min, Sum
+from frappe.utils import flt
 from pypika import Order
 
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -45,6 +47,7 @@ class ProductionPlanReport:
 					parent.planned_start_date,
 					parent.stock_uom,
 					parent.qty.as_("qty_to_manufacture"),
+					parent.produced_qty,
 					parent.name,
 					parent.bom_no,
 					parent.fg_warehouse.as_("warehouse"),
@@ -82,6 +85,9 @@ class ProductionPlanReport:
 				query = query.select(
 					child.delivery_date,
 					parent.base_grand_total,
+					child.delivered_qty,
+					child.conversion_factor,
+					child.produced_qty,
 				).where(
 					(child.stock_qty > child.produced_qty)
 					& (parent.per_delivered < 100.0)
@@ -96,6 +102,7 @@ class ProductionPlanReport:
 			elif doctype == "Material Request":
 				query = query.select(
 					child.schedule_date,
+					child.ordered_qty,
 				).where(
 					(parent.per_ordered < 100)
 					& (parent.material_request_type == "Manufacture")
@@ -111,6 +118,16 @@ class ProductionPlanReport:
 			query = query.where(parent.company == self.filters.company)
 
 		self.orders = query.run(as_dict=True)
+		self.set_pending_qty()
+
+	def set_pending_qty(self):
+		for d in self.orders:
+			done_qty = max(
+				flt(d.produced_qty), flt(d.delivered_qty) * flt(d.conversion_factor), flt(d.ordered_qty)
+			)
+			d.qty_to_manufacture = flt(d.qty_to_manufacture) - done_qty
+
+		self.orders = [d for d in self.orders if d.qty_to_manufacture > 0]
 
 	def get_raw_materials(self):
 		"""Retrieve raw materials and source warehouses for production orders.
@@ -137,11 +154,17 @@ class ProductionPlanReport:
 						"item_name as raw_material_name",
 						"source_warehouse as warehouse",
 						"required_qty",
+						"transferred_qty",
+						"consumed_qty",
+						"returned_qty",
 					],
 					filters={"docstatus": 1, "parent": ("in", work_orders), "source_warehouse": ("!=", "")},
 				)
 				or []
 			)
+			for d in raw_materials:
+				issued_qty = max(flt(d.transferred_qty), flt(d.consumed_qty)) - flt(d.returned_qty)
+				d.required_qty = max(flt(d.required_qty) - issued_qty, 0)
 			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:
@@ -165,7 +188,7 @@ class ProductionPlanReport:
 			if self.filters.include_subassembly_raw_materials:
 				qty_field = bom_item.qty_consumed_per_unit
 			else:
-				qty_field = bom_item.qty / bom.quantity
+				qty_field = bom_item.stock_qty / bom.quantity
 
 			raw_materials = (
 				frappe.qb.from_(bom)
@@ -177,6 +200,8 @@ class ProductionPlanReport:
 					qty_field.as_("required_qty_per_unit"),
 				)
 				.where((bom_item.parent.isin(bom_nos)) & (bom_item.parent == bom.name) & (bom.docstatus == 1))
+				.orderby(bom_item.parent)
+				.orderby(bom_item.idx)
 			).run(as_dict=True)
 
 		if not raw_materials:
@@ -228,21 +253,27 @@ class ProductionPlanReport:
 
 		self.purchase_details = {}
 
-		purchased_items = frappe.get_all(
-			"Purchase Order Item",
-			fields=[
-				"item_code",
-				{"MIN": "schedule_date", "as": "arrival_date"},
-				"qty as arrival_qty",
-				"warehouse",
-			],
-			filters={
-				"item_code": ("in", self.item_codes),
-				"warehouse": ("in", self.warehouses),
-				"docstatus": 1,
-			},
-			group_by="item_code, warehouse",
-		)
+		po = frappe.qb.DocType("Purchase Order")
+		poi = frappe.qb.DocType("Purchase Order Item")
+		purchased_items = (
+			frappe.qb.from_(po)
+			.join(poi)
+			.on(poi.parent == po.name)
+			.select(
+				poi.item_code,
+				Min(poi.schedule_date).as_("arrival_date"),
+				Sum((poi.qty - poi.received_qty) * poi.conversion_factor).as_("arrival_qty"),
+				poi.warehouse,
+			)
+			.where(
+				(poi.item_code.isin(self.item_codes))
+				& (poi.warehouse.isin(self.warehouses))
+				& (po.docstatus == 1)
+				& (po.status.notin(["Closed", "Completed", "Cancelled"]))
+				& (poi.qty > poi.received_qty)
+			)
+			.groupby(poi.item_code, poi.warehouse)
+		).run(as_dict=True)
 		for d in purchased_items:
 			key = (d.item_code, d.warehouse)
 			if key not in self.purchase_details:
@@ -276,19 +307,16 @@ class ProductionPlanReport:
 		self.index = 0
 		self.raw_materials_dict.get(key)
 
-		warehouses = self.mrp_warehouses or []
 		for d in self.raw_materials_dict.get(key):
 			if self.filters.based_on != "Work Order":
 				d.required_qty = d.required_qty_per_unit * data.qty_to_manufacture
 
-			if not warehouses:
-				warehouses = [data.warehouse]
-
+			warehouses = self.mrp_warehouses or [data.warehouse]
 			if self.filters.based_on == "Work Order" and d.warehouse:
 				warehouses = [d.warehouse]
 			else:
 				item_details = self.item_details.get(d.item_code)
-				if item_details:
+				if item_details and item_details.get("default_warehouse"):
 					warehouses = [item_details["default_warehouse"]]
 
 			if self.filters.raw_material_warehouse:

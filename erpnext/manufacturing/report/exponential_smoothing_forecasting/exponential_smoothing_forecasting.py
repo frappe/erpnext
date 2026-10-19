@@ -17,10 +17,12 @@ def execute(filters=None):
 
 class ExponentialSmoothingForecast:
 	def forecast_future_data(self):
+		from_date = getdate(self.filters.from_date)
 		for _key, value in self.period_wise_data.items():
 			forecast_data = []
 			for period in self.period_list:
 				forecast_key = "forecast_" + period.key
+				is_future = getdate(period.from_date) >= from_date
 
 				if value.get(period.key) and not forecast_data:
 					value[forecast_key] = flt(value.get("avg", 0)) or flt(value.get(period.key))
@@ -32,8 +34,8 @@ class ExponentialSmoothingForecast:
 					)
 
 				if value.get(forecast_key):
-					# will be use to forecaset next period
-					forecast_data.append([value.get(period.key), value.get(forecast_key)])
+					actual = value.get(forecast_key) if is_future else value.get(period.key)
+					forecast_data.append([actual, value.get(forecast_key)])
 
 
 class ForecastingReport(ExponentialSmoothingForecast):
@@ -96,6 +98,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 					value["avg"] = flt(sum(list_of_period_value)) / flt(sum(total_qty))
 
 	def get_data_for_forecast(self):
+		frappe.has_permission(self.doctype, "read", throw=True)
 		parent = frappe.qb.DocType(self.doctype)
 		child = frappe.qb.DocType(self.child_doctype)
 
@@ -121,6 +124,14 @@ class ForecastingReport(ExponentialSmoothingForecast):
 				& (parent.company == self.filters.company)
 			)
 		)
+
+		permitted = frappe.qb.get_query(
+			self.doctype,
+			fields=["name"],
+			filters={"docstatus": 1, "company": self.filters.company},
+			ignore_permissions=False,
+		)
+		query = query.where(parent.name.isin(permitted))
 
 		if self.filters.item_code:
 			query = query.where(child.item_code == self.filters.item_code)
