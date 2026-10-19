@@ -1,9 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
@@ -64,36 +66,54 @@ def process_stock_ledger_entries(
 
 def get_serial_nos_in_stock(filters, sl_entries):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
+	opening_entries = [row for row in sl_entries if row.is_opening_entry]
+	conditions = (
+		(sle.is_cancelled == 0)
+		& (sle.item_code.isin({row.item_code for row in sl_entries}))
+		& (sle.warehouse.isin({row.warehouse for row in sl_entries}))
+	)
 	before_from_date = sle.posting_datetime < get_datetime(filters.from_date + " 00:00:00")
-	if opening_bundles := [
-		row.serial_and_batch_bundle
-		for row in sl_entries
-		if row.is_opening_entry and row.serial_and_batch_bundle
-	]:
-		before_from_date |= sle.serial_and_batch_bundle.isin(opening_bundles)
+	if opening_entries:
+		before_from_date |= sle.voucher_no.isin({row.voucher_no for row in opening_entries})
 
-	rows = (
+	serial_qty = defaultdict(float)
+	for row in get_bundle_serial_qty(sle, conditions & before_from_date):
+		serial_qty[(row.item_code, row.warehouse, row.serial_no)] += flt(row.qty)
+
+	for row in get_legacy_serial_entries(sle, conditions & before_from_date):
+		for serial_no in get_serial_nos(row.serial_no):
+			serial_qty[(row.item_code, row.warehouse, serial_no)] += 1 if flt(row.actual_qty) > 0 else -1
+
+	balance_serial_nos = {}
+	for (item_code, warehouse, serial_no), qty in sorted(serial_qty.items()):
+		if qty > 0:
+			balance_serial_nos.setdefault((item_code, warehouse), {})[serial_no] = None
+
+	return balance_serial_nos
+
+
+def get_bundle_serial_qty(sle, conditions):
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	return (
 		frappe.qb.from_(sle)
 		.inner_join(entry)
 		.on(entry.parent == sle.serial_and_batch_bundle)
-		.select(sle.item_code, sle.warehouse, entry.serial_no)
-		.where(
-			(sle.is_cancelled == 0)
-			& (before_from_date)
-			& (sle.item_code.isin({row.item_code for row in sl_entries}))
-			& (sle.warehouse.isin({row.warehouse for row in sl_entries}))
-		)
+		.select(sle.item_code, sle.warehouse, entry.serial_no, Sum(entry.qty).as_("qty"))
+		.where(conditions)
 		.groupby(sle.item_code, sle.warehouse, entry.serial_no)
-		.having(Sum(entry.qty) > 0)
-		.orderby(entry.serial_no)
 	).run(as_dict=True)
 
-	balance_serial_nos = {}
-	for row in rows:
-		balance_serial_nos.setdefault((row.item_code, row.warehouse), {})[row.serial_no] = None
 
-	return balance_serial_nos
+def get_legacy_serial_entries(sle, conditions):
+	return (
+		frappe.qb.from_(sle)
+		.select(sle.item_code, sle.warehouse, sle.serial_no, sle.actual_qty)
+		.where(
+			conditions & (IfNull(sle.serial_and_batch_bundle, "") == "") & (IfNull(sle.serial_no, "") != "")
+		)
+		.orderby(sle.posting_datetime)
+		.orderby(sle.creation)
+	).run(as_dict=True)
 
 
 def update_stock_ledger_entry(sle, item_details, precision):
