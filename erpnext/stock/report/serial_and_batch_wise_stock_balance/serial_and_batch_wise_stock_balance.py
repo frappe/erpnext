@@ -14,6 +14,7 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 )
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 
 def execute(filters: StockBalanceFilter | None = None):
@@ -56,15 +57,24 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		self.batch_map = {}
 		self.serial_map = {}
 
+		adjustment_netting = AdjustmentNetting()
+		adjustment_changes = {}
 		query = self.get_serial_batch_query()
 		with frappe.db.unbuffered_cursor():
 			for entry in query.run(as_dict=True, as_iterator=True):
 				group_by_key = self.get_group_by_key(entry)
-				if entry.batch_no:
+				if entry.batch_no and adjustment_netting.is_adjustment(entry):
+					add_to_net_change(
+						adjustment_changes, (group_by_key, entry.voucher_no, entry.batch_no), entry
+					)
+				elif entry.batch_no:
 					self.add_batch_entry(group_by_key, entry)
 
 				if entry.serial_no:
 					self.add_serial_nos(group_by_key, entry)
+
+		for (group_by_key, _voucher_no, _batch_no), change in adjustment_changes.items():
+			self.add_batch_entry(group_by_key, change)
 
 		for batches in self.batch_map.values():
 			filter_items_with_no_transactions(batches, self.float_precision, self.inventory_dimensions)
@@ -91,6 +101,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 				sle.company,
 				sle.voucher_type,
 				sle.voucher_no,
+				sle.is_adjustment_entry,
 				Coalesce(bundle_entry.batch_no, sle.batch_no).as_("batch_no"),
 				Coalesce(bundle_entry.serial_no, sle.serial_no).as_("serial_no"),
 				Coalesce(bundle_entry.qty, sle.actual_qty).as_("actual_qty"),
@@ -183,6 +194,13 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		]
 
 		return columns
+
+
+def add_to_net_change(changes, key, entry):
+	"""Sums what one Adjustment Entry counts out and back in, as the item row shows it."""
+	change = changes.setdefault(key, frappe._dict(entry, actual_qty=0.0, stock_value_difference=0.0))
+	change.actual_qty += flt(entry.actual_qty)
+	change.stock_value_difference += flt(entry.stock_value_difference)
 
 
 def sort_serial_nos_by_number(row):
