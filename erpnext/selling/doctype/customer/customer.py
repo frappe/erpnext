@@ -409,8 +409,8 @@ class Customer(TransactionBase):
 
 	def get_credit_limit_breakup_message(self, company, breakup, precision):
 		currency = frappe.get_cached_value("Company", company, "default_currency")
-		breakup = frappe._dict({key: flt(value, precision) for key, value in breakup.items()})
 		outstanding_amt = flt(breakup.gle + breakup.sales_order + breakup.delivery_note, precision)
+		breakup = frappe._dict({key: flt(value, precision) for key, value in breakup.items()})
 		rows = [
 			(_("Outstanding as per General Ledger"), breakup.gle),
 			(_("Pending Sales Orders (unbilled amount)"), breakup.sales_order),

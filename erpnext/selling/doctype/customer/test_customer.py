@@ -355,7 +355,7 @@ class TestCustomer(FrappeTestCase):
 		message = frappe.message_log[-1].get("message")
 		self.assertIn("Outstanding as per General Ledger", message)
 		self.assertIn("Pending Sales Orders", message)
-		self.assertIn("query-report/Customer Credit Balance", message)
+		self.assertIn("query-report/Customer%20Credit%20Balance", message)
 
 	def test_customer_payment_terms(self):
 		frappe.db.set_value(
