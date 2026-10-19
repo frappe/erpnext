@@ -14,15 +14,17 @@ from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_masters_condition,
 	get_allowed_warehouses_condition,
 )
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
 	columns = get_columns(filters.item)
-	data = get_data(filters.item)
+	data = get_data(filters)
 	return columns, data
 
 
-def get_data(item):
+def get_data(filters):
+	item = filters.item
 	if not item:
 		return []
 	item_dicts = []
@@ -39,8 +41,9 @@ def get_data(item):
 	else:
 		variant_list = [variant["name"] for variant in variant_results]
 
-	order_count_map = get_open_sales_orders_count(variant_list)
-	stock_details_map = get_stock_details_map(variant_list)
+	warehouses = get_selected_warehouses(filters)
+	order_count_map = get_open_sales_orders_count(variant_list, warehouses)
+	stock_details_map = get_stock_details_map(variant_list, warehouses)
 	buying_price_map = get_buying_price_map(variant_list)
 	selling_price_map = get_selling_price_map(variant_list)
 	currency = get_report_currency()
@@ -133,7 +136,22 @@ def get_columns(item):
 	return columns
 
 
-def get_open_sales_orders_count(variants_list):
+def get_selected_warehouses(filters):
+	"""Selected warehouses with the descendants of selected groups."""
+	return list(
+		{child for warehouse in filters.get("warehouse") or [] for child in get_child_warehouses(warehouse)}
+	)
+
+
+def get_open_sales_orders_count(variants_list, warehouses):
+	order_filters = [
+		["Sales Order", "docstatus", "=", 1],
+		["Sales Order", "status", "not in", ["Closed", "Completed"]],
+		["Sales Order Item", "item_code", "in", variants_list],
+	]
+	if warehouses:
+		order_filters.append(["Sales Order Item", "warehouse", "in", warehouses])
+
 	open_sales_orders = frappe.db.get_list(
 		"Sales Order",
 		fields=[
@@ -142,11 +160,7 @@ def get_open_sales_orders_count(variants_list):
 			"`tabSales Order Item`.qty",
 			"`tabSales Order Item`.delivered_qty",
 		],
-		filters=[
-			["Sales Order", "docstatus", "=", 1],
-			["Sales Order", "status", "not in", ["Closed", "Completed"]],
-			["Sales Order Item", "item_code", "in", variants_list],
-		],
+		filters=order_filters,
 	)
 
 	open_orders = {}
@@ -157,8 +171,10 @@ def get_open_sales_orders_count(variants_list):
 	return {item_code: len(orders) for item_code, orders in open_orders.items()}
 
 
-def get_stock_details_map(variant_list):
+def get_stock_details_map(variant_list, warehouses):
 	bin_filters = [{"item_code": ["in", variant_list]}]
+	if warehouses:
+		bin_filters.append({"warehouse": ["in", warehouses]})
 	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
 		bin_filters.append({"warehouse": ["in", warehouses]})
 	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
