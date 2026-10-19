@@ -312,6 +312,7 @@ class TransactionDeletionRecord(Document):
 						reference_docs = frappe.get_all(
 							docfield.doctype_name,
 							filters={docfield.docfield_name: self.company},
+							order_by="name asc",
 							limit=self.batch_size,
 						)
 						reference_doc_names = [r.name for r in reference_docs]
