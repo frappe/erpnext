@@ -159,7 +159,6 @@
    "label": "Raw Materials Required"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "received_items",
    "fieldtype": "Table",
    "label": "Required Items",
@@ -306,7 +305,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 11:20:14.512336",
+ "modified": "2026-10-05 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Inward Order",

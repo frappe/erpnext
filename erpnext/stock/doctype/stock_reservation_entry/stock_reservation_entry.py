@@ -7,7 +7,7 @@ from typing import Literal
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
@@ -116,6 +116,27 @@ class StockReservationEntry(Document):
 
 	def before_cancel(self) -> None:
 		self.validate_reserved_entries()
+		self.validate_work_order_usage()
+
+	def validate_work_order_usage(self) -> None:
+		"""Stock a Work Order has transferred or consumed is released by closing the Work Order, not by cancelling its reservation."""
+		if self.voucher_type != "Work Order" or not (flt(self.transferred_qty) or flt(self.consumed_qty)):
+			return
+
+		if frappe.db.get_value("Work Order", self.voucher_no, "status") in ("Closed", "Cancelled"):
+			return
+
+		if (
+			self.from_voucher_type == "Stock Entry"
+			and frappe.db.get_value("Stock Entry", self.from_voucher_no, "docstatus") == 2
+		):
+			return
+
+		frappe.throw(
+			_(
+				"Stock Reservation Entry {0} is already used by Work Order {1}. Close the Work Order to release the unused stock."
+			).format(frappe.bold(self.name), frappe.bold(self.voucher_no))
+		)
 
 	def validate_reserved_entries(self):
 		entries = frappe.get_all(
@@ -146,59 +167,104 @@ class StockReservationEntry(Document):
 			)
 
 	def update_unreserved_qty_in_sre(self):
-		if self.voucher_type == "Delivery Note":
+		if self.voucher_type != "Delivery Note":
+			self.give_back_to_from_voucher(self.get_serial_batch_entries())
+
+	def give_back_to_from_voucher(self, released: frappe._dict) -> None:
+		"""Return `released` serial and batch qty to the reservations this one was taken from and recount them."""
+		if not (self.from_voucher_type and self.from_voucher_detail_no):
 			return
 
-		if self.from_voucher_type and self.from_voucher_detail_no:
-			sre = frappe.qb.DocType("Stock Reservation Entry")
-			delivered_qty = (
-				frappe.qb.from_(sre)
-				.select(Sum(sre.reserved_qty))
-				.where(
-					(sre.docstatus == 1)
-					& (sre.item_code == self.item_code)
-					& (sre.from_voucher_type == self.from_voucher_type)
-					& (sre.from_voucher_no == self.from_voucher_no)
-					& (sre.from_voucher_detail_no == self.from_voucher_detail_no)
-				)
-			).run(as_list=True)[0][0] or 0
+		if self.has_batch_no or self.has_serial_no:
+			self.give_back_serial_batch(released)
 
-			sres = self.get_from_voucher_reservation_entries()
-			for row in sres:
-				if delivered_qty < 0.0:
-					break
+		self.update_delivered_qty_in_from_voucher_reservations()
 
-				status = "Reserved"
+	def update_delivered_qty_in_from_voucher_reservations(self):
+		"""Recount the delivered qty of the reservations this one was taken from, each by its own reservation mode."""
+		sres = self.get_from_voucher_reservation_entries()
+		open_qty = get_serial_batch_open_qty([row.name for row in sres])
+		counted_qty = 0.0
+		for row in sres:
+			if row.name in open_qty:
+				delivered_qty = row.reserved_qty - open_qty[row.name]
+				set_delivered_qty(row, delivered_qty)
+				counted_qty += delivered_qty
 
-				if self.has_batch_no or self.has_serial_no:
-					serial_batch_data = self.get_serial_batch_entries()
-					update_serial_batch_delivered_qty(serial_batch_data, row.name, is_cancelled=True)
+		self.spread_used_qty([row for row in sres if row.name not in open_qty], counted_qty)
 
-				if row.reserved_qty > delivered_qty:
-					frappe.db.set_value(
-						"Stock Reservation Entry",
-						row.name,
-						{"delivered_qty": delivered_qty, "status": status},
-					)
+		for warehouse in {row.warehouse for row in sres}:
+			frappe.get_cached_doc("Bin", get_or_make_bin(self.item_code, warehouse)).update_reserved_stock()
 
-					delivered_qty = 0.0
-				else:
-					frappe.db.set_value(
-						"Stock Reservation Entry",
-						row.name,
-						{"delivered_qty": row.reserved_qty, "status": "Delivered"},
-					)
+	def spread_used_qty(self, sres: list, counted_qty: float = 0) -> None:
+		"""Spread the used qty of reservations taken from the source row, less `counted_qty`, over these reservations oldest first."""
+		if not sres:
+			return
 
-					delivered_qty -= row.reserved_qty
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		used_qty = sre.delivered_qty + sre.transferred_qty + sre.consumed_qty
+		delivered_qty = (
+			frappe.qb.from_(sre)
+			.select(Sum(Case().when(sre.docstatus == 1, sre.reserved_qty).else_(used_qty)))
+			.where(
+				(sre.docstatus.isin([1, 2]))
+				& (sre.item_code == self.item_code)
+				& (sre.from_voucher_type == self.from_voucher_type)
+				& (sre.from_voucher_no == self.from_voucher_no)
+				& (sre.from_voucher_detail_no == self.from_voucher_detail_no)
+			)
+		).run(as_list=True)[0][0] or 0
+		delivered_qty = max(delivered_qty - counted_qty, 0)
+
+		for row in sres:
+			qty = min(row.reserved_qty, delivered_qty)
+			set_delivered_qty(row, qty)
+			delivered_qty -= qty
+
+	def release_reversed_usage(self, field: str, row_wise_serial_batch: dict) -> None:
+		"""Give the source reservations back the transfer or consumption a cancelled entry reversed on this cancelled reservation."""
+		if (self.has_batch_no or self.has_serial_no) and self.reservation_based_on == "Serial and Batch":
+			before = self.get_delivered_serial_batch_entries()
+			self.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+			self.db_set(field, self.matched_serial_batch_qty, update_modified=False)
+			after = self.get_delivered_serial_batch_entries()
+			released = frappe._dict(
+				serial_nos=[
+					serial_no for serial_no in before.serial_nos if serial_no not in after.serial_nos
+				],
+				batches={batch_no: qty - after.batches[batch_no] for batch_no, qty in before.batches.items()},
+			)
+			self.give_back_serial_batch(released)
+
+		self.update_delivered_qty_in_from_voucher_reservations()
+
+	def give_back_serial_batch(self, released: frappe._dict) -> None:
+		"""Lower the delivered serial and batch qty of the source reservations by `released` once."""
+		sources = self.get_from_voucher_reservation_entries()
+		move_serial_batch_delivered_qty(
+			{row.name: row.delivered_qty for row in sources}, released, release=True
+		)
+
+	def get_delivered_serial_batch_entries(self) -> frappe._dict:
+		serial_nos = []
+		batches = defaultdict(float)
+		for entry in self.sb_entries:
+			if entry.serial_no and flt(entry.delivered_qty):
+				serial_nos.append(entry.serial_no)
+			elif entry.batch_no:
+				batches[entry.batch_no] += flt(entry.delivered_qty)
+
+		return frappe._dict({"serial_nos": serial_nos, "batches": batches})
 
 	def get_serial_batch_entries(self):
 		serial_nos = []
 		batches = defaultdict(float)
 		for entry in self.sb_entries:
 			if entry.serial_no:
-				serial_nos.append(entry.serial_no)
+				if flt(entry.qty) and not flt(entry.delivered_qty):
+					serial_nos.append(entry.serial_no)
 			elif entry.batch_no:
-				batches[entry.batch_no] += entry.qty
+				batches[entry.batch_no] += flt(entry.qty) - flt(entry.delivered_qty)
 
 		return frappe._dict(
 			{
@@ -208,16 +274,29 @@ class StockReservationEntry(Document):
 		)
 
 	def get_from_voucher_reservation_entries(self):
-		return frappe.get_all(
-			"Stock Reservation Entry",
-			fields=["name", "delivered_qty", "reserved_qty"],
-			filters={
-				"voucher_type": self.from_voucher_type,
-				"voucher_no": self.from_voucher_no,
-				"voucher_detail_no": self.from_voucher_detail_no,
-				"item_code": self.item_code,
-			},
-		)
+		"""Reservations this one was taken from, oldest first, locked until the transaction ends."""
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		return (
+			frappe.qb.from_(sre)
+			.select(
+				sre.name,
+				sre.docstatus,
+				sre.voucher_qty,
+				sre.reserved_qty,
+				sre.delivered_qty,
+				sre.transferred_qty,
+				sre.consumed_qty,
+				sre.warehouse,
+			)
+			.where(
+				(sre.voucher_type == self.from_voucher_type)
+				& (sre.voucher_no == self.from_voucher_no)
+				& (sre.voucher_detail_no == self.from_voucher_detail_no)
+				& (sre.item_code == self.item_code)
+			)
+			.orderby(sre.creation)
+			.for_update()
+		).run(as_dict=True)
 
 	def validate_amended_doc(self) -> None:
 		"""Raises an exception if document is amended."""
@@ -531,28 +610,9 @@ class StockReservationEntry(Document):
 
 	def update_status(self, status: str | None = None, update_modified: bool = True) -> None:
 		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
-
-		if not status:
-			if self.docstatus == 2:
-				status = "Cancelled"
-			elif self.docstatus == 1:
-				if self.transferred_qty:
-					status = "Closed"
-					if self.transferred_qty < self.reserved_qty:
-						status = "Partially Used"
-
-				elif self.reserved_qty == (self.delivered_qty or self.consumed_qty):
-					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
-					status = "Partially Delivered"
-				elif self.reserved_qty >= self.voucher_qty:
-					status = "Reserved"
-				else:
-					status = "Partially Reserved"
-			else:
-				status = "Draft"
-
-		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
+		frappe.db.set_value(
+			self.doctype, self.name, "status", status or get_status(self), update_modified=update_modified
+		)
 
 	def can_be_updated(self) -> None:
 		"""Raises an exception if `Stock Reservation Entry` is not allowed to be updated."""
@@ -1471,8 +1531,8 @@ class StockReservation:
 
 			query.run()
 
-			if data.serial_nos or data.batches:
-				update_serial_batch_delivered_qty(data, name)
+		if data.serial_nos or data.batches:
+			move_serial_batch_delivered_qty(data.get("sre_names"), data)
 
 	def make_stock_reservation_entry(self, row):
 		fields = [
@@ -1962,24 +2022,122 @@ def _get_stock_reservation_entries_for_voucher(
 	return query.run(as_dict=True)
 
 
-def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
-	if row.serial_nos:
-		doctype = frappe.qb.DocType("Serial and Batch Entry")
-		query = (
-			frappe.qb.update(doctype)
-			.set(doctype.delivered_qty, (doctype.delivered_qty + (1 if not is_cancelled else -1)))
-			.where((doctype.parent == name) & (doctype.serial_no.isin(row.serial_nos)))
+def get_serial_batch_open_qty(sre_names: list[str]) -> dict[str, float]:
+	"""Undelivered serial and batch qty of each reservation that has serial and batch entries, read under a lock."""
+	if not sre_names:
+		return {}
+
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	open_qty = defaultdict(float)
+	for parent, qty in (
+		frappe.qb.from_(sb_entry)
+		.select(sb_entry.parent, sb_entry.qty - sb_entry.delivered_qty)
+		.where((sb_entry.parenttype == "Stock Reservation Entry") & sb_entry.parent.isin(sre_names))
+		.for_update()
+	).run():
+		open_qty[parent] += flt(qty)
+
+	return open_qty
+
+
+def set_delivered_qty(sre: frappe._dict, delivered_qty: float) -> None:
+	sre.delivered_qty = delivered_qty
+	frappe.db.set_value(
+		"Stock Reservation Entry", sre.name, {"delivered_qty": delivered_qty, "status": get_status(sre)}
+	)
+
+
+def get_status(sre) -> str:
+	"""Status of a reservation from its docstatus and quantities."""
+	if sre.docstatus == 2:
+		return "Cancelled"
+	if sre.docstatus != 1:
+		return "Draft"
+	if sre.transferred_qty:
+		return "Partially Used" if sre.transferred_qty < sre.reserved_qty else "Closed"
+	if sre.reserved_qty == (sre.delivered_qty or sre.consumed_qty):
+		return "Delivered"
+	if sre.delivered_qty and sre.delivered_qty < sre.reserved_qty:
+		return "Partially Delivered"
+	if sre.reserved_qty >= sre.voucher_qty:
+		return "Reserved"
+	return "Partially Reserved"
+
+
+def move_serial_batch_delivered_qty(
+	limits: dict[str, float], serial_batch: frappe._dict, release: bool = False
+) -> None:
+	"""Mark serial and batch qty delivered on these reservations once, oldest first, or give it back newest first.
+
+	`limits` holds the most each reservation may take or give back.
+	"""
+	if not limits:
+		return
+
+	entries = get_open_serial_batch_entries(list(limits), release)
+	moved_qty = allocate_serial_batch_qty(entries, limits, serial_batch)
+	add_serial_batch_delivered_qty({name: -qty if release else qty for name, qty in moved_qty.items()})
+
+
+def get_open_serial_batch_entries(sre_names: list[str], release: bool) -> list[dict]:
+	"""Rows of these reservations with qty still to deliver, oldest reservation first, or to give back, newest first, locked until the transaction ends."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	open_qty = sb_entry.delivered_qty if release else sb_entry.qty - sb_entry.delivered_qty
+	return (
+		frappe.qb.from_(sb_entry)
+		.inner_join(sre)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sb_entry.name,
+			sb_entry.parent,
+			sb_entry.serial_no,
+			sb_entry.batch_no,
+			open_qty.as_("open_qty"),
 		)
+		.where(
+			(sb_entry.parenttype == "Stock Reservation Entry")
+			& sb_entry.parent.isin(sre_names)
+			& (open_qty > 0)
+		)
+		.orderby(sre.creation, order=Order.desc if release else Order.asc)
+		.orderby(sb_entry.idx)
+		.for_update()
+	).run(as_dict=True)
 
-		query.run()
 
-	elif row.batches:
-		for batch_no, qty in row.batches.items():
-			doctype = frappe.qb.DocType("Serial and Batch Entry")
-			query = (
-				frappe.qb.update(doctype)
-				.set(doctype.delivered_qty, (doctype.delivered_qty + (qty if not is_cancelled else -1 * qty)))
-				.where((doctype.parent == name) & (doctype.batch_no == batch_no))
-			)
+def allocate_serial_batch_qty(
+	entries: list[dict], limits: dict[str, float], serial_batch: frappe._dict
+) -> dict[str, float]:
+	"""Qty to move on each row, within its open qty, the serial and batch qty to move and its reservation's limit."""
+	limits = defaultdict(float, limits)
+	serial_nos = set(serial_batch.get("serial_nos") or [])
+	batches = defaultdict(float, serial_batch.get("batches") or {})
+	moved_qty = {}
+	for entry in entries:
+		qty = 0
+		if entry.serial_no and entry.serial_no in serial_nos and limits[entry.parent] >= entry.open_qty:
+			qty = entry.open_qty
+			serial_nos.remove(entry.serial_no)
+		elif not entry.serial_no and entry.batch_no:
+			qty = min(entry.open_qty, batches[entry.batch_no], limits[entry.parent])
+			batches[entry.batch_no] -= qty
 
-		query.run()
+		limits[entry.parent] -= qty
+		if qty > 0:
+			moved_qty[entry.name] = qty
+
+	return moved_qty
+
+
+def add_serial_batch_delivered_qty(deltas: dict[str, float]) -> None:
+	"""Add each delta to its row's delivered qty, one statement per distinct delta."""
+	rows_by_delta = defaultdict(list)
+	for name, delta in deltas.items():
+		rows_by_delta[delta].append(name)
+
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	for delta, names in rows_by_delta.items():
+		frappe.qb.update(sb_entry).set(sb_entry.delivered_qty, sb_entry.delivered_qty + delta).where(
+			sb_entry.name.isin(names)
+		).run()
