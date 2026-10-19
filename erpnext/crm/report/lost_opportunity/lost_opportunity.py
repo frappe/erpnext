@@ -82,7 +82,7 @@ def get_data(filters):
 			{get_join(filters)}
 		WHERE
 			`tabOpportunity`.status = 'Lost' and `tabOpportunity`.company = %(company)s
-			AND DATE(`tabOpportunity`.modified) BETWEEN %(from_date)s AND %(to_date)s
+			AND `tabOpportunity`.lost_on BETWEEN %(from_date)s AND %(to_date)s
 			{get_conditions(filters)}
 		GROUP BY
 			`tabOpportunity`.name

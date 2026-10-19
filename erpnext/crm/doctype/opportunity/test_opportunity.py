@@ -5,7 +5,7 @@ import json
 import unittest
 
 import frappe
-from frappe.utils import add_days, now_datetime, random_string, today
+from frappe.utils import add_days, getdate, now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
@@ -189,6 +189,32 @@ class TestOpportunity(unittest.TestCase):
 		for status in ("Open", "Closed", "Quotation", "Lost"):
 			self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), status)
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
+
+	def test_lost_on_follows_the_lost_status(self):
+		lost_reason = _ensure_master("Opportunity Lost Reason", "lost_reason", "_Test Lost - Too Expensive")
+		opportunity = make_opportunity(with_items=0)
+		opportunity.declare_enquiry_lost([{"lost_reason": lost_reason}], [])
+		self.assertEqual(str(opportunity.lost_on), today())
+
+		opportunity.status = "Open"
+		opportunity.save()
+		self.assertIsNone(frappe.db.get_value("Opportunity", opportunity.name, "lost_on"))
+
+		quoted = make_opportunity(with_items=0)
+		quotation = submit_quotation(quoted)
+		quotation_lost_reason = _ensure_master(
+			"Quotation Lost Reason", "order_lost_reason", "_Test Quotation Lost Reason"
+		)
+		quotation.declare_enquiry_lost([{"lost_reason": quotation_lost_reason}], [])
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", quoted.name, ["status", "lost_on"]), ("Lost", getdate())
+		)
+
+		quotation.reload()
+		quotation.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", quoted.name, ["status", "lost_on"]), ("Open", None)
+		)
 
 	def test_form_hides_contacts_of_a_customer_the_user_cannot_read(self):
 		contact = frappe.get_doc(
