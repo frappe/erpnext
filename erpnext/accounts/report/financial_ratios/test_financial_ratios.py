@@ -62,6 +62,19 @@ class TestFinancialRatios(ERPNextTestSuite):
 
 		self.assertEqual(self.get_group_balance("Current Asset", "Asset") - before, 400)
 
+	def test_category_takes_precedence_over_account_type(self):
+		loan_account = create_account(
+			account_name="_Test Supplier Loan",
+			parent_account=f"Non-Current Liabilities - {self.abbr}",
+			account_type="Payable",
+			company=self.company,
+		)
+		frappe.db.set_value("Account", loan_account, "account_category", "Long-term Borrowings")
+		before = self.get_group_balance("Current Liability", "Liability")
+		self.make_journal_entry("Cash", "_Test Supplier Loan", 400, party=("Supplier", "_Test Supplier"))
+
+		self.assertEqual(self.get_group_balance("Current Liability", "Liability"), before)
+
 	def test_other_income_is_not_sales_in_a_year_without_sales(self):
 		self.make_journal_entry("Cash", "Interest Income", 300)
 
@@ -228,11 +241,15 @@ class TestFinancialRatios(ERPNextTestSuite):
 		journal_entry.company = self.company
 		party_type, party_name = party or (None, None)
 		for account, debit, credit in ((debit_account, amount, 0), (credit_account, 0, amount)):
-			is_party_account = account in ("Debtors", "Creditors")
+			account = f"{account} - {self.abbr}"
+			is_party_account = frappe.get_cached_value("Account", account, "account_type") in (
+				"Receivable",
+				"Payable",
+			)
 			journal_entry.append(
 				"accounts",
 				{
-					"account": f"{account} - {self.abbr}",
+					"account": account,
 					"debit_in_account_currency": debit,
 					"credit_in_account_currency": credit,
 					"party_type": party_type if is_party_account else None,

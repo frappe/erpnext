@@ -42,7 +42,9 @@ class GroupLedgers:
 		)
 
 	def matches(self, row: dict, category: str | None) -> bool:
-		return category in self.categories or row.get("account_type") in self.account_types
+		if category:
+			return category in self.categories
+		return row.get("account_type") in self.account_types
 
 
 GROUP_LEDGERS = {
