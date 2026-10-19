@@ -424,7 +424,9 @@ class TaxWithholdingController:
 		entries.extend(self._adjust_under_over_withheld(under_entries, over_entries, category))
 
 		# Case 4: Lower Deduction Certificate processing
-		if category.ldc_unutilized_amount:
+		if self._is_return_against_invoice():
+			entries.extend(self._process_return_ldc_entries(under_entries, category))
+		elif category.ldc_unutilized_amount:
 			entries.extend(self._process_ldc_entries(under_entries, over_entries, category))
 
 		# Case 5: Regular tax withholding processing
@@ -521,6 +523,69 @@ class TaxWithholdingController:
 			constraint=category.ldc_unutilized_amount,
 			default_obj=ldc_config,
 		)
+
+	def _is_return_against_invoice(self) -> bool:
+		return bool(self.doc.get("is_return") and self.doc.get("return_against"))
+
+	def _process_return_ldc_entries(self, under_entries: deque, category: dict) -> list:
+		"""Reverse a return at the certificate rate applied on the original invoice, up to the
+		amount deducted under the certificate, so that the certificate limit is given back."""
+		ldc_entry = self._get_original_ldc_entry(category)
+		current_entry = under_entries[0] if under_entries else None
+		if not (ldc_entry and current_entry and current_entry.taxable_name == self.doc.name):
+			return []
+
+		taxable_amount = max(current_entry.taxable_amount, -ldc_entry.taxable_amount)
+		if taxable_amount >= 0:
+			return []
+
+		ldc_part = current_entry.copy()
+		ldc_part.taxable_amount = taxable_amount
+		current_entry.taxable_amount -= taxable_amount
+		if not flt(current_entry.taxable_amount, self.precision):
+			under_entries.popleft()
+
+		return self._merge_entries(
+			deque([ldc_part]),
+			deque(),
+			category,
+			tax_rate=ldc_entry.tax_rate,
+			default_obj={
+				"under_withheld_reason": "Lower Deduction Certificate",
+				"lower_deduction_certificate": ldc_entry.lower_deduction_certificate,
+			},
+		)
+
+	def _get_original_ldc_entry(self, category: dict) -> dict | None:
+		"""Certificate, rate and net taxable amount deducted under it on the original invoice
+		and its earlier returns."""
+		entry = frappe.qb.DocType(DOCTYPE)
+		rows = (
+			frappe.qb.from_(entry)
+			.select(
+				entry.lower_deduction_certificate,
+				entry.tax_rate,
+				Sum(entry.taxable_amount).as_("taxable_amount"),
+			)
+			.where(entry.parenttype == self.doc.doctype)
+			.where(entry.parent.isin(self._get_original_and_return_names()))
+			.where(entry.tax_withholding_category == category.name)
+			.where(IfNull(entry.lower_deduction_certificate, "") != "")
+			.where(entry.status == "Settled")
+			.where(entry.docstatus == 1)
+			.groupby(entry.lower_deduction_certificate, entry.tax_rate)
+			.run(as_dict=True)
+		)
+
+		return next((row for row in rows if row.taxable_amount > 0), None)
+
+	def _get_original_and_return_names(self) -> list[str]:
+		returns = frappe.get_all(
+			self.doc.doctype,
+			filters={"return_against": self.doc.return_against, "docstatus": 1},
+			pluck="name",
+		)
+		return [self.doc.return_against, *returns]
 
 	def _update_taxable_amounts(self):
 		if not self.doc.base_net_total:

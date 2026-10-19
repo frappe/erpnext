@@ -1617,6 +1617,41 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		self.cleanup_invoices([pi1, pi2, pi3])
 
+	def test_return_reverses_at_certificate_rate_and_gives_limit_back(self):
+		frappe.db.set_value(
+			"Supplier",
+			"Test LDC Supplier",
+			{
+				"tax_withholding_category": "Test Service Category",
+				"pan": "ABCTY1234D",
+			},
+		)
+
+		create_lower_deduction_certificate(
+			supplier="Test LDC Supplier",
+			certificate_no="1AE0423AAJ",
+			tax_withholding_category="Test Service Category",
+			tax_rate=2,
+			limit=50000,
+		)
+
+		# 50,000 at 2% uses up the limit and the remaining 20,000 is deducted at 10%
+		pi = create_purchase_invoice(supplier="Test LDC Supplier", rate=70000)
+		pi.submit()
+		self.assertEqual(pi.taxes_and_charges_deducted, 3000)
+
+		pi_return = create_purchase_invoice(supplier="Test LDC Supplier", is_return=1, qty=-1, rate=60000)
+		pi_return.return_against = pi.name
+		pi_return.save()
+		pi_return.submit()
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -2000)
+
+		next_pi = create_purchase_invoice(supplier="Test LDC Supplier", rate=20000)
+		next_pi.submit()
+		self.assertEqual(next_pi.taxes_and_charges_deducted, 400)
+
+		self.cleanup_invoices([pi, pi_return, next_pi])
+
 	def test_ldc_at_0_rate(self):
 		frappe.db.set_value(
 			"Supplier",
