@@ -1069,6 +1069,37 @@ class TestAsset(AssetSetup):
 			],
 		)
 
+	def test_sale_and_return_gl_unchanged_on_repost(self):
+		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+			update_repost_settings,
+		)
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_monthly_depreciating_asset()
+		post_depreciation_entries(date="2025-08-31")
+		sale_args = {"item_code": "Macbook Pro", "asset": asset.name, "rate": 50000}
+		sale = create_sales_invoice(qty=1, posting_date="2025-09-15", **sale_args)
+		sale_return = create_sales_invoice(
+			qty=-1, posting_date="2025-09-20", is_return=1, return_against=sale.name, **sale_args
+		)
+		# the restored asset depreciates further, so its current values differ from the sale's
+		post_depreciation_entries(date="2025-10-31")
+		posted_entries = {
+			name: get_gl_entries("Sales Invoice", name) for name in (sale.name, sale_return.name)
+		}
+
+		update_repost_settings()
+		repost = frappe.new_doc("Repost Accounting Ledger")
+		repost.company = sale.company
+		repost.delete_cancelled_entries = 1
+		for name in posted_entries:
+			repost.append("vouchers", {"voucher_type": "Sales Invoice", "voucher_no": name})
+		repost.submit()
+
+		self.assertEqual(frappe.db.get_value(repost.doctype, repost.name, "status"), "Completed")
+		for name, entries in posted_entries.items():
+			self.assertCountEqual(get_gl_entries("Sales Invoice", name), entries)
+
 	def test_split_asset_validations(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
@@ -2376,6 +2407,7 @@ def create_asset(**args):
 				"frequency_of_depreciation": args.frequency_of_depreciation or 12,
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
+				"salvage_value_percentage": args.salvage_value_percentage or 0,
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
 				"shift_based": args.shift_based or 0,

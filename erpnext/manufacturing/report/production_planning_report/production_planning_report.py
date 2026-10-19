@@ -156,15 +156,15 @@ class ProductionPlanReport:
 						"required_qty",
 						"transferred_qty",
 						"consumed_qty",
+						"returned_qty",
 					],
 					filters={"docstatus": 1, "parent": ("in", work_orders), "source_warehouse": ("!=", "")},
 				)
 				or []
 			)
 			for d in raw_materials:
-				d.required_qty = max(
-					flt(d.required_qty) - max(flt(d.transferred_qty), flt(d.consumed_qty)), 0
-				)
+				issued_qty = max(flt(d.transferred_qty), flt(d.consumed_qty)) - flt(d.returned_qty)
+				d.required_qty = max(flt(d.required_qty) - issued_qty, 0)
 			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:

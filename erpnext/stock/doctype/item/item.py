@@ -132,7 +132,6 @@ class Item(Document):
 		opening_stock: DF.Float
 		over_billing_allowance: DF.Float
 		over_delivery_receipt_allowance: DF.Float
-		production_capacity: DF.Int
 		purchase_tax_withholding_category: DF.Link | None
 		purchase_uom: DF.Link | None
 		quality_inspection_template: DF.Link | None
@@ -220,6 +219,7 @@ class Item(Document):
 				self.set_opening_stock()
 
 	def validate(self):
+		self.opening_stock = flt(self.opening_stock)
 		if not self.item_name:
 			self.item_name = self.item_code
 
@@ -707,7 +707,7 @@ class Item(Document):
 			self.validate_shared_serial_batch_numbers_before_merge(old_name, new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
 			self.validate_duplicate_lead_times_before_merge(old_name, new_name)
-			self.delete_old_bins(old_name)
+			self.delete_old_bins(old_name, new_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
@@ -726,8 +726,14 @@ class Item(Document):
 
 		queue_item(new_name, drop=old_name)
 
-	def delete_old_bins(self, old_name):
-		frappe.db.delete("Bin", {"item_code": old_name})
+	def delete_old_bins(self, old_name, new_name=None):
+		if not new_name:
+			frappe.db.delete("Bin", {"item_code": old_name})
+			return
+
+		target_warehouses = frappe.get_all("Bin", filters={"item_code": new_name}, pluck="warehouse")
+		if target_warehouses:
+			frappe.db.delete("Bin", {"item_code": old_name, "warehouse": ("in", target_warehouses)})
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
 		sri = frappe.qb.DocType("Stock Reconciliation Item")

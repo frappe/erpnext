@@ -116,3 +116,25 @@ class TestIncorrectStockValueReport(ERPNextTestSuite):
 		rows = self.run_report(account=account, from_date=add_days(today(), -4))
 
 		self.assertEqual([(row.name, row.difference_value) for row in rows], [(sle, 500)])
+
+	def test_rows_of_warehouses_under_another_account_are_left_out(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		other_warehouse = create_warehouse("_Test ISV Other WH", company=COMPANY)
+		other_account = frappe.get_value("Warehouse", other_warehouse, "account")
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=other_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=COMPANY,
+			posting_date=add_days(today(), -5),
+		)
+		sle = self.issue(item, other_warehouse, 2, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value", 1300)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -4))
+		other_rows = self.run_report(account=other_account, from_date=add_days(today(), -4))
+
+		self.assertNotEqual(account, other_account)
+		self.assertNotIn(sle, [row.name for row in rows])
+		self.assertEqual([(row.name, row.difference_value) for row in other_rows], [(sle, 500)])

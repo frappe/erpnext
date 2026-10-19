@@ -788,3 +788,65 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			[(row["item_code"], row["qty"]) for row in data if row.get("item_code")],
 			[(fg_item, 10), (raw_item, 10)],
 		)
+
+	def test_backward_trace_reaches_materials_of_an_intermediate_batch(self):
+		raw, intermediate, finished_good = (self.make_batch_item(p) for p in ("TRL", "TRM", "TRN"))
+		receipt = make_stock_entry(item_code=raw, to_warehouse="Stores - _TC", qty=4, rate=100)
+		first = self.make_batch_repack((raw, self.get_batch(receipt, 0), 4), (intermediate, None, 2), 2)
+		intermediate_batch = self.get_batch(first, 1)
+		frappe.db.set_value(
+			"Batch", intermediate_batch, {"reference_doctype": "Work Order", "reference_name": "WO-0002"}
+		)
+		second = self.make_batch_repack(
+			(intermediate, intermediate_batch, 2), (finished_good, None, 1), 1, source="Finished Goods - _TC"
+		)
+
+		rows = self.run_report(
+			item_code=finished_good,
+			batches=[self.get_batch(second, 1)],
+			traceability_direction="Backward",
+		)
+
+		self.assertIn(raw, [row["item_code"] for row in rows if row.get("indent") == 2])
+
+	def test_backward_trace_of_a_batch_repacked_into_itself(self):
+		item = self.make_batch_item("TRP")
+		receipt = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=4, rate=100)
+		batch = self.get_batch(receipt, 0)
+		self.make_batch_repack((item, batch, 4), (item, batch, 4), 4)
+
+		rows = self.run_report(item_code=item, batches=[batch], traceability_direction="Backward")
+
+		self.assertIn(receipt.name, [row.get("reference_name") for row in rows])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 1})
+	def test_backward_trace_splits_qty_across_entries_that_made_a_batch(self):
+		raw, intermediate, finished_good = (self.make_batch_item(p) for p in ("TRS", "TRT", "TRU"))
+		receipt = make_stock_entry(item_code=raw, to_warehouse="Stores - _TC", qty=10, rate=100)
+		raw_batch = self.get_batch(receipt, 0)
+		intermediate_batch = (
+			frappe.get_doc(
+				{"doctype": "Batch", "item": intermediate, "batch_id": frappe.generate_hash(length=10)}
+			)
+			.insert()
+			.name
+		)
+		makers = [
+			self.make_batch_repack((raw, raw_batch, qty), (intermediate, intermediate_batch, qty), qty).name
+			for qty in (6, 4)
+		]
+		consumer = self.make_batch_repack(
+			(intermediate, intermediate_batch, 5), (finished_good, None, 5), 5, source="Finished Goods - _TC"
+		)
+
+		rows = self.run_report(
+			item_code=finished_good,
+			batches=[self.get_batch(consumer, 1)],
+			traceability_direction="Backward",
+		)
+
+		intermediate_rows = {
+			row["reference_name"]: row["qty"] for row in rows if row.get("item_code") == intermediate
+		}
+		self.assertEqual(intermediate_rows, {makers[0]: 3, makers[1]: 2})
+		self.assertEqual(sorted(row["qty"] for row in rows if row.get("item_code") == raw), [2, 3])

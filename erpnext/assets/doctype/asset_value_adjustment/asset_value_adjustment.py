@@ -104,9 +104,15 @@ class AssetValueAdjustment(Document):
 			frappe.throw(_("New Asset Value cannot be negative"))
 
 	def validate_finance_book(self):
-		if not self.finance_book or not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
+		if not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
 			return
 
+		if self.finance_book:
+			self.validate_finance_book_is_set_on_asset()
+		else:
+			self.validate_asset_has_no_named_finance_book()
+
+	def validate_finance_book_is_set_on_asset(self):
 		if not frappe.db.exists(
 			"Asset Finance Book",
 			{"parent": self.asset, "parenttype": "Asset", "finance_book": self.finance_book},
@@ -115,6 +121,19 @@ class AssetValueAdjustment(Document):
 				_("Finance Book {0} is not set on Asset {1}").format(
 					frappe.bold(self.finance_book), get_link_to_form("Asset", self.asset)
 				)
+			)
+
+	def validate_asset_has_no_named_finance_book(self):
+		# The adjustment updates only the matching book row, but its GL entries without a book apply to all books
+		if frappe.db.exists(
+			"Asset Finance Book",
+			{"parent": self.asset, "parenttype": "Asset", "finance_book": ["is", "set"]},
+		):
+			frappe.throw(
+				_("Select a Finance Book, as Asset {0} has named finance books").format(
+					get_link_to_form("Asset", self.asset)
+				),
+				title=_("Missing Finance Book"),
 			)
 
 	def validate_difference_amount(self):
