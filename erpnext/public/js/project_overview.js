@@ -23,6 +23,7 @@ erpnext.ProjectOverview = class ProjectOverview {
 	constructor(frm) {
 		this.frm = frm;
 		this.seq = 0;
+		this.charts = [];
 		this.progress = new erpnext.ProjectOverviewProgress(this);
 		this.attention = new erpnext.ProjectOverviewAttention(this);
 		this.breakdown = new erpnext.ProjectOverviewBreakdown(this);
@@ -48,6 +49,7 @@ erpnext.ProjectOverview = class ProjectOverview {
 	}
 
 	build() {
+		this.destroy_charts();
 		this.project = this.frm.doc.name;
 		const $wrapper = this.frm.get_field("overview_html").$wrapper.empty();
 		this.$root = $('<div class="project-overview">').appendTo($wrapper);
@@ -66,6 +68,7 @@ erpnext.ProjectOverview = class ProjectOverview {
 	}
 
 	render({ loading, error, data }) {
+		this.destroy_charts();
 		this.$root.empty().attr("aria-busy", loading ? "true" : "false");
 		this.render_header(data);
 		if (loading || error || data.errors.summary) {
@@ -239,14 +242,15 @@ erpnext.ProjectOverview = class ProjectOverview {
 		};
 	}
 
-	overdue_card({ overdue: { count, oldest_days_late } }) {
+	overdue_card({ overdue: { count, oldest_days_late, tasks } }) {
 		const caption = count
 			? __("Oldest {0}", [this.days_late_text(oldest_days_late)])
 			: __("Nothing overdue");
 		return {
 			value: count ? $('<span class="po-error">').text(format_number(count, null, 0)) : "0",
 			caption,
-			onclick: () => this.open_task_list({ exp_end_date: ["<", this.data.as_of] }),
+			// the tasks counted, as a due-date filter can't leave out those still awaiting review
+			onclick: count ? () => this.open_list("Task", { name: ["in", tasks] }) : null,
 		};
 	}
 
@@ -387,6 +391,17 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return $head;
 	}
 
+	// charts keep window and resize listeners until destroyed, so they're released before every redraw
+	add_chart(chart) {
+		this.charts.push(chart);
+		return chart;
+	}
+
+	destroy_charts() {
+		this.charts.forEach((chart) => chart.destroy());
+		this.charts = [];
+	}
+
 	// an info mark after a section title, with the detail in its tooltip
 	info_icon(text) {
 		const $icon = $('<span class="po-title-info">').html(frappe.utils.icon("info", "sm"));
@@ -400,6 +415,17 @@ erpnext.ProjectOverview = class ProjectOverview {
 			variant: "ghost",
 			size: "sm",
 			icon_right: "arrow-up-right",
+			onclick,
+		});
+	}
+
+	// the same link as an arrow only, named by its tooltip, for a panel's header
+	icon_link(tooltip, onclick) {
+		return frappe.ui.button({
+			icon: "arrow-up-right",
+			variant: "ghost",
+			size: "sm",
+			tooltip,
 			onclick,
 		});
 	}

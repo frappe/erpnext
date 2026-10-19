@@ -113,9 +113,16 @@ class PlannedVsCompleted:
 
 	@cached_property
 	def axis_start(self) -> date:
+		"""The project's Expected Start, or its earliest task date, pulled back to any task completed
+		before it and to today while the project is open, so work done ahead of the plan still shows."""
 		if self.project.expected_start_date:
-			return getdate(self.project.expected_start_date)
-		return min(self.task_dates, default=self.today)
+			starts = [getdate(self.project.expected_start_date)]
+		else:
+			starts = list(self.task_dates)
+		starts += [self.closed_date(task) for task in self.tasks if task.status == "Completed"]
+		if self.project.status not in CLOSED_PROJECT_STATUSES:
+			starts.append(self.today)
+		return min(starts, default=self.today)
 
 	@cached_property
 	def axis_end(self) -> date:

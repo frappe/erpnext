@@ -134,6 +134,8 @@ frappe.ui.form.on("Project", {
 			// a refresh while loading starts over with a list of its own
 			if (frm.tasks_list !== pending) return;
 
+			const can_edit = frappe.model.can_write("Task");
+			const editable = (field, html) => (can_edit ? frm.events.inline_edit_html(field, html) : html);
 			const list = new frappe.ui.EmbeddedList({
 				wrapper: $wrapper,
 				get_page: ({ start, page_length, txt }) =>
@@ -160,17 +162,18 @@ frappe.ui.form.on("Project", {
 							// the Task list gives no colour for statuses missing from its map, e.g. ones
 							// added through Customize Form
 							const [label, color] = frappe.get_indicator(row, "Task") || [];
-							return frappe.ui.badge.html({
+							const badge = frappe.ui.badge.html({
 								label: label || __(row.status),
 								// badge knows "darkgrey" but not the list view's "dark grey"
 								theme: (color || "gray").replace(" ", ""),
 							});
+							return editable("status", badge);
 						},
 					},
 					{
 						label: __("Priority"),
 						fieldname: "priority",
-						render: (row) => erpnext.utils.task_priority_html(row.priority),
+						render: (row) => editable("priority", erpnext.utils.task_priority_html(row.priority)),
 					},
 					{
 						label: __("Start Date"),
@@ -191,13 +194,15 @@ frappe.ui.form.on("Project", {
 					{
 						label: __("Assigned To"),
 						render: (row) =>
-							frappe
-								.avatar_group(JSON.parse(row._assign || "[]"), 3, {
-									align: "left",
-									overlap: true,
-									action_icon: "plus",
-								})
-								.prop("outerHTML"),
+							frappe.ui.avatar_group.html({
+								avatars: JSON.parse(row._assign || "[]").map((user) => {
+									const { fullname, image } = frappe.user_info(user);
+									return { label: fullname, image };
+								}),
+								max: 3,
+								size: "sm",
+								add: { title: __("Assign") },
+							}),
 					},
 				],
 			});
@@ -224,20 +229,104 @@ frappe.ui.form.on("Project", {
 				},
 			}).wrapper.insertAfter($actions.find("[data-action='search']"));
 
-			// cells are rendered as HTML, so avatar_group's own handler for "+" is lost; bound here instead
-			$wrapper.off(".project_tasks").on("click.project_tasks", ".avatar-group", (e) => {
+			// Status and Priority change in place; the menu is made on the first click, then opens itself
+			$wrapper.off(".project_tasks").on("click.project_tasks", ".task-inline-edit", (e) => {
+				e.stopPropagation();
+				const button = e.currentTarget;
+				if ($(button).data("dropdown")) return;
+
+				const row = list.data[$(button).closest("tr").attr("data-row-idx")];
+				const field = button.dataset.field;
+				const dropdown = new frappe.ui.Dropdown({
+					trigger: button,
+					options: () =>
+						frm.events.task_field_options(frm, row, field, () =>
+							frm.events.reload_task_rows(list)
+						),
+				});
+				$(button).data("dropdown", dropdown);
+				dropdown.open();
+			});
+
+			// cells are rendered as HTML, so the group's add button has no handler of its own; bound here instead
+			$wrapper.on("click.project_tasks", ".es-avatar-group", (e) => {
 				// the avatars only show their user's name on hover, rather than opening the task
 				e.stopPropagation();
-				if (!$(e.target).closest(".avatar-action").length) return;
+				if (!$(e.target).closest(".es-avatar-group__add").length) return;
 
 				const row = list.data[$(e.currentTarget).closest("tr").attr("data-row-idx")];
-				frm.events.assign_task(frm, row, () => list.refresh());
+				frm.events.assign_task(frm, row, () => frm.events.reload_task_rows(list));
 			});
 
 			list.refresh();
 			return list;
 		});
 		return pending;
+	},
+
+	// a cell's value as a button that opens a menu of the field's options
+	inline_edit_html: function (field, html) {
+		const caret = frappe.utils.icon("chevron-down", "xs", "", "", "ml-1 text-ink-gray-4", true);
+		return `<button type="button" class="btn-reset inline-flex items-center rounded task-inline-edit"
+			data-field="${field}" title="${__("Change")}">${html}${caret}</button>`;
+	},
+
+	// Overdue follows the due date and Template marks template tasks, so neither is offered as a status;
+	// priorities are listed most urgent first
+	task_field_options: function (frm, task, field, after) {
+		const options = frappe.meta.get_docfield("Task", field).options.split("\n");
+		const choices =
+			field === "status"
+				? options.filter((value) => !["Overdue", "Template"].includes(value))
+				: options.slice().reverse();
+		const icons = ["Urgent", "High", "Medium", "Low"];
+		return choices.map((value) => ({
+			label: __(value),
+			icon: field === "priority" && icons.includes(value) ? `priority-${value.toLowerCase()}` : null,
+			selected: task[field] === value,
+			onclick: () => task[field] !== value && frm.events.update_task(frm, task, field, value, after),
+		}));
+	},
+
+	// saved through the task's own validation, as if edited in its form; cancelling asks first. The loaded
+	// rows and the project's progress are reloaded, keeping a search and how far the list was loaded
+	update_task: function (frm, task, field, value, after) {
+		const save = () =>
+			frappe.db.set_value("Task", task.name, field, value).then(() => {
+				after();
+				frm.events.refresh_project_progress(frm);
+			});
+		if (field === "status" && value === "Cancelled") {
+			frappe.confirm(__("Cancel task {0}?", [frappe.utils.escape_html(task.subject)]), save);
+		} else {
+			save();
+		}
+	},
+
+	// an edit can move a task in the sort order (and a save changes more than the field picked: completing
+	// sets Progress), so the rows already loaded are read again in one request and redrawn in their new
+	// order. Load More then carries on from the right offset, without repeating or skipping a task
+	reload_task_rows: function (list) {
+		const page_size = list.page_size;
+		list.page_size = Math.max(page_size, list.data.length);
+		return list.load_page(0).finally(() => (list.page_size = page_size));
+	},
+
+	// a task's status moves the project's % Complete and can complete it. The task save leaves the project's
+	// modified as it was, so the form keeps its conflict check; unsaved edits keep their own values
+	refresh_project_progress: function (frm) {
+		const fields = ["percent_complete", "status"];
+		const project = frm.doc.name;
+		return frappe.db.get_value("Project", project, fields).then(({ message }) => {
+			// the form is reused for the next Project opened, so a late reply may belong to another one
+			if (frm.doc.name !== project) return;
+			if (!frm.is_dirty()) {
+				Object.assign(frm.doc, message);
+				frm.refresh_fields(fields);
+				frm.refresh_header();
+			}
+			frm.project_overview?.refresh();
+		});
 	},
 
 	create_task: function (frm) {

@@ -71,9 +71,8 @@ class ProjectOverview:
 				"expected_end_date",
 				"company",
 				"total_billed_amount",
-				"total_costing_amount",
-				"total_purchase_cost",
-				"total_consumed_material_cost",
+				"gross_margin",
+				"per_gross_margin",
 			],
 			as_dict=True,
 		)
@@ -130,21 +129,17 @@ class ProjectOverview:
 		return get_unbilled_time(self.project.name)
 
 	def profitability(self) -> dict:
-		"""Billed against cost, added up as Project.calculate_gross_margin does: cost is the time logged
-		at costing rates, purchases and consumed material. The margin is relative to what was billed."""
-		cost = (
-			flt(self.project.total_costing_amount)
-			+ flt(self.project.total_purchase_cost)
-			+ flt(self.project.total_consumed_material_cost)
-		)
+		"""Billed against cost, using the gross margin the project stores for its Costing tab, so the two
+		always agree; cost is what billing less that margin leaves. With nothing billed there is no
+		margin percentage to show."""
 		billed = flt(self.project.total_billed_amount)
-		margin = billed - cost
+		margin = flt(self.project.gross_margin)
 		return {
 			"currency": frappe.get_cached_value("Company", self.project.company, "default_currency"),
 			"billed": billed,
-			"cost": cost,
+			"cost": billed - margin,
 			"margin": margin,
-			"margin_percent": flt(margin / billed * 100, 1) if billed else None,
+			"margin_percent": flt(self.project.per_gross_margin, 1) if billed else None,
 		}
 
 	def stats(self) -> dict:
@@ -241,8 +236,12 @@ class ProjectOverview:
 		}
 
 	def overdue_stats(self) -> dict:
-		days_late = [self.days_late(task) for task in self.open_tasks if self.is_overdue(task)]
-		return {"count": len(days_late), "oldest_days_late": max(days_late, default=0)}
+		overdue = [task for task in self.open_tasks if self.is_overdue(task)]
+		return {
+			"count": len(overdue),
+			"oldest_days_late": max((self.days_late(task) for task in overdue), default=0),
+			"tasks": [task.name for task in overdue],
+		}
 
 	def hours_stats(self) -> dict:
 		"""Hours on submitted Timesheets against the Expected Time of the project's tasks.
@@ -294,8 +293,12 @@ class ProjectOverview:
 		return len(TASK_PRIORITIES)
 
 	def is_overdue(self, task: frappe._dict) -> bool:
-		"""Past its Expected End Date, as Task.is_overdue decides; an undated task never is."""
-		return bool(task.due_date) and task.due_date < self.today
+		"""Past its Expected End Date, as Task.is_overdue decides; an undated task never is. A task
+		Pending Review with its Review Date still ahead isn't either, as set_tasks_as_overdue leaves it be."""
+		if not task.due_date or task.due_date >= self.today:
+			return False
+		awaiting_review = task.status == "Pending Review" and task.review_date
+		return not (awaiting_review and getdate(task.review_date) > self.today)
 
 	def is_due_soon(self, task: frappe._dict) -> bool:
 		return bool(task.due_date) and self.today <= task.due_date <= self.due_soon_until
@@ -378,6 +381,7 @@ class ProjectOverview:
 				"progress",
 				"exp_start_date",
 				"completed_on",
+				"review_date",
 				"modified",
 			],
 			limit_page_length=0,

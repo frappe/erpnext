@@ -24,7 +24,7 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		if (data.delivery) {
 			this.render_completed($panel, data.completed_by_assignee);
 		} else {
-			this.render_workload($panel, data.workload);
+			this.render_workload($panel, $head, data.workload);
 		}
 	}
 
@@ -39,7 +39,7 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		const $panel = $('<div class="po-panel bg-surface-base">').appendTo($parent);
 		const $head = this.overview.section_head($panel, {
 			title: __("Profitability"),
-			action: this.overview.report_link(__("Costing"), () => this.overview.open_tab("costing_tab")),
+			action: this.overview.icon_link(__("Open Costing"), () => this.overview.open_tab("costing_tab")),
 		});
 		$head
 			.find(".po-title")
@@ -64,32 +64,34 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 			"po-margin-negative",
 			margin < 0
 		);
-		frappe.utils.make_chart($chart.appendTo($panel)[0], {
-			type: "donut",
-			height: 280,
-			colors: ["var(--surface-blue-7)", "var(--surface-blue-4)"],
-			data: { labels: [__("Billed"), __("Cost")], datasets: [{ values: [billed, cost] }] },
-			center: {
-				value: money(margin),
-				label:
-					margin_percent == null
-						? __("Gross Margin")
-						: __("Gross Margin {0}%", [format_number(margin_percent, null, 1)]),
-			},
-			tooltipOptions: { formatTooltipY: money },
-		});
+		this.overview.add_chart(
+			frappe.utils.make_chart($chart.appendTo($panel)[0], {
+				type: "donut",
+				height: 280,
+				colors: ["var(--surface-green-7)", "var(--surface-red-6)"],
+				data: { labels: [__("Billed"), __("Cost")], datasets: [{ values: [billed, cost] }] },
+				center: {
+					value: money(margin),
+					label:
+						margin_percent == null
+							? __("Gross Margin")
+							: __("Gross Margin {0}%", [format_number(margin_percent, null, 1)]),
+				},
+				tooltipOptions: { formatTooltipY: money },
+			})
+		);
 	}
 
 	render_delivery($panel, by_delivery) {
 		if (!by_delivery) return this.error($panel);
 
-		const colors = this.outcome_colors();
+		const outcomes = this.outcomes();
 		this.donut($panel, {
-			slices: by_delivery.outcomes.map(({ outcome, count }) => ({
-				label: __(outcome),
+			slices: by_delivery.outcomes.map(({ outcome, count, tasks }) => ({
+				label: outcomes[outcome].label,
 				value: count,
-				color: colors[outcome],
-				onclick: () => this.open_outcome(outcome),
+				color: outcomes[outcome].color,
+				onclick: () => this.overview.open_list("Task", { name: ["in", tasks] }),
 			})),
 			total: by_delivery.total,
 		});
@@ -111,40 +113,56 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 
 		const colors = this.status_colors();
 		this.donut($panel, {
-			slices: by_status.statuses.map(({ status, count }) => ({
+			slices: by_status.statuses.map(({ status, count, tasks }) => ({
 				label: __(status),
 				value: count,
-				color: colors[status],
-				onclick: () => this.open_status(status),
+				// a status added through Customize Form has no colour of its own
+				color: colors[status] || "var(--surface-gray-4)",
+				onclick: () => this.overview.open_list("Task", { name: ["in", tasks] }),
 			})),
 			total: by_status.total,
 		});
 	}
 
-	// each slice opens the tasks behind it; slices stay in the order given, as there are far fewer
-	// than frappe-charts' maxSlices
+	// each slice opens the tasks behind it. frappe-charts folds slices past maxSlices into 'Rest' and reorders
+	// them, which would break the index lookup, so every slice is kept in the order given
 	donut($panel, { slices, total }) {
-		frappe.utils.make_chart($('<div class="po-donut">').appendTo($panel)[0], {
-			type: "donut",
-			height: 280,
-			colors: slices.map((slice) => slice.color),
-			data: {
-				labels: slices.map((slice) => slice.label),
-				datasets: [{ values: slices.map((slice) => slice.value) }],
-			},
-			center: { value: format_number(total, null, 0), label: __("tasks") },
-			onClick: ({ index }) => slices[index].onclick(),
-		});
+		this.overview.add_chart(
+			frappe.utils.make_chart($('<div class="po-donut">').appendTo($panel)[0], {
+				type: "donut",
+				height: 280,
+				colors: slices.map((slice) => slice.color),
+				data: {
+					labels: slices.map((slice) => slice.label),
+					datasets: [{ values: slices.map((slice) => slice.value) }],
+				},
+				center: { value: format_number(total, null, 0), label: __("tasks") },
+				maxSlices: slices.length,
+				maxLegendPoints: slices.length,
+				onClick: ({ index }) => slices[index].onclick(),
+			})
+		);
 	}
 
-	render_workload($panel, workload) {
+	// the busiest people, keeping Unassigned in view; with more than five rows the rest are in the Task List
+	render_workload($panel, $head, workload) {
 		if (!workload) return this.error($panel);
 
-		this.people_list($panel, workload.rows, {
+		let rows = workload.rows;
+		if (rows.length > 5) {
+			const unassigned = rows.find((row) => !row.user);
+			rows = unassigned ? [...rows.slice(0, 4), unassigned] : rows.slice(0, 5);
+			$head.append(
+				this.overview.icon_link(__("Open Task List"), () =>
+					this.overview.open_task_list({ is_group: 0 })
+				)
+			);
+		}
+		this.people_list($panel, rows, {
 			count: (row) => __("{0} open", [row.open]),
 			note: (row) => (row.overdue ? __("{0} overdue", [row.overdue]) : ""),
 			empty: __("No open tasks"),
-			onclick: (row) => this.open_assignee_tasks(row.user),
+			onclick: (row) => this.overview.open_task_list({ name: ["in", row.tasks] }),
 		});
 	}
 
@@ -191,40 +209,15 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		});
 	}
 
-	// on time and late can't be told apart by a list filter, so both open the completed tasks
-	open_outcome(outcome) {
-		const project = this.overview.project;
-		const filters = {
-			"On Time": { project, status: "Completed" },
-			Late: { project, status: "Completed" },
-			"No Due Date": { project, status: "Completed", exp_end_date: ["is", "not set"] },
-			Cancelled: { project, status: "Cancelled" },
-		}[outcome];
-		if (filters) this.overview.open_list("Task", filters);
-		else this.overview.open_task_list();
-	}
-
-	outcome_colors() {
+	// the outcomes come from the server, so their labels are written out here to be picked up for translation
+	outcomes() {
 		return {
-			"On Time": "var(--surface-green-7)",
-			Late: "var(--surface-red-6)",
-			"No Due Date": "var(--surface-gray-4)",
-			"Still Open": "var(--surface-blue-7)",
-			Cancelled: "var(--surface-gray-6)",
+			"On Time": { label: __("On Time"), color: "var(--surface-green-7)" },
+			Late: { label: __("Late"), color: "var(--surface-red-6)" },
+			"No Due Date": { label: __("No Due Date"), color: "var(--surface-gray-4)" },
+			"Still Open": { label: __("Still Open"), color: "var(--surface-blue-7)" },
+			Cancelled: { label: __("Cancelled"), color: "var(--surface-gray-6)" },
 		};
-	}
-
-	open_assignee_tasks(user) {
-		this.overview.open_task_list({ _assign: user ? ["like", `%${user}%`] : ["is", "not set"] });
-	}
-
-	// Overdue is worked out from the Expected End Date, as on the Overdue card
-	open_status(status) {
-		if (status === "Overdue") {
-			this.overview.open_task_list({ exp_end_date: ["<", this.overview.data.as_of] });
-		} else {
-			this.overview.open_list("Task", { project: this.overview.project, status });
-		}
 	}
 
 	status_colors() {

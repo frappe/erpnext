@@ -80,6 +80,21 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.assertEqual(
 			outcomes, {"On Time": 1, "Late": 1, "No Due Date": 1, "Still Open": 1, "Cancelled": 1}
 		)
+		# each slice opens exactly its own tasks
+		subjects = {
+			row["outcome"]: [frappe.db.get_value("Task", name, "subject") for name in row["tasks"]]
+			for row in data["tasks_by_delivery"]["outcomes"]
+		}
+		self.assertEqual(
+			subjects,
+			{
+				"On Time": ["On time"],
+				"Late": ["Late"],
+				"No Due Date": ["Undated"],
+				"Still Open": ["Left open"],
+				"Cancelled": ["Dropped"],
+			},
+		)
 		# completing the task closed its assignment, yet its assignee is still credited
 		self.assertFalse(json.loads(frappe.db.get_value("Task", on_time.name, "_assign") or "[]"))
 		rows = data["completed_by_assignee"]["rows"]
@@ -120,18 +135,20 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.assertEqual(data["tasks_by_delivery"]["total"], 2)
 
 	def test_profitability_sets_cost_against_what_was_billed(self):
-		# saving a task recalculates the project's costing, so the totals are set after it
+		# saving a task recalculates the project's costing, so the totals are set after it, through the
+		# project's own gross margin calculation
 		self.make_task("Something to show")
-		frappe.db.set_value(
-			"Project",
-			self.project,
+		project = frappe.get_doc("Project", self.project)
+		project.update(
 			{
 				"total_billed_amount": 28_600,
 				"total_costing_amount": 30_000,
 				"total_purchase_cost": 25_000,
 				"total_consumed_material_cost": 14_810,
-			},
+			}
 		)
+		project.calculate_gross_margin()
+		project.db_update()
 
 		profitability = project_overview.get_project_overview(self.project)["profitability"]
 
@@ -139,8 +156,37 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.assertEqual(profitability["margin"], -41_210)
 		self.assertEqual(profitability["margin_percent"], -144.1)
 
+	def test_a_task_awaiting_review_is_not_overdue_until_its_review_date(self):
+		# set_tasks_as_overdue leaves a Pending Review task alone while its Review Date is ahead
+		waiting = self.make_task(
+			"Awaiting review",
+			due=-3,
+			status="Pending Review",
+			review_date=add_days(nowdate(), 2),
+			assigned=True,
+		)
+		late = self.make_task(
+			"Review missed",
+			due=-3,
+			status="Pending Review",
+			review_date=add_days(nowdate(), -1),
+			assigned=True,
+		)
+
+		data = project_overview.get_project_overview(self.project)
+
+		self.assertEqual(data["stats"]["overdue"]["count"], 1)
+		self.assertEqual(data["stats"]["overdue"]["tasks"], [late.name])
+		statuses = {row["status"]: row["tasks"] for row in data["tasks_by_status"]["statuses"]}
+		self.assertEqual(statuses, {"Pending Review": [waiting.name], "Overdue": [late.name]})
+		self.assertEqual(
+			[(row["subject"], row["reason"]) for row in data["needs_attention"]["tasks"]],
+			[("Review missed", "Overdue")],
+		)
+		self.assertEqual(data["workload"]["rows"][0]["overdue"], 1)
+
 	def test_stat_cards(self):
-		self.make_task("Five days late", due=-5, expected_time=4)
+		late = self.make_task("Five days late", due=-5, expected_time=4)
 		self.make_task("Due in three days", due=3, expected_time=6)
 		self.make_task("Due in a month", due=30)
 		self.make_task("Undated", expected_time=2)
@@ -153,7 +199,7 @@ class TestProjectOverview(ERPNextTestSuite):
 
 		self.assertEqual(stats["open_tasks"], {"count": 5, "due_soon": 1, "due_soon_days": 7})
 		# cancelled, completed and undated tasks are never overdue
-		self.assertEqual(stats["overdue"], {"count": 1, "oldest_days_late": 5})
+		self.assertEqual(stats["overdue"], {"count": 1, "oldest_days_late": 5, "tasks": [late.name]})
 		# cancelled and group tasks are left out of the expected hours
 		self.assertEqual(stats["hours"], {"logged": 12.5, "expected": 20})
 
@@ -256,6 +302,21 @@ class TestProjectOverview(ERPNextTestSuite):
 
 		self.assertEqual(self.planned_vs_completed("Manual")["points"], [])
 
+	def test_an_open_project_planned_to_start_later_still_shows_progress_made_today(self):
+		frappe.db.set_value(
+			"Project",
+			self.project,
+			{"expected_start_date": add_days(nowdate(), 10), "expected_end_date": add_days(nowdate(), 40)},
+		)
+		self.make_task("Started early", due=20, status="Completed", completed_on=nowdate())
+		self.make_task("Later", due=30)
+
+		chart = project_overview.get_project_overview(self.project)["planned_vs_completed"]
+
+		today = chart["points"][chart["today_index"]]
+		self.assertEqual(getdate(today["date"]), getdate(nowdate()))
+		self.assertEqual(today["completed"], 50)
+
 	def test_completed_line_ends_on_today_and_the_axis_ends_on_whole_weeks(self):
 		frappe.db.set_value(
 			"Project",
@@ -333,44 +394,69 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.make_task("New", due=10)
 		self.make_task("In progress", due=5, status="Working")
 		self.make_task("Late", due=-3)
+		# still saved as Working until the daily job marks it Overdue
+		self.make_task("Late and working", due=-2, status="Working")
 		self.make_task("Undated")
 		self.make_task("Done", due=-10, status="Completed")
 		self.make_task("Dropped", due=-10, status="Cancelled")
 
 		breakdown = project_overview.get_project_overview(self.project)["tasks_by_status"]
 
+		# each slice lists exactly the tasks it counts, which its click opens
 		self.assertEqual(
-			breakdown["statuses"],
 			[
-				{"status": "Open", "count": 2},
-				{"status": "Working", "count": 1},
-				{"status": "Overdue", "count": 1},
-				{"status": "Completed", "count": 1},
-				{"status": "Cancelled", "count": 1},
+				(row["status"], sorted(frappe.db.get_value("Task", name, "subject") for name in row["tasks"]))
+				for row in breakdown["statuses"]
+			],
+			[
+				("Open", ["New", "Undated"]),
+				("Working", ["In progress"]),
+				("Overdue", ["Late", "Late and working"]),
+				("Completed", ["Done"]),
+				("Cancelled", ["Dropped"]),
 			],
 		)
-		self.assertEqual(breakdown["total"], 6)
+		self.assertEqual(breakdown["total"], 7)
+
+	def test_tasks_by_status_keeps_statuses_added_through_customize_form(self):
+		self.make_task("Normal", due=10)
+		# a status the Task doctype doesn't ship with, as Customize Form can add
+		self.make_task("Parked", due=10).db_set("status", "On Hold")
+
+		breakdown = project_overview.get_project_overview(self.project)["tasks_by_status"]
+
+		self.assertEqual(
+			[(row["status"], row["count"]) for row in breakdown["statuses"]], [("Open", 1), ("On Hold", 1)]
+		)
+		self.assertEqual(sum(row["count"] for row in breakdown["statuses"]), breakdown["total"])
 
 	def test_workload_counts_open_and_overdue_per_person(self):
 		other = "test1@example.com"
-		self.make_task("Late", due=-2, assigned=True)
-		self.make_task("Soon", due=5, assigned=True)
-		self.make_task("Later", due=30, assigned=True)
-		self.make_task("Shared", assigned=["Administrator", other])
-		self.make_task("Nobody on it", due=3)
-		self.make_task("Also late", due=-1, assigned=[other])
+		late = self.make_task("Late", due=-2, assigned=True).name
+		soon = self.make_task("Soon", due=5, assigned=True).name
+		later = self.make_task("Later", due=30, assigned=True).name
+		shared = self.make_task("Shared", assigned=["Administrator", other]).name
+		nobody = self.make_task("Nobody on it", due=3).name
+		also_late = self.make_task("Also late", due=-1, assigned=[other]).name
 		self.make_task("Phase", due=30, is_group=1, assigned=True)
 		self.make_task("Done", due=-5, status="Completed", assigned=True)
 
 		workload = project_overview.get_project_overview(self.project)["workload"]
 
-		# group and closed tasks are left out; a shared task counts for each person
+		# group and closed tasks are left out; a shared task counts for each person, and each row lists
+		# the tasks it counts
+		rows = [{**row, "tasks": sorted(row["tasks"])} for row in workload["rows"]]
 		self.assertEqual(
-			workload["rows"],
+			rows,
 			[
-				{"user": "Administrator", "open": 4, "overdue": 1},
-				{"user": other, "open": 2, "overdue": 1},
-				{"user": None, "open": 1, "overdue": 0},
+				{
+					"user": "Administrator",
+					"open": 4,
+					"overdue": 1,
+					"tasks": sorted([late, soon, later, shared]),
+				},
+				{"user": other, "open": 2, "overdue": 1, "tasks": sorted([shared, also_late])},
+				{"user": None, "open": 1, "overdue": 0, "tasks": [nobody]},
 			],
 		)
 

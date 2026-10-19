@@ -53,23 +53,25 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 			colors.unshift("var(--surface-gray-5)");
 		}
 
-		frappe.utils.make_chart(wrapper, {
-			type: "line",
-			height: 270,
-			colors,
-			data: {
-				labels,
-				datasets,
-				xMarkers: today_index == null ? [] : [{ label: __("Today"), value: labels[today_index] }],
-			},
-			axisOptions: {
-				yAxisRange: { min: 0, max: 100 },
-				numberFormatter: (value) => this.percent_text(value),
-			},
-			tooltipOptions: {
-				formatTooltipY: (value) => (value == null ? "" : this.percent_text(value)),
-			},
-		});
+		this.overview.add_chart(
+			frappe.utils.make_chart(wrapper, {
+				type: "line",
+				height: 270,
+				colors,
+				data: {
+					labels,
+					datasets,
+					xMarkers: today_index == null ? [] : [{ label: __("Today"), value: labels[today_index] }],
+				},
+				axisOptions: {
+					yAxisRange: { min: 0, max: 100 },
+					numberFormatter: (value) => this.percent_text(value),
+				},
+				tooltipOptions: {
+					formatTooltipY: (value) => (value == null ? "" : this.percent_text(value)),
+				},
+			})
+		);
 	}
 
 	// where the project stands today, and the gap to plan or why there is no plan

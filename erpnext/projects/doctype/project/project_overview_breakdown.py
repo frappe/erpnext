@@ -1,7 +1,6 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from collections import Counter
 from functools import cached_property
 from typing import TYPE_CHECKING
 
@@ -27,11 +26,18 @@ class TaskBreakdown:
 		self.overview = overview
 
 	def by_status(self) -> dict:
-		"""Task count per status; an open task past its Expected End Date counts as Overdue."""
-		counts = Counter(self.status(task) for task in self.overview.tasks)
+		"""Tasks per status; an open task past its Expected End Date counts as Overdue, whatever its saved
+		status. Each status lists its tasks, so a slice opens exactly the tasks it counts. Statuses added
+		through Customize Form follow the standard ones, alphabetically."""
+		tasks = {}
+		for task in self.overview.tasks:
+			tasks.setdefault(self.status(task), []).append(task.name)
+		custom = sorted(status for status in tasks if status not in TASK_STATUSES)
 		return {
 			"statuses": [
-				{"status": status, "count": counts[status]} for status in TASK_STATUSES if counts[status]
+				{"status": status, "count": len(tasks[status]), "tasks": tasks[status]}
+				for status in (*TASK_STATUSES, *custom)
+				if status in tasks
 			],
 			"total": len(self.overview.tasks),
 		}
@@ -40,14 +46,15 @@ class TaskBreakdown:
 		"""Open tasks per assignee and how many of them are overdue; busiest first, Unassigned last.
 
 		A task shared by several people counts for each of them. Group tasks are left out, as their
-		subtasks carry the work.
+		subtasks carry the work. Each row lists its tasks so its link opens exactly what it counts.
 		"""
 		rows = {}
 		for task in self.workload_tasks:
 			for user in task.assigned_to or [None]:
-				row = rows.setdefault(user, {"user": user, "open": 0, "overdue": 0})
+				row = rows.setdefault(user, {"user": user, "open": 0, "overdue": 0, "tasks": []})
 				row["open"] += 1
 				row["overdue"] += self.overview.is_overdue(task)
+				row["tasks"].append(task.name)
 
 		return {
 			"rows": sorted(
@@ -57,13 +64,16 @@ class TaskBreakdown:
 
 	def by_delivery(self) -> dict:
 		"""For a completed or cancelled project, its tasks by how they ended: on time, late, without a date to
-		judge, still open, or cancelled."""
-		counts = Counter(self.outcome(task) for task in self.overview.tasks)
+		judge, still open, or cancelled. Each outcome lists its tasks, as no list filter can tell on time
+		from late."""
+		tasks = {}
+		for task in self.overview.tasks:
+			tasks.setdefault(self.outcome(task), []).append(task.name)
 		return {
 			"outcomes": [
-				{"outcome": outcome, "count": counts[outcome]}
+				{"outcome": outcome, "count": len(tasks[outcome]), "tasks": tasks[outcome]}
 				for outcome in DELIVERY_OUTCOMES
-				if counts[outcome]
+				if outcome in tasks
 			],
 			"total": len(self.overview.tasks),
 		}

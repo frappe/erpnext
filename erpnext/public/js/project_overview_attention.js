@@ -47,16 +47,12 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 			return;
 		}
 		this.make_list($("<div>").appendTo($section), attention.tasks, { badge_label, badges }).refresh();
-		// only the top rows are sent; the count under the table says how many the Task List holds
-		if (attention.total > attention.tasks.length) {
-			$('<div class="po-note po-list-count">')
-				.text(__("{0} of {1}", [attention.tasks.length, attention.total]))
-				.appendTo($section);
-		}
 	}
 
 	make_list($wrapper, tasks, { badge_label, badges }) {
-		const rows = tasks.map((task) => ({ ...task, ...badges[task.reason] }));
+		// a status added through Customize Form has no badge of its own, so it shows as itself in gray
+		const fallback = (reason) => ({ label: __(reason), theme: "gray" });
+		const rows = tasks.map((task) => ({ ...task, ...(badges[task.reason] || fallback(task.reason)) }));
 		return new frappe.ui.EmbeddedList({
 			wrapper: $wrapper,
 			// the rows are already ranked by the server and sent with the rest of the overview
