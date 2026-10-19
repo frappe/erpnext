@@ -269,11 +269,16 @@ class Subscription(Document):
 		"""
 		Returns `True` if the grace period for the `Subscription` has passed
 		"""
+<<<<<<< HEAD
 		if not self.current_invoice_is_past_due():
 			return
+=======
+		if not self.current_invoice_is_past_due(posting_date):
+			return False
+>>>>>>> 1697b66 (fix(accounts): honor the full subscription grace period)
 
 		grace_period = cint(frappe.get_value("Subscription Settings", None, "grace_period"))
-		return getdate(posting_date) >= getdate(add_days(self.current_invoice.due_date, grace_period))
+		return getdate(posting_date) > getdate(add_days(self.current_invoice.due_date, grace_period))
 
 	def current_invoice_is_past_due(self, posting_date: DateTimeLikeObject | None = None) -> bool:
 		"""
@@ -282,7 +287,14 @@ class Subscription(Document):
 		if not self.current_invoice or self.is_paid(self.current_invoice):
 			return False
 
+<<<<<<< HEAD
 		return getdate(posting_date) >= getdate(self.current_invoice.due_date)
+=======
+		if not self.current_invoice.due_date:
+			return False
+
+		return getdate(posting_date) > getdate(self.current_invoice.due_date)
+>>>>>>> 1697b66 (fix(accounts): honor the full subscription grace period)
 
 	@property
 	def invoice_document_type(self) -> str:
