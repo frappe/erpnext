@@ -47,8 +47,10 @@ def get_finished_good_row(row, fg_work_orders):
 
 def get_produced_and_pending_qty(qty, documents):
 	produced_qty = sum(flt(d.produced_qty) for d in documents)
-	process_loss_qty = flt(documents[-1].get("process_loss_qty")) if documents else 0.0
-	return produced_qty, get_pending_qty(qty, produced_qty, process_loss_qty)
+	ordered_beyond_plan = max(sum(flt(d.qty) for d in documents) - flt(qty), 0)
+	process_loss_qty = sum(flt(d.get("process_loss_qty")) for d in documents)
+	unreplaced_loss_qty = max(process_loss_qty - ordered_beyond_plan, 0)
+	return produced_qty, get_pending_qty(qty, produced_qty, unreplaced_loss_qty)
 
 
 def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
@@ -111,7 +113,6 @@ def get_work_orders(filters):
 			"production_plan_item",
 			"production_plan_sub_assembly_item",
 		],
-		order_by="creation",
 	)
 
 	for row in work_orders:
