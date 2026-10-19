@@ -3,6 +3,7 @@
 
 
 import json
+from urllib.parse import urlencode
 
 import frappe
 import frappe.defaults
@@ -488,15 +489,42 @@ class Customer(TransactionBase):
 			if not flt(limit.credit_limit):
 				continue
 
-			outstanding_amt = get_customer_outstanding(
+			breakup = get_customer_outstanding_breakup(
 				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
 			)
-			if flt(limit.credit_limit) < outstanding_amt:
+			precision = limit.precision("credit_limit")
+			outstanding_amt = flt(breakup.gle + breakup.sales_order + breakup.delivery_note, precision)
+			if flt(limit.credit_limit, precision) < outstanding_amt:
 				frappe.throw(
-					_(
-						"""New credit limit is less than current outstanding amount for the customer. Credit limit has to be at least {0}"""
-					).format(outstanding_amt)
+					self.get_credit_limit_breakup_message(limit.company, breakup, precision),
+					title=_("Credit Limit Too Low"),
 				)
+
+	def get_credit_limit_breakup_message(self, company, breakup, precision):
+		currency = frappe.get_cached_value("Company", company, "default_currency")
+		outstanding_amt = flt(breakup.gle + breakup.sales_order + breakup.delivery_note, precision)
+		breakup = frappe._dict({key: flt(value, precision) for key, value in breakup.items()})
+		rows = [
+			(_("Outstanding as per General Ledger"), breakup.gle),
+			(_("Pending Sales Orders (unbilled amount)"), breakup.sales_order),
+			(_("Pending Delivery Notes (not billed, without Sales Order)"), breakup.delivery_note),
+		]
+		rows_html = "".join(
+			f"<tr><td>{label}</td><td style='text-align: right'>{fmt_money(amount, precision=precision, currency=currency)}</td></tr>"
+			for label, amount in rows
+		)
+		report_url = get_url_to_report_with_filters(company, self.name)
+
+		return _(
+			"New credit limit is less than the current outstanding amount for the customer. "
+			"Credit limit has to be at least {0}."
+		).format(frappe.bold(fmt_money(outstanding_amt, precision=precision, currency=currency))) + (
+			f"<br><br><table class='table table-bordered'><tbody>{rows_html}"
+			f"<tr><td><b>{_('Total')}</b></td>"
+			f"<td style='text-align: right'><b>{fmt_money(outstanding_amt, precision=precision, currency=currency)}</b></td></tr>"
+			f"</tbody></table>"
+			f"<a href='{report_url}'>{_('View Customer Credit Balance report')}</a>"
+		)
 
 	def on_trash(self):
 		if self.customer_primary_contact:
@@ -788,7 +816,20 @@ def get_overdue_portion(invoice: frappe._dict, payable_amount: float | None) -> 
 	return min(max(payable_amount - paid, 0.0), outstanding)
 
 
+def get_url_to_report_with_filters(company, customer):
+	return "/app/query-report/Customer%20Credit%20Balance?" + urlencode(
+		{"company": company, "customer": customer}
+	)
+
+
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
+	breakup = get_customer_outstanding_breakup(customer, company, ignore_outstanding_sales_order, cost_center)
+	return breakup.gle + breakup.sales_order + breakup.delivery_note
+
+
+def get_customer_outstanding_breakup(
+	customer, company, ignore_outstanding_sales_order=False, cost_center=None
+):
 	from frappe.query_builder import Criterion
 	from frappe.query_builder.functions import Coalesce, IfNull, Sum
 
@@ -881,7 +922,11 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	dn_res = dn_query.run()
 	outstanding_based_on_dn = flt(dn_res[0][0]) if dn_res and dn_res[0][0] is not None else 0.0
 
-	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
+	return frappe._dict(
+		gle=outstanding_based_on_gle,
+		sales_order=outstanding_based_on_so,
+		delivery_note=outstanding_based_on_dn,
+	)
 
 
 def get_credit_limit(customer, company):
