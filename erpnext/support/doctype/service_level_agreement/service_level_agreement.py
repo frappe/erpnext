@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.core.utils import get_parent_doc
 from frappe.model.document import Document
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import (
 	add_days,
 	add_to_date,
@@ -1107,24 +1108,59 @@ def update_agreement_status_on_custom_status(doc):
 
 
 def update_agreement_status(doc, apply_sla_for_resolution):
-	if doc.meta.has_field("agreement_status"):
-		# if SLA is applied for resolution check for response and resolution, else only response
-		if apply_sla_for_resolution:
-			if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
-				doc.agreement_status = "First Response Due"
-			elif doc.meta.has_field("sla_resolution_date") and not doc.get("sla_resolution_date"):
-				doc.agreement_status = "Resolution Due"
-			elif get_datetime(doc.get("sla_resolution_date")) <= get_datetime(doc.get("sla_resolution_by")):
-				doc.agreement_status = "Fulfilled"
-			else:
-				doc.agreement_status = "Failed"
-		else:
-			if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
-				doc.agreement_status = "First Response Due"
-			elif get_datetime(doc.get("first_responded_on")) <= get_datetime(doc.get("response_by")):
-				doc.agreement_status = "Fulfilled"
-			else:
-				doc.agreement_status = "Failed"
+	if not doc.meta.has_field("agreement_status"):
+		return
+
+	# if SLA is applied for resolution check for response and resolution, else only response
+	if has_missed_deadline(doc, "first_responded_on", "response_by") or (
+		apply_sla_for_resolution and has_missed_deadline(doc, "sla_resolution_date", "sla_resolution_by")
+	):
+		doc.agreement_status = "Failed"
+	elif doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
+		doc.agreement_status = "First Response Due"
+	elif (
+		apply_sla_for_resolution
+		and doc.meta.has_field("sla_resolution_date")
+		and not doc.get("sla_resolution_date")
+	):
+		doc.agreement_status = "Resolution Due"
+	else:
+		doc.agreement_status = "Fulfilled"
+
+
+def has_missed_deadline(doc, done_on_field: str, deadline_field: str) -> bool:
+	"""Done after the deadline, or not done and the deadline passed before now or before the hold."""
+	deadline = doc.get(deadline_field)
+	if not deadline:
+		return False
+
+	reached_on = doc.get(done_on_field) or doc.get("on_hold_since") or get_current_time()
+	return get_datetime(reached_on) > get_datetime(deadline)
+
+
+def fail_overdue_agreements():
+	"""Hourly: an open document fails its SLA once a deadline passes, but not while it is on hold."""
+	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+		return
+
+	for doctype in get_sla_doctypes():
+		for name in get_overdue_documents(doctype):
+			frappe.get_doc(doctype, name).db_set("agreement_status", "Failed", notify=True)
+
+
+def get_overdue_documents(doctype: str) -> list[str]:
+	table = frappe.qb.DocType(doctype)
+	reached_on = Coalesce(table.on_hold_since, get_current_time())
+	return (
+		frappe.qb.from_(table)
+		.select(table.name)
+		.where(table.service_level_agreement.isnotnull())
+		.where(
+			((table.agreement_status == "First Response Due") & (table.response_by < reached_on))
+			| ((table.agreement_status == "Resolution Due") & (table.sla_resolution_by < reached_on))
+		)
+		.run(pluck=True)
+	)
 
 
 def is_holiday(date, holidays):

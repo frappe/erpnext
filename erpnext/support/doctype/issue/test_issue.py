@@ -575,6 +575,45 @@ class TestIssue(TestSetUp):
 		issue.save()
 		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-08 11:00"))
 
+	def test_overdue_agreement_fails_unless_on_hold(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			fail_overdue_agreements,
+		)
+
+		# Response By 16:00 and Resolution By 18:00
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		unanswered = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		on_hold = make_issue(get_datetime("2019-03-04 12:00"), index=2)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		on_hold.status = "Replied"
+		on_hold.save()
+
+		# Tue 2019-03-05 is a holiday
+		frappe.flags.current_time = get_datetime("2019-03-06 12:00")
+		fail_overdue_agreements()
+		self.assertEqual(frappe.db.get_value("Issue", unanswered.name, "agreement_status"), "Failed")
+		self.assertEqual(frappe.db.get_value("Issue", on_hold.name, "agreement_status"), "Resolution Due")
+
+		# the 5 hours left run from the resume, and the agreement fails on save once they pass
+		on_hold.reload()
+		on_hold.status = "Open"
+		on_hold.save()
+		self.assertEqual(on_hold.sla_resolution_by, get_datetime("2019-03-06 17:00"))
+		self.assertEqual(on_hold.agreement_status, "Resolution Due")
+
+		frappe.flags.current_time = get_datetime("2019-03-06 17:30")
+		on_hold.save()
+		self.assertEqual(on_hold.agreement_status, "Failed")
+
+	def test_late_first_response_fails_the_agreement(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+
+		# answered and closed after Response By 16:00, before Resolution By 18:00
+		frappe.flags.current_time = get_datetime("2019-03-04 16:30")
+		issue.status = "Closed"
+		issue.save()
+		self.assertEqual(issue.agreement_status, "Failed")
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
