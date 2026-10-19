@@ -548,12 +548,24 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 	linked_sq_names = (
 		frappe.qb.from_(sq_item).select(sq_item.parent).where(linked_sq_conditions).distinct().run(pluck=True)
 	)
+	if not linked_sq_names or not frappe.has_permission("Supplier Quotation", "read"):
+		return []
+
+	# only quotations the user is allowed to open, so their prices are not exposed through the RFQ
+	permitted_sq_names = frappe.get_list(
+		"Supplier Quotation",
+		filters={"name": ["in", linked_sq_names], "docstatus": ["<", 2]},
+		pluck="name",
+		limit_page_length=0,
+	)
+	if not permitted_sq_names:
+		return []
 
 	conditions = linked_sq_conditions
-	if linked_sq_names and rfq_item_codes:
+	if rfq_item_codes:
 		# rows added manually to a linked quotation, but not rows that belong to another RFQ
 		conditions = conditions | (
-			sq_item.parent.isin(linked_sq_names)
+			sq_item.parent.isin(permitted_sq_names)
 			& sq_item.item_code.isin(rfq_item_codes)
 			& (Coalesce(sq_item.request_for_quotation, "") == "")
 			& (Coalesce(sq_item.request_for_quotation_item, "") == "")
@@ -585,7 +597,7 @@ def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
 			sq.status,
 			sq.docstatus,
 		)
-		.where(conditions & (sq.docstatus < 2))
+		.where(conditions & sq.name.isin(permitted_sq_names))
 		.orderby(sq.transaction_date)
 		.orderby(sq_item.idx)
 	)
