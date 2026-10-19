@@ -247,7 +247,10 @@ class AssetValueAdjustment(Document):
 					salvage_value_adjustment = self.get_adjusted_salvage_value_amount(row, difference_amount)
 					row.expected_value_after_useful_life += salvage_value_adjustment
 					row.value_after_depreciation = row.value_after_depreciation + flt(difference_amount)
+					row.value_adjustment_amount = flt(row.value_adjustment_amount) + flt(difference_amount)
 					row.db_update()
+		else:
+			asset.value_adjustment_amount = flt(asset.value_adjustment_amount) + flt(difference_amount)
 
 		asset.value_after_depreciation += flt(difference_amount)
 		asset.db_update()

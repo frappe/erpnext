@@ -974,6 +974,43 @@ class TestAsset(AssetSetup):
 				),
 			)
 
+	def test_split_shares_value_adjustment(self):
+		from erpnext.assets.doctype.asset.depreciation import get_gross_asset_value
+		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+			make_asset_value_adjustment,
+		)
+
+		for calculate_depreciation in (0, 1):
+			asset = create_asset(
+				calculate_depreciation=calculate_depreciation,
+				asset_quantity=2,
+				purchase_date="2025-04-01",
+				available_for_use_date="2025-04-01",
+				depreciation_start_date="2026-03-31",
+				submit=1,
+			)
+			make_asset_value_adjustment(
+				asset=asset.name, date="2025-06-15", current_asset_value=100000, new_asset_value=120000
+			).submit()
+
+			new_asset = split_asset(asset.name, 1)
+			asset.load_from_db()
+
+			self.assertEqual(get_gross_asset_value(asset), 60000)
+			self.assertEqual(get_gross_asset_value(new_asset), 60000)
+			if calculate_depreciation:
+				continue
+
+			scrap_asset(new_asset.name, "2025-09-01")
+			new_asset.load_from_db()
+			self.assertCountEqual(
+				get_gl_entries("Journal Entry", new_asset.journal_entry_for_scrap),
+				(
+					("_Test Fixed Asset - _TC", 0.0, 60000.0),
+					("_Test Gain/Loss on Asset Disposal - _TC", 60000.0, 0.0),
+				),
+			)
+
 	def test_sold_status_survives_status_recompute(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
