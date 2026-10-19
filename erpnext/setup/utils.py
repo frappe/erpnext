@@ -1,9 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from urllib.parse import quote
+
 import frappe
 from frappe import _
-from frappe.utils import add_days, flt, get_datetime_str, nowdate
+from frappe.permissions import is_system_user
+from frappe.utils import add_days, flt, get_datetime_str, getdate, nowdate
 from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_root_of
 
@@ -68,11 +71,17 @@ def get_exchange_rate(
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
+	for currency in (from_currency, to_currency):
+		if not isinstance(currency, str) or not frappe.db.exists("Currency", currency):
+			frappe.throw(_("Invalid currency: {0}").format(currency))
+
 	if from_currency == to_currency:
 		return 1
 
+	transaction_date = getdate(transaction_date)
 	if not transaction_date:
-		transaction_date = nowdate()
+		frappe.throw(_("Invalid transaction date"))
+	transaction_date = transaction_date.isoformat()
 
 	currency_settings = frappe.get_cached_doc("Accounts Settings")
 	allow_stale_rates = currency_settings.get("allow_stale")
@@ -120,6 +129,12 @@ def get_exchange_rate(
 		value = cache.get(key)
 
 		if not value:
+			if not is_system_user():
+				frappe.throw(
+					_("Only system users can fetch exchange rates from an external provider."),
+					frappe.PermissionError,
+				)
+
 			import requests
 
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
@@ -135,7 +150,12 @@ def get_exchange_rate(
 			params = {}
 			for row in settings.req_params:
 				params[row.key] = format_ces_api(row.value, req_params)
-			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
+			response = requests.get(
+				format_ces_api(
+					settings.api_endpoint, {key: quote(value, safe="") for key, value in req_params.items()}
+				),
+				params=params,
+			)
 			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()
@@ -152,6 +172,8 @@ def get_exchange_rate(
 			value /= flt(pegged_currencies[from_currency]["ratio"])
 
 		return flt(value)
+	except frappe.PermissionError:
+		raise
 	except Exception:
 		frappe.log_error("Unable to fetch exchange rate")
 		frappe.msgprint(
