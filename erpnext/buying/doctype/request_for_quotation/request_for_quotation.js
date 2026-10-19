@@ -218,44 +218,25 @@ frappe.ui.form.on("Request for Quotation", {
 	},
 
 	toggle_quotations_tab: function (frm, show, quotes) {
-		const $tab_li = frm.$wrapper.find(".form-tabs .nav-item").filter(function () {
-			const text = $(this).text().trim();
-			const fieldname = $(this).find(".nav-link").attr("data-fieldname");
-			const href = $(this).find(".nav-link").attr("href") || "";
-			return (
-				text === __("Quotations") ||
-				text === "Quotations" ||
-				fieldname === "quotations_tab" ||
-				href.includes("quotations")
-			);
-		});
+		const field = frm.get_field("quotations_html");
+		const tab = field?.tab;
 
-		if (!show) {
-			$tab_li.hide().addClass("hide hidden d-none").attr("style", "display: none !important;");
-			if ($tab_li.find(".nav-link.active").length || $tab_li.hasClass("active")) {
-				if (frm.layout && frm.layout.tabs && frm.layout.tabs[0]) {
-					frm.layout.tabs[0].set_active();
-				} else {
-					frm.$wrapper.find(".form-tabs .nav-link").first().trigger("click");
-				}
-			}
+		if (show) {
+			frm.events.draw_quotations_comparison_table(frm, field.$wrapper, quotes);
+		} else {
+			field?.$wrapper.empty();
+		}
+
+		if (!tab) {
+			frm.set_df_property("quotations_tab", "hidden", show ? 0 : 1);
 			return;
 		}
 
-		if ($tab_li.length) {
-			$tab_li.show().removeClass("hide hidden d-none").attr("style", "");
-			if (
-				frm.fields_dict &&
-				frm.fields_dict.quotations_html &&
-				frm.fields_dict.quotations_html.$wrapper
-			) {
-				frm.events.draw_quotations_comparison_table(
-					frm,
-					frm.fields_dict.quotations_html.$wrapper,
-					quotes
-				);
-				return;
-			}
+		const was_active = tab.is_active();
+		tab.df.hidden = show ? 0 : 1;
+		tab.toggle(show);
+		if (!show && was_active) {
+			frm.layout.tabs[0].set_active();
 		}
 	},
 
@@ -265,7 +246,9 @@ frappe.ui.form.on("Request for Quotation", {
 			return;
 		}
 
-		frm.events.toggle_quotations_tab(frm, false);
+		if (frm._quotations_rendered_for !== frm.doc.name) {
+			frm.events.toggle_quotations_tab(frm, false);
+		}
 		const rfq_name = frm.doc.name;
 
 		frappe.call({
@@ -279,6 +262,7 @@ frappe.ui.form.on("Request for Quotation", {
 				const quotes = r.message || [];
 				// a comparison needs at least two supplier quotations
 				const quotation_count = new Set(quotes.map((q) => q.supplier_quotation).filter(Boolean)).size;
+				frm._quotations_rendered_for = rfq_name;
 				frm.events.toggle_quotations_tab(frm, quotation_count > 1, quotes);
 			},
 		});
@@ -292,8 +276,6 @@ frappe.ui.form.on("Request for Quotation", {
 			frappe.boot.sysdefaults.currency ||
 			"";
 
-		// Each Supplier Quotation is a separate offer, so revised or alternative quotations
-		// from the same supplier are compared side by side instead of being added together.
 		const rfq_suppliers = (frm.doc.suppliers || []).map((s) => s.supplier).filter(Boolean);
 		const offers = [];
 		const offer_by_sq = {};
@@ -311,7 +293,6 @@ frappe.ui.form.on("Request for Quotation", {
 			const idx = rfq_suppliers.indexOf(supplier);
 			return idx === -1 ? rfq_suppliers.length : idx;
 		};
-		// stable sort: RFQ supplier order first, unlisted suppliers after, quotation date within a supplier
 		offers.sort((a, b) => supplier_order(a.supplier) - supplier_order(b.supplier));
 
 		const all_items = frm.doc.items || [];
@@ -350,8 +331,6 @@ frappe.ui.form.on("Request for Quotation", {
 				return q;
 			}
 
-			// Several lines of the same Supplier Quotation for one RFQ item (e.g. split by rate
-			// slabs) together make up a single offer, so their quantities and amounts are added
 			let total_qty = 0;
 			let total_base_amount = 0;
 			const sq_names = [];
