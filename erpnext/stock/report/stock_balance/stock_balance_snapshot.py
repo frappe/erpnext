@@ -16,6 +16,7 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
 )
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 ITEM_COLUMNS = {
 	"name": pa.string(),
@@ -182,7 +183,7 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		self.prepare_stock_reco_voucher_wise_count()
 
 		changes = [*self.run_sql(REPLAY_ROWS_SQL), *self.run_sql(self.get_segments_sql())]
-		for change in sorted(changes, key=itemgetter("row_no")):
+		for change in AdjustmentNetting().net(sorted(changes, key=itemgetter("row_no"))):
 			self.apply_change(change)
 
 		self.item_warehouse_map = filter_items_with_no_transactions(
