@@ -86,6 +86,7 @@ erpnext.PartyItems = class PartyItems {
 					},
 					render: (row) => {
 						if (row.restrict_based_on === "Item") return escape(row.item_name || "");
+						if (row.item_count == null) return "";
 						if (!row.item_count) return `<span class="text-muted">${__("No items")}</span>`;
 						return `<a href="#">${this.count_label(row.item_count)}</a>`;
 					},

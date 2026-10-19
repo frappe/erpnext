@@ -155,21 +155,24 @@ def get_party_specific_items(party_type: str, party: str):
 		rule for rule in rules if rule.party == (party if rule.party_type == party_type else party_group)
 	]
 
-	item_names = dict(
-		frappe.get_all(
-			"Item",
-			filters={
-				"name": ("in", [r.based_on_value for r in rules if r.restrict_based_on == "Item"] or [""])
-			},
-			fields=["name", "item_name"],
-			as_list=True,
+	can_read_items = frappe.has_permission("Item")
+	item_names = {}
+	if can_read_items:
+		item_names = dict(
+			frappe.get_list(
+				"Item",
+				filters={
+					"name": ("in", [r.based_on_value for r in rules if r.restrict_based_on == "Item"] or [""])
+				},
+				fields=["name", "item_name"],
+				as_list=True,
+			)
 		)
-	)
 	for rule in rules:
 		if rule.restrict_based_on == "Item":
 			rule.item_name = item_names.get(rule.based_on_value)
 			rule.item_count = 1
-		else:
+		elif can_read_items:
 			rule.item_count = count_rule_items(rule)
 
 	rules.sort(
@@ -225,6 +228,13 @@ def get_items_ranked_by_orders(party_type, party, filters, or_filters, fields, s
 
 def get_order_history(party_type, party, limit=None):
 	order_doctype = ORDER_DOCTYPES[party_type]
+	party_field = frappe.scrub(party_type)
+	permitted_orders = frappe.qb.get_query(
+		order_doctype,
+		fields=["name"],
+		filters={party_field: party, "docstatus": 1},
+		ignore_permissions=False,
+	)
 	order = frappe.qb.DocType(order_doctype)
 	order_item = frappe.qb.DocType(f"{order_doctype} Item")
 	order_count = Count(order.name).distinct()
@@ -234,7 +244,7 @@ def get_order_history(party_type, party, limit=None):
 		.join(order)
 		.on(order.name == order_item.parent)
 		.select(order_item.item_code, order_count.as_("order_count"), last_ordered.as_("last_ordered"))
-		.where((order[frappe.scrub(party_type)] == party) & (order.docstatus == 1))
+		.where((order[party_field] == party) & order.name.isin(permitted_orders))
 		.groupby(order_item.item_code)
 		.orderby(order_count, order=Order.desc)
 		.orderby(last_ordered, order=Order.desc)
@@ -262,9 +272,12 @@ def get_order_hint(party_type, item):
 
 def count_rule_items(rule):
 	item = frappe.qb.DocType("Item")
+	permitted_items = frappe.qb.get_query(
+		"Item", fields=["name"], filters={"disabled": 0}, ignore_permissions=False
+	)
 	return (
 		frappe.qb.from_(item)
 		.select(Count(item.name))
-		.where(get_rules_condition([rule]) & (item.disabled == 0))
+		.where(get_rules_condition([rule]) & item.name.isin(permitted_items))
 		.run()[0][0]
 	)
