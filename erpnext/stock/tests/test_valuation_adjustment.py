@@ -26,7 +26,12 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
-from erpnext.stock.report.stock_balance.test_stock_balance_snapshot import execute_from_snapshot
+from erpnext.stock.report.stock_balance.stock_balance import execute_snapshot_report
+from erpnext.stock.report.stock_balance.test_stock_balance_snapshot import (
+	capture_ledger,
+	execute_from_snapshot,
+	ledger_snapshot,
+)
 from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.test_stock_ledger_entries_of_cancelled_vouchers import (
 	make_stock_manager,
 )
@@ -545,6 +550,18 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 
 		filters = self.get_balance_filters(item)
 		self.assertEqual(execute_from_snapshot(filters), stock_balance(deepcopy(filters)))
+
+	def test_stock_balance_snapshot_nets_an_adjustment_cancelled_after_the_sync(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		adjustment = self.fix_by_adjustment_entry(item)
+
+		filters = self.get_balance_filters(item)
+		synced = stock_balance(deepcopy(filters))
+		ledger = capture_ledger(filters)
+		adjustment.cancel()
+
+		with ledger_snapshot(ledger):
+			self.assertEqual(execute_snapshot_report(deepcopy(filters)), synced)
 
 	def test_stock_ageing_keeps_the_age_of_what_is_counted_back_in(self):
 		item = self.make_serial_no_issued_at_wrong_value()
