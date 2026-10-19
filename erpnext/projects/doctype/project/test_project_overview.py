@@ -26,6 +26,15 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.make_task("Scoping")
 		data = project_overview.get_project_overview(self.project)
 		self.assertTrue(data["summary"]["has_tasks"])
+		self.assertFalse(data["summary"]["all_cancelled"])
+
+	def test_summary_flags_a_project_whose_tasks_were_all_cancelled(self):
+		self.make_task("Dropped", status="Cancelled")
+		self.make_task("Also dropped", status="Cancelled")
+
+		summary = project_overview.get_project_overview(self.project)["summary"]
+		self.assertTrue(summary["all_cancelled"])
+		self.assertEqual(summary["task_count"], 2)
 
 	def test_delivery_of_a_completed_project(self):
 		self.make_task("On time", due=-10, status="Completed", completed_on=add_days(nowdate(), -12))
@@ -109,6 +118,26 @@ class TestProjectOverview(ERPNextTestSuite):
 		self.assertEqual(data["planned_vs_completed"]["points"], [])
 		self.assertEqual([row["subject"] for row in data["loose_ends"]["tasks"]], ["Never started"])
 		self.assertEqual(data["tasks_by_delivery"]["total"], 2)
+
+	def test_profitability_sets_cost_against_what_was_billed(self):
+		# saving a task recalculates the project's costing, so the totals are set after it
+		self.make_task("Something to show")
+		frappe.db.set_value(
+			"Project",
+			self.project,
+			{
+				"total_billed_amount": 28_600,
+				"total_costing_amount": 30_000,
+				"total_purchase_cost": 25_000,
+				"total_consumed_material_cost": 14_810,
+			},
+		)
+
+		profitability = project_overview.get_project_overview(self.project)["profitability"]
+
+		self.assertEqual((profitability["billed"], profitability["cost"]), (28_600, 69_810))
+		self.assertEqual(profitability["margin"], -41_210)
+		self.assertEqual(profitability["margin_percent"], -144.1)
 
 	def test_stat_cards(self):
 		self.make_task("Five days late", due=-5, expected_time=4)

@@ -72,16 +72,45 @@ erpnext.ProjectOverview = class ProjectOverview {
 			this.render_placeholders(loading);
 		} else if (!data.summary.has_tasks) {
 			this.render_no_tasks();
+		} else if (data.summary.all_cancelled) {
+			this.render_all_cancelled(data.summary.task_count);
 		} else {
 			this.data = data;
 			this.render_stats(data.stats);
-			this.progress.render(data.planned_vs_completed);
-			this.attention.render(data);
-			this.breakdown.render(data);
+			this.render_sections(data);
 		}
 	}
 
+	// the chart shares its row with the task donut; without a chart the donut sits beside the people list
+	// the chart shares its row with the task donut, and the people list with profitability; without a
+	// chart the donut takes the chart's place beside profitability
+	render_sections(data) {
+		const chart = data.planned_vs_completed;
+		const row = (css_class) => $(`<div class="po-section ${css_class}">`).appendTo(this.$root);
+		if (this.progress.has_chart(chart)) {
+			const $top = row("po-chart-row");
+			this.progress.render($top, chart);
+			this.breakdown.render_tasks($top, data);
+			this.attention.render(data);
+			const $bottom = row("po-two-col");
+			this.breakdown.render_people($bottom, data);
+			this.breakdown.render_profitability($bottom, data.profitability);
+		} else {
+			this.attention.render(data);
+			const $top = row("po-two-col");
+			this.breakdown.render_tasks($top, data);
+			this.breakdown.render_profitability($top, data.profitability);
+			this.breakdown.render_people(row(""), data);
+		}
+	}
+
+	open_tab(fieldname) {
+		this.frm.layout.tabs.find((tab) => tab.df.fieldname === fieldname)?.set_active();
+	}
+
 	render_header(data) {
+		// with every task cancelled there is no delivery or milestone to speak of
+		if (data?.summary?.all_cancelled) return;
 		const items = [];
 		if (data?.delivery) {
 			// once the project is completed, how it finished replaces what is coming up
@@ -328,13 +357,41 @@ erpnext.ProjectOverview = class ProjectOverview {
 		);
 	}
 
+	// nothing went ahead, so progress, workload and delivery would all be empty panels
+	render_all_cancelled(count) {
+		this.$root.append(
+			frappe.ui.empty_state({
+				icon: "circle-x",
+				title: __("All tasks were cancelled"),
+				description: __(
+					"None of this project's {0} tasks went ahead, so there is no progress or workload to show.",
+					[count]
+				),
+				actions: [
+					{
+						label: __("View Tasks"),
+						onclick: () => this.open_list("Task", { project: this.project }),
+					},
+				],
+			})
+		);
+	}
+
+	// title and subtitle on the left; the action sits level with the subtitle, just above the content
 	section_head($parent, { title, subtitle, action }) {
 		const $head = $('<div class="po-head">').appendTo($parent);
-		const $top = $('<div class="po-head-top">').appendTo($head);
-		$('<div class="po-title">').text(title).appendTo($top);
-		if (action) $top.append(action);
-		if (subtitle) $('<div class="po-subtitle">').text(subtitle).appendTo($head);
+		const $text = $('<div class="po-head-text">').appendTo($head);
+		$('<div class="po-title">').text(title).appendTo($text);
+		if (subtitle) $('<div class="po-subtitle">').text(subtitle).appendTo($text);
+		if (action) $head.append(action);
 		return $head;
+	}
+
+	// an info mark after a section title, with the detail in its tooltip
+	info_icon(text) {
+		const $icon = $('<span class="po-title-info">').html(frappe.utils.icon("info", "sm"));
+		frappe.ui.tooltip($icon, { text, text_align: "start", delay: 100 });
+		return $icon;
 	}
 
 	report_link(label, onclick) {

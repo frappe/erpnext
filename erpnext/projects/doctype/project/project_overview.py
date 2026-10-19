@@ -54,6 +54,7 @@ class ProjectOverview:
 		"tasks_by_delivery",
 		"completed_by_assignee",
 		"unbilled",
+		"profitability",
 	)
 
 	def __init__(self, project: str):
@@ -68,6 +69,11 @@ class ProjectOverview:
 				"percent_complete_method",
 				"expected_start_date",
 				"expected_end_date",
+				"company",
+				"total_billed_amount",
+				"total_costing_amount",
+				"total_purchase_cost",
+				"total_consumed_material_cost",
 			],
 			as_dict=True,
 		)
@@ -86,8 +92,12 @@ class ProjectOverview:
 		return payload
 
 	def summary(self) -> dict:
-		"""Without tasks the user can read, the tab is a single empty state."""
-		return {"has_tasks": bool(self.tasks)}
+		"""Without tasks the user can read, or when every one was cancelled, the tab is a single empty state."""
+		return {
+			"has_tasks": bool(self.tasks),
+			"all_cancelled": bool(self.tasks) and all(task.status == "Cancelled" for task in self.tasks),
+			"task_count": len(self.tasks),
+		}
 
 	def milestone(self) -> dict:
 		"""The open milestone due first (undated ones last), and whether every milestone is done."""
@@ -118,6 +128,24 @@ class ProjectOverview:
 
 	def unbilled(self) -> dict | None:
 		return get_unbilled_time(self.project.name)
+
+	def profitability(self) -> dict:
+		"""Billed against cost, added up as Project.calculate_gross_margin does: cost is the time logged
+		at costing rates, purchases and consumed material. The margin is relative to what was billed."""
+		cost = (
+			flt(self.project.total_costing_amount)
+			+ flt(self.project.total_purchase_cost)
+			+ flt(self.project.total_consumed_material_cost)
+		)
+		billed = flt(self.project.total_billed_amount)
+		margin = billed - cost
+		return {
+			"currency": frappe.get_cached_value("Company", self.project.company, "default_currency"),
+			"billed": billed,
+			"cost": cost,
+			"margin": margin,
+			"margin_percent": flt(margin / billed * 100, 1) if billed else None,
+		}
 
 	def stats(self) -> dict:
 		return {

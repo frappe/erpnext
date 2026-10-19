@@ -1,20 +1,83 @@
-// The Overview tab's task donut and per-person list, side by side: open work while the project runs,
-// and how it was delivered once it is completed or cancelled
+// The Overview tab's task donut and per-person list: open work while the project runs, and how it was
+// delivered once it is completed or cancelled
 erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 	constructor(overview) {
 		this.overview = overview;
 	}
 
-	render(data) {
-		const $row = $('<div class="po-section po-two-col">').appendTo(this.overview.$root);
-		const panel = (title) => this.overview.panel($row, title);
+	render_tasks($parent, data) {
 		if (data.delivery) {
-			this.render_delivery(panel(__("Tasks by Outcome")), data.tasks_by_delivery);
-			this.render_completed(panel(__("Completed by Assignee")), data.completed_by_assignee);
+			this.render_delivery(
+				this.overview.panel($parent, __("Tasks by Outcome")),
+				data.tasks_by_delivery
+			);
 		} else {
-			this.render_status(panel(__("Tasks by Status")), data.tasks_by_status);
-			this.render_workload(panel(__("Open Tasks by Assignee")), data.workload);
+			this.render_status(this.overview.panel($parent, __("Tasks by Status")), data.tasks_by_status);
 		}
+	}
+
+	render_people($parent, data) {
+		const $panel = $('<div class="po-panel bg-surface-base">').appendTo($parent);
+		const title = data.delivery ? __("Completed by Assignee") : __("Open Tasks by Assignee");
+		const $head = this.overview.section_head($panel, { title });
+		$head.find(".po-title").append(this.overview.info_icon(this.people_note()));
+		if (data.delivery) {
+			this.render_completed($panel, data.completed_by_assignee);
+		} else {
+			this.render_workload($panel, data.workload);
+		}
+	}
+
+	people_note() {
+		return __(
+			"A task shared by several people counts for each of them. Group tasks are left out, as their subtasks carry the work."
+		);
+	}
+
+	// billed against cost as the Costing tab adds them up, with the gross margin in the middle
+	render_profitability($parent, profitability) {
+		const $panel = $('<div class="po-panel bg-surface-base">').appendTo($parent);
+		const $head = this.overview.section_head($panel, {
+			title: __("Profitability"),
+			action: this.overview.report_link(__("Costing"), () => this.overview.open_tab("costing_tab")),
+		});
+		$head
+			.find(".po-title")
+			.append(
+				this.overview.info_icon(
+					__(
+						"Billed is the amount on Sales Invoices for this project. Cost is the time logged at costing rates, plus purchases and consumed material. Gross margin is Billed less Cost."
+					)
+				)
+			);
+		if (!profitability) return this.error($panel);
+
+		const { currency, billed, cost, margin, margin_percent } = profitability;
+		if (!billed && !cost) {
+			$panel.append(
+				frappe.ui.empty_state({ icon: "wallet", title: __("Nothing billed or spent yet") })
+			);
+			return;
+		}
+		const money = (value) => format_currency(value, currency, 0);
+		const $chart = $('<div class="po-donut po-profit-donut">').toggleClass(
+			"po-margin-negative",
+			margin < 0
+		);
+		frappe.utils.make_chart($chart.appendTo($panel)[0], {
+			type: "donut",
+			height: 280,
+			colors: ["var(--surface-blue-7)", "var(--surface-blue-4)"],
+			data: { labels: [__("Billed"), __("Cost")], datasets: [{ values: [billed, cost] }] },
+			center: {
+				value: money(margin),
+				label:
+					margin_percent == null
+						? __("Gross Margin")
+						: __("Gross Margin {0}%", [format_number(margin_percent, null, 1)]),
+			},
+			tooltipOptions: { formatTooltipY: money },
+		});
 	}
 
 	render_delivery($panel, by_delivery) {
@@ -35,20 +98,12 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 	render_completed($panel, completed) {
 		if (!completed) return this.error($panel);
 
-		const columns = [
-			{ label: __("Assignee"), render: (row) => this.assignee_html(row.user) },
-			{ label: __("Completed"), align: "right", render: (row) => this.completed_count_html(row) },
-		];
-
-		new frappe.ui.EmbeddedList({
-			wrapper: $("<div>").appendTo($panel),
-			get_data: () => Promise.resolve(completed.rows),
-			columns,
-			show_search: false,
-			empty_icon: "users",
-			empty_message: __("No completed tasks"),
-			on_row_click: (row) => this.overview.open_list("Task", { name: ["in", row.tasks] }),
-		}).refresh();
+		this.people_list($panel, completed.rows, {
+			count: (row) => __("{0} completed", [row.completed]),
+			note: (row) => (row.late ? __("{0} late", [row.late]) : ""),
+			empty: __("No completed tasks"),
+			onclick: (row) => this.overview.open_list("Task", { name: ["in", row.tasks] }),
+		});
 	}
 
 	render_status($panel, by_status) {
@@ -85,44 +140,55 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 	render_workload($panel, workload) {
 		if (!workload) return this.error($panel);
 
-		const columns = [
-			{ label: __("Assignee"), render: (row) => this.assignee_html(row.user) },
-			{ label: __("Open Tasks"), align: "right", render: (row) => this.open_count_html(row) },
-		];
-
-		new frappe.ui.EmbeddedList({
-			wrapper: $("<div>").appendTo($panel),
-			get_data: () => Promise.resolve(workload.rows),
-			columns,
-			show_search: false,
-			empty_icon: "users",
-			empty_message: __("No open tasks"),
-			on_row_click: (row) => this.open_assignee_tasks(row.user),
-		}).refresh();
+		this.people_list($panel, workload.rows, {
+			count: (row) => __("{0} open", [row.open]),
+			note: (row) => (row.overdue ? __("{0} overdue", [row.overdue]) : ""),
+			empty: __("No open tasks"),
+			onclick: (row) => this.open_assignee_tasks(row.user),
+		});
 	}
 
-	assignee_html(user) {
-		if (!user) return `<span class="text-ink-gray-5">${__("Unassigned")}</span>`;
-		const { fullname, image } = frappe.user_info(user);
-		const avatar = frappe.ui.avatar.html({ label: fullname, image, size: "sm" });
-		return `<span class="po-assignee">${avatar}<span class="po-assignee-name">${frappe.utils.escape_html(
-			fullname
-		)}</span></span>`;
-	}
-
-	// the overdue part is mentioned only when there is one, so most rows read as just a number
-	open_count_html({ open, overdue }) {
-		const count = format_number(open, null, 0);
-		if (!overdue) return count;
-		const late = __("{0} overdue", [format_number(overdue, null, 0)]);
-		return `${count} <span class="text-ink-gray-4">·</span> <span class="text-ink-red-7">${late}</span>`;
-	}
-
-	completed_count_html({ completed, late }) {
-		const count = format_number(completed, null, 0);
-		if (!late) return count;
-		const text = __("{0} late", [format_number(late, null, 0)]);
-		return `${count} <span class="text-ink-gray-4">·</span> <span class="text-ink-red-7">${text}</span>`;
+	// one row per person: avatar, name, and their count with the overdue (or late) part in red; the row
+	// opens their tasks
+	people_list($panel, rows, { count, note, empty, onclick }) {
+		if (!rows.length) {
+			$panel.append(frappe.ui.empty_state({ icon: "users", title: empty }));
+			return;
+		}
+		const $list = $('<div class="po-people">').appendTo($panel);
+		rows.forEach((row) => {
+			const { fullname, image } = row.user ? frappe.user_info(row.user) : {};
+			const avatar = row.user
+				? frappe.ui.avatar.html({ label: fullname, image, size: "lg", theme: "auto" })
+				: frappe.ui.avatar.html({
+						label: "?",
+						title: __("Unassigned"),
+						size: "lg",
+						css_class: "po-avatar-unassigned",
+				  });
+			const $meta = $('<div class="po-person-meta">').text(count(row));
+			if (note(row)) {
+				$meta.append(" · ", $('<span class="text-ink-red-7">').text(note(row)));
+			}
+			$('<div class="po-person" role="button" tabindex="0">')
+				.append(avatar)
+				.append(
+					$('<div class="po-person-text">')
+						.append(
+							$('<div class="po-person-name">')
+								.toggleClass("is-unassigned", !row.user)
+								.text(row.user ? fullname : __("Unassigned"))
+						)
+						.append($meta)
+				)
+				.on("click", () => onclick(row))
+				.on("keydown", (e) => {
+					if (e.key !== "Enter" && e.key !== " ") return;
+					e.preventDefault();
+					onclick(row);
+				})
+				.appendTo($list);
+		});
 	}
 
 	// on time and late can't be told apart by a list filter, so both open the completed tasks

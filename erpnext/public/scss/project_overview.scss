@@ -1,4 +1,7 @@
 .project-overview {
+	// lets rows respond to the width the form gives the tab, not the window's
+	container-type: inline-size;
+
 	// keeps the last section clear of the comment area that follows the form
 	padding-bottom: var(--padding-xl);
 
@@ -39,19 +42,20 @@
 	}
 
 	.po-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: var(--margin-sm);
 		margin-bottom: var(--margin-md);
+	}
+
+	.po-head-text {
+		min-width: 0;
 	}
 
 	// inside a panel the panel's own gap spaces the heading
 	.po-panel > .po-head {
 		margin-bottom: 0;
-	}
-
-	.po-head-top {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: var(--margin-sm);
 	}
 
 	.po-section > .po-head .po-title {
@@ -69,8 +73,9 @@
 		color: var(--ink-gray-5);
 	}
 
-	.po-attention-more {
+	.po-list-count {
 		margin-top: var(--margin-sm);
+		text-align: end;
 	}
 
 	.po-title-info {
@@ -81,27 +86,88 @@
 		cursor: help;
 	}
 
+	.po-people {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.po-person {
+		display: flex;
+		align-items: center;
+		gap: var(--margin-md);
+		padding: var(--padding-sm);
+		margin-inline: calc(var(--padding-sm) * -1);
+		border-radius: var(--radius-md);
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--surface-gray-2);
+		}
+	}
+
+	.po-person-text {
+		min-width: 0;
+	}
+
+	.po-person-name {
+		color: var(--ink-gray-8);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&.is-unassigned {
+			color: var(--ink-gray-5);
+		}
+	}
+
+	.po-person-meta {
+		font-size: var(--text-sm);
+		color: var(--ink-gray-5);
+	}
+
+	// nobody to show, so the circle is left empty and dashed
+	.po-avatar-unassigned .es-avatar__fallback {
+		background: transparent;
+		border: 1px dashed var(--outline-gray-4);
+	}
+
+	// an amount with its currency is wider than a task count, so the margin sits smaller in the middle;
+	// a loss reads in red
+	.po-profit-donut .donut-center-value {
+		font-size: var(--text-base);
+	}
+
+	.po-margin-negative .donut-center-value {
+		fill: var(--ink-red-7);
+	}
+
+	.po-subtitle-link {
+		color: var(--ink-gray-7);
+		text-decoration: underline;
+		text-decoration-color: var(--outline-gray-3);
+		text-underline-offset: 2px;
+
+		&:hover {
+			color: var(--ink-gray-9);
+		}
+	}
+
 	.po-chart-gap {
 		font-weight: var(--weight-medium);
 	}
 
-	.po-assignee {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		max-width: 100%;
-		white-space: nowrap;
-	}
+	// the chart and the donut share the row equally, as the donut's legend needs the width; they
+	// stack once the tab is too narrow for both
+	.po-chart-row {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+		align-items: stretch;
 
-	.po-assignee-name {
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	// a list inside a panel uses the panel's border instead of drawing its own
-	.po-panel .embedded-list-table-wrap {
-		margin-bottom: 0;
-		border: none;
+		@container (max-width: 640px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
 	}
 
 	.po-two-col {

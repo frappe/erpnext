@@ -47,15 +47,10 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 			return;
 		}
 		this.make_list($("<div>").appendTo($section), attention.tasks, { badge_label, badges }).refresh();
-		// only the top rows are sent; the rest are left to the Task List linked above
+		// only the top rows are sent; the count under the table says how many the Task List holds
 		if (attention.total > attention.tasks.length) {
-			$('<div class="po-note po-attention-more">')
-				.text(
-					__("Showing {0} of {1}. Open the Task List for the rest.", [
-						attention.tasks.length,
-						attention.total,
-					])
-				)
+			$('<div class="po-note po-list-count">')
+				.text(__("{0} of {1}", [attention.tasks.length, attention.total]))
 				.appendTo($section);
 		}
 	}
@@ -80,8 +75,7 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 				{
 					label: badge_label,
 					fieldname: "label",
-					type: "badge",
-					color: (row) => row.theme,
+					render: (row) => frappe.ui.badge.html({ label: row.label, theme: row.theme, size: "sm" }),
 					width: "110px",
 				},
 				{

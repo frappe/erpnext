@@ -7,13 +7,13 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		this.overview = overview;
 	}
 
-	render(chart) {
-		// nothing to plot (Manual % Complete, or only cancelled tasks), so the panel is left out
-		if (chart && !chart.points.length) return;
+	// nothing to plot (Manual % Complete, or only cancelled tasks) leaves the panel out; a failed load still shows
+	has_chart(chart) {
+		return !chart || chart.points.length > 0;
+	}
 
-		const $panel = $('<div class="po-panel bg-surface-base">').appendTo(
-			$('<div class="po-section">').appendTo(this.overview.$root)
-		);
+	render($parent, chart) {
+		const $panel = $('<div class="po-panel bg-surface-base">').appendTo($parent);
 		if (!chart) {
 			this.overview.section_head($panel, { title: __("Planned vs Completed") });
 			this.overview.error_text(__("Could not load tasks")).addClass("po-empty").appendTo($panel);
@@ -25,11 +25,10 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		const $head = this.overview.section_head($panel, {
 			// without a plan only one line is drawn, so the title says just that
 			title: has_plan ? __("Planned vs Completed") : __("Completed over Time"),
-			// without a plan, a way to the tasks that need dates, like the tab's other links
-			action: has_plan ? null : this.set_due_dates_link(),
 		});
-		$head.find(".po-title").append(this.about_icon());
-		$('<div class="po-subtitle">').append(this.subtitle()).appendTo($head);
+		// what the lines measure and which dates they use, kept out of the way in a tooltip
+		$head.find(".po-title").append(this.overview.info_icon(this.about_text()));
+		$('<div class="po-subtitle">').append(this.subtitle()).appendTo($head.find(".po-head-text"));
 
 		this.render_chart($('<div class="po-chart">').appendTo($panel)[0]);
 	}
@@ -56,7 +55,7 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 
 		frappe.utils.make_chart(wrapper, {
 			type: "line",
-			height: 220,
+			height: 270,
 			colors,
 			data: {
 				labels,
@@ -85,17 +84,20 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		);
 		const point = points[today_index ?? latest];
 		const completed = this.percent_text(point.completed || 0);
-		const prefix = today_index == null ? "" : __("Today") + ": ";
 
 		const $subtitle = $("<span>");
 		if (!has_plan) {
+			// the count is also the way to the tasks that need dates, as the panel has no room for a button
 			const { undated, total } = this.chart;
-			const note = __("No plan: {0} of {1} tasks have no Expected End Date", [undated, total]);
-			return $subtitle.text(prefix + __("{0} completed", [completed]) + " · " + note);
+			return $subtitle.text(__("{0} done", [completed]) + " · ").append(
+				$('<a class="po-subtitle-link">')
+					.text(__("{0} of {1} tasks need a due date", [undated, total]))
+					.on("click", () => this.overview.open_task_list({ exp_end_date: ["is", "not set"] }))
+			);
 		}
 		const planned = this.percent_text(point.planned || 0);
 		return $subtitle
-			.text(prefix + __("{0} completed of {1} planned", [completed, planned]) + " · ")
+			.text(__("{0} done of {1} planned", [completed, planned]) + " · ")
 			.append(this.gap_text(point));
 	}
 
@@ -151,19 +153,6 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		return $gap
 			.addClass(-gap > BEHIND_PLAN_WARNING ? "text-ink-amber-7" : "text-ink-gray-7")
 			.text(__("{0} pts behind", [-gap]));
-	}
-
-	set_due_dates_link() {
-		return this.overview.report_link(__("Set Due Dates"), () =>
-			this.overview.open_task_list({ exp_end_date: ["is", "not set"] })
-		);
-	}
-
-	// what the lines measure and which dates they use, kept out of the way in a tooltip
-	about_icon() {
-		const $icon = $('<span class="po-title-info">').html(frappe.utils.icon("info", "sm"));
-		frappe.ui.tooltip($icon, { text: this.about_text(), text_align: "start", delay: 100 });
-		return $icon;
 	}
 
 	about_text() {
