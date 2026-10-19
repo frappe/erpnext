@@ -110,13 +110,7 @@ class WorkOrderStockReservation:
 
 	def get_reservations_to_update(self, filters: dict, field: str) -> list[str]:
 		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
-		or_filters = None
-		if self.doc.status == "Closed":
-			filters = {**filters, "docstatus": ("in", [1, 2])}
-			or_filters = {"docstatus": 1, field: (">", 0)}
-		else:
-			filters = {**filters, "docstatus": 1}
-
+		filters, or_filters = self.get_holding_filters(filters, field)
 		return frappe.get_all(
 			"Stock Reservation Entry",
 			filters=filters,
@@ -124,6 +118,13 @@ class WorkOrderStockReservation:
 			pluck="name",
 			order_by="creation",
 		)
+
+	def get_holding_filters(self, filters: dict, field: str) -> tuple[dict, dict | None]:
+		"""Filters for submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
+		if self.doc.status == "Closed":
+			return {**filters, "docstatus": ("in", [1, 2])}, {"docstatus": 1, field: (">", 0)}
+
+		return {**filters, "docstatus": 1}, None
 
 	def _apply_transferred_qty(self, name, transferred_qty, row_wise_serial_batch):
 		if transferred_qty < 0:
