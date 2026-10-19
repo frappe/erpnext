@@ -557,8 +557,8 @@ class TaxWithholdingController:
 		)
 
 	def _get_original_ldc_entry(self, category: dict) -> dict | None:
-		"""Certificate, rate and net taxable amount deducted under it on the original invoice
-		and its earlier returns."""
+		"""Certificate, rate and net taxable amount deducted under it for the original invoice
+		and its earlier returns, including deductions made through later documents."""
 		entry = frappe.qb.DocType(DOCTYPE)
 		rows = (
 			frappe.qb.from_(entry)
@@ -567,8 +567,8 @@ class TaxWithholdingController:
 				entry.tax_rate,
 				Sum(entry.taxable_amount).as_("taxable_amount"),
 			)
-			.where(entry.parenttype == self.doc.doctype)
-			.where(entry.parent.isin(self._get_original_and_return_names()))
+			.where(entry.taxable_doctype == self.doc.doctype)
+			.where(entry.taxable_name.isin(self._get_original_and_return_names()))
 			.where(entry.tax_withholding_category == category.name)
 			.where(IfNull(entry.lower_deduction_certificate, "") != "")
 			.where(entry.status == "Settled")
