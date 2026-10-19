@@ -455,7 +455,8 @@ class TestIssue(TestSetUp):
 		issue.status = "Closed"
 		issue.save()
 		self.assertFalse(issue.service_level_agreement)
-		self.assertEqual(get_time(issue.opening_time), get_time("12:00:00"))
+		# insert stamps creation with the real time; resolution time runs from service_level_agreement_creation
+		self.assertEqual(get_time(issue.opening_time), get_time(issue.creation))
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 		self.assertEqual(issue.resolution_time, 14400)
 
@@ -467,6 +468,16 @@ class TestIssue(TestSetUp):
 		self.assertFalse(issue.sla_resolution_date)
 		self.assertFalse(issue.resolution_time)
 		self.assertEqual(issue.total_hold_time, 3600)
+
+		# insert stamps creation with the real time, so put the mails back at their times
+		for sent_or_received, creation in (("Sent", "13:00"), ("Received", "17:00")):
+			frappe.db.set_value(
+				"Communication",
+				{"reference_name": issue.name, "sent_or_received": sent_or_received},
+				"creation",
+				get_datetime(f"2019-03-04 {creation}"),
+				update_modified=False,
+			)
 
 		frappe.flags.current_time = get_datetime("2019-03-04 18:00")
 		issue.status = "Resolved"
