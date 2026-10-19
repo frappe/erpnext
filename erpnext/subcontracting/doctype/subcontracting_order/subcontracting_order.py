@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -621,7 +623,7 @@ def update_subcontracted_qty(work_order: str):
 		.inner_join(order)
 		.on(order.name == supplied_item.parent)
 		.inner_join(order_item)
-		.on(order_item.name == supplied_item.reference_name)
+		.on((order_item.parent == supplied_item.parent) & (order_item.name == supplied_item.reference_name))
 		.inner_join(job_card)
 		.on(job_card.name == order_item.job_card)
 		.select(job_card.operation_row_id, supplied_item.rm_item_code, Sum(qty))
@@ -631,11 +633,14 @@ def update_subcontracted_qty(work_order: str):
 	subcontracted = {(row[0], row[1]): flt(row[2]) for row in subcontracted}
 
 	doc = frappe.get_doc("Work Order", work_order)
+	required = defaultdict(float)
 	for row in doc.required_items:
-		# rows of the same operation and item share what was subcontracted, each up to its own qty
+		required[(row.operation_row_id, row.item_code)] += flt(row.required_qty)
+
+	for row in doc.required_items:
+		# rows of the same operation and item share what was subcontracted, by their required qty
 		key = (row.operation_row_id, row.item_code)
-		qty = min(subcontracted.get(key, 0.0), flt(row.required_qty))
-		subcontracted[key] = subcontracted.get(key, 0.0) - qty
+		qty = subcontracted.get(key, 0.0) * flt(row.required_qty) / required[key] if required[key] else 0.0
 		if flt(row.subcontracted_qty) != qty:
 			row.db_set("subcontracted_qty", qty)
 	doc.update_reserved_qty_for_production()
