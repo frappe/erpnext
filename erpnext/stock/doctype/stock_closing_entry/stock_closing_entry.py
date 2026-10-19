@@ -60,6 +60,22 @@ def mark_closing_entries_outdated(company, posting_date):
 		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
 
 
+def has_open_closing_entry(company, posting_date):
+	return frappe.db.exists(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": ("in", ["Queued", "In Progress"]),
+			"to_date": (">=", posting_date),
+		},
+	)
+
+
+def lock_company_for_closing(company):
+	frappe.db.get_value("Company", company, "name", for_update=True)
+
+
 @request_cache
 def _get_completed_closing_entry(company, closed_upto):
 	filters = apply_unscoped_filters(
@@ -400,6 +416,7 @@ def prepare_closing_stock_balance(name):
 			doc.db_set("status", "Cancelled")
 			return
 
+		lock_company_for_closing(doc.company)
 		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts_now()
 		doc.db_set("status", "Outdated" if is_outdated else "Completed")
 	except Exception:
