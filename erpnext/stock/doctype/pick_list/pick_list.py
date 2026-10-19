@@ -120,7 +120,7 @@ class PickList(TransactionBase):
 		self.validate_with_previous_doc()
 
 	def set_stock_qty(self):
-		if self.docstatus != 0:
+		if not self.docstatus.is_draft() and getattr(self, "_action", None) != "submit":
 			return
 
 		conversion_factors = get_uom_conversion_factors(
@@ -152,19 +152,20 @@ class PickList(TransactionBase):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 		for row in self.get("locations"):
-			if not row.picked_qty:
+			row_qty = self.get_qty_to_pick(row)
+			if not row_qty:
 				continue
 
-			if row.batch_no and row.picked_qty:
+			if row.batch_no:
 				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
 
-				if row.picked_qty > batch_qty:
+				if row_qty > batch_qty:
 					frappe.throw(
 						_(
 							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
 						).format(
 							row.idx,
-							row.picked_qty,
+							row_qty,
 							row.item_code,
 							batch_qty,
 							row.batch_no,
@@ -183,13 +184,19 @@ class PickList(TransactionBase):
 				)
 			)
 
-			if row.picked_qty > bin_qty:
+			if row_qty > bin_qty:
 				frappe.throw(
 					_(
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
-					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
+					).format(row.idx, row_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
 					title=_("Insufficient Stock"),
 				)
+
+	def get_qty_to_pick(self, row):
+		if row.picked_qty or self.scan_mode or not self.docstatus.is_submitted():
+			return flt(row.picked_qty)
+
+		return flt(row.stock_qty)
 
 	def validate_warehouses(self):
 		for location in self.locations:
@@ -1456,16 +1463,38 @@ SALES_ORDER_HEADER_FIELDS = (
 	"additional_discount_percentage",
 	"discount_amount",
 	"tc_name",
+	"terms",
 	"payment_terms_template",
+)
+
+SALES_ORDER_TAX_KEY_FIELDS = (
+	"charge_type",
+	"account_head",
+	"rate",
+	"row_id",
+	"included_in_print_rate",
+	"cost_center",
 )
 
 
 def get_header_key(sales_order):
 	key = tuple(cstr(sales_order.get(field)) for field in SALES_ORDER_HEADER_FIELDS)
-	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+	key += (
+		tuple(
+			tuple(cstr(tax.get(field)) for field in SALES_ORDER_TAX_KEY_FIELDS) for tax in sales_order.taxes
+		),
+	)
+	if has_order_specific_amounts(sales_order):
 		key += (sales_order.sales_order,)
 
 	return key
+
+
+def has_order_specific_amounts(sales_order):
+	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+		return True
+
+	return any(tax.charge_type == "Actual" for tax in sales_order.taxes)
 
 
 def get_sales_order_headers(sales_orders):
@@ -1473,18 +1502,40 @@ def get_sales_order_headers(sales_orders):
 	if not sales_orders:
 		return []
 
-	return frappe.get_all(
+	headers = frappe.get_all(
 		"Sales Order",
 		filters={"name": ("in", sales_orders)},
 		fields=["name as sales_order", *SALES_ORDER_HEADER_FIELDS],
 	)
+	taxes = get_sales_order_taxes(sales_orders)
+	for header in headers:
+		header.taxes = taxes.get(header.sales_order, [])
+
+	return headers
+
+
+def get_sales_order_taxes(sales_orders):
+	tax = frappe.qb.DocType("Sales Taxes and Charges")
+	rows = (
+		frappe.qb.from_(tax)
+		.select(tax.parent, *[tax[field] for field in SALES_ORDER_TAX_KEY_FIELDS])
+		.where((tax.parenttype == "Sales Order") & (tax.parent.isin(sales_orders)))
+		.orderby(tax.parent)
+		.orderby(tax.idx)
+	).run(as_dict=True)
+
+	taxes = {}
+	for row in rows:
+		taxes.setdefault(row.parent, []).append(row)
+
+	return taxes
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
 	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
 
 
-def create_delivery_wo_so(pick_list, target, target_doc=None):
+def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations=None):
 	if not target_doc:
 		target_doc = frappe.new_doc(target)
 
@@ -1501,7 +1552,9 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 			"parent": "",
 		},
 	}
-	map_pl_locations(pick_list, item_table_mapper_without_so, target_doc)
+	map_pl_locations(
+		pick_list, item_table_mapper_without_so, target_doc, selected_locations=selected_locations
+	)
 	target_doc.flags.ignore_mandatory = True
 	if target == "Sales Invoice":
 		target_doc.update_stock = 1
@@ -1547,7 +1600,9 @@ def create_dn_for_pick_lists(
 		if isinstance(delivery_note, str):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
-		delivery_note = create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
+		delivery_note = create_delivery_wo_so(
+			pick_list, "Delivery Note", delivery_note, set(kwargs.get("filtered_children") or [])
+		)
 
 	return delivery_note
 
@@ -1658,7 +1713,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 
 			update_child_item(source_doc, child_item, target_doc)
 
-	add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order)
+	if sales_order:
+		add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order, selected_locations)
+
 	set_target_missing_values(target_doc)
 
 	target_doc.company = pick_list.company
@@ -1672,12 +1729,22 @@ def add_product_bundles_to_delivery_note(
 	return add_product_bundles_to_target(pick_list, delivery_note, item_mapper, sales_order)
 
 
-def add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order=None) -> None:
+def add_product_bundles_to_target(
+	pick_list, target_doc, item_mapper, sales_order=None, selected_locations=None
+) -> None:
 	"""Add product bundles found in pick list to target document.
 
 	When mapping pick list items, the bundle item itself isn't part of the
 	locations. Dynamically fetch and add parent bundle item into target document."""
 	product_bundles = pick_list._get_product_bundles()
+	if selected_locations:
+		selected_bundles = {
+			row.sales_order_item
+			for row in pick_list.locations
+			if row.product_bundle_item and row.name in selected_locations
+		}
+		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+
 	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
 
 	for so_row, value in product_bundles.items():
