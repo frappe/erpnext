@@ -7,6 +7,8 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, flt, getdate
@@ -29,6 +31,8 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
+	if not apply_permitted_warehouses(filters):
+		return columns, []
 
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
@@ -79,12 +83,28 @@ def execute(filters=None):
 			row += [total_qty]
 		row += bal_qty
 
-		if total_qty > 0:
+		if total_qty != 0:
 			data.append(row)
 		elif not filters.get("filter_total_zero_qty"):
 			data.append(row)
 	add_warehouse_column(columns, warehouse_list)
 	return columns, data
+
+
+def apply_permitted_warehouses(filters):
+	permitted = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
+	if not permitted:
+		return True
+
+	permitted = frappe.get_all("Warehouse", filters={"name": ("in", permitted), "is_group": 0}, pluck="name")
+	if filters.get("warehouse"):
+		selected = {warehouse.name for warehouse in get_warehouse_list(filters)}
+		permitted = [warehouse for warehouse in permitted if warehouse in selected]
+
+	filters["warehouse"] = permitted
+	return bool(permitted)
 
 
 def get_itemwise_brand(items):
@@ -139,7 +159,7 @@ def get_warehouse_list(filters):
 	return (
 		frappe.qb.from_(warehouse)
 		.select(warehouse.name)
-		.where(condition)
+		.where(condition & (warehouse.is_group == 0))
 		.orderby(warehouse.name)
 		.run(as_dict=True)
 	)
@@ -147,10 +167,10 @@ def get_warehouse_list(filters):
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-		columns += [_("Total Qty") + ":Int:120"]
+		columns += [_("Total Qty") + ":Float:120"]
 
 	for wh in warehouse_list:
-		columns += [_(wh.name) + ":Int:100"]
+		columns += [_(wh.name) + ":Float:100"]
 
 
 def get_item_warehouse_map(filters, sle):
