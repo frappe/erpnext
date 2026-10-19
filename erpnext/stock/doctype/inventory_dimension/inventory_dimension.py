@@ -240,8 +240,6 @@ class InventoryDimension(Document):
 				and not field_exists(dt, self.target_fieldname)
 			):
 				dimension_field = dimension_fields[1].copy()
-				dimension_field["mandatory_depends_on"] = ""
-				dimension_field["reqd"] = 0
 				dimension_field["fieldname"] = self.target_fieldname
 				custom_fields[dt] = dimension_field
 

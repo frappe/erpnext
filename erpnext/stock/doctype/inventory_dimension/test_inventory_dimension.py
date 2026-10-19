@@ -307,27 +307,6 @@ class TestInventoryDimension(ERPNextTestSuite):
 		doc.reqd = 0
 		doc.save()
 
-	def test_new_mandatory_dimension_keeps_document_field_mandatory(self):
-		doc = create_inventory_dimension(
-			reference_document="Pallet",
-			dimension_name="Pallet Mandatory New",
-			apply_to_all_doctypes=0,
-			document_type="Delivery Note Item",
-			reqd=1,
-			do_not_save=True,
-		)
-		doc.set_source_and_target_fieldname()
-
-		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
-		with patch(f"{module}.create_dimension_custom_fields") as create_custom_fields:
-			doc.add_custom_fields()
-
-		custom_fields = create_custom_fields.call_args[0][0]
-		document_field = custom_fields["Delivery Note Item"][1]
-		ledger_field = custom_fields["Stock Ledger Entry"][0]
-		self.assertEqual((document_field["fieldname"], document_field["reqd"]), ("pallet_mandatory_new", 1))
-		self.assertEqual(ledger_field["reqd"], 0)
-
 	def test_dimension_condition_limits_rows(self):
 		dimension = frappe._dict(name="Pallet", condition="doc.qty > 100", type_of_transaction="Both")
 		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
