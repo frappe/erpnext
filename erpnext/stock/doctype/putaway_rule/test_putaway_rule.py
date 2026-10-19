@@ -64,6 +64,7 @@ class TestPutawayRule(ERPNextTestSuite):
 			"Purchase Receipt",
 			[{"item_code": item_code, "qty": 2, "uom": "Box", "warehouse": "_Test Warehouse - _TC"}],
 			"_Test Company",
+			sync="true",
 		)
 
 		self.assertEqual([(row.qty, row.stock_qty) for row in rows], [(2, 20)])
@@ -621,6 +622,7 @@ class TestPutawayRule(ERPNextTestSuite):
 				}
 			],
 			"_Test Company",
+			sync="true",
 		)
 
 		self.assertEqual([len(row.serial_no.split("\n")) for row in rows], [4, 2])
@@ -644,6 +646,7 @@ class TestPutawayRule(ERPNextTestSuite):
 				for source_warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
 			],
 			"_Test Company",
+			sync="true",
 			purpose="Material Transfer",
 		)
 
