@@ -284,6 +284,23 @@ class StockClosingEntry(Document):
 				& (sle.modified >= started_at)
 			)
 			.limit(1)
+			.for_update()
+			.run()
+		)
+
+	def has_pending_reposts_now(self):
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		return bool(
+			frappe.qb.from_(riv)
+			.select(riv.name)
+			.where(
+				(riv.docstatus == 1)
+				& (riv.status.isin(["Queued", "In Progress"]))
+				& (riv.posting_date <= self.to_date)
+				& (riv.company == self.company)
+			)
+			.limit(1)
+			.for_update()
 			.run()
 		)
 
@@ -383,7 +400,7 @@ def prepare_closing_stock_balance(name):
 			doc.db_set("status", "Cancelled")
 			return
 
-		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts()
+		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts_now()
 		doc.db_set("status", "Outdated" if is_outdated else "Completed")
 	except Exception:
 		doc.db_set("status", "Failed")
