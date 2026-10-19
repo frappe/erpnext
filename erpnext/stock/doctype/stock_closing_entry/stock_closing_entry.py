@@ -46,17 +46,37 @@ def get_closing_entry_for_closed_period(company):
 
 
 def mark_closing_entries_outdated(company, posting_date):
-	for name in frappe.get_all(
+	names = frappe.db.get_values(
 		"Stock Closing Entry",
-		filters={
+		{
 			"company": company,
 			"docstatus": 1,
 			"status": "Completed",
 			"to_date": (">=", posting_date),
 		},
-		pluck="name",
-	):
+		"name",
+		for_update=True,
+		skip_locked=True,
+		pluck=True,
+	)
+	for name in names:
 		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
+
+
+def has_closing_entry_to_coordinate(company, posting_date):
+	return frappe.db.exists(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": ("in", ["Queued", "In Progress", "Completed"]),
+			"to_date": (">=", posting_date),
+		},
+	)
+
+
+def lock_company_for_closing(company):
+	frappe.db.get_value("Company", company, "name", for_update=True)
 
 
 @request_cache
@@ -282,6 +302,23 @@ class StockClosingEntry(Document):
 				& (sle.modified >= started_at)
 			)
 			.limit(1)
+			.for_update()
+			.run()
+		)
+
+	def has_pending_reposts_now(self):
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		return bool(
+			frappe.qb.from_(riv)
+			.select(riv.name)
+			.where(
+				(riv.docstatus == 1)
+				& (riv.status.isin(["Queued", "In Progress"]))
+				& (riv.posting_date <= self.to_date)
+				& (riv.company == self.company)
+			)
+			.limit(1)
+			.for_update()
 			.run()
 		)
 
@@ -381,7 +418,8 @@ def prepare_closing_stock_balance(name):
 			doc.db_set("status", "Cancelled")
 			return
 
-		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts()
+		lock_company_for_closing(doc.company)
+		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts_now()
 		doc.db_set("status", "Outdated" if is_outdated else "Completed")
 	except Exception:
 		frappe.db.rollback()
