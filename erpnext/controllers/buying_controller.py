@@ -145,13 +145,16 @@ class BuyingController(SubcontractingController):
 				):
 					bundle_ids[bundle.name] = bundle.serial_and_batch_bundle
 
+			bundle_ids.update(self.get_component_packages())
+
 			if not bundle_ids:
 				return
 
 			for item in self.get("items"):
-				if item.get(field) and not item.serial_and_batch_bundle and bundle_ids.get(item.get(field)):
+				reference = item.get(field) or item.get("delivery_note_packed_item")
+				if reference and not item.serial_and_batch_bundle and bundle_ids.get(reference):
 					item.serial_and_batch_bundle = self.make_package_for_transfer(
-						bundle_ids.get(item.get(field)),
+						bundle_ids.get(reference),
 						item.from_warehouse,
 						type_of_transaction="Outward",
 						do_not_submit=True,
@@ -178,6 +181,38 @@ class BuyingController(SubcontractingController):
 					== 1
 				):
 					frappe.set_value("Serial and Batch Entry", sabe[0], "qty", item.qty)
+
+	def get_component_incoming_rates(self) -> dict:
+		packed_items = [
+			d.delivery_note_packed_item for d in self.get("items") if d.get("delivery_note_packed_item")
+		]
+		if not packed_items:
+			return {}
+
+		return frappe._dict(
+			frappe.get_all(
+				"Packed Item",
+				filters={"name": ("in", packed_items)},
+				fields=["name", "incoming_rate"],
+				as_list=True,
+			)
+		)
+
+	def get_component_packages(self) -> dict:
+		packed_items = [
+			d.delivery_note_packed_item for d in self.get("items") if d.get("delivery_note_packed_item")
+		]
+		if not packed_items:
+			return {}
+
+		return frappe._dict(
+			frappe.get_all(
+				"Packed Item",
+				filters={"name": ("in", packed_items)},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
 
 	def set_rate_for_standalone_debit_note(self):
 		if self.get("is_return") and self.get("update_stock") and not self.return_against:
@@ -696,8 +731,13 @@ class BuyingController(SubcontractingController):
 		}
 
 		ref_doctype = ref_doctype_map.get(self.doctype)
+		component_rates = self.get_component_incoming_rates()
 		for d in self.get("items"):
-			if not d.get(frappe.scrub(ref_doctype)):
+			if d.get("delivery_note_packed_item") in component_rates:
+				d.sales_incoming_rate = flt(
+					component_rates[d.delivery_note_packed_item] * (d.conversion_factor or 1)
+				)
+			elif not d.get(frappe.scrub(ref_doctype)):
 				posting_time = self.get("posting_time")
 				if not posting_time:
 					posting_time = nowtime()
