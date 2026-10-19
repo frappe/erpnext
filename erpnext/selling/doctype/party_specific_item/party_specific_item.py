@@ -235,6 +235,7 @@ def get_order_history(party_type, party, limit=None):
 		filters={party_field: party, "docstatus": 1},
 		ignore_permissions=False,
 	)
+	permitted_items = frappe.qb.get_query("Item", fields=["name"], ignore_permissions=False)
 	order = frappe.qb.DocType(order_doctype)
 	order_item = frappe.qb.DocType(f"{order_doctype} Item")
 	order_count = Count(order.name).distinct()
@@ -244,7 +245,11 @@ def get_order_history(party_type, party, limit=None):
 		.join(order)
 		.on(order.name == order_item.parent)
 		.select(order_item.item_code, order_count.as_("order_count"), last_ordered.as_("last_ordered"))
-		.where((order[party_field] == party) & order.name.isin(permitted_orders))
+		.where(
+			(order[party_field] == party)
+			& order.name.isin(permitted_orders)
+			& order_item.item_code.isin(permitted_items)
+		)
 		.groupby(order_item.item_code)
 		.orderby(order_count, order=Order.desc)
 		.orderby(last_ordered, order=Order.desc)
