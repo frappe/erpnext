@@ -164,3 +164,38 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		self.assertEqual(row.get("current_stock"), 7)
 		self.assertEqual(row.get("open_orders"), 1)
+
+	def test_variants_grouped_under_their_templates(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			"_Test Variant Colour Item", {"has_variants": 1, "attributes": [{"attribute": "Test Colour"}]}
+		).name
+		create_variant("_Test Variant Item", {"Test Size": "Small"}).insert(ignore_if_duplicate=True)
+		variants = []
+		for colour, qty in (("Red", 4), ("Green", 6)):
+			variant = create_variant(template, {"Test Colour": colour})
+			variant.insert()
+			make_stock_entry(item_code=variant.name, to_warehouse="Stores - _TC", qty=qty, rate=100)
+			variants.append(variant.name)
+		make_sales_order(
+			item_list=[
+				{"item_code": variant, "warehouse": "Stores - _TC", "qty": 1, "rate": 100}
+				for variant in variants
+			]
+		)
+
+		columns, data = execute(frappe._dict(item=["_Test Variant Item", template]))
+
+		self.assertEqual(data[0]["variant_name"], "_Test Variant Item")
+		self.assertTrue({"test_size", "test_colour"} <= {column["fieldname"] for column in columns})
+
+		template_index = next(index for index, row in enumerate(data) if row["variant_name"] == template)
+		template_row, *variant_rows = data[template_index:]
+		self.assertEqual(template_row["indent"], 0)
+		self.assertEqual(template_row["current_stock"], 10)
+		self.assertEqual(template_row["open_orders"], 1)
+		self.assertEqual({row["variant_name"] for row in variant_rows}, set(variants))
+		for row in variant_rows:
+			self.assertEqual((row["indent"], row["template"], row["open_orders"]), (1, template, 1))
