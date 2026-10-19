@@ -67,6 +67,7 @@ class VATAuditReport:
 				"name as voucher_no",
 				"posting_date",
 				"remarks",
+				"is_return",
 				f"{party_field} as party",
 				f"{account_field} as account",
 			],
@@ -142,11 +143,16 @@ class VATAuditReport:
 		net_amount = 0.0
 		if row.item_row not in totals["items"]:
 			totals["items"].add(row.item_row)
-			net_amount = -row.taxable_amount if is_deduct else row.taxable_amount
+			net_amount = self.get_deducted_net_amount(row) if is_deduct else row.taxable_amount
 
 		totals["tax_amount"] += row.amount
 		totals["net_amount"] += net_amount
 		totals["gross_amount"] += row.amount + net_amount
+
+	def get_deducted_net_amount(self, row: dict) -> float:
+		"""Deduct rows store the taxable amount negated, or as is in data migrated from the old JSON field."""
+		sign = -1 if self.invoices[row.parent].is_return else 1
+		return abs(flt(row.taxable_amount)) * sign
 
 	def get_data(self, doctype):
 		consolidated_data = self.get_consolidated_data(doctype)
