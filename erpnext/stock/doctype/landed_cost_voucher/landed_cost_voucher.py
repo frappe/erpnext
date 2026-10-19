@@ -373,17 +373,16 @@ class LandedCostVoucher(Document):
 		self.validate_charges_follow_total_sign()
 
 	def validate_charges_follow_total_sign(self):
-		sign = -1 if flt(self.total_taxes_and_charges) < 0 else 1
+		total_sign = -1 if flt(self.total_taxes_and_charges) < 0 else 1
 		for row in self.get("items"):
-			if flt(row.applicable_charges) * sign >= 0:
+			row_sign = -1 if flt(row.qty) < 0 or flt(row.amount) < 0 else 1
+			if flt(row.applicable_charges) * total_sign * row_sign >= 0:
 				continue
 
 			message = (
 				_("Row {0}: Applicable Charges for Item {1} cannot be negative")
-				if sign > 0
-				else _(
-					"Row {0}: Applicable Charges for Item {1} cannot be positive when Total Taxes and Charges are negative"
-				)
+				if total_sign * row_sign > 0
+				else _("Row {0}: Applicable Charges for Item {1} cannot be positive")
 			)
 			frappe.throw(message.format(row.idx, frappe.bold(row.item_code)))
 

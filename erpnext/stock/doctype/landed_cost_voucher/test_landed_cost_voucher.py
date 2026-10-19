@@ -184,6 +184,27 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, lcv.insert)
 
+	def test_purchase_and_return_with_qty_based_charges_can_be_submitted(self):
+		purchase = make_purchase_receipt(qty=2, rate=100)
+		original = make_purchase_receipt(qty=1, rate=100)
+		purchase_return = make_purchase_receipt(qty=-1, rate=100, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase.doctype,
+			receipt_document=purchase.name,
+			charges=80,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": purchase_return.doctype, "receipt_document": purchase_return.name},
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual(sorted(item.applicable_charges for item in lcv.items), sorted([160, -80]))
+
 	def test_manual_distribution_refuses_negative_charges(self):
 		receipt = make_purchase_receipt(qty=10, rate=100, do_not_save=True)
 		receipt.append(
