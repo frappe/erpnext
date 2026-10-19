@@ -32,6 +32,7 @@ class AssetFinanceBook(Document):
 		shift_based: DF.Check
 		total_number_of_booked_depreciations: DF.Int
 		total_number_of_depreciations: DF.Int
+		value_adjustment_amount: DF.Currency
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
 
