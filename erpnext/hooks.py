@@ -418,6 +418,7 @@ doc_events = {
 		"on_update": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.on_communication_update",
 			"erpnext.support.doctype.issue.issue.set_first_response_time",
+			"erpnext.support.doctype.issue.issue.reopen_issue_without_sla",
 		],
 		"after_insert": [
 			"erpnext.crm.utils.link_communications_with_prospect",
