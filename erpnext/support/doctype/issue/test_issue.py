@@ -304,6 +304,45 @@ class TestIssue(TestSetUp):
 		issue.save()
 		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-08 11:00"))
 
+	def test_overdue_agreement_fails_unless_on_hold(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			fail_overdue_agreements,
+		)
+
+		# Response By 16:00 and Resolution By 18:00
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		unanswered = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		on_hold = make_issue(get_datetime("2019-03-04 12:00"), index=2)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		on_hold.status = "Replied"
+		on_hold.save()
+
+		# Tue 2019-03-05 is a holiday
+		frappe.flags.current_time = get_datetime("2019-03-06 12:00")
+		fail_overdue_agreements()
+		self.assertEqual(frappe.db.get_value("Issue", unanswered.name, "agreement_status"), "Failed")
+		self.assertEqual(frappe.db.get_value("Issue", on_hold.name, "agreement_status"), "Resolution Due")
+
+		# the 5 hours left run from the resume, and the agreement fails on save once they pass
+		on_hold.reload()
+		on_hold.status = "Open"
+		on_hold.save()
+		self.assertEqual(on_hold.sla_resolution_by, get_datetime("2019-03-06 17:00"))
+		self.assertEqual(on_hold.agreement_status, "Resolution Due")
+
+		frappe.flags.current_time = get_datetime("2019-03-06 17:30")
+		on_hold.save()
+		self.assertEqual(on_hold.agreement_status, "Failed")
+
+	def test_late_first_response_fails_the_agreement(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+
+		# answered and closed after Response By 16:00, before Resolution By 18:00
+		frappe.flags.current_time = get_datetime("2019-03-04 16:30")
+		issue.status = "Closed"
+		issue.save()
+		self.assertEqual(issue.agreement_status, "Failed")
+
 	def test_status_change_times_are_in_system_time_zone(self):
 		user = create_user("test_sla_timezone@example.com")
 		user.time_zone = "Pacific/Kiritimati"
@@ -600,7 +639,8 @@ class TestIssue(TestSetUp):
 		)
 
 		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
-		issue.first_responded_on = get_datetime("2019-03-04 13:00")
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		issue.first_responded_on = frappe.flags.current_time
 		update_agreement_status_on_custom_status(issue)
 		self.assertEqual(issue.agreement_status, "Resolution Due")
 
