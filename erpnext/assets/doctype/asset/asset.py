@@ -116,6 +116,7 @@ class Asset(AccountsController):
 		supplier: DF.Link | None
 		total_asset_cost: DF.Currency
 		total_number_of_depreciations: DF.Int
+		value_adjustment_amount: DF.Currency
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
 
