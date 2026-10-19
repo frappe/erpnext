@@ -388,7 +388,7 @@ class LandedCostVoucher(Document):
 			frappe.throw(message.format(row.idx, frappe.bold(row.item_code)))
 
 	@frappe.whitelist()
-	def get_receipt_document_details(self, receipt_document_type, receipt_document):
+	def get_receipt_document_details(self, receipt_document_type: str, receipt_document: str):
 		if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
 			frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
 
@@ -558,7 +558,7 @@ class LandedCostVoucher(Document):
 					)
 
 	@frappe.whitelist()
-	def get_vendor_invoice_amount(self, vendor_invoice):
+	def get_vendor_invoice_amount(self, vendor_invoice: str):
 		frappe.has_permission("Purchase Invoice", "read", vendor_invoice, throw=True)
 		filters = frappe._dict(
 			{
