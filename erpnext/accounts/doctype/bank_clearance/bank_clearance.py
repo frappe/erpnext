@@ -165,22 +165,21 @@ class BankClearance(Document):
 				frappe.throw(
 					_("Row {0}: Voucher is not eligible for clearance with the selected filters.").format(
 						row.idx
-					)
+					),
+					title=_("Invalid Voucher"),
 				)
 
 			voucher = frappe.get_doc(row.payment_document, row.payment_entry)
-			voucher.check_permission("read")
-			voucher.check_permission("write")
-			if voucher.docstatus != 1:
-				frappe.throw(_("Row {0}: Only submitted vouchers can be cleared.").format(row.idx))
-
-			if row.clearance_date:
-				if getdate(row.clearance_date) < getdate(entry.posting_date):
-					frappe.throw(_("Row {0}: Clearance date cannot be before posting date.").format(row.idx))
-				if entry.get("cheque_date") and getdate(row.clearance_date) < getdate(entry.cheque_date):
-					frappe.throw(_("Row {0}: Clearance date cannot be before cheque date.").format(row.idx))
-			else:
+			if not row.clearance_date:
 				row.clearance_date = None
+
+			validate_clearance_date(
+				voucher,
+				row.clearance_date,
+				self.account,
+				row_idx=row.idx,
+				cheque_date=entry.get("cheque_date"),
+			)
 
 			entries_to_update.append(row)
 
@@ -195,7 +194,7 @@ class BankClearance(Document):
 					{
 						"parent": d.payment_entry,
 						"account": self.account,
-						"amount": [">", 0],
+						"amount": ["!=", 0],
 					},
 					"clearance_date",
 				)
@@ -203,7 +202,7 @@ class BankClearance(Document):
 >>>>>>> 3c49e8b (fix(accounts): validate bank clearance voucher updates)
 					frappe.db.set_value(
 						"Sales Invoice Payment",
-						{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
+						{"parent": d.payment_entry, "account": self.get("account"), "amount": ["!=", 0]},
 						"clearance_date",
 						d.clearance_date,
 					)
@@ -221,6 +220,73 @@ class BankClearance(Document):
 			msgprint(_("Clearance Date updated"))
 		else:
 			msgprint(_("Clearance Date not mentioned"))
+
+
+def validate_clearance_date(voucher, clearance_date, account, row_idx=None, cheque_date=None):
+	"""Validate manual clearance changes using the stored voucher and bank allocations."""
+	voucher.check_permission("read")
+	voucher.check_permission("write")
+	label = _("Row {0}").format(row_idx) if row_idx else f"{_(voucher.doctype)} {voucher.name}"
+	if voucher.docstatus != 1:
+		frappe.throw(
+			_("{0}: Only submitted vouchers can be cleared.").format(label), title=_("Invalid Voucher")
+		)
+
+	clearance_date = getdate(clearance_date) if clearance_date else None
+	clearance_dates = (
+		[
+			payment.clearance_date
+			for payment in voucher.payments
+			if payment.account == account and payment.amount != 0
+		]
+		if voucher.doctype == "Sales Invoice"
+		else [voucher.clearance_date]
+	)
+	if all((getdate(date) if date else None) == clearance_date for date in clearance_dates):
+		return
+
+	if clearance_date:
+		if clearance_date < getdate(voucher.posting_date):
+			frappe.throw(
+				_("{0}: Clearance date cannot be before posting date.").format(label),
+				title=_("Invalid Clearance Date"),
+			)
+		cheque_date = cheque_date or voucher.get("cheque_date") or voucher.get("reference_date")
+		if cheque_date and clearance_date < getdate(cheque_date):
+			frappe.throw(
+				_("{0}: Clearance date cannot be before cheque date.").format(label),
+				title=_("Invalid Clearance Date"),
+			)
+
+	transaction = frappe.qb.DocType("Bank Transaction")
+	payment = frappe.qb.DocType("Bank Transaction Payments")
+	allocated = (
+		frappe.qb.from_(transaction)
+		.inner_join(payment)
+		.on(payment.parent == transaction.name)
+		.select(transaction.name)
+		.where(
+			(transaction.docstatus == 1)
+			& (payment.payment_document == voucher.doctype)
+			& (payment.payment_entry == voucher.name)
+			& (payment.allocated_amount != 0)
+		)
+		.limit(1)
+	)
+	if voucher.doctype == "Sales Invoice":
+		bank_account = frappe.qb.DocType("Bank Account")
+		allocated = allocated.where(
+			transaction.bank_account.isin(
+				frappe.qb.from_(bank_account).select(bank_account.name).where(bank_account.account == account)
+			)
+		)
+	if allocated.run():
+		frappe.throw(
+			_(
+				"{0}: Unreconcile the voucher from its Bank Transaction before changing the clearance date."
+			).format(label),
+			title=_("Voucher Already Reconciled"),
+		)
 
 
 def get_payment_entries_for_bank_clearance(
