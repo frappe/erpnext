@@ -1,10 +1,16 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import random_string
 
-from erpnext.selling.report.customer_credit_balance.customer_credit_balance import get_columns, get_details
+from erpnext.selling.report.customer_credit_balance.customer_credit_balance import (
+	execute,
+	get_columns,
+	get_details,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -116,3 +122,41 @@ class TestCustomerCreditBalance(ERPNextTestSuite):
 		self.assertEqual(len(with_breakup), len(without_breakup) + 3)
 		self.assertTrue(any("Pending Sales Orders" in col for col in with_breakup))
 		self.assertFalse(any("Pending Sales Orders" in col for col in without_breakup))
+
+	def test_execute_breakup_values_and_positions(self):
+		company = "_Test Company"
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Credit Balance " + random_string(8),
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"credit_limits": [{"company": company, "credit_limit": 1000}],
+			}
+		).insert()
+		breakup = frappe._dict(gle=100.0, sales_order=200.0, delivery_note=50.0)
+		filters = frappe._dict(company=company, customer=customer.name)
+		module = "erpnext.selling.report.customer_credit_balance.customer_credit_balance"
+
+		for naming_type, offset in (("Customer Name", 0), ("Naming Series", 1)):
+			frappe.db.set_single_value("Selling Settings", "cust_master_name", naming_type)
+			with patch(f"{module}.get_customer_outstanding_breakup", return_value=breakup):
+				columns, data = execute(filters)
+				breakup_columns, breakup_data = execute(frappe._dict(filters, show_breakup=1))
+
+			self.assertEqual(len(columns), len(data[0]))
+			self.assertEqual(len(breakup_columns), len(breakup_data[0]))
+
+			# without breakup: customer, [customer name], credit limit, outstanding, balance
+			row = data[0]
+			self.assertEqual(row[0], customer.name)
+			self.assertEqual(row[1 + offset], 1000)
+			self.assertEqual(row[2 + offset], 350)
+			self.assertEqual(row[3 + offset], 650)
+
+			# with breakup: credit limit, GL, sales order, delivery note, outstanding, balance
+			row = breakup_data[0]
+			self.assertEqual(row[1 + offset], 1000)
+			self.assertEqual(row[2 + offset : 5 + offset], [100.0, 200.0, 50.0])
+			self.assertEqual(sum(row[2 + offset : 5 + offset]), row[5 + offset])
+			self.assertEqual(row[6 + offset], 650)
