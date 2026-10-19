@@ -1250,8 +1250,10 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 		new_asset_depr_schedule_doc.flags.is_rescheduled = True
 
 		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+		current_asset_depr_schedule_doc.flags.ignore_permissions = True
 		current_asset_depr_schedule_doc.cancel()
 
+		new_asset_depr_schedule_doc.flags.ignore_permissions = True
 		new_asset_depr_schedule_doc.submit()
 
 
