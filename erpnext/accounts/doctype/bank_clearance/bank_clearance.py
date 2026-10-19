@@ -310,10 +310,16 @@ def get_payment_entries_for_bank_clearance(
 		frappe.qb.from_(pi)
 		.inner_join(acc)
 		.on(pi.cash_bank_account == acc.name)
+		.inner_join(company)
+		.on(pi.company == company.name)
 		.select(
 			ConstantColumn("Purchase Invoice").as_("payment_document"),
 			pi.name.as_("payment_entry"),
-			pi.paid_amount.as_("credit"),
+			(
+				Case()
+				.when(acc.account_currency == company.default_currency, pi.base_paid_amount)
+				.else_(pi.paid_amount)
+			).as_("credit"),
 			pi.posting_date,
 			pi.supplier.as_("against_account"),
 			pi.bill_no.as_("cheque_number"),
@@ -351,11 +357,17 @@ def get_payment_entries_for_bank_clearance(
 			.on(si_payment.parent == si.name)
 			.inner_join(acc)
 			.on(si_payment.account == acc.name)
+			.inner_join(company)
+			.on(si.company == company.name)
 			.select(
 				ConstantColumn("Sales Invoice").as_("payment_document"),
 				si.name.as_("payment_entry"),
 				si_payment.reference_no.as_("cheque_number"),
-				si_payment.amount.as_("debit"),
+				(
+					Case()
+					.when(acc.account_currency == company.default_currency, si_payment.base_amount)
+					.else_(si_payment.amount)
+				).as_("debit"),
 				si.posting_date,
 				si.customer.as_("against_account"),
 				si_payment.clearance_date,
