@@ -279,8 +279,10 @@ class ReportData:
 				sabb_data.raw_materials[key if idx == 0 else (*key, details.reference_name)] = details
 
 		sources = [details for node_key, details in sabb_data.raw_materials.items() if node_key[:4] == key]
+		produced_qty = sum(abs(flt(details.qty)) for details in sources)
 		for details in sources:
-			self.set_backward_data(details, material.qty if len(sources) == 1 else None)
+			share = abs(flt(details.qty)) / produced_qty if produced_qty else 1 / len(sources)
+			self.set_backward_data(details, flt(material.qty) * share)
 
 	def get_component_sources(self, value):
 		details = self.get_serial_no_batches(value)
