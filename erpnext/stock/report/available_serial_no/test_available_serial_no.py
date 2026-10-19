@@ -116,7 +116,15 @@ class TestStockLedgerReeport(ERPNextTestSuite):
 			posting_time="00:00:00",
 			purpose="Opening Stock",
 		)
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_stock_entry(
+			item_code=item,
+			target="_Test Warehouse - _TC",
+			qty=1,
+			basic_rate=100,
+			posting_date=today(),
+			posting_time="11:00:00",
+			set_posting_time=1,
+		)
 
 		filters = self.filters.copy()
 		filters.update(item_code=item, warehouse="_Test Warehouse - _TC", from_date=today(), to_date=today())
