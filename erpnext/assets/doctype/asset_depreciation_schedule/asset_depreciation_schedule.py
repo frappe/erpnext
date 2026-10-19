@@ -272,13 +272,33 @@ def set_modified_depreciation_rate(asset_doc, row, new_schedule):
 	if row.depreciation_method in (
 		"Written Down Value",
 		"Double Declining Balance",
-	):
+	) and not is_depreciation_rate_entered(asset_doc, row):
 		new_rate_of_depreciation = flt(
 			asset_doc.get_depreciation_rate(row), row.precision("rate_of_depreciation")
 		)
 
 		row.db_set("rate_of_depreciation", new_rate_of_depreciation)
 		new_schedule.rate_of_depreciation = new_rate_of_depreciation
+
+
+def is_depreciation_rate_entered(asset_doc, row) -> bool:
+	"""Finance books saved before the flag existed are judged by the rate of their first schedule."""
+	if row.is_rate_of_depreciation_entered:
+		return True
+
+	first_rate = get_first_depreciation_rate(asset_doc.name, row.finance_book)
+	return asset_doc.is_entered_depreciation_rate(row, first_rate)
+
+
+def get_first_depreciation_rate(asset: str, finance_book: str | None) -> float:
+	schedules = frappe.get_all(
+		"Asset Depreciation Schedule",
+		filters={"asset": asset, "finance_book": finance_book or ["is", "not set"]},
+		fields=["rate_of_depreciation"],
+		order_by="creation asc",
+		limit=1,
+	)
+	return flt(schedules[0].rate_of_depreciation) if schedules else 0
 
 
 def get_temp_depr_schedule_doc(asset_doc, fb_row, disposal_date=None, updated_depr_schedule=None):

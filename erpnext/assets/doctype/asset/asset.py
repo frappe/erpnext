@@ -617,6 +617,11 @@ class Asset(AccountsController):
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
 			self.validate_asset_finance_books(d)
+			d.db_set(
+				"is_rate_of_depreciation_entered",
+				self.is_entered_depreciation_rate(d, d.rate_of_depreciation),
+				update_modified=False,
+			)
 			d.rate_of_depreciation = self.get_depreciation_rate(d, on_validate=True)
 
 	def validate_asset_finance_books(self, row):
@@ -1071,6 +1076,25 @@ class Asset(AccountsController):
 			return self.get_double_declining_balance_rate(args, rate_field_precision)
 		elif args.get("depreciation_method") == "Written Down Value":
 			return self.get_written_down_value_rate(args, rate_field_precision, on_validate)
+
+	def is_entered_depreciation_rate(self, row: Document, rate: float) -> bool:
+		"""A Written Down Value rate is entered when it differs from the rate derived from the salvage value."""
+		if row.depreciation_method != "Written Down Value" or not flt(rate):
+			return False
+		if not flt(row.expected_value_after_useful_life):
+			return True
+
+		precision = row.precision("rate_of_depreciation")
+		return flt(rate, precision) != flt(self.get_initial_depreciation_rate(row), precision)
+
+	def get_initial_depreciation_rate(self, row: Document) -> float:
+		initial_values = {
+			"rate_of_depreciation": 0,
+			"value_after_depreciation": 0,
+			"total_number_of_booked_depreciations": 0,
+			"increase_in_asset_life": 0,
+		}
+		return self.get_depreciation_rate({**row.as_dict(), **initial_values})
 
 	def get_double_declining_balance_rate(self, args, rate_field_precision):
 		return flt(
