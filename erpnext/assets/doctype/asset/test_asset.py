@@ -2346,6 +2346,7 @@ def create_asset(**args):
 				"frequency_of_depreciation": args.frequency_of_depreciation or 12,
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
+				"salvage_value_percentage": args.salvage_value_percentage or 0,
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
 				"shift_based": args.shift_based or 0,
