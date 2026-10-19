@@ -5,6 +5,8 @@
 from urllib.parse import urlparse
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.tests import change_settings
 from frappe.utils import nowdate
 
@@ -568,6 +570,26 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		other_data = get_supplier_quotations_data(other_rfq.name)
 		self.assertEqual(len(other_data), 1)
 		self.assertEqual(other_data[0].get("request_for_quotation_item"), other_rfq.items[0].name)
+
+	def test_get_supplier_quotations_data_respects_supplier_quotation_permissions(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}]
+		)
+
+		own_quote = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+		own_quote.items[0].rate = 150
+		own_quote.save()
+		other_quote = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier 1")
+		other_quote.items[0].rate = 120
+		other_quote.save()
+
+		user = create_user("rfq-quotations-buyer@example.com", "Purchase User")
+		add_user_permission("Supplier", "_Test Supplier", user.name)
+
+		with self.set_user(user.name):
+			data = get_supplier_quotations_data(rfq.name)
+
+		self.assertEqual({row.get("supplier_quotation") for row in data}, {own_quote.name})
 
 
 def make_request_for_quotation(**args):
