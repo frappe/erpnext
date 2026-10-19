@@ -307,18 +307,21 @@ class StockReservationEntry(Document):
 		)
 
 	def get_from_voucher_reservation_entries(self):
-		return frappe.get_all(
-			"Stock Reservation Entry",
-			fields=["name", "delivered_qty", "reserved_qty", "warehouse"],
-			filters={
-				"voucher_type": self.from_voucher_type,
-				"voucher_no": self.from_voucher_no,
-				"voucher_detail_no": self.from_voucher_detail_no,
-				"item_code": self.item_code,
-				"docstatus": 1,
-			},
-			order_by="creation",
-		)
+		"""Submitted reservations this one was taken from, oldest first, locked until the transaction ends."""
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		return (
+			frappe.qb.from_(sre)
+			.select(sre.name, sre.delivered_qty, sre.reserved_qty, sre.warehouse)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == self.from_voucher_type)
+				& (sre.voucher_no == self.from_voucher_no)
+				& (sre.voucher_detail_no == self.from_voucher_detail_no)
+				& (sre.item_code == self.item_code)
+			)
+			.orderby(sre.creation)
+			.for_update()
+		).run(as_dict=True)
 
 	def validate_amended_doc(self) -> None:
 		"""Raises an exception if document is amended."""
@@ -2174,18 +2177,21 @@ def _get_stock_reservation_entries_for_voucher(
 
 
 def get_serial_batch_open_qty(sre_names: list[str]) -> dict[str, float]:
-	"""Undelivered serial and batch qty of each reservation that has serial and batch entries."""
+	"""Undelivered serial and batch qty of each reservation that has serial and batch entries, read under a lock."""
 	if not sre_names:
 		return {}
 
 	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
-	return dict(
+	open_qty = defaultdict(float)
+	for parent, qty in (
 		frappe.qb.from_(sb_entry)
-		.select(sb_entry.parent, Sum(sb_entry.qty - sb_entry.delivered_qty))
+		.select(sb_entry.parent, sb_entry.qty - sb_entry.delivered_qty)
 		.where((sb_entry.parenttype == "Stock Reservation Entry") & sb_entry.parent.isin(sre_names))
-		.groupby(sb_entry.parent)
-		.run()
-	)
+		.for_update()
+	).run():
+		open_qty[parent] += flt(qty)
+
+	return open_qty
 
 
 def set_delivered_qty(sre_name: str, delivered_qty: float) -> None:
@@ -2210,7 +2216,7 @@ def move_serial_batch_delivered_qty(
 
 
 def get_open_serial_batch_entries(sre_names: list[str], release: bool) -> list[dict]:
-	"""Rows of these reservations with qty still to deliver, oldest reservation first, or to give back, newest first."""
+	"""Rows of these reservations with qty still to deliver, oldest reservation first, or to give back, newest first, locked until the transaction ends."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	open_qty = sb_entry.delivered_qty if release else sb_entry.qty - sb_entry.delivered_qty
@@ -2232,6 +2238,7 @@ def get_open_serial_batch_entries(sre_names: list[str], release: bool) -> list[d
 		)
 		.orderby(sre.creation, order=Order.desc if release else Order.asc)
 		.orderby(sb_entry.idx)
+		.for_update()
 	).run(as_dict=True)
 
 
