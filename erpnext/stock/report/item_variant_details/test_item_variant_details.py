@@ -106,3 +106,38 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		price_columns = [column for column in columns if column["fieldname"].startswith("avg_")]
 		self.assertEqual({column.get("options") for column in price_columns}, {"currency"})
 		self.assertEqual(row.get("currency"), get_report_currency())
+
+	def test_warehouse_filter_includes_descendants_of_group_warehouses(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		group = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "_Test Variant Group",
+				"is_group": 1,
+				"company": "_Test Company",
+			}
+		).insert()
+		child = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "_Test Variant Child",
+				"parent_warehouse": group.name,
+				"company": "_Test Company",
+			}
+		).insert()
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant.insert(ignore_if_duplicate=True)
+		for warehouse, qty in (("Stores - _TC", 18), (child.name, 7)):
+			make_stock_entry(item_code=variant.name, to_warehouse=warehouse, qty=qty, rate=100)
+			make_sales_order(item_code=variant.name, qty=1, warehouse=warehouse)
+
+		row = next(
+			row
+			for row in self.run_report(item="_Test Variant Item", warehouse=[group.name])
+			if row.get("variant_name") == variant.name
+		)
+
+		self.assertEqual(row.get("current_stock"), 7)
+		self.assertEqual(row.get("open_orders"), 1)
