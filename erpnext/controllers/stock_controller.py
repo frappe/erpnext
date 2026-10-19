@@ -407,14 +407,17 @@ class StockController(AccountsController):
 				BatchExpiredError,
 			)
 
-	def validate_outward_bundle_batches(self, check_expiry=True):
+	def validate_outward_bundle_batches(self, check_expiry=True, rows=None, qty_field="qty"):
 		if self.get("is_return") or not self.get("posting_date") or self.docstatus == 2:
 			return
 
+		if rows is None:
+			rows = (self.get("items") or []) + (self.get("packed_items") or [])
+
 		row_idx_by_bundle = {
 			d.serial_and_batch_bundle: d.idx
-			for d in (self.get("items") or []) + (self.get("packed_items") or [])
-			if d.get("serial_and_batch_bundle") and flt(d.get("qty")) > 0
+			for d in rows
+			if d.get("serial_and_batch_bundle") and flt(d.get(qty_field)) > 0
 		}
 		if not row_idx_by_bundle:
 			return
