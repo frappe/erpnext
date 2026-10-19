@@ -188,7 +188,7 @@ class StockReservationEntry(Document):
 		for row in sres:
 			if row.name in open_qty:
 				delivered_qty = row.reserved_qty - open_qty[row.name]
-				set_delivered_qty(row.name, delivered_qty)
+				set_delivered_qty(row, delivered_qty)
 				counted_qty += delivered_qty
 
 		self.spread_used_qty([row for row in sres if row.name not in open_qty], counted_qty)
@@ -218,7 +218,7 @@ class StockReservationEntry(Document):
 
 		for row in sres:
 			qty = min(row.reserved_qty, delivered_qty)
-			set_delivered_qty(row.name, qty)
+			set_delivered_qty(row, qty)
 			delivered_qty -= qty
 
 	def release_reversed_usage(self, field: str, row_wise_serial_batch: dict) -> None:
@@ -278,7 +278,16 @@ class StockReservationEntry(Document):
 		sre = frappe.qb.DocType("Stock Reservation Entry")
 		return (
 			frappe.qb.from_(sre)
-			.select(sre.name, sre.delivered_qty, sre.reserved_qty, sre.warehouse)
+			.select(
+				sre.name,
+				sre.docstatus,
+				sre.voucher_qty,
+				sre.reserved_qty,
+				sre.delivered_qty,
+				sre.transferred_qty,
+				sre.consumed_qty,
+				sre.warehouse,
+			)
 			.where(
 				(sre.voucher_type == self.from_voucher_type)
 				& (sre.voucher_no == self.from_voucher_no)
@@ -601,28 +610,9 @@ class StockReservationEntry(Document):
 
 	def update_status(self, status: str | None = None, update_modified: bool = True) -> None:
 		"""Updates status based on Voucher Qty, Reserved Qty and Delivered Qty."""
-
-		if not status:
-			if self.docstatus == 2:
-				status = "Cancelled"
-			elif self.docstatus == 1:
-				if self.transferred_qty:
-					status = "Closed"
-					if self.transferred_qty < self.reserved_qty:
-						status = "Partially Used"
-
-				elif self.reserved_qty == (self.delivered_qty or self.consumed_qty):
-					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
-					status = "Partially Delivered"
-				elif self.reserved_qty >= self.voucher_qty:
-					status = "Reserved"
-				else:
-					status = "Partially Reserved"
-			else:
-				status = "Draft"
-
-		frappe.db.set_value(self.doctype, self.name, "status", status, update_modified=update_modified)
+		frappe.db.set_value(
+			self.doctype, self.name, "status", status or get_status(self), update_modified=update_modified
+		)
 
 	def can_be_updated(self) -> None:
 		"""Raises an exception if `Stock Reservation Entry` is not allowed to be updated."""
@@ -2050,10 +2040,28 @@ def get_serial_batch_open_qty(sre_names: list[str]) -> dict[str, float]:
 	return open_qty
 
 
-def set_delivered_qty(sre_name: str, delivered_qty: float) -> None:
-	sre = frappe.get_doc("Stock Reservation Entry", sre_name)
-	sre.db_set("delivered_qty", delivered_qty)
-	sre.update_status()
+def set_delivered_qty(sre: frappe._dict, delivered_qty: float) -> None:
+	sre.delivered_qty = delivered_qty
+	frappe.db.set_value(
+		"Stock Reservation Entry", sre.name, {"delivered_qty": delivered_qty, "status": get_status(sre)}
+	)
+
+
+def get_status(sre) -> str:
+	"""Status of a reservation from its docstatus and quantities."""
+	if sre.docstatus == 2:
+		return "Cancelled"
+	if sre.docstatus != 1:
+		return "Draft"
+	if sre.transferred_qty:
+		return "Partially Used" if sre.transferred_qty < sre.reserved_qty else "Closed"
+	if sre.reserved_qty == (sre.delivered_qty or sre.consumed_qty):
+		return "Delivered"
+	if sre.delivered_qty and sre.delivered_qty < sre.reserved_qty:
+		return "Partially Delivered"
+	if sre.reserved_qty >= sre.voucher_qty:
+		return "Reserved"
+	return "Partially Reserved"
 
 
 def move_serial_batch_delivered_qty(
