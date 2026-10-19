@@ -199,10 +199,10 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_serial_nos(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	if not frappe.has_permission("Serial No", "select"):
+	if not has_filter_scope(filters):
 		return []
 
-	if not has_filter_scope(filters):
+	if not frappe.has_permission("Serial No", "select"):
 		return []
 
 	query_filters = {}
@@ -238,10 +238,10 @@ def get_serial_nos(doctype: str, txt: str, searchfield: str, start: int, page_le
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_nos(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	if not frappe.has_permission("Batch", "select"):
+	if not has_filter_scope(filters):
 		return []
 
-	if not has_filter_scope(filters):
+	if not frappe.has_permission("Batch", "select"):
 		return []
 
 	query_filters = {}
