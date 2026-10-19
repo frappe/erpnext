@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe import qb
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
@@ -713,6 +713,7 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(result["transaction"].status, "Reconciled")
 		self.assertEqual(result["journal_entry"].accounts[1].party, self.customer)
 
+<<<<<<< HEAD
 		with as_user(accounts_user):
 			result = create_bank_entry_and_reconcile(
 				**bank_entry_kwargs(
@@ -720,6 +721,50 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 				)
 			)
 		self.assertEqual(result["journal_entry"].accounts[1].party, OTHER_CUSTOMER)
+=======
+	def test_update_clearance_date_validates_dates_and_reconciliation(self):
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+		)
+		payment.reference_date = add_days(payment.posting_date, 1)
+		payment.save().submit()
+
+		for clearance_date, message in (
+			(add_days(payment.posting_date, -1), "posting date"),
+			(payment.posting_date, "cheque date"),
+		):
+			with self.subTest(clearance_date=clearance_date):
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					update_clearance_date(payment.doctype, payment.name, self.bank, str(clearance_date))
+				self.assertFalse(payment.reload().clearance_date)
+
+		clearance_date = str(payment.reference_date)
+		update_clearance_date(payment.doctype, payment.name, self.bank, clearance_date)
+		self.assertEqual(payment.reload().clearance_date, getdate(clearance_date))
+		update_clearance_date(payment.doctype, payment.name, self.bank, None)
+		self.assertFalse(payment.reload().clearance_date)
+
+		transaction = self.make_bank_transaction(clearance_date)
+		reconcile_vouchers(
+			transaction.name, [{"payment_doctype": payment.doctype, "payment_name": payment.name}]
+		)
+		update_clearance_date(payment.doctype, payment.name, self.bank, clearance_date)
+		for changed_date in (None, str(add_days(clearance_date, 1))):
+			with self.subTest(clearance_date=changed_date):
+				with self.assertRaisesRegex(frappe.ValidationError, "Unreconcile"):
+					update_clearance_date(payment.doctype, payment.name, self.bank, changed_date)
+				self.assertEqual(payment.reload().clearance_date, getdate(clearance_date))
+		self.assertEqual(transaction.reload().allocated_amount, 100)
+
+	def test_update_clearance_date_fences_the_voucher(self):
+		payment = self.make_other_company_payment()
+>>>>>>> 96be98d (fix(accounts): protect reconciled voucher clearance dates)
 
 	def test_create_bulk_payment_entry_and_reconcile_refuses_party_outside_customer_fence(self):
 		transaction = make_bank_transaction(self.bank_account, deposit=91)

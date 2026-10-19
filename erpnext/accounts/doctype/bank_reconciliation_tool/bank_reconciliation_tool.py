@@ -19,6 +19,7 @@ from erpnext import (
 	require_party_permission,
 )
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+from erpnext.accounts.doctype.bank_clearance.bank_clearance import validate_clearance_date
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
 	get_doctypes_for_bank_reconciliation,
 	get_total_allocated_amount,
@@ -477,10 +478,14 @@ def update_clearance_date(
 	if not payment_entry or not frappe.has_permission(payment_document, "write", doc=payment_entry):
 		_refuse()
 
+	frappe.get_doc("Account", account).check_permission("read")
+	voucher = frappe.get_doc(payment_document, payment_entry)
+	validate_clearance_date(voucher, clearance_date, account)
+
 	if payment_document == "Sales Invoice":
 		frappe.db.set_value(
 			"Sales Invoice Payment",
-			{"parent": payment_entry, "account": account, "amount": [">", 0]},
+			{"parent": payment_entry, "account": account, "amount": ["!=", 0]},
 			"clearance_date",
 			clearance_date,
 		)
