@@ -475,6 +475,7 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			FixedAssetService(self).process_asset_depreciation()
 
+		FixedAssetService(self).set_asset_disposal_values()
 		self.make_gl_entries()
 
 		if self.is_return:

@@ -25,6 +25,8 @@ class SalesInvoiceItem(Document):
 		amount: DF.Currency
 		apply_tds: DF.Check
 		asset: DF.Link | None
+		asset_gross_value: DF.Currency
+		asset_value_after_depreciation: DF.Currency
 		barcode: DF.Data | None
 		base_amount: DF.Currency
 		base_net_amount: DF.Currency
