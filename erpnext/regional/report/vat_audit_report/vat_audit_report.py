@@ -112,13 +112,12 @@ class VATAuditReport:
 
 	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
-		self.item_tax_rate = frappe._dict()
 		self.tax_doctype = (
 			"Purchase Taxes and Charges" if doctype == "Purchase Invoice" else "Sales Taxes and Charges"
 		)
 
 		tax_doctype = frappe.qb.DocType(self.tax_doctype)
-		self.tax_details = (
+		query = (
 			frappe.qb.from_(tax_doctype)
 			.select(
 				tax_doctype.parent,
@@ -131,8 +130,10 @@ class VATAuditReport:
 			.where(tax_doctype.parent.isin(list(self.invoices.keys())))
 			.where(tax_doctype.account_head.isin(self.sa_vat_accounts))
 			.orderby(tax_doctype.account_head)
-			.run(as_dict=True)
 		)
+		if doctype == "Purchase Invoice":
+			query = query.select(tax_doctype.add_deduct_tax)
+		self.tax_details = query.run(as_dict=True)
 
 		for tax_detail in self.tax_details:
 			if not tax_detail.item_wise_tax_detail:
@@ -144,7 +145,6 @@ class VATAuditReport:
 				continue
 
 			parent_items = self.invoice_items.get(tax_detail.parent, {})
-			parent_tax_rates = self.items_based_on_tax_rate.setdefault(tax_detail.parent, {})
 			is_actual = tax_detail.charge_type == "Actual"
 			actual_tax_rate = get_actual_tax_rate(item_wise_tax_detail, parent_items) if is_actual else 0
 
@@ -157,37 +157,26 @@ class VATAuditReport:
 				if taxes[0] == 0 and not is_zero_rated:
 					continue
 
-				tax_rate = self.get_item_amount_map(tax_detail.parent, item, taxes)
-				if tax_rate is not None:
-					rate_based_dict = parent_tax_rates.setdefault(tax_rate, [])
-					if item not in rate_based_dict:
-						rate_based_dict.append(item)
+				if item in parent_items:
+					self.add_item_tax(tax_detail, item, taxes)
 
-	def get_item_amount_map(self, parent, item, taxes):
-		item_details = self.invoice_items.get(parent, {}).get(item)
-		if not item_details:
-			return None
-
-		net_amount = item_details.get("net_amount", 0)
-		tax_rate = taxes[0]
-		tax_amount = taxes[1]
-		gross_amount = net_amount + tax_amount
-
-		self.item_tax_rate.setdefault(parent, {}).setdefault(
-			item,
-			{
-				"tax_rate": tax_rate,
-				"gross_amount": 0.0,
-				"tax_amount": 0.0,
-				"net_amount": 0.0,
-			},
+	def add_item_tax(self, tax_detail: dict, item: str, taxes: list) -> None:
+		"""Add input (Add) and output (Deduct) VAT separately, counting each item's net amount once."""
+		is_deduct = tax_detail.get("add_deduct_tax") == "Deduct"
+		totals = self.items_based_on_tax_rate.setdefault(tax_detail.parent, {}).setdefault(
+			(taxes[0], is_deduct),
+			{"gross_amount": 0.0, "tax_amount": 0.0, "net_amount": 0.0, "items": set()},
 		)
+		net_amount = 0.0
+		if item not in totals["items"]:
+			totals["items"].add(item)
+			net_amount = flt(self.invoice_items[tax_detail.parent][item].get("net_amount"))
 
-		self.item_tax_rate[parent][item]["net_amount"] += net_amount
-		self.item_tax_rate[parent][item]["tax_amount"] += tax_amount
-		self.item_tax_rate[parent][item]["gross_amount"] += gross_amount
-
-		return tax_rate
+		# item_wise_tax_detail keeps a Deduct row's share with the sign of the item, not of the row
+		tax_amount = -flt(taxes[1]) if is_deduct else flt(taxes[1])
+		totals["tax_amount"] += tax_amount
+		totals["net_amount"] += net_amount
+		totals["gross_amount"] += tax_amount + net_amount
 
 	def get_data(self, doctype):
 		consolidated_data = self.get_consolidated_data(doctype)
@@ -218,25 +207,22 @@ class VATAuditReport:
 	def get_consolidated_data(self, doctype):
 		consolidated_data_map = {}
 		for inv, inv_data in self.invoices.items():
-			if self.items_based_on_tax_rate.get(inv):
-				for rate, items in self.items_based_on_tax_rate.get(inv).items():
-					row = {"tax_amount": 0.0, "gross_amount": 0.0, "net_amount": 0.0}
+			for (rate, _is_deduct), item_details in self.items_based_on_tax_rate.get(inv, {}).items():
+				row = {
+					"account": inv_data.get("account"),
+					"posting_date": formatdate(inv_data.get("posting_date"), "dd-mm-yyyy"),
+					"voucher_type": doctype,
+					"voucher_no": inv,
+					"party_type": "Customer" if doctype == "Sales Invoice" else "Supplier",
+					"party": inv_data.get("party"),
+					"remarks": inv_data.get("remarks"),
+					"gross_amount": item_details.get("gross_amount"),
+					"tax_amount": item_details.get("tax_amount"),
+					"net_amount": item_details.get("net_amount"),
+				}
 
-					consolidated_data_map.setdefault(rate, {"data": []})
-					for item in items:
-						item_details = self.item_tax_rate.get(inv).get(item)
-						row["account"] = inv_data.get("account")
-						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
-						row["voucher_type"] = doctype
-						row["voucher_no"] = inv
-						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
-						row["party"] = inv_data.get("party")
-						row["remarks"] = inv_data.get("remarks")
-						row["gross_amount"] += item_details.get("gross_amount")
-						row["tax_amount"] += item_details.get("tax_amount")
-						row["net_amount"] += item_details.get("net_amount")
-
-					consolidated_data_map[rate]["data"].append(row)
+				consolidated_data_map.setdefault(rate, {"data": []})
+				consolidated_data_map[rate]["data"].append(row)
 
 		return consolidated_data_map
 
