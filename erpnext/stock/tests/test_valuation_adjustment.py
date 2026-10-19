@@ -23,6 +23,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost as run_repost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.report.serial_and_batch_wise_stock_balance.serial_and_batch_wise_stock_balance import (
+	execute as serial_and_batch_wise_stock_balance,
+)
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
 from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.test_stock_ledger_entries_of_cancelled_vouchers import (
@@ -615,6 +618,21 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		self.fix_by_adjustment_entry(item)
 
 		self.assertEqual([slot[3] for slot in self.get_fifo_queue(item)], ages)
+
+	def test_serial_and_batch_wise_stock_balance_nets_each_batch(self):
+		item = self.make_batch_issued_at_wrong_value()
+		self.fix_by_adjustment_entry(item)
+
+		item_row, batch_row = serial_and_batch_wise_stock_balance(
+			frappe._dict(
+				company=COMPANY,
+				from_date=get_adjustment_date(),
+				to_date=nowdate(),
+				item_code=[item],
+				warehouse=[WAREHOUSE],
+			)
+		)[1]
+		self.assertEqual((batch_row.in_qty, batch_row.out_qty), (item_row.in_qty, item_row.out_qty))
 
 	def test_invariant_check_reads_the_reset_as_stock_moving(self):
 		from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import get_data
