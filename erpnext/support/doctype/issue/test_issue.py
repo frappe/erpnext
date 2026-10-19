@@ -6,7 +6,7 @@ import calendar
 import frappe
 from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import flt, get_datetime
+from frappe.utils import flt, get_datetime, get_time
 
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import (
 	create_service_level_agreement,
@@ -444,6 +444,47 @@ class TestIssue(TestSetUp):
 		self.assertFalse(split.on_hold_since)
 		self.assertFalse(split.total_hold_time)
 		self.assertTrue(split.sla_resolution_by)
+
+	def test_issue_without_sla_records_resolution_metrics(self):
+		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 0)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		create_communication(issue.name, "test@admin.com", "Sent", get_datetime("2019-03-04 13:00"))
+
+		frappe.flags.current_time = get_datetime("2019-03-04 16:00")
+		issue.reload()
+		issue.status = "Closed"
+		issue.save()
+		self.assertFalse(issue.service_level_agreement)
+		# insert stamps creation with the real time; resolution time runs from service_level_agreement_creation
+		self.assertEqual(get_time(issue.opening_time), get_time(issue.creation))
+		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.resolution_time, 14400)
+
+		# a received mail reopens it, which must clear the resolution like a reopen from the form
+		frappe.flags.current_time = get_datetime("2019-03-04 17:00")
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		issue.reload()
+		self.assertEqual(issue.status, "Open")
+		self.assertFalse(issue.sla_resolution_date)
+		self.assertFalse(issue.resolution_time)
+		self.assertEqual(issue.total_hold_time, 3600)
+
+		# insert stamps creation with the real time, so put the mails back at their times
+		for sent_or_received, creation in (("Sent", "13:00"), ("Received", "17:00")):
+			frappe.db.set_value(
+				"Communication",
+				{"reference_name": issue.name, "sent_or_received": sent_or_received},
+				"creation",
+				get_datetime(f"2019-03-04 {creation}"),
+				update_modified=False,
+			)
+
+		frappe.flags.current_time = get_datetime("2019-03-04 18:00")
+		issue.status = "Resolved"
+		issue.save()
+		self.assertEqual(issue.resolution_time, 21600)
+		# the 13:00 to 17:00 wait for the customer's reply is not the user's time
+		self.assertEqual(issue.user_resolution_time, 7200)
 
 	def test_issue_from_secondary_email_of_contact_gets_customer(self):
 		contact = frappe.get_doc({"doctype": "Contact", "first_name": "_Test Secondary Email"})
