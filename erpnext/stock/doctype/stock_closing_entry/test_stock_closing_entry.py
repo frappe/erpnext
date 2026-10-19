@@ -625,6 +625,35 @@ class TestStockClosingEntryDates(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Stock Closing Entry", closing.name, "status"), "Outdated")
 
+	def test_posting_into_an_open_closing_takes_the_company_lock(self):
+		item = make_item("_Test SCE Lock Item", {"is_stock_item": 1}).name
+		self.submit_closing(self.make_closing("2026-03-31"))
+
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		with patch(f"{module}.lock_company_for_closing") as lock:
+			make_stock_entry(
+				item_code=item, qty=1, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-10"
+			)
+		lock.assert_called_with(COMPANY)
+
+		with patch(f"{module}.lock_company_for_closing") as lock:
+			make_stock_entry(
+				item_code=item, qty=1, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-04-10"
+			)
+		lock.assert_not_called()
+
+	def test_closing_worker_takes_the_company_lock_before_publishing(self):
+		closing = self.submit_closing(self.make_closing("2026-03-31"))
+
+		module = "erpnext.stock.doctype.stock_closing_entry.stock_closing_entry"
+		with (
+			patch(f"{module}.StockClosingEntry.has_pending_reposts", return_value=False),
+			patch(f"{module}.lock_company_for_closing") as lock,
+		):
+			prepare_closing_stock_balance(closing.name)
+
+		lock.assert_called_once_with(COMPANY)
+
 	def test_backdated_entry_before_open_closing_is_reposted(self):
 		item = make_item("_Test SCE Open Closing Item", {"is_stock_item": 1}).name
 		make_stock_entry(item_code=item, qty=10, rate=100, to_warehouse=WAREHOUSE, posting_date="2026-03-15")
