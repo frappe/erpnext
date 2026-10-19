@@ -624,17 +624,15 @@ def update_subcontracted_qty(work_order: str):
 		.on(order_item.name == supplied_item.reference_name)
 		.inner_join(job_card)
 		.on(job_card.name == order_item.job_card)
-		.select(
-			job_card.operation_row_id, supplied_item.rm_item_code, supplied_item.reserve_warehouse, Sum(qty)
-		)
+		.select(job_card.operation_row_id, supplied_item.rm_item_code, Sum(qty))
 		.where((job_card.work_order == work_order) & (order.docstatus == 1))
-		.groupby(job_card.operation_row_id, supplied_item.rm_item_code, supplied_item.reserve_warehouse)
+		.groupby(job_card.operation_row_id, supplied_item.rm_item_code)
 	).run()
-	subcontracted = {tuple(row[:3]): flt(row[3]) for row in subcontracted}
+	subcontracted = {(row[0], row[1]): flt(row[2]) for row in subcontracted}
 
 	doc = frappe.get_doc("Work Order", work_order)
 	for row in doc.required_items:
-		qty = subcontracted.get((row.operation_row_id, row.item_code, row.source_warehouse), 0.0)
+		qty = subcontracted.get((row.operation_row_id, row.item_code), 0.0)
 		if flt(row.subcontracted_qty) != qty:
 			row.db_set("subcontracted_qty", qty)
 	doc.update_reserved_qty_for_production()

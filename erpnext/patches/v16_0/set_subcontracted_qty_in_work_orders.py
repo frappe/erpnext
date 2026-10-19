@@ -22,7 +22,7 @@ def execute():
 		.where(
 			(order.docstatus == 1)
 			& (work_order.docstatus == 1)
-			& work_order.status.notin(["Stopped", "Completed", "Closed"])
+			& work_order.status.notin(["Completed", "Closed"])
 		)
 	).run(pluck=True)
 
