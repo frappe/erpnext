@@ -10,6 +10,7 @@ callers and the whitelisted entry point keep working unchanged.
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
 from pypika import functions as fn
 
@@ -476,7 +477,7 @@ class RequiredItemsService:
 				(ste.work_order == self.doc.name)
 				& (ste.purpose.isin(CONSUMPTION_PURPOSES))
 				& (ste.docstatus == 1)
-				& (ste_child.s_warehouse.isnotnull())
+				& (IfNull(ste_child.s_warehouse, "") != "")
 			)
 			.groupby(item_code)
 		)
