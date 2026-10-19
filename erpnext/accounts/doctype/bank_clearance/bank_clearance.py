@@ -41,28 +41,8 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def get_payment_entries(self):
-		if not (self.from_date and self.to_date):
-			frappe.throw(_("From Date and To Date are Mandatory"))
-
-		if not self.account:
-			frappe.throw(_("Account is mandatory to get payment entries"))
-
-		entries = []
-
-		# get entries from all the apps
+		entries = self.get_entries_for_account()
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
-		for method_name in frappe.get_hooks("get_payment_entries_for_bank_clearance"):
-			entries += (
-				frappe.get_attr(method_name)(
-					self.from_date,
-					self.to_date,
-					self.account,
-					self.bank_account,
-					self.include_reconciled_entries,
-					self.include_pos_transactions,
-				)
-				or []
-			)
 
 		entries = sorted(
 			entries,
@@ -89,47 +69,72 @@ class BankClearance(Document):
 			d.pop("account_currency")
 			row.update(d)
 
+	def get_entries_for_account(self):
+		if not (self.from_date and self.to_date):
+			frappe.throw(_("From Date and To Date are Mandatory"))
+
+		if not self.account:
+			frappe.throw(_("Account is mandatory to get payment entries"))
+
+		entries = []
+
+		# get entries from all the apps
+		for method_name in frappe.get_hooks("get_payment_entries_for_bank_clearance"):
+			entries += (
+				frappe.get_attr(method_name)(
+					self.from_date,
+					self.to_date,
+					self.account,
+					self.bank_account,
+					self.include_reconciled_entries,
+					self.include_pos_transactions,
+				)
+				or []
+			)
+
+		return entries
+
 	@frappe.whitelist()
 	def update_clearance_date(self):
 		self.check_permission("write")
+<<<<<<< HEAD
 		invalid_document = []
 		invalid_cheque_date = []
 		entries_to_update = []
+=======
+		frappe.get_doc("Account", self.account).check_permission("read")
+		available_entries = {
+			(entry.payment_document, entry.payment_entry): entry for entry in self.get_entries_for_account()
+		}
+		entries_to_update = []
+		for row in self.get("payment_entries"):
+			if not (row.clearance_date or self.include_reconciled_entries):
+				continue
+>>>>>>> 3c49e8b (fix(accounts): validate bank clearance voucher updates)
 
-		def validate_entry(d):
-			is_valid = True
-			if not d.payment_document:
-				invalid_document.append(str(d.idx))
-				is_valid = False
-
-			if d.clearance_date and d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
-				invalid_cheque_date.append(str(d.idx))
-				is_valid = False
-
-			return is_valid
-
-		for d in self.get("payment_entries"):
-			if validate_entry(d) and (d.clearance_date or self.include_reconciled_entries):
-				if not d.clearance_date:
-					d.clearance_date = None
-
-				entries_to_update.append(d)
-
-		if invalid_document or invalid_cheque_date:
-			msg = _("<p>Please correct the following row(s):</p><ul>")
-			if invalid_document:
-				msg += _("<li>Payment document required for row(s): {0}</li>").format(
-					", ".join(invalid_document)
+			entry = available_entries.get((row.payment_document, row.payment_entry))
+			if not entry:
+				frappe.throw(
+					_("Row {0}: Voucher is not eligible for clearance with the selected filters.").format(
+						row.idx
+					)
 				)
 
-			if invalid_cheque_date:
-				msg += _("<li>Clearance date must be after cheque date for row(s): {0}</li>").format(
-					", ".join(invalid_cheque_date)
-				)
+			voucher = frappe.get_doc(row.payment_document, row.payment_entry)
+			voucher.check_permission("read")
+			voucher.check_permission("write")
+			if voucher.docstatus != 1:
+				frappe.throw(_("Row {0}: Only submitted vouchers can be cleared.").format(row.idx))
 
-			msg += "</ul>"
-			msgprint(_(msg))
-			return
+			if row.clearance_date:
+				if getdate(row.clearance_date) < getdate(entry.posting_date):
+					frappe.throw(_("Row {0}: Clearance date cannot be before posting date.").format(row.idx))
+				if entry.get("cheque_date") and getdate(row.clearance_date) < getdate(entry.cheque_date):
+					frappe.throw(_("Row {0}: Clearance date cannot be before cheque date.").format(row.idx))
+			else:
+				row.clearance_date = None
+
+			entries_to_update.append(row)
 
 		if not entries_to_update:
 			msgprint(_("Clearance Date not mentioned"))
