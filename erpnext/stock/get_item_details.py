@@ -506,12 +506,18 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
+<<<<<<< HEAD
 	if item.variant_of and not item.taxes and frappe.db.exists("Item Tax", {"parent": item.variant_of}):
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
+=======
+	item_defaults = get_item_defaults(item.name, ctx.company)
+	item_group_defaults = get_item_group_defaults(item.name, ctx.company)
+	brand_defaults = get_brand_defaults(item.name, ctx.company)
+>>>>>>> 4fe26ab (fix(stock): stop inheriting template item taxes at runtime for variants)
 
 	defaults = frappe._dict(
 		{
