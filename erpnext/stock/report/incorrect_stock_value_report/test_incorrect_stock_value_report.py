@@ -116,3 +116,16 @@ class TestIncorrectStockValueReport(ERPNextTestSuite):
 		rows = self.run_report(account=account, from_date=add_days(today(), -4))
 
 		self.assertEqual([(row.name, row.difference_value) for row in rows], [(sle, 500)])
+
+	def test_rows_of_warehouses_under_another_account_are_left_out(self):
+		from unittest.mock import patch
+
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		sle = self.issue(item, warehouse, 2, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value", 1300)
+
+		module = "erpnext.stock.report.incorrect_stock_value_report.incorrect_stock_value_report"
+		with patch(f"{module}.get_account_warehouses", return_value=["_Test Warehouse - TCP1"]):
+			rows = self.run_report(account=account, from_date=add_days(today(), -4))
+
+		self.assertNotIn(sle, [row.name for row in rows])

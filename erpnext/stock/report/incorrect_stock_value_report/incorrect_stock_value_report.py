@@ -5,11 +5,12 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Min, Sum
-from frappe.utils import add_days, flt, getdate, today
+from frappe.query_builder.functions import Count, Min, Sum
+from frappe.utils import add_days, cint, flt, getdate, today
 
 import erpnext
 from erpnext.accounts.utils import get_stock_and_account_balance
+from erpnext.stock import get_warehouse_account_map
 
 
 def execute(filters=None):
@@ -52,7 +53,11 @@ def get_data(report_filters):
 	if not from_date:
 		return []
 
-	entries = get_entries_from(from_date, report_filters.company)
+	warehouses = get_account_warehouses(report_filters.company, report_filters.account)
+	if warehouses == []:
+		return []
+
+	entries = get_entries_from(from_date, report_filters.company, warehouses)
 	running_values = get_stock_values_before(from_date, report_filters.company, entries)
 
 	result = []
@@ -69,9 +74,30 @@ def get_data(report_filters):
 	return result
 
 
-def get_entries_from(from_date, company):
+def get_account_warehouses(company, account):
+	stock_account = frappe.qb.DocType("Account")
+	no_of_stock_accounts = (
+		frappe.qb.from_(stock_account)
+		.select(Count(stock_account.name))
+		.where(
+			(stock_account.account_type == "Stock")
+			& (stock_account.company == company)
+			& (stock_account.is_group == 0)
+		)
+	).run()[0][0]
+	if cint(no_of_stock_accounts) <= 1:
+		return None
+
+	return [
+		warehouse
+		for warehouse, details in get_warehouse_account_map(company).items()
+		if details.account == account and not details.is_group
+	]
+
+
+def get_entries_from(from_date, company, warehouses=None):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	return (
+	query = (
 		frappe.qb.from_(sle)
 		.select(
 			sle.name,
@@ -86,7 +112,11 @@ def get_entries_from(from_date, company):
 		)
 		.where((sle.posting_date >= from_date) & (sle.company == company) & (sle.is_cancelled == 0))
 		.orderby(sle.posting_datetime, sle.creation)
-	).run(as_dict=True)
+	)
+	if warehouses:
+		query = query.where(sle.warehouse.isin(warehouses))
+
+	return query.run(as_dict=True)
 
 
 def get_stock_values_before(from_date, company, entries):
@@ -102,6 +132,7 @@ def get_stock_values_before(from_date, company, entries):
 			& (sle.company == company)
 			& (sle.is_cancelled == 0)
 			& (sle.item_code.isin({row.item_code for row in entries}))
+			& (sle.warehouse.isin({row.warehouse for row in entries}))
 		)
 		.groupby(sle.item_code, sle.warehouse)
 	).run()
