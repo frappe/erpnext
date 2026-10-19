@@ -172,7 +172,25 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		template_row, *variant_rows = data[template_index:]
 		self.assertEqual(template_row["indent"], 0)
 		self.assertEqual(template_row["current_stock"], 10)
+		self.assertEqual(template_row["stock_uom"], frappe.db.get_value("Item", template, "stock_uom"))
 		self.assertEqual(template_row["open_orders"], 1)
 		self.assertEqual({row["variant_name"] for row in variant_rows}, set(variants))
 		for row in variant_rows:
 			self.assertEqual((row["indent"], row["template"], row["open_orders"]), (1, template, 1))
+
+	def test_template_stock_left_blank_when_variant_uoms_differ(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			"_Test Variant Colour Item", {"has_variants": 1, "attributes": [{"attribute": "Test Colour"}]}
+		)
+		with self.change_settings("Item Variant Settings", {"allow_different_uom": 1}):
+			create_variant(template.name, {"Test Colour": "Red"}).insert()
+			green = create_variant(template.name, {"Test Colour": "Green"})
+			green.stock_uom = "_Test UOM 1"
+			green.insert()
+
+		template_row, *variant_rows = self.run_report(item=[template.name])
+
+		self.assertFalse({"stock_uom", "current_stock", "in_production"} & set(template_row))
+		self.assertEqual({row["stock_uom"] for row in variant_rows}, {template.stock_uom, "_Test UOM 1"})
