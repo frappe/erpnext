@@ -6,8 +6,11 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import Criterion
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder import Criterion, Order
+from frappe.query_builder.functions import Count, IfNull, Max
+from frappe.utils import formatdate
+
+ORDER_DOCTYPES = {"Customer": "Sales Order", "Supplier": "Purchase Order"}
 
 
 class PartySpecificItem(Document):
@@ -95,4 +98,173 @@ def get_item_group_subtree_query(item_groups):
 		.on((group.lft >= parent.lft) & (group.rgt <= parent.rgt))
 		.select(group.name)
 		.where(parent.name.isin(item_groups))
+	)
+
+
+@frappe.whitelist()
+def get_frequently_ordered_items(party_type: str, party: str):
+	order_doctype = validate_party(party_type, party)
+	frappe.has_permission(order_doctype, throw=True)
+
+	history = get_order_history(party_type, party, limit=5)
+	items = {
+		item.name: item
+		for item in frappe.get_list(
+			"Item",
+			filters={"name": ("in", [row.item_code for row in history] or [""])},
+			fields=["name", "item_name", "disabled"],
+		)
+	}
+	return [{**row, **items[row.item_code]} for row in history if row.item_code in items]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def party_item_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	party_type, party = filters.get("party_type"), filters.get("party")
+	validate_party(party_type, party)
+
+	or_filters = (
+		[["Item", "name", "like", f"%{txt}%"], ["Item", "item_name", "like", f"%{txt}%"]] if txt else None
+	)
+	items = get_items_ranked_by_orders(
+		party_type,
+		party,
+		filters=[["Item", "disabled", "=", 0]],
+		or_filters=or_filters,
+		fields=["name", "item_name"],
+		start=start,
+		page_length=page_len,
+	)
+	return [(item.name, item.item_name, get_order_hint(party_type, item)) for item in items]
+
+
+@frappe.whitelist()
+def get_party_specific_items(party_type: str, party: str):
+	validate_party(party_type, party)
+	group_type = f"{party_type} Group"
+	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
+
+	rules = frappe.get_list(
+		"Party Specific Item",
+		filters={"party_type": ("in", [party_type, group_type])},
+		or_filters=[["party", "=", party], ["party", "=", party_group or ""]],
+		fields=["name", "party_type", "party", "restrict_based_on", "based_on_value"],
+	)
+	rules = [
+		rule for rule in rules if rule.party == (party if rule.party_type == party_type else party_group)
+	]
+
+	item_names = dict(
+		frappe.get_all(
+			"Item",
+			filters={
+				"name": ("in", [r.based_on_value for r in rules if r.restrict_based_on == "Item"] or [""])
+			},
+			fields=["name", "item_name"],
+			as_list=True,
+		)
+	)
+	for rule in rules:
+		if rule.restrict_based_on == "Item":
+			rule.item_name = item_names.get(rule.based_on_value)
+			rule.item_count = 1
+		else:
+			rule.item_count = count_rule_items(rule)
+
+	rules.sort(
+		key=lambda rule: (
+			rule.restrict_based_on == "Item",
+			rule.party_type != party_type,
+			(rule.item_name or rule.based_on_value).lower(),
+		)
+	)
+	return rules
+
+
+def validate_party(party_type, party):
+	if party_type not in ORDER_DOCTYPES or not party:
+		frappe.throw(_("A customer or supplier is required"), title=_("Missing Party"))
+	frappe.has_permission(party_type, doc=party, throw=True)
+	return ORDER_DOCTYPES[party_type]
+
+
+def get_items_ranked_by_orders(party_type, party, filters, or_filters, fields, start, page_length):
+	history = {}
+	if frappe.has_permission(ORDER_DOCTYPES[party_type], "read"):
+		history = {row.item_code: row for row in get_order_history(party_type, party)}
+
+	rank = {item_code: idx for idx, item_code in enumerate(history)}
+	ordered = frappe.get_list(
+		"Item",
+		filters=[*filters, ["Item", "name", "in", list(history) or [""]]],
+		or_filters=or_filters,
+		fields=fields,
+	)
+	ordered.sort(key=lambda item: rank[item.name])
+	page = ordered[start : start + page_length]
+
+	if len(page) < page_length:
+		not_ordered = [*filters, ["Item", "name", "not in", list(history)]] if history else filters
+		page += frappe.get_list(
+			"Item",
+			filters=not_ordered,
+			or_filters=or_filters,
+			fields=fields,
+			order_by="`tabItem`.item_name asc",
+			start=max(start - len(ordered), 0),
+			limit=page_length - len(page),
+		)
+
+	for item in page:
+		row = history.get(item.name)
+		item.order_count = row.order_count if row else 0
+		item.last_ordered = row.last_ordered if row else None
+	return page
+
+
+def get_order_history(party_type, party, limit=None):
+	order_doctype = ORDER_DOCTYPES[party_type]
+	order = frappe.qb.DocType(order_doctype)
+	order_item = frappe.qb.DocType(f"{order_doctype} Item")
+	order_count = Count(order.name).distinct()
+	last_ordered = Max(order.transaction_date)
+	query = (
+		frappe.qb.from_(order_item)
+		.join(order)
+		.on(order.name == order_item.parent)
+		.select(order_item.item_code, order_count.as_("order_count"), last_ordered.as_("last_ordered"))
+		.where((order[frappe.scrub(party_type)] == party) & (order.docstatus == 1))
+		.groupby(order_item.item_code)
+		.orderby(order_count, order=Order.desc)
+		.orderby(last_ordered, order=Order.desc)
+		.orderby(order_item.item_code)
+	)
+	if limit:
+		query = query.limit(limit)
+	return query.run(as_dict=True)
+
+
+def get_order_hint(party_type, item):
+	if party_type == "Supplier":
+		if not item.order_count:
+			return _("Not bought from this supplier yet")
+		if item.order_count == 1:
+			return _("Bought once, on {0}").format(formatdate(item.last_ordered))
+		return _("Bought {0} times, last on {1}").format(item.order_count, formatdate(item.last_ordered))
+
+	if not item.order_count:
+		return _("Not ordered by this customer yet")
+	if item.order_count == 1:
+		return _("Ordered once, on {0}").format(formatdate(item.last_ordered))
+	return _("Ordered {0} times, last on {1}").format(item.order_count, formatdate(item.last_ordered))
+
+
+def count_rule_items(rule):
+	item = frappe.qb.DocType("Item")
+	return (
+		frappe.qb.from_(item)
+		.select(Count(item.name))
+		.where(get_rules_condition([rule]) & (item.disabled == 0))
+		.run()[0][0]
 	)
