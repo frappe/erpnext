@@ -37,14 +37,15 @@ def get_production_plan_item_details(filters, data, order_details):
 				"production_item": row.item_code,
 				"docstatus": 1,
 			},
+			order_by="creation",
 			pluck="name",
 		)
 
-		order_qty = row.planned_qty
+		order_qty = flt(row.planned_qty)
 		total_produced_qty = 0.0
 		# default to the full planned qty so a plan without any work order still
 		# reports everything as pending rather than a misleading zero
-		pending_qty = flt(order_qty)
+		pending_qty = order_qty
 		for work_order in work_orders:
 			details = order_details.get((work_order, row.item_code), {})
 			produced_qty = flt(details.get("produced_qty", 0))
@@ -67,7 +68,7 @@ def get_production_plan_item_details(filters, data, order_details):
 				}
 			)
 
-			order_qty = pending_qty
+			order_qty = get_pending_qty(order_qty, produced_qty, 0)
 
 		data.append(
 			{
@@ -104,28 +105,26 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 					pluck="name",
 				)
 
+			remaining_qty = flt(item.qty)
 			for docname in docnames:
 				details = order_details.get((docname, item.production_item), {})
-				data_to_append = {
-					"indent": 1 + item.indent,
-					"item_code": item.production_item,
-					"item_name": item.item_name,
-					"qty": item.qty,
-					"document_type": "Work Order" if not subcontracted_item else "Purchase Order",
-					"document_name": docname or "",
-					"bom_level": item.bom_level,
-					"produced_qty": flt(details.get("produced_qty", 0)),
-					"pending_qty": get_pending_qty(
-						item.qty, details.get("produced_qty"), details.get("process_loss_qty")
-					),
-				}
-				if data[-1] and data[-1]["item_code"] == item.production_item:
-					data_to_append["pending_qty"] = get_pending_qty(
-						data[-1]["pending_qty"],
-						data_to_append["produced_qty"],
-						details.get("process_loss_qty"),
-					)
-				data.append(data_to_append)
+				produced_qty = flt(details.get("produced_qty", 0))
+				data.append(
+					{
+						"indent": 1 + item.indent,
+						"item_code": item.production_item,
+						"item_name": item.item_name,
+						"qty": item.qty,
+						"document_type": "Work Order" if not subcontracted_item else "Purchase Order",
+						"document_name": docname or "",
+						"bom_level": item.bom_level,
+						"produced_qty": produced_qty,
+						"pending_qty": get_pending_qty(
+							remaining_qty, produced_qty, details.get("process_loss_qty")
+						),
+					}
+				)
+				remaining_qty = get_pending_qty(remaining_qty, produced_qty, 0)
 
 
 def get_pending_qty(qty, produced_qty, process_loss_qty):

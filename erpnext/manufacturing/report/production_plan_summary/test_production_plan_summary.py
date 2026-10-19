@@ -133,6 +133,32 @@ class TestProductionPlanSummary(ERPNextTestSuite):
 		self.assertEqual(self.get_work_order_row(data, "_Test FG Item").get("pending_qty"), 0)
 		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 0)
 
+	def test_replacement_work_order_for_lost_qty_is_not_negative(self):
+		plan = self.make_plan(planned_qty=2)
+		first = self.make_submitted_work_order(plan, qty=2)
+		self.stock_required_materials(first)
+		se = frappe.get_doc(make_se_from_wo(first.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.qty = 1
+		se.submit()
+
+		second = self.make_submitted_work_order(plan, qty=1)
+		self.stock_required_materials(second)
+		frappe.get_doc(make_se_from_wo(second.name, "Manufacture", 1)).submit()
+
+		data = self.run_report(plan.name)
+
+		self.assertEqual(
+			[
+				row.get("pending_qty")
+				for row in data
+				if row.get("item_code") == "_Test FG Item" and row.get("document_type") == "Work Order"
+			],
+			[0, 0],
+		)
+		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 0)
+
 	def test_pending_qty_is_rounded_to_the_qty_precision(self):
 		from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
 			get_pending_qty,
