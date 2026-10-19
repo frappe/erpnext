@@ -60,7 +60,10 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 		},
 	),
 	("Batch Item Expiry Status", {}),
-	("Incorrect Stock Value Report", {"company": "_Test Company with perpetual inventory"}),
+	(
+		"Incorrect Stock Value Report",
+		{"company": "_Test Company with perpetual inventory", "account": "Stock In Hand - TCP1"},
+	),
 	("Incorrect Serial No Valuation", {}),
 	("Incorrect Balance Qty After Transaction", {}),
 	("Item Wise Consumption", {}),
