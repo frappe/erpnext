@@ -287,8 +287,13 @@ class DeliveryNote(SellingController):
 				if not d.against_sales_order:
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
+	def before_insert(self):
+		if self.amended_from:
+			self.delivery_trip = None
+
 	def validate(self):
 		self.validate_posting_time()
+		self.set_internal_return_target_warehouse()
 		super().validate()
 		self.validate_references()
 		self.set_status()
@@ -311,6 +316,34 @@ class DeliveryNote(SellingController):
 
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
+	def set_internal_return_target_warehouse(self):
+		"""An internal return brings material back from the warehouse the delivery put it in."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not (self.is_return and self.return_against and self.is_internal_customer and original_rows):
+			return
+
+		target_warehouses = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows)},
+				fields=["name", "target_warehouse"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			expected = target_warehouses.get(row.dn_detail)
+			if not expected:
+				continue
+
+			if not row.target_warehouse:
+				row.target_warehouse = expected
+			elif row.target_warehouse != expected:
+				frappe.throw(
+					_("Row #{0}: Target Warehouse must be {1}, as on Delivery Note {2}").format(
+						row.idx, frappe.bold(expected), frappe.bold(self.return_against)
+					)
+				)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -637,6 +670,7 @@ class DeliveryNote(SellingController):
 		if res:
 			for r in res:
 				ps = frappe.get_doc("Packing Slip", r[0])
+				ps.flags.cancelled_by_delivery_note = True
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
@@ -664,9 +698,15 @@ class DeliveryNote(SellingController):
 		self.load_from_db()
 
 	def make_return_invoice(self):
+		creditable_qty = get_creditable_qty(self)
+		if not any(creditable_qty.values()):
+			frappe.msgprint(_("No Credit Note was created because the returned items were not invoiced"))
+			return
+
 		try:
 			return_invoice = make_sales_invoice(self.name)
 			return_invoice.is_return = True
+			limit_to_creditable_qty(return_invoice, creditable_qty)
 			return_invoice.save()
 			return_invoice.submit()
 
@@ -696,6 +736,152 @@ class DeliveryNote(SellingController):
 			filters={"new_item_code": ["in", items_list], "disabled": 0},
 			pluck="name",
 		)
+
+
+def get_creditable_qty(return_doc) -> dict:
+	original_rows = get_original_rows(return_doc)
+	if not original_rows:
+		return {}
+
+	available = get_billed_stock_qty({row.name for row in original_rows})
+	apply_earlier_credits(available, original_rows, return_doc)
+
+	creditable_qty = {}
+	rows = [d for d in return_doc.items if d.dn_detail] + [d for d in return_doc.items if not d.dn_detail]
+	for row in rows:
+		sources = (
+			[row.dn_detail]
+			if row.dn_detail
+			else [d.name for d in original_rows if d.item_code == row.item_code]
+		)
+		factor = flt(row.conversion_factor) or 1
+		needed = abs(flt(row.stock_qty) or flt(row.qty) * factor)
+		creditable_qty[row.name] = flt(take_credit(available, sources, needed) / factor, 6)
+
+	return creditable_qty
+
+
+def get_original_rows(return_doc) -> list:
+	linked = {d.dn_detail for d in return_doc.items if d.dn_detail}
+	item_codes = {d.item_code for d in return_doc.items}
+	rows = {}
+	fields = ["name", "item_code", "idx"]
+	if linked:
+		for row in frappe.get_all(
+			"Delivery Note Item", filters={"name": ("in", list(linked))}, fields=fields
+		):
+			rows[row.name] = row
+
+	if return_doc.return_against:
+		for row in frappe.get_all(
+			"Delivery Note Item",
+			filters={"parent": return_doc.return_against, "item_code": ("in", list(item_codes))},
+			fields=fields,
+		):
+			rows[row.name] = row
+
+	return sorted(rows.values(), key=lambda row: row.idx)
+
+
+def take_credit(available: dict, sources: list, needed: float) -> float:
+	taken = 0.0
+	for source in sources:
+		take = min(needed - taken, max(flt(available.get(source)), 0))
+		available[source] = flt(available.get(source)) - take
+		taken += take
+
+	return taken
+
+
+def apply_earlier_credits(available: dict, original_rows: list, return_doc) -> None:
+	earlier_credits = get_earlier_credits(original_rows, return_doc)
+	for earlier in earlier_credits:
+		if earlier.dn_detail in available:
+			take_credit(available, [earlier.dn_detail], earlier.stock_qty)
+
+	for earlier in earlier_credits:
+		if not earlier.dn_detail:
+			sources = [d.name for d in original_rows if d.item_code == earlier.item_code]
+			take_credit(available, sources, earlier.stock_qty)
+
+
+def get_billed_stock_qty(original_rows: set) -> dict:
+	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	invoiced = {
+		row.dn_detail: row
+		for row in (
+			frappe.qb.from_(sii)
+			.join(si)
+			.on(si.name == sii.parent)
+			.select(sii.dn_detail, Sum(sii.stock_qty).as_("stock_qty"), Sum(sii.amount).as_("amount"))
+			.where(
+				sii.dn_detail.isin(list(original_rows))
+				& (sii.docstatus == 1)
+				& ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
+			)
+			.groupby(sii.dn_detail)
+		).run(as_dict=True)
+	}
+
+	billed_qty = {}
+	for row in frappe.get_all(
+		"Delivery Note Item",
+		filters={"name": ("in", list(original_rows))},
+		fields=["name", "billed_amt", "rate", "qty", "conversion_factor"],
+	):
+		factor = flt(row.conversion_factor) or 1
+		billed_qty[row.name] = get_row_billed_qty(row, invoiced.get(row.name)) * factor
+
+	return billed_qty
+
+
+def get_row_billed_qty(row, invoiced) -> float:
+	direct_qty = flt(invoiced.stock_qty) / (flt(row.conversion_factor) or 1) if invoiced else 0.0
+	if not flt(row.rate):
+		return direct_qty if invoiced else flt(row.qty)
+
+	direct_amount = flt(invoiced.amount) if invoiced else 0.0
+	order_billed_amount = max(flt(row.billed_amt) - direct_amount, 0.0)
+	return direct_qty + flt(order_billed_amount / flt(row.rate), 6)
+
+
+def get_earlier_credits(original_rows: list, return_doc) -> list:
+	dn = frappe.qb.DocType("Delivery Note")
+	dni = frappe.qb.DocType("Delivery Note Item")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	condition = dni.dn_detail.isin([row.name for row in original_rows])
+	if return_doc.return_against:
+		condition |= dn.return_against == return_doc.return_against
+
+	return (
+		frappe.qb.from_(sii)
+		.join(dni)
+		.on(dni.name == sii.dn_detail)
+		.join(dn)
+		.on(dn.name == dni.parent)
+		.select(dni.dn_detail, dni.item_code, Abs(Sum(sii.stock_qty)).as_("stock_qty"))
+		.where(
+			condition
+			& (dn.docstatus == 1)
+			& (dn.is_return == 1)
+			& (dn.name != return_doc.name)
+			& (sii.docstatus == 1)
+			& (sii.qty < 0)
+		)
+		.groupby(dni.name, dni.dn_detail, dni.item_code)
+	).run(as_dict=True)
+
+
+def limit_to_creditable_qty(return_invoice, creditable_qty: dict) -> None:
+	rows = []
+	for row in return_invoice.items:
+		qty = flt(creditable_qty.get(row.dn_detail))
+		if qty:
+			row.qty = -min(abs(flt(row.qty)), qty)
+			rows.append(row)
+
+	return_invoice.set("items", rows)
 
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
@@ -854,6 +1040,8 @@ def make_sales_invoice(
 		args = json.loads(args)
 
 	doc = frappe.get_doc("Delivery Note", source_name)
+	if doc.status == "Closed":
+		frappe.throw(_("Delivery Note {0} is closed and cannot be invoiced").format(frappe.bold(doc.name)))
 
 	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)
@@ -911,7 +1099,7 @@ def make_sales_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.si_detail
 
 	doc = get_mapped_doc(
 		"Delivery Note",
@@ -984,7 +1172,12 @@ def make_sales_invoice(
 
 
 @frappe.whitelist()
-def make_delivery_trip(source_name, target_doc=None, kwargs=None):
+def make_delivery_trip(
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
+):
+	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
+
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 
@@ -1097,8 +1290,12 @@ def make_packing_slip(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_shipment(source_name, target_doc=None):
+def make_shipment(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, target):
+		target.append(
+			"shipment_delivery_note", {"delivery_note": source.name, "grand_total": source.base_grand_total}
+		)
+
 		user = frappe.db.get_value(
 			"User", frappe.session.user, ["email", "full_name", "phone", "mobile_no"], as_dict=1
 		)
@@ -1158,16 +1355,7 @@ def make_shipment(source_name, target_doc=None):
 					"contact_person": "delivery_contact_name",
 					"contact_email": "delivery_contact_email",
 				},
-				"validation": {"docstatus": ["=", 1]},
-			},
-			"Delivery Note Item": {
-				"doctype": "Shipment Delivery Note",
-				"field_map": {
-					"name": "prevdoc_detail_docname",
-					"parent": "prevdoc_docname",
-					"parenttype": "prevdoc_doctype",
-					"base_amount": "grand_total",
-				},
+				"validation": {"docstatus": ["=", 1], "is_return": ["=", 0]},
 			},
 		},
 		target_doc,
@@ -1185,9 +1373,12 @@ def make_sales_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def update_delivery_note_status(docname, status):
+def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.check_permission("submit")
+	if dn.docstatus != 1:
+		frappe.throw(_("Only a submitted Delivery Note can be closed or reopened"))
+
 	dn.update_status(status)
 
 
@@ -1334,8 +1525,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 	def update_item(source, target, source_parent):
-		if source_parent.doctype == "Delivery Note" and source.received_qty:
-			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
+		if source_parent.doctype == "Delivery Note":
+			target.qty = get_pending_receipt_qty(source)
 
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
@@ -1343,32 +1534,61 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
 			target.set("use_serial_batch_fields", 1)
 
-	doclist = get_mapped_doc(
-		doctype,
-		source_name,
-		{
-			doctype: {
-				"doctype": target_doctype,
-				"postprocess": update_details,
-				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
-			},
-			doctype + " Item": {
-				"doctype": target_doctype + " Item",
-				"field_map": {
-					source_document_warehouse_field: target_document_warehouse_field,
-					"name": "delivery_note_item",
-					"purchase_order": "purchase_order",
-					"purchase_order_item": "purchase_order_item",
-					"material_request": "material_request",
-					"Material_request_item": "material_request_item",
-				},
-				"field_no_map": ["warehouse"],
-				"condition": lambda item: item.received_qty < item.qty + item.returned_qty,
-				"postprocess": update_item,
-			},
+	bundle_rows = {d.parent_detail_docname: d for d in source_doc.get("packed_items") or []}
+	bundle_rows = {d.name: d for d in source_doc.items if d.name in bundle_rows}
+	table_maps = {
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 		},
-		target_doc,
-		set_missing_values,
-	)
+		doctype + " Item": {
+			"doctype": target_doctype + " Item",
+			"field_map": {
+				source_document_warehouse_field: target_document_warehouse_field,
+				"name": "delivery_note_item",
+				"purchase_order": "purchase_order",
+				"purchase_order_item": "purchase_order_item",
+				"material_request": "material_request",
+				"Material_request_item": "material_request_item",
+			},
+			"field_no_map": ["warehouse"],
+			"condition": lambda item: get_pending_receipt_qty(item) > 0 and item.name not in bundle_rows,
+			"postprocess": update_item,
+		},
+	}
+	if doctype == "Delivery Note" and bundle_rows:
+		table_maps["Packed Item"] = get_component_receipt_map(bundle_rows)
 
-	return doclist
+	return get_mapped_doc(doctype, source_name, table_maps, target_doc, set_missing_values)
+
+
+def get_pending_receipt_qty(item) -> float:
+	returned_qty = flt(item.get("returned_qty")) / (flt(item.get("conversion_factor")) or 1)
+	return flt(item.qty) - returned_qty - flt(item.get("received_qty"))
+
+
+def get_component_receipt_map(bundle_rows: dict) -> dict:
+	def update_component(source, target, source_parent):
+		target.qty = get_pending_component_qty(source, bundle_rows[source.parent_detail_docname])
+		target.rate = flt(source.incoming_rate)
+		if source.get("use_serial_batch_fields") or source.get("serial_no") or source.get("batch_no"):
+			target.set("use_serial_batch_fields", 1)
+
+	return {
+		"doctype": "Purchase Receipt Item",
+		"field_map": {"target_warehouse": "from_warehouse", "name": "delivery_note_packed_item"},
+		"field_no_map": ["warehouse"],
+		"condition": lambda packed: packed.parent_detail_docname in bundle_rows
+		and get_pending_component_qty(packed, bundle_rows[packed.parent_detail_docname]) > 0,
+		"postprocess": update_component,
+	}
+
+
+def get_pending_component_qty(packed_item, bundle_row) -> float:
+	bundle_qty = flt(bundle_row.stock_qty or bundle_row.qty)
+	if not bundle_qty:
+		return 0.0
+
+	kept_share = 1 - flt(bundle_row.returned_qty) / bundle_qty
+	return flt(packed_item.qty) * kept_share - flt(packed_item.get("received_qty"))
