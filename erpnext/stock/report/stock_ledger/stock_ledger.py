@@ -57,9 +57,10 @@ def execute(filters=None):
 	data = []
 	conversion_factors = []
 	opening_rows = opening_row if isinstance(opening_row, list) else ([opening_row] if opening_row else [])
+	opening_conversion_factor = get_opening_conversion_factor(filters, item_details) if include_uom else 0
 	for row in opening_rows:
 		data.append(row)
-		conversion_factors.append(0)
+		conversion_factors.append(opening_conversion_factor)
 
 	actual_qty = stock_value = 0
 	if opening_rows:
@@ -137,6 +138,14 @@ def execute(filters=None):
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
+
+
+def get_opening_conversion_factor(filters, item_details):
+	item_codes = filters.get("item_code") or []
+	if len(item_codes) != 1 or item_codes[0] not in item_details:
+		return 0
+
+	return item_details[item_codes[0]].get("conversion_factor") or 0
 
 
 def set_opening_row_for_inv_dimension(
