@@ -632,7 +632,10 @@ def update_subcontracted_qty(work_order: str):
 
 	doc = frappe.get_doc("Work Order", work_order)
 	for row in doc.required_items:
-		qty = subcontracted.get((row.operation_row_id, row.item_code), 0.0)
+		# rows of the same operation and item share what was subcontracted, each up to its own qty
+		key = (row.operation_row_id, row.item_code)
+		qty = min(subcontracted.get(key, 0.0), flt(row.required_qty))
+		subcontracted[key] = subcontracted.get(key, 0.0) - qty
 		if flt(row.subcontracted_qty) != qty:
 			row.db_set("subcontracted_qty", qty)
 	doc.update_reserved_qty_for_production()

@@ -19,11 +19,7 @@ def execute():
 		.on(work_order.name == job_card.work_order)
 		.select(work_order.name)
 		.distinct()
-		.where(
-			(order.docstatus == 1)
-			& (work_order.docstatus == 1)
-			& work_order.status.notin(["Completed", "Closed"])
-		)
+		.where((order.docstatus == 1) & (work_order.docstatus == 1))
 	).run(pluck=True)
 
 	for name in work_orders:
