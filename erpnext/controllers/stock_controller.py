@@ -283,7 +283,7 @@ class StockController(AccountsController):
 			parent_details = self.get_parent_details_for_packed_items()
 
 		auto_pick_outward = self.auto_picks_outward_serial_batch()
-		picked_serial_nos = self.get_serial_nos_in_fields(table_name) if auto_pick_outward else None
+		picked_serial_nos = self.get_serial_nos_used_in_rows() if auto_pick_outward else None
 
 		for row in self.get(table_name):
 			item_code = row.get("rm_item_code") or row.get("item_code")
@@ -338,15 +338,26 @@ class StockController(AccountsController):
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
 
-	def get_serial_nos_in_fields(self, table_name):
+	def get_serial_nos_used_in_rows(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		picked_serial_nos = defaultdict(list)
-		for row in self.get(table_name):
-			if row.get("serial_no"):
-				picked_serial_nos[row.get("rm_item_code") or row.item_code].extend(
-					get_serial_nos(row.serial_no)
-				)
+		bundle_items = {}
+		for table_name in ("items", "packed_items"):
+			for row in self.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.item_code
+				if row.get("serial_no"):
+					picked_serial_nos[item_code].extend(get_serial_nos(row.serial_no))
+				elif row.get("serial_and_batch_bundle"):
+					bundle_items[row.serial_and_batch_bundle] = item_code
+
+		if bundle_items:
+			for entry in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": ("in", list(bundle_items)), "serial_no": ("is", "set")},
+				fields=["parent", "serial_no"],
+			):
+				picked_serial_nos[bundle_items[entry.parent]].append(entry.serial_no)
 
 		return picked_serial_nos
 
