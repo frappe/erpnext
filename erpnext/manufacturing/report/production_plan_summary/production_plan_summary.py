@@ -46,8 +46,9 @@ def get_production_plan_item_details(filters, data, order_details):
 		# reports everything as pending rather than a misleading zero
 		pending_qty = flt(order_qty)
 		for work_order in work_orders:
-			produced_qty = flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0))
-			pending_qty = flt(order_qty) - produced_qty
+			details = order_details.get((work_order, row.item_code), {})
+			produced_qty = flt(details.get("produced_qty", 0))
+			pending_qty = get_pending_qty(order_qty, produced_qty, details.get("process_loss_qty"))
 
 			total_produced_qty += produced_qty
 
@@ -104,6 +105,7 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 				)
 
 			for docname in docnames:
+				details = order_details.get((docname, item.production_item), {})
 				data_to_append = {
 					"indent": 1 + item.indent,
 					"item_code": item.production_item,
@@ -112,22 +114,38 @@ def get_production_plan_sub_assembly_item_details(filters, row, production_plan_
 					"document_type": "Work Order" if not subcontracted_item else "Purchase Order",
 					"document_name": docname or "",
 					"bom_level": item.bom_level,
-					"produced_qty": order_details.get((docname, item.production_item), {}).get(
-						"produced_qty", 0
+					"produced_qty": flt(details.get("produced_qty", 0)),
+					"pending_qty": get_pending_qty(
+						item.qty, details.get("produced_qty"), details.get("process_loss_qty")
 					),
-					"pending_qty": flt(item.qty)
-					- flt(order_details.get((docname, item.production_item), {}).get("produced_qty", 0)),
 				}
 				if data[-1] and data[-1]["item_code"] == item.production_item:
-					data_to_append["pending_qty"] = data[-1]["pending_qty"] - data_to_append["produced_qty"]
+					data_to_append["pending_qty"] = get_pending_qty(
+						data[-1]["pending_qty"],
+						data_to_append["produced_qty"],
+						details.get("process_loss_qty"),
+					)
 				data.append(data_to_append)
+
+
+def get_pending_qty(qty, produced_qty, process_loss_qty):
+	return flt(
+		flt(qty) - flt(produced_qty) - flt(process_loss_qty), frappe.get_precision("Work Order", "qty")
+	)
 
 
 def get_work_order_details(filters, order_details):
 	for row in frappe.get_all(
 		"Work Order",
 		filters={"production_plan": filters.get("production_plan"), "docstatus": 1},
-		fields=["name", "produced_qty", "production_plan", "production_item", "sales_order"],
+		fields=[
+			"name",
+			"produced_qty",
+			"process_loss_qty",
+			"production_plan",
+			"production_item",
+			"sales_order",
+		],
 	):
 		order_details.setdefault((row.name, row.production_item), row)
 
