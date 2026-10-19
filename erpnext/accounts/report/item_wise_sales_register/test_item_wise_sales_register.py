@@ -231,6 +231,24 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertEqual((row["delivery_doctype"], row["delivery_note"]), ("Sales Invoice", si.name))
 
+	def test_update_stock_invoice_for_partly_delivered_order(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		so = make_sales_order(item_code=self.item, qty=2)
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 1
+		dn.submit()
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.items[0].qty = 1
+		si.submit()
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual((row["delivery_doctype"], row["delivery_note"]), ("Sales Invoice", si.name))
+
 	def get_amount_fieldnames(self, **filters):
 		filters = frappe._dict(from_date=today(), to_date=today(), company=self.company, **filters)
 		columns = execute(filters)[0]

@@ -509,11 +509,10 @@ def get_delivery_document(item: dict, so_dn_map: dict) -> tuple[str, str | None]
 	if item.delivery_note:
 		return "Delivery Note", item.delivery_note
 
-	delivery_notes = ", ".join(so_dn_map.get(item.so_detail, []))
-	if not delivery_notes and item.update_stock:
+	if item.update_stock:
 		return "Sales Invoice", item.parent
 
-	return "Delivery Note", delivery_notes or None
+	return "Delivery Note", ", ".join(so_dn_map.get(item.so_detail, [])) or None
 
 
 def get_delivery_notes_against_sales_order(item_list):
