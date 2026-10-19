@@ -179,8 +179,13 @@ def _get_total(doclist, amount_field="base_grand_total"):
 	if not doclist:
 		return 0
 
+	# a document fans out into one row per item/source, so total each one only once
+	seen = set()
 	total = 0
 	for doc in doclist:
+		if doc.get("name") in seen:
+			continue
+		seen.add(doc.get("name"))
 		total += doc.get(amount_field, 0)
 
 	return total
