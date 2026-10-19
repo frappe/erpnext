@@ -127,7 +127,7 @@ def get_materials_by_work_order(work_orders):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
+def get_work_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	wo = frappe.qb.DocType("Work Order")
 	query = (
 		get_work_order_query(["name"])
