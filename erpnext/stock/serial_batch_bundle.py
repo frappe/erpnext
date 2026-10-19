@@ -1489,9 +1489,17 @@ class SerialBatchCreation:
 					"item": self.get("item_code"),
 					"reference_doctype": self.get("voucher_type"),
 					"reference_name": self.get("voucher_no"),
+					"manufacturing_date": self.get_posting_date_for_new_batch(),
 				}
 			)
 		)
+
+	def get_posting_date_for_new_batch(self):
+		if self.get("posting_date"):
+			return getdate(self.posting_date)
+
+		if self.get("posting_datetime"):
+			return getdate(self.posting_datetime)
 
 	def get_auto_created_serial_nos(self):
 		sr_nos = []
