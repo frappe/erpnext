@@ -174,14 +174,17 @@ class SerialBatchBundleService:
 				BatchExpiredError,
 			)
 
-	def validate_outward_bundle_batches(self, check_expiry=True):
+	def validate_outward_bundle_batches(self, check_expiry=True, rows=None, qty_field="qty"):
 		if self.doc.get("is_return") or not self.doc.get("posting_date") or self.doc.docstatus == 2:
 			return
 
+		if rows is None:
+			rows = (self.doc.get("items") or []) + (self.doc.get("packed_items") or [])
+
 		row_idx_by_bundle = {
 			d.serial_and_batch_bundle: d.idx
-			for d in (self.doc.get("items") or []) + (self.doc.get("packed_items") or [])
-			if d.get("serial_and_batch_bundle") and flt(d.get("qty")) > 0
+			for d in rows
+			if d.get("serial_and_batch_bundle") and flt(d.get(qty_field)) > 0
 		}
 		if not row_idx_by_bundle:
 			return

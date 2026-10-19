@@ -204,6 +204,8 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 	def on_submit(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
 		self.validate_closed_subcontracting_order()
 		self.validate_bom_required_qty()
 		self.update_status_updater_args()
@@ -214,6 +216,9 @@ class SubcontractingReceipt(SubcontractingController):
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
+		SerialBatchBundleService(self).validate_outward_bundle_batches(
+			check_expiry=False, rows=self.get("supplied_items"), qty_field="consumed_qty"
+		)
 		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.make_gl_entries()
