@@ -323,7 +323,8 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 
 		lead.reload()
 		self.assertEqual(flt(lead.total_hold_time, 2), 3000)
-		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
+		# the hold was before working hours
+		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2020, 3, 4, 16, 0))
 
 	def test_failed_sla_for_response_only(self):
 		doctype = "Lead"
