@@ -5,16 +5,11 @@ frappe.query_reports["Item Variant Details"] = {
 	filters: [
 		{
 			reqd: 1,
-			default: "",
 			options: "Item",
-			label: __("Item"),
+			label: __("Items"),
 			fieldname: "item",
-			fieldtype: "Link",
-			get_query: () => {
-				return {
-					filters: { has_variants: 1 },
-				};
-			},
+			fieldtype: "MultiSelectList",
+			get_data: (txt) => erpnext.utils.get_link_options("Item", txt, { has_variants: 1 }),
 		},
 		{
 			fieldname: "warehouse",
@@ -24,4 +19,6 @@ frappe.query_reports["Item Variant Details"] = {
 			get_data: (txt) => erpnext.utils.get_link_options("Warehouse", txt),
 		},
 	],
+	tree: true,
+	parent_field: "template",
 };
