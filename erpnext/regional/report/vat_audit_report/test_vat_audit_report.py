@@ -138,6 +138,14 @@ class TestVATAuditReport(FrappeTestCase):
 		self.assertEqual((rows[0]["net_amount"], rows[0]["tax_amount"]), (500.99, 75.15))
 
 	def test_reverse_charge_shows_input_and_output_vat(self):
+		pi = self.make_reverse_charge_purchase()
+		self.assertEqual(self.get_figures(pi), [(1000, -150, 850), (1000, 150, 1150)])
+
+	def test_reverse_charge_return_stays_negative(self):
+		debit_note = self.make_reverse_charge_purchase(is_return=1)
+		self.assertEqual(self.get_figures(debit_note), [(-1000, -150, -1150), (-1000, 150, -850)])
+
+	def make_reverse_charge_purchase(self, is_return: int = 0):
 		output_vat_account = create_account(
 			account_name="VAT Reverse Charge",
 			account_type="Tax",
@@ -149,7 +157,7 @@ class TestVATAuditReport(FrappeTestCase):
 			settings.append("vat_accounts", {"account": output_vat_account})
 			settings.save()
 
-		pi = make_sa_purchase_invoice(1000)
+		pi = make_sa_purchase_invoice(1000, qty=-1 if is_return else 1, is_return=is_return)
 		for account, add_deduct_tax in (("VAT - 15% - _TCSV", "Add"), (output_vat_account, "Deduct")):
 			pi.append(
 				"taxes",
@@ -164,11 +172,12 @@ class TestVATAuditReport(FrappeTestCase):
 				},
 			)
 		pi.submit()
+		return pi
 
+	def get_figures(self, invoice):
 		filters = {"company": self.company, "from_date": today(), "to_date": today()}
-		rows = [row for row in execute(filters)[1] if row.get("voucher_no") == pi.name]
-		figures = sorted((row["net_amount"], row["tax_amount"], row["gross_amount"]) for row in rows)
-		self.assertEqual(figures, [(1000, -150, 850), (1000, 150, 1150)])
+		rows = [row for row in execute(filters)[1] if row.get("voucher_no") == invoice.name]
+		return sorted((row["net_amount"], row["tax_amount"], row["gross_amount"]) for row in rows)
 
 
 def make_company(company_name, abbr):
@@ -300,7 +309,7 @@ def make_sales_invoices():
 	make_sales_invoices_wrapper(test_zero_rated_item, 100.0, "VAT - 0% - _TCSV", 0.0)
 
 
-def make_sa_purchase_invoice(rate):
+def make_sa_purchase_invoice(rate, qty=1, is_return=0):
 	return make_purchase_invoice(
 		company="_Test Company SA VAT",
 		supplier="_Test SA Supplier",
@@ -310,8 +319,9 @@ def make_sa_purchase_invoice(rate):
 		cost_center="Main - _TCSV",
 		expense_account="Cost of Goods Sold - _TCSV",
 		item="_Test SA VAT Item",
-		qty=1,
+		qty=qty,
 		rate=rate,
+		is_return=is_return,
 		uom="Nos",
 		do_not_save=1,
 	)
