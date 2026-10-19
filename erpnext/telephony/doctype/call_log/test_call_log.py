@@ -284,6 +284,7 @@ class TestCallLog(ERPNextTestSuite):
 		contacts = [
 			self._make_contact(f"+91 {number[:5]} {number[5:]}"),
 			self._make_contact(f"0{number[:3]}-{number[3:6]}-{number[6:]}"),
+			self._make_contact(f"(+91 {number}) "),
 		]
 		# shares the last 8 digits only
 		other_contact = self._make_contact(f"+91 93{number[2:]}")
@@ -308,7 +309,7 @@ class TestCallLog(ERPNextTestSuite):
 		agent = make_employee(
 			"test_call_agent_a@example.com",
 			company="_Test Company",
-			cell_number=f"+91 {self.number[:5]} {self.number[5:]}",
+			cell_number=f"(+91 {self.number[:5]} {self.number[5:]}) ",
 		)
 		make_employee(
 			"test_call_agent_b@example.com", company="_Test Company", cell_number=f"1{self.number}5"
