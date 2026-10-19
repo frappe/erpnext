@@ -1371,6 +1371,8 @@ class SerialBatchCreation:
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
 
+		kwargs.update(self.get_reservation_kwargs())
+
 		if (
 			self.has_serial_no
 			and self.has_batch_no
@@ -1388,6 +1390,17 @@ class SerialBatchCreation:
 				kwargs["posting_datetime"] = self.get("posting_datetime")
 
 			self.batches = get_available_batches(kwargs)
+
+	def get_reservation_kwargs(self):
+		if self.get("voucher_type") not in ("Delivery Note", "Sales Invoice", "POS Invoice"):
+			return {}
+
+		return {
+			"pick_reserved_items": True,
+			"sabb_voucher_type": self.voucher_type,
+			"sabb_voucher_no": self.get("voucher_no"),
+			"sabb_voucher_detail_no": self.get("voucher_detail_no"),
+		}
 
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
