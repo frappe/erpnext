@@ -69,7 +69,9 @@ def get_data_with_qty_to_make(filters):
 		)
 
 	min_producible = (
-		min(int(r["_available_qty"] // r["_qty_per_unit"]) for r in data if r["_qty_per_unit"]) if data else 0
+		min(get_producible_qty(r["_available_qty"], r["_qty_per_unit"]) for r in data if r["_qty_per_unit"])
+		if data
+		else 0
 	)
 
 	for row in data:
@@ -322,7 +324,11 @@ def get_producible_fg_items(filters):
 		row.qty_per_unit = flt(row.qty_per_unit)
 		row.available_qty = flt(row.actual_qty)
 		row.producible_qty = (
-			math.floor(flt(row.available_qty / row.qty_per_unit, 9)) if row.qty_per_unit > 0 else None
+			get_producible_qty(row.available_qty, row.qty_per_unit) if row.qty_per_unit > 0 else None
 		)
 
 	return rows
+
+
+def get_producible_qty(available_qty, qty_per_unit):
+	return math.floor(flt(flt(available_qty) / flt(qty_per_unit), 6))
