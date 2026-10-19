@@ -550,3 +550,4 @@ execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report"
 erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
 erpnext.patches.v16_0.set_default_mins_between_operations
 erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
