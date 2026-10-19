@@ -67,7 +67,6 @@ class VATAuditReport:
 				"name as voucher_no",
 				"posting_date",
 				"remarks",
-				"is_return",
 				f"{party_field} as party",
 				f"{account_field} as account",
 			],
@@ -89,17 +88,14 @@ class VATAuditReport:
 		return filters
 
 	def get_invoice_items(self, doctype):
-		self.invoice_items = frappe._dict()
 		item_doctype = frappe.qb.DocType(doctype + " Item")
-		self.invoice_items = frappe._dict(
+		items = (
 			frappe.qb.from_(item_doctype)
-			.select(
-				item_doctype.name,
-				item_doctype.is_zero_rated,
-			)
+			.select(item_doctype.name, item_doctype.is_zero_rated, item_doctype.base_net_amount)
 			.where(item_doctype.parent.isin(list(self.invoices.keys())))
-			.run(as_list=1)
+			.run(as_dict=True)
 		)
+		self.invoice_items = frappe._dict({item.name: item for item in items})
 
 	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
@@ -125,7 +121,7 @@ class VATAuditReport:
 		actual_tax_rates = get_actual_tax_rates(tax_details)
 
 		for row in tax_details:
-			is_zero_rated = self.invoice_items.get(row.item_row)
+			is_zero_rated = self.invoice_items.get(row.item_row, {}).get("is_zero_rated")
 			if row.charge_type == "Actual":
 				row.rate = actual_tax_rates.get(row.tax_row, 0)
 			if row.rate == 0 and not is_zero_rated:
@@ -150,8 +146,9 @@ class VATAuditReport:
 		totals["gross_amount"] += row.amount + net_amount
 
 	def get_deducted_net_amount(self, row: dict) -> float:
-		"""Deduct rows store the taxable amount negated, or as is in data migrated from the old JSON field."""
-		sign = -1 if self.invoices[row.parent].is_return else 1
+		"""Deduct rows store the taxable amount negated, or as is when migrated, so use the item line's sign."""
+		item_net_amount = flt(self.invoice_items.get(row.item_row, {}).get("base_net_amount"))
+		sign = -1 if item_net_amount < 0 else 1
 		return abs(flt(row.taxable_amount)) * sign
 
 	def get_data(self, doctype):
