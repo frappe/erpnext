@@ -1427,7 +1427,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		update_subcontracting_order_status(sco.name, "Closed")
 
-		reserved_qty, delivered_qty = frappe.get_value(
+		reserved_qty, delivered_qty, status = frappe.get_value(
 			"Stock Reservation Entry",
 			{
 				"voucher_type": "Production Plan",
@@ -1435,9 +1435,10 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 				"item_code": rm_item["item_code"],
 				"docstatus": 1,
 			},
-			["reserved_qty", "delivered_qty"],
+			["reserved_qty", "delivered_qty", "status"],
 		)
 		self.assertEqual(delivered_qty, 4)
+		self.assertEqual(status, "Partially Delivered")
 		self.assertEqual(get_bin(rm_item["item_code"], rm_item["warehouse"]).reserved_stock, reserved_qty - 4)
 
 	def test_service_cost_is_converted_to_company_currency(self):
