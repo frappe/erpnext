@@ -3593,6 +3593,54 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -2)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_linked_return_row_keeps_its_credit_before_unlinked_rows(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500, do_not_submit=True)
+		delivery_note.append("items", delivery_note.items[0].as_dict().copy().update({"name": None}))
+		delivery_note.submit()
+		make_sales_invoice(delivery_note.name).submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"qty": -5, "dn_detail": None})
+		sales_return.items[1].update({"qty": -5, "dn_detail": delivery_note.items[0].name})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+
+		credited_qty = sum(
+			frappe.get_all(
+				"Sales Invoice Item",
+				filters={"dn_detail": ("in", [d.name for d in sales_return.items]), "docstatus": 1},
+				pluck="qty",
+			)
+		)
+		self.assertEqual(credited_qty, -10)
+
+	def test_unlinked_returns_are_not_credited_twice(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.items[0].qty = 2
+		invoice.submit()
+
+		credited = []
+		for _i in range(2):
+			sales_return = make_sales_return(delivery_note.name)
+			sales_return.items[0].update({"qty": -2, "dn_detail": None})
+			sales_return.issue_credit_note = 1
+			sales_return.submit()
+			credited.append(
+				frappe.db.get_value(
+					"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+				)
+			)
+
+		self.assertEqual(credited, [-2, None])
+
 	def test_credit_note_after_a_reduced_rate_invoice(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
