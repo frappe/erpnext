@@ -1279,7 +1279,7 @@ def _get_stock_uom_rate(rate: float, ctx: ItemDetailsCtx):
 
 
 def get_item_price(
-	pctx: ItemPriceCtx | dict, item_code, ignore_party=False, force_batch_no=False
+	pctx: ItemPriceCtx | dict, item_code, ignore_party=False, force_batch_no=False, limit=1
 ) -> list[dict]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
@@ -1290,10 +1290,12 @@ def get_item_price(
 	"""
 	pctx: ItemPriceCtx = frappe._dict(pctx)
 	query, ip = _get_item_price_query(pctx, [item_code], ignore_party, force_batch_no)
-	query = query.select(ip.name, ip.price_list_rate, ip.uom)
+	query = query.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit)
 	query = _order_item_prices(query, ip, pctx)
+	if limit:
+		query = query.limit(limit)
 
-	return query.limit(1).run(as_dict=True)
+	return query.run(as_dict=True)
 
 
 def get_item_prices_for_stock_uom(pctx: ItemPriceCtx | dict, item_codes: list[str]) -> dict[str, ItemDetails]:
@@ -1373,17 +1375,16 @@ def _get_item_price_query(
 
 
 def _order_item_prices(query, ip, pctx):
-	query = (
-		query.orderby(ip.valid_from, order=Order.desc)
-		.orderby(IfNull(ip.batch_no, ""), order=Order.desc)
-		.orderby(ip.uom, order=Order.desc)
-	)
 	if pctx.customer:
 		query = query.orderby(IfNull(ip.customer, ""), order=Order.desc)
 	elif pctx.supplier:
 		query = query.orderby(IfNull(ip.supplier, ""), order=Order.desc)
 
-	return query
+	return (
+		query.orderby(IfNull(ip.batch_no, ""), order=Order.desc)
+		.orderby(ip.valid_from, order=Order.desc)
+		.orderby(ip.uom, order=Order.desc)
+	)
 
 
 @frappe.whitelist()
@@ -1431,11 +1432,10 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code):
 	)
 
 	item_price_data = 0
-	price_list_rate = get_item_price(pctx, item_code)
+	price_list_rate = get_item_price(pctx, item_code, limit=None)
 	if price_list_rate:
-		desired_qty = ctx.get("qty")
-		if desired_qty and check_packing_list(price_list_rate[0].name, desired_qty, item_code):
-			item_price_data = price_list_rate
+		if desired_qty := ctx.get("qty"):
+			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
 	else:
 		general_price_list_rate = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
 
@@ -1453,6 +1453,14 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code):
 			return flt(item_price_data[0].price_list_rate * flt(ctx.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0].price_list_rate
+
+
+def get_prices_fitting_packing_unit(item_prices, desired_qty):
+	for item_price in item_prices:
+		if not item_price.packing_unit or flt(desired_qty) % flt(item_price.packing_unit) == 0:
+			return [item_price]
+
+	return []
 
 
 def check_packing_list(price_list_rate_name, desired_qty, item_code):
