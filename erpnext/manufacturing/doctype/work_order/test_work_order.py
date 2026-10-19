@@ -4666,6 +4666,11 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacturing_entry = frappe.get_doc(stitching_jc.make_stock_entry_for_semi_fg_item())
 		manufacturing_entry.submit()
 
+		# Producing the Stitched Shirt does not consume it.
+		wo.reload()
+		stitched_row = next(row for row in wo.required_items if row.item_code == stitched)
+		self.assertEqual(stitched_row.consumed_qty, 0)
+
 		sre_name = frappe.db.get_value(
 			"Stock Reservation Entry",
 			{"voucher_no": wo.name, "item_code": stitched, "warehouse": warehouse, "docstatus": 1},
