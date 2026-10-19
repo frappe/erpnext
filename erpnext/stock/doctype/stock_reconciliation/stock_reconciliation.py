@@ -3,11 +3,13 @@
 
 
 from collections import defaultdict
+from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
+from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -1390,7 +1392,14 @@ class StockReconciliation(StockController):
 
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+def get_items(
+	warehouse: str,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject,
+	company: str,
+	item_code: str | None = None,
+	ignore_empty_stock: bool | str | int = False,
+):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 	frappe.has_permission("Item", "read", throw=True)
 	frappe.has_permission("Warehouse", "read", doc=warehouse, throw=True)
@@ -1590,13 +1599,13 @@ def get_row_stock_value_difference(voucher_type: str, voucher_no: str, voucher_d
 def get_stock_balance_for(
 	item_code: str,
 	warehouse: str,
-	posting_date,
-	posting_time,
+	posting_date: DateTimeLikeObject,
+	posting_time: DateTimeLikeObject | timedelta,
 	batch_no: str | None = None,
 	with_valuation_rate: bool = True,
-	inventory_dimensions_dict=None,
-	row=None,
-	company=None,
+	inventory_dimensions_dict: dict | None = None,
+	row: str | dict | None = None,
+	company: str | None = None,
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
