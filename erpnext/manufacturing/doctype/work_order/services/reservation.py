@@ -687,7 +687,7 @@ def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code)
 		(stock_entry.work_order == work_order)
 		& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 		& (stock_entry.docstatus == 1)
-		& (stock_entry_detail.s_warehouse.isnotnull())
+		& (IfNull(stock_entry_detail.s_warehouse, "") != "")
 		# An attributed row belongs to its original requirement, not both item codes.
 		& (fn.Coalesce(stock_entry_detail.original_item, stock_entry_detail.item_code) == item_code)
 	)
