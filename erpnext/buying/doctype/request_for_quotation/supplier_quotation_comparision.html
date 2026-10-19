@@ -11,8 +11,8 @@
 		background: transparent;
 	}
 	.quotations-table thead th {
-		background-color: #F3F3F3;
-		color: #171717;
+		background-color: var(--subtle-fg);
+		color: var(--heading-color);
 		border-color: var(--border-color);
 		border-top: none;
 		font-weight: 600;
@@ -33,7 +33,7 @@
 	.quotations-table th a,
 	.quotations-table td a.supplier-link,
 	.quotations-table td a.quotation-link {
-		color: #171717;
+		color: var(--heading-color);
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
@@ -198,7 +198,7 @@
 						{% } %}
 						{% if (items && items.length) { %}
 							<tr style="background-color: var(--card-bg, #ffffff);">
-								<td colspan="2" class="text-center font-weight-bold" style="vertical-align: middle; padding: 12px 16px; font-weight: 600; font-size: 13px; color: #171717;">
+								<td colspan="2" class="text-center font-weight-bold" style="vertical-align: middle; padding: 12px 16px; font-weight: 600; font-size: 13px; color: var(--heading-color);">
 									{{ __("Total Price") }}
 								</td>
 								{% for (let o = 0; o < offers.length; o++) {
