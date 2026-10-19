@@ -572,17 +572,19 @@ def process_sla(doc, sla):
 	doc.service_level_agreement = sla.name
 	doc.priority = doc.get("priority") or sla.default_priority
 
-	handle_status_change(doc, sla.apply_sla_for_resolution)
+	handle_status_change(
+		doc, sla.apply_sla_for_resolution, get_hold_statuses(sla.name), get_fulfillment_statuses(sla.name)
+	)
 	update_response_and_resolution_metrics(doc, sla.apply_sla_for_resolution)
 	update_agreement_status(doc, sla.apply_sla_for_resolution)
 
 
-def handle_status_change(doc, apply_sla_for_resolution):
+def handle_status_change(
+	doc, apply_sla_for_resolution, hold_statuses: list | tuple, fulfillment_statuses: list | tuple
+):
+	"""Records hold and resolution metrics on a status change; the first response only with an SLA."""
 	now_time = frappe.flags.current_time or frappe.utils.now_datetime()
 	prev_status = frappe.db.get_value(doc.doctype, doc.name, "status")
-
-	hold_statuses = get_hold_statuses(doc.service_level_agreement)
-	fulfillment_statuses = get_fulfillment_statuses(doc.service_level_agreement)
 
 	def is_hold_status(status):
 		return status in hold_statuses
@@ -594,6 +596,9 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		return status not in hold_statuses and status not in fulfillment_statuses
 
 	def set_first_response():
+		# the first response time is counted in the SLA's working hours
+		if not doc.get("service_level_agreement"):
+			return
 		if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
 			doc.first_responded_on = now_time
 			if doc.meta.has_field("first_response_time"):
@@ -878,7 +883,12 @@ def on_communication_update(doc, status):
 		"Service Level Agreement", parent.service_level_agreement, "apply_sla_for_resolution"
 	)
 
-	handle_status_change(parent, for_resolution)
+	handle_status_change(
+		parent,
+		for_resolution,
+		get_hold_statuses(parent.service_level_agreement),
+		get_fulfillment_statuses(parent.service_level_agreement),
+	)
 	update_response_and_resolution_metrics(parent, for_resolution)
 	update_agreement_status(parent, for_resolution)
 
