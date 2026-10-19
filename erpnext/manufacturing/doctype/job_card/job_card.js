@@ -3,6 +3,8 @@
 
 frappe.ui.form.on("Job Card", {
 	setup(frm) {
+		$(frm.wrapper).on("dirty", () => frm.events.keep_one_primary_button(frm));
+
 		frm.set_query("operation", () => ({
 			query: "erpnext.manufacturing.doctype.job_card.job_card.get_operations",
 			filters: { work_order: frm.doc.work_order },
@@ -211,6 +213,7 @@ frappe.ui.form.on("Job Card", {
 		}
 
 		frm.events.hold_submit_until_job_is_done(frm, has_items);
+		frm.events.keep_one_primary_button(frm);
 
 		frm.trigger("setup_quality_inspection");
 
@@ -258,6 +261,14 @@ frappe.ui.form.on("Job Card", {
 				__("Create")
 			);
 		}
+	},
+
+	keep_one_primary_button(frm) {
+		const dashboard = $(frm.fields_dict["job_card_dashboard"].wrapper);
+		const has_primary = !!dashboard.find(".btn-primary").length;
+		frappe.ui.button
+			.dress(frm.page.btn_primary, { variant: has_primary ? "subtle" : "solid" })
+			.toggleClass("btn-primary", !has_primary);
 	},
 
 	hold_submit_until_job_is_done(frm, has_items) {
