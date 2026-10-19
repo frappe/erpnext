@@ -763,7 +763,7 @@ def get_creditable_qty(return_doc) -> dict:
 
 def get_original_rows(return_doc) -> list:
 	linked = {d.dn_detail for d in return_doc.items if d.dn_detail}
-	unlinked_items = {d.item_code for d in return_doc.items if not d.dn_detail}
+	item_codes = {d.item_code for d in return_doc.items}
 	rows = {}
 	fields = ["name", "item_code", "idx"]
 	if linked:
@@ -772,10 +772,10 @@ def get_original_rows(return_doc) -> list:
 		):
 			rows[row.name] = row
 
-	if unlinked_items and return_doc.return_against:
+	if return_doc.return_against:
 		for row in frappe.get_all(
 			"Delivery Note Item",
-			filters={"parent": return_doc.return_against, "item_code": ("in", list(unlinked_items))},
+			filters={"parent": return_doc.return_against, "item_code": ("in", list(item_codes))},
 			fields=fields,
 		):
 			rows[row.name] = row
@@ -794,13 +794,15 @@ def take_credit(available: dict, sources: list, needed: float) -> float:
 
 
 def apply_earlier_credits(available: dict, original_rows: list, return_doc) -> None:
-	for earlier in get_earlier_credits(original_rows, return_doc):
+	earlier_credits = get_earlier_credits(original_rows, return_doc)
+	for earlier in earlier_credits:
 		if earlier.dn_detail in available:
 			take_credit(available, [earlier.dn_detail], earlier.stock_qty)
-			continue
 
-		sources = [d.name for d in original_rows if d.item_code == earlier.item_code]
-		take_credit(available, sources, earlier.stock_qty)
+	for earlier in earlier_credits:
+		if not earlier.dn_detail:
+			sources = [d.name for d in original_rows if d.item_code == earlier.item_code]
+			take_credit(available, sources, earlier.stock_qty)
 
 
 def get_billed_stock_qty(original_rows: set) -> dict:
