@@ -321,6 +321,23 @@ class TestOpportunity(ERPNextTestSuite):
 			frappe.db.get_value("Opportunity", quoted.name, ["status", "lost_on"]), ("Open", None)
 		)
 
+	def test_lost_on_patch_ignores_a_lost_date_followed_by_a_reopening(self):
+		from erpnext.patches.v16_0.set_lost_on_in_opportunity import execute
+
+		# Lost from a quotation in January, reopened in February, declared lost directly in March
+		reopened = make_opportunity(with_items=0)
+		add_status_comment(reopened, "Lost", "2026-01-10 10:00:00")
+		add_status_comment(reopened, "Open", "2026-02-10 10:00:00")
+		set_lost_without_date(reopened, "2026-03-10 10:00:00")
+
+		lost_once = make_opportunity(with_items=0)
+		add_status_comment(lost_once, "Lost", "2026-01-10 10:00:00")
+		set_lost_without_date(lost_once, "2026-03-10 10:00:00")
+
+		execute()
+		self.assertEqual(frappe.db.get_value("Opportunity", reopened.name, "lost_on"), getdate("2026-03-10"))
+		self.assertEqual(frappe.db.get_value("Opportunity", lost_once.name, "lost_on"), getdate("2026-01-10"))
+
 	def test_form_hides_contacts_of_a_customer_the_user_cannot_read(self):
 		contact = frappe.get_doc(
 			{
@@ -512,6 +529,20 @@ def submit_quotation(opportunity, **args):
 	quotation.run_method("set_missing_values")
 	quotation.run_method("calculate_taxes_and_totals")
 	return quotation.submit()
+
+
+def add_status_comment(opportunity, status, creation):
+	comment = opportunity.add_comment("Label", status)
+	frappe.db.set_value("Comment", comment.name, "creation", creation, update_modified=False)
+
+
+def set_lost_without_date(opportunity, modified):
+	frappe.db.set_value(
+		"Opportunity",
+		opportunity.name,
+		{"status": "Lost", "lost_on": None, "modified": modified},
+		update_modified=False,
+	)
 
 
 def make_sales_user(email):
