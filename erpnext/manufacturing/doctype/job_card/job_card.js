@@ -108,13 +108,40 @@ frappe.ui.form.on("Job Card", {
 
 		if (!can_make_stock_entry) return;
 
-		frm.add_custom_button(__("Make Stock Entry"), () => {
-			frappe.confirm(
-				__("Do you want to submit the stock entry?"),
-				() => frm.events.make_manufacture_stock_entry(frm, 1),
-				() => frm.events.make_manufacture_stock_entry(frm, 0)
-			);
-		}).addClass("btn-primary");
+		frm.add_custom_button(__("Record Output"), () => frm.events.confirm_record_output(frm)).addClass(
+			"btn-primary"
+		);
+	},
+
+	confirm_record_output(frm) {
+		const { doc } = frm;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Record Output"),
+			fields: [
+				{
+					fieldtype: "HTML",
+					fieldname: "message",
+					options: `<p>${__(
+						"This makes a Stock Entry that puts {0} made in this Job Card into {1}.",
+						[
+							frappe.utils.escape_html(doc.finished_good),
+							frappe.utils.escape_html(doc.target_warehouse || __("the target warehouse")),
+						]
+					)}</p>`,
+				},
+			],
+			primary_action_label: __("Save and Submit"),
+			primary_action() {
+				dialog.hide();
+				frm.events.make_manufacture_stock_entry(frm, 1);
+			},
+			secondary_action_label: __("Save as Draft"),
+			secondary_action() {
+				dialog.hide();
+				frm.events.make_manufacture_stock_entry(frm, 0);
+			},
+		});
+		dialog.show();
 	},
 
 	make_manufacture_stock_entry(frm, submit_entry) {
@@ -183,6 +210,8 @@ frappe.ui.form.on("Job Card", {
 			frm.trigger("setup_stock_entry");
 		}
 
+		frm.events.hold_submit_until_job_is_done(frm, has_items);
+
 		frm.trigger("setup_quality_inspection");
 
 		if (doc.work_order) {
@@ -229,6 +258,144 @@ frappe.ui.form.on("Job Card", {
 				__("Create")
 			);
 		}
+	},
+
+	hold_submit_until_job_is_done(frm, has_items) {
+		if (frm.doc.docstatus !== 0 || frm.is_new() || frm.is_dirty()) return;
+
+		const steps = frm.events.get_job_steps(frm, has_items);
+		if (steps.slice(0, -1).some((step) => !step.done)) {
+			frm.page.clear_primary_action();
+			frm.dashboard.clear_headline();
+		}
+	},
+
+	get_job_steps(frm, has_items) {
+		const { doc } = frm;
+		const escape = frappe.utils.escape_html;
+		const needs_move = has_items && !doc.skip_material_transfer && !doc.is_corrective_job_card;
+		const steps = [];
+
+		if (needs_move) {
+			steps.push({
+				label: __("Move Materials"),
+				done: !doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty)),
+				hint: __("Move the raw materials to {0}. Click Move Materials.", [escape(doc.wip_warehouse)]),
+			});
+		}
+
+		const submit_hint = doc.finished_good
+			? __("Click Submit. Then click Record Output to put {0} into stock.", [escape(doc.finished_good)])
+			: __("Click Submit to finish this Job Card.");
+
+		steps.push(
+			{
+				label: __("Start Job"),
+				done: !!doc.time_logs?.length,
+				hint: __("Click Start Job when the work begins."),
+			},
+			{
+				label: __("Complete Job"),
+				done: frm.events.is_job_done(frm),
+				hint: __("Click Complete Job when the work is done and enter the quantity made."),
+			},
+			{ label: __("Submit"), done: false, hint: submit_hint }
+		);
+
+		return steps;
+	},
+
+	is_job_done(frm) {
+		const { doc } = frm;
+		const last_log = doc.time_logs?.[doc.time_logs.length - 1];
+		const qty_precision = precision("for_quantity", doc);
+		const accounted_qty = flt(doc.total_completed_qty) + flt(doc.process_loss_qty) + flt(doc.pending_qty);
+
+		return (
+			!!last_log?.to_time &&
+			flt(doc.for_quantity) > 0 &&
+			flt(accounted_qty, qty_precision) >= flt(doc.for_quantity, qty_precision)
+		);
+	},
+
+	get_job_steps_html(frm, has_items) {
+		const steps = frm.events.get_job_steps(frm, has_items);
+		const current = steps.find((step) => !step.done);
+
+		const pills = steps
+			.map((step, idx) => {
+				const color = step.done ? "green" : step === current ? "blue" : "gray";
+				const mark = step.done ? "✓" : `${idx + 1}.`;
+				return `<span class="indicator-pill no-indicator-dot ${color}" style="flex-shrink:0;">${mark} ${step.label}</span>`;
+			})
+			.join(`<span class="text-muted" style="flex-shrink:0;">›</span>`);
+
+		return `
+			<div style="display:flex;align-items:center;gap:6px;overflow-x:auto;margin-bottom:8px;">${pills}</div>
+			<div class="text-muted ellipsis" style="margin-bottom:12px;">${current ? current.hint : ""}</div>`;
+	},
+
+	move_materials(frm) {
+		frm.call({ method: "get_material_shortages", doc: frm.doc, freeze: true }).then(({ message }) => {
+			if (!message?.length) {
+				frm.trigger("make_stock_entry");
+				return;
+			}
+
+			frm.events.show_shortage_dialog(frm, message);
+		});
+	},
+
+	show_shortage_dialog(frm, shortages) {
+		const escape = frappe.utils.escape_html;
+		const qty_precision = precision("for_quantity", frm.doc);
+		const qty = (value, uom) => `${format_number(value, null, qty_precision)} ${escape(uom || "")}`;
+		const rows = shortages
+			.map(
+				(row) => `<tr>
+					<td class="ellipsis">${escape(row.item_code)}</td>
+					<td class="ellipsis">${escape(row.warehouse)}</td>
+					<td class="text-right">${qty(row.qty_to_move, row.uom)}</td>
+					<td class="text-right">${qty(row.available_qty, row.uom)}</td>
+					<td class="text-right text-danger">${qty(row.shortage_qty, row.uom)}</td>
+				</tr>`
+			)
+			.join("");
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Not Enough Stock"),
+			size: "large",
+			fields: [
+				{
+					fieldtype: "HTML",
+					fieldname: "shortages",
+					options: `<p>${__(
+						"These raw materials are short in their source warehouse, so the transfer cannot be submitted yet."
+					)}</p>
+						<table class="table table-bordered" style="table-layout:fixed;">
+							<thead><tr>
+								<th>${__("Item")}</th>
+								<th>${__("Source Warehouse")}</th>
+								<th class="text-right">${__("To Move")}</th>
+								<th class="text-right">${__("In Stock")}</th>
+								<th class="text-right">${__("Short")}</th>
+							</tr></thead>
+							<tbody>${rows}</tbody>
+						</table>`,
+				},
+			],
+			primary_action_label: __("Request Missing Materials"),
+			primary_action() {
+				dialog.hide();
+				frm.events.make_material_request(frm, true);
+			},
+			secondary_action_label: __("Continue to Transfer"),
+			secondary_action() {
+				dialog.hide();
+				frm.trigger("make_stock_entry");
+			},
+		});
+		dialog.show();
 	},
 
 	// Renders the dashboard widget (info + timer + action buttons) into job_card_dashboard wrapper.
@@ -667,7 +834,10 @@ frappe.ui.form.on("Job Card", {
 			check: { d: '<polyline points="20 6 9 17 4 12"/>', sw: 3 },
 		};
 
+		const show_move = has_remaining_qty && !materials_ready;
+
 		const buttons_html = [
+			show_move && btn("btn-primary jcd-btn-move", "truck", __("Move Materials")),
 			show_start && btn("btn-primary jcd-btn-start", "play", __("Start Job")),
 			show_resume && btn("btn-primary jcd-btn-resume", "play", __("Resume Job")),
 			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
@@ -681,6 +851,7 @@ frappe.ui.form.on("Job Card", {
 			<div class="job-card-dashboard-widget"
 				style="border:1px solid var(--border-color);border-radius:var(--border-radius-lg,8px);
 					background:var(--card-bg,#fff);padding:16px 20px;margin-bottom:16px;">
+				${frm.events.get_job_steps_html(frm, has_items)}
 				<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
 					<div>
 						<div style="font-size:10px;color:var(--text-muted);font-weight:600;
@@ -703,6 +874,10 @@ frappe.ui.form.on("Job Card", {
 			</div>`);
 
 		// ── Wire up button click handlers ─────────────────────────────────
+		if (show_move) {
+			wrapper.find(".jcd-btn-move").on("click", () => frm.events.move_materials(frm));
+		}
+
 		if (show_start) {
 			wrapper.find(".jcd-btn-start").on("click", () => {
 				const has_no_employee = !frm.doc.employee || !frm.doc.employee.length;
@@ -828,10 +1003,11 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
-	make_material_request(frm) {
+	make_material_request(frm, only_shortage = false) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.manufacturing.doctype.job_card.job_card.make_material_request",
 			frm: frm,
+			args: only_shortage === true ? { only_shortage: 1 } : null,
 			run_link_triggers: true,
 		});
 	},
