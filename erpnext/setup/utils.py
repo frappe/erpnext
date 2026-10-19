@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from math import isfinite
 from urllib.parse import quote
 
 import frappe
@@ -126,7 +127,7 @@ def get_exchange_rate(
 	try:
 		cache = frappe.cache()
 		key = f"currency_exchange_rate_{transaction_date}:{from_currency}:{to_currency}"
-		value = cache.get(key)
+		value = cache.get_value(key)
 
 		if not value:
 			if not is_system_user():
@@ -162,10 +163,17 @@ def get_exchange_rate(
 			value = response.json()
 			for res_key in settings.result_key:
 				value = value[format_ces_api(str(res_key.key), req_params)]
-			cache.setex(name=key, time=21600, value=flt(value))
+			if isinstance(value, bool):
+				raise ValueError("Invalid exchange rate")
+			value = float(value)
+			if not isfinite(value) or value <= 0:
+				raise ValueError("Exchange rate must be a positive finite number")
+			cache.set_value(key, value, expires_in_sec=21600)
 
 		# Support multiple pegged currencies
-		value = flt(value)
+		value = float(value)
+		if not isfinite(value) or value <= 0:
+			raise ValueError("Exchange rate must be a positive finite number")
 
 		if currency_settings.allow_pegged_currencies_exchange_rates and to_currency in pegged_currencies:
 			value *= flt(pegged_currencies[to_currency]["ratio"])

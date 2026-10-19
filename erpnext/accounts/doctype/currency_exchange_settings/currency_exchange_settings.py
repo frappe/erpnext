@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from math import isfinite
+
 import frappe
 import requests
 from frappe import _
@@ -40,6 +42,14 @@ class CurrencyExchangeSettings(Document):
 			return
 		response, value = self.validate_parameters()
 		self.validate_result(response, value)
+
+	def on_update(self):
+		def clear_rates():
+			frappe.cache.delete_keys("currency_exchange_rate_")
+
+		clear_rates()
+		# Concurrent lookups can cache old provider rates before this save commits.
+		frappe.db.after_commit.add(clear_rates)
 
 	def set_parameters_and_result(self):
 		if self.service_provider == "exchangerate.host":
@@ -107,8 +117,8 @@ class CurrencyExchangeSettings(Document):
 				]
 		except Exception:
 			frappe.throw(_("Invalid result key. Response:") + " " + response.text)
-		if not isinstance(value, int | float):
-			frappe.throw(_("Returned exchange rate is neither integer not float."))
+		if isinstance(value, bool) or not isinstance(value, int | float) or not isfinite(value) or value <= 0:
+			frappe.throw(_("Returned exchange rate must be a positive finite number."))
 
 		self.url = response.url
 
