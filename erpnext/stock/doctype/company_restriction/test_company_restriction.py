@@ -360,7 +360,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		with self.set_user(self.make_report_user()):
 			rows = self.run_report("stock", "item_variant_details", {"item": template.name})
-			self.assertEqual([row["variant_name"] for row in rows], [allowed.name])
+			self.assertEqual([row["variant_name"] for row in rows], [template.name, allowed.name])
 
 			rows = self.run_report("stock", "item_where_used", {"item": template.name})
 			self.assertEqual([row.related_item for row in rows], [allowed.name])
