@@ -143,7 +143,7 @@ class TestIssue(TestSetUp):
 		issue.save()
 
 		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
-		self.assertFalse(issue.sla_resolution_by)
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:00"))
 
 		creation = get_datetime("2020-03-04 5:00")
 		frappe.flags.current_time = get_datetime("2020-03-04 5:00")
@@ -151,7 +151,8 @@ class TestIssue(TestSetUp):
 
 		issue.reload()
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:45"))
+		# the hold was before working hours
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:00"))
 
 		creation = get_datetime("2020-03-04 5:05")
 		create_communication(issue.name, "test@admin.com", "Sent", creation)
@@ -185,7 +186,8 @@ class TestIssue(TestSetUp):
 		issue.status = "Closed"
 		issue.save()
 
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-22 06:00:00"))
+		# 5 working hours were left when it was put on hold
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-22 15:00:00"))
 		self.assertEqual(issue.sla_resolution_date, get_datetime("2021-11-22 01:00:00"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 
@@ -234,8 +236,8 @@ class TestIssue(TestSetUp):
 		issue.save()
 		# Hold Time + 6 Hrs
 		self.assertEqual(issue.total_hold_time, 3600 + 21600)
-		# Resolution By should increase by 6 hrs
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 02:00"))
+		# Resolution By should increase by 6 hrs; the 24-hour SLA's day ends at 23:59:59
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 02:00:01"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
@@ -526,7 +528,8 @@ class TestIssue(TestSetUp):
 				self.assertFalse(issue.sla_resolution_date)
 
 		self.assertEqual(issue.total_hold_time, 7200)
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
+		# the 5 hours left at 14:00 run past closing time and over the holiday on 2019-03-05
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-06 11:00"))
 
 	def test_resetting_sla_of_resolved_issue_recalculates_deadlines(self):
 		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
@@ -543,6 +546,34 @@ class TestIssue(TestSetUp):
 		reset_service_level_agreement("Issue", issue.name, "customer asked")
 		issue.reload()
 		self.assertGreater(get_datetime(issue.response_by), get_datetime(old_response_by))
+
+	def test_hold_moves_resolution_by_in_working_hours(self):
+		# Resolution By Wed 12:00: 4 hours on Mon 2019-03-04, Tue is a holiday, 2 hours on Wed
+		issue = make_issue(get_datetime("2019-03-04 14:00"), index=1)
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-06 12:00"))
+
+		# 3 working hours are left when it is put on hold Mon 17:00
+		for status, time, resolution_by in (
+			("Replied", "2019-03-04 17:00", "2019-03-06 12:00"),
+			("Open", "2019-03-06 11:00", "2019-03-06 14:00"),
+			("Open", "2019-03-06 11:30", "2019-03-06 14:00"),
+			# Thu 2019-03-07 is a holiday
+			("Replied", "2019-03-06 13:00", "2019-03-06 14:00"),
+			("Open", "2019-03-08 10:00", "2019-03-08 11:00"),
+		):
+			frappe.flags.current_time = get_datetime(time)
+			issue.reload()
+			issue.status = status
+			issue.save()
+			self.assertEqual(issue.sla_resolution_by, get_datetime(resolution_by), time)
+
+		# the hold time stays in calendar seconds: Mon 17:00 to Wed 11:00 and Wed 13:00 to Fri 10:00
+		self.assertEqual(issue.total_hold_time, 151200 + 162000)
+
+		# changing the priority keeps the working hours spent on hold
+		issue.priority = "High"
+		issue.save()
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-08 11:00"))
 
 
 class TestFirstResponseTime(TestSetUp):

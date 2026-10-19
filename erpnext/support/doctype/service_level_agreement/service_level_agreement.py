@@ -9,6 +9,7 @@ from frappe import _
 from frappe.core.utils import get_parent_doc
 from frappe.model.document import Document
 from frappe.utils import (
+	add_days,
 	add_to_date,
 	get_datetime,
 	get_datetime_str,
@@ -617,7 +618,6 @@ def handle_status_change(doc, apply_sla_for_resolution):
 	if is_open_status(prev_status) and is_hold_status(doc.status):
 		# Issue is on hold -> Set on_hold_since
 		doc.on_hold_since = now_time
-		reset_expected_response_and_resolution(doc)
 
 	# Replied to Open
 	if is_hold_status(prev_status) and is_open_status(doc.status):
@@ -646,7 +646,6 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		reset_resolution_metrics(doc)
 		# Issue is on hold -> Set on_hold_since
 		doc.on_hold_since = now_time
-		reset_expected_response_and_resolution(doc)
 
 	# Replied to Closed
 	if is_hold_status(prev_status) and is_fulfilled_status(doc.status):
@@ -680,17 +679,24 @@ def update_response_and_resolution_metrics(doc, apply_sla_for_resolution):
 	priority = get_response_and_resolution_duration(doc)
 	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
 	set_response_by(doc, start_date_time, priority)
-	if apply_sla_for_resolution and not doc.get("on_hold_since"):  # resolution_by is reset if on hold
+	if apply_sla_for_resolution:
 		set_resolution_by(doc, start_date_time, priority)
 
 
 def get_expected_time_for(parameter, service_level, start_date_time):
+	allotted_seconds = get_allotted_seconds(parameter, service_level)
+	return add_working_seconds(start_date_time, allotted_seconds, service_level)
+
+
+def add_working_seconds(start_date_time, allotted_seconds, service_level):
+	if allotted_seconds <= 0:
+		return start_date_time
+
 	current_date_time = start_date_time
 	expected_time = current_date_time
 	start_time = end_time = None
 	expected_time_is_set = 0
 
-	allotted_seconds = get_allotted_seconds(parameter, service_level)
 	support_days = get_support_days(service_level)
 	holidays = get_holidays(service_level.get("holiday_list"))
 	weekdays = get_weekdays()
@@ -732,6 +738,29 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		current_date_time = expected_time
 
 	return current_date_time
+
+
+def get_working_seconds_between(start_date_time, end_date_time, service_level) -> float:
+	support_days = get_support_days(service_level)
+	holidays = get_holidays(service_level.get("holiday_list"))
+	weekdays = get_weekdays()
+	working_seconds = 0
+	day = getdate(start_date_time)
+
+	while day <= getdate(end_date_time):
+		working_hours = support_days.get(weekdays[day.weekday()])
+		if working_hours and not is_holiday(day, holidays):
+			working_seconds += get_working_seconds_on(day, working_hours, start_date_time, end_date_time)
+		day = add_days(day, 1)
+
+	return working_seconds
+
+
+def get_working_seconds_on(day, working_hours, start_date_time, end_date_time) -> float:
+	midnight = datetime.combine(day, datetime.min.time())
+	opens_at = max(midnight + to_timedelta(working_hours.start_time), start_date_time)
+	closes_at = min(midnight + to_timedelta(working_hours.end_time), end_date_time)
+	return max(time_diff_in_seconds(closes_at, opens_at), 0)
 
 
 def get_allotted_seconds(parameter, service_level):
@@ -907,35 +936,87 @@ def on_communication_update(doc, status):
 	parent.save(ignore_permissions=True)
 
 
-def reset_expected_response_and_resolution(doc):
-	if doc.meta.has_field("first_responded_on") and not doc.get("first_responded_on"):
-		doc.response_by = None
-	if doc.meta.has_field("sla_resolution_by") and not doc.get("sla_resolution_date"):
-		doc.sla_resolution_by = None
-
-
 def set_response_by(doc, start_date_time, priority):
 	if doc.meta.has_field("response_by"):
-		doc.response_by = get_expected_time_for(
-			parameter="response", service_level=priority, start_date_time=start_date_time
-		)
-		if (
-			doc.meta.has_field("total_hold_time")
-			and doc.get("total_hold_time")
-			and not doc.get("first_responded_on")
-		):
-			doc.response_by = add_to_date(doc.response_by, seconds=round(doc.get("total_hold_time")))
+		deadline = SLADeadline(doc, "response", "response_by", priority, start_date_time)
+		doc.response_by = deadline.get(moves_on_resume=not doc.get("first_responded_on"))
 
 
 def set_resolution_by(doc, start_date_time, priority):
 	if doc.meta.has_field("sla_resolution_by"):
-		doc.sla_resolution_by = get_expected_time_for(
-			parameter="resolution", service_level=priority, start_date_time=start_date_time
+		deadline = SLADeadline(doc, "resolution", "sla_resolution_by", priority, start_date_time)
+		doc.sla_resolution_by = deadline.get()
+
+
+class SLADeadline:
+	"""A response or resolution deadline, moved by the working time the document spends on hold."""
+
+	def __init__(self, doc, parameter: str, fieldname: str, priority: dict, start_date_time: datetime):
+		self.doc = doc
+		self.previous_doc = doc.get_doc_before_save()
+		self.parameter = parameter
+		self.fieldname = fieldname
+		self.priority = priority
+		self.start_date_time = start_date_time
+
+	def get(self, moves_on_resume: bool = True) -> datetime:
+		hold_seconds = self.get_previous_hold_seconds()
+		if moves_on_resume:
+			hold_seconds += self.get_resumed_hold_seconds()
+		deadline = get_expected_time_for(self.parameter, self.priority, self.start_date_time)
+		return add_working_seconds(deadline, hold_seconds, self.priority)
+
+	def get_previous_hold_seconds(self) -> float:
+		"""Working time by which earlier holds moved the saved deadline."""
+		previous_deadline = self.get_previous_deadline()
+		if not previous_deadline or not self.previous_doc.get("total_hold_time"):
+			return 0
+
+		deadline_without_hold = self.get_previous_deadline_without_hold()
+		if not deadline_without_hold:
+			return 0
+		return get_working_seconds_between(deadline_without_hold, previous_deadline, self.priority)
+
+	def get_resumed_hold_seconds(self) -> float:
+		"""Working time of the hold that ends with this save, if it began before the deadline."""
+		on_hold_since = get_hold_start(self.previous_doc)
+		hold_start = get_hold_start(self.doc)
+		if not on_hold_since or (hold_start and hold_start <= on_hold_since):
+			return 0
+
+		previous_deadline = self.get_previous_deadline()
+		if previous_deadline and on_hold_since >= previous_deadline:
+			return 0
+		return get_working_seconds_between(on_hold_since, get_current_time(), self.priority)
+
+	def get_previous_deadline(self) -> datetime | None:
+		deadline = self.previous_doc and self.previous_doc.get(self.fieldname)
+		return get_datetime(deadline) if deadline else None
+
+	def get_previous_deadline_without_hold(self) -> datetime | None:
+		previous_doc = self.previous_doc
+		allotted_seconds = frappe.db.get_value(
+			"Service Level Priority",
+			{"parent": previous_doc.get("service_level_agreement"), "priority": previous_doc.get("priority")},
+			f"{self.parameter}_time",
 		)
-		if doc.meta.has_field("total_hold_time") and doc.get("total_hold_time"):
-			doc.sla_resolution_by = add_to_date(
-				doc.sla_resolution_by, seconds=round(doc.get("total_hold_time"))
-			)
+		if not allotted_seconds:
+			return None
+
+		start_date_time = get_datetime(
+			previous_doc.get("service_level_agreement_creation") or previous_doc.creation
+		)
+		return add_working_seconds(start_date_time, allotted_seconds, self.priority)
+
+
+def get_hold_start(doc) -> datetime | None:
+	"""A resolved document is on hold since its resolution, others since they were paused."""
+	hold_start = doc and (doc.get("sla_resolution_date") or doc.get("on_hold_since"))
+	return get_datetime(hold_start) if hold_start else None
+
+
+def get_current_time() -> datetime:
+	return frappe.flags.current_time or frappe.utils.now_datetime()
 
 
 def record_assigned_users_on_failure(doc):
