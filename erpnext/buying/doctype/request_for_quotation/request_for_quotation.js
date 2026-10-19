@@ -373,7 +373,6 @@ frappe.ui.form.on("Request for Quotation", {
 				quoted_as: "",
 				stock_uom: first.stock_uom || item.stock_uom,
 				conversion_factor: rfq_item_conv,
-				// weighted average, so it compares directly with single rate offers
 				converted_rate: total_qty > 0 ? total_base_amount / total_qty : 0,
 				converted_amount: total_base_amount,
 				rate_breakdown: rate_breakdown,
