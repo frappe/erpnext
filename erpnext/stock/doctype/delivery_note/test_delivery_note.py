@@ -3550,6 +3550,49 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertEqual(credited_qty, -2)
 
+	def test_credit_note_for_a_return_in_another_unit(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(item_code=item, qty=1, rate=1000, do_not_submit=True)
+		delivery_note.items[0].update({"uom": "Box", "conversion_factor": 10})
+		delivery_note.submit()
+		make_sales_invoice(delivery_note.name).submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"uom": "Nos", "conversion_factor": 1, "qty": -10, "rate": 100})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -10)
+
+	def test_credit_note_for_a_return_row_without_its_delivery_row(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+		make_sales_invoice(delivery_note.name).submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"qty": -2, "dn_detail": None})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -2)
+
 	def test_credit_note_after_a_reduced_rate_invoice(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
