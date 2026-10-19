@@ -561,7 +561,7 @@ class SubcontractingOrder(SubcontractingController):
 			self.cancel_stock_reservation_entries(sre_list, notify=False)
 
 	def release_unused_reserved_qty(self, sre_name: str) -> None:
-		"""Keep only the used qty reserved."""
+		"""Keep only the used qty reserved and give the rest back to the reservation it was taken from."""
 		sre = frappe.get_doc("Stock Reservation Entry", sre_name)
 		sre.db_set("reserved_qty", flt(sre.delivered_qty) + flt(sre.transferred_qty) + flt(sre.consumed_qty))
 
@@ -574,6 +574,7 @@ class SubcontractingOrder(SubcontractingController):
 
 		sre.update_status()
 		sre.update_reserved_qty_in_voucher()
+		sre.update_unreserved_qty_in_sre()
 		sre.update_reserved_stock_in_bin()
 
 	@frappe.whitelist()
