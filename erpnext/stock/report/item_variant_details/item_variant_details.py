@@ -21,88 +21,118 @@ from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
-	columns = get_columns(filters.item)
-	data = get_data(filters)
+	templates = get_selected_templates(filters)
+	columns = get_columns(templates)
+	data = get_data(templates, filters)
 	return columns, data
 
 
-def get_data(filters):
-	item = filters.item
-	if not item:
-		return []
-	item_dicts = []
+def get_selected_templates(filters):
+	templates = filters.get("item") or []
+	return [templates] if isinstance(templates, str) else templates
 
+<<<<<<< HEAD
 	variant_results = frappe.db.get_all(
 		"Item", fields=["name"], filters={"variant_of": ["=", item], "disabled": 0}
 	)
+=======
+
+def get_data(templates, filters):
+	if not templates:
+		return []
+
+	variant_filters = [{"variant_of": ["in", templates], "disabled": 0}]
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		variant_filters.append(condition)
+
+	variant_results = frappe.db.get_all("Item", fields=["name", "variant_of"], filters=variant_filters)
+>>>>>>> ea4ce4f (feat(item variant details): group variants under multiple templates)
 
 	if not variant_results:
 		frappe.msgprint(_("There aren't any item variants for the selected item"))
 		return []
-	else:
-		variant_list = [variant["name"] for variant in variant_results]
 
+	variant_list = [variant.name for variant in variant_results]
 	warehouses = get_selected_warehouses(filters)
-	order_count_map = get_open_sales_orders_count(variant_list, warehouses)
+	open_orders = get_open_sales_orders(variant_list, warehouses)
+	variant_rows = get_variant_rows(variant_results, warehouses, open_orders)
+
+	data = []
+	for template in templates:
+		rows = [row for row in variant_rows.values() if row["template"] == template]
+		if rows:
+			data.append(get_template_row(template, rows, open_orders))
+			data.extend(rows)
+
+	return data
+
+
+def get_variant_rows(variant_results, warehouses, open_orders):
+	"""Variant rows keyed by variant name, indented under their template."""
+	variant_list = [variant.name for variant in variant_results]
 	stock_details_map = get_stock_details_map(variant_list, warehouses)
 	buying_price_map = get_buying_price_map(variant_list)
 	selling_price_map = get_selling_price_map(variant_list)
 	currency = get_report_currency()
 	attr_val_map = get_attribute_values_map(variant_list)
 
-	attributes = frappe.db.get_all(
-		"Item Variant Attribute",
-		fields=["attribute"],
-		filters={"parent": ["in", variant_list]},
-		group_by="attribute",
-	)
-	attribute_list = [row.get("attribute") for row in attributes]
+	variant_rows = {}
+	for variant in variant_results:
+		stock_details = stock_details_map.get(variant.name, {})
+		variant_rows[variant.name] = {
+			"variant_name": variant.name,
+			"template": variant.variant_of,
+			"indent": 1,
+			**{
+				frappe.scrub(attribute): value
+				for attribute, value in attr_val_map.get(variant.name, {}).items()
+			},
+			"current_stock": stock_details.get("Inventory") or 0,
+			"in_production": stock_details.get("In Production") or 0,
+			"open_orders": len(open_orders.get(variant.name, ())),
+			"avg_buying_price_list_rate": buying_price_map.get(variant.name) or 0,
+			"avg_selling_price_list_rate": selling_price_map.get(variant.name) or 0,
+			"currency": currency,
+		}
 
-	# Prepare dicts
-	variant_dicts = [{"variant_name": d["name"]} for d in variant_results]
-	for item_dict in variant_dicts:
-		name = item_dict.get("variant_name")
-
-		for attribute in attribute_list:
-			attr_dict = attr_val_map.get(name)
-			if attr_dict and attr_dict.get(attribute):
-				item_dict[frappe.scrub(attribute)] = attr_val_map.get(name).get(attribute)
-
-		item_dict["open_orders"] = order_count_map.get(name) or 0
-
-		if stock_details_map.get(name):
-			item_dict["current_stock"] = stock_details_map.get(name)["Inventory"] or 0
-			item_dict["in_production"] = stock_details_map.get(name)["In Production"] or 0
-		else:
-			item_dict["current_stock"] = item_dict["in_production"] = 0
-
-		item_dict["avg_buying_price_list_rate"] = buying_price_map.get(name) or 0
-		item_dict["currency"] = currency
-		item_dict["avg_selling_price_list_rate"] = selling_price_map.get(name) or 0
-
-		item_dicts.append(item_dict)
-
-	return item_dicts
+	return variant_rows
 
 
-def get_columns(item):
+def get_template_row(template, rows, open_orders):
+	"""Template subtotal. Orders with several of its variants count once."""
+	orders = set().union(*(open_orders.get(row["variant_name"], ()) for row in rows))
+	return {
+		"variant_name": template,
+		"indent": 0,
+		"current_stock": sum(row["current_stock"] for row in rows),
+		"in_production": sum(row["in_production"] for row in rows),
+		"open_orders": len(orders),
+	}
+
+
+def get_columns(templates):
 	columns = [
 		{
 			"fieldname": "variant_name",
-			"label": _("Variant"),
+			"label": _("Item"),
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 200,
 		}
 	]
 
-	item_doc = frappe.get_doc("Item", item)
+	attributes = frappe.get_all(
+		"Item Variant Attribute",
+		filters={"parent": ["in", templates], "parenttype": "Item"},
+		pluck="attribute",
+		order_by="idx",
+	)
 
-	for entry in item_doc.attributes:
+	for attribute in dict.fromkeys(attributes):
 		columns.append(
 			{
-				"fieldname": frappe.scrub(entry.attribute),
-				"label": entry.attribute,
+				"fieldname": frappe.scrub(attribute),
+				"label": attribute,
 				"fieldtype": "Data",
 				"width": 100,
 			}
@@ -144,7 +174,7 @@ def get_selected_warehouses(filters):
 	)
 
 
-def get_open_sales_orders_count(variants_list, warehouses):
+def get_open_sales_orders(variants_list, warehouses):
 	order_filters = [
 		["Sales Order", "docstatus", "=", 1],
 		["Sales Order", "status", "not in", ["Closed", "Completed"]],
@@ -169,15 +199,24 @@ def get_open_sales_orders_count(variants_list, warehouses):
 		if flt(row.delivered_qty) < flt(row.qty):
 			open_orders.setdefault(row.item_code, set()).add(row.name)
 
-	return {item_code: len(orders) for item_code, orders in open_orders.items()}
+	return open_orders
 
 
 def get_stock_details_map(variant_list, warehouses):
 	bin_filters = [{"item_code": ["in", variant_list]}]
 	if warehouses:
 		bin_filters.append({"warehouse": ["in", warehouses]})
+<<<<<<< HEAD
 	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
 		bin_filters.append({"warehouse": ["in", warehouses]})
+=======
+	if permitted_warehouses := get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Item"
+	):
+		bin_filters.append({"warehouse": ["in", permitted_warehouses]})
+	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
+		bin_filters.append(condition)
+>>>>>>> ea4ce4f (feat(item variant details): group variants under multiple templates)
 
 	stock_details = frappe.db.get_all(
 		"Bin",
