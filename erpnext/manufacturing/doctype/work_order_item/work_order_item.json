@@ -175,6 +175,7 @@
    "fieldtype": "Float",
    "label": "Subcontracted Qty",
    "no_copy": 1,
+   "non_negative": 1,
    "read_only": 1
   },
   {
