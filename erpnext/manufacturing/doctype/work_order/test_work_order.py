@@ -4712,6 +4712,117 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sre.transferred_qty, 0)
 		self.assertEqual(sre.status, "Reserved")
 
+	def test_subcontracting_order_takes_over_the_subcontracted_operation_inputs(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company"
+		warehouse = "Stores - _TC"
+		supplier_warehouse = create_warehouse("Test SOI Supplier WH", company=company)
+
+		cloth = make_item("Test SOI Cloth", {"is_stock_item": 1}).name
+		shirt = make_item("Test SOI Shirt", {"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		service_item = make_item("Test SOI Dyeing Service", {"is_stock_item": 0}).name
+
+		shirt_from_cloth = frappe.new_doc("BOM")
+		shirt_from_cloth.company = company
+		shirt_from_cloth.item = shirt
+		shirt_from_cloth.quantity = 1
+		shirt_from_cloth.append("items", {"item_code": cloth, "qty": 1})
+		shirt_from_cloth.insert()
+		shirt_from_cloth.submit()
+
+		if not frappe.db.exists("Subcontracting BOM", {"finished_good": shirt}):
+			frappe.get_doc(
+				{
+					"doctype": "Subcontracting BOM",
+					"finished_good": shirt,
+					"finished_good_qty": 1,
+					"service_item": service_item,
+					"service_item_qty": 1,
+					"finished_good_bom": shirt_from_cloth.name,
+					"is_active": 1,
+				}
+			).insert()
+
+		if not frappe.db.exists("Workstation", "Test SOI Workstation"):
+			make_workstation(workstation="Test SOI Workstation", production_capacity=1)
+		if not frappe.db.exists("Operation", "Test SOI Dyeing"):
+			make_operation(operation="Test SOI Dyeing", workstation="Test SOI Workstation")
+
+		bom = frappe.new_doc("BOM")
+		bom.company = company
+		bom.item = shirt
+		bom.quantity = 1
+		bom.with_operations = 1
+		bom.track_semi_finished_goods = 1
+		bom.append(
+			"operations",
+			{
+				"operation": "Test SOI Dyeing",
+				"workstation": "Test SOI Workstation",
+				"finished_good": shirt,
+				"finished_good_qty": 1,
+				"is_final_finished_good": 1,
+				"is_subcontracted": 1,
+				"bom_no": shirt_from_cloth.name,
+				"time_in_mins": 60,
+				"sequence_id": 1,
+			},
+		)
+		bom.append("items", {"item_code": cloth, "qty": 1, "operation_row_id": 1})
+		bom.insert()
+		bom.submit()
+
+		wo = make_wo_order_test_record(
+			production_item=shirt,
+			qty=10,
+			bom_no=bom.name,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+			wip_warehouse=warehouse,
+			fg_warehouse=warehouse,
+		)
+
+		# Until a Subcontracting Order takes it, the Work Order keeps the cloth reserved.
+		self.assertEqual(wo.required_items[0].item_code, cloth)
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
+
+		job_card = frappe.db.get_value("Job Card", {"work_order": wo.name})
+		po = frappe.get_doc(make_subcontracting_po(job_card))
+		po.supplier = "_Test Supplier"
+		po.supplier_warehouse = supplier_warehouse
+		po.schedule_date = nowdate()
+		for item in po.items:
+			item.schedule_date = nowdate()
+		po.insert()
+		po.submit()
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
+
+		sco = make_subcontracting_order(po.name)
+		sco.supplier_warehouse = supplier_warehouse
+		for item in sco.supplied_items:
+			item.reserve_warehouse = warehouse
+		sco.insert()
+		sco.submit()
+		self.assertEqual(
+			frappe.db.get_value("Work Order Item", wo.required_items[0].name, "subcontracted_qty"), 10
+		)
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 0)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": cloth, "warehouse": warehouse}, "projected_qty"), -10
+		)
+
+		sco.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Work Order Item", wo.required_items[0].name, "subcontracted_qty"), 0
+		)
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
+		self.assertEqual(
+			frappe.db.get_value("Bin", {"item_code": cloth, "warehouse": warehouse}, "projected_qty"), -10
+		)
+
 	def test_rework_keeps_the_reworked_item_reserved(self):
 		warehouse = "Stores - _TC"
 		item = make_item("Test Rework Item", {"is_stock_item": 1}).name
