@@ -113,6 +113,7 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 				"user": user.name,
 				"allow": "Company",
 				"for_value": "Parent Group Company India",
+				"hide_descendants": 1,
 			}
 		).insert(ignore_permissions=True)
 
