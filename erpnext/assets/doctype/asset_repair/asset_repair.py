@@ -159,6 +159,7 @@ class AssetRepair(AccountsController):
 					get_link_to_form(self.doctype, self.name),
 				)
 				self.asset_doc.flags.ignore_validate_update_after_submit = True
+				self.asset_doc.flags.ignore_permissions = True
 				make_new_active_asset_depr_schedules_and_cancel_current_ones(
 					self.asset_doc, notes, ignore_booked_entry=True
 				)
@@ -207,6 +208,7 @@ class AssetRepair(AccountsController):
 					get_link_to_form(self.doctype, self.name),
 				)
 				self.asset_doc.flags.ignore_validate_update_after_submit = True
+				self.asset_doc.flags.ignore_permissions = True
 				make_new_active_asset_depr_schedules_and_cancel_current_ones(
 					self.asset_doc, notes, ignore_booked_entry=True
 				)
@@ -227,7 +229,9 @@ class AssetRepair(AccountsController):
 	def cancel_stock_entry(self):
 		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
 		if stock_entry:
-			frappe.get_doc("Stock Entry", stock_entry).cancel()
+			stock_entry = frappe.get_doc("Stock Entry", stock_entry)
+			stock_entry.flags.ignore_permissions = True
+			stock_entry.cancel()
 
 	def after_delete(self):
 		frappe.get_doc("Asset", self.asset).set_status()
@@ -322,6 +326,7 @@ class AssetRepair(AccountsController):
 				},
 			)
 
+		stock_entry.flags.ignore_permissions = True
 		stock_entry.insert()
 		stock_entry.submit()
 
