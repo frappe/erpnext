@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	reconcile_vouchers,
 	update_clearance_date,
 )
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.permission_test_utils import (
@@ -153,6 +154,59 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 	def test_get_linked_payments_without_document_types(self):
 		bank_transaction = self.make_bank_transaction(date=today())
 		self.assertEqual(get_linked_payments(bank_transaction.name), [])
+
+	def test_get_linked_payments_hides_vouchers_outside_the_fence(self):
+		def make_payment(cost_center):
+			payment = create_payment_entry(
+				company=self.company,
+				payment_type="Receive",
+				party_type="Customer",
+				party=self.customer,
+				paid_from=self.debit_to,
+				paid_to=self.bank,
+				paid_amount=100,
+			)
+			payment.cost_center = cost_center
+			return payment.save().submit()
+
+		def make_journal(cost_center):
+			return make_journal_entry(self.bank, "Sales - _TC", 100, cost_center=cost_center, submit=True)
+
+		def get_matches(transaction):
+			vouchers = get_linked_payments(
+				transaction.name,
+				["payment_entry", "journal_entry"],
+				from_date=add_days(today(), -1),
+				to_date=today(),
+			)
+			return {(v["doctype"], v["name"]) for v in vouchers}
+
+		inside = make_payment("_Test Cost Center - _TC"), make_journal("_Test Cost Center - _TC")
+		outside = make_payment("_Test Cost Center 2 - _TC"), make_journal("_Test Cost Center 2 - _TC")
+		inside = {(doc.doctype, doc.name) for doc in inside}
+		outside = {(doc.doctype, doc.name) for doc in outside}
+		transaction = self.make_bank_transaction(date=today())
+
+		self.assertLessEqual(inside | outside, get_matches(transaction))
+
+		user = make_fenced_user(
+			"brt-fenced@example.com", ["Accounts User"], [("Cost Center", "_Test Cost Center - _TC")]
+		)
+		with as_user(user):
+			for doctype, name in outside:
+				self.assertFalse(frappe.has_permission(doctype, "read", doc=name))
+			matches = get_matches(transaction)
+		self.assertLessEqual(inside, matches)
+		self.assertFalse(outside & matches)
+
+	def test_get_linked_payments_drops_rows_without_a_doctype(self):
+		transaction = self.make_bank_transaction(date=today())
+		rows = [frappe._dict(name="ROW-WITHOUT-DOCTYPE", paid_amount=100)]
+		with patch(
+			"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool._get_linked_payments",
+			return_value=rows,
+		):
+			self.assertEqual(get_linked_payments(transaction.name, ["payment_entry"]), [])
 
 	def test_rejects_reversed_date_ranges(self):
 		from_date, to_date = today(), add_days(today(), -1)
