@@ -1397,39 +1397,14 @@ def get_purchase_orders(scr_doc) -> list[str]:
 
 def can_combine_purchase_orders(purchase_orders: list[str]) -> bool:
 	"""One Purchase Receipt carries one currency, one set of rate-based taxes and one header discount."""
-	if len(purchase_orders) < 2:
-		return True
+	return len(purchase_orders) < 2 or len(get_purchase_order_terms(purchase_orders)) == 1
 
+
+def get_purchase_order_terms(purchase_orders: list[str]) -> set[tuple]:
 	key_fields = get_charge_key_fields()
-	taxes = defaultdict(list)
-	for row in frappe.get_all(
-		"Purchase Taxes and Charges",
-		filters={
-			"parenttype": "Purchase Order",
-			"parent": ["in", purchase_orders],
-			"is_tax_withholding_account": 0,
-		},
-		fields=[
-			"parent",
-			"charge_type",
-			"row_id",
-			"rate",
-			"included_in_print_rate",
-			*key_fields,
-		],
-		order_by="idx",
-	):
-		taxes[row.parent].append(row)
-
-	def get_discount(order) -> tuple:
-		if flt(order.additional_discount_percentage):
-			return (order.apply_discount_on, flt(order.additional_discount_percentage))
-		if flt(order.discount_amount):
-			return (order.name,)
-		return ()
-
-	terms = {
-		(order.currency, get_tax_terms(taxes[order.name], key_fields), get_discount(order))
+	taxes = get_purchase_order_taxes(purchase_orders, key_fields)
+	return {
+		(order.currency, get_tax_terms(taxes[order.name], key_fields), get_discount_terms(order))
 		for order in frappe.get_all(
 			"Purchase Order",
 			filters={"name": ["in", purchase_orders]},
@@ -1442,7 +1417,32 @@ def can_combine_purchase_orders(purchase_orders: list[str]) -> bool:
 			],
 		)
 	}
-	return len(terms) == 1
+
+
+def get_purchase_order_taxes(purchase_orders: list[str], key_fields: list[str]) -> dict[str, list]:
+	taxes = defaultdict(list)
+	for row in frappe.get_all(
+		"Purchase Taxes and Charges",
+		filters={
+			"parenttype": "Purchase Order",
+			"parent": ["in", purchase_orders],
+			"is_tax_withholding_account": 0,
+		},
+		fields=["parent", "charge_type", "row_id", "rate", "included_in_print_rate", *key_fields],
+		order_by="idx",
+	):
+		taxes[row.parent].append(row)
+
+	return taxes
+
+
+def get_discount_terms(order) -> tuple:
+	"""A percentage discount can be shared by orders; an amount discount belongs to its order alone."""
+	if flt(order.additional_discount_percentage):
+		return (order.apply_discount_on, flt(order.additional_discount_percentage))
+	if flt(order.discount_amount):
+		return (order.name,)
+	return ()
 
 
 def get_tax_terms(taxes: list, key_fields: list[str]) -> tuple:
