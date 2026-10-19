@@ -862,7 +862,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 				)
 
-			if self.purpose == "Subcontracting Delivery":
+			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
 				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
 
 	def validate_fg_completed_qty(self):
@@ -969,7 +969,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 
 			if (
-				self.purpose not in ["Material Issue", "Subcontracting Delivery"]
+				self.purpose not in ["Material Issue", "Subcontracting Delivery", "Subcontracting Return"]
 				and acc_details.account_type == "Cost of Goods Sold"
 			):
 				frappe.msgprint(
