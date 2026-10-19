@@ -588,7 +588,9 @@ class TestGetItemDetail(ERPNextTestSuite):
 		item_code = make_item(properties=properties).name
 		batches = []
 		for qty in quantities:
-			se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
+			se = make_stock_entry(
+				item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
+			)
 			batches.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
 
 		return item_code, batches
@@ -633,7 +635,9 @@ class TestGetItemDetail(ERPNextTestSuite):
 			details = self.get_item_details_for_row(item_code, 3, batch_no=batches[1])
 			self.assertFalse(details.get("serial_no"))
 
-			dn = create_delivery_note(item_code=item_code, qty=3, use_serial_batch_fields=1, batch_no=batches[1])
+			dn = create_delivery_note(
+				item_code=item_code, qty=3, use_serial_batch_fields=1, batch_no=batches[1]
+			)
 			dn.reload()
 			self.assertFalse(dn.items[0].serial_no)
 
@@ -688,14 +692,19 @@ class TestGetItemDetail(ERPNextTestSuite):
 			"Stock Settings",
 			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
 		):
-			dn = create_delivery_note(item_code=item_code, qty=2, use_serial_batch_fields=1, do_not_submit=True)
+			dn = create_delivery_note(
+				item_code=item_code, qty=2, use_serial_batch_fields=1, do_not_submit=True
+			)
 			first_row = dn.items[0].as_dict()
 			dn.append("items", {k: v for k, v in first_row.items() if k not in ("name", "idx")})
 			dn.save()
 			dn.submit()
 			dn.reload()
 
-			picked = [d.serial_no for d in self.get_bundle_entries([row.serial_and_batch_bundle for row in dn.items])]
+			picked = [
+				d.serial_no
+				for d in self.get_bundle_entries([row.serial_and_batch_bundle for row in dn.items])
+			]
 			self.assertEqual(len(picked), 4)
 			self.assertEqual(len(set(picked)), 4)
 
@@ -724,10 +733,53 @@ class TestGetItemDetail(ERPNextTestSuite):
 			so.submit()
 
 			dn = make_delivery_note(so.name)
-			dn.items[0].update({"qty": 2, "use_serial_batch_fields": 1, "batch_no": batches[1], "serial_no": None})
+			dn.items[0].update(
+				{"qty": 2, "use_serial_batch_fields": 1, "batch_no": batches[1], "serial_no": None}
+			)
 			dn.insert()
 			dn.submit()
 			dn.reload()
 
 			entries = self.get_bundle_entries([dn.items[0].serial_and_batch_bundle])
 			self.assertEqual([d.batch_no for d in entries], [batches[1], batches[1]])
+
+	def test_item_row_and_product_bundle_get_different_serial_nos(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[3], has_serial_no=1, serial_no_series="SPB-SN-.#####"
+		)
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [item_code])
+
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"pick_serial_and_batch_based_on": "FIFO",
+				"auto_create_serial_and_batch_bundle_for_outward": 1,
+				"use_serial_batch_fields": 1,
+			},
+		):
+			dn = create_delivery_note(
+				item_code=item_code, qty=1, use_serial_batch_fields=1, do_not_submit=True
+			)
+			first_row = dn.items[0].as_dict()
+			dn.append(
+				"items",
+				{k: v for k, v in first_row.items() if k not in ("name", "idx", "batch_no", "serial_no")}
+				| {"item_code": bundle_item, "item_name": bundle_item},
+			)
+			dn.save()
+			dn.submit()
+			dn.reload()
+
+			bundles = [
+				row.serial_and_batch_bundle
+				for row in dn.items + dn.packed_items
+				if row.serial_and_batch_bundle
+			]
+			picked = [d.serial_no for d in self.get_bundle_entries(bundles)]
+			self.assertEqual(len(picked), 2)
+			self.assertEqual(len(set(picked)), 2)
