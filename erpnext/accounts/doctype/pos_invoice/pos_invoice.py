@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext import _refuse
@@ -230,6 +230,10 @@ class POSInvoice(SalesInvoice):
 		if self.coupon_code:
 			validate_coupon_code(self.coupon_code, self.customer)
 
+	def before_submit(self):
+		super().before_submit()
+		self.validate_mandatory_pos_fields()
+
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
@@ -251,6 +255,37 @@ class POSInvoice(SalesInvoice):
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
+
+	def validate_mandatory_pos_fields(self):
+		mandatory_fields = frappe.get_all(
+			"POS Field",
+			filters={"parent": "POS Settings", "parenttype": "POS Settings", "reqd": 1},
+			fields=["fieldname", "label", "fieldtype"],
+		)
+		missing_fields = []
+		for field in mandatory_fields:
+			if field.fieldtype == "Check" or not self.meta.has_field(field.fieldname):
+				continue
+
+			value = self.get(field.fieldname)
+			value = "" if value in (None, []) else cstr(value)
+			if field.fieldtype == "Text Editor" and "<img" in value:
+				continue
+
+			if not strip_html(value).strip():
+				missing_fields.append(_(field.label))
+		if not missing_fields:
+			return
+
+		message = _("{0} is mandatory in POS Settings")
+		if len(missing_fields) > 1:
+			message = _("{0} are mandatory in POS Settings")
+
+		frappe.throw(
+			message.format(", ".join(map(frappe.bold, missing_fields))),
+			frappe.MandatoryError,
+			title=_("Missing POS Fields"),
+		)
 
 	def before_cancel(self):
 		if (
