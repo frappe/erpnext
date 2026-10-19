@@ -291,6 +291,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
 		self.check_purchase_order_on_hold_or_close("purchase_order", exclude_if_field="purchase_receipt")
+		self.validate_closed_purchase_receipts()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -373,6 +374,22 @@ class PurchaseInvoice(BuyingController):
 
 		if self.docstatus < 1:
 			frappe.throw(_("Purchase Invoice can be held after submitting."))
+
+	def validate_closed_purchase_receipts(self):
+		purchase_receipts = {d.purchase_receipt for d in self.items if d.purchase_receipt}
+		if self.is_return or not purchase_receipts:
+			return
+
+		if closed := frappe.get_all(
+			"Purchase Receipt",
+			filters={"name": ("in", list(purchase_receipts)), "status": "Closed"},
+			pluck="name",
+		):
+			frappe.throw(
+				_("Purchase Receipt {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
+			)
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -899,6 +916,7 @@ class PurchaseInvoice(BuyingController):
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 		if self.docstatus == 1:
+			self.cancel_provisional_entries()
 			if not gl_entries:
 				gl_entries = self.get_gl_entries()
 
@@ -1357,7 +1375,12 @@ class PurchaseInvoice(BuyingController):
 				self.update_net_purchase_amount_for_linked_assets(item)
 
 	def get_provisional_accounts(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			get_order_billing_provisional_reversals,
+		)
+
 		self.provisional_accounts = frappe._dict()
+		self.order_provisional_reversals = get_order_billing_provisional_reversals(self)
 		linked_purchase_receipts = set([d.purchase_receipt for d in self.items if d.purchase_receipt])
 		if not linked_purchase_receipts:
 			return
@@ -1398,23 +1421,37 @@ class PurchaseInvoice(BuyingController):
 			}
 
 	def make_provisional_gl_entry(self, gl_entries, item):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import post_provisional_gl_entry
+
 		if item.purchase_receipt:
 			pr_item = self.provisional_accounts.get(item.pr_detail, {})
 			if pr_item.get("has_provisional_entry"):
-				purchase_receipt_doc = frappe.get_cached_doc("Purchase Receipt", item.purchase_receipt)
+				conversion_rate = frappe.get_cached_value(
+					"Purchase Receipt", item.purchase_receipt, "conversion_rate"
+				)
 
-				# Intentionally passing purchase invoice item to handle partial billing
-				purchase_receipt_doc.add_provisional_gl_entry(
+				post_provisional_gl_entry(
+					self,
 					item,
 					gl_entries,
 					self.posting_date,
 					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(
-						(min(item.qty, pr_item.get("qty")) * pr_item.get("rate"))
-						* purchase_receipt_doc.get("conversion_rate")
-					),
+					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("rate")) * conversion_rate,
 				)
+			return
+
+		for row, qty in self.order_provisional_reversals.get(item.name, []):
+			post_provisional_gl_entry(
+				self,
+				item,
+				gl_entries,
+				self.posting_date,
+				row.provisional_expense_account,
+				reverse=1,
+				item_amount=qty * flt(row.rate) * flt(row.conversion_rate),
+				pr_detail=row.name,
+			)
 
 	def update_net_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(
@@ -1427,7 +1464,9 @@ class PurchaseInvoice(BuyingController):
 			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
-			purchase_amount = flt(item.valuation_rate) * asset.asset_quantity
+			purchase_amount = (
+				flt(item.valuation_rate) * flt(item.conversion_factor or 1) * asset.asset_quantity
+			)
 			frappe.db.set_value(
 				"Asset",
 				asset.name,
