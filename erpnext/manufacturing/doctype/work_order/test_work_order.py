@@ -4713,13 +4713,51 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sre.status, "Reserved")
 
 	def test_subcontracting_order_takes_over_the_subcontracted_operation_inputs(self):
-		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
-		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
+		warehouse = "Stores - _TC"
+		reserve_warehouse = create_warehouse("Test SOI Reserve WH", company="_Test Company")
+		wo = self.make_subcontracted_operation_work_order(skip_transfer=1)
+		cloth = wo.required_items[0].item_code
+
+		# Until a Subcontracting Order takes it, the Work Order keeps the cloth reserved.
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
+
+		# The order reserves it from its own warehouse instead.
+		sco = self.subcontract_work_order(wo, 10, reserve_warehouse)
+		self.assertEqual(
+			frappe.db.get_value("Work Order Item", wo.required_items[0].name, "subcontracted_qty"), 10
+		)
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 0)
+		self.assertEqual(get_projected_qty(cloth, reserve_warehouse), -10)
+
+		sco.cancel()
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
+		self.assertEqual(get_projected_qty(cloth, warehouse), -10)
+		self.assertEqual(get_projected_qty(cloth, reserve_warehouse), 0)
+
+	def test_subcontracting_material_already_transferred_is_not_deducted_twice(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		warehouse = "Stores - _TC"
+		wip_warehouse = "_Test Warehouse - _TC"
+		wo = self.make_subcontracted_operation_work_order(skip_transfer=0, wip_warehouse=wip_warehouse)
+		cloth = wo.required_items[0].item_code
+
+		make_stock_entry_test_record(item_code=cloth, target=warehouse, qty=4, basic_rate=100)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 6)
+
+		# The order takes the 4 already in WIP: the other 6 are still the Work Order's.
+		self.subcontract_work_order(wo, 4, wip_warehouse)
+		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 6)
+
+	def make_subcontracted_operation_work_order(self, **kwargs):
+		"""A Work Order for 10 shirts whose only operation, a subcontracted dyeing, uses 10 cloth."""
 		company = "_Test Company"
 		warehouse = "Stores - _TC"
-		supplier_warehouse = create_warehouse("Test SOI Supplier WH", company=company)
 
 		cloth = make_item("Test SOI Cloth", {"is_stock_item": 1}).name
 		shirt = make_item("Test SOI Shirt", {"is_stock_item": 1, "is_sub_contracted_item": 1}).name
@@ -4775,53 +4813,39 @@ class TestWorkOrder(ERPNextTestSuite):
 		bom.insert()
 		bom.submit()
 
-		wo = make_wo_order_test_record(
+		kwargs.setdefault("wip_warehouse", warehouse)
+		return make_wo_order_test_record(
 			production_item=shirt,
 			qty=10,
 			bom_no=bom.name,
-			skip_transfer=1,
 			source_warehouse=warehouse,
-			wip_warehouse=warehouse,
 			fg_warehouse=warehouse,
+			**kwargs,
 		)
 
-		# Until a Subcontracting Order takes it, the Work Order keeps the cloth reserved.
-		self.assertEqual(wo.required_items[0].item_code, cloth)
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
+	def subcontract_work_order(self, wo, qty, reserve_warehouse):
+		"""Submit a Subcontracting Order for qty of the Work Order's subcontracted Job Card."""
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
+		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		job_card = frappe.db.get_value("Job Card", {"work_order": wo.name})
-		po = frappe.get_doc(make_subcontracting_po(job_card))
+		supplier_warehouse = create_warehouse("Test SOI Supplier WH", company="_Test Company")
+		po = frappe.get_doc(make_subcontracting_po(frappe.db.get_value("Job Card", {"work_order": wo.name})))
 		po.supplier = "_Test Supplier"
 		po.supplier_warehouse = supplier_warehouse
 		po.schedule_date = nowdate()
 		for item in po.items:
 			item.schedule_date = nowdate()
+			item.qty = item.fg_item_qty = qty
 		po.insert()
 		po.submit()
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
 
 		sco = make_subcontracting_order(po.name)
 		sco.supplier_warehouse = supplier_warehouse
-		for item in sco.supplied_items:
-			item.reserve_warehouse = warehouse
+		sco.set_reserve_warehouse = reserve_warehouse
 		sco.insert()
 		sco.submit()
-		self.assertEqual(
-			frappe.db.get_value("Work Order Item", wo.required_items[0].name, "subcontracted_qty"), 10
-		)
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 0)
-		self.assertEqual(
-			frappe.db.get_value("Bin", {"item_code": cloth, "warehouse": warehouse}, "projected_qty"), -10
-		)
-
-		sco.cancel()
-		self.assertEqual(
-			frappe.db.get_value("Work Order Item", wo.required_items[0].name, "subcontracted_qty"), 0
-		)
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 10)
-		self.assertEqual(
-			frappe.db.get_value("Bin", {"item_code": cloth, "warehouse": warehouse}, "projected_qty"), -10
-		)
+		return sco
 
 	def test_rework_keeps_the_reworked_item_reserved(self):
 		warehouse = "Stores - _TC"
@@ -8147,3 +8171,7 @@ def complete_review_job_card(work_order, qty, hours_ago=2):
 	)
 	job_card.submit()
 	return job_card
+
+
+def get_projected_qty(item_code, warehouse):
+	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty") or 0
