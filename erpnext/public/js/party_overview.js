@@ -349,6 +349,7 @@ erpnext.PartyOverview = class PartyOverview {
 			data: slices,
 			category: "label",
 			value: "value",
+			order: "rows",
 			colors: Object.fromEntries(slices.map((s) => [s.label, s.color])),
 			...config,
 		});
