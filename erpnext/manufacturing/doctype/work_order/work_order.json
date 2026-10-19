@@ -613,7 +613,7 @@
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Track Semi Finished Goods",
+   "label": "Make in Stages",
    "read_only": 1
   },
   {
@@ -768,7 +768,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-20 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
