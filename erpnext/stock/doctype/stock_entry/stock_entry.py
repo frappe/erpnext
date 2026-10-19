@@ -672,6 +672,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 
 		self.make_gl_entries_on_cancel()

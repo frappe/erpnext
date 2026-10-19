@@ -1727,7 +1727,10 @@ class StockController(AccountsController):
 		):
 			return
 
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import validate_qi_reference
+
 		for row in self.get("items"):
+			validate_qi_reference(self, row)
 			qi_required = False
 			if inspection_required_fieldname and frappe.get_cached_value(
 				"Item", row.item_code, inspection_required_fieldname
@@ -1787,7 +1790,7 @@ class StockController(AccountsController):
 		action = frappe.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
 		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
 
-		if qa_status == "Rejected":
+		if qa_status != "Accepted":
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = _("Row #{0}: Quality Inspection {1} was rejected for item {2}").format(
 				row.idx, link, row.item_code
