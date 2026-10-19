@@ -69,7 +69,9 @@ def get_data_with_qty_to_make(filters):
 		)
 
 	min_producible = (
-		min(int(r["_available_qty"] // r["_qty_per_unit"]) for r in data if r["_qty_per_unit"]) if data else 0
+		min(get_producible_qty(r["_available_qty"], r["_qty_per_unit"]) for r in data if r["_qty_per_unit"])
+		if data
+		else 0
 	)
 
 	for row in data:
@@ -252,7 +254,7 @@ def get_bom_data(filters):
 			bom_item.item_code,
 			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
 			Max(bom_item.parent).as_("from_bom_no"),
-			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
+			Sum(bom_item.stock_qty).as_("bom_stock_qty"),
 			IfNull(Max(stock_qty.actual_qty), 0).as_("actual_qty"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
@@ -261,6 +263,9 @@ def get_bom_data(filters):
 	)
 
 	data = query.run(as_dict=True)
+	bom_quantity = flt(frappe.db.get_value("BOM", filters.get("bom"), "quantity")) or 1.0
+	for row in data:
+		row.qty_per_unit = flt(row.pop("bom_stock_qty")) / bom_quantity
 
 	# description belongs to a BOM line, not to the item, so a component listed more than once holds
 	# several values per group. Max() over text is a sort and the engines sort text differently
@@ -353,7 +358,11 @@ def get_producible_fg_items(filters):
 		row.qty_per_unit = flt(row.qty_per_unit)
 		row.available_qty = flt(row.actual_qty)
 		row.producible_qty = (
-			math.floor(flt(row.available_qty / row.qty_per_unit, 9)) if row.qty_per_unit > 0 else None
+			get_producible_qty(row.available_qty, row.qty_per_unit) if row.qty_per_unit > 0 else None
 		)
 
 	return rows
+
+
+def get_producible_qty(available_qty, qty_per_unit):
+	return math.floor(flt(flt(available_qty) / flt(qty_per_unit), 9))
