@@ -42,6 +42,44 @@ class TestSubcontractingBOM(ERPNextTestSuite):
 				frappe.PermissionError, get_subcontracting_boms_for_service_item, service_item.name
 			)
 
+	def test_finished_good_bom_must_be_active_and_submitted(self):
+		finished_good = make_item(
+			"Subcontracted BOM Check Item", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		)
+		service_item = make_item("Subcontracted BOM Check Service Item", {"is_stock_item": 0})
+		bom = make_bom(item=finished_good.name, raw_materials=["_Test Item"])
+		draft_bom = make_bom(item=finished_good.name, raw_materials=["_Test Item"], do_not_submit=True)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_subcontracting_bom,
+			finished_good=finished_good.name,
+			finished_good_bom=draft_bom.name,
+			service_item=service_item.name,
+		)
+
+		subcontracting_bom = create_subcontracting_bom(
+			finished_good=finished_good.name, finished_good_bom=bom.name, service_item=service_item.name
+		)
+		frappe.db.set_value("BOM", bom.name, "is_active", 0)
+		subcontracting_bom.is_active = 0
+		subcontracting_bom.save()
+
+	def test_quantities_must_be_greater_than_zero(self):
+		finished_good = make_item(
+			"Subcontracted BOM Check Item", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		)
+		service_item = make_item("Subcontracted BOM Check Service Item", {"is_stock_item": 0})
+		bom = make_bom(item=finished_good.name, raw_materials=["_Test Item"])
+		subcontracting_bom = create_subcontracting_bom(
+			finished_good=finished_good.name, finished_good_bom=bom.name, service_item=service_item.name
+		)
+
+		for fieldname in ("finished_good_qty", "service_item_qty"):
+			subcontracting_bom.reload()
+			subcontracting_bom.set(fieldname, 0)
+			self.assertRaises(frappe.ValidationError, subcontracting_bom.save)
+
 
 def create_subcontracting_bom(**kwargs):
 	kwargs = frappe._dict(kwargs)
