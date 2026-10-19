@@ -25,6 +25,9 @@ from frappe.utils import (
 )
 from frappe.utils.user import is_website_user
 
+# without an SLA, an Issue is resolved as by an SLA fulfilled on these statuses and paused on none
+RESOLVED_STATUSES = ("Resolved", "Closed")
+
 
 class Issue(Document):
 	# begin: auto-generated types
@@ -82,6 +85,12 @@ class Issue(Document):
 			self.raised_by = frappe.session.user
 
 		self.set_lead_contact(self.raised_by)
+		self.set_opening_time()
+
+	def before_save(self) -> None:
+		# runs after the SLA validate hook, so service_level_agreement is final here
+		if not self.service_level_agreement:
+			self.record_resolution_metrics()
 
 	def on_update(self):
 		# Add a communication in the issue timeline
@@ -99,6 +108,17 @@ class Issue(Document):
 		doc_before_save = self.get_doc_before_save()
 		self.customer = doc_before_save.customer if doc_before_save else None
 		self.status = doc_before_save.status if doc_before_save else "Open"
+
+	def set_opening_time(self) -> None:
+		if not self.opening_time:
+			self.opening_time = get_datetime(self.creation).time()
+
+	def record_resolution_metrics(self) -> None:
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			handle_status_change,
+		)
+
+		handle_status_change(self, True, hold_statuses=[], fulfillment_statuses=RESOLVED_STATUSES)
 
 	def set_lead_contact(self, email_id):
 		import email.utils
@@ -199,6 +219,7 @@ class Issue(Document):
 		replicated_issue.creation = now_datetime()
 		replicated_issue.status = "Open"
 		replicated_issue.opening_date = getdate()
+		replicated_issue.opening_time = None
 		replicated_issue.resolution_time = None
 		replicated_issue.user_resolution_time = None
 		replicated_issue.sla_resolution_date = None
@@ -391,6 +412,24 @@ def set_first_response_time(communication, method):
 		if is_first_response(issue) and issue.service_level_agreement:
 			first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
 			issue.db_set("first_response_time", first_response_time)
+
+
+def reopen_issue_without_sla(communication: Document, method: str | None = None) -> None:
+	"""Clears the resolution metrics of an Issue without an SLA that a received mail reopens.
+
+	communication.py reopens it with db_set, which skips the controller; the SLA hook does
+	the same for an Issue with an SLA."""
+	if communication.get("reference_doctype") != "Issue" or communication.sent_or_received != "Received":
+		return
+
+	issue = get_parent_doc(communication)
+	if not issue or issue.service_level_agreement or not issue.sla_resolution_date:
+		return
+
+	# handle_status_change reads the previous status from the database
+	previous_status = issue.get_doc_before_save().status
+	frappe.db.set_value("Issue", issue.name, "status", previous_status, update_modified=False)
+	issue.save(ignore_permissions=True)
 
 
 def is_first_response(issue):
