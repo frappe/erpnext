@@ -914,6 +914,19 @@ class TestItem(ERPNextTestSuite):
 
 		self.assertEqual(get_bin(target_item, "_Test Warehouse - _TC").reserved_qty_for_production, 6)
 
+	def test_merge_keeps_the_source_demand_in_other_warehouses(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.utils import get_bin
+
+		old_item = make_item(properties={"is_stock_item": 1}).name
+		target_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=target_item, target="_Test Warehouse - _TC", qty=5, basic_rate=300)
+		create_purchase_order(item_code=old_item, warehouse="_Test Warehouse 1 - _TC", qty=7)
+
+		frappe.rename_doc("Item", old_item, target_item, merge=True)
+
+		self.assertEqual(get_bin(target_item, "_Test Warehouse 1 - _TC").ordered_qty, 7)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
