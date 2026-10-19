@@ -2715,7 +2715,13 @@ def get_available_serial_nos(kwargs):
 		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
 			kwargs, reserved_entries, reserved_voucher_details
 		):
+			ignore = set(kwargs.get("ignore_serial_nos") or [])
+			reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
+			if not reserved_serial_nos or not set_batch_filter(filters, kwargs):
+				return []
+
 			filters["name"] = ("in", reserved_serial_nos)
+
 			return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
 
 		# Check if serial nos are reserved for other vouchers then ignore those serial nos
@@ -2748,14 +2754,22 @@ def get_available_serial_nos(kwargs):
 	elif kwargs.get("serial_nos"):
 		filters["name"] = ("in", kwargs.get("serial_nos"))
 
-	if kwargs.get("batches"):
-		batches = get_non_expired_batches(kwargs.get("batches"))
-		if not batches:
-			return []
-
-		filters["batch_no"] = ("in", batches)
+	if not set_batch_filter(filters, kwargs):
+		return []
 
 	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def set_batch_filter(filters, kwargs):
+	if not kwargs.get("batches"):
+		return True
+
+	batches = get_non_expired_batches(kwargs.get("batches"))
+	if not batches:
+		return False
+
+	filters["batch_no"] = ("in", batches)
+	return True
 
 
 def get_batch_expiry_date_column(serial_no):

@@ -701,6 +701,70 @@ class TestGetItemDetail(ERPNextTestSuite):
 			dn.submit()
 			self.assertEqual(len(get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle)), 2)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_rows_of_same_item_get_different_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[5], has_serial_no=1, serial_no_series="SRD-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			dn = create_delivery_note(
+				item_code=item_code, qty=2, use_serial_batch_fields=1, do_not_submit=True
+			)
+			first_row = dn.items[0].as_dict()
+			dn.append("items", {k: v for k, v in first_row.items() if k not in ("name", "idx")})
+			dn.save()
+			dn.submit()
+
+			picked = frappe.get_all(
+				"Serial and Batch Entry",
+				{"parent": ("in", [row.serial_and_batch_bundle for row in dn.items])},
+				pluck="serial_no",
+			)
+			self.assertEqual(len(picked), 4)
+			self.assertEqual(len(set(picked)), 4)
+
+	def test_reserved_serial_nos_follow_selected_batch(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 2], has_serial_no=1, serial_no_series="SRB-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"pick_serial_and_batch_based_on": "FIFO",
+				"auto_create_serial_and_batch_bundle_for_outward": 1,
+				"enable_stock_reservation": 1,
+				"allow_negative_stock": 0,
+			},
+		):
+			so = make_sales_order(
+				item_code=item_code, warehouse="_Test Warehouse - _TC", qty=4, rate=100, do_not_submit=True
+			)
+			so.reserve_stock = 1
+			so.items[0].reserve_stock = 1
+			so.submit()
+
+			dn = make_delivery_note(so.name)
+			dn.items[0].update(
+				{"qty": 2, "use_serial_batch_fields": 1, "batch_no": batches[1], "serial_no": None}
+			)
+			dn.insert()
+			dn.submit()
+
+			picked_batches = frappe.get_all(
+				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, pluck="batch_no"
+			)
+			self.assertEqual(picked_batches, [batches[1], batches[1]])
+
 	def test_same_document_rows_reduce_batch_by_stock_qty(self):
 		item_code, batches = self.make_batched_item_with_stock(
 			[10], uoms=[{"uom": "Box", "conversion_factor": 5}]

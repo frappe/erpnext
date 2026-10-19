@@ -227,6 +227,7 @@ class SerialBatchBundleService:
 			parent_details = self.get_parent_details_for_packed_items()
 
 		auto_pick_outward = self.auto_picks_outward_serial_batch()
+		picked_serial_nos = self.get_serial_nos_in_fields(table_name) if auto_pick_outward else None
 
 		for row in self.doc.get(table_name):
 			item_code = row.get("rm_item_code") or row.get("item_code")
@@ -275,11 +276,38 @@ class SerialBatchBundleService:
 
 				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, parent_details=parent_details)
-					self.create_serial_batch_bundle(bundle_details, row)
+					self.create_auto_picked_bundle(bundle_details, row, picked_serial_nos)
 
 				if row.get("rejected_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
+
+	def get_serial_nos_in_fields(self, table_name):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		numbers_by_item = defaultdict(list)
+		for row in self.doc.get(table_name):
+			if row.get("serial_no"):
+				numbers_by_item[row.get("rm_item_code") or row.item_code].extend(
+					get_serial_nos(row.serial_no)
+				)
+
+		picked_serial_nos = defaultdict(list)
+		for item_code, numbers in numbers_by_item.items():
+			records = SerialBatchIdentity("Serial No").get_records(item_code, numbers, ["name"])
+			picked_serial_nos[item_code].extend(record.name for record in records)
+
+		return picked_serial_nos
+
+	def create_auto_picked_bundle(self, bundle_details, row, picked_serial_nos):
+		if picked_serial_nos is None or row.serial_no:
+			self.create_serial_batch_bundle(bundle_details, row)
+			return
+
+		item_code = bundle_details["item_code"]
+		bundle_details["ignore_serial_nos"] = list(picked_serial_nos[item_code])
+		sn_doc = self.create_serial_batch_bundle(bundle_details, row)
+		picked_serial_nos[item_code].extend(d.serial_no for d in sn_doc.get("entries") or [] if d.serial_no)
 
 	def auto_picks_outward_serial_batch(self):
 		if self.doc.doctype not in ("Delivery Note", "Sales Invoice", "POS Invoice") or self.doc.get(
@@ -535,6 +563,8 @@ class SerialBatchBundleService:
 
 		row.set(field, sn_doc.name)
 		row.db_set({field: sn_doc.name})
+
+		return sn_doc
 
 	def validate_serial_nos_and_batches_with_bundle(self, row):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
