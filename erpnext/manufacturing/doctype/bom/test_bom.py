@@ -1341,6 +1341,83 @@ class TestBOM(ERPNextTestSuite):
 		bom.operations[1].finished_good = fg_item
 		bom.insert()
 
+	def test_make_in_stages_lists_every_step_problem_together(self):
+		fg_item, sfg_item, rm_item = make_stage_items()
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation"},
+				{
+					"operation": "_Test SFG Final Operation",
+					"is_final_finished_good": 1,
+					"finished_good": sfg_item,
+				},
+			],
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+
+		with self.assertRaises(frappe.ValidationError) as error:
+			bom.insert()
+
+		self.assertIn("Step 1", str(error.exception))
+		self.assertIn("Step 2", str(error.exception))
+
+	def test_make_in_stages_ticks_the_last_step_by_default(self):
+		fg_item, sfg_item, rm_item = make_stage_items()
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "finished_good": sfg_item},
+				{"operation": "_Test SFG Final Operation"},
+			],
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+
+		self.assertEqual(bom.operations[1].is_final_finished_good, 1)
+		self.assertEqual(bom.operations[1].finished_good, fg_item)
+		self.assertEqual(bom.operations[0].is_final_finished_good, 0)
+
+	def test_make_in_stages_submit_lists_steps_without_raw_materials(self):
+		fg_item, sfg_item, rm_item = make_stage_items()
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "finished_good": sfg_item},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.insert()
+
+		self.assertRaisesRegex(frappe.ValidationError, "Step 2.*Add Raw Materials", bom.submit)
+
+	def test_changing_step_bom_replaces_its_raw_materials(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item, sfg_item, first_rm = make_stage_items()
+		second_rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		first_bom = make_bom(item=sfg_item, raw_materials=[first_rm])
+		second_bom = make_bom(item=sfg_item, raw_materials=[second_rm])
+
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "bom_no": first_bom.name},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+		self.assertEqual(get_step_items(bom, 1), [first_rm])
+
+		bom.operations[0].bom_no = second_bom.name
+		bom.save()
+
+		self.assertEqual(get_step_items(bom, 1), [second_rm])
+		self.assertEqual(get_step_items(bom, 2), [sfg_item])
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -1515,3 +1592,34 @@ def create_tree_for_phantom_bom_tests():  # returns expected explosion result
 	phantom_list = ["Phantom Item Level 1-2", "Phantom Item Level 2-1", "Phantom Item Level 2-2"]
 	create_nested_bom(bom_tree_1, prefix="", phantom_items=phantom_list)
 	return ["Sub Assembly Level 1-1", "Item Level 2-3"]
+
+
+def make_stage_items():
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+	make_workstation({"workstation": "_Test SFG Workstation"})
+	for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
+		make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
+
+	return (
+		make_item(properties={"is_stock_item": 1}).name,
+		make_item(properties={"is_stock_item": 1}).name,
+		make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name,
+	)
+
+
+def make_stage_bom(fg_item, operations):
+	bom = frappe.new_doc("BOM")
+	bom.update(
+		{"company": "_Test Company", "item": fg_item, "quantity": 1, "with_operations": 1, "currency": "USD"}
+	)
+	bom.track_semi_finished_goods = 1
+	for operation in operations:
+		bom.append("operations", {"workstation": "_Test SFG Workstation", "time_in_mins": 30, **operation})
+
+	return bom
+
+
+def get_step_items(bom, step):
+	return [row.item_code for row in bom.items if row.operation_row_id == step]
