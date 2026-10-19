@@ -26,11 +26,20 @@ class GroupLedgers:
 			for name, row in accounts.items()
 			if not row.get("is_group") and self.matches(row, categories.get(name))
 		}
-		if ledgers or not self.whole_root_if_none:
+		if not self.whole_root_if_none or self.has_category_accounts(accounts):
 			return ledgers
 		return {
 			name for name, row in accounts.items() if row.get("is_group") and not row.get("parent_account")
 		}
+
+	def has_category_accounts(self, accounts: dict) -> bool:
+		if not accounts:
+			return False
+
+		company = frappe.get_cached_value("Account", next(iter(accounts)), "company")
+		return bool(
+			frappe.db.exists("Account", {"company": company, "account_category": ("in", self.categories)})
+		)
 
 	def matches(self, row: dict, category: str | None) -> bool:
 		return category in self.categories or row.get("account_type") in self.account_types

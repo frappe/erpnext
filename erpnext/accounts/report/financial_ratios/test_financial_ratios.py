@@ -62,6 +62,11 @@ class TestFinancialRatios(ERPNextTestSuite):
 
 		self.assertEqual(self.get_group_balance("Current Asset", "Asset") - before, 400)
 
+	def test_other_income_is_not_sales_in_a_year_without_sales(self):
+		self.make_journal_entry("Cash", "Interest Income", 300)
+
+		self.assertEqual(self.get_group_balance("Direct Income", "Income"), 0)
+
 	def test_net_sales_are_total_income_without_revenue_category(self):
 		frappe.db.set_value(
 			"Account",
