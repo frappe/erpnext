@@ -58,6 +58,27 @@ class TestTerritoryWiseSales(ERPNextTestSuite):
 		after = self.amount_for(TERRITORY, "quotation_amount")
 		self.assertEqual(after - before, quotation.base_grand_total)
 
+	def test_opportunity_amount_uses_company_currency(self):
+		before = self.amount_for(TERRITORY, "opportunity_amount")
+
+		opp = frappe.get_doc(
+			{
+				"doctype": "Opportunity",
+				"opportunity_from": "Customer",
+				"party_name": "_Test Customer",
+				"territory": TERRITORY,
+				"company": "_Test Company",
+				"currency": "USD",
+				"conversion_rate": 70,
+				"opportunity_amount": 100,
+				"transaction_date": "2026-06-01",
+			}
+		).insert()
+
+		after = self.amount_for(TERRITORY, "opportunity_amount")
+		self.assertEqual(opp.base_opportunity_amount, 7000)
+		self.assertEqual(after - before, 7000)
+
 	def test_order_and_billing_amount_counted_once(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice

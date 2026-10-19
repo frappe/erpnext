@@ -10,13 +10,18 @@ from erpnext import get_default_currency
 
 def execute(filters=None):
 	filters = frappe._dict(filters)
-	columns = get_columns()
+	columns = get_columns(filters)
 	data = get_data(filters)
 	return columns, data
 
 
-def get_columns():
+def get_columns(filters=None):
+	filters = filters or frappe._dict()
+	# amounts are stored in each document's company currency; show the selected
+	# company's currency, falling back to the default company's
 	currency = get_default_currency()
+	if filters.get("company"):
+		currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency") or currency
 	return [
 		{
 			"label": _("Territory"),
@@ -93,7 +98,7 @@ def get_data(filters=None):
 
 		territory_data = {
 			"territory": territory.name,
-			"opportunity_amount": _get_total(territory_opportunities, "opportunity_amount"),
+			"opportunity_amount": _get_total(territory_opportunities, "base_opportunity_amount"),
 			"quotation_amount": _get_total(territory_quotations),
 			"order_amount": _get_total(territory_orders),
 			"billing_amount": _get_total(territory_invoices),
@@ -116,7 +121,7 @@ def get_opportunities(filters):
 		orm_filters["company"] = filters["company"]
 
 	return frappe.get_all(
-		"Opportunity", fields=["name", "territory", "opportunity_amount"], filters=orm_filters
+		"Opportunity", fields=["name", "territory", "base_opportunity_amount"], filters=orm_filters
 	)
 
 
