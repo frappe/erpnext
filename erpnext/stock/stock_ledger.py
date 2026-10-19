@@ -109,7 +109,7 @@ def validate_stock_frozen_by_closing_entry(sl_entries):
 
 def mark_stock_closing_outdated(sl_entries):
 	from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
-		has_open_closing_entry,
+		has_closing_entry_to_coordinate,
 		lock_company_for_closing,
 		mark_closing_entries_outdated,
 	)
@@ -122,7 +122,7 @@ def mark_stock_closing_outdated(sl_entries):
 	if not posting_dates:
 		return
 
-	if has_open_closing_entry(company, min(posting_dates)):
+	if has_closing_entry_to_coordinate(company, min(posting_dates)):
 		lock_company_for_closing(company)
 
 	mark_closing_entries_outdated(company, min(posting_dates))
