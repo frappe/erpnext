@@ -88,7 +88,9 @@ class CurrencyExchangeSettings(Document):
 		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 
 		try:
-			response = requests.get(api_url, params=params)
+			response = requests.get(
+				api_url, params=params, timeout=frappe.conf.get("currency_exchange_request_timeout") or 10
+			)
 		except requests.exceptions.RequestException as e:
 			frappe.throw(_("Error: {0}").format(str(e)))
 

@@ -155,6 +155,7 @@ def get_exchange_rate(
 					settings.api_endpoint, {key: quote(value, safe="") for key, value in req_params.items()}
 				),
 				params=params,
+				timeout=frappe.conf.get("currency_exchange_request_timeout") or 10,
 			)
 			# expire in 6 hours
 			response.raise_for_status()
