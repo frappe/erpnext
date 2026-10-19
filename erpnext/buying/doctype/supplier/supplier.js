@@ -180,8 +180,36 @@ frappe.ui.form.on("Supplier", {
 
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
+
+			frm.trigger("render_items_tab");
 		}
 	},
+
+	render_items_tab(frm) {
+		frm.party_items ??= new erpnext.PartyItems(frm, {
+			party_type: "Supplier",
+			order_doctype: "Purchase Order",
+			labels: {
+				frequent_description: __("The items ordered most often from this supplier."),
+				frequent_empty: __("No purchase orders from this supplier yet."),
+				orders_title: __("Submitted purchase orders that include this item"),
+				reserved_description: __(
+					"Items you buy only from this supplier. They won't appear when buying from other suppliers."
+				),
+				reserved_empty: __("No items are reserved for this supplier."),
+				item_hint: __("Items bought most often from this supplier are listed first."),
+				this_party: __("This supplier"),
+				reserved: (item) => __("{0} is now reserved for this supplier", [item]),
+				remove_reserved: (item) => __("Remove {0} from this supplier's reserved items?", [item]),
+			},
+		});
+		frm.party_items.refresh();
+	},
+
+	on_tab_change(frm) {
+		frm.party_items?.show();
+	},
+
 	get_supplier_group_details: function (frm) {
 		frappe.call({
 			method: "get_supplier_group_details",
