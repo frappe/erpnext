@@ -35,6 +35,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "billed",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Invoiced"
@@ -45,6 +46,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "collected",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Received"
@@ -91,6 +93,7 @@
      {
       "aggregation": "sum",
       "column_name": "collected",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "collected",
@@ -125,6 +128,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "due_soon_a_month_ago",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Due a Month Ago"
@@ -140,6 +144,7 @@
      {
       "aggregation": "sum",
       "column_name": "due_soon",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Due in the Next 30 Days",
@@ -171,6 +176,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "overdue_a_month_ago",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Overdue a Month Ago"
@@ -187,6 +193,7 @@
      {
       "aggregation": "sum",
       "column_name": "overdue",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Overdue",
@@ -237,6 +244,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "overdue",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Overdue"
@@ -268,6 +276,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "outstanding_a_month_ago",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "A Month Ago"
@@ -284,6 +293,7 @@
      {
       "aggregation": "sum",
       "column_name": "outstanding",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Receivables",
@@ -364,6 +374,7 @@
      {
       "aggregation": "sum",
       "column_name": "overdue",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Overdue"
@@ -371,6 +382,7 @@
      {
       "aggregation": "sum",
       "column_name": "outstanding",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Outstanding"
@@ -436,7 +448,7 @@
       "payments-collected-2": "`payments-collected`.`company`",
       "payments-due-in-the-next-30-days": "`payments-receivables-due-in-30-days`.`company`",
       "payments-overdue": "`payments-overdue-receivables`.`company`",
-      "payments-overdue-by-age-2": "`payments-overdue-receivables`.`company`",
+      "payments-overdue-by-age-2": "`payments-receivable-ledger`.`company`",
       "payments-receivables": "`payments-open-receivables`.`company`",
       "payments-top-10-overdue-customers": "`payments-receivables-by-customer`.`company`"
      },
@@ -595,7 +607,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:09:41.453155",
+ "modified": "2026-10-20 06:00:03.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "payments",
@@ -610,15 +622,15 @@
    "operations": [
     {
      "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPayment Ledger Entry",
-      "type": "table"
+      "query_name": "payments-receivable-ledger",
+      "type": "query",
+      "workbook": "payments"
      },
      "type": "source"
     },
     {
      "column_names": [
-      "name"
+      "company"
      ],
      "type": "select"
     },
@@ -665,7 +677,8 @@
     {
      "column_names": [
       "age",
-      "overdue"
+      "overdue",
+      "company"
      ],
      "type": "select"
     }
@@ -1105,7 +1118,8 @@
     {
      "column_names": [
       "age",
-      "overdue"
+      "overdue",
+      "company"
      ],
      "type": "select"
     },
