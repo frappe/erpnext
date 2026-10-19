@@ -112,6 +112,11 @@ class TestCustomerOverview(ERPNextTestSuite):
 		self.assertEqual(start, getdate("2025-10-01"))
 		self.assertEqual(end, as_of)
 
+		points = customer_overview.trend(CUSTOMER, COMPANY, start, end, as_of, accounts=True)["points"]
+		self.assertEqual(len(points), 12)
+		self.assertEqual(points[0]["month"], getdate("2025-10-01"))
+		self.assertEqual(points[-1]["month"], getdate("2026-09-01"))
+
 	def test_credit_balance_has_no_collection_days(self):
 		for outstanding in (0, -100):
 			self.assertIsNone(
