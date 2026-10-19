@@ -117,30 +117,36 @@ class VATAuditReport:
 			.select(item_wise_tax.tax_row)
 			.where(item_wise_tax.parent.isin(invoice_names))
 			.where(taxes_and_charges.account_head.isin(self.sa_vat_accounts))
-			.run(as_dict=True)
 		)
+		if doctype == "Purchase Invoice":
+			tax_details = tax_details.select(taxes_and_charges.add_deduct_tax)
+		tax_details = tax_details.run(as_dict=True)
 		actual_tax_rates = get_actual_tax_rates(tax_details)
 
 		for row in tax_details:
-			parent = row.parent
-			item = row.item_row
-			is_zero_rated = self.invoice_items.get(item)
+			is_zero_rated = self.invoice_items.get(row.item_row)
 			if row.charge_type == "Actual":
 				row.rate = actual_tax_rates.get(row.tax_row, 0)
 			if row.rate == 0 and not is_zero_rated:
 				continue
 
-			self.items_based_on_tax_rate.setdefault(parent, {}).setdefault(
-				row.rate,
-				{
-					"gross_amount": 0.0,
-					"tax_amount": 0.0,
-					"net_amount": 0.0,
-				},
-			)
-			self.items_based_on_tax_rate[parent][row.rate]["tax_amount"] += row.amount
-			self.items_based_on_tax_rate[parent][row.rate]["net_amount"] += row.taxable_amount
-			self.items_based_on_tax_rate[parent][row.rate]["gross_amount"] += row.amount + row.taxable_amount
+			self.add_item_tax(row)
+
+	def add_item_tax(self, row: dict) -> None:
+		"""Add input (Add) and output (Deduct) VAT separately, counting each item's taxable amount once."""
+		is_deduct = row.add_deduct_tax == "Deduct"
+		totals = self.items_based_on_tax_rate.setdefault(row.parent, {}).setdefault(
+			(row.rate, is_deduct),
+			{"gross_amount": 0.0, "tax_amount": 0.0, "net_amount": 0.0, "items": set()},
+		)
+		net_amount = 0.0
+		if row.item_row not in totals["items"]:
+			totals["items"].add(row.item_row)
+			net_amount = -row.taxable_amount if is_deduct else row.taxable_amount
+
+		totals["tax_amount"] += row.amount
+		totals["net_amount"] += net_amount
+		totals["gross_amount"] += row.amount + net_amount
 
 	def get_data(self, doctype):
 		consolidated_data = self.get_consolidated_data(doctype)
@@ -175,7 +181,7 @@ class VATAuditReport:
 			if not rate_details:
 				continue
 
-			for rate, item_details in rate_details.items():
+			for (rate, _is_deduct), item_details in rate_details.items():
 				row = {
 					"tax_amount": 0.0,
 					"gross_amount": 0.0,
