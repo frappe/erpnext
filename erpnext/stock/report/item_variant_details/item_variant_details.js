@@ -16,5 +16,12 @@ frappe.query_reports["Item Variant Details"] = {
 				};
 			},
 		},
+		{
+			fieldname: "warehouse",
+			label: __("Warehouses"),
+			fieldtype: "MultiSelectList",
+			options: "Warehouse",
+			get_data: (txt) => erpnext.utils.get_link_options("Warehouse", txt),
+		},
 	],
 };
