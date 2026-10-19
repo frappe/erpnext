@@ -221,6 +221,7 @@ def get_stock_ledger_entries(filters, items):
 		)
 		.select(sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company)
 		.where(sle.is_cancelled == 0)
+		.orderby(sle.creation)
 	)
 
 	if filters.get("warehouse"):
@@ -241,8 +242,8 @@ def get_stock_ledger_entries(filters, items):
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))
 
-	if filters.get("data"):
-		query = query.where(sle.posting_date <= filters.get("data"))
+	if filters.get("date"):
+		query = query.where(sle.posting_date <= filters.get("date"))
 
 	return query.run(as_dict=True)
 
@@ -275,7 +276,7 @@ def get_item_wise_max_posting_datetime(filters, items):
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))
 
-	if filters.get("data"):
-		query = query.where(sle.posting_date <= filters.get("data"))
+	if filters.get("date"):
+		query = query.where(sle.posting_date <= filters.get("date"))
 
 	return query
