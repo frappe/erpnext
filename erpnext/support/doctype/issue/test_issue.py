@@ -638,6 +638,22 @@ class TestIssue(TestSetUp):
 		on_hold.save()
 		self.assertEqual(on_hold.agreement_status, "Failed")
 
+	def test_overdue_agreement_is_rechecked_before_failing(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			fail_agreement_if_overdue,
+			get_overdue_documents,
+		)
+
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 17:00")
+		self.assertIn(issue.name, get_overdue_documents("Issue"))
+
+		# the deadline moves after the job selected the issue, as a reset would
+		issue.db_set("response_by", get_datetime("2019-03-04 18:00"))
+		fail_agreement_if_overdue("Issue", issue.name)
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, "agreement_status"), "First Response Due")
+
 	def test_late_first_response_fails_the_agreement(self):
 		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
 

@@ -1159,7 +1159,7 @@ def fail_overdue_agreements():
 
 	for doctype in get_sla_doctypes():
 		for name in get_overdue_documents(doctype):
-			frappe.get_doc(doctype, name).db_set("agreement_status", "Failed", notify=True)
+			fail_agreement_if_overdue(doctype, name)
 
 
 def get_overdue_documents(doctype: str) -> list[str]:
@@ -1175,6 +1175,21 @@ def get_overdue_documents(doctype: str) -> list[str]:
 		)
 		.run(pluck=True)
 	)
+
+
+def fail_agreement_if_overdue(doctype: str, name: str) -> None:
+	"""Rechecks the locked document, since a save or reset may have moved it after the query."""
+	doc = frappe.get_doc(doctype, name, for_update=True)
+	if is_overdue(doc):
+		doc.db_set("agreement_status", "Failed", notify=True)
+
+
+def is_overdue(doc) -> bool:
+	if doc.agreement_status == "First Response Due":
+		return has_missed_deadline(doc, "first_responded_on", "response_by")
+	if doc.agreement_status == "Resolution Due":
+		return has_missed_deadline(doc, "sla_resolution_date", "sla_resolution_by")
+	return False
 
 
 def is_holiday(date, holidays):
