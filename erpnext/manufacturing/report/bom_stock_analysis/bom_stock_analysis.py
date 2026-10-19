@@ -10,6 +10,8 @@ from frappe.utils import flt
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
 
+MAX_STORED_QTY_PER_UNIT_ERROR = 0.5e-9
+
 
 def execute(filters=None):
 	filters = filters or {}
@@ -362,4 +364,10 @@ def get_producible_fg_items(filters):
 
 
 def get_producible_qty(available_qty, qty_per_unit):
-	return math.floor(flt(flt(available_qty) / flt(qty_per_unit), 6))
+	available_qty, qty_per_unit = flt(available_qty), flt(qty_per_unit)
+	producible_qty = math.floor(available_qty / qty_per_unit)
+	next_qty = producible_qty + 1
+	if next_qty * qty_per_unit - available_qty <= next_qty * MAX_STORED_QTY_PER_UNIT_ERROR:
+		return next_qty
+
+	return producible_qty
