@@ -45,6 +45,7 @@ class PackedItem(Document):
 		projected_qty: DF.Float
 		qty: DF.Float
 		rate: DF.Currency
+		received_qty: DF.Float
 		requested_qty: DF.Float
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None

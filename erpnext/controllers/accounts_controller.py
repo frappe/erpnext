@@ -1030,7 +1030,7 @@ class AccountsController(TransactionBase):
 			field = frappe.scrub(label)
 
 			for row in self.get("items"):
-				if not row.get(field):
+				if not row.get(field) and not row.get("delivery_note_packed_item"):
 					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
 					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
 
