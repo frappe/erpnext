@@ -348,6 +348,16 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		):
 			self.assertEqual(get_producible_fg_items({})[0].producible_qty, 10)
 
+	def test_stored_per_unit_qty_does_not_lose_a_unit(self):
+		from unittest.mock import patch
+
+		rows = [frappe._dict(qty_per_unit=0.142857143, actual_qty=1)]
+		with patch(
+			"erpnext.manufacturing.report.bom_stock_analysis.bom_stock_analysis.get_bom_data",
+			return_value=rows,
+		):
+			self.assertEqual(get_producible_fg_items({})[0].producible_qty, 7)
+
 	def test_default_view_without_warehouse(self):
 		bom, material, permitted = self.build_bom_with_stock_in_many_warehouses()
 
