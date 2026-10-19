@@ -140,7 +140,7 @@
 								<th class="text-center" style="padding: 14px 16px;">
 									<div class="flex flex-col items-center gap-1">
 										<span class="column-name" title="{{ frappe.utils.escape_html(offer.supplier) }}">{{ frappe.utils.escape_html(offer.supplier) }}</span>
-										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small column-name" title="{{ frappe.utils.escape_html(offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
+										<a href="{{ frappe.utils.get_form_link("Supplier Quotation", offer.supplier_quotation) }}" class="quotation-link text-muted small column-name" title="{{ frappe.utils.escape_html(offer.supplier_quotation) }}">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
 									</div>
 								</th>
 							{% } %}
@@ -229,7 +229,7 @@
 									<div class="flex flex-col items-start gap-1">
 										<div class="flex items-center gap-1.5 w-full">
 											<span class="font-weight-bold truncate" title="{{ frappe.utils.escape_html(offer.supplier) }}">{{ frappe.utils.escape_html(offer.supplier) }}</span>										</div>
-										<a href="/app/supplier-quotation/{{ encodeURIComponent(offer.supplier_quotation) }}" class="quotation-link text-muted small truncate">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
+										<a href="{{ frappe.utils.get_form_link("Supplier Quotation", offer.supplier_quotation) }}" class="quotation-link text-muted small truncate">{{ frappe.utils.escape_html(offer.supplier_quotation) }}</a>
 									</div>
 								</td>
 								{% for (let it = 0; it < items.length; it++) { const item = items[it]; const q = get_quote(item, offer); %}
