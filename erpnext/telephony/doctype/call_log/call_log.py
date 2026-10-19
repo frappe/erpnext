@@ -4,12 +4,18 @@
 
 import frappe
 from frappe import _
-from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 from frappe.model.document import Document
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Sum
 
-from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
-from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
+from erpnext.crm.doctype.lead.lead import get_leads_with_phone_number
+from erpnext.crm.doctype.utils import (
+	get_contacts_with_phone_number,
+	get_phone_number_key,
+	get_phone_number_like_pattern,
+	get_scheduled_employees_for_popup,
+)
 
 END_CALL_STATUSES = ["No Answer", "Completed", "Busy", "Failed"]
 ONGOING_CALL_STATUSES = ["Ringing", "In Progress"]
@@ -50,14 +56,13 @@ class CallLog(Document):
 			self.update_received_by()
 
 	def before_insert(self):
-		"""Add lead(third party person) links to the document."""
-		lead_number = self.get("from") if self.is_incoming_call() else self.get("to")
-		lead_number = strip_number(lead_number)
+		"""Add links to all contacts and leads (third party person) with the caller's number."""
+		number = self.get("from") if self.is_incoming_call() else self.get("to")
 
-		if contact := get_contact_with_phone_number(strip_number(lead_number)):
+		for contact in get_contacts_with_phone_number(number):
 			self.add_link(link_type="Contact", link_name=contact)
 
-		if lead := get_lead_with_phone_number(lead_number):
+		for lead in get_leads_with_phone_number(number):
 			self.add_link(link_type="Lead", link_name=lead)
 
 		# Add Employee Name
@@ -149,21 +154,26 @@ def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str |
 
 
 def get_employees_with_number(number):
-	number = strip_number(number)
-	if not number:
+	key = get_phone_number_key(number)
+	if not key:
 		return []
 
-	employee_doc_name_and_emails = frappe.cache().hget("employees_with_number", number)
+	employee_doc_name_and_emails = frappe.cache().hget("employees_with_number", key)
 	if employee_doc_name_and_emails:
 		return employee_doc_name_and_emails
 
-	employee_doc_name_and_emails = frappe.get_all(
+	employees = frappe.get_all(
 		"Employee",
-		filters={"cell_number": ["like", f"%{number}%"], "user_id": ["!=", ""]},
-		fields=["name", "user_id"],
+		filters={"cell_number": ["like", get_phone_number_like_pattern(key)], "user_id": ["!=", ""]},
+		fields=["name", "user_id", "cell_number"],
 	)
+	employee_doc_name_and_emails = [
+		frappe._dict(name=employee.name, user_id=employee.user_id)
+		for employee in employees
+		if get_phone_number_key(employee.cell_number) == key
+	]
 
-	frappe.cache().hset("employees_with_number", number, employee_doc_name_and_emails)
+	frappe.cache().hset("employees_with_number", key, employee_doc_name_and_emails)
 
 	return employee_doc_name_and_emails
 
@@ -182,33 +192,43 @@ def link_existing_conversations(doc, state):
 		numbers = [d.phone for d in doc.phone_nos]
 
 		for number in numbers:
-			number = strip_number(number)
-			if not number:
-				continue
-			logs = frappe.db.sql_list(
-				"""
-				SELECT cl.name FROM `tabCall Log` cl
-				LEFT JOIN `tabDynamic Link` dl
-				ON cl.name = dl.parent
-				WHERE (cl.`from` like %(phone_number)s or cl.`to` like %(phone_number)s)
-				GROUP BY cl.name
-				HAVING SUM(
-					CASE
-						WHEN dl.link_doctype = %(doctype)s AND dl.link_name = %(docname)s
-						THEN 1
-						ELSE 0
-					END
-				)=0
-				""",
-				dict(phone_number=f"%{number}", docname=doc.name, doctype=doc.doctype),
-			)
-			for log in logs:
+			for log in get_unlinked_call_logs_with_number(doc, number):
 				call_log = frappe.get_doc("Call Log", log)
 				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
 				call_log.save(ignore_permissions=True)
 	except Exception:
 		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))
+
+
+def get_unlinked_call_logs_with_number(doc, number: str) -> list[str]:
+	"""Return call logs from or to the number that are not yet linked to the document."""
+	if not (key := get_phone_number_key(number)):
+		return []
+
+	pattern = get_phone_number_like_pattern(key)
+	call_log = frappe.qb.DocType("Call Log")
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	logs = (
+		frappe.qb.from_(call_log)
+		.left_join(dynamic_link)
+		.on(call_log.name == dynamic_link.parent)
+		.select(call_log.name, call_log["from"], call_log["to"])
+		.where(call_log["from"].like(pattern) | call_log["to"].like(pattern))
+		.groupby(call_log.name, call_log["from"], call_log["to"])
+		.having(
+			Sum(
+				Case()
+				.when((dynamic_link.link_doctype == doc.doctype) & (dynamic_link.link_name == doc.name), 1)
+				.else_(0)
+			)
+			== 0
+		)
+		.run(as_dict=True)
+	)
+	return [
+		log.name for log in logs if key in (get_phone_number_key(log["from"]), get_phone_number_key(log.to))
+	]
 
 
 def get_linked_call_logs(doctype, docname):
