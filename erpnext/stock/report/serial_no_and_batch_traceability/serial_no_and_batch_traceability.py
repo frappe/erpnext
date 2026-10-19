@@ -244,22 +244,7 @@ class ReportData:
 
 			# Recursive: batch has sub-components
 			if material.serial_no or material.batch_no:
-				value = material.serial_no or material.batch_no
-				key = (material.item_code, material.reference_name, material.name, value)
-
-				if key not in sabb_data.raw_materials:
-					details = self.get_serial_no_batches(value)
-					if not details:
-						inward_data = self.get_sabb_entries(value, "Inward")
-						if inward_data:
-							details = inward_data[-1]
-
-					if details:
-						details.update(self.get_data_from_sabb(details))
-						sabb_data.raw_materials[key] = details
-
-				if sabb_data.raw_materials.get(key):
-					self.set_backward_data(sabb_data.raw_materials[key], material.qty)
+				self.set_backward_data_for_component(sabb_data, material)
 			else:
 				sub_key = (material.item_code, material.name)
 				if sub_key not in sabb_data.raw_materials:
@@ -273,6 +258,32 @@ class ReportData:
 					)
 
 		return sabb_data
+
+	def set_backward_data_for_component(self, sabb_data, material):
+		value = material.serial_no or material.batch_no
+		key = (material.item_code, material.reference_name, material.name, value)
+		if key not in sabb_data.raw_materials:
+			for idx, details in enumerate(self.get_component_sources(value)):
+				sabb_data.raw_materials[key if idx == 0 else (*key, details.reference_name)] = details
+
+		sources = [details for node_key, details in sabb_data.raw_materials.items() if node_key[:4] == key]
+		for details in sources:
+			self.set_backward_data(details, material.qty if len(sources) == 1 else None)
+
+	def get_component_sources(self, value):
+		details = self.get_serial_no_batches(value)
+		if not details:
+			inward_data = self.get_sabb_entries(value, "Inward")
+			details = inward_data[-1] if inward_data else None
+
+		if not details:
+			return []
+
+		sources = self.split_by_production_entries([details])
+		for source in sources:
+			source.update(self.get_data_from_sabb(source))
+
+		return sources
 
 	def get_serial_no_batches(self, name=None):
 		batches = self.filters.get("batches", [])
