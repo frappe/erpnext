@@ -296,6 +296,10 @@ frappe.ui.form.on("Request for Quotation", {
 		offers.sort((a, b) => supplier_order(a.supplier) - supplier_order(b.supplier));
 
 		const all_items = frm.doc.items || [];
+		// frm is reused across RFQs, so drop a filter for an item this request doesn't have
+		if (!all_items.some((i) => i.item_code === frm.quotations_item_filter)) {
+			frm.quotations_item_filter = "";
+		}
 		const selected_item = frm.quotations_item_filter || "";
 		const items = selected_item ? all_items.filter((i) => i.item_code === selected_item) : all_items;
 
@@ -610,10 +614,6 @@ frappe.ui.form.on("Request for Quotation", {
 				"pointer-events": "none",
 			});
 		}
-
-		$container.find(".btn-new-supplier-quotation").on("click", function () {
-			frm.trigger("make_supplier_quotation");
-		});
 	},
 
 	schedule_date(frm) {
