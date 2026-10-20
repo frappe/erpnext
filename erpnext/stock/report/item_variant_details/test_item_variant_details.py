@@ -279,3 +279,17 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		self.assertEqual(template_row["current_stock"], 4)
 		self.assertEqual([row["variant_name"] for row in variant_rows], [variants[0]])
+
+	def test_warehouse_filter_accepts_a_single_warehouse_string(self):
+		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant.insert(ignore_if_duplicate=True)
+		for warehouse, qty in (("Stores - _TC", 18), ("Finished Goods - _TC", 7)):
+			make_stock_entry(item_code=variant.name, to_warehouse=warehouse, qty=qty, rate=100)
+
+		row = next(
+			row
+			for row in self.run_report(item="_Test Variant Item", warehouse="Finished Goods - _TC")
+			if row.get("variant_name") == variant.name
+		)
+
+		self.assertEqual(row.get("current_stock"), 7)
