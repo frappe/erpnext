@@ -130,14 +130,14 @@ def get_variant_rows(variant_results, warehouses, open_orders):
 	for variant in variant_results:
 		stock_details = stock_details_map.get(variant.name, {})
 		variant_rows[variant.name] = {
-			"variant_name": variant.name,
-			"template": variant.variant_of,
-			"item_group": variant.item_group,
-			"indent": 1,
 			**{
 				frappe.scrub(attribute): value
 				for attribute, value in attr_val_map.get(variant.name, {}).items()
 			},
+			"variant_name": variant.name,
+			"template": variant.variant_of,
+			"item_group": variant.item_group,
+			"indent": 1,
 			"stock_uom": variant.stock_uom,
 			"current_stock": stock_details.get("Inventory") or 0,
 			"in_production": stock_details.get("In Production") or 0,
