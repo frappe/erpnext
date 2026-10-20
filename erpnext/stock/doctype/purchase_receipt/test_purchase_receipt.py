@@ -8194,6 +8194,18 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		order_invoice = make_invoice_against_order(purchase_order.name, qty=4, rate=200)
 		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name, order_invoice.name), 0)
 
+	def test_order_invoice_with_a_receipt_row_reverses_the_provision_once(self):
+		purchase_order = self.make_provisional_purchase_order()
+		receipt = self.make_receipt_at_rate(purchase_order.name, 10, 100, "08:00")
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.items[0].qty = 4
+		order_row = invoice.items[0].as_dict(no_default_fields=True)
+		order_row.update({"qty": 6, "purchase_receipt": None, "pr_detail": None})
+		invoice.append("items", order_row)
+		invoice.submit()
+
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), 0)
+
 	def test_order_invoices_reverse_receipt_provisional_entries(self):
 		purchase_order = self.make_provisional_purchase_order()
 		receipts = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
@@ -8393,6 +8405,38 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(
 			self.get_provisional_balance(first.name, receipt_return.name, second.name, invoice.name), 0
 		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (100, 200))
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+		credit_note = make_return_doc("Purchase Invoice", vouchers[-1])
+		credit_note.submit()
+
+		self.assertEqual(self.get_provisional_balance(*vouchers, credit_note.name), -600)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_clears_the_whole_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (200, 100))
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def bill_order_again_after_cancelling_its_first_invoice(self, purchase_order, rates):
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order, 6, rates[0], "08:00").name,
+			self.make_receipt_at_rate(purchase_order, 4, rates[1], "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+		vouchers.append(make_invoice_against_order(purchase_order, qty=6, rate=200).name)
+
+		return vouchers
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
 	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
