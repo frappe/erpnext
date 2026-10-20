@@ -338,8 +338,8 @@ class WorkOrder(Document):
 	def get_default_fg_warehouse(self):
 		return (
 			self.get_bom_target_warehouse()
-			or self.get_production_item_warehouse()
 			or frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+			or self.get_production_item_warehouse()
 		)
 >>>>>>> 4e89ec0 (fix(manufacturing): default work order target warehouse from BOM, then item, then company)
 
