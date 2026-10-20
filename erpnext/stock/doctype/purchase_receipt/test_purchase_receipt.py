@@ -7313,18 +7313,36 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
-		purchase_order = self.make_provisional_purchase_order()
-		vouchers = [
-			self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00").name,
-			self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00").name,
-		]
-		first = make_invoice_against_order(purchase_order.name, qty=6, rate=200)
-		vouchers.append(make_invoice_against_order(purchase_order.name, qty=4, rate=200).name)
-		frappe.get_doc("Purchase Invoice", first.name).cancel()
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-		vouchers.append(make_invoice_against_order(purchase_order.name, qty=6, rate=200).name)
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (100, 200))
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+		credit_note = make_return_doc("Purchase Invoice", vouchers[-1])
+		credit_note.submit()
+
+		self.assertEqual(self.get_provisional_balance(*vouchers, credit_note.name), -600)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoice_after_a_cancelled_one_clears_the_whole_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (200, 100))
 
 		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def bill_order_again_after_cancelling_its_first_invoice(self, purchase_order, rates):
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order, 6, rates[0], "08:00").name,
+			self.make_receipt_at_rate(purchase_order, 4, rates[1], "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+		vouchers.append(make_invoice_against_order(purchase_order, qty=6, rate=200).name)
+
+		return vouchers
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
