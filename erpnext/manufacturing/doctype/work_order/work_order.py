@@ -1604,6 +1604,7 @@ class WorkOrder(Document):
 					"base_hour_rate as hour_rate",
 					"time_in_mins",
 					"parent as bom",
+					"name as bom_operation",
 					"bom_no",
 					"batch_size",
 					"sequence_id",
@@ -2270,25 +2271,31 @@ class WorkOrder(Document):
 
 	def get_bom_operation_rows(self, bom_qty):
 		source_operations = self.get_source_bom_operations()
+		sources_by_name = {d.name: d for sources in source_operations.values() for d in sources}
 		occurrence = {}
 		rows = []
 		for operation in self.operations:
+			source = self.get_source_bom_operation(operation, source_operations, sources_by_name, occurrence)
+			rows.append(self.get_bom_operation_row(operation, bom_qty, source))
+
+		return rows
+
+	def get_source_bom_operation(self, operation, source_operations, sources_by_name, occurrence):
+		if operation.get("bom_operation"):
+			source = sources_by_name.get(operation.bom_operation)
+		else:
 			key = (operation.bom or self.bom_no, operation.operation)
 			idx = occurrence[key] = occurrence.get(key, -1) + 1
 			sources = source_operations.get(key, [])
 			source = sources[idx] if idx < len(sources) else None
-			if source and not source.keeps_own_time:
-				source = None
 
-			rows.append(self.get_bom_operation_row(operation, bom_qty, source))
-
-		return rows
+		return source if source and source.keeps_own_time else None
 
 	def get_source_bom_operations(self):
 		operations = frappe.get_all(
 			"BOM Operation",
 			filters={"parent": self.bom_no, "parenttype": "BOM"},
-			fields=["parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
+			fields=["name", "parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
 			order_by="idx",
 		)
 		batch_based = set(

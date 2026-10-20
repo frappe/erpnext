@@ -21,6 +21,7 @@ class WorkOrderOperation(Document):
 		backflush_from_wip_warehouse: DF.Check
 		batch_size: DF.Float
 		bom: DF.Link | None
+		bom_operation: DF.Data | None
 		bom_no: DF.Link | None
 		completed_qty: DF.Float
 		description: DF.TextEditor | None
