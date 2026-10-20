@@ -237,7 +237,7 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "Unresolved",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -403,7 +403,7 @@
  "icon": "bell-ring",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-30 23:18:04.712528",
+ "modified": "2026-10-20 16:11:07.329463",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",

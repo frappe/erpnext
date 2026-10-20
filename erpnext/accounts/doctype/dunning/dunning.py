@@ -76,6 +76,8 @@ class Dunning(AccountsController):
 		self.validate_same_currency()
 		self.validate_overdue_payments()
 		self.validate_totals()
+		if self.docstatus == 0:
+			self.status = "Draft"
 		self.set_party_details()
 		self.set_dunning_level()
 
@@ -102,6 +104,7 @@ class Dunning(AccountsController):
 	def before_submit(self):
 		if self.dunning_amount and not self.income_account:
 			frappe.throw(_("Income Account is required to collect dunning fees or interest."))
+		self.status = "Unresolved"
 
 	def validate_same_currency(self):
 		"""
@@ -198,6 +201,10 @@ class Dunning(AccountsController):
 			for row in self.overdue_payments
 			if (outstanding := get_current_outstanding(row)) > 0
 		]
+
+	def before_cancel(self):
+		super().before_cancel()
+		self.status = "Cancelled"
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -404,7 +411,7 @@ def get_linked_dunnings_as_per_state(sales_invoice, state):
 		.distinct()
 		.where(
 			(dunning.status == state)
-			& (dunning.docstatus != 2)
+			& (dunning.docstatus == 1)
 			& (overdue_payment.sales_invoice == sales_invoice)
 		)
 	).run(as_dict=True)
