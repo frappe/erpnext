@@ -691,6 +691,23 @@ class TestPurchaseOrder(FrappeTestCase):
 		create_pr_against_po(po.name, received_qty=150)
 		self.assertEqual(get_ordered_qty(item_code=item), 50)
 
+	def test_ordered_qty_rounds_each_open_order_for_whole_number_item(self):
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		for _i in range(3):
+			po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+			po.items[0].uom = "Kg"
+			po.items[0].conversion_factor = 0.6
+			po.insert()
+			po.submit()
+			self.assertEqual(po.items[0].stock_qty, 2000)
+
+		self.assertEqual(get_ordered_qty(item_code=item), 6000)
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",
