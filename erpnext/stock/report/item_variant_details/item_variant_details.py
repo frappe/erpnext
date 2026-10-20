@@ -67,7 +67,7 @@ def get_data(templates, filters):
 	)
 
 	if not variant_results:
-		frappe.msgprint(_("There are no item variants for the selected item"))
+		frappe.msgprint(_("There are no item variants for the selected filters"))
 		return []
 
 	variant_list = [variant.name for variant in variant_results]
