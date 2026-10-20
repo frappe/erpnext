@@ -1165,7 +1165,7 @@ class ProductionPlan(Document):
 			msgprint(_("No material request created"))
 
 	@frappe.whitelist()
-	def get_sub_assembly_items(self, manufacturing_type=None):
+	def get_sub_assembly_items(self, manufacturing_type: str | None = None):
 		"Fetch sub assembly items and optionally combine them."
 		self.sub_assembly_items = []
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
@@ -1185,7 +1185,7 @@ class ProductionPlan(Document):
 			if frappe.db.get_value("BOM", row.bom_no, "track_semi_finished_goods"):
 				frappe.msgprint(
 					_(
-						"Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+						"Row #{0}: Since 'Produce an Item at Each Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
 					).format(row.idx, row.bom_no)
 				)
 				continue
