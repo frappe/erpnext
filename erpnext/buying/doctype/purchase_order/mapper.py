@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+import math
 
 import frappe
 from frappe import _
@@ -40,8 +41,16 @@ def make_purchase_receipt(
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
 
 	def get_max_receivable_qty(source):
+		if hasattr(source, "max_receivable_qty"):
+			return source.max_receivable_qty
+
 		tolerance = flt(get_allowance_for(source.item_code, qty_or_amount="qty")[0])
-		return flt(source.qty) * (100 + tolerance) / 100
+		precision = source.precision("qty") if hasattr(source, "precision") else 2
+		max_qty = flt(flt(source.qty) * (100 + tolerance) / 100, precision)
+		if frappe.get_cached_value("UOM", source.uom, "must_be_whole_number"):
+			return math.floor(max_qty)
+
+		return max_qty
 
 	def update_item(obj, target, source_parent):
 		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
@@ -53,7 +62,7 @@ def make_purchase_receipt(
 		elif pending_qty > 0:
 			target.qty = pending_qty
 		else:
-			target.qty = max(get_max_receivable_qty(obj) - received_qty, 0)
+			target.qty = flt(max(get_max_receivable_qty(obj) - received_qty, 0), obj.precision("qty"))
 
 		target.stock_qty = target.qty * flt(obj.conversion_factor)
 		target.amount = target.qty * flt(obj.rate)
