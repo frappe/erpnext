@@ -1152,8 +1152,8 @@ class SubcontractingController(StockController):
 
 		for row in self.get(self.raw_material_table):
 			key = (row.rm_item_code, row.main_item_code, row.get(self.subcontract_data.order_field))
-			if not self.__transferred_items or not self.__transferred_items.get(key):
-				return
+			if not self.__transferred_items.get(key):
+				continue
 
 			self.__validate_batch_no(row, key)
 			self.__validate_serial_no(row, key)
