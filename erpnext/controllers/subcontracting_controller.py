@@ -20,7 +20,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
+from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import _get_incoming_rate
 
 
@@ -1107,20 +1107,24 @@ class SubcontractingController(StockController):
 		self.__modify_serial_and_batch_bundle()
 		self.__set_rate_for_serial_and_batch_bundle()
 
-	def __validate_batch_no(self, row, key):
-		if row.get("batch_no") and row.get("batch_no") not in self.__transferred_items.get(key).get(
-			"batch_no"
-		):
+	def __validate_batch_no(self, row, key, bundle_entries):
+		transferred_batches = self.__transferred_items.get(key).get("batch_no")
+		batch_nos = {row.get("batch_no")} if row.get("batch_no") else set()
+		if transferred_batches:
+			batch_nos.update(entry.batch_no for entry in bundle_entries if entry.batch_no)
+
+		incorrect_batches = batch_nos.difference(transferred_batches)
+		if incorrect_batches:
 			link = get_link_to_form(
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
-			msg = f"The Batch No {frappe.bold(row.get('batch_no'))} has not supplied against the {self.subcontract_data.order_doctype} {link}"
+			msg = f"The Batch No {frappe.bold(', '.join(incorrect_batches))} has not supplied against the {self.subcontract_data.order_doctype} {link}"
 			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
 
-	def __validate_serial_no(self, row, key):
-		if row.get("serial_and_batch_bundle") and self.__transferred_items.get(key).get("serial_no"):
-			serial_nos = get_serial_nos_from_bundle(row.get("serial_and_batch_bundle"))
-			incorrect_sn = set(serial_nos).difference(self.__transferred_items.get(key).get("serial_no"))
+	def __validate_serial_no(self, row, key, bundle_entries):
+		if self.__transferred_items.get(key).get("serial_no"):
+			serial_nos = {entry.serial_no for entry in bundle_entries if entry.serial_no}
+			incorrect_sn = serial_nos.difference(self.__transferred_items.get(key).get("serial_no"))
 
 			if incorrect_sn:
 				incorrect_sn = "\n".join(incorrect_sn)
@@ -1140,13 +1144,34 @@ class SubcontractingController(StockController):
 		):
 			return
 
+		bundle_entries = self.__get_bundle_entries()
 		for row in self.get(self.raw_material_table):
 			key = (row.rm_item_code, row.main_item_code, row.get(self.subcontract_data.order_field))
-			if not self.__transferred_items or not self.__transferred_items.get(key):
-				return
+			if not self.__transferred_items.get(key):
+				continue
 
-			self.__validate_batch_no(row, key)
-			self.__validate_serial_no(row, key)
+			entries = bundle_entries.get(row.get("serial_and_batch_bundle"), [])
+			self.__validate_batch_no(row, key, entries)
+			self.__validate_serial_no(row, key, entries)
+
+	def __get_bundle_entries(self):
+		bundles = [
+			row.get("serial_and_batch_bundle")
+			for row in self.get(self.raw_material_table)
+			if row.get("serial_and_batch_bundle")
+		]
+		if not bundles:
+			return {}
+
+		bundle_entries = defaultdict(list)
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			fields=["parent", "serial_no", "batch_no"],
+			filters={"parent": ("in", bundles)},
+		):
+			bundle_entries[entry.parent].append(entry)
+
+		return bundle_entries
 
 	def set_materials_for_subcontracted_items(self, raw_material_table):
 		if self.doctype == "Purchase Invoice" and not self.update_stock:

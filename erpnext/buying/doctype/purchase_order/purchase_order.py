@@ -471,8 +471,15 @@ class PurchaseOrder(BuyingController):
 		super().update_prevdoc_status()
 
 	def update_status(self, status):
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			validate_reopen_against_blanket_order,
+		)
+
 		self.check_modified_date()
 		was_closed = self.status == "Closed"
+		if status != "Closed" and was_closed:
+			validate_reopen_against_blanket_order(self)
+
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
@@ -493,8 +500,7 @@ class PurchaseOrder(BuyingController):
 			self.update_status_updater_if_from_pp()
 
 		self.update_prevdoc_status()
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 		self.validate_budget()
@@ -541,8 +547,7 @@ class PurchaseOrder(BuyingController):
 
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 
@@ -582,7 +587,7 @@ class PurchaseOrder(BuyingController):
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Production Plan Sub Assembly Item",
 				"join_field": "production_plan_sub_assembly_item",
-				"target_field": "received_qty",
+				"target_field": "ordered_qty",
 				"target_parent_dt": "Production Plan",
 				"target_parent_field": "",
 				"target_ref_field": "qty",

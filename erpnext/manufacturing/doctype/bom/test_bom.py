@@ -816,6 +816,21 @@ class TestBOM(ERPNextTestSuite):
 		self.assertIn(item.name, [d[0] for d in results])
 
 	@timeout
+	def test_bom_item_query_with_operator_filters(self):
+		item = make_item("_Test BOM Query Operator Filter", {"is_stock_item": 1})
+
+		results = item_query(
+			doctype="Item",
+			txt=item.name,
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"is_stock_item": ["!=", 0], "has_variants": ["=", 0]},
+		)
+
+		self.assertIn(item.name, [d[0] for d in results])
+
+	@timeout
 	def test_exclude_exploded_items_from_bom(self):
 		bom_no = get_default_bom()
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", bom_no))
