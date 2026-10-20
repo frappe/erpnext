@@ -50,7 +50,6 @@ class ShopFloor {
 		this.op_state = { workstation: null, work_order: null };
 
 		this.make();
-		this.bind_realtime();
 		this.bind_lifecycle();
 		this.init();
 	}
@@ -1249,11 +1248,21 @@ class ShopFloor {
 
 	// ── Realtime + lifecycle ───────────────────────────────────────────────────
 	bind_realtime() {
-		frappe.realtime.on("update_workstation_status", (data) => {
-			if (data && data.name === this.op_state.workstation) {
-				this.reload();
+		frappe.realtime.doctype_subscribe("Workstation");
+		frappe.realtime.doctype_subscribe("Job Card");
+		if (this.status_handler) {
+			frappe.realtime.off("list_update", this.status_handler);
+		}
+		this.status_handler = (data) => {
+			if (
+				this.initialized &&
+				frappe.get_route()[0] === "shop-floor" &&
+				["Workstation", "Job Card"].includes(data.doctype)
+			) {
+				this.refresh();
 			}
-		});
+		};
+		frappe.realtime.on("list_update", this.status_handler);
 	}
 
 	bind_lifecycle() {
@@ -1274,11 +1283,18 @@ class ShopFloor {
 	}
 
 	on_show() {
+		this.bind_realtime();
 		$(document.body).addClass("shop-floor-active");
 		this.bind_keys();
 		// Cached re-navigation (e.g. the Work Order "Shop Floor" button) lands here with fresh
 		// route_options; init() handles the very first load before we're initialized.
-		if (this.initialized) this.apply_route_options();
+		if (this.initialized) {
+			if (frappe.route_options?.work_order || frappe.route_options?.workstation) {
+				this.apply_route_options();
+			} else {
+				this.refresh();
+			}
+		}
 	}
 
 	// ── Keyboard ────────────────────────────────────────────────────────────────

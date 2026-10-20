@@ -1870,9 +1870,6 @@ class JobCard(Document):
 			row.db_update()
 
 	def update_workstation_status(self):
-		if not self.workstation:
-			return
-
 		job_cards = frappe.get_all(
 			"Job Card",
 			fields=["name", "status"],
@@ -1889,7 +1886,9 @@ class JobCard(Document):
 		elif "On Hold" in statuses:
 			status = "Idle"
 
-		frappe.db.set_value("Workstation", self.workstation, "status", status)
+		workstation = frappe.get_doc("Workstation", self.workstation)
+		if workstation.status != status:
+			workstation.db_set("status", status, update_modified=False, notify=True)
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
