@@ -521,7 +521,10 @@ def get_available_qty_to_reserve(
 
 	if batch_no:
 		return get_batch_qty(
-			item_code=item_code, warehouse=warehouse, batch_no=batch_no, ignore_voucher_nos=[ignore_sre]
+			item_code=item_code,
+			warehouse=warehouse,
+			batch_no=batch_no,
+			ignore_voucher_nos=[ignore_sre] if ignore_sre else None,
 		)
 
 	available_qty = _get_stock_balance(item_code, warehouse)
