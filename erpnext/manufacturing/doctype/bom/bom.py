@@ -2300,9 +2300,9 @@ def _get_unit_operating_cost(bom_no, unit_costs):
 	if bom_no in unit_costs:
 		return unit_costs[bom_no]
 
-	bom = frappe.get_cached_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=True)
+	bom = frappe.get_cached_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=True)
 	quantity = flt(bom.quantity) or 1
-	cost = flt(bom.operating_cost) / quantity
+	cost = flt(bom.base_operating_cost) / quantity
 
 	for row in frappe.get_all(
 		"BOM Item",

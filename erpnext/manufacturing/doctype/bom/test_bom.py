@@ -1652,11 +1652,34 @@ class TestBOM(ERPNextTestSuite):
 		leaf, mid, top = (
 			make_item(f"_Test Op Tree {name}", {"is_stock_item": 1}).name for name in ("Leaf", "Mid", "Top")
 		)
-		make_bom(item=leaf, raw_materials=[rm_item], operating_cost_per_bom_quantity=30)
-		make_bom(item=mid, raw_materials=[leaf], operating_cost_per_bom_quantity=20)
-		top_bom = make_bom(item=top, raw_materials=[mid], rm_qty=2, operating_cost_per_bom_quantity=10)
+		make_bom(item=leaf, raw_materials=[rm_item], operating_cost_per_bom_quantity=30, currency="INR")
+		make_bom(item=mid, raw_materials=[leaf], operating_cost_per_bom_quantity=20, currency="INR")
+		top_bom = make_bom(
+			item=top, raw_materials=[mid], rm_qty=2, operating_cost_per_bom_quantity=10, currency="INR"
+		)
 
 		self.assertEqual(get_op_cost_from_sub_assemblies(top_bom.name), 110)
+
+	def test_operating_cost_from_sub_assemblies_is_in_company_currency(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_op_cost_from_sub_assemblies
+
+		rm_item = make_item("_Test Op Tree USD RM", {"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_item = make_item("_Test Op Tree USD Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Op Tree USD FG", {"is_stock_item": 1}).name
+		sub_bom = make_usd_bom(
+			sub_item,
+			[{"item_code": rm_item, "qty": 1}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=10,
+		)
+		top_bom = make_usd_bom(
+			fg_item,
+			[{"item_code": sub_item, "qty": 1, "bom_no": sub_bom.name}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=1,
+		)
+
+		self.assertEqual(get_op_cost_from_sub_assemblies(top_bom.name), 880)
 
 	def test_bom_cannot_be_reactivated_with_an_inactive_sub_assembly_bom(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
