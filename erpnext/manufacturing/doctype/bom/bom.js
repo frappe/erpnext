@@ -121,6 +121,27 @@ frappe.ui.form.on("BOM", {
 				title: __("Mandatory"),
 			});
 		}
+
+		frm.events.set_default_last_step(frm);
+	},
+
+	set_default_last_step(frm) {
+		const steps = frm.doc.operations || [];
+		if (!frm.doc.track_semi_finished_goods || !steps.length) return;
+
+		if (!steps.some((row) => row.is_final_finished_good)) {
+			const makes_bom_item = steps.filter((row) => row.finished_good === frm.doc.item);
+			const last_step = steps[steps.length - 1];
+			if (makes_bom_item.length === 1) {
+				makes_bom_item[0].is_final_finished_good = 1;
+			} else if (!makes_bom_item.length && !last_step.finished_good) {
+				last_step.is_final_finished_good = 1;
+			}
+		}
+
+		steps
+			.filter((row) => row.is_final_finished_good && !row.finished_good)
+			.forEach((row) => (row.finished_good = frm.doc.item));
 	},
 
 	set_company_filters: function (frm, fieldname) {
@@ -1259,6 +1280,6 @@ frappe.ui.form.on("BOM", {
 				operation_row_id: values.operation_row_id,
 				items: values.items,
 			},
-		});
+		}).then(() => frm.events.render_stage_summary(frm));
 	},
 });

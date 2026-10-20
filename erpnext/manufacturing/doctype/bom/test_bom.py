@@ -1418,6 +1418,32 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(get_step_items(bom, 1), [second_rm])
 		self.assertEqual(get_step_items(bom, 2), [sfg_item])
 
+	def test_saving_keeps_edits_to_materials_imported_for_a_changed_step_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item, sfg_item, first_rm = make_stage_items()
+		second_rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		first_bom = make_bom(item=sfg_item, raw_materials=[first_rm])
+		second_bom = make_bom(item=sfg_item, raw_materials=[second_rm])
+
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "bom_no": first_bom.name},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+
+		bom.operations[0].bom_no = second_bom.name
+		bom.add_materials_from_bom(sfg_item, second_bom.name, 1, replace=True)
+		next(row for row in bom.items if row.item_code == second_rm).qty = 5
+		bom.save()
+
+		step_items = [(row.item_code, row.qty) for row in bom.items if row.operation_row_id == 1]
+		self.assertEqual(step_items, [(second_rm, 5)])
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
