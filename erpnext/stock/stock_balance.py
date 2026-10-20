@@ -189,8 +189,13 @@ def get_ordered_qty(item_code, warehouse):
 
 	purchase_order_qty = get_purchase_order_qty(item_code, warehouse)
 	subcontracting_order_qty = get_subcontracting_order_qty(item_code, warehouse)
+	ordered_qty = flt(purchase_order_qty) + flt(subcontracting_order_qty)
 
-	return flt(purchase_order_qty) + flt(subcontracting_order_qty)
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	if stock_uom and frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"):
+		ordered_qty = flt(ordered_qty, frappe.get_precision("Bin", "ordered_qty"))
+
+	return ordered_qty
 
 
 def get_purchase_order_qty(item_code, warehouse):
