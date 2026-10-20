@@ -609,11 +609,12 @@
   },
   {
    "default": "0",
+   "description": "Each operation produces its own output item and puts it in stock, for example Cut Sheet, then Painted Sheet, then the final Box.",
    "fetch_from": "bom_no.track_semi_finished_goods",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Make in Stages",
+   "label": "Produce an Item at Each Operation",
    "read_only": 1
   },
   {
