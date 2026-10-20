@@ -88,6 +88,15 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		self.assertEqual(row.get("avg_selling_price_list_rate"), 100)
 
+	def make_report_user(self):
+		user = "variant-details-warehouse@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Variant Details", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc("User", user).add_roles("Stock Manager", "Sales User")
+		return user
+
 	def get_current_stock_for_restricted_user(self, applicable_for=None):
 		from frappe.permissions import add_user_permission
 
@@ -96,12 +105,7 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		for warehouse, qty in (("Stores - _TC", 18), ("Finished Goods - _TC", 7)):
 			make_stock_entry(item_code=variant.name, to_warehouse=warehouse, qty=qty, rate=100)
 
-		user = "variant-details-warehouse@example.com"
-		if not frappe.db.exists("User", user):
-			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "Variant Details", "send_welcome_email": 0}
-			).insert(ignore_permissions=True)
-		frappe.get_doc("User", user).add_roles("Stock Manager", "Sales User")
+		user = self.make_report_user()
 		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
 
 		frappe.set_user(user)
@@ -251,3 +255,27 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		self.assertRaises(
 			frappe.ValidationError, self.run_report, item=["_Test Variant Item"], item_group=["Products"]
 		)
+
+	def test_template_totals_leave_out_variants_hidden_by_user_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			"_Test Variant Colour Item", {"has_variants": 1, "attributes": [{"attribute": "Test Colour"}]}
+		).name
+		variants = []
+		for colour, qty in (("Red", 4), ("Green", 6)):
+			variant = create_variant(template, {"Test Colour": colour}).insert()
+			make_stock_entry(item_code=variant.name, to_warehouse="Stores - _TC", qty=qty, rate=100)
+			variants.append(variant.name)
+
+		user = self.make_report_user()
+		for item in (template, variants[0]):
+			add_user_permission("Item", item, user)
+
+		with self.set_user(user):
+			template_row, *variant_rows = self.run_report(item=[template])
+
+		self.assertEqual(template_row["current_stock"], 4)
+		self.assertEqual([row["variant_name"] for row in variant_rows], [variants[0]])
