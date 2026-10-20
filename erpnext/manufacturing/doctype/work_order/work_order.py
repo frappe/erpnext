@@ -327,10 +327,21 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
+<<<<<<< HEAD
 			self.fg_warehouse = (
 				frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
 				or self.get_production_item_warehouse()
 			)
+=======
+			self.fg_warehouse = self.get_default_fg_warehouse()
+
+	def get_default_fg_warehouse(self):
+		return (
+			(self.bom_no and frappe.get_cached_value("BOM", self.bom_no, "default_target_warehouse"))
+			or self.get_production_item_warehouse()
+			or frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+		)
+>>>>>>> 4e89ec0 (fix(manufacturing): default work order target warehouse from BOM, then item, then company)
 
 	def get_production_item_warehouse(self):
 		if not self.production_item:
