@@ -4200,10 +4200,32 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 	return False
 
 
+def has_kept_reservation(parent, row):
+	if not flt(parent.per_picked):
+		return False
+
+	if flt(row.stock_reserved_qty):
+		return True
+
+	packed_items = [d.name for d in parent.get("packed_items") if d.parent_detail_docname == row.name]
+	return bool(packed_items) and bool(
+		frappe.db.exists(
+			"Stock Reservation Entry",
+			{
+				"docstatus": 1,
+				"voucher_type": parent.doctype,
+				"voucher_no": parent.name,
+				"voucher_detail_no": ["in", packed_items],
+				"status": ["not in", ["Delivered", "Cancelled"]],
+			},
+		)
+	)
+
+
 def validate_child_on_delete(row, parent, ordered_item=None):
 	"""Check if partially transacted item (row) is being deleted."""
 	if parent.doctype == "Sales Order":
-		if flt(parent.per_picked) and flt(row.stock_reserved_qty):
+		if has_kept_reservation(parent, row):
 			frappe.throw(
 				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
 					row.idx, frappe.bold(row.item_code)
@@ -4380,13 +4402,16 @@ def update_child_qty_rate(
 					title=_("Invalid Qty"),
 				)
 
-		if parent_doctype == "Sales Order" and flt(parent.per_picked) and flt(child_item.stock_reserved_qty):
+		if parent_doctype == "Sales Order" and has_kept_reservation(parent, child_item):
 			new_stock_qty = flt(new_data.get("qty")) * (
 				flt(new_data.get("conversion_factor")) or flt(child_item.conversion_factor)
 			)
 			min_stock_qty = flt(child_item.delivered_qty) * flt(child_item.conversion_factor) + flt(
 				child_item.stock_reserved_qty
 			)
+			# Packed Items reserve in component units, so a reserved bundle keeps its qty.
+			if not flt(child_item.stock_reserved_qty):
+				min_stock_qty = flt(child_item.stock_qty)
 			if flt(new_stock_qty - min_stock_qty, child_item.precision("stock_qty")) < 0:
 				frappe.throw(
 					_(
@@ -4424,7 +4449,7 @@ def update_child_qty_rate(
 		if not uom_changed and not factor_changed:
 			return
 
-		if parent_doctype == "Sales Order" and flt(parent.per_picked) and flt(child_item.stock_reserved_qty):
+		if parent_doctype == "Sales Order" and has_kept_reservation(parent, child_item):
 			frappe.throw(
 				_(
 					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
