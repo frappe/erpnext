@@ -34,12 +34,15 @@ def get_templates(filters):
 	if not (items or item_groups):
 		return {}
 
-	template_filters = {"has_variants": 1}
+	template_filters = [{"has_variants": 1}]
 	if items:
-		template_filters["name"] = ["in", items]
+		template_filters.append({"name": ["in", items]})
 	else:
-		template_filters["disabled"] = 0
-		template_filters["item_group"] = ["in", get_item_groups_with_descendants(item_groups)]
+		template_filters.append(
+			{"disabled": 0, "item_group": ["in", get_item_groups_with_descendants(item_groups)]}
+		)
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		template_filters.append(condition)
 
 	return dict(
 		frappe.get_all(
