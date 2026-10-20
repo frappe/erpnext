@@ -906,6 +906,24 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		fractional.items[0].conversion_factor = 0.6
 		self.assertRaises(UOMMustBeIntegerError, fractional.insert)
 
+	def test_whole_number_stock_qty_and_ordered_qty_drop_conversion_dust(self):
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.333333333})
+		item_doc.save()
+		item = item_doc.name
+
+		po = create_purchase_order(item_code=item, qty=300, do_not_save=1)
+		po.items[0].uom = "Kg"
+		po.items[0].conversion_factor = 0.333333333
+		po.insert()
+		po.submit()
+
+		self.assertEqual(po.items[0].stock_qty, 100)
+		self.assertEqual(get_ordered_qty(item_code=item), 100)
+
+		create_pr_against_po(po.name, received_qty=150)
+		self.assertEqual(get_ordered_qty(item_code=item), 50)
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",
