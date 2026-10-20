@@ -119,6 +119,7 @@ def make_payment_records(name: str, supplier: str, mode_of_payment: str | None =
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je = frappe.new_doc("Journal Entry")
+	je.company = doc.company
 	je.payment_order = doc.name
 	je.posting_date = nowdate()
 	mode_of_payment_type = frappe._dict(frappe.get_all("Mode of Payment", fields=["name", "type"], as_list=1))
