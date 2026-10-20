@@ -833,9 +833,6 @@
    "visible_to_roles": [
     {
      "role": "Purchase User"
-    },
-    {
-     "role": "Purchase Manager"
     }
    ],
    "workbook": "buying"
@@ -846,7 +843,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-20 06:00:03.000000",
+ "modified": "2026-10-20 06:00:04.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "buying",
