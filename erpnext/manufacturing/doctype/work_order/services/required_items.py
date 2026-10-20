@@ -59,6 +59,9 @@ class RequiredItemsService:
 				stock_bin.update_reserved_qty_for_production()
 
 	def get_items_and_operations_from_bom(self):
+		if not self.doc.fg_warehouse:
+			self.doc.fg_warehouse = self.doc.get_default_fg_warehouse()
+
 		self.set_required_items()
 		self.doc.set_work_order_operations()
 
