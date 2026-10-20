@@ -526,3 +526,4 @@ execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report"
 erpnext.patches.v16_0.set_user_on_timesheets
 erpnext.patches.v16_0.remove_invalid_fields_from_copy_fields_to_variants
 erpnext.patches.v16_0.unhide_item_barcode_fields
+erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types
