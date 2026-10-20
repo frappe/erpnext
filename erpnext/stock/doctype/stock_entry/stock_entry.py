@@ -1660,7 +1660,7 @@ class StockEntry(StockController):
 		if self.flags.via_repost:
 			cost_left = max(cost_left, 0)
 
-		return flt(cost_left / finished_item_qty)
+		return flt(cost_left / finished_item_qty) if finished_item_qty else 0.0
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
