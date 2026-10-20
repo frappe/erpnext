@@ -1944,7 +1944,7 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def make_material_request(source_name, target_doc=None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	shortages = get_shortages_to_request(source_name)
 
 	def update_item(obj, target, source_parent):
