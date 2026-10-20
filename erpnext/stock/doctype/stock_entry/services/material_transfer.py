@@ -369,6 +369,15 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			)
 		return item_dict
 
+<<<<<<< HEAD
+=======
+	def _is_row_of_job_card_operation(self, row):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import is_row_of_operation
+
+		operation = self.job_card_operation
+		return not operation or is_row_of_operation(row, operation)
+
+>>>>>>> 7e659ac (fix(manufacturing): credit a job card transfer to its operation's rows)
 	def _resolve_wip_warehouse(self, work_order):
 		if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 			return work_order.wip_warehouse
