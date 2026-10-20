@@ -116,7 +116,9 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	)
 	data = get_entries(filters)
 
-	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
+	balance_as_per_system = get_balance_on(
+		filters["account"], filters["report_date"], company=filters["company"]
+	)
 
 	total_debit, total_credit = 0.0, 0.0
 	for d in data:
