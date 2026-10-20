@@ -462,13 +462,25 @@ def get_paid_dunning_amount(dunning: str) -> float:
 	"""Interest and fee collected for this dunning, in company currency."""
 	deduction = frappe.qb.DocType("Payment Entry Deduction")
 	payment_entry = frappe.qb.DocType("Payment Entry")
+	dunning_doc = frappe.qb.DocType("Dunning")
 
 	paid = (
 		frappe.qb.from_(deduction)
 		.join(payment_entry)
 		.on(payment_entry.name == deduction.parent)
+		.join(dunning_doc)
+		.on(dunning_doc.name == deduction.dunning)
 		.select(Sum(deduction.amount))
-		.where((deduction.dunning == dunning) & (payment_entry.docstatus == 1))
+		.where(
+			(deduction.dunning == dunning)
+			& (payment_entry.docstatus == 1)
+			& (payment_entry.payment_type == "Receive")
+			& (payment_entry.party_type == "Customer")
+			& (payment_entry.party == dunning_doc.customer)
+			& (payment_entry.company == dunning_doc.company)
+			& (deduction.account == dunning_doc.income_account)
+			& (deduction.amount < 0)
+		)
 	).run()
 
 	# the dunning amount is booked as a negative deduction, against the income account
