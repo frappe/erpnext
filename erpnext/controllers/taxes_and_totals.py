@@ -1074,7 +1074,7 @@ class calculate_taxes_and_totals:
 					self.doc.precision("base_write_off_amount"),
 				)
 				invoice_total = (
-					flt(grand_total * self.doc.conversion_rate, self.doc.precision("grand_total"))
+					flt(grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total"))
 					- base_write_off_amount
 				)
 
