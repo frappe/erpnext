@@ -701,11 +701,14 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	si_amounts = frappe.db.sql(
 		"""
 		SELECT
-			dn_detail, sum(amount) from `tabSales Invoice Item`
+			si_item.dn_detail, sum(si_item.amount)
+		FROM `tabSales Invoice Item` si_item
+		INNER JOIN `tabSales Invoice` si ON si.name = si_item.parent
 		WHERE
-			docstatus = 1
-			and dn_detail in ({})
-		GROUP BY dn_detail""".format(
+			si.docstatus = 1
+			and si.is_return = 0
+			and si_item.dn_detail in ({})
+		GROUP BY si_item.dn_detail""".format(
 			", ".join(frappe.db.escape(dn_item.name) for dn_item in unmarked_delivery_note_items)
 		)
 	)

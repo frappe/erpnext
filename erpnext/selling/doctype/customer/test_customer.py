@@ -341,6 +341,28 @@ class TestCustomer(FrappeTestCase):
 		)
 		self.assertRaises(frappe.ValidationError, customer.save)
 
+	def test_customer_outstanding_for_returned_standalone_delivery_note(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		outstanding_before = get_customer_outstanding("_Test Customer", "_Test Company")
+
+		# standalone Delivery Note, not against a Sales Order
+		dn = create_delivery_note(qty=1, rate=100)
+
+		si = frappe.get_doc(make_sales_invoice(dn.name))
+		si.insert()
+		si.submit()
+
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.submit()
+
+		# fully invoiced and then fully returned: the delivery note should not
+		# add anything to the customer's outstanding exposure
+		outstanding_after = get_customer_outstanding("_Test Customer", "_Test Company")
+		self.assertEqual(flt(outstanding_after), flt(outstanding_before))
+
 	def test_customer_payment_terms(self):
 		frappe.db.set_value(
 			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 3"
