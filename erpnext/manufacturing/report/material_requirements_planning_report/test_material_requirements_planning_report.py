@@ -391,8 +391,10 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reserved_in_wip_after_transfer_is_not_free(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
 		from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
 			get_free_stock,
 		)
