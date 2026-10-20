@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import _
-from frappe.utils import now_datetime
 
 
 def lock_company(company: str) -> None:
@@ -11,4 +10,5 @@ def lock_company(company: str) -> None:
 	if not frappe.db.get_value("Company", company, "name", for_update=True):
 		frappe.throw(_("Company does not exist."))
 	# A row write also rejects stale PostgreSQL snapshots after a competing post.
-	frappe.db.set_value("Company", company, "modified", now_datetime(), update_modified=False)
+	table = frappe.qb.DocType("Company")
+	frappe.qb.update(table).set(table.name, table.name).where(table.name == company).run()

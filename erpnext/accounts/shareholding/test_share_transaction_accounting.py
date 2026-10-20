@@ -83,7 +83,7 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 		issue.cancel()
 		self.assertEqual(frappe.db.get_value("Payment Entry", payment_entry.name, "docstatus"), 2)
 
-	def test_direct_mode_requires_a_bank_account(self):
+	def test_clearing_mode_lets_accounts_choose_the_bank_at_settlement(self):
 		settings = frappe.get_doc("Share Accounting Settings", self.company)
 		settings.accounting_mode = "Clearing"
 		settings.default_bank_account = None
@@ -92,6 +92,14 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 		self.assertFalse(issue.bank_account)
 		with self.assertRaisesRegex(frappe.ValidationError, "Bank or Cash Account"):
 			issue.make_payment_entry()
+
+		payment_entry = frappe.get_doc(
+			"Payment Entry", issue.make_payment_entry(bank_account=self.cash, reference_no="CHQ-1")
+		)
+		self.assertEqual(payment_entry.paid_to, self.cash)
+		self.assertEqual(payment_entry.reference_no, "CHQ-1")
+		issue.reload()
+		self.assertEqual((issue.bank_account, issue.reference_no), (self.cash, "CHQ-1"))
 
 	def test_accounting_preview_lists_accounts_before_and_after_submit(self):
 		draft = frappe.get_doc(
@@ -406,3 +414,37 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 				self.securities_premium_account: (0, 20),
 			},
 		)
+
+	def test_retirement_preview_matches_the_posted_entries(self):
+		holder = self.create_shareholder()
+		self.create_transaction(
+			transaction_type="Issue",
+			to_shareholder=holder,
+			from_share_number=1,
+			to_share_number=10,
+			face_value_per_share=10,
+			rate_per_share=12,
+		)
+		self.create_transaction(
+			transaction_type="Buyback",
+			from_shareholder=holder,
+			from_share_number=1,
+			to_share_number=5,
+			rate_per_share=14,
+		)
+		draft = frappe.get_doc(
+			{
+				"doctype": "Share Transaction",
+				"company": self.company,
+				"share_class": self.share_class,
+				"posting_date": nowdate(),
+				"transaction_type": "Retirement",
+				"from_share_number": 1,
+				"to_share_number": 5,
+			}
+		).insert()
+		preview = {row["account"]: (row["debit"], row["credit"]) for row in draft.get_accounting_preview()}
+		draft.submit()
+		posted = {row.account: (row.debit, row.credit) for row in draft.get_accounting_preview()}
+		self.assertEqual(preview, posted)
+		self.assertEqual(preview[self.share_capital_account], (50, 0))

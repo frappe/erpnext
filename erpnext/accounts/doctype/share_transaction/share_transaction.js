@@ -42,10 +42,7 @@ frappe.ui.form.on("Share Transaction", {
 	},
 
 	async mode_of_payment(frm) {
-		const account = await frappe.xcall(
-			"erpnext.accounts.shareholding.share_transaction_accounting.get_mode_of_payment_account",
-			{ mode_of_payment: frm.doc.mode_of_payment, company: frm.doc.company }
-		);
+		const account = await get_mode_of_payment_account(frm, frm.doc.mode_of_payment);
 		if (account) {
 			frm.set_value("bank_account", account);
 		}
@@ -95,9 +92,61 @@ function get_account_query(frm) {
 	};
 }
 
-async function make_payment_entry(frm) {
-	const name = await frm.call("make_payment_entry").then((r) => r.message);
-	frappe.set_route("Form", "Payment Entry", name);
+function make_payment_entry(frm) {
+	const dialog = new frappe.ui.Dialog({
+		title: __("Create Payment Entry"),
+		fields: [
+			{
+				fieldname: "mode_of_payment",
+				fieldtype: "Link",
+				options: "Mode of Payment",
+				label: __("Mode of Payment"),
+				default: frm.doc.mode_of_payment,
+				async onchange() {
+					const account = await get_mode_of_payment_account(frm, this.get_value());
+					if (account) dialog.set_value("bank_account", account);
+				},
+			},
+			{
+				fieldname: "bank_account",
+				fieldtype: "Link",
+				options: "Account",
+				label: __("Bank or Cash Account"),
+				reqd: 1,
+				default: frm.doc.bank_account,
+				get_query: () => get_account_query(frm),
+			},
+			{
+				fieldname: "reference_no",
+				fieldtype: "Data",
+				label: __("Cheque / Reference No"),
+				default: frm.doc.reference_no,
+			},
+			{
+				fieldname: "reference_date",
+				fieldtype: "Date",
+				label: __("Cheque / Reference Date"),
+				default: frm.doc.reference_date,
+			},
+		],
+		primary_action_label: __("Create"),
+		async primary_action(values) {
+			dialog.hide();
+			const { message } = await frm.call({ method: "make_payment_entry", doc: frm.doc, args: values });
+			frappe.set_route("Form", "Payment Entry", message);
+		},
+	});
+	dialog.show();
+}
+
+function get_mode_of_payment_account(frm, mode_of_payment) {
+	return frappe.xcall(
+		"erpnext.accounts.shareholding.share_transaction_accounting.get_mode_of_payment_account",
+		{
+			mode_of_payment,
+			company: frm.doc.company,
+		}
+	);
 }
 
 function get_preview_html(frm, rows) {

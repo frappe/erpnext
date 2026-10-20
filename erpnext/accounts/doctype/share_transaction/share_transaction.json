@@ -46,6 +46,8 @@
   "clearance_date",
   "accounting_impact_section",
   "accounting_preview",
+  "accounting_dimensions_section",
+  "dimension_col_break",
   "references_section",
   "remarks",
   "amended_from"
@@ -338,6 +340,16 @@
    "fieldname": "accounting_preview",
    "fieldtype": "HTML",
    "label": "Accounting Impact"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "references_section",

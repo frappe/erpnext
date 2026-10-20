@@ -26,6 +26,17 @@ TRANSACTION_FOLIOS = {
 }
 
 ACCOUNTING_TRANSACTION_TYPES = {"Issue", "Buyback", "Retirement", "Reissue"}
+REVERSED_FIELDS = (
+	"from_share_number",
+	"to_share_number",
+	"currency",
+	"face_value_per_share",
+	"company",
+	"share_class",
+	"transaction_type",
+	"capital_change",
+	"posting_date",
+)
 
 
 class ShareTransaction(TransactionAccounting, Document):
@@ -260,27 +271,7 @@ class ShareTransaction(TransactionAccounting, Document):
 			)
 
 	def create_reversal_entries(self):
-		original_entries = frappe.get_all(
-			"Share Ledger Entry",
-			filters={"share_transaction": self.name, "is_reversal": 0},
-			fields=[
-				"name",
-				"share_folio",
-				"from_share_number",
-				"to_share_number",
-				"quantity_change",
-				"currency",
-				"face_value_per_share",
-				"treasury_cost_change",
-				"company",
-				"share_class",
-				"transaction_type",
-				"capital_change",
-				"posting_date",
-			],
-			order_by="posting_sequence asc",
-		)
-
+		original_entries = self.get_original_ledger_entries()
 		if not original_entries:
 			frappe.throw(_("No ledger entries were found to reverse for this transaction."))
 
@@ -297,6 +288,14 @@ class ShareTransaction(TransactionAccounting, Document):
 				reversal_of=original.name,
 				original=original,
 			)
+
+	def get_original_ledger_entries(self):
+		return frappe.get_all(
+			"Share Ledger Entry",
+			filters={"share_transaction": self.name, "is_reversal": 0},
+			fields=["name", "share_folio", "quantity_change", "treasury_cost_change", *REVERSED_FIELDS],
+			order_by="posting_sequence asc",
+		)
 
 	def get_reversal_date(self):
 		from erpnext.accounts.utils import is_immutable_ledger_enabled

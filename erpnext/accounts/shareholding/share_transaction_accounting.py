@@ -7,6 +7,9 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.doctype.share_accounting_settings.share_accounting_settings import (
 	ACCOUNT_ROOT_TYPES,
 	validate_account,
@@ -291,6 +294,8 @@ class TransactionAccounting:
 	def build_payment_entry(self):
 		paid_from, paid_to = self.get_payment_entry_direction()
 		payment_entry = frappe.new_doc("Payment Entry")
+		for dimension in get_accounting_dimensions():
+			payment_entry.set(dimension, self.get(dimension))
 		payment_entry.update(
 			{
 				"payment_type": "Internal Transfer",
@@ -315,18 +320,41 @@ class TransactionAccounting:
 		payment_entry.insert()
 		if submit:
 			payment_entry.submit()
-		self.db_set("payment_entry", payment_entry.name, update_modified=False)
+		self.db_set(
+			{
+				"payment_entry": payment_entry.name,
+				"mode_of_payment": self.mode_of_payment,
+				"bank_account": self.bank_account,
+				"reference_no": self.reference_no,
+				"reference_date": self.reference_date,
+			},
+			update_modified=False,
+		)
 		return payment_entry.name
 
 	@frappe.whitelist(methods=["POST"])
-	def make_payment_entry(self):
-		self.reload()
-		self.check_permission("write")
+	def make_payment_entry(
+		self,
+		bank_account: str | None = None,
+		mode_of_payment: str | None = None,
+		reference_no: str | None = None,
+		reference_date: str | None = None,
+	):
 		frappe.db.get_value("Share Transaction", self.name, "name", for_update=True)
+		self.reload()
+		self.check_permission("read")
+		frappe.has_permission("Payment Entry", "create", throw=True)
 		lock_company(self.company)
 		self.validate_can_create_payment_entry()
+		self.set_payment_details(bank_account, mode_of_payment, reference_no, reference_date)
 		self.validate_settlement_account("bank_account")
 		return self.create_settlement_payment_entry()
+
+	def set_payment_details(self, bank_account, mode_of_payment, reference_no, reference_date):
+		self.bank_account = bank_account or self.bank_account
+		self.mode_of_payment = mode_of_payment or self.mode_of_payment
+		self.reference_no = reference_no or self.reference_no
+		self.reference_date = reference_date or self.reference_date
 
 	def validate_can_create_payment_entry(self):
 		if self.docstatus != 1 or self.transaction_type not in PAYMENT_TRANSACTION_TYPES:
@@ -404,6 +432,7 @@ class TransactionAccounting:
 			self.from_folio = frappe.db.get_value(
 				"Share Folio", {"company": self.company, "is_treasury": 1}, "name"
 			)
+			self.set_face_value()
 		self.calculate_accounting_values()
 
 	def get_preview_row(self, row):

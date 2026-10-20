@@ -608,6 +608,7 @@ accounting_dimension_doctypes = [
 	"Sales Invoice",
 	"Purchase Invoice",
 	"Payment Entry",
+	"Share Transaction",
 	"Asset",
 	"Stock Entry",
 	"Budget",

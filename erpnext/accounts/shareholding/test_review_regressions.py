@@ -28,6 +28,33 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 			**values,
 		)
 
+	def test_unrelated_issue_can_be_cancelled_after_a_transfer_is_cancelled(self):
+		holder = self.create_shareholder()
+		other_holder = self.create_shareholder()
+		sunday, monday, tuesday = add_days(nowdate(), -3), add_days(nowdate(), -2), add_days(nowdate(), -1)
+		values = {
+			"transaction_type": "Issue",
+			"to_shareholder": holder,
+			"face_value_per_share": 10,
+			"rate_per_share": 15,
+		}
+		self.create_transaction(from_share_number=4, to_share_number=6, posting_date=sunday, **values)
+		first_issue = self.create_transaction(
+			from_share_number=1, to_share_number=3, posting_date=monday, **values
+		)
+		transfer = self.create_transaction(
+			transaction_type="Transfer",
+			from_shareholder=holder,
+			to_shareholder=other_holder,
+			from_share_number=4,
+			to_share_number=6,
+			posting_date=tuesday,
+		)
+		transfer.cancel()
+		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=False):
+			first_issue.cancel()
+		self.assertEqual(frappe.db.get_value("Share Transaction", first_issue.name, "docstatus"), 2)
+
 	def test_cancel_rejects_changed_submitted_range(self):
 		issue = self.issue()
 		transfer = self.create_transaction(

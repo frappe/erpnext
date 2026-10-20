@@ -106,67 +106,6 @@ def get_face_value_per_share(
 	return selected_face_value
 
 
-def get_treasury_cost_per_share(
-	company,
-	share_class,
-	share_folio,
-	from_share_number,
-	to_share_number,
-	exclude_share_transaction=None,
-):
-	"""Return one historical treasury cost per share for the complete range.
-
-	A single Share Transaction cannot combine treasury lots carrying different costs;
-	the user must post those lots as separate transactions.
-	"""
-	entries = get_range_entries(
-		company, share_class, from_share_number, to_share_number, share_folio, exclude_share_transaction
-	)
-
-	start = cint(from_share_number)
-	end = cint(to_share_number)
-	events = defaultdict(lambda: [0, 0.0])
-	events[start]
-	events[end + 1]
-	for entry in entries:
-		entry_start = max(start, cint(entry.from_share_number))
-		entry_end = min(end, cint(entry.to_share_number))
-		entry_quantity = abs(cint(entry.quantity_change))
-		if not entry_quantity:
-			continue
-
-		cost_change = flt(entry.treasury_cost_change)
-
-		quantity_direction = 1 if cint(entry.quantity_change) > 0 else -1
-		cost_per_share_change = cost_change / entry_quantity
-		events[entry_start][0] += quantity_direction
-		events[entry_start][1] += cost_per_share_change
-		events[entry_end + 1][0] -= quantity_direction
-		events[entry_end + 1][1] -= cost_per_share_change
-
-	coverage = 0
-	cost_per_share = 0.0
-	selected_cost = None
-	points = sorted(events)
-	for index, point in enumerate(points[:-1]):
-		coverage += events[point][0]
-		cost_per_share += events[point][1]
-		if points[index + 1] <= point:
-			continue
-		if coverage != 1 or cost_per_share <= 0:
-			frappe.throw(_("Could not determine treasury cost for the complete selected share range."))
-		if selected_cost is None:
-			selected_cost = cost_per_share
-		elif abs(selected_cost - cost_per_share) > 0.000001:
-			frappe.throw(
-				_(
-					"The selected range contains treasury shares with different costs. Use separate transactions."
-				)
-			)
-
-	return flt(selected_cost)
-
-
 def money(value, currency):
 	from frappe.model.meta import get_field_precision
 
