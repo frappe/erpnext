@@ -12,8 +12,8 @@ import frappe.defaults
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import Order
-from frappe.query_builder.functions import Min, Sum
+from frappe.query_builder import Case, Order
+from frappe.query_builder.functions import IfNull, Min, Sum
 from frappe.utils import (
 	cint,
 	comma_and,
@@ -270,30 +270,33 @@ class MaterialRequest(BuyingController):
 
 	def validate_pp_qty(self):
 		items_from_pp = [item for item in self.items if item.material_request_plan_item]
-		if items_from_pp:
-			items_mr_plan_items = [item.material_request_plan_item for item in items_from_pp]
-			table = frappe.qb.DocType("Material Request Plan Item")
-			query = (
-				frappe.qb.from_(table)
-				.select(table.name, (table.quantity - table.requested_qty).as_("available_qty"))
-				.where(table.name.isin(items_mr_plan_items))
-			)
-			result = query.run(as_dict=True)
+		if not items_from_pp:
+			return
 
-			requested_qty = {}
-			for item in items_from_pp:
-				plan_item = item.material_request_plan_item
-				requested_qty[plan_item] = requested_qty.get(plan_item, 0) + item.qty
-				row = next(r for r in result if r.name == item.material_request_plan_item)
-				if (
-					item.qty > row.available_qty
-					or flt(requested_qty[plan_item], item.precision("qty")) > row.available_qty
-				):
-					frappe.throw(
-						_("Quantity cannot be greater than {0} for Item {1}").format(
-							row.available_qty, item.item_code
-						)
+		plan_items = self.get_plan_items(items_from_pp)
+		requested_qty = {}
+		for item in items_from_pp:
+			row = plan_items[item.material_request_plan_item]
+			precision = item.precision("qty")
+			available_qty = flt(flt(row.quantity) - flt(row.requested_qty), precision)
+			qty = get_qty_in_plan_uom(item, row)
+			requested_qty[row.name] = requested_qty.get(row.name, 0) + qty
+			if max(flt(qty, precision), flt(requested_qty[row.name], precision)) > available_qty:
+				frappe.throw(
+					_("Quantity cannot be greater than {0} for Item {1}").format(
+						available_qty, item.item_code
 					)
+				)
+
+	def get_plan_items(self, items):
+		return {
+			row.name: row
+			for row in frappe.get_all(
+				"Material Request Plan Item",
+				filters={"name": ("in", {item.material_request_plan_item for item in items})},
+				fields=["name", "quantity", "requested_qty", "conversion_factor"],
+			)
+		}
 
 	def before_update_after_submit(self):
 		self.validate_schedule_date()
@@ -301,11 +304,25 @@ class MaterialRequest(BuyingController):
 	def validate_material_request_type(self):
 		"""Validate fields in accordance with selected type"""
 
-		if self.material_request_type != "Customer Provided":
+		if self.material_request_type == "Customer Provided":
+			self.validate_customer_provided_items()
+		else:
 			self.customer = None
 
 		if self.material_request_type == "Subcontracting":
 			self.validate_subcontracted_items()
+
+	def validate_customer_provided_items(self):
+		items = {d.item_code for d in self.items if d.item_code}
+		provided_items = frappe.get_all(
+			"Item", filters={"name": ("in", items), "is_customer_provided_item": 1}, pluck="name"
+		)
+		if other_items := items - set(provided_items):
+			frappe.throw(
+				_("Items {0} are not Customer Provided Items").format(
+					", ".join(frappe.bold(d) for d in sorted(other_items))
+				)
+			)
 
 	def validate_subcontracted_items(self):
 		items = frappe.get_all(
@@ -334,11 +351,11 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
-		if self.material_request_type in ("Purchase", "Subcontracting"):
-			self.update_prevdoc_status()
-		if self.material_request_type == "Purchase":
-			if frappe.db.exists("Budget", {"applicable_on_material_request": 1, "docstatus": 1}):
-				self.validate_budget()
+		self.update_prevdoc_status()
+		if self.material_request_type == "Purchase" and frappe.db.exists(
+			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
+		):
+			self.validate_budget()
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -393,8 +410,7 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
-		if self.material_request_type in ("Purchase", "Subcontracting"):
-			self.update_prevdoc_status()
+		self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
 		mr_items_ordered_qty = {}
@@ -406,7 +422,13 @@ class MaterialRequest(BuyingController):
 			qty_field = doctype.transfer_qty
 		elif self.material_request_type == "Manufacture":
 			doctype = frappe.qb.DocType("Work Order")
-			qty_field = doctype.qty
+			qty_field = (
+				Case()
+				.when(
+					(doctype.status == "Closed") & (doctype.produced_qty < doctype.qty), doctype.produced_qty
+				)
+				.else_(doctype.qty)
+			)
 
 		if doctype and qty_field:
 			query = (
@@ -419,9 +441,6 @@ class MaterialRequest(BuyingController):
 				)
 				.groupby(doctype.material_request_item)
 			)
-
-			if self.material_request_type == "Manufacture":
-				query = query.where(doctype.status != "Closed")
 
 			mr_items_ordered_qty = frappe._dict(query.run())
 
@@ -464,7 +483,9 @@ class MaterialRequest(BuyingController):
 						)
 
 				elif self.material_request_type == "Manufacture":
-					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
+					ordered_qty = flt(mr_items_ordered_qty.get(d.name))
+					self.validate_work_order_qty(d, ordered_qty, mr_qty_allowance)
+					d.ordered_qty = ordered_qty
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
@@ -479,6 +500,22 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
+
+	def validate_work_order_qty(self, row, ordered_qty, mr_qty_allowance):
+		precision = row.precision("ordered_qty")
+		if flt(ordered_qty, precision) <= flt(row.ordered_qty, precision):
+			return
+
+		if self.status == "Stopped":
+			frappe.throw(_("Material Request {0} is stopped").format(self.name), frappe.InvalidStatusError)
+
+		allowed_qty = flt(row.stock_qty + row.stock_qty * flt(mr_qty_allowance) / 100, precision)
+		if flt(ordered_qty, precision) > allowed_qty:
+			frappe.throw(
+				_(
+					"The total Work Order quantity {0} in Material Request {1} cannot be greater than allowed requested quantity {2} for Item {3}"
+				).format(ordered_qty, self.name, allowed_qty, row.item_code)
+			)
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -514,25 +551,60 @@ class MaterialRequest(BuyingController):
 			)
 
 	def update_requested_qty_in_production_plan(self, cancel=False):
-		production_plans = []
-		for d in self.get("items"):
-			if d.production_plan and d.material_request_plan_item:
-				requested_qty = frappe.get_value(
-					"Material Request Plan Item", d.material_request_plan_item, "requested_qty"
-				)
-				qty = (requested_qty + d.qty) if not cancel else (requested_qty - d.qty)
-				frappe.db.set_value(
-					"Material Request Plan Item", d.material_request_plan_item, "requested_qty", qty
-				)
+		items_from_pp = [d for d in self.items if d.production_plan and d.material_request_plan_item]
+		if not items_from_pp:
+			return
 
-				if d.production_plan not in production_plans:
-					production_plans.append(d.production_plan)
+		update_plan_item_requested_qty({d.material_request_plan_item for d in items_from_pp})
 
-		for production_plan in production_plans:
+		for production_plan in {d.production_plan for d in items_from_pp}:
 			doc = frappe.get_doc("Production Plan", production_plan)
 			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
+
+
+def update_plan_item_requested_qty(plan_item_names):
+	mr_item = frappe.qb.DocType("Material Request Item")
+	plan_item = frappe.qb.DocType("Material Request Plan Item")
+	requested = (
+		frappe.qb.from_(plan_item)
+		.left_join(mr_item)
+		.on((mr_item.material_request_plan_item == plan_item.name) & (mr_item.docstatus == 1))
+		.select(
+			plan_item.name, plan_item.conversion_factor, Sum(IfNull(mr_item.stock_qty, 0)).as_("stock_qty")
+		)
+		.where(plan_item.name.isin(list(plan_item_names)))
+		.groupby(plan_item.name, plan_item.conversion_factor)
+	).run(as_dict=True)
+
+	for row in requested:
+		requested_qty = flt(row.stock_qty) / (flt(row.conversion_factor) or 1)
+		frappe.db.set_value("Material Request Plan Item", row.name, "requested_qty", requested_qty)
+
+
+def get_qty_in_plan_uom(item, plan_item):
+	return flt(item.stock_qty) / (flt(plan_item.conversion_factor) or 1)
+
+
+def validate_request_not_stopped(source_name):
+	if frappe.db.get_value("Material Request", source_name, "status") == "Stopped":
+		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
+
+
+def get_pending_pick_qty(row):
+	return flt(row.stock_qty) - max(flt(row.ordered_qty), flt(row.picked_qty))
+
+
+def get_draft_work_order_qty(material_request):
+	work_order = frappe.qb.DocType("Work Order")
+	return frappe._dict(
+		frappe.qb.from_(work_order)
+		.select(work_order.material_request_item, Sum(work_order.qty))
+		.where((work_order.material_request == material_request) & (work_order.docstatus == 0))
+		.groupby(work_order.material_request_item)
+		.run()
+	)
 
 
 def is_valid_buying_price_list(price_list: str | None) -> bool:
@@ -650,6 +722,7 @@ def make_purchase_order(
 	target_doc: str | dict | Document | None = None,
 	args: str | dict | None = None,
 ):
+	validate_request_not_stopped(source_name)
 	if args is None:
 		args = frappe.flags.args or {}
 	if isinstance(args, str):
@@ -843,6 +916,8 @@ def make_purchase_orders_by_supplier(source_name: str, item_suppliers: str | lis
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = obj.ordered_qty or obj.received_qty
 		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
@@ -1002,7 +1077,9 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 
 
 @frappe.whitelist()
-def make_supplier_quotation(source_name, target_doc=None):
+def make_supplier_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
 
@@ -1021,6 +1098,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 					"parent": "material_request",
 					"sales_order": "sales_order",
 				},
+				"condition": lambda doc: flt(doc.ordered_qty or doc.received_qty) < flt(doc.stock_qty),
 			},
 		},
 		target_doc,
@@ -1033,6 +1111,8 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
@@ -1153,9 +1233,11 @@ def raise_work_orders(material_request: str, company: str):
 	errors = []
 	work_orders = []
 	default_wip_warehouse = frappe.get_cached_value("Company", company, "default_wip_warehouse")
+	draft_qty = get_draft_work_order_qty(mr.name)
 
 	for d in mr.items:
-		if (d.stock_qty - d.ordered_qty) > 0:
+		pending_qty = flt(d.stock_qty - d.ordered_qty - flt(draft_qty.get(d.name)), d.precision("stock_qty"))
+		if pending_qty > 0:
 			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1, "is_active": 1}) or (
 				(variant_of := frappe.get_value("Item", d.item_code, "variant_of"))
 				and frappe.db.exists("BOM", {"item": variant_of, "is_default": 1, "is_active": 1})
@@ -1164,7 +1246,7 @@ def raise_work_orders(material_request: str, company: str):
 				wo_order.update(
 					{
 						"production_item": d.item_code,
-						"qty": d.stock_qty - d.ordered_qty,
+						"qty": pending_qty,
 						"fg_warehouse": d.warehouse,
 						"wip_warehouse": default_wip_warehouse,
 						"description": d.description,
@@ -1219,9 +1301,11 @@ def raise_work_orders(material_request: str, company: str):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
-		qty = flt((obj.stock_qty - obj.picked_qty) / target.conversion_factor, obj.precision("qty"))
+		qty = flt(get_pending_pick_qty(obj) / target.conversion_factor, obj.precision("qty"))
 		target.qty = qty
 		target.stock_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
@@ -1233,7 +1317,7 @@ def create_pick_list(source_name, target_doc=None):
 			"Material Request": {
 				"doctype": "Pick List",
 				"field_map": {"material_request_type": "purpose"},
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Material Transfer"]},
 			},
 			"Material Request Item": {
 				"doctype": "Pick List Item",
@@ -1243,10 +1327,7 @@ def create_pick_list(source_name, target_doc=None):
 					"from_warehouse": "warehouse",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: (
-					flt(doc.picked_qty, doc.precision("picked_qty"))
-					< flt(doc.stock_qty, doc.precision("stock_qty"))
-				),
+				"condition": lambda doc: flt(get_pending_pick_qty(doc), doc.precision("stock_qty")) > 0,
 			},
 		},
 		target_doc,

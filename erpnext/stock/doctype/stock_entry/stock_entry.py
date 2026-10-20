@@ -331,6 +331,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_work_order_status_for_return()
+		self.validate_job_card_for_semi_finished_goods()
 		self.validate_returned_qty_within_work_order()
 		self.validate_alternative_items()
 		self.validate_source_stock_entry()
@@ -1172,6 +1173,32 @@ class StockEntry(StockController, SubcontractingInwardController):
 			),
 			title=_("Work Order Not Finished"),
 		)
+
+	def validate_job_card_for_semi_finished_goods(self):
+		"""Semi-finished goods move per operation: through its Job Card, or its Subcontracting Order
+		when subcontracted."""
+		if (
+			self.purpose != "Material Transfer for Manufacture"
+			or self.is_return
+			or not self.pro_doc.get("track_semi_finished_goods")
+		):
+			return
+
+		if not self.job_card:
+			frappe.throw(
+				_("Transfer materials for Work Order {0} from its Job Cards.").format(
+					get_link_to_form("Work Order", self.work_order)
+				),
+				title=_("Job Card Required"),
+			)
+
+		if frappe.db.get_value("Job Card", self.job_card, "is_subcontracted"):
+			frappe.throw(
+				_("Send materials for Job Card {0} to the supplier from its Subcontracting Order.").format(
+					get_link_to_form("Job Card", self.job_card)
+				),
+				title=_("Subcontracted Job Card"),
+			)
 
 	def validate_returned_qty_within_work_order(self):
 		if not (self.is_return and self.pro_doc and self.purpose == "Material Transfer for Manufacture"):
@@ -2125,7 +2152,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.flags.via_repost:
 			cost_left = max(cost_left, 0)
 
-		return flt(cost_left / finished_item_qty)
+		return flt(cost_left / finished_item_qty) if finished_item_qty else 0.0
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank

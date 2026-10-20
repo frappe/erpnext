@@ -4012,8 +4012,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(sre.transferred_qty, 0)
 		self.assertEqual(sre.status, "Reserved")
 
-<<<<<<< HEAD
-=======
 	def test_subcontracting_order_takes_over_the_subcontracted_operation_inputs(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -4039,7 +4037,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(get_projected_qty(cloth, reserve_warehouse), 0)
 
 	def test_semi_finished_goods_work_order_transfers_from_job_cards(self):
-		from erpnext.manufacturing.doctype.job_card.mapper import (
+		from erpnext.manufacturing.doctype.job_card.job_card import (
 			make_stock_entry as make_stock_entry_from_job_card,
 		)
 
@@ -4048,6 +4046,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4))
+		# fetching items unlinks a semi-finished goods Work Order; link it as an API caller can
+		transfer.work_order = wo.name
 		self.assertRaisesRegex(frappe.ValidationError, "from its Job Cards", transfer.insert)
 
 		# The subcontracted operation's material goes through its Subcontracting Order.
@@ -4055,7 +4055,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "from its Subcontracting Order", transfer.insert)
 
 	def test_job_card_transfer_is_credited_to_its_operation(self):
-		from erpnext.manufacturing.doctype.job_card.mapper import (
+		from erpnext.manufacturing.doctype.job_card.job_card import (
 			make_stock_entry as make_stock_entry_from_job_card,
 		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
@@ -4169,8 +4169,8 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	def subcontract_work_order(self, wo, qty, reserve_warehouse):
 		"""Submit a Subcontracting Order for qty of the Work Order's subcontracted Job Card."""
-		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
-		from erpnext.manufacturing.doctype.job_card.mapper import make_subcontracting_po
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
+		from erpnext.manufacturing.doctype.job_card.job_card import make_subcontracting_po
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		supplier_warehouse = create_warehouse("Test SOI Supplier WH", company="_Test Company")
@@ -4191,7 +4191,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		sco.submit()
 		return sco
 
->>>>>>> 0f5c20a (test: job card transfer is credited to its operation)
 	def test_rework_keeps_the_reworked_item_reserved(self):
 		warehouse = "Stores - _TC"
 		item = make_item("Test Rework Item", {"is_stock_item": 1}).name
@@ -7502,3 +7501,7 @@ def complete_review_job_card(work_order, qty, hours_ago=2):
 	)
 	job_card.submit()
 	return job_card
+
+
+def get_projected_qty(item_code, warehouse):
+	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "projected_qty") or 0

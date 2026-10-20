@@ -1568,14 +1568,33 @@ class WorkOrder(Document):
 			"Production Plan Item", self.production_plan_item, "sales_order_item"
 		)
 
+		ordered_qty = self.get_ordered_qty_of_plan_item()
 		for plan_reference in prod_plan.prod_plan_references:
-			work_order_qty = 0.0
-			if plan_reference.item_reference == item_reference:
-				if self.docstatus == 1:
-					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
-				frappe.db.set_value(
-					"Sales Order Item", plan_reference.sales_order_item, "work_order_qty", work_order_qty
+			if plan_reference.item_reference != item_reference:
+				continue
+
+			allocated_qty = min(flt(plan_reference.qty), ordered_qty)
+			ordered_qty -= allocated_qty
+			frappe.db.set_value(
+				"Sales Order Item",
+				plan_reference.sales_order_item,
+				"work_order_qty",
+				allocated_qty / total_bundle_qty,
+			)
+
+	def get_ordered_qty_of_plan_item(self):
+		work_order = frappe.qb.DocType("Work Order")
+		return flt(
+			(
+				frappe.qb.from_(work_order)
+				.select(Sum(work_order.qty))
+				.where(
+					(work_order.production_plan_item == self.production_plan_item)
+					& (work_order.docstatus == 1)
+					& (work_order.status != "Closed")
 				)
+			).run()[0][0]
+		)
 
 	def update_completed_qty_in_material_request(self):
 		if self.material_request and self.material_request_item:
@@ -1927,9 +1946,9 @@ class WorkOrder(Document):
 		if self.skip_transfer:
 			return
 
-		transferred_by_key = self._material_transfer_qty_by_item_and_warehouse()
+		transferred_by_key = self._material_transfer_qty_by_item_warehouse_and_operation()
 		transferred_items = frappe._dict()
-		for (item_code, _warehouse), qty in transferred_by_key.items():
+		for (item_code, _warehouse, _operation_row_id, _operation), qty in transferred_by_key.items():
 			transferred_items[item_code] = flt(transferred_items.get(item_code)) + qty
 
 		row_wise_serial_batch = frappe._dict({})
@@ -1985,17 +2004,22 @@ class WorkOrder(Document):
 			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
 		return transferred_items
 
-	def _material_transfer_qty_by_item_and_warehouse(self):
+	def _material_transfer_qty_by_item_warehouse_and_operation(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(
@@ -2004,11 +2028,17 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
 			)
-			.groupby(ste_child.item_code, ste_child.original_item, ste_child.s_warehouse)
+			.groupby(
+				ste_child.item_code,
+				ste_child.original_item,
+				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
+			)
 		)
 		qty_by_key = {}
 		for d in query.run(as_dict=1) or []:
-			key = (d.original_item or d.item_code, d.s_warehouse)
+			key = (d.original_item or d.item_code, d.s_warehouse, d.operation_row_id, d.operation)
 			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
 
 		return qty_by_key
@@ -3217,16 +3247,24 @@ def get_default_warehouse(company):
 	}
 
 
-def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
+def distribute_transfers_over_rows(rows, qty_by_item_warehouse_and_operation):
+	"""Split each transfer over the rows of its item, keeping a Job Card's transfer on its operation."""
 	rows_by_item = {}
 	for row in rows:
 		rows_by_item.setdefault(row.item_code, []).append(row)
 
 	qty_by_row = {row.name: 0.0 for row in rows}
-	for (item_code, warehouse), qty in qty_by_item_and_warehouse.items():
+	for key, qty in qty_by_item_warehouse_and_operation.items():
+		item_code, warehouse, operation_row_id, operation = key
 		item_rows = rows_by_item.get(item_code)
 		if not item_rows:
 			continue
+
+		if operation:
+			job_card_operation = frappe._dict(operation_row_id=operation_row_id, operation=operation)
+			item_rows = [
+				row for row in item_rows if is_row_of_operation(row, job_card_operation)
+			] or item_rows
 
 		share_by_row = {}
 		matching_rows = [row for row in item_rows if row.source_warehouse == warehouse] or item_rows
@@ -3235,6 +3273,14 @@ def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
 			qty_by_row[name] += share
 
 	return qty_by_row
+
+
+def is_row_of_operation(row, operation):
+	"""Whether a required item row belongs to a Job Card's operation."""
+	if cint(row.operation_row_id) and cint(operation.operation_row_id):
+		return cint(row.operation_row_id) == cint(operation.operation_row_id)
+
+	return not row.operation or row.operation == operation.operation
 
 
 def distribute_over_rows(rows, qty_by_item):
@@ -3599,6 +3645,15 @@ def get_reserved_qty_for_production(
 		)
 		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
 		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+		# what Subcontracting Orders took over is their demand, not the Work Order's, even when they
+		# send what the Work Order already transferred
+		not_subcontracted = wo_item.required_qty - wo_item.subcontracted_qty
+		qty_field = (
+			Case()
+			.when(not_subcontracted <= 0, 0.0)
+			.when(not_subcontracted < qty_field, not_subcontracted)
+			.else_(qty_field)
+		)
 
 	query = (
 		frappe.qb.from_(wo)
