@@ -25,9 +25,68 @@ class TestModeofPayment(ERPNextTestSuite):
 		return doc
 
 	def test_valid_mode_of_payment_saves(self):
-		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC")])
-		doc.insert()
-		self.assertTrue(doc.name)
+		for account in ("_Test Bank - _TC", "Cash - _TC", "Debtors - _TC"):
+			with self.subTest(account=account):
+				doc = self.make_mop(accounts=[(COMPANY, account)]).insert()
+				self.assertTrue(doc.name)
+
+	def test_invalid_default_accounts_are_rejected(self):
+		frappe.db.set_value("Account", "Cash - _TC", "disabled", 1)
+		for account, error in (
+			("Bank Accounts - _TC", "must be a ledger account"),
+			("Sales - _TC", "must be a ledger account"),
+			("Creditors - _TC", "must be a ledger account"),
+			("Cash - _TC", "is disabled"),
+		):
+			with self.subTest(account=account):
+				doc = self.make_mop(accounts=[(COMPANY, account)])
+				with self.assertRaisesRegex(frappe.ValidationError, error):
+					doc.insert()
+
+	def test_disabled_mode_cannot_be_used_on_transactions(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		mode = self.make_mop(accounts=[(COMPANY, "Cash - _TC")]).insert()
+		payment = create_payment_entry()
+		payment.mode_of_payment = mode.name
+		payment.insert()
+		mode.enabled = 0
+		mode.save()
+		with self.assertRaisesRegex(frappe.ValidationError, "Mode of Payment .* is disabled"):
+			payment.submit()
+
+		payment.reload()
+		mode.enabled = 1
+		mode.save()
+		payment.submit()
+		self.assertEqual(payment.docstatus, 1)
+		mode.enabled = 0
+		mode.save()
+		payment.cancel()
+		self.assertEqual(payment.docstatus, 2)
+
+		invoice = create_sales_invoice()
+		request = frappe.get_doc(
+			{
+				"doctype": "Payment Request",
+				"payment_request_type": "Inward",
+				"company": invoice.company,
+				"reference_doctype": invoice.doctype,
+				"reference_name": invoice.name,
+				"grand_total": invoice.grand_total,
+				"currency": invoice.currency,
+				"mode_of_payment": mode.name,
+				"mute_email": 1,
+			}
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "Mode of Payment .* is disabled"):
+			request.insert()
+
+		invoice = create_sales_invoice(is_pos=1, do_not_save=True)
+		invoice.append("payments", {"mode_of_payment": mode.name, "amount": 100, "account": "Cash - _TC"})
+		with self.assertRaisesRegex(frappe.ValidationError, "Mode of Payment .* is disabled"):
+			invoice.insert()
 
 	def test_account_of_wrong_company_throws(self):
 		other_account = frappe.db.get_value("Account", {"company": "_Test Company 1", "is_group": 0}, "name")
