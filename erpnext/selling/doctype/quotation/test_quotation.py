@@ -208,6 +208,12 @@ class TestQuotation(ERPNextTestSuite):
 		qo.save()
 		self.assertEqual(qo.items[0].qty, 1)
 
+	def test_quotation_zero_qty_cannot_be_forced_by_the_client(self):
+		qo = make_quotation(qty=0, do_not_save=True)
+		qo.has_unit_price_items = 1
+
+		self.assertRaises(InvalidQtyError, qo.save)
+
 	def test_quotation_zero_qty(self):
 		"""
 		Test if Quote with zero qty (Unit Price Item) is conditionally allowed.

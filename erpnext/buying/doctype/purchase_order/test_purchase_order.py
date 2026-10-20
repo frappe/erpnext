@@ -76,6 +76,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.append("items", {"item_code": "_Test Item 2", "qty": -1, "rate": 100})
 		self.assertRaises(frappe.ValidationError, po.save)
 
+	def test_purchase_order_zero_qty_cannot_be_forced_by_the_client(self):
+		po = create_purchase_order(qty=0, do_not_save=True)
+		po.has_unit_price_items = 1
+
+		self.assertRaises(InvalidQtyError, po.save)
+
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
