@@ -510,6 +510,7 @@ scheduler_events = {
 	},
 	"hourly": [
 		"erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.fail_overdue_agreements",
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
