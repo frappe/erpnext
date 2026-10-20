@@ -907,6 +907,65 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			self.assertEqual(location.stock_reserved_qty, 0)
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
+	def test_update_items_keeps_pick_list_reservation(self) -> None:
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		so = make_sales_order(item_code=self.sr_item.name, qty=10, warehouse=self.warehouse)
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 4
+		dn.submit()
+		so.reload()
+
+		def update_items(qty):
+			row = so.items[0]
+			trans_items = [
+				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 250, "idx": 1}
+			]
+			update_child_qty_rate("Sales Order", frappe.as_json(trans_items), so.name)
+
+		# Test - 1: Changing the rate should keep the picked reservation.
+		update_items(10)
+		so.reload()
+		self.assertEqual(so.items[0].stock_reserved_qty, 6)
+
+		# Test - 2: Qty can't drop below delivered + reserved qty.
+		self.assertRaises(frappe.ValidationError, update_items, 9)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
+	def test_update_items_keeps_pick_list_reservation_for_product_bundle(self) -> None:
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		bundle, _components = create_product_bundle(quantities=[2, 3], warehouse=self.warehouse)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+		so.reload()
+
+		row = so.items[0]
+		trans_items = [{"docname": row.name, "item_code": bundle, "qty": 1, "rate": row.rate, "idx": 1}]
+
+		# Packed Item reservations block reducing the bundle qty.
+		self.assertRaises(
+			frappe.ValidationError,
+			update_child_qty_rate,
+			"Sales Order",
+			frappe.as_json(trans_items),
+			so.name,
+		)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,

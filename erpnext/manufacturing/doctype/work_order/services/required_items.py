@@ -11,7 +11,7 @@ callers and the whitelisted entry point keep working unchanged.
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
-from frappe.utils import flt
+from frappe.utils import cint, flt
 from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
@@ -169,7 +169,7 @@ class RequiredItemsService:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name)
 
 		transferred_by_row = distribute_transfers_over_rows(
-			self.doc.required_items, self._material_transfer_qty_by_item_and_warehouse()
+			self.doc.required_items, self._material_transfer_qty_by_item_warehouse_and_operation()
 		)
 		for row in self.doc.required_items:
 			transferred_qty = transferred_by_row[row.name]
@@ -358,7 +358,7 @@ class RequiredItemsService:
 
 		return qty_by_item
 
-	def _material_transfer_qty_by_item_and_warehouse(self):
+	def _material_transfer_qty_by_item_warehouse_and_operation(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 		job_card = frappe.qb.DocType("Job Card")
@@ -372,15 +372,23 @@ class RequiredItemsService:
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, 0))
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
-			.groupby(ste_child.item_code, ste_child.original_item, ste_child.s_warehouse)
+			.groupby(
+				ste_child.item_code,
+				ste_child.original_item,
+				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
+			)
 		)
 		qty_by_key = {}
 		for d in query.run(as_dict=1) or []:
-			key = (d.original_item or d.item_code, d.s_warehouse)
+			key = (d.original_item or d.item_code, d.s_warehouse, d.operation_row_id, d.operation)
 			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
 
 		return qty_by_key
@@ -541,16 +549,24 @@ def _find_bom_item(item_dict, row):
 			return item_dict[key]
 
 
-def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
+def distribute_transfers_over_rows(rows, qty_by_item_warehouse_and_operation):
+	"""Split each transfer over the rows of its item, keeping a Job Card's transfer on its operation."""
 	rows_by_item = {}
 	for row in rows:
 		rows_by_item.setdefault(row.item_code, []).append(row)
 
 	qty_by_row = {row.name: 0.0 for row in rows}
-	for (item_code, warehouse), qty in qty_by_item_and_warehouse.items():
+	for key, qty in qty_by_item_warehouse_and_operation.items():
+		item_code, warehouse, operation_row_id, operation = key
 		item_rows = rows_by_item.get(item_code)
 		if not item_rows:
 			continue
+
+		if operation:
+			job_card_operation = frappe._dict(operation_row_id=operation_row_id, operation=operation)
+			item_rows = [
+				row for row in item_rows if is_row_of_operation(row, job_card_operation)
+			] or item_rows
 
 		share_by_row = {}
 		matching_rows = [row for row in item_rows if row.source_warehouse == warehouse] or item_rows
@@ -559,6 +575,14 @@ def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
 			qty_by_row[name] += share
 
 	return qty_by_row
+
+
+def is_row_of_operation(row, operation):
+	"""Whether a required item row belongs to a Job Card's operation."""
+	if cint(row.operation_row_id) and cint(operation.operation_row_id):
+		return cint(row.operation_row_id) == cint(operation.operation_row_id)
+
+	return not row.operation or row.operation == operation.operation
 
 
 def distribute_over_rows(rows, qty_by_item):

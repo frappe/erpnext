@@ -166,7 +166,10 @@ def _item_query_filters(filters):
 			query_filters.append(["has_variants", "=", 0])
 
 	for fieldname, value in (filters or {}).items():
-		query_filters.append([fieldname, "=", value])
+		# link_filters arrive as [operator, value]
+		query_filters.append(
+			[fieldname, *value] if isinstance(value, list | tuple) else [fieldname, "=", value]
+		)
 	return query_filters
 
 
