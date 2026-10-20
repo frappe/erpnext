@@ -1681,6 +1681,37 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertEqual(get_op_cost_from_sub_assemblies(top_bom.name), 880)
 
+	def test_operating_cost_from_sub_assemblies_of_another_company(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_op_cost_from_sub_assemblies
+
+		rm_item = make_item("_Test Op Tree Group RM", {"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_item = make_item("_Test Op Tree Group Sub", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Op Tree Group FG", {"is_stock_item": 1}).name
+		sub_bom = make_usd_bom(
+			sub_item,
+			[{"item_code": rm_item, "qty": 1}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=10,
+		)
+		top_bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company 1",
+				"currency": "USD",
+				"quantity": 1,
+				"rm_cost_as_per": "Valuation Rate",
+				"fg_based_operating_cost": 1,
+				"operating_cost_per_bom_quantity": 1,
+				"items": [{"item_code": sub_item, "qty": 1, "bom_no": sub_bom.name}],
+			}
+		)
+		top_bom.insert()
+		top_bom.submit()
+
+		self.assertEqual(top_bom.conversion_rate, 1)
+		self.assertEqual(get_op_cost_from_sub_assemblies(top_bom.name), 11)
+
 	def test_bom_cannot_be_reactivated_with_an_inactive_sub_assembly_bom(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
