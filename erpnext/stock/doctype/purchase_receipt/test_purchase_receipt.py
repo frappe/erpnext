@@ -8395,6 +8395,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00").name,
+			self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order.name, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order.name, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+
+		vouchers.append(make_invoice_against_order(purchase_order.name, qty=6, rate=200).name)
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
 	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
 		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_invoice as make_invoice_from_order,
