@@ -75,6 +75,25 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		)
 		make_stock_reservation_entry(**row, warehouse=other_warehouse, reserved_qty=2)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_item_picked_from_two_warehouses_is_reserved(self) -> None:
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=self.sr_item.name, target=other_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=self.sr_item.name, qty=4, warehouse=self.warehouse)
+
+		pl = create_pick_list(so.name)
+		location = pl.locations[0]
+		location.qty = location.stock_qty = location.picked_qty = 2
+		pl.append("locations", location.as_dict(no_default_fields=True)).warehouse = other_warehouse
+		pl.submit()
+		pl.create_stock_reservation_entries()
+
+		self.assertEqual(
+			get_sre_reserved_qty_details_for_voucher("Sales Order", so.name), {so.items[0].name: 4}
+		)
+
 	def test_get_available_qty_to_reserve(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_available_qty_to_reserve,
