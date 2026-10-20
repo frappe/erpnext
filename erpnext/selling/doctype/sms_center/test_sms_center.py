@@ -70,3 +70,33 @@ class TestSMSCenter(FrappeTestCase):
 
 		self.assertIn(unlinked.mobile_no, numbers)
 		self.assertEqual(numbers.count(multi.mobile_no), 1)
+
+	def test_all_sales_person_excludes_disabled_and_left(self):
+		active_emp = make_employee("sms-active@example.com", cell_number="9800000020")
+		left_emp = make_employee(
+			"sms-left@example.com", cell_number="9800000021", status="Left", relieving_date="2020-01-01"
+		)
+
+		frappe.get_doc(
+			{
+				"doctype": "Sales Person",
+				"sales_person_name": "SMS Active SP",
+				"enabled": 1,
+				"employee": active_emp,
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Sales Person",
+				"sales_person_name": "SMS Disabled SP",
+				"enabled": 0,
+				"employee": left_emp,
+			}
+		).insert()
+
+		sms_center = frappe.new_doc("SMS Center")
+		sms_center.send_to = "All Sales Person"
+		numbers = [row[1] for row in sms_center.get_contact_query_for_all_sales_person().run(as_list=1)]
+
+		self.assertIn("9800000020", numbers)
+		self.assertNotIn("9800000021", numbers)
