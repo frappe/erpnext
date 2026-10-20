@@ -117,11 +117,44 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
+		self.validate_bank_account()
 		self.validate_print_format()
 		self.validate_against_payment_reference()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_bank_account(self):
+		if not self.bank_account:
+			return
+
+		bank_account = frappe.get_cached_value(
+			"Bank Account",
+			self.bank_account,
+			["disabled", "is_company_account", "company", "party_type", "party"],
+			as_dict=True,
+		)
+		if not bank_account or bank_account.disabled:
+			frappe.throw(_("Bank Account {0} is missing or disabled").format(self.bank_account))
+
+		if bank_account.is_company_account:
+			if not self.company or bank_account.company != self.company:
+				frappe.throw(
+					_("Bank Account {0} does not belong to Company {1}").format(
+						self.bank_account, self.company
+					)
+				)
+		elif (
+			not self.party_type
+			or not self.party
+			or bank_account.party_type != self.party_type
+			or bank_account.party != self.party
+		):
+			frappe.throw(
+				_("Bank Account {0} does not belong to {1} {2}").format(
+					self.bank_account, self.party_type, self.party
+				)
+			)
 
 	def validate_against_payment_reference(self):
 		if not self.payment_reference:
@@ -1206,6 +1239,38 @@ def validate_payment(doc, method=None):
 		_("The Payment Request {0} is already paid, cannot process payment twice").format(
 			doc.reference_docname
 		)
+	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_bank_account_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	filters = frappe._dict(filters or {})
+	if not filters.company and not (filters.party_type and filters.party):
+		return []
+
+	bank_account = frappe.qb.DocType("Bank Account")
+	ownership = bank_account.name == ""
+	if filters.company:
+		ownership = (bank_account.is_company_account == 1) & (bank_account.company == filters.company)
+	if filters.party_type and filters.party:
+		ownership |= (
+			(bank_account.is_company_account == 0)
+			& (bank_account.party_type == filters.party_type)
+			& (bank_account.party == filters.party)
+		)
+
+	return (
+		frappe.qb.get_query("Bank Account", fields=["name", "bank", "account"], ignore_permissions=False)
+		.where(bank_account.disabled == 0)
+		.where(ownership)
+		.where(bank_account[searchfield].like(f"%{txt}%"))
+		.orderby(bank_account.name)
+		.limit(page_len)
+		.offset(start)
+		.run(as_list=True)
 	)
 
 
