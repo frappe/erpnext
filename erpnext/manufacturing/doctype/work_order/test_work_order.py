@@ -819,6 +819,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.db.set_value("BOM", bom.name, "default_target_warehouse", "_Test Warehouse - _TC")
 		self.assertEqual(get_fg_warehouse(), "_Test Warehouse - _TC")
 
+		other_company_warehouse = create_warehouse(
+			"_Test Other Company FG Warehouse", company="_Test Company 1"
+		)
+		frappe.db.set_value("BOM", bom.name, "default_target_warehouse", other_company_warehouse)
+		self.assertEqual(get_fg_warehouse(), "_Test Warehouse 1 - _TC")
+
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
 		rm1 = "Test Batch Size Item RM 1 For BOM"
