@@ -24,7 +24,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+from erpnext.accounts.doctype.journal_entry.mapper import map_reverse_journal_entry
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -174,6 +174,7 @@ def make_depreciation_entry(
 	depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", depr_schedule_name)
 	frappe.has_permission("Asset Depreciation Schedule", "write", depr_schedule_doc, throw=True)
 	frappe.has_permission("Asset", "write", depr_schedule_doc.asset, throw=True)
+	frappe.has_permission("Journal Entry", throw=True)
 
 	return _make_depreciation_entry(depr_schedule_name, date, accounting_dimensions=accounting_dimensions)
 
@@ -185,7 +186,6 @@ def _make_depreciation_entry(
 	sch_end_idx: int | None = None,
 	accounting_dimensions: list[dict] | None = None,
 ):
-	frappe.has_permission("Journal Entry", throw=True)
 	date = date or today()
 
 	depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", depr_schedule_name)
@@ -560,7 +560,7 @@ def disposal_happens_in_the_future(disposal_date):
 
 
 def create_reverse_depreciation_entry(asset_name, journal_entry):
-	reverse_journal_entry = make_reverse_journal_entry(journal_entry)
+	reverse_journal_entry = map_reverse_journal_entry(journal_entry, ignore_permissions=True)
 	reverse_journal_entry.posting_date = nowdate()
 
 	for account in reverse_journal_entry.accounts:
@@ -573,6 +573,7 @@ def create_reverse_depreciation_entry(asset_name, journal_entry):
 
 	frappe.flags.is_reverse_depr_entry = True
 	if not reverse_journal_entry.meta.get_workflow():
+		reverse_journal_entry.flags.ignore_permissions = True
 		reverse_journal_entry.submit()
 		return reverse_journal_entry
 	else:
