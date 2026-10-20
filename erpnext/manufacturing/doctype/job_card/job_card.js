@@ -307,9 +307,11 @@ frappe.ui.form.on("Job Card", {
 		const last_log = doc.time_logs?.[doc.time_logs.length - 1];
 		const qty_precision = precision("for_quantity", doc);
 		const accounted_qty = flt(doc.total_completed_qty) + flt(doc.process_loss_qty) + flt(doc.pending_qty);
+		const needs_end_time = !!doc.__onload?.enforce_time_logs;
 
 		return (
-			!!last_log?.to_time &&
+			!!last_log &&
+			(!needs_end_time || !!last_log.to_time) &&
 			flt(doc.for_quantity) > 0 &&
 			flt(accounted_qty, qty_precision) >= flt(doc.for_quantity, qty_precision)
 		);

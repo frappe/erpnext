@@ -146,6 +146,9 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
+		self.set_onload(
+			"enforce_time_logs", frappe.db.get_single_value("Manufacturing Settings", "enforce_time_logs")
+		)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
 		self.set_onload("has_stock_entry", self.has_stock_entry())
 		if self.docstatus == 0:
