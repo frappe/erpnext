@@ -152,7 +152,11 @@ class SMSCenter(Document):
 			.left_join(Employee)
 			.on(SalesPerson.employee == Employee.name)
 			.select(SalesPerson.sales_person_name, Employee.cell_number)
-			.where(fn.IfNull(Employee.cell_number, "") != "")
+			.where(
+				(SalesPerson.enabled == 1)
+				& (Employee.status == "Active")
+				& (fn.IfNull(Employee.cell_number, "") != "")
+			)
 		)
 
 		return query
