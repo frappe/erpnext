@@ -177,7 +177,7 @@ class AssetRepair(AccountsController):
 
 	def validate_purchase_invoice_repair_cost(self, row):
 		"""Validate that repair cost doesn't exceed available amount."""
-		available_amount = get_unallocated_repair_cost(
+		available_amount = _get_unallocated_repair_cost(
 			row.purchase_invoice, row.expense_account, exclude_asset_repair=self.name
 		)
 
@@ -267,7 +267,9 @@ class AssetRepair(AccountsController):
 	def cancel_stock_entry(self):
 		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
 		if stock_entry:
-			frappe.get_doc("Stock Entry", stock_entry).cancel()
+			stock_entry = frappe.get_doc("Stock Entry", stock_entry)
+			stock_entry.flags.ignore_permissions = True
+			stock_entry.cancel()
 
 	def after_delete(self):
 		self.close_pending_repair_activity("Deleted")
@@ -305,6 +307,7 @@ class AssetRepair(AccountsController):
 			self.update_value_after_depreciation(total_repair_cost)
 
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
+		self.asset_doc.flags.ignore_permissions = True
 		self.asset_doc.save()
 
 	def update_value_after_depreciation(self, total_repair_cost: float):
@@ -356,6 +359,7 @@ class AssetRepair(AccountsController):
 				},
 			)
 
+		stock_entry.flags.ignore_permissions = True
 		stock_entry.insert()
 		stock_entry.submit()
 
@@ -586,6 +590,12 @@ def get_unallocated_repair_cost(
 
 	frappe.has_permission("Purchase Invoice", "read", purchase_invoice, throw=True)
 
+	return _get_unallocated_repair_cost(purchase_invoice, expense_account, exclude_asset_repair)
+
+
+def _get_unallocated_repair_cost(
+	purchase_invoice: str, expense_account: str, exclude_asset_repair: str | None = None
+) -> float:
 	used_amount = get_allocated_repair_cost(purchase_invoice, expense_account, exclude_asset_repair)
 	total_amount = get_total_expense_amount(purchase_invoice, expense_account)
 
