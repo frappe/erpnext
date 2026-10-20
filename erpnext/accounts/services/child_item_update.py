@@ -4,6 +4,7 @@
 """Child item update service: ChildItemUpdater class and helpers for the update_child_qty_rate API."""
 
 from collections import defaultdict
+from functools import cached_property
 
 import frappe
 from frappe import _
@@ -38,6 +39,10 @@ class ChildItemUpdater:
 		self._blanket_order_change = defaultdict(float)
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
+
+	@cached_property
+	def _rows_with_kept_reservation(self) -> set[str]:
+		return get_rows_with_kept_reservation(self.parent)
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
@@ -356,7 +361,7 @@ class ChildItemUpdater:
 		if not uom_changed and change_state.conversion_factor_unchanged:
 			return
 
-		if self.parent_doctype == "Sales Order" and has_kept_reservation(self.parent, child_item):
+		if child_item.name in self._rows_with_kept_reservation:
 			frappe.throw(
 				_(
 					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
@@ -403,7 +408,7 @@ class ChildItemUpdater:
 					title=_("Invalid Qty"),
 				)
 
-			if self.parent_doctype == "Sales Order" and has_kept_reservation(self.parent, child_item):
+			if child_item.name in self._rows_with_kept_reservation:
 				self._validate_qty_covers_reservation(child_item, new_data, new_stock_qty, old_stock_qty)
 
 		if not self._transacted_stock_qty:
@@ -536,39 +541,23 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 	return False
 
 
-def has_kept_reservation(parent, row) -> bool:
-	"""Whether stock stays reserved for a picked Sales Order row, directly or through its Packed Items."""
-	if not flt(parent.per_picked):
-		return False
+def get_rows_with_kept_reservation(parent) -> set[str]:
+	"""Rows of a picked Sales Order whose stock stays reserved, directly or through their Packed Items."""
+	if parent.doctype != "Sales Order" or not flt(parent.per_picked):
+		return set()
 
-	if flt(row.stock_reserved_qty):
-		return True
-
-	packed_items = [d.name for d in parent.get("packed_items") if d.parent_detail_docname == row.name]
-	return bool(packed_items) and bool(
-		frappe.db.exists(
-			"Stock Reservation Entry",
-			{
-				"docstatus": 1,
-				"voucher_type": parent.doctype,
-				"voucher_no": parent.name,
-				"voucher_detail_no": ["in", packed_items],
-				"status": ["not in", ["Delivered", "Closed"]],
-			},
-		)
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details_for_voucher,
 	)
+
+	bundle_rows = {d.name: d.parent_detail_docname for d in parent.get("packed_items")}
+	reserved = get_sre_reserved_qty_details_for_voucher(parent.doctype, parent.name)
+	return {bundle_rows.get(row, row) for row in reserved}
 
 
 def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 	"""Raise if a partially transacted child item is being deleted."""
 	if parent.doctype == "Sales Order":
-		if has_kept_reservation(parent, row):
-			frappe.throw(
-				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
-					row.idx, frappe.bold(row.item_code)
-				),
-				title=_("Stock Reserved"),
-			)
 		if flt(row.delivered_qty):
 			frappe.throw(
 				_("Row #{0}: Cannot delete item {1} which has already been delivered").format(
@@ -649,6 +638,22 @@ def validate_no_issued_proforma(rows) -> None:
 			)
 
 
+def validate_no_kept_reservation(rows, parent) -> None:
+	"""Raise if a Sales Order row being deleted still holds reserved stock."""
+	if not rows:
+		return
+
+	reserved_rows = get_rows_with_kept_reservation(parent)
+	for row in rows:
+		if row.name in reserved_rows:
+			frappe.throw(
+				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
+					row.idx, frappe.bold(row.item_code)
+				),
+				title=_("Stock Reserved"),
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	"""Delete child rows not present in data; return True if any were removed."""
 	updated_item_names = [d.get("docname") for d in data]
@@ -660,6 +665,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype == "Sales Order":
 		validate_no_issued_proforma(deleted_children)
+		validate_no_kept_reservation(deleted_children, parent)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
