@@ -2123,7 +2123,10 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	if filters:
 		for fieldname, value in filters.items():
-			query_filters.append([fieldname, "=", value])
+			# link_filters arrive as [operator, value]
+			query_filters.append(
+				[fieldname, *value] if isinstance(value, list | tuple) else [fieldname, "=", value]
+			)
 
 	return frappe.get_list(
 		"Item",
