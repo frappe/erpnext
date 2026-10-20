@@ -157,9 +157,8 @@ class SMSCenter(Document):
 		receiver_nos = []
 		if self.receiver_list:
 			for d in self.receiver_list.split("\n"):
-				receiver_no = d
-				if "-" in d:
-					receiver_no = receiver_no.split("-")[1]
+				# lines are "name - number"; split on the last " - " so hyphens in names/numbers survive
+				receiver_no = d.rsplit(" - ", 1)[-1]
 				if receiver_no.strip():
 					receiver_nos.append(cstr(receiver_no).strip())
 		else:
