@@ -8194,6 +8194,18 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		order_invoice = make_invoice_against_order(purchase_order.name, qty=4, rate=200)
 		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name, order_invoice.name), 0)
 
+	def test_order_invoice_with_a_receipt_row_reverses_the_provision_once(self):
+		purchase_order = self.make_provisional_purchase_order()
+		receipt = self.make_receipt_at_rate(purchase_order.name, 10, 100, "08:00")
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.items[0].qty = 4
+		order_row = invoice.items[0].as_dict(no_default_fields=True)
+		order_row.update({"qty": 6, "purchase_receipt": None, "pr_detail": None})
+		invoice.append("items", order_row)
+		invoice.submit()
+
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), 0)
+
 	def test_order_invoices_reverse_receipt_provisional_entries(self):
 		purchase_order = self.make_provisional_purchase_order()
 		receipts = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
