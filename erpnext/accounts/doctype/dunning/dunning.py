@@ -21,6 +21,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.setup.utils import get_exchange_rate
 
 
 class Dunning(AccountsController):
@@ -71,12 +72,33 @@ class Dunning(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_currency()
 		self.set_dunning_fee()
 		self.validate_overdue_payment_references()
 		self.validate_overdue_payments()
 		self.validate_totals()
 		self.set_party_details()
 		self.set_dunning_level()
+
+	def validate_currency(self):
+		self.currency = self.currency or self.company_currency
+		if self.currency == self.company_currency:
+			self.conversion_rate = 1
+		elif not self.conversion_rate or (
+			self.get_doc_before_save()
+			and not self.has_value_changed("conversion_rate")
+			and any(self.has_value_changed(field) for field in ("currency", "company", "posting_date"))
+		):
+			self.conversion_rate = get_exchange_rate(
+				self.currency, self.company_currency, self.posting_date, "for_selling"
+			)
+
+		if flt(self.conversion_rate) <= 0:
+			frappe.throw(
+				_("Conversion Rate from {0} to {1} must be greater than zero.").format(
+					self.currency, self.company_currency
+				)
+			)
 
 	def set_dunning_fee(self):
 		if not self.dunning_type:
