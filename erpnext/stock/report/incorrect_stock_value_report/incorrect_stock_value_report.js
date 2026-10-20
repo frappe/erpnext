@@ -16,6 +16,7 @@ frappe.query_reports["Incorrect Stock Value Report"] = {
 			fieldname: "account",
 			fieldtype: "Link",
 			options: "Account",
+			reqd: 1,
 			get_query: function () {
 				var company = frappe.query_report.get_filter_value("company");
 				return {
@@ -30,6 +31,7 @@ frappe.query_reports["Incorrect Stock Value Report"] = {
 			label: __("From Date"),
 			fieldname: "from_date",
 			fieldtype: "Date",
+			default: frappe.datetime.month_start(),
 		},
 	],
 };

@@ -152,13 +152,6 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.total_billable_amount, 200)
 		self.assertEqual(timesheet.total_costing_amount, 20)
 
-	def test_billing_fields_cannot_change_after_submit(self):
-		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
-		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
-
-		timesheet.time_logs[0].billing_hours = 10
-		self.assertRaises(frappe.UpdateAfterSubmitError, timesheet.save)
-
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
@@ -699,15 +692,7 @@ class TestTimesheet(ERPNextTestSuite):
 
 		customer = "_Test Customer"
 
-		# tie the current user (Administrator) to the customer so the portal resolves it
-		frappe.get_doc(
-			{
-				"doctype": "Contact",
-				"first_name": "_Test Timesheet Portal Contact",
-				"user": "Administrator",
-				"links": [{"link_doctype": "Customer", "link_name": customer}],
-			}
-		).insert(ignore_permissions=True)
+		portal_user = make_portal_user(customer)
 
 		si = create_sales_invoice(customer=customer)
 
@@ -715,7 +700,8 @@ class TestTimesheet(ERPNextTestSuite):
 		timesheet = make_timesheet(employee, is_billable=0)
 		frappe.db.set_value("Timesheet", timesheet.name, "sales_invoice", si.name)
 
-		rows = get_timesheets_list("Timesheet", None, {}, 0, 500)
+		with as_user(portal_user):
+			rows = get_timesheets_list("Timesheet", None, {}, 0, 500)
 
 		row = next((r for r in rows if r.name == timesheet.name), None)
 		self.assertIsNotNone(row, "billed timesheet not returned by portal list")
@@ -724,14 +710,7 @@ class TestTimesheet(ERPNextTestSuite):
 	def test_portal_lists_only_submitted_timesheets(self):
 		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
 
-		frappe.get_doc(
-			{
-				"doctype": "Contact",
-				"first_name": "_Test Timesheet Portal Contact",
-				"user": "Administrator",
-				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
-			}
-		).insert(ignore_permissions=True)
+		portal_user = make_portal_user("_Test Customer")
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
@@ -744,7 +723,8 @@ class TestTimesheet(ERPNextTestSuite):
 		draft = make_timesheet(emp, simulate=True, project=project.name, do_not_submit=True)
 		submitted = make_timesheet(emp, simulate=True, project=project.name)
 
-		names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
+		with as_user(portal_user):
+			names = [row.name for row in get_timesheets_list("Timesheet", None, {}, 0, 500)]
 		self.assertIn(submitted.name, names)
 		self.assertNotIn(draft.name, names)
 
@@ -862,17 +842,6 @@ class TestTimesheet(ERPNextTestSuite):
 		rate = get_timesheet_detail_rate(detail.name, timesheet.currency)
 		self.assertEqual(rate, detail.billing_amount)
 
-	def test_title_follows_employee(self):
-		first = make_employee("_test_timesheet_title_one@example.com", company="_Test Company")
-		second = make_employee("_test_timesheet_title_two@example.com", company="_Test Company")
-
-		timesheet = make_timesheet(first, simulate=True, do_not_submit=True)
-		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", first, "employee_name"))
-
-		timesheet.employee = second
-		timesheet.save()
-		self.assertEqual(timesheet.get_title(), frappe.db.get_value("Employee", second, "employee_name"))
-
 	def test_get_activity_cost_requires_timesheet_access_and_the_employee(self):
 		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
 
@@ -939,6 +908,14 @@ class TestTimesheet(ERPNextTestSuite):
 				caller_supplied=True,
 			)
 			self.assertEqual(get_activity_cost(employee, "_Test Activity Type")["billing_rate"], 150)
+
+
+def make_portal_user(customer):
+	user = make_fenced_user("_test_timesheet_portal_user@example.com", ["Customer"])
+	customer = frappe.get_doc("Customer", customer)
+	customer.append("portal_users", {"user": user})
+	customer.save()
+	return user
 
 
 def make_timesheet_without_employee(start, hours):

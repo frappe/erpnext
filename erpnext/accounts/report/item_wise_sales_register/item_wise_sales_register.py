@@ -52,14 +52,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 			{"customer_name": d.customer_name, "customer_group": d.customer_group}
 		)
 
-		delivery_note = None
-		if d.delivery_note:
-			delivery_note = d.delivery_note
-		elif d.so_detail:
-			delivery_note = ", ".join(so_dn_map.get(d.so_detail, []))
-
-		if not delivery_note and d.update_stock:
-			delivery_note = d.parent
+		delivery_doctype, delivery_note = get_delivery_document(d, so_dn_map)
 
 		row = {
 			"item_code": d.item_code,
@@ -78,7 +71,8 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 			"project": d.project,
 			"company": d.company,
 			"sales_order": d.sales_order,
-			"delivery_note": d.delivery_note,
+			"delivery_doctype": delivery_doctype,
+			"delivery_note": delivery_note,
 			"income_account": get_income_account(d),
 			"cost_center": d.cost_center,
 			"stock_qty": d.stock_qty,
@@ -302,8 +296,8 @@ def get_columns(additional_table_columns, filters):
 		{
 			"label": _("Delivery Note"),
 			"fieldname": "delivery_note",
-			"fieldtype": "Link",
-			"options": "Delivery Note",
+			"fieldtype": "Dynamic Link",
+			"options": "delivery_doctype",
 			"width": 100,
 		},
 		{
@@ -508,6 +502,17 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 	query = apply_order_by_conditions(doctype, query, filters)
 
 	return query.run(as_dict=True)
+
+
+def get_delivery_document(item: dict, so_dn_map: dict) -> tuple[str, str | None]:
+	"""Return the doctype and comma separated names of the documents that delivered the item."""
+	if item.delivery_note:
+		return "Delivery Note", item.delivery_note
+
+	if item.update_stock:
+		return "Sales Invoice", item.parent
+
+	return "Delivery Note", ", ".join(so_dn_map.get(item.so_detail, [])) or None
 
 
 def get_delivery_notes_against_sales_order(item_list):

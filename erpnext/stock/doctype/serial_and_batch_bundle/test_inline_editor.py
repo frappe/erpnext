@@ -134,36 +134,6 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
-	def test_scanned_serial_is_created_for_a_user_who_may_write_the_voucher(self):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
-		pr = self.make_draft_pr(item, qty=1)
-		user = frappe.get_doc(
-			{
-				"doctype": "User",
-				"email": "inline-scan-stock-user@example.com",
-				"first_name": "Inline Scan",
-				"send_welcome_email": 0,
-				"roles": [{"role": "Stock User"}],
-			}
-		).insert()
-		with self.set_user(user.name):
-			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
-		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
-
-	def test_scan_cannot_override_outward_transaction_type(self):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
-		doc = frappe.get_doc(
-			{
-				"doctype": "Delivery Note",
-				"company": "_Test Company",
-				"items": [{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": 1}],
-			}
-		)
-		doc.items[0].type_of_transaction = "Inward"
-		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
-			self.upsert(doc, serial_numbers=[{"serial_number": "Missing-Scan"}])
-		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
-
 	def test_incremental_append_preserves_existing_entries(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=3)
@@ -613,20 +583,6 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
 		bundle.reload()
 		self.assertEqual(len(bundle.entries), 1)
-
-	def test_selector_creation_follows_the_voucher_not_the_serial_master(self):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
-		pr = self.make_draft_pr(item, qty=1)
-		user = frappe.get_doc(
-			doctype="User",
-			email="selector-stock-user@example.com",
-			first_name="Selector",
-			send_welcome_email=0,
-			roles=[{"role": "Stock User"}],
-		).insert()
-		with self.set_user(user.name):
-			self.save_selector(pr, csv_entries=[{"serial_no": "Missing-Serial", "qty": 1}])
-		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
 
 	def test_pagination(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name

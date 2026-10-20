@@ -9,6 +9,7 @@ from frappe import _, qb
 from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
 from frappe.utils import date_diff, flt, nowdate
+from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
 
@@ -50,9 +51,14 @@ def validate_filters(filters):
 
 
 def get_data(filters):
+	permitted_orders = get_permitted_sales_orders(filters)
+	if not permitted_orders:
+		return []
+
 	so = qb.DocType("Sales Order")
 	soi = qb.DocType("Sales Order Item")
 	sii = qb.DocType("Sales Invoice Item")
+	si = qb.DocType("Sales Invoice")
 
 	# Use the application's today (nowdate, System Settings timezone) rather than the database
 	# server's CURRENT_DATE: the two differ by a day when the DB server runs in a different timezone
@@ -62,6 +68,13 @@ def get_data(filters):
 	# soi.name primary key, so this is valid under both.
 	delay = DateDiff(nowdate(), soi.delivery_date)
 	conversion_rate = Coalesce(so.conversion_rate, 1)
+	is_closed = (so.status == "Closed") | (soi.closed == 1)
+	no_delay = so.status.isin(["Completed", "To Bill"]) | is_closed
+
+	# credit notes don't reduce the order's billed_amt, so exclude them to keep billed qty in step
+	counts_as_billed = (Coalesce(si.is_return, 0) == 0) | (
+		Coalesce(si.update_billed_amount_in_sales_order, 0) == 1
+	)
 
 	query = (
 		qb.from_(so)
@@ -69,6 +82,8 @@ def get_data(filters):
 		.on(soi.parent == so.name)
 		.left_join(sii)
 		.on((sii.so_detail == soi.name) & (sii.docstatus == 1))
+		.left_join(si)
+		.on(si.name == sii.parent)
 		.select(
 			so.transaction_date.as_("date"),
 			soi.delivery_date.as_("delivery_date"),
@@ -78,37 +93,62 @@ def get_data(filters):
 			soi.item_code,
 			soi.uom,
 			delay.as_("delay_days"),
-			Case().when(so.status.isin(["Completed", "To Bill"]), 0).else_(delay).as_("delay"),
+			Case().when(no_delay, 0).else_(delay).as_("delay"),
 			soi.qty,
 			soi.delivered_qty,
-			(soi.qty - soi.delivered_qty).as_("pending_qty"),
-			Coalesce(Sum(sii.qty), 0).as_("billed_qty"),
+			soi.closed,
+			Case().when(is_closed, 0).else_(soi.qty - soi.delivered_qty).as_("pending_qty"),
+			(
+				Coalesce(Sum(Case().when(counts_as_billed, sii.qty * sii.conversion_factor).else_(0)), 0)
+				/ soi.conversion_factor
+			).as_("billed_qty"),
 			soi.base_amount.as_("amount"),
 			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
 			(soi.billed_amt * conversion_rate).as_("billed_amount"),
-			(soi.base_amount - (soi.billed_amt * conversion_rate)).as_("pending_amount"),
+			Case()
+			.when(is_closed, 0)
+			.else_(soi.base_amount - (soi.billed_amt * conversion_rate))
+			.as_("pending_amount"),
 			soi.warehouse.as_("warehouse"),
 			so.company,
 			soi.name,
 			soi.description.as_("description"),
 		)
-		.where((so.status.notin(["Stopped", "On Hold"])) & (so.docstatus == 1))
-		.where(so.company == filters.get("company"))
+		.where(so.name.isin(permitted_orders))
 		.groupby(soi.name, so.name)
 		.orderby(so.transaction_date)
 		.orderby(soi.item_code)
 	)
 
-	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(so.transaction_date[filters.get("from_date") : filters.get("to_date")])
-	if filters.get("sales_order"):
-		query = query.where(so.name.isin(filters.get("sales_order")))
-	if filters.get("status"):
-		query = query.where(so.status.isin(filters.get("status")))
 	if filters.get("warehouse"):
-		query = query.where(soi.warehouse == filters.get("warehouse"))
+		warehouses = [*get_descendants_of("Warehouse", filters.get("warehouse")), filters.get("warehouse")]
+		query = query.where(soi.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
+
+
+def get_permitted_sales_orders(filters):
+	so_filters = [
+		["Sales Order", "docstatus", "=", 1],
+		["Sales Order", "company", "=", filters.get("company")],
+		["Sales Order", "status", "not in", ["Stopped", "On Hold"]],
+	]
+
+	if filters.get("from_date") and filters.get("to_date"):
+		so_filters.append(
+			["Sales Order", "transaction_date", "between", [filters.get("from_date"), filters.get("to_date")]]
+		)
+	if filters.get("sales_order"):
+		so_filters.append(["Sales Order", "name", "in", filters.get("sales_order")])
+	if filters.get("status"):
+		so_filters.append(["Sales Order", "status", "in", filters.get("status")])
+
+	return frappe.qb.get_query(
+		table="Sales Order",
+		fields=["name"],
+		filters=so_filters,
+		ignore_permissions=False,
+	).run(pluck="name")
 
 
 def get_so_elapsed_time(data):
@@ -182,7 +222,9 @@ def prepare_data(data, so_elapsed_time, filters):
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
 
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		row["qty_to_bill"] = (
+			0 if row["status"] == "Closed" or row["closed"] else flt(row["qty"]) - flt(row["billed_qty"])
+		)
 		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
 		row["time_taken_to_deliver"] = (
 			so_elapsed_time.get((row.sales_order, row.item_code))
@@ -209,12 +251,16 @@ def group_by_sales_order(data):
 			sales_order_map[row["sales_order"]] = copy.deepcopy(row)
 			continue
 
-		group["delay"] = (
-			min(group["delay"], row["delay"]) if row["delay"] and group["delay"] else group["delay"]
-		)
+		group["delay"] = least_delay(group["delay"], row["delay"])
 		add_aggregated_fields(group, row)
 
 	return list(sales_order_map.values())
+
+
+def least_delay(*delays):
+	# completed/closed/not-yet-due lines carry 0; ignore them so none masks an overdue line
+	overdue = [d for d in delays if d]
+	return min(overdue) if overdue else 0
 
 
 def group_by_item(data):

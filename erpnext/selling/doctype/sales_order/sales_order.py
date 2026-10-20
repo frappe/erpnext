@@ -548,7 +548,7 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "used")
 
 		if self.get("reserve_stock") and not self.get("is_subcontracted"):
-			self.create_stock_reservation_entries()
+			SalesOrderStockReservation(self).create_stock_reservation_entries()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -680,6 +680,8 @@ class SalesOrder(SellingController):
 		StatusService(self).set_indicator()
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
+
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
 			delivery_date = auto_repeat_doc.get_next_schedule_date(schedule_date=ref_doc_delivery_date)
 
@@ -723,6 +725,7 @@ class SalesOrder(SellingController):
 		notify: bool = True,
 	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
+		self.check_permission("write")
 		SalesOrderStockReservation(self).create_stock_reservation_entries(
 			items_details, from_voucher_type, notify
 		)
@@ -870,8 +873,11 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.manufacturing.doctype.work_order.services.status import qty_against_sales_order
+
 	if sales_order:
 		so = frappe.get_doc("Sales Order", sales_order)
+		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
 
@@ -898,13 +904,12 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(wo.qty - wo.process_loss_qty))
+						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
 							& (wo.sales_order_item == i.name)
 							& (wo.docstatus == 1)
-							& (wo.status != "Closed")
 						)
 						.run()[0][0]
 					)
@@ -952,7 +957,10 @@ def get_billed_qty_query(sales_order_item):
 	invoice_item = qb.DocType("Sales Invoice Item")
 	return (
 		qb.from_(invoice_item)
-		.select(IfNull(Sum(invoice_item.qty), 0))
+		.select(
+			IfNull(Sum(invoice_item.qty * invoice_item.conversion_factor), 0)
+			/ sales_order_item.conversion_factor
+		)
 		.where((invoice_item.docstatus == 1) & (invoice_item.so_detail == sales_order_item.name))
 	)
 
@@ -965,7 +973,10 @@ def get_pending_qty_criterion(sales_order_item, billed_qty):
 		qb.from_(invoice_item)
 		.inner_join(invoice)
 		.on(invoice.name == invoice_item.parent)
-		.select(IfNull(Sum(-invoice_item.qty), 0))
+		.select(
+			IfNull(Sum(-invoice_item.qty * invoice_item.conversion_factor), 0)
+			/ sales_order_item.conversion_factor
+		)
 		.where(
 			(invoice_item.docstatus == 1)
 			& (invoice_item.so_detail == sales_order_item.name)

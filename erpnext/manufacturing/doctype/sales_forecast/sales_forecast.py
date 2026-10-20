@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_to_date
+from frappe.utils import add_to_date, cint, formatdate, getdate
 
 
 class SalesForecast(Document):
@@ -31,7 +32,62 @@ class SalesForecast(Document):
 		status: DF.Literal["Planned", "MPS Generated", "Cancelled"]
 	# end: auto-generated types
 
+	def validate(self):
+		if self.is_new():
+			self.status = "Planned"
+
+		self.validate_demand_qty()
+		self.validate_parent_warehouse()
+		self.validate_periods_and_dates()
+		self.validate_stock_items()
+
+	def validate_parent_warehouse(self):
+		warehouse = frappe.get_cached_value(
+			"Warehouse", self.parent_warehouse, ["is_group", "company"], as_dict=True
+		)
+		if warehouse and (not warehouse.is_group or warehouse.company != self.company):
+			frappe.throw(
+				_("Parent Warehouse {0} must be a group warehouse of company {1}").format(
+					frappe.bold(self.parent_warehouse), frappe.bold(self.company)
+				)
+			)
+
+	def validate_periods_and_dates(self):
+		if cint(self.demand_number) <= 0:
+			frappe.throw(_("Number of periods must be greater than zero"))
+
+		for row in self.items:
+			if row.delivery_date and getdate(row.delivery_date) < getdate(self.from_date):
+				frappe.throw(
+					_("Row #{0}: Delivery Date {1} cannot be before From Date {2}").format(
+						row.idx, formatdate(row.delivery_date), formatdate(self.from_date)
+					)
+				)
+
+	def validate_stock_items(self):
+		item_codes = {row.item_code for row in self.items + self.selected_items if row.item_code}
+		if not item_codes:
+			return
+
+		non_stock_items = frappe.get_all(
+			"Item", filters={"name": ["in", list(item_codes)], "is_stock_item": 0}, pluck="name"
+		)
+		if non_stock_items:
+			frappe.throw(
+				_("Only stock items can be forecast: {0}").format(
+					", ".join(frappe.bold(item) for item in non_stock_items)
+				)
+			)
+
+	def validate_demand_qty(self):
+		for row in self.items:
+			if row.get("demand_qty") in (None, ""):
+				frappe.throw(_("Row #{0}: Demand Qty is mandatory").format(row.idx), frappe.MandatoryError)
+
 	def on_discard(self):
+		self.db_set("status", "Cancelled")
+
+	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 
 	def generate_manual_demand(self):
@@ -68,9 +124,9 @@ class SalesForecast(Document):
 
 			for index in range(self.demand_number):
 				if self.frequency == "Monthly":
-					delivery_date = add_to_date(self.from_date, months=index + 1)
+					delivery_date = add_to_date(self.from_date, months=index)
 				else:
-					delivery_date = add_to_date(self.from_date, weeks=index + 1)
+					delivery_date = add_to_date(self.from_date, weeks=index)
 
 				forecast_demand.append(
 					{
@@ -102,7 +158,7 @@ def create_mps(source_name: str, target_doc: str | dict | Document | None = None
 		{
 			"Sales Forecast": {
 				"doctype": "Master Production Schedule",
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "status": ["=", "Planned"]},
 				"field_map": {
 					"name": "sales_forecast",
 					"from_date": "from_date",
@@ -114,3 +170,15 @@ def create_mps(source_name: str, target_doc: str | dict | Document | None = None
 	)
 
 	return doc
+
+
+def update_sales_forecast_status(sales_forecast):
+	if not sales_forecast or frappe.db.get_value("Sales Forecast", sales_forecast, "docstatus") != 1:
+		return
+
+	status = (
+		"MPS Generated"
+		if frappe.db.exists("Master Production Schedule", {"sales_forecast": sales_forecast})
+		else "Planned"
+	)
+	frappe.db.set_value("Sales Forecast", sales_forecast, "status", status)

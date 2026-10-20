@@ -162,9 +162,10 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_field": "per_received",
 				"target_ref_field": "qty",
 				"source_dt": "Purchase Receipt Item",
-				"source_field": "received_qty",
+				"source_field": "received_qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"second_source_dt": "Purchase Invoice Item",
-				"second_source_field": "received_qty",
+				"second_source_field": "received_qty * conversion_factor",
 				"second_join_field": "po_detail",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "receipt",
@@ -235,9 +236,10 @@ class PurchaseReceipt(BuyingController):
 				"target_dt": "Purchase Order Item",
 				"join_field": "purchase_order_item",
 				"target_field": "returned_qty",
-				"source_field": "-1 * qty",
+				"source_field": "-1 * qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"second_source_dt": "Purchase Invoice Item",
-				"second_source_field": "-1 * qty",
+				"second_source_field": "-1 * qty * conversion_factor",
 				"second_join_field": "po_detail",
 				"extra_cond": """ and exists (select name from `tabPurchase Receipt`
 				where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
@@ -473,6 +475,16 @@ class PurchaseReceipt(BuyingController):
 	def before_cancel(self):
 		super().before_cancel()
 		self.remove_amount_difference_with_purchase_invoice()
+		self.cancel_stock_reservations_made_by_receipt()
+
+	def cancel_stock_reservations_made_by_receipt(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		cancel_stock_reservation_entries(
+			from_voucher_type="Purchase Receipt", from_voucher_no=self.name, notify=False
+		)
 
 	def remove_amount_difference_with_purchase_invoice(self):
 		for item in self.items:
@@ -511,7 +523,7 @@ class PurchaseReceipt(BuyingController):
 		)
 
 		for asset in assets:
-			purchase_amount = flt(valuation_rate) * asset.asset_quantity
+			purchase_amount = flt(valuation_rate) * flt(item.conversion_factor or 1) * asset.asset_quantity
 			frappe.db.set_value(
 				"Asset",
 				asset.name,
@@ -567,6 +579,9 @@ def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 @frappe.whitelist()
 def update_purchase_receipt_status(docname: str, status: str):
 	pr = frappe.get_lazy_doc("Purchase Receipt", docname, check_permission="submit")
+	if pr.docstatus != 1:
+		frappe.throw(_("Only a submitted Purchase Receipt can be closed or reopened"))
+
 	pr.update_status(status)
 
 

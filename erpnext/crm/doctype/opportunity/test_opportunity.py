@@ -314,6 +314,81 @@ class TestOpportunity(ERPNextTestSuite):
 		opp.run_method("onload")
 		self.assertNotIn(contact.name, [c.name for c in opp.get("__onload").contact_list])
 
+	def test_contact_and_title_follow_the_party(self):
+		frappe.db.set_value("Customer", "_Test Customer", "territory", "_Test Territory India")
+		frappe.db.set_value("Customer", "_Test Customer 1", "territory", "_Test Territory Rest Of The World")
+		other_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Opportunity Other Buyer",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 1"}],
+			}
+		).insert()
+
+		opp = make_opportunity(with_items=0)
+		opp.contact_person = other_contact.name
+		self.assertRaisesRegex(frappe.ValidationError, "is not linked to", opp.save)
+
+		opp.reload()
+		opp.party_name = "_Test Customer 1"
+		opp.save()
+		self.assertEqual(opp.title, frappe.db.get_value("Customer", "_Test Customer 1", "customer_name"))
+		self.assertEqual(opp.territory, "_Test Territory Rest Of The World")
+
+		opp.contact_person = other_contact.name
+		opp.save()
+		opp.party_name = "_Test Customer"
+		self.assertRaisesRegex(frappe.ValidationError, "is not linked to", opp.save)
+
+	def test_party_change_keeps_hand_set_territory(self):
+		frappe.db.set_value(
+			"Customer",
+			"_Test Customer",
+			{"territory": "_Test Territory India", "customer_group": "_Test Customer Group"},
+		)
+		frappe.db.set_value(
+			"Customer",
+			"_Test Customer 1",
+			{"territory": "_Test Territory Rest Of The World", "customer_group": "_Test Customer Group 1"},
+		)
+
+		opp = make_opportunity(with_items=0)
+		opp.territory = "_Test Territory Maharashtra"
+		opp.save()
+
+		opp.party_name = "_Test Customer 1"
+		opp.save()
+		self.assertEqual(opp.territory, "_Test Territory Maharashtra")
+		self.assertEqual(opp.customer_group, "_Test Customer Group 1")
+
+	def test_party_change_keeps_explicit_edits_matching_previous_party(self):
+		frappe.db.set_value(
+			"Customer",
+			"_Test Customer",
+			{"territory": "_Test Territory India", "customer_group": "_Test Customer Group"},
+		)
+		frappe.db.set_value(
+			"Customer",
+			"_Test Customer 1",
+			{"territory": "_Test Territory Rest Of The World", "customer_group": "_Test Customer Group 1"},
+		)
+
+		opp = make_opportunity(with_items=0)
+		opp.territory = "_Test Territory Maharashtra"
+		opp.customer_group = "_Test Customer Group 1"
+		opp.title = "_Test Opportunity Custom Title"
+		opp.save()
+
+		previous_customer_name = opp.customer_name
+		opp.party_name = "_Test Customer 1"
+		opp.title = previous_customer_name
+		opp.territory = "_Test Territory India"
+		opp.customer_group = "_Test Customer Group"
+		opp.save()
+		self.assertEqual(opp.title, previous_customer_name)
+		self.assertEqual(opp.territory, "_Test Territory India")
+		self.assertEqual(opp.customer_group, "_Test Customer Group")
+
 	def test_get_item_details(self):
 		details = get_item_details("_Test Item")
 		self.assertEqual(details["item_name"], frappe.db.get_value("Item", "_Test Item", "item_name"))

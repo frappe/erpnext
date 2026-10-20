@@ -13,6 +13,7 @@ from frappe.utils import (
 	get_date_str,
 	get_link_to_form,
 	getdate,
+	now_datetime,
 	nowdate,
 	nowtime,
 	parse_json,
@@ -42,6 +43,40 @@ def get_closing_entry_for_closed_period(company):
 		return None
 
 	return _get_completed_closing_entry(company, str(closed_upto))
+
+
+def mark_closing_entries_outdated(company, posting_date):
+	names = frappe.db.get_values(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": "Completed",
+			"to_date": (">=", posting_date),
+		},
+		"name",
+		for_update=True,
+		skip_locked=True,
+		pluck=True,
+	)
+	for name in names:
+		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
+
+
+def has_closing_entry_to_coordinate(company, posting_date):
+	return frappe.db.exists(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": ("in", ["Queued", "In Progress", "Completed"]),
+			"to_date": (">=", posting_date),
+		},
+	)
+
+
+def lock_company_for_closing(company):
+	frappe.db.get_value("Company", company, "name", for_update=True)
 
 
 @request_cache
@@ -77,7 +112,7 @@ class StockClosingEntry(Document):
 		company: DF.Link
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
-		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Outdated", "Failed", "Cancelled"]
 		to_date: DF.Date
 	# end: auto-generated types
 
@@ -242,16 +277,55 @@ class StockClosingEntry(Document):
 			)
 
 	def validate_no_pending_reposts(self):
-		from erpnext.stock.utils import PendingRepostingError, check_pending_reposting
+		from erpnext.stock.utils import PendingRepostingError
 
-		if check_pending_reposting(self.to_date, self.company, throw_error=False):
+		if self.has_pending_reposts():
 			frappe.throw(
-				_(
-					"Cannot generate the closing balance of Stock Closing Entry {0} while Repost Item Valuation entries dated on or before {1} are pending. Try again once they are completed."
-				).format(self.name, frappe.bold(frappe.format(self.to_date, "Date"))),
+				self.get_pending_reposts_message(),
 				PendingRepostingError,
 				title=_("Stock Reposting Ongoing"),
 			)
+
+	def has_pending_reposts(self):
+		from erpnext.stock.utils import check_pending_reposting
+
+		return check_pending_reposting(self.to_date, self.company, throw_error=False)
+
+	def has_ledger_changes_since(self, started_at):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return bool(
+			frappe.qb.from_(sle)
+			.select(sle.name)
+			.where(
+				(sle.company == self.company)
+				& (sle.posting_date <= self.to_date)
+				& (sle.modified >= started_at)
+			)
+			.limit(1)
+			.for_update()
+			.run()
+		)
+
+	def has_pending_reposts_now(self):
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		return bool(
+			frappe.qb.from_(riv)
+			.select(riv.name)
+			.where(
+				(riv.docstatus == 1)
+				& (riv.status.isin(["Queued", "In Progress"]))
+				& (riv.posting_date <= self.to_date)
+				& (riv.company == self.company)
+			)
+			.limit(1)
+			.for_update()
+			.run()
+		)
+
+	def get_pending_reposts_message(self):
+		return _(
+			"Cannot generate the closing balance of Stock Closing Entry {0} while Repost Item Valuation entries dated on or before {1} are pending. Try again once they are completed."
+		).format(self.name, frappe.bold(frappe.format(self.to_date, "Date")))
 
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
@@ -329,7 +403,13 @@ def prepare_closing_stock_balance(name):
 		return
 
 	doc = frappe.get_doc("Stock Closing Entry", name)
+	if doc.has_pending_reposts():
+		doc.db_set("status", "Failed")
+		doc.log_error(title=_("Stock Closing Entry Failed"), message=doc.get_pending_reposts_message())
+		return
+
 	doc.db_set("status", "In Progress")
+	started_at = now_datetime()
 
 	try:
 		doc.create_stock_closing_balance_entries()
@@ -338,7 +418,9 @@ def prepare_closing_stock_balance(name):
 			doc.db_set("status", "Cancelled")
 			return
 
-		doc.db_set("status", "Completed")
+		lock_company_for_closing(doc.company)
+		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts_now()
+		doc.db_set("status", "Outdated" if is_outdated else "Completed")
 	except Exception:
 		frappe.db.rollback()
 		doc.db_set("status", "Failed")

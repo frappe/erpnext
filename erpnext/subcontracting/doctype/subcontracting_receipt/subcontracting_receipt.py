@@ -19,6 +19,9 @@ from erpnext.stock.get_item_details import get_default_cost_center, get_default_
 from erpnext.stock.stock_ledger import get_valuation_rate
 
 from .mapper import (
+	can_combine_purchase_orders,
+	get_purchase_orders,
+	get_uncombinable_orders_message,
 	make_purchase_receipt,
 )
 
@@ -150,6 +153,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		if not self.get("is_return"):
 			self.validate_inspection()
+			self.validate_purchase_orders_share_terms()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			frappe.throw(_("Posting Date cannot be a future date"))
@@ -176,6 +180,10 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
+
+	def validate_purchase_orders_share_terms(self):
+		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
+			frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -208,11 +216,30 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
+		self.validate_consumed_batches()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
 		self.auto_create_purchase_receipt()
 		self.update_job_card()
+
+	def validate_consumed_batches(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		bundles = frappe._dict(
+			frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"parent": self.name},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
+		for row in self.supplied_items:
+			row.serial_and_batch_bundle = bundles.get(row.name) or row.serial_and_batch_bundle
+
+		SerialBatchBundleService(self).validate_outward_bundle_batches(
+			check_expiry=False, rows=self.supplied_items, qty_field="consumed_qty"
+		)
 
 	def on_update(self):
 		for table_field in ["items", "supplied_items"]:
@@ -845,7 +872,8 @@ class SubcontractingReceipt(SubcontractingController):
 					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
 				)
 				required.qty += flt(
-					bom_item.qty_consumed_per_unit * row.qty * row.conversion_factor, row.precision("qty")
+					bom_item.qty_consumed_per_unit * self.get_qty_for_costing(row) * row.conversion_factor,
+					row.precision("qty"),
 				)
 
 		return rm_dict

@@ -553,3 +553,7 @@ erpnext.patches.v17_0.migrate_legacy_shareholders_to_folios
 erpnext.patches.v17_0.backfill_legacy_share_transfers
 erpnext.patches.v17_0.rebuild_shareholder_current_balances
 erpnext.patches.v17_0.remove_shareholder_document_shares
+erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
+erpnext.patches.v16_0.set_default_mins_between_operations
+erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+erpnext.patches.v16_0.set_value_adjustment_amount_on_asset

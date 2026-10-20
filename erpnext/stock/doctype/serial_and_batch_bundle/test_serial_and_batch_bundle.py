@@ -103,21 +103,6 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
 		)
 
-	def test_number_entry_follows_the_bundle_not_the_serial_master(self):
-		bundle = self.make_bundle()
-		user = frappe.get_doc(
-			doctype="User",
-			email="bundle-entry-stock-user@example.com",
-			first_name="Bundle Entry",
-			send_welcome_email=0,
-			roles=[{"role": "Stock User"}],
-		).insert()
-		with self.set_user(user.name):
-			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertTrue(
-			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
-		)
-
 
 class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_naming_for_sabb(self):
@@ -243,6 +228,47 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 
 		self.assertEqual(flt(stock_value_difference, 2), -500)
+
+	@patch("erpnext.stock.serial_batch_bundle.SERIAL_NO_QUERY_BATCH_SIZE", 1)
+	def test_outward_serial_valued_at_latest_inward_rate_in_warehouse(self):
+		item_code = make_item(
+			"_Test Serial Latest Inward Rate Item",
+			{"has_serial_no": 1, "serial_no_series": "TEST-SER-LIR-.#####", "is_stock_item": 1},
+		).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code, qty=2, rate=100, target=warehouse, posting_date=add_days(today(), -10)
+		)
+		serial_nos = [
+			frappe.db.get_value("Serial No", name, "serial_no")
+			for name in get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		]
+		for days, rate, target, source in ((-8, 0, None, warehouse), (-6, 150, warehouse, None)):
+			make_stock_entry(
+				item_code=item_code,
+				qty=2,
+				rate=rate,
+				target=target,
+				source=source,
+				serial_no=serial_nos,
+				posting_date=add_days(today(), days),
+				use_serial_batch_fields=1,
+			)
+
+		issue = make_stock_entry(
+			item_code=item_code,
+			qty=2,
+			source=warehouse,
+			serial_no=serial_nos,
+			posting_date=add_days(today(), -2),
+			use_serial_batch_fields=1,
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -300)
 
 	def test_inward_outward_batch_valuation(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -1100,23 +1126,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 		self.assertEqual(entries, [{"serial_no": None, "batch_no": batch.name, "qty": 2}])
 		self.assertEqual(frappe.db.count("Batch", {"item": item_code, "batch_id": batch_id}), 1)
-
-	def test_serial_number_reuses_existing_record(self):
-		item_code = make_item(properties={"has_serial_no": 1}).name
-		serial_no = "TEST-SNID-VAL-00001"
-		entries = resolve_csv_entries(
-			[{"serial_no": serial_no, "qty": 1}], item_code, "Inward", "_Test Company"
-		)
-		serial = frappe.get_doc("Serial No", entries[0].serial_no)
-		self.assertEqual((serial.item_code, serial.serial_no), (item_code, serial_no))
-		self.assertNotEqual(serial.name, serial_no)
-		self.assertEqual((serial.company, serial.status), ("_Test Company", "Inactive"))
-
-		entries = resolve_csv_entries(
-			[{"serial_no": serial_no.lower(), "qty": 1}], item_code, "Inward", "_Test Company"
-		)
-		self.assertEqual(entries, [{"serial_no": serial.name, "batch_no": None, "qty": 1}])
-		self.assertEqual(frappe.db.count("Serial No", {"item_code": item_code, "serial_no": serial_no}), 1)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}

@@ -2,7 +2,9 @@
 # For license information, please see license.txt
 
 
+import frappe
 from frappe import _
+from frappe.utils import flt, getdate
 
 from erpnext.stock.report.delayed_item_report.delayed_item_report import DelayedItemReport
 
@@ -22,14 +24,27 @@ class DelayedOrderReport(DelayedItemReport):
 	def get_data(self, consolidated=False):
 		data = super().get_data(consolidated) or []
 
-		so_list = []
-		result = []
+		last_deliveries = {}
 		for d in data:
-			if d.sales_order not in so_list:
-				so_list.append(d.sales_order)
-				result.append(d)
+			if flt(d.qty) <= 0:
+				continue
 
-		return result
+			last = last_deliveries.get(d.sales_order)
+			if not last or getdate(d.posting_date) > getdate(last.posting_date):
+				last_deliveries[d.sales_order] = d
+
+		order_totals = dict(
+			frappe.get_all(
+				"Sales Order",
+				filters={"name": ("in", list(last_deliveries))},
+				fields=["name", "grand_total"],
+				as_list=True,
+			)
+		)
+		for sales_order, row in last_deliveries.items():
+			row.grand_total = order_totals.get(sales_order)
+
+		return list(last_deliveries.values())
 
 	def get_columns(self):
 		based_on = self.filters.get("based_on")
