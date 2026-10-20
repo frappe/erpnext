@@ -2904,17 +2904,28 @@ class StockEntry(StockController, SubcontractingInwardController):
 					)
 				)
 
+	def is_new_entry_against_closed_work_order(self, pro_doc):
+		return (
+			pro_doc.status == "Closed"
+			and self.docstatus == 1
+			and not self.is_return
+			and self.purpose in ("Material Transfer for Manufacture", "Manufacture")
+		)
+
 	def update_work_order(self):
 		def _validate_work_order(pro_doc):
-			msg, title = "", ""
+			msg = ""
 			if flt(pro_doc.docstatus) != 1:
-				msg = f"Work Order {self.work_order} must be submitted"
+				msg = _("Work Order {0} must be submitted").format(self.work_order)
 
 			if pro_doc.status == "Stopped":
-				msg = f"Transaction not allowed against stopped Work Order {self.work_order}"
+				msg = _("Transaction not allowed against stopped Work Order {0}").format(self.work_order)
+
+			if self.is_new_entry_against_closed_work_order(pro_doc):
+				msg = _("Transaction not allowed against closed Work Order {0}").format(self.work_order)
 
 			if msg:
-				frappe.throw(_(msg), title=title)
+				frappe.throw(msg)
 
 		if self.job_card:
 			job_doc = frappe.get_doc("Job Card", self.job_card)
@@ -4441,8 +4452,19 @@ class StockEntry(StockController, SubcontractingInwardController):
 			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
 		)
 
+		job_card_operation = (
+			frappe.db.get_value(
+				"Job Card", self.get("job_card"), ["operation_row_id", "operation"], as_dict=True
+			)
+			if consider_job_card
+			else None
+		)
+
 		for d in work_order.get("required_items"):
 			if consider_job_card and (d.item_code not in job_card_items):
+				continue
+
+			if consider_job_card and not is_row_of_job_card_operation(d, job_card_operation):
 				continue
 
 			additional_qty = 0.0
@@ -4455,33 +4477,37 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			can_transfer = transfer_pending or (backflush_based_on == "Material Transferred for Manufacture")
 
-			if not can_transfer:
-				continue
-
-			if d.include_item_in_manufacturing:
-				item_row = d.as_dict()
-				item_row["idx"] = len(item_dict) + 1
-
-				if consider_job_card:
-					job_card_item = frappe.db.get_value(
-						"Job Card Item", {"item_code": d.item_code, "parent": self.get("job_card")}
-					)
-					item_row["job_card_item"] = job_card_item or None
-
-				if d.source_warehouse and not frappe.db.get_value(
-					"Warehouse", d.source_warehouse, "is_group"
-				):
-					item_row["from_warehouse"] = d.source_warehouse
-
-				item_row["to_warehouse"] = wip_warehouse
-				item_row["allow_alternative_item"] = cint(
-					work_order.allow_alternative_item
-					and frappe.get_cached_value("Item", d.item_code, "allow_alternative_item")
-				)
-
-				item_dict.setdefault(d.item_code, item_row)
+			if can_transfer and d.include_item_in_manufacturing:
+				self.add_required_item_row(item_dict, d, work_order, consider_job_card, wip_warehouse)
 
 		return item_dict
+
+	def add_required_item_row(self, item_dict, d, work_order, consider_job_card, wip_warehouse):
+		key = (d.item_code, d.source_warehouse)
+		if existing_row := item_dict.get(key):
+			existing_row["required_qty"] = flt(existing_row["required_qty"]) + flt(d.required_qty)
+			existing_row["transferred_qty"] = flt(existing_row["transferred_qty"]) + flt(d.transferred_qty)
+			return
+
+		item_row = d.as_dict()
+		item_row["idx"] = len(item_dict) + 1
+
+		if consider_job_card:
+			job_card_item = frappe.db.get_value(
+				"Job Card Item", {"item_code": d.item_code, "parent": self.get("job_card")}
+			)
+			item_row["job_card_item"] = job_card_item or None
+
+		if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
+			item_row["from_warehouse"] = d.source_warehouse
+
+		item_row["to_warehouse"] = wip_warehouse
+		item_row["allow_alternative_item"] = cint(
+			work_order.allow_alternative_item
+			and frappe.get_cached_value("Item", d.item_code, "allow_alternative_item")
+		)
+
+		item_dict[key] = item_row
 
 	def get_job_card_item_codes(self, job_card=None):
 		if not job_card:
@@ -5359,6 +5385,16 @@ def get_expired_batch_items():
 		)
 	)
 	return [row for row in expired_batches_stock if row.warehouse in permitted_warehouses]
+
+
+def is_row_of_job_card_operation(row, operation):
+	if not operation:
+		return True
+
+	if cint(row.operation_row_id) and cint(operation.operation_row_id):
+		return cint(row.operation_row_id) == cint(operation.operation_row_id)
+
+	return not row.operation or row.operation == operation.operation
 
 
 def get_outward_rows(ste_details):

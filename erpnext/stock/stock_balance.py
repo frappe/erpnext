@@ -248,12 +248,18 @@ def get_subcontracting_order_qty(item_code, warehouse):
 
 
 def get_planned_qty(item_code, warehouse):
-	planned_qty = frappe.db.sql(
-		"""
-		select sum(qty - produced_qty) from `tabWork Order`
-		where production_item = %s and fg_warehouse = %s and status not in ('Stopped', 'Completed', 'Closed')
-		and docstatus=1 and qty > produced_qty""",
-		(item_code, warehouse),
+	wo = frappe.qb.DocType("Work Order")
+	planned_qty = (
+		frappe.qb.from_(wo)
+		.select(Sum(wo.qty - wo.produced_qty - wo.process_loss_qty))
+		.where(
+			(wo.production_item == item_code)
+			& (wo.fg_warehouse == warehouse)
+			& wo.status.notin(["Stopped", "Completed", "Closed"])
+			& (wo.docstatus == 1)
+			& (wo.qty > wo.produced_qty + wo.process_loss_qty)
+		)
+		.run()
 	)
 
 	return flt(planned_qty[0][0]) if planned_qty else 0
