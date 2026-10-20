@@ -44,7 +44,8 @@ class ShopFloor {
 		this.view = "operator"; // overwritten once context loads
 		this.active_bucket = "open";
 		this.with_job_cards_only = true; // board default: hide WOs that have no job cards
-		this.buckets = {}; // key -> { rows, total, start, loaded }
+		this.buckets = {}; // key -> { rows, total, page_length }
+		this.board_request = 0;
 		this.selected_wo = null;
 		this.focus_index = -1;
 		this.op_state = { workstation: null, work_order: null };
@@ -288,29 +289,29 @@ class ShopFloor {
 		this.load_bucket(this.active_bucket);
 	}
 
-	load_bucket(bucket, append = false) {
-		const state = this.buckets[bucket] || { rows: [], total: 0, start: 0, loaded: false };
-		const start = append ? state.start : 0;
-		// A reload keeps the pages already loaded.
-		const page_length = append ? PAGE_LENGTH : Math.max(PAGE_LENGTH, state.rows.length);
+	load_bucket(bucket, more = false) {
+		const state = this.buckets[bucket];
+		// Every request fetches all pages asked for, so a reload can't undo "Load more".
+		if (state && more) state.page_length += PAGE_LENGTH;
+		const page_length = state?.page_length || PAGE_LENGTH;
+		// Only the latest request applies, so an older reply can't replace newer rows.
+		const request = ++this.board_request;
 
 		frappe.call({
 			method: "erpnext.manufacturing.page.shop_floor.shop_floor.get_work_orders",
 			args: {
 				status_group: bucket,
-				start: start,
 				page_length: page_length,
 				search: this.search_term || null,
 				with_job_cards_only: this.with_job_cards_only ? 1 : 0,
 			},
 			callback: (r) => {
+				if (request !== this.board_request) return;
 				const data = r.message || {};
-				const rows = data.work_orders || [];
 				this.buckets[bucket] = {
-					rows: append ? state.rows.concat(rows) : rows,
+					rows: data.work_orders || [],
 					total: cint(data.total),
-					start: start + rows.length,
-					loaded: true,
+					page_length: page_length,
 				};
 				this.update_tab_count(bucket);
 				if (bucket === this.active_bucket) this.render_board();
