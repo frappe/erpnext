@@ -1703,6 +1703,18 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
+	def test_return_allowed_when_sales_order_required(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		dn = create_delivery_note(qty=2)
+
+		with self.change_settings("Selling Settings", {"so_required": "Yes"}):
+			dn_return = make_sales_return(dn.name)
+			dn_return.submit()
+
+		self.assertEqual(dn_return.docstatus, 1)
+
 	def test_returned_qty_in_return_dn(self):
 		# SO ---> SI ---> DN
 		#                 |
