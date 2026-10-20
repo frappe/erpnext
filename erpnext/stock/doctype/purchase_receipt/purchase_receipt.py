@@ -1910,7 +1910,7 @@ def get_order_billing_provisional_reversals(invoice) -> dict:
 def get_posted_to_replayed_factors(receipt_rows, unreversed_qty, posted) -> dict:
 	factors = {}
 	for po_detail, rows in receipt_rows.items():
-		replayed_open = sum(unreversed_qty[row.name] * get_unit_amount(row) for row in rows)
+		replayed_open = sum(max(unreversed_qty[row.name], 0) * get_unit_amount(row) for row in rows)
 		replayed_reversal = sum(
 			(flt(row.kept_qty) - unreversed_qty[row.name]) * get_unit_amount(row) for row in rows
 		)
@@ -1960,11 +1960,31 @@ def get_posted_provision(receipt_rows, invoice) -> frappe._dict:
 	for name, po_detail in booking_rows.items():
 		posted.booked[po_detail] = flt(posted.booked.get(po_detail)) + flt(balances.get(name))
 
+	for po_detail, amount in get_own_receipt_row_reversals(invoice, receipt_rows).items():
+		posted.booked[po_detail] = flt(posted.booked.get(po_detail)) - amount
+
 	for name, row in invoice_rows.items():
 		row.reversed = -flt(balances.get(name))
 		posted.reversed[row.po_detail] = flt(posted.reversed.get(row.po_detail)) + row.reversed
 
 	return posted
+
+
+def get_own_receipt_row_reversals(invoice, receipt_rows) -> dict:
+	if cint(invoice.docstatus) != 1:
+		return {}
+
+	rows = {row.name: (po_detail, row) for po_detail, po_rows in receipt_rows.items() for row in po_rows}
+	reversals = {}
+	for item in invoice.items:
+		if item.pr_detail not in rows:
+			continue
+
+		po_detail, row = rows[item.pr_detail]
+		amount = min(flt(item.qty), flt(row.qty)) * get_unit_amount(row)
+		reversals[po_detail] = flt(reversals.get(po_detail)) + amount
+
+	return reversals
 
 
 def get_receipt_return_rows(booking_rows) -> dict:
