@@ -1094,6 +1094,11 @@ class WorkOrder(Document):
 	def get_source_bom_operation(self, operation, source_operations, sources_by_name, occurrence):
 		if operation.get("bom_operation"):
 			source = sources_by_name.get(operation.bom_operation)
+			if source and (source.parent, source.operation) != (
+				operation.bom or self.bom_no,
+				operation.operation,
+			):
+				source = None
 		else:
 			key = (operation.bom or self.bom_no, operation.operation)
 			idx = occurrence[key] = occurrence.get(key, -1) + 1
