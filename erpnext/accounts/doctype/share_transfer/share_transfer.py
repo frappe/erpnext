@@ -50,17 +50,3 @@ class ShareTransfer(Document):
 	on_trash = validate
 	on_submit = validate
 	on_cancel = validate
-
-
-@frappe.whitelist(methods=["POST"])
-def make_jv_entry(
-	company: str,
-	account: str,
-	amount: float,
-	payment_account: str,
-	credit_applicant_type: str,
-	credit_applicant: str,
-	debit_applicant_type: str,
-	debit_applicant: str,
-):
-	frappe.throw(_("Share Transfer is read-only. Create a Share Transaction instead."))
