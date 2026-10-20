@@ -326,7 +326,9 @@ class ShopFloor {
 
 	render_board() {
 		const state = this.buckets[this.active_bucket] || { rows: [], total: 0 };
-		this.focus_index = -1;
+		// Realtime reloads re-render the board, so keep keyboard focus on the same work order.
+		const focused = this.focused_el()?.attr("data-name");
+		this.focus_index = state.rows.findIndex((wo) => wo.name === focused);
 
 		if (!state.rows.length) {
 			this.board_container.html(`<div class="sf-empty">${__("No work orders here.")}</div>`);
@@ -344,6 +346,7 @@ class ShopFloor {
 		this.board_container.html(
 			`<div class="sf-wo-grid">${cards}</div><div class="sf-board-more">${more}</div>`
 		);
+		this.focused_el()?.addClass("sf-focused");
 
 		this.board_container.find(".sf-wo-card").on("click", (e) => {
 			this.open_wo($(e.currentTarget).attr("data-name"));
