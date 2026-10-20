@@ -177,6 +177,11 @@ class TestChequeBook(ERPNextTestSuite):
 			self.assertEqual((cheque.status, cheque.docstatus), ("Cancelled", 2))
 			self.assertEqual(cheque.remarks, f"Cheque Book {self.book.name} cancelled")
 
+	def test_book_with_a_used_cheque_cannot_be_cancelled(self):
+		# An amendment would bring the lost leaf back as Available
+		frappe.get_doc("Cheque", f"{self.book.name}-000103").cancel_with_reason("Lost")
+		self.assertRaisesRegex(frappe.ValidationError, "000103.*Cancelled", self.book.cancel)
+
 	def test_accounts_user_can_only_read_and_select(self):
 		user = make_fenced_user("cheque.user@example.com", ["Accounts User"])
 		for doctype in ("Cheque Book", "Cheque"):
