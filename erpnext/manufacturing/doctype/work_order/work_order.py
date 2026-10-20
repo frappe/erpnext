@@ -1911,6 +1911,9 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
+		if not self.fg_warehouse:
+			self.fg_warehouse = self.get_default_fg_warehouse()
+
 		self.set_required_items()
 		self.set_work_order_operations()
 
