@@ -1005,7 +1005,6 @@ erpnext.work_order = {
 					// ignore stale responses if the company changed while the request was in flight
 					if (!r.exe && frm.doc.company === company) {
 						frm.set_value("wip_warehouse", r.message.wip_warehouse);
-						frm.set_value("fg_warehouse", r.message.fg_warehouse);
 						frm.set_value("scrap_warehouse", r.message.scrap_warehouse);
 					}
 				},
