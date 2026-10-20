@@ -153,7 +153,7 @@
 								<th class="text-center" style="padding: 14px 16px;">
 									<div class="column-name" title="{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}">{{ frappe.utils.escape_html(itm.item_name || itm.item_code) }}</div>
 									{%
-										const raw_desc = (itm.description ? (frappe.utils.strip_html ? frappe.utils.strip_html(itm.description) : itm.description.replace(/<[^>]*>/g, "")) : "").trim();
+										const raw_desc = frappe.utils.html2text(itm.description || "").trim();
 										const clean_desc = raw_desc.length > 45 ? raw_desc.slice(0, 42) + "..." : raw_desc;
 									%}
 									{% if (raw_desc && raw_desc !== itm.item_name && raw_desc !== itm.item_code) { %}
@@ -176,7 +176,7 @@
 								<td style="width: 200px; min-width: 160px; max-width: 200px; vertical-align: middle; font-size: 14px;">
 									<div class="font-weight-bold truncate" title="{{ frappe.utils.escape_html(item.item_name || item.item_code) }}">{{ frappe.utils.escape_html(item.item_name || item.item_code) }}</div>
 									{%
-										const raw_desc = (item.description ? (frappe.utils.strip_html ? frappe.utils.strip_html(item.description) : item.description.replace(/<[^>]*>/g, "")) : "").trim();
+										const raw_desc = frappe.utils.html2text(item.description || "").trim();
 										const clean_desc = raw_desc.length > 45 ? raw_desc.slice(0, 42) + "..." : raw_desc;
 									%}
 									{% if (raw_desc && raw_desc !== item.item_name && raw_desc !== item.item_code) { %}
