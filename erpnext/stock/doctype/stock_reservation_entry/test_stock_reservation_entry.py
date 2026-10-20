@@ -427,6 +427,29 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		so_b.create_stock_reservation_entries()
 		self.assertTrue(has_reserved_stock("Sales Order", so_b.name))
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_sales_order_row_reservation_limit_counts_every_warehouse(self) -> None:
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=other_warehouse, qty=10)
+		so = make_sales_order(item_code=self.sr_item.name, warehouse=self.warehouse, qty=10, rate=100)
+		row = {
+			"item_code": self.sr_item.name,
+			"voucher_type": "Sales Order",
+			"voucher_no": so.name,
+			"voucher_detail_no": so.items[0].name,
+			"voucher_qty": 10,
+		}
+
+		make_stock_reservation_entry(**row, reserved_qty=8)
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_reservation_entry,
+			**row,
+			warehouse=other_warehouse,
+			reserved_qty=3,
+		)
+		make_stock_reservation_entry(**row, warehouse=other_warehouse, reserved_qty=2)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
@@ -963,6 +986,28 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"Sales Order",
 			frappe.as_json(trans_items),
 			so.name,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_bundle_component_picked_from_two_warehouses_is_reserved(self) -> None:
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
+		make_stock_entry(item_code=components[0], target=other_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)
+
+		pl = create_pick_list(so.name)
+		location = pl.locations[0]
+		location.qty = location.stock_qty = location.picked_qty = 2
+		pl.append("locations", location.as_dict(no_default_fields=True)).warehouse = other_warehouse
+		pl.submit()
+		pl.create_stock_reservation_entries()
+
+		self.assertEqual(
+			get_sre_reserved_qty_details_for_voucher("Sales Order", so.name), {so.packed_items[0].name: 4}
 		)
 
 	@ERPNextTestSuite.change_settings(
