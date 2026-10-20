@@ -2048,6 +2048,43 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.load_from_db()
 		so.cancel()
 
+	def test_drop_shipping_delivery_progress_excludes_closed_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		drop_ship_item = make_item(
+			"_Test Drop Ship Closed Row Progress", {"is_stock_item": 1, "delivered_by_supplier": 1}
+		)
+		so = make_sales_order(qty=10, rate=100, do_not_save=True)
+		so.append(
+			"items",
+			{
+				"item_code": drop_ship_item.name,
+				"qty": 10,
+				"rate": 100,
+				"delivery_date": so.delivery_date,
+				"delivered_by_supplier": 1,
+				"supplier": "_Test Supplier",
+			},
+		)
+		so.submit()
+		po = make_purchase_order(so.name, selected_items=[so.items[1].as_dict()])[0]
+		po.submit()
+
+		update_closed_status("Sales Order", so.name, [so.items[0].name], 1)
+		for expected_qty, expected_percentage in ((5, 50), (10, 100)):
+			with self.subTest(delivered_qty=expected_qty):
+				po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 5}])
+				so.reload()
+				self.assertEqual(so.items[0].closed, 1)
+				self.assertEqual(so.items[0].delivered_qty, 0)
+				self.assertEqual(so.items[1].delivered_qty, expected_qty)
+				self.assertEqual(so.per_delivered, expected_percentage)
+
+		po.reload().cancel()
+		so.reload()
+		self.assertEqual(so.items[1].delivered_qty, 0)
+		self.assertEqual(so.per_delivered, 0)
+
 	def test_drop_shipping_partial_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
