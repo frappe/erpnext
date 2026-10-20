@@ -168,6 +168,40 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
 
+	def test_over_receipt_keeps_whole_number_uom_qty(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		item = make_item(
+			"_Test Over Receipt Whole Item",
+			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 50},
+		).name
+		po = create_purchase_order(item_code=item, qty=3)
+		create_pr_against_po(po.name, received_qty=3)
+
+		po.load_from_db()
+		self.assertTrue(po.has_pending_receivable_qty())
+		pr = make_purchase_receipt(po.name)
+		self.assertEqual([row.qty for row in pr.items], [1])
+		pr.submit()
+
+		po.load_from_db()
+		self.assertFalse(po.has_pending_receivable_qty())
+		self.assertEqual(len(make_purchase_receipt(po.name).items), 0)
+
+	def test_over_receipt_fractional_allowance_exhausted_for_whole_number_uom(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		item = make_item(
+			"_Test Over Receipt Whole Item 10",
+			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 10},
+		).name
+		po = create_purchase_order(item_code=item, qty=3)
+		create_pr_against_po(po.name, received_qty=3)
+
+		po.load_from_db()
+		self.assertFalse(po.has_pending_receivable_qty())
+		self.assertEqual(len(make_purchase_receipt(po.name).items), 0)
+
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
 		po = create_purchase_order()
