@@ -11,10 +11,7 @@ from frappe.utils import flt, today
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
-from erpnext.stock.doctype.company_restriction.company_restriction import (
-	get_allowed_masters_condition,
-	get_allowed_warehouses_condition,
-)
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_warehouses_condition
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
@@ -34,18 +31,14 @@ def get_templates(filters):
 	if not (items or item_groups):
 		return {}
 
-	template_filters = [{"has_variants": 1}]
+	template_filters = {"has_variants": 1}
 	if items:
-		template_filters.append({"name": ["in", items]})
+		template_filters["name"] = ["in", items]
 	else:
-		template_filters.append(
-			{"disabled": 0, "item_group": ["in", get_item_groups_with_descendants(item_groups)]}
-		)
-	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
-		template_filters.append(condition)
+		template_filters.update(disabled=0, item_group=["in", get_item_groups_with_descendants(item_groups)])
 
 	return dict(
-		frappe.get_all(
+		frappe.get_list(
 			"Item", filters=template_filters, fields=["name", "item_group"], order_by="name", as_list=True
 		)
 	)
@@ -67,12 +60,10 @@ def get_data(templates, filters):
 	if not templates:
 		return []
 
-	variant_filters = [{"variant_of": ["in", list(templates)], "disabled": 0}]
-	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
-		variant_filters.append(condition)
-
-	variant_results = frappe.db.get_all(
-		"Item", fields=["name", "variant_of", "item_group", "stock_uom"], filters=variant_filters
+	variant_results = frappe.get_list(
+		"Item",
+		fields=["name", "variant_of", "item_group", "stock_uom"],
+		filters={"variant_of": ["in", list(templates)], "disabled": 0},
 	)
 
 	if not variant_results:
