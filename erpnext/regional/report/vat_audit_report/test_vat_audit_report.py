@@ -131,6 +131,71 @@ class TestVATAuditReport(ERPNextTestSuite):
 		self.assertEqual(len(rows), 1)
 		self.assertEqual((rows[0]["net_amount"], rows[0]["tax_amount"]), (500.99, 75.15))
 
+	def test_reverse_charge_shows_input_and_output_vat(self):
+		pi = self.make_reverse_charge_purchase()
+		self.assertEqual(self.get_figures(pi), [(1000, -150, 850), (1000, 150, 1150)])
+
+		# item tax details migrated from the old JSON field keep a Deduct row's taxable amount positive
+		deduct_tax_row = next(tax.name for tax in pi.taxes if tax.add_deduct_tax == "Deduct")
+		frappe.db.set_value(
+			"Item Wise Tax Detail", {"parent": pi.name, "tax_row": deduct_tax_row}, "taxable_amount", 1000
+		)
+		self.assertEqual(self.get_figures(pi), [(1000, -150, 850), (1000, 150, 1150)])
+
+	def test_reverse_charge_return_stays_negative(self):
+		debit_note = self.make_reverse_charge_purchase(is_return=1)
+		self.assertEqual(self.get_figures(debit_note), [(-1000, -150, -1150), (-1000, 150, -850)])
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_negative_rates_for_items": 1})
+	def test_reverse_charge_credit_line_reduces_supplies(self):
+		pi = self.make_reverse_charge_purchase(credit_amount=100)
+		self.assertEqual(self.get_figures(pi), [(900, -135, 765), (900, 135, 1035)])
+
+	def make_reverse_charge_purchase(self, is_return: int = 0, credit_amount: float = 0):
+		output_vat_account = create_account(
+			account_name="VAT Reverse Charge",
+			account_type="Tax",
+			parent_account="Duties and Taxes - _TCSV",
+			company=self.company,
+		)
+		settings = frappe.get_doc("South Africa VAT Settings", self.company)
+		if output_vat_account not in [row.account for row in settings.vat_accounts]:
+			settings.append("vat_accounts", {"account": output_vat_account})
+			settings.save()
+
+		pi = make_sa_purchase_invoice(1000, qty=-1 if is_return else 1, is_return=is_return)
+		if credit_amount:
+			make_item("_Test SA VAT Item 2")
+			pi.append(
+				"items",
+				{
+					**pi.items[0].as_dict(),
+					"name": None,
+					"item_code": "_Test SA VAT Item 2",
+					"rate": -credit_amount,
+				},
+			)
+		for account, add_deduct_tax in (("VAT - 15% - _TCSV", "Add"), (output_vat_account, "Deduct")):
+			pi.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"category": "Total",
+					"add_deduct_tax": add_deduct_tax,
+					"account_head": account,
+					"cost_center": "Main - _TCSV",
+					"description": "VAT 15%",
+					"rate": 15,
+				},
+			)
+		pi.submit()
+		return pi
+
+	def get_figures(self, invoice):
+		filters = {"company": self.company, "from_date": today(), "to_date": today()}
+		rows = [row for row in execute(filters)[1] if row.get("voucher_no") == invoice.name]
+		return sorted((row["net_amount"], row["tax_amount"], row["gross_amount"]) for row in rows)
+
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
@@ -260,8 +325,8 @@ def make_sales_invoices():
 	make_sales_invoices_wrapper(test_zero_rated_item, 100.0, "VAT - 0% - _TCSV", 0.0)
 
 
-def create_purchase_invoices():
-	pi = make_purchase_invoice(
+def make_sa_purchase_invoice(rate, qty=1, is_return=0):
+	return make_purchase_invoice(
 		company="_Test Company SA VAT",
 		supplier="_Test SA Supplier",
 		supplier_warehouse="Finished Goods - _TCSV",
@@ -270,11 +335,16 @@ def create_purchase_invoices():
 		cost_center="Main - _TCSV",
 		expense_account="Cost of Goods Sold - _TCSV",
 		item="_Test SA VAT Item",
-		qty=1,
-		rate=100,
+		qty=qty,
+		rate=rate,
+		is_return=is_return,
 		uom="Nos",
 		do_not_save=1,
 	)
+
+
+def create_purchase_invoices():
+	pi = make_sa_purchase_invoice(100)
 	pi.append(
 		"taxes",
 		{
