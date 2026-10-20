@@ -309,12 +309,11 @@ frappe.ui.form.on("Job Card", {
 		const accounted_qty = flt(doc.total_completed_qty) + flt(doc.process_loss_qty) + flt(doc.pending_qty);
 		const needs_end_time = !!doc.__onload?.enforce_time_logs;
 
-		return (
-			!!last_log &&
-			(!needs_end_time || !!last_log.to_time) &&
-			flt(doc.for_quantity) > 0 &&
-			flt(accounted_qty, qty_precision) >= flt(doc.for_quantity, qty_precision)
-		);
+		const qty_done =
+			!flt(doc.for_quantity) ||
+			flt(accounted_qty, qty_precision) >= flt(doc.for_quantity, qty_precision);
+
+		return !!last_log && (!needs_end_time || !!last_log.to_time) && qty_done;
 	},
 
 	get_job_steps_html(frm, has_items) {
