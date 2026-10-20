@@ -148,7 +148,7 @@ class SalesForecast(Document):
 
 
 @frappe.whitelist()
-def create_mps(source_name, target_doc=None):
+def create_mps(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
 		doc.naming_series = "MPS.YY.-.######"
 
