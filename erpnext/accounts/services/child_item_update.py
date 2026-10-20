@@ -346,7 +346,7 @@ class ChildItemUpdater:
 	def _track_deleted_blanket_order_rows(self, data: list) -> None:
 		kept_rows = {d.get("docname") for d in data}
 		for row in self.parent.items:
-			if row.name not in kept_rows and row.get("blanket_order"):
+			if row.name not in kept_rows and not row.get("closed") and row.get("blanket_order"):
 				self._blanket_order_change[(row.blanket_order, row.item_code)] -= flt(row.stock_qty)
 
 	def _validate_blanket_order_changes(self) -> None:

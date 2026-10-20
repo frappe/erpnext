@@ -436,6 +436,19 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 100)
 		self.assertFalse(frappe.db.exists("Purchase Order Item", po.items[1].name))
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_does_not_count_a_closed_row_as_deleted(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=80)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 20})
+		po.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[1].name], 1)
+
+		self.assertRaises(frappe.ValidationError, update_purchase_order_row_qty, po, po.items[0], 120)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 80)
+
 	def test_update_items_cannot_raise_qty_past_blanket_order(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
 		po = make_purchase_order_against(bo, qty=50)
