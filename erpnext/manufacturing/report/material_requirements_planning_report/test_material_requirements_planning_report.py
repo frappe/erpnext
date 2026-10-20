@@ -425,6 +425,19 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual(row.required_qty, 7)
 
+	def test_supply_covers_the_later_demand_merged_into_a_row(self):
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		report._so_details = {("_Test Item", add_days(today(), 25)): frappe._dict(qty=7)}
+		report._po_details = {("_Test Item", add_days(today(), 28)): frappe._dict(qty=10)}
+		row = frappe._dict(item_code="_Test Item", delivery_date=add_days(today(), 30), planned_qty=10)
+
+		report.add_non_planned_so(row)
+		row.required_qty = flt(row.planned_qty)
+		report.add_po_details(row)
+
+		self.assertEqual(row.required_qty, 7)
+		self.assertEqual(row.po_ordered_qty, 10)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_free_stock_counts_a_work_order_reservation_once(self):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
