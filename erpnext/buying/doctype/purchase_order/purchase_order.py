@@ -500,8 +500,7 @@ class PurchaseOrder(BuyingController):
 			self.update_status_updater_if_from_pp()
 
 		self.update_prevdoc_status()
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 		self.validate_budget()
@@ -548,8 +547,7 @@ class PurchaseOrder(BuyingController):
 
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 
