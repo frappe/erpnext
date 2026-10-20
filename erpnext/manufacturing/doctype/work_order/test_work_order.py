@@ -4038,23 +4038,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(get_projected_qty(cloth, warehouse), -10)
 		self.assertEqual(get_projected_qty(cloth, reserve_warehouse), 0)
 
-	def test_subcontracting_material_already_transferred_is_not_deducted_twice(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
-			make_stock_entry as make_stock_entry_test_record,
+	def test_semi_finished_goods_work_order_transfers_from_job_cards(self):
+		wo = self.make_subcontracted_operation_work_order(
+			skip_transfer=0, wip_warehouse="_Test Warehouse - _TC"
 		)
 
-		warehouse = "Stores - _TC"
-		wip_warehouse = "_Test Warehouse - _TC"
-		wo = self.make_subcontracted_operation_work_order(skip_transfer=0, wip_warehouse=wip_warehouse)
-		cloth = wo.required_items[0].item_code
-
-		make_stock_entry_test_record(item_code=cloth, target=warehouse, qty=4, basic_rate=100)
-		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 6)
-
-		# The order takes the 4 already in WIP: the other 6 are still the Work Order's.
-		self.subcontract_work_order(wo, 4, wip_warehouse)
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 6)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4))
+		self.assertRaisesRegex(frappe.ValidationError, "from its Job Cards", transfer.insert)
 
 	def test_job_card_transfer_is_credited_to_its_operation(self):
 		from erpnext.manufacturing.doctype.job_card.mapper import (
