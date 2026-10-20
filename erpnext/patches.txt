@@ -528,3 +528,10 @@ erpnext.patches.v16_0.remove_invalid_fields_from_copy_fields_to_variants
 erpnext.patches.v16_0.unhide_item_barcode_fields
 erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types
 erpnext.patches.v16_0.set_default_mins_between_operations
+<<<<<<< HEAD
+=======
+erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
+erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
+erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
+>>>>>>> 219e8a8 (fix(manufacturing): credit existing job card transfers to their operation)
