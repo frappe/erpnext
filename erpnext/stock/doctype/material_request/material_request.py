@@ -351,6 +351,7 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
+		self.update_requested_qty_in_job_card()
 		self.update_prevdoc_status()
 		if self.material_request_type == "Purchase" and frappe.db.exists(
 			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
@@ -381,6 +382,7 @@ class MaterialRequest(BuyingController):
 		self.status_can_change(status)
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
+		self.update_requested_qty_in_job_card()
 
 	def status_can_change(self, status):
 		"""
@@ -410,6 +412,7 @@ class MaterialRequest(BuyingController):
 	def on_cancel(self):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
+		self.update_requested_qty_in_job_card()
 		self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
@@ -500,6 +503,10 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
+
+	def update_requested_qty_in_job_card(self):
+		if self.job_card:
+			frappe.get_doc("Job Card", self.job_card).set_requested_qty()
 
 	def validate_work_order_qty(self, row, ordered_qty, mr_qty_allowance):
 		precision = row.precision("ordered_qty")
