@@ -1654,26 +1654,26 @@ class JobCard(Document):
 			self.set_status(update_status=update_status)
 
 	def update_workstation_status(self):
-		status_map = {
-			"Open": "Off",
-			"Work In Progress": "Production",
-			"Completed": "Off",
-			"On Hold": "Idle",
-		}
+		if not self.workstation:
+			return
 
 		job_cards = frappe.get_all(
 			"Job Card",
 			fields=["name", "status"],
 			filters={"workstation": self.workstation, "docstatus": 0, "status": ("!=", "Completed")},
-			order_by="status desc",
 		)
+		# Validation runs before the current card's status is written to the database.
+		statuses = {row.status for row in job_cards if row.name != self.name}
+		if self.docstatus == 0:
+			statuses.add(self.status)
 
-		if not job_cards:
-			frappe.db.set_value("Workstation", self.workstation, "status", "Off")
+		status = "Off"
+		if "Work In Progress" in statuses:
+			status = "Production"
+		elif "On Hold" in statuses:
+			status = "Idle"
 
-		for row in job_cards:
-			frappe.db.set_value("Workstation", self.workstation, "status", status_map.get(row.status))
-			return
+		frappe.db.set_value("Workstation", self.workstation, "status", status)
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
