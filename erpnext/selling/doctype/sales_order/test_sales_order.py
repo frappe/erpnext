@@ -307,6 +307,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.save()
 		self.assertEqual(so.items[0].qty, 1)
 
+	def test_sales_order_zero_qty_cannot_be_forced_by_the_client(self):
+		so = make_sales_order(qty=0, do_not_save=True)
+		so.has_unit_price_items = 1
+
+		self.assertRaises(InvalidQtyError, so.save)
+
 	def test_sales_order_zero_qty(self):
 		po = make_sales_order(qty=0, do_not_save=True)
 

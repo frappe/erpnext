@@ -70,6 +70,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.docstatus, 1)
 		self.assertTrue(po.base_grand_total < 0)
 
+	def test_purchase_order_zero_qty_cannot_be_forced_by_the_client(self):
+		po = create_purchase_order(qty=0, do_not_save=True)
+		po.has_unit_price_items = 1
+
+		self.assertRaises(InvalidQtyError, po.save)
+
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
