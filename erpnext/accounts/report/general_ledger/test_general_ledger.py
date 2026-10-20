@@ -57,7 +57,8 @@ class TestGeneralLedger(ERPNextTestSuite):
 
 		self.clear_old_entries()
 		# reuse bootstrap non-party accounts; clear_old_entries() leaves them clean of GL
-		account = "_Test Account Cost for Goods Sold - _TC"
+		# balance sheet account, so the opening doesn't depend on whether -60 days crosses a fiscal year
+		account = "_Test Cash - _TC"
 		offset = "_Test Bank - _TC"
 		make_journal_entry(account, offset, 1000, posting_date=add_days(today(), -60), submit=True)  # opening
 		make_journal_entry(account, offset, 200, posting_date=today(), submit=True)  # in period
@@ -70,6 +71,35 @@ class TestGeneralLedger(ERPNextTestSuite):
 		self.assertEqual(labelled["'Opening'"]["debit"], 1000)
 		self.assertEqual(labelled["'Total'"]["debit"], 200)
 		self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 1200)
+
+	def test_pl_account_opening_excludes_previous_fiscal_years(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		# test fiscal years are calendar years
+		pl_account = "_Test Account Cost for Goods Sold - _TC"
+		bs_account = "_Test Cash - _TC"
+		make_journal_entry(pl_account, bs_account, 1000, posting_date="2024-12-15", submit=True)  # last FY
+		make_journal_entry(pl_account, bs_account, 300, posting_date="2025-03-10", submit=True)  # this FY
+		make_journal_entry(pl_account, bs_account, 200, posting_date="2025-06-10", submit=True)  # in period
+
+		def get_rows(account):
+			filters = frappe._dict(
+				company=self.company, from_date="2025-06-01", to_date="2025-06-30", account=[account]
+			)
+			return {row.get("account"): row for row in execute(filters)[1]}
+
+		pl_rows = get_rows(pl_account)
+		self.assertEqual(pl_rows["'Opening'"]["debit"] - pl_rows["'Opening'"]["credit"], 300)
+		self.assertEqual(
+			pl_rows["'Closing (Opening + Total)'"]["debit"]
+			- pl_rows["'Closing (Opening + Total)'"]["credit"],
+			500,
+		)
+
+		# balance sheet accounts still carry forward across fiscal years
+		bs_rows = get_rows(bs_account)
+		self.assertEqual(bs_rows["'Opening'"]["debit"] - bs_rows["'Opening'"]["credit"], -1300)
 
 	def test_categorize_by_account_subtotals(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
