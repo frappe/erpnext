@@ -648,12 +648,16 @@ class SubcontractingController(StockController):
 
 		return data
 
-	def __update_reserve_warehouse(self, row, item):
+	def __update_reserve_warehouse(self, row, item, job_card_warehouses):
 		if (
 			self.doctype == self.subcontract_data.order_doctype
 			and self.doctype != "Subcontracting Inward Order"
 		):
-			row.reserve_warehouse = self.set_reserve_warehouse or item.warehouse
+			row.reserve_warehouse = (
+				self.set_reserve_warehouse
+				or job_card_warehouses.get((item.get("job_card"), row.rm_item_code))
+				or item.warehouse
+			)
 		elif frappe.get_cached_value("Item", row.rm_item_code, "is_customer_provided_item") and self.get(
 			"customer_warehouse"
 		):
@@ -973,8 +977,22 @@ class SubcontractingController(StockController):
 
 			return qty
 
+	def get_job_card_source_warehouses(self):
+		"""Source warehouse of each Job Card item an order subcontracts, keyed by (Job Card, item)."""
+		job_cards = {row.job_card for row in self.items if row.get("job_card")}
+		if self.doctype != self.subcontract_data.order_doctype or not job_cards:
+			return {}
+
+		rows = frappe.get_all(
+			"Job Card Item",
+			filters={"parent": ("in", list(job_cards))},
+			fields=["parent", "item_code", "source_warehouse"],
+		)
+		return {(d.parent, d.item_code): d.source_warehouse for d in rows}
+
 	def __set_supplied_or_received_items(self):
 		self.bom_items = {}
+		job_card_warehouses = self.get_job_card_source_warehouses()
 
 		has_items = True if self.get(self.raw_material_table) else False
 		for row in self.items:
@@ -996,7 +1014,7 @@ class SubcontractingController(StockController):
 						* row.conversion_factor
 					)
 					bom_item.main_item_code = row.item_code
-					self.__update_reserve_warehouse(bom_item, row)
+					self.__update_reserve_warehouse(bom_item, row, job_card_warehouses)
 					self.__set_alternative_item(bom_item)
 					self.__add_supplied_or_received_item(row, bom_item, qty)
 
