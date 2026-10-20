@@ -517,6 +517,9 @@ class MaterialRequirementsPlanningReport:
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
 
 	def add_non_planned_so(self, row):
+		if row.demand_parts is None:
+			row.demand_parts = [[getdate(row.delivery_date), flt(row.planned_qty)]]
+
 		keys = [
 			key
 			for key in self._so_details
@@ -525,75 +528,30 @@ class MaterialRequirementsPlanningReport:
 		if not keys:
 			return
 
-		qty = sum(flt(self._so_details.pop(key).qty) for key in keys)
-		row.adhoc_qty = flt(row.adhoc_qty) + qty
-		row.planned_qty = flt(row.planned_qty) + qty
-		row.supply_cutoff_date = min(getdate(key[1]) for key in keys)
+		for key in keys:
+			qty = flt(self._so_details.pop(key).qty)
+			row.adhoc_qty = flt(row.adhoc_qty) + qty
+			row.planned_qty = flt(row.planned_qty) + qty
+			row.demand_parts.append([getdate(key[1]), qty])
 
 	def add_bin_details(self, row):
 		if bin_details := self._bin_details.get(row.item_code):
 			current_qty = get_free_stock(bin_details)
 			if current_qty > 0:
-				if row.required_qty > current_qty:
-					row.in_hand_qty = current_qty
-					row.required_qty -= current_qty
-					bin_details["actual_qty"] = 0.0
-				else:
-					row.in_hand_qty = row.required_qty
-					bin_details["actual_qty"] -= row.required_qty
-					row.required_qty = 0.0
+				covered_qty = cover_demand(row, current_qty)
+				row.in_hand_qty = covered_qty
+				bin_details["actual_qty"] = flt(bin_details["actual_qty"]) - covered_qty
 
 	def add_po_details(self, row):
-		if row.required_qty > 0 and self._po_details:
-			dict_update = {}
-			for (item_code, delivery_date), po_data in self._po_details.items():
-				if row.item_code == item_code and getdate(delivery_date) <= get_supply_cutoff_date(row):
-					po_ordered_qty = po_data.qty
-					if row.required_qty > po_ordered_qty:
-						row.po_ordered_qty = flt(row.po_ordered_qty) + po_ordered_qty
-						row.required_qty -= po_ordered_qty
-						dict_update[(item_code, delivery_date)] = 0.0
-					else:
-						row.po_ordered_qty = flt(row.po_ordered_qty) + row.required_qty
-						dict_update[(item_code, delivery_date)] = flt(po_data.qty) - flt(row.required_qty)
-						row.required_qty = 0.0
-
-					if row.required_qty <= 0.0:
-						break
-
-			for key, qty in dict_update.items():
-				if qty <= 0.0 and key in self._po_details:
-					del self._po_details[key]
-				elif key in self._po_details:
-					self._po_details[key].qty = qty
+		row.po_ordered_qty = flt(row.po_ordered_qty) + apply_dated_supply(row, self._po_details)
 
 	def add_wo_details(self, row):
-		if row.required_qty > 0 and self._wo_details:
-			dict_update = {}
-			for (item_code, delivery_date), wo_data in self._wo_details.items():
-				if row.item_code == item_code and getdate(delivery_date) <= get_supply_cutoff_date(row):
-					wo_ordered_qty = wo_data.qty
-					if row.required_qty > wo_ordered_qty:
-						row.wo_ordered_qty = flt(row.wo_ordered_qty) + wo_ordered_qty
-						row.required_qty -= wo_ordered_qty
-						dict_update[(item_code, delivery_date)] = 0.0
-					else:
-						row.wo_ordered_qty = flt(row.wo_ordered_qty) + row.required_qty
-						dict_update[(item_code, delivery_date)] = flt(wo_data.qty) - flt(row.required_qty)
-						row.required_qty = 0.0
-
-					if row.required_qty <= 0.0:
-						break
-
-			if dict_update:
-				for key, qty in dict_update.items():
-					if qty <= 0.0 and key in self._wo_details:
-						del self._wo_details[key]
-					elif key in self._wo_details:
-						self._wo_details[key].qty = qty
+		row.wo_ordered_qty = flt(row.wo_ordered_qty) + apply_dated_supply(row, self._wo_details)
 
 	def update_required_qty(self, row):
+		row.demand_parts = None
 		self.add_non_planned_so(row)
+		row.demand_parts.sort(key=lambda part: part[0])
 		row.required_qty = flt(row.planned_qty)
 		row.in_hand_qty = 0.0
 
@@ -601,6 +559,7 @@ class MaterialRequirementsPlanningReport:
 		self.add_bin_details(row)
 		self.add_po_details(row)
 		self.add_wo_details(row)
+		row.pop("demand_parts", None)
 
 	def reserve_safety_stock(self, row):
 		if not self.filters.add_safety_stock or not flt(row.safety_stock):
@@ -617,6 +576,7 @@ class MaterialRequirementsPlanningReport:
 		reserved = min(flt(row.safety_stock), available)
 		bin_details.actual_qty = flt(bin_details.actual_qty) - reserved
 		row.required_qty += flt(row.safety_stock) - reserved
+		row.demand_parts.insert(0, [row.demand_parts[0][0], flt(row.safety_stock) - reserved])
 
 	def get_work_order_data(self):
 		wo_details = frappe._dict({})
@@ -1275,8 +1235,41 @@ def get_reserved_for_production_by_warehouse(items, warehouses=None):
 	}
 
 
-def get_supply_cutoff_date(row):
-	return getdate(row.get("supply_cutoff_date") or row.delivery_date)
+def apply_dated_supply(row, supply_details):
+	supplied_qty = 0.0
+	if row.required_qty <= 0 or not supply_details:
+		return supplied_qty
+
+	keys = [key for key in supply_details if key[0] == row.item_code]
+	for key in sorted(keys, key=lambda key: getdate(key[1])):
+		covered_qty = cover_demand(row, flt(supply_details[key].qty), getdate(key[1]))
+		supplied_qty += covered_qty
+		supply_details[key].qty = flt(supply_details[key].qty) - covered_qty
+		if supply_details[key].qty <= 0:
+			del supply_details[key]
+
+		if row.required_qty <= 0:
+			break
+
+	return supplied_qty
+
+
+def cover_demand(row, qty, supply_date=None):
+	covered_qty = 0.0
+	for part in row.demand_parts:
+		if qty <= 0:
+			break
+
+		if part[1] <= 0 or (supply_date and part[0] < supply_date):
+			continue
+
+		covered = min(part[1], qty)
+		part[1] -= covered
+		qty -= covered
+		covered_qty += covered
+
+	row.required_qty = flt(row.required_qty) - covered_qty
+	return covered_qty
 
 
 def get_free_stock(bin_details):
