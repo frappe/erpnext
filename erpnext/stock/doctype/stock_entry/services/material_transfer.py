@@ -275,16 +275,25 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_alternative_items()
 
 	def validate_job_card_for_semi_finished_goods(self):
-		"""Semi-finished goods move per operation, so a Work Order transfer can't tell which row it feeds."""
-		if self.doc.is_return or self.doc.job_card or not self.wo_doc:
+		"""Semi-finished goods move per operation: through its Job Card, or its Subcontracting Order
+		when subcontracted."""
+		if self.doc.is_return or not (self.wo_doc and self.wo_doc.track_semi_finished_goods):
 			return
 
-		if self.wo_doc.track_semi_finished_goods:
+		if not self.doc.job_card:
 			frappe.throw(
 				_("Transfer materials for Work Order {0} from its Job Cards.").format(
 					get_link_to_form("Work Order", self.wo_doc.name)
 				),
 				title=_("Job Card Required"),
+			)
+
+		if frappe.db.get_value("Job Card", self.doc.job_card, "is_subcontracted"):
+			frappe.throw(
+				_("Send materials for Job Card {0} to the supplier from its Subcontracting Order.").format(
+					get_link_to_form("Job Card", self.doc.job_card)
+				),
+				title=_("Subcontracted Job Card"),
 			)
 
 	def validate_work_order_status_for_return(self):
