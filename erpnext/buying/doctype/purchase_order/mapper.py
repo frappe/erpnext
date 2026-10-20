@@ -11,7 +11,6 @@ from frappe.utils import flt, get_link_to_form
 
 from erpnext.accounts.party import get_party_account
 from erpnext.controllers.mapper import get_qty_already_mapped
-from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_invoiced_qty_against_po_items
@@ -39,10 +38,6 @@ def make_purchase_receipt(
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
 
-	def get_max_receivable_qty(source):
-		tolerance = flt(get_allowance_for(source.item_code, qty_or_amount="qty")[0])
-		return flt(source.qty) * (100 + tolerance) / 100
-
 	def update_item(obj, target, source_parent):
 		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
 		qty = flt(obj.qty)
@@ -53,7 +48,7 @@ def make_purchase_receipt(
 		elif pending_qty > 0:
 			target.qty = pending_qty
 		else:
-			target.qty = max(get_max_receivable_qty(obj) - received_qty, 0)
+			target.qty = flt(max(obj.max_receivable_qty - received_qty, 0), obj.precision("qty"))
 
 		target.stock_qty = target.qty * flt(obj.conversion_factor)
 		target.amount = target.qty * flt(obj.rate)
@@ -92,7 +87,7 @@ def make_purchase_receipt(
 					doc.name not in mapped_qty_by_item
 					if is_unit_price_row(doc, has_unit_price_items)
 					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0))
-					< abs(get_max_receivable_qty(doc))
+					< abs(doc.max_receivable_qty)
 				)
 				and doc.delivered_by_supplier != 1
 				and not doc.closed
