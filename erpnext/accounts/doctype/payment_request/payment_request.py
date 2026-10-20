@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
@@ -102,6 +103,7 @@ class PaymentRequest(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		if self.get("__islocal"):
 			self.status = "Draft"
 		self.validate_reference_document()
