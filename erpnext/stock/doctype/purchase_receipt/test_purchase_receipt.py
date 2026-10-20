@@ -1729,6 +1729,279 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			},
 		)
 
+	def test_get_items_from_internal_delivery_note(self):
+		from frappe.model.mapper import map_docs
+
+		from erpnext.controllers.queries import get_delivery_notes_to_be_received
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		pr1 = make_purchase_receipt(warehouse="Stores - TCP1", company=company)
+
+		dn = create_delivery_note(
+			item_code=pr1.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+
+		# 1. Test get_delivery_notes_to_be_received query finds the submitted internal Delivery Note
+		results = get_delivery_notes_to_be_received(
+			doctype="Delivery Note",
+			txt="",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"company": company},
+			as_dict=True,
+		)
+		matching_dns = [d.name for d in results if d.name == dn.name]
+		self.assertTrue(matching_dns, f"Delivery Note {dn.name} was not returned by query")
+
+		# 2. Test mapping items from Delivery Note to Purchase Receipt
+		target_pr = make_inter_company_purchase_receipt(dn.name)
+		self.assertEqual(len(target_pr.items), 1)
+		self.assertEqual(target_pr.inter_company_reference, dn.name)
+		self.assertEqual(target_pr.items[0].qty, 5)
+		self.assertEqual(target_pr.items[0].delivery_note_item, dn.items[0].name)
+		self.assertEqual(target_pr.items[0].from_warehouse, "Work In Progress - TCP1")
+
+		# the Get Items From dialog maps through map_docs and always sends args
+		dialog_pr = map_docs(
+			"erpnext.stock.doctype.delivery_note.mapper.make_inter_company_purchase_receipt",
+			frappe.as_json([dn.name]),
+			frappe.as_json({"doctype": "Purchase Receipt", "company": company}),
+			frappe.as_json({"supplier": target_pr.supplier, "filtered_children": []}),
+		)
+		self.assertEqual([d.delivery_note_item for d in dialog_pr.items], [dn.items[0].name])
+
+		# 3. Test deduplication / idempotency when called on target_doc with already mapped rows
+		target_pr_updated = make_inter_company_purchase_receipt(dn.name, target_pr)
+		self.assertEqual(len(target_pr_updated.items), 1, "Duplicate items were appended when re-mapping")
+
+		# rejected qty is received as well, so re-mapping must not add it again
+		target_pr.items[0].qty = 3
+		target_pr.items[0].rejected_qty = 2
+		target_pr_updated = make_inter_company_purchase_receipt(dn.name, target_pr)
+		self.assertEqual(len(target_pr_updated.items), 1, "Rejected qty was mapped again")
+
+		# the draft row may be in another uom, so compare in stock units
+		target_pr.items[0].update({"qty": 1, "rejected_qty": 0, "conversion_factor": 5})
+		target_pr_updated = make_inter_company_purchase_receipt(dn.name, target_pr)
+		self.assertEqual(len(target_pr_updated.items), 1, "Qty in another uom was mapped again")
+
+		# 4. Test the search can be narrowed to the Delivery Note already linked to the Purchase Receipt
+		results = get_delivery_notes_to_be_received(
+			"Delivery Note", "", "name", 0, 20, {"company": company, "delivery_note": dn.name}, as_dict=True
+		)
+		self.assertEqual([d.name for d in results], [dn.name])
+
+		# 5. Test rejection of multiple delivery notes
+		target_pr.inter_company_reference = "OTHER-DN-00001"
+		self.assertRaises(frappe.ValidationError, make_inter_company_purchase_receipt, dn.name, target_pr)
+
+		dn.cancel()
+		pr1.cancel()
+
+	def test_warehouse_restricted_user_gets_items_from_internal_delivery_note(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.buying.test_utils import create_user_with_roles
+		from erpnext.controllers.queries import get_delivery_notes_to_be_received
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+		pr = make_purchase_receipt(warehouse="Stores - TCP1", company=company)
+		dn = create_delivery_note(
+			item_code=pr.items[0].item_code,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=5,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+
+		receiver = create_user_with_roles("internal-receiver@example.com", "Purchase User").name
+		add_user_permission("Warehouse", "Work In Progress - TCP1", receiver)
+		add_user_permission("Company", company, receiver)
+		outsider = create_user_with_roles("internal-outsider@example.com", "Purchase User").name
+		add_user_permission("Warehouse", "Finished Goods - TCP1", outsider)
+
+		def search():
+			results = get_delivery_notes_to_be_received(
+				"Delivery Note", "", "name", 0, 20, {"company": company}, as_dict=True
+			)
+			return [d.name for d in results]
+
+		# the receiver cannot read the DN (source warehouse restricted) but can receive into its target
+		with self.set_user(receiver):
+			self.assertFalse(frappe.has_permission("Delivery Note", "read", dn))
+			self.assertIn(dn.name, search())
+			receipt = make_inter_company_purchase_receipt(dn.name)
+			self.assertEqual(receipt.inter_company_reference, dn.name)
+			self.assertEqual(receipt.items[0].delivery_note_item, dn.items[0].name)
+
+		with self.set_user(outsider):
+			self.assertNotIn(dn.name, search())
+			self.assertRaises(frappe.PermissionError, make_inter_company_purchase_receipt, dn.name)
+
+		# the mapped receipt's internal supplier must be allowed too
+		other_supplier_user = create_user_with_roles(
+			"internal-other-supplier@example.com", "Purchase User"
+		).name
+		add_user_permission("Supplier", "_Test Supplier", other_supplier_user)
+		with self.set_user(other_supplier_user):
+			self.assertNotIn(dn.name, search())
+			self.assertRaises(frappe.PermissionError, make_inter_company_purchase_receipt, dn.name)
+
+		# a DN that also sends rows to a warehouse the receiver is not allowed is not offered
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_receipt(item_code=dn.items[0].item_code, warehouse="Stores - TCP1", company=company)
+		make_purchase_receipt(item_code=other_item, warehouse="Stores - TCP1", company=company)
+		mixed_dn = create_delivery_note(
+			item_code=dn.items[0].item_code,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=2,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			do_not_submit=True,
+		)
+		other_row = frappe.copy_doc(mixed_dn.items[0])
+		other_row.update({"item_code": other_item, "target_warehouse": "Finished Goods - TCP1"})
+		mixed_dn.append("items", other_row)
+		mixed_dn.submit()
+
+		with self.set_user(receiver):
+			self.assertNotIn(mixed_dn.name, search())
+			self.assertRaises(frappe.PermissionError, make_inter_company_purchase_receipt, mixed_dn.name)
+			self.assertRaises(
+				frappe.PermissionError,
+				get_delivery_notes_to_be_received,
+				"Delivery Note",
+				"",
+				"name",
+				0,
+				20,
+				{"company": "_Test Company"},
+			)
+
+		# strict user permissions must not reject the search for its empty warehouse fields
+		with self.change_settings("System Settings", {"apply_strict_user_permissions": 1}):
+			with self.set_user(receiver):
+				self.assertIn(dn.name, search())
+
+	def test_internal_receipt_in_another_uom_marks_delivery_note_received(self):
+		from erpnext.controllers.queries import get_delivery_notes_to_be_received
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Box"}).insert(ignore_if_duplicate=True)
+		box = [{"uom": "_Test Box", "conversion_factor": 5}]
+		item = make_item(properties={"is_stock_item": 1}, uoms=box).name
+		component = make_item(properties={"is_stock_item": 1}, uoms=box).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component], qty=2)
+		for item_code in (item, component):
+			make_purchase_receipt(item_code=item_code, warehouse="Stores - TCP1", company=company, qty=10)
+
+		def receive_in_boxes(item_code, qty, boxes):
+			dn = create_delivery_note(
+				item_code=item_code,
+				company=company,
+				customer="_Test Internal Customer 2",
+				cost_center="Main - TCP1",
+				expense_account="Cost of Goods Sold - TCP1",
+				qty=qty,
+				rate=500,
+				warehouse="Stores - TCP1",
+				target_warehouse="Work In Progress - TCP1",
+			)
+			receipt = make_inter_company_purchase_receipt(dn.name)
+			receipt.items[0].update(
+				{"uom": "_Test Box", "conversion_factor": 5, "qty": boxes, "warehouse": "Stores - TCP1"}
+			)
+			receipt.submit()
+			return dn
+
+		item_dn = receive_in_boxes(item, 5, 1)
+		bundle_dn = receive_in_boxes(bundle_item, 5, 2)
+
+		self.assertEqual(frappe.db.get_value("Delivery Note Item", item_dn.items[0].name, "received_qty"), 5)
+		self.assertEqual(
+			frappe.db.get_value("Packed Item", bundle_dn.packed_items[0].name, "received_qty"), 10
+		)
+
+		results = get_delivery_notes_to_be_received(
+			"Delivery Note", "", "name", 0, 50, {"company": company}, as_dict=True
+		)
+		self.assertNotIn(item_dn.name, [d.name for d in results])
+		self.assertNotIn(bundle_dn.name, [d.name for d in results])
+
+	def test_internal_delivery_note_search_skips_received_bundles(self):
+		from erpnext.controllers.queries import get_delivery_notes_to_be_received
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.mapper import (
+			make_inter_company_purchase_receipt,
+			make_sales_return,
+		)
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+		component = make_item(properties={"is_stock_item": 1}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component], qty=2)
+		make_purchase_receipt(item_code=component, warehouse="Stores - TCP1", company=company, qty=20)
+
+		def make_bundle_dn():
+			return create_delivery_note(
+				item_code=bundle_item,
+				company=company,
+				customer="_Test Internal Customer 2",
+				cost_center="Main - TCP1",
+				expense_account="Cost of Goods Sold - TCP1",
+				qty=3,
+				rate=500,
+				warehouse="Stores - TCP1",
+				target_warehouse="Work In Progress - TCP1",
+			)
+
+		def search():
+			results = get_delivery_notes_to_be_received(
+				"Delivery Note", "", "name", 0, 50, {"company": company}, as_dict=True
+			)
+			return [d.name for d in results]
+
+		received_dn = make_bundle_dn()
+		self.assertIn(received_dn.name, search())
+		receipt = make_inter_company_purchase_receipt(received_dn.name)
+		receipt.items[0].warehouse = "Stores - TCP1"
+		receipt.submit()
+		self.assertNotIn(received_dn.name, search())
+
+		returned_dn = make_bundle_dn()
+		sales_return = make_sales_return(returned_dn.name).insert()
+		# reload so the return's status updater sees is_return
+		frappe.get_doc("Delivery Note", sales_return.name).submit()
+		self.assertNotIn(returned_dn.name, search())
+
 	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
 		item = make_item(
