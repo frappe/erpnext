@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Max, Sum
 
 from erpnext.accounts.shareholding.company_lock import lock_company
 
@@ -34,3 +35,15 @@ def get_or_create_folio(company, shareholder=None, posting_date=None, is_treasur
 	finally:
 		frappe.flags.creating_share_folio = previous_creation_flag
 	return folio.name
+
+
+def update_cessation_date(folio):
+	entry = frappe.qb.DocType("Share Ledger Entry")
+	quantity, last_date = (
+		frappe.qb.from_(entry)
+		.select(Sum(entry.quantity_change), Max(entry.posting_date))
+		.where(entry.share_folio == folio)
+		.run()[0]
+	)
+	ceased_on = last_date if last_date and not quantity else None
+	frappe.db.set_value("Share Folio", folio, "date_of_cessation", ceased_on, update_modified=False)

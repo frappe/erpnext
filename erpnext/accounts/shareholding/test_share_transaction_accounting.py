@@ -449,3 +449,24 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 		posted = {row.account: (row.debit, row.credit) for row in draft.get_accounting_preview()}
 		self.assertEqual(preview, posted)
 		self.assertEqual(preview[self.share_capital_account], (50, 0))
+
+	def test_folio_gets_a_cessation_date_when_its_last_share_leaves(self):
+		holder = self.create_shareholder()
+		issue = self.issue_ten_shares()
+		holder_folio = issue.to_folio
+		self.assertFalse(frappe.db.get_value("Share Folio", holder_folio, "date_of_cessation"))
+
+		transfer = self.create_transaction(
+			transaction_type="Transfer",
+			from_shareholder=issue.to_shareholder,
+			to_shareholder=holder,
+			from_share_number=1,
+			to_share_number=10,
+		)
+		self.assertEqual(
+			frappe.db.get_value("Share Folio", holder_folio, "date_of_cessation"), getdate(nowdate())
+		)
+		self.assertFalse(frappe.db.get_value("Share Folio", transfer.to_folio, "date_of_cessation"))
+
+		transfer.cancel()
+		self.assertFalse(frappe.db.get_value("Share Folio", holder_folio, "date_of_cessation"))

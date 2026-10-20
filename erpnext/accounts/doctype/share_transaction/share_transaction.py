@@ -10,7 +10,7 @@ from frappe.utils import cint, flt, nowdate
 from erpnext.accounts.shareholding.ledger_entries import create_ledger_entry
 from erpnext.accounts.shareholding.ledger_posting import assert_cancellable, lock_company, validate_posting
 from erpnext.accounts.shareholding.legacy_migration import assert_legacy_history_backfilled
-from erpnext.accounts.shareholding.share_folios import get_or_create_folio
+from erpnext.accounts.shareholding.share_folios import get_or_create_folio, update_cessation_date
 from erpnext.accounts.shareholding.share_ranges import (
 	get_face_value_per_share,
 	range_has_coverage,
@@ -112,12 +112,14 @@ class ShareTransaction(TransactionAccounting, Document):
 		folios = [folio for folio in (self.from_folio, self.to_folio) if folio]
 		if not folios:
 			return
-		shareholders = frappe.get_all(
+		holder_folios = frappe.get_all(
 			"Share Folio",
 			filters={"name": ["in", folios], "is_treasury": 0},
-			pluck="shareholder",
+			fields=["name", "shareholder"],
 		)
-		for shareholder in sorted({shareholder for shareholder in shareholders if shareholder}):
+		for folio in holder_folios:
+			update_cessation_date(folio.name)
+		for shareholder in sorted({folio.shareholder for folio in holder_folios if folio.shareholder}):
 			rebuild_current_holdings(shareholder)
 
 	def lock_shareholders(self):

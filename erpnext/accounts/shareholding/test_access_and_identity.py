@@ -97,6 +97,14 @@ class TestShareholdingAccessAndIdentity(ShareholdingTestCase):
 					with self.assertRaises(frappe.MandatoryError):
 						doc.insert()
 
+	def test_duplicate_tax_identity_is_rejected(self):
+		original = frappe.get_doc("Shareholder", self.create_shareholder())
+		duplicate = frappe.copy_doc(original)
+		duplicate.legal_name = "Another Name"
+		duplicate.tax_id = f" {original.tax_id} "
+		with self.assertRaisesRegex(frappe.ValidationError, "tax identity already exists"):
+			duplicate.insert()
+
 	def test_api_update_rejects_blank_tax_identity(self):
 		doc = frappe.get_doc("Shareholder", self.create_shareholder())
 		doc.tax_id = "   "

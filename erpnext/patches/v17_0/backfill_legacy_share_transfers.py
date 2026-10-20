@@ -250,6 +250,7 @@ def reconcile_legacy_balances(final_ranges):
 
 def post_legacy_movements(prepared):
 	from erpnext.accounts.doctype.shareholder.shareholder import rebuild_current_holdings
+	from erpnext.accounts.shareholding.share_folios import update_cessation_date
 
 	sequences = {}
 	for transfer, share_class, source, destination, folios in prepared:
@@ -309,3 +310,10 @@ def post_legacy_movements(prepared):
 	}
 	for shareholder in sorted(shareholders):
 		rebuild_current_holdings(shareholder)
+	for folio in {
+		folios[(transfer.company, party)]
+		for transfer, _class, source, destination, folios in prepared
+		for party in (source, destination)
+		if party
+	}:
+		update_cessation_date(folio)

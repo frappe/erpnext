@@ -45,6 +45,7 @@ class Shareholder(Document):
 			frappe.db.get_value("Shareholder", self.name, "name", for_update=True)
 		self.validate_joint_holding()
 		self.validate_tax_identity()
+		self.validate_unique_tax_identity()
 		self.validate_nominees()
 		self.set_current_holdings()
 
@@ -93,6 +94,21 @@ class Shareholder(Document):
 					),
 					frappe.MandatoryError,
 				)
+
+	def validate_unique_tax_identity(self):
+		if self.is_joint_holding:
+			return
+		self.tax_id = self.tax_id.strip()
+		if frappe.db.exists(
+			"Shareholder",
+			{
+				"tax_id_type": self.tax_id_type,
+				"tax_id": self.tax_id,
+				"tax_id_country": self.tax_id_country,
+				"name": ["!=", self.name or ""],
+			},
+		):
+			frappe.throw(_("A Shareholder with this tax identity already exists."))
 
 	def validate_nominees(self):
 		if not self.nominees:
