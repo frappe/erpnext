@@ -2075,6 +2075,32 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 50)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_closing_row_keeps_skip_delivery_rows_out_of_delivery_progress(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, rate=100)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 10, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": service_item, "qty": 10, "rate": 100},
+				{
+					"item_code": "_Test Item Home Desktop 100",
+					"qty": 5,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+				},
+			]
+		)
+		dn = make_delivery_note(so.name)
+		dn.items = [row for row in dn.items if row.so_detail == so.items[0].name]
+		dn.submit()
+
+		update_closed_status("Sales Order", so.name, [so.items[2].name], 1)
+
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 100)
+
 	def test_drop_shipping_partial_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
