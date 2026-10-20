@@ -934,7 +934,7 @@ class TestBOM(ERPNextTestSuite):
 			searchfield="name",
 			start=0,
 			page_len=20,
-			filters={"is_stock_item": ["=", 1], "has_variants": ["=", 0]},
+			filters={"is_stock_item": ["!=", 0], "has_variants": ["=", 0]},
 		)
 
 		self.assertIn(item.name, [d[0] for d in results])
