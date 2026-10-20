@@ -1171,7 +1171,8 @@ def make_payment_order(source_name, target_doc=None):
 			{
 				"reference_doctype": source.reference_doctype,
 				"reference_name": source.reference_name,
-				"amount": source.grand_total,
+				# Journal Entry debits the supplier in party account currency.
+				"amount": source.outstanding_amount,
 				"supplier": source.party,
 				"payment_request": source_name,
 				"mode_of_payment": source.mode_of_payment,
