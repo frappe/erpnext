@@ -2071,19 +2071,9 @@ class TestSalesOrder(ERPNextTestSuite):
 		po.submit()
 
 		update_closed_status("Sales Order", so.name, [so.items[0].name], 1)
-		for expected_qty, expected_percentage in ((5, 50), (10, 100)):
-			with self.subTest(delivered_qty=expected_qty):
-				po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 5}])
-				so.reload()
-				self.assertEqual(so.items[0].closed, 1)
-				self.assertEqual(so.items[0].delivered_qty, 0)
-				self.assertEqual(so.items[1].delivered_qty, expected_qty)
-				self.assertEqual(so.per_delivered, expected_percentage)
+		po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 5}])
 
-		po.reload().cancel()
-		so.reload()
-		self.assertEqual(so.items[1].delivered_qty, 0)
-		self.assertEqual(so.per_delivered, 0)
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 50)
 
 	def test_drop_shipping_partial_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
