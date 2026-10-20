@@ -42,6 +42,7 @@ def get_columns():
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 100,
+			"disable_total": 1,
 		},
 		{
 			"fieldname": "total_face_value",

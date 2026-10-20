@@ -15,6 +15,7 @@ frappe.ui.form.on("Share Transaction", {
 	refresh(frm) {
 		frm.trigger("render_accounting_preview");
 		frm.trigger("add_payment_entry_button");
+		frm.trigger("show_clearance_status");
 	},
 
 	async company(frm) {
@@ -61,6 +62,21 @@ frappe.ui.form.on("Share Transaction", {
 			!frm.doc.payment_entry;
 		if (!needs_payment_entry) return;
 		frm.add_custom_button(__("Payment Entry"), () => make_payment_entry(frm), __("Create"));
+	},
+
+	async show_clearance_status(frm) {
+		if (frm.doc.docstatus !== 1 || !frm.doc.payment_entry) return;
+		const { message } = await frappe.db.get_value("Payment Entry", frm.doc.payment_entry, [
+			"docstatus",
+			"clearance_date",
+		]);
+		if (!message || message.docstatus !== 1) return;
+		if (message.clearance_date) {
+			const date = frappe.datetime.str_to_user(message.clearance_date);
+			frm.dashboard.add_indicator(__("Cleared in bank on {0}", [date]), "green");
+		} else {
+			frm.dashboard.add_indicator(__("Not cleared in bank"), "orange");
+		}
 	},
 
 	async render_accounting_preview(frm) {
