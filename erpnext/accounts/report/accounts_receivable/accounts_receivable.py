@@ -8,7 +8,7 @@ import frappe
 from frappe import _, qb, query_builder, scrub
 from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date, Substring, Sum
+from frappe.query_builder.functions import Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -856,17 +856,7 @@ class ReceivablePayableReport:
 		# get all the GL entries filtered by the given filters
 
 		self.prepare_conditions()
-
-		if self.filters.show_future_payments:
-			self.qb_selection_filter.append(
-				self.ple.posting_date.lte(self.filters.report_date)
-				| (
-					(self.ple.voucher_no == self.ple.against_voucher_no)
-					& (Date(self.ple.creation).lte(self.filters.report_date))
-				)
-			)
-		else:
-			self.qb_selection_filter.append(self.ple.posting_date.lte(self.filters.report_date))
+		self.qb_selection_filter.append(self.ple.posting_date.lte(self.filters.report_date))
 
 		ple = qb.DocType("Payment Ledger Entry")
 		query = (
