@@ -76,14 +76,18 @@ class SMSCenter(Document):
 		DynamicLink = frappe.qb.DocType("Dynamic Link")
 		query = (
 			frappe.qb.from_(Contact)
-			.join(DynamicLink)
-			.on(DynamicLink.parent == Contact.name)
 			.select(
 				fn.Concat(fn.IfNull(Contact.first_name, ""), " ", fn.IfNull(Contact.last_name, "")),
 				Contact.mobile_no,
 			)
 			.where((fn.IfNull(Contact.mobile_no, "") != "") & (Contact.docstatus != 2))
 		)
+
+		# "All Contact" needs no link; the party options join Dynamic Link and dedupe multi-link contacts
+		if self.send_to == "All Contact":
+			return query
+
+		query = query.join(DynamicLink).on(DynamicLink.parent == Contact.name).distinct()
 
 		if self.send_to == "All Customer Contact":
 			query = query.where(DynamicLink.link_doctype == "Customer")
