@@ -130,6 +130,9 @@ def get_template_row(template, item_group, rows, open_orders):
 		"item_group": item_group,
 		"indent": 0,
 		"open_orders": len(orders),
+		"stock_uom": None,
+		"current_stock": None,
+		"in_production": None,
 	}
 
 	stock_uoms = {row["stock_uom"] for row in rows}
