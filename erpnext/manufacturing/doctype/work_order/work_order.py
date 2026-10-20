@@ -863,6 +863,9 @@ class WorkOrder(Document):
 					StockOverProductionError,
 				)
 
+			if purpose == "Manufacture":
+				self.validate_produced_qty_covers_disassembly(qty, precision)
+
 			self.db_set(fieldname, qty)
 			if purpose == "Manufacture" and self.production_plan:
 				ProductionPlanWorkOrderQuantities(self.production_plan).validate_work_order(
@@ -901,6 +904,16 @@ class WorkOrder(Document):
 					in Manufacturing Settings."""
 				).format(actual_qty, allowed_qty),
 			)
+
+	def validate_produced_qty_covers_disassembly(self, produced_qty, precision):
+		if flt(produced_qty, precision) >= flt(self.disassembled_qty, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Manufactured Qty ({0}) cannot be less than the Disassembled Qty ({1}) of Work Order {2}. Cancel the disassembly first."
+			).format(flt(produced_qty, precision), flt(self.disassembled_qty, precision), self.name)
+		)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
 		precision = self.precision("disassembled_qty")
@@ -2870,6 +2883,7 @@ def make_stock_entry(
 
 @frappe.whitelist()
 def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | None = None) -> float:
+	frappe.has_permission("Stock Entry", "read", doc=stock_entry_name, throw=True)
 	se = frappe.db.get_value("Stock Entry", stock_entry_name, ["fg_completed_qty"], as_dict=True)
 	if not se:
 		return 0.0
