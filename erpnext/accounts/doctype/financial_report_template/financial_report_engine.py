@@ -1312,7 +1312,7 @@ class RowProcessor:
 				if period["key"] in keys
 			)
 
-			# avg for percent
+			# percent rows: average, not sum
 			row_data.total = total / len(keys) if row.fieldtype == "Percent" else total
 
 		if row.reference_code:
