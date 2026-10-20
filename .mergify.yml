@@ -86,11 +86,13 @@ queue_rules:
   - name: default
     batch_size: 5
     batch_max_wait_time: 10 min
+    max_checks_retries: 1
     merge_method: merge
     queue_conditions: *pr_checks
     merge_conditions: *suite_checks
   - name: alone
     batch_size: 1
+    max_checks_retries: 1
     merge_method: merge
     queue_conditions: *pr_checks
     merge_conditions: *suite_checks
