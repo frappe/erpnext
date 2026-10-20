@@ -434,9 +434,9 @@ class BOM(WebsiteGenerator):
 
 			if not self.track_semi_finished_goods:
 				frappe.throw(
-					_("Row #{0}: Batch Split is only supported when 'Make in Stages' is enabled.").format(
-						row.idx
-					)
+					_(
+						"Row #{0}: Batch Split is only supported when 'Produce an Item at Each Operation' is enabled."
+					).format(row.idx)
 				)
 
 			if flt(row.weight_per_piece) <= 0:
@@ -786,7 +786,7 @@ class BOM(WebsiteGenerator):
 		if self.track_semi_finished_goods:
 			frappe.throw(
 				_(
-					"'Set Component Quantities Based On Percentage' cannot be used together with 'Make in Stages', as the component rows are derived from the operation BOMs."
+					"'Set Component Quantities Based On Percentage' cannot be used together with 'Produce an Item at Each Operation', as the component rows are derived from the operation BOMs."
 				),
 				title=_("Invalid Formulation"),
 			)
