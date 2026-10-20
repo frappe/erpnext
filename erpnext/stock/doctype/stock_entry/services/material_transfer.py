@@ -472,14 +472,10 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		return item_dict
 
 	def _is_row_of_job_card_operation(self, row):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import is_row_of_operation
+
 		operation = self.job_card_operation
-		if not operation:
-			return True
-
-		if cint(row.operation_row_id) and cint(operation.operation_row_id):
-			return cint(row.operation_row_id) == cint(operation.operation_row_id)
-
-		return not row.operation or row.operation == operation.operation
+		return not operation or is_row_of_operation(row, operation)
 
 	def _resolve_wip_warehouse(self, work_order):
 		if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
