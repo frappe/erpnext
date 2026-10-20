@@ -1672,7 +1672,7 @@ class JobCard(Document):
 
 		workstation = frappe.get_doc("Workstation", self.workstation)
 		if workstation.status != status:
-			workstation.db_set("status", status, update_modified=False, notify=True)
+			workstation.db_set("status", status, notify=True)
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
