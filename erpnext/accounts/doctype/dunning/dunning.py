@@ -100,6 +100,10 @@ class Dunning(AccountsController):
 				)
 			)
 
+	def before_submit(self):
+		if self.dunning_amount and not self.income_account:
+			frappe.throw(_("Income Account is required to collect dunning fees or interest."))
+
 	def set_dunning_fee(self):
 		if not self.dunning_type:
 			self.dunning_fee = flt(self.dunning_fee)
