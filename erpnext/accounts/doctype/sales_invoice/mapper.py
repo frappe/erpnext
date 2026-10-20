@@ -595,6 +595,8 @@ def create_dunning(
 	args: str | dict | bool | None = None,
 	ignore_permissions: bool = False,
 ):
+	from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
+
 	if isinstance(args, bool):
 		ignore_permissions = args
 		args = None
@@ -626,6 +628,16 @@ def create_dunning(
 					else:
 						row.outstanding = source.get("outstanding_amount")
 
+		if len(source.payment_schedule) > 1 and source.party_account_currency == source.currency:
+			outstanding = get_payment_schedule_outstanding(source, source.payment_schedule)
+			for row in target.overdue_payments[:]:
+				if row.sales_invoice == source.name:
+					row.outstanding = outstanding[row.payment_schedule]
+					if flt(row.outstanding, row.precision("outstanding")) <= 0:
+						target.remove(row)
+
+		if not target.overdue_payments:
+			frappe.throw(_("There are no overdue payments to include in this Dunning."))
 		target.validate()
 		if dunning_type:
 			target.get_dunning_letter_text()
