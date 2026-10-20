@@ -72,7 +72,9 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 
 		payment_entry = frappe.get_doc("Payment Entry", issue.make_payment_entry())
 		self.assertEqual(payment_entry.docstatus, 0)
-		self.assertEqual(frappe.db.get_value("Share Transaction", issue.name, "payment_entry"), payment_entry.name)
+		self.assertEqual(
+			frappe.db.get_value("Share Transaction", issue.name, "payment_entry"), payment_entry.name
+		)
 		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
 			issue.make_payment_entry()
 
@@ -111,9 +113,14 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			self.share_capital_account: (0, 100),
 			self.securities_premium_account: (0, 20),
 		}
-		self.assertEqual({row["account"]: (row["debit"], row["credit"]) for row in draft.get_accounting_preview()}, expected)
+		self.assertEqual(
+			{row["account"]: (row["debit"], row["credit"]) for row in draft.get_accounting_preview()},
+			expected,
+		)
 		draft.submit()
-		self.assertEqual({row.account: (row.debit, row.credit) for row in draft.get_accounting_preview()}, expected)
+		self.assertEqual(
+			{row.account: (row.debit, row.credit) for row in draft.get_accounting_preview()}, expected
+		)
 
 	def test_treasury_cost_drives_buyback_reissue_and_retirement_entries(self):
 		original_holder = self.create_shareholder()
@@ -140,7 +147,9 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			{self.treasury_shares_account: (70, 0), self.clearing_account: (0, 70)},
 		)
 		buyback_payment = frappe.get_doc("Payment Entry", buyback.payment_entry)
-		self.assertEqual((buyback_payment.paid_from, buyback_payment.paid_to), (self.cash, self.clearing_account))
+		self.assertEqual(
+			(buyback_payment.paid_from, buyback_payment.paid_to), (self.cash, self.clearing_account)
+		)
 
 		reissue = self.create_transaction(
 			transaction_type="Reissue",
@@ -273,7 +282,9 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			rate_per_share=15,
 		)
 		self.assertFalse(transfer.payment_entry)
-		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": "Share Transaction", "voucher_no": transfer.name}))
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"voucher_type": "Share Transaction", "voucher_no": transfer.name})
+		)
 		self.assertEqual(frappe.db.count("Share Ledger Entry", {"share_transaction": transfer.name}), 2)
 		transfer.cancel()
 		self.assertEqual(
@@ -377,7 +388,11 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			transaction.submit()
 		self.assertEqual(frappe.db.get_value("Share Transaction", transaction.name, "docstatus"), 0)
 		self.assertFalse(frappe.db.exists("Share Ledger Entry", {"share_transaction": transaction.name}))
-		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": "Share Transaction", "voucher_no": transaction.name}))
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry", {"voucher_type": "Share Transaction", "voucher_no": transaction.name}
+			)
+		)
 		settings.securities_premium_account = self.securities_premium_account
 		settings.save()
 		transaction.reload()

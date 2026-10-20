@@ -112,11 +112,15 @@ function get_preview_html(frm, rows) {
 		)
 		.join("");
 	return `<table class="table table-bordered table-sm">
-		<thead><tr><th>${__("Account")}</th><th class="text-right">${__("Debit")}</th><th class="text-right">${__("Credit")}</th></tr></thead>
+		<thead><tr><th>${__("Account")}</th><th class="text-right">${__("Debit")}</th><th class="text-right">${__(
+		"Credit"
+	)}</th></tr></thead>
 		<tbody>${body}</tbody>
 	</table>`;
 }
 
 function get_preview_unavailable_html() {
-	return `<p class="text-muted">${__("The accounting impact is shown once the shares, rate and accounts are set.")}</p>`;
+	return `<p class="text-muted">${__(
+		"The accounting impact is shown once the shares, rate and accounts are set."
+	)}</p>`;
 }

@@ -184,7 +184,7 @@ class TransactionAccounting:
 		if not account:
 			frappe.throw(
 				_("Set {0} in Share Accounting Settings for {1}.").format(
-					frappe.get_meta("Share Accounting Settings").get_label(field), self.company
+					_(frappe.get_meta("Share Accounting Settings").get_label(field)), self.company
 				)
 			)
 		validate_account(account, self.company, self.currency, ACCOUNT_ROOT_TYPES[field])
@@ -193,7 +193,7 @@ class TransactionAccounting:
 	def validate_settlement_account(self, field):
 		account = self.get(field)
 		if not account:
-			frappe.throw(_("Set {0} on the Share Transaction.").format(self.meta.get_label(field)))
+			frappe.throw(_("Set {0} on the Share Transaction.").format(_(self.meta.get_label(field))))
 		validate_account(account, self.company, self.currency, SETTLEMENT_ROOT_TYPES[field])
 		return account
 
