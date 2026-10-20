@@ -561,7 +561,7 @@ class PurchaseOrder(BuyingController):
 		for item in self.get("items", []):
 			if item.delivered_by_supplier or item.closed:
 				continue
-			if abs(flt(item.received_qty)) < abs(flt(item.max_receivable_qty, item.precision("qty"))):
+			if abs(flt(item.received_qty)) < abs(item.max_receivable_qty):
 				return True
 		return False
 
