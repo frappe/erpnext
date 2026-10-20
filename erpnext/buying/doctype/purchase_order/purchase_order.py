@@ -231,6 +231,7 @@ class PurchaseOrder(BuyingController):
 		If permitted in settings and any item has 0 qty, the PO has unit price items.
 		"""
 		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
