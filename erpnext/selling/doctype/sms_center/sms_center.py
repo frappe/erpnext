@@ -114,7 +114,7 @@ class SMSCenter(Document):
 		Lead = frappe.qb.DocType("Lead")
 		query = (
 			frappe.qb.from_(Lead)
-			.select(Lead.lead_name, Lead.mobile)
+			.select(Lead.lead_name, Lead.mobile_no)
 			.where((fn.IfNull(Lead.mobile_no, "") != "") & (Lead.docstatus != 2) & (Lead.status == "Open"))
 		)
 		return query
