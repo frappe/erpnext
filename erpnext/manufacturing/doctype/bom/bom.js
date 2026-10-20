@@ -1088,6 +1088,20 @@ frappe.ui.form.on("BOM Operation", "operations_remove", function (frm) {
 	erpnext.bom.calculate_total(frm.doc);
 });
 
+frappe.ui.form.on("BOM Item", {
+	items_add(frm) {
+		frm.events.render_stage_summary(frm);
+	},
+
+	item_code(frm) {
+		frm.events.render_stage_summary(frm);
+	},
+
+	operation_row_id(frm) {
+		frm.events.render_stage_summary(frm);
+	},
+});
+
 frappe.ui.form.on("BOM Item", "items_remove", function (frm) {
 	erpnext.bom.calculate_rm_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
