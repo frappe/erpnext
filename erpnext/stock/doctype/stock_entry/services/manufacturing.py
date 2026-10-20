@@ -927,9 +927,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.warehouse = row.t_warehouse
 			key = (row.item_code, row.warehouse, row.original_item or None)
 			if key not in self.available_materials:
-				self.available_materials[key] = frappe._dict(row, serial_nos=[], batches=defaultdict(float))
-			else:
-				self.available_materials[key].qty += row.qty
+				self.available_materials[key] = frappe._dict(
+					row,
+					qty=0.0,
+					uom=row.stock_uom,
+					conversion_factor=1,
+					serial_nos=[],
+					batches=defaultdict(float),
+				)
+
+			self.available_materials[key].qty += flt(row.transfer_qty)
 
 			if row.serial_and_batch_bundle:
 				material = self.available_materials[key]
@@ -972,7 +979,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
-				self._deduct_consumed_qty(buckets, flt(row.qty))
+				self._deduct_consumed_qty(buckets, flt(row.transfer_qty))
 
 	def _get_available_buckets(self, row):
 		"""Use exact attribution when present; otherwise drain the direct item first."""
