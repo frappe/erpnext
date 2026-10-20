@@ -547,6 +547,12 @@ class StatusUpdater(Document):
 			if "percent_join_field" in args or "percent_join_field_parent" in args:
 				self._update_percent_field_in_targets(args, update_modified)
 
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			refresh_blanket_orders_of_fulfilled_rows,
+		)
+
+		refresh_blanket_orders_of_fulfilled_rows(self)
+
 	def _update_children(self, args, update_modified):
 		"""Update quantities or amount in child table"""
 		for d in self.get_all_children():
