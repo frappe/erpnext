@@ -753,7 +753,7 @@ class StockReservationEntry(Document):
 			self.voucher_no,
 			self.voucher_detail_no,
 			ignore_sre=self.name,
-			warehouse=self.warehouse,
+			warehouse=None if self.voucher_type == "Sales Order" else self.warehouse,
 			from_voucher_detail_no=from_voucher_detail_no,
 		)
 
