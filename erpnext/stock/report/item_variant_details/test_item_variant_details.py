@@ -221,7 +221,9 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		template_row, *variant_rows = self.run_report(item=[template.name])
 
-		self.assertFalse({"stock_uom", "current_stock", "in_production"} & set(template_row))
+		self.assertEqual(
+			[template_row[field] for field in ("stock_uom", "current_stock", "in_production")], [None] * 3
+		)
 		self.assertEqual({row["stock_uom"] for row in variant_rows}, {template.stock_uom, "_Test UOM 1"})
 
 	def test_item_group_filter_includes_templates_of_descendant_groups(self):
