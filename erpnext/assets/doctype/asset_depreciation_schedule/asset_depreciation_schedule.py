@@ -263,8 +263,10 @@ def reschedule_depreciation(asset_doc, notes, disposal_date=None):
 
 		if current_schedule and current_schedule.docstatus == 1:
 			current_schedule.flags.should_not_cancel_depreciation_entries = True
+			current_schedule.flags.ignore_permissions = True
 			current_schedule.cancel()
 
+		new_schedule.flags.ignore_permissions = True
 		new_schedule.submit()
 
 
