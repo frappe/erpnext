@@ -1979,9 +1979,9 @@ class WorkOrder(Document):
 		if self.skip_transfer:
 			return
 
-		transferred_by_key = self._material_transfer_qty_by_item_and_warehouse()
+		transferred_by_key = self._material_transfer_qty_by_item_warehouse_and_operation()
 		transferred_items = frappe._dict()
-		for (item_code, _warehouse), qty in transferred_by_key.items():
+		for (item_code, _warehouse, _operation_row_id, _operation), qty in transferred_by_key.items():
 			transferred_items[item_code] = flt(transferred_items.get(item_code)) + qty
 
 		row_wise_serial_batch = frappe._dict({})
@@ -2037,17 +2037,22 @@ class WorkOrder(Document):
 			transferred_items[key] = flt(transferred_items.get(key)) + flt(d.qty)
 		return transferred_items
 
-	def _material_transfer_qty_by_item_and_warehouse(self):
+	def _material_transfer_qty_by_item_warehouse_and_operation(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
 				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(
@@ -2056,11 +2061,17 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
 			)
-			.groupby(ste_child.item_code, ste_child.original_item, ste_child.s_warehouse)
+			.groupby(
+				ste_child.item_code,
+				ste_child.original_item,
+				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
+			)
 		)
 		qty_by_key = {}
 		for d in query.run(as_dict=1) or []:
-			key = (d.original_item or d.item_code, d.s_warehouse)
+			key = (d.original_item or d.item_code, d.s_warehouse, d.operation_row_id, d.operation)
 			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
 
 		return qty_by_key
@@ -3269,16 +3280,24 @@ def get_default_warehouse(company):
 	}
 
 
-def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
+def distribute_transfers_over_rows(rows, qty_by_item_warehouse_and_operation):
+	"""Split each transfer over the rows of its item, keeping a Job Card's transfer on its operation."""
 	rows_by_item = {}
 	for row in rows:
 		rows_by_item.setdefault(row.item_code, []).append(row)
 
 	qty_by_row = {row.name: 0.0 for row in rows}
-	for (item_code, warehouse), qty in qty_by_item_and_warehouse.items():
+	for key, qty in qty_by_item_warehouse_and_operation.items():
+		item_code, warehouse, operation_row_id, operation = key
 		item_rows = rows_by_item.get(item_code)
 		if not item_rows:
 			continue
+
+		if operation:
+			job_card_operation = frappe._dict(operation_row_id=operation_row_id, operation=operation)
+			item_rows = [
+				row for row in item_rows if is_row_of_operation(row, job_card_operation)
+			] or item_rows
 
 		share_by_row = {}
 		matching_rows = [row for row in item_rows if row.source_warehouse == warehouse] or item_rows
@@ -3287,6 +3306,14 @@ def distribute_transfers_over_rows(rows, qty_by_item_and_warehouse):
 			qty_by_row[name] += share
 
 	return qty_by_row
+
+
+def is_row_of_operation(row, operation):
+	"""Whether a required item row belongs to a Job Card's operation."""
+	if cint(row.operation_row_id) and cint(operation.operation_row_id):
+		return cint(row.operation_row_id) == cint(operation.operation_row_id)
+
+	return not row.operation or row.operation == operation.operation
 
 
 def distribute_over_rows(rows, qty_by_item):
