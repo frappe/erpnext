@@ -96,7 +96,11 @@ def get_data(templates, filters):
 >>>>>>> dddedc4 (feat(item variant details): show stock UOM, total stock only within one UOM)
 
 	if not variant_results:
+<<<<<<< HEAD
 		frappe.msgprint(_("There aren't any item variants for the selected item"))
+=======
+		frappe.msgprint(_("There are no item variants for the selected filters"))
+>>>>>>> fa28d9f (fix(item variant details): message for filters with no variants)
 		return []
 
 	variant_list = [variant.name for variant in variant_results]
