@@ -317,6 +317,28 @@ class TestJobCard(ERPNextTestSuite):
 		jc2.save()
 		self.assertTrue(jc2.name)
 
+	def test_workstation_status_after_material_transfer_and_start(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		job_card.workstation = make_jc_review_workstation()
+		job_card.save()
+
+		transfer = make_stock_entry_from_jc(job_card.name)
+		transfer.insert()
+		transfer.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.status, "Material Transferred")
+		self.assertEqual(frappe.db.get_value("Workstation", job_card.workstation, "status"), "Off")
+
+		job_card.start_timer(start_time=now())
+
+		job_card.reload()
+		self.assertEqual(job_card.status, "Work In Progress")
+		self.assertEqual(frappe.db.get_value("Workstation", job_card.workstation, "status"), "Production")
+
 	def test_job_card_multiple_materials_transfer(self):
 		"Test transferring RMs separately against Job Card with multiple RMs."
 		self.transfer_material_against = "Job Card"
