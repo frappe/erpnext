@@ -1904,12 +1904,8 @@ class WorkOrder(Document):
 				if transferred_qty < 0:
 					continue
 
-				if transferred_qty > flt(doc.reserved_qty - doc.consumed_qty):
-					qty_to_update = doc.reserved_qty - doc.transferred_qty
-					transferred_qty -= qty_to_update
-				else:
-					qty_to_update = transferred_qty
-					transferred_qty = 0.0
+				qty_to_update = min(flt(transferred_qty), flt(doc.reserved_qty - doc.consumed_qty))
+				transferred_qty = flt(transferred_qty) - qty_to_update
 
 				if qty_to_update < 0:
 					continue

@@ -785,6 +785,7 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ("Quality Inspection",)
 		self.update_work_order()
 		self.set_transferred_qty()
 
@@ -805,6 +806,10 @@ class JobCard(Document):
 						"Quality Inspection is required for the item {0} before completing the job card {1}"
 					).format(get_link_to_form("Item", self.finished_good), bold(self.name))
 				)
+
+			from erpnext.stock.doctype.quality_inspection.quality_inspection import validate_qi_reference
+
+			validate_qi_reference(self, self, item_code=self.production_item)
 
 			qa_status, docstatus = frappe.get_value(
 				"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
