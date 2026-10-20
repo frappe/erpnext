@@ -2597,7 +2597,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_bundle_batch_not_supplied_against_order(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
@@ -2680,7 +2680,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			}
 		).name
 
-		self.assertRaisesRegex(frappe.ValidationError, "has not been supplied", scr.save)
+		self.assertRaisesRegex(frappe.ValidationError, "has not supplied", scr.save)
 
 	def test_bom_required_qty_validation_based_on_bom(self):
 		set_backflush_based_on("BOM")
