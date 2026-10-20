@@ -2137,9 +2137,14 @@ class WorkOrder(Document):
 		query = (
 			frappe.qb.from_(sre)
 			.select(sre.voucher_detail_no, sre.warehouse, fn.Sum(sre.reserved_qty).as_("qty"))
-			.where((sre.voucher_type == "Work Order") & (sre.voucher_no == self.name) & (sre.docstatus == 1))
+			.where((sre.voucher_type == "Work Order") & (sre.voucher_no == self.name))
 			.groupby(sre.voucher_detail_no, sre.warehouse)
 		)
+		if self.status == "Closed":
+			query = query.where(sre.docstatus.isin([1, 2]) & ((sre.docstatus == 1) | (sre.consumed_qty > 0)))
+		else:
+			query = query.where(sre.docstatus == 1)
+
 		if not self.skip_transfer:
 			query = query.where(fn.Coalesce(sre.from_voucher_no, "") != "")
 
