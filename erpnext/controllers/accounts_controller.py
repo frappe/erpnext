@@ -4389,6 +4389,33 @@ def update_bin_on_delete(row, doctype):
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
+def validate_blanket_order_changes(parent_doctype, data) -> None:
+	if parent_doctype not in ("Sales Order", "Purchase Order"):
+		return
+
+	rows = {d.get("docname"): d for d in data if d.get("docname") and d.get("item_code")}
+	if not rows:
+		return
+
+	precision = frappe.get_precision(parent_doctype + " Item", "stock_qty")
+	changes = defaultdict(float)
+	for row in frappe.get_all(
+		parent_doctype + " Item",
+		filters={"name": ("in", list(rows)), "blanket_order": ("is", "set"), "against_blanket_order": 1},
+		fields=["name", "blanket_order", "item_code", "stock_qty", "conversion_factor"],
+	):
+		new_data = rows[row.name]
+		conversion_factor = flt(new_data.get("conversion_factor")) or flt(row.conversion_factor) or 1
+		new_stock_qty = flt(flt(new_data.get("qty")) * conversion_factor, precision)
+		changes[(row.blanket_order, row.item_code)] += new_stock_qty - flt(row.stock_qty)
+
+	for (blanket_order, item_code), change in sorted(changes.items()):
+		if change > 0:
+			frappe.get_doc("Blanket Order", blanket_order, for_update=True).validate_qty_can_be_ordered(
+				{item_code: change}, parent_doctype
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
@@ -4603,6 +4630,7 @@ def update_child_qty_rate(
 		_removed_items = validate_and_delete_children(parent, data)
 
 	items_added_or_removed |= _removed_items
+	validate_blanket_order_changes(parent_doctype, data)
 
 	for d in data:
 		new_child_flag = False
