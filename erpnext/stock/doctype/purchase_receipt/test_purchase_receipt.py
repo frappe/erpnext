@@ -7001,7 +7001,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_po_invoice_split_over_receipts_nets_their_returns(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		purchase_order = create_purchase_order(qty=10, rate=100)
+		purchase_order = create_purchase_order(qty=10, rate=100, transaction_date=add_days(today(), -1))
 		first, second = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
 		self.submit_receipt_return(first, 2)
 		make_invoice_against_order(purchase_order.name, qty=8, rate=100)
@@ -7097,7 +7097,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		setup_provisional_accounting()
 		self.addCleanup(toggle_provisional_accounting_setting)
-		return create_purchase_order(item_code="_Test Non Stock Item", qty=10, rate=200)
+		return create_purchase_order(
+			item_code="_Test Non Stock Item", qty=10, rate=200, transaction_date=add_days(today(), -1)
+		)
 
 	def test_order_invoice_skips_receipt_qty_billed_directly(self):
 		purchase_order = self.make_provisional_purchase_order()
@@ -7309,6 +7311,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00").name,
+			self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order.name, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order.name, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+
+		vouchers.append(make_invoice_against_order(purchase_order.name, qty=6, rate=200).name)
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
@@ -7340,6 +7357,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		receipt = make_receipt_from_order(purchase_order)
 		receipt.set_posting_time = 1
+		receipt.posting_date = add_days(today(), -1)
 		receipt.posting_time = posting_time
 		receipt.items[0].update({"received_qty": qty, "qty": qty, "rate": rate})
 		receipt.submit()
@@ -7525,6 +7543,7 @@ def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
 	for qty, posting_time in receipts:
 		pr = make_receipt_from_order(purchase_order)
 		pr.set_posting_time = 1
+		pr.posting_date = add_days(today(), -1)
 		pr.posting_time = posting_time
 		pr.items[0].received_qty = qty
 		pr.items[0].qty = qty
