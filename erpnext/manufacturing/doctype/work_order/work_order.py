@@ -3618,6 +3618,15 @@ def get_reserved_qty_for_production(
 		)
 		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
 		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+		# what Subcontracting Orders took over is their demand, not the Work Order's, even when they
+		# send what the Work Order already transferred
+		not_subcontracted = wo_item.required_qty - wo_item.subcontracted_qty
+		qty_field = (
+			Case()
+			.when(not_subcontracted <= 0, 0.0)
+			.when(not_subcontracted < qty_field, not_subcontracted)
+			.else_(qty_field)
+		)
 
 	query = (
 		frappe.qb.from_(wo)
