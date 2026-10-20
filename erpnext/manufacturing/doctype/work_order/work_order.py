@@ -1568,14 +1568,33 @@ class WorkOrder(Document):
 			"Production Plan Item", self.production_plan_item, "sales_order_item"
 		)
 
+		ordered_qty = self.get_ordered_qty_of_plan_item()
 		for plan_reference in prod_plan.prod_plan_references:
-			work_order_qty = 0.0
-			if plan_reference.item_reference == item_reference:
-				if self.docstatus == 1:
-					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
-				frappe.db.set_value(
-					"Sales Order Item", plan_reference.sales_order_item, "work_order_qty", work_order_qty
+			if plan_reference.item_reference != item_reference:
+				continue
+
+			allocated_qty = min(flt(plan_reference.qty), ordered_qty)
+			ordered_qty -= allocated_qty
+			frappe.db.set_value(
+				"Sales Order Item",
+				plan_reference.sales_order_item,
+				"work_order_qty",
+				allocated_qty / total_bundle_qty,
+			)
+
+	def get_ordered_qty_of_plan_item(self):
+		work_order = frappe.qb.DocType("Work Order")
+		return flt(
+			(
+				frappe.qb.from_(work_order)
+				.select(Sum(work_order.qty))
+				.where(
+					(work_order.production_plan_item == self.production_plan_item)
+					& (work_order.docstatus == 1)
+					& (work_order.status != "Closed")
 				)
+			).run()[0][0]
+		)
 
 	def update_completed_qty_in_material_request(self):
 		if self.material_request and self.material_request_item:
