@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
 import erpnext
+from erpnext.accounts.deferred_revenue import get_already_booked_amount
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
@@ -117,11 +118,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 	def _append_item_discount_gl_entries(self, item, gl_entries) -> None:
 		doc = self.doc
 		discount_amount = item.discount_amount * item.qty
-		income_account = (
-			item.income_account
-			if (not item.enable_deferred_revenue or doc.is_return)
-			else item.deferred_revenue_account
-		)
+		income_account = self.get_item_income_account(item)
 
 		account_currency = get_account_currency(item.discount_account)
 		gl_entries.append(
@@ -147,6 +144,9 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 			doc.get_gl_dict(
 				{
 					"account": income_account,
+					"voucher_detail_no": item.name
+					if doc.is_return and item.enable_deferred_revenue
+					else None,
 					"against": doc.customer,
 					"credit": flt(
 						discount_amount * doc.get("conversion_rate"),
@@ -376,11 +376,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 	def _append_item_income_gl_entry(self, item, gl_entries, tax_service, enable_discount_accounting) -> None:
 		doc = self.doc
-		income_account = (
-			item.income_account
-			if (not item.enable_deferred_revenue or doc.is_return)
-			else item.deferred_revenue_account
-		)
+		income_account = self.get_item_income_account(item)
 
 		amount, base_amount = tax_service.get_amount_and_base_amount(item, enable_discount_accounting)
 
@@ -389,6 +385,9 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 			self.get_gl_dict(
 				{
 					"account": income_account,
+					"voucher_detail_no": item.name
+					if doc.is_return and item.enable_deferred_revenue
+					else None,
 					"against": doc.customer,
 					"credit": flt(base_amount, item.precision("base_net_amount")),
 					"credit_in_account_currency": self._get_amount_in_account_currency(
@@ -404,6 +403,46 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				item=item,
 			)
 		)
+
+	def get_item_income_account(self, item):
+		if not item.enable_deferred_revenue:
+			return item.income_account
+		if not self.doc.is_return:
+			return item.deferred_revenue_account
+		if not self.doc.return_against or not item.sales_invoice_item:
+			return item.income_account
+
+		frappe.db.get_value("Sales Invoice", self.doc.return_against, "name", for_update=True)
+		# Stock reposting composes entries before replacing the existing ledger.
+		if frappe.db.exists(
+			"GL Entry",
+			{
+				"voucher_type": "Sales Invoice",
+				"voucher_no": self.doc.name,
+				"voucher_detail_no": item.name,
+				"account": item.deferred_revenue_account,
+				"is_cancelled": 0,
+			},
+		):
+			return item.deferred_revenue_account
+
+		invoice = frappe.get_cached_doc("Sales Invoice", self.doc.return_against)
+		for original_item in invoice.items:
+			if original_item.name != item.sales_invoice_item:
+				continue
+			if (
+				not original_item.enable_deferred_revenue
+				or original_item.deferred_revenue_account != item.deferred_revenue_account
+			):
+				break
+
+			booked_amount, booked_account_amount = get_already_booked_amount(invoice, original_item)
+			# Keep the existing treatment once recognition has started, including reserved draft journals.
+			if not booked_amount and not booked_account_amount:
+				return original_item.deferred_revenue_account
+			break
+
+		return item.income_account
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		doc = self.doc

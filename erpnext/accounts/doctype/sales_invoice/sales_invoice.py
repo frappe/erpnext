@@ -12,7 +12,10 @@ from frappe.utils import cint, flt, formatdate, get_link_to_form
 from frappe.utils.data import comma_and
 
 import erpnext
-from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.deferred_revenue import (
+	validate_deferred_revenue_return_cancellation,
+	validate_service_stop_date,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
@@ -534,6 +537,7 @@ class SalesInvoice(SellingController):
 			self.refresh_subscription_status()
 
 	def before_cancel(self):
+		validate_deferred_revenue_return_cancellation(self)
 		POSService(self).check_if_created_using_pos_and_pos_closing_entry_generated()
 		POSService(self).check_if_consolidated_invoice()
 
