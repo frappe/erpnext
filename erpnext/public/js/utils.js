@@ -1026,7 +1026,12 @@ erpnext.utils.update_child_items = function (opts) {
 			},
 		],
 		primary_action: function () {
-			if (frm.doctype == "Sales Order" && has_reserved_stock && frm.doc.is_subcontracted == 0) {
+			if (
+				frm.doctype == "Sales Order" &&
+				has_reserved_stock &&
+				frm.doc.is_subcontracted == 0 &&
+				!frm.doc.per_picked
+			) {
 				this.hide();
 				frappe.confirm(
 					__(
