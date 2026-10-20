@@ -93,11 +93,8 @@ class TestDunning(ERPNextTestSuite):
 		self.assertEqual(dunning.status, "Unresolved")
 		self.assertEqual(round(dunning.get_unpaid_dunning_amount(), 2), 10.41)
 
-	def test_dunning_can_be_cancelled_after_its_interest_was_paid(self):
-		"""
-		The payment collecting the interest links back to the dunning, which must not stand in
-		the way of cancelling it.
-		"""
+	def test_paid_dunning_requires_payment_cancellation(self):
+		"""Cancel the linked payment before cancelling a Dunning with paid charges."""
 		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
 		dunning.submit()
 
@@ -109,8 +106,18 @@ class TestDunning(ERPNextTestSuite):
 		dunning.reload()
 		self.assertEqual(dunning.status, "Resolved")
 
+		frappe.db.savepoint("dunning_cancellation")
+		with self.assertRaises(frappe.LinkExistsError):
+			dunning.cancel()
+		frappe.db.rollback(save_point="dunning_cancellation")
+
+		pe.reload()
+		pe.cancel()
+		dunning.reload()
 		dunning.cancel()
+		dunning.reload()
 		self.assertEqual(dunning.docstatus, 2)
+		self.assertEqual(dunning.status, "Cancelled")
 
 	def test_waived_interest_keeps_a_manually_resolved_dunning_resolved(self):
 		"""
