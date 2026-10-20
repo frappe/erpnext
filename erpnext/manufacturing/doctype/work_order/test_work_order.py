@@ -795,7 +795,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		fg_row = next(d for d in ste.items if d.is_finished_item)
 		self.assertEqual(fg_row.cost_center, "_Test Cost Center 2 - _TC")
 
-	def test_default_fg_warehouse_prefers_bom_then_item_over_company(self):
+	def test_default_fg_warehouse_prefers_bom_then_company_over_item(self):
 		fg_item = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -814,7 +814,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			wo.get_items_and_operations_from_bom()
 			return wo.fg_warehouse
 
-		self.assertEqual(get_fg_warehouse(), "_Test Warehouse 1 - _TC")
+		self.assertEqual(get_fg_warehouse(), "Finished Goods - _TC")
 
 		frappe.db.set_value("BOM", bom.name, "default_target_warehouse", "_Test Warehouse - _TC")
 		self.assertEqual(get_fg_warehouse(), "_Test Warehouse - _TC")
@@ -823,6 +823,9 @@ class TestWorkOrder(ERPNextTestSuite):
 			"_Test Other Company FG Warehouse", company="_Test Company 1"
 		)
 		frappe.db.set_value("BOM", bom.name, "default_target_warehouse", other_company_warehouse)
+		self.assertEqual(get_fg_warehouse(), "Finished Goods - _TC")
+
+		frappe.db.set_value("Company", "_Test Company", "default_fg_warehouse", None)
 		self.assertEqual(get_fg_warehouse(), "_Test Warehouse 1 - _TC")
 
 	def test_operation_time_with_batch_size(self):
