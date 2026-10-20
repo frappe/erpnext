@@ -23,6 +23,7 @@
   "routing",
   "operations_section",
   "operations",
+  "steps_section",
   "stage_summary",
   "fg_based_section_section",
   "fg_based_operating_cost",
@@ -296,6 +297,14 @@
    "oldfieldname": "bom_operations",
    "oldfieldtype": "Table",
    "options": "BOM Operation"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.docstatus === 0",
+   "depends_on": "eval:doc.with_operations && doc.track_semi_finished_goods",
+   "fieldname": "steps_section",
+   "fieldtype": "Section Break",
+   "label": "Steps"
   },
   {
    "depends_on": "eval:doc.with_operations && doc.track_semi_finished_goods",
@@ -774,7 +783,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-20 12:00:00.000000",
+ "modified": "2026-10-20 23:10:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
