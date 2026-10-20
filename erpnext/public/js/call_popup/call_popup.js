@@ -154,6 +154,7 @@ class CallPopup {
 					label: "Call Type",
 					fieldtype: "Link",
 					options: "Telephony Call Type",
+					get_query: () => ({ filters: { docstatus: 1 } }),
 				},
 				{
 					fieldtype: "Section Break",

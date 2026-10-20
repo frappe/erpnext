@@ -22,36 +22,33 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		});
 	},
 	render_heatmap(frm) {
-		let bisect_heatmap = frm.get_field("bisect_heatmap").$wrapper;
-		bisect_heatmap.addClass("bisect_heatmap_location");
-
-		// milliseconds in a day
-		let msiad = 24 * 60 * 60 * 1000;
-		let datapoints = {};
-		let fr_dt = new Date(frm.doc.from_date).getTime();
-		let to_dt = new Date(frm.doc.to_date).getTime();
-		let bisect_start = new Date(frm.doc.current_from_date).getTime();
-		let bisect_end = new Date(frm.doc.current_to_date).getTime();
-
-		for (let x = fr_dt; x <= to_dt; x += msiad) {
-			let epoch_in_seconds = x / 1000;
-			if (bisect_start <= x && x <= bisect_end) {
-				datapoints[epoch_in_seconds] = 1.0;
-			} else {
-				datapoints[epoch_in_seconds] = 0.0;
-			}
+		const day = (value) => value?.slice(0, 10);
+		const [from_date, to_date, current_from_date, current_to_date] = [
+			frm.doc.from_date,
+			frm.doc.to_date,
+			frm.doc.current_from_date,
+			frm.doc.current_to_date,
+		].map(day);
+		const days = [];
+		for (let date = from_date; date <= to_date; date = day(frappe.datetime.add_days(date, 1))) {
+			days.push({ date, bisecting: current_from_date <= date && date <= current_to_date ? 1 : 0 });
 		}
 
-		new frappe.Chart(".bisect_heatmap_location", {
-			type: "heatmap",
-			data: {
-				dataPoints: datapoints,
-				start: new Date(frm.doc.from_date),
-				end: new Date(frm.doc.to_date),
-			},
-			countLabel: "Bisecting",
-			discreteDomains: 1,
-		});
+		const config = {
+			type: "calendar-heatmap",
+			data: days,
+			date: "date",
+			value: "bisecting",
+			start: from_date,
+			end: to_date,
+			fieldtype: "Int",
+			height: 200,
+		};
+		if (frm.bisect_heatmap) {
+			frm.bisect_heatmap.update(config);
+		} else {
+			frm.bisect_heatmap = frappe.ui.chart(frm.get_field("bisect_heatmap").$wrapper, config);
+		}
 	},
 	bisect_left(frm) {
 		frm.call({

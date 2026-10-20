@@ -94,7 +94,7 @@ def execute(filters=None):
 		compute_growth_view_data(data, period_list)
 
 	if filters.get("selected_view") == "Margin":
-		compute_margin_view_data(data, period_list)
+		compute_margin_view_data(data, period_list, income[-2] if income else None)
 
 	return columns, data, None, chart, report_summary, primitive_summary
 
@@ -259,7 +259,7 @@ def execute_snapshot_report(filters):
 		compute_growth_view_data(data, period_list)
 
 	if filters.get("selected_view") == "Margin":
-		compute_margin_view_data(data, period_list, filters.accumulated_values)
+		compute_margin_view_data(data, period_list, income[-2] if income else None)
 
 	return columns, data, None, chart, report_summary, primitive_summary
 

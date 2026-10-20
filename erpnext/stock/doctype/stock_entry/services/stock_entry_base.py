@@ -37,8 +37,19 @@ class BaseStockEntry:
 		if self.wo_doc.status == "Stopped":
 			msg = _("Transaction not allowed against stopped Work Order {0}").format(self.doc.work_order)
 
+		if self._is_new_entry_against_closed_work_order():
+			msg = _("Transaction not allowed against closed Work Order {0}").format(self.doc.work_order)
+
 		if msg:
 			frappe.throw(msg)
+
+	def _is_new_entry_against_closed_work_order(self):
+		return (
+			self.wo_doc.status == "Closed"
+			and self.doc.docstatus == 1
+			and not self.doc.is_return
+			and self.doc.purpose in ("Material Transfer for Manufacture", "Manufacture")
+		)
 
 	def validate_alternative_items(self):
 		if not self.wo_doc:
@@ -49,26 +60,30 @@ class BaseStockEntry:
 			return
 
 		transferred_pairs = self.get_transferred_alternative_pairs()
-		for row in rows:
-			if (row.original_item, row.item_code) not in transferred_pairs:
-				self.validate_alternative_item_row(row)
-
-	def validate_alternative_item_row(self, row):
-		from erpnext.stock.doctype.item_alternative.item_alternative import is_alternative_item
+		rows = [row for row in rows if (row.original_item, row.item_code) not in transferred_pairs]
+		if not rows:
+			return
 
 		if not self.wo_doc.allow_alternative_item:
 			frappe.throw(
 				_("Row #{0}: Work Order {1} does not allow alternative items").format(
-					row.idx, frappe.bold(self.doc.work_order)
+					rows[0].idx, frappe.bold(self.doc.work_order)
 				)
 			)
 
-		if not is_alternative_item(row.original_item, row.item_code):
-			frappe.throw(
-				_("Row #{0}: Item {1} is not an alternative of Item {2}").format(
-					row.idx, frappe.bold(row.item_code), frappe.bold(row.original_item)
+		self.validate_alternative_item_rows(rows)
+
+	def validate_alternative_item_rows(self, rows):
+		from erpnext.stock.doctype.item_alternative.item_alternative import get_alternative_item_pairs
+
+		alternative_pairs = get_alternative_item_pairs(list({row.original_item for row in rows}))
+		for row in rows:
+			if (row.original_item, row.item_code) not in alternative_pairs:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not an alternative of Item {2}").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(row.original_item)
+					)
 				)
-			)
 
 	def get_transferred_alternative_pairs(self):
 		if self.doc.purpose == "Material Transfer for Manufacture" and not self.doc.is_return:

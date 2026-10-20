@@ -81,3 +81,18 @@ class TestCodeList(ERPNextTestSuite):
 
 	def test_default_code_follows_latest_version(self):
 		self.assertEqual(get_default_code(CANONICAL_URI), "XYZ")
+
+	def test_default_common_code_must_belong_to_the_list(self):
+		new_version_code = frappe.db.get_value("Code List", NEW_VERSION, "default_common_code")
+		old_version = frappe.get_doc("Code List", OLD_VERSION)
+		old_version.default_common_code = new_version_code
+		self.assertRaises(frappe.ValidationError, old_version.save)
+
+	def test_bulk_delete_removes_the_codes_of_the_list(self):
+		frappe.flags.in_bulk_delete = True
+		self.addCleanup(frappe.flags.pop, "in_bulk_delete", None)
+
+		frappe.delete_doc("Code List", NEW_VERSION)
+
+		self.assertFalse(frappe.db.exists("Code List", NEW_VERSION))
+		self.assertFalse(frappe.db.exists("Common Code", {"code_list": NEW_VERSION}))

@@ -19,7 +19,7 @@ def get_columns(filters, trans):
 	# get conditions for periodic filter cond
 	period_cols, period_select = period_wise_columns_query(filters, trans)
 	# get conditions for grouping filter cond
-	group_by_cols = group_wise_column(filters.get("group_by"))
+	group_by_cols = group_wise_column(filters.get("group_by"), trans)
 
 	columns = (
 		based_on_details["based_on_cols"]
@@ -80,16 +80,7 @@ def get_data(filters, conditions):
 	inc, cond = "", ""
 	query_details = conditions["based_on_select"] + conditions["period_wise_select"]
 
-	posting_date = "t1.transaction_date"
-	if conditions.get("trans") in [
-		"Sales Invoice",
-		"Purchase Invoice",
-		"Purchase Receipt",
-		"Delivery Note",
-	]:
-		posting_date = "t1.posting_date"
-		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
-			posting_date = "t1." + filters.period_based_on
+	posting_date = get_period_date_field(filters, conditions.get("trans"))
 
 	if filters.get("based_on") == "Project":
 		cond = " and " + conditions["based_on_select"].split(",")[0] + " != ''"
@@ -98,13 +89,18 @@ def get_data(filters, conditions):
 		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
 			cond += " and t1.status != 'Closed'"
 
-	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
-		cond += " and t1.quotation_to = 'Customer'"
-
 	cond += get_permission_condition(conditions["trans"])
 
 	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
+	)
+
+	# Lead/Prospect quotations have no customer group; label the empty based-on bucket for display only,
+	# keeping the raw key so the group_by detail queries still match it.
+	empty_group_label = (
+		_("No Customer Group")
+		if conditions.get("trans") == "Quotation" and filters.get("based_on") == "Customer Group"
+		else None
 	)
 
 	if filters.get("group_by"):
@@ -114,7 +110,12 @@ def get_data(filters, conditions):
 		if filters.get("group_by") == "Item":
 			sel_col = "t2.item_code"
 		elif filters.get("group_by") == "Customer":
-			sel_col = "t1.party_name" if conditions.get("trans") == "Quotation" else "t1.customer"
+			# A Quotation's party spans Customer/Lead/Prospect, so key the breakdown by type and party
+			# (as based_on Customer does); otherwise same-named parties of different types would merge.
+			if conditions.get("trans") == "Quotation":
+				sel_col = "concat(t1.quotation_to, ': ', t1.party_name)"
+			else:
+				sel_col = "t1.customer"
 		elif filters.get("group_by") == "Supplier":
 			sel_col = "t1.supplier"
 
@@ -221,6 +222,10 @@ def get_data(filters, conditions):
 
 				data.append(des)
 
+			# relabel only after the detail queries have matched on the raw key
+			if empty_group_label and not dt[0]:
+				dt[0] = empty_group_label
+
 		total_row = calculate_total_row(data1, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 	else:
@@ -245,6 +250,11 @@ def get_data(filters, conditions):
 			(filters.get("company"), year_start_date, year_end_date),
 			as_list=1,
 		)
+
+		if empty_group_label:
+			for row in data:
+				if not row[0]:
+					row[0] = empty_group_label
 
 		total_row = calculate_total_row(data, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
@@ -293,12 +303,7 @@ def period_wise_columns_query(filters, trans):
 	pwc = []
 	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
 
-	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
-		trans_date = "posting_date"
-		if filters.period_based_on and trans in ["Purchase Invoice", "Sales Invoice"]:
-			trans_date = filters.period_based_on
-	else:
-		trans_date = "transaction_date"
+	trans_date = get_period_date_field(filters, trans)
 
 	if filters.get("period") != "Yearly":
 		for dt in bet_dates:
@@ -313,6 +318,15 @@ def period_wise_columns_query(filters, trans):
 
 	query_details += "SUM(t2.stock_qty), SUM(t2.base_net_amount)"
 	return pwc, query_details
+
+
+def get_period_date_field(filters: dict, trans: str) -> str:
+	"""Date expression the periods are based on; Billing Date falls back to the posting date when empty."""
+	if trans not in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
+		return "t1.transaction_date"
+	if filters.period_based_on == "bill_date" and trans in ["Purchase Invoice", "Sales Invoice"]:
+		return "ifnull(t1.bill_date, t1.posting_date)"
+	return "t1.posting_date"
 
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -334,8 +348,8 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.stock_qty ELSE NULL END),
-					SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.base_net_amount ELSE NULL END),
+	query_details += """SUM(CASE WHEN {trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.stock_qty ELSE NULL END),
+					SUM(CASE WHEN {trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.base_net_amount ELSE NULL END),
 				""".format(
 		trans_date=trans_date,
 		sd=bet_dates[0],
@@ -522,16 +536,30 @@ def based_wise_columns_query(based_on, trans):
 			based_on_details["addl_tables_relational_cond"] = " and t1.customer = customer_master.name"
 
 	elif based_on == "Customer Group":
-		based_on_details["based_on_cols"] = [
-			{
+		customer_group = "t1.customer_group"
+		customer_group_col = {
+			"label": _("Customer Group"),
+			"fieldtype": "Link",
+			"options": "Customer Group",
+			"fieldname": "customer_group",
+		}
+		# A Quotation to a Lead/Prospect has no customer group (NULL or ''); fold both into one key so
+		# the group_by detail queries still match it (labelled for display in get_data). The CASE has
+		# no comma, so the based-on key stays intact when split out. Render it as plain text since the
+		# bucket is not a real Customer Group record.
+		if trans == "Quotation":
+			customer_group = (
+				"case when t1.customer_group is null or t1.customer_group = '' "
+				"then '' else t1.customer_group end"
+			)
+			customer_group_col = {
 				"label": _("Customer Group"),
-				"fieldtype": "Link",
-				"options": "Customer Group",
+				"fieldtype": "Data",
 				"fieldname": "customer_group",
 			}
-		]
-		based_on_details["based_on_select"] = "t1.customer_group,"
-		based_on_details["based_on_group_by"] = "t1.customer_group"
+		based_on_details["based_on_cols"] = [customer_group_col]
+		based_on_details["based_on_select"] = f"{customer_group} as customer_group,"
+		based_on_details["based_on_group_by"] = customer_group
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Supplier":
@@ -639,16 +667,21 @@ def based_wise_columns_query(based_on, trans):
 	return based_on_details
 
 
-def group_wise_column(group_by):
-	if group_by:
-		return [
-			{
-				"label": _(group_by),
-				"fieldtype": "Link",
-				"options": group_by,
-				"width": 120,
-				"fieldname": frappe.scrub(group_by),
-			}
-		]
-	else:
+def group_wise_column(group_by, trans=None):
+	if not group_by:
 		return []
+
+	# A Quotation's customer breakdown spans Customer/Lead/Prospect parties, so it can't link to a
+	# single master; show the party as plain data under a neutral label.
+	if trans == "Quotation" and group_by == "Customer":
+		return [{"label": _("Party"), "fieldtype": "Data", "width": 120, "fieldname": "party"}]
+
+	return [
+		{
+			"label": _(group_by),
+			"fieldtype": "Link",
+			"options": group_by,
+			"width": 120,
+			"fieldname": frappe.scrub(group_by),
+		}
+	]

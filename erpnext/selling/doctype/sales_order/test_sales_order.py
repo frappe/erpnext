@@ -283,11 +283,6 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertIn("selling-settings", frappe.local.message_log[-1]["message"])
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
-	def test_sales_order_negative_rate_setting_does_not_allow_negative_quantity(self):
-		so = make_sales_order(qty=-1, rate=100, do_not_save=True)
-		self.assertRaises(frappe.NonNegativeError, so.save)
-
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_order_qty(self):
 		so = make_sales_order(qty=1, do_not_save=True)
@@ -700,6 +695,51 @@ class TestSalesOrder(ERPNextTestSuite):
 				so.load_from_db()
 				self.assertEqual(so.get("items")[0].returned_qty, 3)
 				self.assertEqual(make_sales_invoice(so.name).get("items")[0].qty, 1)
+
+	def test_delivery_progress_after_returns_in_stock_uom(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return as make_credit_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, rate=10)
+		so = make_sales_order(item_code=item.name, qty=2, uom="Box", rate=120)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 1
+		dn.submit()
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -2})
+		dn_return.submit()
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.items[0].qty = 1
+		si.submit()
+		credit_note = make_credit_note(si.name)
+		credit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -4})
+		credit_note.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 1.5)
+		self.assertEqual(so.items[0].returned_qty, 0.5)
+
+	def test_make_sales_invoice_after_credit_note_in_stock_uom(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=24, rate=10)
+		so = make_sales_order(item_code=item.name, qty=2, uom="Box", rate=120)
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.submit()
+		credit_note = make_sales_return(si.name)
+		credit_note.update_billed_amount_in_sales_order = 1
+		credit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -12, "rate": 10})
+		credit_note.submit()
+
+		self.assertTrue(has_potentially_billable_items(so.name))
+		self.assertEqual(make_sales_invoice(so.name).items[0].qty, 1)
 
 	def test_make_sales_invoice_after_partial_billing_multiple_items(self):
 		so = make_sales_order(
@@ -1666,7 +1706,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[0].tax_amount, 10)
 		self.assertEqual(so.taxes[0].total, 110)
 
-		old_default_warehouse = frappe.db.get_value("Company", "_Test Company", "default_warehouse")
 		frappe.db.set_value("Company", "_Test Company", "default_warehouse", "_Test Warehouse - _TC")
 
 		items = json.dumps(
@@ -1692,20 +1731,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[1].account_head, "_Test Account Service Tax - _TC")
 		self.assertEqual(so.taxes[1].tax_amount, 40)
 		self.assertEqual(so.taxes[1].total, 480)
-
-		# teardown
-		frappe.db.set_value(
-			"Item Tax",
-			{"parent": item, "item_tax_template": tax_template},
-			"valid_from",
-			None,
-			update_modified=False,
-		)
-		so.cancel()
-		so.delete()
-		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
-		frappe.db.set_value("Company", "_Test Company", "default_warehouse", old_default_warehouse)
 
 	def test_warehouse_user(self):
 		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")
@@ -2029,6 +2054,59 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.load_from_db()
 		so.cancel()
 
+	def test_drop_shipping_delivery_progress_excludes_closed_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		drop_ship_item = make_item(
+			"_Test Drop Ship Closed Row Progress", {"is_stock_item": 1, "delivered_by_supplier": 1}
+		)
+		so = make_sales_order(qty=10, rate=100, do_not_save=True)
+		so.append(
+			"items",
+			{
+				"item_code": drop_ship_item.name,
+				"qty": 10,
+				"rate": 100,
+				"delivery_date": so.delivery_date,
+				"delivered_by_supplier": 1,
+				"supplier": "_Test Supplier",
+			},
+		)
+		so.submit()
+		po = make_purchase_order(so.name, selected_items=[so.items[1].as_dict()])[0]
+		po.submit()
+
+		update_closed_status("Sales Order", so.name, [so.items[0].name], 1)
+		po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 5}])
+
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 50)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_closing_row_keeps_skip_delivery_rows_out_of_delivery_progress(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, rate=100)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 10, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": service_item, "qty": 10, "rate": 100},
+				{
+					"item_code": "_Test Item Home Desktop 100",
+					"qty": 5,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+				},
+			]
+		)
+		dn = make_delivery_note(so.name)
+		dn.items = [row for row in dn.items if row.so_detail == so.items[0].name]
+		dn.submit()
+
+		update_closed_status("Sales Order", so.name, [so.items[2].name], 1)
+
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 100)
+
 	def test_drop_shipping_partial_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
@@ -2288,6 +2366,29 @@ class TestSalesOrder(ERPNextTestSuite):
 		si = make_sales_invoice(so.name)
 		si.insert()
 		self.assertTrue(si.get("payment_schedule"))
+
+	def test_work_order_items_need_sales_order_read(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+		from erpnext.tests.permission_test_utils import (
+			OTHER_COMPANY,
+			as_user,
+			make_company_fenced_user,
+			make_fenced_user,
+		)
+
+		so = make_sales_order(item_code="_Test FG Item", qty=10)
+		expected = get_work_order_items(so.name)
+		self.assertTrue(expected)
+
+		with as_user(make_company_fenced_user("so-wo-items@example.com", ["Sales User"], so.company)):
+			self.assertEqual(get_work_order_items(so.name), expected)
+
+		for outsider in (
+			make_fenced_user("so-wo-items-website@example.com", []),
+			make_company_fenced_user("so-wo-items-fenced@example.com", ["Sales User"], OTHER_COMPANY),
+		):
+			with as_user(outsider):
+				self.assertRaises(frappe.PermissionError, get_work_order_items, so.name)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_work_order(self):

@@ -55,6 +55,21 @@ class AssetValueAdjustment(Document):
 
 	def before_cancel(self):
 		self.validate_asset_not_disposed()
+		self.validate_asset_not_split()
+
+	def validate_asset_not_split(self):
+		# self.modified is already the cancel time here; the stored value is the submission time
+		submitted_on = frappe.db.get_value(self.doctype, self.name, "modified")
+		split_asset = frappe.db.get_value(
+			"Asset", {"split_from": self.asset, "creation": (">", submitted_on)}, "name"
+		)
+		if split_asset:
+			frappe.throw(
+				_(
+					"Asset {0} was split into Asset {1} after this adjustment, so it cannot be cancelled. Adjust the value of each asset instead."
+				).format(get_link_to_form("Asset", self.asset), get_link_to_form("Asset", split_asset)),
+				title=_("Asset Split"),
+			)
 
 	def validate_asset_not_disposed(self):
 		status, disposal_date = frappe.db.get_value("Asset", self.asset, ["status", "disposal_date"])
@@ -89,9 +104,15 @@ class AssetValueAdjustment(Document):
 			frappe.throw(_("New Asset Value cannot be negative"))
 
 	def validate_finance_book(self):
-		if not self.finance_book or not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
+		if not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
 			return
 
+		if self.finance_book:
+			self.validate_finance_book_is_set_on_asset()
+		else:
+			self.validate_asset_has_no_named_finance_book()
+
+	def validate_finance_book_is_set_on_asset(self):
 		if not frappe.db.exists(
 			"Asset Finance Book",
 			{"parent": self.asset, "parenttype": "Asset", "finance_book": self.finance_book},
@@ -100,6 +121,19 @@ class AssetValueAdjustment(Document):
 				_("Finance Book {0} is not set on Asset {1}").format(
 					frappe.bold(self.finance_book), get_link_to_form("Asset", self.asset)
 				)
+			)
+
+	def validate_asset_has_no_named_finance_book(self):
+		# The adjustment updates only the matching book row, but its GL entries without a book apply to all books
+		if frappe.db.exists(
+			"Asset Finance Book",
+			{"parent": self.asset, "parenttype": "Asset", "finance_book": ["is", "set"]},
+		):
+			frappe.throw(
+				_("Select a Finance Book, as Asset {0} has named finance books").format(
+					get_link_to_form("Asset", self.asset)
+				),
+				title=_("Missing Finance Book"),
 			)
 
 	def validate_difference_amount(self):
@@ -247,7 +281,10 @@ class AssetValueAdjustment(Document):
 					salvage_value_adjustment = self.get_adjusted_salvage_value_amount(row, difference_amount)
 					row.expected_value_after_useful_life += salvage_value_adjustment
 					row.value_after_depreciation = row.value_after_depreciation + flt(difference_amount)
+					row.value_adjustment_amount = flt(row.value_adjustment_amount) + flt(difference_amount)
 					row.db_update()
+		else:
+			asset.value_adjustment_amount = flt(asset.value_adjustment_amount) + flt(difference_amount)
 
 		asset.value_after_depreciation += flt(difference_amount)
 		asset.db_update()

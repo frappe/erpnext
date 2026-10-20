@@ -3,6 +3,9 @@
 
 """Child item update service: ChildItemUpdater class and helpers for the update_child_qty_rate API."""
 
+from collections import defaultdict
+from functools import cached_property
+
 import frappe
 from frappe import _
 from frappe.model.workflow import get_workflow_name
@@ -33,8 +36,13 @@ class ChildItemUpdater:
 		self.child_docname = child_docname
 		self.parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 		self.allow_zero_qty = get_allow_zero_qty(parent_doctype)
+		self._blanket_order_change = defaultdict(float)
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
+
+	@cached_property
+	def _rows_with_kept_reservation(self) -> set[str]:
+		return get_rows_with_kept_reservation(self.parent)
 
 	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
@@ -44,6 +52,7 @@ class ChildItemUpdater:
 		from erpnext.selling.doctype.quotation.mapper import get_ordered_items
 
 		data = frappe.parse_json(trans_items)
+		had_mapped_discount = self.parent.has_mapped_discount
 		any_qty_changed = False
 		items_added_or_removed = False
 		any_conversion_factor_changed = False
@@ -64,84 +73,101 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		else:
+			self._track_deleted_blanket_order_rows(data)
 			items_added_or_removed |= validate_and_delete_children(self.parent, data)
 
-		for d in data:
-			new_child_flag = False
-			rate_unchanged = None
+		frappe.db.savepoint("update_child_items")
+		try:
+			for d in data:
+				new_child_flag = False
+				rate_unchanged = None
 
-			if not d.get("item_code"):
-				continue
-
-			if not d.get("docname"):
-				new_child_flag = True
-				items_added_or_removed = True
-				self._check_permissions("create")
-				child_item = self._get_new_child_item(d)
-			else:
-				self._check_permissions("write")
-				child_item = frappe.get_doc(self.parent_doctype + " Item", d.get("docname"))
-				d["conversion_factor"] = self._get_new_conversion_factor(child_item, d)
-
-				change_state = get_child_item_change_state(self.parent_doctype, child_item, d)
-				rate_unchanged = change_state.rate_unchanged
-				any_conversion_factor_changed |= not change_state.conversion_factor_unchanged
-				if is_child_item_unchanged(change_state):
+				if not d.get("item_code"):
 					continue
 
-				if child_item.get("closed"):
-					frappe.throw(
-						_(
-							"Row #{0}: Cannot change item {1} because it is closed. Reopen the row first."
-						).format(child_item.idx, child_item.item_code)
-					)
+				if not d.get("docname"):
+					new_child_flag = True
+					items_added_or_removed = True
+					self._check_permissions("create")
+					child_item = self._get_new_child_item(d)
+				else:
+					self._check_permissions("write")
+					child_item = frappe.get_doc(self.parent_doctype + " Item", d.get("docname"))
+					d["conversion_factor"] = self._get_new_conversion_factor(child_item, d)
 
-				self._validate_blanket_order_is_open(child_item, d)
+					change_state = get_child_item_change_state(self.parent_doctype, child_item, d)
+					rate_unchanged = change_state.rate_unchanged
+					any_conversion_factor_changed |= not change_state.conversion_factor_unchanged
+					if is_child_item_unchanged(change_state):
+						continue
 
-			self._validate_quantity_and_rate(child_item, d, rate_unchanged)
-			if not new_child_flag:
-				self._validate_uom_unchanged_after_fulfilment(child_item, d, change_state)
+					if child_item.get("closed"):
+						frappe.throw(
+							_(
+								"Row #{0}: Cannot change item {1} because it is closed. Reopen the row first."
+							).format(child_item.idx, child_item.item_code)
+						)
 
-			if flt(child_item.get("qty")) != flt(d.get("qty")):
-				any_qty_changed = True
+					self._track_blanket_order_change(child_item, d)
 
-			if self.parent.doctype in ("Sales Order", "Purchase Order") and self.parent.is_subcontracted:
-				self._validate_fg_item_for_subcontracting(d, new_child_flag)
-				child_item.fg_item_qty = flt(d["fg_item_qty"])
+				self._validate_quantity_and_rate(child_item, d, rate_unchanged)
+				if not new_child_flag:
+					self._validate_uom_unchanged_after_fulfilment(child_item, d, change_state)
+
+				if flt(child_item.get("qty")) != flt(d.get("qty")):
+					any_qty_changed = True
+
+				if self.parent.doctype in ("Sales Order", "Purchase Order") and self.parent.is_subcontracted:
+					self._validate_fg_item_for_subcontracting(d, new_child_flag)
+					child_item.fg_item_qty = flt(d["fg_item_qty"])
+					if new_child_flag:
+						child_item.fg_item = d["fg_item"]
+
+				child_item.qty = flt(d.get("qty"))
+				child_item.description = d.get("description")
+				update_child_item_rate_and_discount(
+					self.parent_doctype, child_item, d, self.allow_zero_qty, rate_unchanged=rate_unchanged
+				)
+				update_child_item_uom_and_weight(child_item, d)
+
+				if d.get("delivery_date") and self.parent_doctype == "Sales Order":
+					child_item.delivery_date = d.get("delivery_date")
+
+				if d.get("schedule_date") and self.parent_doctype == "Purchase Order":
+					child_item.schedule_date = d.get("schedule_date")
+
+				if d.get("bom_no") and self.parent_doctype == "Sales Order":
+					child_item.bom_no = d.get("bom_no")
+
+				child_item.flags.ignore_validate_update_after_submit = True
 				if new_child_flag:
-					child_item.fg_item = d["fg_item"]
+					self.parent.load_from_db()
+					child_item.idx = len(self.parent.items) + 1
+					child_item.insert()
+				else:
+					child_item.save(ignore_permissions=True)
 
-			child_item.qty = flt(d.get("qty"))
-			child_item.description = d.get("description")
-			update_child_item_rate_and_discount(
-				self.parent_doctype, child_item, d, self.allow_zero_qty, rate_unchanged=rate_unchanged
-			)
-			update_child_item_uom_and_weight(child_item, d)
+			self._validate_blanket_order_changes()
+		except Exception:
+			frappe.db.rollback(save_point="update_child_items")
+			raise
 
-			if d.get("delivery_date") and self.parent_doctype == "Sales Order":
-				child_item.delivery_date = d.get("delivery_date")
-
-			if d.get("schedule_date") and self.parent_doctype == "Purchase Order":
-				child_item.schedule_date = d.get("schedule_date")
-
-			if d.get("bom_no") and self.parent_doctype == "Sales Order":
-				child_item.bom_no = d.get("bom_no")
-
-			child_item.flags.ignore_validate_update_after_submit = True
-			if new_child_flag:
-				self.parent.load_from_db()
-				child_item.idx = len(self.parent.items) + 1
-				child_item.insert()
-			else:
-				child_item.save(ignore_permissions=True)
-
-		self._post_update(any_qty_changed, items_added_or_removed, any_conversion_factor_changed)
+		self._post_update(
+			any_qty_changed, items_added_or_removed, any_conversion_factor_changed, had_mapped_discount
+		)
 
 	def _post_update(
-		self, any_qty_changed: bool, items_added_or_removed: bool, any_conversion_factor_changed: bool
+		self,
+		any_qty_changed: bool,
+		items_added_or_removed: bool,
+		any_conversion_factor_changed: bool,
+		had_mapped_discount: bool,
 	) -> None:
 		parent = self.parent
 		parent.reload()
+		if had_mapped_discount:
+			parent.clear_stale_mapped_discount_total()
+
 		parent.flags.ignore_validate_update_after_submit = True
 		parent.set_qty_as_per_stock_uom()
 		parent.calculate_taxes_and_totals()
@@ -228,10 +254,9 @@ class ChildItemUpdater:
 				has_reserved_stock,
 			)
 
-			if has_reserved_stock(parent.doctype, parent.name):
+			if parent.per_picked == 0 and has_reserved_stock(parent.doctype, parent.name):
 				cancel_stock_reservation_entries(parent.doctype, parent.name)
-				if parent.per_picked == 0:
-					parent.create_stock_reservation_entries()
+				parent.create_stock_reservation_entries()
 
 	def _check_permissions(self, perm_type: str = "create") -> None:
 		try:
@@ -311,7 +336,7 @@ class ChildItemUpdater:
 
 		return flt(get_conversion_factor(child_item.item_code, uom).get("conversion_factor")) or 1
 
-	def _validate_blanket_order_is_open(self, child_item, new_data: dict) -> None:
+	def _track_blanket_order_change(self, child_item, new_data: dict) -> None:
 		if not child_item.get("blanket_order"):
 			return
 
@@ -319,26 +344,50 @@ class ChildItemUpdater:
 			flt(new_data.get("qty")) * flt(new_data.get("conversion_factor")),
 			child_item.precision("stock_qty"),
 		)
-		if new_stock_qty > flt(child_item.stock_qty):
-			blanket_order = frappe.get_doc("Blanket Order", child_item.blanket_order, for_update=True)
+		key = (child_item.blanket_order, child_item.item_code)
+		self._blanket_order_change[key] += new_stock_qty - flt(child_item.stock_qty)
+
+	def _track_deleted_blanket_order_rows(self, data: list) -> None:
+		kept_rows = {d.get("docname") for d in data}
+		for row in self.parent.items:
+			if row.name not in kept_rows and not row.get("closed") and row.get("blanket_order"):
+				self._blanket_order_change[(row.blanket_order, row.item_code)] -= flt(row.stock_qty)
+
+	def _validate_blanket_order_changes(self) -> None:
+		for (blanket_order_name, item_code), change in sorted(self._blanket_order_change.items()):
+			if change <= 0:
+				continue
+
+			blanket_order = frappe.get_doc("Blanket Order", blanket_order_name, for_update=True)
 			blanket_order.validate_can_be_ordered(self.parent.transaction_date)
-			blanket_order.validate_items_are_open([child_item.item_code])
+			blanket_order.validate_items_are_open([item_code])
+			blanket_order.validate_qty_can_be_ordered({item_code: change}, self.parent_doctype)
 
 	def _validate_uom_unchanged_after_fulfilment(self, child_item, new_data: dict, change_state) -> None:
+		uom_changed = new_data.get("uom") not in (None, child_item.uom)
+		if not uom_changed and change_state.conversion_factor_unchanged:
+			return
+
+		if child_item.name in self._rows_with_kept_reservation:
+			frappe.throw(
+				_(
+					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
+				).format(new_data.get("idx") or child_item.idx, frappe.bold(child_item.item_code)),
+				title=_("Stock Reserved"),
+			)
+
 		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
 			self.parent_doctype
 		)
 		if not fulfilled_qty_field or not flt(child_item.get(fulfilled_qty_field)):
 			return
 
-		uom_changed = new_data.get("uom") not in (None, child_item.uom)
-		if uom_changed or not change_state.conversion_factor_unchanged:
-			frappe.throw(
-				_(
-					"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
-				).format(child_item.idx, frappe.bold(child_item.item_code)),
-				title=_("Invalid UOM"),
-			)
+		frappe.throw(
+			_(
+				"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
+			).format(new_data.get("idx") or child_item.idx, frappe.bold(child_item.item_code)),
+			title=_("Invalid UOM"),
+		)
 
 	def _validate_quantity_and_rate(self, child_item, new_data: dict, rate_unchanged: bool | None) -> None:
 		if not flt(new_data.get("qty")) and not self.allow_zero_qty:
@@ -366,6 +415,9 @@ class ChildItemUpdater:
 					title=_("Invalid Qty"),
 				)
 
+			if child_item.name in self._rows_with_kept_reservation:
+				self._validate_qty_covers_reservation(child_item, new_data, new_stock_qty, old_stock_qty)
+
 		if not self._transacted_stock_qty:
 			return
 
@@ -382,6 +434,20 @@ class ChildItemUpdater:
 
 		if new_stock_qty < old_stock_qty:
 			frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
+
+	def _validate_qty_covers_reservation(
+		self, child_item, new_data: dict, new_stock_qty: float, delivered_stock_qty: float
+	) -> None:
+		reserved_qty = flt(child_item.get("stock_reserved_qty"))
+		# Packed Items reserve in component units, so a reserved bundle keeps its qty.
+		min_stock_qty = delivered_stock_qty + reserved_qty if reserved_qty else flt(child_item.stock_qty)
+		if flt(new_stock_qty - min_stock_qty, child_item.precision("stock_qty")) < 0:
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot set quantity less than delivered and reserved quantity. Unreserve stock before reducing the quantity."
+				).format(new_data.get("idx") or child_item.idx),
+				title=_("Invalid Qty"),
+			)
 
 	def _validate_fg_item_for_subcontracting(self, new_data: dict, is_new: bool) -> None:
 		if is_new:
@@ -482,6 +548,20 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 	return False
 
 
+def get_rows_with_kept_reservation(parent) -> set[str]:
+	"""Rows of a picked Sales Order whose stock stays reserved, directly or through their Packed Items."""
+	if parent.doctype != "Sales Order" or not flt(parent.per_picked):
+		return set()
+
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details_for_voucher,
+	)
+
+	bundle_rows = {d.name: d.parent_detail_docname for d in parent.get("packed_items")}
+	reserved = get_sre_reserved_qty_details_for_voucher(parent.doctype, parent.name)
+	return {bundle_rows.get(row, row) for row in reserved}
+
+
 def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 	"""Raise if a partially transacted child item is being deleted."""
 	if parent.doctype == "Sales Order":
@@ -565,6 +645,22 @@ def validate_no_issued_proforma(rows) -> None:
 			)
 
 
+def validate_no_kept_reservation(rows, parent) -> None:
+	"""Raise if a Sales Order row being deleted still holds reserved stock."""
+	if not rows:
+		return
+
+	reserved_rows = get_rows_with_kept_reservation(parent)
+	for row in rows:
+		if row.name in reserved_rows:
+			frappe.throw(
+				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
+					row.idx, frappe.bold(row.item_code)
+				),
+				title=_("Stock Reserved"),
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	"""Delete child rows not present in data; return True if any were removed."""
 	updated_item_names = [d.get("docname") for d in data]
@@ -576,6 +672,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype == "Sales Order":
 		validate_no_issued_proforma(deleted_children)
+		validate_no_kept_reservation(deleted_children, parent)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)

@@ -131,7 +131,6 @@
   "is_sub_contracted_item",
   "default_bom",
   "column_break_74",
-  "production_capacity",
   "total_projected_qty",
   "section_break_xili",
   "default_manufacturer_part_no",
@@ -980,11 +979,6 @@
    "label": "Deferred Accounting"
   },
   {
-   "fieldname": "production_capacity",
-   "fieldtype": "Int",
-   "label": "Production Capacity"
-  },
-  {
    "fieldname": "section_break_znra",
    "fieldtype": "Section Break"
   },
@@ -1142,7 +1136,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-09-16 12:00:00.000000",
+ "modified": "2026-10-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

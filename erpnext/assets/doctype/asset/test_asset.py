@@ -50,7 +50,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class AssetSetup(ERPNextTestSuite):
 	def setUp(self):
-		set_depreciation_settings_in_company()
 		enable_cwip_accounting("Computers")
 		make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
@@ -975,6 +974,67 @@ class TestAsset(AssetSetup):
 				),
 			)
 
+	def test_split_shares_value_adjustment(self):
+		from erpnext.assets.doctype.asset.depreciation import get_gross_asset_value
+		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+			make_asset_value_adjustment,
+		)
+
+		for calculate_depreciation in (0, 1):
+			asset = create_asset(
+				calculate_depreciation=calculate_depreciation,
+				asset_quantity=2,
+				purchase_date="2025-04-01",
+				available_for_use_date="2025-04-01",
+				depreciation_start_date="2026-03-31",
+				submit=1,
+			)
+			make_asset_value_adjustment(
+				asset=asset.name, date="2025-06-15", current_asset_value=100000, new_asset_value=120000
+			).submit()
+
+			new_asset = split_asset(asset.name, 1)
+			asset.load_from_db()
+
+			self.assertEqual(get_gross_asset_value(asset), 60000)
+			self.assertEqual(get_gross_asset_value(new_asset), 60000)
+			if calculate_depreciation:
+				continue
+
+			scrap_asset(new_asset.name, "2025-09-01")
+			new_asset.load_from_db()
+			self.assertCountEqual(
+				get_gl_entries("Journal Entry", new_asset.journal_entry_for_scrap),
+				(
+					("_Test Fixed Asset - _TC", 0.0, 60000.0),
+					("_Test Gain/Loss on Asset Disposal - _TC", 60000.0, 0.0),
+				),
+			)
+
+	def test_value_adjustment_before_split_cannot_be_cancelled(self):
+		from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+			make_asset_value_adjustment,
+		)
+
+		asset = create_asset(
+			asset_quantity=2, purchase_date="2025-04-01", available_for_use_date="2025-04-01", submit=1
+		)
+		adjustment_before_split = make_asset_value_adjustment(
+			asset=asset.name, date="2025-06-15", current_asset_value=100000, new_asset_value=120000
+		)
+		adjustment_before_split.submit()
+		split_asset(asset.name, 1)
+
+		adjustment_after_split = make_asset_value_adjustment(
+			asset=asset.name, date="2025-07-15", current_asset_value=60000, new_asset_value=70000
+		)
+		adjustment_after_split.submit()
+
+		self.assertRaises(frappe.ValidationError, adjustment_before_split.cancel)
+		adjustment_after_split.cancel()
+		asset.load_from_db()
+		self.assertEqual(asset.value_adjustment_amount, 10000)
+
 	def test_sold_status_survives_status_recompute(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
@@ -1008,6 +1068,37 @@ class TestAsset(AssetSetup):
 				for account, debit, credit in get_gl_entries("Sales Invoice", sale.name)
 			],
 		)
+
+	def test_sale_and_return_gl_unchanged_on_repost(self):
+		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+			update_repost_settings,
+		)
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_monthly_depreciating_asset()
+		post_depreciation_entries(date="2025-08-31")
+		sale_args = {"item_code": "Macbook Pro", "asset": asset.name, "rate": 50000}
+		sale = create_sales_invoice(qty=1, posting_date="2025-09-15", **sale_args)
+		sale_return = create_sales_invoice(
+			qty=-1, posting_date="2025-09-20", is_return=1, return_against=sale.name, **sale_args
+		)
+		# the restored asset depreciates further, so its current values differ from the sale's
+		post_depreciation_entries(date="2025-10-31")
+		posted_entries = {
+			name: get_gl_entries("Sales Invoice", name) for name in (sale.name, sale_return.name)
+		}
+
+		update_repost_settings()
+		repost = frappe.new_doc("Repost Accounting Ledger")
+		repost.company = sale.company
+		repost.delete_cancelled_entries = 1
+		for name in posted_entries:
+			repost.append("vouchers", {"voucher_type": "Sales Invoice", "voucher_no": name})
+		repost.submit()
+
+		self.assertEqual(frappe.db.get_value(repost.doctype, repost.name, "status"), "Completed")
+		for name, entries in posted_entries.items():
+			self.assertCountEqual(get_gl_entries("Sales Invoice", name), entries)
 
 	def test_split_asset_validations(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -2316,6 +2407,7 @@ def create_asset(**args):
 				"frequency_of_depreciation": args.frequency_of_depreciation or 12,
 				"total_number_of_depreciations": args.total_number_of_depreciations or 5,
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
+				"salvage_value_percentage": args.salvage_value_percentage or 0,
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
 				"shift_based": args.shift_based or 0,
@@ -2436,9 +2528,7 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 	return item
 
 
-def set_depreciation_settings_in_company(company=None):
-	if not company:
-		company = "_Test Company"
+def set_depreciation_settings_in_company(company):
 	company = frappe.get_doc("Company", company)
 	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - " + company.abbr
 	company.depreciation_expense_account = "_Test Depreciations - " + company.abbr

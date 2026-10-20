@@ -69,7 +69,7 @@ frappe.query_reports["Gross Profit"] = {
 			fieldtype: "MultiSelectList",
 			options: "Cost Center",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
+				return erpnext.utils.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -80,7 +80,7 @@ frappe.query_reports["Gross Profit"] = {
 			fieldtype: "MultiSelectList",
 			options: "Project",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Project", txt, {
+				return erpnext.utils.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},

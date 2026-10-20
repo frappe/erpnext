@@ -4,7 +4,7 @@ from functools import cached_property
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder.functions import Coalesce, Max, Min, NullIf, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
@@ -387,7 +387,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
 			return
 
-		if not self.doc.fg_completed_qty:
+		consumes_transferred_qty = self.backflush_based_on == "Material Transferred for Manufacture" and not (
+			self.wo_doc and self.wo_doc.skip_transfer
+		)
+		if not self.doc.fg_completed_qty or consumes_transferred_qty:
 			return
 
 		rm_items = [item for item in self.doc.items if item.s_warehouse]
@@ -691,7 +694,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.where(
 				(doctype.work_order == self.doc.work_order)
 				& (doctype.docstatus == 1)
-				& (child_doc.s_warehouse.isnotnull())
+				& (IfNull(child_doc.s_warehouse, "") != "")
 				& (
 					doctype.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
 					| ((doctype.purpose == "Material Transfer for Manufacture") & (doctype.is_return == 1))
@@ -924,9 +927,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.warehouse = row.t_warehouse
 			key = (row.item_code, row.warehouse, row.original_item or None)
 			if key not in self.available_materials:
-				self.available_materials[key] = frappe._dict(row, serial_nos=[], batches=defaultdict(float))
-			else:
-				self.available_materials[key].qty += row.qty
+				self.available_materials[key] = frappe._dict(
+					row,
+					qty=0.0,
+					uom=row.stock_uom,
+					conversion_factor=1,
+					serial_nos=[],
+					batches=defaultdict(float),
+				)
+
+			self.available_materials[key].qty += flt(row.transfer_qty)
 
 			if row.serial_and_batch_bundle:
 				material = self.available_materials[key]
@@ -946,7 +956,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.select(stock_entry_detail.star)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
-				& (stock_entry_detail.s_warehouse.isnotnull())
+				& (IfNull(stock_entry_detail.s_warehouse, "") != "")
 				& (
 					stock_entry.purpose.isin(["Manufacture", "Material Consumption for Manufacture"])
 					| (
@@ -969,7 +979,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
-				self._deduct_consumed_qty(buckets, flt(row.qty))
+				self._deduct_consumed_qty(buckets, flt(row.transfer_qty))
 
 	def _get_available_buckets(self, row):
 		"""Use exact attribution when present; otherwise drain the direct item first."""
@@ -1411,10 +1421,13 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.valuation_type,
 			(doctype.cost / NullIf(doctype.stock_qty, 0)).as_("manual_rate"),
 		)
-	query = query.select(doctype.rate.as_("basic_rate"))
 	if table_name == "BOM Item":
-		return query.select(doctype.allow_alternative_item, doctype.bom_no)
-	return query
+		return query.select(
+			(doctype.base_rate / NullIf(doctype.conversion_factor, 0)).as_("basic_rate"),
+			doctype.allow_alternative_item,
+			doctype.bom_no,
+		)
+	return query.select(doctype.rate.as_("basic_rate"))
 
 
 def _deduplicate_bom_items(items, by_type=False):

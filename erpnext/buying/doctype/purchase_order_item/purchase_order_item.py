@@ -2,8 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import math
+
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
+
+from erpnext.controllers.status_updater import get_allowance_for
 
 
 class PurchaseOrderItem(Document):
@@ -55,6 +60,7 @@ class PurchaseOrderItem(Document):
 		last_purchase_rate: DF.Currency
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		material_request: DF.Link | None
@@ -96,7 +102,15 @@ class PurchaseOrderItem(Document):
 		wip_composite_asset: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	@property
+	def max_receivable_qty(self) -> float:
+		"""Ordered qty plus the over delivery/receipt allowance, in whole units when the UOM needs it."""
+		allowance = flt(get_allowance_for(self.item_code, qty_or_amount="qty")[0])
+		max_qty = flt(flt(self.qty) * (100 + allowance) / 100, self.precision("qty"))
+		if frappe.get_cached_value("UOM", self.uom, "must_be_whole_number"):
+			return math.floor(max_qty)
+
+		return max_qty
 
 
 def on_doctype_update():

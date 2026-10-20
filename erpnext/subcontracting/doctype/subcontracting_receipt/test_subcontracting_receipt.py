@@ -17,13 +17,9 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 	make_subcontracted_item,
-	make_subcontracted_items,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -51,12 +47,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingReceipt(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_project_is_carried_over_from_subcontracting_order(self):
 		project = make_project({"project_name": "_Test SCR Project"}).name
 		po = make_subcontracted_purchase_order(project)
@@ -76,6 +66,49 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr = make_subcontracting_receipt(sco.name)
 		scr.items[0].project = other_project
 		self.assertRaises(frappe.ValidationError, scr.save)
+
+	def test_supplied_items_ledger_takes_project_of_finished_good_row(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		project = make_project({"project_name": "_Test SCR Project"}).name
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA7",
+					"fg_item_qty": 10,
+				},
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=1,
+		)
+		po.items[0].project = project
+		po.submit()
+		sco = get_subcontracting_order(po_name=po.name)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		self.assertFalse(scr.project)
+		self.assertEqual(scr.items[0].project, project)
+		supplied_item_projects = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": scr.name, "warehouse": scr.supplier_warehouse},
+			pluck="project",
+		)
+		self.assertTrue(supplied_item_projects)
+		self.assertEqual(set(supplied_item_projects), {project})
 
 	def test_subcontracting(self):
 		set_backflush_based_on("BOM")
@@ -799,6 +832,158 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.db.exists("Stock Ledger Entry", {"voucher_type": scr.doctype, "voucher_no": scr.name})
 		)
 
+	def make_receipt_with_taxed_freight(self, cost_centers, freight_rows=1):
+		"""Subcontracting Receipt of one order per cost center, each with freight and a tax on the first row."""
+		set_backflush_based_on("BOM")
+		orders = [get_subcontracting_order() for _ in cost_centers]
+		for idx, (sco, cost_center) in enumerate(zip(orders, cost_centers, strict=True)):
+			freights = [
+				{
+					"idx": row + 1,
+					"charge_type": "Actual",
+					"account_head": "_Test Account Shipping Charges - _TC",
+					"description": f"Freight {idx}",
+					"tax_amount": 10 ** (row + 1) * (idx + 1),
+				}
+				for row in range(freight_rows)
+			]
+			for charge in (
+				*freights,
+				{
+					"idx": freight_rows + 1,
+					"charge_type": "On Previous Row Amount",
+					"row_id": "1",
+					"rate": 10,
+					"account_head": "_Test Account Excise Duty - _TC",
+					"description": f"Freight Tax {idx}",
+				},
+			):
+				frappe.get_doc(
+					{
+						"doctype": "Purchase Taxes and Charges",
+						"parent": sco.purchase_order,
+						"parenttype": "Purchase Order",
+						"parentfield": "taxes",
+						"category": "Total",
+						"add_deduct_tax": "Add",
+						"cost_center": cost_center,
+						**charge,
+					}
+				).db_insert()
+			rm_items = get_rm_items(sco.supplied_items)
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name,
+				rm_items=rm_items,
+				itemwise_details=copy.deepcopy(itemwise_details),
+			)
+
+		scr = make_subcontracting_receipt(orders[0].name)
+		return make_subcontracting_receipt(orders[1].name, scr)
+
+	def test_purchase_receipt_keeps_charges_of_every_order(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		scr = self.make_receipt_with_taxed_freight(["Main - _TC", "Main - _TC"])
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(
+			[(t.description, t.tax_amount) for t in pr.taxes], [("Freight 0", 30), ("Freight Tax 0", 3)]
+		)
+
+	def test_purchase_receipt_merges_repeated_charges_by_position(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		scr = self.make_receipt_with_taxed_freight(["Main - _TC", "Main - _TC"], freight_rows=2)
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(
+			[t.tax_amount for t in pr.taxes],
+			[30, 300, 3],
+		)
+
+	def test_receipt_refuses_orders_whose_taxed_freight_cannot_merge(self):
+		scr = self.make_receipt_with_taxed_freight(["Main - _TC", "_Test Cost Center - _TC"])
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def make_receipt_of_two_orders(
+		self, taxes=None, discounts=None, cost_centers=("Main - _TC", "Main - _TC"), currencies=None
+	):
+		"""Subcontracting Receipt of two orders; taxes and discounts are keyed by the order's position."""
+		set_backflush_based_on("BOM")
+		orders = [get_subcontracting_order(), get_subcontracting_order()]
+		for idx, sco in enumerate(orders):
+			for tax_idx, rate in enumerate((taxes or {}).get(idx, []), 1):
+				frappe.get_doc(
+					{
+						"doctype": "Purchase Taxes and Charges",
+						"parent": sco.purchase_order,
+						"parenttype": "Purchase Order",
+						"parentfield": "taxes",
+						"idx": tax_idx,
+						"category": "Total",
+						"add_deduct_tax": "Add",
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Excise Duty - _TC",
+						"cost_center": cost_centers[idx],
+						"description": f"Excise {rate}",
+						"rate": rate,
+					}
+				).db_insert()
+			if currency := (currencies or {}).get(idx):
+				frappe.db.set_value("Purchase Order", sco.purchase_order, "currency", currency)
+			if discount := (discounts or {}).get(idx):
+				frappe.db.set_value(
+					"Purchase Order",
+					sco.purchase_order,
+					{"apply_discount_on": "Net Total", "additional_discount_percentage": discount},
+				)
+			rm_items = get_rm_items(sco.supplied_items)
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name,
+				rm_items=rm_items,
+				itemwise_details=copy.deepcopy(itemwise_details),
+			)
+
+		scr = make_subcontracting_receipt(orders[0].name)
+		return make_subcontracting_receipt(orders[1].name, scr)
+
+	def test_receipt_refuses_orders_with_different_taxes(self):
+		scr = self.make_receipt_of_two_orders(taxes={1: [10]})
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def test_receipt_refuses_orders_with_different_discounts(self):
+		scr = self.make_receipt_of_two_orders(discounts={0: 10})
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def test_receipt_refuses_orders_with_taxes_in_different_cost_centers(self):
+		scr = self.make_receipt_of_two_orders(
+			taxes={0: [10], 1: [10]}, cost_centers=("Main - _TC", "_Test Cost Center - _TC")
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def test_receipt_refuses_orders_in_different_currencies(self):
+		scr = self.make_receipt_of_two_orders(currencies={1: "USD"})
+
+		self.assertRaisesRegex(frappe.ValidationError, "Make one Subcontracting Receipt for each", scr.save)
+
+	def test_purchase_receipt_combines_orders_with_the_same_tax(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		scr = self.make_receipt_of_two_orders(taxes={0: [10], 1: [10]})
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name)
+		self.assertEqual(len({item.purchase_order for item in pr.items}), 2)
+		self.assertEqual([tax.description for tax in pr.taxes], ["Excise 10"])
+
 	def test_subcontracting_receipt_gl_entry_with_different_rm_expense_accounts(self):
 		service_items = [
 			{
@@ -924,9 +1109,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
-
-		scr.reload()
-		scr.cancel()
 
 	def test_supplied_items_consumed_qty(self):
 		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
@@ -1242,6 +1424,99 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
 
+	def test_disabled_raw_material_batch_cannot_be_consumed(self):
+		set_backflush_based_on("BOM")
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BNDS-.####",
+			}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		se = make_stock_entry(item_code=rm_item, qty=1, target="_Test Warehouse 1 - _TC", rate=300)
+		se.reload()
+		rm_batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 1,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.reload()
+
+		bundle_doc = make_serial_batch_bundle(
+			{
+				"item_code": scr.supplied_items[0].rm_item_code,
+				"warehouse": "_Test Warehouse 1 - _TC",
+				"voucher_type": "Subcontracting Receipt",
+				"posting_date": today(),
+				"posting_time": nowtime(),
+				"qty": -1,
+				"batches": frappe._dict({rm_batch_no: 1}),
+				"type_of_transaction": "Outward",
+				"do_not_submit": True,
+			}
+		)
+		scr.supplied_items[0].serial_and_batch_bundle = bundle_doc.name
+		frappe.db.set_value("Batch", rm_batch_no, "disabled", 1)
+
+		self.assertRaises(frappe.ValidationError, scr.submit)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_disabled_batch_of_auto_picked_serial_raw_material_cannot_be_consumed(self):
+		set_backflush_based_on("BOM")
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BNDA-.####",
+				"has_serial_no": 1,
+				"serial_no_series": "SNDA-.####",
+			}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		se = make_stock_entry(item_code=rm_item, qty=1, target="_Test Warehouse 1 - _TC", rate=300)
+		se.reload()
+		rm_batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 1,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.reload()
+		self.assertFalse(scr.supplied_items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", rm_batch_no, "disabled", 1)
+
+		self.assertRaises(frappe.ValidationError, scr.submit)
+
 	def test_subcontracting_receipt_valuation_with_auto_created_serial_batch_bundle(self):
 		set_backflush_based_on("BOM")
 
@@ -1507,6 +1782,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
 		scr1 = make_subcontracting_receipt(sco.name)
+		scr1.items[0].qty = 2
 		scr1.save()
 
 		# Enable `Inspection Required before Purchase` in Item Master
@@ -1526,10 +1802,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		# SCR should be submitted successfully as Quality Inspection is set
 		scr1.submit()
-		scr1.reload()
-		scr1.cancel()
-		qa.reload()
-		qa.cancel()
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
@@ -2109,15 +2381,59 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			frappe.copy_doc(purchase_receipt).insert,
 		)
 
+	def test_purchase_receipt_keeps_purchase_order_currency(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import make_purchase_receipt
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 10,
+				},
+			],
+			is_subcontracted=1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_submit=True,
+		)
+		po.conversion_rate = 80
+		po.save()
+		po.submit()
+
+		sco = get_subcontracting_order(po_name=po.name)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		pr = make_purchase_receipt(scr.name, save=True)
+
+		self.assertEqual(pr.currency, "USD")
+		self.assertEqual(pr.conversion_rate, 80)
+		self.assertEqual(pr.grand_total, 1000)
+		self.assertEqual(pr.base_grand_total, 80000)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2177,11 +2493,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt_with_tax_withholding_row(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2244,11 +2560,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_auto_create_purchase_receipt_with_no_reference_of_po_item(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		fg_item = "Subcontracted Item SA1"
+		fg_item = "Subcontracted Item SA7"
 		service_items = [
 			{
 				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
+				"item_code": "Subcontracted Service Item 7",
 				"qty": 10,
 				"rate": 100,
 				"fg_item": fg_item,
@@ -2640,6 +2956,91 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(batch_no, second_batch_no)
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 300)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_bundle_batch_not_supplied_against_order(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("Material Transferred for Subcontract")
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BNSO-.####",
+			}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		supplied_batch, other_batch = (
+			get_batch_from_bundle(
+				make_stock_entry(item_code=rm_item, qty=5, target="_Test Warehouse - _TC", rate=100)
+				.items[0]
+				.serial_and_batch_bundle
+			)
+			for _ in range(2)
+		)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = [
+			{
+				"name": sco.supplied_items[0].name,
+				"item_code": rm_item,
+				"rm_item_code": rm_item,
+				"item_name": rm_item,
+				"qty": 5,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"stock_uom": "Nos",
+			},
+		]
+		se = frappe.get_doc(make_rm_stock_entry(sco.name, rm_items))
+		se.items[0].subcontracted_item = fg_item
+		se.items[0].s_warehouse = "_Test Warehouse - _TC"
+		se.items[0].t_warehouse = sco.supplier_warehouse
+		se.items[0].use_serial_batch_fields = 1
+		se.items[0].batch_no = supplied_batch
+		se.submit()
+
+		make_stock_entry(
+			item_code=rm_item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target=sco.supplier_warehouse,
+			batch_no=other_batch,
+			use_serial_batch_fields=1,
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		row = scr.supplied_items[0]
+		row.batch_no = None
+		row.serial_and_batch_bundle = make_serial_batch_bundle(
+			{
+				"item_code": rm_item,
+				"warehouse": sco.supplier_warehouse,
+				"voucher_type": "Subcontracting Receipt",
+				"qty": -row.consumed_qty,
+				"batches": frappe._dict({other_batch: row.consumed_qty}),
+				"type_of_transaction": "Outward",
+				"do_not_submit": 1,
+			}
+		).name
+
+		self.assertRaisesRegex(frappe.ValidationError, "has not been supplied", scr.save)
 
 	def test_bom_required_qty_validation_based_on_bom(self):
 		set_backflush_based_on("BOM")
@@ -3093,6 +3494,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				if gle.account == stock_adjustment_account
 			]
 		)
+
+	def test_bom_backflush_return_of_accepted_and_rejected_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "_Test Warehouse 2 - _TC"
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].rejected_qty = -2
+		scr_return.items[0].rejected_warehouse = "_Test Warehouse 2 - _TC"
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual(scr_return.docstatus, 1)
+		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -5)
 
 	def test_return_of_rows_sharing_a_raw_material(self):
 		set_backflush_based_on("BOM")

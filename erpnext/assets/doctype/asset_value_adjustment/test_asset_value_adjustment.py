@@ -527,6 +527,23 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, adjustment.insert)
 
+	def test_adjustment_without_finance_book_is_refused_for_named_finance_books(self):
+		asset = create_asset_for_value_adjustment(finance_book="Test Finance Book 1")
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=100000,
+			date="2023-01-15",
+		)
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset.name, finance_book="Test Finance Book 1", new_asset_value=100000, date="2023-01-15"
+		)
+		adjustment.submit()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)

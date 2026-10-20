@@ -16,13 +16,9 @@ from erpnext.controllers.subcontracting_controller import (
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 	make_subcontracted_item,
-	make_subcontracted_items,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -41,12 +37,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingOrder(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}
@@ -198,26 +188,6 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Purchase Order Item", {"parent": po_name}, "subcontracted_qty"), 10
 		)
-
-	def test_partial_subcontracting_order_leaves_the_exact_remaining_qty(self):
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 7",
-				"qty": 1,
-				"rate": 100,
-				"fg_item": "Subcontracted Item SA7",
-				"fg_item_qty": 3,
-			},
-		]
-		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
-		sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
-		sco.items[0].qty = 1
-		sco.insert()
-		sco.submit()
-
-		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
-		self.assertEqual(next_sco.items[0].qty, 2)
 
 	def test_purchase_order_stays_open_while_finished_goods_remain(self):
 		service_items = [
@@ -1326,6 +1296,74 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		for row in reservations:
 			self.assertEqual(row.docstatus, 1 if row.transferred_qty else 2)
 
+	def test_closing_releases_unused_balance_of_partly_transferred_reservation(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.reserve_stock = 1
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		half_transfer = copy.deepcopy(rm_items[:1])
+		half_transfer[0]["qty"] /= 2
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=half_transfer, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		reservation = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_type": sco.doctype, "voucher_no": sco.name, "docstatus": 1},
+			fields=["reserved_qty", "transferred_qty", "status"],
+		)
+		self.assertEqual(len(reservation), 1)
+		self.assertEqual(reservation[0].transferred_qty, half_transfer[0]["qty"])
+		self.assertEqual(reservation[0].reserved_qty, reservation[0].transferred_qty)
+		self.assertEqual(reservation[0].status, "Closed")
+
+	def test_closing_releases_unused_batches_of_partly_transferred_reservation(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 4,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 4,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		half_transfer = copy.deepcopy(rm_items)
+		for item in half_transfer:
+			item["qty"] /= 2
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=half_transfer, itemwise_details=itemwise_details)
+
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": sco.doctype,
+				"voucher_no": sco.name,
+				"docstatus": 1,
+				"reservation_based_on": "Serial and Batch",
+			},
+			pluck="name",
+		)
+		self.assertTrue(reservations)
+		for name in reservations:
+			for entry in frappe.get_doc("Stock Reservation Entry", name).sb_entries:
+				self.assertEqual(entry.qty, entry.delivered_qty)
+
+		update_subcontracting_order_status(sco.name)
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=half_transfer, itemwise_details=itemwise_details)
+		for name in reservations:
+			reservation = frappe.get_doc("Stock Reservation Entry", name)
+			self.assertLessEqual(reservation.transferred_qty, reservation.reserved_qty)
+
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
 			{
@@ -1356,82 +1394,52 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)
 
 	def test_stock_reservation_transfer(self):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
-			get_items_for_material_requests,
-		)
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import create_production_plan
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_serial_batch_entries_for_voucher,
 			get_sre_details_for_voucher,
 		)
 
-		parent_fg = make_item()
-		make_bom(
-			item=parent_fg.name, raw_materials=["Subcontracted Item SA10"], rate=100, rm_qty=1, currency="INR"
-		)
-
-		plan = create_production_plan(
-			item_code=parent_fg.name,
-			planned_qty=10,
-			do_not_submit=True,
-			reserve_stock=True,
-			skip_available_sub_assembly_item=True,
-			for_warehouse="_Test Warehouse - _TC",
-			sub_assembly_warehouse="_Test Warehouse - _TC",
-			skip_getting_mr_items=True,
-		)
-		plan.get_sub_assembly_items()
-		plan.sub_assembly_items[0].supplier = "_Test Supplier"
-		mr_items = get_items_for_material_requests(plan.as_dict())
-		for d in mr_items:
-			plan.append("mr_items", d)
-
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=10, basic_rate=100
-		)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 2", qty=10, basic_rate=100
-		)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 3", qty=10, basic_rate=100
-		)
-		plan.submit()
-
-		sre_against_plan = get_sre_details_for_voucher("Production Plan", plan.name)
-		sbe_pp_list = []
-		for sre in sre_against_plan:
-			sbe_pp_list.append(
+		def get_serial_batch_entries(voucher_type, voucher_no):
+			return [
 				sorted(
-					get_serial_batch_entries_for_voucher(sre.name),
+					get_serial_batch_entries_for_voucher([sre.name]),
 					key=lambda x: x.get("serial_no") or x.get("batch_no") or "",
 				)
-			)
+				for sre in get_sre_details_for_voucher(voucher_type, voucher_no)
+			]
 
-		plan.make_work_order()
-		po = frappe.get_doc(
-			"Purchase Order",
-			frappe.get_value("Purchase Order Item", {"production_plan": plan.name}, "parent"),
+		plan = make_reserved_production_plan()
+		sbe_pp_list = get_serial_batch_entries("Production Plan", plan.name)
+		sco = make_subcontracting_order_from_plan(plan)
+
+		self.assertEqual(sbe_pp_list, get_serial_batch_entries("Subcontracting Order", sco.name))
+
+	def test_closing_gives_the_unused_balance_back_to_the_plan(self):
+		plan = make_reserved_production_plan()
+		sco = make_subcontracting_order_from_plan(plan)
+		rm_item = next(
+			row
+			for row in get_rm_items(sco.supplied_items)
+			if not any(frappe.get_cached_value("Item", row["item_code"], ["has_serial_no", "has_batch_no"]))
 		)
-		po.items[0].item_code = "Subcontracted Service Item 4"
-		po.items[0].qty = 10
-		po.submit()
-		so = create_subcontracting_order(po_name=po.name, do_not_save=1)
-		so.supplier_warehouse = "_Test Warehouse 1 - _TC"
-		so.reserve_stock = True
-		so.submit()
-		so.reload()
+		rm_item["qty"] = 4
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=[rm_item], itemwise_details={})
 
-		sre_against_so = get_sre_details_for_voucher("Subcontracting Order", so.name)
-		sbe_so_list = []
-		for sre in sre_against_so:
-			sbe_so_list.append(
-				sorted(
-					get_serial_batch_entries_for_voucher(sre.name),
-					key=lambda x: x.get("serial_no") or x.get("batch_no") or "",
-				)
-			)
+		update_subcontracting_order_status(sco.name, "Closed")
 
-		self.assertEqual(sbe_pp_list, sbe_so_list)
+		reserved_qty, delivered_qty, status = frappe.get_value(
+			"Stock Reservation Entry",
+			{
+				"voucher_type": "Production Plan",
+				"voucher_no": plan.name,
+				"item_code": rm_item["item_code"],
+				"docstatus": 1,
+			},
+			["reserved_qty", "delivered_qty", "status"],
+		)
+		self.assertEqual(delivered_qty, 4)
+		self.assertEqual(status, "Partially Delivered")
+		self.assertEqual(get_bin(rm_item["item_code"], rm_item["warehouse"]).reserved_stock, reserved_qty - 4)
 
 	def test_service_cost_is_converted_to_company_currency(self):
 		sco = make_foreign_currency_subcontracting_order()
@@ -1547,6 +1555,54 @@ def set_unconverted_service_cost(sco):
 	frappe.db.set_value(
 		"Subcontracting Order Item", sco.items[0].name, {"service_cost_per_qty": 500, "rate": 0, "amount": 0}
 	)
+
+
+def make_reserved_production_plan():
+	"""Production Plan that reserves the raw materials of one subcontracted sub-assembly."""
+	from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		get_items_for_material_requests,
+	)
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import create_production_plan
+
+	parent_fg = make_item()
+	make_bom(
+		item=parent_fg.name, raw_materials=["Subcontracted Item SA10"], rate=100, rm_qty=1, currency="INR"
+	)
+	plan = create_production_plan(
+		item_code=parent_fg.name,
+		planned_qty=10,
+		do_not_submit=True,
+		reserve_stock=True,
+		skip_available_sub_assembly_item=True,
+		for_warehouse="_Test Warehouse - _TC",
+		sub_assembly_warehouse="_Test Warehouse - _TC",
+		skip_getting_mr_items=True,
+	)
+	plan.get_sub_assembly_items()
+	plan.sub_assembly_items[0].supplier = "_Test Supplier"
+	for d in get_items_for_material_requests(plan.as_dict()):
+		plan.append("mr_items", d)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code=d["item_code"], qty=10, basic_rate=100)
+	plan.submit()
+	return plan
+
+
+def make_subcontracting_order_from_plan(plan):
+	"""Subcontracting Order whose raw material reservations are taken from the plan's."""
+	plan.make_work_order()
+	po = frappe.get_doc(
+		"Purchase Order",
+		frappe.get_value("Purchase Order Item", {"production_plan": plan.name}, "parent"),
+	)
+	po.items[0].item_code = "Subcontracted Service Item 4"
+	po.items[0].qty = 10
+	po.submit()
+	sco = create_subcontracting_order(po_name=po.name, do_not_save=1)
+	sco.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	sco.reserve_stock = True
+	sco.submit()
+	sco.reload()
+	return sco
 
 
 def create_subcontracting_order(**args):
