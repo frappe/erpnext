@@ -1575,6 +1575,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
 			return
 
+		if self.consumes_transferred_materials():
+			return
+
 		raw_materials = self.get_bom_raw_materials(self.fg_completed_qty, split_alternative_items=False)
 
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
@@ -1597,6 +1600,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 					),
 					title=_("Incorrect Component Quantity"),
 				)
+
+	def consumes_transferred_materials(self) -> bool:
+		if self.get_backflush_based_on() != "Material Transferred for Manufacture":
+			return False
+
+		if self.purpose == "Manufacture":
+			return not (self.pro_doc and self.pro_doc.skip_transfer)
+
+		return True
 
 	def _validate_no_excess_transfer(self):
 		if self.is_return:

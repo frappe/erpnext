@@ -33,6 +33,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	validate_bom_no,
 )
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_capacity_planning_days,
 	get_mins_between_operations,
 )
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
@@ -1240,7 +1241,7 @@ class WorkOrder(Document):
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
 
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
-		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
+		plan_days = get_capacity_planning_days()
 
 		for idx, row in enumerate(self.operations):
 			qty = self.qty
