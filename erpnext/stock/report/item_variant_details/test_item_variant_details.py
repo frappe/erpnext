@@ -219,3 +219,34 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		self.assertFalse({"stock_uom", "current_stock", "in_production"} & set(template_row))
 		self.assertEqual({row["stock_uom"] for row in variant_rows}, {template.stock_uom, "_Test UOM 1"})
+
+	def test_item_group_filter_includes_templates_of_descendant_groups(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		parent = frappe.get_doc(
+			{"doctype": "Item Group", "item_group_name": "_Test Variant Parent Group", "is_group": 1}
+		).insert()
+		child = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Variant Child Group",
+				"parent_item_group": parent.name,
+			}
+		).insert()
+		template = make_item(
+			"_Test Variant Colour Item",
+			{"has_variants": 1, "item_group": child.name, "attributes": [{"attribute": "Test Colour"}]},
+		).name
+		variant = create_variant(template, {"Test Colour": "Red"}).insert()
+
+		rows = self.run_report(item_group=[parent.name])
+
+		self.assertEqual(
+			[(row["variant_name"], row["item_group"]) for row in rows],
+			[(template, child.name), (variant.name, child.name)],
+		)
+
+	def test_items_and_item_groups_filters_are_exclusive(self):
+		for filters in ({}, {"item": ["_Test Variant Item"], "item_group": ["Products"]}):
+			with self.subTest(filters=filters):
+				self.assertRaises(frappe.ValidationError, self.run_report, **filters)
