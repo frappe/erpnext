@@ -8058,7 +8058,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.submit_receipt_return(receipt_with_rejected_return, 1, from_rejected_warehouse=True)
 		self.assertEqual(make_purchase_invoice(receipt_with_rejected_return.name).items[0].qty, 8)
 
-	def submit_receipt_return(self, receipt, qty, from_rejected_warehouse=False):
+	def submit_receipt_return(self, receipt, qty, from_rejected_warehouse=False, posting_time=None):
 		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_return,
 			make_purchase_return_against_rejected_warehouse,
@@ -8071,6 +8071,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		receipt_return = make_return(receipt.name)
 		receipt_return.items[0].update({"qty": -qty, "received_qty": -qty, "rejected_qty": 0})
+		if posting_time:
+			receipt_return.update({"set_posting_time": 1, "posting_time": posting_time})
 		receipt_return.insert()
 		frappe.get_doc("Purchase Receipt", receipt_return.name).submit()
 
@@ -8087,7 +8089,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		purchase_order = create_purchase_order(qty=10, rate=100)
 		first, second = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
-		self.submit_receipt_return(first, 2)
+		self.submit_receipt_return(first, 2, posting_time="09:00")
 		make_invoice_against_order(purchase_order.name, qty=8, rate=100)
 
 		self.assertEqual(
@@ -8381,6 +8383,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		purchase_order = self.make_provisional_purchase_order()
 		first = self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00")
 		receipt_return = make_return_doc("Purchase Receipt", first.name)
+		receipt_return.update({"set_posting_time": 1, "posting_time": "09:00"})
 		receipt_return.items[0].update({"qty": -2, "received_qty": -2})
 		receipt_return.submit()
 		second = self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00")
