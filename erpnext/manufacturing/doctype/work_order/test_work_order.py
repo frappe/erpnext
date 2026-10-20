@@ -7885,6 +7885,7 @@ def prepare_boms_for_sub_assembly_test():
 		bom = make_bom(
 			item="Test Final SF Item 1",
 			source_warehouse="Stores - _TC",
+			currency="INR",
 			raw_materials=["Test Final RM Item 1"],
 			operating_cost_per_bom_quantity=100,
 			do_not_submit=True,
@@ -7906,6 +7907,7 @@ def prepare_boms_for_sub_assembly_test():
 		bom = make_bom(
 			item="Test Final SF Item 2",
 			source_warehouse="Stores - _TC",
+			currency="INR",
 			raw_materials=["Test Final RM Item 2"],
 			operating_cost_per_bom_quantity=200,
 			do_not_submit=True,
@@ -7927,6 +7929,7 @@ def prepare_boms_for_sub_assembly_test():
 		bom = make_bom(
 			item="Test Final FG Item",
 			source_warehouse="Stores - _TC",
+			currency="INR",
 			raw_materials=["Test Final SF Item 1", "Test Final SF Item 2"],
 		)
 
