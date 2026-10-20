@@ -1,0 +1,62 @@
+name: Dependency Audit
+
+on:
+  schedule:
+    # Every day at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  # GitHub users or teams to cc on the issue, separated by spaces, e.g. "@user1 @frappe/team"
+  NOTIFY: "@diptanilsaha"
+
+jobs:
+  pip-audit:
+    name: pip-audit (${{ matrix.branch }})
+    runs-on: ubuntu-latest
+    # One audit per branch at a time, so overlapping runs do not create duplicate issues or reminders
+    concurrency:
+      group: dependency-audit-${{ matrix.branch }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - branch: develop
+            python-version: '3.14'
+          - branch: version-16-hotfix
+            python-version: '3.14'
+          - branch: version-15-hotfix
+            python-version: '3.10'
+
+    steps:
+      # The helper comes from the branch this workflow runs on; the audited branch goes to a subdirectory
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/helper
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.branch }}
+          path: target
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run pip-audit
+        id: audit
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/dependency_audit.sh audit target "$RUNNER_TEMP/report.md"
+
+      - name: Create or update issue
+        if: steps.audit.outputs.vulnerable == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ matrix.branch }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/dependency_audit.sh report "$RUNNER_TEMP/report.md"
