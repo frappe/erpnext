@@ -7397,6 +7397,31 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_from_a_copied_work_order_keeps_the_fixed_row(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10},
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		wo.remove(wo.operations[0])
+		wo.operations[0].sequence_id = 1
+		wo.save()
+
+		copy = frappe.copy_doc(wo, ignore_no_copy=False)
+		copy.insert()
+		copy.submit()
+
+		new_bom = frappe.get_doc("Work Order", copy.name).make_bom()
+		self.assertEqual([(row.time_in_mins, cint(row.fixed_time)) for row in new_bom.operations], [(30, 1)])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_create_bom_keeps_fixed_and_batch_operation_times(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
