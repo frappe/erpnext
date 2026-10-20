@@ -1887,15 +1887,98 @@ def get_order_billing_provisional_reversals(invoice) -> dict:
 		return {}
 
 	unreversed_qty = get_unreversed_receipt_qty(receipt_rows, invoice)
+	open_provision = get_open_provision(receipt_rows, invoice)
 	reversals = {}
 	for item in items:
 		rows = receipt_rows.get(item.po_detail, [])
 		if flt(item.qty) < 0:
 			reversals[item.name] = release_receipt_rows(rows, unreversed_qty, -flt(item.qty))
+			open_provision[item.po_detail] = flt(open_provision.get(item.po_detail)) - get_reversal_amount(
+				reversals[item.name]
+			)
 		else:
-			reversals[item.name] = allocate_receipt_rows(rows, unreversed_qty, flt(item.qty))
+			allocations = allocate_receipt_rows(rows, unreversed_qty, flt(item.qty))
+			reversals[item.name] = cap_to_open_provision(allocations, open_provision, item.po_detail)
 
 	return reversals
+
+
+def get_reversal_amount(allocations) -> float:
+	return sum(flt(qty) * flt(row.rate) * flt(row.conversion_rate) for row, qty in allocations)
+
+
+def cap_to_open_provision(allocations, open_provision, po_detail) -> list:
+	left = flt(open_provision.get(po_detail))
+	capped = []
+	for row, qty in allocations:
+		unit_amount = flt(row.rate) * flt(row.conversion_rate)
+		allowed = min(flt(qty), flt(left / unit_amount, 9)) if unit_amount else flt(qty)
+		if allowed > 0:
+			capped.append((row, allowed))
+			left -= allowed * unit_amount
+
+	open_provision[po_detail] = left
+	return capped
+
+
+def get_open_provision(receipt_rows, invoice) -> dict:
+	po_detail_by_row = {row.name: po_detail for po_detail, po_rows in receipt_rows.items() for row in po_rows}
+	po_detail_by_row.update(get_linked_rows_of_provision(po_detail_by_row, invoice))
+
+	gle = frappe.qb.DocType("GL Entry")
+	balances = (
+		frappe.qb.from_(gle)
+		.select(gle.voucher_detail_no, Sum(gle.credit - gle.debit))
+		.where(
+			(gle.voucher_detail_no.isin(list(po_detail_by_row)))
+			& (
+				gle.account.isin(
+					{row.provisional_expense_account for rows in receipt_rows.values() for row in rows}
+				)
+			)
+			& (gle.is_cancelled == 0)
+			& (gle.voucher_no != invoice.name)
+		)
+		.groupby(gle.voucher_detail_no)
+	).run()
+
+	open_provision = {}
+	for voucher_detail_no, balance in balances:
+		po_detail = po_detail_by_row[voucher_detail_no]
+		open_provision[po_detail] = flt(open_provision.get(po_detail)) + flt(balance)
+
+	return open_provision
+
+
+def get_linked_rows_of_provision(po_detail_by_row, invoice) -> dict:
+	linked = {}
+	for row in frappe.get_all(
+		"Purchase Receipt Item",
+		filters={"purchase_receipt_item": ("in", list(po_detail_by_row)), "docstatus": 1},
+		fields=["name", "purchase_receipt_item"],
+	):
+		linked[row.name] = po_detail_by_row[row.purchase_receipt_item]
+
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	invoice_rows = (
+		frappe.qb.from_(pi_item)
+		.join(pi)
+		.on(pi.name == pi_item.parent)
+		.select(pi_item.name, pi_item.pr_detail, pi_item.po_detail)
+		.where(
+			(pi.docstatus == 1)
+			& (pi.name != invoice.name)
+			& (
+				(pi_item.pr_detail.isin(list(po_detail_by_row)))
+				| (pi_item.po_detail.isin(set(po_detail_by_row.values())))
+			)
+		)
+	).run(as_dict=True)
+	for row in invoice_rows:
+		linked[row.name] = po_detail_by_row.get(row.pr_detail) or row.po_detail
+
+	return linked
 
 
 def get_provisional_receipt_rows(company, po_details) -> dict:

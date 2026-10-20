@@ -7309,6 +7309,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
 	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import (
