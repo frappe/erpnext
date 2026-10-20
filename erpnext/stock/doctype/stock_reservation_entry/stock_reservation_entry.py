@@ -1415,8 +1415,8 @@ class StockReservation:
 		return is_sre_created
 
 	def get_voucher_qty(self, item, voucher_detail_no):
-		"""Returns the voucher row's full requirement for a direct reservation."""
-		if item.get("from_voucher_type"):
+		"""Returns the voucher row's full requirement, unless the limit is scoped to the source row."""
+		if item.get("from_voucher_type") in ["Stock Entry", "Production Plan"]:
 			return None
 
 		rows = self.doc.get(self.table_name, {"name": voucher_detail_no})
