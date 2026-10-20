@@ -1809,6 +1809,15 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 		)
 
 
+def get_component_operating_cost(wc, row, consumed_op_cost, total_component_rate):
+	if flt(row.actual_operating_cost) and total_component_rate:
+		cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
+	else:
+		cost = flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0)
+
+	return flt(cost - flt(consumed_op_cost.get("consumed_cost")), row.precision("actual_operating_cost"))
+
+
 def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_account=None, job_card=None):
 	if not work_order:
 		return False
@@ -1835,6 +1844,7 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 		consumed_operating_cost = (
 			get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name) or []
 		)
+		total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
 		for wc in workstation_cost:
 			expense_account = (
 				get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
@@ -1847,10 +1857,8 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 				),
 				{},
 			)
-			actual_cp_operating_cost = flt(
-				flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0)
-				- flt(consumed_op_cost.get("consumed_cost")),
-				row.precision("actual_operating_cost"),
+			actual_cp_operating_cost = get_component_operating_cost(
+				wc, row, consumed_op_cost, total_component_rate
 			)
 
 			remaining_qty = row.completed_qty - consumed_op_cost.get("consumed_qty", 0)
