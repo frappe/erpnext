@@ -16,6 +16,8 @@ frappe.query_reports["Share Balance"] = {
 			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1,
 		},
 		{
 			fieldname: "shareholder",

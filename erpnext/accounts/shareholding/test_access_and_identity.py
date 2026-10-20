@@ -77,7 +77,7 @@ class TestShareholdingAccessAndIdentity(ShareholdingTestCase):
 		try:
 			for report in (positions, balances, ledger):
 				with self.subTest(report=report.__module__):
-					rows = report({"share_class": self.share_class, "date": nowdate()})[1]
+					rows = report({"company": self.company, "share_class": self.share_class, "date": nowdate()})[1]
 					self.assertTrue(rows)
 					self.assertEqual({row.company for row in rows}, {self.company})
 					with self.assertRaises(frappe.PermissionError):

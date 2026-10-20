@@ -122,11 +122,16 @@ class TestShareholdingSecurity(ShareholdingTestCase):
 				positions({"company": other})
 			with self.assertRaises(frappe.PermissionError):
 				ledger({"company": other})
-			_data = positions({"as_of_date": nowdate()})[1]
+			_data = positions({"company": self.company, "as_of_date": nowdate()})[1]
 			self.assertTrue(_data)
 			self.assertTrue(all(row.company == self.company for row in _data))
 		finally:
 			frappe.set_user(original_user)
+
+	def test_reports_require_company(self):
+		for report in (positions, ledger):
+			with self.assertRaisesRegex(frappe.ValidationError, "Company"):
+				report({})
 
 	def test_report_rejects_filter_operators_in_link_fields(self):
 		with self.assertRaisesRegex(frappe.ValidationError, "document name"):

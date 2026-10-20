@@ -7,11 +7,12 @@ from frappe.query_builder.functions import Max, NullIf, Sum
 from frappe.utils import cint, nowdate
 from pypika.terms import Case
 
-from erpnext.accounts.shareholding.report_permissions import apply_report_filters
+from erpnext.accounts.shareholding.report_permissions import apply_report_filters, require_company
 
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+	require_company(filters)
 	filters.as_of_date = filters.as_of_date or nowdate()
 	return get_columns(), get_data(filters)
 
@@ -19,11 +20,11 @@ def execute(filters=None):
 def get_columns():
 	return [
 		{
-			"fieldname": "company",
-			"label": _("Company"),
+			"fieldname": "shareholder",
+			"label": _("Shareholder"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"width": 150,
+			"options": "Shareholder",
+			"width": 160,
 		},
 		{
 			"fieldname": "share_class",
@@ -32,22 +33,8 @@ def get_columns():
 			"options": "Share Class",
 			"width": 140,
 		},
-		{
-			"fieldname": "share_folio",
-			"label": _("Share Folio"),
-			"fieldtype": "Link",
-			"options": "Share Folio",
-			"width": 130,
-		},
-		{"fieldname": "folio_number", "label": _("Folio Number"), "fieldtype": "Data", "width": 120},
-		{
-			"fieldname": "shareholder",
-			"label": _("Shareholder"),
-			"fieldtype": "Link",
-			"options": "Shareholder",
-			"width": 150,
-		},
 		{"fieldname": "holding_type", "label": _("Holding Type"), "fieldtype": "Data", "width": 105},
+		{"fieldname": "folio_number", "label": _("Folio Number"), "fieldtype": "Data", "width": 120},
 		{"fieldname": "quantity", "label": _("Current Shares"), "fieldtype": "Int", "width": 115},
 		{
 			"fieldname": "face_value_per_share",
@@ -69,13 +56,6 @@ def get_columns():
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120,
-		},
-		{
-			"fieldname": "currency",
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"width": 85,
 		},
 	]
 
@@ -125,6 +105,6 @@ def get_data(filters, *, ignore_company_permissions=False):
 	)
 	if not cint(filters.get("include_zero_positions")):
 		query = query.having(quantity != 0)
-	return query.orderby(entry.company, entry.share_class, folio.is_treasury, folio.folio_number).run(
+	return query.orderby(folio.is_treasury, folio.shareholder, entry.share_class, folio.folio_number).run(
 		as_dict=True
 	)

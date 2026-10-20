@@ -7,10 +7,12 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.report.equity_position.equity_position import get_columns, get_data
+from erpnext.accounts.shareholding.report_permissions import require_company
 
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+	require_company(filters)
 	if not filters.get("date"):
 		frappe.throw(_("Please select date"))
 	filters.as_of_date = filters.date
