@@ -48,8 +48,3 @@ payroll:
 
 projects:
 - erpnext/projects/*
-
-# Any python files modifed but no test files modified
-needs-tests:
-- any: ['erpnext/**/*.py']
-  all: ['!erpnext/**/test*.py']

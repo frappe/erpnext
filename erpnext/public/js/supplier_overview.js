@@ -124,17 +124,17 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			title: __("Purchases vs Payments"),
 			subtitle: __("Invoiced and paid each month"),
 			right: this.report_link(__("Purchase Analytics"), () => this.open_analytics()),
-			type: "bar",
-			height: 280,
-			colors: ["--co-series-1", "--co-series-2"],
 			notes,
-			data: t?.points.some((p) => flt(p.purchased) || flt(p.paid)) && {
-				labels: t.points.map((p) => p.label),
-				titles: t.points.map((p) => p.title),
-				datasets: [
-					{ name: __("Purchased"), values: t.points.map((p) => flt(p.purchased)) },
-					{ name: __("Paid"), values: t.points.map((p) => flt(p.paid)) },
-				],
+			chart: t?.points.some((p) => flt(p.purchased) || flt(p.paid)) && {
+				type: "bar",
+				height: 280,
+				data: t.points,
+				x: "month",
+				y: ["purchased", "paid"],
+				seriesConfig: {
+					purchased: { label: __("Purchased") },
+					paid: { label: __("Paid") },
+				},
 			},
 		};
 	}
@@ -184,14 +184,15 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			$panel.remove();
 			return null;
 		}
-		this.draw_donut($panel, {
-			segments: [
-				{ label: __("On time"), value: d.on_time, color: "var(--green-600)" },
-				{ label: __("Received late"), value: d.late, color: "var(--blue-400)" },
-				{ label: __("Overdue"), value: d.overdue, color: "var(--blue-600)" },
+		this.draw_donut(
+			$panel,
+			[
+				{ label: __("On time"), value: d.on_time, color: "var(--chart-categorical-3)" },
+				{ label: __("Received late"), value: d.late, color: "var(--chart-categorical-2)" },
+				{ label: __("Overdue"), value: d.overdue, color: "var(--chart-categorical-1)" },
 			],
-			center: { value: d.lines, label: d.lines === 1 ? __("delivery") : __("deliveries") },
-		});
+			{ centerLabel: d.lines === 1 ? __("delivery") : __("deliveries"), fieldtype: "Int" }
+		);
 		return $panel;
 	}
 

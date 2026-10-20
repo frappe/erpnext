@@ -305,9 +305,6 @@ class BOM(WebsiteGenerator):
 		self._validate_materials_and_cost()
 		self._validate_uoms_and_goods()
 
-		if self.docstatus == 1:
-			self.validate_raw_materials_of_operation()
-
 	def _validate_setup(self):
 		self.clear_operations()
 		self.clear_inspection()
@@ -350,49 +347,85 @@ class BOM(WebsiteGenerator):
 			return
 
 		for row in self.operations:
+			if row.bom_no and not row.finished_good:
+				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
+
+		self.set_default_last_step()
+
+		for row in self.operations:
 			if row.is_final_finished_good and not row.finished_good:
 				row.finished_good = self.item
-			elif row.bom_no and not row.finished_good:
-				row.finished_good = frappe.get_cached_value("BOM", row.bom_no, "item")
+
+	def set_default_last_step(self):
+		if not self.operations or any(row.is_final_finished_good for row in self.operations):
+			return
+
+		makes_bom_item = [row for row in self.operations if row.finished_good == self.item]
+		if len(makes_bom_item) == 1:
+			makes_bom_item[0].is_final_finished_good = 1
+		elif not makes_bom_item and not self.operations[-1].finished_good:
+			self.operations[-1].is_final_finished_good = 1
 
 	def validate_semi_finished_goods(self):
 		if not self.track_semi_finished_goods or not self.operations:
 			return
 
-		fg_items = []
+		problems = self.get_output_item_problems() + self.get_last_step_problems()
+		if self.docstatus == 1:
+			problems.extend(self.get_raw_material_problems())
+
+		if problems:
+			frappe.throw(problems, title=_("Fix These Steps"), as_list=True)
+
+	def get_step_label(self, row):
+		return _("Step {0} ({1})").format(row.idx, bold(row.operation))
+
+	def get_output_item_problems(self):
+		problems = []
 		for row in self.operations:
 			if not row.finished_good:
-				frappe.throw(
-					_(
-						"Row #{0}: FG / Semi FG Item is required for the operation {1} as 'Track Semi Finished Goods' is enabled."
-					).format(row.idx, bold(row.operation)),
+				problems.append(
+					_("{0}: choose the Output Item, that is the item this step makes.").format(
+						self.get_step_label(row)
+					)
+				)
+			elif row.is_final_finished_good and row.finished_good != self.item:
+				problems.append(
+					_("{0}: this is the Last Step, so its Output Item must be {1}.").format(
+						self.get_step_label(row), bold(self.item)
+					)
 				)
 
-			if not row.is_final_finished_good:
-				continue
+		return problems
 
-			if row.finished_good != self.item:
-				frappe.throw(
-					_(
-						"Row #{0}: The operation {1} has 'Is Final Finished Good' checked, so its FG / Semi FG Item must be {2}."
-					).format(row.idx, bold(row.operation), bold(self.item)),
+	def get_last_step_problems(self):
+		last_steps = [row for row in self.operations if row.is_final_finished_good]
+		if not last_steps:
+			return [
+				_("Tick Last Step on the step that makes {0}. Its Output Item must be {0}.").format(
+					bold(self.item)
 				)
+			]
 
-			fg_items.append(row.finished_good)
+		if len(last_steps) > 1:
+			return [
+				_("Only one step can be the Last Step, but it is ticked on steps {0}.").format(
+					", ".join(str(row.idx) for row in last_steps)
+				)
+			]
 
-		if not fg_items:
-			frappe.throw(
-				_(
-					"Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-				).format(bold(self.item)),
-			)
+		return []
 
-		if fg_items and len(fg_items) > 1:
-			frappe.throw(
-				_(
-					"Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-				),
-			)
+	def get_raw_material_problems(self):
+		steps_with_materials = {cint(row.operation_row_id) for row in self.items if row.operation_row_id}
+
+		return [
+			_(
+				"{0}: has no raw materials. Choose an Output Item BOM, or open the step and click Add Raw Materials."
+			).format(self.get_step_label(row))
+			for row in self.operations
+			if not row.bom_no and row.idx not in steps_with_materials
+		]
 
 	def validate_batch_split_operations(self):
 		for row in self.operations:
@@ -402,7 +435,7 @@ class BOM(WebsiteGenerator):
 			if not self.track_semi_finished_goods:
 				frappe.throw(
 					_(
-						"Row #{0}: Batch Split is only supported when 'Track Semi Finished Goods' is enabled."
+						"Row #{0}: Batch Split is only supported when 'Produce an Item at Each Operation' is enabled."
 					).format(row.idx)
 				)
 
@@ -451,28 +484,6 @@ class BOM(WebsiteGenerator):
 						item.idx, item.secondary_item_type, get_link_to_form("Item", item.item_code)
 					)
 				)
-
-	def validate_raw_materials_of_operation(self):
-		if not self.track_semi_finished_goods or not self.operations:
-			return
-
-		operation_idx_with_no_rm = {}
-		for row in self.operations:
-			if row.bom_no:
-				continue
-
-			operation_idx_with_no_rm[row.idx] = row
-
-		for row in self.items:
-			if row.operation_row_id and row.operation_row_id in operation_idx_with_no_rm:
-				del operation_idx_with_no_rm[row.operation_row_id]
-
-		for idx, row in operation_idx_with_no_rm.items():
-			frappe.throw(
-				_("For operation {0} at row {1}, please add raw materials or set a BOM against it.").format(
-					bold(row.operation), idx
-				),
-			)
 
 	def set_default_uom(self):
 		if not self.get("items"):
@@ -775,7 +786,7 @@ class BOM(WebsiteGenerator):
 		if self.track_semi_finished_goods:
 			frappe.throw(
 				_(
-					"'Set Component Quantities Based On Percentage' cannot be used together with 'Track Semi Finished Goods', as the component rows are derived from the operation BOMs."
+					"'Set Component Quantities Based On Percentage' cannot be used together with 'Produce an Item at Each Operation', as the component rows are derived from the operation BOMs."
 				),
 				title=_("Invalid Formulation"),
 			)
@@ -978,7 +989,27 @@ class BOM(WebsiteGenerator):
 
 		for row in self.get("operations"):
 			if row.bom_no and row.finished_good:
-				self.add_materials_from_bom(row.finished_good, row.bom_no, row.idx, qty=row.finished_good_qty)
+				self.add_materials_from_bom(
+					row.finished_good,
+					row.bom_no,
+					row.idx,
+					qty=row.finished_good_qty,
+					replace=self.operation_bom_changed(row),
+				)
+
+	def operation_bom_changed(self, row):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return False
+
+		old_row = next((d for d in doc_before_save.operations if d.name == row.name), None)
+		if not old_row or old_row.bom_no == row.bom_no:
+			return False
+
+		return get_step_material_names(doc_before_save, old_row.idx) == get_step_material_names(self, row.idx)
+
+	def remove_operation_materials(self, operation_row_id):
+		self.set("items", [row for row in self.items if cint(row.operation_row_id) != cint(operation_row_id)])
 
 	@frappe.whitelist()
 	def add_raw_materials(self, operation_row_id: int, items: str | list):
@@ -1025,10 +1056,18 @@ class BOM(WebsiteGenerator):
 
 	@frappe.whitelist()
 	def add_materials_from_bom(
-		self, finished_good: str, bom_no: str, operation_row_id: int, qty: float | None = None
+		self,
+		finished_good: str,
+		bom_no: str,
+		operation_row_id: int,
+		qty: float | None = None,
+		replace: bool = False,
 	):
 		if not frappe.db.exists("BOM", {"item": finished_good, "name": bom_no, "docstatus": 1}):
 			frappe.throw(_("BOM {0} not found for the item {1}").format(bom_no, finished_good))
+
+		if replace:
+			self.remove_operation_materials(operation_row_id)
 
 		if self.items and not self.items[0].item_code:
 			self.set("items", [])
@@ -1403,6 +1442,10 @@ def _get_last_valuation_rate_from_sle(item_code):
 def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
+
+
+def get_step_material_names(bom, operation_row_id):
+	return {row.name for row in bom.items if cint(row.operation_row_id) == cint(operation_row_id)}
 
 
 def get_bom_items_as_dict(

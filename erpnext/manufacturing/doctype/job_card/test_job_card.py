@@ -317,6 +317,28 @@ class TestJobCard(ERPNextTestSuite):
 		jc2.save()
 		self.assertTrue(jc2.name)
 
+	def test_workstation_status_after_material_transfer_and_start(self):
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+		self.generate_required_stock(self.work_order)
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		job_card.workstation = make_jc_review_workstation()
+		job_card.save()
+
+		transfer = make_stock_entry_from_jc(job_card.name)
+		transfer.insert()
+		transfer.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.status, "Material Transferred")
+		self.assertEqual(frappe.db.get_value("Workstation", job_card.workstation, "status"), "Off")
+
+		job_card.start_timer(start_time=now())
+
+		job_card.reload()
+		self.assertEqual(job_card.status, "Work In Progress")
+		self.assertEqual(frappe.db.get_value("Workstation", job_card.workstation, "status"), "Production")
+
 	def test_job_card_multiple_materials_transfer(self):
 		"Test transferring RMs separately against Job Card with multiple RMs."
 		self.transfer_material_against = "Job Card"
@@ -3827,7 +3849,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		job_card.reload()
 		job_card.append("time_logs", jc_review_log("2031-03-07 08:00:00", 60, 10))
-		self.assertRaisesRegex(frappe.ValidationError, "Materials need to be transferred", job_card.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "Move the raw materials", job_card.submit)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_repeated_operation_gets_only_its_own_materials(self):
@@ -4409,6 +4431,59 @@ class TestJobCardLogic(ERPNextTestSuite):
 		jc.finished_good = None
 		jc.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, jc.validate_transfer_qty)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_material_shortages_list_only_short_raw_materials(self):
+		job_card, _first_item, second_item = make_jc_review_shortage_job_card()
+
+		shortages = job_card.get_material_shortages()
+
+		self.assertEqual(len(shortages), 1)
+		self.assertEqual(shortages[0]["item_code"], second_item)
+		self.assertEqual(shortages[0]["qty_to_move"], 30)
+		self.assertEqual(shortages[0]["available_qty"], 10)
+		self.assertEqual(shortages[0]["shortage_qty"], 20)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_material_request_for_shortage_asks_only_missing_qty(self):
+		job_card, _first_item, second_item = make_jc_review_shortage_job_card()
+
+		frappe.flags.args = frappe._dict(only_shortage=1)
+		self.addCleanup(setattr, frappe.flags, "args", None)
+		material_request = make_material_request(job_card.name)
+
+		self.assertEqual([(row.item_code, row.qty) for row in material_request.items], [(second_item, 20)])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_submit_without_moving_materials_lists_what_is_left(self):
+		job_card, first_item, second_item = make_jc_review_shortage_job_card()
+		job_card.append("time_logs", jc_review_log("2031-03-08 08:00:00", 60, 10))
+
+		with self.assertRaises(frappe.ValidationError) as error:
+			job_card.submit()
+
+		self.assertIn("Move the raw materials", str(error.exception))
+		self.assertIn(first_item, str(error.exception))
+		self.assertIn(second_item, str(error.exception))
+
+
+def make_jc_review_shortage_job_card():
+	workstation = make_jc_review_workstation()
+	operation = make_jc_review_operation(workstation)
+	first_item, second_item = make_jc_review_item(), make_jc_review_item()
+	make_stock_entry(item_code=first_item, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+	make_stock_entry(item_code=second_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+	wo = make_jc_review_work_order(
+		make_jc_review_item(),
+		[
+			{"item_code": first_item, "qty": 2, "operation": operation},
+			{"item_code": second_item, "qty": 3, "operation": operation},
+		],
+		[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+		transfer_material_against="Job Card",
+	)
+	return get_jc_review_job_cards(wo.name)[0], first_item, second_item
 
 
 def make_jc_review_item(**properties):

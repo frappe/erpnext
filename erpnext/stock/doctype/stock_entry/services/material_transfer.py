@@ -267,11 +267,34 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate(self):
 		self.validate_warehouse()
+		self.validate_job_card_for_semi_finished_goods()
 		self.validate_work_order_status_for_return()
 		self.validate_returned_qty_within_work_order()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
+
+	def validate_job_card_for_semi_finished_goods(self):
+		"""Semi-finished goods move per operation: through its Job Card, or its Subcontracting Order
+		when subcontracted."""
+		if self.doc.is_return or not (self.wo_doc and self.wo_doc.track_semi_finished_goods):
+			return
+
+		if not self.doc.job_card:
+			frappe.throw(
+				_("Transfer materials for Work Order {0} from its Job Cards.").format(
+					get_link_to_form("Work Order", self.wo_doc.name)
+				),
+				title=_("Job Card Required"),
+			)
+
+		if frappe.db.get_value("Job Card", self.doc.job_card, "is_subcontracted"):
+			frappe.throw(
+				_("Send materials for Job Card {0} to the supplier from its Subcontracting Order.").format(
+					get_link_to_form("Job Card", self.doc.job_card)
+				),
+				title=_("Subcontracted Job Card"),
+			)
 
 	def validate_work_order_status_for_return(self):
 		if not (self.doc.is_return and self.wo_doc) or self.wo_doc.status in ("Completed", "Closed"):
@@ -472,14 +495,10 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		return item_dict
 
 	def _is_row_of_job_card_operation(self, row):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import is_row_of_operation
+
 		operation = self.job_card_operation
-		if not operation:
-			return True
-
-		if cint(row.operation_row_id) and cint(operation.operation_row_id):
-			return cint(row.operation_row_id) == cint(operation.operation_row_id)
-
-		return not row.operation or row.operation == operation.operation
+		return not operation or is_row_of_operation(row, operation)
 
 	def _resolve_wip_warehouse(self, work_order):
 		if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
