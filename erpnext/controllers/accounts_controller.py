@@ -4328,6 +4328,13 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 def validate_child_on_delete(row, parent, ordered_item=None):
 	"""Check if partially transacted item (row) is being deleted."""
 	if parent.doctype == "Sales Order":
+		if flt(parent.per_picked) and flt(row.stock_reserved_qty):
+			frappe.throw(
+				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
+					row.idx, frappe.bold(row.item_code)
+				),
+				title=_("Stock Reserved"),
+			)
 		if flt(row.delivered_qty):
 			frappe.throw(
 				_("Row #{0}: Cannot delete item {1} which has already been delivered").format(
@@ -4528,6 +4535,21 @@ def update_child_qty_rate(
 					title=_("Invalid Qty"),
 				)
 
+		if parent_doctype == "Sales Order" and flt(parent.per_picked) and flt(child_item.stock_reserved_qty):
+			new_stock_qty = flt(new_data.get("qty")) * (
+				flt(new_data.get("conversion_factor")) or flt(child_item.conversion_factor)
+			)
+			min_stock_qty = flt(child_item.delivered_qty) * flt(child_item.conversion_factor) + flt(
+				child_item.stock_reserved_qty
+			)
+			if flt(new_stock_qty - min_stock_qty, child_item.precision("stock_qty")) < 0:
+				frappe.throw(
+					_(
+						"Row #{0}: Cannot set quantity less than delivered and reserved quantity. Unreserve stock before reducing the quantity."
+					).format(new_data.get("idx") or child_item.idx),
+					title=_("Invalid Qty"),
+				)
+
 		if parent_doctype in ["Quotation", "Supplier Quotation"]:
 			if (parent_doctype == "Quotation" and not ordered_items) or (
 				parent_doctype == "Supplier Quotation" and not purchased_items
@@ -4552,21 +4574,31 @@ def update_child_qty_rate(
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
 	def validate_uom_unchanged_after_fulfilment(child_item, new_data):
+		uom_changed = new_data.get("uom") not in (None, child_item.uom)
+		factor_changed = flt(new_data.get("conversion_factor")) not in (0, flt(child_item.conversion_factor))
+		if not uom_changed and not factor_changed:
+			return
+
+		if parent_doctype == "Sales Order" and flt(parent.per_picked) and flt(child_item.stock_reserved_qty):
+			frappe.throw(
+				_(
+					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
+				).format(new_data.get("idx") or child_item.idx, frappe.bold(child_item.item_code)),
+				title=_("Stock Reserved"),
+			)
+
 		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
 			parent_doctype
 		)
 		if not fulfilled_qty_field or not flt(child_item.get(fulfilled_qty_field)):
 			return
 
-		uom_changed = new_data.get("uom") not in (None, child_item.uom)
-		factor_changed = flt(new_data.get("conversion_factor")) not in (0, flt(child_item.conversion_factor))
-		if uom_changed or factor_changed:
-			frappe.throw(
-				_(
-					"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
-				).format(child_item.idx, frappe.bold(child_item.item_code)),
-				title=_("Invalid UOM"),
-			)
+		frappe.throw(
+			_(
+				"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
+			).format(new_data.get("idx") or child_item.idx, frappe.bold(child_item.item_code)),
+			title=_("Invalid UOM"),
+		)
 
 	def should_update_supplied_items(doc) -> bool:
 		"""Subcontracted PO can allow following changes *after submit*:
@@ -4883,11 +4915,9 @@ def update_child_qty_rate(
 			has_reserved_stock,
 		)
 
-		if has_reserved_stock(parent.doctype, parent.name):
+		if parent.per_picked == 0 and has_reserved_stock(parent.doctype, parent.name):
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
-
-			if parent.per_picked == 0:
-				parent._create_stock_reservation_entries()
+			parent._create_stock_reservation_entries()
 
 
 def check_if_child_table_updated(child_table_before_update, child_table_after_update, fields_to_check):
