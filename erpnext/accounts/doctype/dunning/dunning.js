@@ -161,8 +161,16 @@ frappe.ui.form.on("Dunning", {
 	company_address: function (frm) {
 		erpnext.utils.get_address_display(frm, "company_address");
 	},
-	dunning_type: function (frm) {
-		frm.trigger("get_dunning_letter_text");
+	dunning_type: async function (frm) {
+		if (frm.doc.dunning_type && flt(frm.doc.conversion_rate) > 0) {
+			const { message } = await frappe.db.get_value(
+				"Dunning Type",
+				frm.doc.dunning_type,
+				"dunning_fee"
+			);
+			await frm.set_value("dunning_fee", flt(message.dunning_fee) / frm.doc.conversion_rate);
+		}
+		return frm.trigger("get_dunning_letter_text");
 	},
 	language: function (frm) {
 		frm.trigger("get_dunning_letter_text");
