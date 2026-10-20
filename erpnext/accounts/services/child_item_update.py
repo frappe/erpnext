@@ -356,11 +356,7 @@ class ChildItemUpdater:
 		if not uom_changed and change_state.conversion_factor_unchanged:
 			return
 
-		if (
-			self.parent_doctype == "Sales Order"
-			and flt(self.parent.per_picked)
-			and flt(child_item.get("stock_reserved_qty"))
-		):
+		if self.parent_doctype == "Sales Order" and has_kept_reservation(self.parent, child_item):
 			frappe.throw(
 				_(
 					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
@@ -407,17 +403,8 @@ class ChildItemUpdater:
 					title=_("Invalid Qty"),
 				)
 
-			if (
-				self.parent_doctype == "Sales Order"
-				and flt(self.parent.per_picked)
-				and new_stock_qty < old_stock_qty + flt(child_item.get("stock_reserved_qty"))
-			):
-				frappe.throw(
-					_(
-						"Row #{0}: Cannot set quantity less than delivered and reserved quantity. Unreserve stock before reducing the quantity."
-					).format(new_data.get("idx") or child_item.idx),
-					title=_("Invalid Qty"),
-				)
+			if self.parent_doctype == "Sales Order" and has_kept_reservation(self.parent, child_item):
+				self._validate_qty_covers_reservation(child_item, new_data, new_stock_qty, old_stock_qty)
 
 		if not self._transacted_stock_qty:
 			return
@@ -435,6 +422,20 @@ class ChildItemUpdater:
 
 		if new_stock_qty < old_stock_qty:
 			frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
+
+	def _validate_qty_covers_reservation(
+		self, child_item, new_data: dict, new_stock_qty: float, delivered_stock_qty: float
+	) -> None:
+		reserved_qty = flt(child_item.get("stock_reserved_qty"))
+		# Packed Items reserve in component units, so a reserved bundle keeps its qty.
+		min_stock_qty = delivered_stock_qty + reserved_qty if reserved_qty else flt(child_item.stock_qty)
+		if flt(new_stock_qty - min_stock_qty, child_item.precision("stock_qty")) < 0:
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot set quantity less than delivered and reserved quantity. Unreserve stock before reducing the quantity."
+				).format(new_data.get("idx") or child_item.idx),
+				title=_("Invalid Qty"),
+			)
 
 	def _validate_fg_item_for_subcontracting(self, new_data: dict, is_new: bool) -> None:
 		if is_new:
@@ -535,10 +536,33 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 	return False
 
 
+def has_kept_reservation(parent, row) -> bool:
+	"""Whether stock stays reserved for a picked Sales Order row, directly or through its Packed Items."""
+	if not flt(parent.per_picked):
+		return False
+
+	if flt(row.stock_reserved_qty):
+		return True
+
+	packed_items = [d.name for d in parent.get("packed_items") if d.parent_detail_docname == row.name]
+	return bool(packed_items) and bool(
+		frappe.db.exists(
+			"Stock Reservation Entry",
+			{
+				"docstatus": 1,
+				"voucher_type": parent.doctype,
+				"voucher_no": parent.name,
+				"voucher_detail_no": ["in", packed_items],
+				"status": ["not in", ["Delivered", "Closed"]],
+			},
+		)
+	)
+
+
 def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 	"""Raise if a partially transacted child item is being deleted."""
 	if parent.doctype == "Sales Order":
-		if flt(parent.per_picked) and flt(row.stock_reserved_qty):
+		if has_kept_reservation(parent, row):
 			frappe.throw(
 				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
 					row.idx, frappe.bold(row.item_code)
