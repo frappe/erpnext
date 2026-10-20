@@ -107,7 +107,7 @@
    "options": "send_sms"
   }
  ],
- "icon": "fa fa-mobile-phone",
+ "icon": "message-square",
  "idx": 1,
  "issingle": 1,
  "links": [],

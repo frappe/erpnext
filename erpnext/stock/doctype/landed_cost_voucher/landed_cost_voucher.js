@@ -10,7 +10,7 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 			<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<h4>
-						<i class="fa fa-hand-right"></i>
+						<svg class="icon icon-sm"><use href="#icon-info"></use></svg>
 						${__("Notes")}:
 					</h4>
 					<ul>
@@ -73,32 +73,60 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 	}
 
 	set_applicable_charges_for_item() {
-		var me = this;
-
 		if (this.frm.doc.taxes.length) {
 			var total_item_cost = 0.0;
 			var based_on = this.frm.doc.distribute_charges_based_on.toLowerCase();
 
 			if (based_on != "distribute manually") {
-				$.each(this.frm.doc.items || [], function (i, d) {
-					total_item_cost += flt(d[based_on]);
+				var items = this.frm.doc.items || [];
+				items.forEach((item) => {
+					total_item_cost += flt(item[based_on]);
 				});
 
+				if (items.length) {
+					total_item_cost = flt(total_item_cost, precision(based_on, items[0]));
+				}
+
+				if (!total_item_cost) {
+					items.forEach((item) => {
+						item.applicable_charges = 0;
+					});
+					refresh_field("items");
+					if (items.length) {
+						frappe.show_alert({
+							message: __(
+								"Total {0} of all items is zero, charges cannot be distributed on it.",
+								[this.frm.doc.distribute_charges_based_on]
+							),
+							indicator: "red",
+						});
+					}
+					return;
+				}
+
 				var total_charges = 0.0;
-				$.each(this.frm.doc.items || [], function (i, item) {
-					item.applicable_charges =
-						(flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges)) /
-						flt(total_item_cost);
+				items.forEach((item) => {
 					item.applicable_charges = flt(
-						item.applicable_charges,
+						(flt(item[based_on]) * flt(this.frm.doc.total_taxes_and_charges)) /
+							flt(total_item_cost),
 						precision("applicable_charges", item)
 					);
 					total_charges += item.applicable_charges;
 				});
 
-				if (total_charges != this.frm.doc.total_taxes_and_charges) {
-					var diff = this.frm.doc.total_taxes_and_charges - flt(total_charges);
-					this.frm.doc.items.slice(-1)[0].applicable_charges += diff;
+				var charge_precision = precision("applicable_charges", items[0]);
+				var total = flt(this.frm.doc.total_taxes_and_charges);
+				var sign = total < 0 ? -1 : 1;
+				var diff = flt(total - total_charges, charge_precision);
+				for (const item of items.slice().reverse()) {
+					if (!diff) break;
+					var share = flt(item.applicable_charges) * sign;
+					var adjustment = diff * sign > 0 ? diff : sign * Math.max(diff * sign, -share);
+					item.applicable_charges = flt(
+						flt(item.applicable_charges) + adjustment,
+						charge_precision
+					);
+					diff = flt(diff - adjustment, charge_precision);
 				}
 				refresh_field("items");
 			}

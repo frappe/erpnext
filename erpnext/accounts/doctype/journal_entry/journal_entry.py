@@ -32,7 +32,7 @@ from erpnext.accounts.utils import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 )
-from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.accounts_controller import AccountsController, validate_account_head
 from erpnext.setup.utils import get_exchange_rate as _get_exchange_rate
 
 
@@ -137,7 +137,9 @@ class JournalEntry(AccountsController):
 
 		self.clearance_date = None
 
+		self.validate_account_company()
 		self.validate_party()
+		self.ensure_supplier_is_not_blocked()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
@@ -164,6 +166,14 @@ class JournalEntry(AccountsController):
 
 		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
+
+	def validate_account_company(self):
+		"""Catch an account/Company mismatch on save, before GL Entry has to reject it on submit."""
+		if not self.company:
+			return
+		for d in self.get("accounts"):
+			if d.account:
+				validate_account_head(d.idx, d.account, self.company, _("Journal Entry"))
 
 	def validate_advance_accounts(self):
 		journal_accounts = set([x.account for x in self.accounts])
@@ -193,7 +203,7 @@ class JournalEntry(AccountsController):
 		self.has_asset_adjustment_entry()
 
 	def cancel(self):
-		if len(self.accounts) > 100:
+		if len(self.accounts) > 100 and not self.meta.queue_in_background:
 			queue_submission(self, "_cancel")
 		else:
 			return self._cancel()
@@ -1356,6 +1366,10 @@ def get_default_bank_cash_account(
 ):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
+	# `select`, not `read`: this also runs server-side from get_payment_entry, and Auditor/HR User/Desk
+	# User hold only the select row on Company. doc= brings User Permissions to bear.
+	frappe.has_permission("Company", ptype="select", doc=company, throw=True)
+
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
 
@@ -1384,6 +1398,10 @@ def get_default_bank_cash_account(
 					account = account_list[0].name
 
 	if account:
+		# `fetch_balance` is caller supplied, so authorise the account here rather than relying on
+		# get_balance_on(), which only checks on the branch that reads a balance.
+		frappe.has_permission("Account", doc=account, throw=True)
+
 		account_details = frappe.get_cached_value(
 			"Account", account, ["account_currency", "account_type"], as_dict=1
 		)
@@ -1568,30 +1586,39 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if not frappe.db.has_column("Journal Entry", searchfield):
 		return []
 
-	JournalEntry = frappe.qb.DocType("Journal Entry")
-	JournalEntryAccount = frappe.qb.DocType("Journal Entry Account")
+	account = filters.get("account")
+	party = filters.get("party")
 
-	query = (
-		frappe.qb.from_(JournalEntry)
-		.join(JournalEntryAccount)
-		.on(JournalEntryAccount.parent == JournalEntry.name)
-		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.remark)
-		.where(JournalEntryAccount.account == filters.get("account"))
-		.where(JournalEntryAccount.reference_type.isnull() | (JournalEntryAccount.reference_type == ""))
-		.where(JournalEntry.docstatus == 1)
-		.where(JournalEntry[searchfield].like(f"%{txt}%"))
-		.orderby(JournalEntry.name, order=frappe.qb.desc)
-		.limit(page_len)
-		.offset(start)
+	# each names one value: a list would be read as a filter operator and widen the search.
+	for value in (account, party):
+		if value and not isinstance(value, str):
+			frappe.throw(_("Invalid filter"), frappe.PermissionError)
+
+	# get_list applies the permission query conditions; the child-table filter resolves the check to `read`
+	je_filters = [
+		["docstatus", "=", 1],
+		[searchfield, "like", f"%{txt}%"],
+		["Journal Entry Account", "account", "=", account],
+		["Journal Entry Account", "reference_type", "is", "not set"],
+	]
+	je_filters.append(
+		["Journal Entry Account", "party", "=", party]
+		if party
+		else ["Journal Entry Account", "party", "is", "not set"]
 	)
 
-	party = filters.get("party")
-	if party:
-		query = query.where(JournalEntryAccount.party == party)
-	else:
-		query = query.where(JournalEntryAccount.party.isnull() | (JournalEntryAccount.party == ""))
-
-	return query.run()
+	return frappe.get_list(
+		"Journal Entry",
+		filters=je_filters,
+		fields=["name", "posting_date", "remark"],
+		order_by="name desc",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+		# one row per entry, not per matching account row. group_by rather than distinct: frappe
+		# drops ORDER BY from a distinct query on postgres, which would lose the ordering above.
+		group_by="name",
+	)
 
 
 @frappe.whitelist()
@@ -1810,6 +1837,10 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 
 	def post_process(source, target):
 		target.reversal_of = source.name
+		target.naming_series = source.naming_series
+		if source.voucher_type == "Bank Entry":
+			target.cheque_no = source.cheque_no
+			target.cheque_date = source.cheque_date
 
 	doclist = get_mapped_doc(
 		"Journal Entry",

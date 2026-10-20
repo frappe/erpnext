@@ -106,7 +106,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				return item.is_delivered_by_supplier ? true : false;
 			});
 
-			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+			if (
+				frappe.model.can_create("Sales Invoice") &&
+				(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total))
+			) {
 				this.frm.add_custom_button(
 					__("Return / Credit Note"),
 					this.make_sales_return.bind(this),
@@ -115,7 +118,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 
-			if (cint(doc.update_stock) != 1) {
+			if (cint(doc.update_stock) != 1 && frappe.model.can_create("Delivery Note")) {
 				if (!is_delivered_by_supplier) {
 					const should_create_delivery_note = doc.items.some(
 						(item) =>
@@ -144,22 +147,24 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						__("Create")
 					);
 				}
-				this.frm.add_custom_button(
-					__("Invoice Discounting"),
-					this.make_invoice_discounting.bind(this),
-					__("Create")
-				);
+				if (frappe.model.can_create("Invoice Discounting")) {
+					this.frm.add_custom_button(
+						__("Invoice Discounting"),
+						this.make_invoice_discounting.bind(this),
+						__("Create")
+					);
+				}
 
 				const payment_is_overdue = doc.payment_schedule
 					.map((row) => Date.parse(row.due_date) < Date.now())
 					.reduce((prev, current) => prev || current, false);
 
-				if (payment_is_overdue) {
+				if (payment_is_overdue && frappe.model.can_create("Dunning")) {
 					this.frm.add_custom_button(__("Dunning"), this.make_dunning.bind(this), __("Create"));
 				}
 			}
 
-			if (doc.docstatus === 1) {
+			if (doc.docstatus === 1 && frappe.model.can_create("Maintenance Schedule")) {
 				this.frm.add_custom_button(
 					__("Maintenance Schedule"),
 					this.make_maintenance_schedule.bind(this),
@@ -170,7 +175,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.toggle_get_items();
 
 		this.set_default_print_format();
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (
+			doc.docstatus == 1 &&
+			!doc.inter_company_invoice_reference &&
+			frappe.model.can_create("Purchase Invoice")
+		) {
 			let internal = me.frm.doc.is_internal_customer;
 			if (internal) {
 				let button_label =
@@ -197,7 +206,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						if (r.exc) return;
 						const received_items = r.message || {};
 						const has_pending_qty = me.frm.doc.items.some(
-							(item) => flt(item.qty) - flt(received_items[item.name] || 0) > 0
+							(item) => flt(item.stock_qty) - flt(received_items[item.name] || 0) > 0
 						);
 						if (!has_pending_qty) {
 							me.frm.remove_custom_button(__(button_label), __("Create"));
@@ -344,8 +353,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							default: me.frm.doc.project,
 						},
 					],
-					primary_action: function () {
-						const data = d.get_values();
+					primary_action: function (data) {
 						me.frm.events.add_timesheet_data(me.frm, {
 							from_time: data.from_time,
 							to_time: data.to_time,
@@ -711,7 +719,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.doc.is_cash_or_non_trade_discount
 		);
 
-		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+		if (this.frm.doc.is_cash_or_non_trade_discount) {
+			this.clear_mapped_discounts();
+		} else {
 			this.frm.set_value("additional_discount_account", "");
 		}
 

@@ -24,13 +24,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
    "fieldname": "rating",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Rating",
-   "options": "\n1\n2\n3\n4\n5",
-   "reqd": 1
+   "options": "\n1\n2\n3\n4\n5"
   },
   {
    "fieldname": "sb_00",
@@ -46,7 +44,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:28.002632",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Parameter",

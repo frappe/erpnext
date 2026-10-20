@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
+from frappe.query_builder import DocType
 from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
@@ -16,7 +17,6 @@ from frappe.utils.scheduler import is_scheduler_inactive
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
 
 
 class POSInvoiceMergeLog(Document):
@@ -214,6 +214,8 @@ class POSInvoiceMergeLog(Document):
 
 		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
+		reversed_rows = get_reversed_rows([doc.return_against for doc in data if doc.is_return])
+
 		for doc in data:
 			old_new_item_map = frappe._dict()
 			old_new_tax_map = frappe._dict()
@@ -238,9 +240,13 @@ class POSInvoiceMergeLog(Document):
 				si_item.pos_invoice = doc.name
 				si_item.pos_invoice_item = item.name
 				if doc.is_return:
-					si_item.sales_invoice_item = get_sales_invoice_item_from_consolidated_invoice(
-						doc.return_against, item.pos_invoice_item
-					)
+					reversed_row = reversed_rows.get(item.pos_invoice_item) or frappe._dict()
+					si_item.sales_invoice_item = reversed_row.get("name")
+					# quote the rate of the row being reversed: rounding an invoice-level discount
+					# can leave a return's net rate a minor unit above the sale's, and
+					# validate_returned_items refuses a return priced above its original
+					if si_item.sales_invoice_item:
+						si_item.rate = reversed_row.rate
 				if item.serial_and_batch_bundle:
 					si_item.serial_and_batch_bundle = item.serial_and_batch_bundle
 				items.append(si_item)
@@ -430,6 +436,28 @@ class POSInvoiceMergeLog(Document):
 			si = frappe.get_doc("Sales Invoice", si_name)
 			si.flags.ignore_validate = True
 			si.cancel()
+
+
+def get_reversed_rows(return_against):
+	"""Rows of the consolidated sales these returns reverse, keyed by the POS invoice row."""
+	if not return_against:
+		return {}
+
+	sales_invoice = DocType("Sales Invoice")
+	sales_invoice_item = DocType("Sales Invoice Item")
+
+	rows = (
+		frappe.qb.from_(sales_invoice)
+		.from_(sales_invoice_item)
+		.select(sales_invoice_item.name, sales_invoice_item.rate, sales_invoice_item.pos_invoice_item)
+		.where(
+			(sales_invoice.name == sales_invoice_item.parent)
+			& (sales_invoice.is_return == 0)
+			& (sales_invoice_item.pos_invoice.isin(return_against))
+		)
+	).run(as_dict=True)
+
+	return {row.pos_invoice_item: row for row in rows}
 
 
 def get_all_unconsolidated_invoices():

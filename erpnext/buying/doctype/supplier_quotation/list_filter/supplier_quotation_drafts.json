@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"transaction_date\", \"label\": \"Date\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"owner\", \"label\": \"Created By\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.990854",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Supplier Quotation\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.990854",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier Quotation-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Supplier Quotation",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

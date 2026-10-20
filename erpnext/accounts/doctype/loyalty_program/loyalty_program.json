@@ -2,7 +2,9 @@
  "actions": [],
  "autoname": "field:loyalty_program_name",
  "creation": "2018-01-23 06:23:05.731431",
+ "description": "Rewards customers with points they can spend on later purchases.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/loyalty-program",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -153,8 +155,9 @@
     "options": "Project"
   }
  ],
+ "icon": "gift",
  "links": [],
- "modified": "2024-03-27 13:10:03.361383",
+ "modified": "2026-09-16 11:42:07.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Program",
@@ -171,6 +174,14 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

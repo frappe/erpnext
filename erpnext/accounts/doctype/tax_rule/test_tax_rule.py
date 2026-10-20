@@ -3,10 +3,24 @@
 import unittest
 
 import frappe
+from frappe.utils import nowdate
 
-from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
+from erpnext.accounts.doctype.tax_rule.tax_rule import (
+	ConflictingTaxRule,
+	get_party_details,
+	get_tax_template,
+)
+from erpnext.accounts.party import set_taxes
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.tests.permission_test_utils import (
+	MISSING_NAME,
+	as_user,
+	assert_not_found,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -389,6 +403,113 @@ class TestTaxRule(ERPNextTestSuite):
 
 		# Check if accounts heads and rate fetched are also fetched from tax template or not
 		self.assertTrue(len(quotation.taxes) > 0)
+
+	def test_get_party_details_respects_customer_user_permission(self):
+		user = make_fenced_user("tax-rule-party-user@example.com", ["Accounts Manager"])
+
+		with as_user(user):
+			details = get_party_details("_Test Customer 2", "customer")
+		self.assertEqual(details.get("billing_city"), "Lagos")
+
+		make_fenced_user(user, ["Accounts Manager"], [("Customer", "_Test Customer")])
+		with as_user(user):
+			details = get_party_details("_Test Customer", "customer")
+			self.assertEqual(details.get("billing_state"), "Test State")
+
+			assert_refused_without(
+				self,
+				["_Test Customer Group", "_Test Territory", "Lagos"],
+				get_party_details,
+				"_Test Customer 2",
+				"customer",
+			)
+
+			def build_kwargs(party):
+				return {"party": party, "party_type": "customer"}
+
+			assert_refused_for_names(
+				self,
+				get_party_details,
+				build_kwargs,
+				[["_Test Customer 2"]],
+				type_gated=True,
+				caller_supplied=True,
+			)
+
+	def test_get_party_details_refuses_unreadable_address(self):
+		user = make_fenced_user(
+			"tax-rule-address-user@example.com",
+			["Accounts Manager"],
+			[("Address", "_Test Address for Customer-Office")],
+		)
+
+		with as_user(user):
+			details = get_party_details(
+				"_Test Customer", "customer", {"billing_address": "_Test Address for Customer-Office"}
+			)
+			self.assertEqual(details.get("billing_city"), "_Test City")
+
+			for fieldname in ("billing_address", "shipping_address"):
+				assert_refused_without(
+					self,
+					["_Test Customer 2", "Lagos"],
+					get_party_details,
+					"_Test Customer",
+					"customer",
+					{fieldname: "_Test Billing Address Title-Billing"},
+				)
+				assert_not_found(
+					self, get_party_details, "_Test Customer", "customer", {fieldname: MISSING_NAME}
+				)
+
+	def test_get_party_details_refuses_unreadable_default_address(self):
+		user = make_fenced_user(
+			"tax-rule-default-address-user@example.com",
+			["Accounts Manager"],
+			[("Address", "_Test Address for Customer-Office")],
+		)
+
+		with as_user(user):
+			details = get_party_details("_Test Customer", "customer")
+		self.assertEqual(details.get("billing_city"), "_Test City")
+
+		make_fenced_user(user, ["Accounts Manager"], [("Address", "_Test Billing Address 2 Title-Billing")])
+		with as_user(user):
+			assert_refused_without(
+				self,
+				["_Test Address for Customer-Office", "_Test City", "Test State"],
+				get_party_details,
+				"_Test Customer",
+				"customer",
+			)
+
+	def test_set_taxes_does_not_check_party_details_permission(self):
+		make_tax_rule(
+			customer="_Test Customer 2",
+			sales_tax_template="_Test Sales Taxes and Charges Template 2 - _TC",
+			save=1,
+		)
+		user = make_fenced_user("tax-rule-stock-user@example.com", ["Stock User"])
+
+		with as_user(user):
+			assert_refused_without(
+				self,
+				["_Test Customer Group", "_Test Territory", "Lagos"],
+				get_party_details,
+				"_Test Customer 2",
+				"Customer",
+				{"billing_address": "_Test Billing Address Title-Billing"},
+			)
+			self.assertEqual(
+				set_taxes(
+					"_Test Customer 2",
+					"Customer",
+					nowdate(),
+					"_Test Company",
+					billing_address="_Test Billing Address Title-Billing",
+				),
+				"_Test Sales Taxes and Charges Template 2 - _TC",
+			)
 
 
 def make_tax_rule(**args):

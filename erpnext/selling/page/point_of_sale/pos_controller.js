@@ -558,6 +558,9 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	make_new_invoice() {
+		if (this.payment) {
+			this.payment.selected_mode = "";
+		}
 		return frappe.run_serially([
 			() => frappe.dom.freeze(),
 			() => this.make_invoice_frm(this.settings.frm_doctype),

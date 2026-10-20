@@ -10,6 +10,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	cint,
+	cstr,
 	flt,
 	get_datetime,
 	get_last_day,
@@ -20,6 +21,7 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext import _refuse
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.assets.doctype.asset.depreciation import (
@@ -736,6 +738,7 @@ class Asset(AccountsController):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
 	def cancel_movement_entries(self):
+		# filter the parent Asset Movement's docstatus (as the original SQL did), not the child row's
 		movements = frappe.db.sql(
 			"""SELECT asm.name, asm.docstatus
 			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
@@ -796,13 +799,12 @@ class Asset(AccountsController):
 					].expected_value_after_useful_life
 					value_after_depreciation = self.finance_books[idx].value_after_depreciation
 
-					if (
-						flt(value_after_depreciation) <= expected_value_after_useful_life
-						or self.is_fully_depreciated
-					):
+					if flt(value_after_depreciation) <= expected_value_after_useful_life:
 						status = "Fully Depreciated"
 					elif flt(value_after_depreciation) < flt(self.net_purchase_amount):
 						status = "Partially Depreciated"
+				elif self.is_fully_depreciated:
+					status = "Fully Depreciated"
 		elif self.docstatus == 2:
 			status = "Cancelled"
 		return status
@@ -1283,7 +1285,7 @@ def make_journal_entry(asset_name):
 
 
 @frappe.whitelist()
-def make_asset_movement(assets, purpose=None):
+def make_asset_movement(assets: str | list, purpose: str | None = None):
 	import json
 
 	if isinstance(assets, str):
@@ -1295,6 +1297,10 @@ def make_asset_movement(assets, purpose=None):
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
 	for asset in assets:
+		asset["name"] = cstr(asset.get("name"))
+		if not asset["name"] or not frappe.has_permission("Asset", "select", doc=asset["name"]):
+			_refuse()
+
 		asset = frappe.get_doc("Asset", asset.get("name"))
 		asset_movement.company = asset.get("company")
 		asset_movement.append(
@@ -1316,7 +1322,25 @@ def is_cwip_accounting_enabled(asset_category):
 
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
+	"""Whitelisted entry point: authorise the caller, then return the value."""
+	# one of the three calling forms is the boundary; Asset itself excludes the roles holding Asset Value Adjustment write
+	if not any(
+		frappe.has_permission(dt, "write")
+		for dt in ("Asset Value Adjustment", "Asset Capitalization", "Asset Repair")
+	):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	# select-or-read: these roles hold `select` on Asset, which does not satisfy a `read` check.
+	# Guard only here -- the in-process callers use _get_asset_value_after_depreciation() below.
+	ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
+	frappe.has_permission("Asset", ptype, doc=asset_name, throw=True)
+
+	return _get_asset_value_after_depreciation(asset_name, finance_book)
+
+
+def _get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
+
 	if not asset.calculate_depreciation:
 		return flt(asset.value_after_depreciation)
 
@@ -1325,6 +1349,8 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 
 @frappe.whitelist()
 def has_active_capitalization(asset):
+	frappe.has_permission("Asset", doc=asset, throw=True)
+
 	active_capitalizations = frappe.db.count(
 		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
 	)
@@ -1333,7 +1359,19 @@ def has_active_capitalization(asset):
 
 @frappe.whitelist()
 def get_values_from_purchase_doc(purchase_doc_name: str, item_code: str, doctype: str):
-	purchase_doc = frappe.get_doc(doctype, purchase_doc_name)
+	# `doctype` is caller-supplied and reaches frappe.get_doc(), so without this list any document with
+	# an `items` table could be read for its valuation rates.
+	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(_("Invalid document type"), frappe.PermissionError)
+
+	# The Asset form is the boundary: Quality Manager writes Assets but reads neither Purchase Receipt
+	# nor Purchase Invoice, so the purchase document cannot be it.
+	frappe.has_permission("Asset", "write", throw=True)
+
+	# and the purchase document itself, whose company, posting date and amount are returned below.
+	# Asset write is not authority to read a Purchase Receipt or Invoice.
+	purchase_doc = frappe.get_doc(doctype, purchase_doc_name, check_permission="read")
+
 	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
 
 	if not matching_items:

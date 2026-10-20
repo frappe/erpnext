@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Journal Entry",
+ "creation": "2026-10-04 01:25:22.675609",
+ "description": "For anything that isn't an invoice or a payment: accruals, depreciation, or fixing a mistake. See [Journal Entry](https://docs.frappe.io/erpnext/user/manual/en/journal-entry).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "intro_video_url": "https://www.youtube.com/watch?v=AGTMkzfqtbE",
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:39:31.634775",
+ "modified_by": "Administrator",
+ "name": "Create Journal Entry",
+ "owner": "Administrator",
+ "reference_document": "Journal Entry",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Post a journal entry",
+ "validate_action": 1
+}

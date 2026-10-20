@@ -1,13 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
+from frappe.tests.classes.context_managers import freeze_time
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.projects.doctype.project.project import create_kanban_board_if_not_exists, get_cost_center_name
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.selling.doctype.sales_order.sales_order import make_project as make_project_from_so
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -159,6 +165,33 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(len(tasks), 2)
 
+	def test_project_from_template_without_holiday_list(self):
+		template = make_project_template("_Test Template Without Holiday List")
+		self.assertFalse(frappe.db.get_value("Company", "Wind Power LLC", "default_holiday_list"))
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Template Without Holiday List {frappe.generate_hash(length=6)}",
+			project_template=template.name,
+			expected_start_date=nowdate(),
+			company="Wind Power LLC",
+		).insert()
+
+		self.assertEqual(frappe.db.count("Task", {"project": project.name}), len(template.tasks))
+
+	def test_deleted_template_tasks_are_not_recreated_on_save(self):
+		template = make_project_template("_Test Template Tasks Not Recreated")
+		project = get_project(
+			f"_Test Template Tasks Not Recreated {frappe.generate_hash(length=6)}", template
+		)
+		for task in frappe.get_all("Task", filters={"project": project.name}, pluck="name"):
+			frappe.delete_doc("Task", task)
+
+		project.reload()
+		project.save()
+
+		self.assertFalse(frappe.db.exists("Task", {"project": project.name}))
+
 	def test_project_linking_with_sales_order(self):
 		so = make_sales_order()
 		project = make_project_from_so(so.name)
@@ -173,6 +206,15 @@ class TestProject(ERPNextTestSuite):
 
 		so.reload()
 		self.assertFalse(so.project)
+
+	def test_project_from_sales_order_has_its_sales_amount(self):
+		so = make_sales_order()
+		project = make_project_from_so(so.name).insert()
+
+		self.assertEqual(project.total_sales_amount, so.base_net_total)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_sales_amount"), so.base_net_total
+		)
 
 	def test_project_with_template_tasks_having_common_name(self):
 		# Step - 1: Create Template Parent Tasks
@@ -316,6 +358,410 @@ class TestProject(ERPNextTestSuite):
 		self.assertEqual(project.percent_complete, 75)
 		self.assertEqual(project.status, "On hold")
 
+	def test_set_project_status_completes_tasks_in_dependency_order(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Progress", 2)
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+
+		set_project_status(project.name, "Completed")
+
+		self.assertEqual(frappe.db.get_value("Project", project.name, "status"), "Completed")
+		for task in tasks:
+			self.assertEqual(frappe.db.get_value("Task", task, ["status", "progress"]), ("Completed", 100))
+
+	def test_set_project_status_by_projects_manager(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 1)
+		user = create_user("projects-manager-only@example.com", "Projects Manager")
+
+		with self.set_user(user.name):
+			set_project_status(project.name, "Cancelled")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[0], "status"), "Cancelled")
+
+	def test_create_duplicate_project_links_tasks_to_their_copies(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 0)
+		group = frappe.get_doc(doctype="Task", subject="Phase 1", project=source.name, is_group=1).insert()
+		design = frappe.get_doc(
+			doctype="Task", subject="Design", project=source.name, parent_task=group.name
+		).insert()
+		build = frappe.get_doc(
+			doctype="Task",
+			subject="Build",
+			project=source.name,
+			parent_task=group.name,
+			depends_on=[{"task": design.name}],
+		).insert()
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
+
+		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
+		copied_tasks = frappe.get_all(
+			"Task", filters={"project": copy}, fields=["name", "subject", "parent_task", "depends_on_tasks"]
+		)
+		copied = {task.subject: task.name for task in copied_tasks}
+		links = {
+			link
+			for task in copied_tasks
+			for link in [task.parent_task, *(task.depends_on_tasks or "").split(",")]
+			if link
+		}
+		self.assertEqual(len(copied_tasks), 3)
+		self.assertFalse(links & {group.name, design.name, build.name})
+		self.assertEqual(
+			set(frappe.get_all("Task Depends On", filters={"parent": copied["Phase 1"]}, pluck="task")),
+			{copied["Design"], copied["Build"]},
+		)
+
+	def test_create_duplicate_project_detaches_parents_outside_the_project(self):
+		from erpnext.projects.doctype.project.project import create_duplicate_project
+
+		source, _ = self._project_with_tasks("Task Completion", 0)
+		other, _ = self._project_with_tasks("Task Completion", 0)
+		outside_group = frappe.get_doc(
+			doctype="Task", subject="Other phase", project=other.name, is_group=1
+		).insert()
+		moved = frappe.get_doc(doctype="Task", subject="Moved", project=source.name).insert()
+		frappe.db.set_value("Task", moved.name, "parent_task", outside_group.name)
+
+		create_duplicate_project(frappe.as_json(source.as_dict()), f"{source.project_name} Copy")
+
+		copy = frappe.db.get_value("Project", {"project_name": f"{source.project_name} Copy"})
+		self.assertEqual(frappe.get_all("Task", filters={"project": copy}, pluck="parent_task"), [None])
+
+	def _progress_project(self, **settings):
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Progress {frappe.generate_hash(length=8)}",
+			company="_Test Company",
+			collect_progress=1,
+			subject="Progress",
+			message="Reply with your progress",
+			**settings,
+		)
+		project.append("users", {"user": "test@example.com", "welcome_email_sent": 1})
+		return project.insert()
+
+	def test_hourly_reminder_is_sent_only_within_the_time_window(self):
+		from erpnext.projects.doctype.project.project import hourly_reminder
+
+		project = self._progress_project(frequency="Hourly", from_time="14:00:00", to_time="18:00:00")
+		for time, updates in (("10:00:00", 0), ("15:00:00", 1)):
+			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				hourly_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
+	def test_twice_daily_reminder_waits_for_the_second_time(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="09:00:00", second_email="17:00:00"
+		)
+		for time, updates in (("10:00:00", 1), ("11:00:00", 1), ("17:30:00", 2)):
+			with freeze_time(f"2026-01-05 {time}"), patch("frappe.sendmail"):
+				twice_daily_reminder()
+			self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), updates)
+
+	def test_twice_daily_reminder_sends_both_overdue_updates(self):
+		from erpnext.projects.doctype.project.project import twice_daily_reminder
+
+		project = self._progress_project(
+			frequency="Twice Daily", first_email="22:10:00", second_email="22:40:00"
+		)
+		with freeze_time("2026-01-05 23:00:00"), patch("frappe.sendmail") as sendmail:
+			twice_daily_reminder()
+
+		self.assertEqual(frappe.db.count("Project Update", {"project": project.name}), 2)
+		self.assertEqual(sendmail.call_count, 2)
+
+	def test_percent_complete_counts_cancelled_tasks_and_zero_weights(self):
+		for method in ("Task Progress", "Task Weight"):
+			project, tasks = self._project_with_tasks(method, 2)
+			frappe.db.set_value("Task", tasks[0], {"status": "Completed", "progress": 100})
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 50)
+
+			frappe.db.set_value("Task", tasks[1], "status", "Cancelled")
+			project.update_percent_complete()
+			self.assertEqual(project.percent_complete, 100)
+			self.assertEqual(project.status, "Completed")
+
+	def test_completed_status_is_refused_until_tasks_are_done(self):
+		project, tasks = self._project_with_tasks("Task Progress", 1)
+		project.status = "Completed"
+		self.assertRaises(frappe.ValidationError, project.save)
+
+		frappe.db.set_value("Task", tasks[0], "status", "Completed")
+		project.reload()
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.percent_complete, 100)
+
+	def test_set_project_status_keeps_dependent_task_dates(self):
+		from erpnext.projects.doctype.project.project import set_project_status
+
+		project, tasks = self._project_with_tasks("Task Completion", 2)
+		frappe.db.set_value("Task", tasks[0], "exp_end_date", add_days(nowdate(), 5))
+		dependent = frappe.get_doc("Task", tasks[1])
+		dependent.append("depends_on", {"task": tasks[0]})
+		dependent.save()
+		planned = frappe.db.get_value("Task", tasks[1], ["exp_start_date", "exp_end_date"])
+
+		set_project_status(project.name, "Completed")
+
+		self.assertEqual(frappe.db.get_value("Task", tasks[1], ["exp_start_date", "exp_end_date"]), planned)
+
+	def test_stock_bought_for_the_project_is_counted_when_issued(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		project = make_project({"project_name": f"_Test Stock Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		make_purchase_invoice(item_code=item, qty=10, rate=100, update_stock=1, project=project.name)
+		issue_to_project(item, 10, project.name)
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 0)
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+	def test_landed_cost_after_delivery_reaches_consumed_cost(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		company = "_Test Company with perpetual inventory"
+		project = make_project(
+			{
+				"project_name": f"_Test Landed After Delivery {frappe.generate_hash(length=6)}",
+				"company": company,
+			}
+		)
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		receipt = make_purchase_receipt(
+			company=company, warehouse="Stores - TCP1", item_code=item, qty=10, rate=100, do_not_save=True
+		)
+		receipt.items[0].project = project.name
+		receipt.insert()
+		receipt.submit()
+		delivery_note = create_delivery_note(
+			company=company,
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			item_code=item,
+			qty=10,
+			rate=500,
+			do_not_save=True,
+		)
+		delivery_note.project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+		make_purchase_invoice(
+			company=company,
+			warehouse="Stores - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			item_code="_Test Non Stock Item",
+			qty=1,
+			rate=50,
+			project=project.name,
+		)
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, company, charges=50)
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 0)
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
+	def test_drop_shipped_stock_is_purchase_cost(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		project = make_project({"project_name": f"_Test Drop Ship Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		invoice = make_purchase_invoice(
+			item_code=item, qty=10, rate=100, project=project.name, do_not_save=True
+		)
+		invoice.items[0].delivered_by_supplier = 1
+		invoice.insert()
+		invoice.submit()
+
+		project.reload()
+		self.assertEqual(project.total_purchase_cost, 1000)
+
+	def test_stock_delivered_for_the_project_is_consumed_material(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		project = make_project({"project_name": f"_Test Delivered Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		delivery_note = create_delivery_note(item_code=item, qty=10, rate=500, do_not_save=True)
+		delivery_note.project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+		delivery_note.cancel()
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 0)
+
+	def test_stock_delivered_on_a_project_row_is_consumed_material(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		project = make_project({"project_name": f"_Test Row Delivered Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		delivery_note = create_delivery_note(item_code=item, qty=10, rate=500, do_not_save=True)
+		delivery_note.items[0].project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+
+		project.reload()
+		self.assertFalse(delivery_note.project)
+		self.assertEqual(project.total_consumed_material_cost, 1000)
+
+	def test_backdated_receipt_refreshes_consumed_cost_without_perpetual_inventory(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		project = make_project({"project_name": f"_Test Repost Cost {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item,
+			qty=10,
+			to_warehouse="_Test Warehouse - _TC",
+			rate=100,
+			posting_date=add_days(nowdate(), -2),
+		)
+
+		delivery_note = create_delivery_note(
+			item_code=item, qty=10, rate=500, posting_date=add_days(nowdate(), -1), do_not_save=True
+		)
+		delivery_note.project = project.name
+		delivery_note.insert()
+		delivery_note.submit()
+
+		make_stock_entry(
+			item_code=item,
+			qty=10,
+			to_warehouse="_Test Warehouse - _TC",
+			rate=200,
+			posting_date=add_days(nowdate(), -3),
+		)
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1500)
+
+	def test_manufactured_stock_is_counted_once(self):
+		project = make_project({"project_name": f"_Test Manufactured Cost {frappe.generate_hash(length=6)}"})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=raw_material, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		manufacture = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Manufacture",
+				"stock_entry_type": "Manufacture",
+				"company": "_Test Company",
+				"items": [
+					{
+						"item_code": raw_material,
+						"qty": 10,
+						"s_warehouse": "_Test Warehouse - _TC",
+						"project": project.name,
+					},
+					{
+						"item_code": finished_good,
+						"qty": 1,
+						"t_warehouse": "_Test Warehouse - _TC",
+						"is_finished_item": 1,
+						"project": project.name,
+					},
+				],
+				"additional_costs": [
+					{
+						"expense_account": "Expenses Included In Valuation - _TC",
+						"description": "Labour",
+						"amount": 50,
+					}
+				],
+			}
+		)
+		manufacture.insert()
+		manufacture.submit()
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 0)
+
+		issue_to_project(finished_good, 1, project.name)
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
+	def test_landed_cost_on_manufactured_stock_is_counted_once(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		project = make_project(
+			{
+				"project_name": f"_Test Landed Manufacture {frappe.generate_hash(length=6)}",
+				"company": company,
+			}
+		)
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=raw_material, qty=10, to_warehouse=warehouse, rate=100, company=company)
+
+		manufacture = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"purpose": "Manufacture",
+				"stock_entry_type": "Manufacture",
+				"company": company,
+				"project": project.name,
+				"items": [
+					{"item_code": raw_material, "qty": 10, "s_warehouse": warehouse},
+					{"item_code": finished_good, "qty": 1, "t_warehouse": warehouse, "is_finished_item": 1},
+				],
+			}
+		)
+		manufacture.insert()
+		manufacture.submit()
+		make_landed_cost_voucher(
+			company=company,
+			receipt_document_type="Stock Entry",
+			receipt_document=manufacture.name,
+			charges=50,
+		)
+
+		issue = make_stock_entry(
+			item_code=finished_good, qty=1, from_warehouse=warehouse, company=company, do_not_save=True
+		)
+		issue.project = project.name
+		issue.insert()
+		issue.submit()
+
+		project.reload()
+		self.assertEqual(project.total_consumed_material_cost, 1050)
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
@@ -371,6 +817,66 @@ class TestProject(ERPNextTestSuite):
 		self.assertFalse(project.has_permission(user=leaves))
 		self.assertTrue(project.has_permission(user=stays))
 
+	def test_kanban_board_needs_project_read(self):
+		project = make_project({"project_name": f"_Test Kanban Access {frappe.generate_hash(length=6)}"})
+		stock_user = self._create_portal_user(f"kanban_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", stock_user).add_roles("Stock User")
+
+		with self.set_user(stock_user):
+			self.assertRaises(frappe.PermissionError, create_kanban_board_if_not_exists, project.name)
+
+		self.assertFalse(frappe.db.exists("Kanban Board", project.project_name))
+
+	def test_kanban_board_is_found_by_project_not_by_name(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		name = f"_Test Kanban {frappe.generate_hash(length=6)}"
+		renamed = make_project({"project_name": name})
+		renamed_board = create_kanban_board_if_not_exists(renamed.name)
+		renamed.db_set("project_name", f"{name} old")
+
+		project = make_project({"project_name": name})
+		board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, renamed_board)
+		self.assertEqual(create_kanban_board_if_not_exists(renamed.name), renamed_board)
+		self.assertIn(project.name, frappe.db.get_value("Kanban Board", board, "filters"))
+
+		lead_board = quick_kanban_board("Lead", f"{name} lead", "status").name
+		quick_kanban_board("Lead", f"{lead_board}-1", "status")
+		lead_named_project = make_project({"project_name": lead_board})
+		board = create_kanban_board_if_not_exists(lead_named_project.name)
+
+		self.assertEqual(board, f"{lead_board}-2")
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "reference_doctype"), "Task")
+
+	def test_kanban_board_skips_another_users_private_board(self):
+		from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+
+		project = make_project({"project_name": f"_Test Kanban Private {frappe.generate_hash(length=6)}"})
+		private_board = quick_kanban_board("Task", f"{project.project_name} private", "status", project.name)
+		private_board.db_set("private", 1)
+
+		user = self._create_portal_user(f"kanban_private_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", user).add_roles("Projects User")
+		with self.set_user(user):
+			board = create_kanban_board_if_not_exists(project.name)
+
+		self.assertNotEqual(board, private_board.name)
+		self.assertEqual(frappe.db.get_value("Kanban Board", board, "owner"), user)
+
+	def test_cost_center_name_needs_project_access(self):
+		project = make_project({"project_name": f"_Test Cost Center Access {frappe.generate_hash(length=6)}"})
+		project.db_set("cost_center", "_Test Cost Center - _TC")
+		website_user = self._create_portal_user(f"cost_center_{frappe.generate_hash(length=6)}@example.com")
+		sales_user = self._create_portal_user(f"cost_center_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", sales_user).add_roles("Sales User")
+
+		with self.set_user(sales_user):
+			self.assertEqual(get_cost_center_name(project.name), "_Test Cost Center - _TC")
+		with self.set_user(website_user):
+			self.assertRaises(frappe.PermissionError, get_cost_center_name, project.name)
+
 
 def get_project(name, template):
 	project = frappe.get_doc(
@@ -406,6 +912,15 @@ def make_project(args):
 	project.insert()
 
 	return project
+
+
+def issue_to_project(item_code, qty, project):
+	issue = make_stock_entry(
+		item_code=item_code, qty=qty, from_warehouse="_Test Warehouse - _TC", do_not_save=True
+	)
+	issue.project = project
+	issue.insert()
+	issue.submit()
 
 
 def task_exists(subject):

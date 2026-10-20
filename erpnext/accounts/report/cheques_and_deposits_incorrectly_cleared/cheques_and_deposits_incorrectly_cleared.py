@@ -86,6 +86,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 		.where(
 			je.docstatus.eq(1)
 			& jea.account.eq(filters.account)
+			& (je.finance_book.isnull() | je.finance_book.eq(""))
 			& je.posting_date.gt(filters.report_date)
 			& je.clearance_date.lte(filters.report_date)
 			& (je.is_opening.isnull() | je.is_opening.eq("No"))
@@ -124,7 +125,8 @@ def get_columns():
 		{
 			"fieldname": "payment_document",
 			"label": _("Payment Document Type"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 220,
 		},
 		{

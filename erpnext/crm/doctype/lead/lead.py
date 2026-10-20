@@ -142,7 +142,7 @@ class Lead(SellingController, CRMNote):
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
 			elif self.company_name:
 				self.lead_name = self.company_name
-			else:
+			elif self.email_id:
 				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
@@ -199,17 +199,17 @@ class Lead(SellingController, CRMNote):
 			lead_row.db_update()
 
 	def remove_link_from_prospect(self):
-		prospects = self.get_linked_prospects()
+		linked_prospects = self.get_linked_prospects()
 
-		for d in prospects:
-			prospect = frappe.get_doc("Prospect", d.parent)
+		for linked_prospect in linked_prospects:
+			prospect = frappe.get_doc("Prospect", linked_prospect.parent)
 			if len(prospect.get("leads")) == 1:
 				prospect.delete(ignore_permissions=True)
 			else:
 				to_remove = None
-				for d in prospect.get("leads"):
-					if d.lead == self.name:
-						to_remove = d
+				for lead in prospect.get("leads"):
+					if lead.lead == self.name:
+						to_remove = lead
 
 				if to_remove:
 					prospect.remove(to_remove)
@@ -483,6 +483,14 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 @frappe.whitelist()
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
+
+	# Communication grants read to `All` only for the owner and carries a has_permission hook, so doc=
+	# is what decides access.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
+	# both paths end in a Lead: the insert path checks `create`, but the path reusing an existing Lead
+	# required nothing at all.
+	frappe.has_permission("Lead", ptype="create", throw=True)
 
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None

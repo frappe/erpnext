@@ -28,6 +28,7 @@ from erpnext.controllers.website_list_for_contact import (
 	add_role_for_portal_user,
 	link_portal_users_to_contacts,
 )
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -187,6 +188,7 @@ class Customer(TransactionBase):
 		self.validate_internal_customer()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+		validate_default_price_list_side(self.default_price_list, "selling")
 
 		# set loyalty program tier
 		if not self.is_new() and (customer := self.get_doc_before_save()):
@@ -324,8 +326,27 @@ class Customer(TransactionBase):
 	def update_lead_status(self):
 		"""If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity"""
-		if self.lead_name:
-			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
+		if not self.lead_name:
+			return
+
+		frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
+		for doctype, party_type_field in (("Quotation", "quotation_to"), ("Opportunity", "opportunity_from")):
+			self.link_lead_records(doctype, party_type_field)
+
+	def link_lead_records(self, doctype: str, party_type_field: str):
+		names = [
+			name
+			for name in frappe.get_all(
+				doctype, {party_type_field: "Lead", "party_name": self.lead_name}, pluck="name"
+			)
+			if frappe.has_permission(doctype, "write", name)
+		]
+		if names:
+			frappe.db.set_value(
+				doctype,
+				{"name": ("in", names), party_type_field: "Lead", "party_name": self.lead_name},
+				{party_type_field: "Customer", "party_name": self.name},
+			)
 
 	def link_address_and_contact(self):
 		linked_documents = {
@@ -362,8 +383,8 @@ class Customer(TransactionBase):
 
 		from erpnext.crm.utils import copy_comments, link_communications
 
-		copy_comments("Lead", self.lead_name, self)
-		link_communications("Lead", self.lead_name, self)
+		copy_comments("Lead", self.lead_name, self, self.flags.ignore_permissions)
+		link_communications("Lead", self.lead_name, self, self.flags.ignore_permissions)
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
@@ -464,15 +485,11 @@ class Customer(TransactionBase):
 
 @frappe.whitelist()
 def make_quotation(source_name: str, target_doc: str | Document | None = None) -> Document:
-	def set_missing_values(source, target):
-		_set_missing_values(source, target)
-
 	target_doc = get_mapped_doc(
 		"Customer",
 		source_name,
 		{"Customer": {"doctype": "Quotation", "field_map": {"name": "party_name"}}},
 		target_doc,
-		set_missing_values,
 	)
 
 	target_doc.quotation_to = "Customer"
@@ -1014,6 +1031,15 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 def get_customer_primary(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get("customer")
 	type = filters.get("type")
+
+	# `type` is caller-supplied and reaches qb.DocType(), so any doctype could be joined to Dynamic
+	# Link. The two pickers that call this send only these two values.
+	if type not in ("Contact", "Address"):
+		frappe.throw(_("Invalid type"), frappe.PermissionError)
+
+	# authorise the party, not Contact/Address: the `if_owner` row on Address would empty the picker rather than error
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	type_doctype = qb.DocType(type)
 	dlink = qb.DocType("Dynamic Link")
 

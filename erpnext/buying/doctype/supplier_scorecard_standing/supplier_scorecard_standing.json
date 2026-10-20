@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:standing_name",
  "creation": "2017-05-29 01:36:47.893639",
+ "description": "A band of scores, and what happens to suppliers in it.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -92,6 +93,7 @@
    "options": "Employee"
   }
  ],
+ "icon": "podium",
  "links": [],
  "modified": "2024-03-27 13:10:50.574065",
  "modified_by": "Administrator",

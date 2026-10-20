@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:call_type",
  "creation": "2022-02-25 16:13:37.321312",
+ "description": "A grouping of calls, like sales or support.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -29,6 +30,7 @@
    "read_only": 1
   }
  ],
+ "icon": "tag",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

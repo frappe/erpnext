@@ -4,8 +4,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
+ "description": "A customer's confirmed order.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-order",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -216,7 +218,6 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
@@ -311,6 +312,7 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Delivery Date",
    "no_copy": 1
@@ -321,6 +323,7 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_global_search": 1,
    "label": "Customer's Purchase Order",
    "oldfieldname": "po_no",
    "oldfieldtype": "Data",
@@ -390,7 +393,6 @@
    "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -497,6 +499,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_order_reference",
    "reqd": 1,
    "width": "100px"
   },
@@ -1759,11 +1762,11 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "shopping-cart",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-10-13 12:12:32.190935",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1818,6 +1821,7 @@
    "email": 1,
    "print": 1,
    "read": 1,
+   "report": 1,
    "role": "Accounts User"
   },
   {
@@ -1830,6 +1834,14 @@
    "read": 1,
    "role": "Sales Manager",
    "write": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

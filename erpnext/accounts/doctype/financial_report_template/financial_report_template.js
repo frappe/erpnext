@@ -236,6 +236,8 @@ async function refresh_tree_view(dialog, account_rows) {
 		parent: wrapper,
 		label: company,
 		root_value: company,
+		// read-only preview: row-mode visuals without actions
+		row_style: true,
 		method: "erpnext.accounts.doctype.financial_report_template.financial_report_engine.get_children_accounts",
 		args: { doctype: "Account", company: company, filtered_accounts: filtered_accounts, missed: missed },
 		toolbar: [],

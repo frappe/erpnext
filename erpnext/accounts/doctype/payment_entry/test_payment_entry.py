@@ -23,10 +23,33 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.permission_test_utils import make_bank_account
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
+	def test_payment_creation_excludes_disabled_bank_default(self):
+		bank_account = frappe.get_doc(
+			"Bank Account", make_bank_account("_Test Payment Bank Default", "_Test Company", "HDFC - _TC")
+		)
+		bank_account.disabled = 0
+		bank_account.is_default = 1
+		bank_account.save()
+
+		for make_document in (create_sales_invoice, make_sales_order):
+			doc = make_document()
+			with self.subTest(doctype=doc.doctype):
+				bank_account.db_set("disabled", 0)
+				self.assertEqual(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account,
+					bank_account.name,
+				)
+				# Preserve is_default to reproduce disabled accounts saved before the fix.
+				bank_account.db_set("disabled", 1)
+				self.assertIsNone(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account
+				)
+
 	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
 		journals = []
 		if voucher_type and voucher_no:
@@ -122,7 +145,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_payment_entry_for_blocked_supplier_payments_today_date(self):
+	def test_payment_entry_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.hold_type = "Payments"
@@ -131,13 +154,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		pi = make_purchase_invoice()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Invoice",
-			dn=pi.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()
@@ -162,6 +180,26 @@ class TestPaymentEntry(ERPNextTestSuite):
 				pass
 			else:
 				raise Exception
+
+	def test_outstanding_invoices_listed_after_supplier_release_date(self):
+		pi = make_purchase_invoice()
+		supplier = frappe.get_doc("Supplier", pi.supplier)
+		supplier.update({"on_hold": 1, "hold_type": "All", "release_date": add_days(nowdate(), -3)})
+		supplier.save()
+
+		references = get_outstanding_reference_documents(
+			{
+				"posting_date": nowdate(),
+				"company": pi.company,
+				"party_type": "Supplier",
+				"payment_type": "Pay",
+				"party": pi.supplier,
+				"party_account": pi.credit_to,
+				"get_outstanding_invoices": True,
+			}
+		)
+
+		self.assertIn(pi.name, [row.voucher_no for row in references])
 
 	def test_payment_entry_against_si_usd_to_usd(self):
 		si = create_sales_invoice(
@@ -245,6 +283,21 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", pi.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
+
+	def test_allocation_equal_to_outstanding_at_precision_is_allowed(self):
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = "Pay"
+		pe.party_type = "Employee"
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Employee Advance",
+				"reference_name": "_Test Precision Boundary",
+				"outstanding_amount": 259.99999039999966,
+				"allocated_amount": 260.0,
+			},
+		)
+		pe.validate_allocated_amount()
 
 	def test_payment_against_sales_invoice_to_check_status(self):
 		si = create_sales_invoice(
@@ -1419,6 +1472,40 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[2].voucher_no, si2.name)
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
+
+	def test_negative_outstanding_invoice_currency_multicurrency(self):
+		"""
+		A foreign-currency invoice whose party account is in company currency should report its
+		negative outstanding amount in the account's currency, not the invoice's own currency.
+		"""
+		party_account_currency = frappe.db.get_value("Account", "Debtors - _TC", "account_currency")
+
+		credit_note = create_sales_invoice(
+			customer="_Test Customer",
+			currency="USD",
+			conversion_rate=50,
+			qty=-1,
+			is_return=1,
+		)
+
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", credit_note.name, "outstanding_amount"))
+		self.assertLess(outstanding_amount, 0)
+
+		args = {
+			"posting_date": nowdate(),
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"party": "_Test Customer",
+			"party_account": "Debtors - _TC",
+			"get_outstanding_invoices": True,
+		}
+		references = get_outstanding_reference_documents(args)
+
+		reference = next(r for r in references if r.voucher_no == credit_note.name)
+		self.assertEqual(reference.currency, party_account_currency)
+		self.assertEqual(
+			reference.invoice_amount, credit_note.base_rounded_total or credit_note.base_grand_total
+		)
 
 	def test_receive_payment_from_payable_party_type(self):
 		"""

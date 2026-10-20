@@ -34,6 +34,7 @@
   "projected_qty",
   "ordered_qty",
   "packed_qty",
+  "received_qty",
   "requested_qty",
   "column_break_16",
   "incoming_rate",
@@ -56,7 +57,6 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
@@ -266,6 +266,17 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "depends_on": "eval: doc.received_qty",
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
@@ -316,7 +327,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 17:31:31.732720",
+ "modified": "2026-10-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",

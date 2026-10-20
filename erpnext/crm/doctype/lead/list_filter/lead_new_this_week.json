@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"company_name\", \"label\": \"Organization Name\"}, {\"fieldname\": \"utm_source\", \"label\": \"Source\"}, {\"fieldname\": \"lead_owner\", \"label\": \"Lead Owner\"}]",
+ "creation": "2026-09-30 21:12:56.916508",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "New This Week",
+ "filters": "[[\"Lead\", \"creation\", \"Timespan\", \"this week\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.916508",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Lead-New This Week",
+ "owner": "Administrator",
+ "reference_doctype": "Lead",
+ "route_signature": "creation=[\"Timespan\",\"this week\"]",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

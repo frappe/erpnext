@@ -22,8 +22,13 @@ def execute(filters=None):
 
 	company_currency = get_company_currency(filters.get("company"))
 
+	seen_item_rows = set()
 	for d in entries:
 		if d.stock_qty > 0 or filters.get("show_return_entries", 0):
+			# qty and amount belong to the item line; the Sales Team join repeats the line per
+			# sales person, so show them once to stop the total row counting them more than once
+			first_row = d.item_row not in seen_item_rows
+			seen_item_rows.add(d.item_row)
 			data.append(
 				[
 					d.name,
@@ -34,8 +39,8 @@ def execute(filters=None):
 					d.item_code,
 					item_details.get(d.item_code, {}).get("item_group"),
 					item_details.get(d.item_code, {}).get("brand"),
-					d.stock_qty,
-					d.base_net_amount,
+					d.stock_qty if first_row else None,
+					d.base_net_amount if first_row else None,
 					d.sales_person,
 					d.allocated_percentage,
 					(d.stock_qty * d.allocated_percentage / 100),
@@ -43,10 +48,6 @@ def execute(filters=None):
 					company_currency,
 				]
 			)
-
-	if data:
-		total_row = [""] * len(data[0])
-		data.append(total_row)
 
 	return columns, data
 
@@ -165,7 +166,8 @@ def get_entries(filters):
 	st = frappe.qb.DocType("Sales Team")
 
 	calc_qty = dt_item[qty_field] * dt_item.conversion_factor
-	calc_net_amount = dt_item.base_net_rate * calc_qty
+	# base_net_rate is per transaction UOM, so the amount must use the transaction-UOM qty, not the stock qty
+	calc_net_amount = dt_item.base_net_rate * dt_item[qty_field]
 
 	stock_qty_case = Case().when(dt.status == "Closed", calc_qty).else_(dt_item.stock_qty).as_("stock_qty")
 
@@ -209,6 +211,7 @@ def get_entries(filters):
 			dt.territory,
 			dt[date_field].as_("posting_date"),
 			dt_item.item_code,
+			dt_item.name.as_("item_row"),
 			st.sales_person,
 			st.allocated_percentage,
 			dt_item.warehouse,

@@ -6,10 +6,10 @@ import math
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, flt, getdate, parse_json, today
-from frappe.utils.nestedset import get_descendants_of
+from frappe.query_builder.functions import IfNull
+from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_json
+
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
 
 
 class MasterProductionSchedule(Document):
@@ -65,6 +65,23 @@ class MasterProductionSchedule(Document):
 	def validate(self):
 		self.set_to_date()
 		self.validate_company()
+		self.validate_sales_forecast_not_used()
+
+	def validate_sales_forecast_not_used(self):
+		if not self.sales_forecast:
+			return
+
+		frappe.db.get_value("Sales Forecast", self.sales_forecast, "name", for_update=True)
+		existing = frappe.db.get_value(
+			"Master Production Schedule",
+			{"sales_forecast": self.sales_forecast, "name": ("!=", self.name or "")},
+		)
+		if existing:
+			frappe.throw(
+				_("Sales Forecast {0} already has Master Production Schedule {1}").format(
+					bold(self.sales_forecast), get_link_to_form("Master Production Schedule", existing)
+				)
+			)
 
 	def validate_company(self):
 		if self.sales_forecast:
@@ -82,7 +99,9 @@ class MasterProductionSchedule(Document):
 				)
 
 	def set_to_date(self):
-		self.to_date = None
+		if self.to_date:
+			return
+
 		for row in self.items:
 			if not self.to_date or getdate(row.delivery_date) > getdate(self.to_date):
 				self.to_date = row.delivery_date
@@ -111,12 +130,16 @@ class MasterProductionSchedule(Document):
 	def update_item_details(self, data):
 		items = [item[0] for item in data if item[0]]
 		item_details = self.get_item_details(items)
+		self.load_lead_times([(row.item_code, row.bom_no) for row in item_details.values()])
 
 		for key in data:
 			item_data = data[key]
 			item_code = key[0]
 			if item_code in item_details:
 				item_data.update(item_details[item_code])
+				item_data.cumulative_lead_time = self.get_cumulative_lead_time(
+					item_code, item_data.bom_no, flt(item_data.qty)
+				)
 
 	def get_item_details(self, items):
 		doctype = frappe.qb.DocType("Item")
@@ -131,38 +154,64 @@ class MasterProductionSchedule(Document):
 			.where(doctype.name.isin(items))
 		)
 
-		item_details = query.run(as_dict=True)
-		item_wise_details = frappe._dict({})
+		return frappe._dict({row.item_code: row for row in query.run(as_dict=True)})
 
-		if not item_details:
-			return item_wise_details
+	def load_lead_times(self, roots):
+		self._bom_materials = {}
+		items, visited, stack = set(), set(), list(roots)
+		while stack:
+			item_code, bom_no = stack.pop()
+			items.add(item_code)
+			if bom_no and bom_no not in visited:
+				visited.add(bom_no)
+				stack.extend((row.item_code, row.bom_no) for row in self.get_bom_materials(bom_no))
 
-		for row in item_details:
-			row.cumulative_lead_time = self.get_cumulative_lead_time(row.item_code, row.bom_no)
+		self._lead_times = {
+			row.item_code: row
+			for row in frappe.get_all(
+				"Item Lead Time",
+				filters={"item_code": ("in", list(items) or [""])},
+				fields=[
+					"item_code",
+					"capacity_per_day",
+					"manufacturing_time_in_mins",
+					"no_of_shift",
+					"shift_time_in_hours",
+					"no_of_workstations",
+					"purchase_time",
+					"buffer_time",
+				],
+			)
+		}
 
-		for row in item_details:
-			item_wise_details.setdefault(row.item_code, row)
+	def get_bom_materials(self, bom_no):
+		if bom_no not in self._bom_materials:
+			bom = frappe.qb.DocType("BOM")
+			bom_item = frappe.qb.DocType("BOM Item")
+			self._bom_materials[bom_no] = (
+				frappe.qb.from_(bom_item)
+				.join(bom)
+				.on(bom.name == bom_item.parent)
+				.select(
+					bom_item.item_code,
+					bom_item.bom_no,
+					(bom_item.stock_qty / bom.quantity).as_("qty_per_unit"),
+				)
+				.where((bom_item.parent == bom_no) & (bom_item.parenttype == "BOM") & (bom.docstatus == 1))
+			).run(as_dict=True)
 
-		return item_wise_details
+		return self._bom_materials[bom_no]
 
-	def get_cumulative_lead_time(self, item_code, bom_no, time_in_days=0):
-		if not time_in_days:
-			time_in_days = get_item_lead_time(item_code)
+	def get_cumulative_lead_time(self, item_code, bom_no, qty):
+		own_time = get_own_lead_time(self._lead_times.get(item_code), qty, bool(bom_no))
+		if not bom_no:
+			return own_time
 
-		bom_materials = frappe.get_all(
-			"BOM Item",
-			filters={"parent": bom_no, "docstatus": 1},
-			fields=["item_code", "bom_no"],
-		)
-
-		for row in bom_materials:
-			if row.bom_no:
-				time_in_days += self.get_cumulative_lead_time(row.item_code, row.bom_no)
-			else:
-				lead_time = get_item_lead_time(row.item_code)
-				time_in_days += lead_time
-
-		return time_in_days
+		component_times = [
+			self.get_cumulative_lead_time(row.item_code, row.bom_no, qty * flt(row.qty_per_unit))
+			for row in self.get_bom_materials(bom_no)
+		]
+		return own_time + max(component_times, default=0)
 
 	def get_demand_data(self):
 		sales_order_data = self.get_sales_orders_data()
@@ -171,27 +220,35 @@ class MasterProductionSchedule(Document):
 		return sales_order_data + material_request_data
 
 	def get_material_requests_data(self):
-		if not self.material_requests:
+		material_requests = [m.material_request for m in self.material_requests if m.material_request]
+		if not material_requests:
 			return []
 
 		doctype = frappe.qb.DocType("Material Request Item")
+		parent = frappe.qb.DocType("Material Request")
+		pending_qty = doctype.stock_qty - IfNull(doctype.ordered_qty, 0)
 
 		query = (
 			frappe.qb.from_(doctype)
+			.join(parent)
+			.on(parent.name == doctype.parent)
 			.select(
 				doctype.item_code,
 				doctype.warehouse,
 				doctype.stock_uom,
 				doctype.schedule_date.as_("delivery_date"),
 				doctype.parent.as_("material_request"),
-				doctype.stock_qty.as_("qty"),
+				pending_qty.as_("qty"),
+			)
+			.where(
+				doctype.parent.isin(material_requests)
+				& (parent.docstatus == 1)
+				& (parent.company == self.company)
+				& (parent.status != "Stopped")
+				& (pending_qty > 0)
 			)
 			.orderby(doctype.schedule_date)
 		)
-
-		if self.material_requests:
-			material_requests = [m.material_request for m in self.material_requests if m.material_request]
-			query = query.where(doctype.parent.isin(material_requests))
 
 		if self.from_date:
 			query = query.where(doctype.schedule_date >= self.from_date)
@@ -199,33 +256,46 @@ class MasterProductionSchedule(Document):
 		if self.to_date:
 			query = query.where(doctype.schedule_date <= self.to_date)
 
-		return query.run(as_dict=True)
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
+
+	def filter_selected_items(self, query, doctype):
+		if items := self.get_items_for_mps():
+			query = query.where(doctype.item_code.isin(items))
+
+		return query
 
 	def get_sales_orders_data(self):
-		sales_order_schedules = self.get_sales_order_schedules()
-		ignore_orders = []
-		if sales_order_schedules:
-			for row in sales_order_schedules:
-				if row.sales_order_item and row.sales_order_item not in ignore_orders:
-					ignore_orders.append(row.sales_order_item)
+		schedules = self.get_sales_order_schedules()
+		scheduled_rows = list({row.sales_order_item for row in schedules if row.sales_order_item})
+		sales_order_schedules = [
+			row for row in deduct_delivered_qty(schedules) if self.is_in_date_range(row.delivery_date)
+		]
 
-		sales_orders = self.get_items_from_sales_orders(ignore_orders)
-
-		return sales_orders + sales_order_schedules
+		return self.get_items_from_sales_orders(scheduled_rows) + sales_order_schedules
 
 	def get_items_from_sales_orders(self, ignore_orders=None):
 		doctype = frappe.qb.DocType("Sales Order Item")
+		parent = frappe.qb.DocType("Sales Order")
+		pending_qty = (doctype.qty - IfNull(doctype.delivered_qty, 0)) * doctype.conversion_factor
+
 		query = (
 			frappe.qb.from_(doctype)
+			.join(parent)
+			.on(parent.name == doctype.parent)
 			.select(
 				doctype.item_code,
 				doctype.warehouse,
 				doctype.stock_uom,
 				doctype.delivery_date,
 				doctype.name.as_("sales_order"),
-				doctype.stock_qty.as_("qty"),
+				pending_qty.as_("qty"),
 			)
-			.where(doctype.docstatus == 1)
+			.where(
+				(doctype.docstatus == 1)
+				& (parent.company == self.company)
+				& parent.status.notin(["Closed", "Completed"])
+				& (pending_qty > 0)
+			)
 			.orderby(doctype.delivery_date)
 		)
 
@@ -245,40 +315,60 @@ class MasterProductionSchedule(Document):
 		if ignore_orders:
 			query = query.where(doctype.name.notin(ignore_orders))
 
-		return query.run(as_dict=True)
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
 
 	def get_sales_order_schedules(self):
 		doctype = frappe.qb.DocType("Delivery Schedule Item")
-		query = frappe.qb.from_(doctype).select(
-			doctype.item_code,
-			doctype.warehouse,
-			doctype.stock_uom,
-			doctype.delivery_date,
-			doctype.sales_order,
-			doctype.sales_order_item,
-			doctype.stock_qty.as_("qty"),
+		parent = frappe.qb.DocType("Sales Order")
+		so_item = frappe.qb.DocType("Sales Order Item")
+		query = (
+			frappe.qb.from_(doctype)
+			.join(parent)
+			.on(parent.name == doctype.sales_order)
+			.join(so_item)
+			.on(so_item.name == doctype.sales_order_item)
+			.select(
+				doctype.item_code,
+				doctype.warehouse,
+				doctype.stock_uom,
+				doctype.delivery_date,
+				doctype.sales_order,
+				doctype.sales_order_item,
+				doctype.stock_qty.as_("qty"),
+				(IfNull(so_item.delivered_qty, 0) * so_item.conversion_factor).as_("delivered_qty"),
+			)
+			.where(
+				(parent.docstatus == 1)
+				& (parent.company == self.company)
+				& parent.status.notin(["Closed", "Completed"])
+			)
+			.orderby(doctype.sales_order_item)
+			.orderby(doctype.delivery_date)
 		)
 
 		if self.sales_orders:
 			names = [s.sales_order for s in self.sales_orders if s.sales_order]
 			query = query.where(doctype.sales_order.isin(names))
 
-		if self.from_date:
-			query = query.where(doctype.delivery_date >= self.from_date)
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
 
-		return query.run(as_dict=True)
+	def is_in_date_range(self, delivery_date):
+		if self.from_date and getdate(delivery_date) < getdate(self.from_date):
+			return False
+		return not (self.to_date and getdate(delivery_date) > getdate(self.to_date))
 
 	def get_item_wise_mps_data(self, data):
 		item_wise_data = frappe._dict({})
 
 		for item in data:
-			key = (item.item_code, item.delivery_date)
+			key = (item.item_code, item.delivery_date, item.warehouse)
 
 			if key not in item_wise_data:
 				item_wise_data[key] = frappe._dict(
 					{
 						"item_code": item.item_code,
 						"delivery_date": item.delivery_date,
+						"warehouse": item.warehouse,
 						"stock_uom": item.stock_uom,
 						"qty": 0.0,
 						"cumulative_lead_time": 0.0,
@@ -423,7 +513,7 @@ class MasterProductionSchedule(Document):
 			query = query.where(doctype.delivery_date >= kwargs.get("delivery_from_date"))
 
 		if kwargs.get("delivery_to_date"):
-			query = query.where(doctype.delivery_date <= kwargs.get("to_delivery_date"))
+			query = query.where(doctype.delivery_date <= kwargs.get("delivery_to_date"))
 
 		if items := self.get_items_for_mps():
 			doctype_item = frappe.qb.DocType("Sales Order Item")
@@ -438,6 +528,16 @@ class MasterProductionSchedule(Document):
 
 		return [d.item_code for d in self.select_items if d.item_code]
 
+	def on_update(self):
+		previous = self.get_doc_before_save()
+		if previous and previous.sales_forecast != self.sales_forecast:
+			update_sales_forecast_status(previous.sales_forecast)
+
+		update_sales_forecast_status(self.sales_forecast)
+
+	def after_delete(self):
+		update_sales_forecast_status(self.sales_forecast)
+
 	def on_submit(self):
 		self.enqueue_mrp_creation()
 
@@ -450,31 +550,65 @@ class MasterProductionSchedule(Document):
 		)
 
 
-def get_item_lead_time(item_code):
-	doctype = frappe.qb.DocType("Item Lead Time")
+def get_own_lead_time(lead_time, qty, is_manufactured):
+	if not lead_time:
+		return 0
 
-	query = (
-		frappe.qb.from_(doctype)
-		.select(
-			((doctype.manufacturing_time_in_mins / 1440) + doctype.purchase_time + doctype.buffer_time).as_(
-				"cumulative_lead_time"
-			)
+	if is_manufactured:
+		days = get_days_needed(lead_time, qty, 0)
+	else:
+		days = flt(lead_time.purchase_time)
+
+	return days + flt(lead_time.buffer_time)
+
+
+def get_days_needed(lead_time, qty, no_of_shifts):
+	capacity = get_daily_capacity(lead_time, no_of_shifts)
+	if capacity:
+		return qty / capacity
+
+	if lead_time.manufacturing_time_in_mins:
+		minutes_per_day = get_daily_working_mins(lead_time, no_of_shifts) * (
+			cint(lead_time.no_of_workstations) or 1
 		)
-		.where(doctype.item_code == item_code)
-	)
-
-	result = query.run(as_dict=True)
-	if result:
-		return result[0].cumulative_lead_time or 0
+		return cint(lead_time.manufacturing_time_in_mins) * qty / minutes_per_day
 
 	return 0
 
 
+def get_daily_working_mins(lead_time, no_of_shifts):
+	return (
+		(no_of_shifts or cint(lead_time.no_of_shift) or 1) * (cint(lead_time.shift_time_in_hours) or 8) * 60.0
+	)
+
+
+def get_daily_capacity(lead_time, no_of_shifts):
+	capacity = flt(lead_time.capacity_per_day)
+	if capacity and no_of_shifts:
+		capacity = capacity * no_of_shifts / (cint(lead_time.no_of_shift) or 1)
+
+	return capacity
+
+
 @frappe.whitelist()
-def get_mps_details(mps):
+def get_mps_details(mps: str):
+	frappe.has_permission("Master Production Schedule", "read", doc=mps, throw=True)
 	return frappe.db.get_value(
 		"Master Production Schedule",
 		mps,
 		["name", "from_date", "to_date", "company", "posting_date"],
 		as_dict=True,
 	)
+
+
+def deduct_delivered_qty(schedules):
+	delivered_by_row = {}
+	pending = []
+	for row in schedules:
+		delivered = delivered_by_row.setdefault(row.sales_order_item, flt(row.delivered_qty))
+		covered = min(delivered, flt(row.qty))
+		delivered_by_row[row.sales_order_item] = delivered - covered
+		row.qty = flt(row.qty) - covered
+		if row.qty > 0:
+			pending.append(row)
+	return pending

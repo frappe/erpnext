@@ -15,6 +15,8 @@ class SubcontractingOrderServiceItem(Document):
 		from frappe.types import DF
 
 		amount: DF.Currency
+		base_amount: DF.Currency
+		base_rate: DF.Currency
 		fg_item: DF.Link
 		fg_item_qty: DF.Float
 		item_code: DF.Link

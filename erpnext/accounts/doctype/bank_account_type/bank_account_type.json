@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:account_type",
  "creation": "2018-10-25 15:45:45.789963",
+ "description": "A grouping of bank accounts, like checking or credit card.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -18,6 +19,7 @@
    "unique": 1
   }
  ],
+ "icon": "credit-card",
  "links": [],
  "modified": "2024-03-27 13:06:37.347035",
  "modified_by": "Administrator",

@@ -10,7 +10,7 @@ from frappe.utils import cstr, flt, formatdate, get_link_to_form, getdate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
+from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
@@ -61,7 +61,7 @@ class AssetValueAdjustment(Document):
 
 	def set_current_asset_value(self):
 		if not self.current_asset_value and self.asset:
-			self.current_asset_value = get_asset_value_after_depreciation(self.asset, self.finance_book)
+			self.current_asset_value = _get_asset_value_after_depreciation(self.asset, self.finance_book)
 
 	def on_submit(self):
 		self.make_asset_revaluation_entry()

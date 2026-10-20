@@ -668,7 +668,7 @@ const InvoicesSection = ({ currency }: { currency: string }) => {
     return <div className="flex flex-col gap-2">
         <div className="flex gap-4 items-center">
             <H4 className="text-base">{_("Invoices")}</H4>
-            <GetUnpaidInvoicesButton />
+            <GetUnpaidInvoicesButton currency={currency} />
         </div>
         <Table>
             <TableHeader>
@@ -885,7 +885,7 @@ const Summary = ({ currency }: { currency: string }) => {
 
     </div>
 }
-const GetUnpaidInvoicesButton = () => {
+const GetUnpaidInvoicesButton = ({ currency }: { currency: string }) => {
 
     const [isOpen, setIsOpen] = useAtom(isUnpaidInvoicesButtonOpen)
 
@@ -905,9 +905,9 @@ const GetUnpaidInvoicesButton = () => {
             <DialogContent className="min-w-[75vw]">
                 <DialogHeader>
                     <DialogTitle>Select Invoices</DialogTitle>
-                    <DialogDescription>Unpaid invoices from {partyName} for {formatCurrency(amount)}.</DialogDescription>
+                    <DialogDescription>Unpaid invoices from {partyName} for {formatCurrency(amount, currency)}.</DialogDescription>
                 </DialogHeader>
-                <FetchInvoicesModal onClose={() => setIsOpen(false)} />
+                <FetchInvoicesModal currency={currency} onClose={() => setIsOpen(false)} />
             </DialogContent>
         </Dialog>
     </>
@@ -924,8 +924,9 @@ interface OutstandingInvoice {
     payment_term_outstanding?: string,
     account?: string,
     allocated_amount?: number,
+    currency?: string,
 }
-const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
+const FetchInvoicesModal = ({ currency, onClose }: { currency: string, onClose: () => void }) => {
 
     const { getValues, setValue } = useFormContext<PaymentEntry>()
 
@@ -1085,10 +1086,10 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
                             {formatDate(ref.due_date)}
                         </TableCell>
                         <TableCell className="text-end">
-                            {formatCurrency(ref.invoice_amount)}
+                            {formatCurrency(ref.invoice_amount, ref.currency)}
                         </TableCell>
                         <TableCell className="text-end font-medium">
-                            {formatCurrency(ref.outstanding_amount)}
+                            {formatCurrency(ref.outstanding_amount, ref.currency)}
                         </TableCell>
                     </TableRow>
                 ))}
@@ -1097,7 +1098,7 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
         <div className="flex justify-between items-center sticky bottom-0 bg-surface-modal">
             <div className="flex gap-2">
                 <span className="text-ink-gray-5">Invoices: <span className="text-ink-gray-8 font-numeric font-medium">{selectedInvoices.length}</span></span> /
-                <span className="text-ink-gray-5">Total: <span className="text-ink-gray-8 font-numeric font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0))}</span></span>
+                <span className="text-ink-gray-5">Total: <span className="text-ink-gray-8 font-numeric font-medium">{formatCurrency(selectedInvoices.reduce((acc, invoice) => acc + invoice.outstanding_amount, 0), selectedInvoices[0]?.currency ?? currency)}</span></span>
             </div>
             <DialogFooter className="pt-2">
                 <DialogClose asChild>

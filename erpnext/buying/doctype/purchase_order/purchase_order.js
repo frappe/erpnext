@@ -608,7 +608,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 						var item_length = me.frm.doc.items.length;
 						while (i < item_length) {
 							var qty = me.frm.doc.items[i].qty;
-							(r.message[0] || []).forEach(function (d) {
+							(r.message || []).forEach(function (d) {
 								if (
 									d.qty > 0 &&
 									qty > 0 &&
@@ -701,8 +701,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				let reason_for_hold = "Reason for hold: " + data.reason_for_hold;
 
 				frappe.call({

@@ -3,6 +3,7 @@
  "creation": "2013-06-24 15:49:57",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounts-settings",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -401,7 +402,7 @@
   },
   {
    "default": "0",
-   "description": "Rows with Same Account heads will be merged on Ledger",
+   "description": "Merge rows with the same account head in the ledger for Journal Entries and Payment Entries only.",
    "fieldname": "merge_similar_account_heads",
    "fieldtype": "Check",
    "label": "Merge similar Account Heads"
@@ -793,12 +794,12 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "icon-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-04 10:08:30.115003",
+ "modified": "2026-10-12 12:14:32.301569",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
@@ -820,6 +821,10 @@
   {
    "read": 1,
    "role": "Purchase User"
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
   }
  ],
  "quick_entry": 1,

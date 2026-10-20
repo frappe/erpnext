@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"item\", \"label\": \"Item to Manufacture\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"modified\", \"label\": \"Last Updated On\"}]",
+ "creation": "2026-09-30 21:12:56.885669",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Inactive",
+ "filters": "[[\"BOM\", \"is_active\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.885669",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM-Inactive",
+ "owner": "Administrator",
+ "reference_doctype": "BOM",
+ "route_signature": "is_active=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

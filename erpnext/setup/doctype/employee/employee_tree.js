@@ -13,9 +13,10 @@ frappe.treeview_settings["Employee"] = {
 	disable_add_node: true,
 	get_tree_root: false,
 	toolbar: [
-		{ toggle_btn: true },
 		{
 			label: __("Edit"),
+			icon: "pencil",
+			inline: true,
 			condition: function (node) {
 				return !node.is_root;
 			},

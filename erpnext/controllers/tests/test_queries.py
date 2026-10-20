@@ -81,6 +81,26 @@ class TestQueries(ERPNextTestSuite):
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
 
+	def test_get_delivery_notes_to_be_billed_skips_fully_returned(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		returned_dn = create_delivery_note(qty=2)
+		dn_return = make_sales_return(returned_dn.name)
+		dn_return.submit()
+		# a new doc misses the is_return part of status_updater, so update the original DN explicitly
+		frappe.get_doc("Delivery Note", dn_return.name).update_prevdoc_status()
+		returned_dn.reload()
+		self.assertEqual(returned_dn.status, "Return Issued")
+
+		open_dn = create_delivery_note(qty=2)
+
+		query = add_default_params(queries.get_delivery_notes_to_be_billed, "Delivery Note")
+		result = query(filters={"name": ["in", [returned_dn.name, open_dn.name]]})
+
+		self.assert_nested_in(open_dn.name, result)
+		self.assertNotIn(returned_dn.name, [row[0] for row in result])
+
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
 

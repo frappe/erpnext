@@ -6,7 +6,16 @@ import frappe
 from frappe import _
 
 field_map = {
-	"Contact": ["name", "first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact"],
+	"Contact": [
+		"name",
+		"first_name",
+		"last_name",
+		"designation",
+		"phone",
+		"mobile_no",
+		"email_id",
+		"is_primary_contact",
+	],
 	"Address": [
 		"name",
 		"address_line1",
@@ -47,6 +56,7 @@ def get_columns(filters):
 		{"label": _("Contact"), "fieldtype": "Link", "options": "Contact", "hidden": 1},
 		"First Name",
 		"Last Name",
+		"Designation",
 		"Phone",
 		"Mobile No",
 		"Email Id",
@@ -78,10 +88,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 	if party:
 		query_filters = {"name": party}
 
-	if filters.get("party_type") in ["Customer", "Supplier"]:
-		field = filters.get("party_type").lower() + "_name"
-	else:
-		field = "partner_name"
+	field = get_party_name_field(party_type)
 
 	fetch_party_list = frappe.get_list(
 		party_type, filters=query_filters, fields=["name", party_group, field], as_list=True
@@ -152,6 +159,17 @@ def get_party_details(party_type, party_list, doctype, party_details):
 
 def add_blank_columns_for(doctype):
 	return ["" for field in field_map.get(doctype, [])]
+
+
+def get_party_name_field(party_type):
+	field = {
+		"Customer": "customer_name",
+		"Supplier": "supplier_name",
+		"Sales Partner": "partner_name",
+		"Lead": "lead_name",
+	}
+
+	return field[party_type]
 
 
 def get_party_group(party_type):

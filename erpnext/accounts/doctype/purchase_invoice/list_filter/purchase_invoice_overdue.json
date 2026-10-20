@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"bill_no\", \"label\": \"Supplier Invoice No\"}, {\"fieldname\": \"due_date\", \"label\": \"Due Date\"}, {\"fieldname\": \"outstanding_amount\", \"label\": \"Outstanding Amount\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.552870",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Overdue",
+ "filters": "[[\"Purchase Invoice\", \"status\", \"=\", \"Overdue\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.552870",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Purchase Invoice-Overdue",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Invoice",
+ "route_signature": "status=Overdue",
+ "sort_field": "due_date",
+ "sort_order": "asc"
+}

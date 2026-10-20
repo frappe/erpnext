@@ -8,15 +8,48 @@ from erpnext.manufacturing.doctype.operation.test_operation import make_operatio
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	NotInWorkingHoursError,
+	OverlapError,
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
 	get_raw_materials,
 	update_job_card,
 )
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
 class TestWorkstation(ERPNextTestSuite):
+	def make_workstation(self, name, *timings):
+		doc = frappe.new_doc("Workstation", workstation_name=name)
+		for start_time, end_time in timings:
+			doc.append("working_hours", {"start_time": start_time, "end_time": end_time})
+		return doc
+
+	def test_back_to_back_working_hours_do_not_overlap(self):
+		doc = self.make_workstation(
+			"_Test Back To Back Shifts", ("08:00:00", "16:00:00"), ("16:00:00", "23:59:59")
+		)
+		doc.insert()
+
+		# also holds when the touching row is added to an already saved workstation
+		doc.append("working_hours", {"start_time": "05:00:00", "end_time": "08:00:00"})
+		doc.save()
+		self.assertEqual(len(doc.working_hours), 3)
+
+	def test_overlapping_working_hours_raise_error(self):
+		for timing in (
+			("15:00:00", "20:00:00"),  # partial overlap at the end
+			("06:00:00", "09:00:00"),  # partial overlap at the start
+			("10:00:00", "12:00:00"),  # enclosed
+			("07:00:00", "17:00:00"),  # enclosing
+			("08:00:00", "16:00:00"),  # identical
+		):
+			with self.subTest(timing=timing):
+				doc = self.make_workstation("_Test Overlapping Shifts", ("08:00:00", "16:00:00"))
+				doc.insert()
+				doc.append("working_hours", {"start_time": timing[0], "end_time": timing[1]})
+				self.assertRaises(OverlapError, doc.save)
+				doc.delete()
+
 	def test_get_raw_materials_without_items(self):
 		for skip_transfer, backflush_from_wip in ((0, 0), (1, 0), (1, 1)):
 			with self.subTest(skip_transfer=skip_transfer, backflush_from_wip=backflush_from_wip):
@@ -198,6 +231,141 @@ class TestWorkstation(ERPNextTestSuite):
 			self.assertEqual(hour_rate, 250)
 			self.assertEqual(operating_cost, expected_operating_cost)
 
+	def test_manufacture_uses_operating_cost_recorded_on_the_work_order(self):
+		from frappe.utils import add_to_date, now
+
+		from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry as make_test_entry
+
+		workstation = make_workstation(workstation_name="_Test WS Recorded Cost", hour_rate_rent=600)
+		operations = [
+			{"operation": "_Test Op Recorded Cost", "workstation": workstation.name, "time_in_mins": 6}
+		]
+		setup_operations(operations)
+		fg_item = make_item("_Test FG Recorded Cost", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test RM Recorded Cost", {"is_stock_item": 1}).name
+		routing = create_routing(routing_name="Recorded Cost Route", operations=operations)
+		bom = setup_bom(
+			item_code=fg_item, routing=routing.name, raw_materials=[rm_item], source_warehouse="Stores - _TC"
+		)
+		make_test_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=50)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, skip_transfer=1, source_warehouse="Stores - _TC"
+		)
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		from_time = add_to_date(now(), days=1)
+		job_card.append(
+			"time_logs",
+			{"from_time": from_time, "to_time": add_to_date(from_time, minutes=60), "completed_qty": 10},
+		)
+		job_card.submit()
+
+		workstation.reload()
+		workstation.workstation_costs[0].operating_cost = 1200
+		workstation.save()
+
+		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
+		entry.insert()
+		recorded_cost = frappe.db.get_value(
+			"Work Order Operation", {"parent": work_order.name}, "actual_operating_cost"
+		)
+		self.assertAlmostEqual(recorded_cost, 600, delta=1)
+		self.assertEqual(
+			sum(row.amount for row in entry.additional_costs if row.has_operating_cost), recorded_cost
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
+		shifts = [("13:00:00", "17:00:00"), ("08:00:00", "12:00:00")]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Early", shifts, 60, "2031-03-03 06:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 09:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Break", shifts, 60, "2031-03-03 12:30:00"),
+			[("2031-03-03 13:00:00", "2031-03-03 14:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Order", shifts, 360, "2031-03-03 08:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-03 13:00:00", "2031-03-03 15:00:00")],
+		)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "allow_overtime": 0, "mins_between_operations": 10},
+	)
+	def test_start_moved_into_a_shift_is_checked_for_overlap(self):
+		shifts = [("08:00:00", "17:00:00")]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Overlap", shifts, 60, "2031-03-05 08:00:00"),
+			[("2031-03-05 08:00:00", "2031-03-05 09:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Overlap", shifts, 60, "2031-03-05 06:00:00"),
+			[("2031-03-05 09:10:00", "2031-03-05 10:10:00")],
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_disabled_working_hours_are_not_used(self):
+		shifts = [("08:00:00", "12:00:00"), ("13:00:00", "17:00:00", 0)]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Disabled Shift", shifts, 360, "2031-03-03 08:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-04 08:00:00", "2031-03-04 10:00:00")],
+		)
+		self.assertEqual(
+			frappe.db.get_value("Workstation", "_Test WS Disabled Shift", "total_working_hours"), 4
+		)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "allow_overtime": 0, "allow_production_on_holidays": 0},
+	)
+	def test_holidays_are_skipped_without_working_hours_and_with_overtime(self):
+		holiday_list = make_test_holiday_list("_Test WS Holiday List", ["2031-03-03"])
+		self.assertEqual(
+			schedule_one_operation("_Test WS Holiday No Shift", [], 60, "2031-03-03 08:00:00", holiday_list),
+			[("2031-03-04 08:00:00", "2031-03-04 09:00:00")],
+		)
+
+		frappe.db.set_single_value("Manufacturing Settings", "allow_overtime", 1)
+		self.assertEqual(
+			schedule_one_operation(
+				"_Test WS Holiday Overtime",
+				[("08:00:00", "17:00:00")],
+				60,
+				"2031-03-03 08:00:00",
+				holiday_list,
+			),
+			[("2031-03-04 08:00:00", "2031-03-04 09:00:00")],
+		)
+
+	def test_complete_job_books_the_qty_once_on_an_open_card(self):
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		job_card = make_scheduled_job_card("_Test WS Complete Job", [], 60, "2031-03-03 08:00:00", qty=10)
+		workstation = frappe.get_doc("Workstation", "_Test WS Complete Job")
+		other_workstation = make_workstation(workstation_name="_Test WS Complete Job Other")
+
+		first = make_employee("ws-operator-1@example.com", company="_Test Company")
+		second = make_employee("ws-operator-2@example.com", company="_Test Company")
+		self.assertRaises(
+			frappe.ValidationError, other_workstation.start_job, job_card.name, "2031-03-03 10:00:00", first
+		)
+		workstation.start_job(job_card.name, "2031-03-03 10:00:00", first)
+		workstation.start_job(job_card.name, "2031-03-03 10:00:00", second)
+		workstation.complete_job(job_card.name, 5, "2031-03-03 11:00:00")
+
+		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "total_completed_qty"), 5)
+		self.assertRaises(
+			frappe.ValidationError, workstation.start_job, job_card.name, "2031-03-03 13:00:00", first
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
@@ -233,3 +401,53 @@ def make_workstation(*args, **kwargs):
 		return doc
 
 	return frappe.get_doc("Workstation", workstation_name)
+
+
+def schedule_one_operation(workstation_name, shifts, minutes, planned_start, holiday_list=None):
+	job_card = make_scheduled_job_card(workstation_name, shifts, minutes, planned_start, holiday_list)
+	return [(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
+
+
+def make_scheduled_job_card(workstation_name, shifts, minutes, planned_start, holiday_list=None, qty=1):
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	workstation = frappe.get_doc("Workstation", make_workstation(workstation_name=workstation_name).name)
+	workstation.holiday_list = holiday_list
+	workstation.set("working_hours", [])
+	for shift in shifts:
+		workstation.append(
+			"working_hours",
+			{"start_time": shift[0], "end_time": shift[1], "enabled": shift[2] if len(shift) > 2 else 1},
+		)
+	workstation.save()
+
+	operation = make_operation(operation=f"{workstation_name} Op", workstation=workstation.name).name
+	fg_item = make_item(f"{workstation_name} FG", {"is_stock_item": 1}).name
+	rm_item = make_item(f"{workstation_name} RM", {"is_stock_item": 1}).name
+	bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_submit=True)
+	bom.append(
+		"operations",
+		{"operation": operation, "workstation": workstation.name, "time_in_mins": minutes, "hour_rate": 100},
+	)
+	bom.submit()
+
+	work_order = make_wo_order_test_record(
+		item=fg_item, bom_no=bom.name, qty=qty, planned_start_date=planned_start, skip_transfer=1
+	)
+	return frappe.get_doc("Job Card", {"work_order": work_order.name})
+
+
+def make_test_holiday_list(name, dates):
+	if not frappe.db.exists("Holiday List", name):
+		frappe.get_doc(
+			{
+				"doctype": "Holiday List",
+				"holiday_list_name": name,
+				"from_date": "2031-01-01",
+				"to_date": "2031-12-31",
+				"holidays": [{"holiday_date": date, "description": "Test holiday"} for date in dates],
+			}
+		).insert()
+	return name

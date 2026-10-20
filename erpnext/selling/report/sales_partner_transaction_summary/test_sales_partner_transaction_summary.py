@@ -15,7 +15,6 @@ class TestSalesPartnerTransactionSummary(SalesPartnerSummaryReportTestMixin):
 			"doctype": "Sales Order",
 			"from_date": "2026-01-01",
 			"to_date": "2026-01-31",
-			"show_return_entries": 1,
 		}
 		self.report_name = "Sales Partner Transaction Summary"
 
@@ -50,7 +49,9 @@ class TestSalesPartnerTransactionSummary(SalesPartnerSummaryReportTestMixin):
 		self.assert_sales_partner_transaction_summary_report()
 
 	def assert_sales_partner_transaction_summary_report(self):
-		report_data = run(self.report_name, self.filters)
+		filters = self.filters.copy()
+		filters["account_for_return_entries"] = 1
+		report_data = run(self.report_name, filters)
 
 		self.report_result = report_data.get("result")
 		self.report_result_without_total_row = self.report_result[:-1]
@@ -68,6 +69,8 @@ class TestSalesPartnerTransactionSummary(SalesPartnerSummaryReportTestMixin):
 
 		if self.filters["doctype"] != "Sales Order":
 			self.assert_returned_doc()
+			self.assert_returns_excluded_when_untoggled()
+			self.assert_old_filter_key_still_accounts_returns()
 
 	def assert_7pc_commission(self):
 		doc_name = self.seven_pc_doc.name
@@ -181,3 +184,27 @@ class TestSalesPartnerTransactionSummary(SalesPartnerSummaryReportTestMixin):
 
 		self.assertEqual(inward_row["amount"], -900)
 		self.assertEqual(inward_row["commission"], -45)
+
+	def assert_returns_excluded_when_untoggled(self):
+		# Unchecking the box drops the key entirely, which must exclude returns
+		result = run(self.report_name, self.filters.copy()).get("result")
+		rows = result[:-1]
+
+		outward_row = next((row for row in rows if row.get("name") == self.to_be_returned_doc.name), None)
+		inward_row = next((row for row in rows if row.get("name") == self.returned_doc.name), None)
+
+		self.assertIsNotNone(outward_row)
+		self.assertIsNone(inward_row)
+
+		total_row = result[-1]
+		self.assertEqual(total_row[-4], 2940)
+		self.assertEqual(total_row[-1], 127)
+
+	def assert_old_filter_key_still_accounts_returns(self):
+		# Saved reports pass the old key; it must still include returns
+		filters = self.filters.copy()
+		filters["show_return_entries"] = 1
+		rows = run(self.report_name, filters).get("result")[:-1]
+
+		inward_row = next((row for row in rows if row.get("name") == self.returned_doc.name), None)
+		self.assertIsNotNone(inward_row)

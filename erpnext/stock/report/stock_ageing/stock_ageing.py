@@ -7,12 +7,15 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.valuation import round_off_if_near_zero
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 Filters = frappe._dict
 
@@ -29,6 +32,7 @@ BATCH_SLOT_DATE_INDEX = 3
 BATCH_SLOT_VALUE_INDEX = 4
 
 AVERAGE_AGE_COLUMN = 6
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
 MAX_CHART_ITEMS = 10
 
 
@@ -45,8 +49,9 @@ def execute(filters: Filters = None) -> tuple:
 	return columns, data, None, chart_data
 
 
-def get_age_ranges(age_range: str) -> list[str]:
-	return [num.strip() for num in age_range.split(",") if num.strip().isdigit()]
+def get_age_ranges(age_range: str | None) -> list[str]:
+	ranges = [num.strip() for num in (age_range or "30, 60, 90").split(",") if num.strip().isdigit()]
+	return sorted(ranges, key=cint)
 
 
 def get_float_precision() -> int:
@@ -286,6 +291,7 @@ class FIFOSlots:
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
 		self.batch_no_details = {}
+		self.batches_with_negative_slots = set()
 		self.batchwise_valuation_by_batch = {}
 		self.valuation_method_by_item = {}
 		self.filters = filters
@@ -303,9 +309,12 @@ class FIFOSlots:
 		"""
 		stock_ledger_entries = self.sle
 		bundle_wise_serial_nos, bundle_wise_batch_nos = self._get_bundle_wise_details(stock_ledger_entries)
+		# an Adjustment Entry counts stock out and back in, which would restart its age
+		adjustment_netting = AdjustmentNetting(by_lot=True)
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.subcontracting_returns = self._get_subcontracting_returns()
 		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
@@ -318,7 +327,7 @@ class FIFOSlots:
 			if stock_ledger_entries is None:
 				stock_ledger_entries = self._get_stock_ledger_entries()
 
-			for row in stock_ledger_entries:
+			for row in adjustment_netting.net_by_lot(stock_ledger_entries, item_field="name"):
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
 			# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
@@ -402,7 +411,8 @@ class FIFOSlots:
 	def _set_stock_reconciliation_actual_qty(
 		self, row: dict, key: tuple, fifo_queue: list, prev_balance_qty: float
 	) -> None:
-		if row.voucher_type != "Stock Reconciliation":
+		# the net change of an Adjustment Entry moves stock, it does not set a balance
+		if row.voucher_type != "Stock Reconciliation" or row.get("is_adjustment_entry"):
 			return
 
 		if row.has_serial_no and (not row.batch_no or row.serial_no or row.serial_and_batch_bundle):
@@ -424,6 +434,10 @@ class FIFOSlots:
 			return
 
 		if row.has_batch_no:
+			# a batch an Adjustment Entry changed arrives or leaves at its own value
+			if row.get("is_adjustment_entry"):
+				return
+
 			if flt(row.actual_qty) > 0:
 				self._revalue_reconciled_batch_slots(fifo_queue, batch_nos)
 			return
@@ -616,7 +630,7 @@ class FIFOSlots:
 	def _add_serial_fifo_slots(self, row: dict, fifo_queue: list, serial_nos: list) -> None:
 		valuation = row.stock_value_difference / row.actual_qty
 		for serial_no in serial_nos:
-			posting_date = self.serial_no_details.setdefault(serial_no, row.posting_date)
+			posting_date = self.serial_no_details.setdefault((serial_no, row.warehouse), row.posting_date)
 			fifo_queue.append([serial_no, posting_date, valuation])
 
 	def _add_batch_fifo_slots(self, row: dict, fifo_queue: list, batch_nos: list) -> None:
@@ -628,7 +642,7 @@ class FIFOSlots:
 			if not qty:
 				continue
 
-			posting_date = self.batch_no_details.setdefault(batch_no, row.posting_date)
+			posting_date = self.batch_no_details.setdefault((batch_no, row.warehouse), row.posting_date)
 			fifo_queue.append([batch_no, use_batchwise_valuation, qty, posting_date, stock_value_difference])
 
 	def _neutralize_negative_batch_stock(
@@ -645,6 +659,11 @@ class FIFOSlots:
 
 		if not qty:
 			return qty, stock_value_difference
+
+		if (batch_no, row.warehouse) not in self.batches_with_negative_slots:
+			return qty, stock_value_difference
+
+		negative_slot_may_remain = False
 
 		for slot in list(fifo_queue):
 			if not self._is_matching_negative_batch_slot(slot, batch_no, use_batchwise_valuation):
@@ -666,9 +685,15 @@ class FIFOSlots:
 
 			if not flt(slot[BATCH_SLOT_QTY_INDEX]) and not flt(slot[BATCH_SLOT_VALUE_INDEX]):
 				fifo_queue.remove(slot)
+			elif flt(slot[BATCH_SLOT_QTY_INDEX]) < 0:
+				negative_slot_may_remain = True
 
 			if not qty:
+				negative_slot_may_remain = True
 				break
+
+		if not negative_slot_may_remain:
+			self.batches_with_negative_slots.discard((batch_no, row.warehouse))
 
 		return qty, stock_value_difference
 
@@ -778,9 +803,13 @@ class FIFOSlots:
 		qty: float,
 		stock_value_difference: float,
 	) -> None:
+		"""The only place a batch slot goes negative, so it is also where the warehouse
+		is recorded as owing stock on that batch. The record is discarded again by a walk
+		that reaches the end of the queue and leaves nothing negative behind."""
 		fifo_queue.append(
 			[batch_no, use_batchwise_valuation, -(qty), row.posting_date, -(stock_value_difference)]
 		)
+		self.batches_with_negative_slots.add((batch_no, row.warehouse))
 		self.transferred_item_details[transfer_key].append([qty, row.posting_date, stock_value_difference])
 
 	def _consume_fifo_slots(
@@ -790,6 +819,10 @@ class FIFOSlots:
 		index = -1 if from_end else 0
 		qty_to_pop = abs(row.actual_qty)
 		stock_value = abs(row.stock_value_difference)
+		if qty_to_pop and self._is_return_entry(row):
+			qty_to_pop, stock_value = self._consume_slots_at_return_rate(
+				fifo_queue, transfer_key, qty_to_pop, stock_value, from_end
+			)
 
 		while qty_to_pop:
 			slot = fifo_queue[index] if fifo_queue else [0, None, 0]
@@ -816,6 +849,45 @@ class FIFOSlots:
 				qty_to_pop = 0
 				stock_value = 0
 
+	def _get_subcontracting_returns(self) -> set:
+		return set(
+			frappe.get_all(
+				"Subcontracting Receipt",
+				filters={"is_return": 1, "docstatus": 1, "company": self.filters.get("company")},
+				pluck="name",
+			)
+		)
+
+	def _is_return_entry(self, row: dict) -> bool:
+		if row.voucher_type in PURCHASE_VOUCHER_TYPES:
+			return True
+
+		return row.voucher_type == "Subcontracting Receipt" and row.voucher_no in self.subcontracting_returns
+
+	def _consume_slots_at_return_rate(
+		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float, from_end: bool
+	) -> tuple[float, float]:
+		return_rate = stock_value / qty_to_pop
+		for slot in list(reversed(fifo_queue)) if from_end else list(fifo_queue):
+			slot_qty = flt(slot[FIFO_QTY_INDEX])
+			if slot_qty <= 0 or abs(flt(slot[FIFO_VALUE_INDEX]) / slot_qty - return_rate) > 0.01:
+				continue
+
+			qty = min(slot_qty, qty_to_pop)
+			value = flt(slot[FIFO_VALUE_INDEX]) * qty / slot_qty
+			slot[FIFO_QTY_INDEX] = slot_qty - qty
+			slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_VALUE_INDEX]) - value
+			if not slot[FIFO_QTY_INDEX]:
+				fifo_queue.remove(slot)
+
+			self.transferred_item_details[transfer_key].append([qty, slot[FIFO_DATE_INDEX], value])
+			qty_to_pop -= qty
+			stock_value -= value
+			if not qty_to_pop:
+				break
+
+		return qty_to_pop, stock_value
+
 	def _adjust_incoming_transfer_qty(
 		self,
 		transfer_data: dict,
@@ -839,13 +911,25 @@ class FIFOSlots:
 				transfer_qty_to_pop -= transfer_qty
 				stock_value -= transfer_value
 				self._add_incoming_transfer_slots(
-					fifo_queue, batch_nos, transfer_qty, transfer_date, transfer_value, serial_nos
+					fifo_queue,
+					row.warehouse,
+					batch_nos,
+					transfer_qty,
+					transfer_date,
+					transfer_value,
+					serial_nos,
 				)
 				transfer_data.pop(0)
 			elif not transfer_data:
 				# transfer bucket is empty, extra incoming qty
 				self._add_incoming_transfer_slots(
-					fifo_queue, batch_nos, transfer_qty_to_pop, row.posting_date, stock_value, serial_nos
+					fifo_queue,
+					row.warehouse,
+					batch_nos,
+					transfer_qty_to_pop,
+					row.posting_date,
+					stock_value,
+					serial_nos,
 				)
 				transfer_qty_to_pop = 0
 				stock_value = 0
@@ -855,6 +939,7 @@ class FIFOSlots:
 				transfer_data[0][FIFO_VALUE_INDEX] -= stock_value
 				self._add_incoming_transfer_slots(
 					fifo_queue,
+					row.warehouse,
 					batch_nos,
 					transfer_qty_to_pop,
 					transfer_data[0][FIFO_DATE_INDEX],
@@ -867,17 +952,21 @@ class FIFOSlots:
 	def _add_incoming_transfer_slots(
 		self,
 		fifo_queue: list,
+		warehouse: str,
 		batch_nos: list,
 		qty: float,
 		posting_date: str,
 		value: float,
 		serial_nos: list | None = None,
 	) -> None:
-		for slot in self._get_incoming_transfer_slots(batch_nos, qty, posting_date, value, serial_nos):
+		for slot in self._get_incoming_transfer_slots(
+			warehouse, batch_nos, qty, posting_date, value, serial_nos
+		):
 			self._add_transfer_slot_to_fifo_queue(fifo_queue, slot)
 
 	def _get_incoming_transfer_slots(
 		self,
+		warehouse: str,
 		batch_nos: list,
 		qty: float,
 		posting_date: str,
@@ -885,7 +974,7 @@ class FIFOSlots:
 		serial_nos: list | None = None,
 	) -> list:
 		if serial_nos:
-			return self._get_serial_incoming_transfer_slots(serial_nos, qty, posting_date, value)
+			return self._get_serial_incoming_transfer_slots(serial_nos, warehouse, qty, posting_date, value)
 
 		if not batch_nos:
 			return [[qty, posting_date, value]]
@@ -919,7 +1008,7 @@ class FIFOSlots:
 		return incoming_slots
 
 	def _get_serial_incoming_transfer_slots(
-		self, serial_nos: list, qty: float, posting_date: str, value: float
+		self, serial_nos: list, warehouse: str, qty: float, posting_date: str, value: float
 	) -> list:
 		incoming_slots = []
 		remaining_value = flt(value)
@@ -928,7 +1017,7 @@ class FIFOSlots:
 		for index in range(serial_count):
 			serial_no = serial_nos.pop(0)
 			serial_value = remaining_value if index == serial_count - 1 else flt(value / serial_count)
-			serial_posting_date = self.serial_no_details.setdefault(serial_no, posting_date)
+			serial_posting_date = self.serial_no_details.setdefault((serial_no, warehouse), posting_date)
 
 			incoming_slots.append([serial_no, serial_posting_date, serial_value])
 			remaining_value = flt(remaining_value - serial_value)
@@ -1045,6 +1134,7 @@ class FIFOSlots:
 				sle.qty_after_transaction,
 				sle.serial_and_batch_bundle,
 				sle.warehouse,
+				sle.is_adjustment_entry,
 			)
 			.where(
 				(sle.item_code == item.name)
@@ -1053,6 +1143,9 @@ class FIFOSlots:
 				& (sle.is_cancelled != 1)
 			)
 		)
+
+		if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
+			sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
 		if self.filters.get("warehouse"):
 			sle_query = self._get_warehouse_conditions(sle, sle_query)

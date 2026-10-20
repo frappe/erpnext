@@ -7,7 +7,7 @@ from frappe import _
 
 
 def execute(filters=None):
-	if filters.from_date >= filters.to_date:
+	if filters.from_date > filters.to_date:
 		frappe.msgprint(_("To Date must be greater than From Date"))
 
 	data = []
@@ -82,6 +82,7 @@ def get_subcontract_orders(filters):
 		["transaction_date", "<=", filters.to_date],
 		["transaction_date", ">=", filters.from_date],
 		["docstatus", "=", 1],
+		["status", "!=", "Closed"],
 	]
 
 	if filters.order_type == "Purchase Order":

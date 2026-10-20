@@ -5,6 +5,7 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Task", {
 	setup: function (frm) {
+		frm.add_fetch("type", "weight", "task_weight");
 		frm.make_methods = {
 			Timesheet: () =>
 				frappe.model.open_mapped_doc({
@@ -43,6 +44,8 @@ frappe.ui.form.on("Task", {
 	},
 
 	is_group: function (frm) {
+		if (frm.is_new()) return;
+
 		frappe.call({
 			method: "erpnext.projects.doctype.task.task.check_if_child_exists",
 			args: {

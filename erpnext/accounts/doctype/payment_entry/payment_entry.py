@@ -27,6 +27,7 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -51,7 +52,6 @@ from erpnext.accounts.utils import (
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
-	get_supplier_block_status,
 	validate_taxes_and_charges,
 )
 from erpnext.setup.utils import get_exchange_rate
@@ -171,6 +171,7 @@ class PaymentEntry(AccountsController):
 			self.party_account_currency = self.paid_to_account_currency
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
@@ -383,11 +384,15 @@ class PaymentEntry(AccountsController):
 
 		fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 		for d in self.get("references"):
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(d.outstanding_amount):
+			precision = d.precision("allocated_amount")
+			allocated_amount = flt(d.allocated_amount, precision)
+			outstanding_amount = flt(d.outstanding_amount, precision)
+
+			if allocated_amount > 0 and allocated_amount > outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
+			if allocated_amount < 0 and allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 	def validate_allocated_amount_as_per_payment_request(self):
@@ -488,12 +493,16 @@ class PaymentEntry(AccountsController):
 
 			fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
+			precision = d.precision("allocated_amount")
+			allocated_amount = flt(d.allocated_amount, precision)
+			outstanding_amount = flt(latest.outstanding_amount, precision)
+
 			if (
 				d.payment_term
 				and (
-					(flt(d.allocated_amount)) > 0
+					allocated_amount > 0
 					and latest.payment_term_outstanding
-					and (flt(d.allocated_amount) > flt(latest.payment_term_outstanding))
+					and (allocated_amount > flt(latest.payment_term_outstanding, precision))
 				)
 				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
@@ -503,11 +512,11 @@ class PaymentEntry(AccountsController):
 					).format(d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term)
 				)
 
-			if (flt(d.allocated_amount)) > 0 and flt(d.allocated_amount) > flt(latest.outstanding_amount):
+			if allocated_amount > 0 and allocated_amount > outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(latest.outstanding_amount):
+			if allocated_amount < 0 and allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
@@ -670,8 +679,11 @@ class PaymentEntry(AccountsController):
 
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
+			self.set(field, flt(self.get(field)))
 			if not self.get(field):
 				frappe.throw(_("{0} is mandatory").format(_(self.meta.get_label(field))))
+			if self.get(field) < 0:
+				frappe.throw(_("{0} must be greater than zero").format(_(self.meta.get_label(field))))
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -879,7 +891,7 @@ class PaymentEntry(AccountsController):
 						base_paid_amount = `base_paid_amount` - %s,
 						discounted_amount = `discounted_amount` - %s,
 						outstanding = `outstanding` + %s,
-						base_outstanding = `base_outstanding` - %s
+						base_outstanding = `base_outstanding` + %s
 					WHERE parent = %s and payment_term = %s""",
 					(
 						allocated_amount - discounted_amt,
@@ -2324,18 +2336,10 @@ def get_outstanding_reference_documents(args, validate=False):
 	accounting_dimensions_filter = []
 	posting_and_due_date = []
 
-	# confirm that Supplier is not blocked
-	if args.get("party_type") == "Supplier":
-		supplier_status = get_supplier_block_status(args["party"])
-		if supplier_status["on_hold"]:
-			if supplier_status["hold_type"] == "All":
-				return []
-			elif supplier_status["hold_type"] == "Payments":
-				if (
-					not supplier_status["release_date"]
-					or getdate(nowdate()) <= supplier_status["release_date"]
-				):
-					return []
+	if args.get("party_type") == "Supplier" and frappe.get_lazy_doc("Supplier", args["party"]).is_blocked_for(
+		"Payments"
+	):
+		return []
 
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.get_cached_value("Company", args.get("company"), "default_currency")
@@ -2689,7 +2693,7 @@ def get_negative_outstanding_invoices(
 			"{voucher_type}" as voucher_type, name as voucher_no, {account} as account,
 			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
 			outstanding_amount, posting_date,
-			due_date, conversion_rate as exchange_rate
+			due_date, conversion_rate as exchange_rate, %s as currency
 		from
 			`tab{voucher_type}`
 		where
@@ -2699,8 +2703,8 @@ def get_negative_outstanding_invoices(
 			{condition}
 		order by
 			posting_date, name
-		""".format(
-			**{
+		""".format_map(
+			{
 				"supplier_condition": supplier_condition,
 				"condition": condition,
 				"rounded_total_field": rounded_total_field,
@@ -2712,7 +2716,7 @@ def get_negative_outstanding_invoices(
 				"account": account,
 			}
 		),
-		(party, party_account),
+		(party_account_currency, party, party_account),
 		as_dict=True,
 	)
 
@@ -2768,6 +2772,7 @@ def get_account_details(account, date, cost_center=None):
 
 @frappe.whitelist()
 def get_company_defaults(company):
+	frappe.has_permission("Company", doc=company, throw=True)
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
@@ -2972,7 +2977,9 @@ def get_payment_entry(
 	pe.received_amount = received_amount
 	pe.letter_head = doc.get("letter_head")
 	pe.bank_account = frappe.db.get_value(
-		"Bank Account", {"is_company_account": 1, "is_default": 1, "company": doc.company}, "name"
+		"Bank Account",
+		{"is_company_account": 1, "is_default": 1, "company": doc.company, "disabled": 0},
+		"name",
 	)
 
 	if dt in ["Purchase Order", "Sales Order", "Sales Invoice", "Purchase Invoice"]:

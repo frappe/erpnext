@@ -3,8 +3,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
+ "description": "Moves, receives, issues or manufactures stock.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-entry",
  "engine": "InnoDB",
  "field_order": [
   "stock_entry_details_tab",
@@ -66,7 +68,7 @@
   "address_display",
   "accounting_dimensions_section",
   "project",
-  "column_break_wgvc",
+  "dimension_col_break",
   "cost_center",
   "other_info_tab",
   "printing_settings",
@@ -233,6 +235,7 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Posting Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
@@ -254,6 +257,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -313,6 +317,7 @@
    "description": "Sets 'Source Warehouse' in each row of the items table.",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Source Warehouse",
@@ -343,6 +348,7 @@
    "description": "Sets 'Target Warehouse' in each row of the items table.",
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Target Warehouse",
@@ -752,7 +758,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_wgvc",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -763,12 +769,12 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "arrow-left-right",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-11 18:23:12.340065",
+ "modified": "2026-09-30 13:11:01.498358",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

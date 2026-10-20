@@ -8,6 +8,7 @@ from functools import reduce
 
 import frappe
 from frappe import _
+from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.desk.form.linked_with import get_linked_fields
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
@@ -58,6 +59,8 @@ def validate_columns(data):
 
 @frappe.whitelist()
 def validate_company(company):
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	parent_company, allow_account_creation_against_child_company = frappe.get_cached_value(
 		"Company", company, ["parent_company", "allow_account_creation_against_child_company"]
 	)
@@ -110,7 +113,10 @@ def import_coa(file_name, company):
 
 
 def get_file(file_name):
-	file_doc = frappe.get_doc("File", {"file_url": file_name})
+	file_doc = find_file_by_url(file_name)
+	if not file_doc:
+		raise frappe.PermissionError
+
 	parts = file_doc.get_extension()
 	extension = parts[1]
 	extension = extension.lstrip(".")
@@ -176,6 +182,8 @@ def generate_data_from_excel(file_doc, extension, as_dict=False):
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root=False, file_name=None, for_validate=0):
 	"""called by tree view (to fetch node's children)"""
+
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
 
 	file_doc, extension = get_file(file_name)
 	parent = None if parent == _("All Accounts") else parent
@@ -324,6 +332,8 @@ def build_response_as_excel(writer):
 
 @frappe.whitelist()
 def download_template(file_type, template_type, company):
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	writer = get_template(template_type, company)
 
 	if file_type == "CSV":
@@ -376,7 +386,6 @@ def get_sample_template(writer, company):
 	return writer
 
 
-@frappe.whitelist()
 def validate_accounts(file_doc, extension):
 	if extension == "csv":
 		accounts = generate_data_from_csv(file_doc, as_dict=True)

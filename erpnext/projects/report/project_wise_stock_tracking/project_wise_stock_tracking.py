@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Coalesce, NullIf, Sum
 
 
 def execute(filters=None):
@@ -50,35 +51,61 @@ def get_columns():
 
 
 def get_project_details():
-	return frappe.db.sql(
-		""" select name, project_name, status, company, customer, estimated_costing,
-		expected_start_date, expected_end_date from tabProject where docstatus < 2""",
-		as_dict=1,
+	return frappe.get_all(
+		"Project",
+		filters={"docstatus": ["<", 2]},
+		fields=[
+			"name",
+			"project_name",
+			"status",
+			"company",
+			"customer",
+			"estimated_costing",
+			"expected_start_date",
+			"expected_end_date",
+		],
 	)
 
 
 def get_purchased_items_cost():
-	pr_items = frappe.db.sql(
-		"""select project, sum(base_net_amount) as amount
-		from `tabPurchase Receipt Item` where ifnull(project, '') != ''
-		and docstatus = 1 group by project""",
-		as_dict=1,
+	pr_items = frappe.get_all(
+		"Purchase Receipt Item",
+		filters={"project": ["is", "set"], "docstatus": 1},
+		fields=["project", {"SUM": "base_net_amount", "as": "amount"}],
+		group_by="project",
 	)
 
-	pr_item_map = {}
-	for item in pr_items:
-		pr_item_map.setdefault(item.project, item.amount)
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	pi_items = (
+		frappe.qb.from_(pi)
+		.inner_join(pi_item)
+		.on(pi.name == pi_item.parent)
+		.select(pi_item.project, Sum(pi_item.base_net_amount).as_("amount"))
+		.where((pi.docstatus == 1) & (pi.update_stock == 1) & (pi_item.project != ""))
+		.groupby(pi_item.project)
+		.run(as_dict=1)
+	)
 
-	return pr_item_map
+	return sum_amount_by_project(pr_items + pi_items)
 
 
 def get_issued_items_cost():
-	se_items = frappe.db.sql(
-		"""select se.project, sum(se_item.amount) as amount
-		from `tabStock Entry` se, `tabStock Entry Detail` se_item
-		where se.name = se_item.parent and se.docstatus = 1 and ifnull(se_item.t_warehouse, '') = ''
-		and se.project != '' group by se.project""",
-		as_dict=1,
+	se = frappe.qb.DocType("Stock Entry")
+	se_item = frappe.qb.DocType("Stock Entry Detail")
+	project = Coalesce(NullIf(se_item.project, ""), se.project)
+	se_items = (
+		frappe.qb.from_(se)
+		.inner_join(se_item)
+		.on(se.name == se_item.parent)
+		.select(project.as_("project"), Sum(se_item.amount).as_("amount"))
+		.where(
+			(se.docstatus == 1)
+			& (se_item.t_warehouse.isnull() | (se_item.t_warehouse == ""))
+			& (project != "")
+		)
+		.groupby(project)
+		.run(as_dict=1)
 	)
 
 	se_item_map = {}
@@ -89,28 +116,30 @@ def get_issued_items_cost():
 
 
 def get_delivered_items_cost():
-	dn_items = frappe.db.sql(
-		"""select dn.project, sum(dn_item.base_net_amount) as amount
-		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where dn.name = dn_item.parent and dn.docstatus = 1 and ifnull(dn.project, '') != ''
-		group by dn.project""",
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	si_item = frappe.qb.DocType("Sales Invoice Item")
+	project = Coalesce(NullIf(dn_item.project, ""), NullIf(si_item.project, ""), sle.project)
+	return dict(
+		frappe.qb.from_(sle)
+		.left_join(dn_item)
+		.on((sle.voucher_type == "Delivery Note") & (dn_item.name == sle.voucher_detail_no))
+		.left_join(si_item)
+		.on((sle.voucher_type == "Sales Invoice") & (si_item.name == sle.voucher_detail_no))
+		.select(project, -Sum(sle.stock_value_difference))
+		.where(
+			sle.voucher_type.isin(["Delivery Note", "Sales Invoice"])
+			& (sle.is_cancelled == 0)
+			& (project != "")
+		)
+		.groupby(project)
+		.run()
 	)
 
-	si_items = frappe.db.sql(
-		"""select si.project, sum(si_item.base_net_amount) as amount
-		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
-		where si.name = si_item.parent and si.docstatus = 1 and si.update_stock = 1
-		and si.is_pos = 1 and ifnull(si.project, '') != ''
-		group by si.project""",
-		as_dict=1,
-	)
 
-	dn_item_map = {}
-	for item in dn_items:
-		dn_item_map.setdefault(item.project, item.amount)
+def sum_amount_by_project(rows):
+	amounts = {}
+	for row in rows:
+		amounts[row.project] = amounts.get(row.project, 0) + row.amount
 
-	for item in si_items:
-		dn_item_map.setdefault(item.project, item.amount)
-
-	return dn_item_map
+	return amounts

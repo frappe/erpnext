@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"transaction_date\", \"label\": \"Date\"}, {\"fieldname\": \"delivery_date\", \"label\": \"Delivery Date\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.741095",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "On Hold",
+ "filters": "[[\"Sales Order\", \"status\", \"=\", \"On Hold\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 21:12:56.741095",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Order-On Hold",
+ "owner": "Administrator",
+ "reference_doctype": "Sales Order",
+ "route_signature": "status=On Hold",
+ "sort_field": "delivery_date",
+ "sort_order": "asc"
+}

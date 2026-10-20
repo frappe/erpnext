@@ -51,10 +51,10 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			let stock_uom = unescape(element.attr("data-stock-uom"));
 
 			if (disable_quick_entry) {
-				open_stock_entry(item, warehouse, entry_type, stock_uom);
+				open_stock_entry(item, warehouse, entry_type);
 			} else {
 				if (action === "Add") {
-					let rate = unescape($(this).attr("data-rate"));
+					let rate = Number(element.attr("data-rate"));
 					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, stock_uom, function () {
 						me.refresh();
 					});
@@ -66,26 +66,13 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			}
 		}
 
-		function open_stock_entry(item, warehouse, entry_type, stock_uom) {
-			frappe.model.with_doctype("Stock Entry", function () {
-				var doc = frappe.model.get_new_doc("Stock Entry");
-				if (entry_type) {
-					doc.stock_entry_type = entry_type;
-				}
-
-				var row = frappe.model.add_child(doc, "items");
-				row.item_code = item;
-				row.uom = stock_uom;
-				row.stock_uom = stock_uom;
-				row.conversion_factor = 1;
-
-				if (entry_type === "Material Transfer") {
-					row.s_warehouse = warehouse;
-				} else {
-					row.t_warehouse = warehouse;
-				}
-
-				frappe.set_route("Form", doc.doctype, doc.name);
+		function open_stock_entry(item, warehouse, entry_type) {
+			let is_transfer = entry_type === "Material Transfer";
+			erpnext.stock.make_stock_entry({
+				item_code: item,
+				source_warehouse: is_transfer ? warehouse : null,
+				target_warehouse: is_transfer ? null : warehouse,
+				stock_entry_type: entry_type,
 			});
 		}
 
@@ -268,7 +255,7 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 		dialog.get_field("source").refresh();
 	}
 
-	if (rate) {
+	if (target) {
 		dialog.get_field("rate").set_value(rate);
 		dialog.get_field("rate").df.hidden = 0;
 		dialog.get_field("rate").refresh();
@@ -296,22 +283,24 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, stoc
 			return;
 		}
 
-		frappe.model.with_doctype("Stock Entry", function () {
-			let doc = frappe.model.get_new_doc("Stock Entry");
-			doc.from_warehouse = dialog.get_value("source");
-			doc.to_warehouse = dialog.get_value("target");
-			doc.stock_entry_type = doc.from_warehouse ? "Material Transfer" : "Material Receipt";
-			let row = frappe.model.add_child(doc, "items");
-			row.item_code = dialog.get_value("item_code");
-			row.s_warehouse = dialog.get_value("source");
-			row.stock_uom = stock_uom;
-			row.uom = stock_uom;
-			row.t_warehouse = dialog.get_value("target");
-			row.qty = dialog.get_value("qty");
-			row.conversion_factor = 1;
-			row.transfer_qty = dialog.get_value("qty");
-			row.basic_rate = dialog.get_value("rate");
-			frappe.set_route("Form", doc.doctype, doc.name);
+		erpnext.stock.make_stock_entry({
+			item_code: dialog.get_value("item_code"),
+			source_warehouse: dialog.get_value("source"),
+			target_warehouse: dialog.get_value("target"),
+			qty: dialog.get_value("qty"),
+			rate: flt(dialog.get_value("rate")),
 		});
+	});
+};
+
+erpnext.stock.make_stock_entry = function (args) {
+	frappe.call({
+		method: "erpnext.stock.dashboard.item_dashboard.make_stock_entry",
+		args: args,
+		freeze: true,
+		callback: (r) => {
+			let doc = frappe.model.sync(r.message)[0];
+			frappe.set_route("Form", doc.doctype, doc.name);
+		},
 	});
 };

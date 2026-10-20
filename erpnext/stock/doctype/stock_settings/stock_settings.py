@@ -38,11 +38,11 @@ class StockSettings(Document):
 		auto_create_serial_and_batch_bundle_for_outward: DF.Check
 		auto_indent: DF.Check
 		auto_insert_price_list_rate_if_missing: DF.Check
+		auto_map_raw_materials_to_finished_goods: DF.Check
 		auto_reserve_serial_and_batch: DF.Check
 		auto_reserve_stock: DF.Check
 		auto_reserve_stock_for_sales_order_on_purchase: DF.Check
 		clean_description_html: DF.Check
-		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		do_not_use_batchwise_valuation: DF.Check
@@ -58,7 +58,6 @@ class StockSettings(Document):
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None
-		sample_retention_warehouse: DF.Link | None
 		set_serial_and_batch_bundle_naming_based_on_naming_series: DF.Check
 		show_barcode_field: DF.Check
 		stock_auth_role: DF.Link | None
@@ -79,7 +78,6 @@ class StockSettings(Document):
 			"item_group",
 			"stock_uom",
 			"allow_negative_stock",
-			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
 			"enable_serial_and_batch_no_for_item",
@@ -97,15 +95,7 @@ class StockSettings(Document):
 			make_mandatory=0,
 		)
 
-		# show/hide barcode field
-		for name in ["barcode", "barcodes", "scan_barcode"]:
-			frappe.make_property_setter(
-				{"fieldname": name, "property": "hidden", "value": 0 if self.show_barcode_field else 1},
-				validate_fields_for_doctype=False,
-			)
-
-		self.validate_warehouses()
-		self.validate_over_delivery_receipt_allowance()
+		self.update_barcode_field_visibility()
 		self.validate_serial_and_batch_no_settings()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
@@ -117,9 +107,20 @@ class StockSettings(Document):
 		self.change_precision_for_stock_entry()
 		self.validate_do_not_use_batchwise_valuation()
 
-	def validate_over_delivery_receipt_allowance(self):
-		if not self.over_delivery_receipt_allowance:
-			self.role_allowed_to_over_deliver_receive = None
+	def update_barcode_field_visibility(self):
+		if not self.has_value_changed("show_barcode_field"):
+			return
+
+		for doctype, fieldname in get_transaction_barcode_fields():
+			frappe.make_property_setter(
+				{
+					"doctype": doctype,
+					"fieldname": fieldname,
+					"property": "hidden",
+					"value": 0 if self.show_barcode_field else 1,
+				},
+				validate_fields_for_doctype=False,
+			)
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
@@ -148,22 +149,21 @@ class StockSettings(Document):
 			doc_before_save.enable_serial_and_batch_no_for_item
 			and not self.enable_serial_and_batch_no_for_item
 		):
-			if frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+			if frappe.db.exists("Serial and Batch Bundle", {"docstatus": 1}):
 				frappe.throw(
 					_(
 						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
 					)
 				)
 
-	def validate_warehouses(self):
-		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
-		for field in warehouse_fields:
-			if frappe.db.get_value("Warehouse", self.get(field), "is_group"):
+			# settings hidden by this flag still apply to items that track serial / batch
+			if frappe.db.exists("Item", {"has_serial_no": 1}) or frappe.db.exists(
+				"Item", {"has_batch_no": 1}
+			):
 				frappe.throw(
 					_(
-						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
-					).format(frappe.bold(self.meta.get_field(field).label)),
-					title=_("Incorrect Warehouse"),
+						"Cannot disable Serial and Batch No for Item, as there are items with serial / batch enabled."
+					)
 				)
 
 	def cant_change_valuation_method(self):
@@ -238,9 +238,7 @@ class StockSettings(Document):
 			# Enable -> Disable
 			else:
 				# Don't allow if there are open Stock Reservation Entries
-				has_reserved_stock = frappe.db.exists(
-					"Stock Reservation Entry", {"docstatus": 1, "status": ["!=", "Delivered"]}
-				)
+				has_reserved_stock = has_open_stock_reservation()
 
 				if has_reserved_stock:
 					frappe.throw(
@@ -347,4 +345,29 @@ def get_enable_stock_uom_editing():
 			"allow_to_edit_stock_uom_qty_for_stock_entry",
 		],
 		as_dict=1,
+	)
+
+
+def get_transaction_barcode_fields():
+	fields = []
+	for doctype in frappe.get_all("DocField", filters={"fieldname": "scan_barcode"}, pluck="parent"):
+		fields.append((doctype, "scan_barcode"))
+		for table_field in frappe.get_meta(doctype).get_table_fields():
+			if frappe.get_meta(table_field.options).has_field("barcode"):
+				fields.append((table_field.options, "barcode"))
+
+	return fields
+
+
+def has_open_stock_reservation() -> bool:
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	return bool(
+		frappe.qb.from_(sre)
+		.select(sre.name)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty > 0)
+		)
+		.limit(1)
+		.run()
 	)

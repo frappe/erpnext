@@ -54,17 +54,19 @@ class Prospect(CRMNote):
 			"CRM Settings", "carry_forward_communication_and_comments"
 		)
 
+		ignore_permissions = self.flags.ignore_permissions
+
 		for row in self.get("leads"):
 			if carry_forward_communication_and_comments:
-				copy_comments("Lead", row.lead, self)
-				link_communications("Lead", row.lead, self)
-			link_open_events("Lead", row.lead, self)
+				copy_comments("Lead", row.lead, self, ignore_permissions)
+				link_communications("Lead", row.lead, self, ignore_permissions)
+			link_open_events("Lead", row.lead, self, ignore_permissions)
 
 		for row in self.get("opportunities"):
 			if carry_forward_communication_and_comments:
-				copy_comments("Opportunity", row.opportunity, self)
-				link_communications("Opportunity", row.opportunity, self)
-			link_open_events("Opportunity", row.opportunity, self)
+				copy_comments("Opportunity", row.opportunity, self, ignore_permissions)
+				link_communications("Opportunity", row.opportunity, self, ignore_permissions)
+			link_open_events("Opportunity", row.opportunity, self, ignore_permissions)
 
 	def link_with_lead_contact_and_address(self):
 		for row in self.leads:

@@ -1,14 +1,16 @@
 {
  "action": "Create Entry",
- "action_label": "Create Raw Material",
+ "action_label": "Add Item",
  "creation": "2026-02-23 20:34:00.158852",
+ "description": "Something you use to make your products, kept in the Raw Material group. See [Item](https://docs.frappe.io/erpnext/user/manual/en/item).",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
+ "intro_video_url": "https://www.youtube.com/watch?v=oSYESI-EVCI",
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2026-02-23 22:45:51.319162",
+ "modified": "2026-10-04 01:49:02.795110",
  "modified_by": "Administrator",
  "name": "Create Raw Materials",
  "owner": "Administrator",
@@ -16,6 +18,6 @@
  "route_options": "{\n    \"item_group\": \"Raw Material\"\n}",
  "show_form_tour": 0,
  "show_full_form": 1,
- "title": "Create Raw Materials",
+ "title": "Add a raw material",
  "validate_action": 1
 }

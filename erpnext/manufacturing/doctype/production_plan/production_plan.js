@@ -40,10 +40,21 @@ frappe.ui.form.on("Production Plan", {
 		});
 
 		frm.set_query("for_warehouse", function (doc) {
+			const filters = [
+				["Warehouse", "company", "=", doc.company],
+				["Warehouse", "is_group", "=", 0],
+			];
+			if (doc.raw_material_group_warehouse) {
+				filters.push(["Warehouse", "name", "descendants of", doc.raw_material_group_warehouse]);
+			}
+			return { filters };
+		});
+
+		frm.set_query("raw_material_group_warehouse", function (doc) {
 			return {
 				filters: {
 					company: doc.company,
-					is_group: 0,
+					is_group: 1,
 				},
 			};
 		});
@@ -102,6 +113,13 @@ frappe.ui.form.on("Production Plan", {
 		});
 	},
 
+	raw_material_group_warehouse(frm) {
+		// For Warehouse must sit inside the chosen group, so drop a stale selection
+		if (frm.doc.raw_material_group_warehouse && frm.doc.for_warehouse) {
+			frm.set_value("for_warehouse", null);
+		}
+	},
+
 	refresh(frm) {
 		if (frm.doc.docstatus === 1) {
 			frm.trigger("show_progress");
@@ -152,8 +170,8 @@ frappe.ui.form.on("Production Plan", {
 
 				if (
 					frm.doc.mr_items &&
-					frm.doc.mr_items.length &&
-					!["Material Requested", "Closed"].includes(frm.doc.status)
+					frm.doc.mr_items.some((row) => flt(row.quantity) > flt(row.requested_qty)) &&
+					frm.doc.status !== "Closed"
 				) {
 					frm.add_custom_button(
 						__("Material Request"),
@@ -457,6 +475,7 @@ frappe.ui.form.on("Production Plan", {
 			frm.events.get_items_for_material_requests(frm);
 		} else {
 			const title = __("Transfer Materials For Warehouse {0}", [frm.doc.for_warehouse]);
+			const source_warehouse = frm.doc.raw_material_group_warehouse;
 			var dialog = new frappe.ui.Dialog({
 				title: title,
 				fields: [
@@ -465,6 +484,7 @@ frappe.ui.form.on("Production Plan", {
 						fieldtype: "Table MultiSelect",
 						fieldname: "warehouses",
 						options: "Production Plan Material Request Warehouse",
+						default: source_warehouse ? [{ warehouse: source_warehouse }] : [],
 						get_query: function () {
 							return {
 								filters: {
@@ -485,8 +505,8 @@ frappe.ui.form.on("Production Plan", {
 
 			dialog.show();
 
-			dialog.set_primary_action(__("Get Items"), () => {
-				let warehouses = dialog.get_values().warehouses;
+			dialog.set_primary_action(__("Get Items"), (values) => {
+				let warehouses = values.warehouses;
 				frm.events.get_items_for_material_requests(frm, warehouses);
 				dialog.hide();
 			});
@@ -521,8 +541,9 @@ frappe.ui.form.on("Production Plan", {
 	download_materials_required(frm) {
 		const warehouses_data = [];
 
-		if (frm.doc.for_warehouse) {
-			warehouses_data.push({ warehouse: frm.doc.for_warehouse });
+		const availability_warehouse = frm.doc.raw_material_group_warehouse || frm.doc.for_warehouse;
+		if (availability_warehouse) {
+			warehouses_data.push({ warehouse: availability_warehouse });
 		}
 
 		const fields = [
@@ -617,21 +638,19 @@ frappe.ui.form.on("Material Request Plan Item", {
 		const row = locals[cdt][cdn];
 		if (row.warehouse && row.item_code && frm.doc.company) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_pooled_bin_details",
 				args: {
 					row: row,
 					company: frm.doc.company,
 					for_warehouse: row.warehouse,
 				},
 				callback: function (r) {
-					if (r.message) {
-						let { projected_qty, actual_qty } = r.message[0];
+					let { projected_qty, actual_qty } = r.message;
 
-						frappe.model.set_value(cdt, cdn, {
-							projected_qty: projected_qty,
-							actual_qty: actual_qty,
-						});
-					}
+					frappe.model.set_value(cdt, cdn, {
+						projected_qty: projected_qty,
+						actual_qty: actual_qty,
+					});
 				},
 			});
 		}
@@ -690,17 +709,15 @@ frappe.ui.form.on("Production Plan Sub Assembly Item", {
 			};
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
+				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_pooled_bin_details",
 				args: {
 					row: child_row,
 					company: frm.doc.company,
 					for_warehouse: row.fg_warehouse,
 				},
 				callback: function (r) {
-					if (r.message && r.message.length) {
-						frappe.model.set_value(cdt, cdn, "actual_qty", r.message[0].actual_qty);
-						frappe.model.set_value(cdt, cdn, "projected_qty", r.message[0].projected_qty);
-					}
+					frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
+					frappe.model.set_value(cdt, cdn, "projected_qty", r.message.projected_qty);
 				},
 			});
 		}

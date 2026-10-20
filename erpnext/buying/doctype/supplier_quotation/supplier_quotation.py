@@ -12,6 +12,7 @@ from frappe.utils import flt, getdate, nowdate
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.deprecation_dumpster import deprecated
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -144,6 +145,7 @@ class SupplierQuotation(BuyingController):
 		If permitted in settings and any item has 0 qty, the SQ has unit price items.
 		"""
 		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_supplier_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -169,12 +171,11 @@ class SupplierQuotation(BuyingController):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till Date cannot be before Transaction Date"))
 
-	def update_rfq_supplier_status(self, include_me):
-		rfq_list = set([])
-		for item in self.items:
-			if item.request_for_quotation:
-				rfq_list.add(item.request_for_quotation)
-		for rfq in rfq_list:
+	def get_request_for_quotations(self) -> set[str]:
+		return {item.request_for_quotation for item in self.items if item.request_for_quotation}
+
+	def update_rfq_supplier_status(self, include_me, previous_rfqs: set[str] | None = None):
+		for rfq in self.get_request_for_quotations() | (previous_rfqs or set()):
 			doc = frappe.get_doc("Request for Quotation", rfq)
 			doc_sup = frappe.get_all(
 				"Request for Quotation Supplier",
@@ -298,6 +299,12 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
+@deprecated(
+	f"{__name__}.make_purchase_invoice",
+	"2026-10-05",
+	"v18",
+	"Make the Purchase Invoice from the Purchase Order.",
+)
 def make_purchase_invoice(source_name, target_doc=None):
 	doc = get_mapped_doc(
 		"Supplier Quotation",

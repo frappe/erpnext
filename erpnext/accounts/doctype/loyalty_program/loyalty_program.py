@@ -96,6 +96,8 @@ def get_loyalty_program_details_with_points(
 	include_expired_entry=False,
 	current_transaction_amount=0,
 ):
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
 	loyalty_details = get_loyalty_details(
@@ -126,6 +128,10 @@ def get_loyalty_program_details(
 	silent=False,
 	include_expired_entry=False,
 ):
+	# The customer is what the caller is entitled to, not the programme: a check on Loyalty Program
+	# would be read-only to System Manager and deny every role that fills in the calling forms.
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	lp_details = frappe._dict()
 
 	if not loyalty_program:
@@ -147,6 +153,13 @@ def get_loyalty_program_details(
 
 @frappe.whitelist()
 def get_redeemption_factor(loyalty_program=None, customer=None):
+	# both call sites send only `loyalty_program`, so the calling form is the boundary; the customer branch stays guarded
+	if not (frappe.has_permission("Sales Invoice") or frappe.has_permission("POS Invoice")):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	if customer:
+		frappe.has_permission("Customer", doc=customer, throw=True)
+
 	customer_loyalty_program = None
 	if not loyalty_program:
 		customer_loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")

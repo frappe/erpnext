@@ -29,7 +29,9 @@ class SubcontractingBOM(Document):
 
 	def validate(self):
 		self.validate_finished_good()
+		self.validate_finished_good_bom()
 		self.validate_service_item()
+		self.validate_quantities()
 		self.validate_is_active()
 
 	def before_save(self):
@@ -55,6 +57,13 @@ class SubcontractingBOM(Document):
 				_("Finished Good {0} must be a sub-contracted item.").format(frappe.bold(self.finished_good))
 			)
 
+	def validate_finished_good_bom(self):
+		is_active, docstatus = frappe.db.get_value("BOM", self.finished_good_bom, ["is_active", "docstatus"])
+		if self.is_active and (not is_active or docstatus != 1):
+			frappe.throw(
+				_("BOM {0} must be active and submitted.").format(frappe.bold(self.finished_good_bom))
+			)
+
 	def validate_service_item(self):
 		disabled, is_stock_item = frappe.db.get_value(
 			"Item", self.service_item, ["disabled", "is_stock_item"]
@@ -66,6 +75,11 @@ class SubcontractingBOM(Document):
 			frappe.throw(
 				_("Service Item {0} must be a non-stock item.").format(frappe.bold(self.service_item))
 			)
+
+	def validate_quantities(self):
+		for fieldname in ("finished_good_qty", "service_item_qty"):
+			if flt(self.get(fieldname)) <= 0:
+				frappe.throw(_("{0} must be greater than zero.").format(_(self.meta.get_label(fieldname))))
 
 	def validate_is_active(self):
 		if self.is_active:
@@ -83,8 +97,26 @@ class SubcontractingBOM(Document):
 		self.conversion_factor = flt(self.service_item_qty) / flt(self.finished_good_qty)
 
 
+LOOKUP_FIELDS = [
+	"finished_good",
+	"finished_good_qty",
+	"finished_good_uom",
+	"service_item",
+	"service_item_qty",
+	"service_item_uom",
+	"conversion_factor",
+]
+
+
+def check_order_read_permission():
+	"""Subcontracting BOMs are looked up from Purchase and Sales Orders."""
+	if not (frappe.has_permission("Purchase Order", "read") or frappe.has_permission("Sales Order", "read")):
+		frappe.throw_permission_error()
+
+
 @frappe.whitelist()
 def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
+	check_order_read_permission()
 	if fg_items:
 		filters = {"is_active": 1}
 
@@ -93,7 +125,7 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
 		else:
 			filters["finished_good"] = fg_items
 
-		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=["*"]):
+		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=LOOKUP_FIELDS):
 			if isinstance(fg_items, list):
 				return {d.finished_good: d for d in subcontracting_boms}
 			else:
@@ -104,9 +136,10 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
 
 @frappe.whitelist()
 def get_subcontracting_boms_for_service_item(service_item: str) -> dict:
+	check_order_read_permission()
 	if service_item:
 		filters = {"is_active": 1, "service_item": service_item}
-		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=["*"])
+		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=LOOKUP_FIELDS)
 
 		if Subcontracting_boms:
 			return {d.finished_good: d for d in Subcontracting_boms}

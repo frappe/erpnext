@@ -1,4 +1,3 @@
-import "./conf";
 import "./utils";
 import "./stock_reservation";
 import "./queries";

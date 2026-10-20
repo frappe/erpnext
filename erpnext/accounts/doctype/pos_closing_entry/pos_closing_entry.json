@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "POS-CLO-.YYYY.-.#####",
  "creation": "2018-05-28 19:06:40.830043",
+ "description": "Closes a POS shift and totals what was collected.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -254,6 +255,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "book-lock",
  "is_submittable": 1,
  "links": [
   {

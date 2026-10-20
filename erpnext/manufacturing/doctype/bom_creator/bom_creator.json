@@ -4,8 +4,10 @@
  "autoname": "prompt",
  "creation": "2023-07-18 14:56:34.477800",
  "default_view": "List",
+ "description": "Build a multi-level BOM in one place.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bom-creator",
  "engine": "InnoDB",
  "field_order": [
   "tab_2_tab",
@@ -280,6 +282,7 @@
    "fieldname": "error_log",
    "fieldtype": "Text",
    "label": "Error Log",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -303,7 +306,7 @@
   }
  ],
  "hide_toolbar": 1,
- "icon": "fa fa-sitemap",
+ "icon": "list-plus",
  "is_submittable": 1,
  "links": [
   {
@@ -311,7 +314,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2026-04-16 20:43:30.820781",
+ "modified": "2026-10-14 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
