@@ -159,6 +159,9 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
+		self.set_onload(
+			"enforce_time_logs", frappe.db.get_single_value("Manufacturing Settings", "enforce_time_logs")
+		)
 		self.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(self.bom_no))
 		self.set_onload(
 			"transfer_material_against",
