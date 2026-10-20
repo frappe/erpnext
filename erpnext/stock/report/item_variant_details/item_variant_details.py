@@ -32,8 +32,10 @@ def get_templates(filters):
 	"""Templates picked by the Items or the Item Groups filter, mapped to their Item Group."""
 	items = get_filter_values(filters, "item")
 	item_groups = get_filter_values(filters, "item_group")
-	if bool(items) == bool(item_groups):
-		frappe.throw(_("Select either Items or Item Groups"))
+	if items and item_groups:
+		frappe.throw(_("Select either Items or Item Groups, not both"))
+	if not (items or item_groups):
+		return {}
 
 	template_filters = {"has_variants": 1}
 	if items:
