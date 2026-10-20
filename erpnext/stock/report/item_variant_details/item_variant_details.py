@@ -104,10 +104,13 @@ def get_data(templates, filters):
 	open_orders = get_open_sales_orders(variant_list, warehouses)
 	variant_rows = get_variant_rows(variant_results, warehouses, open_orders)
 
+	rows_by_template = {}
+	for row in variant_rows.values():
+		rows_by_template.setdefault(row["template"], []).append(row)
+
 	data = []
 	for template, item_group in templates.items():
-		rows = [row for row in variant_rows.values() if row["template"] == template]
-		if rows:
+		if rows := rows_by_template.get(template):
 			data.append(get_template_row(template, item_group, rows, open_orders))
 			data.extend(rows)
 
