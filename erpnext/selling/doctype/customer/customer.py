@@ -604,12 +604,16 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	SalesInvoice = frappe.qb.DocType("Sales Invoice")
 	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 
 	si_subquery = (
 		frappe.qb.from_(SalesInvoiceItem)
+		.join(SalesInvoice)
+		.on(SalesInvoice.name == SalesInvoiceItem.parent)
 		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.amount).as_("billed_amount"))
-		.where(SalesInvoiceItem.docstatus == 1)
+		.where(SalesInvoice.docstatus == 1)
+		.where(SalesInvoice.is_return == 0)
 		.groupby(SalesInvoiceItem.dn_detail)
 	)
 
