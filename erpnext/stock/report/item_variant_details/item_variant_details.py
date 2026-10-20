@@ -76,7 +76,7 @@ def get_data(templates, filters):
 	variant_rows = get_variant_rows(variant_results, warehouses, open_orders)
 
 	rows_by_template = {}
-	for row in variant_rows.values():
+	for row in variant_rows:
 		rows_by_template.setdefault(row["template"], []).append(row)
 
 	data = []
@@ -89,7 +89,7 @@ def get_data(templates, filters):
 
 
 def get_variant_rows(variant_results, warehouses, open_orders):
-	"""Variant rows keyed by variant name, indented under their template."""
+	"""Variant rows, indented under their template."""
 	variant_list = [variant.name for variant in variant_results]
 	stock_details_map = get_stock_details_map(variant_list, warehouses)
 	buying_price_map = get_buying_price_map(variant_list)
@@ -97,26 +97,28 @@ def get_variant_rows(variant_results, warehouses, open_orders):
 	currency = get_report_currency()
 	attr_val_map = get_attribute_values_map(variant_list)
 
-	variant_rows = {}
+	variant_rows = []
 	for variant in variant_results:
 		stock_details = stock_details_map.get(variant.name, {})
-		variant_rows[variant.name] = {
-			**{
-				frappe.scrub(attribute): value
-				for attribute, value in attr_val_map.get(variant.name, {}).items()
-			},
-			"variant_name": variant.name,
-			"template": variant.variant_of,
-			"item_group": variant.item_group,
-			"indent": 1,
-			"stock_uom": variant.stock_uom,
-			"current_stock": stock_details.get("Inventory") or 0,
-			"in_production": stock_details.get("In Production") or 0,
-			"open_orders": len(open_orders.get(variant.name, ())),
-			"avg_buying_price_list_rate": buying_price_map.get(variant.name) or 0,
-			"avg_selling_price_list_rate": selling_price_map.get(variant.name) or 0,
-			"currency": currency,
-		}
+		variant_rows.append(
+			{
+				**{
+					frappe.scrub(attribute): value
+					for attribute, value in attr_val_map.get(variant.name, {}).items()
+				},
+				"variant_name": variant.name,
+				"template": variant.variant_of,
+				"item_group": variant.item_group,
+				"indent": 1,
+				"stock_uom": variant.stock_uom,
+				"current_stock": stock_details.get("Inventory") or 0,
+				"in_production": stock_details.get("In Production") or 0,
+				"open_orders": len(open_orders.get(variant.name, ())),
+				"avg_buying_price_list_rate": buying_price_map.get(variant.name) or 0,
+				"avg_selling_price_list_rate": selling_price_map.get(variant.name) or 0,
+				"currency": currency,
+			}
+		)
 
 	return variant_rows
 
