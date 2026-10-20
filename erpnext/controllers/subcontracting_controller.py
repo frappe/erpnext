@@ -20,7 +20,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
+from erpnext.stock.serial_batch_bundle import (
+	SerialBatchCreation,
+	get_batches_from_bundle,
+	get_serial_nos_from_bundle,
+)
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_incoming_rate, get_valuation_method
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
@@ -1091,14 +1095,22 @@ class SubcontractingController(StockController):
 		self.__set_rate_for_serial_and_batch_bundle()
 
 	def __validate_batch_no(self, row, key):
-		if row.get("batch_no") and row.get("batch_no") not in self.__transferred_items.get(key).get(
-			"batch_no"
-		):
+		transferred_batches = self.__transferred_items.get(key).get("batch_no")
+		batch_nos = {row.get("batch_no")} if row.get("batch_no") else set()
+		if row.get("serial_and_batch_bundle") and transferred_batches:
+			batch_nos.update(get_batches_from_bundle(row.get("serial_and_batch_bundle")))
+
+		incorrect_batches = batch_nos.difference(transferred_batches)
+		if incorrect_batches:
 			link = get_link_to_form(
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
 			msg = _("The Batch No {0} has not been supplied against the {1} {2}").format(
-				frappe.bold(SerialBatchIdentity("Batch").get_label(row.get("batch_no"))),
+				frappe.bold(
+					", ".join(
+						SerialBatchIdentity("Batch").get_label(batch_no) for batch_no in incorrect_batches
+					)
+				),
 				self.subcontract_data.order_doctype,
 				link,
 			)
