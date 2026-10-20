@@ -11,18 +11,7 @@ from frappe.utils import flt, today
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-from erpnext.stock.doctype.company_restriction.company_restriction import (
-	get_allowed_masters_condition,
-	get_allowed_warehouses_condition,
-)
-=======
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_warehouses_condition
->>>>>>> c2d0b9b (fix(item variant details): apply Item permissions before totalling templates)
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
->>>>>>> 8e30b93 (feat(item variant details): filter by warehouse)
 
 
 def execute(filters=None):
@@ -65,42 +54,19 @@ def get_filter_values(filters, fieldname):
 	values = filters.get(fieldname) or []
 	return [values] if isinstance(values, str) else values
 
-<<<<<<< HEAD
-	variant_results = frappe.db.get_all(
-		"Item", fields=["name"], filters={"variant_of": ["=", item], "disabled": 0}
-	)
-=======
 
 def get_data(templates, filters):
 	if not templates:
 		return []
 
-<<<<<<< HEAD
-	variant_filters = [{"variant_of": ["in", list(templates)], "disabled": 0}]
-	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
-		variant_filters.append(condition)
-
-<<<<<<< HEAD
-	variant_results = frappe.db.get_all("Item", fields=["name", "variant_of"], filters=variant_filters)
->>>>>>> ea4ce4f (feat(item variant details): group variants under multiple templates)
-=======
-	variant_results = frappe.db.get_all(
-		"Item", fields=["name", "variant_of", "item_group", "stock_uom"], filters=variant_filters
-=======
 	variant_results = frappe.get_list(
 		"Item",
 		fields=["name", "variant_of", "item_group", "stock_uom"],
 		filters={"variant_of": ["in", list(templates)], "disabled": 0},
->>>>>>> c2d0b9b (fix(item variant details): apply Item permissions before totalling templates)
 	)
->>>>>>> dddedc4 (feat(item variant details): show stock UOM, total stock only within one UOM)
 
 	if not variant_results:
-<<<<<<< HEAD
-		frappe.msgprint(_("There aren't any item variants for the selected item"))
-=======
 		frappe.msgprint(_("There are no item variants for the selected filters"))
->>>>>>> fa28d9f (fix(item variant details): message for filters with no variants)
 		return []
 
 	variant_list = [variant.name for variant in variant_results]
@@ -295,17 +261,10 @@ def get_stock_details_map(variant_list, warehouses):
 	bin_filters = [{"item_code": ["in", variant_list]}]
 	if warehouses:
 		bin_filters.append({"warehouse": ["in", warehouses]})
-<<<<<<< HEAD
-	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
-		bin_filters.append({"warehouse": ["in", warehouses]})
-=======
 	if permitted_warehouses := get_allowed_docs_for_doctype(
 		get_user_permissions().get("Warehouse", []), "Item"
 	):
 		bin_filters.append({"warehouse": ["in", permitted_warehouses]})
-	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
-		bin_filters.append(condition)
->>>>>>> ea4ce4f (feat(item variant details): group variants under multiple templates)
 
 	stock_details = frappe.db.get_all(
 		"Bin",
