@@ -840,6 +840,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		post_dated_invoice.set_posting_time = 1
 		post_dated_invoice.posting_date = add_days(today(), 8)
 		post_dated_invoice.due_date = add_days(today(), 8)
+		post_dated_invoice.payment_schedule = []
 		post_dated_invoice.save().submit()
 
 		receipt = create_payment_entry(
