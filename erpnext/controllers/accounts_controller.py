@@ -2382,11 +2382,7 @@ class AccountsController(TransactionBase):
 			for item in self.get("items"):
 				if item.get("discount_amount") and item.get("discount_account"):
 					discount_amount = item.discount_amount * item.qty
-					income_account = (
-						item.income_account
-						if (not item.enable_deferred_revenue or self.is_return)
-						else item.deferred_revenue_account
-					)
+					income_account = self.get_item_income_account(item)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
@@ -2414,6 +2410,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_account,
+								"voucher_detail_no": item.name
+								if self.is_return and item.enable_deferred_revenue
+								else None,
 								"against": self.customer,
 								"credit": flt(
 									discount_amount * self.get("conversion_rate"),
