@@ -247,6 +247,7 @@ class TestItemVariantDetails(ERPNextTestSuite):
 		)
 
 	def test_items_and_item_groups_filters_are_exclusive(self):
-		for filters in ({}, {"item": ["_Test Variant Item"], "item_group": ["Products"]}):
-			with self.subTest(filters=filters):
-				self.assertRaises(frappe.ValidationError, self.run_report, **filters)
+		self.assertEqual(self.run_report(), [])
+		self.assertRaises(
+			frappe.ValidationError, self.run_report, item=["_Test Variant Item"], item_group=["Products"]
+		)
