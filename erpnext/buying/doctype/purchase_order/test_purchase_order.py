@@ -2056,6 +2056,32 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 0)
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 0)
 
+	def test_drop_ship_delivery_blocked_for_closed_row(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test Drop Ship Closed Row Item", {"is_stock_item": 1, "delivered_by_supplier": 1})
+		so_item = {
+			"item_code": item.name,
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[so_item])
+		po = make_po_from_so(so.name, selected_items=[so_item])[0]
+		po.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+
+		po.reload()
+		self.assertRaises(
+			frappe.ValidationError,
+			po.update_dropship_received_qty,
+			[{"name": po.items[0].name, "qty_change": 2}],
+		)
+
 	def test_cancelling_subcontracted_po_keeps_material_request_ordered_qty_in_fg(self):
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
