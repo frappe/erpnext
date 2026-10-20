@@ -331,6 +331,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_work_order_status_for_return()
+		self.validate_alternative_items()
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
@@ -1135,6 +1136,68 @@ class StockEntry(StockController, SubcontractingInwardController):
 			),
 			title=_("Work Order Not Finished"),
 		)
+
+	def validate_alternative_items(self):
+		if not self.pro_doc or self.purpose not in (
+			"Manufacture",
+			"Material Transfer for Manufacture",
+			"Material Consumption for Manufacture",
+		):
+			return
+
+		rows = [row for row in self.items if row.original_item and row.original_item != row.item_code]
+		if not rows:
+			return
+
+		transferred_pairs = self.get_transferred_alternative_pairs()
+		rows = [row for row in rows if (row.original_item, row.item_code) not in transferred_pairs]
+		if not rows:
+			return
+
+		if not self.pro_doc.allow_alternative_item:
+			frappe.throw(
+				_("Row #{0}: Work Order {1} does not allow alternative items").format(
+					rows[0].idx, frappe.bold(self.work_order)
+				)
+			)
+
+		self.validate_alternative_item_rows(rows)
+
+	def validate_alternative_item_rows(self, rows):
+		from erpnext.stock.doctype.item_alternative.item_alternative import get_alternative_item_pairs
+
+		alternative_pairs = get_alternative_item_pairs(list({row.original_item for row in rows}))
+		for row in rows:
+			if (row.original_item, row.item_code) not in alternative_pairs:
+				frappe.throw(
+					_("Row #{0}: Item {1} is not an alternative of Item {2}").format(
+						row.idx, frappe.bold(row.item_code), frappe.bold(row.original_item)
+					)
+				)
+
+	def get_transferred_alternative_pairs(self):
+		if self.purpose == "Material Transfer for Manufacture" and not self.is_return:
+			return set()
+
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+		pairs = (
+			frappe.qb.from_(stock_entry)
+			.inner_join(stock_entry_detail)
+			.on(stock_entry.name == stock_entry_detail.parent)
+			.select(stock_entry_detail.original_item, stock_entry_detail.item_code)
+			.distinct()
+			.where(
+				(stock_entry.work_order == self.work_order)
+				& (stock_entry.purpose == "Material Transfer for Manufacture")
+				& (stock_entry.is_return == 0)
+				& (stock_entry.docstatus == 1)
+				& (stock_entry_detail.original_item.isnotnull())
+				& (stock_entry_detail.original_item != stock_entry_detail.item_code)
+			)
+		).run()
+
+		return {tuple(pair) for pair in pairs}
 
 	def validate_source_stock_entry(self):
 		if not self.get("source_stock_entry"):
