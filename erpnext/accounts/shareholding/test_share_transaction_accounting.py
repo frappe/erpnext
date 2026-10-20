@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
 
@@ -88,7 +88,7 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 		settings.accounting_mode = "Clearing"
 		settings.default_bank_account = None
 		settings.save()
-		issue = self.issue_ten_shares()
+		issue = self.issue_ten_shares(posting_date=add_days(nowdate(), -5))
 		self.assertFalse(issue.bank_account)
 		with self.assertRaisesRegex(frappe.ValidationError, "Bank or Cash Account"):
 			issue.make_payment_entry()
@@ -97,6 +97,7 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			"Payment Entry", issue.make_payment_entry(bank_account=self.cash, reference_no="CHQ-1")
 		)
 		self.assertEqual(payment_entry.paid_to, self.cash)
+		self.assertEqual(payment_entry.posting_date, getdate(nowdate()))
 		self.assertEqual(payment_entry.reference_no, "CHQ-1")
 		issue.reload()
 		self.assertEqual((issue.bank_account, issue.reference_no), (self.cash, "CHQ-1"))

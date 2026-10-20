@@ -117,6 +117,13 @@ function make_payment_entry(frm) {
 				get_query: () => get_account_query(frm),
 			},
 			{
+				fieldname: "posting_date",
+				fieldtype: "Date",
+				label: __("Payment Date"),
+				reqd: 1,
+				default: frappe.datetime.get_today(),
+			},
+			{
 				fieldname: "reference_no",
 				fieldtype: "Data",
 				label: __("Cheque / Reference No"),

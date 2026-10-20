@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -46,6 +46,7 @@ def get_mode_of_payment_account(mode_of_payment: str | None, company: str):
 	if not mode_of_payment:
 		return None
 	frappe.has_permission("Mode of Payment", "read", mode_of_payment, throw=True)
+	frappe.has_permission("Company", "read", company, throw=True)
 	return frappe.db.get_value(
 		"Mode of Payment Account", {"parent": mode_of_payment, "company": company}, "default_account"
 	)
@@ -291,7 +292,7 @@ class TransactionAccounting:
 			return self.bank_account, self.clearing_account
 		return self.clearing_account, self.bank_account
 
-	def build_payment_entry(self):
+	def build_payment_entry(self, posting_date=None):
 		paid_from, paid_to = self.get_payment_entry_direction()
 		payment_entry = frappe.new_doc("Payment Entry")
 		for dimension in get_accounting_dimensions():
@@ -300,7 +301,7 @@ class TransactionAccounting:
 			{
 				"payment_type": "Internal Transfer",
 				"company": self.company,
-				"posting_date": self.posting_date,
+				"posting_date": posting_date or self.posting_date,
 				"mode_of_payment": self.mode_of_payment,
 				"paid_from": paid_from,
 				"paid_to": paid_to,
@@ -315,8 +316,8 @@ class TransactionAccounting:
 		)
 		return payment_entry
 
-	def create_settlement_payment_entry(self, submit=False):
-		payment_entry = self.build_payment_entry()
+	def create_settlement_payment_entry(self, submit=False, posting_date=None):
+		payment_entry = self.build_payment_entry(posting_date)
 		payment_entry.insert()
 		if submit:
 			payment_entry.submit()
@@ -339,6 +340,7 @@ class TransactionAccounting:
 		mode_of_payment: str | None = None,
 		reference_no: str | None = None,
 		reference_date: str | None = None,
+		posting_date: str | None = None,
 	):
 		frappe.db.get_value("Share Transaction", self.name, "name", for_update=True)
 		self.reload()
@@ -348,7 +350,7 @@ class TransactionAccounting:
 		self.validate_can_create_payment_entry()
 		self.set_payment_details(bank_account, mode_of_payment, reference_no, reference_date)
 		self.validate_settlement_account("bank_account")
-		return self.create_settlement_payment_entry()
+		return self.create_settlement_payment_entry(posting_date=posting_date or nowdate())
 
 	def set_payment_details(self, bank_account, mode_of_payment, reference_no, reference_date):
 		self.bank_account = bank_account or self.bank_account
