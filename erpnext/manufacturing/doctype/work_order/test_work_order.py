@@ -4098,6 +4098,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		transferred = {row.operation: row.transferred_qty for row in wo.reload().required_items}
 		self.assertEqual(transferred, {"Test JCT Cutting": 10, "Test JCT Lining": 0})
 
+	def test_subcontracting_order_reserves_job_card_materials_from_source_warehouse(self):
+		wo = self.make_subcontracted_operation_work_order(
+			skip_transfer=1, fg_warehouse="_Test Warehouse - _TC"
+		)
+		sco = self.subcontract_work_order(wo, 10)
+		self.assertEqual([row.reserve_warehouse for row in sco.supplied_items], ["Stores - _TC"])
+
 	def make_subcontracted_operation_work_order(self, **kwargs):
 		"""A Work Order for 10 shirts whose only operation, a subcontracted dyeing, uses 10 cloth."""
 		company = "_Test Company"
@@ -4158,16 +4165,16 @@ class TestWorkOrder(ERPNextTestSuite):
 		bom.submit()
 
 		kwargs.setdefault("wip_warehouse", warehouse)
+		kwargs.setdefault("fg_warehouse", warehouse)
 		return make_wo_order_test_record(
 			production_item=shirt,
 			qty=10,
 			bom_no=bom.name,
 			source_warehouse=warehouse,
-			fg_warehouse=warehouse,
 			**kwargs,
 		)
 
-	def subcontract_work_order(self, wo, qty, reserve_warehouse):
+	def subcontract_work_order(self, wo, qty, reserve_warehouse=None):
 		"""Submit a Subcontracting Order for qty of the Work Order's subcontracted Job Card."""
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 		from erpnext.manufacturing.doctype.job_card.job_card import make_subcontracting_po
