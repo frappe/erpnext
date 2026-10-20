@@ -291,13 +291,15 @@ class ShopFloor {
 	load_bucket(bucket, append = false) {
 		const state = this.buckets[bucket] || { rows: [], total: 0, start: 0, loaded: false };
 		const start = append ? state.start : 0;
+		// A reload keeps the pages already loaded.
+		const page_length = append ? PAGE_LENGTH : Math.max(PAGE_LENGTH, state.rows.length);
 
 		frappe.call({
 			method: "erpnext.manufacturing.page.shop_floor.shop_floor.get_work_orders",
 			args: {
 				status_group: bucket,
 				start: start,
-				page_length: PAGE_LENGTH,
+				page_length: page_length,
 				search: this.search_term || null,
 				with_job_cards_only: this.with_job_cards_only ? 1 : 0,
 			},
@@ -505,13 +507,15 @@ class ShopFloor {
 		}
 	}
 
-	// Leaves the manager board alone so its loaded pages stay put.
 	reload_operations() {
 		if (this.view !== "manager") {
 			this.load_operator();
-		} else if (this.selected_wo) {
+			return;
+		}
+		if (this.selected_wo) {
 			this.load_operator_data(this.op_container_target, { work_order: this.selected_wo });
 		}
+		this.load_bucket(this.active_bucket);
 	}
 
 	refresh() {
