@@ -217,7 +217,11 @@ def get_columns(templates):
 def get_selected_warehouses(filters):
 	"""Selected warehouses with the descendants of selected groups."""
 	return list(
-		{child for warehouse in filters.get("warehouse") or [] for child in get_child_warehouses(warehouse)}
+		{
+			child
+			for warehouse in get_filter_values(filters, "warehouse")
+			for child in get_child_warehouses(warehouse)
+		}
 	)
 
 
