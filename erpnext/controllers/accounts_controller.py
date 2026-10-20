@@ -4200,38 +4200,23 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 	return False
 
 
-def has_kept_reservation(parent, row):
-	if not flt(parent.per_picked):
-		return False
+def get_rows_with_kept_reservation(parent):
+	"""Rows of a picked Sales Order whose stock stays reserved, including Packed Items."""
+	if parent.doctype != "Sales Order" or not flt(parent.per_picked):
+		return set()
 
-	if flt(row.stock_reserved_qty):
-		return True
-
-	packed_items = [d.name for d in parent.get("packed_items") if d.parent_detail_docname == row.name]
-	return bool(packed_items) and bool(
-		frappe.db.exists(
-			"Stock Reservation Entry",
-			{
-				"docstatus": 1,
-				"voucher_type": parent.doctype,
-				"voucher_no": parent.name,
-				"voucher_detail_no": ["in", packed_items],
-				"status": ["not in", ["Delivered", "Cancelled"]],
-			},
-		)
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details_for_voucher,
 	)
+
+	bundle_rows = {d.name: d.parent_detail_docname for d in parent.get("packed_items")}
+	reserved = get_sre_reserved_qty_details_for_voucher(parent.doctype, parent.name)
+	return {bundle_rows.get(row, row) for row in reserved}
 
 
 def validate_child_on_delete(row, parent, ordered_item=None):
 	"""Check if partially transacted item (row) is being deleted."""
 	if parent.doctype == "Sales Order":
-		if has_kept_reservation(parent, row):
-			frappe.throw(
-				_("Row #{0}: Unreserve stock before deleting item {1}.").format(
-					row.idx, frappe.bold(row.item_code)
-				),
-				title=_("Stock Reserved"),
-			)
 		if flt(row.delivered_qty):
 			frappe.throw(
 				_("Row #{0}: Cannot delete item {1} which has already been delivered").format(
@@ -4293,12 +4278,24 @@ def update_bin_on_delete(row, doctype):
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
-def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
+def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept_reservation=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
 		if item.name not in updated_item_names:
 			deleted_children.append(item)
+
+	if deleted_children:
+		if rows_with_kept_reservation is None:
+			rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
+		for row in deleted_children:
+			if row.name in rows_with_kept_reservation:
+				frappe.throw(
+					_("Row #{0}: Unreserve stock before deleting item {1}.").format(
+						row.idx, frappe.bold(row.item_code)
+					),
+					title=_("Stock Reserved"),
+				)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
@@ -4402,7 +4399,7 @@ def update_child_qty_rate(
 					title=_("Invalid Qty"),
 				)
 
-		if parent_doctype == "Sales Order" and has_kept_reservation(parent, child_item):
+		if child_item.name in rows_with_kept_reservation:
 			new_stock_qty = flt(new_data.get("qty")) * (
 				flt(new_data.get("conversion_factor")) or flt(child_item.conversion_factor)
 			)
@@ -4449,7 +4446,7 @@ def update_child_qty_rate(
 		if not uom_changed and not factor_changed:
 			return
 
-		if parent_doctype == "Sales Order" and has_kept_reservation(parent, child_item):
+		if child_item.name in rows_with_kept_reservation:
 			frappe.throw(
 				_(
 					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
@@ -4521,6 +4518,7 @@ def update_child_qty_rate(
 	rfqs_before_update = set()
 
 	check_doc_permissions(parent, "write")
+	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
 	validate_parent_status(parent)
 
 	if parent_doctype == "Quotation":
@@ -4531,7 +4529,9 @@ def update_child_qty_rate(
 		purchased_items = get_purchased_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, purchased_items)
 	else:
-		_removed_items = validate_and_delete_children(parent, data)
+		_removed_items = validate_and_delete_children(
+			parent, data, rows_with_kept_reservation=rows_with_kept_reservation
+		)
 
 	items_added_or_removed |= _removed_items
 
