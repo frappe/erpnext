@@ -66,6 +66,7 @@ class StatusService:
 				"target_parent_field": "per_delivered",
 				"target_ref_field": "qty",
 				"target_field": "delivered_qty",
+				"exclude_field": "skip_delivery",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
 				"name": self.doc.name,
