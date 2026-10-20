@@ -20,23 +20,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-<<<<<<< HEAD
-<<<<<<< HEAD
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
-from erpnext.stock.utils import _get_incoming_rate
-=======
-from erpnext.stock.serial_batch_bundle import (
-	SerialBatchCreation,
-	get_batches_from_bundle,
-	get_serial_nos_from_bundle,
-)
-=======
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
->>>>>>> fc3eb4c (perf(subcontracting): fetch supplied item bundle entries in one query)
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import _get_incoming_rate, get_valuation_method
-from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
->>>>>>> 5d6c756 (fix(subcontracting): validate consumed batches on the serial and batch bundle)
+from erpnext.stock.utils import _get_incoming_rate
 
 
 class SubcontractingController(StockController):
@@ -1115,21 +1100,8 @@ class SubcontractingController(StockController):
 			link = get_link_to_form(
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
-<<<<<<< HEAD
-			msg = f"The Batch No {frappe.bold(row.get('batch_no'))} has not supplied against the {self.subcontract_data.order_doctype} {link}"
+			msg = f"The Batch No {frappe.bold(', '.join(incorrect_batches))} has not supplied against the {self.subcontract_data.order_doctype} {link}"
 			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
-=======
-			msg = _("The Batch No {0} has not been supplied against the {1} {2}").format(
-				frappe.bold(
-					", ".join(
-						SerialBatchIdentity("Batch").get_label(batch_no) for batch_no in incorrect_batches
-					)
-				),
-				self.subcontract_data.order_doctype,
-				link,
-			)
-			frappe.throw(msg, title=_("Incorrect Batch Consumed"))
->>>>>>> 5d6c756 (fix(subcontracting): validate consumed batches on the serial and batch bundle)
 
 	def __validate_serial_no(self, row, key, bundle_entries):
 		if self.__transferred_items.get(key).get("serial_no"):

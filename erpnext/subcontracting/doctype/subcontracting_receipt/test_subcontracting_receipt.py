@@ -3206,7 +3206,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			}
 		).name
 
-		self.assertRaisesRegex(frappe.ValidationError, "has not been supplied", scr.save)
+		self.assertRaisesRegex(frappe.ValidationError, "has not supplied", scr.save)
 
 	def test_bom_required_qty_validation_based_on_bom(self):
 		set_backflush_based_on("BOM")
