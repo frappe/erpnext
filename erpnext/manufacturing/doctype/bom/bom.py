@@ -1003,7 +1003,10 @@ class BOM(WebsiteGenerator):
 			return False
 
 		old_row = next((d for d in doc_before_save.operations if d.name == row.name), None)
-		return bool(old_row and old_row.bom_no != row.bom_no)
+		if not old_row or old_row.bom_no == row.bom_no:
+			return False
+
+		return get_step_material_names(doc_before_save, old_row.idx) == get_step_material_names(self, row.idx)
 
 	def remove_operation_materials(self, operation_row_id):
 		self.set("items", [row for row in self.items if cint(row.operation_row_id) != cint(operation_row_id)])
@@ -1439,6 +1442,10 @@ def _get_last_valuation_rate_from_sle(item_code):
 def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
+
+
+def get_step_material_names(bom, operation_row_id):
+	return {row.name for row in bom.items if cint(row.operation_row_id) == cint(operation_row_id)}
 
 
 def get_bom_items_as_dict(
