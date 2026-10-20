@@ -267,11 +267,25 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate(self):
 		self.validate_warehouse()
+		self.validate_job_card_for_semi_finished_goods()
 		self.validate_work_order_status_for_return()
 		self.validate_returned_qty_within_work_order()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
 		self.validate_alternative_items()
+
+	def validate_job_card_for_semi_finished_goods(self):
+		"""Semi-finished goods move per operation, so a Work Order transfer can't tell which row it feeds."""
+		if self.doc.is_return or self.doc.job_card or not self.wo_doc:
+			return
+
+		if self.wo_doc.track_semi_finished_goods:
+			frappe.throw(
+				_("Transfer materials for Work Order {0} from its Job Cards.").format(
+					get_link_to_form("Work Order", self.wo_doc.name)
+				),
+				title=_("Job Card Required"),
+			)
 
 	def validate_work_order_status_for_return(self):
 		if not (self.doc.is_return and self.wo_doc) or self.wo_doc.status in ("Completed", "Closed"):
