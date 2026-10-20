@@ -2047,7 +2047,64 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not self.get_consumption_entries():
 			return outgoing_items_cost
 
+<<<<<<< HEAD
 		return self._fetch_consumption_entry_cost()
+=======
+		cost_left = outgoing_items_cost - scrap_items_cost - manual_cost
+		if self.flags.via_repost:
+			cost_left = max(cost_left, 0)
+
+		return flt(cost_left / finished_item_qty) if finished_item_qty else 0.0
+
+	def _get_rm_cost_for_manufacture(
+		self, settings, finished_item_qty, outgoing_items_cost, has_consumption_basis=False
+	):
+		if settings.get_rm_cost_from_consumption_entry and self.work_order:
+			if self.get_consumption_entries():
+				self._validate_no_raw_materials_in_manufacture_entry(settings)
+				self._validate_single_manufacture_entry()
+				return self._fetch_consumption_entry_cost()
+		# Estimate from the BOM only when nothing was consumed. A consumed cost of zero is a
+		# real cost, so substituting BOM rates would value free inputs as output.
+		elif not outgoing_items_cost and not has_consumption_basis:
+			bom_items = self.get_bom_raw_materials(finished_item_qty)
+			outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
+
+		return outgoing_items_cost
+
+	def _validate_no_raw_materials_in_manufacture_entry(self, settings):
+		for item in self.items:
+			if not item.is_finished_item and not item.secondary_item_type and not item.valuation_type:
+				label = frappe.get_meta(settings.doctype).get_translated_label(
+					"get_rm_cost_from_consumption_entry"
+				)
+				frappe.throw(
+					_(
+						"Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
+					).format(
+						item.idx,
+						frappe.bold(label),
+						frappe.bold(_("Manufacture")),
+						frappe.bold(_("Material Consumption for Manufacture")),
+					)
+				)
+
+	def _validate_single_manufacture_entry(self):
+		if frappe.db.exists(
+			"Stock Entry",
+			{
+				"docstatus": 1,
+				"work_order": self.work_order,
+				"purpose": "Manufacture",
+				"name": ("!=", self.name),
+			},
+		):
+			frappe.throw(
+				_("Only one {0} entry can be created against the Work Order {1}").format(
+					frappe.bold(_("Manufacture")), frappe.bold(self.work_order)
+				)
+			)
+>>>>>>> a6e9d16 (fix(stock): don't divide by zero when no finished good is received)
 
 	def _fetch_consumption_entry_cost(self):
 		SE = frappe.qb.DocType("Stock Entry")
