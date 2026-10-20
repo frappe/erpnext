@@ -8,6 +8,7 @@ from frappe.core.doctype.user_permission.user_permission import get_user_permiss
 from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Avg, IfNull
 from frappe.utils import flt, today
+from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
 from erpnext.stock.doctype.company_restriction.company_restriction import (
@@ -18,27 +19,55 @@ from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
-	templates = get_selected_templates(filters)
-	columns = get_columns(templates)
+	templates = get_templates(filters)
+	columns = get_columns(list(templates))
 	data = get_data(templates, filters)
 	return columns, data
 
 
-def get_selected_templates(filters):
-	templates = filters.get("item") or []
-	return [templates] if isinstance(templates, str) else templates
+def get_templates(filters):
+	"""Templates picked by the Items or the Item Groups filter, mapped to their Item Group."""
+	items = get_filter_values(filters, "item")
+	item_groups = get_filter_values(filters, "item_group")
+	if bool(items) == bool(item_groups):
+		frappe.throw(_("Select either Items or Item Groups"))
+
+	template_filters = {"has_variants": 1}
+	if items:
+		template_filters["name"] = ["in", items]
+	else:
+		template_filters["disabled"] = 0
+		template_filters["item_group"] = ["in", get_item_groups_with_descendants(item_groups)]
+
+	return dict(
+		frappe.get_all(
+			"Item", filters=template_filters, fields=["name", "item_group"], order_by="name", as_list=True
+		)
+	)
+
+
+def get_item_groups_with_descendants(item_groups):
+	return [
+		*item_groups,
+		*(child for group in item_groups for child in get_descendants_of("Item Group", group)),
+	]
+
+
+def get_filter_values(filters, fieldname):
+	values = filters.get(fieldname) or []
+	return [values] if isinstance(values, str) else values
 
 
 def get_data(templates, filters):
 	if not templates:
 		return []
 
-	variant_filters = [{"variant_of": ["in", templates], "disabled": 0}]
+	variant_filters = [{"variant_of": ["in", list(templates)], "disabled": 0}]
 	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
 		variant_filters.append(condition)
 
 	variant_results = frappe.db.get_all(
-		"Item", fields=["name", "variant_of", "stock_uom"], filters=variant_filters
+		"Item", fields=["name", "variant_of", "item_group", "stock_uom"], filters=variant_filters
 	)
 
 	if not variant_results:
@@ -51,10 +80,10 @@ def get_data(templates, filters):
 	variant_rows = get_variant_rows(variant_results, warehouses, open_orders)
 
 	data = []
-	for template in templates:
+	for template, item_group in templates.items():
 		rows = [row for row in variant_rows.values() if row["template"] == template]
 		if rows:
-			data.append(get_template_row(template, rows, open_orders))
+			data.append(get_template_row(template, item_group, rows, open_orders))
 			data.extend(rows)
 
 	return data
@@ -75,6 +104,7 @@ def get_variant_rows(variant_results, warehouses, open_orders):
 		variant_rows[variant.name] = {
 			"variant_name": variant.name,
 			"template": variant.variant_of,
+			"item_group": variant.item_group,
 			"indent": 1,
 			**{
 				frappe.scrub(attribute): value
@@ -92,11 +122,16 @@ def get_variant_rows(variant_results, warehouses, open_orders):
 	return variant_rows
 
 
-def get_template_row(template, rows, open_orders):
+def get_template_row(template, item_group, rows, open_orders):
 	"""Template subtotal. Orders with several of its variants count once.
 	Stock is totalled only when all variants share a stock UOM."""
 	orders = set().union(*(open_orders.get(row["variant_name"], ()) for row in rows))
-	template_row = {"variant_name": template, "indent": 0, "open_orders": len(orders)}
+	template_row = {
+		"variant_name": template,
+		"item_group": item_group,
+		"indent": 0,
+		"open_orders": len(orders),
+	}
 
 	stock_uoms = {row["stock_uom"] for row in rows}
 	if len(stock_uoms) == 1:
@@ -117,7 +152,14 @@ def get_columns(templates):
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 200,
-		}
+		},
+		{
+			"fieldname": "item_group",
+			"label": _("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"width": 150,
+		},
 	]
 
 	attributes = frappe.get_all(

@@ -188,11 +188,13 @@ class TestItemVariantDetails(ERPNextTestSuite):
 
 		columns, data = execute(frappe._dict(item=["_Test Variant Item", template]))
 
-		self.assertEqual(data[0]["variant_name"], "_Test Variant Item")
+		self.assertEqual(
+			[row["variant_name"] for row in data if row["indent"] == 0], [template, "_Test Variant Item"]
+		)
 		self.assertTrue({"test_size", "test_colour"} <= {column["fieldname"] for column in columns})
 
-		template_index = next(index for index, row in enumerate(data) if row["variant_name"] == template)
-		template_row, *variant_rows = data[template_index:]
+		template_row = data[0]
+		variant_rows = [row for row in data if row.get("template") == template]
 		self.assertEqual(template_row["indent"], 0)
 		self.assertEqual(template_row["current_stock"], 10)
 		self.assertEqual(template_row["stock_uom"], frappe.db.get_value("Item", template, "stock_uom"))
