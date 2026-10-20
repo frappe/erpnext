@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.report.equity_position.equity_position import get_columns, get_data
-from erpnext.accounts.shareholding.report_permissions import require_company
+from erpnext.accounts.shareholding.report_filters import require_company
 
 
 def execute(filters=None):

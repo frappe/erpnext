@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
-from erpnext.accounts.shareholding.locking import lock_company
+from erpnext.accounts.shareholding.company_lock import lock_company
 
 
 class ShareFolio(Document):

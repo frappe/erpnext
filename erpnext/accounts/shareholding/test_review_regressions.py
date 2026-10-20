@@ -87,9 +87,7 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 			"erpnext.accounts.general_ledger.is_immutable_ledger_enabled", return_value=True
 		), patch.dict(frappe.form_dict, {"posting_date": cancel_date}):
 			issue.cancel()
-		self.assertTrue(
-			frappe.db.exists("GL Entry", {"voucher_no": issue.name, "posting_date": cancel_date})
-		)
+		self.assertTrue(frappe.db.exists("GL Entry", {"voucher_no": issue.name, "posting_date": cancel_date}))
 		filters = {"company": self.company, "share_class": self.share_class}
 		self.assertEqual(positions({**filters, "as_of_date": issue_date})[1][0].quantity, 3)
 		self.assertEqual(positions({**filters, "as_of_date": cancel_date})[1], [])
@@ -180,7 +178,7 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 		).insert(ignore_permissions=True)
 		allowed = self.create_shareholder()
 		other = self.create_company("_Test Shared Equity Issuer", "SEI")
-		from erpnext.accounts.shareholding.folios import get_or_create_folio
+		from erpnext.accounts.shareholding.share_folios import get_or_create_folio
 
 		get_or_create_folio(other, issue.to_shareholder, nowdate())
 		frappe.get_doc(

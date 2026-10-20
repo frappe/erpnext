@@ -7,15 +7,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, nowdate
 
-from erpnext.accounts.shareholding.entries import create_ledger_entry
-from erpnext.accounts.shareholding.folios import get_or_create_folio
-from erpnext.accounts.shareholding.ledger import assert_cancellable, lock_company, validate_posting
-from erpnext.accounts.shareholding.legacy import assert_legacy_history_backfilled
-from erpnext.accounts.shareholding.ranges import (
+from erpnext.accounts.shareholding.ledger_entries import create_ledger_entry
+from erpnext.accounts.shareholding.ledger_posting import assert_cancellable, lock_company, validate_posting
+from erpnext.accounts.shareholding.legacy_migration import assert_legacy_history_backfilled
+from erpnext.accounts.shareholding.share_folios import get_or_create_folio
+from erpnext.accounts.shareholding.share_ranges import (
 	get_face_value_per_share,
 	range_has_coverage,
 )
-from erpnext.accounts.shareholding.transaction_accounting import TransactionAccounting
+from erpnext.accounts.shareholding.share_transaction_accounting import TransactionAccounting
 
 TRANSACTION_FOLIOS = {
 	"Issue": (("to_folio", 1),),

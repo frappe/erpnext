@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_party_detai
 from erpnext.accounts.doctype.shareholder.shareholder import shareholder_query
 from erpnext.accounts.report.equity_position.equity_position import execute as positions
 from erpnext.accounts.report.trial_balance_for_party.trial_balance_for_party import get_data
-from erpnext.accounts.shareholding.folios import get_or_create_folio
+from erpnext.accounts.shareholding.share_folios import get_or_create_folio
 from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
 
 

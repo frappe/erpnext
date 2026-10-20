@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from erpnext.accounts.shareholding.locking import lock_company
+from erpnext.accounts.shareholding.company_lock import lock_company
 
 ACCOUNT_ROOT_TYPES = {
 	"clearing_account": {"Asset", "Liability"},
@@ -51,7 +51,7 @@ def validate_account(name, company, currency, root_types):
 		frappe.throw(_("Account {0} must have root type {1}.").format(name, ", ".join(sorted(root_types))))
 	if account.account_type in {"Receivable", "Payable"}:
 		frappe.throw(
-			_("Account {0} requires a party. Use a settlement clearing account for this V1 integration.").format(
-				name
-			)
+			_(
+				"Account {0} requires a party. Use a settlement clearing account for this V1 integration."
+			).format(name)
 		)

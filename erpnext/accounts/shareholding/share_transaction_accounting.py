@@ -13,8 +13,8 @@ from erpnext.accounts.doctype.share_accounting_settings.share_accounting_setting
 )
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.accounts.services.base_gl_composer import get_gl_dict
-from erpnext.accounts.shareholding.locking import lock_company
-from erpnext.accounts.shareholding.ranges import get_treasury_cost
+from erpnext.accounts.shareholding.company_lock import lock_company
+from erpnext.accounts.shareholding.share_ranges import get_treasury_cost
 
 ACCOUNTING_TRANSACTION_TYPES = {"Issue", "Buyback", "Retirement", "Reissue"}
 PAYMENT_TRANSACTION_TYPES = {"Issue", "Buyback", "Reissue"}
@@ -84,9 +84,9 @@ class TransactionAccounting:
 	def validate_issue_premium(self):
 		if self.securities_premium_amount < 0:
 			frappe.throw(
-				_("Issuing shares below face value is not supported. Rate Per Share must be at least {0}.").format(
-					frappe.bold(self.face_value_per_share)
-				)
+				_(
+					"Issuing shares below face value is not supported. Rate Per Share must be at least {0}."
+				).format(frappe.bold(self.face_value_per_share))
 			)
 
 	def set_treasury_disposal_amounts(self):
@@ -115,7 +115,9 @@ class TransactionAccounting:
 		settings = self.find_accounting_settings()
 		if not settings:
 			frappe.throw(
-				_("Configure Share Accounting Settings for company {0} before submitting.").format(self.company)
+				_("Configure Share Accounting Settings for company {0} before submitting.").format(
+					self.company
+				)
 			)
 		return settings
 
@@ -128,7 +130,9 @@ class TransactionAccounting:
 			return
 		self.accounting_mode = self.accounting_mode or settings.accounting_mode
 		self.clearing_account = self.clearing_account or settings.clearing_account
-		self.bank_account = self.bank_account or self.get_mode_of_payment_account() or settings.default_bank_account
+		self.bank_account = (
+			self.bank_account or self.get_mode_of_payment_account() or settings.default_bank_account
+		)
 
 	def clear_payment_fields(self):
 		for field in PAYMENT_FIELDS:
@@ -257,7 +261,9 @@ class TransactionAccounting:
 		make_gl_entries([self.get_gl_entry(row, rows) for row in rows], merge_entries=False)
 
 	def get_gl_entry(self, row, rows):
-		against = ", ".join(sorted({other["account"] for other in rows if other["account"] != row["account"]}))
+		against = ", ".join(
+			sorted({other["account"] for other in rows if other["account"] != row["account"]})
+		)
 		return get_gl_dict(
 			self,
 			{
@@ -326,7 +332,9 @@ class TransactionAccounting:
 		if self.docstatus != 1 or self.transaction_type not in PAYMENT_TRANSACTION_TYPES:
 			frappe.throw(_("Submit an Issue, Buyback or Reissue before creating its Payment Entry."))
 		if self.get_active_payment_entry():
-			frappe.throw(_("Payment Entry {0} already exists for this Share Transaction.").format(self.payment_entry))
+			frappe.throw(
+				_("Payment Entry {0} already exists for this Share Transaction.").format(self.payment_entry)
+			)
 
 	def get_active_payment_entry(self):
 		if not self.payment_entry:

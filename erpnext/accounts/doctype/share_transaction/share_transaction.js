@@ -43,7 +43,7 @@ frappe.ui.form.on("Share Transaction", {
 
 	async mode_of_payment(frm) {
 		const account = await frappe.xcall(
-			"erpnext.accounts.shareholding.transaction_accounting.get_mode_of_payment_account",
+			"erpnext.accounts.shareholding.share_transaction_accounting.get_mode_of_payment_account",
 			{ mode_of_payment: frm.doc.mode_of_payment, company: frm.doc.company }
 		);
 		if (account) {

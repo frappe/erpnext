@@ -5,8 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
-from erpnext.accounts.shareholding.legacy import assert_legacy_history_backfilled
-from erpnext.accounts.shareholding.permissions import get_allowed_companies
+from erpnext.accounts.shareholding.legacy_migration import assert_legacy_history_backfilled
+from erpnext.accounts.shareholding.shareholder_permissions import get_allowed_companies
 
 
 def require_company(filters):

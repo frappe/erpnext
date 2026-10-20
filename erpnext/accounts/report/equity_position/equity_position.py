@@ -7,7 +7,7 @@ from frappe.query_builder.functions import Max, NullIf, Sum
 from frappe.utils import cint, nowdate
 from pypika.terms import Case
 
-from erpnext.accounts.shareholding.report_permissions import apply_report_filters, require_company
+from erpnext.accounts.shareholding.report_filters import apply_report_filters, require_company
 
 
 def execute(filters=None):

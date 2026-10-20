@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
 
-from erpnext.accounts.shareholding.locking import lock_company
+from erpnext.accounts.shareholding.company_lock import lock_company
 
 
 def validate_posting(company, share_class, posting_date):

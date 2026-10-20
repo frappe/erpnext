@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-from erpnext.accounts.shareholding.report_permissions import apply_report_filters, require_company
+from erpnext.accounts.shareholding.report_filters import apply_report_filters, require_company
 
 
 def execute(filters=None):

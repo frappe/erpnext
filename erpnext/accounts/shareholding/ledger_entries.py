@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import cint, flt, now_datetime
 
-from erpnext.accounts.shareholding.locking import lock_company
+from erpnext.accounts.shareholding.company_lock import lock_company
 
 
 def create_ledger_entry(

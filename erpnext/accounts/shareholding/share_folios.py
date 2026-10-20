@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 
-from erpnext.accounts.shareholding.locking import lock_company
+from erpnext.accounts.shareholding.company_lock import lock_company
 
 
 def get_or_create_folio(company, shareholder=None, posting_date=None, is_treasury=False):

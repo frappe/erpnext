@@ -7,8 +7,8 @@ from frappe.utils import nowdate
 from erpnext.accounts.report.equity_position.equity_position import execute as positions
 from erpnext.accounts.report.share_balance.share_balance import execute as balances
 from erpnext.accounts.report.share_ledger.share_ledger import execute as ledger
-from erpnext.accounts.shareholding.entries import create_ledger_entry
-from erpnext.accounts.shareholding.folios import get_or_create_folio
+from erpnext.accounts.shareholding.ledger_entries import create_ledger_entry
+from erpnext.accounts.shareholding.share_folios import get_or_create_folio
 from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
 
 
@@ -77,7 +77,9 @@ class TestShareholdingAccessAndIdentity(ShareholdingTestCase):
 		try:
 			for report in (positions, balances, ledger):
 				with self.subTest(report=report.__module__):
-					rows = report({"company": self.company, "share_class": self.share_class, "date": nowdate()})[1]
+					rows = report(
+						{"company": self.company, "share_class": self.share_class, "date": nowdate()}
+					)[1]
 					self.assertTrue(rows)
 					self.assertEqual({row.company for row in rows}, {self.company})
 					with self.assertRaises(frappe.PermissionError):
