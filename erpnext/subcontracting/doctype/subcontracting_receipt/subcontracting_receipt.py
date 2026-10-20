@@ -216,11 +216,30 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
+		self.validate_consumed_batches()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
 		self.auto_create_purchase_receipt()
 		self.update_job_card()
+
+	def validate_consumed_batches(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		bundles = frappe._dict(
+			frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"parent": self.name},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
+		for row in self.supplied_items:
+			row.serial_and_batch_bundle = bundles.get(row.name) or row.serial_and_batch_bundle
+
+		SerialBatchBundleService(self).validate_outward_bundle_batches(
+			check_expiry=False, rows=self.supplied_items, qty_field="consumed_qty"
+		)
 
 	def on_update(self):
 		for table_field in ["items", "supplied_items"]:

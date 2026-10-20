@@ -3124,7 +3124,16 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 			if row.item_code == batch_serial_item.name:
 				self.assertTrue(row.batch_no)
-				self.assertTrue(row.serial_no)
+				self.assertFalse(row.serial_no)
+
+		dn.submit()
+		dn.reload()
+		row = next(row for row in dn.items if row.item_code == batch_serial_item.name)
+		entries = frappe.get_all(
+			"Serial and Batch Entry", {"parent": row.serial_and_batch_bundle}, ["serial_no", "batch_no"]
+		)
+		self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 5)
+		self.assertEqual({d.batch_no for d in entries}, {row.batch_no})
 
 	def test_delivery_note_return_for_batch_item_with_different_warehouse(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
@@ -4153,6 +4162,141 @@ class TestDeliveryNote(ERPNextTestSuite):
 			"Sales Invoice Item", {"dn_detail": billed_return.items[0].name, "docstatus": 1}, "qty"
 		)
 		self.assertEqual(credited_qty, -2)
+
+	def test_credit_note_for_a_return_in_another_unit(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(item_code=item, qty=1, rate=1000, do_not_submit=True)
+		delivery_note.items[0].update({"uom": "Box", "conversion_factor": 10})
+		delivery_note.submit()
+		make_sales_invoice(delivery_note.name).submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"uom": "Nos", "conversion_factor": 1, "qty": -10, "rate": 100})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -10)
+
+	def test_credit_note_for_a_return_row_without_its_delivery_row(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+		make_sales_invoice(delivery_note.name).submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"qty": -2, "dn_detail": None})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+
+		credited_qty = frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+		)
+		self.assertEqual(credited_qty, -2)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_linked_return_row_keeps_its_credit_before_unlinked_rows(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500, do_not_submit=True)
+		delivery_note.append("items", delivery_note.items[0].as_dict().copy().update({"name": None}))
+		delivery_note.submit()
+		make_sales_invoice(delivery_note.name).submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].update({"qty": -5, "dn_detail": None})
+		sales_return.items[1].update({"qty": -5, "dn_detail": delivery_note.items[0].name})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+
+		credited_qty = sum(
+			frappe.get_all(
+				"Sales Invoice Item",
+				filters={"dn_detail": ("in", [d.name for d in sales_return.items]), "docstatus": 1},
+				pluck="qty",
+			)
+		)
+		self.assertEqual(credited_qty, -10)
+
+	def test_unlinked_returns_are_not_credited_twice(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500)
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.items[0].qty = 2
+		invoice.submit()
+
+		credited = []
+		for _i in range(2):
+			sales_return = make_sales_return(delivery_note.name)
+			sales_return.items[0].update({"qty": -2, "dn_detail": None})
+			sales_return.issue_credit_note = 1
+			sales_return.submit()
+			credited.append(
+				frappe.db.get_value(
+					"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+				)
+			)
+
+		self.assertEqual(credited, [-2, None])
+
+	def make_two_row_delivery_note_billed(self, billed_qty):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=5, rate=500, do_not_submit=True)
+		delivery_note.append("items", delivery_note.items[0].as_dict().copy().update({"name": None}))
+		delivery_note.submit()
+		invoice = make_sales_invoice(delivery_note.name)
+		for row in invoice.items:
+			row.qty = billed_qty
+		invoice.submit()
+		return delivery_note
+
+	def make_credited_return(self, delivery_note, qty, dn_detail):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items = sales_return.items[:1]
+		sales_return.items[0].update({"qty": qty, "dn_detail": dn_detail})
+		sales_return.issue_credit_note = 1
+		sales_return.submit()
+		return frappe.db.get_value(
+			"Sales Invoice Item", {"dn_detail": sales_return.items[0].name, "docstatus": 1}, "qty"
+		)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_returns_linked_to_different_rows_are_both_credited(self):
+		delivery_note = self.make_two_row_delivery_note_billed(5)
+
+		first = self.make_credited_return(delivery_note, -5, delivery_note.items[0].name)
+		second = self.make_credited_return(delivery_note, -5, delivery_note.items[1].name)
+
+		self.assertEqual([first, second], [-5, -5])
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_linked_and_unlinked_credits_stay_within_billed_qty(self):
+		delivery_note = self.make_two_row_delivery_note_billed(2)
+
+		credited = [
+			self.make_credited_return(delivery_note, -2, delivery_note.items[0].name),
+			self.make_credited_return(delivery_note, -2, None),
+			self.make_credited_return(delivery_note, -2, None),
+		]
+
+		self.assertEqual(credited, [-2, -2, None])
 
 	def test_credit_note_after_a_reduced_rate_invoice(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

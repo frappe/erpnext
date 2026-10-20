@@ -7,7 +7,8 @@
  "field_order": [
   "enable_youtube_tracking",
   "api_key",
-  "frequency"
+  "frequency",
+  "last_youtube_update"
  ],
  "fields": [
   {
@@ -30,14 +31,21 @@
    "fieldtype": "Select",
    "label": "Frequency",
    "mandatory_depends_on": "eval:doc.enable_youtube_tracking",
-   "options": "30 mins\n1 hr\n6 hrs\nDaily"
+   "options": "1 hr\n6 hrs\nDaily"
+  },
+  {
+   "fieldname": "last_youtube_update",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Last YouTube Update",
+   "read_only": 1
   }
  ],
  "icon": "settings",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:58.942609",
+ "modified": "2026-10-19 15:47:07.992884",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video Settings",
