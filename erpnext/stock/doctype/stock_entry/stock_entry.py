@@ -901,7 +901,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.flags.via_repost:
 			cost_left = max(cost_left, 0)
 
-		return flt(cost_left / finished_item_qty)
+		return flt(cost_left / finished_item_qty) if finished_item_qty else 0.0
 
 	def _get_rm_cost_for_manufacture(
 		self, settings, finished_item_qty, outgoing_items_cost, has_consumption_basis=False
