@@ -68,6 +68,7 @@ class ChildItemUpdater:
 				self.parent, data, self._transacted_stock_qty
 			)
 		else:
+			self._track_deleted_blanket_order_rows(data)
 			items_added_or_removed |= validate_and_delete_children(self.parent, data)
 
 		frappe.db.savepoint("update_child_items")
@@ -341,6 +342,12 @@ class ChildItemUpdater:
 		)
 		key = (child_item.blanket_order, child_item.item_code)
 		self._blanket_order_change[key] += new_stock_qty - flt(child_item.stock_qty)
+
+	def _track_deleted_blanket_order_rows(self, data: list) -> None:
+		kept_rows = {d.get("docname") for d in data}
+		for row in self.parent.items:
+			if row.name not in kept_rows and row.get("blanket_order"):
+				self._blanket_order_change[(row.blanket_order, row.item_code)] -= flt(row.stock_qty)
 
 	def _validate_blanket_order_changes(self) -> None:
 		for (blanket_order_name, item_code), change in sorted(self._blanket_order_change.items()):
