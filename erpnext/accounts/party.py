@@ -201,6 +201,10 @@ def _get_party_details(
 
 
 def validate_party_company(party_type, party, company):
+	if company and party_type == "Shareholder":
+		if not frappe.db.exists("Share Folio", {"company": company, "shareholder": party}):
+			frappe.throw(_("Shareholder {0} has no Share Folio in company {1}.").format(party, company))
+		return
 	if not company or party_type not in ("Customer", "Supplier"):
 		return
 

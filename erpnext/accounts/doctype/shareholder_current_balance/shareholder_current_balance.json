@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "share_class",
+  "share_folio",
+  "folio_number",
+  "quantity",
+  "currency",
+  "face_value_per_share",
+  "total_face_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "share_class",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Share Class",
+   "options": "Share Class",
+   "read_only": 1
+  },
+  {
+   "fieldname": "share_folio",
+   "fieldtype": "Link",
+   "label": "Share Folio",
+   "options": "Share Folio",
+   "read_only": 1
+  },
+  {
+   "fieldname": "folio_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Folio Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Shares Held",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "face_value_per_share",
+   "fieldtype": "Currency",
+   "label": "Face Value Per Share",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_face_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Face Value",
+   "options": "currency",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "module": "Accounts",
+ "name": "Shareholder Current Balance",
+ "permissions": [],
+ "sort_field": "idx",
+ "sort_order": "ASC"
+}

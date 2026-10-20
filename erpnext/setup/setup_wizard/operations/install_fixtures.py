@@ -311,9 +311,6 @@ def get_preset_records(country=None):
 		{"doctype": "Project Type", "project_type": _("Other")},
 		{"doctype": "Print Heading", "print_heading": _("Credit Note")},
 		{"doctype": "Print Heading", "print_heading": _("Debit Note")},
-		# Share Management
-		{"doctype": "Share Type", "title": _("Equity")},
-		{"doctype": "Share Type", "title": _("Preference")},
 		# Market Segments
 		{"doctype": "Market Segment", "market_segment": _("Lower Income")},
 		{"doctype": "Market Segment", "market_segment": _("Middle Income")},

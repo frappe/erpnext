@@ -28,7 +28,7 @@ def get_data(filters, show_party_name):
 	if filters.get("party_type") in ("Customer", "Supplier", "Employee", "Member"):
 		party_name_field = "{}_name".format(frappe.scrub(filters.get("party_type")))
 	elif filters.get("party_type") == "Shareholder":
-		party_name_field = "title"
+		party_name_field = "legal_name"
 	else:
 		party_name_field = "name"
 

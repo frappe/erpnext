@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "autoname": "format:FOL-{#####}",
+ "creation": "2026-09-25 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "folio_details_section",
+  "company",
+  "folio_number",
+  "is_treasury",
+  "shareholder",
+  "membership_section",
+  "date_of_becoming_member",
+  "column_break_membership",
+  "date_of_cessation"
+ ],
+ "fields": [
+  {
+   "fieldname": "folio_details_section",
+   "fieldtype": "Section Break",
+   "label": "Folio Details"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "folio_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Folio Number",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_treasury",
+   "fieldtype": "Check",
+   "label": "Is Treasury?",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_treasury",
+   "fieldname": "shareholder",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shareholder",
+   "mandatory_depends_on": "eval:!doc.is_treasury",
+   "options": "Shareholder",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:!doc.is_treasury",
+   "fieldname": "membership_section",
+   "fieldtype": "Section Break",
+   "label": "Membership"
+  },
+  {
+   "fieldname": "date_of_becoming_member",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Becoming Member",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_membership",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_of_cessation",
+   "fieldtype": "Date",
+   "label": "Date of Cessation",
+   "read_only": 1
+  }
+ ],
+ "icon": "folder-normal",
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-10-13 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Share Folio",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "search_fields": "folio_number, company, shareholder",
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "folio_number",
+ "track_changes": 1
+}
