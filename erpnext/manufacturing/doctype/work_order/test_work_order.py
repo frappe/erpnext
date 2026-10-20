@@ -5197,6 +5197,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		row.qty += 10
 		self.assertRaises(frappe.ValidationError, return_entry.save)
 
+	def test_return_of_components_transferred_in_two_uoms(self):
+		raw_material = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 50}],
+			}
+		).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=60)
+		test_stock_entry.make_stock_entry(
+			item_code=raw_material, target="_Test Warehouse - _TC", qty=100, basic_rate=10
+		)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good, bom_no=bom.name, qty=1, source_warehouse="_Test Warehouse - _TC"
+		)
+
+		for fg_qty, uom, conversion_factor, qty in ((1, "Box", 50, 1), (0, "Kg", 1, 10)):
+			transfer = frappe.get_doc(
+				make_stock_entry(work_order.name, "Material Transfer for Manufacture", 1)
+			)
+			transfer.fg_completed_qty = fg_qty
+			transfer.items[0].update({"uom": uom, "conversion_factor": conversion_factor, "qty": qty})
+			transfer.submit()
+		close_work_order(work_order.name, "Closed")
+
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.save()
+		self.assertEqual(sum(row.transfer_qty for row in return_entry.items), 60)
+
 	def test_return_of_components_transferred_in_another_uom(self):
 		raw_material = make_item(
 			properties={
