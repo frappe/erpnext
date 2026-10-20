@@ -4741,23 +4741,65 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(get_projected_qty(cloth, warehouse), -10)
 		self.assertEqual(get_projected_qty(cloth, reserve_warehouse), 0)
 
-	def test_subcontracting_material_already_transferred_is_not_deducted_twice(self):
+	def test_semi_finished_goods_work_order_transfers_from_job_cards(self):
+		from erpnext.manufacturing.doctype.job_card.mapper import (
+			make_stock_entry as make_stock_entry_from_job_card,
+		)
+
+		wo = self.make_subcontracted_operation_work_order(
+			skip_transfer=0, wip_warehouse="_Test Warehouse - _TC"
+		)
+
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4))
+		self.assertRaisesRegex(frappe.ValidationError, "from its Job Cards", transfer.insert)
+
+		# The subcontracted operation's material goes through its Subcontracting Order.
+		transfer = make_stock_entry_from_job_card(frappe.db.get_value("Job Card", {"work_order": wo.name}))
+		self.assertRaisesRegex(frappe.ValidationError, "from its Subcontracting Order", transfer.insert)
+
+	def test_job_card_transfer_is_credited_to_its_operation(self):
+		from erpnext.manufacturing.doctype.job_card.mapper import (
+			make_stock_entry as make_stock_entry_from_job_card,
+		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
 		)
 
 		warehouse = "Stores - _TC"
-		wip_warehouse = "_Test Warehouse - _TC"
-		wo = self.make_subcontracted_operation_work_order(skip_transfer=0, wip_warehouse=wip_warehouse)
-		cloth = wo.required_items[0].item_code
+		cloth = make_item("Test JCT Cloth", {"is_stock_item": 1}).name
+		shirt = make_item("Test JCT Shirt", {"is_stock_item": 1}).name
+		if not frappe.db.exists("Workstation", "Test JCT Workstation"):
+			make_workstation(workstation="Test JCT Workstation", production_capacity=1)
 
-		make_stock_entry_test_record(item_code=cloth, target=warehouse, qty=4, basic_rate=100)
-		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 6)
+		bom = frappe.new_doc("BOM")
+		bom.company = "_Test Company"
+		bom.item = shirt
+		bom.quantity = 1
+		bom.with_operations = 1
+		for operation in ("Test JCT Cutting", "Test JCT Lining"):
+			if not frappe.db.exists("Operation", operation):
+				make_operation(operation=operation, workstation="Test JCT Workstation")
+			bom.append(
+				"operations",
+				{"operation": operation, "workstation": "Test JCT Workstation", "time_in_mins": 60},
+			)
+			bom.append("items", {"item_code": cloth, "qty": 1, "operation": operation})
+		bom.insert()
+		bom.submit()
 
-		# The order takes the 4 already in WIP: the other 6 are still the Work Order's.
-		self.subcontract_work_order(wo, 4, wip_warehouse)
-		self.assertEqual(get_reserved_qty_for_production(cloth, warehouse), 6)
+		wo = make_wo_order_test_record(
+			production_item=shirt,
+			qty=10,
+			bom_no=bom.name,
+			source_warehouse=warehouse,
+			transfer_material_against="Job Card",
+		)
+		make_stock_entry_test_record(item_code=cloth, target=warehouse, qty=10, basic_rate=100)
+		job_card = frappe.db.get_value("Job Card", {"work_order": wo.name, "operation": "Test JCT Cutting"})
+		make_stock_entry_from_job_card(job_card).submit()
+
+		transferred = {row.operation: row.transferred_qty for row in wo.reload().required_items}
+		self.assertEqual(transferred, {"Test JCT Cutting": 10, "Test JCT Lining": 0})
 
 	def make_subcontracted_operation_work_order(self, **kwargs):
 		"""A Work Order for 10 shirts whose only operation, a subcontracted dyeing, uses 10 cloth."""
