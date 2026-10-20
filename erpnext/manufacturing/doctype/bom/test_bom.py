@@ -1448,7 +1448,7 @@ class TestBOM(ERPNextTestSuite):
 		bom.items[1].percentage = 60
 		bom.with_operations = 1
 		bom.track_semi_finished_goods = 1
-		self.assertRaisesRegex(frappe.ValidationError, "Track Semi Finished Goods", bom.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Produce an Item at Each Operation", bom.insert)
 
 	@timeout
 	def test_final_operation_must_produce_the_bom_item(self):
@@ -1777,6 +1777,140 @@ class TestBOM(ERPNextTestSuite):
 		sub_bom.reload()
 		sub_bom.is_active = 0
 		self.assertRaisesRegex(frappe.ValidationError, "linked with other BOMs", sub_bom.save)
+
+	def test_make_in_stages_lists_every_step_problem_together(self):
+		fg_item, sfg_item, rm_item = make_stage_items()
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation"},
+				{
+					"operation": "_Test SFG Final Operation",
+					"is_final_finished_good": 1,
+					"finished_good": sfg_item,
+				},
+			],
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+
+		with self.assertRaises(frappe.ValidationError) as error:
+			bom.insert()
+
+		self.assertIn("Step 1", str(error.exception))
+		self.assertIn("Step 2", str(error.exception))
+
+	def test_make_in_stages_ticks_the_last_step_by_default(self):
+		fg_item, sfg_item, rm_item = make_stage_items()
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "finished_good": sfg_item},
+				{"operation": "_Test SFG Final Operation"},
+			],
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+
+		self.assertEqual(bom.operations[1].is_final_finished_good, 1)
+		self.assertEqual(bom.operations[1].finished_good, fg_item)
+		self.assertEqual(bom.operations[0].is_final_finished_good, 0)
+
+	def test_make_in_stages_submit_lists_steps_without_raw_materials(self):
+		fg_item, sfg_item, rm_item = make_stage_items()
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "finished_good": sfg_item},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
+		bom.insert()
+
+		self.assertRaisesRegex(frappe.ValidationError, "Step 2.*Add Raw Materials", bom.submit)
+
+	def test_changing_step_bom_replaces_its_raw_materials(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item, sfg_item, first_rm = make_stage_items()
+		second_rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		first_bom = make_bom(item=sfg_item, raw_materials=[first_rm])
+		second_bom = make_bom(item=sfg_item, raw_materials=[second_rm])
+
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "bom_no": first_bom.name},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+		self.assertEqual(get_step_items(bom, 1), [first_rm])
+
+		bom.operations[0].bom_no = second_bom.name
+		bom.save()
+
+		self.assertEqual(get_step_items(bom, 1), [second_rm])
+		self.assertEqual(get_step_items(bom, 2), [sfg_item])
+
+	def test_saving_keeps_edits_to_materials_imported_for_a_changed_step_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item, sfg_item, first_rm = make_stage_items()
+		second_rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name
+		first_bom = make_bom(item=sfg_item, raw_materials=[first_rm])
+		second_bom = make_bom(item=sfg_item, raw_materials=[second_rm])
+
+		bom = make_stage_bom(
+			fg_item,
+			[
+				{"operation": "_Test SFG Operation", "bom_no": first_bom.name},
+				{"operation": "_Test SFG Final Operation", "is_final_finished_good": 1},
+			],
+		)
+		bom.append("items", {"item_code": sfg_item, "qty": 1, "operation_row_id": 2})
+		bom.insert()
+
+		bom.operations[0].bom_no = second_bom.name
+		bom.add_materials_from_bom(sfg_item, second_bom.name, 1, replace=True)
+		next(row for row in bom.items if row.item_code == second_rm).qty = 5
+		bom.save()
+
+		step_items = [(row.item_code, row.qty) for row in bom.items if row.operation_row_id == 1]
+		self.assertEqual(step_items, [(second_rm, 5)])
+
+
+def make_stage_items():
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+	make_workstation({"workstation": "_Test SFG Workstation"})
+	for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
+		make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
+
+	return (
+		make_item(properties={"is_stock_item": 1}).name,
+		make_item(properties={"is_stock_item": 1}).name,
+		make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name,
+	)
+
+
+def make_stage_bom(fg_item, operations):
+	bom = frappe.new_doc("BOM")
+	bom.update(
+		{"company": "_Test Company", "item": fg_item, "quantity": 1, "with_operations": 1, "currency": "USD"}
+	)
+	bom.track_semi_finished_goods = 1
+	for operation in operations:
+		bom.append("operations", {"workstation": "_Test SFG Workstation", "time_in_mins": 30, **operation})
+
+	return bom
+
+
+def get_step_items(bom, step):
+	return [row.item_code for row in bom.items if row.operation_row_id == step]
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
