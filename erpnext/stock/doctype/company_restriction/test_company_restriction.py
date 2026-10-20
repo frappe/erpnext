@@ -365,6 +365,16 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			rows = self.run_report("stock", "item_where_used", {"item": template.name})
 			self.assertEqual([row.related_item for row in rows], [allowed.name])
 
+	def test_variant_details_hides_restricted_templates(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = make_item(properties={"has_variants": 1, "attributes": [{"attribute": "Test Size"}]})
+		create_variant(template.name, {"Test Size": "Small"}).insert()
+		self.restrict_to_companies("Item", template.name, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			self.assertEqual(self.run_report("stock", "item_variant_details", {"item": template.name}), [])
+
 	def test_bom_search_hides_restricted_product_bundles(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
