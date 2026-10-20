@@ -135,4 +135,4 @@ class TestLegacyBackfill(IntegrationTestCase):
 		transfer.submit()
 		self.assertEqual(frappe.get_doc("Shareholder", holders[0]).current_holdings[0].quantity, 2)
 		self.assertEqual(frappe.get_doc("Shareholder", holders[1]).current_holdings[0].quantity, 6)
-		self.assertFalse(transfer.journal_entry)
+		self.assertFalse(transfer.payment_entry)

@@ -4,12 +4,12 @@
 import frappe
 from frappe.tests import IntegrationTestCase
 
-from erpnext.accounts.doctype.equity_accounting_settings.equity_accounting_settings import (
+from erpnext.accounts.doctype.share_accounting_settings.share_accounting_settings import (
 	validate_account,
 )
 
 
-class TestEquityAccountingSettings(IntegrationTestCase):
+class TestShareAccountingSettings(IntegrationTestCase):
 	def setUp(self):
 		self.company = "_Test Company"
 		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
@@ -55,7 +55,7 @@ class TestEquityAccountingSettings(IntegrationTestCase):
 		self.assertIsNotNone(account)
 		settings = frappe.get_doc(
 			{
-				"doctype": "Equity Accounting Settings",
+				"doctype": "Share Accounting Settings",
 				"company": self.company,
 				"share_capital_account": account,
 				"securities_premium_account": account,

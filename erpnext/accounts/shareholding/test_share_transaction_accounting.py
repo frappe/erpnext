@@ -8,53 +8,112 @@ from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
 
 
 class TestShareTransactionAccounting(ShareholdingTestCase):
-	def test_issue_creates_draft_journal_entry_and_posts_to_general_ledger(self):
-		shareholder = self.create_shareholder()
-		issue = self.create_transaction(
+	def issue_ten_shares(self, **values):
+		return self.create_transaction(
 			transaction_type="Issue",
-			to_shareholder=shareholder,
+			to_shareholder=self.create_shareholder(),
 			from_share_number=1,
 			to_share_number=10,
 			face_value_per_share=10,
 			rate_per_share=12,
+			**values,
 		)
 
-		journal_entry = frappe.get_doc("Journal Entry", issue.journal_entry)
-		self.assertEqual(journal_entry.docstatus, 0)
-		self.assertEqual(journal_entry.share_transaction, issue.name)
-		self.assertEqual(issue.create_accounting_journal_entry(), journal_entry.name)
-		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": journal_entry.name}))
-		self.assert_accounting_rows(
-			journal_entry,
+	def set_accounting_mode(self, mode):
+		settings = frappe.get_doc("Share Accounting Settings", self.company)
+		settings.accounting_mode = mode
+		settings.save()
+
+	def test_direct_issue_posts_equity_gl_and_submits_settlement_payment_entry(self):
+		issue = self.issue_ten_shares()
+
+		self.assertEqual(issue.accounting_mode, "Direct")
+		self.assertEqual(issue.bank_account, self.cash)
+		self.assert_gl_rows(
+			"Share Transaction",
+			issue.name,
 			{
-				self.cash: (120, 0),
+				self.clearing_account: (120, 0),
 				self.share_capital_account: (0, 100),
 				self.securities_premium_account: (0, 20),
 			},
 		)
-
-		journal_entry.submit()
-		general_ledger_rows = frappe.get_all(
-			"GL Entry",
-			filters={
-				"voucher_type": "Journal Entry",
-				"voucher_no": journal_entry.name,
-				"is_cancelled": 0,
-			},
-			fields=["account", "debit", "credit"],
-		)
-		self.assertEqual(
-			{row.account: (row.debit, row.credit) for row in general_ledger_rows},
-			{
-				self.cash: (120, 0),
-				self.share_capital_account: (0, 100),
-				self.securities_premium_account: (0, 20),
-			},
+		payment_entry = frappe.get_doc("Payment Entry", issue.payment_entry)
+		self.assertEqual(payment_entry.docstatus, 1)
+		self.assertEqual(payment_entry.payment_type, "Internal Transfer")
+		self.assertEqual((payment_entry.paid_from, payment_entry.paid_to), (self.clearing_account, self.cash))
+		self.assert_gl_rows(
+			"Payment Entry", payment_entry.name, {self.cash: (120, 0), self.clearing_account: (0, 120)}
 		)
 
 		issue.cancel()
-		journal_entry.reload()
-		self.assertEqual(journal_entry.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment_entry.name, "docstatus"), 2)
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry", {"voucher_type": "Share Transaction", "voucher_no": issue.name, "is_cancelled": 0}
+			)
+		)
+
+	def test_clearing_mode_leaves_the_payment_entry_to_accounts(self):
+		self.set_accounting_mode("Clearing")
+		issue = self.issue_ten_shares()
+
+		self.assertEqual(issue.accounting_mode, "Clearing")
+		self.assertFalse(issue.payment_entry)
+		self.assert_gl_rows(
+			"Share Transaction",
+			issue.name,
+			{
+				self.clearing_account: (120, 0),
+				self.share_capital_account: (0, 100),
+				self.securities_premium_account: (0, 20),
+			},
+		)
+
+		payment_entry = frappe.get_doc("Payment Entry", issue.make_payment_entry())
+		self.assertEqual(payment_entry.docstatus, 0)
+		self.assertEqual(frappe.db.get_value("Share Transaction", issue.name, "payment_entry"), payment_entry.name)
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			issue.make_payment_entry()
+
+		payment_entry.submit()
+		issue.reload()
+		issue.cancel()
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment_entry.name, "docstatus"), 2)
+
+	def test_direct_mode_requires_a_bank_account(self):
+		settings = frappe.get_doc("Share Accounting Settings", self.company)
+		settings.accounting_mode = "Clearing"
+		settings.default_bank_account = None
+		settings.save()
+		issue = self.issue_ten_shares()
+		self.assertFalse(issue.bank_account)
+		with self.assertRaisesRegex(frappe.ValidationError, "Bank or Cash Account"):
+			issue.make_payment_entry()
+
+	def test_accounting_preview_lists_accounts_before_and_after_submit(self):
+		draft = frappe.get_doc(
+			{
+				"doctype": "Share Transaction",
+				"company": self.company,
+				"share_class": self.share_class,
+				"posting_date": nowdate(),
+				"transaction_type": "Issue",
+				"to_shareholder": self.create_shareholder(),
+				"from_share_number": 1,
+				"to_share_number": 10,
+				"face_value_per_share": 10,
+				"rate_per_share": 12,
+			}
+		).insert()
+		expected = {
+			self.clearing_account: (120, 0),
+			self.share_capital_account: (0, 100),
+			self.securities_premium_account: (0, 20),
+		}
+		self.assertEqual({row["account"]: (row["debit"], row["credit"]) for row in draft.get_accounting_preview()}, expected)
+		draft.submit()
+		self.assertEqual({row.account: (row.debit, row.credit) for row in draft.get_accounting_preview()}, expected)
 
 	def test_treasury_cost_drives_buyback_reissue_and_retirement_entries(self):
 		original_holder = self.create_shareholder()
@@ -75,10 +134,13 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			to_share_number=5,
 			rate_per_share=14,
 		)
-		self.assert_accounting_rows(
-			frappe.get_doc("Journal Entry", buyback.journal_entry),
-			{self.treasury_shares_account: (70, 0), self.cash: (0, 70)},
+		self.assert_gl_rows(
+			"Share Transaction",
+			buyback.name,
+			{self.treasury_shares_account: (70, 0), self.clearing_account: (0, 70)},
 		)
+		buyback_payment = frappe.get_doc("Payment Entry", buyback.payment_entry)
+		self.assertEqual((buyback_payment.paid_from, buyback_payment.paid_to), (self.cash, self.clearing_account))
 
 		reissue = self.create_transaction(
 			transaction_type="Reissue",
@@ -88,12 +150,13 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			rate_per_share=16,
 		)
 		self.assertEqual(reissue.treasury_cost, 28)
-		self.assert_accounting_rows(
-			frappe.get_doc("Journal Entry", reissue.journal_entry),
+		self.assert_gl_rows(
+			"Share Transaction",
+			reissue.name,
 			{
-				self.cash: (32, 0),
+				self.clearing_account: (32, 0),
 				self.treasury_shares_account: (0, 28),
-				self.equity_adjustment_account: (0, 4),
+				self.treasury_adjustment_account: (0, 4),
 			},
 		)
 
@@ -104,12 +167,14 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			rate_per_share=0,
 		)
 		self.assertEqual(retirement.treasury_cost, 42)
-		self.assert_accounting_rows(
-			frappe.get_doc("Journal Entry", retirement.journal_entry),
+		self.assertFalse(retirement.payment_entry)
+		self.assert_gl_rows(
+			"Share Transaction",
+			retirement.name,
 			{
 				self.share_capital_account: (30, 0),
 				self.treasury_shares_account: (0, 42),
-				self.equity_adjustment_account: (12, 0),
+				self.treasury_adjustment_account: (12, 0),
 			},
 		)
 
@@ -152,41 +217,29 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			rate_per_share=12,
 		)
 		other_company = self.create_company("_Test Other Equity Issuer", "OEI")
-		other_settings = frappe.copy_doc(frappe.get_doc("Equity Accounting Settings", self.company))
-		other_settings.company = other_company
-		for field in (
-			"cash_or_bank_account",
-			"share_capital_account",
-			"securities_premium_account",
-			"treasury_shares_account",
-			"equity_adjustment_account",
-		):
-			account_name = frappe.db.get_value("Account", other_settings.get(field), "account_name")
-			other_settings.set(
-				field,
-				frappe.db.get_value(
-					"Account",
-					{
-						"company": other_company,
-						"account_name": account_name,
-						"is_group": 0,
-					},
-				),
-			)
-		other_settings.cash_or_bank_account = frappe.db.get_value(
-			"Account", {"company": other_company, "account_type": "Cash", "is_group": 0}
-		)
-		# An issue at face value needs no premium or treasury accounts.
-		other_settings.share_capital_account = frappe.db.get_value(
+		other_accounts = frappe.get_all(
 			"Account",
-			{
+			filters={
 				"company": other_company,
 				"root_type": "Liability",
 				"is_group": 0,
 				"account_type": ["not in", ["Payable", "Receivable"]],
 			},
+			pluck="name",
+			limit=2,
 		)
-		other_settings.insert()
+		frappe.get_doc(
+			{
+				"doctype": "Share Accounting Settings",
+				"company": other_company,
+				"accounting_mode": "Direct",
+				"clearing_account": other_accounts[0],
+				"share_capital_account": other_accounts[1],
+				"default_bank_account": frappe.db.get_value(
+					"Account", {"company": other_company, "account_type": "Cash", "is_group": 0}
+				),
+			}
+		).insert()
 		second = self.create_transaction(
 			company=other_company,
 			transaction_type="Issue",
@@ -219,16 +272,16 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			to_share_number=3,
 			rate_per_share=15,
 		)
-		self.assertFalse(transfer.journal_entry)
-		self.assertFalse(frappe.db.exists("Journal Entry", {"share_transaction": transfer.name}))
+		self.assertFalse(transfer.payment_entry)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": "Share Transaction", "voucher_no": transfer.name}))
 		self.assertEqual(frappe.db.count("Share Ledger Entry", {"share_transaction": transfer.name}), 2)
 		transfer.cancel()
 		self.assertEqual(
 			frappe.db.count("Share Ledger Entry", {"share_transaction": transfer.name, "is_reversal": 1}), 2
 		)
-		journal_name = issue.journal_entry
+		payment_entry = issue.payment_entry
 		issue.cancel()
-		self.assertFalse(frappe.db.exists("Journal Entry", journal_name))
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment_entry, "docstatus"), 2)
 
 	def test_shareholder_child_balances_follow_ledger_and_cannot_be_manually_changed(self):
 		original_holder = self.create_shareholder()
@@ -296,30 +349,14 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			folio.save(ignore_permissions=True)
 
-	def test_settings_validated_and_journal_source_protected(self):
-		settings = frappe.get_doc("Equity Accounting Settings", self.company)
+	def test_settings_reject_an_account_used_for_two_roles(self):
+		settings = frappe.get_doc("Share Accounting Settings", self.company)
 		settings.securities_premium_account = self.share_capital_account
 		with self.assertRaises(frappe.ValidationError):
 			settings.save()
-		issue = self.create_transaction(
-			transaction_type="Issue",
-			to_shareholder=self.create_shareholder(),
-			from_share_number=1,
-			to_share_number=10,
-			face_value_per_share=10,
-			rate_per_share=12,
-		)
-		journal = frappe.get_doc("Journal Entry", issue.journal_entry)
-		duplicate = frappe.copy_doc(journal)
-		duplicate.share_transaction = issue.name
-		with self.assertRaises(frappe.ValidationError):
-			duplicate.insert()
-		journal.share_transaction = None
-		with self.assertRaises(frappe.ValidationError):
-			journal.save()
 
-	def test_missing_settings_blocks_posting_and_api_cannot_override_accounts(self):
-		settings = frappe.get_doc("Equity Accounting Settings", self.company)
+	def test_missing_settings_block_posting(self):
+		settings = frappe.get_doc("Share Accounting Settings", self.company)
 		settings.securities_premium_account = None
 		settings.save()
 		transaction = frappe.get_doc(
@@ -340,17 +377,16 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			transaction.submit()
 		self.assertEqual(frappe.db.get_value("Share Transaction", transaction.name, "docstatus"), 0)
 		self.assertFalse(frappe.db.exists("Share Ledger Entry", {"share_transaction": transaction.name}))
-		self.assertFalse(frappe.db.exists("Journal Entry", {"share_transaction": transaction.name}))
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": "Share Transaction", "voucher_no": transaction.name}))
 		settings.securities_premium_account = self.securities_premium_account
 		settings.save()
 		transaction.reload()
-		transaction.share_capital_account = self.cash
 		transaction.submit()
-		journal = frappe.get_doc("Journal Entry", transaction.journal_entry)
-		self.assert_accounting_rows(
-			journal,
+		self.assert_gl_rows(
+			"Share Transaction",
+			transaction.name,
 			{
-				self.cash: (120, 0),
+				self.clearing_account: (120, 0),
 				self.share_capital_account: (0, 100),
 				self.securities_premium_account: (0, 20),
 			},

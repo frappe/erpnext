@@ -167,10 +167,15 @@ def get_treasury_cost_per_share(
 	return flt(selected_cost)
 
 
+def money(value, currency):
+	from frappe.model.meta import get_field_precision
+
+	precision = get_field_precision(frappe._dict(fieldtype="Currency", precision=None), currency=currency)
+	return flt(value, precision)
+
+
 def get_treasury_cost(company, share_class, share_folio, start, end, currency, exclude_transaction=None):
 	"""Allocate a lot's rounded cost by cumulative share-number boundaries."""
-	from erpnext.accounts.shareholding.posting import money
-
 	if not range_has_coverage(company, share_class, start, end, 1, share_folio, exclude_transaction):
 		frappe.throw(_("The treasury folio does not own the complete selected share range."))
 	entries = get_range_entries(company, share_class, start, end, share_folio, exclude_transaction)

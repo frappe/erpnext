@@ -33,13 +33,22 @@
   "securities_premium_amount",
   "treasury_cost_per_share",
   "treasury_cost",
-  "equity_adjustment_amount",
+  "treasury_adjustment_amount",
+  "accounting_section",
+  "accounting_mode",
+  "clearing_account",
+  "column_break_accounting",
+  "mode_of_payment",
+  "bank_account",
+  "reference_no",
+  "reference_date",
+  "payment_entry",
+  "clearance_date",
+  "accounting_impact_section",
+  "accounting_preview",
   "references_section",
-  "journal_entry",
   "remarks",
-  "amended_from",
-  "settlement_account",
-  "accounting_snapshot"
+  "amended_from"
  ],
  "fields": [
   {
@@ -234,28 +243,106 @@
    "no_copy": 1
   },
   {
-   "description": "Positive values credit the equity adjustment account; negative values debit it.",
-   "fieldname": "equity_adjustment_amount",
+   "description": "Positive values credit the treasury gain / loss account; negative values debit it.",
+   "fieldname": "treasury_adjustment_amount",
    "fieldtype": "Currency",
-   "label": "Equity Adjustment (+ Credit / - Debit)",
+   "label": "Treasury Gain / Loss (+ Credit / - Debit)",
    "options": "currency",
    "read_only": 1,
    "hidden": 1,
    "no_copy": 1
   },
   {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting",
+   "depends_on": "eval:doc.transaction_type && doc.transaction_type != 'Transfer'"
+  },
+  {
+   "fieldname": "accounting_mode",
+   "fieldtype": "Select",
+   "label": "Accounting Mode",
+   "options": "\nDirect\nClearing",
+   "no_copy": 1,
+   "depends_on": "eval:['Issue', 'Buyback', 'Reissue'].includes(doc.transaction_type)",
+   "description": "Direct creates the Payment Entry on submit. Clearing posts to the Clearing Account and leaves the Payment Entry to Accounts."
+  },
+  {
+   "fieldname": "clearing_account",
+   "fieldtype": "Link",
+   "label": "Clearing Account",
+   "options": "Account",
+   "no_copy": 1,
+   "description": "Equity entries post here first. Defaults from Share Accounting Settings."
+  },
+  {
+   "fieldname": "column_break_accounting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment",
+   "no_copy": 1,
+   "depends_on": "eval:['Issue', 'Buyback', 'Reissue'].includes(doc.transaction_type)"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank or Cash Account",
+   "options": "Account",
+   "no_copy": 1,
+   "depends_on": "eval:['Issue', 'Buyback', 'Reissue'].includes(doc.transaction_type)",
+   "mandatory_depends_on": "eval:['Issue', 'Buyback', 'Reissue'].includes(doc.transaction_type) && doc.accounting_mode == 'Direct'"
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Cheque / Reference No",
+   "no_copy": 1,
+   "depends_on": "eval:['Issue', 'Buyback', 'Reissue'].includes(doc.transaction_type)"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Cheque / Reference Date",
+   "no_copy": 1,
+   "depends_on": "eval:['Issue', 'Buyback', 'Reissue'].includes(doc.transaction_type)"
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1,
+   "no_copy": 1,
+   "depends_on": "eval:doc.payment_entry"
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "read_only": 1,
+   "no_copy": 1,
+   "fetch_from": "payment_entry.clearance_date",
+   "depends_on": "eval:doc.payment_entry"
+  },
+  {
+   "fieldname": "accounting_impact_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Impact",
+   "depends_on": "eval:doc.transaction_type && doc.transaction_type != 'Transfer'"
+  },
+  {
+   "fieldname": "accounting_preview",
+   "fieldtype": "HTML",
+   "label": "Accounting Impact"
+  },
+  {
    "fieldname": "references_section",
    "fieldtype": "Section Break",
    "label": "Notes"
-  },
-  {
-   "fieldname": "journal_entry",
-   "fieldtype": "Link",
-   "label": "Journal Entry",
-   "options": "Journal Entry",
-   "read_only": 1,
-   "hidden": 1,
-   "no_copy": 1
   },
   {
    "fieldname": "remarks",
@@ -270,30 +357,12 @@
    "options": "Share Transaction",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "settlement_account",
-   "fieldtype": "Link",
-   "options": "Account",
-   "label": "Prepared Settlement Account",
-   "hidden": 1,
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
-   "fieldname": "accounting_snapshot",
-   "fieldtype": "Code",
-   "options": "JSON",
-   "label": "Accounting Snapshot",
-   "hidden": 1,
-   "read_only": 1,
-   "no_copy": 1
   }
  ],
  "icon": "exchange",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-13 00:00:00.000000",
+ "modified": "2026-10-20 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Transaction",

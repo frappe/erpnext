@@ -397,10 +397,6 @@ period_closing_doctypes = [
 sqlite_search = ["erpnext.stock.doctype.item.item_search.ItemSearch"]
 
 doc_events = {
-	"Journal Entry": {
-		"validate": "erpnext.accounts.shareholding.accounting.validate_equity_journal_entry",
-		"before_cancel": "erpnext.accounts.shareholding.accounting.prevent_independent_cancellation",
-	},
 	"*": {
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",

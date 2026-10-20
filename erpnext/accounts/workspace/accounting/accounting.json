@@ -818,9 +818,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Equity Accounting Settings",
+   "label": "Share Accounting Settings",
    "link_count": 0,
-   "link_to": "Equity Accounting Settings",
+   "link_to": "Share Accounting Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -1537,8 +1537,8 @@
    "icon": "settings",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Equity Accounting Settings",
-   "link_to": "Equity Accounting Settings",
+   "label": "Share Accounting Settings",
+   "link_to": "Share Accounting Settings",
    "link_type": "DocType",
    "open_in_new_tab": 0,
    "show_arrow": 0,

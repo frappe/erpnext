@@ -39,22 +39,25 @@ class ShareholdingTestCase(IntegrationTestCase):
 		self.share_capital_account = self.create_equity_account("Test Share Capital")
 		self.securities_premium_account = self.create_equity_account("Test Securities Premium")
 		self.treasury_shares_account = self.create_equity_account("Test Treasury Shares")
-		self.equity_adjustment_account = self.create_equity_account("Test Equity Adjustment")
+		self.treasury_adjustment_account = self.create_equity_account("Test Treasury Gain Loss")
+		self.clearing_account = self.create_equity_account("Test Share Clearing")
 		self.share_class = self.create_share_class()
-		settings_name = frappe.db.get_value("Equity Accounting Settings", {"company": self.company})
+		settings_name = frappe.db.get_value("Share Accounting Settings", {"company": self.company})
 		settings = (
-			frappe.get_doc("Equity Accounting Settings", settings_name)
+			frappe.get_doc("Share Accounting Settings", settings_name)
 			if settings_name
-			else frappe.new_doc("Equity Accounting Settings")
+			else frappe.new_doc("Share Accounting Settings")
 		)
 		settings.update(
 			{
 				"company": self.company,
-				"cash_or_bank_account": self.cash,
+				"accounting_mode": "Direct",
+				"clearing_account": self.clearing_account,
+				"default_bank_account": self.cash,
 				"share_capital_account": self.share_capital_account,
 				"securities_premium_account": self.securities_premium_account,
 				"treasury_shares_account": self.treasury_shares_account,
-				"equity_adjustment_account": self.equity_adjustment_account,
+				"treasury_adjustment_account": self.treasury_adjustment_account,
 			}
 		)
 		settings.save()
@@ -149,9 +152,10 @@ class ShareholdingTestCase(IntegrationTestCase):
 			.name
 		)
 
-	def assert_accounting_rows(self, journal_entry, expected):
-		actual = {
-			row.account: (row.debit_in_account_currency, row.credit_in_account_currency)
-			for row in journal_entry.accounts
-		}
-		self.assertEqual(actual, expected)
+	def assert_gl_rows(self, voucher_type, voucher_no, expected):
+		rows = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		self.assertEqual({row.account: (row.debit, row.credit) for row in rows}, expected)

@@ -111,7 +111,7 @@ class TestShareholdingAccessAndIdentity(ShareholdingTestCase):
 				user = self.create_user(role)
 				frappe.set_user(user)
 				self.assertTrue(frappe.has_permission("Share Transaction", "amend", doc=issue))
-				amendment = frappe.copy_doc(issue)
+				amendment = frappe.copy_doc(issue, ignore_no_copy=False)
 				amendment.docstatus = 0
 				amendment.amended_from = issue.name
 				amendment.insert()

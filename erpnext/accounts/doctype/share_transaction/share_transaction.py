@@ -30,15 +30,13 @@ ACCOUNTING_TRANSACTION_TYPES = {"Issue", "Buyback", "Retirement", "Reissue"}
 
 class ShareTransaction(TransactionAccounting, Document):
 	def validate(self):
-		previous = self.get_doc_before_save()
-		if self.is_new() or (previous and previous.docstatus == 0):
-			self.journal_entry = None
-			self.accounting_snapshot = None
-			self.settlement_account = None
+		if self.docstatus == 0:
+			self.payment_entry = None
 		self.set_company_defaults()
 		self.validate_share_class()
 		self.calculate_quantities_and_values()
 		self.set_display_accounting_values()
+		self.set_accounting_defaults()
 
 	def before_submit(self):
 		lock_company(self.company)
@@ -55,37 +53,45 @@ class ShareTransaction(TransactionAccounting, Document):
 		self.create_ledger_entries()
 		self.rebuild_shareholder_holdings()
 		if self.transaction_type in ACCOUNTING_TRANSACTION_TYPES:
-			self.create_accounting_journal_entry()
+			self.make_accounting_gl_entries()
+			self.create_direct_payment_entry()
 
 	def before_cancel(self):
-		from erpnext.accounts.shareholding.posting import assert_journal_unreconciled
-		from erpnext.accounts.utils import is_immutable_ledger_enabled
-
 		previous = self.get_doc_before_save()
 		if not previous:
 			frappe.throw(_("Reload the submitted Share Transaction before cancellation."))
-		for field, value in previous.get_valid_dict().items():
-			if field in {"modified", "modified_by", "docstatus"}:
-				continue
-			current = self.get(field)
-			df = self.meta.get_field(field)
-			if df and df.fieldtype in {"Currency", "Float", "Int", "Check"}:
-				changed = flt(current) != flt(value)
-			else:
-				changed = frappe.utils.cstr(current or "") != frappe.utils.cstr(value or "")
-			if changed:
-				frappe.throw(_("Submitted transaction fields cannot be changed during cancellation."))
-		if self.transaction_type != "Transfer" and is_immutable_ledger_enabled():
-			date = frappe.utils.getdate(frappe.form_dict.get("posting_date") or nowdate())
-			if date < frappe.utils.getdate(self.posting_date) or date > frappe.utils.getdate(nowdate()):
-				frappe.throw(_("Cancellation date must be between the original posting date and today."))
+		self.validate_unchanged_since_submit(previous)
+		self.validate_cancellation_date()
 		lock_company(self.company)
 		self.lock_shareholders()
 		assert_cancellable(self, self.get_reversal_date())
-		assert_journal_unreconciled(self)
+		self.assert_payment_entry_unreconciled()
+
+	def validate_unchanged_since_submit(self, previous):
+		for field, value in previous.get_valid_dict().items():
+			if field not in {"modified", "modified_by", "docstatus"} and self.is_field_changed(field, value):
+				frappe.throw(_("Submitted transaction fields cannot be changed during cancellation."))
+
+	def is_field_changed(self, field, value):
+		current = self.get(field)
+		df = self.meta.get_field(field)
+		if df and df.fieldtype in {"Currency", "Float", "Int", "Check"}:
+			return flt(current) != flt(value)
+		return frappe.utils.cstr(current or "") != frappe.utils.cstr(value or "")
+
+	def validate_cancellation_date(self):
+		from erpnext.accounts.utils import is_immutable_ledger_enabled
+
+		if self.transaction_type == "Transfer" or not is_immutable_ledger_enabled():
+			return
+		date = frappe.utils.getdate(frappe.form_dict.get("posting_date") or nowdate())
+		if date < frappe.utils.getdate(self.posting_date) or date > frappe.utils.getdate(nowdate()):
+			frappe.throw(_("Cancellation date must be between the original posting date and today."))
 
 	def on_cancel(self):
-		self.cancel_accounting_journal_entry()
+		if self.transaction_type in ACCOUNTING_TRANSACTION_TYPES:
+			self.cancel_payment_entry()
+			self.reverse_accounting_gl_entries()
 		self.create_reversal_entries()
 		self.rebuild_shareholder_holdings()
 
@@ -141,33 +147,41 @@ class ShareTransaction(TransactionAccounting, Document):
 			frappe.get_doc("Shareholder", shareholder).check_permission("read")
 		if self.transaction_type not in TRANSACTION_FOLIOS:
 			frappe.throw(_("Unsupported transaction type {0}.").format(frappe.bold(self.transaction_type)))
+		if self.transaction_type == "Transfer" and self.from_shareholder == self.to_shareholder:
+			frappe.throw(_("From Shareholder and To Shareholder must be different."))
 
-		if self.transaction_type == "Issue":
-			self.from_folio = None
-			self.from_shareholder = None
-			self.to_folio = get_or_create_folio(self.company, self.to_shareholder, self.posting_date)
+		used = {field for field, _direction in TRANSACTION_FOLIOS[self.transaction_type]}
+		for folio_field in ("from_folio", "to_folio"):
+			if folio_field in used:
+				self.resolve_folio(folio_field)
+			else:
+				self.clear_folio(folio_field)
 
-		elif self.transaction_type == "Transfer":
-			if self.from_shareholder == self.to_shareholder:
-				frappe.throw(_("From Shareholder and To Shareholder must be different."))
-			self.from_folio = get_or_create_folio(self.company, self.from_shareholder, self.posting_date)
-			self.to_folio = get_or_create_folio(self.company, self.to_shareholder, self.posting_date)
+	def clear_folio(self, folio_field):
+		self.set(folio_field, None)
+		self.set(self.get_shareholder_field(folio_field), None)
 
-		elif self.transaction_type == "Buyback":
-			self.from_folio = get_or_create_folio(self.company, self.from_shareholder, self.posting_date)
-			self.to_folio = get_or_create_folio(self.company, is_treasury=True)
-			self.to_shareholder = None
+	def resolve_folio(self, folio_field):
+		shareholder_field = self.get_shareholder_field(folio_field)
+		if self.is_treasury_side(folio_field):
+			self.set(shareholder_field, None)
+			self.set(folio_field, get_or_create_folio(self.company, is_treasury=True))
+			return
+		self.set(
+			folio_field,
+			get_or_create_folio(self.company, self.get(shareholder_field), self.posting_date),
+		)
 
-		elif self.transaction_type == "Retirement":
-			self.from_folio = get_or_create_folio(self.company, is_treasury=True)
-			self.from_shareholder = None
-			self.to_folio = None
-			self.to_shareholder = None
+	def get_shareholder_field(self, folio_field):
+		return folio_field.replace("folio", "shareholder")
 
-		elif self.transaction_type == "Reissue":
-			self.from_folio = get_or_create_folio(self.company, is_treasury=True)
-			self.from_shareholder = None
-			self.to_folio = get_or_create_folio(self.company, self.to_shareholder, self.posting_date)
+	def is_treasury_side(self, folio_field):
+		treasury_sides = {
+			"Buyback": "to_folio",
+			"Retirement": "from_folio",
+			"Reissue": "from_folio",
+		}
+		return treasury_sides.get(self.transaction_type) == folio_field
 
 	def set_face_value(self):
 		if self.transaction_type == "Issue":

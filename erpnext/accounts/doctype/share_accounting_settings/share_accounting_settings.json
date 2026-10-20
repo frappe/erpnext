@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "autoname": "field:company",
+ "creation": "2026-10-13 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "settlement_section",
+  "accounting_mode",
+  "clearing_account",
+  "column_break_settlement",
+  "default_bank_account",
+  "equity_accounts_section",
+  "share_capital_account",
+  "securities_premium_account",
+  "column_break_equity",
+  "treasury_shares_account",
+  "treasury_adjustment_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "settlement_section",
+   "fieldtype": "Section Break",
+   "label": "Settlement"
+  },
+  {
+   "default": "Direct",
+   "description": "Direct: a Payment Entry is created and submitted with the Share Transaction. Clearing: the amount stays in the Clearing Account until Accounts creates the Payment Entry.",
+   "fieldname": "accounting_mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Accounting Mode",
+   "options": "Direct\nClearing",
+   "reqd": 1
+  },
+  {
+   "description": "Share Transactions post to this account first. The Payment Entry moves the money between this account and the bank.",
+   "fieldname": "clearing_account",
+   "fieldtype": "Link",
+   "label": "Clearing Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_settlement",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Pre-fills the Bank or Cash Account on Share Transactions. It can be changed on each transaction.",
+   "fieldname": "default_bank_account",
+   "fieldtype": "Link",
+   "label": "Default Bank or Cash Account",
+   "mandatory_depends_on": "eval:doc.accounting_mode == 'Direct'",
+   "options": "Account"
+  },
+  {
+   "fieldname": "equity_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Equity Accounts"
+  },
+  {
+   "description": "Credited at face value on Issue. Debited at face value on Retirement.",
+   "fieldname": "share_capital_account",
+   "fieldtype": "Link",
+   "label": "Share Capital Account",
+   "options": "Account"
+  },
+  {
+   "description": "Credited with the amount received above face value on Issue.",
+   "fieldname": "securities_premium_account",
+   "fieldtype": "Link",
+   "label": "Securities Premium Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_equity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Debited with the buyback cost. Credited when treasury shares are reissued or retired.",
+   "fieldname": "treasury_shares_account",
+   "fieldtype": "Link",
+   "label": "Treasury Shares Account",
+   "options": "Account"
+  },
+  {
+   "description": "Receives the difference between treasury cost and the reissue price, or between treasury cost and face value on Retirement. It never affects Profit and Loss.",
+   "fieldname": "treasury_adjustment_account",
+   "fieldtype": "Link",
+   "label": "Treasury Gain / Loss Account",
+   "options": "Account"
+  }
+ ],
+ "links": [],
+ "modified": "2026-10-20 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Share Accounting Settings",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -26,7 +26,7 @@ class TestShareholdingSecurity(ShareholdingTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "already been issued"):
 			self.issue()
 		self.assertEqual(frappe.db.count("Share Ledger Entry", {"share_class": self.share_class}), 1)
-		self.assertTrue(issue.journal_entry)
+		self.assertTrue(issue.payment_entry)
 
 	def test_retired_numbers_cannot_be_issued_again(self):
 		holder = self.create_shareholder()
@@ -78,22 +78,26 @@ class TestShareholdingSecurity(ShareholdingTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "immutable"):
 			frappe.delete_doc("Share Ledger Entry", entry.name, ignore_permissions=True)
 
-	def test_balanced_journal_cannot_change_source_amounts(self):
-		journal = frappe.get_doc("Journal Entry", self.issue().journal_entry)
-		for row in journal.accounts:
-			if row.account == self.cash:
-				row.debit_in_account_currency -= 10
-			elif row.account == self.share_capital_account:
-				row.credit_in_account_currency -= 10
-		with self.assertRaisesRegex(frappe.ValidationError, "must match the Share Transaction"):
-			journal.save()
+	def test_payment_entry_cannot_be_cancelled_separately(self):
+		issue = self.issue()
+		payment_entry = frappe.get_doc("Payment Entry", issue.payment_entry)
+		with self.assertRaises(frappe.LinkExistsError):
+			payment_entry.cancel()
 
-	def test_journal_cannot_be_cancelled_separately(self):
-		journal = frappe.get_doc("Journal Entry", self.issue().journal_entry)
-		journal.submit()
-		journal.flags.from_equity_cancellation = True
-		with self.assertRaisesRegex(frappe.ValidationError, "Cancel the Share Transaction"):
-			journal.cancel()
+	def test_posted_equity_entries_are_balanced_and_cancelled_with_the_transaction(self):
+		issue = self.issue()
+		rows = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Share Transaction", "voucher_no": issue.name, "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(sum(row.debit for row in rows), sum(row.credit for row in rows))
+		issue.cancel()
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry", {"voucher_type": "Share Transaction", "voucher_no": issue.name, "is_cancelled": 0}
+			)
+		)
 
 	def test_company_permissions_protect_parent_and_reports(self):
 		holder = self.create_shareholder()

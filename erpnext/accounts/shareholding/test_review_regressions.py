@@ -8,7 +8,6 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.report.equity_position.equity_position import execute as positions
 from erpnext.accounts.report.share_balance.share_balance import execute as balances
-from erpnext.accounts.shareholding.posting import assert_journal_unreconciled
 from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
 
 
@@ -70,8 +69,6 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 	def test_cancellation_matches_accounting_history_setting(self):
 		issue_date = add_days(nowdate(), -2)
 		issue = self.issue(posting_date=issue_date)
-		journal = frappe.get_doc("Journal Entry", issue.journal_entry)
-		journal.submit()
 		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=False):
 			issue.cancel()
 		self.assertEqual(
@@ -80,20 +77,18 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 			],
 			[],
 		)
-		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": journal.name, "is_cancelled": 0}))
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": issue.name, "is_cancelled": 0}))
 
 	def test_immutable_cancellation_uses_the_gl_reversal_date(self):
 		issue_date = add_days(nowdate(), -2)
 		cancel_date = add_days(nowdate(), -1)
 		issue = self.issue(posting_date=issue_date)
-		journal = frappe.get_doc("Journal Entry", issue.journal_entry)
-		journal.submit()
 		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=True), patch(
 			"erpnext.accounts.general_ledger.is_immutable_ledger_enabled", return_value=True
 		), patch.dict(frappe.form_dict, {"posting_date": cancel_date}):
 			issue.cancel()
 		self.assertTrue(
-			frappe.db.exists("GL Entry", {"voucher_no": journal.name, "posting_date": cancel_date})
+			frappe.db.exists("GL Entry", {"voucher_no": issue.name, "posting_date": cancel_date})
 		)
 		filters = {"company": self.company, "share_class": self.share_class}
 		self.assertEqual(positions({**filters, "as_of_date": issue_date})[1][0].quantity, 3)
@@ -150,12 +145,12 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 				"parent": bank.name,
 				"parenttype": "Bank Transaction",
 				"parentfield": "payment_entries",
-				"payment_document": "Journal Entry",
-				"payment_entry": issue.journal_entry,
+				"payment_document": "Payment Entry",
+				"payment_entry": issue.payment_entry,
 				"allocated_amount": 45,
 			}
 		).db_insert()
-		assert_journal_unreconciled(issue)
+		issue.assert_payment_entry_unreconciled()
 
 	def test_allowed_accounts_user_can_read_shareholder(self):
 		issue = self.issue()
