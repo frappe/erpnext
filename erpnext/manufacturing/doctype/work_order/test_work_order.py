@@ -4742,12 +4742,20 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(get_projected_qty(cloth, reserve_warehouse), 0)
 
 	def test_semi_finished_goods_work_order_transfers_from_job_cards(self):
+		from erpnext.manufacturing.doctype.job_card.mapper import (
+			make_stock_entry as make_stock_entry_from_job_card,
+		)
+
 		wo = self.make_subcontracted_operation_work_order(
 			skip_transfer=0, wip_warehouse="_Test Warehouse - _TC"
 		)
 
 		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4))
 		self.assertRaisesRegex(frappe.ValidationError, "from its Job Cards", transfer.insert)
+
+		# The subcontracted operation's material goes through its Subcontracting Order.
+		transfer = make_stock_entry_from_job_card(frappe.db.get_value("Job Card", {"work_order": wo.name}))
+		self.assertRaisesRegex(frappe.ValidationError, "from its Subcontracting Order", transfer.insert)
 
 	def test_job_card_transfer_is_credited_to_its_operation(self):
 		from erpnext.manufacturing.doctype.job_card.mapper import (
