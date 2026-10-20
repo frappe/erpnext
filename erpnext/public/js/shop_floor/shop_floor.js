@@ -49,7 +49,7 @@ class ShopFloor {
 		this.focus_index = -1;
 		this.op_state = { workstation: null, work_order: null };
 		// Job Card updates arrive for the whole site, so cap reloads on a busy floor.
-		this.throttled_refresh = frappe.utils.throttle(() => this.refresh(), 2000);
+		this.throttled_reload = frappe.utils.throttle(() => this.reload_operations(), 2000);
 
 		this.make();
 		this.bind_lifecycle();
@@ -502,6 +502,15 @@ class ShopFloor {
 			this.load_bucket(this.active_bucket);
 		} else {
 			this.load_operator();
+		}
+	}
+
+	// Leaves the manager board alone so its loaded pages stay put.
+	reload_operations() {
+		if (this.view !== "manager") {
+			this.load_operator();
+		} else if (this.selected_wo) {
+			this.load_operator_data(this.op_container_target, { work_order: this.selected_wo });
 		}
 	}
 
@@ -1261,7 +1270,7 @@ class ShopFloor {
 				frappe.get_route()[0] === "shop-floor" &&
 				["Workstation", "Job Card"].includes(data.doctype)
 			) {
-				this.throttled_refresh();
+				this.throttled_reload();
 			}
 		};
 		frappe.realtime.on("list_update", this.status_handler);
