@@ -75,7 +75,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		def repost_voucher(doc, delete_cancelled_entries):
 			reposted.append(doc.name)
 			if doc.doctype in fail_for:
-				raise frappe.ValidationError(SIMULATED_FAILURE)
+				frappe.throw(SIMULATED_FAILURE)
 			_repost_vouchers(doc, delete_cancelled_entries)
 
 		with patch(f"{REPOST_MODULE}._repost_vouchers", new=repost_voucher):
@@ -410,7 +410,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		# the job dies after the loop committed the invoice, e.g. killed or timed out
 		try:
-			raise frappe.ValidationError(SIMULATED_FAILURE)
+			frappe.throw(SIMULATED_FAILURE)
 		except frappe.ValidationError:
 			_record_repost_failure(ral)
 
