@@ -74,12 +74,11 @@ class ChequeBook(Document):
 
 	def on_cancel(self):
 		cheques = self.get_cheques_for_update()
-		if issued := next((cheque for cheque in cheques if cheque.status == "Issued"), None):
+		# A used leaf was written or lost, so an amendment or a new book must never offer it again
+		if used := next((cheque for cheque in cheques if cheque.status != "Available"), None):
 			frappe.throw(
-				_("Cannot cancel {0} because cheque {1} is used in {2}").format(
-					frappe.bold(self.name),
-					frappe.bold(issued.cheque_no),
-					get_link_to_form("Payment Entry", issued.payment_entry),
+				_("Cannot cancel {0} because cheque {1} is {2}. Disable the book to stop using it.").format(
+					frappe.bold(self.name), frappe.bold(used.cheque_no), _(used.status)
 				)
 			)
 
@@ -233,11 +232,12 @@ class ChequeBook(Document):
 		frappe.db.bulk_insert("Cheque", fields, values)
 
 	def get_cheques_for_update(self):
-		# Every cheque writer holds this book's lock, so the locked rows stay current
+		# Every cheque writer holds this book's lock, so the locked rows stay current.
+		# Cancelled cheques are included, so that on_cancel sees every used leaf.
 		return frappe.db.get_values(
 			"Cheque",
-			{"cheque_book": self.name, "docstatus": 1},
-			["name", "cheque_no", "status", "payment_entry"],
+			{"cheque_book": self.name},
+			["name", "cheque_no", "status"],
 			as_dict=True,
 			order_by="name",
 			for_update=True,
