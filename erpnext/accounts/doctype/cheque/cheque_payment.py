@@ -137,11 +137,18 @@ def issue_cheque(payment_entry):
 		return
 
 	cheque = lock_cheque(payment_entry.cheque)
-	# Validate ran before the lock, so read both again: another user may have changed them since
+	# Validate ran before the locks, so read them again: another user may have changed them since
 	if cheque.status != "Available":
 		frappe.throw(_("Cheque {0} is no longer available").format(frappe.bold(cheque.cheque_no)))
 	if frappe.db.get_value("Cheque Book", cheque.cheque_book, "status", for_update=True) == "Disabled":
 		frappe.throw(_("Cheque Book {0} is disabled").format(frappe.bold(cheque.cheque_book)))
+	bank_account = frappe.db.get_value(
+		"Bank Account", cheque.bank_account, ["is_company_account", "disabled"], as_dict=True, for_update=True
+	)
+	if not bank_account.is_company_account or bank_account.disabled:
+		frappe.throw(
+			_("Bank Account {0} must be an enabled Company Account").format(frappe.bold(cheque.bank_account))
+		)
 	cheque.issue(payment_entry.name)
 
 
@@ -176,7 +183,7 @@ def cancel_cheque_payment(
 	)
 
 	reason = require_reason(reason)
-	# Lock order: the payment, then the book, then the cheque, as on submit
+	# Lock order: the payment, then the bank account, the book and the cheque, as on submit
 	payment = frappe.get_doc("Payment Entry", name, for_update=True)
 	payment.check_permission("cancel")
 	if payment.docstatus != 1 or not payment.cheque:
@@ -211,11 +218,13 @@ def is_cheque_payment(payment_entry) -> bool:
 
 
 def lock_cheque(name: str) -> Cheque:
-	"""Lock the book, then the cheque: the order that every cheque writer uses."""
-	cheque_book = frappe.db.get_value("Cheque", name, "cheque_book")  # never changes, so no lock
-	if not cheque_book:  # a lock query with no name would lock some other row
+	"""Lock the bank account, the book, then the cheque: the order that every cheque writer uses."""
+	# Neither field ever changes, so they need no lock
+	cheque = frappe.db.get_value("Cheque", name, ["cheque_book", "bank_account"], as_dict=True)
+	if not cheque:  # a lock query with no name would lock some other row
 		frappe.throw(_("Cheque {0} does not exist").format(frappe.bold(name)), frappe.DoesNotExistError)
-	frappe.db.get_value("Cheque Book", cheque_book, "name", for_update=True)
+	frappe.db.get_value("Bank Account", cheque.bank_account, "name", for_update=True)
+	frappe.db.get_value("Cheque Book", cheque.cheque_book, "name", for_update=True)
 	return frappe.get_doc("Cheque", name, for_update=True)
 
 

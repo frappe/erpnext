@@ -219,6 +219,14 @@ class TestChequePayment(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "is disabled", issue_cheque, payment)
 		self.assertEqual(frappe.db.get_value("Cheque", self.name_of("000101"), "status"), "Available")
 
+	def test_bank_account_disabled_after_validation_issues_no_cheque(self):
+		payment = self.pay("000101", submit=False)
+		# another user disables the bank account after this payment passed validation
+		frappe.db.set_value("Bank Account", self.bank_account, "disabled", 1)
+
+		self.assertRaisesRegex(frappe.ValidationError, "enabled Company Account", issue_cheque, payment)
+		self.assertEqual(frappe.db.get_value("Cheque", self.name_of("000101"), "status"), "Available")
+
 	def test_used_or_cancelled_cheque_is_rejected(self):
 		self.pay("000101")
 		self.assertRaisesRegex(frappe.ValidationError, "already used", self.pay, "000101")
@@ -331,9 +339,10 @@ class TestChequePayment(ERPNextTestSuite):
 		queries = count_queries(lambda: validate_cheque(payment))
 		self.assertTrue(0 < len(queries) <= 2, queries)  # the cheque with its book and bank account, drafts
 
-	def test_submit_locks_the_book_before_the_cheque(self):
+	def test_submit_locks_bank_account_then_book_then_cheque(self):
 		payment = self.pay("000101", submit=False)
 		locks = record_locks(payment.submit)
+		self.assertLess(locks.index("Bank Account"), locks.index("Cheque Book"))
 		self.assertLess(locks.index("Cheque Book"), locks.index("Cheque"))
 
 	def test_missing_cheque_is_refused_before_any_lock(self):
