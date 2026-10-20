@@ -114,8 +114,6 @@
   },
   {
    "default": "0",
-   "fetch_from": "dunning_type.dunning_fee",
-   "fetch_if_empty": 1,
    "fieldname": "dunning_fee",
    "fieldtype": "Currency",
    "label": "Dunning Fee",
@@ -399,7 +397,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-30 20:40:30.851842",
+ "modified": "2026-10-22 11:30:44.883211",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
