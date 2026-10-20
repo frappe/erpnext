@@ -1442,7 +1442,9 @@ class JobCard(Document):
 
 		self.validate_docstatus()
 		if self.is_paused:
-			frappe.throw(_("Job Card {0} is already paused.").format(bold(self.name)))
+			frappe.throw(
+				_("Job Card {0} is already paused.").format(bold(self.name)), title=_("Already Paused")
+			)
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1456,7 +1458,7 @@ class JobCard(Document):
 
 		self.validate_docstatus()
 		if not self.is_paused:
-			frappe.throw(_("Job Card {0} is not paused.").format(bold(self.name)))
+			frappe.throw(_("Job Card {0} is not paused.").format(bold(self.name)), title=_("Not Paused"))
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)

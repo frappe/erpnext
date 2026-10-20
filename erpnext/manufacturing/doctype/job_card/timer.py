@@ -5,12 +5,9 @@ from collections import defaultdict
 from typing import Any
 
 import frappe
-from frappe.core.doctype.user_permission.user_permission import get_user_permissions
-from frappe.permissions import get_role_permissions
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import cint, flt, now_datetime, time_diff_in_seconds
-from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.job_card.job_card import CLOSED_WORK_ORDER_STATUSES
 
@@ -25,6 +22,7 @@ TIMER_FIELDS = [
 	"pending_qty",
 	"skip_material_transfer",
 	"is_corrective_job_card",
+	"is_subcontracted",
 ]
 
 # keep in sync with JOB_CARD_SEARCH_FIELDS in work_order.js
@@ -32,34 +30,19 @@ SEARCH_FIELDS = ["name", "operation", "workstation", "status"]
 
 MAX_PAGE_LENGTH = 100
 
-# per-card permission checks are N+1, so keep those pages small
-MAX_PAGE_LENGTH_WITH_DOCUMENT_CHECKS = 20
-
-# loaded pages are a prefix of this order, so the list can trust its first startable row
-OPERATION_ORDER = "sequence_id asc, creation asc, name asc"
-
 
 @frappe.whitelist()
 def get_work_order_job_cards(
 	work_order: str, start: int = 0, page_length: int = 20, txt: str | None = None
-) -> dict:
-	"""One page of Job Cards with timer state, plus the page size limit for this user."""
+) -> list[dict]:
 	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 
-	page_length_limit = get_page_length_limit()
-	rows = get_timer_rows(
+	return get_timer_rows(
 		{"work_order": work_order},
 		or_filters=[[field, "like", f"%{txt}%"] for field in SEARCH_FIELDS] if txt else None,
 		start=cint(start),
-		page_length=min(max(cint(page_length), 1), page_length_limit),
+		page_length=min(max(cint(page_length), 1), MAX_PAGE_LENGTH),
 	)
-	return {"rows": rows, "page_length_limit": page_length_limit}
-
-
-def get_page_length_limit() -> int:
-	if get_write_check() == "document":
-		return MAX_PAGE_LENGTH_WITH_DOCUMENT_CHECKS
-	return MAX_PAGE_LENGTH
 
 
 @frappe.whitelist()
@@ -71,63 +54,31 @@ def get_job_card_timer(job_card: str) -> dict:
 def get_timer_rows(
 	filters: dict, or_filters: list | None = None, start: int = 0, page_length: int = 1
 ) -> list[dict]:
-	job_cards = frappe.get_list(
-		"Job Card",
-		filters=filters,
-		or_filters=or_filters,
-		fields=[*LIST_FIELDS, *TIMER_FIELDS],
-		order_by=OPERATION_ORDER,
-		start=start,
-		page_length=page_length,
+	job_card = frappe.qb.DocType("Job Card")
+	job_cards = (
+		frappe.qb.get_query(
+			"Job Card",
+			fields=[*LIST_FIELDS, *TIMER_FIELDS],
+			filters=filters,
+			or_filters=or_filters,
+			offset=start,
+			limit=page_length,
+			ignore_permissions=False,
+		)
+		# by sequence, unsequenced last; loaded pages are a prefix, so the list trusts its first startable row
+		.orderby(Case().when(IfNull(job_card.sequence_id, 0) == 0, 1).else_(0))
+		.orderby(job_card.sequence_id, job_card.creation, job_card.name)
+		.run(as_dict=True)
 	)
 	attach_timer_summary(job_cards)
 
 	timers = [JobCardTimer(job_card) for job_card in job_cards]
-	writable = get_writable_job_cards([timer.job_card.name for timer in timers if timer.get_action()])
-
-	return [timer.as_list_row(can_write=timer.job_card.name in writable) for timer in timers]
+	return [timer.as_list_row(can_write=can_write(timer)) for timer in timers]
 
 
-def get_writable_job_cards(names: list[str]) -> set[str]:
-	"""Same answer as `has_permission` per card, batched where possible.
-
-	The "document" path stays N+1: permission hooks can't be checked in bulk.
-	"""
-	if not names:
-		return set()
-
-	write_check = get_write_check()
-	if write_check == "shared":
-		return set(
-			frappe.share.get_shared("Job Card", rights=["write"], filters=[["share_name", "in", names]])
-		)
-	if write_check == "role":
-		return set(names)
-
-	return {name for name in names if can_write_job_card(name, frappe.session.user)}
-
-
-def get_write_check() -> str:
-	if frappe.session.user == "Administrator":
-		return "role"  # always allowed, hooks included
-
-	role_permissions = get_role_permissions(frappe.get_meta("Job Card"))
-	write_if_owner = "write" in role_permissions.get("if_owner", {})
-	if not role_permissions.get("write") and not write_if_owner:
-		return "shared"
-	if role_permissions.get("write") and not has_document_specific_permission_rules():
-		return "role"
-	return "document"
-
-
-@request_cache
-def can_write_job_card(name: str, user: str) -> bool:
-	return frappe.has_permission("Job Card", "write", doc=name, user=user)
-
-
-def has_document_specific_permission_rules() -> bool:
-	hooks = frappe.get_hooks("has_permission")
-	return bool(hooks.get("Job Card") or hooks.get("*") or get_user_permissions())
+def can_write(timer: "JobCardTimer") -> bool:
+	# only cards that would show a button need the per-card check
+	return bool(timer.get_action()) and frappe.has_permission("Job Card", "write", doc=timer.job_card.name)
 
 
 def attach_timer_summary(job_cards: list[dict]) -> None:
@@ -265,7 +216,8 @@ class JobCardTimer:
 		return self.job_card.last_log_open and not self.job_card.is_paused
 
 	def get_action(self) -> str | None:
-		if self.job_card.docstatus != 0:
+		# the supplier does subcontracted work; the form shows no timer for it
+		if self.job_card.docstatus != 0 or self.job_card.is_subcontracted:
 			return None
 		if self.job_card.work_order_status in CLOSED_WORK_ORDER_STATUSES:
 			return None

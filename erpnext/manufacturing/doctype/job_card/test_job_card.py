@@ -3,7 +3,6 @@
 
 
 from typing import Literal
-from unittest.mock import patch
 
 import frappe
 from frappe.utils import flt, random_string
@@ -25,7 +24,6 @@ from erpnext.manufacturing.doctype.job_card.timer import (
 	JobCardTimer,
 	get_job_card_timer,
 	get_work_order_job_cards,
-	get_writable_job_cards,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import (
@@ -258,7 +256,7 @@ class TestJobCard(ERPNextTestSuite):
 		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
 
 		def timer_row():
-			rows = get_work_order_job_cards(self.work_order.name)["rows"]
+			rows = get_work_order_job_cards(self.work_order.name)
 			return next(row for row in rows if row["name"] == job_card.name)
 
 		row = timer_row()
@@ -308,12 +306,12 @@ class TestJobCard(ERPNextTestSuite):
 			"Job Card", {"work_order": work_order}, pluck="name", order_by="creation asc, name asc"
 		)
 		frappe.db.set_value("Job Card", newest, "sequence_id", 1)
-		for name in (oldest, middle):
-			frappe.db.set_value("Job Card", name, "sequence_id", 2)
+		frappe.db.set_value("Job Card", oldest, "sequence_id", 2)
+		frappe.db.set_value("Job Card", middle, "sequence_id", 0)
 		names = [newest, oldest, middle]
 
 		def page(**kwargs):
-			return [row["name"] for row in get_work_order_job_cards(work_order, **kwargs)["rows"]]
+			return [row["name"] for row in get_work_order_job_cards(work_order, **kwargs)]
 
 		self.assertEqual(page(start=0, page_length=2), names[:2])
 		self.assertEqual(page(start=2, page_length=2), names[2:])
@@ -331,70 +329,10 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(get_job_card_timer(job_card.name)["timer_action"], "start")
 		with self.set_user(reader):
 			row = next(
-				r
-				for r in get_work_order_job_cards(self.work_order.name)["rows"]
-				if r["name"] == job_card.name
+				r for r in get_work_order_job_cards(self.work_order.name) if r["name"] == job_card.name
 			)
 			self.assertIsNone(row["timer_action"])
 			self.assertEqual(row["elapsed_seconds"], 0)
-
-	def test_writable_job_cards_match_document_permission(self):
-		# request_cache outlives the test; card names repeat after rollback
-		frappe.local.request_cache.clear()
-		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
-		names = [job_card.name]
-
-		def assert_matches_document_check():
-			expected = {name for name in names if frappe.has_permission("Job Card", "write", doc=name)}
-			self.assertEqual(get_writable_job_cards(names), expected)
-			return expected
-
-		reader = self.make_job_card_test_user("job-card-reader@example.com", "Stock User")
-		writer = self.make_job_card_test_user("job-card-writer@example.com", "Manufacturing User")
-		frappe.share.add("Job Card", job_card.name, reader, read=1)
-
-		with self.set_user(reader):
-			self.assertEqual(assert_matches_document_check(), set())
-		frappe.share.add("Job Card", job_card.name, reader, read=1, write=1)
-		with self.set_user(reader):
-			self.assertEqual(assert_matches_document_check(), set(names))
-
-		with self.set_user(writer):
-			self.assertEqual(assert_matches_document_check(), set(names))
-			with patch(
-				"erpnext.manufacturing.doctype.job_card.timer.has_document_specific_permission_rules",
-				return_value=False,
-			):
-				self.assertEqual(assert_matches_document_check(), set(names))
-
-	def test_document_permission_checks_only_where_needed(self):
-		frappe.local.request_cache.clear()
-		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
-		names = [job_card.name]
-		writer = self.make_job_card_test_user("job-card-writer@example.com", "Manufacturing User")
-		rules = "erpnext.manufacturing.doctype.job_card.timer.has_document_specific_permission_rules"
-
-		def document_checks(has_permission):
-			return [call for call in has_permission.call_args_list if call.kwargs.get("doc")]
-
-		with self.set_user(writer), patch.object(
-			frappe, "has_permission", wraps=frappe.has_permission
-		) as has_permission:
-			with patch(rules, return_value=False):
-				self.assertEqual(get_writable_job_cards(names), set(names))
-				self.assertEqual(document_checks(has_permission), [])
-				self.assertEqual(
-					get_work_order_job_cards(self.work_order.name, page_length=51)["page_length_limit"], 100
-				)
-
-			has_permission.reset_mock()
-			with patch(rules, return_value=True):
-				self.assertEqual(get_writable_job_cards(names), set(names))
-				self.assertEqual(get_writable_job_cards(names), set(names))
-				self.assertEqual(len(document_checks(has_permission)), len(names))
-				self.assertEqual(
-					get_work_order_job_cards(self.work_order.name, page_length=51)["page_length_limit"], 20
-				)
 
 	def make_job_card_test_user(self, email: str, role: str) -> str:
 		if not frappe.db.exists("User", email):
@@ -469,6 +407,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertIsNone(timer(has_pending_transfer=True).get_action())
 		self.assertEqual(timer(has_pending_transfer=True, skip_material_transfer=1).get_action(), "start")
 		self.assertIsNone(timer(docstatus=1).get_action())
+		self.assertIsNone(timer(is_subcontracted=1).get_action())
 		self.assertIsNone(timer().as_list_row(can_write=False)["timer_action"])
 		self.assertIsNone(timer(work_order_status="Closed").get_action())
 		self.assertIsNone(timer(work_order_status="Stopped").get_action())

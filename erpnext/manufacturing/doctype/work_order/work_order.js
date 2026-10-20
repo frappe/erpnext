@@ -1577,9 +1577,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 				html_field: "job_card_list_html",
 				doctype: "Job Card",
 				list_overrides: {
-					get_page(args) {
-						return erpnext.work_order.get_job_card_page(this, frm, args);
-					},
+					get_page: (args) => erpnext.work_order.get_job_card_page(this.frm, args),
 					after_render() {
 						erpnext.work_order.bind_job_card_timer_actions(this);
 						// render() skips render_more when there are no rows
@@ -1762,7 +1760,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 	}
 };
 
-erpnext.work_order.get_job_card_page = function (list, frm, { start, page_length, txt }) {
+erpnext.work_order.get_job_card_page = function (frm, { start, page_length, txt }) {
 	return frappe
 		.xcall("erpnext.manufacturing.doctype.job_card.timer.get_work_order_job_cards", {
 			work_order: frm.doc.name,
@@ -1770,11 +1768,7 @@ erpnext.work_order.get_job_card_page = function (list, frm, { start, page_length
 			page_length,
 			txt,
 		})
-		.then(({ rows, page_length_limit }) => {
-			// fit the server's page limit, or a short page would hide Load More
-			list.page_size = Math.min(list.page_size, page_length_limit - 1);
-			return erpnext.work_order.stamp_fetched_at(rows);
-		});
+		.then(erpnext.work_order.stamp_fetched_at);
 };
 
 // keep in sync with SEARCH_FIELDS in job_card/timer.py
@@ -1832,13 +1826,13 @@ erpnext.work_order.job_card_actions_html = function (row) {
 				icon: action.icon,
 				size: "xs",
 				title: action.title || action.label,
-				attrs: { "data-timer-action": action_name, "data-job-card": name },
+				// button.html escapes attrs itself
+				attrs: { "data-timer-action": action_name, "data-job-card": row.name },
 			});
 		})
 		.join("");
 
-	return `<span class="job-card-actions embedded-list-hover-reveal" data-job-card="${name}"
-		style="display: inline-flex; gap: var(--padding-xs);">${buttons}</span>`;
+	return `<span class="job-card-actions inline-flex gap-1 embedded-list-hover-reveal" data-job-card="${name}">${buttons}</span>`;
 };
 
 // in-progress cards, else the next card to start, keep buttons visible; the rest on hover
@@ -1975,16 +1969,21 @@ erpnext.work_order.start_job_card = function (list, row) {
 };
 
 erpnext.work_order.update_job_card = function (list, job_card, method, args) {
-	return frappe
-		.xcall("erpnext.manufacturing.doctype.workstation.workstation.update_job_card", {
-			job_card,
-			method,
-			...args,
-		})
-		.then(() =>
-			frappe.xcall("erpnext.manufacturing.doctype.job_card.timer.get_job_card_timer", { job_card })
-		)
-		.then((row) => erpnext.work_order.replace_job_card_row(list, row));
+	const reload_row = () =>
+		frappe
+			.xcall("erpnext.manufacturing.doctype.job_card.timer.get_job_card_timer", { job_card })
+			.then((row) => erpnext.work_order.replace_job_card_row(list, row));
+
+	return (
+		frappe
+			.xcall("erpnext.manufacturing.doctype.workstation.workstation.update_job_card", {
+				job_card,
+				method,
+				...args,
+			})
+			// a failure often means the card changed elsewhere; xcall has shown the error already
+			.then(reload_row, reload_row)
+	);
 };
 
 erpnext.work_order.replace_job_card_row = function (list, row) {
