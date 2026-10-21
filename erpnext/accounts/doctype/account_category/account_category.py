@@ -70,6 +70,22 @@ def get_permission_query_conditions(user, doctype=None):
 	if not doctype:
 		return None
 
+	allowed_accounts = get_allowed_accounts_query(user)
+	if allowed_accounts is None:
+		return None
+
+	return frappe.qb.DocType(doctype).account.isin(allowed_accounts)
+
+
+def get_allowed_accounts(user=None):
+	allowed_accounts = get_allowed_accounts_query(user)
+	if allowed_accounts is None:
+		return None
+
+	return allowed_accounts.run(pluck="name")
+
+
+def get_allowed_accounts_query(user=None):
 	allowed_categories = get_allowed_account_categories(user)
 	if not allowed_categories:
 		return None
@@ -79,8 +95,7 @@ def get_permission_query_conditions(user, doctype=None):
 	if not frappe.get_system_settings("apply_strict_user_permissions"):
 		condition = (IfNull(account.account_category, "") == "") | condition
 
-	allowed_accounts = frappe.qb.from_(account).select(account.name).where(condition)
-	return frappe.qb.DocType(doctype).account.isin(allowed_accounts)
+	return frappe.qb.from_(account).select(account.name).where(condition)
 
 
 def has_permission(doc, ptype=None, user=None):
