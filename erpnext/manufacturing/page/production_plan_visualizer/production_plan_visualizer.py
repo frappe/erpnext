@@ -9,13 +9,14 @@ def get_plan_overview(production_plan: str):
 	plan.check_permission("read")
 
 	work_orders = get_work_orders(production_plan)
+	finished_goods = get_finished_goods(plan, work_orders)
 	purchase_orders = get_purchase_orders(production_plan)
 	schedule = get_schedule(production_plan)
 	stock, warehouses = get_stock_levels(plan)
 
 	return {
-		"plan": get_plan_details(plan),
-		"finished_goods": get_finished_goods(plan, work_orders),
+		"plan": get_plan_details(plan, finished_goods),
+		"finished_goods": finished_goods,
 		"sub_assemblies": get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses),
 		"material_requests": get_material_requests(production_plan),
 		"materials": get_materials(plan, production_plan, stock, warehouses),
@@ -170,9 +171,10 @@ def get_row_materials(plan, schedule):
 	return {name: by_bom[bom_no] for name, bom_no in rows if by_bom.get(bom_no)}
 
 
-def get_plan_details(plan):
+def get_plan_details(plan, finished_goods):
 	total_planned = flt(plan.total_planned_qty)
 	total_produced = flt(plan.total_produced_qty)
+	unreplaced_loss_qty = sum(row["unreplaced_loss_qty"] for row in finished_goods)
 	return {
 		"name": plan.name,
 		"status": plan.status,
@@ -182,7 +184,9 @@ def get_plan_details(plan):
 		"combine_sub_items": plan.combine_sub_items,
 		"total_planned_qty": total_planned,
 		"total_produced_qty": total_produced,
-		"completion": flt(total_produced / total_planned * 100 if total_planned else 0, 1),
+		"completion": flt(
+			(total_produced + unreplaced_loss_qty) / total_planned * 100 if total_planned else 0, 1
+		),
 	}
 
 
@@ -191,6 +195,8 @@ def get_finished_goods(plan, work_orders):
 	for row in plan.po_items:
 		documents = [d for d in work_orders if d.production_plan_item == row.name]
 		produced_qty = sum(flt(d.produced_qty) for d in documents)
+		ordered_beyond_plan = max(sum(flt(d.qty) for d in documents) - flt(row.planned_qty), 0)
+		unreplaced_loss_qty = max(sum(flt(d.process_loss_qty) for d in documents) - ordered_beyond_plan, 0)
 		rows.append(
 			{
 				"row_name": row.name,
@@ -202,7 +208,8 @@ def get_finished_goods(plan, work_orders):
 				"planned_end_date": row.get("planned_end_date"),
 				"qty": flt(row.planned_qty),
 				"produced_qty": produced_qty,
-				"pending_qty": flt(row.planned_qty) - produced_qty,
+				"unreplaced_loss_qty": unreplaced_loss_qty,
+				"pending_qty": flt(row.planned_qty) - produced_qty - unreplaced_loss_qty,
 				"stock_uom": row.stock_uom,
 				"documents": documents,
 			}
@@ -220,6 +227,8 @@ def get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses):
 			documents = [d for d in work_orders if d.production_plan_sub_assembly_item == item.name]
 
 		produced_qty = sum(flt(d.produced_qty) for d in documents)
+		ordered_beyond_plan = max(sum(flt(d.qty) for d in documents) - flt(item.qty), 0)
+		unreplaced_loss_qty = max(sum(flt(d.process_loss_qty) for d in documents) - ordered_beyond_plan, 0)
 		stock_known = item.fg_warehouse in warehouses
 		level = stock.get((item.production_item, item.fg_warehouse)) or frappe._dict()
 		rows.append(
@@ -232,7 +241,8 @@ def get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses):
 				"item_name": item.item_name,
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
-				"pending_qty": flt(item.qty) - produced_qty,
+				"unreplaced_loss_qty": unreplaced_loss_qty,
+				"pending_qty": flt(item.qty) - produced_qty - unreplaced_loss_qty,
 				"available_qty": flt(level.actual_qty) if stock_known else 0.0,
 				"stock_known": stock_known,
 				"bom_no": item.bom_no,
@@ -260,6 +270,7 @@ def get_work_orders(production_plan):
 			"name",
 			"qty",
 			"produced_qty",
+			"process_loss_qty",
 			"material_transferred_for_manufacturing",
 			"status",
 			"docstatus",
