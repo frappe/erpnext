@@ -400,7 +400,11 @@ class StatusUpdater(Document):
 						)
 					)
 
-			if items_to_validate and args.get("validate_overflow") is not False:
+			# a later return can lower the installation limit below an already-installed qty;
+			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
+			skip_on_cancel = self.docstatus == 2 and args.get("overflow_type") == "installation"
+
+			if items_to_validate and args.get("validate_overflow") is not False and not skip_on_cancel:
 				pp_sub_assembly_items = [
 					item.production_plan_sub_assembly_item
 					for item in items_to_validate
@@ -456,30 +460,48 @@ class StatusUpdater(Document):
 						elif item[args["target_ref_field"]]:
 							self.check_overflow_with_allowance(item, args)
 
+						elif (
+							args.get("overflow_type") == "installation"
+							and flt(item[args["target_field"]]) > 0
+						):
+							# nothing left to install (e.g. fully returned) but a positive qty was entered
+							item["reduce_by"] = flt(item[args["target_field"]])
+							self.limits_crossed_error(args, item, "qty")
+
 	def fetch_items_with_pending_qty(self, args, item_field, items):
 		doctype = frappe.qb.DocType(args["target_dt"])
 		item_field_col = doctype[item_field]
-		target_ref_field = doctype[args["target_ref_field"]]
 		target_field = doctype[args["target_field"]]
 
 		is_qty_check = "qty" in args["target_ref_field"]
+		is_installation = args.get("overflow_type") == "installation"
+
+		# installation consumes delivered-minus-returned qty, not the raw delivered qty
+		# (returned_qty is in stock UOM, so bring it back to the row's sales UOM)
+		if is_installation:
+			target_ref_value = (
+				doctype[args["target_ref_field"]] - doctype.returned_qty / doctype.conversion_factor
+			)
+		else:
+			target_ref_value = doctype[args["target_ref_field"]]
 
 		query = (
 			frappe.qb.from_(doctype)
 			.select(
 				doctype.name,
 				item_field_col.as_("item_code"),
-				target_ref_field,
+				target_ref_value.as_(args["target_ref_field"]),
 				target_field,
 				doctype.parenttype,
 				doctype.parent,
 			)
-			.where(target_ref_field < target_field)
+			.where(target_ref_value < target_field)
 			.where(doctype.name.isin(items))
 			.where(doctype.docstatus == 1)
 		)
 
-		if is_qty_check:
+		# installation is not a stock movement, so bundles and non-stock items are installable too
+		if is_qty_check and not is_installation:
 			item_table = frappe.qb.DocType("Item")
 			query = (
 				query.join(item_table)
