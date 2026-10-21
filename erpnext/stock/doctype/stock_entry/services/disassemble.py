@@ -1,9 +1,10 @@
 from collections import defaultdict
+from math import floor
 
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Min, NullIf, Sum
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -23,6 +24,15 @@ def _qty_tolerance(precision: int) -> float:
 	"""One unit at the column's precision -- absorbs float rounding without letting a real
 	(whole-unit) quantity divergence slip through."""
 	return 1.0 / (10**precision)
+
+
+def get_whole_number_step(row) -> float:
+	"""Stock qty of one unit of the row's whole-number UOM, or 0 when any qty is allowed."""
+	if cint(frappe.get_cached_value("UOM", row.uom, "must_be_whole_number")):
+		return flt(row.conversion_factor)
+	if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
+		return 1.0
+	return 0.0
 
 
 def _manufacture_line_order(line):
@@ -82,16 +92,19 @@ class DisassembleStockEntry(BaseStockEntry):
 			)
 
 	def validate_materials_against_source(self):
-		"""Every non-finished-good row's posted stock qty must equal the source qty x scale."""
-		scale_factor = self._get_disassembly_scale_factor()
-		if not scale_factor:
+		"""Every non-finished-good row's posted stock qty must equal the qty derived from the source."""
+		source_fg_qty = self.get_source_fg_qty()
+		if not source_fg_qty:
 			return self.validate_materials_against_bom()
 
-		source_rows = self.get_items_from_manufacture_stock_entry()
-		source_by_name = {row.name: row for row in source_rows if row.get("name")}
-		source_by_item = defaultdict(float)
-		for row in source_rows:
-			source_by_item[row.item_code] += flt(row.transfer_qty)
+		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty
+		progress = self.get_disassembly_progress(source_fg_qty)
+		expected_by_name, expected_by_item = {}, defaultdict(float)
+		for source_row in self.get_items_from_manufacture_stock_entry():
+			qty = self.get_component_stock_qty(source_row, scale_factor, progress)
+			if source_row.get("name"):
+				expected_by_name[source_row.name] = qty
+			expected_by_item[source_row.item_code] += qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		tolerance = _qty_tolerance(precision)
@@ -100,10 +113,10 @@ class DisassembleStockEntry(BaseStockEntry):
 			if row.is_finished_item:
 				continue  # covered by validate_finished_good_consumption
 
-			if row.ste_detail and row.ste_detail in source_by_name:
-				expected = flt(source_by_name[row.ste_detail].transfer_qty) * scale_factor
-			elif row.item_code in source_by_item:
-				expected = source_by_item[row.item_code] * scale_factor
+			if row.ste_detail and row.ste_detail in expected_by_name:
+				expected = expected_by_name[row.ste_detail]
+			elif row.item_code in expected_by_item:
+				expected = expected_by_item[row.item_code]
 			else:
 				frappe.throw(
 					_(
@@ -162,21 +175,56 @@ class DisassembleStockEntry(BaseStockEntry):
 
 		return received_qty
 
-	def _get_disassembly_scale_factor(self) -> float:
-		disassemble_qty = flt(self.doc.fg_completed_qty)
+	def get_source_fg_qty(self) -> float:
 		if self.doc.source_stock_entry:
-			source_fg_qty = flt(
-				frappe.db.get_value("Stock Entry", self.doc.source_stock_entry, "fg_completed_qty")
-			)
-		elif self.doc.work_order:
-			source_fg_qty = flt(frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty"))
+			return flt(frappe.db.get_value("Stock Entry", self.doc.source_stock_entry, "fg_completed_qty"))
+		if self.doc.work_order:
+			return flt(frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty"))
+		return 0.0
+
+	def get_disassembly_progress(self, source_fg_qty) -> frappe._dict:
+		"""Share of the source disassembled up to this entry, and component stock qty that submitted
+		disassemblies of the same source already moved."""
+		SE = frappe.qb.DocType("Stock Entry")
+		SED = frappe.qb.DocType("Stock Entry Detail")
+		if self.doc.source_stock_entry:
+			source_filter, key = SE.source_stock_entry == self.doc.source_stock_entry, SED.ste_detail
 		else:
-			return 0.0
+			source_filter, key = SE.work_order == self.doc.work_order, SED.item_code
 
-		if not source_fg_qty:
-			return 0.0
+		earlier = (
+			source_filter
+			& (SE.purpose == "Disassemble")
+			& (SE.docstatus == 1)
+			& (SE.name != (self.doc.name or ""))
+		)
+		earlier_fg_qty = frappe.qb.from_(SE).select(Sum(SE.fg_completed_qty)).where(earlier).run()[0][0]
+		moved = (
+			frappe.qb.from_(SED)
+			.join(SE)
+			.on(SED.parent == SE.name)
+			.select(key.as_("key"), Sum(SED.transfer_qty).as_("qty"))
+			.where(earlier & (SED.is_finished_item == 0))
+			.groupby(key)
+			.run(as_dict=True)
+		)
 
-		return disassemble_qty / source_fg_qty
+		return frappe._dict(
+			share_to_date=(flt(earlier_fg_qty) + flt(self.doc.fg_completed_qty)) / source_fg_qty,
+			moved_qty={row.key: flt(row.qty) for row in moved},
+		)
+
+	def get_component_stock_qty(self, source_row, scale_factor, progress) -> float:
+		"""Stock qty of a source row this disassembly moves. Whole-number rows are rounded down on the
+		running total, so the disassembly that completes the source takes the remainder."""
+		step = get_whole_number_step(source_row)
+		if not step:
+			return flt(source_row.transfer_qty) * scale_factor
+
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		units_to_date = floor(flt(flt(source_row.transfer_qty) * progress.share_to_date / step, precision))
+		moved_qty = progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0)
+		return units_to_date * step - moved_qty
 
 	def add_items(self):
 		"""
@@ -209,49 +257,40 @@ class DisassembleStockEntry(BaseStockEntry):
 		return self._add_items_for_disassembly_from_bom()
 
 	def _add_items_for_disassembly_from_stock_entry(self):
-		source_fg_qty = frappe.db.get_value("Stock Entry", self.doc.source_stock_entry, "fg_completed_qty")
+		source_fg_qty = self.get_source_fg_qty()
 		if not source_fg_qty:
 			frappe.throw(
 				_("Source Stock Entry {0} has no finished goods quantity").format(self.doc.source_stock_entry)
 			)
 
-		disassemble_qty = flt(self.doc.fg_completed_qty)
-		scale_factor = disassemble_qty / flt(source_fg_qty)
-
-		self._append_disassembly_row_from_source(
-			disassemble_qty=disassemble_qty,
-			scale_factor=scale_factor,
-		)
+		self._append_disassembly_row_from_source(source_fg_qty)
 
 	def _add_items_for_disassembly_from_work_order(self):
-		wo_produced_qty = frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty")
-
-		wo_produced_qty = flt(wo_produced_qty)
+		wo_produced_qty = self.get_source_fg_qty()
 		if wo_produced_qty <= 0:
 			frappe.throw(_("Work Order {0} has no produced qty").format(self.doc.work_order))
 
-		disassemble_qty = flt(self.doc.fg_completed_qty)
-		if disassemble_qty <= 0:
+		if flt(self.doc.fg_completed_qty) <= 0:
 			frappe.throw(_("Disassemble Qty cannot be less than or equal to 0."))
 
-		scale_factor = disassemble_qty / wo_produced_qty
+		self._append_disassembly_row_from_source(wo_produced_qty)
 
-		self._append_disassembly_row_from_source(
-			disassemble_qty=disassemble_qty,
-			scale_factor=scale_factor,
-		)
-
-	def _append_disassembly_row_from_source(self, disassemble_qty, scale_factor):
+	def _append_disassembly_row_from_source(self, source_fg_qty):
+		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty
+		progress = self.get_disassembly_progress(source_fg_qty)
 		for source_row in self.get_items_from_manufacture_stock_entry():
-			self._append_disassembly_item(source_row, disassemble_qty, scale_factor)
+			self._append_disassembly_item(source_row, scale_factor, progress)
 
-	def _get_disassembly_warehouses(self, source_row, disassemble_qty, scale_factor):
+	def _get_disassembly_warehouses(self, source_row, scale_factor, progress):
 		if source_row.is_finished_item:
-			return disassemble_qty, self.doc.from_warehouse or source_row.t_warehouse, ""
-		elif source_row.s_warehouse:
-			return flt(source_row.qty * scale_factor), "", self.doc.to_warehouse or source_row.s_warehouse
-		else:
-			return flt(source_row.qty * scale_factor), source_row.t_warehouse, ""
+			return flt(self.doc.fg_completed_qty), self.doc.from_warehouse or source_row.t_warehouse, ""
+
+		qty = flt(
+			self.get_component_stock_qty(source_row, scale_factor, progress) / source_row.conversion_factor
+		)
+		if source_row.s_warehouse:
+			return qty, "", self.doc.to_warehouse or source_row.s_warehouse
+		return qty, source_row.t_warehouse, ""
 
 	def _build_disassembly_item_dict(self, source_row, qty, s_warehouse, t_warehouse):
 		return {
@@ -273,10 +312,8 @@ class DisassembleStockEntry(BaseStockEntry):
 			"use_serial_batch_fields": 1 if (source_row.batch_no or source_row.serial_no) else 0,
 		}
 
-	def _append_disassembly_item(self, source_row, disassemble_qty, scale_factor):
-		qty, s_warehouse, t_warehouse = self._get_disassembly_warehouses(
-			source_row, disassemble_qty, scale_factor
-		)
+	def _append_disassembly_item(self, source_row, scale_factor, progress):
+		qty, s_warehouse, t_warehouse = self._get_disassembly_warehouses(source_row, scale_factor, progress)
 		item = self._build_disassembly_item_dict(source_row, qty, s_warehouse, t_warehouse)
 		if self.doc.source_stock_entry:
 			item.update({"against_stock_entry": self.doc.source_stock_entry, "ste_detail": source_row.name})
