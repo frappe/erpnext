@@ -2243,6 +2243,48 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				getdate(expected_delivery_dates[work_order.sales_order_item]),
 			)
 
+	def test_update_child_keeps_paid_payment_term_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+			get_payment_entry,
+		)
+
+		create_payment_terms_template()
+		for invoice_portion in (100, 0):
+			with self.subTest(invoice_portion=invoice_portion):
+				so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+				so.payment_terms_template = "Test Receivable Template"
+				so.set("payment_schedule", [])
+				so.append(
+					"payment_schedule",
+					{
+						"payment_term": "Basic Amount Receivable",
+						"due_date": so.delivery_date,
+						"invoice_portion": invoice_portion,
+						"payment_amount": 1000,
+					},
+				)
+				so.insert()
+				so.submit()
+
+				pe = get_payment_entry("Sales Order", so.name, party_amount=400)
+				pe.reference_no = "1"
+				pe.reference_date = nowdate()
+				pe.references[0].allocated_amount = 400
+				pe.insert()
+				pe.submit()
+
+				item = so.items[0]
+				trans_item = json.dumps(
+					[{"item_code": item.item_code, "qty": 1, "rate": 1000, "docname": item.name}]
+				)
+				update_child_qty_rate("Sales Order", trans_item, so.name)
+
+				term = frappe.get_doc("Sales Order", so.name).payment_schedule[0]
+				self.assertEqual(term.paid_amount, 400)
+				self.assertEqual(term.outstanding, 600)
+				self.assertEqual(term.base_outstanding, 600)
+
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
