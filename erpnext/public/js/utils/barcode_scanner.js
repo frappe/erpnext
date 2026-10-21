@@ -303,12 +303,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 						return;
 					}
 
-					if (e.target.value) {
+					const input = e.target.value;
+					if (input) {
 						this.scan_api_call(
-							e.target.value,
+							input,
 							(r) => {
 								if (r.message) {
-									this.update_dialog_values(item_code, r, e.target.value);
+									this.update_dialog_values(item_code, r, input);
 								}
 							},
 							item_code
