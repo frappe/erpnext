@@ -285,7 +285,9 @@ def build_forest(data):
 
 		if account_name in charts_map:
 			error_messages.append(
-				f"Row {line_no}: Account {account_name} is duplicated. Use a different name or account number"
+				_("Row {0}: Account {1} is duplicated. Use a different name or account number").format(
+					line_no, frappe.bold(account_name)
+				)
 			)
 
 		charts_map[account_name] = {}
