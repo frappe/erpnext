@@ -41,7 +41,7 @@ def execute(filters=None):
 			"fieldtype": "Dynamic Link",
 			"options": "doctype",
 		},
-		{"fieldname": "doctype", "label": _("Type"), "width": 200, "fieldtype": "Data"},
+		{"fieldname": "doctype", "label": _("Type"), "width": 200, "fieldtype": "Link", "options": "DocType"},
 	], data
 
 
