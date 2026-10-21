@@ -417,7 +417,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.restrict_to_companies("Customer", restricted_customer, ["_Test Company 1"])
 
 		with self.set_user(self.make_report_user()):
-			items = {row.item_code for row in self.run_report("stock", "item_balance", {})}
+			items = {row.item_code for row in self.run_report("stock", "item_balance_(simple)", {})}
 			self.assertIn(allowed_item.name, items)
 			self.assertNotIn(restricted_item.name, items)
 
