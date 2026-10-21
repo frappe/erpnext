@@ -735,7 +735,6 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.where(DeliveryNote.docstatus == 1)
 		.where(DeliveryNote.base_net_total > 0)
 		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
-		.where(DeliveryNoteItem.stock_qty > 0)
 		.where(DeliveryNoteItem.stock_qty > IfNull(si_subquery.billed_qty, 0.0))
 		.where(
 			Criterion.any(
