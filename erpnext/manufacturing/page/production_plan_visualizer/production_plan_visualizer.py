@@ -1,5 +1,5 @@
 import frappe
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
 
@@ -347,7 +347,10 @@ def get_subcontracted_received_qty(po_details):
 			(scr_item.docstatus == 1)
 			& sco_item.purchase_order_item.isin(po_details)
 			# skip returns of rejected qty, they come out of the rejected warehouse
-			& (return_against.name.isnull() | (scr_item.warehouse == return_against.warehouse))
+			& (
+				return_against.name.isnull()
+				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
+			)
 		)
 		.groupby(sco_item.purchase_order_item)
 		.run()
