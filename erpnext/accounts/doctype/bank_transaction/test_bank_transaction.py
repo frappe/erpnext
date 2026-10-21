@@ -397,7 +397,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 		frappe.get_doc(
 			{
 				"doctype": "Supplier",
-				"supplier_group": "All Supplier Groups",
+				"supplier_group": "Services",
 				"supplier_type": "Company",
 				"supplier_name": "Conrad Electronic",
 			}
@@ -418,7 +418,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 		frappe.get_doc(
 			{
 				"doctype": "Supplier",
-				"supplier_group": "All Supplier Groups",
+				"supplier_group": "Services",
 				"supplier_type": "Company",
 				"supplier_name": "Mr G",
 			}
@@ -444,7 +444,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 		frappe.get_doc(
 			{
 				"doctype": "Supplier",
-				"supplier_group": "All Supplier Groups",
+				"supplier_group": "Services",
 				"supplier_type": "Company",
 				"supplier_name": "Poore Simon's",
 			}
