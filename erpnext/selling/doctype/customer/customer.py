@@ -20,6 +20,7 @@ from frappe.utils import cint, cstr, flt, get_formatted_email, get_link_to_form,
 from frappe.utils.deprecations import deprecated
 from frappe.utils.user import get_users_with_role
 
+from erpnext import get_company_currency
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
@@ -593,7 +594,8 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
 	customer_outstanding = flt(
-		customer_outstanding, frappe.get_precision("Customer Credit Limit", "credit_limit")
+		customer_outstanding,
+		frappe.get_precision("Customer Credit Limit", "credit_limit", get_company_currency(company)),
 	)
 
 	if credit_limit > 0 and customer_outstanding > credit_limit:
