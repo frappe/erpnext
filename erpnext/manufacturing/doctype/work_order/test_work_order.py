@@ -3439,17 +3439,28 @@ class TestWorkOrder(FrappeTestCase):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Zero Whole Number Partial Disassembly")
 
-		def disassemble(qty):
+		def make_disassembly(qty):
 			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", qty))
 			disassembly.save()
-			disassembly.submit()
-			return disassembly, [row.qty for row in disassembly.items if row.item_code == rm_item]
+			return disassembly
 
-		first, _ = disassemble(2)
-		disassemble(1)
+		def rm_qty(disassembly):
+			return [row.qty for row in disassembly.items if row.item_code == rm_item]
+
+		first = make_disassembly(2)
+		first.submit()
+		make_disassembly(1).submit()
 		first.cancel()
 
-		self.assertEqual([disassemble(1)[1], disassemble(1)[1]], [[], [2]])
+		# both drafts are made before either is submitted
+		skipped, stale = make_disassembly(1), make_disassembly(1)
+		skipped.submit()
+		self.assertEqual(rm_qty(skipped), [])
+		self.assertRaisesRegex(frappe.ValidationError, "missing", stale.submit)
+
+		last = make_disassembly(1)
+		last.submit()
+		self.assertEqual(rm_qty(last), [2])
 
 	def test_partial_disassemblies_fill_batches_with_rounded_qty(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
