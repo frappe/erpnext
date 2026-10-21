@@ -142,6 +142,54 @@ class TestSalesTeam(ERPNextTestSuite):
 		doc.save()
 		self.assertEqual(doc.sales_team[0].commission_rate, 10)
 
+	def test_disable_rejects_unfinished_sales_order(self):
+		doc = self.make_transaction()
+		doc.submit()
+		self.person.enabled = 0
+		with self.assertRaises(frappe.ValidationError):
+			self.person.save()
+		doc.update_status("Closed")
+		self.person.reload()
+		self.person.enabled = 0
+		self.person.save()
+		self.assertFalse(self.person.enabled)
+
+	def test_disable_rejects_unbilled_delivery_note(self):
+		doc = self.make_transaction("Delivery Note")
+		doc.submit()
+		self.person.enabled = 0
+		with self.assertRaises(frappe.ValidationError):
+			self.person.save()
+		# Billing completion is a fixture; invoice generation is covered by its own tests.
+		doc.db_set("per_billed", 100)
+		self.person.reload()
+		self.person.enabled = 0
+		self.person.save()
+		self.assertFalse(self.person.enabled)
+
+	def test_disable_allows_draft_cancelled_and_completed_orders(self):
+		self.make_transaction()
+		cancelled = self.make_transaction()
+		cancelled.submit()
+		cancelled.cancel()
+		completed = self.make_transaction()
+		completed.submit()
+		completed.db_set("status", "Completed")
+		self.person.enabled = 0
+		self.person.save()
+		self.assertFalse(self.person.enabled)
+
+	def test_disable_allows_closed_delivery_and_unpaid_invoice(self):
+		delivery = self.make_transaction("Delivery Note")
+		delivery.submit()
+		delivery.update_status("Closed")
+		invoice = self.make_transaction("Sales Invoice")
+		invoice.submit()
+		self.assertGreater(invoice.outstanding_amount, 0)
+		self.person.enabled = 0
+		self.person.save()
+		self.assertFalse(self.person.enabled)
+
 	def make_transaction(self, doctype="Sales Order"):
 		factory = {
 			"Sales Order": make_sales_order,
