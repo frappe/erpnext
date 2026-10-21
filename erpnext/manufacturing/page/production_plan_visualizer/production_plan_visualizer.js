@@ -514,7 +514,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	rail_row(fg) {
-		const completion = fg.qty ? ((fg.produced_qty + fg.unreplaced_loss_qty) / fg.qty) * 100 : 0;
+		const completion = fg.qty ? ((fg.qty - fg.pending_qty) / fg.qty) * 100 : 0;
 		const risk = this.risk_of(fg);
 		const row = $(`
 			<div class="ppv-rail-row" data-focus="${this.esc(fg.row_name)}" data-risk="${risk.level}"
@@ -680,7 +680,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	manufacture_row(row, kind) {
-		const completion = row.qty ? ((row.produced_qty + row.unreplaced_loss_qty) / row.qty) * 100 : 0;
+		const completion = row.qty ? ((row.qty - row.pending_qty) / row.qty) * 100 : 0;
 		const uom = row.stock_uom || row.uom || "";
 		const tr = $(`
 			<tr data-kind="${kind}" data-search="${this.esc(
