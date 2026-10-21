@@ -66,7 +66,7 @@ class SalesPartner(WebsiteGenerator):
 		address_names = frappe.db.get_all(
 			"Dynamic Link",
 			filters={"link_doctype": "Sales Partner", "link_name": self.name, "parenttype": "Address"},
-			pluck=["parent"],
+			pluck="parent",
 		)
 
 		addresses = []
@@ -83,8 +83,8 @@ class SalesPartner(WebsiteGenerator):
 			addresses.append(
 				{
 					"email": address_doc.email_id,
-					"partner_address": filter_strip_join(address_rows, "\n<br>"),
-					"phone": filter_strip_join(cstr(address_doc.phone).split(","), "\n<br>"),
+					"partner_address": filter_strip_join(address_rows, "\n"),
+					"phone": filter_strip_join(cstr(address_doc.phone).split(","), "\n"),
 				}
 			)
 
