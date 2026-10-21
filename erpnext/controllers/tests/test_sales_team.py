@@ -58,6 +58,90 @@ class TestSalesTeam(ERPNextTestSuite):
 		self.assertEqual([row.allocated_amount for row in doc.sales_team], [400, 600])
 		self.assertEqual([row.incentives for row in doc.sales_team], [40, 60])
 
+	def test_person_change_refreshes_zero_rate_and_incentives(self):
+		doc = self.make_transaction()
+		zero_person = self.make_person()
+		doc.sales_team[0].sales_person = zero_person.name
+		doc.sales_team[0].incentives = 999
+		doc.save()
+		doc.reload()
+		self.assertEqual(doc.sales_team[0].commission_rate, 0)
+		self.assertEqual(doc.sales_team[0].incentives, 0)
+
+	def test_new_assignments_use_master_rate(self):
+		doc = self.make_transaction()
+		new_person = self.make_person(7)
+		doc.sales_team[0].sales_person = new_person.name
+		doc.sales_team[0].commission_rate = 99
+		doc.save()
+		self.assertEqual(doc.sales_team[0].commission_rate, 7)
+		self.assertEqual(doc.sales_team[0].incentives, 70)
+		doc.set(
+			"sales_team",
+			[{"sales_person": self.person.name, "allocated_percentage": 100, "commission_rate": 99}],
+		)
+		doc.save()
+		self.assertEqual(doc.sales_team[0].commission_rate, 10)
+
+	def test_unchanged_person_preserves_saved_rate(self):
+		for rate in (0, 10):
+			with self.subTest(rate=rate):
+				self.person.commission_rate = rate
+				self.person.save()
+				doc = self.make_transaction()
+				self.person.commission_rate = 20
+				self.person.save()
+				doc.sales_team[0].commission_rate = 99
+				doc.save()
+				doc.reload()
+				self.assertEqual(doc.sales_team[0].commission_rate, rate)
+				self.assertEqual(doc.sales_team[0].incentives, rate * 10)
+
+	def test_invalid_master_and_saved_rates_are_rejected(self):
+		bad_person = self.make_person(500)
+		doc = self.make_transaction()
+		doc.sales_team[0].sales_person = bad_person.name
+		with self.assertRaises(frappe.ValidationError):
+			doc.save()
+		doc.reload()
+		frappe.db.set_value("Sales Team", doc.sales_team[0].name, "commission_rate", 500)
+		doc.sales_team[0].commission_rate = 10
+		with self.assertRaises(frappe.ValidationError):
+			doc.save()
+
+	def test_row_commission_rate_bounds(self):
+		doc = self.make_transaction()
+		for rate in (-1, 500):
+			with self.subTest(rate=rate):
+				doc.reload()
+				doc.sales_team[0].commission_rate = rate
+				with self.assertRaises(frappe.ValidationError):
+					doc.save()
+
+	def test_submitted_person_change_updates_rate(self):
+		doc = self.make_transaction()
+		doc.submit()
+		doc.sales_team[0].sales_person = self.make_person(7).name
+		doc.save()
+		doc.reload()
+		self.assertEqual(doc.sales_team[0].commission_rate, 7)
+		self.assertEqual(doc.sales_team[0].incentives, 70)
+
+	def test_mapped_sales_team_uses_current_master_rate(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		doc = self.make_transaction()
+		doc.submit()
+		self.person.commission_rate = 20
+		self.person.save()
+		invoice = make_sales_invoice(doc.name)
+		invoice.insert()
+		self.assertEqual(invoice.sales_team[0].commission_rate, 20)
+		self.assertEqual(invoice.sales_team[0].incentives, 200)
+		doc.reload()
+		doc.save()
+		self.assertEqual(doc.sales_team[0].commission_rate, 10)
+
 	def make_transaction(self, doctype="Sales Order"):
 		factory = {
 			"Sales Order": make_sales_order,
