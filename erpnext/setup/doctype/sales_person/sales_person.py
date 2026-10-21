@@ -160,9 +160,9 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		return dict(
 			frappe.qb.from_(transaction)
 			.join(sales_team)
-			.on(transaction.name == sales_team.parent)
+			.on((transaction.name == sales_team.parent) & (sales_team.parenttype == doctype))
 			.select(UnixTimestamp(transaction[date_field]), Count("*"))
-			.where(sales_team.sales_person == name)
+			.where((sales_team.sales_person == name) & (transaction.docstatus == 1))
 			.where(transaction[date_field] > CurDate() - Interval(years=1))
 			.groupby(transaction[date_field])
 			.run()
