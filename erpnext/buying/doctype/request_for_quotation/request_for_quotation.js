@@ -453,7 +453,7 @@ frappe.ui.form.on("Request for Quotation", {
 					if (!q) return [];
 					return q.is_combined ? q.rate_breakdown.map((row) => row.rate) : [q.converted_rate];
 				})
-				.filter((r) => r !== undefined && r !== null && r > 0);
+				.filter((r) => r !== undefined && r !== null);
 			if (rates.length > 0) {
 				min_rates[item.name] = Math.min(...rates);
 			}
