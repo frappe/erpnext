@@ -98,15 +98,19 @@ class DisassembleStockEntry(BaseStockEntry):
 			return self.validate_materials_against_bom()
 
 		progress = self.get_disassembly_progress(source_fg_qty)
+		expected_rows = [
+			(source_row, self.get_component_stock_qty(source_row, progress))
+			for source_row in self.get_items_from_manufacture_stock_entry()
+		]
 		expected_by_name, expected_by_item = {}, defaultdict(float)
-		for source_row in self.get_items_from_manufacture_stock_entry():
-			qty = self.get_component_stock_qty(source_row, progress)
+		for source_row, qty in expected_rows:
 			if source_row.get("name"):
 				expected_by_name[source_row.name] = qty
 			expected_by_item[source_row.item_code] += qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		tolerance = _qty_tolerance(precision)
+		self.validate_no_missing_components(expected_rows, precision, tolerance)
 
 		for row in self.doc.items:
 			if row.is_finished_item:
@@ -164,6 +168,19 @@ class DisassembleStockEntry(BaseStockEntry):
 						frappe.bold(item_code), flt(qty, precision), flt(expected_qty[item_code], precision)
 					),
 					title=_("Invalid Disassembly Quantity"),
+				)
+
+	def validate_no_missing_components(self, expected_rows, precision, tolerance):
+		"""A draft made before another disassembly was submitted can lack a component it now owes."""
+		present = {row.ste_detail or row.item_code for row in self.doc.items}
+		for source_row, qty in expected_rows:
+			key = source_row.get("name") or source_row.item_code
+			if not source_row.is_finished_item and flt(qty, precision) > tolerance and key not in present:
+				frappe.throw(
+					_("Item {0} is missing from this disassembly. Get the items again.").format(
+						frappe.bold(source_row.item_code)
+					),
+					title=_("Missing Disassembly Item"),
 				)
 
 	def get_received_component_qty(self) -> dict:
