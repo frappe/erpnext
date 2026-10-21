@@ -136,7 +136,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	convert_to_invoice_currency(price, currency) {
 		const doc = this.events.get_frm().doc || {};
 		if (
-			!price ||
+			price == null ||
 			!doc.currency ||
 			currency === doc.currency ||
 			!doc.plc_conversion_rate ||
