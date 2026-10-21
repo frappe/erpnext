@@ -389,7 +389,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 		if (item_code !== scanned_item) {
 			this.play_fail_sound();
-			frappe.throw(__("Cannot find {0} for Item {1}", [frappe.utils.escape_html(input), scanned_item]));
+			frappe.msgprint(
+				__("Cannot find {0} for Item {1}", [frappe.utils.escape_html(input), scanned_item])
+			);
+			return;
 		}
 
 		if (this.dialog.get_value("barcode") === barcode || batch_no || serial_no) {
