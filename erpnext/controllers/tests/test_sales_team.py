@@ -262,6 +262,25 @@ class TestSalesTeam(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			doc.save()
 
+	def test_timeline_counts_only_submitted_transactions(self):
+		from erpnext.setup.doctype.sales_person.sales_person import get_timeline_data
+
+		for doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
+			with self.subTest(doctype=doctype):
+				self.make_transaction(doctype)
+				submitted = self.make_transaction(doctype)
+				submitted.submit()
+				cancelled = self.make_transaction(doctype)
+				cancelled.submit()
+				cancelled.cancel()
+				# A different parent type can have the same name as a transaction.
+				from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
+				customer = frappe.get_doc(get_customer_dict(submitted.name))
+				customer.append("sales_team", {"sales_person": self.person.name, "allocated_percentage": 100})
+				customer.insert(set_name=submitted.name)
+		self.assertEqual(sum(get_timeline_data("Sales Person", self.person.name).values()), 3)
+
 	def make_transaction(self, doctype="Sales Order"):
 		factory = {
 			"Sales Order": make_sales_order,
