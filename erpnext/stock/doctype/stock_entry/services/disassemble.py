@@ -532,11 +532,10 @@ class DisassembleStockEntry(BaseStockEntry):
 				continue
 			source_row = source_rows_by_name.get(row.ste_detail)
 			if source_row:
-				self._apply_bundle_to_disassembly_row(row, source_row, bundle_data, used[row.ste_detail])
+				self._apply_bundle_to_disassembly_row(row, source_row, bundle_data, used)
 
-	def get_serial_batches_used_by_earlier_disassemblies(self) -> defaultdict:
-		"""Serial nos and batch qty that submitted disassemblies of the source entry already moved,
-		by source row."""
+	def get_serial_batches_used_by_earlier_disassemblies(self) -> frappe._dict:
+		"""Serial nos and batch qty that submitted disassemblies of the source entry already moved."""
 		SE = frappe.qb.DocType("Stock Entry")
 		SED = frappe.qb.DocType("Stock Entry Detail")
 		SBE = frappe.qb.DocType("Serial and Batch Entry")
@@ -546,7 +545,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			.on(SED.parent == SE.name)
 			.join(SBE)
 			.on(SBE.parent == SED.serial_and_batch_bundle)
-			.select(SED.ste_detail, SBE.serial_no, SBE.batch_no, SBE.qty)
+			.select(SBE.serial_no, SBE.batch_no, SBE.qty)
 			.where(
 				(SE.source_stock_entry == self.doc.source_stock_entry)
 				& (SE.purpose == "Disassemble")
@@ -556,12 +555,12 @@ class DisassembleStockEntry(BaseStockEntry):
 			.run(as_dict=True)
 		)
 
-		used = defaultdict(lambda: frappe._dict(serial_nos=set(), batch_qty=defaultdict(float)))
+		used = frappe._dict(serial_nos=set(), batch_qty=defaultdict(float))
 		for row in rows:
 			if row.serial_no:
-				used[row.ste_detail].serial_nos.add(row.serial_no)
+				used.serial_nos.add(row.serial_no)
 			if row.batch_no:
-				used[row.ste_detail].batch_qty[row.batch_no] += abs(flt(row.qty))
+				used.batch_qty[row.batch_no] += abs(flt(row.qty))
 		return used
 
 	def _apply_bundle_to_disassembly_row(self, row, source_row, bundle_data, used):
@@ -571,6 +570,11 @@ class DisassembleStockEntry(BaseStockEntry):
 		batches = self._extract_batches(source_row, source_bundle, row, used.batch_qty)
 		serial_nos = self._extract_serial_nos(source_row, source_bundle, row, used.serial_nos)
 		self._set_serial_batch_bundle_for_disassembly_row(row, serial_nos, batches)
+
+		# rows of the same item share the source bundle
+		used.serial_nos.update(serial_nos)
+		for batch_no, qty in batches.items():
+			used.batch_qty[batch_no] += qty
 
 	def _extract_batches(self, source_row, source_bundle, row, used_batch_qty):
 		"""Fill the row from the source batches in order, skipping qty earlier disassemblies moved."""
