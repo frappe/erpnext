@@ -245,11 +245,23 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					}
 
 					if (e.target.value) {
+<<<<<<< HEAD
 						this.scan_api_call(e.target.value, (r) => {
 							if (r.message) {
 								this.update_dialog_values(item_code, r);
 							}
 						});
+=======
+						this.scan_api_call(
+							e.target.value,
+							(r) => {
+								if (r.message) {
+									this.update_dialog_values(item_code, r, e.target.value);
+								}
+							},
+							item_code
+						);
+>>>>>>> d4fc305 (fix(stock): show error for unmatched scan in barcode scan dialog)
 					}
 				},
 			},
@@ -315,6 +327,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return fields;
 	}
 
+<<<<<<< HEAD
 	update_dialog_values(scanned_item, r) {
 		const { item_code, barcode, batch_no, serial_no } = r.message;
 
@@ -323,6 +336,22 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			item_code === scanned_item &&
 			(this.dialog.get_value("barcode") === barcode || batch_no || serial_no)
 		) {
+=======
+	async update_dialog_values(scanned_item, r, input) {
+		this.dialog.set_value("barcode_scanner", "");
+		if (r.message.candidates) {
+			r.message = await erpnext.utils.BarcodeScanner.select_scan_match(r.message.candidates);
+			if (!r.message) return;
+		}
+		const { item_code, barcode, batch_no, serial_no } = r.message;
+
+		if (item_code !== scanned_item) {
+			this.play_fail_sound();
+			frappe.throw(__("Cannot find {0} for Item {1}", [frappe.utils.escape_html(input), scanned_item]));
+		}
+
+		if (this.dialog.get_value("barcode") === barcode || batch_no || serial_no) {
+>>>>>>> d4fc305 (fix(stock): show error for unmatched scan in barcode scan dialog)
 			if (batch_no) {
 				this.dialog.set_value("batch_no", batch_no);
 			}
