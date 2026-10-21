@@ -31,7 +31,9 @@ class TermsandConditions(Document):
 	def validate(self):
 		if self.terms:
 			validate_template(self.terms, restrict_globals=True)
-		if not cint(self.buying) and not cint(self.selling) and not cint(self.hr) and not cint(self.disabled):
+		if not cint(self.disabled) and not any(
+			cint(self.get(module)) for module in ("buying", "selling", "hr")
+		):
 			throw(_("At least one of the Applicable Modules should be selected"))
 
 
