@@ -569,6 +569,7 @@ class TestBatch(FrappeTestCase):
 				"plc_conversion_rate": 1,
 				"customer": "_Test Customer",
 				"name": None,
+				"qty": 1,
 			}
 		)
 
