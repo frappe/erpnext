@@ -84,7 +84,7 @@ def execute(filters=None):
 		accumulated_values=filters.accumulated_values,
 	)
 
-	message, opening_balance = check_opening_balance(asset, liability, equity, period_list)
+	message, opening_balance = check_opening_balance(asset, liability, equity)
 
 	data = []
 	data.extend(asset or [])
@@ -199,7 +199,7 @@ def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_li
 	return unclosed
 
 
-def check_opening_balance(asset, liability, equity, period_list):
+def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
 	opening_balance = {}
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
@@ -213,8 +213,8 @@ def check_opening_balance(asset, liability, equity, period_list):
 
 	opening_balance = {key: flt(value, float_precision) for key, value in opening_balance.items()}
 
-	# check the total across all dimensions, not each column
-	if flt(get_total_opening_balance(opening_balance, period_list), float_precision):
+	# check each column: one dimension's profit can cancel another's loss in the total
+	if any(opening_balance.values()):
 		return _("Previous Financial Year is not closed"), opening_balance
 	return None, None
 
@@ -345,7 +345,7 @@ def execute_snapshot_report(filters):
 		currency,
 		accumulated_values=filters.accumulated_values,
 	)
-	message, opening_balance = check_opening_balance(asset, liability, equity, period_list)
+	message, opening_balance = check_opening_balance(asset, liability, equity)
 
 	data = []
 	data.extend(asset or [])

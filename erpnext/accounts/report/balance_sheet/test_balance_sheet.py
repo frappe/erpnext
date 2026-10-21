@@ -229,33 +229,30 @@ class TestBalanceSheet(ERPNextTestSuite):
 			cost_centers.append(cc.name)
 		cc_a, cc_b = cost_centers
 
-		def book_sale(cost_center, amount, posting_date=None):
+		def book_profit(cost_center, amount, posting_date=None):
+			"""A sale when amount is positive, a loss (sale reversed) when negative."""
+			debit, credit = ("BS Unclosed Test Bank", "Sales")
+			if amount < 0:
+				debit, credit = credit, debit
+
 			make_journal_entry(
 				[
+					dict(account_name=debit, debit_in_account_currency=abs(amount), cost_center=cost_center),
 					dict(
-						account_name="BS Unclosed Test Bank",
-						debit_in_account_currency=amount,
-						credit_in_account_currency=0,
-						cost_center=cost_center,
-					),
-					dict(
-						account_name="Sales",
-						debit_in_account_currency=0,
-						credit_in_account_currency=amount,
-						cost_center=cost_center,
+						account_name=credit, credit_in_account_currency=abs(amount), cost_center=cost_center
 					),
 				],
 				posting_date=posting_date,
 			)
 
-		# last year's profit, never closed
+		# last year, never closed: profit in CC A, the same loss in CC B (they cancel in the total)
 		last_year = add_years(today(), -1)
-		book_sale(cc_a, 300, last_year)
-		book_sale(cc_b, 500, last_year)
+		book_profit(cc_a, 300, last_year)
+		book_profit(cc_b, -300, last_year)
 
 		# this year's profit
-		book_sale(cc_a, 100)
-		book_sale(cc_b, 100)
+		book_profit(cc_a, 100)
+		book_profit(cc_b, 100)
 
 		# execute() rewrites period_start_date, so each run needs its own filters
 		def make_filters(accumulated_values):
@@ -287,7 +284,7 @@ class TestBalanceSheet(ERPNextTestSuite):
 
 		unclosed = find_row(data, "Unclosed Fiscal Years")
 		self.assertIsNotNone(unclosed)
-		self.assertEqual(values(unclosed), (300, 500, 800))
+		self.assertEqual(values(unclosed), (300, -300, 0))
 		self.assertEqual(values(find_row(data, "Provisional Profit / Loss")), (100, 100, 200))
 
 		# Not accumulated: columns are this year's movement only, nothing to split out
