@@ -8,7 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import cint
-from frappe.utils.jinja import validate_template
+from frappe.utils.jinja import get_jenv, safe_render_flags, validate_template
 
 
 class TermsandConditions(Document):
@@ -45,4 +45,8 @@ def get_terms_and_conditions(template_name: str, doc: str | dict):
 	if not tnc.terms:
 		return
 
-	return frappe.render_template(tnc.terms, doc, restrict_globals=True)
+	if ".__" in tnc.terms:
+		throw(_("Illegal template"))
+
+	with safe_render_flags():
+		return get_jenv(restrict_globals=True).from_string(tnc.terms).render(doc)
