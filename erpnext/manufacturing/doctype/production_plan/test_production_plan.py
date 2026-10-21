@@ -31,6 +31,66 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProductionPlan(ERPNextTestSuite):
+	def test_visualizer_accounts_for_process_loss(self):
+		from erpnext.manufacturing.page.production_plan_visualizer.production_plan_visualizer import (
+			get_finished_goods,
+			get_plan_details,
+			get_sub_assemblies,
+		)
+
+		plan = frappe._dict(
+			total_planned_qty=10,
+			po_items=[frappe._dict(name="finished", item_code="Test Production Item 1", planned_qty=10)],
+			sub_assembly_items=[frappe._dict(name="sub", type_of_manufacturing="In House", qty=10)],
+		)
+		for produced, loss, replacement_qty, replacement_produced, pending, completion in (
+			(9, 1, 0, 0, 0, 100),
+			(4, 1, 0, 0, 5, 50),
+			(4, 0, 0, 0, 6, 40),
+			(9, 1, 1, 0, 1, 90),
+			(9, 1, 1, 1, 0, 100),
+		):
+			with self.subTest(
+				produced=produced,
+				process_loss=loss,
+				replacement=replacement_produced,
+				replacement_qty=replacement_qty,
+			):
+				plan.total_produced_qty = produced + replacement_produced
+				work_orders = [
+					frappe._dict(
+						production_plan_item="finished", qty=10, produced_qty=produced, process_loss_qty=loss
+					),
+					frappe._dict(
+						production_plan_sub_assembly_item="sub",
+						qty=10,
+						produced_qty=produced,
+						process_loss_qty=loss,
+					),
+				]
+				if replacement_qty:
+					work_orders.extend(
+						[
+							frappe._dict(
+								production_plan_item="finished",
+								qty=replacement_qty,
+								produced_qty=replacement_produced,
+							),
+							frappe._dict(
+								production_plan_sub_assembly_item="sub",
+								qty=replacement_qty,
+								produced_qty=replacement_produced,
+							),
+						]
+					)
+				finished_goods = get_finished_goods(plan, work_orders)
+				sub_assemblies = get_sub_assemblies(plan, work_orders, [], {}, set())
+				for row in [finished_goods[0], sub_assemblies[0]]:
+					self.assertEqual(row["produced_qty"], produced + replacement_produced)
+					self.assertEqual(row["unreplaced_loss_qty"], max(loss - replacement_qty, 0))
+					self.assertEqual(row["pending_qty"], pending)
+				self.assertEqual(get_plan_details(plan, finished_goods)["completion"], completion)
+
 	def setUp(self):
 		for item in [
 			"Test Production Item 1",
