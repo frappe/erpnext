@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
@@ -91,14 +92,8 @@ def get_stock_ledger_entries(filters):
 
 
 def get_warehouses_with_children(warehouses):
-	if isinstance(warehouses, str) and warehouses.startswith("["):
-		warehouses = frappe.parse_json(warehouses)
-
-	if not isinstance(warehouses, list | tuple):
-		warehouses = [warehouses]
-
 	all_warehouses = []
-	for warehouse in warehouses:
+	for warehouse in get_filter_values(warehouses):
 		all_warehouses.extend(get_child_warehouses(warehouse))
 
 	return list(set(all_warehouses))

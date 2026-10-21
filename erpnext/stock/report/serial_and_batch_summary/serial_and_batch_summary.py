@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -93,21 +94,11 @@ def get_warehouses_with_descendants(value):
 
 
 def show_warehouse_column(filters):
-	if not filters.get("warehouse"):
+	warehouses = get_filter_values(filters.get("warehouse"))
+	if not warehouses:
 		return True
 
-	warehouses = get_filter_values(filters.get("warehouse"))
 	return len(warehouses) != 1 or bool(frappe.get_cached_value("Warehouse", warehouses[0], "is_group"))
-
-
-def get_filter_values(value):
-	if isinstance(value, str) and value.startswith("["):
-		value = frappe.parse_json(value)
-
-	if isinstance(value, list | tuple):
-		return value
-
-	return [value]
 
 
 def get_columns(filters, data):

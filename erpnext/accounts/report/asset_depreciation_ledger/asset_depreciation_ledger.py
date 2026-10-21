@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, flt
 
+from erpnext.accounts.report.utils import get_filter_values
+
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
@@ -28,12 +30,11 @@ def get_data(filters):
 	if filters.get("asset"):
 		filters_data.append(["against_voucher", "=", filters.get("asset")])
 
-	asset_filters = {key: filters.get(key) for key in ("asset_category", "cost_center") if filters.get(key)}
-	if cost_centers := asset_filters.get("cost_center"):
-		if isinstance(cost_centers, str) and cost_centers.startswith("["):
-			cost_centers = frappe.parse_json(cost_centers)
-		if isinstance(cost_centers, list | tuple):
-			asset_filters["cost_center"] = ["in", cost_centers]
+	asset_filters = {}
+	if filters.get("asset_category"):
+		asset_filters["asset_category"] = filters.get("asset_category")
+	if cost_centers := get_filter_values(filters.get("cost_center")):
+		asset_filters["cost_center"] = ["in", cost_centers]
 
 	if asset_filters:
 		assets = frappe.get_all("Asset", filters={**asset_filters, "docstatus": 1}, pluck="name")

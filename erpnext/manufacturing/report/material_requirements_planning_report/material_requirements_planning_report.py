@@ -20,6 +20,7 @@ from frappe.utils import (
 	today,
 )
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
 
@@ -43,16 +44,10 @@ class MaterialRequirementsPlanningReport:
 		if getattr(self, cache_attr) is not None:
 			return getattr(self, cache_attr)
 
-		warehouses = self.filters.get("warehouse")
+		warehouses = get_filter_values(self.filters.get("warehouse"))
 		if not warehouses:
 			setattr(self, cache_attr, [])
 			return []
-
-		if isinstance(warehouses, str) and warehouses.startswith("["):
-			warehouses = parse_json(warehouses)
-
-		if not isinstance(warehouses, list | tuple):
-			warehouses = [warehouses]
 
 		warehouse_group_map = {
 			row.name: row.is_group

@@ -425,13 +425,33 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	return query
 
 
+def get_filter_values(value) -> list:
+	"""A report filter value as a list. MultiSelectList filters can arrive as a JSON string."""
+	if not value:
+		return []
+
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return list(value)
+
+	return [value]
+
+
+def get_qb_filter_condition(field, value):
+	"""`field = value` for one value, `field IN (...)` for many, None when nothing is selected."""
+	values = get_filter_values(value)
+	if not values:
+		return None
+
+	return field == values[0] if len(values) == 1 else field.isin(values)
+
+
 def get_with_descendants(doctype: str, names: str | list[str] | tuple[str, ...]) -> list[str]:
 	"""The selected tree nodes and all nodes under them."""
-	if isinstance(names, str):
-		names = frappe.parse_json(names) if names.startswith("[") else [names]
-
 	values = []
-	for name in names:
+	for name in get_filter_values(names):
 		values.extend([name, *get_descendants_of(doctype, name, ignore_permissions=True)])
 
 	return list(dict.fromkeys(values))
