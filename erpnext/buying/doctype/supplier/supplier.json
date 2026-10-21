@@ -57,6 +57,10 @@
   "column_break_27",
   "tax_withholding_category",
   "tax_withholding_group",
+  "items_tab",
+  "frequently_bought_html",
+  "party_specific_items_section",
+  "party_specific_items_html",
   "settings_tab",
   "company_restrictions_section",
   "restrict_to_companies",
@@ -461,6 +465,26 @@
    "show_dashboard": 1
   },
   {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "frequently_bought_html",
+   "fieldtype": "HTML",
+   "label": "Frequently Bought HTML"
+  },
+  {
+   "fieldname": "party_specific_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_specific_items_html",
+   "fieldtype": "HTML",
+   "label": "Party Specific Items HTML"
+  },
+  {
    "fieldname": "settings_tab",
    "fieldtype": "Tab Break",
    "label": "Settings"
@@ -625,7 +649,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-10-15 12:00:00.000000",
+ "modified": "2026-10-19 16:37:01.724710",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
