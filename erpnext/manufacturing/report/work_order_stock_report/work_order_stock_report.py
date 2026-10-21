@@ -7,6 +7,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
@@ -214,19 +215,6 @@ def get_warehouses_by_company(warehouses):
 		warehouses_by_company.setdefault(company, []).append(name)
 
 	return warehouses_by_company
-
-
-def get_filter_values(value):
-	if not value:
-		return []
-
-	if isinstance(value, str) and value.startswith("["):
-		value = frappe.parse_json(value)
-
-	if isinstance(value, list | tuple):
-		return value
-
-	return [value]
 
 
 def get_columns():

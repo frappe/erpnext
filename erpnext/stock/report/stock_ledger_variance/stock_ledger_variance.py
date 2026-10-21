@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
 	get_data as stock_ledger_invariant_check,
 )
@@ -259,22 +260,12 @@ def get_item_warehouse_combinations(filters: dict | None = None) -> dict:
 
 	if filters.item_code:
 		query = query.where(item.name == filters.item_code)
-	if filters.warehouse:
-		query = query.where(warehouse.name.isin(get_filter_values(filters.warehouse)))
+	if warehouses := get_filter_values(filters.warehouse):
+		query = query.where(warehouse.name.isin(warehouses))
 	if not filters.include_disabled:
 		query = query.where((item.disabled == 0) & (warehouse.disabled == 0))
 
 	return query.run(as_dict=1)
-
-
-def get_filter_values(value):
-	if isinstance(value, str) and value.startswith("["):
-		value = frappe.parse_json(value)
-
-	if isinstance(value, list | tuple):
-		return value
-
-	return [value]
 
 
 def has_difference(row, float_precision, currency_precision, difference_in, valuation_method):

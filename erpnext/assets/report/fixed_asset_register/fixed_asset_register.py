@@ -15,6 +15,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 	validate_fiscal_year,
 )
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -29,21 +30,6 @@ def execute(filters=None):
 	)
 
 	return columns, data, None, chart
-
-
-def get_filter_values(value):
-	if isinstance(value, str) and value.startswith("["):
-		value = frappe.parse_json(value)
-
-	if isinstance(value, list | tuple):
-		return value
-
-	return [value]
-
-
-def get_qb_filter_condition(field, value):
-	values = get_filter_values(value)
-	return field.isin(values) if len(values) > 1 else field == values[0]
 
 
 def get_data(filters):
@@ -192,11 +178,8 @@ def get_conditions(filters):
 
 	if filters.get("asset_category"):
 		conditions["asset_category"] = filters.get("asset_category")
-	if filters.get("cost_center"):
-		conditions["cost_center"] = [
-			"in",
-			get_cost_centers_with_children(get_filter_values(filters.get("cost_center"))),
-		]
+	if cost_centers := get_filter_values(filters.get("cost_center")):
+		conditions["cost_center"] = ["in", get_cost_centers_with_children(cost_centers)]
 
 	if status:
 		# In Store assets are those that are not sold or scrapped or capitalized
@@ -324,10 +307,8 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		query = query.where(asset.asset_type == "Existing Asset")
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
-	if filters.cost_center:
-		query = query.where(
-			asset.cost_center.isin(get_cost_centers_with_children(get_filter_values(filters.cost_center)))
-		)
+	if cost_centers := get_filter_values(filters.cost_center):
+		query = query.where(asset.cost_center.isin(get_cost_centers_with_children(cost_centers)))
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
@@ -377,10 +358,8 @@ def get_asset_value_adjustment_map(filters, finance_book):
 		query = query.where(asset.asset_type == "Existing Asset")
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
-	if filters.cost_center:
-		query = query.where(
-			asset.cost_center.isin(get_cost_centers_with_children(get_filter_values(filters.cost_center)))
-		)
+	if cost_centers := get_filter_values(filters.cost_center):
+		query = query.where(asset.cost_center.isin(get_cost_centers_with_children(cost_centers)))
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))

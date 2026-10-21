@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import get_filter_values
+
 
 def execute(filters=None):
 	columns = get_columns()
@@ -53,10 +55,8 @@ def get_data(filters):
 		.orderby(bin.projected_qty)
 	)
 
-	if warehouses := filters.get("warehouse"):
-		query = query.where(
-			bin.warehouse.isin(get_warehouses_with_descendants(get_filter_values(warehouses)))
-		)
+	if warehouses := get_filter_values(filters.get("warehouse")):
+		query = query.where(bin.warehouse.isin(get_warehouses_with_descendants(warehouses)))
 
 	if filters.get("company"):
 		query = query.where(wh.company == filters.get("company"))
@@ -70,16 +70,6 @@ def get_warehouses_with_descendants(warehouses):
 		result.update(get_descendants_of("Warehouse", warehouse))
 
 	return list(result)
-
-
-def get_filter_values(value):
-	if isinstance(value, str) and value.startswith("["):
-		value = frappe.parse_json(value)
-
-	if isinstance(value, list | tuple):
-		return value
-
-	return [value]
 
 
 def get_chart_data(data):

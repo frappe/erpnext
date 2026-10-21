@@ -8,6 +8,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import get_qb_filter_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
@@ -149,19 +150,6 @@ def apply_filters_on_query(filters, parent, child, query):
 		query = query.where(parent.transaction_date <= filters.get("to_date"))
 
 	return query
-
-
-def get_qb_filter_condition(field, value):
-	if not value:
-		return None
-
-	if isinstance(value, str) and value.startswith("["):
-		value = frappe.parse_json(value)
-
-	if isinstance(value, list | tuple):
-		return field.isin(value)
-
-	return field == value
 
 
 def get_data(filters):

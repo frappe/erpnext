@@ -6,6 +6,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import cint
 
+from erpnext.accounts.report.utils import get_qb_filter_condition
+
 
 def execute(filters: dict | None = None):
 	"""Return columns and data for the report.
@@ -141,16 +143,8 @@ def get_linked_cancelled_sabb(filters):
 
 def apply_filters(query, doctype, filters):
 	for field, value in filters.items():
-		if not value:
-			continue
-
-		if isinstance(value, str) and value.startswith("["):
-			value = frappe.parse_json(value)
-
-		if isinstance(value, list | tuple):
-			query = query.where(doctype[field].isin(value))
-		else:
-			query = query.where(doctype[field] == value)
+		if (condition := get_qb_filter_condition(doctype[field], value)) is not None:
+			query = query.where(condition)
 
 	return query
 
