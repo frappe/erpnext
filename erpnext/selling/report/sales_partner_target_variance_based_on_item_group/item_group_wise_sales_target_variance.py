@@ -233,13 +233,17 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
 	doctype = filters.get("doctype")
 
+	doc_filters = {
+		"docstatus": 1,
+		date_field: ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
+	}
+	if filters.get("company"):
+		doc_filters["company"] = filters.company
+
 	permitted_docs = frappe.qb.get_query(
 		table=doctype,
 		fields=["name"],
-		filters={
-			"docstatus": 1,
-			date_field: ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
-		},
+		filters=doc_filters,
 		ignore_permissions=False,
 	)
 
