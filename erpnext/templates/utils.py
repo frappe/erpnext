@@ -12,6 +12,9 @@ from frappe.utils import escape_html
 def send_message(sender, message, subject="Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
+	if frappe.get_single_value("Contact Us Settings", "is_disabled"):
+		return
+
 	website_send_message(sender, message, subject)
 
 	message = escape_html(message)
@@ -25,12 +28,14 @@ def send_message(sender, message, subject="Website Query"):
 		return
 
 	lead = customer = None
-	customer = frappe.db.sql(
-		"""select distinct dl.link_name from `tabDynamic Link` dl
-		left join `tabContact` c on dl.parent=c.name where dl.link_doctype='Customer'
-		and c.email_id = %s""",
-		sender,
-	)
+	# a guest's address is unverified, so only a signed-in sender is matched to a customer
+	if frappe.session.user == sender:
+		customer = frappe.db.sql(
+			"""select distinct dl.link_name from `tabDynamic Link` dl
+			left join `tabContact` c on dl.parent=c.name where dl.link_doctype='Customer'
+			and c.email_id = %s""",
+			sender,
+		)
 
 	if not customer:
 		lead = frappe.db.get_value("Lead", dict(email_id=sender))
