@@ -232,7 +232,7 @@ class DisassembleStockEntry(BaseStockEntry):
 		moved_qty = progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0)
 		whole_number_units = get_whole_number_units(source_row)
 		if not whole_number_units:
-			return max(flt(flt(source_row.transfer_qty) * progress.share_to_date, precision) - moved_qty, 0)
+			return flt(max(flt(source_row.transfer_qty) * progress.share_to_date - moved_qty, 0), precision)
 
 		units, step = whole_number_units
 		units_to_date = floor(flt(units * progress.share_to_date, precision))
@@ -296,7 +296,10 @@ class DisassembleStockEntry(BaseStockEntry):
 		if source_row.is_finished_item:
 			return flt(self.doc.fg_completed_qty), self.doc.from_warehouse or source_row.t_warehouse, ""
 
-		qty = flt(self.get_component_stock_qty(source_row, progress) / source_row.conversion_factor)
+		qty = flt(
+			self.get_component_stock_qty(source_row, progress) / source_row.conversion_factor,
+			frappe.get_precision("Stock Entry Detail", "qty"),
+		)
 		if source_row.s_warehouse:
 			return qty, "", self.doc.to_warehouse or source_row.s_warehouse
 		return qty, source_row.t_warehouse, ""
