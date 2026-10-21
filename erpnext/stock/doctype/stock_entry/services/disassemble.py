@@ -97,11 +97,10 @@ class DisassembleStockEntry(BaseStockEntry):
 		if not source_fg_qty:
 			return self.validate_materials_against_bom()
 
-		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty
 		progress = self.get_disassembly_progress(source_fg_qty)
 		expected_by_name, expected_by_item = {}, defaultdict(float)
 		for source_row in self.get_items_from_manufacture_stock_entry():
-			qty = self.get_component_stock_qty(source_row, scale_factor, progress)
+			qty = self.get_component_stock_qty(source_row, progress)
 			if source_row.get("name"):
 				expected_by_name[source_row.name] = qty
 			expected_by_item[source_row.item_code] += qty
@@ -209,18 +208,18 @@ class DisassembleStockEntry(BaseStockEntry):
 			moved_qty={row.key: flt(row.qty) for row in moved},
 		)
 
-	def get_component_stock_qty(self, source_row, scale_factor, progress) -> float:
-		"""Stock qty of a source row this disassembly moves. Whole-number rows are rounded down on the
-		running total, so the disassembly that completes the source takes the remainder."""
+	def get_component_stock_qty(self, source_row, progress) -> float:
+		"""Stock qty of a source row this disassembly moves, taken off the running total so the
+		disassembly that completes the source takes the remainder. Whole-number rows are rounded down."""
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		moved_qty = progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0)
 		whole_number_units = get_whole_number_units(source_row)
 		if not whole_number_units:
-			return flt(source_row.transfer_qty) * scale_factor
+			return max(flt(flt(source_row.transfer_qty) * progress.share_to_date, precision) - moved_qty, 0)
 
 		units, step = whole_number_units
-		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		units_to_date = floor(flt(units * progress.share_to_date, precision))
-		moved_units = round(progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0) / step)
-		return max(units_to_date - moved_units, 0) * step
+		return max(units_to_date - round(moved_qty / step), 0) * step
 
 	def add_items(self):
 		"""
@@ -272,18 +271,15 @@ class DisassembleStockEntry(BaseStockEntry):
 		self._append_disassembly_row_from_source(wo_produced_qty)
 
 	def _append_disassembly_row_from_source(self, source_fg_qty):
-		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty
 		progress = self.get_disassembly_progress(source_fg_qty)
 		for source_row in self.get_items_from_manufacture_stock_entry():
-			self._append_disassembly_item(source_row, scale_factor, progress)
+			self._append_disassembly_item(source_row, progress)
 
-	def _get_disassembly_warehouses(self, source_row, scale_factor, progress):
+	def _get_disassembly_warehouses(self, source_row, progress):
 		if source_row.is_finished_item:
 			return flt(self.doc.fg_completed_qty), self.doc.from_warehouse or source_row.t_warehouse, ""
 
-		qty = flt(
-			self.get_component_stock_qty(source_row, scale_factor, progress) / source_row.conversion_factor
-		)
+		qty = flt(self.get_component_stock_qty(source_row, progress) / source_row.conversion_factor)
 		if source_row.s_warehouse:
 			return qty, "", self.doc.to_warehouse or source_row.s_warehouse
 		return qty, source_row.t_warehouse, ""
@@ -308,8 +304,8 @@ class DisassembleStockEntry(BaseStockEntry):
 			"use_serial_batch_fields": 1 if (source_row.batch_no or source_row.serial_no) else 0,
 		}
 
-	def _append_disassembly_item(self, source_row, scale_factor, progress):
-		qty, s_warehouse, t_warehouse = self._get_disassembly_warehouses(source_row, scale_factor, progress)
+	def _append_disassembly_item(self, source_row, progress):
+		qty, s_warehouse, t_warehouse = self._get_disassembly_warehouses(source_row, progress)
 		if not qty:
 			return
 		item = self._build_disassembly_item_dict(source_row, qty, s_warehouse, t_warehouse)
