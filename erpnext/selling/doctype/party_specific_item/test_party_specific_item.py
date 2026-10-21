@@ -47,6 +47,29 @@ def create_item(item_code, item_group="Products"):
 
 
 class TestPartySpecificItem(ERPNextTestSuite):
+	def test_template_item_rule_covers_variant(self):
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			"_Test Party Specific Template",
+			{"has_variants": 1, "attributes": [{"attribute": "Test Size"}]},
+		)
+		variant = create_variant(template.name, {"Test Size": "Small"}).insert()
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value=template.name,
+		)
+
+		self.assertIn(variant.name, search_items(variant.name, {"customer": "_Test Customer"}))
+		self.assertNotIn(variant.name, search_items(variant.name, {"customer": "_Test Customer 2"}))
+		make_sales_order(customer="_Test Customer", item_code=variant.name, do_not_submit=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+			make_sales_order(customer="_Test Customer 2", item_code=variant.name, do_not_submit=True)
+
 	def test_item_query_for_customer(self):
 		customer = "_Test Customer With Template"
 		item = "_Test Item"
