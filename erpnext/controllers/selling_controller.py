@@ -307,12 +307,24 @@ class SellingController(StockController):
 		sales_person_status = frappe.db.get_all(
 			"Sales Person",
 			filters={"name": ["in", sales_persons]},
-			fields=["name", "enabled", "commission_rate"],
+			fields=["name", "enabled", "is_group", "commission_rate"],
 		)
 
 		for row in sales_person_status:
+			if row.is_group:
+				frappe.throw(_("Sales Person {0} is a group.").format(frappe.bold(row.name)))
 			if not row.enabled:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
+
+		seen = set()
+		for row in sales_team:
+			if row.sales_person in seen:
+				frappe.throw(
+					_("Sales Person {0} is repeated in the sales team.").format(frappe.bold(row.sales_person))
+				)
+			seen.add(row.sales_person)
+			if not 0 <= flt(row.allocated_percentage) <= 100:
+				frappe.throw(_("Row #{0}: Contribution (%) must be between 0 and 100").format(row.idx))
 
 		previous = self.get_doc_before_save()
 		previous_rows = {row.name: row for row in previous.get("sales_team")} if previous else {}

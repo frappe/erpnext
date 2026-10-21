@@ -242,6 +242,26 @@ class TestSalesTeam(ERPNextTestSuite):
 		self.person.save()
 		self.assertFalse(self.person.enabled)
 
+	def test_group_sales_person_is_rejected(self):
+		doc = self.make_transaction()
+		doc.sales_team[0].sales_person = self.make_person(is_group=1).name
+		with self.assertRaises(frappe.ValidationError):
+			doc.save()
+
+	def test_duplicate_sales_person_is_rejected(self):
+		doc = self.make_transaction()
+		doc.sales_team[0].allocated_percentage = 50
+		doc.append("sales_team", {"sales_person": self.person.name, "allocated_percentage": 50})
+		with self.assertRaises(frappe.ValidationError):
+			doc.save()
+
+	def test_individual_allocation_bounds(self):
+		doc = self.make_transaction()
+		doc.sales_team[0].allocated_percentage = 150
+		doc.append("sales_team", {"sales_person": self.other_person.name, "allocated_percentage": -50})
+		with self.assertRaises(frappe.ValidationError):
+			doc.save()
+
 	def make_transaction(self, doctype="Sales Order"):
 		factory = {
 			"Sales Order": make_sales_order,
