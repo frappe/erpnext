@@ -124,6 +124,13 @@ class SalesPerson(NestedSet):
 				)
 
 
+@frappe.whitelist()
+def get_commission_rate(sales_person: str) -> float:
+	person = frappe.get_doc("Sales Person", sales_person)
+	person.check_permission("select")
+	return flt(person.commission_rate)
+
+
 def on_doctype_update():
 	frappe.db.add_index("Sales Person", ["lft", "rgt"])
 

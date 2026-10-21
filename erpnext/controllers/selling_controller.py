@@ -288,11 +288,10 @@ class SellingController(StockController):
 				self.precision("allocated_amount", sales_person),
 			)
 
-			if sales_person.commission_rate:
-				sales_person.incentives = flt(
-					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
-					self.precision("incentives", sales_person),
-				)
+			sales_person.incentives = flt(
+				sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
+				self.precision("incentives", sales_person),
+			)
 
 			total += sales_person.allocated_percentage
 
@@ -306,12 +305,32 @@ class SellingController(StockController):
 			return
 
 		sales_person_status = frappe.db.get_all(
-			"Sales Person", filters={"name": ["in", sales_persons]}, fields=["name", "enabled"]
+			"Sales Person",
+			filters={"name": ["in", sales_persons]},
+			fields=["name", "enabled", "commission_rate"],
 		)
 
 		for row in sales_person_status:
 			if not row.enabled:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
+
+		previous = self.get_doc_before_save()
+		previous_rows = {row.name: row for row in previous.get("sales_team")} if previous else {}
+		master_rates = {row.name: flt(row.commission_rate) for row in sales_person_status}
+		return_rates = {}
+		if self.get("is_return") and self.get("return_against"):
+			source = frappe.get_doc(self.doctype, self.return_against)
+			return_rates = {row.sales_person: row.commission_rate for row in source.sales_team}
+		for row in sales_team:
+			previous_row = previous_rows.get(row.name)
+			if previous_row and previous_row.sales_person == row.sales_person:
+				commission_rate = previous_row.commission_rate
+			else:
+				commission_rate = return_rates.get(row.sales_person, master_rates[row.sales_person])
+
+			if any(not 0 <= flt(rate) <= 100 for rate in (row.commission_rate, commission_rate)):
+				frappe.throw(_("Row #{0}: Commission Rate must be between 0 and 100").format(row.idx))
+			row.commission_rate = commission_rate
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
