@@ -9,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 
@@ -41,6 +42,9 @@ class BlanketOrder(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		validate_terms_and_conditions(
+			self.get("tc_name"), "selling" if self.blanket_order_type == "Selling" else "buying"
+		)
 		self.validate_dates()
 		self.validate_duplicate_items()
 		self.validate_item_qty()

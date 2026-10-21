@@ -17,6 +17,7 @@ from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_i
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate
@@ -32,6 +33,7 @@ class BuyingController(SubcontractingController):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
 	def validate(self):
+		validate_terms_and_conditions(self.get("tc_name"), "buying")
 		self.set_rate_for_standalone_debit_note()
 
 		super().validate()
