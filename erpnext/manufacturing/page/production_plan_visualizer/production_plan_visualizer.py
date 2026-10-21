@@ -1,6 +1,10 @@
 import frappe
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
+
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+	get_subcontracted_received_qty,
+)
 
 
 @frappe.whitelist()
@@ -318,43 +322,9 @@ def get_purchase_orders(production_plan):
 	for row in purchase_orders:
 		row.doctype = "Purchase Order"
 		row.qty = flt(row.fg_item_qty) if row.fg_item else flt(row.order_qty)
-		row.produced_qty = flt(row.received_qty)
-		if row.fg_item:
-			# Subcontracted FG is received via Subcontracting Receipt, which does not update
-			# the Purchase Order Item; count only the accepted FG qty from the receipts
-			row.produced_qty = flt(subcontracted_qty.get(row.po_detail))
+		row.produced_qty = flt(subcontracted_qty.get(row.po_detail)) if row.fg_item else flt(row.received_qty)
 
 	return purchase_orders
-
-
-def get_subcontracted_received_qty(po_details):
-	if not po_details:
-		return {}
-
-	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
-	sco_item = frappe.qb.DocType("Subcontracting Order Item")
-	# return rows don't carry purchase_order_item, so link via the subcontracting order item
-	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
-
-	return frappe._dict(
-		frappe.qb.from_(scr_item)
-		.inner_join(sco_item)
-		.on(scr_item.subcontracting_order_item == sco_item.name)
-		.left_join(return_against)
-		.on(scr_item.subcontracting_receipt_item == return_against.name)
-		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
-		.where(
-			(scr_item.docstatus == 1)
-			& sco_item.purchase_order_item.isin(po_details)
-			# skip returns of rejected qty, they come out of the rejected warehouse
-			& (
-				return_against.name.isnull()
-				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
-			)
-		)
-		.groupby(sco_item.purchase_order_item)
-		.run()
-	)
 
 
 def get_material_requests(production_plan):
