@@ -2,6 +2,10 @@ import frappe
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
+from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
+	get_produced_and_pending_qty,
+)
+
 
 @frappe.whitelist()
 def get_plan_overview(production_plan: str):
@@ -182,15 +186,30 @@ def get_plan_details(plan):
 		"combine_sub_items": plan.combine_sub_items,
 		"total_planned_qty": total_planned,
 		"total_produced_qty": total_produced,
-		"completion": flt(total_produced / total_planned * 100 if total_planned else 0, 1),
+		"completion": get_completion(plan),
 	}
+
+
+def get_completion(plan):
+	"""Plan-wide, so it counts all Work Orders, not only the ones the user can read."""
+	total_planned = flt(plan.total_planned_qty)
+	if not total_planned:
+		return 0
+
+	work_orders = frappe.get_all(
+		"Work Order",
+		filters={"production_plan": plan.name, "docstatus": ("<", 2)},
+		fields=["qty", "produced_qty", "process_loss_qty", "production_plan_item"],
+	)
+	pending_qty = sum(row["pending_qty"] for row in get_finished_goods(plan, work_orders))
+	return flt((total_planned - pending_qty) / total_planned * 100, 1)
 
 
 def get_finished_goods(plan, work_orders):
 	rows = []
 	for row in plan.po_items:
 		documents = [d for d in work_orders if d.production_plan_item == row.name]
-		produced_qty = sum(flt(d.produced_qty) for d in documents)
+		produced_qty, pending_qty = get_produced_and_pending_qty(row.planned_qty, documents)
 		rows.append(
 			{
 				"row_name": row.name,
@@ -202,7 +221,7 @@ def get_finished_goods(plan, work_orders):
 				"planned_end_date": row.get("planned_end_date"),
 				"qty": flt(row.planned_qty),
 				"produced_qty": produced_qty,
-				"pending_qty": flt(row.planned_qty) - produced_qty,
+				"pending_qty": pending_qty,
 				"stock_uom": row.stock_uom,
 				"documents": documents,
 			}
@@ -219,7 +238,7 @@ def get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses):
 		else:
 			documents = [d for d in work_orders if d.production_plan_sub_assembly_item == item.name]
 
-		produced_qty = sum(flt(d.produced_qty) for d in documents)
+		produced_qty, pending_qty = get_produced_and_pending_qty(item.qty, documents)
 		stock_known = item.fg_warehouse in warehouses
 		level = stock.get((item.production_item, item.fg_warehouse)) or frappe._dict()
 		rows.append(
@@ -232,7 +251,7 @@ def get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses):
 				"item_name": item.item_name,
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
-				"pending_qty": flt(item.qty) - produced_qty,
+				"pending_qty": pending_qty,
 				"available_qty": flt(level.actual_qty) if stock_known else 0.0,
 				"stock_known": stock_known,
 				"bom_no": item.bom_no,
@@ -260,6 +279,7 @@ def get_work_orders(production_plan):
 			"name",
 			"qty",
 			"produced_qty",
+			"process_loss_qty",
 			"material_transferred_for_manufacturing",
 			"status",
 			"docstatus",
