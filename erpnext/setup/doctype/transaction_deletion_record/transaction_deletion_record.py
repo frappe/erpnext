@@ -272,10 +272,11 @@ class TransactionDeletionRecord(Document):
 	def reset_company_values(self):
 		self.validate_doc_status()
 		if not self.reset_company_default_values:
-			company_obj = frappe.get_doc("Company", self.company)
-			company_obj.total_monthly_sales = 0
-			company_obj.sales_monthly_history = None
-			company_obj.save()
+			frappe.db.set_value(
+				"Company",
+				self.company,
+				{"total_monthly_sales": 0, "sales_monthly_history": None},
+			)
 			self.db_set("reset_company_default_values", 1)
 		self.enqueue_task(task="Clear Notifications")
 
@@ -312,6 +313,7 @@ class TransactionDeletionRecord(Document):
 						reference_docs = frappe.get_all(
 							docfield.doctype_name,
 							filters={docfield.docfield_name: self.company},
+							order_by="name asc",
 							limit=self.batch_size,
 						)
 						reference_doc_names = [r.name for r in reference_docs]

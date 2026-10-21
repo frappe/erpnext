@@ -673,6 +673,41 @@ class TestPurchaseOrder(FrappeTestCase):
 		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
+	def test_whole_number_stock_qty_and_ordered_qty_drop_conversion_dust(self):
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.333333333})
+		item_doc.save()
+		item = item_doc.name
+
+		po = create_purchase_order(item_code=item, qty=300, do_not_save=1)
+		po.items[0].uom = "Kg"
+		po.items[0].conversion_factor = 0.333333333
+		po.insert()
+		po.submit()
+
+		self.assertEqual(po.items[0].stock_qty, 100)
+		self.assertEqual(get_ordered_qty(item_code=item), 100)
+
+		create_pr_against_po(po.name, received_qty=150)
+		self.assertEqual(get_ordered_qty(item_code=item), 50)
+
+	def test_ordered_qty_rounds_each_open_order_for_whole_number_item(self):
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		for _i in range(3):
+			po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+			po.items[0].uom = "Kg"
+			po.items[0].conversion_factor = 0.6
+			po.insert()
+			po.submit()
+			self.assertEqual(po.items[0].stock_qty, 2000)
+
+		self.assertEqual(get_ordered_qty(item_code=item), 6000)
+
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
 			"Bin",
@@ -1292,6 +1327,69 @@ class TestPurchaseOrder(FrappeTestCase):
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
 
+	def test_billed_qty_after_debit_note_in_stock_uom(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.buying.report.purchase_order_analysis.purchase_order_analysis import (
+			get_billed_qty_data,
+		)
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 4}])
+		po = create_purchase_order(item_code=item.name, qty=2, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 4})
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.update_billed_amount_in_purchase_order = 1
+		debit_note.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": -2})
+		debit_note.submit()
+
+		self.assertEqual(make_pi_from_po(po.name).items[0].qty, 0.5)
+		self.assertEqual(get_billed_qty_data(po.items)[po.items[0].name], 1.5)
+
+	def test_fully_billed_row_with_recurring_conversion_factor_is_not_billed_again(self):
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 0.333333333}]
+		)
+		po = create_purchase_order(item_code=item.name, qty=15, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 0.333333333})
+		po.append(
+			"items",
+			{
+				"item_code": make_item().name,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.remove(pi.items[1])
+		pi.submit()
+
+		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
+
+	def test_returned_qty_from_invoice_return_ignores_receipts(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+
+		po = create_purchase_order(qty=2)
+		pr = make_purchase_receipt(po.name)
+		pr.items[0].update({"qty": 1, "received_qty": 1})
+		pr.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.update_stock = 1
+		pi.items[0].update({"qty": 1, "received_qty": 1})
+		pi.submit()
+
+		debit_note = make_debit_note(pi.name)
+		debit_note.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].returned_qty, 1)
+
 	def test_order_neutral_debit_note_stays_out_of_later_billing(self):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
 
@@ -1306,7 +1404,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		debit_note.submit()
 
 		pi = make_pi_from_po(po.name)
-		pi.items[0].qty = 4
+		self.assertEqual(pi.items[0].qty, 4)
 		pi.submit()
 
 		po.reload()
