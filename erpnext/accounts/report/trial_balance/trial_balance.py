@@ -18,7 +18,11 @@ from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+)
 from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = (
@@ -513,6 +517,9 @@ def hide_group_accounts(data):
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):

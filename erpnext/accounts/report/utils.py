@@ -436,3 +436,10 @@ def get_opening_row(party_type, party, from_date, company):
 			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
+
+
+def has_gl_entry_restrictions() -> bool:
+	"""Snapshot reports read a DuckDB copy that cannot apply the user's GL Entry permission conditions."""
+	from frappe.desk.reportview import build_match_conditions
+
+	return bool(build_match_conditions("GL Entry"))
