@@ -3569,6 +3569,19 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertCountEqual(used_serials[rm_item], rm_serials)
 		self.assertCountEqual(used_serials[fg_item], fg_serials)
 
+	def test_partial_disassemblies_round_whole_number_components(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
+
+		rm_qty = []
+		for _ in range(3):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+			disassembly.save()
+			disassembly.submit()
+			rm_qty += [row.qty for row in disassembly.items if row.item_code == rm_item]
+
+		self.assertEqual(rm_qty, [1, 1, 2])
+
 	def test_components_alternate_item_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
@@ -7444,6 +7457,33 @@ def allow_alternative_item(work_order, item_code, alternative_item_code):
 				"alternative_item_code": alternative_item_code,
 			}
 		).insert()
+
+
+def make_whole_number_work_order(name, rm_properties=None):
+	"""Work order that turned 4 Nos of a raw material into 3 Nos of a finished good."""
+	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+		make_stock_entry as make_stock_entry_test_record,
+	)
+
+	wip_wh = "_Test Warehouse - _TC"
+	rm_item = make_item(f"{name} RM", {"is_stock_item": 1, "stock_uom": "Nos", **(rm_properties or {})}).name
+	fg_item = make_item(f"{name} FG", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+	bom = make_bom(item=fg_item, quantity=3, raw_materials=[rm_item], rm_qty=4)
+	wo = make_wo_order_test_record(
+		production_item=fg_item, qty=3, bom_no=bom.name, skip_transfer=1, source_warehouse=wip_wh
+	)
+	receipt = make_stock_entry_test_record(
+		item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=4, basic_rate=100
+	)
+
+	se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+	for row in se_manufacture.items:
+		if row.item_code == rm_item and receipt.items[0].serial_and_batch_bundle:
+			row.batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+			row.use_serial_batch_fields = 1
+	se_manufacture.save()
+	se_manufacture.submit()
+	return wo, rm_item
 
 
 def make_wo_order_test_record(**args):
