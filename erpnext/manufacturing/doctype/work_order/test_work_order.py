@@ -3582,6 +3582,22 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(rm_qty, [1, 1, 2])
 
+	def test_partial_disassemblies_skip_components_rounded_to_zero(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order("Test Zero Whole Number Partial Disassembly")
+
+		def disassemble(qty):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", qty))
+			disassembly.save()
+			disassembly.submit()
+			return disassembly, [row.qty for row in disassembly.items if row.item_code == rm_item]
+
+		first, _ = disassemble(2)
+		disassemble(1)
+		first.cancel()
+
+		self.assertEqual([disassemble(1)[1], disassemble(1)[1]], [[], [2]])
+
 	def test_partial_disassemblies_fill_batches_with_rounded_qty(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order(
