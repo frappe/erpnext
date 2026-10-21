@@ -182,6 +182,8 @@ class SellingController(StockController):
 			)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
+			if self.get("sales_partner"):
+				party_details.pop("commission_rate", None)
 			self.update_if_missing(party_details)
 
 		elif lead:
@@ -244,6 +246,17 @@ class SellingController(StockController):
 	def calculate_commission(self):
 		if not self.meta.get_field("commission_rate"):
 			return
+
+		if not self.get("sales_partner"):
+			self.commission_rate = 0
+		elif self.commission_rate is None or (
+			self.get_doc_before_save()
+			and self.has_value_changed("sales_partner")
+			and not self.has_value_changed("commission_rate")
+		):
+			self.commission_rate = (
+				frappe.get_cached_value("Sales Partner", self.sales_partner, "commission_rate") or 0
+			)
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
 

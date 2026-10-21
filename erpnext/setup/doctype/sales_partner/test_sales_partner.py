@@ -38,6 +38,25 @@ class TestSalesPartner(IntegrationTestCase):
 		self.assertEqual(context.addresses[0]["partner_address"], "12 Main Road\nFloor 2\nMumbai\nIndia")
 		self.assertEqual(context.addresses[0]["phone"], "111\n222")
 
+	def test_commission_rate_available_with_select_permission(self):
+		from erpnext.setup.doctype.sales_partner.sales_partner import get_commission_rate
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		partner = self.make_partner(commission_rate=8)
+		for role in ("Accounts User", "Delivery User"):
+			with self.subTest(role=role):
+				user = make_fenced_user(
+					"partner-commission-" + frappe.generate_hash(length=10) + "@example.com", [role]
+				)
+				with as_user(user):
+					self.assertFalse(frappe.has_permission("Sales Partner", "read", doc=partner))
+					self.assertTrue(frappe.has_permission("Sales Partner", "select", doc=partner))
+					self.assertEqual(get_commission_rate(partner.name), 8)
+
+		with as_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				get_commission_rate(partner.name)
+
 	def test_partner_address_rendering_escapes_content(self):
 		template = frappe.get_jenv().get_template("templates/generators/sales_partner.html")
 		context = template.new_context(
@@ -56,3 +75,111 @@ class TestSalesPartner(IntegrationTestCase):
 		self.assertIn("111<br>&lt;img src=x onerror=alert(1)&gt;", html)
 		self.assertNotIn("<script>", html)
 		self.assertNotIn("<img src=x", html)
+
+	def test_commission_follows_partner_changes(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		partners = [self.make_partner(commission_rate=rate) for rate in (5, 8, 0)]
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		for factory in (make_sales_order, create_delivery_note, create_sales_invoice):
+			with self.subTest(factory=factory.__name__):
+				doc = factory(qty=10, rate=100, do_not_save=True)
+				doc.sales_partner = partners[0].name
+				self.assertIsNone(doc.commission_rate)
+				doc.save()
+				self.assertEqual(doc.commission_rate, 5)
+				self.assertEqual(doc.total_commission, 50)
+
+				doc.commission_rate = 7
+				doc.save()
+				self.assertEqual(doc.total_commission, 70)
+
+				doc.commission_rate = 6
+				doc.save()
+				self.assertEqual(doc.total_commission, 60)
+
+				doc.sales_partner = partners[1].name
+				doc.save()
+				self.assertEqual(doc.commission_rate, 8)
+				self.assertEqual(doc.total_commission, 80)
+
+				doc.sales_partner = partners[2].name
+				doc.save()
+				self.assertEqual(doc.commission_rate, 0)
+				self.assertEqual(doc.total_commission, 0)
+
+				doc.sales_partner = None
+				doc.commission_rate = 10
+				doc.append("sales_team", {"sales_person": "_Test Sales Person", "allocated_percentage": 100})
+				doc.save()
+				self.assertEqual(doc.commission_rate, 0)
+				self.assertEqual(doc.total_commission, 0)
+				self.assertEqual(doc.amount_eligible_for_commission, 1000)
+				self.assertEqual(doc.sales_team[0].allocated_amount, 1000)
+
+	def test_partner_change_preserves_explicit_commission_rate(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		partners = [self.make_partner(commission_rate=rate) for rate in (5, 8)]
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		for factory in (make_sales_order, create_delivery_note, create_sales_invoice):
+			for rate in (6, 0):
+				with self.subTest(factory=factory.__name__, rate=rate):
+					doc = factory(qty=10, rate=100, do_not_save=True)
+					doc.sales_partner = partners[0].name
+					doc.commission_rate = 7
+					doc.save()
+
+					doc.sales_partner = partners[1].name
+					doc.commission_rate = rate
+					doc.save()
+					doc.reload()
+					self.assertEqual(doc.commission_rate, rate)
+					self.assertEqual(doc.total_commission, 1000 * rate / 100)
+
+	def test_commission_without_partner(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		for factory in (make_sales_order, create_delivery_note, create_sales_invoice):
+			with self.subTest(factory=factory.__name__):
+				doc = factory(qty=10, rate=100, do_not_save=True)
+				doc.sales_partner = None
+				doc.commission_rate = 10
+				doc.save()
+				self.assertEqual(doc.commission_rate, 0)
+				self.assertEqual(doc.total_commission, 0)
+				self.assertEqual(doc.amount_eligible_for_commission, 1000)
+
+	def test_selected_partner_defaults_before_customer_commission(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		customer_partner = self.make_partner(commission_rate=5)
+		selected_partner = self.make_partner(commission_rate=8)
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.default_sales_partner = customer_partner.name
+		customer.default_commission_rate = 5
+		customer.save()
+
+		for factory in (make_sales_order, create_delivery_note, create_sales_invoice):
+			with self.subTest(factory=factory.__name__):
+				doc = factory(qty=10, rate=100, do_not_save=True)
+				doc.sales_partner = selected_partner.name
+				self.assertIsNone(doc.commission_rate)
+				doc.save()
+				self.assertEqual(doc.commission_rate, 8)
+				self.assertEqual(doc.total_commission, 80)
+
+				default_doc = factory(qty=10, rate=100, do_not_save=True)
+				default_doc.save()
+				self.assertEqual(default_doc.sales_partner, customer_partner.name)
+				self.assertEqual(default_doc.commission_rate, 5)
+				self.assertEqual(default_doc.total_commission, 50)

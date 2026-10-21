@@ -90,3 +90,10 @@ class SalesPartner(WebsiteGenerator):
 
 		context["addresses"] = addresses
 		return context
+
+
+@frappe.whitelist()
+def get_commission_rate(sales_partner: str) -> float:
+	partner = frappe.get_doc("Sales Partner", sales_partner)
+	partner.check_permission("select")
+	return flt(partner.commission_rate)

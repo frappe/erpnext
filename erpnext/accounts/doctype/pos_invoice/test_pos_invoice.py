@@ -54,6 +54,37 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
+	def test_partner_change_preserves_explicit_commission_rate(self):
+		partners = [
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test POS Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": rate,
+				}
+			).insert()
+			for rate in (5, 8)
+		]
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		for rate in (6, 0):
+			with self.subTest(rate=rate):
+				doc = create_pos_invoice(qty=10, rate=100, do_not_save=True)
+				doc.sales_partner = partners[0].name
+				self.assertIsNone(doc.commission_rate)
+				doc.save()
+				self.assertEqual(doc.commission_rate, 5)
+				self.assertEqual(doc.total_commission, 50)
+
+				doc.commission_rate = 7
+				doc.save()
+				doc.sales_partner = partners[1].name
+				doc.commission_rate = rate
+				doc.save()
+				doc.reload()
+				self.assertEqual(doc.commission_rate, rate)
+				self.assertEqual(doc.total_commission, 1000 * rate / 100)
+
 	def test_timestamp_change(self):
 		w = create_pos_invoice(do_not_save=1)
 		w.docstatus = 0
