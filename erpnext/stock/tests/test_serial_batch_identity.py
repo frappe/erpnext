@@ -1122,14 +1122,14 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		row = frappe._dict(transfer_qty=1)
 		service = DisassembleStockEntry(frappe.get_doc(doctype="Stock Entry", purpose="Disassemble"))
 
-		self.assertEqual(service._extract_serial_nos(source, {}, row), [second.name])
+		self.assertEqual(service._extract_serial_nos(source, {}, row, set()), [second.name])
 		row.transfer_qty = 2
-		self.assertEqual(service._extract_serial_nos(source, {}, row), [second.name, first.name])
+		self.assertEqual(service._extract_serial_nos(source, {}, row, set()), [second.name, first.name])
 		self.assertEqual(source.serial_no, "disassembly-002\nDISASSEMBLY-001")
 
 		source.serial_no = "Missing-Disassembly"
 		with self.assertRaisesRegex(frappe.ValidationError, "Missing-Disassembly.*does not exist"):
-			service._extract_serial_nos(source, {}, row)
+			service._extract_serial_nos(source, {}, row, set())
 		self.assertFalse(
 			frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Missing-Disassembly"})
 		)
@@ -1142,7 +1142,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		row = frappe._dict(transfer_qty=1)
 		service = DisassembleStockEntry(frappe.get_doc(doctype="Stock Entry", purpose="Disassemble"))
 
-		self.assertEqual(service._extract_serial_nos(source, bundle, row), [serial.name])
+		self.assertEqual(service._extract_serial_nos(source, bundle, row, set()), [serial.name])
 		self.assertEqual(bundle["serial_nos"], [serial.name])
 
 	def test_finished_good_validation_matches_physical_numbers_to_work_order(self):

@@ -3986,6 +3986,54 @@ class TestWorkOrder(ERPNextTestSuite):
 			set(rm_dasm_serials) & set(rm_serials_2), "Disassembly must not use SE_2's RM serials"
 		)
 
+	def test_partial_disassemblies_use_different_serial_nos(self):
+		from frappe.model.naming import make_autoname
+
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		wip_wh = "_Test Warehouse - _TC"
+		rm_item = make_item(
+			"Test Serial RM for Partial Disassembly",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TSPD-RM-.####"},
+		).name
+		fg_item = make_item(
+			"Test Serial FG for Partial Disassembly",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TSPD-FG-.####"},
+		).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[rm_item], rm_qty=2)
+		wo = make_wo_order_test_record(
+			production_item=fg_item, qty=4, bom_no=bom.name, skip_transfer=1, source_warehouse=wip_wh
+		)
+
+		rm_receipt = make_stock_entry_test_record(
+			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=8, basic_rate=100
+		)
+		rm_serials = get_serial_numbers_from_bundle(rm_receipt.items[0].serial_and_batch_bundle)
+		series = frappe.db.get_value("Item", fg_item, "serial_no_series")
+		fg_serials = [make_autoname(series) for _ in range(4)]
+
+		se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
+		for row in se_manufacture.items:
+			row.serial_no = "\n".join(rm_serials if row.item_code == rm_item else fg_serials)
+			row.use_serial_batch_fields = 1
+		se_manufacture.save()
+		se_manufacture.submit()
+
+		used_serials = {rm_item: [], fg_item: []}
+		for _ in range(2):
+			disassembly = frappe.get_doc(
+				make_stock_entry(wo.name, "Disassemble", 2, source_stock_entry=se_manufacture.name)
+			)
+			disassembly.save()
+			disassembly.submit()
+			for row in disassembly.items:
+				used_serials[row.item_code] += get_serial_numbers_from_bundle(row.serial_and_batch_bundle)
+
+		self.assertCountEqual(used_serials[rm_item], rm_serials)
+		self.assertCountEqual(used_serials[fg_item], fg_serials)
+
 	def test_components_alternate_item_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
