@@ -27,3 +27,16 @@ class TestTermsAndConditions(UnitTestCase):
 						get_terms_and_conditions("Test", {"customer": "Acme"}),
 						"Full terms for Acme at https://example.com/terms." + extension,
 					)
+
+	def test_applicable_modules_without_hrms(self):
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import TermsandConditions
+
+		doc = TermsandConditions.__new__(TermsandConditions)
+		doc.__dict__.update(terms=None, buying=0, selling=0, disabled=0)
+		with self.assertRaises(frappe.ValidationError):
+			doc.validate()
+		doc.disabled = 1
+		doc.validate()
+		doc.disabled = 0
+		doc.hr = 1
+		doc.validate()
