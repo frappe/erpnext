@@ -150,6 +150,13 @@ class TestTerritoryTargetVarianceBasedOnItemGroup(FrappeTestCase):
 			remove_user_permission("Customer", "_Test Customer 2", user)
 		self.assertEqual(flt(restricted, 2), 3)
 
+	def test_company_filter_excludes_other_company_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_company_filter,
+		)
+
+		check_company_filter(self, "Territory", "territory_name", execute)
+
 
 def create_territory_with_target(name, fiscal_year, distribution_id, target_qty=50):
 	doc = frappe.new_doc("Territory")
@@ -166,3 +173,41 @@ def create_territory_with_target(name, fiscal_year, distribution_id, target_qty=
 		},
 	)
 	return doc.insert()
+
+
+def check_company_filter(test, doctype, name_field, execute_report):
+	from erpnext.selling.report.sales_person_target_variance_based_on_item_group.test_sales_person_target_variance_based_on_item_group import (
+		create_sales_target_doc,
+	)
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	distribution = create_target_distribution(test.fiscal_year)
+	holder = create_sales_target_doc(
+		doctype, name_field, frappe.generate_hash(length=10), test.fiscal_year, distribution.name
+	)
+	order = make_sales_order(
+		company="_Test Company 2",
+		currency=frappe.get_cached_value("Company", "_Test Company 2", "default_currency"),
+		warehouse=create_warehouse("_Test Target Report Warehouse", company="_Test Company 2"),
+		rate=800,
+		qty=1,
+		do_not_submit=True,
+	)
+	field = frappe.scrub(doctype)
+	if doctype == "Sales Person":
+		order.set("sales_team", [{"sales_person": holder.name, "allocated_percentage": 100}])
+	else:
+		order.set(field, holder.name)
+		if doctype == "Sales Partner":
+			order.commission_rate = 5
+	order.submit()
+	filters = frappe._dict(
+		fiscal_year=test.fiscal_year, doctype="Sales Order", period="Yearly", target_on="Amount"
+	)
+
+	def achieved():
+		return next(r["total_achieved"] for r in execute_report(filters)[1] if r[field] == holder.name)
+
+	test.assertEqual(flt(achieved(), 2), flt(order.base_net_total, 2))
+	filters.company = "_Test Company"
+	test.assertEqual(flt(achieved(), 2), 0)

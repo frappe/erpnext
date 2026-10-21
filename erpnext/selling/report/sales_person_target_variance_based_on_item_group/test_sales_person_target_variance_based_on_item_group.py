@@ -113,6 +113,13 @@ class TestSalesPersonTargetVarianceBasedOnItemGroup(FrappeTestCase):
 		self.assertEqual(flt(rows[person_on_order.name].total_achieved, 2), 20)
 		self.assertEqual(flt(rows[person_on_invoice.name].total_achieved, 2), 0)
 
+	def test_company_filter_excludes_other_company_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_company_filter,
+		)
+
+		check_company_filter(self, "Sales Person", "sales_person_name", execute)
+
 
 def create_target_distribution(fiscal_year):
 	if frappe.db.exists("Monthly Distribution", "Target Report Distribution"):
