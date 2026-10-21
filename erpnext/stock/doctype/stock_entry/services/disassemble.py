@@ -218,8 +218,8 @@ class DisassembleStockEntry(BaseStockEntry):
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		units_to_date = floor(flt(flt(source_row.transfer_qty) * progress.share_to_date / step, precision))
-		moved_qty = progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0)
-		return max(units_to_date * step - moved_qty, 0)
+		moved_units = round(progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0) / step)
+		return max(units_to_date - moved_units, 0) * step
 
 	def add_items(self):
 		"""
