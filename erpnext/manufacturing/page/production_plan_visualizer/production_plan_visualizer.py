@@ -293,6 +293,7 @@ def get_purchase_orders(production_plan):
 		.on(po_item.parent == purchase_order.name)
 		.select(
 			po_item.parent.as_("name"),
+			po_item.name.as_("po_detail"),
 			po_item.qty.as_("order_qty"),
 			po_item.received_qty,
 			po_item.fg_item,
@@ -310,14 +311,47 @@ def get_purchase_orders(production_plan):
 		.run(as_dict=True)
 	)
 
+	subcontracted_qty = get_subcontracted_received_qty(
+		[row.po_detail for row in purchase_orders if row.fg_item]
+	)
+
 	for row in purchase_orders:
 		row.doctype = "Purchase Order"
 		row.qty = flt(row.fg_item_qty) if row.fg_item else flt(row.order_qty)
 		row.produced_qty = flt(row.received_qty)
 		if row.fg_item:
-			row.produced_qty = flt(row.received_qty) / (flt(row.order_qty) / flt(row.fg_item_qty) or 1)
+			# Subcontracted FG is received via Subcontracting Receipt, which does not update
+			# the Purchase Order Item; count only the accepted FG qty from the receipts
+			row.produced_qty = flt(subcontracted_qty.get(row.po_detail))
 
 	return purchase_orders
+
+
+def get_subcontracted_received_qty(po_details):
+	if not po_details:
+		return {}
+
+	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	# return rows don't carry purchase_order_item, so link via the subcontracting order item
+	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
+
+	return frappe._dict(
+		frappe.qb.from_(scr_item)
+		.inner_join(sco_item)
+		.on(scr_item.subcontracting_order_item == sco_item.name)
+		.left_join(return_against)
+		.on(scr_item.subcontracting_receipt_item == return_against.name)
+		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
+		.where(
+			(scr_item.docstatus == 1)
+			& sco_item.purchase_order_item.isin(po_details)
+			# skip returns of rejected qty, they come out of the rejected warehouse
+			& (return_against.name.isnull() | (scr_item.warehouse == return_against.warehouse))
+		)
+		.groupby(sco_item.purchase_order_item)
+		.run()
+	)
 
 
 def get_material_requests(production_plan):
