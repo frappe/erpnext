@@ -10,6 +10,8 @@ from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from erpnext.manufacturing.report.process_loss_report.process_loss_report import execute
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 
+test_dependencies = ["BOM"]
+
 
 class TestProcessLossReport(FrappeTestCase):
 	def run_report(self, **extra):

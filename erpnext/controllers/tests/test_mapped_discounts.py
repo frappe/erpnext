@@ -455,6 +455,16 @@ class TestMappedDiscounts(FrappeTestCase):
 		self.assertEqual(invoice.discount_amount, 0)
 		self.assertEqual(invoice.grand_total, 100)
 
+	def test_adding_a_fully_received_order_keeps_the_receipt_undiscounted(self):
+		received = self.make_order(percentage=10)
+		make_purchase_receipt(received.name).submit()
+		regular = self.make_order(item="_Test Item 2")
+
+		receipt = self.combine(regular, received).save()
+		self.assertEqual(len(receipt.items), 1)
+		self.assertEqual(receipt.discount_amount, 0)
+		self.assertEqual(receipt.grand_total, regular.grand_total)
+
 	def test_update_items_uom_change_keeps_the_carried_discount(self):
 		from erpnext.controllers.accounts_controller import update_child_qty_rate
 

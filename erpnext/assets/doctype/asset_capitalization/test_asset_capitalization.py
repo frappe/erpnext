@@ -369,6 +369,79 @@ class TestAssetCapitalization(unittest.TestCase):
 		rates = [d.valuation_rate for d in asset_capitalization.stock_items]
 		self.assertEqual(rates, [100, 200])
 
+	def test_consumed_asset_value_for_manual_depreciation_method(self):
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		asset_values = {}
+		for method in ("Straight Line", "Manual"):
+			asset = create_depreciation_asset(
+				asset_name=f"Capitalization {method} Asset",
+				asset_value=100000,
+				expected_value_after_useful_life=10000,
+				depreciation_method=method,
+				submit=1,
+			)
+			asset_values[method] = get_value_after_depreciation_on_disposal_date(asset.name, "2021-06-30")
+
+		# value on the disposal date, not the value at the end of useful life
+		self.assertNotEqual(asset_values["Manual"], 10000)
+		self.assertEqual(asset_values["Manual"], asset_values["Straight Line"])
+
+	def test_consumed_asset_value_for_manual_depreciation_schedule_with_custom_amounts(self):
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		asset = create_depreciation_asset(
+			asset_name="Capitalization Custom Manual Asset",
+			asset_value=100000,
+			expected_value_after_useful_life=10000,
+			depreciation_method="Manual",
+		)
+		asset.insert()
+
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Draft")
+		for schedule, depreciation_amount in zip(
+			asset_depr_schedule_doc.depreciation_schedule, [50000, 30000, 10000], strict=True
+		):
+			schedule.depreciation_amount = depreciation_amount
+		asset_depr_schedule_doc.save()
+
+		asset = frappe.get_doc("Asset", asset.name)
+		asset.submit()
+
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2020-06-30"), 75136.61)
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2021-06-30"), 35123.29)
+
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
+		self.assertEqual(
+			[d.depreciation_amount for d in asset_depr_schedule_doc.depreciation_schedule],
+			[50000, 30000, 10000],
+		)
+
+	def test_consumed_asset_value_for_existing_asset_with_fiscal_year_schedule(self):
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		# 5 opening depreciations up to 31-03-2025, schedule runs to 31st March (not the purchase anniversary)
+		asset = create_asset(
+			asset_name="Capitalization Existing Asset",
+			calculate_depreciation=1,
+			purchase_date="2020-12-23",
+			available_for_use_date="2020-12-23",
+			gross_purchase_amount=23895945,
+			purchase_amount=23895945,
+			opening_accumulated_depreciation=14496517,
+			opening_number_of_booked_depreciations=5,
+			total_number_of_depreciations=10,
+			expected_value_after_useful_life=1098496.59,
+			depreciation_start_date="2026-03-31",
+			depreciation_method="Manual",
+			submit=1,
+		)
+
+		# depreciation from 01-04-2025 to 21-03-2026: 2279744.841 * 355 / 365 = 2217286.08
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2026-03-21"), 7182141.92)
+
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2025-03-31"), 9399428)
+
 
 def create_asset_capitalization_data():
 	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
