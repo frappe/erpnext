@@ -230,3 +230,118 @@ class TestTermsPermissions(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		with self.assertRaises(frappe.PermissionError):
 			get_terms_and_conditions(terms.name, {})
+
+
+class TestTermsApplicability(UnitTestCase):
+	def test_transaction_validation_rejects_wrong_side_with_prefilled_terms(self):
+		from erpnext.controllers.buying_controller import BuyingController
+		from erpnext.controllers.selling_controller import SellingController
+
+		for controller, side in ((SellingController, "buying"), (BuyingController, "selling")):
+			with self.subTest(controller=controller.__name__), patch("frappe.get_cached_doc") as get_doc:
+				get_doc.return_value = frappe._dict(name="Wrong side", disabled=0, selling=0, buying=0)
+				get_doc.return_value[side] = 1
+				doc = controller.__new__(controller)
+				doc.__dict__.update(tc_name="Wrong side", terms="Already filled")
+				with self.assertRaises(frappe.ValidationError):
+					doc.validate()
+
+	def test_company_defaults_validate_both_sides(self):
+		from erpnext.setup.doctype.company.company import Company
+
+		for field in ("default_selling_terms", "default_buying_terms"):
+			with self.subTest(field=field), patch("frappe.get_cached_doc") as get_doc:
+				get_doc.return_value = frappe._dict(name="Disabled", disabled=1, selling=1, buying=1)
+				doc = Company.__new__(Company)
+				doc.__dict__[field] = "Disabled"
+				with self.assertRaises(frappe.ValidationError):
+					doc.validate()
+
+	def test_pos_profile_and_blanket_order_validate_terms(self):
+		from erpnext.accounts.doctype.pos_profile.pos_profile import POSProfile
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import BlanketOrder
+
+		for controller in (POSProfile, BlanketOrder):
+			with self.subTest(controller=controller.__name__), patch("frappe.get_cached_doc") as get_doc:
+				get_doc.return_value = frappe._dict(name="Disabled", disabled=1, selling=1, buying=1)
+				doc = controller.__new__(controller)
+				doc.__dict__.update(tc_name="Disabled", blanket_order_type="Selling")
+				with self.assertRaises(frappe.ValidationError):
+					doc.validate()
+
+	def test_render_rejects_disabled_and_wrong_side_terms(self):
+		for flags, doctype in (
+			({"disabled": 1, "selling": 1, "buying": 1}, "Sales Order"),
+			({"disabled": 0, "selling": 0, "buying": 1}, "Sales Order"),
+			({"disabled": 0, "selling": 1, "buying": 0}, "Purchase Order"),
+		):
+			with self.subTest(flags=flags, doctype=doctype), patch("frappe.get_cached_doc") as get_doc:
+				get_doc.return_value.terms = "Plain terms"
+				get_doc.return_value.disabled = flags["disabled"]
+				get_doc.return_value.get.side_effect = flags.get
+				with self.assertRaises(frappe.ValidationError):
+					get_terms_and_conditions("Test", {"doctype": doctype})
+
+	def test_enabled_terms_validate_for_both_modules(self):
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
+			validate_terms_and_conditions,
+		)
+
+		with patch("frappe.get_cached_doc", return_value=frappe._dict(disabled=0, selling=1, buying=1)):
+			validate_terms_and_conditions("Both", "selling")
+			validate_terms_and_conditions("Both", "buying")
+			validate_terms_and_conditions(None, "selling")
+
+
+class TestTermsTransactionValidation(IntegrationTestCase):
+	def test_prefilled_terms_cannot_bypass_transaction_save(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="Buying-only terms sentinel",
+			buying=1,
+			selling=0,
+			terms="Buying terms",
+		).insert()
+		self.addCleanup(frappe.db.rollback)
+		doc = make_sales_order(do_not_save=True)
+		doc.tc_name = terms.name
+		doc.terms = "Already filled"
+		with self.assertRaisesRegex(frappe.ValidationError, "not applicable"):
+			doc.insert()
+
+	def test_render_cannot_bypass_flags_with_client_docstatus(self):
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="Disabled terms sentinel",
+			disabled=1,
+			terms="Disabled terms",
+		).insert()
+		self.addCleanup(frappe.db.rollback)
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled"):
+			get_terms_and_conditions(terms.name, {"doctype": "Sales Order", "docstatus": 1})
+
+	def test_submitted_onload_does_not_render_terms_again(self):
+		from frappe.model.docstatus import DocStatus
+
+		from erpnext.controllers.selling_controller import SellingController
+		from erpnext.controllers.stock_controller import StockController
+
+		doc = SellingController.__new__(SellingController)
+		doc.__dict__.update(
+			doctype="Sales Order",
+			docstatus=DocStatus(1),
+			company="_Test Company",
+			terms=None,
+			tc_name="Disabled",
+		)
+		with (
+			patch.object(StockController, "onload"),
+			patch.object(
+				SellingController,
+				"set_missing_terms",
+				side_effect=AssertionError("Historical terms rendered"),
+			),
+		):
+			doc.onload()

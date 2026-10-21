@@ -44,6 +44,7 @@ def get_terms_and_conditions(template_name: str, doc: str | dict):
 
 	tnc = frappe.get_cached_doc("Terms and Conditions", template_name)
 	tnc.check_permission()
+	validate_terms_and_conditions(template_name, get_terms_module(doc))
 
 	if not tnc.terms:
 		return
@@ -146,3 +147,41 @@ def get_terms_list(author, doctype, filters=None, fields=None, order_by=None, li
 		run=False,
 	)
 	return query.where(frappe.qb.DocType(doctype).name.isin(author_query)).run(as_dict=True)
+
+
+def validate_terms_and_conditions(template_name, module=None):
+	if not template_name:
+		return
+	tnc = frappe.get_cached_doc("Terms and Conditions", template_name)
+	if cint(tnc.disabled):
+		throw(_("Terms and Conditions {0} is disabled").format(frappe.bold(template_name)))
+	if module and not cint(tnc.get(module)):
+		throw(
+			_("Terms and Conditions {0} is not applicable to {1}").format(
+				frappe.bold(template_name), _("Selling") if module == "selling" else _("Buying")
+			)
+		)
+
+
+def get_terms_module(doc):
+	doctype = doc.get("doctype")
+	if doctype in (
+		"Quotation",
+		"Sales Order",
+		"Delivery Note",
+		"Sales Invoice",
+		"POS Invoice",
+		"POS Profile",
+	):
+		return "selling"
+	if doctype in (
+		"Supplier Quotation",
+		"Purchase Order",
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Request for Quotation",
+		"Material Request",
+	):
+		return "buying"
+	if doctype == "Blanket Order":
+		return "selling" if doc.get("blanket_order_type") == "Selling" else "buying"
