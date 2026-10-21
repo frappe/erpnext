@@ -68,10 +68,52 @@ class InstallationNote(TransactionBase):
 	def validate(self):
 		self.validate_installation_date()
 		self.check_item_table()
+		self.validate_with_previous_doc()
 
 		from erpnext.controllers.selling_controller import set_default_income_account_for_item
 
 		set_default_income_account_for_item(self)
+
+	def validate_with_previous_doc(self):
+		self.validate_prevdoc_references()
+		super().validate_with_previous_doc(
+			{
+				"Delivery Note": {
+					"ref_dn_field": "prevdoc_docname",
+					"compare_fields": [["customer", "="], ["company", "="]],
+				},
+				"Delivery Note Item": {
+					"ref_dn_field": "prevdoc_detail_docname",
+					"compare_fields": [["item_code", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
+
+	def validate_prevdoc_references(self):
+		for d in self.get("items"):
+			if not d.prevdoc_detail_docname:
+				continue
+
+			dn_item = frappe.db.get_value(
+				"Delivery Note Item", d.prevdoc_detail_docname, ["parent", "docstatus"], as_dict=True
+			)
+			if not dn_item or dn_item.docstatus != 1:
+				frappe.throw(
+					_("Row #{0}: Installation can only be recorded against a submitted Delivery Note").format(
+						d.idx
+					)
+				)
+
+			# the referenced row must belong to the named Delivery Note, else a submit could
+			# update an unrelated customer's Delivery Note row
+			if dn_item.parent != d.prevdoc_docname:
+				frappe.throw(
+					_("Row #{0}: Delivery Note Item does not belong to Delivery Note {1}").format(
+						d.idx, escape_html(cstr(d.prevdoc_docname))
+					)
+				)
 
 	def is_serial_no_added(self, item_code, serial_no):
 		has_serial_no = frappe.db.get_value("Item", item_code, "has_serial_no")
