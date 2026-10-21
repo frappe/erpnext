@@ -3609,6 +3609,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		last.submit()
 		self.assertEqual(rm_qty(last), [2])
 
+	def test_partial_disassemblies_round_in_the_coarser_whole_number_uom(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order(
+			"Test Coarser Whole Number Partial Disassembly",
+			{"stock_uom": "Box", "uoms": [{"uom": "Nos", "conversion_factor": 0.5}]},
+			rm_row_uom=("Nos", 0.5),
+		)
+
+		rm_qty = []
+		for _ in range(3):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+			disassembly.save()
+			disassembly.submit()
+			rm_qty += [(row.qty, row.transfer_qty) for row in disassembly.items if row.item_code == rm_item]
+
+		self.assertEqual(rm_qty, [(2, 1), (2, 1), (4, 2)])
+
 	def test_partial_disassemblies_fill_batches_with_rounded_qty(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order(
@@ -7526,8 +7544,9 @@ def allow_alternative_item(work_order, item_code, alternative_item_code):
 		).insert()
 
 
-def make_whole_number_work_order(name, rm_properties=None):
-	"""Work order that turned 4 Nos of a raw material into 3 Nos of a finished good."""
+def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
+	"""Work order that turned 4 of a raw material's stock UOM into 3 Nos of a finished good. rm_row_uom
+	is the (uom, conversion_factor) the manufacture entry consumes the raw material in."""
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
 		make_stock_entry as make_stock_entry_test_record,
 	)
@@ -7545,6 +7564,9 @@ def make_whole_number_work_order(name, rm_properties=None):
 
 	se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
 	for row in se_manufacture.items:
+		if row.item_code == rm_item and rm_row_uom:
+			row.uom, row.conversion_factor = rm_row_uom
+			row.qty = 4 / row.conversion_factor
 		if row.item_code == rm_item and receipt.items[0].serial_and_batch_bundle:
 			row.batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
 			row.use_serial_batch_fields = 1
