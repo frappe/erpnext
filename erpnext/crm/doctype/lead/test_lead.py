@@ -145,6 +145,25 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
 
+	def test_edited_note_is_cleaned_and_needs_write(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		lead = make_lead(first_name="Note", last_name="Editor", email_id=f"{random_string(8)}@example.com")
+		lead.add_note("first note")
+		row_id = str(lead.notes[0].name)
+
+		with as_user(make_fenced_user("lead-note-editor@example.com", ["Sales User"])):
+			frappe.get_doc("Lead", lead.name).edit_note('<b>edited</b><img src=x onerror="alert(1)">', row_id)
+		note = frappe.db.get_value("CRM Note", row_id, "note")
+		self.assertIn("<b>edited</b>", note)
+		self.assertNotIn("onerror", note)
+
+		with as_user(make_fenced_user("lead-note-reader@example.com", [])):
+			self.assertRaises(
+				frappe.PermissionError, frappe.get_doc("Lead", lead.name).edit_note, "changed", row_id
+			)
+		self.assertEqual(frappe.db.get_value("CRM Note", row_id, "note"), note)
+
 	def test_opportunity_from_lead(self):
 		lead = make_lead(
 			first_name="Rahul",
@@ -188,6 +207,29 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(len(event.event_participants), 2)
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
+
+	def test_set_lead_name_fallbacks(self):
+		# organization name is used when there is no person name
+		lead = frappe.new_doc("Lead")
+		lead.company_name = "_Test Org Lead"
+		lead.set_lead_name()
+		self.assertEqual(lead.lead_name, "_Test Org Lead")
+
+		# the email local-part is used when only an email is present
+		lead = frappe.new_doc("Lead")
+		lead.email_id = "jane.doe@example.com"
+		lead.set_lead_name()
+		self.assertEqual(lead.lead_name, "jane.doe")
+
+		# data import (ignore_mandatory) with no name/company/email must not crash
+		lead = frappe.new_doc("Lead")
+		lead.flags.ignore_mandatory = True
+		lead.set_lead_name()
+		self.assertFalse(lead.lead_name)
+
+		# otherwise a lead with no name source is rejected
+		lead = frappe.new_doc("Lead")
+		self.assertRaises(frappe.ValidationError, lead.set_lead_name)
 
 
 def create_event(subject, starts_on, reference_type, reference_name):

@@ -48,11 +48,11 @@ def get_data(filters: Filters) -> Data:
 		.having(Sum(se.process_loss_qty) > 0)
 	)
 
-	if "item" in filters:
-		query.where(wo.production_item == filters.item)
+	if filters.get("item"):
+		query = query.where(wo.production_item == filters.item)
 
-	if "work_order" in filters:
-		query.where(wo.name == filters.work_order)
+	if filters.get("work_order"):
+		query = query.where(wo.name == filters.work_order)
 
 	data = query.run(as_dict=True)
 

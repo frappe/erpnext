@@ -235,30 +235,38 @@ def update_balances(
 	net_dict=None,
 	total_net=0,
 ):
+	accounts = {entry.get("account"): entry for entry in root_type_data if entry.get("account")}
+
 	for entry in root_type_data:
 		if not entry.get("parent_account") and entry.get("is_group"):
 			total_dict[year] = entry[year]
 			if account_type == "Direct Expense":
 				total_dict[year] = entry[year] * -1
 
+		if root_type == "Expense" and account_type == "Cost of Goods Sold":
+			if entry.get("account_type") == account_type:
+				total_net += entry.get(year)
+				ratio_dict[year] = total_net
+		elif is_outermost_group_of_type(entry, account_type, accounts):
+			ratio_dict[year] = flt(ratio_dict.get(year)) + flt(entry.get(year))
+
 		if root_type in ("Asset", "Liability"):
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				ratio_dict[year] = entry.get(year)
 			if entry.get("account_type") in ["Bank", "Cash", "Receivable"] and not entry.get("is_group"):
 				total_net += entry.get(year)
 				net_dict[year] = total_net
 
-		elif root_type == "Income":
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				total_net += entry.get(year)
-				ratio_dict[year] = total_net
-		elif root_type == "Expense" and account_type == "Cost of Goods Sold":
-			if entry.get("account_type") == account_type:
-				total_net += entry.get(year)
-				ratio_dict[year] = total_net
-		else:
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				ratio_dict[year] = entry.get(year)
+
+def is_outermost_group_of_type(entry, account_type, accounts):
+	if not (entry.get("is_group") and entry.get("account_type") == account_type):
+		return False
+
+	parent = accounts.get(entry.get("parent_account"))
+	while parent:
+		if parent.get("is_group") and parent.get("account_type") == account_type:
+			return False
+		parent = accounts.get(parent.get("parent_account"))
+
+	return True
 
 
 def avg_ratio_balance(account_type, period_list, precision, filters):

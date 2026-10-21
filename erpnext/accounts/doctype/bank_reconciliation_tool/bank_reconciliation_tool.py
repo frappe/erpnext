@@ -116,7 +116,9 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	)
 	data = get_entries(filters)
 
-	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
+	balance_as_per_system = get_balance_on(
+		filters["account"], filters["report_date"], company=filters["company"]
+	)
 
 	total_debit, total_credit = 0.0, 0.0
 	for d in data:
@@ -1268,7 +1270,7 @@ def get_linked_payments(
 		"Bank Transaction", "read", doc=bank_transaction_name
 	):
 		_refuse()
-	return _get_linked_payments(
+	vouchers = _get_linked_payments(
 		bank_transaction_name,
 		document_types,
 		from_date,
@@ -1277,6 +1279,12 @@ def get_linked_payments(
 		from_reference_date,
 		to_reference_date,
 	)
+	# matching queries skip permissions, so drop the vouchers the user may not read
+	return [
+		voucher
+		for voucher in vouchers
+		if voucher.get("doctype") and _is_permitted(voucher["doctype"], voucher.get("name"), "read")
+	]
 
 
 def _get_linked_payments(
@@ -1379,6 +1387,7 @@ def check_matching(
 	from_reference_date=None,
 	to_reference_date=None,
 ):
+	document_types = document_types or []
 	exact_match = True if "exact_match" in document_types else False
 
 	common_filters = frappe._dict(

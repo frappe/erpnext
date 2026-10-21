@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 import frappe.utils
 from frappe import _, msgprint, throw
@@ -18,6 +20,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
 )
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
 	validate_coupon_code,
@@ -370,6 +373,8 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.validate_time_sheets_are_submitted()
 
+		self.validate_delivery_note_rows_billed_by_invoice()
+		self.validate_closed_delivery_notes()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 
 		if self.is_return and self.return_against:
@@ -516,12 +521,14 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.check_credit_limit()
-			self.check_overdue_billing_threshold()
+			if self.is_opening != "Yes":
+				self.check_credit_limit()
+				self.check_overdue_billing_threshold()
 
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -641,6 +648,7 @@ class SalesInvoice(SellingController):
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		self.db_set("status", "Cancelled")
 
@@ -672,6 +680,7 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
 
@@ -701,13 +710,14 @@ class SalesInvoice(SellingController):
 					"target_parent_field": "per_delivered",
 					"target_field": "delivered_qty",
 					"target_ref_field": "qty",
-					"source_field": "qty",
+					"source_field": "qty * conversion_factor",
+					"target_conversion_factor": "conversion_factor",
 					"join_field": "so_detail",
 					"percent_join_field": "sales_order",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
 					"second_source_dt": "Delivery Note Item",
-					"second_source_field": "qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "so_detail",
 					"overflow_type": "delivery",
 					"extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -725,6 +735,11 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "against_pick_list",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "pick_list_item",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 				},
 			]
 		)
@@ -739,9 +754,10 @@ class SalesInvoice(SellingController):
 				"join_field": "so_detail",
 				"target_field": "returned_qty",
 				"target_parent_dt": "Sales Order",
-				"source_field": "-1 * qty",
+				"source_field": "-1 * qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"second_source_dt": "Delivery Note Item",
-				"second_source_field": "-1 * qty",
+				"second_source_field": "-1 * qty * conversion_factor",
 				"second_join_field": "so_detail",
 				"extra_cond": """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)""",
 				"second_source_extra_cond": """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)""",
@@ -848,17 +864,9 @@ class SalesInvoice(SellingController):
 				timesheet.db_update_all()
 
 	def update_billed_qty_in_scio(self):
-		if self.is_return:
-			return
-
 		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-		data = frappe._dict(
-			{
-				item.scio_detail: item.stock_qty if self._action == "submit" else -item.stock_qty
-				for item in self.items
-				if item.scio_detail
-			}
-		)
+		sign = 1 if self._action == "submit" else -1
+		data = {name: sign * qty for name, qty in self.get_scio_self_rm_stock_qty().items()}
 
 		if data:
 			case_expr = Case()
@@ -867,6 +875,13 @@ class SalesInvoice(SellingController):
 			frappe.qb.update(table).set(table.billed_qty, case_expr).where(
 				(table.name.isin(list(data.keys()))) & (table.docstatus == 1)
 			).run()
+
+	def get_scio_self_rm_stock_qty(self):
+		stock_qty = defaultdict(float)
+		for item in self.items:
+			if item.scio_detail:
+				stock_qty[item.scio_detail] += flt(item.stock_qty)
+		return stock_qty
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:
@@ -1152,6 +1167,42 @@ class SalesInvoice(SellingController):
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
 			)
 
+	def validate_closed_delivery_notes(self):
+		delivery_notes = {d.delivery_note for d in self.items if d.delivery_note}
+		if self.is_return or not delivery_notes:
+			return
+
+		if closed := frappe.get_all(
+			"Delivery Note", filters={"name": ("in", list(delivery_notes)), "status": "Closed"}, pluck="name"
+		):
+			frappe.throw(
+				_("Delivery Note {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
+			)
+
+	def validate_delivery_note_rows_billed_by_invoice(self):
+		dn_details = [d.dn_detail for d in self.items if d.dn_detail]
+		if self.is_return or not dn_details:
+			return
+
+		billing_invoices = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", dn_details), "against_sales_invoice": ("is", "set")},
+				fields=["name", "against_sales_invoice"],
+				as_list=True,
+			)
+		)
+		for d in self.items:
+			invoice = billing_invoices.get(d.dn_detail)
+			if invoice and invoice != self.name:
+				frappe.throw(
+					_(
+						"Row #{0}: Delivery Note {1} was created from Sales Invoice {2}, which already bills it"
+					).format(d.idx, frappe.bold(d.delivery_note), get_link_to_form("Sales Invoice", invoice))
+				)
+
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
 		against_acc = []
@@ -1210,6 +1261,11 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_pos(self):
+		# Consolidation posts payments already accepted on submitted POS invoices.
+		if not self.get("is_consolidated"):
+			for payment in self.get("payments") or []:
+				validate_enabled_mode_of_payment(payment.mode_of_payment)
+
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
 			if abs(flt(self.paid_amount)) + abs(flt(self.write_off_amount)) - abs(
@@ -1319,22 +1375,23 @@ class SalesInvoice(SellingController):
 	def validate_scio_self_rm_qty(self):
 		self_rms = [item for item in self.items if item.scio_detail]
 		if self_rms:
+			stock_qty = self.get_scio_self_rm_stock_qty()
 			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 			query = (
 				frappe.qb.from_(table)
 				.select(table.required_qty, table.consumed_qty, table.billed_qty, table.name)
-				.where((table.docstatus == 1) & (table.name.isin([item.scio_detail for item in self_rms])))
+				.where((table.docstatus == 1) & (table.name.isin(list(stock_qty))))
 			)
 			result = query.run(as_dict=True)
 			data = {item.name: item for item in result}
 			for item in self_rms:
 				row = data.get(item.scio_detail)
 				max_qty = max(row.required_qty, row.consumed_qty) - row.billed_qty
-				if item.stock_qty > max_qty:
+				if stock_qty[item.scio_detail] > max_qty:
 					frappe.throw(
 						_("Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}").format(
 							item.idx,
-							item.stock_qty,
+							stock_qty[item.scio_detail],
 							item.stock_uom,
 							get_link_to_form("Item", item.item_code),
 							frappe.bold(max_qty),
@@ -2193,6 +2250,7 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.po_no = reference_doc.po_no
 		# The payment schedule is rebuilt from the template, relative to the new posting date.

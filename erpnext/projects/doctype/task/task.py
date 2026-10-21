@@ -273,10 +273,10 @@ class Task(NestedSet):
 		):
 			return
 
-		parent_project = frappe.db.get_value("Task", self.parent_task, "project")
-		if not self.project:
-			self.project = parent_project
-		elif self.project != parent_project:
+		parent_project, parent_company = frappe.db.get_value("Task", self.parent_task, ["project", "company"])
+		if not self.project and parent_project:
+			self.project, self.company = parent_project, parent_company
+		elif (self.project or None) != (parent_project or None):
 			frappe.throw(
 				_("Parent Task {0} is not in Project {1}. Pick a group task of the same project.").format(
 					get_link_to_form("Task", self.parent_task), frappe.bold(self.project)

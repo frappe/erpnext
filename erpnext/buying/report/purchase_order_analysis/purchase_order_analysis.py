@@ -113,18 +113,21 @@ def update_billed_qty(data):
 def get_billed_qty_data(data):
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	po_item = frappe.qb.DocType("Purchase Order Item")
 
 	query = (
 		frappe.qb.from_(pi_item)
 		.inner_join(pi)
 		.on(pi_item.parent == pi.name)
-		.select(pi_item.po_detail, Sum(pi_item.qty))
+		.inner_join(po_item)
+		.on(po_item.name == pi_item.po_detail)
+		.select(po_item.name, Sum(pi_item.qty * pi_item.conversion_factor) / po_item.conversion_factor)
 		.where(
-			(pi_item.po_detail.isin([row.name for row in data]))
+			(po_item.name.isin([row.name for row in data]))
 			& (pi.docstatus == 1)
 			& ((pi.is_return == 0) | (pi.update_billed_amount_in_purchase_order == 1))
 		)
-		.groupby(pi_item.po_detail)
+		.groupby(po_item.name)
 	)
 
 	return frappe._dict(query.run())
