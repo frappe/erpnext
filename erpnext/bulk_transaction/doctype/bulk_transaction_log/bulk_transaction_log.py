@@ -58,7 +58,7 @@ class BulkTransactionLog(Document):
 				"failed": failed_logs,
 			}
 		)
-		super(Document, self).__init__(serialize_transaction_log(transaction_log))
+		self.init_from_dict(serialize_transaction_log(transaction_log))
 
 	# nosemgrep: frappe-semgrep-rules.rules.overusing-args -- reviewed: frappe calls virtual doctype get_list with `args=`
 	@staticmethod
