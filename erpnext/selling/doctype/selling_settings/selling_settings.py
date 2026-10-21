@@ -21,6 +21,13 @@ UTM_DOCTYPES = [
 	"Delivery Note",
 ]
 
+COMMISSION_SECTIONS = {
+	"Sales Invoice": ("commission_section", "sales_team_section"),
+	"Sales Order": ("sales_team_section_break", "section_break1"),
+	"Delivery Note": ("sales_team_section_break", "section_break1"),
+	"POS Invoice": ("sales_team_section_break", "section_break2"),
+}
+
 
 class SellingSettings(Document):
 	# begin: auto-generated types
@@ -203,16 +210,9 @@ def toggle_tracking_sales_commissions_section(hide):
 		create_property_setter_for_hiding_field,
 	)
 
-	for doctype, sections in {
-		"Sales Invoice": ("commission_section", "sales_team_section"),
-		"Sales Order": ("sales_team_section_break", "section_break1"),
-		"Delivery Note": ("sales_team_section_break", "section_break1"),
-		"POS Invoice": ("sales_team_section_break", "section_break2"),
-	}.items():
-		meta = frappe.get_meta(doctype)
+	for doctype, sections in COMMISSION_SECTIONS.items():
 		for section in sections:
-			if meta.has_field(section):
-				create_property_setter_for_hiding_field(doctype, section, hide)
+			create_property_setter_for_hiding_field(doctype, section, hide)
 
 
 def toggle_utm_analytics_section(hide):
