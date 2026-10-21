@@ -16,13 +16,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-<<<<<<< HEAD
-from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
-=======
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
-from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
-from erpnext.stock.doctype.item.item import get_allowed_uoms
->>>>>>> a8f0510 (fix: restore v15 behaviour for party specific item)
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
@@ -196,14 +190,8 @@ def item_query(
 	doctype = "Item"
 	conditions = []
 
-<<<<<<< HEAD
 	if isinstance(filters, str):
 		filters = json.loads(filters)
-=======
-	filters = frappe.parse_json(filters)
-	company = filters.pop("company", None) if isinstance(filters, dict) else None
-	allowed_items_condition = None
->>>>>>> a8f0510 (fix: restore v15 behaviour for party specific item)
 
 	# Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta(doctype, cached=True)
@@ -232,16 +220,12 @@ def item_query(
 	searched_fields = list(searchfields)
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
-	restricted_items_cond = ""
+	allowed_items_cond = ""
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
-<<<<<<< HEAD
-			restricted_items_cond = get_restricted_items_cond(party_type, party)
-=======
-			allowed_items_condition = get_allowed_items_condition(party_type, party)
->>>>>>> a8f0510 (fix: restore v15 behaviour for party specific item)
+			allowed_items_cond = get_allowed_items_cond(party_type, party)
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -265,7 +249,6 @@ def item_query(
 
 		candidate_cond = "and tabItem.name in %(candidates)s"
 
-<<<<<<< HEAD
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
 	return frappe.db.sql(
 		"""select
@@ -277,7 +260,7 @@ def item_query(
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
-			{fcond} {mcond} {candidate_cond} {restricted_items_cond}
+			{fcond} {mcond} {candidate_cond} {allowed_items_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -290,7 +273,7 @@ def item_query(
 			mcond=get_match_cond(doctype).replace("%", "%%"),
 			description_cond=description_cond,
 			candidate_cond=candidate_cond,
-			restricted_items_cond=restricted_items_cond.replace("%", "%%"),
+			allowed_items_cond=allowed_items_cond.replace("%", "%%"),
 		),
 		{
 			"today": nowdate(),
@@ -301,71 +284,18 @@ def item_query(
 			"candidates": tuple(candidates or ()),
 		},
 		as_dict=as_dict,
-=======
-	if allowed_items_condition is not None:
-		query = query.where(allowed_items_condition)
-
-	return query.run(as_dict=as_dict)
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def subcontracted_item_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
-):
-	"""Sub-contracted stock items with a default BOM of their own or of their template."""
-	subcontracted_filters = [
-		["is_stock_item", "=", 1],
-		"and",
-		["is_sub_contracted_item", "=", 1],
-		"and",
-		[["default_bom", "is", "set"], "or", ["variant_of.default_bom", "is", "set"]],
-	]
-	return item_query(doctype, txt, searchfield, start, page_len, subcontracted_filters)
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def bom(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
-):
-	doctype = "BOM"
-	fields = get_fields(doctype, ["name", "item"])
-
-	BOM = frappe.qb.DocType("BOM")
-	txt_no_percent = txt.replace("%", "")
-
-	query = frappe.qb.get_query("BOM", fields=fields, filters=filters, ignore_permissions=False)
-
-	query = (
-		query.where(BOM.docstatus == 1)
-		.where(BOM.is_active == 1)
-		.where(BOM[searchfield].like(f"%{txt}%"))
-		.orderby(
-			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(BOM.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(BOM.name)),
-			)
-			.else_(99999)
-		)
-		.orderby(BOM.idx, order=Order.desc)
-		.orderby(BOM.name)
-		.limit(page_len or 20)
-		.offset(start or 0)
->>>>>>> a8f0510 (fix: restore v15 behaviour for party specific item)
 	)
 
 
-def get_restricted_items_cond(party_type, party):
-	"""Return a SQL condition that excludes items reserved for other parties."""
-	restricted_items_condition = get_restricted_items_condition(party_type, party)
-	if restricted_items_condition is None:
+def get_allowed_items_cond(party_type, party):
+	"""Return a SQL condition that keeps only the items this party's rules allow."""
+	allowed_items_condition = get_allowed_items_condition(party_type, party)
+	if allowed_items_condition is None:
 		return ""
 
 	item = frappe.qb.DocType("Item")
-	restricted_items = frappe.qb.from_(item).select(item.name).where(restricted_items_condition)
-	return f"and tabItem.name not in ({restricted_items})"
+	allowed_items = frappe.qb.from_(item).select(item.name).where(allowed_items_condition)
+	return f"and tabItem.name in ({allowed_items})"
 
 
 @frappe.whitelist()
