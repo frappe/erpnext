@@ -51,6 +51,7 @@ class SalesPartner(WebsiteGenerator):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
 		super().validate()
+		self.validate_route()
 		self.validate_targets()
 		if self.partner_website:
 			from urllib.parse import urlsplit, urlunsplit
@@ -63,6 +64,14 @@ class SalesPartner(WebsiteGenerator):
 				parts = parts._replace(scheme="https")
 
 			self.partner_website = urlunsplit(parts)
+
+	def validate_route(self):
+		if frappe.db.exists("Sales Partner", {"route": self.route, "name": ["!=", self.name]}):
+			frappe.throw(
+				_("Route {0} is already used by another Sales Partner. Please choose another route.").format(
+					frappe.bold(self.route)
+				)
+			)
 
 	def validate_targets(self):
 		for target in self.get("targets") or []:
