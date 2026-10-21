@@ -77,7 +77,7 @@ def get_rules_condition(rules):
 
 	conditions = []
 	if values["Item"]:
-		conditions.append(item.name.isin(values["Item"]))
+		conditions.append(item.name.isin(values["Item"]) | IfNull(item.variant_of, "").isin(values["Item"]))
 	if values["Item Group"]:
 		conditions.append(item.item_group.isin(get_item_group_subtree_query(values["Item Group"])))
 	if values["Brand"]:
