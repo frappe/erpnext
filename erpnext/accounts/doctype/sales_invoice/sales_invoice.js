@@ -351,8 +351,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							default: me.frm.doc.project,
 						},
 					],
-					primary_action: function () {
-						const data = d.get_values();
+					primary_action: function (data) {
 						me.frm.events.add_timesheet_data(me.frm, {
 							from_time: data.from_time,
 							to_time: data.to_time,
@@ -708,7 +707,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.doc.is_cash_or_non_trade_discount
 		);
 
-		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+		if (this.frm.doc.is_cash_or_non_trade_discount) {
+			this.clear_mapped_discounts();
+		} else {
 			this.frm.set_value("additional_discount_account", "");
 		}
 

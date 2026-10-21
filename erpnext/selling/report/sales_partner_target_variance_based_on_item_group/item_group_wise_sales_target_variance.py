@@ -193,7 +193,8 @@ def prepare_data(
 					and period.from_date <= r.get(date_field)
 					and r.get(date_field) <= period.to_date
 					and (
-						not sales_user_wise_item_groups.get(d.parent)
+						not d.item_group
+						or not sales_user_wise_item_groups.get(d.parent)
 						or r.item_group == d.item_group
 						or r.item_group in item_group_parent_child_map.get(d.item_group, [])
 					)
@@ -230,9 +231,22 @@ def get_item_group_parent_child_map():
 
 def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_field):
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
+	doctype = filters.get("doctype")
 
-	parent_doc = frappe.qb.DocType(filters.get("doctype"))
-	child_doc = frappe.qb.DocType(filters.get("doctype") + " Item")
+	permitted_names = frappe.get_list(
+		doctype,
+		filters={
+			"docstatus": 1,
+			date_field: ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
+		},
+		pluck="name",
+	)
+
+	if not permitted_names:
+		return []
+
+	parent_doc = frappe.qb.DocType(doctype)
+	child_doc = frappe.qb.DocType(doctype + " Item")
 
 	query = frappe.qb.from_(parent_doc).inner_join(child_doc).on(child_doc.parent == parent_doc.name)
 
@@ -242,7 +256,9 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 		net_amount = child_doc.base_net_amount * sales_team.allocated_percentage / 100
 		sales_field_col = sales_team[sales_field]
 
-		query = query.inner_join(sales_team).on(sales_team.parent == parent_doc.name)
+		query = query.inner_join(sales_team).on(
+			(sales_team.parent == parent_doc.name) & (sales_team.parenttype == doctype)
+		)
 	else:
 		stock_qty = child_doc.stock_qty
 		net_amount = child_doc.base_net_amount
@@ -254,11 +270,7 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 		(stock_qty).as_("stock_qty"),
 		(net_amount).as_("base_net_amount"),
 		sales_field_col,
-	).where(
-		(parent_doc.docstatus == 1)
-		& (parent_doc[date_field].between(fiscal_year.year_start_date, fiscal_year.year_end_date))
-		& (sales_field_col.isin(sales_users_or_territory_data))
-	)
+	).where(parent_doc.name.isin(permitted_names) & (sales_field_col.isin(sales_users_or_territory_data)))
 
 	return query.run(as_dict=True)
 
