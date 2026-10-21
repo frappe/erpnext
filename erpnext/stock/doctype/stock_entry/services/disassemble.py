@@ -192,12 +192,7 @@ class DisassembleStockEntry(BaseStockEntry):
 		else:
 			source_filter, key = SE.work_order == self.doc.work_order, SED.item_code
 
-		earlier = (
-			source_filter
-			& (SE.purpose == "Disassemble")
-			& (SE.docstatus == 1)
-			& (SE.name != (self.doc.name or ""))
-		)
+		earlier = source_filter & (SE.purpose == "Disassemble") & (SE.docstatus == 1)
 		earlier_fg_qty = frappe.qb.from_(SE).select(Sum(SE.fg_completed_qty)).where(earlier).run()[0][0]
 		moved = (
 			frappe.qb.from_(SED)
@@ -550,7 +545,6 @@ class DisassembleStockEntry(BaseStockEntry):
 				(SE.source_stock_entry == self.doc.source_stock_entry)
 				& (SE.purpose == "Disassemble")
 				& (SE.docstatus == 1)
-				& (SE.name != self.doc.name)
 			)
 			.run(as_dict=True)
 		)
