@@ -2853,6 +2853,7 @@ class AccountsController(TransactionBase):
 					d.base_payment_amount = flt(
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
+					d.outstanding = d.payment_amount
 					d.base_outstanding = d.base_payment_amount
 		else:
 			self.fetch_payment_terms_from_order(
@@ -2956,6 +2957,13 @@ class AccountsController(TransactionBase):
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.payment_amount * self.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
+				payment_schedule["outstanding"] = schedule.payment_amount
+
+			payment_schedule["base_outstanding"] = payment_schedule["base_payment_amount"]
 
 			self.append("payment_schedule", payment_schedule)
 
