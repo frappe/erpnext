@@ -224,7 +224,7 @@ class DisassembleStockEntry(BaseStockEntry):
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		units_to_date = floor(flt(flt(source_row.transfer_qty) * progress.share_to_date / step, precision))
 		moved_qty = progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0)
-		return units_to_date * step - moved_qty
+		return max(units_to_date * step - moved_qty, 0)
 
 	def add_items(self):
 		"""
@@ -314,6 +314,8 @@ class DisassembleStockEntry(BaseStockEntry):
 
 	def _append_disassembly_item(self, source_row, scale_factor, progress):
 		qty, s_warehouse, t_warehouse = self._get_disassembly_warehouses(source_row, scale_factor, progress)
+		if not qty:
+			return
 		item = self._build_disassembly_item_dict(source_row, qty, s_warehouse, t_warehouse)
 		if self.doc.source_stock_entry:
 			item.update({"against_stock_entry": self.doc.source_stock_entry, "ste_detail": source_row.name})
