@@ -3,8 +3,9 @@
 
 
 import frappe
+from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils import cstr, filter_strip_join
+from frappe.utils import cstr, filter_strip_join, flt
 from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.setup.doctype.target_detail.target_detail import validate_targets
@@ -53,6 +54,7 @@ class SalesPartner(WebsiteGenerator):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
 		super().validate()
+		self.validate_targets()
 		if self.partner_website:
 			from urllib.parse import urlsplit, urlunsplit
 
@@ -64,6 +66,13 @@ class SalesPartner(WebsiteGenerator):
 				parts = parts._replace(scheme="https")
 
 			self.partner_website = urlunsplit(parts)
+
+	def validate_targets(self):
+		for target in self.get("targets") or []:
+			if not flt(target.target_qty) and not flt(target.target_amount):
+				frappe.throw(
+					_("Row #{0}: Either Target Qty or Target Amount is mandatory").format(target.idx)
+				)
 
 	def get_context(self, context):
 		address_names = frappe.db.get_all(
