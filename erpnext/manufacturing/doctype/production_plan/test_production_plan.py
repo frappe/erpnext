@@ -1403,6 +1403,9 @@ class TestProductionPlan(ERPNextTestSuite):
 		from erpnext.manufacturing.page.production_plan_visualizer.production_plan_visualizer import (
 			get_plan_overview,
 		)
+		from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
+			execute as execute_summary,
+		)
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			make_subcontracting_receipt,
 		)
@@ -1478,6 +1481,10 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(sub_assembly["produced_qty"], 3)
 		self.assertEqual(sub_assembly["pending_qty"], 2)
 		self.assertEqual(sub_assembly["documents"][0]["produced_qty"], 3)
+		summary = execute_summary(frappe._dict(production_plan=plan.name))[1]
+		self.assertEqual(
+			next(r for r in summary if r.get("document_type") == "Purchase Order")["produced_qty"], 3
+		)
 
 		# returning accepted qty reduces the produced qty
 		scr_return = make_subcontract_return(scr.name)
