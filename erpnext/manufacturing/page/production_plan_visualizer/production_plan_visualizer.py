@@ -13,14 +13,13 @@ def get_plan_overview(production_plan: str):
 	plan.check_permission("read")
 
 	work_orders = get_work_orders(production_plan)
-	finished_goods = get_finished_goods(plan, work_orders)
 	purchase_orders = get_purchase_orders(production_plan)
 	schedule = get_schedule(production_plan)
 	stock, warehouses = get_stock_levels(plan)
 
 	return {
-		"plan": get_plan_details(plan, finished_goods),
-		"finished_goods": finished_goods,
+		"plan": get_plan_details(plan),
+		"finished_goods": get_finished_goods(plan, work_orders),
 		"sub_assemblies": get_sub_assemblies(plan, work_orders, purchase_orders, stock, warehouses),
 		"material_requests": get_material_requests(production_plan),
 		"materials": get_materials(plan, production_plan, stock, warehouses),
@@ -175,10 +174,9 @@ def get_row_materials(plan, schedule):
 	return {name: by_bom[bom_no] for name, bom_no in rows if by_bom.get(bom_no)}
 
 
-def get_plan_details(plan, finished_goods):
+def get_plan_details(plan):
 	total_planned = flt(plan.total_planned_qty)
 	total_produced = flt(plan.total_produced_qty)
-	lost_qty = sum(row["qty"] - row["produced_qty"] - row["pending_qty"] for row in finished_goods)
 	return {
 		"name": plan.name,
 		"status": plan.status,
@@ -188,8 +186,23 @@ def get_plan_details(plan, finished_goods):
 		"combine_sub_items": plan.combine_sub_items,
 		"total_planned_qty": total_planned,
 		"total_produced_qty": total_produced,
-		"completion": flt((total_produced + lost_qty) / total_planned * 100 if total_planned else 0, 1),
+		"completion": get_completion(plan),
 	}
+
+
+def get_completion(plan):
+	"""Plan-wide, so it counts all Work Orders, not only the ones the user can read."""
+	total_planned = flt(plan.total_planned_qty)
+	if not total_planned:
+		return 0
+
+	work_orders = frappe.get_all(
+		"Work Order",
+		filters={"production_plan": plan.name, "docstatus": ("<", 2)},
+		fields=["qty", "produced_qty", "process_loss_qty", "production_plan_item"],
+	)
+	pending_qty = sum(row["pending_qty"] for row in get_finished_goods(plan, work_orders))
+	return flt((total_planned - pending_qty) / total_planned * 100, 1)
 
 
 def get_finished_goods(plan, work_orders):
