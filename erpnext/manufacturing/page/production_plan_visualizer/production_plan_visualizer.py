@@ -178,7 +178,7 @@ def get_row_materials(plan, schedule):
 def get_plan_details(plan, finished_goods):
 	total_planned = flt(plan.total_planned_qty)
 	total_produced = flt(plan.total_produced_qty)
-	completed_qty = total_planned - sum(row["pending_qty"] for row in finished_goods)
+	lost_qty = sum(row["qty"] - row["produced_qty"] - row["pending_qty"] for row in finished_goods)
 	return {
 		"name": plan.name,
 		"status": plan.status,
@@ -188,7 +188,7 @@ def get_plan_details(plan, finished_goods):
 		"combine_sub_items": plan.combine_sub_items,
 		"total_planned_qty": total_planned,
 		"total_produced_qty": total_produced,
-		"completion": flt(completed_qty / total_planned * 100 if total_planned else 0, 1),
+		"completion": flt((total_produced + lost_qty) / total_planned * 100 if total_planned else 0, 1),
 	}
 
 

@@ -67,6 +67,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		plan = frappe._dict(
 			total_planned_qty=10,
+			total_produced_qty=9,
 			po_items=[frappe._dict(name="row", item_code="Test Production Item 1", planned_qty=10)],
 		)
 		work_orders = [frappe._dict(production_plan_item="row", qty=10, produced_qty=9, process_loss_qty=1)]
