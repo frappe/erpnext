@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.delivery_note_trends.delivery_note_trends import execute
@@ -13,14 +14,19 @@ ITEM = "_Test Item"
 OTHER_ITEM = "_Test Item 2"
 WAREHOUSE = "Stores - _TC"
 CUSTOMER = "_Test Customer"
+POSTING_DATE = "2026-06-01"
+FISCAL_YEAR = get_fiscal_year(POSTING_DATE)[0]
 
 
 class TestDeliveryNoteTrends(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def run_report_full(self, **extra):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
-				"fiscal_year": "_Test Fiscal Year 2026",
+				"fiscal_year": FISCAL_YEAR,
 				"period": "Yearly",
 				"based_on": "Item",
 				"group_by": "",
@@ -59,12 +65,12 @@ class TestDeliveryNoteTrends(FrappeTestCase):
 		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
 		return total_row[self.labels(columns).index("Total(Amt)")] or 0
 
-	def deliver(self, qty=5, rate=200, customer=CUSTOMER, posting_date="2026-06-01", item_code=ITEM):
+	def deliver(self, qty=5, rate=200, customer=CUSTOMER, posting_date=POSTING_DATE, item_code=ITEM):
 		# stock the item first so the delivery note can ship, then deliver
 		make_stock_entry(
 			item_code=item_code, to_warehouse=WAREHOUSE, qty=qty + 10, rate=100, posting_date=posting_date
 		)
-		create_delivery_note(
+		delivery_note = create_delivery_note(
 			item_code=item_code,
 			warehouse=WAREHOUSE,
 			qty=qty,
@@ -72,12 +78,16 @@ class TestDeliveryNoteTrends(FrappeTestCase):
 			customer=customer,
 			company="_Test Company",
 			posting_date=posting_date,
+			do_not_save=1,
 		)
+		# v15 does not populate this field in the Delivery Note test helper.
+		delivery_note.territory = frappe.db.get_value("Customer", customer, "territory")
+		delivery_note.insert().submit()
 
 	def test_delivery_qty_in_trend(self):
 		# A Delivery Note of qty 5 @ rate 200 sums to qty 5 / amount 1000 (base_net_amount)
 		# in the yearly bucket and the Total columns.
-		cols = ["_Test Fiscal Year 2026 (Qty)", "_Test Fiscal Year 2026 (Amt)", "Total(Qty)", "Total(Amt)"]
+		cols = [f"{FISCAL_YEAR} (Qty)", f"{FISCAL_YEAR} (Amt)", "Total(Qty)", "Total(Amt)"]
 		before = self.values({"Item": ITEM}, cols)
 		self.deliver()
 		after = self.values({"Item": ITEM}, cols)

@@ -6,12 +6,16 @@ from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_invoice_trends.sales_invoice_trends import execute
+from erpnext.accounts.utils import get_fiscal_year
 
-FISCAL_YEAR = "_Test Fiscal Year 2026"
 POSTING_DATE = "2026-06-01"
+FISCAL_YEAR = get_fiscal_year(POSTING_DATE)[0]
 
 
 class TestSalesInvoiceTrends(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{

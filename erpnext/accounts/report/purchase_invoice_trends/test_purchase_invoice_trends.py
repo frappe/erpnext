@@ -7,13 +7,14 @@ from frappe.utils import flt
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.purchase_invoice_trends.purchase_invoice_trends import execute
+from erpnext.accounts.utils import get_fiscal_year
 
-FISCAL_YEAR = "_Test Fiscal Year 2026"
 COMPANY = "_Test Company"
 SUPPLIER = "_Test Supplier"
 ITEM = "_Test Item"
 OTHER_ITEM = "_Test Item 2"
 POSTING_DATE = "2026-06-01"
+FISCAL_YEAR = get_fiscal_year(POSTING_DATE)[0]
 
 
 def make_dated_purchase_invoice(qty, rate, bill_date=None, item_code=ITEM):
@@ -35,6 +36,9 @@ def make_dated_purchase_invoice(qty, rate, bill_date=None, item_code=ITEM):
 
 
 class TestPurchaseInvoiceTrends(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{

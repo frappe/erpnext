@@ -4,6 +4,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.report.purchase_receipt_trends.purchase_receipt_trends import execute
 
@@ -11,9 +12,14 @@ ITEM = "_Test Item"
 OTHER_ITEM = "_Test Item 2"
 ITEM_GROUP = "_Test Item Group"
 SUPPLIER = "_Test Supplier"
+POSTING_DATE = "2026-06-01"
+FISCAL_YEAR = get_fiscal_year(POSTING_DATE)[0]
 
 
 class TestPurchaseReceiptTrends(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def run_report(self, **extra):
 		return self.run_report_full(**extra)[1]
 
@@ -21,7 +27,7 @@ class TestPurchaseReceiptTrends(FrappeTestCase):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
-				"fiscal_year": "_Test Fiscal Year 2026",
+				"fiscal_year": FISCAL_YEAR,
 				"period": "Yearly",
 				"based_on": "Item",
 				"group_by": "",
@@ -57,7 +63,7 @@ class TestPurchaseReceiptTrends(FrappeTestCase):
 	def test_receipt_qty_in_trend(self):
 		# The report sums ALL purchase receipts for the item in the fiscal year, so capture
 		# any pre-existing baseline and assert only this receipt's contribution.
-		cols = ["_Test Fiscal Year 2026 (Qty)", "_Test Fiscal Year 2026 (Amt)"]
+		cols = [f"{FISCAL_YEAR} (Qty)", f"{FISCAL_YEAR} (Amt)"]
 		before = self.values({"Item": ITEM}, cols)
 		make_purchase_receipt(
 			item_code=ITEM, qty=10, rate=100, company="_Test Company", posting_date="2026-06-01"
