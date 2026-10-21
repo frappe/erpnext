@@ -74,6 +74,10 @@ class SellingController(StockController):
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
 
+	def before_update_after_submit(self):
+		self.calculate_commission()
+		self.calculate_contribution()
+
 	def validate_against_stock_reservation_entries(self):
 		if self.get("is_return") or (self.doctype == "Sales Invoice" and not cint(self.get("update_stock"))):
 			return
