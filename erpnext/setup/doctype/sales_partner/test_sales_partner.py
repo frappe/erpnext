@@ -202,3 +202,19 @@ class TestSalesPartner(IntegrationTestCase):
 			with self.subTest(qty=qty, amount=amount):
 				partner.set("targets", [{"target_qty": qty, "target_amount": amount}])
 				partner.validate()
+
+	def test_generated_route_collision_is_readable(self):
+		partner = self.make_partner()
+		with self.assertRaisesRegex(frappe.ValidationError, "Route .* is already used"):
+			self.make_partner(partner_name=partner.name.replace(" ", "-"))
+
+	def test_manual_route_normalization_and_existing_route(self):
+		route = "partners/manual-" + frappe.generate_hash(length=10)
+		partner = self.make_partner(route="/" + route + "/.")
+		self.assertEqual(partner.route, route)
+		partner.partner_name += " Updated"
+		partner.save()
+		self.assertEqual(partner.route, route)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Route .* is already used"):
+			self.make_partner(route="/" + route + "/.")
