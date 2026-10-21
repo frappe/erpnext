@@ -142,18 +142,7 @@ def party_item_query(doctype: str, txt: str, searchfield: str, start: int, page_
 @frappe.whitelist()
 def get_party_specific_items(party_type: str, party: str):
 	validate_party(party_type, party)
-	group_type = f"{party_type} Group"
-	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
-
-	rules = frappe.get_list(
-		"Party Specific Item",
-		filters={"party_type": ("in", [party_type, group_type])},
-		or_filters=[["party", "=", party], ["party", "=", party_group or ""]],
-		fields=["name", "party_type", "party", "restrict_based_on", "based_on_value"],
-	)
-	rules = [
-		rule for rule in rules if rule.party == (party if rule.party_type == party_type else party_group)
-	]
+	rules = get_party_rules(party_type, party)
 
 	can_read_items = frappe.has_permission("Item")
 	item_names = {}
@@ -168,12 +157,13 @@ def get_party_specific_items(party_type: str, party: str):
 				as_list=True,
 			)
 		)
+	counts = count_rule_items(rules) if can_read_items else {}
 	for rule in rules:
 		if rule.restrict_based_on == "Item":
 			rule.item_name = item_names.get(rule.based_on_value)
 			rule.item_count = 1
 		elif can_read_items:
-			rule.item_count = count_rule_items(rule)
+			rule.item_count = counts.get((rule.restrict_based_on, rule.based_on_value), 0)
 
 	rules.sort(
 		key=lambda rule: (
@@ -183,6 +173,18 @@ def get_party_specific_items(party_type: str, party: str):
 		)
 	)
 	return rules
+
+
+def get_party_rules(party_type, party):
+	group_type = f"{party_type} Group"
+	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
+	rules = frappe.get_list(
+		"Party Specific Item",
+		filters={"party_type": ("in", [party_type, group_type])},
+		or_filters=[["party", "=", party], ["party", "=", party_group or ""]],
+		fields=["name", "party_type", "party", "restrict_based_on", "based_on_value"],
+	)
+	return [rule for rule in rules if rule.party == (party if rule.party_type == party_type else party_group)]
 
 
 def validate_party(party_type, party):
@@ -275,14 +277,39 @@ def get_order_hint(party_type, item):
 	return _("Ordered {0} times, last on {1}").format(item.order_count, formatdate(item.last_ordered))
 
 
-def count_rule_items(rule):
+def count_rule_items(rules):
 	item = frappe.qb.DocType("Item")
 	permitted_items = frappe.qb.get_query(
 		"Item", fields=["name"], filters={"disabled": 0}, ignore_permissions=False
 	)
-	return (
-		frappe.qb.from_(item)
-		.select(Count(item.name))
-		.where(get_rules_condition([rule]) & item.name.isin(permitted_items))
-		.run()[0][0]
-	)
+	brands = [rule.based_on_value for rule in rules if rule.restrict_based_on == "Brand"]
+	groups = [rule.based_on_value for rule in rules if rule.restrict_based_on == "Item Group"]
+	counts = {}
+
+	if brands:
+		rows = (
+			frappe.qb.from_(item)
+			.select(item.brand, Count(item.name))
+			.where(item.brand.isin(brands) & item.name.isin(permitted_items))
+			.groupby(item.brand)
+			.run()
+		)
+		counts.update({("Brand", brand): count for brand, count in rows})
+
+	if groups:
+		group = frappe.qb.DocType("Item Group")
+		parent = frappe.qb.DocType("Item Group").as_("parent_group")
+		rows = (
+			frappe.qb.from_(item)
+			.join(group)
+			.on(item.item_group == group.name)
+			.join(parent)
+			.on((group.lft >= parent.lft) & (group.rgt <= parent.rgt))
+			.select(parent.name, Count(item.name))
+			.where(parent.name.isin(groups) & item.name.isin(permitted_items))
+			.groupby(parent.name)
+			.run()
+		)
+		counts.update({("Item Group", name): count for name, count in rows})
+
+	return counts

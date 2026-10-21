@@ -270,12 +270,9 @@ frappe.ui.form.on("Customer", {
 				allowed_description: __("When selling to this customer, only these items can be selected."),
 				allowed_empty: __("No limits set. Every item can be sold to this customer."),
 				first_rule_note: __(
-					"Once you add an item here, only allowed items can be sold to this customer."
+					"After this, only items in Customer Specific Items can be sold to this customer."
 				),
 				item_hint: __("Items this customer orders most often are listed first."),
-				this_party: __("This customer"),
-				allowed: (item) => __("{0} is now allowed for this customer", [item]),
-				remove_allowed: (item) => __("Remove {0} from this customer's allowed items?", [item]),
 			},
 		});
 		frm.party_items.refresh();

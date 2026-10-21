@@ -41,6 +41,7 @@ erpnext.PartyItems = class PartyItems {
 		this.make_list("frequently_bought_html", {
 			title: __("Frequently Bought"),
 			description: this.labels.frequent_description,
+			show_index: true,
 			page_size: 5,
 			show_search: false,
 			empty_icon: "shopping-cart",
@@ -51,18 +52,18 @@ erpnext.PartyItems = class PartyItems {
 	}
 
 	make_rules_list() {
-		const escape = frappe.utils.escape_html;
 		let rule_count = 0;
 		this.rules_list = this.make_list("party_specific_items_html", {
 			title: this.labels.section_title,
 			description: this.labels.allowed_description,
+			show_index: true,
 			page_size: 10,
 			empty_icon: "package",
 			empty_message: this.labels.allowed_empty,
 			get_data: () =>
 				this.call("get_party_specific_items").then((rules) => {
 					rule_count = this.rule_count = rules.length;
-					return rules;
+					return rules.sort((a, b) => this.is_inherited(a) - this.is_inherited(b));
 				}),
 			after_render() {
 				this.$wrapper.find("[data-action='search']").toggle(rule_count > this.page_size);
@@ -71,40 +72,58 @@ erpnext.PartyItems = class PartyItems {
 				label: __("Add"),
 				action: () => this.add_restriction(),
 			},
-			columns: [
-				{
-					label: __("Applies To"),
-					type: "link",
-					fieldname: "based_on_value",
-					route: (row) => ["Form", row.restrict_based_on, row.based_on_value],
-				},
-				{ label: __("Type"), render: (row) => __(row.restrict_based_on) },
-				{
-					label: __("Covers"),
-					on_click: (row) => {
-						if (row.restrict_based_on !== "Item" && row.item_count) this.show_rule_items(row);
-					},
-					render: (row) => {
-						if (row.restrict_based_on === "Item") return escape(row.item_name || "");
-						if (row.item_count == null) return "";
-						if (!row.item_count) return `<span class="text-muted">${__("No items")}</span>`;
-						return `<a href="#">${this.count_label(row.item_count)}</a>`;
-					},
-				},
-				{
-					label: __("Allowed For"),
-					render: (row) =>
-						row.party_type === this.party_type
-							? this.labels.this_party
-							: `${__(row.party_type)}: ${escape(row.party)}`,
-				},
-				this.can.delete_rules &&
-					this.remove_column(
-						(row) => this.remove_restriction(row),
-						(row) => row.party_type === this.party_type
-					),
-			].filter(Boolean),
+			columns: [...this.rule_columns(), this.remove_rule_column()].filter(Boolean),
 		});
+	}
+
+	rule_columns() {
+		return [
+			{ label: __("Value"), render: (row) => this.rule_name(row) },
+			{
+				label: __("Type"),
+				render: (row) =>
+					frappe.ui.badge.html({
+						label: __(row.restrict_based_on),
+						theme: { "Item Group": "blue", Brand: "violet", Item: "green" }[
+							row.restrict_based_on
+						],
+					}),
+			},
+			{
+				label: __("Covers"),
+				align: "right",
+				on_click: (row) => {
+					if (row.restrict_based_on !== "Item" && row.item_count) this.show_rule_items(row);
+				},
+				render: (row) => {
+					if (row.item_count == null) return "";
+					if (!row.item_count) return `<span class="text-muted">${__("No items")}</span>`;
+					if (row.restrict_based_on === "Item")
+						return `<span class="text-muted">${this.count_label(1)}</span>`;
+					return `<a href="#">${this.count_label(row.item_count)}</a>`;
+				},
+			},
+		];
+	}
+
+	is_inherited(row) {
+		return row.party_type !== this.party_type;
+	}
+
+	rule_name(row) {
+		const escape = frappe.utils.escape_html;
+		const href = frappe.utils.get_form_link(row.restrict_based_on, row.based_on_value);
+		const is_item = row.restrict_based_on === "Item";
+		const name = is_item && row.item_name ? row.item_name : row.based_on_value;
+		const title = is_item ? ` title="${escape(row.based_on_value)}"` : "";
+		let html = `<a href="${href}"${title}>${escape(name)}</a>`;
+		if (this.is_inherited(row))
+			html += ` <span class="text-muted">·</span> ${frappe.ui.badge.html({
+				label: __(row.party_type),
+				theme: "gray",
+				title: `${__(row.party_type)}: ${row.party}`,
+			})}`;
+		return html;
 	}
 
 	add_restriction() {
@@ -160,7 +179,12 @@ erpnext.PartyItems = class PartyItems {
 					})
 					.then(() => {
 						dialog.hide();
-						this.notify(this.labels.allowed(frappe.utils.escape_html(values.based_on_value)));
+						this.notify(
+							__("Added {0} to {1}", [
+								frappe.utils.escape_html(values.based_on_value),
+								this.labels.section_title,
+							])
+						);
 						this.rules_list.refresh();
 					}),
 		});
@@ -169,9 +193,9 @@ erpnext.PartyItems = class PartyItems {
 
 	remove_restriction(row) {
 		const name = frappe.utils.escape_html(row.item_name || row.based_on_value);
-		frappe.confirm(this.labels.remove_allowed(name), () =>
+		frappe.confirm(__("Remove {0} from {1}?", [name, this.labels.section_title]), () =>
 			frappe.db.delete_doc("Party Specific Item", row.name).then(() => {
-				this.notify(__("Removed {0} from allowed items", [name]));
+				this.notify(__("Removed {0} from {1}", [name, this.labels.section_title]));
 				this.rules_list.refresh();
 			})
 		);
@@ -234,20 +258,23 @@ erpnext.PartyItems = class PartyItems {
 		];
 	}
 
-	remove_column(on_remove, can_remove = () => true) {
+	remove_rule_column() {
+		if (!this.can.delete_rules) return null;
 		return {
 			label: "",
 			align: "right",
-			on_click: (row) => can_remove(row) && on_remove(row),
+			on_click: (row) => {
+				if (!this.is_inherited(row)) this.remove_restriction(row);
+			},
 			render: (row) =>
-				can_remove(row)
-					? `<span class="embedded-list-hover-reveal">${frappe.ui.button.html({
+				this.is_inherited(row)
+					? ""
+					: `<span class="embedded-list-hover-reveal">${frappe.ui.button.html({
 							icon: "trash",
 							size: "xs",
 							variant: "ghost",
 							title: __("Remove"),
-					  })}</span>`
-					: "",
+					  })}</span>`,
 		};
 	}
 

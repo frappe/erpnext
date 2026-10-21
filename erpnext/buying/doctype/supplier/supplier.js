@@ -198,12 +198,9 @@ frappe.ui.form.on("Supplier", {
 				allowed_description: __("When buying from this supplier, only these items can be selected."),
 				allowed_empty: __("No limits set. Every item can be bought from this supplier."),
 				first_rule_note: __(
-					"Once you add an item here, only allowed items can be bought from this supplier."
+					"After this, only items in Supplier Specific Items can be bought from this supplier."
 				),
 				item_hint: __("Items bought most often from this supplier are listed first."),
-				this_party: __("This supplier"),
-				allowed: (item) => __("{0} is now allowed for this supplier", [item]),
-				remove_allowed: (item) => __("Remove {0} from this supplier's allowed items?", [item]),
 			},
 		});
 		frm.party_items.refresh();
