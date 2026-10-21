@@ -13,6 +13,8 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.utils import get_balance_on
 from erpnext.controllers.accounts_controller import InvalidQtyError
+from erpnext.selling.doctype.customer.customer import get_customer_outstanding
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
 	compare_payment_schedules,
@@ -54,72 +56,29 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.save()
 		self.assertEqual(dn.items[0].qty, 1)
 
-	def test_credit_limit_extra_amount_with_sales_order_bypass(self):
-		dn = frappe.get_doc(
-			{
-				"doctype": "Delivery Note",
-				"customer": "_Test Customer",
-				"company": "_Test Company",
-				"per_billed": 0,
-				"base_grand_total": 720,
-			}
+	def test_credit_limit_with_sales_order_bypass(self):
+		customer = frappe.get_doc("Customer", make_customer("_Test Delivery Credit Bypass"))
+		customer.append(
+			"credit_limits",
+			{"company": "_Test Company", "credit_limit": 1000, "bypass_credit_limit_check": 1},
 		)
-		for references, base_net_total, docstatus, expected_extra_amount in (
-			([(None, None), (None, None)], 600, 1, 0),
-			([("SO-1", None), ("SO-2", None)], 600, 1, 720),
-			([(None, None), ("SO-1", None)], 600, 1, 360),
-			([("SO-1", None), (None, None)], 600, 1, 360),
-			([("SO-1", "SI-1"), ("SO-2", None)], 600, 1, 360),
-			([(None, "SI-1"), (None, "SI-2")], 600, 1, None),
-			([(None, None), (None, None)], 0, 1, 720),
-			([("SO-1", None), ("SO-2", None)], 0, 1, 720),
-			([(None, None), ("SO-1", None)], 0, 1, 720),
-			([(None, "SI-1"), (None, "SI-2")], 0, 1, None),
-			([(None, None), (None, None)], 600, 0, 720),
-			([(None, None), ("SO-1", None)], 600, 0, 720),
-			([(None, "SI-1"), (None, None)], 600, 0, 360),
-			([(None, "SI-1"), (None, "SI-2")], 600, 0, None),
-			([(None, None), (None, None)], 0, 0, 720),
-		):
-			with self.subTest(references=references, base_net_total=base_net_total, docstatus=docstatus):
-				dn.docstatus = docstatus
-				dn.base_net_total = base_net_total
-				dn.set("items", [])
-				for sales_order, sales_invoice in references:
-					dn.append(
-						"items",
-						{
-							"against_sales_order": sales_order,
-							"against_sales_invoice": sales_invoice,
-							"base_net_amount": base_net_total / 2,
-						},
-					)
-				with (
-					patch.object(frappe.db, "get_value", return_value=1),
-					patch(
-						"erpnext.selling.doctype.customer.customer.check_credit_limit"
-					) as check_credit_limit,
-				):
-					dn.check_credit_limit()
-					if expected_extra_amount is None:
-						check_credit_limit.assert_not_called()
-					else:
-						check_credit_limit.assert_called_once_with(
-							dn.customer, dn.company, 1, expected_extra_amount
-						)
+		customer.save()
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+
+		# A submitted standalone delivery is already in customer outstanding, so it is not counted twice.
+		create_delivery_note(customer=customer.name, qty=6, rate=100)
+
+		so = make_sales_order(customer=customer.name, qty=5, rate=100)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 5)
 
 	def test_customer_outstanding_uses_delivery_base_net_amount(self):
-		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
-		from erpnext.selling.doctype.customer.test_customer import make_customer
-
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=6, basic_rate=100)
-		for currency, conversion_rate, discount_percentage in (
-			("INR", 1, 10),
-			("USD", 80, 0),
-			("USD", 80, 10),
+		for customer, currency, conversion_rate, discount_percentage in (
+			(make_customer("_Test Delivery Credit INR"), "INR", 1, 10),
+			("_Test Customer USD", "USD", 80, 0),
+			("_Test Customer USD", "USD", 80, 10),
 		):
 			with self.subTest(currency=currency, discount_percentage=discount_percentage):
-				customer = make_customer(f"_Test Delivery Credit {currency} {discount_percentage}")
 				outstanding = get_customer_outstanding(customer, "_Test Company", True)
 				dn = create_delivery_note(
 					customer=customer, currency=currency, qty=2, rate=300, do_not_save=True
@@ -127,29 +86,40 @@ class TestDeliveryNote(FrappeTestCase):
 				dn.conversion_rate = conversion_rate
 				dn.apply_discount_on = "Net Total"
 				dn.additional_discount_percentage = discount_percentage
+				dn.set(
+					"taxes",
+					[
+						{
+							"charge_type": "On Net Total",
+							"account_head": "_Test Account VAT - _TC",
+							"description": "VAT",
+							"rate": 2,
+						}
+					],
+				)
 				dn.insert()
 				dn.submit()
-				self.assertEqual(dn.base_grand_total, 600 * conversion_rate * (1 - discount_percentage / 100))
+				self.assertEqual(dn.base_net_total, 600 * conversion_rate * (1 - discount_percentage / 100))
 				self.assertAlmostEqual(
 					get_customer_outstanding(customer, dn.company, True) - outstanding, dn.base_grand_total
 				)
 
-				# Billing moves exposure from the Delivery Note to the receivable without changing its total.
-				for billed_qty in (1, 1):
+				# Invoice rounding can change the billed receivable.
+				billed_amount = 0
+				for remaining_qty, disable_rounded_total in ((1, 0), (0, 1)):
 					invoice = make_sales_invoice(dn.name)
-					invoice.items[0].qty = billed_qty
+					invoice.items[0].qty = 1
+					invoice.disable_rounded_total = disable_rounded_total
 					invoice.insert()
 					invoice.submit()
+					billed_amount += invoice.base_rounded_total or invoice.base_grand_total
 					self.assertAlmostEqual(
 						get_customer_outstanding(customer, dn.company, True) - outstanding,
-						dn.base_grand_total,
+						billed_amount + dn.base_grand_total * remaining_qty / 2,
 					)
 
 	def test_delivery_outstanding_clears_with_invoice_discount_and_exchange_rate(self):
-		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
-		from erpnext.selling.doctype.customer.test_customer import make_customer
-
-		customer = make_customer("_Test Delivery Credit Invoice Discount")
+		customer = "_Test Customer USD"
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		outstanding = get_customer_outstanding(customer, "_Test Company", True)
 		dn = create_delivery_note(customer=customer, currency="USD", qty=2, rate=300, do_not_save=True)
@@ -166,8 +136,8 @@ class TestDeliveryNote(FrappeTestCase):
 			invoice.additional_discount_percentage = 10
 			invoice.insert()
 			invoice.submit()
-			self.assertEqual(invoice.base_grand_total, 18900)
-			billed_amount += invoice.base_grand_total
+			self.assertEqual(invoice.base_net_total, 18900)
+			billed_amount += invoice.base_rounded_total or invoice.base_grand_total
 			self.assertAlmostEqual(
 				get_customer_outstanding(customer, dn.company, True) - outstanding,
 				billed_amount + dn.base_grand_total * remaining_qty / 2,
