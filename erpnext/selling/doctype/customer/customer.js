@@ -265,14 +265,17 @@ frappe.ui.form.on("Customer", {
 				frequent_description: __("The items this customer orders most often."),
 				frequent_empty: __("No sales orders from this customer yet."),
 				orders_title: __("Submitted sales orders that include this item"),
-				reserved_description: __(
-					"Items you sell only to this customer. They won't appear when selling to other customers."
+				section_title: __("Customer Specific Items"),
+				add_title: __("Add Customer Specific Item"),
+				allowed_description: __("When selling to this customer, only these items can be selected."),
+				allowed_empty: __("No limits set. Every item can be sold to this customer."),
+				first_rule_note: __(
+					"Once you add an item here, only allowed items can be sold to this customer."
 				),
-				reserved_empty: __("No items are reserved for this customer."),
 				item_hint: __("Items this customer orders most often are listed first."),
 				this_party: __("This customer"),
-				reserved: (item) => __("{0} is now reserved for this customer", [item]),
-				remove_reserved: (item) => __("Remove {0} from this customer's reserved items?", [item]),
+				allowed: (item) => __("{0} is now allowed for this customer", [item]),
+				remove_allowed: (item) => __("Remove {0} from this customer's allowed items?", [item]),
 			},
 		});
 		frm.party_items.refresh();

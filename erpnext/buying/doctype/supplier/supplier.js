@@ -193,14 +193,17 @@ frappe.ui.form.on("Supplier", {
 				frequent_description: __("The items ordered most often from this supplier."),
 				frequent_empty: __("No purchase orders from this supplier yet."),
 				orders_title: __("Submitted purchase orders that include this item"),
-				reserved_description: __(
-					"Items you buy only from this supplier. They won't appear when buying from other suppliers."
+				section_title: __("Supplier Specific Items"),
+				add_title: __("Add Supplier Specific Item"),
+				allowed_description: __("When buying from this supplier, only these items can be selected."),
+				allowed_empty: __("No limits set. Every item can be bought from this supplier."),
+				first_rule_note: __(
+					"Once you add an item here, only allowed items can be bought from this supplier."
 				),
-				reserved_empty: __("No items are reserved for this supplier."),
 				item_hint: __("Items bought most often from this supplier are listed first."),
 				this_party: __("This supplier"),
-				reserved: (item) => __("{0} is now reserved for this supplier", [item]),
-				remove_reserved: (item) => __("Remove {0} from this supplier's reserved items?", [item]),
+				allowed: (item) => __("{0} is now allowed for this supplier", [item]),
+				remove_allowed: (item) => __("Remove {0} from this supplier's allowed items?", [item]),
 			},
 		});
 		frm.party_items.refresh();

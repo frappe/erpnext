@@ -54,14 +54,14 @@ erpnext.PartyItems = class PartyItems {
 		const escape = frappe.utils.escape_html;
 		let rule_count = 0;
 		this.rules_list = this.make_list("party_specific_items_html", {
-			title: __("Reserved Items"),
-			description: this.labels.reserved_description,
+			title: this.labels.section_title,
+			description: this.labels.allowed_description,
 			page_size: 10,
-			empty_icon: "lock",
-			empty_message: this.labels.reserved_empty,
+			empty_icon: "package",
+			empty_message: this.labels.allowed_empty,
 			get_data: () =>
 				this.call("get_party_specific_items").then((rules) => {
-					rule_count = rules.length;
+					rule_count = this.rule_count = rules.length;
 					return rules;
 				}),
 			after_render() {
@@ -92,7 +92,7 @@ erpnext.PartyItems = class PartyItems {
 					},
 				},
 				{
-					label: __("Reserved For"),
+					label: __("Allowed For"),
 					render: (row) =>
 						row.party_type === this.party_type
 							? this.labels.this_party
@@ -114,8 +114,13 @@ erpnext.PartyItems = class PartyItems {
 			Brand: __("Covers every item of this brand."),
 		};
 		const dialog = new frappe.ui.Dialog({
-			title: __("Reserve Item"),
+			title: this.labels.add_title,
 			fields: [
+				!this.rule_count && {
+					fieldname: "first_rule_note",
+					fieldtype: "HTML",
+					options: `<p class="text-muted">${this.labels.first_rule_note}</p>`,
+				},
 				{
 					fieldname: "restrict_based_on",
 					fieldtype: "Select",
@@ -143,8 +148,8 @@ erpnext.PartyItems = class PartyItems {
 					get_query: () =>
 						dialog.get_value("restrict_based_on") === "Item" ? this.item_query() : {},
 				},
-			],
-			primary_action_label: __("Reserve"),
+			].filter(Boolean),
+			primary_action_label: __("Add"),
 			primary_action: (values) =>
 				frappe.db
 					.insert({
@@ -155,7 +160,7 @@ erpnext.PartyItems = class PartyItems {
 					})
 					.then(() => {
 						dialog.hide();
-						this.notify(this.labels.reserved(frappe.utils.escape_html(values.based_on_value)));
+						this.notify(this.labels.allowed(frappe.utils.escape_html(values.based_on_value)));
 						this.rules_list.refresh();
 					}),
 		});
@@ -164,9 +169,9 @@ erpnext.PartyItems = class PartyItems {
 
 	remove_restriction(row) {
 		const name = frappe.utils.escape_html(row.item_name || row.based_on_value);
-		frappe.confirm(this.labels.remove_reserved(name), () =>
+		frappe.confirm(this.labels.remove_allowed(name), () =>
 			frappe.db.delete_doc("Party Specific Item", row.name).then(() => {
-				this.notify(__("Removed {0} from reserved items", [name]));
+				this.notify(__("Removed {0} from allowed items", [name]));
 				this.rules_list.refresh();
 			})
 		);
