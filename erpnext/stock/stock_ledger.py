@@ -1864,6 +1864,9 @@ class update_entries_after:
 		rate = 0
 		# Material Transfer, Repack, Manufacturing
 		if sle.voucher_type == "Stock Entry":
+			if flt(sle.actual_qty) < 0:
+				return rate
+
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
 			rate = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "valuation_rate")
 		# Sales and Purchase Return
