@@ -12,7 +12,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Coalesce, Max, NullIf, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import (
 	cint,
 	comma_or,
@@ -529,6 +529,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=[self.source_stock_entry])
 		source_rows_by_name = {r.name: r for r in self.get_items_from_manufacture_stock_entry()}
+		used_serial_nos = self.get_serial_nos_used_by_earlier_disassemblies()
 
 		for row in self.items:
 			if not row.ste_detail:
@@ -557,11 +558,42 @@ class StockEntry(StockController, SubcontractingInwardController):
 				batches[source_row.batch_no] = row.transfer_qty
 
 			if source_bundle.get("serial_nos"):
-				serial_nos = get_serial_nos(source_bundle["serial_nos"])[: int(row.transfer_qty)]
+				serial_nos = get_serial_nos(source_bundle["serial_nos"])
 			elif source_row.serial_no:
-				serial_nos = get_serial_nos(source_row.serial_no)[: int(row.transfer_qty)]
+				serial_nos = get_serial_nos(source_row.serial_no)
+
+			serial_nos = [
+				serial_no for serial_no in serial_nos if serial_no not in used_serial_nos[row.ste_detail]
+			][: int(row.transfer_qty)]
 
 			self._set_serial_batch_bundle_for_disassembly_row(row, serial_nos, batches)
+
+	def get_serial_nos_used_by_earlier_disassemblies(self) -> defaultdict:
+		"""Serial nos that submitted disassemblies of the source entry already moved, by source row."""
+		SE = frappe.qb.DocType("Stock Entry")
+		SED = frappe.qb.DocType("Stock Entry Detail")
+		SBE = frappe.qb.DocType("Serial and Batch Entry")
+		rows = (
+			frappe.qb.from_(SED)
+			.join(SE)
+			.on(SED.parent == SE.name)
+			.join(SBE)
+			.on(SBE.parent == SED.serial_and_batch_bundle)
+			.select(SED.ste_detail, SBE.serial_no)
+			.where(
+				(SE.source_stock_entry == self.source_stock_entry)
+				& (SE.purpose == "Disassemble")
+				& (SE.docstatus == 1)
+				& (SE.name != self.name)
+				& (IfNull(SBE.serial_no, "") != "")
+			)
+			.run(as_dict=True)
+		)
+
+		used_serial_nos = defaultdict(set)
+		for row in rows:
+			used_serial_nos[row.ste_detail].add(row.serial_no)
+		return used_serial_nos
 
 	def _set_serial_batch_for_disassembly_from_available_materials(self):
 		available_materials = get_available_materials(self.work_order, self)

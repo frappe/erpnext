@@ -3545,7 +3545,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		rm_receipt = make_stock_entry_test_record(
 			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=8, basic_rate=100
 		)
-		rm_serials = get_serial_numbers_from_bundle(rm_receipt.items[0].serial_and_batch_bundle)
+		rm_serials = get_serial_nos_from_bundle(rm_receipt.items[0].serial_and_batch_bundle)
 		series = frappe.db.get_value("Item", fg_item, "serial_no_series")
 		fg_serials = [make_autoname(series) for _ in range(4)]
 
@@ -3564,7 +3564,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			disassembly.save()
 			disassembly.submit()
 			for row in disassembly.items:
-				used_serials[row.item_code] += get_serial_numbers_from_bundle(row.serial_and_batch_bundle)
+				used_serials[row.item_code] += get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 
 		self.assertCountEqual(used_serials[rm_item], rm_serials)
 		self.assertCountEqual(used_serials[fg_item], fg_serials)
