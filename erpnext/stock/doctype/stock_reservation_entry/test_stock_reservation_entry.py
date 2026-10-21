@@ -92,6 +92,36 @@ class TestStockReservationEntry(FrappeTestCase):
 			get_sre_reserved_qty_details_for_voucher("Sales Order", so.name), {so.items[0].name: 4}
 		)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
+	def test_update_items_keeps_pick_list_reservation(self) -> None:
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		so = make_sales_order(item_code=self.sr_item.name, qty=10, warehouse=self.warehouse)
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 4
+		dn.submit()
+		so.reload()
+
+		def update_items(qty):
+			row = so.items[0]
+			trans_items = [
+				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 250, "idx": 1}
+			]
+			update_child_qty_rate("Sales Order", frappe.as_json(trans_items), so.name)
+
+		# Test - 1: Changing the rate should keep the picked reservation.
+		update_items(10)
+		so.reload()
+		self.assertEqual(so.items[0].stock_reserved_qty, 6)
+
+		# Test - 2: Qty can't drop below delivered + reserved qty.
+		self.assertRaises(frappe.ValidationError, update_items, 9)
+
 	def test_get_available_qty_to_reserve(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_available_qty_to_reserve,
