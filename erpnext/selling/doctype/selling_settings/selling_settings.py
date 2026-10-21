@@ -200,16 +200,19 @@ class SellingSettings(Document):
 
 def toggle_tracking_sales_commissions_section(hide):
 	from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
-		SELLING_DOCTYPES,
 		create_property_setter_for_hiding_field,
 	)
 
-	for doctype in SELLING_DOCTYPES:
+	for doctype, sections in {
+		"Sales Invoice": ("commission_section", "sales_team_section"),
+		"Sales Order": ("sales_team_section_break", "section_break1"),
+		"Delivery Note": ("sales_team_section_break", "section_break1"),
+		"POS Invoice": ("sales_team_section_break", "section_break2"),
+	}.items():
 		meta = frappe.get_meta(doctype)
-		if meta.has_field("commission_section"):
-			create_property_setter_for_hiding_field(doctype, "commission_section", hide)
-		if meta.has_field("sales_team_section"):
-			create_property_setter_for_hiding_field(doctype, "sales_team_section", hide)
+		for section in sections:
+			if meta.has_field(section):
+				create_property_setter_for_hiding_field(doctype, section, hide)
 
 
 def toggle_utm_analytics_section(hide):
