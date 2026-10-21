@@ -132,6 +132,7 @@ class TestCreditLimitWarnDeliveryNote(_CreditLimitBase):
 			"rate": amount,
 			"amount": amount,
 			"base_amount": amount,
+			"base_net_amount": amount,
 		}
 		if against_sales_order:
 			item["against_sales_order"] = against_sales_order
