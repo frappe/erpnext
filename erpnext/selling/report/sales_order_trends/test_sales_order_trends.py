@@ -9,6 +9,17 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
 
+def get_report_totals(filters):
+	"""Return (Total row amount, chart sum) so tests can assert deltas over pre-existing orders."""
+	from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
+
+	_columns, data, _message, chart = execute(filters)
+	total_row = next((row for row in data if row[0] == f"'{_('Total')}'"), None)
+	if not total_row:
+		return 0, 0
+	return total_row[-1], sum(chart["data"]["datasets"][0]["values"])
+
+
 class TestSalesOrderTrends(ERPNextTestSuite):
 	def test_report_executes_with_group_by(self):
 		# trends.get_data builds per-period SUM(CASE ...) aggregates (converted from MySQL SUM(IF)),
@@ -92,9 +103,6 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 		# cell made the Total-row-skip guard falsy, so the already-summed Total row got
 		# added into the chart a second time (an SO of qty=3, rate=100 -> 300 read as 600).
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
-
-		make_sales_order(item_code="_Test Item", qty=3, rate=100, transaction_date=today())
 
 		fiscal_year = get_fiscal_year(today())[0]
 		filters = frappe._dict(
@@ -105,17 +113,14 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 				"based_on": "Item",
 			}
 		)
+		base_table, base_chart = get_report_totals(filters)
 
-		columns, data, _message, chart = execute(filters)
-		self.assertTrue(columns)
-		self.assertTrue(data)
+		make_sales_order(item_code="_Test Item", qty=3, rate=100, transaction_date=today())
 
-		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
-		expected_total = total_row[-1]  # Total(Amt) is the last column
-
-		chart_total = sum(chart["data"]["datasets"][0]["values"])
-		self.assertEqual(chart_total, expected_total)
-		self.assertEqual(chart_total, 300)
+		table_total, chart_total = get_report_totals(filters)
+		self.assertEqual(chart_total, table_total)
+		self.assertEqual(table_total - base_table, 300)
+		self.assertEqual(chart_total - base_chart, 300)
 
 	def test_chart_currency_matches_company_currency(self):
 		# Regression test: the chart's "currency" key should reflect the transacting
@@ -145,7 +150,18 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 		# A regression that double-counts header rows would inflate the chart above 600;
 		# a regression that zeroes single-group rows would report less than 600.
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
+
+		fiscal_year = get_fiscal_year(today())[0]
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"fiscal_year": fiscal_year,
+				"period": "Monthly",
+				"based_on": "Item",
+				"group_by": "Customer",
+			}
+		)
+		base_table, base_chart = get_report_totals(filters)
 
 		make_sales_order(
 			item_code="_Test Item", customer="_Test Customer", qty=3, rate=100, transaction_date=today()
@@ -157,28 +173,12 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 			item_code="_Test Item 2", customer="_Test Customer", qty=1, rate=100, transaction_date=today()
 		)
 
-		fiscal_year = get_fiscal_year(today())[0]
-		filters = frappe._dict(
-			{
-				"company": "_Test Company",
-				"fiscal_year": fiscal_year,
-				"period": "Monthly",
-				"based_on": "Item",
-				"group_by": "Customer",
-			}
-		)
-
-		columns, data, _message, chart = execute(filters)
-		self.assertTrue(columns)
-		self.assertTrue(data)
-
-		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
-		expected_total = total_row[-1]
-		chart_total = sum(chart["data"]["datasets"][0]["values"])
+		table_total, chart_total = get_report_totals(filters)
 
 		# 300 (item/customer) + 200 (item/customer1) + 100 (item2/customer) = 600
-		self.assertEqual(expected_total, 600)
-		self.assertEqual(chart_total, expected_total)
+		self.assertEqual(chart_total, table_total)
+		self.assertEqual(table_total - base_table, 600)
+		self.assertEqual(chart_total - base_chart, 600)
 
 	def test_group_by_swapped_roles_based_on_customer_group_by_item(self):
 		# Same regression, opposite role assignment: based_on="Customer" with group_by="Item".
@@ -186,14 +186,6 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 		# group_by placeholder at a different column index than the Item-based_on case above,
 		# exercising the alternate `inc`/`ind` arithmetic.
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
-
-		make_sales_order(
-			item_code="_Test Item", customer="_Test Customer", qty=3, rate=100, transaction_date=today()
-		)
-		make_sales_order(
-			item_code="_Test Item 2", customer="_Test Customer", qty=1, rate=100, transaction_date=today()
-		)
 
 		fiscal_year = get_fiscal_year(today())[0]
 		filters = frappe._dict(
@@ -205,25 +197,26 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 				"group_by": "Item",
 			}
 		)
+		base_table, base_chart = get_report_totals(filters)
 
-		columns, data, _message, chart = execute(filters)
-		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
-		expected_total = total_row[-1]
-		chart_total = sum(chart["data"]["datasets"][0]["values"])
+		make_sales_order(
+			item_code="_Test Item", customer="_Test Customer", qty=3, rate=100, transaction_date=today()
+		)
+		make_sales_order(
+			item_code="_Test Item 2", customer="_Test Customer", qty=1, rate=100, transaction_date=today()
+		)
+
+		table_total, chart_total = get_report_totals(filters)
 
 		# 300 + 100 = 400
-		self.assertEqual(expected_total, 400)
-		self.assertEqual(chart_total, expected_total)
+		self.assertEqual(chart_total, table_total)
+		self.assertEqual(table_total - base_table, 400)
+		self.assertEqual(chart_total - base_chart, 400)
 
 	def test_group_by_single_group_value_not_zeroed(self):
 		# Isolates the specific failure mode flagged in review: a based_on value with exactly
 		# one associated group value must still contribute its real amount to the chart, not 0.
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.selling.report.sales_order_trends.sales_order_trends import execute
-
-		make_sales_order(
-			item_code="_Test Item", customer="_Test Customer", qty=2, rate=150, transaction_date=today()
-		)
 
 		fiscal_year = get_fiscal_year(today())[0]
 		filters = frappe._dict(
@@ -235,12 +228,14 @@ class TestSalesOrderTrends(ERPNextTestSuite):
 				"group_by": "Customer",
 			}
 		)
+		_base_table, base_chart = get_report_totals(filters)
 
-		columns, data, _message, chart = execute(filters)
-		chart_total = sum(chart["data"]["datasets"][0]["values"])
+		make_sales_order(
+			item_code="_Test Item", customer="_Test Customer", qty=2, rate=150, transaction_date=today()
+		)
 
-		self.assertGreater(chart_total, 0)
-		self.assertEqual(chart_total, 300)
+		_table_total, chart_total = get_report_totals(filters)
+		self.assertEqual(chart_total - base_chart, 300)
 
 	def test_item_filter_restricts_rows(self):
 		# the Item filter is applied in the query, so the excluded item never reaches the rows
