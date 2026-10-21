@@ -45,19 +45,7 @@ class PartySpecificItem(Document):
 
 
 def get_allowed_items_condition(party_type, party):
-	group_type = f"{party_type} Group"
-	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
-	rules = frappe.get_all(
-		"Party Specific Item",
-		filters={"party_type": party_type, "party": party},
-		fields=["restrict_based_on", "based_on_value"],
-	)
-	if party_group:
-		rules += frappe.get_all(
-			"Party Specific Item",
-			filters={"party_type": group_type, "party": party_group},
-			fields=["restrict_based_on", "based_on_value"],
-		)
+	rules = get_party_rules(party_type, party, ignore_permissions=True)
 	return get_rules_condition(rules) if rules else None
 
 
@@ -157,15 +145,19 @@ def get_party_specific_items(party_type: str, party: str):
 
 	rules.sort(
 		key=lambda rule: (
-			rule.restrict_based_on == "Item",
 			rule.party_type != party_type,
+			rule.restrict_based_on == "Item",
 			(rule.item_name or rule.based_on_value).lower(),
 		)
 	)
+	for rule in rules:
+		if rule.party_type == party_type:
+			rule.pop("party_type")
+			rule.pop("party")
 	return rules
 
 
-def get_party_rules(party_type, party):
+def get_party_rules(party_type, party, ignore_permissions=False):
 	group_type = f"{party_type} Group"
 	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
 	rules = frappe.get_list(
@@ -173,6 +165,7 @@ def get_party_rules(party_type, party):
 		filters={"party_type": ("in", [party_type, group_type])},
 		or_filters=[["party", "=", party], ["party", "=", party_group or ""]],
 		fields=["name", "party_type", "party", "restrict_based_on", "based_on_value"],
+		ignore_permissions=ignore_permissions,
 	)
 	return [rule for rule in rules if rule.party == (party if rule.party_type == party_type else party_group)]
 

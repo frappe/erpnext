@@ -63,7 +63,7 @@ erpnext.PartyItems = class PartyItems {
 			get_data: () =>
 				this.call("get_party_specific_items").then((rules) => {
 					rule_count = this.rule_count = rules.length;
-					return rules.sort((a, b) => this.is_inherited(a) - this.is_inherited(b));
+					return rules;
 				}),
 			after_render() {
 				this.$wrapper.find("[data-action='search']").toggle(rule_count > this.page_size);
@@ -107,7 +107,7 @@ erpnext.PartyItems = class PartyItems {
 	}
 
 	is_inherited(row) {
-		return row.party_type !== this.party_type;
+		return Boolean(row.party);
 	}
 
 	rule_name(row) {
@@ -250,8 +250,10 @@ erpnext.PartyItems = class PartyItems {
 			{
 				label: __("Last Ordered"),
 				render: (row) => {
+					const today = frappe.datetime.get_today();
 					if (!row.last_ordered) return none;
-					if (row.last_ordered === frappe.datetime.get_today()) return __("Today");
+					if (row.last_ordered === today) return __("Today");
+					if (row.last_ordered > today) return frappe.datetime.str_to_user(row.last_ordered);
 					return frappe.datetime.comment_when(row.last_ordered);
 				},
 			},
