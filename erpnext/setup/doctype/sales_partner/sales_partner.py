@@ -82,8 +82,8 @@ class SalesPartner(WebsiteGenerator):
 			context.update(
 				{
 					"email": address.email_id,
-					"partner_address": filter_strip_join(address_rows, "\n<br>"),
-					"phone": filter_strip_join(cstr(address.phone).split(","), "\n<br>"),
+					"partner_address": filter_strip_join(address_rows, "\n"),
+					"phone": filter_strip_join(cstr(address.phone).split(","), "\n"),
 				}
 			)
 
