@@ -17,6 +17,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestQuotation(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Quotation")
+		self.lost_reason = "_Test Quotation Lost Reason"
+		if not frappe.db.exists("Quotation Lost Reason", self.lost_reason):
+			frappe.get_doc(
+				{"doctype": "Quotation Lost Reason", "order_lost_reason": self.lost_reason}
+			).insert()
 
 	def test_update_child_quotation_add_item(self):
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -591,13 +596,42 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
 		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
 
+	def test_declare_lost_requires_a_reason_without_changing_the_quotation(self):
+		quotation = make_quotation()
+		quotation.append("lost_reasons", {"lost_reason": self.lost_reason})
+		quotation.save()
+		previous_status = quotation.status
+		previous_reason_names = [row.name for row in quotation.lost_reasons]
+
+		with self.assertRaises(frappe.ValidationError):
+			quotation.declare_enquiry_lost([], [], "New detailed reason")
+
+		quotation.reload()
+		self.assertEqual(quotation.status, previous_status)
+		self.assertEqual(quotation.is_active, 1)
+		self.assertFalse(quotation.order_lost_reason)
+		self.assertEqual([row.name for row in quotation.lost_reasons], previous_reason_names)
+		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [self.lost_reason])
+		self.assertFalse(quotation.competitors)
+
+	def test_declare_lost_with_a_reason(self):
+		quotation = make_quotation()
+
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [], "Too expensive")
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Lost")
+		self.assertEqual(quotation.is_active, 1)
+		self.assertEqual(quotation.order_lost_reason, "Too expensive")
+		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [self.lost_reason])
+
 	def test_setting_a_revision_as_lost_sets_other_versions_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
 		revision.insert()
 		revision.submit()
 
-		revision.declare_enquiry_lost([], [])
+		revision.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
 
@@ -612,7 +646,13 @@ class TestQuotation(ERPNextTestSuite):
 		sales_order.submit()
 		quotation.reload()
 
-		self.assertRaises(frappe.ValidationError, quotation.declare_enquiry_lost, [], [])
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot set as Lost as Sales Order is made",
+			quotation.declare_enquiry_lost,
+			[],
+			[],
+		)
 
 	def test_opportunity_is_lost_when_an_older_version_is_set_as_lost(self):
 		opportunity = make_opportunity(with_items=1)
@@ -626,14 +666,14 @@ class TestQuotation(ERPNextTestSuite):
 		revision.submit()
 		quotation.reload()
 
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Lost")
 
 	def test_draft_revision_cannot_be_submitted_after_the_quotation_is_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name).insert()
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertRaises(frappe.ValidationError, revision.submit)
 
@@ -679,7 +719,7 @@ class TestQuotation(ERPNextTestSuite):
 		quotation.reload()
 		self.assertTrue(quotation.has_versions_to_set_as_lost)
 
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertEqual(
 			frappe.db.get_value("Quotation", quotation.name, ["status", "is_active"]), ("Lost", 1)
@@ -721,7 +761,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_is_active_is_locked_on_a_lost_quotation(self):
 		quotation = make_quotation()
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 		quotation.reload()
 		quotation.is_active = 0
 
@@ -729,7 +769,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_lost_quotation_cannot_be_revised(self):
 		quotation = make_quotation()
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
@@ -752,7 +792,7 @@ class TestQuotation(ERPNextTestSuite):
 		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertRaisesRegex(frappe.ValidationError, "is Lost", sales_order.submit)
 
