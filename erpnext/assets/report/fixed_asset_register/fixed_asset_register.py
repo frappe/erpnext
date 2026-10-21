@@ -177,7 +177,7 @@ def get_conditions(filters):
 	if filters.get("asset_category"):
 		conditions["asset_category"] = filters.get("asset_category")
 	if filters.get("cost_center"):
-		conditions["cost_center"] = ["in", get_cost_centers_with_children(filters.get("cost_center"))]
+		conditions["cost_center"] = ["in", get_cost_centers_with_children([filters.get("cost_center")])]
 
 	if status:
 		# In Store assets are those that are not sold or scrapped or capitalized
@@ -306,7 +306,7 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
 	if filters.cost_center:
-		query = query.where(asset.cost_center.isin(get_cost_centers_with_children(filters.cost_center)))
+		query = query.where(asset.cost_center.isin(get_cost_centers_with_children([filters.cost_center])))
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
@@ -357,7 +357,7 @@ def get_asset_value_adjustment_map(filters, finance_book):
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
 	if filters.cost_center:
-		query = query.where(asset.cost_center.isin(get_cost_centers_with_children(filters.cost_center)))
+		query = query.where(asset.cost_center.isin(get_cost_centers_with_children([filters.cost_center])))
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
