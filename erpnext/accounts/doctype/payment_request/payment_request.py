@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
@@ -102,12 +103,14 @@ class PaymentRequest(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		if self.get("__islocal"):
 			self.status = "Draft"
 		self.validate_reference_document()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
+		self.validate_print_format()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
@@ -115,6 +118,25 @@ class PaymentRequest(Document):
 	def validate_reference_document(self):
 		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
+
+		if self.reference_doctype not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
+			frappe.throw(
+				_("Payment Requests cannot be created against: {0}").format(
+					frappe.bold(self.reference_doctype)
+				)
+			)
+
+	def validate_print_format(self):
+		if not self.print_format or self.print_format == "Standard":
+			return
+
+		if frappe.db.get_value("Print Format", self.print_format, "doc_type") != self.reference_doctype:
+			frappe.throw(
+				_("Print Format {0} is not valid for {1}").format(
+					frappe.bold(self.print_format), _(self.reference_doctype)
+				),
+				title=_("Invalid Print Format"),
+			)
 
 	def validate_reference_company(self, ref_doc):
 		if self.company != ref_doc.company:
@@ -427,6 +449,11 @@ class PaymentRequest(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def resend_payment_email(self):
+		# the caller can supply this document's values, so only the saved ones are trusted
+		self.reload()
+		self.check_permission("email")
+		frappe.has_permission(self.reference_doctype, "read", self.reference_name, throw=True)
+
 		if not (
 			self.docstatus == 1
 			and self.payment_request_type == "Inward"
