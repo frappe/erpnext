@@ -70,6 +70,12 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.docstatus, 1)
 		self.assertTrue(po.base_grand_total < 0)
 
+	def test_purchase_order_zero_qty_cannot_be_forced_by_the_client(self):
+		po = create_purchase_order(qty=0, do_not_save=True)
+		po.has_unit_price_items = 1
+
+		self.assertRaises(InvalidQtyError, po.save)
+
 	def test_purchase_order_zero_qty(self):
 		po = create_purchase_order(qty=0, do_not_save=True)
 
@@ -167,6 +173,40 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			)
 		finally:
 			frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
+
+	def test_over_receipt_keeps_whole_number_uom_qty(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		item = make_item(
+			"_Test Over Receipt Whole Item",
+			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 50},
+		).name
+		po = create_purchase_order(item_code=item, qty=3)
+		create_pr_against_po(po.name, received_qty=3)
+
+		po.load_from_db()
+		self.assertTrue(po.has_pending_receivable_qty())
+		pr = make_purchase_receipt(po.name)
+		self.assertEqual([row.qty for row in pr.items], [1])
+		pr.submit()
+
+		po.load_from_db()
+		self.assertFalse(po.has_pending_receivable_qty())
+		self.assertEqual(len(make_purchase_receipt(po.name).items), 0)
+
+	def test_over_receipt_fractional_allowance_exhausted_for_whole_number_uom(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		item = make_item(
+			"_Test Over Receipt Whole Item 10",
+			{"is_stock_item": 1, "stock_uom": "_Test UOM", "over_delivery_receipt_allowance": 10},
+		).name
+		po = create_purchase_order(item_code=item, qty=3)
+		create_pr_against_po(po.name, received_qty=3)
+
+		po.load_from_db()
+		self.assertFalse(po.has_pending_receivable_qty())
+		self.assertEqual(len(make_purchase_receipt(po.name).items), 0)
 
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
@@ -905,6 +945,41 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		fractional.items[0].uom = "Kg"
 		fractional.items[0].conversion_factor = 0.6
 		self.assertRaises(UOMMustBeIntegerError, fractional.insert)
+
+	def test_whole_number_stock_qty_and_ordered_qty_drop_conversion_dust(self):
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.333333333})
+		item_doc.save()
+		item = item_doc.name
+
+		po = create_purchase_order(item_code=item, qty=300, do_not_save=1)
+		po.items[0].uom = "Kg"
+		po.items[0].conversion_factor = 0.333333333
+		po.insert()
+		po.submit()
+
+		self.assertEqual(po.items[0].stock_qty, 100)
+		self.assertEqual(get_ordered_qty(item_code=item), 100)
+
+		create_pr_against_po(po.name, received_qty=150)
+		self.assertEqual(get_ordered_qty(item_code=item), 50)
+
+	def test_ordered_qty_rounds_each_open_order_for_whole_number_item(self):
+		item_doc = make_item(properties={"stock_uom": "Nos"})
+		item_doc.append("uoms", {"uom": "Kg", "conversion_factor": 0.6})
+		item_doc.save()
+		item = item_doc.name
+
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		for _i in range(3):
+			po = create_purchase_order(item_code=item, qty=flt(2000 / 0.6, precision), do_not_save=1)
+			po.items[0].uom = "Kg"
+			po.items[0].conversion_factor = 0.6
+			po.insert()
+			po.submit()
+			self.assertEqual(po.items[0].stock_qty, 2000)
+
+		self.assertEqual(get_ordered_qty(item_code=item), 6000)
 
 	def test_ordered_qty_for_closing_po(self):
 		bin = frappe.get_all(
@@ -2020,6 +2095,32 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 0)
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 0)
+
+	def test_drop_ship_delivery_blocked_for_closed_row(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test Drop Ship Closed Row Item", {"is_stock_item": 1, "delivered_by_supplier": 1})
+		so_item = {
+			"item_code": item.name,
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[so_item])
+		po = make_po_from_so(so.name, selected_items=[so_item])[0]
+		po.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+
+		po.reload()
+		self.assertRaises(
+			frappe.ValidationError,
+			po.update_dropship_received_qty,
+			[{"name": po.items[0].name, "qty_change": 2}],
+		)
 
 	def test_cancelling_subcontracted_po_keeps_material_request_ordered_qty_in_fg(self):
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request

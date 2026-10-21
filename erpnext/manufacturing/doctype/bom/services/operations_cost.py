@@ -301,7 +301,8 @@ def _manufacture_stock_entries(work_order):
 
 
 def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
-	return flt(op_cost) + _get_unit_operating_cost(bom_no, {})
+	conversion_rate = flt(frappe.get_cached_value("BOM", bom_no, "conversion_rate")) or 1
+	return flt(op_cost) + _get_unit_operating_cost(bom_no, {}) * conversion_rate
 
 
 def _get_unit_operating_cost(bom_no, unit_costs):

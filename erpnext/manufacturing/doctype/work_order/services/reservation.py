@@ -18,6 +18,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, parse_json
 from pypika import functions as fn
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
@@ -687,7 +688,7 @@ def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code)
 		(stock_entry.work_order == work_order)
 		& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 		& (stock_entry.docstatus == 1)
-		& (stock_entry_detail.s_warehouse.isnotnull())
+		& (IfNull(stock_entry_detail.s_warehouse, "") != "")
 		# An attributed row belongs to its original requirement, not both item codes.
 		& (fn.Coalesce(stock_entry_detail.original_item, stock_entry_detail.item_code) == item_code)
 	)
@@ -712,9 +713,24 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 				(wo_item.required_qty > wo_item.transferred_qty)
 				| (wo_item.required_qty > wo_item.consumed_qty)
 			)
+			& ExistsCriterion(_earlier_operation_making_item(wo, wo_item)).negate()
 		)
 	)
 	return query.run()[0][0] or 0.0
+
+
+def _earlier_operation_making_item(wo, wo_item):
+	"""An earlier operation of the Work Order that makes the row's item for the operation using it."""
+	operation = frappe.qb.DocType("Work Order Operation")
+	return (
+		frappe.qb.from_(operation)
+		.select(operation.name)
+		.where(
+			(operation.parent == wo.name)
+			& (operation.finished_good == wo_item.item_code)
+			& (operation.idx < wo_item.operation_row_id)
+		)
+	)
 
 
 def _production_reserved_qty_field(wo, wo_item):
@@ -723,7 +739,16 @@ def _production_reserved_qty_field(wo, wo_item):
 		(wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty), 0.0
 	)
 	qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-	return qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+	qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+	# what Subcontracting Orders took over is their demand, not the Work Order's, even when they
+	# send what the Work Order already transferred
+	not_subcontracted = wo_item.required_qty - wo_item.subcontracted_qty
+	return (
+		Case()
+		.when(not_subcontracted <= 0, 0.0)
+		.when(not_subcontracted < qty_field, not_subcontracted)
+		.else_(qty_field)
+	)
 
 
 def get_row_wise_serial_batch(work_order, purpose=None):

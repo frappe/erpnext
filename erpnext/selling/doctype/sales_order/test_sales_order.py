@@ -307,6 +307,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.save()
 		self.assertEqual(so.items[0].qty, 1)
 
+	def test_sales_order_zero_qty_cannot_be_forced_by_the_client(self):
+		so = make_sales_order(qty=0, do_not_save=True)
+		so.has_unit_price_items = 1
+
+		self.assertRaises(InvalidQtyError, so.save)
+
 	def test_sales_order_zero_qty(self):
 		po = make_sales_order(qty=0, do_not_save=True)
 
@@ -2048,6 +2054,59 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.load_from_db()
 		so.cancel()
 
+	def test_drop_shipping_delivery_progress_excludes_closed_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		drop_ship_item = make_item(
+			"_Test Drop Ship Closed Row Progress", {"is_stock_item": 1, "delivered_by_supplier": 1}
+		)
+		so = make_sales_order(qty=10, rate=100, do_not_save=True)
+		so.append(
+			"items",
+			{
+				"item_code": drop_ship_item.name,
+				"qty": 10,
+				"rate": 100,
+				"delivery_date": so.delivery_date,
+				"delivered_by_supplier": 1,
+				"supplier": "_Test Supplier",
+			},
+		)
+		so.submit()
+		po = make_purchase_order(so.name, selected_items=[so.items[1].as_dict()])[0]
+		po.submit()
+
+		update_closed_status("Sales Order", so.name, [so.items[0].name], 1)
+		po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 5}])
+
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 50)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
+	def test_closing_row_keeps_skip_delivery_rows_out_of_delivery_progress(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, rate=100)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 10, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": service_item, "qty": 10, "rate": 100},
+				{
+					"item_code": "_Test Item Home Desktop 100",
+					"qty": 5,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+				},
+			]
+		)
+		dn = make_delivery_note(so.name)
+		dn.items = [row for row in dn.items if row.so_detail == so.items[0].name]
+		dn.submit()
+
+		update_closed_status("Sales Order", so.name, [so.items[2].name], 1)
+
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 100)
+
 	def test_drop_shipping_partial_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
@@ -3622,6 +3681,25 @@ class TestSalesOrder(ERPNextTestSuite):
 		po.items[0].rate = 100
 		po.submit()
 		self.assertEqual(po.taxes[0].tax_amount, 2)
+
+	def test_make_purchase_order_does_not_inherit_incoterm(self):
+		for delivered_by_supplier in (0, 1):
+			with self.subTest(delivered_by_supplier=delivered_by_supplier):
+				so = make_sales_order(do_not_save=True)
+				so.incoterm = "CIF"
+				so.named_place = "Hamburg port"
+				so.items[0].delivered_by_supplier = delivered_by_supplier
+				so.items[0].supplier = "_Test Supplier"
+				so.submit()
+
+				po = make_purchase_order(so.name, selected_items=so.items)[0]
+
+				self.assertFalse(po.incoterm)
+				self.assertFalse(po.named_place)
+				self.assertEqual(po.items[0].sales_order, so.name)
+				self.assertEqual(po.supplier, "_Test Supplier")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "incoterm"), "CIF")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "named_place"), "Hamburg port")
 
 	def test_make_purchase_order_does_not_inherit_party_fields(self):
 		"""

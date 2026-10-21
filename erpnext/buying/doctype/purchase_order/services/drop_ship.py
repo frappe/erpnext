@@ -38,6 +38,13 @@ class DropShipService:
 					)
 				)
 
+			if item.closed:
+				frappe.throw(
+					_("Item {0} is closed. Reopen the row before updating its delivered quantity.").format(
+						frappe.bold(item.item_code)
+					)
+				)
+
 			if not d.get("qty_change"):
 				frappe.throw(
 					_(

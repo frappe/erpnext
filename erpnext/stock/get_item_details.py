@@ -316,8 +316,6 @@ def set_valuation_rate(out: frappe._dict, ctx: frappe._dict):
 
 
 def update_stock(ctx, out, doc=None):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
-
 	if (
 		(
 			ctx.get("doctype") in ["Delivery Note", "POS Invoice"]
@@ -359,24 +357,31 @@ def update_stock(ctx, out, doc=None):
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
 
-		if out.has_serial_no and out.has_batch_no and has_incorrect_serial_nos(ctx, out):
-			batch_no = ctx.get("batch_no") or out.get("batch_no")
-			if batch_no:
-				kwargs["batches"] = [batch_no]
-			serial_nos = get_serial_nos_for_outward(kwargs)
-			serial_nos = get_filtered_serial_nos(serial_nos, doc)
+		if out.has_serial_no and needs_serial_nos(ctx, out):
+			set_serial_nos_for_outward(ctx, out, kwargs, doc)
 
-			out["serial_no"] = "\n".join(
-				SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
-			)
 
-		elif out.has_serial_no and not ctx.get("serial_no"):
-			serial_nos = get_serial_nos_for_outward(kwargs)
-			serial_nos = get_filtered_serial_nos(serial_nos, doc)
+def needs_serial_nos(ctx, out):
+	if not out.has_batch_no:
+		return not ctx.get("serial_no")
 
-			out["serial_no"] = "\n".join(
-				SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
-			)
+	if ctx.get("use_serial_batch_fields"):
+		return False
+
+	return has_incorrect_serial_nos(ctx, out)
+
+
+def set_serial_nos_for_outward(ctx, out, kwargs, doc):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+
+	batch_no = ctx.get("batch_no") or out.get("batch_no")
+	if out.has_batch_no and batch_no:
+		kwargs["batches"] = [batch_no]
+
+	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
+	out["serial_no"] = "\n".join(
+		SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
+	)
 
 
 def has_incorrect_serial_nos(ctx, out):
@@ -1115,11 +1120,9 @@ def get_default_discount_account(ctx: frappe._dict, item, item_group, brand):
 def get_default_deferred_account(ctx: frappe._dict, item, fieldname=None):
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		return (
-			frappe.get_cached_value(
-				"Item Default",
-				{"parent": ctx.item_code, "company": ctx.company},
-				fieldname,
-			)
+			get_item_defaults(ctx.item_code, ctx.company).get(fieldname)
+			or get_item_group_defaults(ctx.item_code, ctx.company).get(fieldname)
+			or get_brand_defaults(ctx.item_code, ctx.company).get(fieldname)
 			or ctx.get(fieldname)
 			or frappe.get_cached_value("Company", ctx.company, "default_" + fieldname)
 		)

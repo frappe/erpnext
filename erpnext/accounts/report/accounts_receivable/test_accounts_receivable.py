@@ -825,13 +825,42 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		pe.paid_amount = 110
 		pe.save().submit()
 		report = execute(filters)[1]
-		self.assertEqual(len(report), 2)
-		expected_data = [[100.0, 0.0, 100.0, 0.0, 100.0], [0.0, 10.0, -10.0, -10.0, 0.0]]
-		for idx, row in enumerate(report):
-			self.assertEqual(
-				expected_data[idx],
-				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
-			)
+		self.assertEqual(len(report), 1)
+		row = report[0]
+		self.assertEqual(
+			[100.0, 0.0, 100.0, 0.0, 100.0],
+			[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+		)
+
+	def test_future_payments_do_not_change_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		self.create_sales_invoice(no_payment_schedule=True)
+		post_dated_invoice = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		post_dated_invoice.set_posting_time = 1
+		post_dated_invoice.posting_date = add_days(today(), 8)
+		post_dated_invoice.due_date = add_days(today(), 8)
+		post_dated_invoice.payment_schedule = []
+		post_dated_invoice.save().submit()
+
+		receipt = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.cash,
+			paid_amount=70,
+		)
+		receipt.posting_date = add_days(today(), 7)
+		receipt.save().submit()
+
+		filters = {"company": self.company, "report_date": today(), "range": "30, 60, 90, 120"}
+		without_option = execute(filters)[1]
+		with_option = execute({**filters, "show_future_payments": True})[1]
+
+		self.assertEqual(sum(row.outstanding for row in without_option), 100.0)
+		self.assertEqual(sum(row.outstanding for row in with_option), 100.0)
 
 	def test_draft_future_payments_are_ignored(self):
 		si = self.create_sales_invoice(no_payment_schedule=True)

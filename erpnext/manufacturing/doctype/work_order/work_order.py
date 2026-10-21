@@ -608,10 +608,19 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = (
-				frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
-				or self.get_production_item_warehouse()
-			)
+			self.fg_warehouse = self.get_default_fg_warehouse()
+
+	def get_default_fg_warehouse(self):
+		return (
+			self.get_bom_target_warehouse()
+			or frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+			or self.get_production_item_warehouse()
+		)
+
+	def get_bom_target_warehouse(self):
+		warehouse = self.bom_no and frappe.get_cached_value("BOM", self.bom_no, "default_target_warehouse")
+		if warehouse and frappe.get_cached_value("Warehouse", warehouse, "company") == self.company:
+			return warehouse
 
 	def get_production_item_warehouse(self):
 		if not self.production_item:
@@ -1055,10 +1064,8 @@ class WorkOrder(Document):
 
 		if self.operations:
 			bom.with_operations = 1
-			source_operations = self.get_source_bom_operations()
-			for operation in self.operations:
-				source = source_operations.get((operation.bom or self.bom_no, operation.operation))
-				bom.append("operations", self.get_bom_operation_row(operation, bom.quantity, source))
+			for row in self.get_bom_operation_rows(bom.quantity):
+				bom.append("operations", row)
 
 		bom.set_bom_material_details()
 		return bom
@@ -1082,11 +1089,38 @@ class WorkOrder(Document):
 			.run(as_dict=1)
 		)
 
+	def get_bom_operation_rows(self, bom_qty):
+		source_operations = self.get_source_bom_operations()
+		sources_by_name = {d.name: d for sources in source_operations.values() for d in sources}
+		occurrence = {}
+		rows = []
+		for operation in self.operations:
+			source = self.get_source_bom_operation(operation, source_operations, sources_by_name, occurrence)
+			rows.append(self.get_bom_operation_row(operation, bom_qty, source))
+
+		return rows
+
+	def get_source_bom_operation(self, operation, source_operations, sources_by_name, occurrence):
+		if operation.get("bom_operation"):
+			source = sources_by_name.get(operation.bom_operation)
+			if source and (source.parent, source.operation) != (
+				operation.bom or self.bom_no,
+				operation.operation,
+			):
+				source = None
+		else:
+			key = (operation.bom or self.bom_no, operation.operation)
+			idx = occurrence[key] = occurrence.get(key, -1) + 1
+			sources = source_operations.get(key, [])
+			source = sources[idx] if idx < len(sources) else None
+
+		return source if source and source.keeps_own_time else None
+
 	def get_source_bom_operations(self):
 		operations = frappe.get_all(
 			"BOM Operation",
 			filters={"parent": self.bom_no, "parenttype": "BOM"},
-			fields=["parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
+			fields=["name", "parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
 			order_by="idx",
 		)
 		batch_based = set(
@@ -1102,8 +1136,8 @@ class WorkOrder(Document):
 
 		source_operations = {}
 		for d in operations:
-			if d.fixed_time or (d.operation in batch_based and flt(d.batch_size)):
-				source_operations.setdefault((d.parent, d.operation), d)
+			d.keeps_own_time = cint(d.fixed_time) or (d.operation in batch_based and flt(d.batch_size))
+			source_operations.setdefault((d.parent, d.operation), []).append(d)
 		return source_operations
 
 	def get_bom_operation_row(self, operation, bom_qty, source=None):

@@ -259,6 +259,7 @@ class Quotation(SellingController):
 		If permitted in settings and any item has 0 qty, the SO has unit price items.
 		"""
 		if not frappe.get_single_value("Selling Settings", "allow_zero_qty_in_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(

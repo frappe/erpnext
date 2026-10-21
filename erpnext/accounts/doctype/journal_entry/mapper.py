@@ -232,6 +232,12 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 	if not frappe.has_permission("Journal Entry", doc=source_name):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
+	return map_reverse_journal_entry(source_name, target_doc)
+
+
+def map_reverse_journal_entry(
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
+) -> Document:
 	reversal_of = frappe.db.get_value("Journal Entry", source_name, "reversal_of")
 	if reversal_of:
 		frappe.throw(
@@ -279,6 +285,7 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 		},
 		target_doc,
 		post_process,
+		ignore_permissions=ignore_permissions,
 	)
 
 	return doclist

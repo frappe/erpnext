@@ -159,6 +159,9 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
+		self.set_onload(
+			"enforce_time_logs", frappe.db.get_single_value("Manufacturing Settings", "enforce_time_logs")
+		)
 		self.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(self.bom_no))
 		self.set_onload(
 			"transfer_material_against",
@@ -225,20 +228,66 @@ class JobCard(Document):
 			return
 
 		if self.items and not self.transferred_qty and not self.skip_material_transfer:
-			frappe.throw(
-				_(
-					"Materials need to be transferred to the work in progress warehouse for the job card {0}"
-				).format(self.name)
-			)
+			self.throw_materials_not_moved()
 
 		if self.docstatus == 1 and not (
 			self.total_completed_qty or self.process_loss_qty or self.pending_qty
 		):
 			frappe.throw(
 				_(
-					"Completed, Process Loss or Pending Qty is required for Job Card {0}, please start and complete the job card before submission"
-				).format(self.name)
+					"Job Card {0} has no completed quantity yet. Click Start Job when the work begins, then click Complete Job and enter the quantity made. After that you can submit it."
+				).format(bold(self.name)),
+				title=_("Job Not Done Yet"),
 			)
+
+	def throw_materials_not_moved(self):
+		still_to_move = [
+			_("{0}: {1} moved out of {2}").format(
+				bold(row.item_code),
+				self.get_qty_with_uom(row.transferred_qty, row.item_code),
+				self.get_qty_with_uom(row.required_qty, row.item_code),
+			)
+			for row in self.get_rows_to_move()
+		]
+
+		message = _(
+			"Move the raw materials to the Work In Progress warehouse {0} first. Click Move Materials on Job Card {1} and submit the Stock Entry it opens. Then click Start Job."
+		).format(bold(self.wip_warehouse), bold(self.name))
+
+		frappe.throw(
+			message + "<br><br>" + "<br>".join(still_to_move),
+			title=_("Raw Materials Not Moved"),
+		)
+
+	def get_rows_to_move(self):
+		return [row for row in self.items if flt(row.transferred_qty) < flt(row.required_qty)]
+
+	@frappe.whitelist()
+	def get_material_shortages(self):
+		rows = [row for row in self.get_rows_to_move() if row.source_warehouse]
+		in_stock = get_actual_qty_map(rows)
+
+		shortages = []
+		for row in rows:
+			key = (row.item_code, row.source_warehouse)
+			qty_to_move = flt(row.required_qty) - flt(row.transferred_qty)
+			available = max(flt(in_stock.get(key)), 0)
+			in_stock[key] = available - qty_to_move
+
+			if available < qty_to_move:
+				shortages.append(
+					{
+						"name": row.name,
+						"item_code": row.item_code,
+						"warehouse": row.source_warehouse,
+						"qty_to_move": qty_to_move,
+						"available_qty": available,
+						"shortage_qty": qty_to_move - available,
+						"uom": row.stock_uom or row.uom,
+					}
+				)
+
+		return shortages
 
 	def on_update(self):
 		self.validate_job_card_qty()
@@ -1002,11 +1051,7 @@ class JobCard(Document):
 			and self.items
 			and (self.transferred_qty < self.for_quantity or self.has_short_transferred_material())
 		):
-			frappe.throw(
-				_(
-					"Materials need to be transferred to the work in progress warehouse for the job card {0}"
-				).format(self.name)
-			)
+			self.throw_materials_not_moved()
 
 	def validate_job_card(self):
 		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped":
@@ -1870,26 +1915,25 @@ class JobCard(Document):
 			row.db_update()
 
 	def update_workstation_status(self):
-		status_map = {
-			"Open": "Off",
-			"Work In Progress": "Production",
-			"Completed": "Off",
-			"On Hold": "Idle",
-		}
-
 		job_cards = frappe.get_all(
 			"Job Card",
 			fields=["name", "status"],
 			filters={"workstation": self.workstation, "docstatus": 0, "status": ("!=", "Completed")},
-			order_by="status desc",
 		)
+		# Validation runs before the current card's status is written to the database.
+		statuses = {row.status for row in job_cards if row.name != self.name}
+		if self.docstatus == 0:
+			statuses.add(self.status)
 
-		if not job_cards:
-			frappe.db.set_value("Workstation", self.workstation, "status", "Off")
+		status = "Off"
+		if "Work In Progress" in statuses:
+			status = "Production"
+		elif "On Hold" in statuses:
+			status = "Idle"
 
-		for row in job_cards:
-			frappe.db.set_value("Workstation", self.workstation, "status", status_map.get(row.status))
-			return
+		workstation = frappe.get_doc("Workstation", self.workstation)
+		if workstation.status != status:
+			workstation.db_set("status", status, notify=True)
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
@@ -2067,6 +2111,22 @@ class JobCard(Document):
 		for row in ste.stock_entry.items:
 			if (row.secondary_item_type or row.valuation_type) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
+
+
+def get_actual_qty_map(rows):
+	if not rows:
+		return {}
+
+	bin_table = frappe.qb.DocType("Bin")
+	stock = (
+		frappe.qb.from_(bin_table)
+		.select(bin_table.item_code, bin_table.warehouse, bin_table.actual_qty)
+		.where(bin_table.item_code.isin(list({row.item_code for row in rows})))
+		.where(bin_table.warehouse.isin(list({row.source_warehouse for row in rows})))
+		.run(as_dict=True)
+	)
+
+	return {(row.item_code, row.warehouse): flt(row.actual_qty) for row in stock}
 
 
 def merge_time_logs_per_job_card(time_logs):

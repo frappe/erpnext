@@ -66,6 +66,7 @@ class StatusService:
 				"target_parent_field": "per_delivered",
 				"target_ref_field": "qty",
 				"target_field": "delivered_qty",
+				"exclude_field": "skip_delivery",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
 				"name": self.doc.name,
@@ -99,13 +100,13 @@ class StatusService:
 		doc = self.doc
 		tot_qty, delivered_qty = 0.0, 0.0
 
-		for item in doc.items:
-			if item.skip_delivery:
-				continue
-
+		deliverable_items = [item for item in doc.items if not item.skip_delivery]
+		for item in deliverable_items:
 			if item.delivered_by_supplier:
 				item.db_set("delivered_qty", self.get_drop_ship_delivered_qty(item), update_modified=False)
 
+		# Refresh closed rows too, but exclude them from progress while open rows remain.
+		for item in [item for item in deliverable_items if not item.closed] or deliverable_items:
 			delivered_qty += min(item.delivered_qty, item.qty)
 			tot_qty += item.qty
 

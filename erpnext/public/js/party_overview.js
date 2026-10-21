@@ -288,7 +288,6 @@ erpnext.PartyOverview = class PartyOverview {
 	destroy_trend() {
 		if (this.trend_chart) this.trend_chart.destroy();
 		this.trend_chart = null;
-		this.trend_target = null;
 		this.$trend_notes = null;
 	}
 
@@ -307,9 +306,8 @@ erpnext.PartyOverview = class PartyOverview {
 		}
 		this.$trend.removeClass("co-loading").removeAttr("aria-busy");
 
-		if (this.trend_chart && spec.data) {
-			this.trend_target = spec.data;
-			this.trend_chart.update(spec.data);
+		if (this.trend_chart && spec.chart) {
+			this.trend_chart.update(this.trend_config(spec));
 			this.set_trend_notes(spec.notes);
 			return;
 		}
@@ -318,68 +316,55 @@ erpnext.PartyOverview = class PartyOverview {
 		this.$trend.empty();
 		const $panel = this.panel(this.$trend, spec);
 		if (this.show_state($panel, this.overview, 220, this.overview_error, "trend")) return;
-		if (!spec.data) {
+		if (!spec.chart) {
 			this.$trend.empty().hide();
 			return;
 		}
 
-		this.trend_target = spec.data;
-		this.trend_chart = this.draw_trend($('<div class="co-chart">').appendTo($panel)[0], spec);
+		this.trend_chart = frappe.ui.chart(
+			$('<div class="co-chart">').appendTo($panel),
+			this.trend_config(spec)
+		);
 		this.$trend_notes = $('<div class="co-note">').appendTo($panel);
 		this.set_trend_notes(spec.notes);
 	}
 
-	draw_trend(el, spec) {
-		const style = getComputedStyle(el);
-		return new frappe.Chart(el, {
-			type: spec.type,
-			height: spec.height || 220,
-			colors: spec.colors.map((token) => style.getPropertyValue(token).trim()),
-			data: spec.data,
-			lineOptions: { regionFill: 1, hideDots: 1 },
-			axisOptions: {
-				xIsSeries: 1,
-				xAxisMode: "none",
-				shortenYAxisNumbers: 1,
-				numberFormatter: (v) => this.short_money(v),
-			},
-			tooltipOptions: {
-				formatTooltipX: (label, index) => this.trend_target?.titles?.[index] || label,
-				formatTooltipY: (v) => this.money0(v),
-			},
-			animate: 1,
-			disableEntryAnimation: 1,
+	trend_config(spec) {
+		return { height: 220, ...spec.chart, ...this.currency_format() };
+	}
+
+	currency_format() {
+		return { fieldtype: "Currency", options: "currency", currency: this.currency, precision: 0 };
+	}
+
+	draw_chart($parent, config) {
+		const $chart = $('<div class="co-chart">').appendTo($parent);
+		this.charts.push({ el: $chart[0], chart: frappe.ui.chart($chart, config) });
+	}
+
+	draw_donut($parent, slices, config) {
+		this.draw_chart($parent, {
+			type: "donut",
+			height: 320,
+			data: slices,
+			category: "label",
+			value: "value",
+			order: "rows",
+			colors: Object.fromEntries(slices.map((s) => [s.label, s.color])),
+			...config,
 		});
 	}
 
-	draw_donut($parent, { segments, center, format }) {
-		const $chart = $('<div class="co-chart">').appendTo($parent);
-		this.charts.push(
-			new frappe.Chart($chart[0], {
-				type: "donut",
-				height: 320,
-				data: {
-					labels: segments.map((s) => s.label),
-					datasets: [{ values: segments.map((s) => Math.max(flt(s.value), 0)) }],
-				},
-				colors: segments.map((s) => s.color),
-				center,
-				tooltipOptions: format && { formatTooltipY: format },
-			})
-		);
-		return $chart;
-	}
-
 	clear_charts() {
-		(this.charts || []).forEach((chart) => chart.destroy());
+		(this.charts || []).forEach(({ chart }) => chart.destroy());
 		this.charts = [];
 		return this.$charts ? this.$charts.empty() : $();
 	}
 
 	remove_panel($panel) {
 		if (!$panel) return;
-		this.charts = this.charts.filter((chart) => {
-			if (!$panel[0].contains(chart.parent)) return true;
+		this.charts = this.charts.filter(({ el, chart }) => {
+			if (!$panel[0].contains(el)) return true;
 			chart.destroy();
 			return false;
 		});
@@ -404,20 +389,16 @@ erpnext.PartyOverview = class PartyOverview {
 			return null;
 		}
 
-		const $chart = $('<div class="co-age-chart">').appendTo($panel);
-		this.charts.push(
-			new frappe.Chart($chart[0], {
-				type: "bar",
-				barOptions: { horizontal: 1 },
-				data: {
-					labels: a.buckets.map((b) => b.label),
-					datasets: [{ name: __("Outstanding"), values: a.buckets.map((b) => flt(b.value)) }],
-				},
-				colors: ["var(--co-series-1)"],
-				axisOptions: { numberFormatter: (v) => this.short_money(v) },
-				tooltipOptions: { formatTooltipY: (v) => this.money0(v) },
-			})
-		);
+		this.draw_chart($panel, {
+			type: "bar",
+			horizontal: true,
+			height: 240,
+			data: a.buckets,
+			x: "label",
+			y: "value",
+			seriesConfig: { value: { label: __("Outstanding") } },
+			...this.currency_format(),
+		});
 
 		$('<div class="co-note">')
 			.text(flt(a.overdue) > 0 ? note(a) : __("Nothing overdue"))

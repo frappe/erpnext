@@ -16,6 +16,8 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -528,6 +530,50 @@ class TestAssetCapitalization(ERPNextTestSuite):
 			consumed_asset=consumed_asset.name,
 			posting_date="2020-06-30",
 		)
+
+	def test_capitalization_roles_consume_stock_and_depreciating_assets(self):
+		make_stock_entry(
+			item_code="Capitalization Source Stock Item",
+			target="_Test Warehouse - _TC",
+			qty=3,
+			basic_rate=1000,
+		)
+		capitalizations = {}
+		for role in ("Manufacturing Manager", "Quality Manager", "Accounts User"):
+			with self.subTest(role=role):
+				consumed_asset = create_depreciation_asset(submit=1, total_number_of_depreciations=10)
+				target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+				user = make_fenced_user(f"capitalization-{frappe.scrub(role)}@example.com", [role])
+				with as_user(user):
+					asset_capitalization = create_asset_capitalization(
+						target_asset=target_asset.name, consumed_asset=consumed_asset.name, stock_rate=1000
+					)
+					asset_capitalization.submit()
+
+				self.assertTrue(asset_capitalization.stock_items[0].valuation_rate)
+				self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
+				capitalizations[role] = (user, asset_capitalization)
+
+		user, asset_capitalization = capitalizations["Manufacturing Manager"]
+		with as_user(user):
+			asset_capitalization.cancel()
+		consumed_asset = asset_capitalization.asset_items[0].asset
+		self.assertNotEqual(frappe.db.get_value("Asset", consumed_asset, "status"), "Capitalized")
+
+	def test_stock_lookups_still_need_stock_ledger_access(self):
+		from erpnext.assets.doctype.asset_capitalization.asset_capitalization import (
+			get_consumed_stock_item_details,
+			get_warehouse_details,
+		)
+
+		ctx = {
+			"item_code": "Capitalization Source Stock Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"company": "_Test Company",
+		}
+		with as_user(make_fenced_user("capitalization-sales-user@example.com", ["Sales User"])):
+			self.assertRaises(frappe.PermissionError, get_consumed_stock_item_details, ctx)
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, ctx)
 
 
 def create_asset_capitalization_data():
