@@ -642,8 +642,11 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
+	customer_outstanding = flt(
+		customer_outstanding, frappe.get_precision("Customer Credit Limit", "credit_limit")
+	)
 
-	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
+	if credit_limit > 0 and customer_outstanding > credit_limit:
 		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 			customer, customer_outstanding, credit_limit
 		)
