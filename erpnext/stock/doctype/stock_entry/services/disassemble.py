@@ -491,19 +491,49 @@ class DisassembleStockEntry(BaseStockEntry):
 		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty if source_fg_qty else 0
 		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=[self.doc.source_stock_entry])
 		source_rows_by_name = {r.name: r for r in self.get_items_from_manufacture_stock_entry()}
+		used_serial_nos = self.get_serial_nos_used_by_earlier_disassemblies()
 		for row in self.doc.items:
 			if not row.ste_detail:
 				continue
 			source_row = source_rows_by_name.get(row.ste_detail)
 			if source_row:
-				self._apply_bundle_to_disassembly_row(row, source_row, bundle_data, scale_factor)
+				self._apply_bundle_to_disassembly_row(
+					row, source_row, bundle_data, scale_factor, used_serial_nos[row.ste_detail]
+				)
 
-	def _apply_bundle_to_disassembly_row(self, row, source_row, bundle_data, scale_factor):
+	def get_serial_nos_used_by_earlier_disassemblies(self) -> defaultdict:
+		"""Serial nos that submitted disassemblies of the source entry already moved, by source row."""
+		SE = frappe.qb.DocType("Stock Entry")
+		SED = frappe.qb.DocType("Stock Entry Detail")
+		SBE = frappe.qb.DocType("Serial and Batch Entry")
+		rows = (
+			frappe.qb.from_(SED)
+			.join(SE)
+			.on(SED.parent == SE.name)
+			.join(SBE)
+			.on(SBE.parent == SED.serial_and_batch_bundle)
+			.select(SED.ste_detail, SBE.serial_no)
+			.where(
+				(SE.source_stock_entry == self.doc.source_stock_entry)
+				& (SE.purpose == "Disassemble")
+				& (SE.docstatus == 1)
+				& (SE.name != self.doc.name)
+				& (IfNull(SBE.serial_no, "") != "")
+			)
+			.run(as_dict=True)
+		)
+
+		used_serial_nos = defaultdict(set)
+		for row in rows:
+			used_serial_nos[row.ste_detail].add(row.serial_no)
+		return used_serial_nos
+
+	def _apply_bundle_to_disassembly_row(self, row, source_row, bundle_data, scale_factor, used_serial_nos):
 		source_warehouse = source_row.s_warehouse or source_row.t_warehouse
 		key = (source_row.item_code, source_warehouse, self.doc.source_stock_entry)
 		source_bundle = bundle_data.get(key, {})
 		batches = self._extract_batches(source_row, source_bundle, row, scale_factor)
-		serial_nos = self._extract_serial_nos(source_row, source_bundle, row)
+		serial_nos = self._extract_serial_nos(source_row, source_bundle, row, used_serial_nos)
 		self._set_serial_batch_bundle_for_disassembly_row(row, serial_nos, batches)
 
 	def _extract_batches(self, source_row, source_bundle, row, scale_factor):
@@ -523,16 +553,19 @@ class DisassembleStockEntry(BaseStockEntry):
 			batches[batch_no] = alloc
 			qty_remaining -= alloc
 
-	def _extract_serial_nos(self, source_row, source_bundle, row):
+	def _extract_serial_nos(self, source_row, source_bundle, row, used_serial_nos):
 		if source_bundle.get("serial_nos"):
-			return get_serial_nos(source_bundle["serial_nos"])[: int(row.transfer_qty)]
+			serial_nos = get_serial_nos(source_bundle["serial_nos"])
 		elif source_row.serial_no:
-			return SerialBatchIdentity("Serial No").resolve(
-				source_row.item_code,
-				get_serial_nos(source_row.serial_no)[: int(row.transfer_qty)],
-				ignore_permissions=True,
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				source_row.item_code, get_serial_nos(source_row.serial_no), ignore_permissions=True
 			)
-		return []
+		else:
+			return []
+
+		return [serial_no for serial_no in serial_nos if serial_no not in used_serial_nos][
+			: int(row.transfer_qty)
+		]
 
 	def _set_serial_batch_for_disassembly_from_available_materials(self):
 		available_materials = get_available_materials(self.doc.work_order, self.doc)
