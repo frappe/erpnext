@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
 )
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -506,6 +507,7 @@ class SalesInvoice(SellingController):
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
+			self.update_project_consumed_material_cost()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -604,6 +606,7 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
+			self.update_project_consumed_material_cost()
 
 		self.db_set("status", "Cancelled")
 
@@ -646,13 +649,14 @@ class SalesInvoice(SellingController):
 					"target_parent_field": "per_delivered",
 					"target_field": "delivered_qty",
 					"target_ref_field": "qty",
-					"source_field": "qty",
+					"source_field": "qty * conversion_factor",
+					"target_conversion_factor": "conversion_factor",
 					"join_field": "so_detail",
 					"percent_join_field": "sales_order",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
 					"second_source_dt": "Delivery Note Item",
-					"second_source_field": "qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "so_detail",
 					"overflow_type": "delivery",
 					"extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -667,9 +671,10 @@ class SalesInvoice(SellingController):
 						"join_field": "so_detail",
 						"target_field": "returned_qty",
 						"target_parent_dt": "Sales Order",
-						"source_field": "-1 * qty",
+						"source_field": "-1 * qty * conversion_factor",
+						"target_conversion_factor": "conversion_factor",
 						"second_source_dt": "Delivery Note Item",
-						"second_source_field": "-1 * qty",
+						"second_source_field": "-1 * qty * conversion_factor",
 						"second_join_field": "so_detail",
 						"extra_cond": """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)""",
 						"second_source_extra_cond": """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)""",
@@ -1089,6 +1094,11 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_pos(self):
+		# Consolidation posts payments already accepted on submitted POS invoices.
+		if not self.get("is_consolidated"):
+			for payment in self.get("payments") or []:
+				validate_enabled_mode_of_payment(payment.mode_of_payment)
+
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
 			if abs(flt(self.paid_amount)) + abs(flt(self.write_off_amount)) - abs(

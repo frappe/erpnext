@@ -12,6 +12,7 @@ from frappe.utils import cint, flt
 import erpnext
 from erpnext import is_perpetual_inventory_enabled
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -259,9 +260,29 @@ class LandedCostVoucher(Document):
 	def on_submit(self):
 		self.validate_applicable_charges_for_item()
 		self.update_landed_cost()
+		self.update_project_purchase_cost()
 
 	def on_cancel(self):
 		self.update_landed_cost()
+		self.update_project_purchase_cost()
+
+	def update_project_purchase_cost(self):
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") != "Each Transaction":
+			return
+
+		projects = set()
+		for receipt_type in {item.receipt_document_type for item in self.get("items")}:
+			receipt_items = [
+				item.purchase_receipt_item
+				for item in self.get("items")
+				if item.receipt_document_type == receipt_type
+			]
+			projects.update(
+				frappe.get_all(
+					f"{receipt_type} Item", filters={"name": ("in", receipt_items)}, pluck="project"
+				)
+			)
+		update_purchase_cost(projects - {None, ""})
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):

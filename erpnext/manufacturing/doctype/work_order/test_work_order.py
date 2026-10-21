@@ -809,6 +809,30 @@ class TestWorkOrder(FrappeTestCase):
 		fg_row = next(d for d in ste.items if d.is_finished_item)
 		self.assertEqual(fg_row.cost_center, "_Test Cost Center 2 - _TC")
 
+	def test_default_fg_warehouse_prefers_settings_over_item(self):
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [
+					{"company": "_Test Company", "default_warehouse": "_Test Warehouse 1 - _TC"}
+				],
+			}
+		).name
+		bom = make_bom(item=fg_item, raw_materials=["_Test Item"])
+		frappe.db.set_single_value("Manufacturing Settings", "default_fg_warehouse", "_Test Warehouse - _TC")
+
+		def get_fg_warehouse():
+			wo = frappe.new_doc(
+				"Work Order", company="_Test Company", production_item=fg_item, bom_no=bom.name, qty=1
+			)
+			wo.get_items_and_operations_from_bom()
+			return wo.fg_warehouse
+
+		self.assertEqual(get_fg_warehouse(), "_Test Warehouse - _TC")
+
+		frappe.db.set_single_value("Manufacturing Settings", "default_fg_warehouse", None)
+		self.assertEqual(get_fg_warehouse(), "_Test Warehouse 1 - _TC")
+
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
 		rm1 = "Test Batch Size Item RM 1 For BOM"

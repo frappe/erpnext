@@ -169,12 +169,13 @@ class DeliveryNote(SellingController):
 				"target_parent_dt": "Sales Order",
 				"target_parent_field": "per_delivered",
 				"target_ref_field": "qty",
-				"source_field": "qty",
+				"source_field": "qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"percent_join_field": "against_sales_order",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
 				"second_source_dt": "Sales Invoice Item",
-				"second_source_field": "qty",
+				"second_source_field": "qty * conversion_factor",
 				"second_join_field": "so_detail",
 				"overflow_type": "delivery",
 				"second_source_extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -215,9 +216,10 @@ class DeliveryNote(SellingController):
 						"join_field": "so_detail",
 						"target_field": "returned_qty",
 						"target_parent_dt": "Sales Order",
-						"source_field": "-1 * qty",
+						"source_field": "-1 * qty * conversion_factor",
+						"target_conversion_factor": "conversion_factor",
 						"second_source_dt": "Sales Invoice Item",
-						"second_source_field": "-1 * qty",
+						"second_source_field": "-1 * qty * conversion_factor",
 						"second_join_field": "so_detail",
 						"extra_cond": """ and exists (select name from `tabDelivery Note`
 					where name=`tabDelivery Note Item`.parent and is_return=1)""",
@@ -276,6 +278,9 @@ class DeliveryNote(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
+		if self.is_return:
+			return
+
 		if frappe.db.get_single_value("Selling Settings", "so_required") == "Yes":
 			for d in self.get("items"):
 				if not d.against_sales_order:
@@ -510,6 +515,7 @@ class DeliveryNote(SellingController):
 		self.validate_produced_serial_nos_against_reservation()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -531,6 +537,7 @@ class DeliveryNote(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
@@ -895,13 +902,16 @@ def get_list_context(context=None):
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
 	sii = DocType("Sales Invoice Item")
+	dni = DocType("Delivery Note Item")
 
 	invoiced_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(sii)
-			.select(sii.dn_detail, Sum(sii.qty).as_("qty"))
+			.join(dni)
+			.on(dni.name == sii.dn_detail)
+			.select(dni.name, (Sum(sii.qty * sii.conversion_factor) / dni.conversion_factor).as_("qty"))
 			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
-			.groupby(sii.dn_detail)
+			.groupby(dni.name)
 		).run()
 	)
 
@@ -912,20 +922,26 @@ def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
 	dn = DocType("Delivery Note")
 	dni = DocType("Delivery Note Item")
+	returned_against = DocType("Delivery Note Item").as_("returned_against")
 
 	returned_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(dni)
 			.join(dn)
 			.on(dn.name == dni.parent)
-			.select(dni.dn_detail, Sum(Abs(dni.qty)).as_("qty"))
+			.join(returned_against)
+			.on(returned_against.name == dni.dn_detail)
+			.select(
+				returned_against.name,
+				(Sum(Abs(dni.qty) * dni.conversion_factor) / returned_against.conversion_factor).as_("qty"),
+			)
 			.where(
 				(dn.docstatus == 1)
 				& (dn.is_return == 1)
 				& (dn.return_against == delivery_note)
 				& (dni.qty <= 0)
 			)
-			.groupby(dni.dn_detail)
+			.groupby(returned_against.name)
 		).run()
 	)
 
