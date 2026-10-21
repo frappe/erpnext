@@ -26,13 +26,13 @@ def _qty_tolerance(precision: int) -> float:
 	return 1.0 / (10**precision)
 
 
-def get_whole_number_step(row) -> float:
-	"""Stock qty of one unit of the row's whole-number UOM, or 0 when any qty is allowed."""
+def get_whole_number_units(row) -> tuple[float, float] | None:
+	"""Row qty in its whole-number UOM and the stock qty of one such unit, or None when any qty is allowed."""
 	if cint(frappe.get_cached_value("UOM", row.uom, "must_be_whole_number")):
-		return flt(row.conversion_factor)
+		return flt(row.qty), flt(row.conversion_factor)
 	if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
-		return 1.0
-	return 0.0
+		return flt(row.transfer_qty), 1.0
+	return None
 
 
 def _manufacture_line_order(line):
@@ -212,12 +212,13 @@ class DisassembleStockEntry(BaseStockEntry):
 	def get_component_stock_qty(self, source_row, scale_factor, progress) -> float:
 		"""Stock qty of a source row this disassembly moves. Whole-number rows are rounded down on the
 		running total, so the disassembly that completes the source takes the remainder."""
-		step = get_whole_number_step(source_row)
-		if not step:
+		whole_number_units = get_whole_number_units(source_row)
+		if not whole_number_units:
 			return flt(source_row.transfer_qty) * scale_factor
 
+		units, step = whole_number_units
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
-		units_to_date = floor(flt(flt(source_row.transfer_qty) * progress.share_to_date / step, precision))
+		units_to_date = floor(flt(units * progress.share_to_date, precision))
 		moved_units = round(progress.moved_qty.get(source_row.get("name") or source_row.item_code, 0) / step)
 		return max(units_to_date - moved_units, 0) * step
 
