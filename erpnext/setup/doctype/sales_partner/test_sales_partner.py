@@ -183,3 +183,18 @@ class TestSalesPartner(IntegrationTestCase):
 				self.assertEqual(default_doc.sales_partner, customer_partner.name)
 				self.assertEqual(default_doc.commission_rate, 5)
 				self.assertEqual(default_doc.total_commission, 50)
+
+	def test_invalid_targets_are_rejected(self):
+		partner = self.make_partner()
+		for qty, amount in ((0, 0), (-1, 10), (1, -10)):
+			with self.subTest(qty=qty, amount=amount):
+				partner.set("targets", [{"target_qty": qty, "target_amount": amount}])
+				with self.assertRaisesRegex(frappe.ValidationError, "Row #1"):
+					partner.validate()
+
+	def test_quantity_or_amount_targets_are_allowed(self):
+		partner = self.make_partner()
+		for qty, amount in ((10, 0), (0, 10), (10, 10)):
+			with self.subTest(qty=qty, amount=amount):
+				partner.set("targets", [{"target_qty": qty, "target_amount": amount}])
+				partner.validate()
