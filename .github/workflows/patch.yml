@@ -141,6 +141,15 @@ jobs:
             honcho start -f ~/frappe-bench/Procfile $procs &>> ~/frappe-bench/bench_start.log &
           }
 
+          function retry() {
+            for attempt in 1 2 3; do
+              "$@" && return
+              echo "Attempt $attempt failed: $*"
+              sleep 15
+            done
+            return 1
+          }
+
           function update_to_version() {
             version=$1
 
@@ -148,8 +157,8 @@ jobs:
             echo "Updating to v$version"
 
             # Fetch and checkout branches
-            git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
-            git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+            retry git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
+            retry git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
             git -C "apps/frappe" checkout -q -f $branch_name
             git -C "apps/erpnext" checkout -q -f $branch_name
 
@@ -191,7 +200,7 @@ jobs:
           elif [ "$ls_remote_status" -ne 0 ]; then
             exit "$ls_remote_status"
           fi
-          git -C "apps/frappe" fetch --depth 1 upstream "$frappe_ref"
+          retry git -C "apps/frappe" fetch --depth 1 upstream "$frappe_ref"
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
