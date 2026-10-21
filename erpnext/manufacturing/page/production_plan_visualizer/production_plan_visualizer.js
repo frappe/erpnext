@@ -543,7 +543,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		if (short.length) {
 			return { level: "short", label: __("{0} materials short", [short.length]) };
 		}
-		if (fg.qty && fg.produced_qty >= fg.qty) return { level: "done", label: __("Completed") };
+		if (fg.qty && fg.pending_qty <= 0) return { level: "done", label: __("Completed") };
 		const rows = [fg, ...(this.index.subs_by_parent[fg.row_name] || [])];
 		if (rows.every((d) => !(d.documents || []).length)) {
 			return { level: "idle", label: __("Not started") };
