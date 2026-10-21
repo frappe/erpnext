@@ -3,11 +3,11 @@
 
 import frappe
 from frappe import _
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.delivery_note_trends.delivery_note_trends import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 ITEM = "_Test Item"
 OTHER_ITEM = "_Test Item 2"
@@ -15,7 +15,7 @@ WAREHOUSE = "Stores - _TC"
 CUSTOMER = "_Test Customer"
 
 
-class TestDeliveryNoteTrends(ERPNextTestSuite):
+class TestDeliveryNoteTrends(FrappeTestCase):
 	def run_report_full(self, **extra):
 		filters = frappe._dict(
 			{

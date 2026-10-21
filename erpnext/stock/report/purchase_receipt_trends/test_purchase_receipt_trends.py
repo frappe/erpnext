@@ -2,10 +2,10 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.report.purchase_receipt_trends.purchase_receipt_trends import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 ITEM = "_Test Item"
 OTHER_ITEM = "_Test Item 2"
@@ -13,7 +13,7 @@ ITEM_GROUP = "_Test Item Group"
 SUPPLIER = "_Test Supplier"
 
 
-class TestPurchaseReceiptTrends(ERPNextTestSuite):
+class TestPurchaseReceiptTrends(FrappeTestCase):
 	def run_report(self, **extra):
 		return self.run_report_full(**extra)[1]
 

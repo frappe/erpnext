@@ -3,13 +3,13 @@
 
 import frappe
 from frappe import _
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestSalesOrderTrends(ERPNextTestSuite):
+class TestSalesOrderTrends(FrappeTestCase):
 	def test_report_executes_with_group_by(self):
 		# trends.get_data builds per-period SUM(CASE ...) aggregates (converted from MySQL SUM(IF)),
 		# groups by the based-on KEY only (non-key descriptive columns like item_name/territory are

@@ -2,16 +2,16 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_invoice_trends.sales_invoice_trends import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 FISCAL_YEAR = "_Test Fiscal Year 2026"
 POSTING_DATE = "2026-06-01"
 
 
-class TestSalesInvoiceTrends(ERPNextTestSuite):
+class TestSalesInvoiceTrends(FrappeTestCase):
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{

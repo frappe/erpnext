@@ -4,12 +4,12 @@
 
 import frappe
 from frappe import _
-from frappe.database.query import RawCriterion
 from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import DateTimeLikeObject, getdate, today
 from pypika.functions import Concat, NullIf
+from pypika.terms import LiteralValue
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
@@ -96,18 +96,6 @@ def get_trans_date(filters, trans, t1):
 	if trans not in ["Sales Invoice", "Purchase Invoice", "Purchase Receipt", "Delivery Note"]:
 		return t1.transaction_date
 
-<<<<<<< HEAD
-	posting_date = "t1.transaction_date"
-	if conditions.get("trans") in [
-		"Sales Invoice",
-		"Purchase Invoice",
-		"Purchase Receipt",
-		"Delivery Note",
-	]:
-		posting_date = "t1.posting_date"
-		if filters.period_based_on and conditions.get("trans") in ["Sales Invoice", "Purchase Invoice"]:
-			posting_date = "t1." + filters.period_based_on
-=======
 	if filters.period_based_on == "bill_date" and trans in ["Sales Invoice", "Purchase Invoice"]:
 		return Coalesce(t1.bill_date, t1.posting_date)
 
@@ -123,7 +111,6 @@ def get_conditions(filters, conditions, t1, t2):
 		"Purchase Order",
 	]:
 		criteria.append(t1.status != "Closed")
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 	if filters.get("based_on") == "Project":
 		criteria.append(conditions["group_by"][0] != "")
@@ -180,12 +167,9 @@ def get_data(filters, conditions):
 		elif filters.get("group_by") == "Supplier":
 			sel_col = t1.supplier
 
-<<<<<<< HEAD
-=======
 		# first column of the multi-column group_by = the based-on key the detail queries equate against
 		based_on_key = conditions["group_by"][0]
 
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 		if filters.get("based_on") in ["Customer", "Supplier"]:
 			inc = 3
 		elif filters.get("based_on") in ["Item"]:
@@ -206,70 +190,12 @@ def get_data(filters, conditions):
 			data.append(dt)
 
 			# to get distinct value of col specified by group_by in filter
-<<<<<<< HEAD
-			# nosemgrep
-			row = frappe.db.sql(
-				"""select DISTINCT({}) from `tab{}` t1, `tab{} Item` t2 {}
-						where t2.parent = t1.name and t1.company = {} and {} between {} and {}
-						and t1.docstatus = 1 and {} = {} {} {}
-					""".format(
-					sel_col,
-					conditions["trans"],
-					conditions["trans"],
-					conditions["addl_tables"],
-					"%s",
-					posting_date,
-					"%s",
-					"%s",
-					conditions["group_by"],
-					"%s",
-					conditions.get("addl_tables_relational_cond"),
-					cond,
-				),
-				(filters.get("company"), year_start_date, year_end_date, data1[d][0], *item_codes),
-				as_list=1,
-			)
-=======
 			row = base.select(sel_col).distinct().where(based_on_key == data1[d][0]).run(as_list=1)
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 			for i in range(len(row)):
 				des = ["" for q in range(len(conditions["columns"]))]
 
 				# get data for group_by filter
-<<<<<<< HEAD
-				# nosemgrep
-				row1 = frappe.db.sql(
-					""" select t4.default_currency AS currency , {} , {} from `tab{}` t1, `tab{} Item` t2 {}
-							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
-							and t1.docstatus = 1 and {} = {} and {} = {} {} {}
-						""".format(
-						sel_col,
-						conditions["period_wise_select"],
-						conditions["trans"],
-						conditions["trans"],
-						conditions["addl_tables"],
-						"%s",
-						posting_date,
-						"%s",
-						"%s",
-						sel_col,
-						"%s",
-						conditions["group_by"],
-						"%s",
-						conditions.get("addl_tables_relational_cond"),
-						cond,
-					),
-					(
-						filters.get("company"),
-						year_start_date,
-						year_end_date,
-						row[i][0],
-						data1[d][0],
-						*item_codes,
-					),
-					as_list=1,
-=======
 				company = frappe.qb.DocType("Company")
 				row1 = (
 					base.select(company.default_currency, sel_col, *conditions["period_wise_select"])
@@ -277,7 +203,6 @@ def get_data(filters, conditions):
 					.where(based_on_key == data1[d][0])
 					.groupby(company.default_currency, sel_col)
 					.run(as_list=1)
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 				)
 
 				des[ind] = row[i][0]
@@ -306,7 +231,7 @@ def get_data(filters, conditions):
 def get_permission_condition(doctype):
 	if match_conditions := build_match_conditions(doctype):
 		table = frappe.qb.DocType(doctype)
-		permitted_documents = frappe.qb.from_(table).select(table.name).where(RawCriterion(match_conditions))
+		permitted_documents = frappe.qb.from_(table).select(table.name).where(LiteralValue(match_conditions))
 		return table.name.isin(permitted_documents)
 
 
@@ -346,17 +271,8 @@ def period_wise_columns_query(filters, trans):
 	t1, t2 = get_tables(trans)
 	trans_date = get_trans_date(filters, trans, t1)
 
-<<<<<<< HEAD
-	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
-		trans_date = "posting_date"
-		if filters.period_based_on and trans in ["Purchase Invoice", "Sales Invoice"]:
-			trans_date = filters.period_based_on
-	else:
-		trans_date = "transaction_date"
-=======
 	pwc, period_select = [], []
 	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 	if filters.get("period") != "Yearly":
 		for dt in bet_dates:
@@ -372,11 +288,8 @@ def period_wise_columns_query(filters, trans):
 	# the trailing pair is the Total(Qty)/Total(Amt) column of every trend report
 	period_select += [Sum(t2.stock_qty), Sum(t2.base_net_amount)]
 
-<<<<<<< HEAD
-=======
 	return pwc, period_select
 
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 def get_period_wise_columns(bet_dates, period, pwc):
 	if period == "Monthly":
@@ -396,17 +309,6 @@ def get_period_wise_columns(bet_dates, period, pwc):
 		]
 
 
-<<<<<<< HEAD
-def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.stock_qty, NULL)),
-					SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.base_net_amount, NULL)),
-				""".format(
-		trans_date=trans_date,
-		sd=bet_dates[0],
-		ed=bet_dates[1],
-	)
-	return query_details
-=======
 def get_period_wise_terms(bet_dates, trans_date, t2):
 	# a CASE with no ELSE yields NULL outside the period, so empty buckets stay blank
 	in_period = trans_date[bet_dates[0] : bet_dates[1]]
@@ -415,7 +317,6 @@ def get_period_wise_terms(bet_dates, trans_date, t2):
 		Sum(Case().when(in_period, t2.stock_qty)),
 		Sum(Case().when(in_period, t2.base_net_amount)),
 	]
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -457,8 +358,6 @@ def get_period_month_ranges(period, fiscal_year):
 	return period_month_ranges
 
 
-<<<<<<< HEAD
-=======
 def quotation_party_name_expr(t1):
 	"""Resolve a Quotation's party label from its dynamic link, mirroring set_customer_name()."""
 	customer = frappe.qb.DocType("Customer")
@@ -513,7 +412,6 @@ def quotation_territory_expr(t1):
 	)
 
 
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 def based_wise_columns_query(based_on, trans):
 	t1, t2 = get_tables(trans)
 	based_on_details = {"joins": []}
@@ -525,11 +423,6 @@ def based_wise_columns_query(based_on, trans):
 			{"label": _("Item"), "fieldtype": "Link", "options": "Item", "width": 120, "fieldname": "item"},
 			{"label": _("Item Name"), "fieldtype": "Data", "width": 120, "fieldname": "item_name"},
 		]
-<<<<<<< HEAD
-		based_on_details["based_on_select"] = "t2.item_code, t2.item_name,"
-		based_on_details["based_on_group_by"] = "t2.item_code"
-		based_on_details["addl_tables"] = ""
-=======
 		# item_name is stored per line and editable, so it is not functionally dependent on item_code
 		# and Max() over it is a sort -- which MariaDB and PostgreSQL resolve differently. Read it
 		# from the Item master instead: that IS functionally dependent on the grouped item_code, so
@@ -537,7 +430,6 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["based_on_select"] = [t2.item_code, item_master.item_name.as_("item_name")]
 		based_on_details["based_on_group_by"] = [t2.item_code, item_master.item_name]
 		based_on_details["joins"] = [(item_master, t2.item_code == item_master.name)]
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 	elif based_on == "Item Group":
 		based_on_details["based_on_cols"] = [
@@ -571,9 +463,6 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
-<<<<<<< HEAD
-			based_on_details["based_on_select"] = "t1.party_name, t1.customer_name, t1.territory,"
-=======
 			# a Quotation's party_name is a dynamic link, so no single master can be joined. Resolve
 			# it through the quotation_to discriminator, mirroring Quotation.set_customer_name, and
 			# group by it too: two parties of different types can share a name, and merging them
@@ -585,7 +474,6 @@ def based_wise_columns_query(based_on, trans):
 				quotation_territory_expr(t1).as_("territory"),
 			]
 			based_on_details["based_on_group_by"] = [t1.party_name, t1.quotation_to]
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 		else:
 			customer_master = frappe.qb.DocType("Customer")
 			based_on_details["based_on_cols"] = [
@@ -610,15 +498,6 @@ def based_wise_columns_query(based_on, trans):
 					"fieldname": "territory",
 				},
 			]
-<<<<<<< HEAD
-			based_on_details["based_on_select"] = "t1.customer, t1.customer_name, t1.territory,"
-		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
-		based_on_details["addl_tables"] = ""
-
-	elif based_on == "Customer Group":
-		based_on_details["based_on_cols"] = [
-			{
-=======
 			# customer_name and territory are stored per transaction and editable, so they are not
 			# functionally dependent on the customer and Max() over them is a text sort, which the
 			# engines resolve differently. The Customer master's values ARE dependent on the grouped
@@ -649,22 +528,14 @@ def based_wise_columns_query(based_on, trans):
 		if trans == "Quotation":
 			customer_group = Coalesce(t1.customer_group, "")
 			customer_group_col = {
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 				"label": _("Customer Group"),
 				"fieldtype": "Link",
 				"options": "Customer Group",
 				"fieldname": "customer_group",
 			}
-<<<<<<< HEAD
-		]
-		based_on_details["based_on_select"] = "t1.customer_group,"
-		based_on_details["based_on_group_by"] = "t1.customer_group"
-		based_on_details["addl_tables"] = ""
-=======
 		based_on_details["based_on_cols"] = [customer_group_col]
 		based_on_details["based_on_select"] = [customer_group]
 		based_on_details["based_on_group_by"] = [customer_group]
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 	elif based_on == "Supplier":
 		supplier_master = frappe.qb.DocType("Supplier")
@@ -685,12 +556,6 @@ def based_wise_columns_query(based_on, trans):
 				"fieldname": "supplier_group",
 			},
 		]
-<<<<<<< HEAD
-		based_on_details["based_on_select"] = "t1.supplier, t1.supplier_name, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier"
-		based_on_details["addl_tables"] = ",`tabSupplier` t3"
-		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
-=======
 		# supplier_name is stored per transaction and editable, so Max() over it is a text sort that
 		# the engines resolve differently. The Supplier master is joined here anyway and its columns
 		# are functionally dependent on the grouped supplier, so both can simply be grouped: no row
@@ -706,7 +571,6 @@ def based_wise_columns_query(based_on, trans):
 			supplier_master.supplier_group,
 		]
 		based_on_details["joins"] = [(supplier_master, t1.supplier == supplier_master.name)]
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 
 	elif based_on == "Supplier Group":
 		supplier_master = frappe.qb.DocType("Supplier")
@@ -744,9 +608,6 @@ def based_wise_columns_query(based_on, trans):
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
-<<<<<<< HEAD
-	based_on_details["based_on_select"] += "t4.default_currency as currency,"
-=======
 		based_on_details["based_on_cols"] = [
 			{
 				"label": _("Project"),
@@ -762,7 +623,6 @@ def based_wise_columns_query(based_on, trans):
 	company = frappe.qb.DocType("Company")
 	based_on_details["based_on_select"].append(company.default_currency.as_("currency"))
 	based_on_details["based_on_group_by"].append(company.default_currency)
->>>>>>> d69154d (refactor(controllers): build trend report queries with the query builder)
 	based_on_details["based_on_cols"].append(
 		{
 			"label": _("Currency"),

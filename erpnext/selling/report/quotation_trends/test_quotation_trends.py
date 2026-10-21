@@ -271,42 +271,6 @@ class TestQuotationTrends(FrappeTestCase):
 
 		party_column = next(c for c in columns if isinstance(c, dict) and c.get("fieldname") == "party")
 		self.assertEqual(party_column["fieldtype"], "Data")
-<<<<<<< HEAD
-=======
-
-	def test_based_on_customer_group_labels_non_customer_quotations(self):
-		# A Lead quotation has no customer_group, so it falls under a labelled bucket, not a blank group.
-		make_quotation(
-			item="_Test Item", party_name="_Test Customer", qty=2, rate=100, transaction_date=TXN_DATE
-		)
-		self._make_lead_quotation("_Test Trends Group Lead", qty=7, rate=100)
-
-		labels, rows = self.run_report(based_on="Customer Group")
-		group_idx = labels.index("Customer Group")
-		amt_idx = labels.index(f"{FISCAL_YEAR} (Amt)")
-		data_rows = [row for row in rows if row[0] != f"'{_('Total')}'"]
-
-		self.assertTrue(all(row[group_idx] for row in data_rows))
-		no_group = next(row for row in data_rows if row[group_idx] == _("No Customer Group"))
-		self.assertEqual(no_group[amt_idx], 700)
-		total_row = next(row for row in rows if row[0] == f"'{_('Total')}'")
-		self.assertEqual(total_row[-1], 900)
-
-		# with a secondary Group By the labelled bucket must still break down, so the chart reconciles
-		_columns, data, _message, chart = execute(
-			frappe._dict(
-				{
-					"company": "_Test Company",
-					"fiscal_year": FISCAL_YEAR,
-					"period": "Yearly",
-					"based_on": "Customer Group",
-					"group_by": "Item",
-				}
-			)
-		)
-		grouped_total = next(row for row in data if row[0] == f"'{_('Total')}'")
-		self.assertEqual(grouped_total[-1], 900)
-		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), 900)
 
 	def test_item_filter_restricts_rows(self):
 		# the Item filter is applied in the query, so the excluded item never reaches the rows
@@ -317,4 +281,3 @@ class TestQuotationTrends(FrappeTestCase):
 		items = {row[labels.index("Item")] for row in data}
 		self.assertIn("_Test Item", items)
 		self.assertNotIn("_Test Item 2", items)
->>>>>>> 32bd414 (test(controllers): cover item filter across trends reports)

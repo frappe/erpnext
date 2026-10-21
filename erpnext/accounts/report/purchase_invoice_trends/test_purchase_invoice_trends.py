@@ -2,11 +2,11 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.purchase_invoice_trends.purchase_invoice_trends import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 FISCAL_YEAR = "_Test Fiscal Year 2026"
 COMPANY = "_Test Company"
@@ -34,7 +34,7 @@ def make_dated_purchase_invoice(qty, rate, bill_date=None, item_code=ITEM):
 	return pi
 
 
-class TestPurchaseInvoiceTrends(ERPNextTestSuite):
+class TestPurchaseInvoiceTrends(FrappeTestCase):
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{
