@@ -477,6 +477,43 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(se, [{"incoming_rate": 150}])
 
+	def test_recalculate_valuation_rate_issues_transfer_at_source_rate(self):
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		source, target = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=source, qty=10, rate=100, posting_date=add_days(today(), -1))
+
+		transfer = make_stock_entry(
+			item_code=item, source=source, target=target, qty=4, purpose="Material Transfer", do_not_save=True
+		)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "freight",
+				"amount": 40,
+			},
+		)
+		transfer.submit()
+
+		for _ in range(2):
+			frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Transaction",
+				voucher_type=transfer.doctype,
+				voucher_no=transfer.name,
+				recalculate_valuation_rate=1,
+				posting_date=transfer.posting_date,
+				posting_time=transfer.posting_time,
+			).submit()
+
+		self.assertSLEs(
+			transfer,
+			[
+				{"warehouse": source, "stock_value_difference": -400, "stock_value": 600},
+				{"warehouse": target, "stock_value_difference": 440, "stock_value": 440},
+			],
+		)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
