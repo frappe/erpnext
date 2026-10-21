@@ -522,24 +522,19 @@ class DisassembleStockEntry(BaseStockEntry):
 			get_voucher_wise_serial_batch_from_bundle,
 		)
 
-		source_fg_qty = flt(
-			frappe.db.get_value("Stock Entry", self.doc.source_stock_entry, "fg_completed_qty")
-		)
-		scale_factor = flt(self.doc.fg_completed_qty) / source_fg_qty if source_fg_qty else 0
 		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=[self.doc.source_stock_entry])
 		source_rows_by_name = {r.name: r for r in self.get_items_from_manufacture_stock_entry()}
-		used_serial_nos = self.get_serial_nos_used_by_earlier_disassemblies()
+		used = self.get_serial_batches_used_by_earlier_disassemblies()
 		for row in self.doc.items:
 			if not row.ste_detail:
 				continue
 			source_row = source_rows_by_name.get(row.ste_detail)
 			if source_row:
-				self._apply_bundle_to_disassembly_row(
-					row, source_row, bundle_data, scale_factor, used_serial_nos[row.ste_detail]
-				)
+				self._apply_bundle_to_disassembly_row(row, source_row, bundle_data, used[row.ste_detail])
 
-	def get_serial_nos_used_by_earlier_disassemblies(self) -> defaultdict:
-		"""Serial nos that submitted disassemblies of the source entry already moved, by source row."""
+	def get_serial_batches_used_by_earlier_disassemblies(self) -> defaultdict:
+		"""Serial nos and batch qty that submitted disassemblies of the source entry already moved,
+		by source row."""
 		SE = frappe.qb.DocType("Stock Entry")
 		SED = frappe.qb.DocType("Stock Entry Detail")
 		SBE = frappe.qb.DocType("Serial and Batch Entry")
@@ -549,46 +544,46 @@ class DisassembleStockEntry(BaseStockEntry):
 			.on(SED.parent == SE.name)
 			.join(SBE)
 			.on(SBE.parent == SED.serial_and_batch_bundle)
-			.select(SED.ste_detail, SBE.serial_no)
+			.select(SED.ste_detail, SBE.serial_no, SBE.batch_no, SBE.qty)
 			.where(
 				(SE.source_stock_entry == self.doc.source_stock_entry)
 				& (SE.purpose == "Disassemble")
 				& (SE.docstatus == 1)
 				& (SE.name != self.doc.name)
-				& (IfNull(SBE.serial_no, "") != "")
 			)
 			.run(as_dict=True)
 		)
 
-		used_serial_nos = defaultdict(set)
+		used = defaultdict(lambda: frappe._dict(serial_nos=set(), batch_qty=defaultdict(float)))
 		for row in rows:
-			used_serial_nos[row.ste_detail].add(row.serial_no)
-		return used_serial_nos
+			if row.serial_no:
+				used[row.ste_detail].serial_nos.add(row.serial_no)
+			if row.batch_no:
+				used[row.ste_detail].batch_qty[row.batch_no] += abs(flt(row.qty))
+		return used
 
-	def _apply_bundle_to_disassembly_row(self, row, source_row, bundle_data, scale_factor, used_serial_nos):
+	def _apply_bundle_to_disassembly_row(self, row, source_row, bundle_data, used):
 		source_warehouse = source_row.s_warehouse or source_row.t_warehouse
 		key = (source_row.item_code, source_warehouse, self.doc.source_stock_entry)
 		source_bundle = bundle_data.get(key, {})
-		batches = self._extract_batches(source_row, source_bundle, row, scale_factor)
-		serial_nos = self._extract_serial_nos(source_row, source_bundle, row, used_serial_nos)
+		batches = self._extract_batches(source_row, source_bundle, row, used.batch_qty)
+		serial_nos = self._extract_serial_nos(source_row, source_bundle, row, used.serial_nos)
 		self._set_serial_batch_bundle_for_disassembly_row(row, serial_nos, batches)
 
-	def _extract_batches(self, source_row, source_bundle, row, scale_factor):
-		batches = defaultdict(float)
+	def _extract_batches(self, source_row, source_bundle, row, used_batch_qty):
+		"""Fill the row from the source batches in order, skipping qty earlier disassemblies moved."""
 		if source_bundle.get("batch_nos"):
-			self._allocate_batches(batches, source_bundle["batch_nos"], row.transfer_qty, scale_factor)
-		elif source_row.batch_no:
-			batches[source_row.batch_no] = row.transfer_qty
-		return batches
-
-	def _allocate_batches(self, batches, batch_nos, transfer_qty, scale_factor):
-		qty_remaining = transfer_qty
-		for batch_no, batch_qty in batch_nos.items():
-			if qty_remaining <= 0:
-				break
-			alloc = min(abs(flt(batch_qty)) * scale_factor, qty_remaining)
-			batches[batch_no] = alloc
-			qty_remaining -= alloc
+			precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+			remaining = {
+				batch_no: flt(abs(flt(qty)) - used_batch_qty[batch_no], precision)
+				for batch_no, qty in source_bundle["batch_nos"].items()
+			}
+			return self._collect_available_batches(
+				{batch_no: qty for batch_no, qty in remaining.items() if qty > 0}, row.transfer_qty
+			)
+		if source_row.batch_no:
+			return {source_row.batch_no: row.transfer_qty}
+		return {}
 
 	def _extract_serial_nos(self, source_row, source_bundle, row, used_serial_nos):
 		if source_bundle.get("serial_nos"):
