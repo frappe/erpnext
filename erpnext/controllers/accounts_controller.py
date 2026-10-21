@@ -68,7 +68,7 @@ from erpnext.controllers.print_settings import (
 )
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.exceptions import InvalidCurrency
-from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -2674,21 +2674,21 @@ class AccountsController(TransactionBase):
 		if not party:
 			return
 
-		restricted_items_condition = get_restricted_items_condition(party_type, party)
-		rows = self.get_rows_for_item_restrictions() if restricted_items_condition is not None else []
+		allowed_items_condition = get_allowed_items_condition(party_type, party)
+		rows = self.get_rows_for_item_restrictions() if allowed_items_condition is not None else []
 		if not rows:
 			return
 
 		item = frappe.qb.DocType("Item")
-		restricted_items = (
+		allowed_items = (
 			frappe.qb.from_(item)
 			.select(item.name)
 			.where(item.name.isin(list({row.item_code for row in rows})))
-			.where(restricted_items_condition)
+			.where(allowed_items_condition)
 			.run(pluck=True)
 		)
 		for row in rows:
-			if row.item_code in restricted_items:
+			if row.item_code not in allowed_items:
 				frappe.throw(
 					_("Row {0}: Item {1} is not allowed for {2} {3}.").format(
 						row.idx, frappe.bold(row.item_code), _(party_type), frappe.bold(party)
