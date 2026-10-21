@@ -1531,8 +1531,6 @@ $.extend(erpnext.stock.utils, {
 	},
 });
 
-// A task's priority as an icon and its label, all in one gray: Urgent as a filled alert square, the others
-// as bars filled up to their level. Empty when there is none; a custom priority gets its label only.
 erpnext.utils.task_priority_html = function (priority) {
 	if (!priority) return "";
 	const icons = {

@@ -124,7 +124,6 @@ frappe.ui.form.on("Project", {
 		}
 
 		const project = frm.doc.name;
-		// kept on the form, so the chosen order survives a reload of the document
 		frm.tasks_sort ??= { sort_by: "creation", sort_order: "asc" };
 		// loading Task's meta also loads task_list.js, whose indicators the Status column reuses
 		const pending = Promise.all([
@@ -214,7 +213,6 @@ frappe.ui.form.on("Project", {
 				args: {
 					sort_by: frm.tasks_sort.sort_by,
 					sort_order: frm.tasks_sort.sort_order,
-					// the columns shown, besides when tasks were created and last changed
 					options: [
 						{ fieldname: "creation", label: __("Created On") },
 						{ fieldname: "modified", label: __("Last Updated On") },
@@ -229,7 +227,6 @@ frappe.ui.form.on("Project", {
 				},
 			}).wrapper.insertAfter($actions.find("[data-action='search']"));
 
-			// Status and Priority change in place; the menu is made on the first click, then opens itself
 			$wrapper.off(".project_tasks").on("click.project_tasks", ".task-inline-edit", (e) => {
 				e.stopPropagation();
 				const button = e.currentTarget;
@@ -248,7 +245,7 @@ frappe.ui.form.on("Project", {
 				dropdown.open();
 			});
 
-			// cells are rendered as HTML, so the group's add button has no handler of its own; bound here instead
+			// cells are HTML, so the group's add button has no handler of its own
 			$wrapper.on("click.project_tasks", ".es-avatar-group", (e) => {
 				// the avatars only show their user's name on hover, rather than opening the task
 				e.stopPropagation();
@@ -264,15 +261,13 @@ frappe.ui.form.on("Project", {
 		return pending;
 	},
 
-	// a cell's value as a button that opens a menu of the field's options
 	inline_edit_html: function (field, html) {
 		const caret = frappe.utils.icon("chevron-down", "xs", "", "", "ml-1 text-ink-gray-4", true);
 		return `<button type="button" class="btn-reset inline-flex items-center rounded task-inline-edit"
 			data-field="${field}" title="${__("Change")}">${html}${caret}</button>`;
 	},
 
-	// Overdue follows the due date and Template marks template tasks, so neither is offered as a status;
-	// priorities are listed most urgent first
+	// Overdue and Template are set by the system, so they aren't offered
 	task_field_options: function (frm, task, field, after) {
 		const options = frappe.meta.get_docfield("Task", field).options.split("\n");
 		const choices =
@@ -288,8 +283,6 @@ frappe.ui.form.on("Project", {
 		}));
 	},
 
-	// saved through the task's own validation, as if edited in its form; cancelling asks first. The loaded
-	// rows and the project's progress are reloaded, keeping a search and how far the list was loaded
 	update_task: function (frm, task, field, value, after) {
 		const save = () =>
 			frappe.db.set_value("Task", task.name, field, value).then(() => {
@@ -303,17 +296,25 @@ frappe.ui.form.on("Project", {
 		}
 	},
 
-	// an edit can move a task in the sort order (and a save changes more than the field picked: completing
-	// sets Progress), so the rows already loaded are read again in one request and redrawn in their new
-	// order. Load More then carries on from the right offset, without repeating or skipping a task
+	// EmbeddedList can't reload what it has loaded, so the page is widened for one request; reloads are
+	// queued because they share that page size. Load More waits, as it would read the next page in the
+	// new order while the rows shown are still in the old one; the redraw brings the button back
 	reload_task_rows: function (list) {
-		const page_size = list.page_size;
-		list.page_size = Math.max(page_size, list.data.length);
-		return list.load_page(0).finally(() => (list.page_size = page_size));
+		const disable_load_more = () =>
+			list.$wrapper.find("[data-action='load-more']").prop("disabled", true);
+		const reload = () => {
+			disable_load_more();
+			const page_size = list.page_size;
+			list.page_size = Math.max(page_size, list.data.length);
+			return list.load_page(0).finally(() => (list.page_size = page_size));
+		};
+		disable_load_more();
+		const previous = list.task_reload || Promise.resolve();
+		list.task_reload = previous.then(reload, reload);
+		return list.task_reload;
 	},
 
-	// a task's status moves the project's % Complete and can complete it. The task save leaves the project's
-	// modified as it was, so the form keeps its conflict check; unsaved edits keep their own values
+	// a task save leaves the project's modified as it was, so it isn't read back and the conflict check holds
 	refresh_project_progress: function (frm) {
 		const fields = ["percent_complete", "status"];
 		const project = frm.doc.name;
@@ -333,7 +334,6 @@ frappe.ui.form.on("Project", {
 		frappe.model.with_doctype("Task", () => {
 			const task = frappe.model.get_new_doc("Task");
 			task.project = frm.doc.name;
-			// % Complete and status are recomputed on the server when a task changes
 			frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
 		});
 	},

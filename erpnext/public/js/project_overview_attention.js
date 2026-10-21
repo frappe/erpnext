@@ -1,5 +1,3 @@
-// The Overview tab's task list under the stat cards: Needs Attention while the project runs, ranked
-// by the server with one reason each, and Loose Ends (tasks left open) once it is completed or cancelled
 erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 	constructor(overview) {
 		this.overview = overview;
@@ -32,7 +30,6 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 	}
 
 	render_list(attention, { title, subtitle, badge_label, badges }) {
-		// with nothing to chase the section is left out entirely; a failed load still says so
 		if (attention?.total === 0) return;
 
 		const $section = $('<section class="po-section">').appendTo(this.overview.$root);
@@ -50,14 +47,11 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 	}
 
 	make_list($wrapper, tasks, { badge_label, badges }) {
-		// a status added through Customize Form has no badge of its own, so it shows as itself in gray
 		const fallback = (reason) => ({ label: __(reason), theme: "gray" });
 		const rows = tasks.map((task) => ({ ...task, ...(badges[task.reason] || fallback(task.reason)) }));
 		return new frappe.ui.EmbeddedList({
 			wrapper: $wrapper,
-			// the rows are already ranked by the server and sent with the rest of the overview
 			get_data: () => Promise.resolve(rows),
-			// every row sent is shown, so the list has no Load More
 			page_size: rows.length,
 			show_search: false,
 			on_row_click: (row) => frappe.set_route("Form", "Task", row.task),
@@ -112,7 +106,6 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 		};
 	}
 
-	// the same overlapping group the list view shows for Assigned To
 	assignee_html(users) {
 		if (!users.length) return "";
 		const avatars = users.map((user) => {
@@ -128,7 +121,6 @@ erpnext.ProjectOverviewAttention = class ProjectOverviewAttention {
 		return due.format(due.year() === moment().year() ? "D MMM" : "D MMM YYYY");
 	}
 
-	// plain text: the Overdue badge already marks the row, so the delay isn't coloured again
 	delay_html({ days_late }) {
 		if (!days_late) return "";
 		return days_late === 1 ? __("1 day") : __("{0} days", [days_late]);

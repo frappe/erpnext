@@ -6,7 +6,6 @@ const OPEN_TASK_STATUS = ["not in", ["Completed", "Cancelled", "Template"]];
 frappe.ui.form.on("Project", {
 	refresh(frm) {
 		if (frm.is_new() || !frm.get_field("overview_html")) return;
-		// every panel is built from Tasks, so without them the tab (this is its only field) is hidden
 		const can_read_tasks = frappe.model.can_read("Task");
 		frm.toggle_display("overview_html", can_read_tasks);
 		if (!can_read_tasks) return;
@@ -34,7 +33,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		this.show();
 	}
 
-	// data is loaded only while the tab is open, and again after each form refresh
 	async show() {
 		if (!this.is_active() || !this.needs_refresh) return;
 		await frappe.require(["desk_charts.bundle.js", "desk_charts.bundle.css", "embedded_list.bundle.js"]);
@@ -84,9 +82,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		}
 	}
 
-	// the chart shares its row with the task donut; without a chart the donut sits beside the people list
-	// the chart shares its row with the task donut, and the people list with profitability; without a
-	// chart the donut takes the chart's place beside profitability
 	render_sections(data) {
 		const chart = data.planned_vs_completed;
 		const row = (css_class) => $(`<div class="po-section ${css_class}">`).appendTo(this.$root);
@@ -97,13 +92,19 @@ erpnext.ProjectOverview = class ProjectOverview {
 			this.attention.render(data);
 			const $bottom = row("po-two-col");
 			this.breakdown.render_people($bottom, data);
-			this.breakdown.render_profitability($bottom, data.profitability);
+			this.render_profitability($bottom, data);
 		} else {
 			this.attention.render(data);
 			const $top = row("po-two-col");
 			this.breakdown.render_tasks($top, data);
-			this.breakdown.render_profitability($top, data.profitability);
+			this.render_profitability($top, data);
 			this.breakdown.render_people(row(""), data);
+		}
+	}
+
+	render_profitability($parent, data) {
+		if (data.profitability || data.errors.profitability) {
+			this.breakdown.render_profitability($parent, data.profitability);
 		}
 	}
 
@@ -112,11 +113,9 @@ erpnext.ProjectOverview = class ProjectOverview {
 	}
 
 	render_header(data) {
-		// with every task cancelled there is no delivery or milestone to speak of
 		if (data?.summary?.all_cancelled) return;
 		const items = [];
 		if (data?.delivery) {
-			// once the project is completed, how it finished replaces what is coming up
 			items.push(
 				data.delivery.status === "Cancelled"
 					? this.cancelled_item(data.delivery)
@@ -153,7 +152,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return $item;
 	}
 
-	// how far a cancelled project got, against the dates it was planned for
 	cancelled_item({ percent_complete }) {
 		const $item = $('<span class="po-milestone">').append(frappe.utils.icon("circle-x", "sm"));
 		$('<span class="po-milestone-link">').text(__("Cancelled")).appendTo($item);
@@ -194,7 +192,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return moment(due_date).format("D MMM") + " · " + relative;
 	}
 
-	// left out entirely when the project has no expected dates
 	date_range_text() {
 		const { expected_start_date: start, expected_end_date: end } = this.frm.doc;
 		const full = (date) => moment(date).format("D MMM YYYY");
@@ -206,8 +203,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 	}
 
 	render_stats(stats, loading) {
-		// a closed project has nothing open or overdue, so those cards report how it ended instead;
-		// a cancelled one never reached its dates, so being on time doesn't apply
 		const delivery = stats && this.data.delivery;
 		const cancelled = delivery?.status === "Cancelled";
 		let labels = [__("Open Tasks"), __("Overdue"), __("Hours Logged")];
@@ -215,15 +210,16 @@ erpnext.ProjectOverview = class ProjectOverview {
 		else if (delivery) labels = [__("Tasks Delivered"), __("On Time"), __("Hours Logged")];
 		const failed = () => ({ value: "—", caption: this.error_text(__("Could not load tasks")) });
 		let cards = labels.map((label) => (loading ? { loading } : failed()));
+		const hours = stats?.hours && this.hours_card(stats);
 		if (cancelled) {
-			cards = [this.delivered_card(delivery), this.hours_card(stats)];
+			cards = [this.delivered_card(delivery), hours];
 		} else if (delivery) {
-			cards = [this.delivered_card(delivery), this.on_time_card(delivery), this.hours_card(stats)];
+			cards = [this.delivered_card(delivery), this.on_time_card(delivery), hours];
 		} else if (stats) {
-			cards = [this.open_tasks_card(stats), this.overdue_card(stats), this.hours_card(stats)];
+			cards = [this.open_tasks_card(stats), this.overdue_card(stats), hours];
 		}
-		cards.forEach((card, i) => (card.label = labels[i]));
-		// left out when the user can't read Timesheets
+		cards.forEach((card, i) => card && (card.label = labels[i]));
+		cards = cards.filter(Boolean);
 		if (stats && this.data.unbilled) cards.push(this.unbilled_card(this.data.unbilled));
 		this.$root.append(frappe.ui.stat_cards({ items: cards }));
 	}
@@ -249,7 +245,7 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return {
 			value: count ? $('<span class="po-error">').text(format_number(count, null, 0)) : "0",
 			caption,
-			// the tasks counted, as a due-date filter can't leave out those still awaiting review
+			// by name, as a due-date filter can't leave out tasks still awaiting review
 			onclick: count ? () => this.open_list("Task", { name: ["in", tasks] }) : null,
 		};
 	}
@@ -265,7 +261,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		};
 	}
 
-	// only tasks with both an Expected End Date and a Completed On can be on time or late
 	on_time_card({ rated, late }) {
 		if (!rated) return { value: "—", caption: __("No Expected End Dates to compare") };
 		let caption = __("Every task finished on time");
@@ -293,7 +288,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return {
 			value: this.hours_text(logged),
 			caption,
-			// actual_time adds up the submitted time logs booked to this project
 			onclick: () => this.open_list("Timesheet", { project: this.project, docstatus: 1 }),
 		};
 	}
@@ -302,9 +296,11 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return {
 			label: __("Unbilled"),
 			value: format_currency(amount, currency, 0),
-			caption: amount
-				? __("{0} of billable time not invoiced", [this.hours_text(hours)])
-				: __("All billable time invoiced"),
+			caption: !amount
+				? __("All billable time invoiced")
+				: hours == null
+				? __("Billable time not invoiced")
+				: __("{0} of billable time not invoiced", [this.hours_text(hours)]),
 			onclick: () =>
 				this.open_list("Timesheet", {
 					"Timesheet Detail.project": this.project,
@@ -315,7 +311,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		};
 	}
 
-	// skeletons while loading; on failure the same shapes say so, never showing 0
 	render_placeholders(loading) {
 		this.render_stats(null, loading);
 		const $panels = $('<div class="po-section po-two-col">').appendTo(this.$root);
@@ -361,7 +356,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		);
 	}
 
-	// nothing went ahead, so progress, workload and delivery would all be empty panels
 	render_all_cancelled(count) {
 		this.$root.append(
 			frappe.ui.empty_state({
@@ -381,7 +375,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		);
 	}
 
-	// title and subtitle on the left; the action sits level with the subtitle, just above the content
 	section_head($parent, { title, subtitle, action }) {
 		const $head = $('<div class="po-head">').appendTo($parent);
 		const $text = $('<div class="po-head-text">').appendTo($head);
@@ -391,7 +384,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		return $head;
 	}
 
-	// charts keep window and resize listeners until destroyed, so they're released before every redraw
 	add_chart(chart) {
 		this.charts.push(chart);
 		return chart;
@@ -402,7 +394,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		this.charts = [];
 	}
 
-	// an info mark after a section title, with the detail in its tooltip
 	info_icon(text) {
 		const $icon = $('<span class="po-title-info">').html(frappe.utils.icon("info", "sm"));
 		frappe.ui.tooltip($icon, { text, text_align: "start", delay: 100 });
@@ -419,7 +410,6 @@ erpnext.ProjectOverview = class ProjectOverview {
 		});
 	}
 
-	// the same link as an arrow only, named by its tooltip, for a panel's header
 	icon_link(tooltip, onclick) {
 		return frappe.ui.button({
 			icon: "arrow-up-right",

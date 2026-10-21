@@ -1,5 +1,3 @@
-// The Overview tab's task donut and per-person list: open work while the project runs, and how it was
-// delivered once it is completed or cancelled
 erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 	constructor(overview) {
 		this.overview = overview;
@@ -34,7 +32,6 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		);
 	}
 
-	// billed against cost as the Costing tab adds them up, with the gross margin in the middle
 	render_profitability($parent, profitability) {
 		const $panel = $('<div class="po-panel bg-surface-base">').appendTo($parent);
 		const $head = this.overview.section_head($panel, {
@@ -116,7 +113,6 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 			slices: by_status.statuses.map(({ status, count, tasks }) => ({
 				label: __(status),
 				value: count,
-				// a status added through Customize Form has no colour of its own
 				color: colors[status] || "var(--surface-gray-4)",
 				onclick: () => this.overview.open_list("Task", { name: ["in", tasks] }),
 			})),
@@ -124,8 +120,7 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		});
 	}
 
-	// each slice opens the tasks behind it. frappe-charts folds slices past maxSlices into 'Rest' and reorders
-	// them, which would break the index lookup, so every slice is kept in the order given
+	// past maxSlices frappe-charts folds slices into 'Rest' and reorders them, breaking the index lookup
 	donut($panel, { slices, total }) {
 		this.overview.add_chart(
 			frappe.utils.make_chart($('<div class="po-donut">').appendTo($panel)[0], {
@@ -144,7 +139,6 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		);
 	}
 
-	// the busiest people, keeping Unassigned in view; with more than five rows the rest are in the Task List
 	render_workload($panel, $head, workload) {
 		if (!workload) return this.error($panel);
 
@@ -166,8 +160,6 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		});
 	}
 
-	// one row per person: avatar, name, and their count with the overdue (or late) part in red; the row
-	// opens their tasks
 	people_list($panel, rows, { count, note, empty, onclick }) {
 		if (!rows.length) {
 			$panel.append(frappe.ui.empty_state({ icon: "users", title: empty }));
@@ -209,7 +201,7 @@ erpnext.ProjectOverviewBreakdown = class ProjectOverviewBreakdown {
 		});
 	}
 
-	// the outcomes come from the server, so their labels are written out here to be picked up for translation
+	// written out so the server's outcome labels are picked up for translation
 	outcomes() {
 		return {
 			"On Time": { label: __("On Time"), color: "var(--surface-green-7)" },

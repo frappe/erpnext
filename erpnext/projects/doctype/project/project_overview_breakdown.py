@@ -9,9 +9,7 @@ import frappe
 if TYPE_CHECKING:
 	from erpnext.projects.doctype.project.project_overview import ProjectOverview
 
-# workflow order, so the donut and its legend read from new work to closed work
 TASK_STATUSES = ("Open", "Working", "Pending Review", "Overdue", "Completed", "Cancelled")
-# how a completed project's tasks ended up, best first
 DELIVERY_OUTCOMES = ("On Time", "Late", "No Due Date", "Still Open", "Cancelled")
 
 

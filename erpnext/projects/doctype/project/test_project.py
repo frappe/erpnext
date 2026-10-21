@@ -467,12 +467,10 @@ class TestProject(ERPNextTestSuite):
 		def subjects(**sort):
 			return [task.subject for task in get_project_tasks(project, **sort)]
 
-		# by rank, not alphabetically, with the empty priority last both ways
 		self.assertEqual(subjects(sort_by="priority", sort_order="desc"), ["Urgent", "High", "Low", "None"])
 		self.assertEqual(subjects(sort_by="priority", sort_order="asc"), ["Low", "High", "Urgent", "None"])
 		self.assertEqual(subjects(sort_by="status", sort_order="asc"), ["Urgent", "None", "High", "Low"])
 		self.assertEqual(subjects(), ["Low", "Urgent", "None", "High"])
-		# any Task column works; internal ones and names that aren't columns don't
 		self.assertEqual(len(get_project_tasks(project, sort_by="expected_time")), 4)
 		self.assertRaises(frappe.ValidationError, get_project_tasks, project, sort_by="_assign")
 		self.assertRaises(frappe.ValidationError, get_project_tasks, project, sort_by="subject; drop")

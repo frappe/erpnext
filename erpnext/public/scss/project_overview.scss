@@ -1,8 +1,6 @@
 .project-overview {
-	// lets rows respond to the width the form gives the tab, not the window's
 	container-type: inline-size;
 
-	// keeps the last section clear of the comment area that follows the form
 	padding-bottom: var(--padding-xl);
 
 	.po-header {
@@ -53,7 +51,6 @@
 		min-width: 0;
 	}
 
-	// inside a panel the panel's own gap spaces the heading
 	.po-panel > .po-head {
 		margin-bottom: 0;
 	}
@@ -121,14 +118,11 @@
 		color: var(--ink-gray-5);
 	}
 
-	// nobody to show, so the circle is left empty and dashed
 	.po-avatar-unassigned .es-avatar__fallback {
 		background: transparent;
 		border: 1px dashed var(--outline-gray-4);
 	}
 
-	// an amount with its currency is wider than a task count, so the margin sits smaller in the middle;
-	// a loss reads in red
 	.po-profit-donut .donut-center-value {
 		font-size: var(--text-base);
 	}
@@ -152,8 +146,6 @@
 		font-weight: var(--weight-medium);
 	}
 
-	// the chart and the donut share the row equally, as the donut's legend needs the width; they
-	// stack once the tab is too narrow for both
 	.po-chart-row {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));

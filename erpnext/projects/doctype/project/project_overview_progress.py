@@ -3,13 +3,14 @@
 
 from datetime import date
 from functools import cached_property
+from itertools import groupby
 from math import ceil
+from operator import itemgetter
 
 import frappe
 from frappe.utils import add_days, date_diff, flt, getdate
 
 STEP_DAYS = 7
-# a long project is drawn every few weeks rather than with hundreds of points
 MAX_POINTS = 60
 CLOSED_PROJECT_STATUSES = ("Completed", "Cancelled")
 
@@ -30,8 +31,7 @@ class PlannedVsCompleted:
 		self.method = project.percent_complete_method
 
 	def build(self) -> dict:
-		# cancelled tasks count as closed, so a project of only cancelled tasks would chart as 100% done;
-		# a cancelled project was stopped short of its plan, so there is nothing to measure against it
+		# cancelled tasks count as closed, so only cancelled tasks would chart as 100% done
 		if (
 			self.method == "Manual"
 			or self.project.status == "Cancelled"
@@ -51,7 +51,34 @@ class PlannedVsCompleted:
 			"completed_without_date": sum(
 				1 for task in self.tasks if task.status == "Completed" and not task.completed_on
 			),
+			"worst_gap": self.worst_gap() if self.project.status == "Completed" and self.has_plan else None,
 		}
+
+	def worst_gap(self) -> dict:
+		"""How far Completed fell behind Planned at worst, and on which date (no date if never behind).
+
+		Checked on every planned date rather than the chart's points, which are a week or more apart, so
+		a task due one day and finished the next still counts; the gap can only grow when Planned does.
+		"""
+		total = sum(self.weights.values())
+		planned = sorted((self.planned_date(task), self.weights[task.name]) for task in self.tasks)
+		completed = sorted(
+			(self.closed_date(task), self.weights[task.name]) for task in self.tasks if task.is_closed
+		)
+		worst, worst_on = 0, None
+		planned_weight = completed_weight = 0
+		done = 0
+		for on, due in groupby(planned, key=itemgetter(0)):
+			if on > self.today:
+				break
+			planned_weight += sum(weight for _, weight in due)
+			while done < len(completed) and completed[done][0] <= on:
+				completed_weight += completed[done][1]
+				done += 1
+			gap = (planned_weight - completed_weight) / total * 100 if total else 0
+			if gap > worst:
+				worst, worst_on = gap, on
+		return {"points": flt(worst, 1), "date": str(worst_on) if worst_on else None}
 
 	def point(self, on: date, is_latest: bool) -> dict:
 		"""The latest point up to today shows the project as it stands today; later ones have no Completed."""

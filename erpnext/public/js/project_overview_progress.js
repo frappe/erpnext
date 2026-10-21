@@ -1,13 +1,10 @@
-// a gap wider than this many points behind plan reads as a warning
 const BEHIND_PLAN_WARNING = 5;
 
-// The Overview tab's Planned vs Completed chart: cumulative % complete over time, worked out by the server
 erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 	constructor(overview) {
 		this.overview = overview;
 	}
 
-	// nothing to plot (Manual % Complete, or only cancelled tasks) leaves the panel out; a failed load still shows
 	has_chart(chart) {
 		return !chart || chart.points.length > 0;
 	}
@@ -23,10 +20,8 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		this.chart = chart;
 		const { has_plan } = chart;
 		const $head = this.overview.section_head($panel, {
-			// without a plan only one line is drawn, so the title says just that
 			title: has_plan ? __("Planned vs Completed") : __("Completed over Time"),
 		});
-		// what the lines measure and which dates they use, kept out of the way in a tooltip
 		$head.find(".po-title").append(this.overview.info_icon(this.about_text()));
 		$('<div class="po-subtitle">').append(this.subtitle()).appendTo($head.find(".po-head-text"));
 
@@ -74,7 +69,6 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		);
 	}
 
-	// where the project stands today, and the gap to plan or why there is no plan
 	subtitle() {
 		const delivery = this.overview.data.delivery;
 		if (delivery) return this.delivery_subtitle(delivery);
@@ -89,7 +83,6 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 
 		const $subtitle = $("<span>");
 		if (!has_plan) {
-			// the count is also the way to the tasks that need dates, as the panel has no room for a button
 			const { undated, total } = this.chart;
 			return $subtitle.text(__("{0} done", [completed]) + " · ").append(
 				$('<a class="po-subtitle-link">')
@@ -103,7 +96,6 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 			.append(this.gap_text(point));
 	}
 
-	// a completed project: how it finished against plan, and how far behind it fell on the way
 	delivery_subtitle({ days_late, finished_on }) {
 		const parts = [];
 		if (days_late > 0) {
@@ -124,17 +116,16 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 			parts.push(__("Finished {0}", [moment(finished_on).format("D MMM YYYY")]));
 		}
 
-		const { points, has_plan, undated, total } = this.chart;
+		const { has_plan, undated, total } = this.chart;
 		if (!has_plan) {
 			parts.push(__("No plan: {0} of {1} tasks have no Expected End Date", [undated, total]));
 			return $("<span>").text(parts.join(" · "));
 		}
 
-		const tracked = points.filter((point) => point.completed != null);
-		if (!tracked.length) return $("<span>").text(parts.join(" · "));
+		const { worst_gap } = this.chart;
+		if (!worst_gap) return $("<span>").text(parts.join(" · "));
 		const $subtitle = $("<span>").text(parts.length ? parts.join(" · ") + " · " : "");
-		const worst = tracked.reduce((a, b) => (b.planned - b.completed > a.planned - a.completed ? b : a));
-		const gap = Math.round(worst.planned - worst.completed);
+		const gap = Math.round(worst_gap.points);
 		if (gap <= 0) {
 			return $subtitle.append(
 				$('<span class="po-chart-gap text-ink-green-7">').text(__("Never behind plan"))
@@ -143,7 +134,7 @@ erpnext.ProjectOverviewProgress = class ProjectOverviewProgress {
 		return $subtitle.append(
 			$('<span class="po-chart-gap">')
 				.addClass(gap > BEHIND_PLAN_WARNING ? "text-ink-amber-7" : "text-ink-gray-7")
-				.text(__("At most {0} pts behind, on {1}", [gap, moment(worst.date).format("D MMM")]))
+				.text(__("At most {0} pts behind, on {1}", [gap, moment(worst_gap.date).format("D MMM")]))
 		);
 	}
 

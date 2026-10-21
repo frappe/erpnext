@@ -2,28 +2,33 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.model import get_permitted_fields
 from frappe.utils import flt
 
 
 def get_unbilled_time(project: str) -> dict | None:
 	"""Billable time on the project's submitted Timesheets that is not yet on a Sales Invoice.
 
-	None when the user can't read Timesheets, so the overview leaves the Unbilled card out.
+	None when the user can't read Timesheets or their billing amount, so the overview leaves the Unbilled
+	card out; hours are None when the user's permission levels hide them.
 	"""
 	if not frappe.has_permission("Timesheet", "read"):
 		return None
+	permitted = get_permitted_fields("Timesheet Detail", parenttype="Timesheet", permission_type="read")
+	if "base_billing_amount" not in permitted:
+		return None
 
 	logs = unbilled_time_logs(project)
-	company = frappe.db.get_value("Project", project, "company")
 	return {
-		"currency": frappe.get_cached_value("Company", company, "default_currency"),
+		# a Timesheet converts its billing into the site's default currency, not the company's
+		"currency": frappe.defaults.get_global_default("currency"),
 		"amount": sum(flt(log.base_billing_amount) for log in logs),
-		"hours": sum(flt(log.billing_hours) for log in logs),
+		"hours": sum(flt(log.billing_hours) for log in logs) if "billing_hours" in permitted else None,
 	}
 
 
 def unbilled_time_logs(project: str) -> list[frappe._dict]:
-	# Timesheets are read through get_list so the user's permissions decide which ones count
+	# get_list, so the user's Timesheet permissions decide which ones count
 	timesheets = frappe.get_list(
 		"Timesheet",
 		filters=[["Timesheet Detail", "project", "=", project], ["docstatus", "=", 1]],

@@ -7,6 +7,7 @@ from functools import cached_property
 
 import frappe
 from frappe import _
+from frappe.model import get_permitted_fields
 from frappe.utils import add_days, date_diff, flt, getdate
 
 from erpnext.projects.doctype.project.project_overview_breakdown import TaskBreakdown
@@ -15,11 +16,23 @@ from erpnext.projects.doctype.project.project_overview_unbilled import get_unbil
 
 CLOSED_STATUSES = ("Completed", "Cancelled")
 DUE_SOON_DAYS = 7
-# most urgent first; a task is listed once, under the first reason that applies
 ATTENTION_REASONS = ("Overdue", "Blocked", "Unassigned", "Due Soon")
-# highest first; a task without a priority comes after Low
 TASK_PRIORITIES = ("Urgent", "High", "Medium", "Low")
 ATTENTION_LIMIT = 10
+PROJECT_FIELDS = (
+	"name",
+	"status",
+	"actual_time",
+	"percent_complete",
+	"percent_complete_method",
+	"expected_start_date",
+	"expected_end_date",
+	"company",
+	"total_billed_amount",
+	"gross_margin",
+	"per_gross_margin",
+)
+MARGIN_FIELDS = ("total_billed_amount", "gross_margin", "per_gross_margin")
 
 
 @frappe.whitelist()
@@ -58,24 +71,14 @@ class ProjectOverview:
 	)
 
 	def __init__(self, project: str):
-		self.project = frappe.db.get_value(
-			"Project",
-			project,
-			[
-				"name",
-				"status",
-				"actual_time",
-				"percent_complete",
-				"percent_complete_method",
-				"expected_start_date",
-				"expected_end_date",
-				"company",
-				"total_billed_amount",
-				"gross_margin",
-				"per_gross_margin",
-			],
-			as_dict=True,
-		)
+		self.project = frappe.db.get_value("Project", project, PROJECT_FIELDS, as_dict=True)
+		# hidden as on the form, where Administrator sees every field
+		self.hidden_fields = set()
+		if frappe.session.user != "Administrator":
+			permitted = set(get_permitted_fields("Project", permission_type="read"))
+			self.hidden_fields = {field for field in PROJECT_FIELDS if field not in permitted}
+		for field in self.hidden_fields:
+			self.project[field] = None
 		self.today = getdate()
 		self.due_soon_until = add_days(self.today, DUE_SOON_DAYS)
 
@@ -128,10 +131,12 @@ class ProjectOverview:
 	def unbilled(self) -> dict | None:
 		return get_unbilled_time(self.project.name)
 
-	def profitability(self) -> dict:
+	def profitability(self) -> dict | None:
 		"""Billed against cost, using the gross margin the project stores for its Costing tab, so the two
 		always agree; cost is what billing less that margin leaves. With nothing billed there is no
-		margin percentage to show."""
+		margin percentage to show. None when the user's permission levels hide those fields."""
+		if self.hidden_fields.intersection(MARGIN_FIELDS):
+			return None
 		billed = flt(self.project.total_billed_amount)
 		margin = flt(self.project.gross_margin)
 		return {
@@ -243,11 +248,14 @@ class ProjectOverview:
 			"tasks": [task.name for task in overdue],
 		}
 
-	def hours_stats(self) -> dict:
+	def hours_stats(self) -> dict | None:
 		"""Hours on submitted Timesheets against the Expected Time of the project's tasks.
 
-		Group tasks are left out of the expected total, as their subtasks carry the estimates.
+		Group tasks are left out of the expected total, as their subtasks carry the estimates. None when
+		the user's permission levels hide the hours logged.
 		"""
+		if "actual_time" in self.hidden_fields:
+			return None
 		expected = sum(
 			flt(task.expected_time) for task in self.tasks if task.status != "Cancelled" and not task.is_group
 		)
