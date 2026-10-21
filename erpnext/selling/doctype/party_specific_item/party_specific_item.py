@@ -41,31 +41,21 @@ class PartySpecificItem(Document):
 			)
 
 
-def get_restricted_items_condition(party_type, party):
-	"""Return a condition matching items reserved for other parties and not for this party."""
+def get_allowed_items_condition(party_type, party):
 	group_type = f"{party_type} Group"
+	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
 	rules = frappe.get_all(
 		"Party Specific Item",
-		filters={"party_type": ("in", [party_type, group_type])},
-		fields=["party_type", "party", "restrict_based_on", "based_on_value"],
+		filters={"party_type": party_type, "party": party},
+		fields=["restrict_based_on", "based_on_value"],
 	)
-	if not rules:
-		return None
-
-	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
-	own_rules, other_rules = [], []
-	for rule in rules:
-		allowed_party = party if rule.party_type == party_type else party_group
-		if rule.party == allowed_party:
-			own_rules.append(rule)
-		else:
-			other_rules.append(rule)
-
-	if not other_rules:
-		return None
-	if not own_rules:
-		return get_rules_condition(other_rules)
-	return get_rules_condition(other_rules) & ~get_rules_condition(own_rules)
+	if party_group:
+		rules += frappe.get_all(
+			"Party Specific Item",
+			filters={"party_type": group_type, "party": party_group},
+			fields=["restrict_based_on", "based_on_value"],
+		)
+	return get_rules_condition(rules) if rules else None
 
 
 def get_rules_condition(rules):
