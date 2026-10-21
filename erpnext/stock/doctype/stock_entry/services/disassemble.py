@@ -27,11 +27,14 @@ def _qty_tolerance(precision: int) -> float:
 
 
 def get_whole_number_units(row) -> tuple[float, float] | None:
-	"""Row qty in its whole-number UOM and the stock qty of one such unit, or None when any qty is allowed."""
-	if cint(frappe.get_cached_value("UOM", row.uom, "must_be_whole_number")):
-		return flt(row.qty), flt(row.conversion_factor)
-	if cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")):
+	"""Row qty in its coarser whole-number UOM and the stock qty of one such unit, or None when any
+	qty is allowed. Rounding in the finer unit can leave a fraction of the coarser one."""
+	uom_is_whole = cint(frappe.get_cached_value("UOM", row.uom, "must_be_whole_number"))
+	stock_uom_is_whole = cint(frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number"))
+	if stock_uom_is_whole and (not uom_is_whole or flt(row.conversion_factor) < 1):
 		return flt(row.transfer_qty), 1.0
+	if uom_is_whole:
+		return flt(row.qty), flt(row.conversion_factor)
 	return None
 
 
