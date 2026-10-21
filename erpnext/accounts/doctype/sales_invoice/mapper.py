@@ -590,8 +590,17 @@ def create_invoice_discounting(source_name: str, target_doc: str | dict | Docume
 
 @frappe.whitelist()
 def create_dunning(
-	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
+	source_name: str,
+	target_doc: str | dict | Document | None = None,
+	args: str | dict | bool | None = None,
+	ignore_permissions: bool = False,
 ):
+	if isinstance(args, bool):
+		ignore_permissions = args
+		args = None
+
+	args = frappe.parse_json(args) or {}
+
 	def postprocess_dunning(source, target):
 		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
 		if dunning_type:
@@ -632,7 +641,11 @@ def create_dunning(
 			"Payment Schedule": {
 				"doctype": "Overdue Payment",
 				"field_map": {"name": "payment_schedule", "parent": "sales_invoice"},
-				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
+				"condition": lambda doc: (
+					doc.outstanding > 0
+					and getdate(doc.due_date) < getdate()
+					and (not args.get("filtered_children") or doc.name in args["filtered_children"])
+				),
 			},
 		},
 		postprocess=postprocess_dunning,
