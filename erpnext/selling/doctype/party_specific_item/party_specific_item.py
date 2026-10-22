@@ -33,6 +33,7 @@ class PartySpecificItem(Document):
 				"party": self.party,
 				"restrict_based_on": self.restrict_based_on,
 				"based_on_value": self.based_on_value,
+				"name": ("!=", self.name),
 			},
 		)
 		if exists:
@@ -47,13 +48,29 @@ def get_allowed_items_condition(party_type, party):
 		filters={"party_type": party_type, "party": party},
 		fields=["restrict_based_on", "based_on_value"],
 	)
-	if party_group:
+	# a group rule applies to the party's group and every group above it in the tree
+	party_groups = get_group_ancestors(group_type, party_group) if party_group else []
+	if party_groups:
 		rules += frappe.get_all(
 			"Party Specific Item",
-			filters={"party_type": group_type, "party": party_group},
+			filters={"party_type": group_type, "party": ("in", party_groups)},
 			fields=["restrict_based_on", "based_on_value"],
 		)
 	return get_rules_condition(rules) if rules else None
+
+
+def get_group_ancestors(group_type, group):
+	"""Return the group and all its ancestor groups (nested set)."""
+	node = frappe.qb.DocType(group_type)
+	ancestor = frappe.qb.DocType(group_type).as_("ancestor")
+	return (
+		frappe.qb.from_(node)
+		.join(ancestor)
+		.on((node.lft >= ancestor.lft) & (node.rgt <= ancestor.rgt))
+		.select(ancestor.name)
+		.where(node.name == group)
+		.run(pluck=True)
+	)
 
 
 def get_rules_condition(rules):
