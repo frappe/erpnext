@@ -136,19 +136,34 @@ class TestPartySpecificItem(ERPNextTestSuite):
 	def test_party_group(self):
 		customer = "_Test Customer With Template"
 		item = "_Test Item"
-		frappe.set_value("Customer", customer, "customer_group", "Government")
+		# a rule on a parent group must also cover a customer sitting in its sub-group
+		parent_group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Party Specific Parent Group",
+				"parent_customer_group": "All Customer Groups",
+				"is_group": 1,
+			}
+		).insert()
+		sub_group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Party Specific Sub Group",
+				"parent_customer_group": parent_group.name,
+			}
+		).insert()
+		frappe.set_value("Customer", customer, "customer_group", sub_group.name)
 
+		other_item = create_item("_Test Party Specific Group Other Item").name
 		create_party_specific_item(
 			party_type="Customer Group",
-			party="Government",
+			party=parent_group.name,
 			restrict_based_on="Item",
 			based_on_value=item,
 		)
-		filters = {"is_sales_item": 1, "customer": customer}
-		items = item_query(
-			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
-		)
-		self.assertTrue(item in flatten(items))
+		self.assertIn(item, search_items(item, {"customer": customer}))
+		# the ancestor rule must actually restrict the customer, not just allow its item
+		self.assertNotIn(other_item, search_items(other_item, {"customer": customer}))
 
 	def test_party_sees_only_items_from_its_rules(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
