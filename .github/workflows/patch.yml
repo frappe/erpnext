@@ -35,7 +35,7 @@ jobs:
 
     env:
       ERPNEXT_CI_USER: ci
-      CI_DB_DATADIR: /home/ci/mariadb-data
+      CI_DB_DATADIR: /home/ci/db-ram/data
       PIP_CACHE_DIR: /home/ci/.cache/pip
       npm_config_cache: /home/ci/.cache/npm
       YARN_CACHE_FOLDER: /home/ci/.cache/yarn
