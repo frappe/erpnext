@@ -91,7 +91,12 @@ def get_item_details(
 	overwrite_warehouse: bool = True,
 ) -> ItemDetails:
 	validate_pricing_context(ctx)
-	return _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
+	out = _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
+	for warehouse in (out.warehouse, ctx.warehouse, ctx.from_warehouse):
+		if warehouse:
+			erpnext.require_user_permission("Warehouse", warehouse)
+
+	return out
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
@@ -1937,6 +1942,7 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 	item_group = get_item_group_defaults(item_code, company)
 	brand = get_brand_defaults(item_code, company)
 	if item.get("is_stock_item"):
+<<<<<<< HEAD
 		if not warehouse:
 			warehouse = (
 				item.get("default_warehouse")
@@ -1944,6 +1950,9 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 				or brand.get("default_warehouse")
 			)
 
+=======
+		warehouse = warehouse or get_accessible_warehouse(get_default_warehouse(item_code, company))
+>>>>>>> ed0348d (fix(stock): check warehouse user permission in get_item_details)
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
 		) or {"valuation_rate": item.get("valuation_rate") or 0}
