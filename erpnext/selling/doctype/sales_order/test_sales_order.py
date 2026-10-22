@@ -184,6 +184,22 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.reload()
 		self.assertEqual(so.status, "Completed")
 
+	@ERPNextTestSuite.change_settings(
+		"Selling Settings",
+		{"skip_delivery_note_for_service_items": 1, "dn_required": "Yes"},
+	)
+	def test_dn_required_allows_invoicing_skipped_service_rows(self):
+		service_item = make_item("_Test Service Item For Skip DN", {"is_stock_item": 0}).name
+		so = make_sales_order(item_code=service_item, qty=1, rate=100)
+		self.assertEqual(so.items[0].skip_delivery, 1)
+
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"skip_delivery_note_for_service_items": 1})
 	def test_no_skip_delivery_for_bundle_with_stock_items(self):
 		make_item("_Test Bundle Parent For Skip DN", {"is_stock_item": 0})
