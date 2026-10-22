@@ -413,3 +413,38 @@ class TestGeneralLedger(FrappeTestCase):
 		jv.insert()
 		jv.submit()
 		return jv
+
+	def test_presentation_currency_without_exchange_rate(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.accounts.report import utils as report_utils
+
+		exchange_settings_disabled = frappe.db.get_single_value("Currency Exchange Settings", "disabled")
+		self.addCleanup(
+			frappe.db.set_single_value, "Currency Exchange Settings", "disabled", exchange_settings_disabled
+		)
+		frappe.db.delete("Currency Exchange", {"from_currency": "USD", "to_currency": "INR"})
+		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)
+		getattr(report_utils, "__exchange_rates").clear()
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 8000, submit=True)
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			account=["_Test Bank - _TC"],
+			voucher_no=jv.name,
+			presentation_currency="USD",
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Exchange rate from .*USD.* to .*INR", execute, filters
+		)
+
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date=today(),
+			from_currency="USD",
+			to_currency="INR",
+			exchange_rate=80,
+		).insert()
+		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
+		self.assertEqual(total["debit"], 100)

@@ -33,6 +33,7 @@ class TestConsolidatedFinancialStatement(FrappeTestCase):
 
 	def setUp(self):
 		self.fiscal_year = get_fiscal_year(today(), company=PARENT_COMPANY)[0]
+		make_usd_inr_exchange_rates()
 
 	def run_report(self, **extra):
 		return self.execute_report(**extra)[1]
@@ -175,6 +176,18 @@ class TestConsolidatedFinancialStatement(FrappeTestCase):
 	def get_summary_value(self, label, **extra):
 		summary = self.execute_report(**extra)[4]
 		return next(flt(card["value"]) for card in summary if card["label"] == label)
+
+
+def make_usd_inr_exchange_rates():
+	"""Reports stop when a rate is missing, so the foreign child company needs today's USD<->INR rates."""
+	from erpnext.accounts.report import utils as report_utils
+
+	for from_currency, to_currency, exchange_rate in (("USD", "INR", 62.9), ("INR", "USD", 0.0167)):
+		filters = {"date": today(), "from_currency": from_currency, "to_currency": to_currency}
+		if not frappe.db.exists("Currency Exchange", filters):
+			frappe.get_doc(doctype="Currency Exchange", exchange_rate=exchange_rate, **filters).insert()
+
+	vars(report_utils)["__exchange_rates"].clear()
 
 
 def make_company(name, abbr, currency, country, is_group=0, parent_company=None):
