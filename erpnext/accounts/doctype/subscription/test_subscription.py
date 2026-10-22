@@ -16,6 +16,7 @@ from frappe.utils.data import (
 	getdate,
 	nowdate,
 )
+from freezegun import freeze_time
 
 from erpnext.accounts.doctype.subscription.subscription import get_plan_dimensions, get_prorata_factor
 
@@ -134,6 +135,46 @@ class TestSubscription(FrappeTestCase):
 		subscription.process(posting_date=subscription.current_invoice_end)  # generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Active")
+
+	def test_subscription_grace_period_boundaries(self):
+		for grace_period in (0, 3):
+			for cancel_after_grace in (0, 1):
+				with self.subTest(grace_period=grace_period, cancel_after_grace=cancel_after_grace):
+					settings = frappe.get_single("Subscription Settings")
+					settings.grace_period = grace_period
+					settings.cancel_after_grace = cancel_after_grace
+					settings.save()
+
+					with freeze_time("2026-09-10 12:00:00.123456"):
+						subscription = create_subscription(
+							start_date=nowdate(),
+							generate_invoice_at="Beginning of the current subscription period",
+							submit_invoice=1,
+						)
+						subscription.process(posting_date=nowdate())
+						invoice = subscription.get_current_invoice()
+						self.assertEqual(getdate(invoice.due_date), getdate("2026-09-10"))
+						self.assertGreater(invoice.outstanding_amount, 0)
+						self.assertTrue(
+							subscription.is_past_grace_period(add_days(invoice.due_date, grace_period + 1))
+						)
+
+					for days_overdue in range(grace_period + 2):
+						posting_date = add_days(invoice.due_date, days_overdue)
+						with self.subTest(posting_date=posting_date), freeze_time(
+							f"{posting_date} 12:00:00.123456"
+						):
+							self.assertEqual(subscription.current_invoice_is_past_due(), days_overdue > 0)
+							self.assertEqual(subscription.is_past_grace_period(), days_overdue > grace_period)
+							subscription.process(posting_date=posting_date)
+							if days_overdue == 0:
+								self.assertEqual(subscription.status, "Active")
+							elif days_overdue <= grace_period:
+								self.assertEqual(subscription.status, "Past Due Date")
+							else:
+								self.assertEqual(
+									subscription.status, "Cancelled" if cancel_after_grace else "Unpaid"
+								)
 
 	def test_subscription_is_past_due_doesnt_change_within_grace_period(self):
 		settings = frappe.get_single("Subscription Settings")
