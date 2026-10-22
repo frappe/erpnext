@@ -7,11 +7,20 @@ frappe.ui.form.on("Payment Order", {
 			return {
 				filters: {
 					is_company_account: 1,
+					company: frm.doc.company,
+					disabled: 0,
 				},
 			};
 		});
 
 		frm.set_df_property("references", "cannot_add_rows", true);
+	},
+	company: function (frm) {
+		frm.set_value({
+			company_bank_account: "",
+			company_bank: "",
+			account: "",
+		});
 	},
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 0) {
@@ -75,6 +84,7 @@ frappe.ui.form.on("Payment Order", {
 				party: frm.doc.supplier || "",
 			},
 			get_query_filters: {
+				company: frm.doc.company,
 				bank: frm.doc.bank,
 				docstatus: 1,
 				payment_type: ["!=", "Receive"],
@@ -96,6 +106,7 @@ frappe.ui.form.on("Payment Order", {
 				party: frm.doc.supplier || "",
 			},
 			get_query_filters: {
+				company: frm.doc.company,
 				bank: frm.doc.bank,
 				docstatus: 1,
 				status: ["=", "Initiated"],
