@@ -5,6 +5,8 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
+from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import get_work_order_qty
+
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
 
@@ -454,8 +456,8 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		extra_materials_pct = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
 		)
-		to_transfer_qty = flt(self.wo_doc.material_transferred_for_manufacturing) + flt(
-			self.doc.fg_completed_qty
+		to_transfer_qty = flt(self.wo_doc.material_transferred_for_manufacturing) + get_work_order_qty(
+			self.doc
 		)
 		limit_pct = extra_materials_pct or overproduction_pct
 		transfer_limit_qty = max_qty + (max_qty * limit_pct / 100)
@@ -463,7 +465,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def _calculate_item_transfer_qty(self, item_details, allow_overproduction, max_qty):
 		pending_to_issue = flt(item_details.required_qty) - flt(item_details.transferred_qty)
-		desire_to_transfer = flt(self.doc.fg_completed_qty) * flt(item_details.required_qty) / max_qty
+		desire_to_transfer = get_work_order_qty(self.doc) * flt(item_details.required_qty) / max_qty
 		can_transfer = (
 			desire_to_transfer <= pending_to_issue
 			or (desire_to_transfer > 0 and self.backflush_based_on == "Material Transferred for Manufacture")

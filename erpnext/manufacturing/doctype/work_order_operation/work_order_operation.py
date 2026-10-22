@@ -68,3 +68,11 @@ def get_output_qty_per_unit(operation_id):
 		"Work Order Operation", operation_id, "output_qty_per_unit", cache=True
 	)
 	return flt(output_qty_per_unit) or 1.0
+
+
+def get_work_order_qty(stock_entry):
+	"""`fg_completed_qty` in Work Order units. A Job Card entry counts the operation's Output Item."""
+	operation_id = stock_entry.job_card and frappe.db.get_value(
+		"Job Card", stock_entry.job_card, "operation_id", cache=True
+	)
+	return flt(stock_entry.fg_completed_qty) / get_output_qty_per_unit(operation_id)

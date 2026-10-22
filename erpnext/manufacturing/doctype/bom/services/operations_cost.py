@@ -12,7 +12,7 @@ from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
-from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import get_output_qty_per_unit
+from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import get_work_order_qty
 
 
 def add_additional_cost(stock_entry, work_order, job_card=None):
@@ -69,14 +69,6 @@ def _non_stock_items_cost(item_amounts, stock_entry, bom):
 	for name in non_stock_items:
 		cost += flt(item_amounts.get(name[0])) * get_work_order_qty(stock_entry) / flt(bom.quantity)
 	return cost
-
-
-def get_work_order_qty(stock_entry):
-	"""`fg_completed_qty` in Work Order units. A Job Card entry counts the operation's Output Item."""
-	operation_id = stock_entry.job_card and frappe.db.get_value(
-		"Job Card", stock_entry.job_card, "operation_id", cache=True
-	)
-	return flt(stock_entry.fg_completed_qty) / get_output_qty_per_unit(operation_id)
 
 
 def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_account=None, job_card=None):
