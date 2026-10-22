@@ -434,6 +434,7 @@ class TestReconciliationBalances(ERPNextTestSuite):
 
 		self.assertReportsMatchLedger(item, 2, 200)
 		self.assertStockBalance(item, 0, 0, id_plant=[plant_a], include_zero_stock_items=1)
+		self.assertStockLedger(item, 0, 0, id_plant=[plant_a])
 		rows = self.get_balance_rows(item, show_dimension_wise_stock=1, include_zero_stock_items=1)
 		self.assertEqual(sum(row.bal_qty for row in rows), 2)
 		self.assertEqual(sum(row.bal_val for row in rows), 200)
