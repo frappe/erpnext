@@ -1119,10 +1119,23 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_installation_note(source_name, target_doc=None, kwargs=None):
+def make_installation_note(
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
+):
+	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
+	from erpnext.stock.utils import get_valid_serial_nos
+
+	# returned_qty_map is keyed by DN Item row and already in the row's sales UOM
+	returned_qty_map = get_returned_qty_map(source_name)
+
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.installed_qty)
-		target.serial_no = obj.serial_no
+		target.qty = flt(obj.qty) - flt(returned_qty_map.get(obj.name, 0)) - flt(obj.installed_qty)
+
+		if obj.serial_no:
+			returned = set(get_returned_serial_nos(obj, source_parent))
+			target.serial_no = "\n".join(s for s in get_valid_serial_nos(obj.serial_no) if s not in returned)
+		else:
+			target.serial_no = obj.serial_no
 
 	doclist = get_mapped_doc(
 		"Delivery Note",
@@ -1137,7 +1150,8 @@ def make_installation_note(source_name, target_doc=None, kwargs=None):
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty,
+				"condition": lambda doc: doc.installed_qty
+				< flt(doc.qty) - flt(returned_qty_map.get(doc.name, 0)),
 			},
 		},
 		target_doc,
