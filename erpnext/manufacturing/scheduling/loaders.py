@@ -171,7 +171,15 @@ def get_carried_operation_qty(work_orders):
 	job_cards = frappe.get_all(
 		"Job Card",
 		filters={"work_order": ("in", list(by_name)), "docstatus": ("<", 2)},
-		fields=["name", "work_order", "operation", "for_quantity", "total_time_in_mins"],
+		fields=["name", "work_order", "operation", "operation_id", "for_quantity", "total_time_in_mins"],
+	)
+	output_qty_per_unit = dict(
+		frappe.get_all(
+			"Work Order Operation",
+			filters={"parent": ("in", list(by_name))},
+			fields=["name", "output_qty_per_unit"],
+			as_list=True,
+		)
 	)
 
 	with_scheduled_time = get_job_cards_with_scheduled_time(job_cards)
@@ -179,7 +187,8 @@ def get_carried_operation_qty(work_orders):
 	for job_card in job_cards:
 		if flt(job_card.total_time_in_mins) or job_card.name in with_scheduled_time:
 			work_order = by_name[job_card.work_order]
-			add_operation_qty(carried, work_order, job_card.operation, flt(job_card.for_quantity))
+			qty = flt(job_card.for_quantity) / flt(output_qty_per_unit.get(job_card.operation_id) or 1)
+			add_operation_qty(carried, work_order, job_card.operation, qty)
 
 	return carried
 
