@@ -727,17 +727,32 @@ class TestAsset(AssetSetup):
 		depr_schedule_of_new_asset = first_asset_depr_schedule_of_new_asset.get("depreciation_schedule")
 
 		self.assertEqual(new_asset.asset_quantity, 2)
+<<<<<<< HEAD
 		self.assertEqual(new_asset.gross_purchase_amount, 24000)
 		self.assertEqual(new_asset.opening_accumulated_depreciation, 4000)
+=======
+		self.assertEqual(new_asset.net_purchase_amount, 2400)
+		self.assertEqual(new_asset.purchase_amount, 2400)
+		self.assertEqual(new_asset.opening_accumulated_depreciation, 98.63)
+>>>>>>> d271eb4 (fix(asset): avoid double-scaling purchase_amount on split)
 		self.assertEqual(new_asset.split_from, asset.name)
 		self.assertEqual(depr_schedule_of_new_asset[0].depreciation_amount, 4000)
 		self.assertEqual(depr_schedule_of_new_asset[1].depreciation_amount, 4000)
 
 		self.assertEqual(asset.asset_quantity, 8)
+<<<<<<< HEAD
 		self.assertEqual(asset.gross_purchase_amount, 96000)
 		self.assertEqual(asset.opening_accumulated_depreciation, 16000)
 		self.assertEqual(depr_schedule_of_asset[0].depreciation_amount, 16000)
 		self.assertEqual(depr_schedule_of_asset[1].depreciation_amount, 16000)
+=======
+		self.assertEqual(asset.net_purchase_amount, 9600)
+		self.assertEqual(asset.purchase_amount, 9600)
+		self.assertEqual(asset.opening_accumulated_depreciation, 394.52)
+		self.assertEqual(depr_schedule_of_asset[0].depreciation_amount, 1600)
+		self.assertEqual(depr_schedule_of_asset[1].depreciation_amount, 1600)
+		self.assertEqual(depr_schedule_of_asset[0].accumulated_depreciation_amount, 1994.52)
+>>>>>>> d271eb4 (fix(asset): avoid double-scaling purchase_amount on split)
 
 		journal_entry = depr_schedule_of_asset[0].journal_entry
 
