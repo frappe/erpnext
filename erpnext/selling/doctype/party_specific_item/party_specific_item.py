@@ -36,6 +36,7 @@ class PartySpecificItem(Document):
 				"party": self.party,
 				"restrict_based_on": self.restrict_based_on,
 				"based_on_value": self.based_on_value,
+				"name": ("!=", self.name),
 			},
 		)
 		if exists:
