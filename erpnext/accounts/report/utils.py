@@ -3,7 +3,8 @@ from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+from frappe.utils import flt, formatdate, get_datetime_str, get_link_to_form, get_table_name
+from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_descendants_of
 from pypika import Order
 
@@ -78,7 +79,7 @@ def convert(value, from_, to, date):
 	:return: Result of converting `value`
 	"""
 	rate = get_rate_as_at(date, from_, to)
-	converted_value = flt(value) / (rate or 1)
+	converted_value = flt(value) / rate
 	return converted_value
 
 
@@ -93,13 +94,31 @@ def get_rate_as_at(date, from_currency, to_currency):
 	:param to_currency: Quote currency
 	:return: Retrieved exchange rate
 	"""
+	if from_currency == to_currency:
+		return 1
 
 	rate = __exchange_rates.get(f"{from_currency}-{to_currency}@{date}")
 	if not rate:
-		rate = get_exchange_rate(from_currency, to_currency, date) or 1
+		rate = get_exchange_rate(from_currency, to_currency, date)
+		if not rate:
+			throw_missing_exchange_rate(date, from_currency, to_currency)
 		__exchange_rates[f"{from_currency}-{to_currency}@{date}"] = rate
 
 	return rate
+
+
+def throw_missing_exchange_rate(date: DateTimeLikeObject, from_currency: str, to_currency: str) -> None:
+	frappe.throw(
+		_(
+			"Exchange rate from {0} to {1} on {2} not found. Create a {3} record and run the report again."
+		).format(
+			frappe.bold(from_currency),
+			frappe.bold(to_currency),
+			frappe.bold(formatdate(date)),
+			get_link_to_form("Currency Exchange", None, _("Currency Exchange")),
+		),
+		title=_("Exchange Rate Missing"),
+	)
 
 
 def convert_to_presentation_currency(
@@ -491,3 +510,10 @@ def get_opening_row(party_type, party, from_date, company):
 			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
+
+
+def has_gl_entry_restrictions() -> bool:
+	"""Snapshot reports read a DuckDB copy that cannot apply the user's GL Entry permission conditions."""
+	from frappe.desk.reportview import build_match_conditions
+
+	return bool(build_match_conditions("GL Entry"))
