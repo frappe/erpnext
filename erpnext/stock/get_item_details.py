@@ -1905,9 +1905,10 @@ def get_valuation_rate(item_code, company, warehouse=None):
 	frappe.has_permission("Item", doc=item_code, throw=True)
 	frappe.has_permission("Company", doc=company, ptype="select", throw=True)
 
-	warehouse = warehouse or get_default_warehouse(item_code, company)
-	if warehouse:
-		erpnext.require_user_permission("Warehouse", warehouse)
+	if frappe.get_cached_value("Item", item_code, "is_stock_item"):
+		warehouse = warehouse or get_default_warehouse(item_code, company)
+		if warehouse:
+			erpnext.require_user_permission("Warehouse", warehouse)
 
 	return _get_valuation_rate(item_code, company, warehouse)
 
