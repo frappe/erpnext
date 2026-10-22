@@ -421,10 +421,10 @@ class BOM(WebsiteGenerator):
 
 		return [
 			_(
-				"{0}: has no raw materials. Choose an Output Item BOM, or open the step and click Add Raw Materials."
-			).format(self.get_step_label(row))
+				"{0} has no raw materials. Click Add Raw Materials for this step in the Steps section, or select a BOM for its output item {1}."
+			).format(self.get_step_label(row), bold(row.finished_good))
 			for row in self.operations
-			if not row.bom_no and row.idx not in steps_with_materials
+			if row.finished_good and not row.bom_no and row.idx not in steps_with_materials
 		]
 
 	def validate_batch_split_operations(self):
