@@ -30,7 +30,7 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 
 	lead = customer = None
 	# a guest's address is unverified, so only a signed-in sender is matched to a customer
-	if frappe.session.user == sender:
+	if frappe.session.user.lower() == sender.lower():
 		customer = frappe.db.sql(
 			"""select distinct dl.link_name from `tabDynamic Link` dl
 			left join `tabContact` c on dl.parent=c.name where dl.link_doctype='Customer'
