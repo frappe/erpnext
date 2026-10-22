@@ -20,7 +20,11 @@ from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+)
 from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = (
@@ -168,6 +172,7 @@ def get_rootwise_opening_balances(
 
 	last_period_closing_voucher = ""
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
+	ignore_closing_balances = ignore_closing_balances or has_gl_entry_restrictions()
 
 	if not ignore_closing_balances:
 		last_period_closing_voucher = frappe.db.get_all(
@@ -608,6 +613,9 @@ def hide_group_accounts(data):
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
