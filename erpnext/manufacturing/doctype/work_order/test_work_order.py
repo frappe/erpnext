@@ -1396,6 +1396,23 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(row.get("qty"), 6)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_finished_good_row_for_item_without_serial_or_batch(self):
+		fg_item = make_item("_Test FG Without Serial Or Batch", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test RM For FG Without Serial Or Batch", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item])
+		wo = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=1,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+
+		self.assertEqual([row.item_code for row in stock_entry.items if row.is_finished_item], [fg_item])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_auto_batch_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
