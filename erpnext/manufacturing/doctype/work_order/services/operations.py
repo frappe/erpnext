@@ -341,6 +341,7 @@ class OperationsService:
 		)
 
 	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
+		d.output_qty_per_unit = 1
 		if self.doc.track_semi_finished_goods:
 			d.output_qty_per_unit = flt(
 				self.get_output_qty_per_unit(d, qty, units, exploded),
