@@ -3422,6 +3422,104 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertCountEqual(used_serials[rm_item], rm_serials)
 		self.assertCountEqual(used_serials[fg_item], fg_serials)
 
+	def test_partial_disassemblies_round_whole_number_components(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
+
+		rm_qty = []
+		for _ in range(3):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+			disassembly.save()
+			disassembly.submit()
+			rm_qty += [row.qty for row in disassembly.items if row.item_code == rm_item]
+
+		self.assertEqual(rm_qty, [1, 1, 2])
+
+	def test_partial_disassemblies_skip_components_rounded_to_zero(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order("Test Zero Whole Number Partial Disassembly")
+
+		def make_disassembly(qty):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", qty))
+			disassembly.save()
+			return disassembly
+
+		def rm_qty(disassembly):
+			return [row.qty for row in disassembly.items if row.item_code == rm_item]
+
+		first = make_disassembly(2)
+		first.submit()
+		make_disassembly(1).submit()
+		first.cancel()
+
+		# both drafts are made before either is submitted
+		skipped, stale = make_disassembly(1), make_disassembly(1)
+		skipped.submit()
+		self.assertEqual(rm_qty(skipped), [])
+		self.assertRaisesRegex(frappe.ValidationError, "missing", stale.submit)
+
+		last = make_disassembly(1)
+		last.submit()
+		self.assertEqual(rm_qty(last), [2])
+
+	def test_partial_disassemblies_round_in_the_coarser_whole_number_uom(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order(
+			"Test Coarser Whole Number Partial Disassembly",
+			{"stock_uom": "Box", "uoms": [{"uom": "Nos", "conversion_factor": 0.5}]},
+			rm_row_uom=("Nos", 0.5),
+		)
+
+		rm_qty = []
+		for _ in range(3):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+			disassembly.save()
+			disassembly.submit()
+			rm_qty += [(row.qty, row.transfer_qty) for row in disassembly.items if row.item_code == rm_item]
+
+		self.assertEqual(rm_qty, [(2, 1), (2, 1), (4, 2)])
+
+	def test_partial_disassemblies_fill_batches_with_rounded_qty(self):
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		wo, rm_item = make_whole_number_work_order(
+			"Test Batch Whole Number Partial Disassembly",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TBWPD-.####"},
+		)
+
+		for expected_qty in (1, 1, 2):
+			disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+			disassembly.save()
+			disassembly.submit()
+			rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+			batch_qty = frappe.get_all(
+				"Serial and Batch Entry", filters={"parent": rm_row.serial_and_batch_bundle}, pluck="qty"
+			)
+			self.assertEqual((rm_row.qty, batch_qty), (expected_qty, [expected_qty]))
+
+	def test_partial_disassemblies_return_the_exact_fractional_total(self):
+		wo, rm_item = make_whole_number_work_order(
+			"Test Fractional Partial Disassembly",
+			{
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TFPD-.####",
+			},
+		)
+		source = frappe.db.get_value("Stock Entry", {"work_order": wo.name, "purpose": "Manufacture"})
+
+		rm_qty = 0
+		for _ in range(3):
+			disassembly = frappe.get_doc(
+				make_stock_entry(wo.name, "Disassemble", 1, source_stock_entry=source)
+			)
+			disassembly.save()
+			disassembly.submit()
+			rm_qty += sum(row.transfer_qty for row in disassembly.items if row.item_code == rm_item)
+
+		self.assertEqual(flt(rm_qty, 6), 4)
+
 	def test_components_alternate_item_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
@@ -4516,6 +4614,37 @@ def allow_overproduction(fieldname, percentage):
 	doc = frappe.get_doc("Manufacturing Settings")
 	doc.update({fieldname: percentage})
 	doc.save()
+
+
+def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
+	"""Work order that turned 4 of a raw material's stock UOM into 3 Nos of a finished good. rm_row_uom
+	is the (uom, conversion_factor) the manufacture entry consumes the raw material in."""
+	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+		make_stock_entry as make_stock_entry_test_record,
+	)
+
+	wip_wh = "_Test Warehouse - _TC"
+	rm_item = make_item(f"{name} RM", {"is_stock_item": 1, "stock_uom": "Nos", **(rm_properties or {})}).name
+	fg_item = make_item(f"{name} FG", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+	bom = make_bom(item=fg_item, quantity=3, raw_materials=[rm_item], rm_qty=4)
+	wo = make_wo_order_test_record(
+		production_item=fg_item, qty=3, bom_no=bom.name, skip_transfer=1, source_warehouse=wip_wh
+	)
+	receipt = make_stock_entry_test_record(
+		item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=4, basic_rate=100
+	)
+
+	se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+	for row in se_manufacture.items:
+		if row.item_code == rm_item and rm_row_uom:
+			row.uom, row.conversion_factor = rm_row_uom
+			row.qty = 4 / row.conversion_factor
+		if row.item_code == rm_item and receipt.items[0].serial_and_batch_bundle:
+			row.batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+			row.use_serial_batch_fields = 1
+	se_manufacture.save()
+	se_manufacture.submit()
+	return wo, rm_item
 
 
 def make_wo_order_test_record(**args):
