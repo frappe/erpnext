@@ -551,7 +551,7 @@ def compare_expense_with_budget(params, budget_amount, action_for, action, budge
 		elif params.get("doctype") == "Purchase Order" and params.for_purchase_order:
 			amount = params.ordered_amount
 
-	total_expense = params.actual_expense + amount
+	total_expense = flt(params.actual_expense + amount, frappe.get_precision("Budget", "budget_amount"))
 
 	if total_expense > budget_amount:
 		if params.actual_expense > budget_amount:
