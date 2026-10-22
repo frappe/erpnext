@@ -402,8 +402,7 @@ class OperationsService:
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		operation_qty = d.get_qty_to_produce(self.doc.qty)
-		max_allowed_qty_for_wo = operation_qty + (allowance_percentage / 100 * operation_qty)
+		max_allowed_qty_for_wo = flt(self.doc.qty) * d.output_qty_per_unit * (1 + allowance_percentage / 100)
 
 		if self._operation_qty(d) > flt(max_allowed_qty_for_wo, d.precision("completed_qty")):
 			frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))

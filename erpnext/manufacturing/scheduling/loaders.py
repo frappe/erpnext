@@ -133,7 +133,8 @@ def filter_covered_schedule_rows(rows):
 def is_operation_covered(row, required, carried):
 	key = (row.production_plan, row.plan_row, row.operation)
 	needed = required.get(key)
-	return bool(needed) and flt(carried.get(key)) >= flt(needed)
+	precision = frappe.get_precision("Work Order", "qty")
+	return bool(needed) and flt(carried.get(key), precision) >= flt(needed, precision)
 
 
 def get_job_card_coverage(production_plans):
