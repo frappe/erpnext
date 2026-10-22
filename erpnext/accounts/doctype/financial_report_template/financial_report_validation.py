@@ -75,7 +75,9 @@ class ValidationIssue:
 
 	def __str__(self) -> str:
 		if self.row_idx:
-			return _("Row {0}: {1}", context="Financial Report Template").format(self.row_idx, self.message)
+			return _("Template row {0}: {1}", context="Financial Report Template").format(
+				self.row_idx, self.message
+			)
 		return self.message
 
 
@@ -315,7 +317,7 @@ class CalculationFormulaValidator(Validator):
 	def __init__(self, reference_codes: set[str]):
 		"""
 		Args:
-		        reference_codes: line references the formula may use.
+		                reference_codes: line references the formula may use.
 		"""
 		self.reference_codes = reference_codes
 
@@ -343,8 +345,9 @@ class CalculationFormulaValidator(Validator):
 			)
 			return result
 		except RecursionError:
-			# too deeply nested for the parser to walk
-			result.add_error(ValidationIssue(message=_("Formula is too complex"), row_idx=row.idx))
+			result.add_error(
+				ValidationIssue(message=_("Formula exceeds maximum recursion depth"), row_idx=row.idx)
+			)
 			return result
 
 		if unsupported := self._unsupported_reason(tree, formula):
@@ -379,7 +382,7 @@ class CalculationFormulaValidator(Validator):
 				return "; ".join(str(r) for r in reasons)
 			return str(reasons or e)
 		except RecursionError:
-			return _("it is too deeply nested")
+			return _("it exceeds the maximum recursion depth")
 		except Exception as e:
 			return str(e)
 
@@ -428,21 +431,17 @@ class CalculationFormulaValidator(Validator):
 		Look up every name a formula uses against the known codes and functions.
 
 		Returns:
-		        Unknown functions, unknown codes, and known codes the formula reads.
+		                Unknown functions, unknown codes, and known codes the formula reads.
 		"""
 		called, created, read = collect_names(tree)
 
-		unknown_functions, unknown_codes, used_codes = set(), set(), set()
-
 		# skip names the formula made itself, like REV in [REV for REV in ...]
-		for name in read - created:
-			if name in called:
-				if name not in ALLOWED_FUNCTIONS:
-					unknown_functions.add(name)
-			elif name in self.reference_codes:
-				used_codes.add(name)
-			elif name not in ALLOWED_FUNCTIONS:
-				unknown_codes.add(name)
+		names = read - created
+		functions, codes = names & called, names - called
+
+		unknown_functions = functions - ALLOWED_FUNCTIONS
+		unknown_codes = codes - self.reference_codes - ALLOWED_FUNCTIONS
+		used_codes = codes & self.reference_codes
 
 		return unknown_functions, unknown_codes, used_codes
 
@@ -617,9 +616,9 @@ def collect_names(tree: ast.Expression) -> tuple[set, set, set]:
 	Read every name in a formula in one pass.
 
 	Returns three sets:
-	        - called: used as a function, like `sum` in `sum([A])`
-	        - created: made by the formula, like `x` in `[x for x in ...]`
-	        - read: everything read by name
+	                - called: used as a function, like `sum` in `sum([A])`
+	                - created: made by the formula, like `x` in `[x for x in ...]`
+	                - read: everything read by name
 	"""
 	called, created, read = set(), set(), set()
 

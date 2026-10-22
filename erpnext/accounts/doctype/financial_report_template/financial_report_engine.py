@@ -1337,7 +1337,7 @@ class FormulaCalculator:
 				title=_("Formula Error in Template"),
 			)
 
-		where = _("template row {0} ({1})").format(
+		where = _("Template row {0} ({1})").format(
 			report_row.idx, report_row.display_name or report_row.reference_code
 		)
 
@@ -1360,23 +1360,23 @@ class FormulaCalculator:
 
 		except ZeroDivisionError:
 			frappe.throw(
-				_("Formula {0} in {1} divides by zero.").format(shown_formula, where)
-				+ "<br><br>"
-				+ _("Check the divisor first, for example {0}.").format(frappe.bold("A / B if B else 0")),
+				_("{0}: formula {1} divides by zero. Check the divisor first, for example {2}.").format(
+					where, shown_formula, frappe.bold("A / B if B else 0")
+				),
 				title=_("Formula Error in Template"),
 			)
 		except Exception as e:
 			frappe.throw(
-				_("Formula {0} in {1} could not be calculated.").format(shown_formula, where)
-				+ "<br><br>"
-				+ escape_html(str(e)),
+				_("{0}: formula {1} couldn't be calculated: {2}").format(
+					where, shown_formula, escape_html(str(e))
+				),
 				title=_("Formula Error in Template"),
 			)
 
 		if type(result) not in (int, float):
 			frappe.throw(
-				_("Formula {0} in {1} must give a number, but it gave {2}.").format(
-					shown_formula, where, frappe.bold(type(result).__name__)
+				_("{0}: formula {1} must return a number, got {2}.").format(
+					where, shown_formula, frappe.bold(type(result).__name__)
 				),
 				title=_("Formula Error in Template"),
 			)
