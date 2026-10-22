@@ -1725,6 +1725,7 @@ def get_projected_qty(item_code, warehouse):
 	# record-level read on the item, as get_item_details() in this file already does. Nothing in the
 	# tree calls this, so no caller's roles constrain the choice.
 	frappe.has_permission("Item", doc=item_code, throw=True)
+	erpnext.require_user_permission("Warehouse", warehouse)
 
 	return {
 		"projected_qty": frappe.db.get_value(
@@ -1797,6 +1798,7 @@ def get_company_total_stock(item_code, company):
 def get_batch_qty(batch_no, warehouse, item_code):
 	from erpnext.stock.doctype.batch import batch
 
+	erpnext.require_user_permission("Warehouse", warehouse)
 	if batch_no:
 		return {"actual_batch_qty": batch.get_batch_qty(batch_no, warehouse)}
 
