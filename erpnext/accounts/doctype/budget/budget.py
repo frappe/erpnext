@@ -551,9 +551,9 @@ def compare_expense_with_budget(params, budget_amount, action_for, action, budge
 		elif params.get("doctype") == "Purchase Order" and params.for_purchase_order:
 			amount = params.ordered_amount
 
-	total_expense = flt(params.actual_expense + amount, frappe.get_precision("Budget", "budget_amount"))
+	total_expense = params.actual_expense + amount
 
-	if total_expense > budget_amount:
+	if flt(total_expense - budget_amount, frappe.get_precision("Budget", "budget_amount")) > 0:
 		if params.actual_expense > budget_amount:
 			diff = params.actual_expense - budget_amount
 			_msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It is already exceeded by {5}.")
