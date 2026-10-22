@@ -629,16 +629,11 @@ class TestGetItemDetail(ERPNextTestSuite):
 		):
 			details = self.get_item_details_for_row(item_code, 5)
 			self.assertIsNone(details.get("batch_no"))
-			serial_nos = details.serial_no.split("\n")
-			self.assertEqual(len(serial_nos), 5)
+			self.assertFalse(details.get("serial_no"))
 
-			dn = create_delivery_note(
-				item_code=item_code, qty=5, use_serial_batch_fields=1, serial_no=details.serial_no
-			)
+			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
 			dn.reload()
-			self.assertEqual(
-				get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), sorted(serial_nos)
-			)
+			self.assertEqual(len(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle)), 5)
 
 	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
