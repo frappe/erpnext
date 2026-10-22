@@ -10,7 +10,7 @@ jobs:
   notify-support:
     if: >-
       github.event.issue.pull_request
-      && github.event.comment.user.id == 28699486
+      && (github.event.comment.user.id == 346168705 || github.event.comment.user.id == 28699486)
       && contains(github.event.comment.body, 'This PR is included in version')
     runs-on: ubuntu-latest
     timeout-minutes: 2
