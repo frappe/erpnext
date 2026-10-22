@@ -106,7 +106,7 @@ def execute(filters=None):
 					batch_balance_dict[sle.batch_no] = [0, 0]
 
 				batch_balance_dict[sle.batch_no][0] += sle.actual_qty
-				batch_balance_dict[sle.batch_no][1] += stock_value
+				batch_balance_dict[sle.batch_no][1] += sle.stock_value_difference
 
 			if filters.get("segregate_serial_batch_bundle"):
 				actual_qty = batch_balance_dict[sle.batch_no][0]
