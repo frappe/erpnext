@@ -129,6 +129,11 @@ class StockBalanceReport:
 		if self.filters.get("ignore_closing_balance"):
 			return []
 
+		# The closing balance has one total per item and warehouse, so it cannot open the rows of
+		# each dimension. The SLE query then starts from the very first entry instead.
+		if self.filters.get("show_dimension_wise_stock"):
+			return []
+
 		stk_cl_obj = StockClosing(self.filters.company, self.from_date, self.from_date)
 		if not stk_cl_obj.last_closing_balance:
 			return []

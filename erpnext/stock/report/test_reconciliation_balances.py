@@ -474,6 +474,24 @@ class TestReconciliationBalances(ERPNextTestSuite):
 		(row,) = self.get_balance_rows(item, from_date=from_date)
 		self.assertEqual((row.opening_qty, row.opening_val), (3, 300))
 
+	def test_inventory_dimension_reconciliation_before_a_stock_closing(self):
+		plant_a, plant_b = make_plant_dimension()
+		item = self.make_stock_item()
+		self.receive_into_plant(item, 10, plant_b, days_ago=20)
+		self.reconcile_plant(item, 4, plant_a, days_ago=18)
+		self.close_stock(15)
+		self.receive_into_plant(item, 2, plant_a, days_ago=5)
+
+		from_date = add_days(today(), -10)
+		self.assertReportsMatchLedger(item, 16, 1600, from_date=from_date)
+		self.assertStockBalance(item, 6, 600, id_plant=[plant_a], from_date=from_date)
+		self.assertStockBalance(item, 10, 1000, id_plant=[plant_b], from_date=from_date)
+		rows = self.get_balance_rows(item, show_dimension_wise_stock=1, from_date=from_date)
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (6, 600), plant_b: (10, 1000)},
+		)
+
 	def test_adjustment_entry_before_a_stock_closing(self):
 		item = self.make_stock_item()
 		self.strand_stock_value(item, 500)
