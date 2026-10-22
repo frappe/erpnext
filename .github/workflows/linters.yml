@@ -62,3 +62,21 @@ jobs:
 
       - name: Semgrep for Test Correctness
         run: semgrep ci --include=**/test_*.py --config ./semgrep/test-correctness.yml
+
+  deps-vulnerable-check:
+    name: vulnerable dependency check
+    if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: pip
+
+      - name: Install and run pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit --desc on .
