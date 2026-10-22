@@ -690,6 +690,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (flt(wh_map.stock_qty) or 0))
 
 			if doctype == "Subcontracting Receipt":
+				target_doc.process_loss_qty = 0
 				target_doc.subcontracting_order = source_doc.subcontracting_order
 				target_doc.subcontracting_order_item = source_doc.subcontracting_order_item
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
@@ -706,6 +707,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.purchase_order_item = source_doc.purchase_order_item
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.purchase_receipt_item = source_doc.name
+				target_doc.delivery_note_packed_item = source_doc.delivery_note_packed_item
 
 			if doctype == "Purchase Receipt" and return_against_rejected_qty:
 				target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
@@ -750,6 +752,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.expense_account = source_doc.expense_account
 			target_doc.dn_detail = source_doc.name
 			target_doc.cost_center = source_doc.cost_center
+			target_doc.target_warehouse = source_doc.target_warehouse
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":

@@ -38,6 +38,22 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		create_items()
 		reset("Stock Entry")
 
+	def test_negative_stock_fallback_rate_ignores_later_entries(self):
+		item = make_item(properties={"allow_negative_stock": 1, "valuation_rate": 80}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(
+			item_code=item, target=warehouse, qty=10, rate=300, posting_date=add_days(today(), -5)
+		)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=5, posting_date=add_days(today(), -10))
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -400)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_fifo_rate_survives_a_balance_below_qty_precision(self):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Third"}).insert(ignore_if_duplicate=True)

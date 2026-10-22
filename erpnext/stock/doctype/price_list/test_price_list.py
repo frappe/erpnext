@@ -1,5 +1,140 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 
 import frappe
+from frappe.utils import random_string
+
+from erpnext.tests.utils import ERPNextTestSuite
+
+
+class TestPriceList(ERPNextTestSuite):
+	def make_price_list(self, currency="INR", buying=1, selling=1):
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test PL " + random_string(10),
+				"enabled": 1,
+				"currency": currency,
+				"buying": buying,
+				"selling": selling,
+			}
+		).insert()
+		return price_list
+
+	def make_item_price(self, price_list, item_code="_Test Item", rate=100):
+		return frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": price_list,
+				"price_list_rate": rate,
+			}
+		).insert()
+
+	def test_update_item_price_propagates_flags(self):
+		# Price List starts in INR, applicable for both buying and selling.
+		price_list = self.make_price_list(currency="INR", buying=1, selling=1)
+
+		ip1 = self.make_item_price(price_list.name, item_code="_Test Item", rate=100)
+		ip2 = self.make_item_price(price_list.name, item_code="_Test Item 2", rate=250)
+
+		# Sanity: Item Price rows inherited the Price List's initial state.
+		for ip in (ip1, ip2):
+			row = frappe.db.get_value("Item Price", ip.name, ["currency", "buying", "selling"], as_dict=True)
+			self.assertEqual(row.currency, "INR")
+			self.assertEqual(row.buying, 1)
+			self.assertEqual(row.selling, 1)
+
+		# Flip the buying flag off.
+		# on_update -> update_item_price() should bulk-UPDATE every Item Price
+		# linked to this Price List.
+		price_list.buying = 0
+		price_list.selling = 1
+		price_list.save()
+
+		for ip in (ip1, ip2):
+			row = frappe.db.get_value("Item Price", ip.name, ["currency", "buying", "selling"], as_dict=True)
+			self.assertEqual(row.currency, "INR")
+			self.assertEqual(row.buying, 0)
+			self.assertEqual(row.selling, 1)
+
+	def test_update_item_price_scoped_to_own_price_list(self):
+		# Two independent Price Lists; updating one must not touch the other's
+		# Item Price rows (the WHERE price_list == self.name clause).
+		pl_a = self.make_price_list(currency="INR", buying=1, selling=1)
+		pl_b = self.make_price_list(currency="INR", buying=1, selling=1)
+
+		ip_a = self.make_item_price(pl_a.name, item_code="_Test Item", rate=100)
+		ip_b = self.make_item_price(pl_b.name, item_code="_Test Item", rate=100)
+
+		pl_a.buying = 0
+		pl_a.save()
+
+		row_a = frappe.db.get_value("Item Price", ip_a.name, ["currency", "buying"], as_dict=True)
+		self.assertEqual(row_a.buying, 0)
+
+		# pl_b was untouched, so its Item Price must keep the original values.
+		row_b = frappe.db.get_value("Item Price", ip_b.name, ["currency", "buying"], as_dict=True)
+		self.assertEqual(row_b.currency, "INR")
+		self.assertEqual(row_b.buying, 1)
+
+	def test_currency_cannot_change_while_list_has_prices(self):
+		price_list = self.make_price_list(currency="INR")
+		self.make_item_price(price_list.name, rate=1000)
+
+		price_list.currency = "USD"
+		self.assertRaises(frappe.ValidationError, price_list.save)
+
+		empty_price_list = self.make_price_list(currency="INR")
+		empty_price_list.currency = "USD"
+		empty_price_list.save()
+
+	def test_buying_list_cannot_be_customer_default(self):
+		price_list = self.make_price_list(buying=1, selling=0)
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.default_price_list = price_list.name
+		self.assertRaises(frappe.ValidationError, customer.save)
+
+	def test_selling_cannot_be_removed_while_customer_default(self):
+		price_list = self.make_price_list(buying=0, selling=1)
+		frappe.db.set_value("Customer", "_Test Customer", "default_price_list", price_list.name)
+
+		price_list.selling = 0
+		price_list.buying = 1
+		self.assertRaises(frappe.ValidationError, price_list.save)
+
+	def test_selling_cannot_be_removed_while_pos_profile_default(self):
+		price_list = self.make_price_list(buying=0, selling=1)
+		pos_profile = frappe.get_all("POS Profile", pluck="name", limit=1)
+		if not pos_profile:
+			from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+
+			pos_profile = [make_pos_profile().name]
+		frappe.db.set_value("POS Profile", pos_profile[0], "selling_price_list", price_list.name)
+
+		price_list.selling = 0
+		price_list.buying = 1
+		self.assertRaises(frappe.ValidationError, price_list.save)
+
+	def test_price_list_restricted_to_other_country_is_refused(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		price_list = self.make_price_list(selling=1)
+		price_list.append("countries", {"country": "United States"})
+		price_list.save()
+
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "_Test Price List Country",
+				"address_line1": "Street 1",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert()
+
+		sales_order = make_sales_order(do_not_save=True, selling_price_list=price_list.name)
+		sales_order.customer_address = address.name
+		self.assertRaises(frappe.ValidationError, sales_order.save)

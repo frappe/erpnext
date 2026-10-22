@@ -55,19 +55,12 @@ def enqueue_replace_bom(boms: dict | str | None = None, args: dict | str | None 
 	if not frappe.has_permission("BOM", "read", doc=boms["new_bom"]):
 		_refuse()
 
-	rewritten_boms = []
-	pending = [boms.get("current_bom"), boms.get("new_bom")]
-	while pending:
-		child_bom = pending.pop()
-		for parent in frappe.get_all(
-			"BOM Item",
-			filters={"bom_no": child_bom, "parenttype": "BOM", "docstatus": ["<", 2]},
-			pluck="parent",
-		):
-			if parent not in rewritten_boms:
-				rewritten_boms.append(parent)
-				pending.append(parent)
+	from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import get_ancestor_boms
 
+	rewritten_boms = sorted(
+		(set(get_ancestor_boms(boms["current_bom"])) | set(get_ancestor_boms(boms["new_bom"])))
+		- {boms["current_bom"], boms["new_bom"]}
+	)
 	for parent in rewritten_boms:
 		require_permission("BOM", parent, "write")
 

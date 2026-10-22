@@ -53,7 +53,7 @@ def get_serial_no_status(sle):
 
 def get_status_for_serial_nos(sle):
 	status = "Inactive"
-	if sle.actual_qty < 0:
+	if sle.actual_qty < 0 and sle.voucher_type not in ["Purchase Invoice", "Purchase Receipt"]:
 		status = "Delivered"
 		if sle.voucher_type == "Stock Entry":
 			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
@@ -61,11 +61,22 @@ def get_status_for_serial_nos(sle):
 				status = "Consumed"
 
 		if sle.is_cancelled == 1 and (
-			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"] or status == "Consumed"
+			sle.voucher_type in ["Purchase Invoice", "Purchase Receipt", "Stock Reconciliation"]
+			or status == "Consumed"
 		):
 			status = "Inactive"
 
 	return status
+
+
+def get_serial_no_status_term(sn_table, sle, warehouse, status):
+	if warehouse:
+		return "Active"
+
+	if not sle.is_cancelled:
+		return status
+
+	return Case().when(sn_table.reference_name == sle.voucher_no, "Inactive").else_(status)
 
 
 class SerialBatchBundle:
@@ -534,14 +545,7 @@ class SerialBatchBundle:
 		query = (
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
-			.set(
-				sn_table.status,
-				"Active"
-				if warehouse
-				else status
-				if (sn_table.reference_name != sle.voucher_no or sle.is_cancelled != 1)
-				else "Inactive",
-			)
+			.set(sn_table.status, get_serial_no_status_term(sn_table, sle, warehouse, status))
 			.set(sn_table.company, sle.company)
 			.set(sn_table.customer, customer)
 			.where(sn_table.name.isin(serial_nos))
@@ -1332,6 +1336,8 @@ class SerialBatchCreation:
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
 
+		kwargs.update(self.get_reservation_kwargs())
+
 		if (
 			self.has_serial_no
 			and self.has_batch_no
@@ -1349,6 +1355,17 @@ class SerialBatchCreation:
 				kwargs["posting_datetime"] = self.get("posting_datetime")
 
 			self.batches = get_available_batches(kwargs)
+
+	def get_reservation_kwargs(self):
+		if self.get("voucher_type") not in ("Delivery Note", "Sales Invoice", "POS Invoice"):
+			return {}
+
+		return {
+			"pick_reserved_items": True,
+			"sabb_voucher_type": self.voucher_type,
+			"sabb_voucher_no": self.get("voucher_no"),
+			"sabb_voucher_detail_no": self.get("voucher_detail_no"),
+		}
 
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
@@ -1485,9 +1502,17 @@ class SerialBatchCreation:
 					"item": self.get("item_code"),
 					"reference_doctype": self.get("voucher_type"),
 					"reference_name": self.get("voucher_no"),
+					"manufacturing_date": self.get_posting_date_for_new_batch(),
 				}
 			)
 		)
+
+	def get_posting_date_for_new_batch(self):
+		if self.get("posting_date"):
+			return getdate(self.posting_date)
+
+		if self.get("posting_datetime"):
+			return getdate(self.posting_datetime)
 
 	def get_auto_created_serial_nos(self):
 		sr_nos = []

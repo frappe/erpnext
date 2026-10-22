@@ -12,9 +12,11 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule_margin
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 from erpnext.accounts.utils import get_zero_cutoff
 from erpnext.controllers.accounts_controller import (
+	get_qty_in_stock_uom,
 	validate_conversion_rate,
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
@@ -55,7 +57,7 @@ class calculate_taxes_and_totals:
 
 		self._calculate()
 
-		if self.doc.meta.get_field("discount_amount"):
+		if self.doc.meta.get_field("discount_amount") and not self.has_mapped_discount:
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
@@ -84,6 +86,7 @@ class calculate_taxes_and_totals:
 		self.update_item_tax_map()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
+		self.apply_mapped_additional_discount()
 		self.calculate_net_total()
 		self.calculate_taxes()
 		self.adjust_grand_total_for_inclusive_tax()
@@ -178,18 +181,7 @@ class calculate_taxes_and_totals:
 
 			for d in get_applied_pricing_rules(item.pricing_rules):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
-
-				if not (
-					pricing_rule.margin_type
-					and pricing_rule.margin_rate_or_amount
-					and (
-						pricing_rule.margin_type == "Percentage" or pricing_rule.currency == self.doc.currency
-					)
-				):
-					continue
-
-				item.margin_type = pricing_rule.margin_type
-				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+				apply_pricing_rule_margin(pricing_rule, item, self.doc)
 
 		item.rate_with_margin = get_rate_with_margin(item)
 		if item.discount_percentage > 0:
@@ -235,6 +227,7 @@ class calculate_taxes_and_totals:
 		]
 		for item in self.doc.items:
 			self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
+			item._mapped_discount_inclusive_amount = 0
 			self.calculate_item_rate(item)
 
 			item.net_rate = item.rate
@@ -249,6 +242,50 @@ class calculate_taxes_and_totals:
 				item, ["price_list_rate", "rate_with_margin", "rate", "net_rate", "amount", "net_amount"]
 			)
 			item.item_tax_amount = 0.0
+
+	@property
+	def has_mapped_discount(self):
+		return not self.doc.get("is_consolidated") and any(
+			item.get("mapped_additional_discount_amount") for item in self._items
+		)
+
+	def apply_mapped_additional_discount(self):
+		if self.discount_amount_applied or not self.has_mapped_discount:
+			return
+
+		if self.doc.get("is_cash_or_non_trade_discount"):
+			frappe.throw(
+				_(
+					"The cash or non-trade discount cannot be combined with discounts carried from other documents."
+				),
+				title=_("Discounts Cannot Be Combined"),
+			)
+
+		for item in self._items:
+			self.apply_mapped_discount_to_item(item)
+
+		self.doc.apply_discount_on = "Net Total"
+		self.doc.additional_discount_percentage = 0
+		self.doc.discount_amount = flt(
+			sum(flt(item.distributed_discount_amount) for item in self._items),
+			self.doc.precision("discount_amount"),
+		)
+		self._set_in_company_currency(self.doc, ["discount_amount"])
+
+	def apply_mapped_discount_to_item(self, item):
+		item.distributed_discount_amount = flt(
+			flt(item.mapped_additional_discount_amount) * get_qty_in_stock_uom(item),
+			item.precision("distributed_discount_amount"),
+		)
+		if not item.distributed_discount_amount:
+			return
+
+		item.net_amount = flt(
+			item.net_amount - item.distributed_discount_amount, item.precision("net_amount")
+		)
+		item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+		item._unrounded_net_amount = None
+		self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
@@ -335,6 +372,12 @@ class calculate_taxes_and_totals:
 
 				total_tax_slope += tax.tax_fraction_for_current_item
 				total_tax_intercept += tax_intercept_per_qty * flt(item.qty)
+
+			item._mapped_discount_inclusive_amount = (
+				flt(item.get("mapped_additional_discount_amount"))
+				* get_qty_in_stock_uom(item)
+				* (1 + total_tax_slope)
+			)
 
 			if not self.discount_amount_applied and item.qty and (total_tax_slope or total_tax_intercept):
 				amount = flt(item.amount) - total_tax_intercept
@@ -756,6 +799,7 @@ class calculate_taxes_and_totals:
 			diff = (
 				self.doc.total + non_inclusive_tax_amount - flt(last_tax.total, last_tax.precision("total"))
 			)
+			diff -= sum(flt(item.get("_mapped_discount_inclusive_amount")) for item in self._items)
 
 			# If discount amount applied, deduct the discount amount
 			# because self.doc.total is always without discount, but last_tax.total is after discount
@@ -1022,7 +1066,7 @@ class calculate_taxes_and_totals:
 					self.doc.precision("base_write_off_amount"),
 				)
 				invoice_total = (
-					flt(grand_total * self.doc.conversion_rate, self.doc.precision("grand_total"))
+					flt(grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total"))
 					- base_write_off_amount
 				)
 
