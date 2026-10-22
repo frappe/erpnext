@@ -428,10 +428,10 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 
 def update_bin_details(ctx: ItemDetailsCtx, out: ItemDetails, doc):
 	if ctx.doctype == "Material Request" and ctx.material_request_type == "Material Transfer":
-		out.update(get_bin_details(ctx.item_code, ctx.from_warehouse))
+		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse))
 
 	elif out.get("warehouse"):
-		bin_details = get_bin_details(
+		bin_details = _get_bin_details(
 			ctx.item_code, out.warehouse, ctx.company, include_child_warehouses=True
 		)
 
@@ -1639,9 +1639,9 @@ def get_pos_profile_item_details_(ctx: ItemDetailsCtx, company, pos_profile=None
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(ctx.item_code, res.warehouse, include_child_warehouses=True).get(
-				"actual_qty"
-			)
+			res.actual_qty = _get_bin_details(
+				ctx.item_code, res.warehouse, include_child_warehouses=True
+			).get("actual_qty")
 
 	return res
 
@@ -1734,10 +1734,26 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
 	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
+=======
+def get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
+	# `select`, not `read`: the selling/buying rows reach this with no Item read row
+>>>>>>> 6141c96 (fix(stock): check warehouse user permission in get_bin_details)
 	frappe.has_permission("Item", ptype="select", throw=True)
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
 
+	return _get_bin_details(item_code, warehouse, company, include_child_warehouses)
+
+
+def _get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
+	# no guard here: internal callers read the warehouse already on the document
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
