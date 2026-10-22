@@ -3,12 +3,6 @@ from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import today
 
-<<<<<<< HEAD
-from erpnext.stock.get_item_details import get_item_details, get_price_list_currency_and_exchange_rate
-
-test_ignore = ["BOM"]
-test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
-=======
 from erpnext.stock.get_item_details import (
 	get_batch_qty,
 	get_bin_details,
@@ -19,8 +13,9 @@ from erpnext.stock.get_item_details import (
 )
 from erpnext.stock.utils import get_latest_stock_qty
 from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 29bd552 (test(stock): stock qty methods apply warehouse user permission)
+
+test_ignore = ["BOM"]
+test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
 
 
 class TestGetItemDetail(FrappeTestCase):
@@ -84,15 +79,9 @@ class TestGetItemDetail(FrappeTestCase):
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
 
-<<<<<<< HEAD
 	def test_fetch_asset_category_expense_account_on_purchase_receipt(self):
-=======
-	def make_stock_item_in_two_warehouses(self):
-		"""Stock item defaulting to `_Test Warehouse - _TC` (rate 100), also stocked in `_Test Warehouse 1 - _TC` (rate 50)."""
->>>>>>> 151df09 (test(stock): get_item_details applies warehouse user permission)
 		from erpnext.stock.doctype.item.test_item import make_item
 
-<<<<<<< HEAD
 		asset_category = "Test Expense Account Asset Category"
 		if not frappe.db.exists("Asset Category", asset_category):
 			frappe.get_doc(
@@ -120,18 +109,6 @@ class TestGetItemDetail(FrappeTestCase):
 		).item_code
 
 		args = frappe._dict(
-=======
-		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
-		item_code = make_item(properties={"is_stock_item": 1, "item_defaults": item_defaults}).name
-		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
-		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=1, rate=50)
-		return item_code
-
-	def make_warehouse_fenced_user(self, roles):
-		"""User allowed only `_Test Warehouse 1 - _TC`, applied to Warehouse alone so Item and transaction checks pass."""
-		user = make_fenced_user("_test_warehouse_fenced_user@example.com", roles)
-		frappe.get_doc(
->>>>>>> 151df09 (test(stock): get_item_details applies warehouse user permission)
 			{
 				"item_code": asset_item,
 				"company": "_Test Company",
@@ -144,11 +121,33 @@ class TestGetItemDetail(FrappeTestCase):
 				"ignore_pricing_rule": 1,
 				"qty": 1,
 			}
-<<<<<<< HEAD
 		)
 		details = get_item_details(args)
 		self.assertEqual(details.get("expense_account"), "_Test Fixed Asset - _TC")
-=======
+
+	def make_stock_item_in_two_warehouses(self):
+		"""Stock item defaulting to `_Test Warehouse - _TC` (rate 100), also stocked in `_Test Warehouse 1 - _TC` (rate 50)."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+		item_code = make_item(properties={"is_stock_item": 1, "item_defaults": item_defaults}).name
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=1, rate=50)
+		return item_code
+
+	def make_warehouse_fenced_user(self, roles):
+		"""User allowed only `_Test Warehouse 1 - _TC`, applied to Warehouse alone so Item and transaction checks pass."""
+		user = make_fenced_user("_test_warehouse_fenced_user@example.com", roles)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Warehouse",
+				"for_value": "_Test Warehouse 1 - _TC",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Warehouse",
+			}
 		).insert(ignore_permissions=True)
 		return user
 
@@ -167,7 +166,6 @@ class TestGetItemDetail(FrappeTestCase):
 				{"valuation_rate": 50},
 			)
 			self.assertEqual(get_valuation_rate(service_item, "_Test Company"), {"valuation_rate": 0.0})
->>>>>>> 151df09 (test(stock): get_item_details applies warehouse user permission)
 
 	def test_get_item_details_applies_warehouse_user_permission(self):
 		ctx = frappe._dict(

@@ -205,15 +205,8 @@ def get_latest_stock_qty(item_code, warehouse=None):
 	# same guard as get_stock_balance above, which returns the same Bin quantity. Loser-free for
 	# the only caller: Work Order write is held by Manufacturing User, who holds Item read.
 	frappe.has_permission("Item", "read", throw=True)
-<<<<<<< HEAD
-=======
-	check_warehouse_company(warehouse)
 	if warehouse:
 		erpnext.require_user_permission("Warehouse", warehouse)
-
-	bin_dt = frappe.qb.DocType("Bin")
-	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)
->>>>>>> 7d70ea9 (fix(stock): check warehouse user permission in projected, batch and latest stock qty)
 
 	values, condition = [item_code], ""
 	if warehouse:

@@ -10,14 +10,8 @@ from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
-<<<<<<< HEAD
 from erpnext.stock.doctype.item.item import set_item_default
-from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-=======
-from erpnext.selling.doctype.customer.customer import is_customer_blocked
-from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
->>>>>>> 6141c96 (fix(stock): check warehouse user permission in get_bin_details)
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
 

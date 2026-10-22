@@ -209,17 +209,7 @@ class StockEntry(StockController):
 
 	def update_items_from_bin_details(self):
 		for item in self.get("items"):
-<<<<<<< HEAD
-			item.update(get_bin_details(item.item_code, item.s_warehouse))
-=======
-			item.update(_get_bin_details(item.item_code, item.s_warehouse or item.t_warehouse))
-
-	def before_insert(self):
-		if self.subcontracting_order and frappe.get_cached_value(
-			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
-		):
-			self.set_serial_batch_from_reserved_entry()
->>>>>>> 6141c96 (fix(stock): check warehouse user permission in get_bin_details)
+			item.update(_get_bin_details(item.item_code, item.s_warehouse))
 
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
