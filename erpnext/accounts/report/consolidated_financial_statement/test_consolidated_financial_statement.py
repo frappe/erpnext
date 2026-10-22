@@ -346,13 +346,76 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		)
 		self.assertAlmostEqual(changes["Total (Credit)"], changes["Total Asset (Debit)"], 2)
 
+	def test_balance_sheet_reserve_with_entries_without_reporting_amounts(self):
+		self.set_closing_rate(70)
+		filters = {"report": "Balance Sheet", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		self.post_journal_entry("Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY)
+		older_entry = self.post_journal_entry("Cash - CCU", "Sales - CCU", 50, company=FOREIGN_CHILD_COMPANY)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": older_entry.name},
+			{"debit_in_reporting_currency": 0, "credit_in_reporting_currency": 0},
+		)
+		after = self.run_report(**filters)
+
+		transaction_rate = frappe.db.get_value(
+			"GL Entry", {"voucher_no": older_entry.name}, "reporting_currency_exchange_rate"
+		)
+		profit_change = self.get_change(before, after, "Provisional Profit / Loss (Credit)")
+		self.assertAlmostEqual(profit_change, 150 * transaction_rate, 2)
+
+	def test_closed_year_leaves_no_provisional_profit(self):
+		self.set_closing_rate(70)
+		year_start_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_start_date")
+		self.set_exchange_rate(60, year_start_date)
+		filters = {"report": "Balance Sheet", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		self.post_journal_entry(
+			"Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY, posting_date=year_start_date
+		)
+		closing_voucher = self.close_period(FOREIGN_CHILD_COMPANY, year_start_date, today())
+		after = self.run_report(**filters)
+
+		closing_rate_of_voucher = frappe.db.get_value(
+			"GL Entry", {"voucher_no": closing_voucher.name}, "reporting_currency_exchange_rate"
+		)
+		self.assertAlmostEqual(self.get_change(before, after, "Provisional Profit / Loss (Credit)"), 0, 2)
+		self.assertAlmostEqual(
+			self.get_change(before, after, "Foreign Currency Translation Reserve"),
+			100 * (70 - closing_rate_of_voucher),
+			2,
+		)
+
+	def close_period(self, company, period_start_date, period_end_date):
+		closing_voucher = frappe.get_doc(
+			{
+				"doctype": "Period Closing Voucher",
+				"transaction_date": period_end_date,
+				"period_start_date": period_start_date,
+				"period_end_date": period_end_date,
+				"company": company,
+				"fiscal_year": self.fiscal_year,
+				"cost_center": frappe.get_cached_value("Company", company, "cost_center"),
+				"closing_account_head": frappe.db.get_value(
+					"Account", {"company": company, "root_type": "Equity", "is_group": 0}
+				),
+				"remarks": "test",
+			}
+		)
+		closing_voucher.submit()
+		return closing_voucher
+
 	def set_closing_rate(self, rate):
 		year_end_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_end_date")
+		self.set_exchange_rate(rate, year_end_date)
+
+	def set_exchange_rate(self, rate, date):
 		for from_currency, to_currency, exchange_rate in (("USD", "INR", rate), ("INR", "USD", 1 / rate)):
 			frappe.get_doc(
 				{
 					"doctype": "Currency Exchange",
-					"date": year_end_date,
+					"date": date,
 					"from_currency": from_currency,
 					"to_currency": to_currency,
 					"exchange_rate": exchange_rate,

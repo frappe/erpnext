@@ -6,9 +6,9 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, getdate
+from frappe.utils import add_days, flt, getdate
 
 import erpnext
 from erpnext.accounts.report.balance_sheet.balance_sheet import (
@@ -579,9 +579,24 @@ class CurrencyTranslator:
 	def add_profit_and_loss_difference(self):
 		"""Balance Sheet does not fetch income and expense, but their translation difference is in the reserve."""
 		for company in self.get_foreign_companies():
-			for entry in get_profit_and_loss_totals(company, self.start_date, self.end_date, self.filters):
+			from_date = self.get_unclosed_from_date(company)
+			for entry in get_profit_and_loss_totals(company, from_date, self.end_date, self.filters):
 				for column in self.get_column_companies(entry):
 					self.translate(entry, column)
+
+	def get_unclosed_from_date(self, company: str):
+		"""Closed income and expense are in retained earnings, which is translated as equity."""
+		closed_until = frappe.get_all(
+			"Period Closing Voucher",
+			filters={"company": company, "docstatus": 1, "period_end_date": ("<=", self.end_date)},
+			order_by="period_end_date desc",
+			limit=1,
+			pluck="period_end_date",
+		)
+		if closed_until and getdate(closed_until[0]) >= self.start_date:
+			return add_days(closed_until[0], 1)
+
+		return self.start_date
 
 	def get_foreign_companies(self) -> set[str]:
 		return {
@@ -597,9 +612,14 @@ def uses_transaction_rate(entry) -> bool:
 
 
 def get_profit_and_loss_totals(company: str, from_date, to_date, filters: dict) -> list[dict]:
-	"""Income and expense of `company` in the period, per posting date."""
+	"""Income and expense of `company` in the period, per posting date and presence of reporting amounts."""
 	gle = frappe.qb.DocType("GL Entry")
 	account = frappe.qb.DocType("Account")
+	has_reporting_amounts = (
+		Case()
+		.when((gle.debit_in_reporting_currency != 0) | (gle.credit_in_reporting_currency != 0), 1)
+		.else_(0)
+	)
 	entries = (
 		frappe.qb.from_(gle)
 		.inner_join(account)
@@ -621,7 +641,7 @@ def get_profit_and_loss_totals(company: str, from_date, to_date, filters: dict) 
 		.where(
 			Criterion.all(get_additional_conditions(from_date, False, filters, frappe._dict(name=company)))
 		)
-		.groupby(gle.company, gle.posting_date)
+		.groupby(gle.company, gle.posting_date, has_reporting_amounts)
 		.run(as_dict=True)
 	)
 
