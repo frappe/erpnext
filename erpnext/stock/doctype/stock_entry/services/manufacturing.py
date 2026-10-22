@@ -179,6 +179,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 	def set_serial_nos_for_finished_good(self, item_details, existing_row=None):
 		serial_nos = self.get_available_serial_nos_for_fg(item_details.item_code)
 		if not serial_nos:
+			if not existing_row:
+				self.doc.append("items", item_details)
 			return
 
 		row = frappe._dict({"serial_nos": serial_nos[0 : cint(item_details.qty)]})
