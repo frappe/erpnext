@@ -146,6 +146,7 @@ class ChildItemUpdater:
 					child_item.insert()
 				else:
 					child_item.save(ignore_permissions=True)
+					self._sync_delivery_schedule(child_item, change_state)
 
 			self._validate_blanket_order_changes()
 		except Exception:
@@ -155,6 +156,21 @@ class ChildItemUpdater:
 		self._post_update(
 			any_qty_changed, items_added_or_removed, any_conversion_factor_changed, had_mapped_discount
 		)
+
+	def _sync_delivery_schedule(self, child_item, change_state) -> None:
+		if self.parent_doctype != "Sales Order":
+			return
+
+		if (
+			change_state.qty_unchanged
+			and change_state.uom_unchanged
+			and change_state.conversion_factor_unchanged
+		):
+			return
+
+		from erpnext.selling.doctype.sales_order.services.delivery_schedule import DeliveryScheduleService
+
+		DeliveryScheduleService(self.parent).sync_schedule_with_item(child_item)
 
 	def _post_update(
 		self,
@@ -683,6 +699,13 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 		d.flags.ignore_permissions = True
 		d.cancel()
 		d.delete()
+
+	if parent.doctype == "Sales Order" and deleted_children:
+		from erpnext.selling.doctype.sales_order.services.delivery_schedule import DeliveryScheduleService
+
+		service = DeliveryScheduleService(parent)
+		for d in deleted_children:
+			service.delete_delivery_schedule_items(d.name)
 
 	if parent.doctype == "Purchase Order":
 		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
