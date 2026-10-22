@@ -762,6 +762,11 @@ class StatusUpdater(Document):
 		return percentage
 
 	@staticmethod
+	def _snap_full_percentage(percentage):
+		# status rules check for a full 100, so store a rounding-short 99.999999 as 100
+		return 100 if flt(percentage) >= 99.999999 else percentage
+
+	@staticmethod
 	def _determine_status(percentage, keyword):
 		if percentage < 0.001:
 			return f"Not {keyword}"
@@ -806,9 +811,8 @@ class StatusUpdater(Document):
 					args["target_parent_field"],
 					args.get("exclude_field"),
 				)
-			update_data[args.get("target_parent_field")] = flt(
-				update_data[args.get("target_parent_field")],
-				frappe.get_precision(args["target_parent_dt"], args["target_parent_field"]),
+			update_data[args.get("target_parent_field")] = self._snap_full_percentage(
+				update_data[args.get("target_parent_field")]
 			)
 			# update field
 			if args.get("status_field"):
@@ -867,10 +871,7 @@ class StatusUpdater(Document):
 				.run()[0][0]
 			)
 
-			per_billed = flt(
-				safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100,
-				frappe.get_precision(ref_dt, "per_billed"),
-			)
+			per_billed = self._snap_full_percentage(safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100)
 
 			ref_doc = frappe.get_lazy_doc(ref_dt, ref_dn)
 
