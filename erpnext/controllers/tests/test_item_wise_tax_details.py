@@ -3,6 +3,7 @@ import json
 import frappe
 from frappe.utils import flt
 
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
@@ -716,3 +717,34 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(gl_map["_Test Account VAT - _TC"], -10)
 		self.assertNotIn("_Test Account Service Tax - _TC", gl_map)
 		self.assertEqual(gl_map[doc.debit_to], 210)
+
+	def make_full_return(self, doc):
+		return_doc = make_return_doc(doc.doctype, doc.name)
+		return_doc.save()
+		return_doc.submit()
+		return return_doc
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_full_return_reverses_actual_tax_cascading_rows(self):
+		doc = self.make_doc_with_cascading_tax("On Previous Row Total")
+		return_doc = self.make_full_return(doc)
+
+		self.assertEqual(return_doc.taxes[1].tax_amount, -10)
+		self.assertEqual(return_doc.grand_total, -220)
+
+		gl_map = self.get_gl_map(doc)
+		for account, amount in self.get_gl_map(return_doc).items():
+			self.assertEqual(gl_map[account] + amount, 0)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_full_return_recomputes_cascading_rows_of_old_split_invoice(self):
+		doc = self.make_doc_with_cascading_tax("On Previous Row Total")
+		# amounts as saved by the old split, where the exempt item took a VAT share
+		doc.taxes[1].db_set({"tax_amount": 10.5, "total": 220.5})
+		doc.db_set("grand_total", 220.5)
+
+		return_doc = self.make_full_return(doc)
+
+		# the return uses the new split, it does not copy the original amounts
+		self.assertEqual(return_doc.taxes[1].tax_amount, -10)
+		self.assertEqual(return_doc.grand_total, -220)
