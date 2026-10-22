@@ -523,6 +523,7 @@ erpnext.patches.v16_0.reset_fifo_queue_in_stock_closing_balance
 erpnext.patches.v16_0.move_warehouse_defaults_to_company
 erpnext.patches.v16_0.replace_legacy_print_formats_with_classic
 execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report", 1)
+<<<<<<< HEAD
 erpnext.patches.v16_0.set_user_on_timesheets
 erpnext.patches.v16_0.remove_invalid_fields_from_copy_fields_to_variants
 erpnext.patches.v16_0.unhide_item_barcode_fields
@@ -532,3 +533,6 @@ erpnext.patches.v16_0.rebuild_production_plan_requested_qty
 erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
 erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
+=======
+erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
+>>>>>>> 7c88594 (fix(telephony): scope voice call settings to their user)
