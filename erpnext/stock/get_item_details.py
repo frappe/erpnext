@@ -1913,11 +1913,6 @@ def get_valuation_rate(item_code, company, warehouse=None):
 	return _get_valuation_rate(item_code, company, warehouse)
 
 
-<<<<<<< HEAD
-def _get_valuation_rate(item_code, company, warehouse=None):
-	# no guard here: set_valuation_rate calls this for the item and every Product Bundle component,
-	# and a caller entitled to the bundle is not necessarily entitled to each component.
-=======
 def get_default_warehouse(item_code: str, company: str) -> str | None:
 	return (
 		get_item_defaults(item_code, company).get("default_warehouse")
@@ -1926,10 +1921,9 @@ def get_default_warehouse(item_code: str, company: str) -> str | None:
 	)
 
 
-def _get_valuation_rate(item_code: str, company: str, warehouse: str | None = None):
-	# no guard here: set_valuation_rate calls this for the item AND for every Product Bundle
-	# component, and a caller entitled to the bundle is not necessarily entitled to each component
->>>>>>> d959a81 (fix(stock): check warehouse user permission in get_valuation_rate)
+def _get_valuation_rate(item_code, company, warehouse=None):
+	# no guard here: set_valuation_rate calls this for the item and every Product Bundle component,
+	# and a caller entitled to the bundle is not necessarily entitled to each component.
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		return {"valuation_rate": 0.0}
 
