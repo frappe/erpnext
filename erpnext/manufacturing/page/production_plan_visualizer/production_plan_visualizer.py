@@ -2,6 +2,9 @@ import frappe
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+	get_subcontracted_received_qty,
+)
 from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
 	get_produced_and_pending_qty,
 )
@@ -313,6 +316,7 @@ def get_purchase_orders(production_plan):
 		.on(po_item.parent == purchase_order.name)
 		.select(
 			po_item.parent.as_("name"),
+			po_item.name.as_("po_detail"),
 			po_item.qty.as_("order_qty"),
 			po_item.received_qty,
 			po_item.fg_item,
@@ -330,12 +334,14 @@ def get_purchase_orders(production_plan):
 		.run(as_dict=True)
 	)
 
+	subcontracted_qty = get_subcontracted_received_qty(
+		[row.po_detail for row in purchase_orders if row.fg_item]
+	)
+
 	for row in purchase_orders:
 		row.doctype = "Purchase Order"
 		row.qty = flt(row.fg_item_qty) if row.fg_item else flt(row.order_qty)
-		row.produced_qty = flt(row.received_qty)
-		if row.fg_item:
-			row.produced_qty = flt(row.received_qty) / (flt(row.order_qty) / flt(row.fg_item_qty) or 1)
+		row.produced_qty = flt(subcontracted_qty.get(row.po_detail)) if row.fg_item else flt(row.received_qty)
 
 	return purchase_orders
 
