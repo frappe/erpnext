@@ -60,6 +60,100 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.warehouse = "_Test Warehouse 2 - _TC"
 		self.item = "_Test Item"
 
+	def test_semi_finished_job_cards_use_operation_output_qty(self):
+		wheel, car = make_item().name, make_item().name
+		operation, workstation = make_review_operation()
+		step = {
+			"operation": operation,
+			"workstation": workstation,
+			"time_in_mins": 60,
+			"skip_material_transfer": 1,
+		}
+		bom = make_review_bom(
+			car,
+			[
+				{"item_code": "_Test Item", "qty": 4, "operation_row_id": 1},
+				{"item_code": wheel, "qty": 4, "operation_row_id": 2},
+			],
+			operations=[
+				{**step, "finished_good": wheel, "finished_good_qty": 4},
+				{**step, "finished_good": car, "is_final_finished_good": 1},
+			],
+			track_semi_finished_goods=1,
+		)
+		wo = make_review_work_order(
+			car, bom.name, 1, skip_transfer=1, track_semi_finished_goods=1, additional_operating_cost=100
+		)
+		self.assertEqual([row.output_qty_per_unit for row in wo.operations], [4, 1])
+
+		wheel_card, car_card = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": wo.name}, order_by="operation_row_id", pluck="name"
+			)
+		)
+		self.assertEqual([wheel_card.for_quantity, wheel_card.time_required], [4, 60])
+		self.assertEqual(wheel_card.items[0].required_qty, 4)
+		self.assertEqual(car_card.for_quantity, 1)
+
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=4, basic_rate=100
+		)
+		wheel_card.append(
+			"time_logs",
+			{
+				"from_time": add_to_date(now(), hours=-2),
+				"to_time": add_to_date(now(), hours=-1),
+				"completed_qty": 4,
+			},
+		)
+		wheel_card.submit()
+		stock_entry = frappe.get_doc(wheel_card.make_stock_entry_for_semi_fg_item())
+		additional_cost = [
+			row.amount
+			for row in stock_entry.additional_costs
+			if row.description == "Additional Operating Cost"
+		]
+		self.assertEqual(additional_cost, [100])
+		stock_entry.submit()
+		self.assertEqual(car_card.get_max_completable_qty(), 1)
+
+		wo.reload()
+		wo.operations[0].process_loss_qty = 1
+		wo.set_process_loss_qty()
+		self.assertEqual(wo.process_loss_qty, 0.25)
+
+	def test_semi_finished_output_qty_for_child_bom_operations(self):
+		rim, wheel, car = (make_item().name for _ in range(3))
+		operation, workstation = make_review_operation()
+		frappe.db.set_value("Operation", operation, "create_job_card_based_on_batch_size", 1)
+		step = {"operation": operation, "workstation": workstation, "time_in_mins": 60}
+		wheel_bom = make_review_bom(
+			wheel,
+			[{"item_code": "_Test Item", "qty": 1}],
+			quantity=2,
+			operations=[
+				{**step, "batch_size": 4, "finished_good": rim, "finished_good_qty": 4},
+				{**step, "finished_good": wheel, "finished_good_qty": 2, "is_final_finished_good": 1},
+			],
+		)
+		car_bom = make_review_bom(
+			car, [{"item_code": wheel, "qty": 2, "bom_no": wheel_bom.name}], operations=[step]
+		)
+		wo = frappe.new_doc(
+			"Work Order",
+			company="_Test Company",
+			production_item=car,
+			bom_no=car_bom.name,
+			qty=3,
+			use_multi_level_bom=1,
+			track_semi_finished_goods=1,
+		)
+		wo.set_work_order_operations()
+
+		self.assertEqual([row.output_qty_per_unit for row in wo.operations], [4, 2, 1])
+		self.assertEqual(wo.operations[0].time_in_mins, 180)
+
 	def check_planned_qty(self):
 		planned0 = (
 			frappe.db.get_value(
