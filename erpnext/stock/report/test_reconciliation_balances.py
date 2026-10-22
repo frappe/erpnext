@@ -196,6 +196,24 @@ class TestReconciliationBalances(ERPNextTestSuite):
 		self.assertEqual(ledger_rows[-1].qty_after_transaction, 6)
 		self.assertEqual(self.get_ledger_rows(item, batch_no=second_batch)[-1].qty_after_transaction, 5)
 
+	def test_reconciliation_of_all_batches_in_batch_filtered_ledger(self):
+		item = self.make_batch_item()
+		first_batch = get_batch_from_bundle(self.receive(item, 10).items[0].serial_and_batch_bundle)
+		second_batch = get_batch_from_bundle(
+			self.receive(item, 5, rate=200, days_ago=4).items[0].serial_and_batch_bundle
+		)
+		self.reconcile(item, 6, batch_no=first_batch)
+
+		self.assertReportsMatchLedger(item, 6, 600)
+		for segregate in (0, 1):
+			for batch, qty, value in ((first_batch, 6, 600), (second_batch, 0, 0)):
+				rows = self.get_ledger_rows(item, batch_no=batch, segregate_serial_batch_bundle=segregate)
+				self.assertEqual(
+					(rows[-1].qty_after_transaction, rows[-1].stock_value),
+					(qty, value),
+					f"{batch=} {segregate=}",
+				)
+
 	def test_reconciliation_of_a_batch_in_segregated_ledger(self):
 		item = self.make_batch_item()
 		batch = get_batch_from_bundle(self.receive(item, 10).items[0].serial_and_batch_bundle)
