@@ -3,10 +3,11 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, flt, today
+from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.report import utils as report_utils
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
+	CurrencyTranslator,
 	execute,
 )
 from erpnext.accounts.utils import get_fiscal_year
@@ -241,6 +242,15 @@ class TestConsolidatedFinancialStatement(FrappeTestCase):
 			100 * (70 - closing_rate_of_voucher),
 			2,
 		)
+
+		closing_voucher.db_set("gle_processing_status", "In Progress")
+		fiscal_year = frappe._dict(
+			frappe.db.get_value(
+				"Fiscal Year", self.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True
+			)
+		)
+		translator = CurrencyTranslator({}, frappe._dict(filter_based_on="Fiscal Year"), fiscal_year)
+		self.assertEqual(translator.get_unclosed_from_date(FOREIGN_CHILD_COMPANY), getdate(year_start_date))
 
 	def close_period(self, company, period_start_date, period_end_date):
 		closing_voucher = frappe.get_doc(

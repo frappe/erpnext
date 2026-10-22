@@ -580,7 +580,12 @@ class CurrencyTranslator:
 		"""Closed income and expense are in retained earnings, which is translated as equity."""
 		closed_until = frappe.get_all(
 			"Period Closing Voucher",
-			filters={"company": company, "docstatus": 1, "period_end_date": ("<=", self.end_date)},
+			filters={
+				"company": company,
+				"docstatus": 1,
+				"gle_processing_status": "Completed",
+				"period_end_date": ("<=", self.end_date),
+			},
 			order_by="period_end_date desc",
 			limit=1,
 			pluck="period_end_date",
