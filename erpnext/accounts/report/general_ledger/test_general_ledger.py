@@ -18,6 +18,9 @@ class TestGeneralLedger(FrappeTestCase):
 
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
+		class SnapshotReached(Exception):
+			pass
+
 		restricted = make_fenced_user(
 			"gl-snapshot-fenced@example.com", ["Accounts User"], [("Company", "_Test Company")]
 		)
@@ -29,15 +32,15 @@ class TestGeneralLedger(FrappeTestCase):
 					as_user(user),
 					patch.object(module, "execute", return_value="live") as live,
 					patch(
-						"frappe.database.duckdb.database.get_latest_sync", side_effect=frappe.ValidationError
-					),
+						"frappe.database.duckdb.database.get_latest_sync", side_effect=SnapshotReached
+					) as sync,
 				):
 					try:
 						result = module.execute_snapshot_report(frappe._dict(company="_Test Company"))
-					except frappe.ValidationError:
+					except SnapshotReached:
 						result = "snapshot"
 				self.assertEqual(result, "live" if expect_live else "snapshot", f"{report} as {user}")
-				self.assertEqual(live.called, expect_live)
+				self.assertEqual((live.called, sync.called), (expect_live, not expect_live))
 
 	def setUp(self):
 		self.company = "_Test Company"
