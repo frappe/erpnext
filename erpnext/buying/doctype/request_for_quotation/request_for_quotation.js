@@ -518,7 +518,7 @@ frappe.ui.form.on("Request for Quotation", {
 			min_offer_total: min_offer_total,
 		};
 
-		const html = frappe.render_template("supplier_quotation_comparision", context);
+		const html = frappe.render_template("supplier_quotation_comparison", context);
 		const $container = $(html).appendTo($wrapper);
 
 		// Item Filter Control using Frappe UI Control
