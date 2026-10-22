@@ -49,7 +49,7 @@ frappe.query_reports["Sales Order Analysis"] = {
 				const to_date = frappe.query_report.get_filter_value("to_date");
 				if (from_date && to_date) filters["transaction_date"] = ["between", [from_date, to_date]];
 
-				return frappe.db.get_link_options("Sales Order", txt, filters);
+				return erpnext.utils.get_link_options("Sales Order", txt, filters);
 			},
 		},
 		{
@@ -89,6 +89,30 @@ frappe.query_reports["Sales Order Analysis"] = {
 			label: __("Group by Sales Order"),
 			fieldtype: "Check",
 			default: 0,
+			on_change: (report) => {
+				if (report.get_filter_value("group_by_so") && report.get_filter_value("group_by_item")) {
+					report.set_filter_value("group_by_item", 0);
+					return;
+				}
+				if (!report._no_refresh) {
+					report.refresh(true);
+				}
+			},
+		},
+		{
+			fieldname: "group_by_item",
+			label: __("Group by Item"),
+			fieldtype: "Check",
+			default: 0,
+			on_change: (report) => {
+				if (report.get_filter_value("group_by_so") && report.get_filter_value("group_by_item")) {
+					report.set_filter_value("group_by_so", 0);
+					return;
+				}
+				if (!report._no_refresh) {
+					report.refresh(true);
+				}
+			},
 		},
 	],
 

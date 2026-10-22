@@ -351,6 +351,7 @@ class SellingController(StockController):
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
 									or get_serial_and_batch_bundle(p, self, d),
 									"name": d.name,
+									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
 									"voucher_type": self.doctype,
@@ -376,6 +377,7 @@ class SellingController(StockController):
 							"conversion_factor": d.conversion_factor,
 							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"name": d.name,
+							"project": d.get("project"),
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,
 							"voucher_type": self.doctype,
@@ -1130,7 +1132,7 @@ def set_default_income_account_for_item(obj):
 	    obj: Transaction document containing items table with income_account field
 	"""
 	company_default = frappe.get_cached_value("Company", obj.company, "default_income_account")
-	for d in obj.get("items", default=[]):
+	for d in sorted(obj.get("items", default=[]), key=lambda row: row.item_code or ""):
 		income_account = getattr(d, "income_account", None)
 		if d.item_code and income_account and income_account != company_default:
 			set_item_default(d.item_code, obj.company, "income_account", income_account)

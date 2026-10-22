@@ -1529,8 +1529,6 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 
 @frappe.whitelist()
 def get_bom_diff(bom1: str, bom2: str):
-	from frappe.model import table_fields
-
 	if bom1 == bom2:
 		frappe.throw(
 			_("BOM 1 {0} and BOM 2 {1} should not be same").format(frappe.bold(bom1), frappe.bold(bom2))
@@ -1546,7 +1544,17 @@ def get_bom_diff(bom1: str, bom2: str):
 	out.added = []
 	out.removed = []
 
-	meta = doc1.meta
+	for df in doc1.meta.fields:
+		diff_table_field(df, doc1, doc2, out)
+
+	return out
+
+
+def diff_table_field(df, doc1, doc2, out):
+	from frappe.model import table_fields
+
+	if df.fieldtype not in table_fields:
+		return
 
 	identifiers = {
 		"operations": "operation",
@@ -1554,37 +1562,39 @@ def get_bom_diff(bom1: str, bom2: str):
 		"scrap_items": "item_code",
 		"exploded_items": "item_code",
 	}
+	identifier = identifiers.get(df.fieldname)
+	if not identifier:
+		return
+	old_rows = {}
+	for row in doc1.get(df.fieldname):
+		old_rows.setdefault(row.get(identifier), []).append(row)
 
-	for df in meta.fields:
-		old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
+	unmatched_rows = []
+	for index, row in enumerate(doc2.get(df.fieldname)):
+		if not pop_unchanged_row(old_rows.get(row.get(identifier), []), row):
+			unmatched_rows.append((index, row))
 
-		if df.fieldtype in table_fields:
-			identifier = identifiers.get(df.fieldname)
-			if not identifier:
-				continue
+	collect_row_changes(df, identifier, old_rows, unmatched_rows, out)
+	for rows in old_rows.values():
+		out.removed.extend([df.fieldname, row.as_dict()] for row in rows)
 
-			# make maps
-			old_row_by_identifier, new_row_by_identifier = {}, {}
-			for d in old_value:
-				old_row_by_identifier[d.get(identifier)] = d
-			for d in new_value:
-				new_row_by_identifier[d.get(identifier)] = d
 
-			# check rows for additions, changes
-			for i, d in enumerate(new_value):
-				if d.get(identifier) in old_row_by_identifier:
-					diff = get_diff(old_row_by_identifier[d.get(identifier)], d, for_child=True)
-					if diff and diff.changed:
-						out.row_changed.append((df.fieldname, i, d.get(identifier), diff.changed))
-				else:
-					out.added.append([df.fieldname, d.as_dict()])
+def pop_unchanged_row(candidates, row):
+	for index, candidate in enumerate(candidates):
+		if not get_diff(candidate, row, for_child=True):
+			return candidates.pop(index)
 
-			# check for deletions
-			for d in old_value:
-				if d.get(identifier) not in new_row_by_identifier:
-					out.removed.append([df.fieldname, d.as_dict()])
 
-	return out
+def collect_row_changes(df, identifier, old_rows, unmatched_rows, out):
+	for index, row in unmatched_rows:
+		candidates = old_rows.get(row.get(identifier))
+		if not candidates:
+			out.added.append([df.fieldname, row.as_dict()])
+			continue
+
+		diff = get_diff(candidates.pop(0), row, for_child=True)
+		if diff and diff.changed:
+			out.row_changed.append((df.fieldname, index, row.get(identifier), diff.changed))
 
 
 @frappe.whitelist()

@@ -23,6 +23,7 @@ from erpnext.stock.doctype.item.item import (
 	get_item_attribute,
 	get_timeline_data,
 	get_uom_conv_factor,
+	set_item_default,
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -164,6 +165,7 @@ class TestItem(FrappeTestCase):
 				"conversion_factor": 1,
 				"price_list_uom_dependant": 1,
 				"ignore_pricing_rule": 1,
+				"qty": 1,
 			}
 		)
 
@@ -335,6 +337,18 @@ class TestItem(FrappeTestCase):
 		)
 		for key, value in purchase_item_check.items():
 			self.assertEqual(value, purchase_item_details.get(key))
+
+	def test_set_item_default_refreshes_cached_item(self):
+		item = make_item(
+			properties={
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+			}
+		)
+
+		set_item_default(item.name, "_Test Company", "income_account", "_Test Account Sales - _TC")
+
+		cached_item = frappe.get_cached_doc("Item", item.name)
+		self.assertEqual(cached_item.item_defaults[0].income_account, "_Test Account Sales - _TC")
 
 	def test_item_default_validations(self):
 		with self.assertRaises(frappe.ValidationError) as ve:
@@ -1043,6 +1057,35 @@ class TestItem(FrappeTestCase):
 		item.description = ""
 		item.save()
 		self.assertEqual(item.description, item.item_name)
+
+	def test_item_dashboard_applies_item_user_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.dashboard.item_dashboard import get_data
+
+		allowed, restricted = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		for item_code in (allowed, restricted):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		user = frappe.get_doc("User", "test@example.com")
+		user.add_roles("Stock User")
+		add_user_permission("Item", allowed, user.name)
+
+		with self.set_user(user.name):
+			self.assertTrue(get_data(item_code=allowed))
+			self.assertFalse(get_data(item_code=restricted))
+
+	def test_item_dashboard_group_warehouse_includes_children(self):
+		from erpnext.stock.dashboard.item_dashboard import get_data
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		group = create_warehouse("_Test Dashboard Group", {"is_group": 1})
+		child = create_warehouse("_Test Dashboard Child", {"parent_warehouse": group})
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target=child, qty=1, basic_rate=100)
+
+		rows = get_data(item_code=item_code, warehouse=group)
+		self.assertEqual([row.warehouse for row in rows], [child])
 
 	def test_item_type_field_change(self):
 		"""Check if critical fields like `is_stock_item`, `has_batch_no` are not changed if transactions exist."""

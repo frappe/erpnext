@@ -265,7 +265,7 @@ class Item(Document):
 		if not price_list:
 			price_list = frappe.db.get_single_value(
 				"Selling Settings", "selling_price_list"
-			) or frappe.db.get_value("Price List", _("Standard Selling"))
+			) or frappe.db.get_value("Price List", "Standard Selling")
 		if price_list:
 			item_price = frappe.get_doc(
 				{
@@ -1436,6 +1436,7 @@ def set_item_default(item_code, company, fieldname, value):
 		if d.company == company:
 			if not d.get(fieldname):
 				frappe.db.set_value(d.doctype, d.name, fieldname, value)
+				item.clear_cache()
 			return
 
 	# no row found, add a new row for the company

@@ -283,7 +283,6 @@ def update_bin_details(args, out, doc):
 
 def update_stock(ctx, out, doc=None):
 	from erpnext.stock.doctype.batch.batch import get_available_batches
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 
 	if (
 		(
@@ -332,18 +331,28 @@ def update_stock(ctx, out, doc=None):
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
 
-		if out.has_serial_no and out.has_batch_no and has_incorrect_serial_nos(ctx, out):
-			kwargs["batches"] = [ctx.get("batch_no")] if ctx.get("batch_no") else [out.get("batch_no")]
-			serial_nos = get_serial_nos_for_outward(kwargs)
-			serial_nos = get_filtered_serial_nos(serial_nos, doc)
+		if out.has_serial_no and needs_serial_nos(ctx, out):
+			set_serial_nos_for_outward(ctx, out, kwargs, doc)
 
-			out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
-		elif out.has_serial_no and not ctx.get("serial_no"):
-			serial_nos = get_serial_nos_for_outward(kwargs)
-			serial_nos = get_filtered_serial_nos(serial_nos, doc)
+def needs_serial_nos(ctx, out):
+	if not out.has_batch_no:
+		return not ctx.get("serial_no")
 
-			out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
+	if ctx.get("use_serial_batch_fields"):
+		return False
+
+	return has_incorrect_serial_nos(ctx, out)
+
+
+def set_serial_nos_for_outward(ctx, out, kwargs, doc):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+
+	if out.has_batch_no:
+		kwargs["batches"] = [ctx.get("batch_no") or out.get("batch_no")]
+
+	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
+	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
 
 def has_incorrect_serial_nos(ctx, out):
@@ -1224,9 +1233,6 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 			& (ip.price_list == args.get("price_list"))
 			& (IfNull(ip.uom, "").isin(["", args.get("uom")]))
 		)
-		.orderby(ip.valid_from, order=frappe.qb.desc)
-		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
-		.orderby(ip.uom, order=frappe.qb.desc)
 	)
 
 	if force_batch_no:
@@ -1236,9 +1242,15 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 
 	if not ignore_party:
 		if args.get("customer"):
-			query = query.where(ip.customer == args.get("customer"))
+			query = query.where(
+				(ip.customer == args.get("customer"))
+				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+			).orderby(IfNull(ip.customer, ""), order=frappe.qb.desc)
 		elif args.get("supplier"):
-			query = query.where(ip.supplier == args.get("supplier"))
+			query = query.where(
+				(ip.supplier == args.get("supplier"))
+				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+			).orderby(IfNull(ip.supplier, ""), order=frappe.qb.desc)
 		else:
 			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
 
@@ -1248,7 +1260,12 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 			& (IfNull(ip.valid_upto, "2500-12-31") >= args["transaction_date"])
 		)
 
-	return query.run()
+	return (
+		query.orderby(ip.valid_from, order=frappe.qb.desc)
+		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
+		.orderby(ip.uom, order=frappe.qb.desc)
+		.run()
+	)
 
 
 @frappe.whitelist()
@@ -1303,9 +1320,6 @@ def get_price_list_rate_for(args, item_code):
 		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
-		for field in ["customer", "supplier"]:
-			del item_price_args[field]
-
 		general_price_list_rate = get_item_price(
 			item_price_args, item_code, ignore_party=args.get("ignore_party")
 		)
@@ -1665,9 +1679,9 @@ def get_price_list_currency_and_exchange_rate(args):
 	if not args.price_list:
 		return {}
 
-	if args.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+	if args.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"]:
 		args.update({"exchange_rate": "for_selling"})
-	elif args.doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+	elif args.doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
 		args.update({"exchange_rate": "for_buying"})
 
 	price_list_details = get_price_list_details(args.price_list)

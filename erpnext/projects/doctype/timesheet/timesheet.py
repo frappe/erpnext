@@ -630,23 +630,18 @@ def get_events(start, end, filters=None):
 
 
 def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
-	user = frappe.session.user
-	# find customer name from contact.
-	customer = ""
+	from frappe.utils.user import is_website_user
 
-	contact = frappe.db.exists("Contact", {"user": user})
-	if contact:
-		# find customer
-		contact = frappe.get_doc("Contact", contact)
-		customer = contact.get_link_for("Customer")
+	from erpnext.controllers.website_list_for_contact import get_parents_for_user
 
-	if customer:
+	customers = get_parents_for_user("Customer") if is_website_user() else []
+	if customers:
 		sales_invoices = frappe.get_all(
 			"Sales Invoice",
-			filters={"customer": customer, "docstatus": ["!=", 2]},
+			filters={"customer": ["in", customers], "docstatus": ["!=", 2]},
 			pluck="name",
 		)
-		projects = frappe.get_all("Project", filters={"customer": customer}, pluck="name")
+		projects = frappe.get_all("Project", filters={"customer": ["in", customers]}, pluck="name")
 		if not (sales_invoices or projects):
 			return []
 

@@ -94,3 +94,22 @@ class TestPartySpecificItem(FrappeTestCase):
 		standalone_note = frappe.copy_doc(credit_note)
 		standalone_note.return_against = None
 		self.assertRaisesRegex(frappe.ValidationError, "is not allowed for", standalone_note.insert)
+
+	def test_opportunity_enforces_party_rules(self):
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer 1",
+			restrict_based_on="Item",
+			based_on_value="_Test Item Home Desktop 100",
+		)
+		make_opportunity(with_items=1, customer="_Test Customer 1", item_code="_Test Item Home Desktop 100")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not allowed for Customer",
+			make_opportunity,
+			with_items=1,
+			customer="_Test Customer 1",
+			item_code="_Test Item",
+		)

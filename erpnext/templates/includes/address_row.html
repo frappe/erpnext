@@ -1,5 +1,5 @@
 <div class="web-list-item mb-3">
-    <a href="/addresses?name={{ doc.name | urlencode }}" class="no-underline text-reset">
+    <a href="/address/{{ doc.name | urlencode }}" class="no-underline text-reset">
 	    <div class="row">
 	        <div class="col-3">
 	                 <span class="indicator {{ "red" if doc.address_type=="Office" else "green" if doc.address_type=="Billing" else "blue" if doc.address_type=="Shipping" else "gray" }}">{{ doc.address_title }}</span>
