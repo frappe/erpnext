@@ -846,7 +846,6 @@ def make_purchase_order(
 	items_to_map = {
 		item.get("item_code"): item.get("supplier") for item in selected_items if item.get("item_code")
 	}
-	item_codes = list(set(items_to_map.keys()))
 	suppliers = list(set(items_to_map.values()))
 
 	if not suppliers:
@@ -906,7 +905,8 @@ def make_purchase_order(
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc: doc.parent_item in item_codes
+					"condition": lambda doc, s=supplier: doc.parent_item in items_to_map
+					and items_to_map[doc.parent_item] == s
 					and flt(doc.ordered_qty) < flt(doc.qty)
 					and not is_bundle_of_closed_row(doc),
 				},
