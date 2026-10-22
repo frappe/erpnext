@@ -24,16 +24,10 @@ jobs:
     name: Patch Test
 
     container:
-      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24-mariadb11.8
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_TOKEN || github.token }}
-
-    services:
-      mysql:
-        image: mariadb:11.8
-        env:
-          MARIADB_ROOT_PASSWORD: 'root'
 
     defaults:
       run:
@@ -41,6 +35,7 @@ jobs:
 
     env:
       ERPNEXT_CI_USER: ci
+      CI_DB_DATADIR: /home/ci/mariadb-data
       PIP_CACHE_DIR: /home/ci/.cache/pip
       npm_config_cache: /home/ci/.cache/npm
       YARN_CACHE_FOLDER: /home/ci/.cache/yarn
@@ -61,6 +56,11 @@ jobs:
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      - name: Start DB
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
+        env:
+          SKIP_SYSTEM_SETUP: "1"
 
       # The v14 baseline backup is a fixed published file — cache it instead of re-downloading
       # it from the GitHub release every run.
