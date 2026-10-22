@@ -736,7 +736,7 @@ def get_ordered_amount(params):
 
 
 def get_other_condition(params, child, parent, for_doc):
-	conditions = [parent.company == params.company, child.expense_account == params.expense_account]
+	conditions = [child.expense_account == params.expense_account]
 	budget_against_field = params.get("budget_against_field")
 
 	if budget_against_field and params.get(budget_against_field):
