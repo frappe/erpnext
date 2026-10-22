@@ -16,7 +16,7 @@ on:
     - cron: "0 10 * * 1"
   workflow_dispatch:
 
-# The runner dispatch uses RELEASE_TOKEN (a PAT), not the default GITHUB_TOKEN,
+# The runner dispatch uses the Frappe Release Bot app token, not the default GITHUB_TOKEN,
 # so no GITHUB_TOKEN permissions are required.
 permissions: {}
 
@@ -31,10 +31,17 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Get Frappe Release Bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FRAPPE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FRAPPE_BOT_PRIVATE_KEY }}
+          permission-actions: write
       - name: Dispatch runner on ${{ matrix.hotfix_branch }}
         run: |
           gh workflow run run-hotfix-translation-sync.yml \
             --repo "${{ github.repository }}" \
             --ref "${{ matrix.hotfix_branch }}"
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
