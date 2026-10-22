@@ -80,6 +80,7 @@ class TestGetItemDetail(FrappeTestCase):
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
 
+<<<<<<< HEAD
 	def test_fetch_asset_category_expense_account_on_purchase_receipt(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -127,16 +128,15 @@ class TestGetItemDetail(FrappeTestCase):
 		self.assertEqual(details.get("expense_account"), "_Test Fixed Asset - _TC")
 
 	# making this test in get_item_details test file as feat/fix is present in that method
+=======
+>>>>>>> ce2bd50 (test(stock): service item valuation rate ignores its default warehouse)
 	def test_get_valuation_rate_applies_warehouse_user_permission(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
-		item_code = make_item(
-			properties={
-				"is_stock_item": 1,
-				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
-			}
-		).name
+		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+		item_code = make_item(properties={"is_stock_item": 1, "item_defaults": item_defaults}).name
+		service_item = make_item(properties={"is_stock_item": 0, "item_defaults": item_defaults}).name
 		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
 		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=1, rate=50)
 
@@ -158,7 +158,9 @@ class TestGetItemDetail(FrappeTestCase):
 				get_valuation_rate(item_code, "_Test Company", "_Test Warehouse 1 - _TC"),
 				{"valuation_rate": 50},
 			)
+			self.assertEqual(get_valuation_rate(service_item, "_Test Company"), {"valuation_rate": 0.0})
 
+	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
 		# create item
 		item = frappe.get_doc(
