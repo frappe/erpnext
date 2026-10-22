@@ -554,3 +554,5 @@ erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
 erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
 erpnext.patches.v16_0.set_lost_on_in_opportunity
+execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
+execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
