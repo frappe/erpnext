@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder.functions import Min
 from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
@@ -59,13 +60,53 @@ class SellingController(StockController):
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
+		self.validate_price_list_country()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		if self.doctype == "Sales Invoice":
+			self.validate_against_stock_reservation_entries()
 		self.validate_auto_repeat_subscription_dates()
 		self.validate_sample_retention_warehouse()
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
+
+	def validate_against_stock_reservation_entries(self):
+		if self.get("is_return") or (self.doctype == "Sales Invoice" and not cint(self.get("update_stock"))):
+			return
+
+		so_field = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
+		rows = [item for item in self.get("items") if item.get(so_field) and item.so_detail]
+		reserved_warehouses = get_reserved_warehouses_by_order_row([item.so_detail for item in rows])
+		for item in rows:
+			warehouses = reserved_warehouses.get(item.so_detail)
+			if not warehouses:
+				continue
+
+			if not item.warehouse:
+				item.warehouse = warehouses[0]
+			elif item.warehouse not in warehouses:
+				frappe.throw(
+					_("Row #{0}: Stock is reserved for item {1} in warehouse {2}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(warehouses[0])
+						if len(warehouses) == 1
+						else _("{0} and {1}").format(
+							frappe.bold(", ".join(warehouses[:-1])), frappe.bold(warehouses[-1])
+						),
+					),
+					title=_("Stock Reservation Warehouse Mismatch"),
+				)
+
+	def validate_price_list_country(self):
+		from erpnext.stock.doctype.price_list.price_list import validate_price_list_country
+
+		if self.get("is_return") or not self.get("customer_address"):
+			return
+
+		country = frappe.db.get_value("Address", self.customer_address, "country")
+		validate_price_list_country(self.get("selling_price_list"), country)
 
 	def validate_standalone_serial_nos_customer(self):
 		if not self.is_return or self.return_against:
@@ -358,6 +399,7 @@ class SellingController(StockController):
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
 									or get_serial_and_batch_bundle(p, self, d),
 									"name": d.name,
+									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
 									"voucher_type": self.doctype,
@@ -383,6 +425,7 @@ class SellingController(StockController):
 							"conversion_factor": d.conversion_factor,
 							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"name": d.name,
+							"project": d.get("project"),
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,
 							"voucher_type": self.doctype,
@@ -1054,6 +1097,7 @@ class SellingController(StockController):
 
 					# Update Reserved Stock in Bin.
 					sre_doc.update_reserved_stock_in_bin()
+					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
 
 					qty_to_deliver -= qty_can_be_deliver
 
@@ -1121,6 +1165,7 @@ class SellingController(StockController):
 
 					# Update Reserved Stock in Bin.
 					sre_doc.update_reserved_stock_in_bin()
+					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
@@ -1215,6 +1260,31 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 	child.db_set("serial_and_batch_bundle", doc.name)
 
 	return doc.name
+
+
+def get_reserved_warehouses_by_order_row(so_details: list) -> dict:
+	if not so_details:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	rows = (
+		frappe.qb.from_(sre)
+		.select(sre.voucher_detail_no, sre.warehouse)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no.isin(so_details))
+			& (sre.delivered_qty < sre.reserved_qty)
+		)
+		.groupby(sre.voucher_detail_no, sre.warehouse)
+		.orderby(Min(sre.creation))
+	).run(as_dict=True)
+
+	reserved_warehouses = {}
+	for row in rows:
+		reserved_warehouses.setdefault(row.voucher_detail_no, []).append(row.warehouse)
+
+	return reserved_warehouses
 
 
 def get_ledger_qty(qty) -> float:

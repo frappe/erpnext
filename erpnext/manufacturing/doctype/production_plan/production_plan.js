@@ -170,8 +170,8 @@ frappe.ui.form.on("Production Plan", {
 
 				if (
 					frm.doc.mr_items &&
-					frm.doc.mr_items.length &&
-					!["Material Requested", "Closed"].includes(frm.doc.status)
+					frm.doc.mr_items.some((row) => flt(row.quantity) > flt(row.requested_qty)) &&
+					frm.doc.status !== "Closed"
 				) {
 					frm.add_custom_button(
 						__("Material Request"),
@@ -505,8 +505,8 @@ frappe.ui.form.on("Production Plan", {
 
 			dialog.show();
 
-			dialog.set_primary_action(__("Get Items"), () => {
-				let warehouses = dialog.get_values().warehouses;
+			dialog.set_primary_action(__("Get Items"), (values) => {
+				let warehouses = values.warehouses;
 				frm.events.get_items_for_material_requests(frm, warehouses);
 				dialog.hide();
 			});

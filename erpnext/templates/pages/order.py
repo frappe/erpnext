@@ -33,7 +33,7 @@ def get_context(context):
 	else:
 		context.print_format = "Standard"
 
-	if not frappe.has_website_permission(context.doc):
+	if not (context.doc.has_permission("read") or frappe.has_website_permission(context.doc)):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 	context.available_loyalty_points = 0.0

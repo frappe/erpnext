@@ -471,12 +471,21 @@ class PurchaseOrder(BuyingController):
 		super().update_prevdoc_status()
 
 	def update_status(self, status):
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			validate_reopen_against_blanket_order,
+		)
+
 		self.check_modified_date()
+		was_closed = self.status == "Closed"
+		if status != "Closed" and was_closed:
+			validate_reopen_against_blanket_order(self)
+
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
-		self.update_subcontracting_order_status()
+		if status == "Closed" or was_closed:
+			self.update_subcontracting_order_status()
 		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -491,8 +500,7 @@ class PurchaseOrder(BuyingController):
 			self.update_status_updater_if_from_pp()
 
 		self.update_prevdoc_status()
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 		self.validate_budget()
@@ -539,8 +547,7 @@ class PurchaseOrder(BuyingController):
 
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
-		if not self.is_subcontracted or self.is_old_subcontracting_flow:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 
@@ -580,7 +587,7 @@ class PurchaseOrder(BuyingController):
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Production Plan Sub Assembly Item",
 				"join_field": "production_plan_sub_assembly_item",
-				"target_field": "received_qty",
+				"target_field": "ordered_qty",
 				"target_parent_dt": "Production Plan",
 				"target_parent_field": "",
 				"target_ref_field": "qty",
@@ -749,9 +756,9 @@ class PurchaseOrder(BuyingController):
 		)
 
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
-			sco = frappe.db.get_value("Subcontracting Order", {"purchase_order": self.name, "docstatus": 1})
-
-			if sco:
+			for sco in frappe.get_all(
+				"Subcontracting Order", {"purchase_order": self.name, "docstatus": 1}, pluck="name"
+			):
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
 
@@ -911,28 +918,22 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target.set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
-	def get_billed_qty(po_item_name):
-		from frappe.query_builder.functions import Sum
-
-		table = frappe.qb.DocType("Purchase Invoice Item")
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.qty).as_("qty"))
-			.where((table.docstatus == 1) & (table.po_detail == po_item_name))
-		)
-		return query.run(pluck="qty")[0] or 0
+	from erpnext.buying.report.purchase_order_analysis.purchase_order_analysis import get_billed_qty_data
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+	po_items = frappe.get_all("Purchase Order Item", filters={"parent": source_name}, fields=["name"])
+	billed_qty_by_item = get_billed_qty_data(po_items) if po_items else {}
 
-	def get_billed_and_mapped_qty(po_item_name):
-		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
+	def get_billed_and_mapped_qty(po_item):
+		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
+		return billed_qty + flt(mapped_qty_by_item.get(po_item.name, 0))
 
 	def update_item(obj, target, source_parent):
 		target.qty = (
 			0
 			if is_unit_price_row(obj, has_unit_price_items)
-			else flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+			else flt(obj.qty) - get_billed_and_mapped_qty(obj)
 		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
@@ -974,7 +975,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"condition": lambda doc: (
 				doc.name not in mapped_qty_by_item
 				if is_unit_price_row(doc, has_unit_price_items)
-				else doc.qty > get_billed_and_mapped_qty(doc.name)
+				else doc.qty > get_billed_and_mapped_qty(doc)
 			)
 			and select_item(doc),
 		},

@@ -212,17 +212,18 @@
    "fieldname": "finished_good",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "FG / Semi FG Item",
+   "label": "Output Item",
    "mandatory_depends_on": "eval:parent.track_semi_finished_goods === 1",
    "options": "Item"
   },
   {
    "columns": 2,
    "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "description": "Pick a BOM to copy its raw materials into this step. Leave it empty to add the raw materials yourself with Add Raw Materials.",
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "BOM No",
+   "label": "Output Item BOM",
    "options": "BOM"
   },
   {
@@ -232,13 +233,14 @@
    "fieldname": "finished_good_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty to Produce"
+   "label": "Output Qty"
   },
   {
    "default": "0",
+   "description": "Tick this on the step that makes this BOM's own item. The other steps make in-between items.",
    "fieldname": "is_final_finished_good",
    "fieldtype": "Check",
-   "label": "Is Final Finished Good"
+   "label": "Last Step"
   },
   {
    "fieldname": "warehouse_section",
@@ -308,7 +310,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-08 12:00:00.000000",
+ "modified": "2026-10-20 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

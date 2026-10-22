@@ -26,7 +26,9 @@ def execute(filters=None):
 
 	data = get_entries(filters)
 
-	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
+	balance_as_per_system = get_balance_on(
+		filters["account"], filters["report_date"], company=filters["company"]
+	)
 
 	total_debit, total_credit = 0, 0
 	for d in data:
@@ -162,6 +164,7 @@ def get_journal_entries(filters):
 			& (je.posting_date <= filters.report_date)
 			& (je.clearance_date.isnull() | (je.clearance_date > filters.report_date))
 			& (je.company == filters.company)
+			& (je.finance_book.isnull() | (je.finance_book == ""))
 			& ((je.is_opening.isnull()) | (je.is_opening == "No"))
 		)
 		.orderby(je.posting_date)
@@ -296,6 +299,7 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 			& (je.posting_date > filters.report_date)
 			& (je.clearance_date <= filters.report_date)
 			& (je.company == filters.company)
+			& (je.finance_book.isnull() | (je.finance_book == ""))
 			& ((je.is_opening.isnull()) | (je.is_opening == "No"))
 		)
 		.run(as_dict=True)

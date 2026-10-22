@@ -1,8 +1,6 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
@@ -277,13 +275,10 @@ def has_difference(row, float_precision, currency_precision, difference_in, valu
 		qty_diff = flt(row.difference_in_qty, float_precision)
 		value_diff = flt(row.diff_value_diff, currency_precision)
 
-		if row.stock_queue and json.loads(row.stock_queue):
-			value_diff = value_diff or (
-				flt(row.fifo_value_diff, currency_precision)
-				or flt(row.fifo_difference_diff, currency_precision)
-			)
-
-			qty_diff = qty_diff or flt(row.fifo_qty_diff, float_precision)
+		value_diff = value_diff or (
+			flt(row.fifo_value_diff, currency_precision) or flt(row.fifo_difference_diff, currency_precision)
+		)
+		qty_diff = qty_diff or flt(row.fifo_qty_diff, float_precision)
 
 		valuation_diff = flt(row.valuation_diff, currency_precision) or flt(
 			row.fifo_valuation_diff, currency_precision

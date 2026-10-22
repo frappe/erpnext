@@ -29,7 +29,9 @@ class SubcontractingBOM(Document):
 
 	def validate(self):
 		self.validate_finished_good()
+		self.validate_finished_good_bom()
 		self.validate_service_item()
+		self.validate_quantities()
 		self.validate_is_active()
 
 	def before_save(self):
@@ -55,6 +57,13 @@ class SubcontractingBOM(Document):
 				_("Finished Good {0} must be a sub-contracted item.").format(frappe.bold(self.finished_good))
 			)
 
+	def validate_finished_good_bom(self):
+		is_active, docstatus = frappe.db.get_value("BOM", self.finished_good_bom, ["is_active", "docstatus"])
+		if self.is_active and (not is_active or docstatus != 1):
+			frappe.throw(
+				_("BOM {0} must be active and submitted.").format(frappe.bold(self.finished_good_bom))
+			)
+
 	def validate_service_item(self):
 		disabled, is_stock_item = frappe.db.get_value(
 			"Item", self.service_item, ["disabled", "is_stock_item"]
@@ -66,6 +75,11 @@ class SubcontractingBOM(Document):
 			frappe.throw(
 				_("Service Item {0} must be a non-stock item.").format(frappe.bold(self.service_item))
 			)
+
+	def validate_quantities(self):
+		for fieldname in ("finished_good_qty", "service_item_qty"):
+			if flt(self.get(fieldname)) <= 0:
+				frappe.throw(_("{0} must be greater than zero.").format(_(self.meta.get_label(fieldname))))
 
 	def validate_is_active(self):
 		if self.is_active:

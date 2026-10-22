@@ -2291,6 +2291,145 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(fifo_slots.batchwise_valuation_by_batch.get(batch_no), 1)
 		self.assertEqual(slots[item_code]["total_qty"], 5.0)
 
+	def get_available_qty_for_restricted_user(self, applicable_for=None):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.report.stock_ageing.stock_ageing import execute
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, to_warehouse="Stores - _TC", qty=7, rate=100)
+		make_stock_entry(item_code=item_code, to_warehouse="Finished Goods - _TC", qty=2, rate=100)
+
+		user = "stock-ageing-warehouse@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Ageing", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc("User", user).add_roles("Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
+
+		frappe.set_user(user)
+		try:
+			data = execute(
+				frappe._dict(
+					company="_Test Company",
+					to_date=frappe.utils.today(),
+					range="30, 60, 90",
+					item_code=item_code,
+				)
+			)[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		return [row[5] for row in data if row[0] == item_code]
+
+	def test_item_rows_count_only_permitted_warehouses(self):
+		self.assertEqual(self.get_available_qty_for_restricted_user(), [2])
+
+	def test_permission_for_another_doctype_does_not_limit_item_rows(self):
+		self.assertEqual(self.get_available_qty_for_restricted_user(applicable_for="Purchase Order"), [9])
+
+	def test_age_ranges_default_and_are_sorted(self):
+		from erpnext.stock.report.stock_ageing.stock_ageing import get_age_ranges
+
+		self.assertEqual(get_age_ranges(None), ["30", "60", "90"])
+		self.assertEqual(get_age_ranges("90, 30, 60"), ["30", "60", "90"])
+
+	def test_purchase_return_removes_the_returned_lot(self):
+		sle = [
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				warehouse="WH 1",
+				posting_date="2021-09-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=10,
+				qty_after_transaction=20,
+				stock_value_difference=2000,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Purchase Receipt",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=-10,
+				qty_after_transaction=10,
+				stock_value_difference=-2000,
+				warehouse="WH 1",
+				posting_date="2021-12-05",
+				voucher_type="Purchase Receipt",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
+
+	def make_sle(self, qty, value, posting_date, voucher_type, voucher_no):
+		return frappe._dict(
+			name="Flask Item",
+			actual_qty=qty,
+			stock_value_difference=value,
+			warehouse="WH 1",
+			posting_date=posting_date,
+			voucher_type=voucher_type,
+			voucher_no=voucher_no,
+			has_serial_no=False,
+			serial_no=None,
+		)
+
+	def test_subcontracting_consumption_takes_stock_in_queue_order(self):
+		sle = [
+			self.make_sle(5, 500, "2021-09-01", "Stock Entry", "001"),
+			self.make_sle(5, 1500, "2021-10-01", "Stock Entry", "002"),
+			self.make_sle(5, 1000, "2021-11-01", "Stock Entry", "003"),
+			self.make_sle(-10, -2000, "2021-12-01", "Subcontracting Receipt", "004"),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[5.0, "2021-11-01", 1000.0]])
+
+	def test_subcontracting_return_removes_the_returned_lot(self):
+		sle = [
+			self.make_sle(10, 1000, "2021-09-01", "Subcontracting Receipt", "001"),
+			self.make_sle(10, 2000, "2021-11-01", "Subcontracting Receipt", "002"),
+			self.make_sle(-10, -2000, "2021-12-01", "Subcontracting Receipt", "003"),
+		]
+
+		with patch.object(FIFOSlots, "_get_subcontracting_returns", return_value={"003"}):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
+
+	def test_lifo_purchase_return_removes_the_newest_matching_lot(self):
+		sle = [
+			self.make_sle(10, 1000, "2021-09-01", "Purchase Receipt", "001"),
+			self.make_sle(10, 1000, "2021-11-01", "Purchase Receipt", "002"),
+			self.make_sle(-10, -1000, "2021-12-01", "Purchase Receipt", "003"),
+		]
+
+		with patch.object(FIFOSlots, "_get_item_valuation_method", return_value="LIFO"):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		self.assertEqual(slots["Flask Item"]["fifo_queue"], [[10.0, "2021-09-01", 1000.0]])
+
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"

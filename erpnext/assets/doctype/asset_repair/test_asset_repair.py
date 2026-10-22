@@ -19,6 +19,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
+from erpnext.assets.doctype.asset_repair import asset_repair as asset_repair_module
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
@@ -220,6 +221,71 @@ class TestAssetRepair(ERPNextTestSuite):
 		)
 
 		self.assertRaises(frappe.ValidationError, asset_repair2.save)
+
+	def test_repair_cost_uses_exact_remaining_available_amount(self):
+		"""Test that repair cost can use the exact remaining amount from Purchase Invoice with fractional values."""
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		asset = create_asset(item_code="Macbook Pro", submit=1)
+		pi = make_purchase_invoice(
+			company=asset.company,
+			item="_Test Non Stock Item",
+			expense_account="Administrative Expenses - _TC",
+			cost_center="Main - _TC",
+			qty=1,
+			rate=1000.30,
+		)
+
+		asset_repair1 = frappe.new_doc("Asset Repair")
+		asset_repair1.update(
+			{
+				"asset": asset.name,
+				"asset_name": asset.item_name,
+				"failure_date": nowdate(),
+				"description": "First Repair",
+				"company": asset.company,
+				"capitalize_repair_cost": 1,
+				"repair_status": "Completed",
+				"completion_date": nowdate(),
+			}
+		)
+		asset_repair1.append(
+			"invoices",
+			{
+				"purchase_invoice": pi.name,
+				"expense_account": "Administrative Expenses - _TC",
+				"repair_cost": 250.10,
+			},
+		)
+		asset_repair1.submit()
+
+		asset_repair2 = frappe.new_doc("Asset Repair")
+		asset_repair2.update(
+			{
+				"asset": asset.name,
+				"asset_name": asset.item_name,
+				"failure_date": nowdate(),
+				"description": "Second Repair",
+				"company": asset.company,
+				"capitalize_repair_cost": 1,
+			}
+		)
+		# 1000.30 - 250.10 produces 750.1999999999999 in binary float representation
+		asset_repair2.append(
+			"invoices",
+			{
+				"purchase_invoice": pi.name,
+				"expense_account": "Administrative Expenses - _TC",
+				"repair_cost": 750.20,
+			},
+		)
+
+		asset_repair2.repair_status = "Completed"
+		asset_repair2.completion_date = nowdate()
+		asset_repair2.submit()
+		self.assertEqual(
+			asset_repair_module.get_unallocated_repair_cost(pi.name, "Administrative Expenses - _TC"), 0
+		)
 
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
