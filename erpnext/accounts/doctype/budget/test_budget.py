@@ -10,9 +10,12 @@ from erpnext.accounts.doctype.budget.budget import (
 	get_actual_expense,
 	revise_budget,
 )
+from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -169,6 +172,72 @@ class TestBudget(ERPNextTestSuite):
 		budget.load_from_db()
 		budget.cancel()
 		po.cancel()
+
+	def test_budget_includes_other_items(self):
+		for doctype, use_legacy_controller in (
+			("Purchase Order", False),
+			("Purchase Order", True),
+			("Material Request", False),
+			("Material Request", True),
+		):
+			with self.subTest(doctype=doctype, use_legacy_controller=use_legacy_controller):
+				frappe.db.set_single_value(
+					"Accounts Settings", "use_legacy_budget_controller", use_legacy_controller
+				)
+				cost_center = f"_Test Budget Commitments {doctype} {use_legacy_controller}"
+				create_cost_center(cost_center_name=cost_center)
+				budget = make_budget(
+					budget_against="Cost Center",
+					cost_center=f"{cost_center} - _TC",
+					budget_amount=1000,
+					applicable_on_purchase_order=1,
+					applicable_on_material_request=1,
+					action_if_annual_budget_exceeded_on_po="Stop",
+					action_if_annual_budget_exceeded_on_mr="Stop",
+					action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+					action_if_accumulated_monthly_budget_exceeded_on_mr="Ignore",
+					submit_budget=True,
+				)
+
+				for item_code in ("_Test Budget Consumable A", "_Test Budget Consumable B"):
+					make_item(item_code, {"is_stock_item": 0, "stock_uom": "Nos"})
+					doc = frappe.new_doc(doctype)
+					doc.company = self.company
+					doc.transaction_date = doc.schedule_date = nowdate()
+					if doctype == "Purchase Order":
+						doc.supplier = "_Test Supplier"
+					else:
+						doc.material_request_type = "Purchase"
+
+					doc.append(
+						"items",
+						{
+							"item_code": item_code,
+							"qty": 1,
+							"uom": "Nos",
+							"conversion_factor": 1,
+							"rate": 600,
+							"schedule_date": nowdate(),
+							"warehouse": "_Test Warehouse - _TC",
+							"expense_account": self.account,
+							"cost_center": budget.cost_center,
+						},
+					)
+					doc.set_missing_values()
+					doc.insert()
+					if item_code == "_Test Budget Consumable A":
+						doc.submit()
+					else:
+						# Each item costs less than the budget, but their combined commitment exceeds it.
+						with assert_raises_with_savepoint(self, BudgetError):
+							doc.submit()
+
+						# The same second item is allowed when the combined commitment equals the budget.
+						doc.reload()
+						doc.items[0].rate = 400
+						doc.save()
+						doc.submit()
+						self.assertEqual(doc.docstatus, 1)
 
 	def test_monthly_budget_crossed_for_po_in_foreign_currency(self):
 		self.assert_foreign_currency_po_budget_crossed()
