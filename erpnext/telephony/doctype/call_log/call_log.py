@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 from frappe.model.document import Document
+from frappe.permissions import get_valid_perms
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 
@@ -19,6 +20,7 @@ from erpnext.crm.doctype.utils import (
 
 END_CALL_STATUSES = ["No Answer", "Completed", "Busy", "Failed"]
 ONGOING_CALL_STATUSES = ["Ringing", "In Progress"]
+RESTRICTED_ROLE = "Employee"
 
 
 class CallLog(Document):
@@ -165,6 +167,31 @@ def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str |
 	doc.summary = summary
 	doc.save(ignore_permissions=True)
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
+
+
+def has_permission(doc: CallLog, ptype: str | None = None, user: str | None = None) -> bool:
+	"""Limit users who read call logs only as Employee to unassigned calls of their own."""
+	user = user or frappe.session.user
+	return bool(doc.call_received_by) or doc.employee_user_id == user or has_unrestricted_access(user)
+
+
+def get_permission_query_conditions(user: str | None = None) -> str | None:
+	user = user or frappe.session.user
+	if has_unrestricted_access(user):
+		return None
+
+	return (
+		"(coalesce(`tabCall Log`.`call_received_by`, '') != ''"
+		f" or `tabCall Log`.`employee_user_id` = {frappe.db.escape(user)})"
+	)
+
+
+def has_unrestricted_access(user: str) -> bool:
+	"""Return True if the user can read call logs through a role other than Employee."""
+	return any(
+		perm.get("read") and not perm.get("permlevel") and perm.get("role") != RESTRICTED_ROLE
+		for perm in get_valid_perms("Call Log", user)
+	)
 
 
 def validate_call_type(call_type: str | None):
