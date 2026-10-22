@@ -694,7 +694,9 @@ def get_requested_amount(params):
 		.on(parent.name == child.parent)
 		.select(
 			# rate inside the aggregate: Sum(qty * rate) is the correct requested amount and is PG-valid
-			Coalesce(Sum((child.stock_qty - child.ordered_qty) * child.rate), 0).as_("amount")
+			Coalesce(
+				Sum((child.stock_qty - child.ordered_qty) * child.rate / child.conversion_factor), 0
+			).as_("amount")
 		)
 		.where(
 			(parent.docstatus == 1)

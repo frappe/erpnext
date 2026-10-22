@@ -259,9 +259,11 @@ class BudgetValidation:
 				.inner_join(mri)
 				.on(mr.name == mri.parent)
 				.select(
-					Sum((IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0)) * IfNull(mri.rate, 0)).as_(
-						"amount"
-					)
+					Sum(
+						(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0))
+						* IfNull(mri.rate, 0)
+						/ mri.conversion_factor
+					).as_("amount")
 				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
