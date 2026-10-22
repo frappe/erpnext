@@ -316,6 +316,21 @@ class TestPartySpecificItem(ERPNextTestSuite):
 				with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for"):
 					standalone_note.insert()
 
+	def test_opportunity_enforces_party_rules(self):
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		allowed_item = create_item("_Test Party Specific Opportunity Allowed Item").name
+		other_item = create_item("_Test Party Specific Opportunity Other Item").name
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value=allowed_item,
+		)
+		make_opportunity(with_items=True, customer="_Test Customer", item_code=allowed_item)
+		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+			make_opportunity(with_items=True, customer="_Test Customer", item_code=other_item)
+
 
 def search_items(txt, filters):
 	return flatten(
