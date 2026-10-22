@@ -456,12 +456,20 @@ def toggle_hidden_fields():
 		toggle_sales_discount_section,
 		toggle_subscription_sections,
 	)
+	from erpnext.selling.doctype.selling_settings.selling_settings import (
+		toggle_tracking_sales_commissions_section,
+		toggle_utm_analytics_section,
+	)
 
 	acc_settings = frappe.get_doc("Accounts Settings")
 	toggle_accounting_dimension_sections(not acc_settings.enable_accounting_dimensions)
 	toggle_sales_discount_section(not acc_settings.enable_discounts_and_margin)
 	toggle_subscription_sections(not acc_settings.enable_subscription)
 	toggle_loyalty_point_program_section(not acc_settings.enable_loyalty_point_program)
+
+	selling_settings = frappe.get_doc("Selling Settings")
+	toggle_tracking_sales_commissions_section(not selling_settings.enable_tracking_sales_commissions)
+	toggle_utm_analytics_section(not selling_settings.enable_utm)
 
 
 DEFAULT_ROLE_PROFILES = {
