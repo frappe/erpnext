@@ -1334,7 +1334,7 @@ class FormulaCalculator:
 		if validation_result.issues:
 			frappe.throw(
 				"<br><br>".join(str(issue) for issue in validation_result.issues),
-				title=_("Formula Error in Template"),
+				title=_("Formula Error"),
 			)
 
 		where = _("Template row {0} ({1})").format(
@@ -1351,8 +1351,8 @@ class FormulaCalculator:
 	def _evaluate_for_period(
 		self, where: str, formula: str, period_index: int, negation_factor: int
 	) -> float:
-		# the formula is user input, and the message is rendered as HTML
-		shown_formula = frappe.bold(escape_html(formula))
+		# quoted, because a Prepared Report strips the bold and the formula runs into the sentence
+		shown_formula = frappe.bold(f'"{escape_html(formula)}"')
 
 		try:
 			context = self._build_context(period_index)
@@ -1361,16 +1361,16 @@ class FormulaCalculator:
 		except ZeroDivisionError:
 			frappe.throw(
 				_("{0}: formula {1} divides by zero. Check the divisor first, for example {2}.").format(
-					where, shown_formula, frappe.bold("A / B if B else 0")
+					where, shown_formula, frappe.bold('"A / B if B else 0"')
 				),
-				title=_("Formula Error in Template"),
+				title=_("Formula Error"),
 			)
 		except Exception as e:
 			frappe.throw(
 				_("{0}: formula {1} couldn't be calculated: {2}").format(
 					where, shown_formula, escape_html(str(e))
 				),
-				title=_("Formula Error in Template"),
+				title=_("Formula Error"),
 			)
 
 		if type(result) not in (int, float):
@@ -1378,7 +1378,7 @@ class FormulaCalculator:
 				_("{0}: formula {1} must return a number, got {2}.").format(
 					where, shown_formula, frappe.bold(type(result).__name__)
 				),
-				title=_("Formula Error in Template"),
+				title=_("Formula Error"),
 			)
 
 		return flt(result * negation_factor, self.precision)
