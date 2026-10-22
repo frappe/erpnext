@@ -106,6 +106,9 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 	in `currency_info`.
 	:param gl_entries:
 	:param currency_info:
+	:param filters: General Ledger filters. Only when these are given and every entry is on an
+	        account in the presentation currency, the account-currency amounts are used as is.
+	        Financial statements do not pass them, so they always convert at the report date.
 	:return:
 	"""
 	converted_gl_list = []
@@ -129,10 +132,12 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 		account_currency = entry["account_currency"]
 
 		if (
-			len(account_currencies) == 1
+			filters
+			and len(account_currencies) == 1
 			and account_currency == presentation_currency
 			and not exchange_gain_or_loss
-		) and not (filters and filters.get("show_amount_in_company_currency")):
+			and not filters.get("show_amount_in_company_currency")
+		):
 			entry["debit"] = debit_in_account_currency
 			entry["credit"] = credit_in_account_currency
 		else:
