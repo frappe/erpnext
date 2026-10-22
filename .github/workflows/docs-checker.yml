@@ -5,19 +5,20 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   build:
     if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
-    runs-on: ubuntu-latest
+    runs-on: erpnext-arc-light
     timeout-minutes: 10
+    container:
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_TOKEN || github.token }}
 
     steps:
-      - name: 'Setup Environment'
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.10'
-
       - name: 'Clone repo'
         uses: actions/checkout@v6
 
