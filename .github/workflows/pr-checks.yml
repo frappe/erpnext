@@ -67,3 +67,7 @@ jobs:
       - name: Semgrep for Test Correctness
         if: ${{ !cancelled() }}
         run: uvx semgrep ci --include=**/test_*.py --config ./semgrep/test-correctness.yml
+
+      - name: Run pip-audit
+        if: ${{ !cancelled() }}
+        run: uvx pip-audit --desc on .
