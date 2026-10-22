@@ -172,6 +172,7 @@ def get_rootwise_opening_balances(
 
 	last_period_closing_voucher = ""
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
+	ignore_closing_balances = ignore_closing_balances or has_gl_entry_restrictions()
 
 	if not ignore_closing_balances:
 		last_period_closing_voucher = frappe.db.get_all(
