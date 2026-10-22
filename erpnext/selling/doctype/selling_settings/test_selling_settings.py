@@ -57,4 +57,4 @@ class TestSellingSettings(ERPNextTestSuite):
 		) as make_property_setter:
 			settings.save()
 
-		self.assertEqual(make_property_setter.call_count, 11)
+		self.assertEqual(make_property_setter.call_count, 13)

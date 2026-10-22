@@ -938,11 +938,28 @@ class SalesInvoice(SellingController):
 				if frappe.get_value("Customer", self.customer, value[0]):
 					continue
 
+				# service rows flagged skip_delivery never reach a Delivery Note, so don't demand one
+				skip_delivery_rows = self.get_skip_delivery_rows() if key == "Delivery Note" else set()
+
 				for d in self.get("items"):
+					if d.so_detail in skip_delivery_rows:
+						continue
 					if d.item_code and not d.get(key.lower().replace(" ", "_")) and not self.get(value[1]):
 						msgprint(
 							_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1
 						)
+
+	def get_skip_delivery_rows(self):
+		so_details = [d.so_detail for d in self.get("items") if d.so_detail]
+		if not so_details:
+			return set()
+		return set(
+			frappe.get_all(
+				"Sales Order Item",
+				filters={"name": ("in", so_details), "skip_delivery": 1},
+				pluck="name",
+			)
+		)
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
