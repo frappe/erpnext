@@ -239,6 +239,20 @@ class TestBudget(ERPNextTestSuite):
 						doc.submit()
 						self.assertEqual(doc.docstatus, 1)
 
+	def test_budget_skips_closed_and_over_ordered_rows(self):
+		cost_center = make_budget_for_new_cost_center("_Test Budget Closed Row")
+		po = make_purchase_commitment("Purchase Order", "_Test Budget Closed Row Item", cost_center, 600)
+		frappe.db.set_value("Purchase Order Item", po.items[0].name, "closed", 1)
+		make_purchase_commitment("Purchase Order", "_Test Budget Open Row Item", cost_center, 500)
+
+		cost_center = make_budget_for_new_cost_center("_Test Budget Over Ordered Row")
+		mr = make_purchase_commitment(
+			"Material Request", "_Test Budget Over Ordered Item", cost_center, 100, 10
+		)
+		frappe.db.set_value("Material Request Item", mr.items[0].name, "ordered_qty", 11)
+		with assert_raises_with_savepoint(self, BudgetError):
+			make_purchase_commitment("Material Request", "_Test Budget Requested Item", cost_center, 1050)
+
 	def test_monthly_budget_crossed_for_po_in_foreign_currency(self):
 		self.assert_foreign_currency_po_budget_crossed()
 
@@ -748,6 +762,52 @@ def set_total_expense_zero(posting_date, budget_against_field=None, budget_again
 				project=budget_against,
 				posting_date=nowdate(),
 			)
+
+
+def make_budget_for_new_cost_center(cost_center_name):
+	create_cost_center(cost_center_name=cost_center_name)
+	return make_budget(
+		budget_against="Cost Center",
+		cost_center=f"{cost_center_name} - _TC",
+		budget_amount=1000,
+		applicable_on_purchase_order=1,
+		applicable_on_material_request=1,
+		action_if_annual_budget_exceeded_on_po="Stop",
+		action_if_annual_budget_exceeded_on_mr="Stop",
+		action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+		action_if_accumulated_monthly_budget_exceeded_on_mr="Ignore",
+		submit_budget=True,
+	).cost_center
+
+
+def make_purchase_commitment(doctype, item_code, cost_center, rate, qty=1):
+	make_item(item_code, {"is_stock_item": 0, "stock_uom": "Nos"})
+	doc = frappe.new_doc(doctype)
+	doc.company = "_Test Company"
+	doc.transaction_date = doc.schedule_date = nowdate()
+	if doctype == "Purchase Order":
+		doc.supplier = "_Test Supplier"
+	else:
+		doc.material_request_type = "Purchase"
+
+	doc.append(
+		"items",
+		{
+			"item_code": item_code,
+			"qty": qty,
+			"uom": "Nos",
+			"conversion_factor": 1,
+			"rate": rate,
+			"schedule_date": nowdate(),
+			"warehouse": "_Test Warehouse - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": cost_center,
+		},
+	)
+	doc.set_missing_values()
+	doc.insert()
+	doc.submit()
+	return doc
 
 
 def make_budget(**args):
