@@ -3520,6 +3520,26 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(flt(rm_qty, 6), 4)
 
+	def test_partial_disassemblies_in_a_uom_that_does_not_divide_evenly(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		wo, rm_item = make_whole_number_work_order(
+			"Test Uneven UOM Partial Disassembly",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 8}]},
+			rm_row_uom=("Box", 8),
+		)
+		source = frappe.db.get_value("Stock Entry", {"work_order": wo.name, "purpose": "Manufacture"})
+
+		rm_qty = 0
+		for _ in range(3):
+			disassembly = frappe.get_doc(
+				make_stock_entry(wo.name, "Disassemble", 1, source_stock_entry=source)
+			)
+			disassembly.save()
+			disassembly.submit()
+			rm_qty += sum(row.transfer_qty for row in disassembly.items if row.item_code == rm_item)
+
+		self.assertEqual(flt(rm_qty, 6), 4)
+
 	def test_components_alternate_item_for_bom_based_manufacture_entry(self):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
