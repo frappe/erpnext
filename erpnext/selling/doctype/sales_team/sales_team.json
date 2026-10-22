@@ -65,6 +65,7 @@
    "width": "120px"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "sales_person.commission_rate",
    "fetch_if_empty": 1,
    "fieldname": "commission_rate",

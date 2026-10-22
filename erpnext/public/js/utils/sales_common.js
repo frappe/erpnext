@@ -274,8 +274,14 @@ erpnext.sales_common = {
 				}
 			}
 
-			sales_person(doc, cdt, cdn) {
-				var row = frappe.get_doc(cdt, cdn);
+			async sales_person(doc, cdt, cdn) {
+				const row = frappe.get_doc(cdt, cdn);
+				const sales_person = row.sales_person;
+				const { message } = sales_person
+					? await frappe.db.get_value("Sales Person", sales_person, "commission_rate")
+					: { message: { commission_rate: 0 } };
+				if (row.sales_person !== sales_person) return;
+				await frappe.model.set_value(cdt, cdn, "commission_rate", flt(message.commission_rate));
 				this.calculate_incentive(row);
 				refresh_field("incentives", row.name, row.parentfield);
 			}
@@ -391,12 +397,10 @@ erpnext.sales_common = {
 			}
 
 			calculate_incentive(row) {
-				if (row.allocated_amount) {
-					row.incentives = flt(
-						(row.allocated_amount * row.commission_rate) / 100.0,
-						precision("incentives", row)
-					);
-				}
+				row.incentives = flt(
+					(flt(row.allocated_amount) * flt(row.commission_rate)) / 100.0,
+					precision("incentives", row)
+				);
 			}
 
 			set_dynamic_labels() {
