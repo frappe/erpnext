@@ -3,20 +3,15 @@ from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import today
 
-<<<<<<< HEAD
-from erpnext.stock.get_item_details import get_item_details, get_price_list_currency_and_exchange_rate
-
-test_ignore = ["BOM"]
-test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
-=======
 from erpnext.stock.get_item_details import (
 	get_item_details,
 	get_price_list_currency_and_exchange_rate,
 	get_valuation_rate,
 )
 from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 2af0b0c (test(stock): get_valuation_rate applies warehouse user permission)
+
+test_ignore = ["BOM"]
+test_dependencies = ["Customer", "Supplier", "Item", "Price List", "Item Price"]
 
 
 class TestGetItemDetail(FrappeTestCase):
@@ -80,7 +75,6 @@ class TestGetItemDetail(FrappeTestCase):
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
 
-<<<<<<< HEAD
 	def test_fetch_asset_category_expense_account_on_purchase_receipt(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -127,9 +121,6 @@ class TestGetItemDetail(FrappeTestCase):
 		details = get_item_details(args)
 		self.assertEqual(details.get("expense_account"), "_Test Fixed Asset - _TC")
 
-	# making this test in get_item_details test file as feat/fix is present in that method
-=======
->>>>>>> ce2bd50 (test(stock): service item valuation rate ignores its default warehouse)
 	def test_get_valuation_rate_applies_warehouse_user_permission(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
