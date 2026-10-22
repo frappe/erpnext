@@ -217,6 +217,7 @@ class BudgetValidation:
 			conditions.append(po.status.ne("Closed"))
 			conditions.append(po.transaction_date[self.fy_start_date : self.fy_end_date])
 			conditions.append(poi.amount.gt(poi.billed_amt))
+			conditions.append(poi.closed.eq(0))
 			conditions.append(poi.expense_account.eq(key[2]))
 
 			# key structure - (dimension_type, dimension, GL account)
@@ -247,6 +248,7 @@ class BudgetValidation:
 			conditions.append(mr.material_request_type.eq("Purchase"))
 			conditions.append(mr.status.ne("Stopped"))
 			conditions.append(mr.transaction_date[self.fy_start_date : self.fy_end_date])
+			conditions.append(mri.stock_qty.gt(mri.ordered_qty))
 			conditions.append(mri.expense_account.eq(key[2]))
 
 			# key structure - (dimension_type, dimension, GL account)
