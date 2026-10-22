@@ -39,6 +39,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import get_output_qty_per_unit
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -343,13 +344,7 @@ class JobCard(Document):
 
 	def get_output_qty_per_unit(self):
 		"""Output Item qty per Work Order unit. Job Card quantities are in Output Item units."""
-		if not self.operation_id:
-			return 1.0
-
-		output_qty_per_unit = frappe.db.get_value(
-			"Work Order Operation", self.operation_id, "output_qty_per_unit", cache=True
-		)
-		return flt(output_qty_per_unit) or 1.0
+		return get_output_qty_per_unit(self.operation_id)
 
 	def get_work_order_qty(self, qty):
 		"""Converts `qty` of the Output Item to Work Order units."""

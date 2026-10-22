@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -56,3 +57,14 @@ class WorkOrderOperation(Document):
 	def get_qty_to_produce(self, work_order_qty):
 		"""Output Item qty this operation makes for `work_order_qty` units of the Work Order item."""
 		return flt(flt(work_order_qty) * self.output_qty_per_unit, self.precision("completed_qty"))
+
+
+def get_output_qty_per_unit(operation_id):
+	"""Output Item qty a Work Order Operation makes per Work Order unit."""
+	if not operation_id:
+		return 1.0
+
+	output_qty_per_unit = frappe.db.get_value(
+		"Work Order Operation", operation_id, "output_qty_per_unit", cache=True
+	)
+	return flt(output_qty_per_unit) or 1.0
