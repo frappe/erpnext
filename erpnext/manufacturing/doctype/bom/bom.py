@@ -395,6 +395,8 @@ class BOM(WebsiteGenerator):
 						self.get_step_label(row), bold(self.item)
 					)
 				)
+			elif flt(row.finished_good_qty) <= 0:
+				problems.append(_("{0}: set an Output Qty above zero.").format(self.get_step_label(row)))
 
 		return problems
 
