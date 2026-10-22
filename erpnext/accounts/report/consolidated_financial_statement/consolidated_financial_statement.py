@@ -7,6 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 import erpnext
@@ -37,7 +38,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_report_summary as get_pl_summary,
 )
-from erpnext.accounts.report.utils import convert, convert_to_presentation_currency
+from erpnext.accounts.report.utils import convert, convert_to_presentation_currency, get_rate_as_at
 from erpnext.accounts.utils import get_zero_cutoff
 
 
@@ -67,11 +68,12 @@ def execute(filters=None):
 
 
 def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
-	asset = get_data(companies, "Asset", "Debit", fiscal_year, filters=filters)
+	translator = CurrencyTranslator(companies, filters, fiscal_year)
+	translator.add_profit_and_loss_difference()
 
-	liability = get_data(companies, "Liability", "Credit", fiscal_year, filters=filters)
-
-	equity = get_data(companies, "Equity", "Credit", fiscal_year, filters=filters)
+	asset = get_data(companies, "Asset", "Debit", fiscal_year, filters, translator=translator)
+	liability = get_data(companies, "Liability", "Credit", fiscal_year, filters, translator=translator)
+	equity = get_data(companies, "Equity", "Credit", fiscal_year, filters, translator=translator)
 
 	data = []
 	data.extend(asset or [])
@@ -202,11 +204,11 @@ def get_summary_companies(companies, filters):
 	return list(companies) if len(currencies) == 1 else [filters.company]
 
 
-def get_income_expense_data(companies, fiscal_year, filters):
+def get_income_expense_data(companies, fiscal_year, filters, translator=None):
 	company_currency = get_company_currency(filters)
-	income = get_data(companies, "Income", "Credit", fiscal_year, filters, True)
-
-	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
+	translator = translator or CurrencyTranslator(companies, filters, fiscal_year)
+	income = get_data(companies, "Income", "Credit", fiscal_year, filters, True, translator)
+	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True, translator)
 
 	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
 
@@ -216,7 +218,9 @@ def get_income_expense_data(companies, fiscal_year, filters):
 def get_cash_flow_data(fiscal_year, companies, filters):
 	cash_flow_accounts = get_cash_flow_accounts()
 
-	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
+	translator = CurrencyTranslator(companies, filters, fiscal_year)
+	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters, translator)
+	translation_difference = get_translation_difference_row(translator, companies, filters)
 
 	data = []
 	summary_data = {}
@@ -241,6 +245,13 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 				)
 				data.append(net_profit_loss)
 				section_data.append(net_profit_loss)
+
+			if translation_difference:
+				translation_difference.update(
+					{"currency": company_currency, "parent_account": cash_flow_accounts[0]["section_header"]}
+				)
+				data.append(translation_difference)
+				section_data.append(translation_difference)
 
 		for account in cash_flow_account["account_types"]:
 			account_data = get_account_type_based_data(
@@ -275,6 +286,22 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 	report_summary = get_cash_flow_summary(summary_data, company_currency)
 
 	return data, report_summary
+
+
+def get_translation_difference_row(translator, companies, filters) -> dict | None:
+	"""Profit is translated at the transaction rate and cash flows at the closing rate; this row reconciles them."""
+	if not any(flt(amount, 3) for amount in translator.reserve.values()):
+		return None
+
+	label = _("Foreign Currency Translation Reserve")
+	row = {company: -flt(translator.reserve.get(company), 3) for company in companies}
+	if filters.get("accumulated_in_group_company"):
+		total = row[filters.company]
+	else:
+		total = sum(row.values())
+
+	row.update({"total": total, "account_name": label, "account": label, "indent": 1})
+	return row
 
 
 def add_cash_flow_total_row(
@@ -399,7 +426,15 @@ def get_columns(company_columns):
 	return columns
 
 
-def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, ignore_closing_entries=False):
+def get_data(
+	companies,
+	root_type,
+	balance_must_be,
+	fiscal_year,
+	filters=None,
+	ignore_closing_entries=False,
+	translator=None,
+):
 	accounts, accounts_by_name, parent_children_map = get_account_heads(root_type, companies, filters)
 
 	if not accounts:
@@ -436,7 +471,11 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 			root_type=root_type,
 		)
 
-	calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year)
+	translator = translator or CurrencyTranslator(companies, filters, fiscal_year)
+	calculate_values(accounts_by_name, gl_entries_by_account, translator)
+	if root_type == "Equity":
+		add_translation_reserve_account(accounts, translator)
+
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
 
 	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters)
@@ -457,11 +496,7 @@ def get_company_currency(filters=None):
 	)
 
 
-def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year):
-	start_date = (
-		fiscal_year.year_start_date if filters.filter_based_on == "Fiscal Year" else filters.period_start_date
-	)
-
+def calculate_values(accounts_by_name, gl_entries_by_account, translator):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			if entry.account_number:
@@ -469,42 +504,144 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters
 			else:
 				account_name = entry.account_name
 
-			d = accounts_by_name.get(account_name)
+			if account := accounts_by_name.get(account_name):
+				add_entry_to_columns(account, entry, translator)
 
-			if d:
-				debit, credit = 0, 0
-				for company in companies:
-					# check if posting date is within the period
-					if (
-						entry.company == company
-						or (filters.get("accumulated_in_group_company"))
-						and entry.company in companies.get(company)
-					):
-						parent_company_currency = erpnext.get_company_currency(company)
-						child_company_currency = erpnext.get_company_currency(entry.company)
 
-						debit, credit = flt(entry.debit), flt(entry.credit)
+def add_entry_to_columns(account, entry, translator):
+	amount = 0.0
+	is_opening = translator.is_opening(entry)
+	for company in translator.get_column_companies(entry):
+		amount = translator.translate(entry, company)
+		account[company] = account.get(company, 0.0) + amount
 
-						if (
-							not filters.get("presentation_currency")
-							and entry.company != company
-							and parent_company_currency != child_company_currency
-							and filters.get("accumulated_in_group_company")
-						):
-							debit = convert(
-								debit, parent_company_currency, child_company_currency, filters.end_date
-							)
-							credit = convert(
-								credit, parent_company_currency, child_company_currency, filters.end_date
-							)
+		if is_opening:
+			account["company_wise_opening_bal"][company] += amount
 
-						d[company] = d.get(company, 0.0) + flt(debit) - flt(credit)
+	if is_opening:
+		account["opening_balance"] = account.get("opening_balance", 0.0) + amount
 
-						if entry.posting_date < getdate(start_date):
-							d["company_wise_opening_bal"][company] += flt(debit) - flt(credit)
 
-				if entry.posting_date < getdate(start_date):
-					d["opening_balance"] = d.get("opening_balance", 0.0) + flt(debit) - flt(credit)
+class CurrencyTranslator:
+	"""Translates each company's amounts into the currency of a report column.
+
+	Income, expense and equity keep the rate of the transaction (the rate on the posting date), other
+	balances take the closing rate. The difference is the column's foreign currency translation reserve."""
+
+	def __init__(self, companies: dict, filters: dict, fiscal_year: dict):
+		self.companies = companies
+		self.filters = filters
+		self.start_date, self.end_date = get_period_dates(fiscal_year, filters)
+		self.start_date = getdate(self.start_date)
+		self.reserve = defaultdict(float)
+		self.opening_reserve = defaultdict(float)
+
+	def get_column_companies(self, entry) -> list[str]:
+		return [company for company in self.companies if entry.company in self.get_column_scope(company)]
+
+	def get_column_scope(self, company: str) -> list[str]:
+		if self.filters.get("accumulated_in_group_company"):
+			return self.companies[company]
+		return [company]
+
+	def get_target_currency(self, company: str) -> str:
+		return self.filters.get("presentation_currency") or erpnext.get_company_currency(company)
+
+	def is_opening(self, entry) -> bool:
+		return entry.posting_date < self.start_date
+
+	def translate(self, entry, company: str) -> float:
+		"""Debit minus credit of `entry` in the currency of the `company` column."""
+		amount = flt(entry.debit) - flt(entry.credit)
+		currency = self.get_target_currency(company)
+		if entry.currency == currency:
+			return amount
+
+		closing_amount = convert(amount, currency, entry.currency, self.end_date)
+		if not uses_transaction_rate(entry):
+			return closing_amount
+
+		translated_amount = amount * get_rate_as_at(entry.posting_date, entry.currency, currency)
+		self.reserve[company] += closing_amount - translated_amount
+		if self.is_opening(entry):
+			self.opening_reserve[company] += closing_amount - translated_amount
+
+		return translated_amount
+
+	def add_profit_and_loss_difference(self):
+		"""Balance Sheet does not fetch income and expense, but their translation difference is in the reserve."""
+		for company in self.get_foreign_companies():
+			for entry in get_profit_and_loss_totals(company, self.start_date, self.end_date, self.filters):
+				for column in self.get_column_companies(entry):
+					self.translate(entry, column)
+
+	def get_foreign_companies(self) -> set[str]:
+		return {
+			company
+			for column in self.companies
+			for company in self.get_column_scope(column)
+			if erpnext.get_company_currency(company) != self.get_target_currency(column)
+		}
+
+
+def uses_transaction_rate(entry) -> bool:
+	return entry.report_type == "Profit and Loss" or "Equity" in (entry.root_type, entry.account_type)
+
+
+def get_profit_and_loss_totals(company: str, from_date, to_date, filters: dict) -> list[dict]:
+	"""Income and expense of `company` in the period, per posting date."""
+	gle = frappe.qb.DocType("GL Entry")
+	account = frappe.qb.DocType("Account")
+	entries = (
+		frappe.qb.from_(gle)
+		.inner_join(account)
+		.on(account.name == gle.account)
+		.select(
+			gle.company,
+			gle.posting_date,
+			Sum(gle.debit).as_("debit"),
+			Sum(gle.credit).as_("credit"),
+		)
+		.where(
+			(gle.company == company)
+			& (gle.is_cancelled == 0)
+			& (gle.posting_date <= to_date)
+			& (account.report_type == "Profit and Loss")
+		)
+		.where(
+			Criterion.all(get_additional_conditions(from_date, False, filters, frappe._dict(name=company)))
+		)
+		.groupby(gle.company, gle.posting_date)
+		.run(as_dict=True)
+	)
+
+	currency = erpnext.get_company_currency(company)
+	for entry in entries:
+		entry.update(currency=currency, report_type="Profit and Loss")
+
+	return entries
+
+
+def add_translation_reserve_account(accounts, translator):
+	"""Show the reserve as the first child of the equity root."""
+	if not any(flt(amount, 3) for amount in translator.reserve.values()):
+		return
+
+	root = accounts[0]
+	label = _("Foreign Currency Translation Reserve")
+	reserve = frappe._dict(
+		translator.reserve,
+		name=label,
+		account_name=label,
+		account_key=label,
+		parent_account=root.name,
+		parent_account_name=root.account_key,
+		root_type=root.root_type,
+		indent=root.indent + 1,
+		is_group=0,
+		company_wise_opening_bal=defaultdict(float, translator.opening_reserve),
+	)
+	accounts.insert(1, reserve)
 
 
 def accumulate_values_into_parents(accounts, accounts_by_name, companies):
@@ -708,6 +845,9 @@ def set_gl_entries_by_account(
 				gle.account_currency,
 				account.account_name,
 				account.account_number,
+				account.root_type,
+				account.report_type,
+				account.account_type,
 			)
 			.where(
 				(gle.company == d.name)
@@ -725,6 +865,8 @@ def set_gl_entries_by_account(
 		if additional_conditions:
 			query = query.where(Criterion.all(additional_conditions))
 		gl_entries = query.run(as_dict=True)
+		for entry in gl_entries:
+			entry.currency = d.default_currency
 
 		if (
 			filters
@@ -733,7 +875,7 @@ def set_gl_entries_by_account(
 		):
 			currency_info["company"] = d.name
 			currency_info["company_currency"] = d.default_currency
-			convert_to_presentation_currency(gl_entries, currency_info)
+			convert_closing_rate_entries(gl_entries, currency_info)
 
 		for entry in gl_entries:
 			if entry.account_number:
@@ -745,6 +887,14 @@ def set_gl_entries_by_account(
 			gl_entries_by_account.setdefault(account_name, []).append(entry)
 
 	return gl_entries_by_account
+
+
+def convert_closing_rate_entries(gl_entries, currency_info):
+	"""Convert balances at the closing rate; `CurrencyTranslator` handles the rest at the transaction rate."""
+	entries = [entry for entry in gl_entries if not uses_transaction_rate(entry)]
+	convert_to_presentation_currency(entries, currency_info)
+	for entry in entries:
+		entry.currency = currency_info.presentation_currency
 
 
 def get_account_details(account):
