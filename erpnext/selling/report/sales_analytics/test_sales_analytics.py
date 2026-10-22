@@ -162,7 +162,9 @@ class TestSalesAnalytics(FrappeTestCase):
 	def test_order_type_synthetic_tree(self):
 		"""tree_type='Order Type' drives get_teams: distinct order_type rebuilt in Python
 		under a synthetic 'Order Types' root, then rolled up via get_rows_by_group."""
-		columns, data, *_ = execute(self._base_filters(tree_type="Order Type"))
+		columns, data, _message, _chart, _extra, skip_total_row = execute(
+			self._base_filters(tree_type="Order Type")
+		)
 
 		self.assertTrue(columns)
 		rows = self._row_by_entity(data)
@@ -174,6 +176,8 @@ class TestSalesAnalytics(FrappeTestCase):
 		expected = self._expected_value_total()
 		self.assertAlmostEqual(rows["Sales"]["total"], expected, places=2)
 		self.assertAlmostEqual(rows["Order Types"]["total"], expected, places=2)
+		# The 'Order Types' root already carries the grand total, so the framework total row is skipped.
+		self.assertEqual(skip_total_row, 1)
 
 	def test_order_type_leaf_rows_in_sorted_order(self):
 		"""get_teams fetches distinct order_types; frappe drops the SQL ORDER BY for distinct queries on

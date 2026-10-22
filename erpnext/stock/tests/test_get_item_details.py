@@ -533,7 +533,7 @@ class TestGetItemDetail(FrappeTestCase):
 
 		return item_code, batches
 
-	def get_item_details_for_row(self, item_code, qty, items=None):
+	def get_item_details_for_row(self, item_code, qty, items=None, batch_no=None):
 		ctx = frappe._dict(
 			{
 				"doctype": "Delivery Note",
@@ -541,6 +541,7 @@ class TestGetItemDetail(FrappeTestCase):
 				"company": "_Test Company",
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": qty,
+				"batch_no": batch_no,
 				"use_serial_batch_fields": 1,
 				"price_list": "_Test Price List",
 				"currency": "INR",
@@ -632,3 +633,92 @@ class TestGetItemDetail(FrappeTestCase):
 		)
 
 		self.assertEqual(details.plc_conversion_rate, 90)
+
+	def get_bundle_entries(self, bundles):
+		return frappe.get_all(
+			"Serial and Batch Entry", {"parent": ("in", bundles)}, ["serial_no", "batch_no"], order_by="idx"
+		)
+
+	@change_settings(
+		"Stock Settings",
+		{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_serial_nos_auto_picked_from_selected_batch(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 3], has_serial_no=1, serial_no_series="SBP-SN-.#####"
+		)
+
+		details = self.get_item_details_for_row(item_code, 3, batch_no=batches[1])
+		self.assertFalse(details.get("serial_no"))
+
+		dn = create_delivery_note(item_code=item_code, qty=3, use_serial_batch_fields=1, batch_no=batches[1])
+		dn.reload()
+		self.assertFalse(dn.items[0].serial_no)
+
+		entries = self.get_bundle_entries([dn.items[0].serial_and_batch_bundle])
+		self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 3)
+		self.assertEqual({d.batch_no for d in entries}, {batches[1]})
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings(
+		"Stock Settings",
+		{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_rows_of_same_item_get_different_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[5], has_serial_no=1, serial_no_series="SRD-SN-.#####"
+		)
+
+		dn = create_delivery_note(item_code=item_code, qty=2, use_serial_batch_fields=1, do_not_submit=True)
+		first_row = dn.items[0].as_dict()
+		dn.append("items", {k: v for k, v in first_row.items() if k not in ("name", "idx")})
+		dn.save()
+		dn.submit()
+		dn.reload()
+
+		picked = [
+			d.serial_no for d in self.get_bundle_entries([row.serial_and_batch_bundle for row in dn.items])
+		]
+		self.assertEqual(len(picked), 4)
+		self.assertEqual(len(set(picked)), 4)
+
+	@change_settings(
+		"Stock Settings",
+		{
+			"pick_serial_and_batch_based_on": "FIFO",
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_item_row_and_product_bundle_get_different_serial_nos(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[3], has_serial_no=1, serial_no_series="SPB-SN-.#####"
+		)
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [item_code])
+
+		dn = create_delivery_note(item_code=item_code, qty=1, use_serial_batch_fields=1, do_not_submit=True)
+		first_row = dn.items[0].as_dict()
+		dn.append(
+			"items",
+			{k: v for k, v in first_row.items() if k not in ("name", "idx", "batch_no", "serial_no")}
+			| {"item_code": bundle_item, "item_name": bundle_item},
+		)
+		dn.save()
+		dn.submit()
+		dn.reload()
+
+		bundles = [
+			row.serial_and_batch_bundle for row in dn.items + dn.packed_items if row.serial_and_batch_bundle
+		]
+		picked = [d.serial_no for d in self.get_bundle_entries(bundles)]
+		self.assertEqual(len(picked), 2)
+		self.assertEqual(len(set(picked)), 2)

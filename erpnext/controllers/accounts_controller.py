@@ -1326,7 +1326,10 @@ class AccountsController(TransactionBase):
 
 				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
 				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
-				if pricing_rule_args.get("pricing_rule_for") == "Rate":
+				if (
+					pricing_rule_args.get("has_pricing_rule_for_rate")
+					or pricing_rule_args.get("pricing_rule_for") == "Rate"
+				):
 					item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
 
 				if item.get("price_list_rate"):
@@ -2174,32 +2177,44 @@ class AccountsController(TransactionBase):
 				self.unlink_ref_doc_from_po()
 
 	def unlink_ref_doc_from_po(self):
-		so_items = []
-		for item in self.items:
-			so_items.append(item.name)
+		so_items = [item.name for item in self.items]
+		filters = {
+			"sales_order": self.name,
+			"sales_order_item": ["in", so_items],
+			"docstatus": ["<", 2],
+		}
 
-		linked_po = list(
-			set(
-				frappe.get_all(
-					"Purchase Order Item",
-					filters={
-						"sales_order": self.name,
-						"sales_order_item": ["in", so_items],
-						"docstatus": ["<", 2],
-					},
-					pluck="parent",
-				)
+		linked_po_items = frappe.get_all(
+			"Purchase Order Item", filters=filters, fields=["parent", "sales_order_item"]
+		)
+		if not linked_po_items:
+			return
+
+		frappe.db.set_value("Purchase Order Item", filters, {"sales_order": None, "sales_order_item": None})
+		self.update_ordered_qty_in_items({item.sales_order_item for item in linked_po_items})
+
+		linked_po = sorted({item.parent for item in linked_po_items})
+		frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+
+	def update_ordered_qty_in_items(self, so_items: set[str]):
+		purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+		ordered_qty = dict(
+			frappe.qb.from_(purchase_order_item)
+			.select(purchase_order_item.sales_order_item, Sum(purchase_order_item.stock_qty))
+			.where(
+				purchase_order_item.sales_order_item.isin(list(so_items))
+				& (purchase_order_item.docstatus == 1)
 			)
+			.groupby(purchase_order_item.sales_order_item)
+			.run()
 		)
 
-		if linked_po:
-			frappe.db.set_value(
-				"Purchase Order Item",
-				{"sales_order": self.name, "sales_order_item": ["in", so_items], "docstatus": ["<", 2]},
-				{"sales_order": None, "sales_order_item": None},
-			)
+		items_by_ordered_qty = defaultdict(list)
+		for so_item in so_items:
+			items_by_ordered_qty[flt(ordered_qty.get(so_item))].append(so_item)
 
-			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+		for qty, items in items_by_ordered_qty.items():
+			frappe.db.set_value("Sales Order Item", {"name": ["in", items]}, "ordered_qty", qty)
 
 	def get_tax_map(self):
 		tax_map = {}
@@ -3342,11 +3357,14 @@ class AccountsController(TransactionBase):
 		)
 
 	def apply_source_discount_to_mapped_items(self, source_doc, existing_item_count):
-		with self.mapped_items_only(existing_item_count):
-			self.update({field: source_doc.get(field) for field in ADDITIONAL_DISCOUNT_FIELDS})
-			self.set_discount_amount_after_mapping(source_doc)
-			self.calculate_taxes_and_totals()
-			self.move_additional_discount_to_items()
+		if len(self.items) == existing_item_count:
+			self.update({"additional_discount_percentage": 0, "discount_amount": 0})
+		else:
+			with self.mapped_items_only(existing_item_count):
+				self.update({field: source_doc.get(field) for field in ADDITIONAL_DISCOUNT_FIELDS})
+				self.set_discount_amount_after_mapping(source_doc)
+				self.calculate_taxes_and_totals()
+				self.move_additional_discount_to_items()
 
 		self.calculate_taxes_and_totals()
 
@@ -4139,7 +4157,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item = frappe.new_doc(child_doctype, parent_doc=p_doc, parentfield=child_docname)
 	item = frappe.get_doc("Item", trans_item.get("item_code"))
 
-	for field in ("item_code", "item_name", "description", "item_group"):
+	for field in ("item_code", "item_name", "description", "item_group", "weight_per_unit", "weight_uom"):
 		child_item.update({field: item.get(field)})
 
 	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
@@ -4192,6 +4210,22 @@ def is_warehouse_required_for_new_child_item(child_doctype: str, item, trans_ite
 		return bool(item.is_stock_item and flt(trans_item.get("qty")) and not item.delivered_by_supplier)
 
 	return False
+
+
+def get_rows_with_kept_reservation(parent):
+	"""Remaining reservations by row; Packed Item parents use None for component quantities."""
+	if parent.doctype != "Sales Order" or not flt(parent.per_picked):
+		return {}
+
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details_for_voucher,
+	)
+
+	bundle_rows = {d.name: d.parent_detail_docname for d in parent.get("packed_items")}
+	reserved = get_sre_reserved_qty_details_for_voucher(parent.doctype, parent.name)
+	return {
+		bundle_rows.get(row, row): qty if row not in bundle_rows else None for row, qty in reserved.items()
+	}
 
 
 def validate_child_on_delete(row, parent, ordered_item=None):
@@ -4258,12 +4292,24 @@ def update_bin_on_delete(row, doctype):
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
-def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
+def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept_reservation=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
 		if item.name not in updated_item_names:
 			deleted_children.append(item)
+
+	if deleted_children:
+		if rows_with_kept_reservation is None:
+			rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
+		for row in deleted_children:
+			if row.name in rows_with_kept_reservation:
+				frappe.throw(
+					_("Row #{0}: Unreserve stock before deleting item {1}.").format(
+						row.idx, frappe.bold(row.item_code)
+					),
+					title=_("Stock Reserved"),
+				)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
@@ -4367,6 +4413,24 @@ def update_child_qty_rate(
 					title=_("Invalid Qty"),
 				)
 
+		if child_item.name in rows_with_kept_reservation:
+			new_stock_qty = flt(new_data.get("qty")) * (
+				flt(new_data.get("conversion_factor")) or flt(child_item.conversion_factor)
+			)
+			min_stock_qty = flt(child_item.delivered_qty) * flt(child_item.conversion_factor) + flt(
+				rows_with_kept_reservation[child_item.name]
+			)
+			# Packed Items reserve in component units, so a reserved bundle keeps its qty.
+			if rows_with_kept_reservation[child_item.name] is None:
+				min_stock_qty = flt(child_item.stock_qty)
+			if flt(new_stock_qty - min_stock_qty, child_item.precision("stock_qty")) < 0:
+				frappe.throw(
+					_(
+						"Row #{0}: Cannot set quantity less than delivered and reserved quantity. Unreserve stock before reducing the quantity."
+					).format(new_data.get("idx") or child_item.idx),
+					title=_("Invalid Qty"),
+				)
+
 		if parent_doctype in ["Quotation", "Supplier Quotation"]:
 			if (parent_doctype == "Quotation" and not ordered_items) or (
 				parent_doctype == "Supplier Quotation" and not purchased_items
@@ -4391,21 +4455,31 @@ def update_child_qty_rate(
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
 	def validate_uom_unchanged_after_fulfilment(child_item, new_data):
+		uom_changed = new_data.get("uom") not in (None, child_item.uom)
+		factor_changed = flt(new_data.get("conversion_factor")) not in (0, flt(child_item.conversion_factor))
+		if not uom_changed and not factor_changed:
+			return
+
+		if child_item.name in rows_with_kept_reservation:
+			frappe.throw(
+				_(
+					"Row #{0}: Unreserve stock before changing the UOM or conversion factor of Item {1}."
+				).format(new_data.get("idx") or child_item.idx, frappe.bold(child_item.item_code)),
+				title=_("Stock Reserved"),
+			)
+
 		fulfilled_qty_field = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}.get(
 			parent_doctype
 		)
 		if not fulfilled_qty_field or not flt(child_item.get(fulfilled_qty_field)):
 			return
 
-		uom_changed = new_data.get("uom") not in (None, child_item.uom)
-		factor_changed = flt(new_data.get("conversion_factor")) not in (0, flt(child_item.conversion_factor))
-		if uom_changed or factor_changed:
-			frappe.throw(
-				_(
-					"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
-				).format(child_item.idx, frappe.bold(child_item.item_code)),
-				title=_("Invalid UOM"),
-			)
+		frappe.throw(
+			_(
+				"Row #{0}: Cannot change the UOM or conversion factor of Item {1} after part of it was received or delivered."
+			).format(new_data.get("idx") or child_item.idx, frappe.bold(child_item.item_code)),
+			title=_("Invalid UOM"),
+		)
 
 	def should_update_supplied_items(doc) -> bool:
 		"""Subcontracted PO can allow following changes *after submit*:
@@ -4458,6 +4532,7 @@ def update_child_qty_rate(
 	rfqs_before_update = set()
 
 	check_doc_permissions(parent, "write")
+	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
 	validate_parent_status(parent)
 
 	if parent_doctype == "Quotation":
@@ -4468,7 +4543,9 @@ def update_child_qty_rate(
 		purchased_items = get_purchased_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, purchased_items)
 	else:
-		_removed_items = validate_and_delete_children(parent, data)
+		_removed_items = validate_and_delete_children(
+			parent, data, rows_with_kept_reservation=rows_with_kept_reservation
+		)
 
 	items_added_or_removed |= _removed_items
 
@@ -4583,7 +4660,7 @@ def update_child_qty_rate(
 				flt(d.get("conversion_factor"), conv_fac_precision) or conversion_factor
 			)
 
-		if child_item.get("total_weight") and child_item.get("weight_per_unit"):
+		if child_item.get("weight_per_unit"):
 			child_item.total_weight = flt(
 				child_item.weight_per_unit * child_item.qty * child_item.conversion_factor,
 				child_item.precision("total_weight"),
@@ -4636,6 +4713,7 @@ def update_child_qty_rate(
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
 	parent.set_total_in_words()
+	parent.validate_party_specific_items()
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()
@@ -4714,11 +4792,9 @@ def update_child_qty_rate(
 			has_reserved_stock,
 		)
 
-		if has_reserved_stock(parent.doctype, parent.name):
+		if parent.per_picked == 0 and has_reserved_stock(parent.doctype, parent.name):
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
-
-			if parent.per_picked == 0:
-				parent.create_stock_reservation_entries()
+			parent.create_stock_reservation_entries()
 
 
 def check_if_child_table_updated(child_table_before_update, child_table_after_update, fields_to_check):

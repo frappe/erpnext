@@ -17,6 +17,7 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
+from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.user import get_users_with_role
 
 import erpnext
@@ -845,7 +846,9 @@ def get_disposal_account_and_cost_center(company):
 
 
 @frappe.whitelist()
-def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book=None):
+def get_value_after_depreciation_on_disposal_date(
+	asset: str, disposal_date: DateTimeLikeObject, finance_book: str | None = None
+):
 	asset_doc = frappe.get_doc("Asset", asset)
 
 	if asset_doc.available_for_use_date > getdate(disposal_date):
@@ -873,9 +876,11 @@ def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_
 		asset_doc, row, getdate(disposal_date)
 	)
 
-	accumulated_depr_amount = temp_asset_depreciation_schedule.get("depreciation_schedule")[
-		-1
-	].accumulated_depreciation_amount
+	depr_schedule = temp_asset_depreciation_schedule.get("depreciation_schedule")
+	if not depr_schedule:
+		return flt(row.value_after_depreciation, asset_doc.precision("gross_purchase_amount"))
+
+	accumulated_depr_amount = depr_schedule[-1].accumulated_depreciation_amount
 
 	return flt(
 		flt(asset_doc.gross_purchase_amount) - accumulated_depr_amount,

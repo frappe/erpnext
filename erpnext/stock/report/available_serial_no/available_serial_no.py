@@ -191,7 +191,13 @@ def get_columns(filters):
 				"options": "Serial and Batch Bundle",
 				"width": 100,
 			},
-			{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+			{
+				"label": _("Voucher Type"),
+				"fieldname": "voucher_type",
+				"fieldtype": "Link",
+				"options": "DocType",
+				"width": 110,
+			},
 			{
 				"label": _("Voucher #"),
 				"fieldname": "voucher_no",

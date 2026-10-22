@@ -104,6 +104,15 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			repost_doc.modified = add_days(now(), days=-i * 10)
 			repost_doc.db_update_all()
 
+		repost_doc.add_comment("Comment", "test comment")
+		frappe.new_doc(
+			"File",
+			file_name="test_clear_old_logs.txt",
+			content="test",
+			attached_to_doctype=repost_doc.doctype,
+			attached_to_name=repost_doc.name,
+		).insert(ignore_permissions=True)
+
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
 		self.assertTrue(len(logs) > 10)
 
@@ -113,6 +122,15 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
 		self.assertTrue(len(logs) == 0)
+
+		orphan_reference = {"reference_doctype": repost_doc.doctype, "reference_name": repost_doc.name}
+		self.assertFalse(frappe.get_all("Comment", filters=orphan_reference))
+		self.assertFalse(
+			frappe.get_all(
+				"File",
+				filters={"attached_to_doctype": repost_doc.doctype, "attached_to_name": repost_doc.name},
+			)
+		)
 
 	def test_create_item_wise_repost_item_valuation_entries(self):
 		pr = make_purchase_receipt(
@@ -557,10 +575,10 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		return_pr.submit()
 
 		expected_sles = [
-			{"outgoing_rate": 200.0, "stock_value_difference": -80000.0, "qty_after_transaction": 600.0},
-			{"outgoing_rate": 200.0, "stock_value_difference": -20000.0, "qty_after_transaction": 500.0},
-			{"outgoing_rate": 200.0, "stock_value_difference": -60000.0, "qty_after_transaction": 200.0},
-			{"outgoing_rate": 200.0, "stock_value_difference": -20000.0, "qty_after_transaction": 100.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 600.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 500.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 200.0},
+			{"outgoing_rate": 190.0, "valuation_rate": 190.0, "qty_after_transaction": 100.0},
 		]
 
 		for _ in range(2):

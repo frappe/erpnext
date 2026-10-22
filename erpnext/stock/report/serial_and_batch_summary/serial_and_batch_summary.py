@@ -106,6 +106,8 @@ def get_columns(filters, data):
 				{
 					"label": _("Voucher Type"),
 					"fieldname": "voucher_type",
+					"fieldtype": "Link",
+					"options": "DocType",
 					"width": 120,
 				},
 				{
@@ -188,6 +190,9 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
+	if not has_filter_permissions(filters):
+		return []
+
 	query_filters = {}
 
 	if txt:
@@ -196,7 +201,12 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("voucher_no"):
 		serial_batch_bundle = frappe.get_cached_value(
 			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
+			{
+				"voucher_type": filters.get("voucher_type"),
+				"voucher_no": ("in", filters.get("voucher_no")),
+				"docstatus": 1,
+				"is_cancelled": 0,
+			},
 			"name",
 		)
 
@@ -216,6 +226,9 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
+	if not has_filter_permissions(filters):
+		return []
+
 	query_filters = {}
 
 	if filters.get("voucher_no") and txt:
@@ -224,7 +237,12 @@ def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("voucher_no"):
 		serial_batch_bundle = frappe.get_cached_value(
 			"Serial and Batch Bundle",
-			{"voucher_no": ("in", filters.get("voucher_no")), "docstatus": 1, "is_cancelled": 0},
+			{
+				"voucher_type": filters.get("voucher_type"),
+				"voucher_no": ("in", filters.get("voucher_no")),
+				"docstatus": 1,
+				"is_cancelled": 0,
+			},
 			"name",
 		)
 
@@ -242,3 +260,20 @@ def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 
 		query_filters["item"] = filters.get("item_code")
 		return frappe.get_all("Batch", filters=query_filters, as_list=True)
+
+
+def has_filter_permissions(filters):
+	if filters.get("voucher_no") and not filters.get("voucher_type"):
+		return False
+
+	voucher_nos = filters.get("voucher_no") or []
+	if isinstance(voucher_nos, str):
+		voucher_nos = [voucher_nos]
+
+	for voucher_no in voucher_nos:
+		frappe.has_permission(filters["voucher_type"], "read", voucher_no, throw=True)
+
+	if filters.get("item_code"):
+		frappe.has_permission("Item", "read", filters["item_code"], throw=True)
+
+	return True
