@@ -63,7 +63,7 @@ jobs:
           SKIP_SYSTEM_SETUP: "1"
 
       # The v13 baseline backup is a fixed published file — cache it instead of re-downloading
-      # it every run.
+      # it from the GitHub release every run.
       - name: Cache erpnext v13 backup
         id: cache-v13
         uses: actions/cache@v4
@@ -76,7 +76,7 @@ jobs:
         run: |
           curl -fSL --retry 5 --retry-all-errors --retry-delay 5 \
             -o /tmp/v13-erpnext.sql.gz \
-            https://erpnext.com/files/v13-erpnext.sql.gz
+            https://github.com/frappe/erpnext/releases/download/v13-baseline/v13-erpnext.sql.gz
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
