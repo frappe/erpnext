@@ -424,7 +424,9 @@ class TestGeneralLedger(FrappeTestCase):
 		)
 		frappe.db.delete("Currency Exchange", {"from_currency": "USD", "to_currency": "INR"})
 		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)
-		getattr(report_utils, "__exchange_rates").clear()
+		exchange_rates = getattr(report_utils, "__exchange_rates")
+		exchange_rates.clear()
+		self.addCleanup(exchange_rates.clear)
 		jv = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 8000, submit=True)
 		filters = frappe._dict(
 			company=self.company,
