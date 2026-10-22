@@ -10,6 +10,7 @@ pull_request_rules:
               - author!=ankush
               - author!=deepeshgarg007
               - author!=frappe-pr-bot
+              - author!=frappe-release-bot[bot]
               - author!=mergify[bot]
           - or:
               - base=version-13
