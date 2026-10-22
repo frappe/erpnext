@@ -536,7 +536,10 @@ frappe.ui.form.on("Work Order", {
 		frm.doc.operations.forEach((data) => {
 			const operation_qty = erpnext.work_order.get_operation_qty(frm, data);
 			if (data.completed_qty + data.process_loss_qty != operation_qty) {
-				pending_qty = operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+				pending_qty = flt(
+					operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty),
+					precision("completed_qty", data)
+				);
 
 				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({

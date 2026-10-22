@@ -68,7 +68,7 @@ def _non_stock_items_cost(item_amounts, stock_entry, bom):
 	cost = 0.0
 	for name in non_stock_items:
 		cost += flt(item_amounts.get(name[0])) * get_work_order_qty(stock_entry) / flt(bom.quantity)
-	return cost
+	return flt(cost, frappe.get_precision("Landed Cost Taxes and Charges", "amount"))
 
 
 def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_account=None, job_card=None):
@@ -232,7 +232,10 @@ def _add_additional_operating_cost(stock_entry, work_order, expense_account):
 		{
 			"expense_account": expense_account,
 			"description": "Additional Operating Cost",
-			"amount": per_unit * get_work_order_qty(stock_entry),
+			"amount": flt(
+				per_unit * get_work_order_qty(stock_entry),
+				frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
+			),
 		},
 	)
 
@@ -249,7 +252,10 @@ def _add_corrective_operation_cost(stock_entry, work_order, expense_account):
 			"expense_account": expense_account,
 			"description": "Corrective Operation Cost",
 			"has_corrective_cost": 1,
-			"amount": remaining / max_qty * get_work_order_qty(stock_entry),
+			"amount": flt(
+				remaining / max_qty * get_work_order_qty(stock_entry),
+				frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
+			),
 		},
 	)
 

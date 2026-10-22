@@ -520,7 +520,10 @@ def _job_card_warehouse_values(work_order, row, qty):
 
 	return {
 		"serial_no": row.get("serial_no"),
-		"time_required": row.get("time_in_mins", 0) / work_order.qty * qty / row.get("output_qty_per_unit"),
+		"time_required": flt(
+			row.get("time_in_mins", 0) / work_order.qty * qty / row.get("output_qty_per_unit"),
+			frappe.get_precision("Job Card", "time_required"),
+		),
 		"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 		"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 		"wip_warehouse": wip_warehouse,

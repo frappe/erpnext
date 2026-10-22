@@ -336,11 +336,11 @@ class JobCard(Document):
 
 	def get_allowed_wo_qty(self):
 		wo_qty = flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
-		operation_qty = flt(wo_qty * self.get_output_qty_per_unit(), self.precision("for_quantity"))
 		over_production_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		return operation_qty + (operation_qty * over_production_percentage / 100)
+		allowed_qty = wo_qty * self.get_output_qty_per_unit() * (1 + over_production_percentage / 100)
+		return flt(allowed_qty, self.precision("for_quantity"))
 
 	def get_output_qty_per_unit(self):
 		"""Output Item qty per Work Order unit. Job Card quantities are in Output Item units."""
