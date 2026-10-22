@@ -214,6 +214,33 @@ class TestReconciliationBalances(ERPNextTestSuite):
 					f"{batch=} {segregate=}",
 				)
 
+	def test_batch_filtered_ledger_after_entries_without_a_bundle(self):
+		item = self.make_batch_item()
+		receipts = [self.receive(item, qty, days_ago=days_ago) for qty, days_ago in ((10, 5), (5, 4))]
+		batch = get_batch_from_bundle(receipts[0].items[0].serial_and_batch_bundle)
+		for receipt in receipts:
+			frappe.db.set_value(
+				"Stock Ledger Entry",
+				{"voucher_no": receipt.name},
+				{"batch_no": batch, "serial_and_batch_bundle": None},
+			)
+		make_stock_entry(
+			item_code=item,
+			from_warehouse=STORES,
+			qty=3,
+			batch_no=batch,
+			use_serial_batch_fields=1,
+			posting_date=add_days(today(), -3),
+		)
+
+		for segregate in (0, 1):
+			rows = self.get_ledger_rows(item, batch_no=batch, segregate_serial_batch_bundle=segregate)
+			self.assertEqual(
+				[(row.qty_after_transaction, row.stock_value) for row in rows],
+				[(10, 1000), (15, 1500), (12, 1200)],
+				f"{segregate=}",
+			)
+
 	def test_reconciliation_of_a_batch_in_segregated_ledger(self):
 		item = self.make_batch_item()
 		batch = get_batch_from_bundle(self.receive(item, 10).items[0].serial_and_batch_bundle)
