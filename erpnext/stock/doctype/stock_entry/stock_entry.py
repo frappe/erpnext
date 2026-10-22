@@ -1448,6 +1448,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		tolerance = _qty_tolerance(precision)
+		qty_tolerance = _qty_tolerance(frappe.get_precision("Stock Entry Detail", "qty"))
 		self.validate_no_missing_components(expected_rows, precision, tolerance)
 
 		for row in self.items:
@@ -1467,7 +1468,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 					title=_("Invalid Disassembly Item"),
 				)
 
-			if abs(flt(row.transfer_qty, precision) - flt(expected, precision)) > tolerance:
+			# qty is rounded in the row UOM, so allow that rounding scaled to stock UOM
+			row_tolerance = max(tolerance, qty_tolerance * flt(row.conversion_factor))
+			if abs(flt(row.transfer_qty, precision) - flt(expected, precision)) > row_tolerance:
 				frappe.throw(
 					_(
 						"Row #{0}: Item {1} quantity ({2} in stock UOM) does not match the quantity "
