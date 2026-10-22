@@ -335,10 +335,25 @@ class JobCard(Document):
 
 	def get_allowed_wo_qty(self):
 		wo_qty = flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
+		operation_qty = flt(wo_qty * self.get_output_qty_per_unit(), self.precision("for_quantity"))
 		over_production_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		return wo_qty + (wo_qty * over_production_percentage / 100)
+		return operation_qty + (operation_qty * over_production_percentage / 100)
+
+	def get_output_qty_per_unit(self):
+		"""Output Item qty per Work Order unit. Job Card quantities are in Output Item units."""
+		if not self.operation_id:
+			return 1.0
+
+		output_qty_per_unit = frappe.db.get_value(
+			"Work Order Operation", self.operation_id, "output_qty_per_unit", cache=True
+		)
+		return flt(output_qty_per_unit) or 1.0
+
+	def get_work_order_qty(self, qty):
+		"""Converts `qty` of the Output Item to Work Order units."""
+		return flt(qty) / self.get_output_qty_per_unit()
 
 	def get_total_job_card_qty(self):
 		job_card = frappe.qb.DocType("Job Card")
@@ -381,10 +396,15 @@ class JobCard(Document):
 		if not self.semi_fg_bom and not self.bom_no:
 			return
 
+		bom_no = self.semi_fg_bom or self.bom_no
+		qty = flt(self.for_quantity)
+		if frappe.get_cached_value("BOM", bom_no, "item") != self.finished_good:
+			qty = self.get_work_order_qty(qty)
+
 		items_dict = get_bom_items_as_dict(
-			self.semi_fg_bom or self.bom_no,
+			bom_no,
 			self.company,
-			qty=self.for_quantity,
+			qty=qty,
 			fetch_exploded=0,
 			fetch_secondary_items=1,
 		)
@@ -965,7 +985,10 @@ class JobCard(Document):
 				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 				"item_name": d.item_name,
 				"description": d.description,
-				"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+				"required_qty": flt(
+					d.required_qty * self.get_work_order_qty(self.for_quantity) / doc.qty,
+					frappe.get_precision("Job Card Item", "required_qty"),
+				),
 				"rate": d.rate,
 				"amount": d.amount,
 			},
@@ -1242,7 +1265,8 @@ class JobCard(Document):
 		if self.docstatus < 2:
 			return
 
-		if wo.produced_qty > for_quantity + process_loss_qty + pending_qty:
+		operation_qty = self.get_work_order_qty(for_quantity + process_loss_qty + pending_qty)
+		if wo.produced_qty > flt(operation_qty, wo.precision("produced_qty")):
 			first_part_msg = _(
 				"The {0} {1} is used to calculate the valuation cost for the finished good {2}."
 			).format(frappe.bold(_("Job Card")), frappe.bold(self.name), frappe.bold(self.production_item))
@@ -1459,7 +1483,7 @@ class JobCard(Document):
 		for row in wo_items:
 			if not self.is_own_material(row):
 				continue
-			expected = flt(row.required_qty) / wo_qty * flt(self.for_quantity)
+			expected = flt(row.required_qty) / wo_qty * self.get_work_order_qty(self.for_quantity)
 			if flt(transferred.get(row.item_code), 6) < flt(expected, 6):
 				return True
 		return False
@@ -1503,12 +1527,12 @@ class JobCard(Document):
 		for d in doc.operations:
 			completed_qty = flt(d.completed_qty) + flt(d.process_loss_qty)
 			if completed_qty:
-				min_qty.append(completed_qty)
+				min_qty.append(completed_qty / d.output_qty_per_unit)
 			else:
 				min_qty = []
 				break
 
-		return min(min_qty) if min_qty else 0.0
+		return flt(min(min_qty), doc.precision("material_transferred_for_manufacturing")) if min_qty else 0.0
 
 	def set_status(self, update_status=False):
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
@@ -1674,10 +1698,10 @@ class JobCard(Document):
 		later_operations = frappe.get_all(
 			"Work Order Operation",
 			filters={"parent": self.work_order, "sequence_id": (">", self.sequence_id)},
-			fields=["operation", "completed_qty"],
+			fields=["operation", "completed_qty", "output_qty_per_unit"],
 		)
 		for row in later_operations:
-			if flt(row.completed_qty) > operation_qty:
+			if self.get_qty_in_operation_units(row.completed_qty, row) > operation_qty:
 				frappe.throw(
 					_(
 						"Operation {0} has already completed {1}, more than the {2} that operation {3} would have. Cancel the Job Cards of operation {0} first."
@@ -1693,7 +1717,15 @@ class JobCard(Document):
 	def get_previous_operations(self):
 		previous_operations = frappe.get_all(
 			"Work Order Operation",
-			fields=["name", "operation", "status", "completed_qty", "sequence_id", "finished_good"],
+			fields=[
+				"name",
+				"operation",
+				"status",
+				"completed_qty",
+				"sequence_id",
+				"finished_good",
+				"output_qty_per_unit",
+			],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
@@ -1748,10 +1780,17 @@ class JobCard(Document):
 			return None
 
 		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
-		min_completed_qty = min(flt(row.get(qty_field)) for row in previous_operations)
+		min_completed_qty = min(
+			self.get_qty_in_operation_units(row.get(qty_field), row) for row in previous_operations
+		)
 
 		precision = self.precision("total_completed_qty")
 		return flt(min_completed_qty - self.get_current_operation_completed_qty(), precision)
+
+	def get_qty_in_operation_units(self, qty, operation):
+		"""Converts `qty` of another Work Order Operation's Output Item to this operation's units."""
+		qty = flt(qty) / flt(operation.output_qty_per_unit or 1) * self.get_output_qty_per_unit()
+		return flt(qty, self.precision("total_completed_qty"))
 
 	def validate_previous_operation(self, row, current_operation_qty):
 		if not row.completed_qty or (row.status != "Completed" and row.completed_qty < current_operation_qty):
@@ -1795,10 +1834,11 @@ class JobCard(Document):
 				OperationSequenceError,
 			)
 
-		if manufactured_qty >= current_operation_qty:
+		if self.get_qty_in_operation_units(manufactured_qty, row) >= current_operation_qty:
 			return
 
-		if manufactured_qty + flt(row.process_loss_qty) >= current_operation_qty:
+		available_qty = self.get_qty_in_operation_units(manufactured_qty + flt(row.process_loss_qty), row)
+		if available_qty >= current_operation_qty:
 			frappe.throw(
 				_(
 					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}, as {4} was booked as process loss there."
