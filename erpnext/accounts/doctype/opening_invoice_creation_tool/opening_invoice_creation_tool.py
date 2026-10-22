@@ -74,14 +74,17 @@ class OpeningInvoiceCreationTool(Document):
 			"count(name) as total_invoices",
 			"sum(outstanding_amount) as outstanding_amount",
 		]
-		companies = frappe.get_all("Company", fields=["name as company", "default_currency as currency"])
+		companies = frappe.get_list("Company", fields=["name as company", "default_currency as currency"])
 		if not companies:
 			return None, None
 
 		company_wise_currency = {row.company: row.currency for row in companies}
 		for doctype in ["Sales Invoice", "Purchase Invoice"]:
 			invoices = frappe.get_all(
-				doctype, filters=dict(is_opening="Yes", docstatus=1), fields=fields, group_by="company"
+				doctype,
+				filters=dict(is_opening="Yes", docstatus=1, company=("in", list(company_wise_currency))),
+				fields=fields,
+				group_by="company",
 			)
 			prepare_invoice_summary(doctype, invoices)
 
@@ -325,6 +328,7 @@ def get_temporary_opening_account(company=None):
 	if not company:
 		return
 
+	frappe.has_permission("Company", "read", company, throw=True)
 	accounts = frappe.get_all("Account", filters={"company": company, "account_type": "Temporary"})
 	if not accounts:
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))

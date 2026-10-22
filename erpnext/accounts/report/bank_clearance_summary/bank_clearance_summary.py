@@ -25,7 +25,8 @@ def get_columns():
 		{
 			"label": _("Payment Document Type"),
 			"fieldname": "payment_document_type",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 130,
 		},
 		{

@@ -134,8 +134,7 @@ frappe.ui.form.on("Invoice Discounting", {
 					fieldtype: "Currency",
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				data.company = frm.doc.company;
 
 				frappe.call({

@@ -1,0 +1,23 @@
+name: Cancel Closed Batch Runs
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  actions: write
+
+jobs:
+  cancel:
+    name: Cancel runs of the closed batch
+    if: github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel unfinished runs on the batch branch
+        run: |
+          gh run list --repo "$GITHUB_REPOSITORY" --branch "$HEAD_REF" --limit 50 \
+            --json databaseId,status --jq ".[] | select(.status != \"completed\" and .databaseId != $GITHUB_RUN_ID) | .databaseId" \
+            | xargs -r -n1 gh run cancel --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}

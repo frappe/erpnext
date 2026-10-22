@@ -983,6 +983,7 @@ class TestSalesInvoice(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1072,6 +1073,7 @@ class TestSalesInvoice(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1113,6 +1115,7 @@ class TestSalesInvoice(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(
@@ -1194,6 +1197,7 @@ class TestSalesInvoice(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			write_off_account="_Test Write Off - TCP1",
+			write_off_cost_center="Main - TCP1",
 		)
 
 		make_purchase_receipt(

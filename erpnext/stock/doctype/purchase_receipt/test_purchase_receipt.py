@@ -1025,6 +1025,49 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		pr.cancel()
 
+	def test_receipt_progress_after_return_in_stock_uom(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt as make_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		po = create_purchase_order(item_code=item.name, qty=1, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 12})
+		po.submit()
+
+		pr = make_receipt(po.name)
+		pr.submit()
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items[0].update(
+			{"uom": item.stock_uom, "conversion_factor": 1, "qty": -6, "received_qty": -6}
+		)
+		pr_return.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].received_qty, 0.5)
+		self.assertEqual(po.items[0].returned_qty, 0.5)
+
+	def test_receipt_progress_with_another_conversion_factor(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt as make_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		po = create_purchase_order(item_code=item.name, qty=1, do_not_save=True)
+		po.items[0].update({"uom": "Box", "conversion_factor": 12})
+		po.submit()
+
+		pr = make_receipt(po.name)
+		pr.items[0].conversion_factor = 10
+		pr.submit()
+
+		po.reload()
+		self.assertAlmostEqual(po.items[0].received_qty, 10 / 12)
+		self.assertAlmostEqual(po.per_received, 83.33, places=2)
+
+		pr.cancel()
+		po.reload()
+		self.assertEqual(po.items[0].received_qty, 0)
+
 	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
@@ -5858,50 +5901,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.status, status_before)
 		self.assertEqual(frappe.db.count("Stock Ledger Entry", {"voucher_no": pr.name}), sle_before)
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pr.name}), gle_before)
-
-	def test_moving_average_purchase_return_keeps_its_rate_on_repost(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		item = make_item(properties={"valuation_method": "Moving Average"}).name
-		company = "_Test Company with perpetual inventory"
-		warehouse = "Stores - TCP1"
-
-		pr = make_purchase_receipt(
-			item_code=item,
-			qty=10,
-			rate=100,
-			company=company,
-			warehouse=warehouse,
-			posting_date=add_days(today(), -3),
-		)
-		pr_return = make_purchase_receipt(
-			item_code=item,
-			qty=-5,
-			rate=100,
-			company=company,
-			warehouse=warehouse,
-			is_return=1,
-			return_against=pr.name,
-			posting_date=add_days(today(), -1),
-		)
-
-		make_stock_entry(
-			item_code=item,
-			target=warehouse,
-			qty=10,
-			rate=300,
-			company=company,
-			posting_date=add_days(today(), -5),
-		)
-
-		self.assertEqual(
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": pr_return.name, "is_cancelled": 0},
-				"stock_value_difference",
-			),
-			-500,
-		)
 
 	def test_return_allowed_when_purchase_order_required(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return

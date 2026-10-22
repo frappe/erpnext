@@ -170,12 +170,13 @@ class DeliveryNote(SellingController):
 				"target_parent_dt": "Sales Order",
 				"target_parent_field": "per_delivered",
 				"target_ref_field": "qty",
-				"source_field": "qty",
+				"source_field": "qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"percent_join_field": "against_sales_order",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
 				"second_source_dt": "Sales Invoice Item",
-				"second_source_field": "qty",
+				"second_source_field": "qty * conversion_factor",
 				"second_join_field": "so_detail",
 				"overflow_type": "delivery",
 				"second_source_extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -216,9 +217,10 @@ class DeliveryNote(SellingController):
 						"join_field": "so_detail",
 						"target_field": "returned_qty",
 						"target_parent_dt": "Sales Order",
-						"source_field": "-1 * qty",
+						"source_field": "-1 * qty * conversion_factor",
+						"target_conversion_factor": "conversion_factor",
 						"second_source_dt": "Sales Invoice Item",
-						"second_source_field": "-1 * qty",
+						"second_source_field": "-1 * qty * conversion_factor",
 						"second_join_field": "so_detail",
 						"extra_cond": """ and exists (select name from `tabDelivery Note`
 					where name=`tabDelivery Note Item`.parent and is_return=1)""",
@@ -277,6 +279,9 @@ class DeliveryNote(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
+		if self.is_return:
+			return
+
 		if frappe.db.get_single_value("Selling Settings", "so_required") == "Yes":
 			for d in self.get("items"):
 				if not d.against_sales_order:
@@ -497,6 +502,7 @@ class DeliveryNote(SellingController):
 		self.validate_produced_serial_nos_against_reservation()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -518,6 +524,7 @@ class DeliveryNote(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
@@ -882,13 +889,16 @@ def get_list_context(context=None):
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
 	sii = DocType("Sales Invoice Item")
+	dni = DocType("Delivery Note Item")
 
 	invoiced_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(sii)
-			.select(sii.dn_detail, Sum(sii.qty).as_("qty"))
+			.join(dni)
+			.on(dni.name == sii.dn_detail)
+			.select(dni.name, (Sum(sii.qty * sii.conversion_factor) / dni.conversion_factor).as_("qty"))
 			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
-			.groupby(sii.dn_detail)
+			.groupby(dni.name)
 		).run()
 	)
 
@@ -899,20 +909,26 @@ def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
 	dn = DocType("Delivery Note")
 	dni = DocType("Delivery Note Item")
+	returned_against = DocType("Delivery Note Item").as_("returned_against")
 
 	returned_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(dni)
 			.join(dn)
 			.on(dn.name == dni.parent)
-			.select(dni.dn_detail, Sum(Abs(dni.qty)).as_("qty"))
+			.join(returned_against)
+			.on(returned_against.name == dni.dn_detail)
+			.select(
+				returned_against.name,
+				(Sum(Abs(dni.qty) * dni.conversion_factor) / returned_against.conversion_factor).as_("qty"),
+			)
 			.where(
 				(dn.docstatus == 1)
 				& (dn.is_return == 1)
 				& (dn.return_against == delivery_note)
 				& (dni.qty <= 0)
 			)
-			.groupby(dni.dn_detail)
+			.groupby(returned_against.name)
 		).run()
 	)
 
@@ -1090,10 +1106,23 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 
 
 @frappe.whitelist()
-def make_installation_note(source_name, target_doc=None, kwargs=None):
+def make_installation_note(
+	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
+):
+	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
+	from erpnext.stock.utils import get_valid_serial_nos
+
+	# returned_qty_map is keyed by DN Item row and already in the row's sales UOM
+	returned_qty_map = get_returned_qty_map(source_name)
+
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.installed_qty)
-		target.serial_no = obj.serial_no
+		target.qty = flt(obj.qty) - flt(returned_qty_map.get(obj.name, 0)) - flt(obj.installed_qty)
+
+		if obj.serial_no:
+			returned = set(get_returned_serial_nos(obj, source_parent))
+			target.serial_no = "\n".join(s for s in get_valid_serial_nos(obj.serial_no) if s not in returned)
+		else:
+			target.serial_no = obj.serial_no
 
 	doclist = get_mapped_doc(
 		"Delivery Note",
@@ -1108,7 +1137,8 @@ def make_installation_note(source_name, target_doc=None, kwargs=None):
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty,
+				"condition": lambda doc: doc.installed_qty
+				< flt(doc.qty) - flt(returned_qty_map.get(doc.name, 0)),
 			},
 		},
 		target_doc,
