@@ -37,6 +37,8 @@ _BOM_OPERATION_FIELDS = [
 	"workstation",
 	"idx",
 	"finished_good",
+	"finished_good_qty",
+	"is_final_finished_good",
 	"is_subcontracted",
 	"wip_warehouse",
 	"source_warehouse",
@@ -118,7 +120,7 @@ class OperationsService:
 		plan_days = get_capacity_planning_days()
 
 		for idx, row in enumerate(self.doc.operations):
-			qty = self.doc.qty
+			qty = row.get_qty_to_produce(self.doc.qty)
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self.doc, row, qty)
 				if row.job_card_qty > 0:
@@ -339,12 +341,25 @@ class OperationsService:
 		)
 
 	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
+		if self.doc.track_semi_finished_goods:
+			d.output_qty_per_unit = flt(
+				self.get_output_qty_per_unit(d, qty, units, exploded),
+				self.doc.precision("output_qty_per_unit", "operations"),
+			)
+			if batch_size_flags.get(d.operation):
+				units = d.output_qty_per_unit
+
 		if not d.fixed_time:
 			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 		d.status = "Pending"
 		if self.doc.track_semi_finished_goods and not d.sequence_id:
 			d.sequence_id = d.idx
+
+	def get_output_qty_per_unit(self, d, qty, units, exploded):
+		if d.is_final_finished_good:
+			return flt(units)
+		return flt(d.finished_good_qty) * (qty if exploded else 1 / flt(qty))
 
 	def calculate_time(self):
 		for d in self.doc.get("operations"):
@@ -386,7 +401,8 @@ class OperationsService:
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		max_allowed_qty_for_wo = flt(self.doc.qty) + (allowance_percentage / 100 * flt(self.doc.qty))
+		operation_qty = d.get_qty_to_produce(self.doc.qty)
+		max_allowed_qty_for_wo = operation_qty + (allowance_percentage / 100 * operation_qty)
 
 		if self._operation_qty(d) > flt(max_allowed_qty_for_wo, d.precision("completed_qty")):
 			frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
@@ -395,7 +411,7 @@ class OperationsService:
 		qty = self._operation_qty(d)
 		if not qty:
 			return "Pending"
-		if qty < flt(self.doc.qty, d.precision("completed_qty")):
+		if qty < d.get_qty_to_produce(self.doc.qty):
 			return "Work in Progress"
 		return "Completed"
 

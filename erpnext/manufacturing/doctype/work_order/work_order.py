@@ -300,7 +300,7 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = self.qty - flt(operation_details.get(d.name))
+			job_card_qty = d.get_qty_to_produce(self.qty) - flt(operation_details.get(d.name))
 			if job_card_qty > 0:
 				return True
 

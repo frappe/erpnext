@@ -3,6 +3,7 @@
 
 
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class WorkOrderOperation(Document):
@@ -31,6 +32,7 @@ class WorkOrderOperation(Document):
 		hour_rate: DF.Float
 		is_subcontracted: DF.Check
 		operation: DF.Link
+		output_qty_per_unit: DF.Float
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -51,4 +53,6 @@ class WorkOrderOperation(Document):
 		workstation_type: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def get_qty_to_produce(self, work_order_qty):
+		"""Output Item qty this operation makes for `work_order_qty` units of the Work Order item."""
+		return flt(flt(work_order_qty) * self.output_qty_per_unit, self.precision("completed_qty"))
