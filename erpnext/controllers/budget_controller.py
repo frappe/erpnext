@@ -219,10 +219,6 @@ class BudgetValidation:
 			conditions.append(poi.amount.gt(poi.billed_amt))
 			conditions.append(poi.expense_account.eq(key[2]))
 
-			if self.document_type in ["Purchase Order", "Material Request"]:
-				if items := set([x.item_code for x in self.doc.items]):
-					conditions.append(poi.item_code.isin(items))
-
 			# key structure - (dimension_type, dimension, GL account)
 			conditions.append(poi[key[0]].eq(key[1]))
 
@@ -252,10 +248,6 @@ class BudgetValidation:
 			conditions.append(mr.status.ne("Stopped"))
 			conditions.append(mr.transaction_date[self.fy_start_date : self.fy_end_date])
 			conditions.append(mri.expense_account.eq(key[2]))
-
-			if self.document_type in ["Purchase Order", "Material Request"]:
-				if items := set([x.item_code for x in self.doc.items]):
-					conditions.append(mri.item_code.isin(items))
 
 			# key structure - (dimension_type, dimension, GL account)
 			conditions.append(mri[key[0]].eq(key[1]))
