@@ -68,6 +68,10 @@
   "column_break_21",
   "tax_withholding_group",
   "tax_withholding_category",
+  "items_tab",
+  "frequently_bought_html",
+  "party_specific_items_section",
+  "party_specific_items_html",
   "settings_tab",
   "company_restrictions_section",
   "restrict_to_companies",
@@ -772,6 +776,26 @@
   {
    "fieldname": "section_break_ario",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "frequently_bought_html",
+   "fieldtype": "HTML",
+   "label": "Frequently Bought HTML"
+  },
+  {
+   "fieldname": "party_specific_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_specific_items_html",
+   "fieldtype": "HTML",
+   "label": "Party Specific Items HTML"
   }
  ],
  "icon": "user-round",
@@ -785,7 +809,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-10-08 12:41:25.000000",
+ "modified": "2026-10-19 16:59:43.446972",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -59,6 +59,18 @@ class TestProductionPlan(ERPNextTestSuite):
 			if not frappe.db.get_value("BOM", {"item": item}):
 				make_bom(item=item, raw_materials=raw_materials)
 
+	def test_visualizer_counts_process_loss_as_done(self):
+		from erpnext.manufacturing.page.production_plan_visualizer.production_plan_visualizer import (
+			get_finished_goods,
+		)
+
+		plan = frappe._dict(
+			po_items=[frappe._dict(name="row", item_code="Test Production Item 1", planned_qty=10)],
+		)
+		work_orders = [frappe._dict(production_plan_item="row", qty=10, produced_qty=9, process_loss_qty=1)]
+
+		self.assertEqual(get_finished_goods(plan, work_orders)[0]["pending_qty"], 0)
+
 	def test_production_plan_mr_creation(self):
 		"Test if MRs are created for unavailable raw materials."
 		pln = create_production_plan(item_code="Test Production Item 1")
