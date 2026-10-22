@@ -92,28 +92,30 @@ def pick_voucher_side(recv, pay, party_type=None) -> str | None:
 
 
 class DimensionFilter:
-	"""Dimension conditions from form values and the user's permissions. Each row obeys the
-	permissions of the document it shows, as Frappe checks a document's child rows against
-	the parent's doctype."""
+	"""Dimension, party and account conditions from form values and the user's permissions. Each
+	row obeys the permissions of the document it shows, as Frappe checks a document's child rows
+	against the parent's doctype."""
 
 	def __init__(self, pr):
-		self.dimensions = pr.dimensions
-		self.values = {dim.fieldname: pr.get(dim.fieldname) for dim in pr.dimensions}
 		self.user_permissions = get_user_permissions(frappe.session.user)
 		self.strict = frappe.get_system_settings("apply_strict_user_permissions")
+		# (column, linked doctype, form value)
+		self.fields = [(dim.fieldname, dim.document_type, pr.get(dim.fieldname)) for dim in pr.dimensions]
+		# party is a Dynamic Link, Frappe's own form check skips it; it does check the picked accounts
+		self.fields += [("party", pr.party_type, pr.party), ("account", "Account", None)]
 
 	def conditions(self, table, doctype=None):
 		"""Conditions on `table`. Its rows are documents of `doctype`, or without one, of
 		their own `voucher_type`."""
 		columns_of = table._table_name.removeprefix("tab")
 		conditions = []
-		for dim in self.dimensions:
-			if not frappe.db.has_column(columns_of, dim.fieldname):
+		for fieldname, document_type, value in self.fields:
+			if not frappe.db.has_column(columns_of, fieldname):
 				continue
-			field = table[dim.fieldname]
-			permissions = self.user_permissions.get(dim.document_type, [])
-			if value := self.values.get(dim.fieldname):
-				self._check_allowed(dim.document_type, value, {p.get("doc") for p in permissions})
+			field = table[fieldname]
+			permissions = self.user_permissions.get(document_type, [])
+			if value:
+				self._check_allowed(document_type, value, {p.get("doc") for p in permissions})
 				conditions.append(field == value)
 			if doctype:
 				if allowed := get_allowed_docs_for_doctype(permissions, doctype):

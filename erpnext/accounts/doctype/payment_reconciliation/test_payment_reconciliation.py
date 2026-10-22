@@ -1596,6 +1596,70 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 					self.assertEqual(name in shown, voucher_doctype != doctype)
 			frappe.permissions.remove_user_permission("Cost Center", allowed, test_user)
 
+	def test_party_follows_user_permissions(self):
+		"""The picked party must be allowed; each voucher's rows then obey that voucher's permissions."""
+		test_user = "test@example.com"
+		si = self.create_sales_invoice(qty=1, rate=100)
+		pe = self.create_payment_entry(amount=100).save().submit()
+		je = self.create_journal_entry(self.bank, self.debit_to, 100, nowdate())
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", test_user)
+		with self.set_user(test_user):
+			self.assertRaises(
+				frappe.PermissionError, self.create_payment_reconciliation().get_unreconciled_entries
+			)
+
+		# allowed for invoices only
+		frappe.permissions.add_user_permission(
+			"Customer", self.customer, test_user, applicable_for="Sales Invoice"
+		)
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.get_unreconciled_entries()
+		for customer in ("_Test Customer 1", self.customer):
+			frappe.permissions.remove_user_permission("Customer", customer, test_user)
+
+		shown = {r.voucher_no for r in pr.to_receive + pr.to_pay}
+		self.assertIn(si.name, shown)
+		self.assertNotIn(pe.name, shown)
+		self.assertNotIn(je.name, shown)
+
+	def test_account_follows_user_permissions(self):
+		"""Rows in accounts the user may not see stay hidden, whether the account is left blank or picked."""
+		test_user = "test@example.com"
+		other = create_account(
+			account_name="_Test Debtors 2",
+			parent_account="Accounts Receivable - _TC",
+			company=self.company,
+			account_type="Receivable",
+			account_currency="INR",
+		)
+		allowed_si = self.create_sales_invoice(qty=1, rate=100)
+		other_si = self.create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		other_si.debit_to = other
+		other_si.save().submit()
+		other_je = self.create_journal_entry(self.bank, other, 100, nowdate())
+		other_je.accounts[1].party_type = "Customer"
+		other_je.accounts[1].party = self.customer
+		other_je.save().submit()
+
+		frappe.permissions.add_user_permission("Account", self.debit_to, test_user)
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.receivable_payable_account = None
+			pr.get_unreconciled_entries()
+			blank = {r.voucher_no for r in pr.to_receive + pr.to_pay}
+			pr.receivable_payable_account = other
+			pr.get_unreconciled_entries()
+			picked = {r.voucher_no for r in pr.to_receive + pr.to_pay}
+		frappe.permissions.remove_user_permission("Account", self.debit_to, test_user)
+
+		self.assertIn(allowed_si.name, blank)
+		self.assertFalse({other_si.name, other_je.name} & (blank | picked))
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{
