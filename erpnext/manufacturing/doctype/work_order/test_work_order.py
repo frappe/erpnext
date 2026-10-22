@@ -123,6 +123,33 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.set_process_loss_qty()
 		self.assertEqual(wo.process_loss_qty, 0.25)
 
+	def test_form_saved_work_order_keeps_job_card_qty(self):
+		item = make_item().name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			item,
+			[{"item_code": "_Test Item", "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+		)
+		wo = frappe.new_doc(
+			"Work Order",
+			company="_Test Company",
+			production_item=item,
+			bom_no=bom.name,
+			qty=2,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="_Test Warehouse 1 - _TC",
+			fg_warehouse="_Test Warehouse 2 - _TC",
+		)
+		wo.get_items_and_operations_from_bom()
+		wo = frappe.get_doc(wo.as_dict())
+		wo.insert()
+		wo.submit()
+
+		self.assertEqual(
+			frappe.get_all("Job Card", filters={"work_order": wo.name}, pluck="for_quantity"), [2]
+		)
+
 	def test_semi_finished_output_qty_for_child_bom_operations(self):
 		rim, wheel, car = (make_item().name for _ in range(3))
 		operation, workstation = make_review_operation()
