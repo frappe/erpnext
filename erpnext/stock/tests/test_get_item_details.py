@@ -1,7 +1,12 @@
 import frappe
 from frappe.utils import today
 
-from erpnext.stock.get_item_details import get_item_details, get_price_list_currency_and_exchange_rate
+from erpnext.stock.get_item_details import (
+	get_item_details,
+	get_price_list_currency_and_exchange_rate,
+	get_valuation_rate,
+)
+from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -61,6 +66,36 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
+
+	def test_get_valuation_rate_applies_warehouse_user_permission(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+		item_code = make_item(properties={"is_stock_item": 1, "item_defaults": item_defaults}).name
+		service_item = make_item(properties={"is_stock_item": 0, "item_defaults": item_defaults}).name
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=1, rate=50)
+
+		user = make_fenced_user("_test_valuation_rate_user@example.com", ["Stock User"])
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Warehouse",
+				"for_value": "_Test Warehouse 1 - _TC",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Warehouse",
+			}
+		).insert(ignore_permissions=True)
+		with as_user(user):
+			assert_refused(self, get_valuation_rate, item_code, "_Test Company", "_Test Warehouse - _TC")
+			assert_refused(self, get_valuation_rate, item_code, "_Test Company")
+			self.assertEqual(
+				get_valuation_rate(item_code, "_Test Company", "_Test Warehouse 1 - _TC"),
+				{"valuation_rate": 50},
+			)
+			self.assertEqual(get_valuation_rate(service_item, "_Test Company"), {"valuation_rate": 0.0})
 
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
