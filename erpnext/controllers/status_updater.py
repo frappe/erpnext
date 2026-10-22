@@ -7,6 +7,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
+# Percentages at this threshold count as complete.
+COMPLETE_PERCENTAGE = 99.999999
+
 
 class OverAllowanceError(frappe.ValidationError):
 	pass
@@ -663,14 +666,14 @@ class StatusUpdater(Document):
 
 	@staticmethod
 	def snap_full_percentage(percentage):
-		# status rules check for a full 100, so store a rounding-short 99.999999 as 100
-		return 100 if flt(percentage) >= 99.999999 else percentage
+		# status rules check for a full 100
+		return 100 if flt(percentage) >= COMPLETE_PERCENTAGE else percentage
 
 	@staticmethod
 	def _determine_status(percentage, keyword):
 		if percentage < 0.001:
 			return f"Not {keyword}"
-		elif percentage >= 99.999999:
+		elif percentage >= COMPLETE_PERCENTAGE:
 			return f"Fully {keyword}"
 		else:
 			return f"Partly {keyword}"
@@ -784,7 +787,7 @@ class StatusUpdater(Document):
 			if hasattr(ref_doc, "billing_status"):
 				if ref_doc.per_billed < 0.001:
 					ref_doc.db_set("billing_status", "Not Billed")
-				elif ref_doc.per_billed > 99.999999:
+				elif ref_doc.per_billed >= COMPLETE_PERCENTAGE:
 					ref_doc.db_set("billing_status", "Fully Billed")
 				else:
 					ref_doc.db_set("billing_status", "Partly Billed")
