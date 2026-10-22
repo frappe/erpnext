@@ -344,7 +344,10 @@ class StatusService:
 
 	def _process_loss_qty(self):
 		if self.doc.track_semi_finished_goods:
-			return flt(sum(flt(row.process_loss_qty) for row in self.doc.operations))
+			process_loss_qty = sum(
+				flt(row.process_loss_qty) / row.output_qty_per_unit for row in self.doc.operations
+			)
+			return flt(process_loss_qty, self.doc.precision("process_loss_qty"))
 
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
