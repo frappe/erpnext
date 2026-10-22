@@ -34,6 +34,29 @@ class TestEmployee(ERPNextTestSuite):
 		employee_doc.save()
 		self.assertTrue("Employee" not in frappe.get_roles(user))
 
+	def test_hr_user_cannot_unlink_or_reenable_users_with_extra_roles(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-linked-manager@example.com", ["System Manager", "Employee"])
+		frappe.db.set_value("User", manager, "enabled", 1)
+		frappe.db.delete("Employee", {"user_id": manager})
+		employee = make_employee(manager, company="_Test Company")
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.user_id = ""
+			self.assertRaises(frappe.PermissionError, linked.save)
+		self.assertEqual(frappe.db.get_value("Employee", employee, "user_id"), manager)
+		self.assertIn("Employee", frappe.get_roles(manager))
+
+		frappe.db.set_value("User", manager, "enabled", 0)
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.cell_number = "9999999999"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 0)
+
 	def test_hr_user_links_only_users_without_extra_roles(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 

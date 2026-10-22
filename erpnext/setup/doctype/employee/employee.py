@@ -139,6 +139,7 @@ class Employee(NestedSet):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
+				self.validate_user_access(existing_user_id)
 				user = frappe.get_doc("User", existing_user_id)
 				validate_employee_role(user, ignore_emp_check=True)
 				user.save(ignore_permissions=True)
@@ -161,16 +162,17 @@ class Employee(NestedSet):
 		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
 			self.validate_user_access()
 
-	def validate_user_access(self):
+	def validate_user_access(self, user: str | None = None):
 		"""Only a System Manager may link or update a User holding roles the editor lacks."""
 		editor_roles = frappe.get_roles()
 		if "System Manager" in editor_roles:
 			return
 
+		user = user or self.user_id
 		ignored_roles = {GUEST_ROLE, ALL_USER_ROLE, SYSTEM_USER_ROLE, "Employee"}
-		if set(frappe.get_roles(self.user_id)) - set(editor_roles) - ignored_roles:
+		if set(frappe.get_roles(user)) - set(editor_roles) - ignored_roles:
 			frappe.throw(
-				_("You are not permitted to link or update User {0}").format(frappe.bold(self.user_id)),
+				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
 				frappe.PermissionError,
 			)
 
@@ -317,6 +319,9 @@ class Employee(NestedSet):
 
 	def update_user_status(self):
 		if not self.user_id:
+			return
+
+		if not self.has_value_changed("status") and not self.has_value_changed("user_id"):
 			return
 
 		user = frappe.get_doc("User", self.user_id)
