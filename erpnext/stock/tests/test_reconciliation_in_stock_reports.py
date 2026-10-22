@@ -403,3 +403,31 @@ class TestStockReportsAfterAnAdjustmentEntry(ValuationFixTestCase, StockReportTe
 					warehouse=[ADJUSTED_WAREHOUSE],
 				)
 				self.assertEqual(execute_from_snapshot(filters), stock_balance(deepcopy(filters)))
+
+	def test_segregated_stock_ledger(self):
+		for scenario, item_code, expected in self.make_adjusted_ledgers():
+			with self.subTest(scenario=scenario):
+				rows = self.get_stock_ledger(
+					item_code,
+					ADJUSTED_WAREHOUSE,
+					from_date=get_adjustment_date(),
+					segregate_serial_batch_bundle=1,
+				)
+				self.assertLedgerRows(rows, expected.stock_ledger_opening[0], expected.balance)
+
+	def test_stock_ledger_with_the_batch_filter(self):
+		item_code = self.make_batch_issued_at_wrong_value()
+		self.fix_by_adjustment_entry(item_code)
+		batch_no = frappe.db.get_value("Batch", {"item": item_code}, "name")
+
+		for segregate in (0, 1):
+			with self.subTest(segregate=segregate):
+				rows = self.get_stock_ledger(
+					item_code,
+					ADJUSTED_WAREHOUSE,
+					from_date=get_adjustment_date(),
+					batch_no=batch_no,
+					segregate_serial_batch_bundle=segregate,
+				)
+				self.assertEqual((rows[0].qty_after_transaction, rows[0].stock_value), (6, 600))
+				self.assertEqual((rows[-1].qty_after_transaction, rows[-1].stock_value), (5, 500))
