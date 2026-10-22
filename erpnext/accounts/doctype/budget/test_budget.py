@@ -277,6 +277,35 @@ class TestBudget(ERPNextTestSuite):
 			)
 			make_purchase_commitment("Material Request", "_Test Budget Loose Item", cost_center, 300)
 
+	def test_budget_allows_request_equal_to_budget_with_fractional_uom(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		make_item(
+			"_Test Budget Pound Item",
+			{
+				"is_stock_item": 0,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.45359237}],
+			},
+		)
+		for use_legacy_controller in (False, True):
+			frappe.db.set_single_value(
+				"Accounts Settings", "use_legacy_budget_controller", use_legacy_controller
+			)
+			cost_center = make_budget_for_new_cost_center(
+				f"_Test Budget Fractional UOM {use_legacy_controller}"
+			)
+
+			# 1.25 x 800 is exactly the budget once the stored stock qty is converted back
+			make_purchase_commitment(
+				"Material Request",
+				"_Test Budget Pound Item",
+				cost_center,
+				800,
+				qty=1.25,
+				uom="Box",
+				conversion_factor=0.45359237,
+			)
+
 	def test_monthly_budget_crossed_for_po_in_foreign_currency(self):
 		self.assert_foreign_currency_po_budget_crossed()
 
