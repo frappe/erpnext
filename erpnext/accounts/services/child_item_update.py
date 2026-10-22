@@ -198,6 +198,10 @@ class ChildItemUpdater:
 		for idx, row in enumerate(parent.get(self.child_docname), start=1):
 			row.idx = idx
 
+		from erpnext.accounts.services.party_validation import PartyValidator
+
+		PartyValidator(parent).validate_party_specific_items()
+
 		parent.save()
 
 		if self.parent_doctype == "Purchase Order":
