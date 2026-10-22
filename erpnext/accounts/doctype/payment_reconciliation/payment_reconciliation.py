@@ -92,7 +92,9 @@ def pick_voucher_side(recv, pay, party_type=None) -> str | None:
 
 
 class DimensionFilter:
-	"""Dimension conditions from form values and the user's permissions."""
+	"""Dimension conditions from form values and the user's permissions. Each row obeys the
+	permissions of the document it shows, as Frappe checks a document's child rows against
+	the parent's doctype."""
 
 	def __init__(self, pr):
 		self.dimensions = pr.dimensions
@@ -100,17 +102,37 @@ class DimensionFilter:
 		self.user_permissions = get_user_permissions(frappe.session.user)
 		self.strict = frappe.get_system_settings("apply_strict_user_permissions")
 
-	def conditions(self, table, doctype):
+	def conditions(self, table, doctype=None):
+		"""Conditions on `table`. Its rows are documents of `doctype`, or without one, of
+		their own `voucher_type`."""
+		columns_of = table._table_name.removeprefix("tab")
 		conditions = []
 		for dim in self.dimensions:
-			if not frappe.db.has_column(doctype, dim.fieldname):
+			if not frappe.db.has_column(columns_of, dim.fieldname):
 				continue
-			allowed = get_allowed_docs_for_doctype(self.user_permissions.get(dim.document_type, []), doctype)
+			field = table[dim.fieldname]
+			permissions = self.user_permissions.get(dim.document_type, [])
 			if value := self.values.get(dim.fieldname):
-				self._check_allowed(dim.document_type, value, allowed)
-				conditions.append(table[dim.fieldname] == value)
-			elif allowed:
-				conditions.append(self._allowed_condition(table[dim.fieldname], allowed))
+				self._check_allowed(dim.document_type, value, {p.get("doc") for p in permissions})
+				conditions.append(field == value)
+			if doctype:
+				if allowed := get_allowed_docs_for_doctype(permissions, doctype):
+					conditions.append(self._allowed_condition(field, allowed))
+			else:
+				conditions += self._by_voucher_type(table, field, permissions)
+		return conditions
+
+	def _by_voucher_type(self, table, field, permissions):
+		# a doctype with permissions of its own binds its rows; the rest obey those for all doctypes
+		own = {p.get("applicable_for") for p in permissions if p.get("applicable_for")}
+		conditions = [
+			(table.voucher_type != doctype)
+			| self._allowed_condition(field, get_allowed_docs_for_doctype(permissions, doctype))
+			for doctype in own
+		]
+		if everywhere := get_allowed_docs_for_doctype(permissions, None):
+			rest = self._allowed_condition(field, everywhere)
+			conditions.append(table.voucher_type.isin(own) | rest if own else rest)
 		return conditions
 
 	def _check_allowed(self, document_type, value, allowed):
@@ -211,10 +233,7 @@ class OpenBalanceFetcher:
 		if self.pr.to_date:
 			posting_date_filter.append(ple.posting_date.lte(self.pr.to_date))
 
-		dimension_filter = self.dimension_filter.conditions(ple, "Payment Ledger Entry")
-		# payments must also pass Payment Entry's own permissions
-		if pe_only := self.dimension_filter.conditions(ple, "Payment Entry"):
-			dimension_filter.append((ple.voucher_type != "Payment Entry") | Criterion.all(pe_only))
+		dimension_filter = self.dimension_filter.conditions(ple)
 
 		return common_filter, posting_date_filter, dimension_filter
 
@@ -382,7 +401,7 @@ class OpenBalanceFetcher:
 			if not names:
 				return []
 			conditions.append(je.name.isin(names))
-		conditions += self.dimension_filter.conditions(jea, "Journal Entry Account")
+		conditions += self.dimension_filter.conditions(jea, "Journal Entry")
 
 		query = (
 			qb.from_(je)
@@ -1041,20 +1060,12 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def calculate_difference_on_allocation_change(
-		self,
-		payment_entry: list | None = None,
-		invoice: list | None = None,
-		allocated_amount: float | None = None,
+		self, to_receive: dict, to_pay: dict, allocated_amount: float
 	):
-		"""Backward-compat API for external callers that manually edit an
-		allocation row's allocated_amount. Delegates to `Allocator._fx_difference`."""
-		if not (payment_entry and invoice):
-			return 0.0
-		pay = (
-			frappe._dict(payment_entry[0]) if isinstance(payment_entry, list) else frappe._dict(payment_entry)
+		"""FX difference of an allocation row after its amount is edited, from its two source rows."""
+		return Allocator(self)._fx_difference(
+			frappe._dict(to_receive), frappe._dict(to_pay), flt(allocated_amount)
 		)
-		recv = frappe._dict(invoice[0]) if isinstance(invoice, list) else frappe._dict(invoice)
-		return Allocator(self)._fx_difference(recv, pay, flt(allocated_amount))
 
 	@frappe.whitelist()
 	def allocate_entries(

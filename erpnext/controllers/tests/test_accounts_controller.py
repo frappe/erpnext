@@ -1194,7 +1194,7 @@ class TestAccountsController(ERPNextTestSuite):
 		payments = [x.as_dict() for x in pr.to_pay]
 		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		difference_amount = pr.calculate_difference_on_allocation_change(
-			[x.as_dict() for x in pr.to_pay], [x.as_dict() for x in pr.to_receive], 1
+			pr.to_receive[0].as_dict(), pr.to_pay[0].as_dict(), 1
 		)
 		pr.allocation[0].allocated_amount = 1
 		pr.allocation[0].difference_amount = difference_amount
@@ -1329,7 +1329,7 @@ class TestAccountsController(ERPNextTestSuite):
 		payments = [x.as_dict() for x in pr.to_pay]
 		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		difference_amount = pr.calculate_difference_on_allocation_change(
-			[x.as_dict() for x in pr.to_pay], [x.as_dict() for x in pr.to_receive], 1
+			pr.to_receive[0].as_dict(), pr.to_pay[0].as_dict(), 1
 		)
 		pr.allocation[0].allocated_amount = 1
 		pr.allocation[0].difference_amount = difference_amount

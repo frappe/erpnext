@@ -281,10 +281,6 @@ class PartyLedgerSummaryReport:
 				# Cache the party data reference to avoid repeated dictionary lookups
 				party_data = self.party_data[gle.party]
 
-				# bridges move balance between the party's own entries; closing already has them
-				if gle.voucher_no in self.bridge_journals:
-					continue
-
 				# Check if this is a direct return invoice (most specific condition first)
 				if gle.voucher_no in self.return_invoices:
 					party_data.return_amount -= amount
@@ -352,52 +348,14 @@ class PartyLedgerSummaryReport:
 				& (IfNull(gle.party, "") != "")
 				& (gle.posting_date <= self.filters.to_date)
 				& (gle.party.isin(self.parties))
+				# bridges move balance between the party's own entries: never invoiced or paid
+				& (IfNull(gle.voucher_subtype, "") != CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
 			)
 		)
-
-		if self.filters.get("ignore_cr_dr_notes"):
-			system_generated_cr_dr_journals = frappe.db.get_all(
-				"Journal Entry",
-				filters={
-					"company": self.filters.get("company"),
-					"docstatus": 1,
-					"voucher_type": ("in", ["Credit Note", "Debit Note", "Reconciliation Journal"]),
-					"is_system_generated": 1,
-					"posting_date": ["between", [self.filters.get("from_date"), self.filters.get("to_date")]],
-				},
-				as_list=True,
-			)
-			if system_generated_cr_dr_journals:
-				vouchers_to_ignore = (self.filters.get("voucher_no_not_in") or []) + [
-					x[0] for x in system_generated_cr_dr_journals
-				]
-				self.filters.update({"voucher_no_not_in": vouchers_to_ignore})
-
-		voucher_no_not_in = self.filters.get("voucher_no_not_in", [])
-		if voucher_no_not_in:
-			query = query.where(gle.voucher_no.notin(voucher_no_not_in))
 
 		query = self.prepare_conditions(query)
 
 		self.gl_entries = query.run(as_dict=True)
-		self.bridge_journals = self.get_bridge_journals()
-
-	def get_bridge_journals(self):
-		"""Reconciliation bridges in the period: transfers inside the party's own balance,
-		not invoicing or payment."""
-		return set(
-			frappe.get_all(
-				"Journal Entry",
-				filters={
-					"company": self.filters.get("company"),
-					"docstatus": 1,
-					"voucher_type": CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
-					"is_system_generated": 1,
-					"posting_date": ["between", [self.filters.get("from_date"), self.filters.get("to_date")]],
-				},
-				pluck="name",
-			)
-		)
 
 	def prepare_conditions(self, query):
 		gle = qb.DocType("GL Entry")

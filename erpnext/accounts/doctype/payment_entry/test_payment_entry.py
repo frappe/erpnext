@@ -2160,8 +2160,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pr.allocate_entries()
 		pr.reconcile()
 
-		# One-sided reference
-		# TODO: Improve UX
+		# only the receipt, on the customer's payment side, is edited, so it alone holds the
+		# link; the refund keeps no reference row, as upstream
 		pe.reload()
 		reverse_pe.reload()
 		self.assertIn(reverse_pe.name, [r.reference_name for r in pe.references])

@@ -124,44 +124,28 @@ def make_exchange_gain_loss_journal(
 
 	if doc.get("doctype") == "Payment Entry":
 		gain_loss_to_book = [x for x in doc.references if x.exchange_gain_loss != 0]
-		booked = []
+		booked = set()
 		if gain_loss_to_book:
 			je = qb.DocType("Journal Entry")
 			jea = qb.DocType("Journal Entry Account")
-			parents = (
+			# payment rows that already have a gain/loss journal
+			booked = set(
 				qb.from_(jea)
-				.select(jea.parent)
+				.inner_join(je)
+				.on(je.name == jea.parent)
+				.select(jea.reference_detail_no)
 				.where(
 					(jea.reference_type == "Payment Entry")
 					& (jea.reference_name == doc.name)
 					& (jea.docstatus == 1)
+					& (je.docstatus == 1)
+					& (je.voucher_type == "Exchange Gain Or Loss")
 				)
-				.run()
+				.run(pluck=True)
 			)
 
-			if parents:
-				booked = (
-					qb.from_(je)
-					.inner_join(jea)
-					.on(je.name == jea.parent)
-					.select(jea.reference_type, jea.reference_name, jea.reference_detail_no)
-					.where(
-						(je.docstatus == 1)
-						& (je.name.isin(parents))
-						& (je.voucher_type == "Exchange Gain Or Loss")
-					)
-					.run()
-				)
-
-		# journals key on the reference row's `name`; ones booked before upgrading used its idx
-		booked_rows = set(booked)
-
 		for d in gain_loss_to_book:
-			keys = {
-				(d.reference_doctype, d.reference_name, d.name),
-				(d.reference_doctype, d.reference_name, str(d.idx)),
-			}
-			if d.exchange_gain_loss and not keys & booked_rows:
+			if d.exchange_gain_loss and d.name not in booked:
 				if doc.book_advance_payments_in_separate_party_account:
 					party_account = d.account
 				else:

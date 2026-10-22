@@ -115,11 +115,6 @@ frappe.query_reports["Customer Ledger Summary"] = {
 				});
 			},
 		},
-		{
-			fieldname: "ignore_cr_dr_notes",
-			label: __("Ignore System Generated Credit / Debit Notes"),
-			fieldtype: "Check",
-		},
 	],
 };
 

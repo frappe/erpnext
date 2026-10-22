@@ -422,20 +422,20 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 frappe.ui.form.on("Payment Reconciliation Allocation", {
 	allocated_amount: function (frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		const same_row = (x, side) =>
-			x.voucher_type == row[`${side}_voucher_type`] &&
-			x.voucher_no == row[`${side}_voucher_no`] &&
-			(x.voucher_row || "") == (row[`${side}_voucher_row`] || "");
-		const recv = (frm.doc.to_receive || []).filter((x) => same_row(x, "to_receive"));
-		const pay = (frm.doc.to_pay || []).filter((x) => same_row(x, "to_pay"));
-		if (!recv.length || !pay.length) return;
+		const source = (side) =>
+			frm.doc[side].find(
+				(x) =>
+					x.voucher_type == row[`${side}_voucher_type`] &&
+					x.voucher_no == row[`${side}_voucher_no`] &&
+					(x.voucher_row || "") == (row[`${side}_voucher_row`] || "")
+			);
 
 		frm.call({
 			doc: frm.doc,
 			method: "calculate_difference_on_allocation_change",
 			args: {
-				payment_entry: pay,
-				invoice: recv,
+				to_receive: source("to_receive"),
+				to_pay: source("to_pay"),
 				allocated_amount: row.allocated_amount,
 			},
 			callback: (r) => {
