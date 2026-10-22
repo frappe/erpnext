@@ -150,14 +150,16 @@ class ReconciledItem:
 
 
 class StockReportTestCase(ERPNextTestSuite):
-	def get_stock_balance(self, item_code, from_date=None, to_date=None, **filters) -> list:
+	def get_stock_balance(
+		self, item_code, from_date=None, to_date=None, filter_by_item=True, **filters
+	) -> list:
 		filters = frappe._dict(
 			company=COMPANY,
 			from_date=from_date or add_days(today(), -30),
 			to_date=to_date or today(),
 			**filters,
 		)
-		if item_code:
+		if filter_by_item:
 			filters.item_code = [item_code]
 
 		return [frappe._dict(row) for row in stock_balance(filters)[1] if row.get("item_code") == item_code]
@@ -241,13 +243,9 @@ class TestStockBalanceAfterReconciliation(StockReportTestCase):
 
 	def test_without_an_item_filter(self):
 		item = ReconciledItem("batch").make_ledger()
-		filters = frappe._dict(
-			company=COMPANY, from_date=add_days(today(), -30), to_date=today(), warehouse=[WAREHOUSE]
-		)
-		rows = [row for row in stock_balance(filters)[1] if row.item_code == item.item_code]
+		(row,) = self.get_stock_balance(item.item_code, filter_by_item=False, warehouse=[WAREHOUSE])
 
-		self.assertEqual(len(rows), 1)
-		self.assertBalanceRow(frappe._dict(rows[0]), (0, 0), BALANCES["last receipt"])
+		self.assertBalanceRow(row, (0, 0), BALANCES["last receipt"])
 
 	def test_other_warehouse_is_not_affected(self):
 		for item_type in ITEM_TYPES:
@@ -323,6 +321,66 @@ class TestStockLedgerAfterReconciliation(StockReportTestCase):
 
 					self.assertEqual(flt(rows[-1].qty_after_transaction), 5)
 					self.assertEqual(flt(rows[-1].stock_value), 550)
+
+
+class TestReconciliationOfTwoWarehouses(StockReportTestCase):
+	"""One reconciliation that raises the stock in one warehouse and lowers it in another."""
+
+	def setUp(self):
+		self.item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		for warehouse, qty in ((WAREHOUSE, 10), (OTHER_WAREHOUSE, 4)):
+			make_stock_entry(
+				item_code=self.item_code,
+				to_warehouse=warehouse,
+				qty=qty,
+				rate=100,
+				posting_date=get_step_date("receipt"),
+			)
+
+		reconciliation = create_stock_reconciliation(
+			item_code=self.item_code,
+			warehouse=WAREHOUSE,
+			qty=15,
+			rate=100,
+			posting_date=get_step_date("first reconciliation"),
+			do_not_save=True,
+		)
+		reconciliation.append(
+			"items",
+			{"item_code": self.item_code, "warehouse": OTHER_WAREHOUSE, "qty": 2, "valuation_rate": 100},
+		)
+		reconciliation.submit()
+
+	def test_stock_balance(self):
+		item_group = frappe.db.get_value("Item", self.item_code, "item_group")
+		for filters in (
+			{},
+			{"warehouse": [GROUP_WAREHOUSE]},
+			{"filter_by_item": False, "item_group": item_group, "warehouse": [WAREHOUSE, OTHER_WAREHOUSE]},
+		):
+			with self.subTest(filters=filters):
+				rows = self.get_stock_balance(
+					self.item_code, from_date=get_step_date("first reconciliation"), **filters
+				)
+				self.assertEqual(
+					{row.warehouse: (row.opening_qty, row.in_qty, row.out_qty, row.bal_qty) for row in rows},
+					{WAREHOUSE: (10, 5, 0, 15), OTHER_WAREHOUSE: (4, 0, 2, 2)},
+				)
+
+	def test_stock_ledger_without_a_warehouse_filter(self):
+		filters = frappe._dict(
+			company=COMPANY,
+			from_date=get_step_date("first reconciliation"),
+			to_date=today(),
+			item_code=[self.item_code],
+			valuation_field_type="Currency",
+		)
+		rows = stock_ledger(filters)[1]
+
+		self.assertEqual(
+			{row["warehouse"]: (row["in_qty"], row["out_qty"], row["qty_after_transaction"]) for row in rows},
+			{WAREHOUSE: (5, 0, 15), OTHER_WAREHOUSE: (0, -2, 2)},
+		)
 
 
 ADJUSTMENT_SCENARIOS = {
