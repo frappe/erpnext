@@ -53,3 +53,17 @@ class TestDeliveryScheduleItem(IntegrationTestCase):
 
 		self.assertEqual(sorted(self._scheduled_qty(so, kept.name)), [4])
 		self.assertEqual(self._scheduled_qty(so, removed.name), [])
+
+	def test_draft_sales_order_with_schedule_can_be_deleted(self):
+		so = make_sales_order(qty=10, do_not_submit=True)
+		row = so.items[0]
+		DeliveryScheduleService(so).create_delivery_schedule(
+			row, [{"delivery_date": today(), "qty": row.qty}]
+		)
+		self.assertTrue(frappe.db.exists("Delivery Schedule Item", {"sales_order": so.name}))
+
+		so.reload()
+		so.delete()
+
+		self.assertFalse(frappe.db.exists("Sales Order", so.name))
+		self.assertFalse(frappe.db.exists("Delivery Schedule Item", {"sales_order": so.name}))
