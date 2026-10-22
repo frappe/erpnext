@@ -39,7 +39,22 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			item_rate = item.rate_with_margin - item.discount_amount;
 		}
 		item_rate = flt(item_rate, precision("rate", item));
+		item_rate = this.apply_rate_rounding(item, item_rate, item.rate_with_margin);
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
+	}
+
+	apply_rate_rounding(item, rate, rate_with_margin) {
+		if (!item.rate_rounding || !item.rounding_increment) return rate;
+
+		const round =
+			{ Up: Math.ceil, Down: Math.floor }[item.rate_rounding] || ((value) => Math.floor(value + 0.5));
+		const steps = round(flt(rate / item.rounding_increment, 9));
+		const rounded_rate = flt(
+			Math.min(steps * item.rounding_increment, rate_with_margin),
+			precision("rate", item)
+		);
+		item.discount_amount = flt(rate_with_margin - rounded_rate, precision("discount_amount", item));
+		return rounded_rate;
 	}
 
 	async calculate_taxes_and_totals(update_paid_amount) {

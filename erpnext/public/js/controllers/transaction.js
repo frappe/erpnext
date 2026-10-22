@@ -65,7 +65,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					);
 				}
 
-				const calculated_rate = flt(rate_with_margin - item.discount_amount, precision("rate", item));
+				const calculated_rate = me.apply_rate_rounding(
+					item,
+					flt(rate_with_margin - item.discount_amount, precision("rate", item)),
+					rate_with_margin
+				);
 
 				if (calculated_rate !== item.rate) {
 					// if rate is greater than price_list_rate, set margin
@@ -2407,10 +2411,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		for (const child of children) {
 			const existing_pricing_rule = frappe.model.get_value(child.doctype, child.name, "pricing_rules");
+			const row = frappe.get_doc(child.doctype, child.name);
+			if (row && (child.rate_rounding || row.rate_rounding)) {
+				row.rate_rounding = child.rate_rounding;
+				row.rounding_increment = child.rounding_increment;
+			}
 
 			for (const [key, value] of Object.entries(child)) {
 				// The percentage handler calculates the amount; triggering both clears the discount.
 				if (key === "discount_amount" && child.discount_percentage) continue;
+				if (["rate_rounding", "rounding_increment"].includes(key)) continue;
 
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {

@@ -77,6 +77,8 @@
   "discount_amount",
   "discount_percentage",
   "for_price_list",
+  "rate_rounding",
+  "rounding_increment",
   "dynamic_condition_tab",
   "condition",
   "section_break_13",
@@ -448,6 +450,22 @@
    "options": "Price List"
   },
   {
+   "depends_on": "eval:doc.price_or_product_discount == 'Price' && doc.rate_or_discount != 'Rate' && doc.apply_on != 'Transaction' && !doc.validate_applied_rule",
+   "description": "Round the discounted rate to a multiple of the Rounding Increment",
+   "fieldname": "rate_rounding",
+   "fieldtype": "Select",
+   "label": "Round Rate",
+   "options": "\nNearest\nUp\nDown"
+  },
+  {
+   "depends_on": "eval:doc.rate_rounding && doc.price_or_product_discount == 'Price' && doc.rate_or_discount != 'Rate' && doc.apply_on != 'Transaction' && !doc.validate_applied_rule",
+   "fieldname": "rounding_increment",
+   "fieldtype": "Float",
+   "label": "Rounding Increment",
+   "mandatory_depends_on": "eval:doc.rate_rounding && doc.price_or_product_discount == 'Price' && doc.rate_or_discount != 'Rate' && doc.apply_on != 'Transaction' && !doc.validate_applied_rule",
+   "non_negative": 1
+  },
+  {
    "depends_on": "eval:doc.price_or_product_discount == 'Product'",
    "fieldname": "product_discount_scheme_section",
    "fieldtype": "Section Break",
@@ -659,7 +677,7 @@
  "icon": "badge-percent",
  "idx": 1,
  "links": [],
- "modified": "2026-02-17 12:24:07.553505",
+ "modified": "2026-10-22 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

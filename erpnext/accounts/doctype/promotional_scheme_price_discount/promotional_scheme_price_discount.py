@@ -52,6 +52,8 @@ class PromotionalSchemePriceDiscount(Document):
 		]
 		rate: DF.Currency
 		rate_or_discount: DF.Literal["", "Rate", "Discount Percentage", "Discount Amount"]
+		rate_rounding: DF.Literal["", "Nearest", "Up", "Down"]
+		rounding_increment: DF.Float
 		rule_description: DF.SmallText
 		threshold_percentage: DF.Percent
 		validate_applied_rule: DF.Check
