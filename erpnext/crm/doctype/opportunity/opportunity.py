@@ -138,6 +138,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.validate_party()
+		self.validate_party_specific_items()
 		self.validate_party_contact_and_address()
 		self.refresh_party_fields()
 		self.map_fields()
@@ -165,6 +166,11 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def on_trash(self):
 		frappe.db.delete("Prospect Opportunity", {"opportunity": self.name})
+
+	def validate_party_specific_items(self):
+		from erpnext.accounts.services.party_validation import PartyValidator
+
+		PartyValidator(self).validate_party_specific_items()
 
 	def validate_opportunity_from(self):
 		if self.opportunity_from not in PARTY_DOCTYPES:

@@ -173,6 +173,10 @@ class ChildItemUpdater:
 		parent.calculate_taxes_and_totals()
 		parent.set_total_in_words()
 
+		from erpnext.accounts.services.party_validation import PartyValidator
+
+		PartyValidator(parent).validate_party_specific_items()
+
 		if self.parent_doctype == "Sales Order" and not parent.is_subcontracted:
 			make_packing_list(parent)
 			parent.set_gross_profit()
