@@ -180,7 +180,7 @@ jobs:
 
           pgrep honcho | xargs kill
           rm -rf ~/frappe-bench/env
-          bench -v setup env
+          bench -v setup env --python python3.14
           bench pip install -e ./apps/erpnext
           start_bench_without_workers
 
