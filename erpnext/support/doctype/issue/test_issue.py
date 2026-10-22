@@ -274,6 +274,25 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
 		self.assertEqual(issue.agreement_status, "Resolution Due")
 
+	def test_portal_user_changes_only_own_issues(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user("_test_issue_portal_customer@example.com", ["Customer"])
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		if user not in [row.user for row in customer.portal_users]:
+			customer.append("portal_users", {"user": user})
+			customer.save()
+		staff_issue = make_issue(customer="_Test Customer", index=1).name
+		own_issue = make_issue(customer="_Test Customer", index=2).name
+		frappe.db.set_value("Issue", own_issue, "raised_by", user)
+		staff_issue, own_issue = frappe.get_doc("Issue", staff_issue), frappe.get_doc("Issue", own_issue)
+
+		with as_user(user):
+			self.assertTrue(frappe.has_website_permission(staff_issue, "read"))
+			self.assertFalse(frappe.has_website_permission(staff_issue, "write"))
+			self.assertFalse(frappe.has_website_permission(staff_issue, "delete"))
+			self.assertTrue(frappe.has_website_permission(own_issue, "write"))
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
