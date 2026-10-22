@@ -10,6 +10,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "project_name",
   "status",
@@ -77,6 +80,22 @@
   "connections_tab"
  ],
  "fields": [
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
