@@ -115,7 +115,7 @@ jobs:
           bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
           DB: mariadb
-          TYPE: server
+          TYPE: patch
           SKIP_WKHTMLTOX_SETUP: 1
           CI_SKIP_ERPNEXT_ASSETS: 1
           # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
@@ -124,7 +124,6 @@ jobs:
       - name: Run Patch Tests
         run: |
           cd ~/frappe-bench/
-          bench remove-app payments --force
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
