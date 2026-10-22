@@ -7,9 +7,9 @@ from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
-from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import Bracket, LiteralValue, Order
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimension_filter_condition
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
 	apply_common_conditions,
@@ -507,14 +507,12 @@ def get_invoices(filters, additional_query_columns):
 			query = query.select(col)
 
 	if filters.get("customer"):
-		query = query.where(si.customer == filters.customer)
+		query = query.where(get_dimension_filter_condition(si.customer, filters.customer))
 
 	if filters.get("customer_group"):
-		customer_groups = [
-			filters.customer_group,
-			*get_descendants_of("Customer Group", filters.customer_group, ignore_permissions=True),
-		]
-		query = query.where(si.customer_group.isin(customer_groups))
+		query = query.where(
+			get_dimension_filter_condition(si.customer_group, filters.customer_group, "Customer Group")
+		)
 
 	query = get_conditions(filters, query, "Sales Invoice")
 	query = apply_common_conditions(
@@ -539,8 +537,12 @@ def get_conditions(filters, query, doctype):
 
 	if filters.get("mode_of_payment"):
 		payment_doc = frappe.qb.DocType("Sales Invoice Payment")
-		query = query.inner_join(payment_doc).on(parent_doc.name == payment_doc.parent)
-		query = query.where(payment_doc.mode_of_payment == filters.mode_of_payment).distinct()
+		query = query.left_join(payment_doc).on(
+			(parent_doc.name == payment_doc.parent) & (payment_doc.parenttype == doctype)
+		)
+		query = query.where(
+			get_dimension_filter_condition(payment_doc.mode_of_payment, filters.mode_of_payment)
+		).distinct()
 
 	return query
 
@@ -691,6 +693,7 @@ def get_mode_of_payments(invoice_list):
 		)
 
 		for d in inv_mop:
-			mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
+			if d.mode_of_payment:
+				mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
 
 	return mode_of_payments
