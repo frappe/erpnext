@@ -154,16 +154,6 @@ frappe.ui.form.on("Request for Quotation", {
 		}
 	},
 
-	show_supplier_quotation_comparison(frm) {
-		frappe.route_options = {
-			company: frm.doc.company,
-			from_date: moment(frm.doc.transaction_date).format("YYYY-MM-DD"),
-			to_date: moment(new Date()).format("YYYY-MM-DD"),
-			request_for_quotation: frm.doc.name,
-		};
-		frappe.set_route("query-report", "Supplier Quotation Comparison");
-	},
-
 	make_supplier_quotation: function (frm) {
 		var doc = frm.doc;
 		var dialog = new frappe.ui.Dialog({
@@ -514,15 +504,11 @@ frappe.ui.form.on("Request for Quotation", {
 		const min_offer_total = complete_offer_totals.length > 0 ? Math.min(...complete_offer_totals) : null;
 
 		const categorize_by = frm.quotations_categorize_by || "Supplier";
-		const has_quotes = quotes && quotes.length > 0;
 
 		const context = {
-			docstatus: frm.doc.docstatus,
 			company_currency: company_currency,
 			offers: offers,
-			all_items: all_items,
 			items: items,
-			selected_item: selected_item,
 			categorize_by: categorize_by,
 			get_quote: get_quote,
 			format_qty: format_qty,
@@ -530,10 +516,9 @@ frappe.ui.form.on("Request for Quotation", {
 			offer_totals: offer_totals,
 			complete_offers: complete_offers,
 			min_offer_total: min_offer_total,
-			has_quotes: has_quotes,
 		};
 
-		const html = frappe.render_template("supplier_quotation_comparision", context);
+		const html = frappe.render_template("supplier_quotation_comparison", context);
 		const $container = $(html).appendTo($wrapper);
 
 		// Item Filter Control using Frappe UI Control
