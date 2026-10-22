@@ -327,6 +327,44 @@ class TestCashFlow(ERPNextTestSuite):
 		self.assertEqual(card - before_card, -1000)
 		self.assertEqual(total - before_total, -400)
 
+	def test_net_change_in_cash_equals_cash_ledger_movement(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		def report_totals():
+			rows = self.run_report()
+			return {row["section"]: row.get("total", 0) for row in rows if row.get("section")}
+
+		before = report_totals()
+		make_journal_entry("Cash - _TC", "Secured Loans - _TC", 1000, posting_date=today(), submit=True)
+		sale = make_journal_entry("Cash - _TC", "Sales - _TC", 1180, posting_date=today(), save=False)
+		sale.accounts[1].credit_in_account_currency = 1000
+		sale.append(
+			"accounts",
+			{
+				"account": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": 180,
+			},
+		)
+		sale.submit()
+		depreciation = make_journal_entry(
+			"_Test Depreciations - _TC",
+			"_Test Accumulated Depreciations - _TC",
+			100,
+			posting_date=today(),
+			save=False,
+		)
+		depreciation.voucher_type = "Depreciation Entry"
+		depreciation.submit()
+		after = report_totals()
+
+		changes = {section: after[section] - before.get(section, 0) for section in after}
+		self.assertEqual(changes["'Net Change in Cash'"], 2180)
+		self.assertEqual(changes["Net Change in Other Balance Sheet Accounts"], 1180)
+		self.assertEqual(changes["Depreciation"], 100)
+		for label in ("Net Change in Accounts Receivable", "Net Change in Accounts Payable"):
+			self.assertEqual(changes[label], 0)
+
 	def test_ifrs_template_counts_short_term_borrowings_once(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
