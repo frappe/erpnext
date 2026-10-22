@@ -61,7 +61,11 @@ class PartyValidator:
 
 	def validate_party_specific_items(self) -> None:
 		party_type, party = self.get_party()
-		if self.doc.get("quotation_to") == "Customer":
+		if self.doc.doctype == "Opportunity":
+			if self.doc.opportunity_from != "Customer":
+				return
+			party = self.doc.party_name
+		elif self.doc.get("quotation_to") == "Customer":
 			party = self.doc.party_name
 		if not party:
 			return
