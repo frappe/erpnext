@@ -7,6 +7,8 @@ Each item goes through the same ledger: 10 received at 100, reconciled to 15 at 
 reconciled to 5 at 110, and 2 received at 100. The balance after each step is in BALANCES.
 """
 
+from copy import deepcopy
+
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, today
@@ -17,8 +19,11 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
+from erpnext.stock.report.stock_balance.test_stock_balance_snapshot import execute_from_snapshot
 from erpnext.stock.report.stock_ledger.stock_ledger import execute as stock_ledger
 from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
+from erpnext.stock.tests.test_valuation_adjustment import WAREHOUSE as ADJUSTED_WAREHOUSE
+from erpnext.stock.tests.test_valuation_adjustment import ValuationFixTestCase, get_adjustment_date
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -170,10 +175,10 @@ class StockReportTestCase(ERPNextTestSuite):
 		return [frappe._dict(row) for row in stock_ledger(filters)[1]]
 
 	def assertBalanceRow(self, row, opening, balance):
-		self.assertEqual((flt(row.opening_qty), flt(row.opening_val)), opening, row)
-		self.assertEqual((flt(row.bal_qty), flt(row.bal_val)), balance, row)
+		self.assertEqual((flt(row.opening_qty), flt(row.opening_val, 2)), opening, row)
+		self.assertEqual((flt(row.bal_qty), flt(row.bal_val, 2)), balance, row)
 		self.assertEqual(flt(row.bal_qty), flt(row.opening_qty + row.in_qty - row.out_qty), row)
-		self.assertEqual(flt(row.bal_val), flt(row.opening_val + row.in_val - row.out_val), row)
+		self.assertEqual(flt(row.bal_val, 2), flt(row.opening_val + row.in_val - row.out_val, 2), row)
 
 	def assertLedgerRows(self, rows, opening_qty, balance):
 		"""Every row's balance is the one before it plus its in and out qty."""
@@ -318,3 +323,83 @@ class TestStockLedgerAfterReconciliation(StockReportTestCase):
 
 					self.assertEqual(flt(rows[-1].qty_after_transaction), 5)
 					self.assertEqual(flt(rows[-1].stock_value), 550)
+
+
+ADJUSTMENT_SCENARIOS = {
+	"make_fifo_issue_at_wrong_value": {
+		"stock_balance_opening": (16, 2050),
+		"stock_ledger_opening": (16, 2050),
+		"balance": (14, 1900),
+	},
+	"make_wrong_balance_qty": {
+		"stock_balance_opening": (6, 700),
+		"stock_ledger_opening": (7, 700),
+		"balance": (6, 600),
+	},
+	"make_batch_issued_at_wrong_value": {
+		"stock_balance_opening": (6, 700),
+		"stock_ledger_opening": (6, 700),
+		"balance": (5, 500),
+	},
+	"make_serial_no_issued_at_wrong_value": {
+		"stock_balance_opening": (3, 450),
+		"stock_ledger_opening": (3, 450),
+		"balance": (3, 500),
+	},
+	"make_serial_no_counted_twice": {
+		"stock_balance_opening": (4, 400),
+		"stock_ledger_opening": (4, 400),
+		"balance": (2, 200),
+	},
+}
+
+
+class TestStockReportsAfterAnAdjustmentEntry(ValuationFixTestCase, StockReportTestCase):
+	"""A wrong ledger set right by an Adjustment Entry. Stock Balance sums the movements for the
+	opening, while Stock Ledger shows the balance of the last entry, which a wrong ledger may not
+	agree with. After the Adjustment Entry both show the balance it sets."""
+
+	def make_adjusted_ledgers(self):
+		for scenario, expected in ADJUSTMENT_SCENARIOS.items():
+			item_code = getattr(self, scenario)()
+			self.fix_by_adjustment_entry(item_code)
+			yield scenario, item_code, frappe._dict(expected)
+
+	def test_stock_balance(self):
+		for scenario, item_code, expected in self.make_adjusted_ledgers():
+			for filters in ({}, {"show_dimension_wise_stock": 1}):
+				with self.subTest(scenario=scenario, filters=filters):
+					(row,) = self.get_stock_balance(
+						item_code, from_date=get_adjustment_date(), warehouse=[ADJUSTED_WAREHOUSE], **filters
+					)
+					self.assertBalanceRow(row, expected.stock_balance_opening, expected.balance)
+
+	def test_stock_balance_after_the_adjustment_date(self):
+		for scenario, item_code, expected in self.make_adjusted_ledgers():
+			with self.subTest(scenario=scenario):
+				(row,) = self.get_stock_balance(
+					item_code, from_date=add_days(today(), 1), warehouse=[ADJUSTED_WAREHOUSE]
+				)
+				self.assertBalanceRow(row, expected.balance, expected.balance)
+
+	def test_stock_ledger(self):
+		for scenario, item_code, expected in self.make_adjusted_ledgers():
+			with self.subTest(scenario=scenario):
+				rows = self.get_stock_ledger(item_code, ADJUSTED_WAREHOUSE, from_date=get_adjustment_date())
+				opening_qty, opening_value = expected.stock_ledger_opening
+				self.assertEqual(
+					(rows[0].qty_after_transaction, rows[0].stock_value), (opening_qty, opening_value)
+				)
+				self.assertLedgerRows(rows, opening_qty, expected.balance)
+
+	def test_stock_balance_snapshot(self):
+		for scenario, item_code, _expected in self.make_adjusted_ledgers():
+			with self.subTest(scenario=scenario):
+				filters = frappe._dict(
+					company=COMPANY,
+					from_date=get_adjustment_date(),
+					to_date=today(),
+					item_code=[item_code],
+					warehouse=[ADJUSTED_WAREHOUSE],
+				)
+				self.assertEqual(execute_from_snapshot(filters), stock_balance(deepcopy(filters)))
