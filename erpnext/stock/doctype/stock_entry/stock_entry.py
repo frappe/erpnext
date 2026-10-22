@@ -49,11 +49,8 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
 from erpnext.stock.get_item_details import (
-<<<<<<< HEAD
 	ItemDetailsCtx,
-=======
 	_get_bin_details,
->>>>>>> 6141c96 (fix(stock): check warehouse user permission in get_bin_details)
 	get_barcode_data,
 	get_conversion_factor,
 	get_default_cost_center,

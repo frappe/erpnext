@@ -1735,15 +1735,8 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
-	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
-=======
-def get_bin_details(
-	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
-):
 	# `select`, not `read`: the selling/buying rows reach this with no Item read row
->>>>>>> 6141c96 (fix(stock): check warehouse user permission in get_bin_details)
 	frappe.has_permission("Item", ptype="select", throw=True)
 	if warehouse:
 		erpnext.require_user_permission("Warehouse", warehouse)
@@ -1947,7 +1940,20 @@ def get_valuation_rate(item_code, company, warehouse=None):
 	frappe.has_permission("Item", doc=item_code, throw=True)
 	frappe.has_permission("Company", doc=company, ptype="select", throw=True)
 
+	if frappe.get_cached_value("Item", item_code, "is_stock_item"):
+		warehouse = warehouse or get_default_warehouse(item_code, company)
+		if warehouse:
+			erpnext.require_user_permission("Warehouse", warehouse)
+
 	return _get_valuation_rate(item_code, company, warehouse)
+
+
+def get_default_warehouse(item_code: str, company: str) -> str | None:
+	return (
+		get_item_defaults(item_code, company).get("default_warehouse")
+		or get_item_group_defaults(item_code, company).get("default_warehouse")
+		or get_brand_defaults(item_code, company).get("default_warehouse")
+	)
 
 
 def _get_valuation_rate(item_code, company, warehouse=None):
@@ -1957,20 +1963,8 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 		return {"valuation_rate": 0.0}
 
 	item = get_item_defaults(item_code, company)
-	item_group = get_item_group_defaults(item_code, company)
-	brand = get_brand_defaults(item_code, company)
 	if item.get("is_stock_item"):
-<<<<<<< HEAD
-		if not warehouse:
-			warehouse = (
-				item.get("default_warehouse")
-				or item_group.get("default_warehouse")
-				or brand.get("default_warehouse")
-			)
-
-=======
 		warehouse = warehouse or get_accessible_warehouse(get_default_warehouse(item_code, company))
->>>>>>> ed0348d (fix(stock): check warehouse user permission in get_item_details)
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
 		) or {"valuation_rate": item.get("valuation_rate") or 0}

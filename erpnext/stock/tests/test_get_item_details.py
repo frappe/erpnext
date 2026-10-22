@@ -1,9 +1,6 @@
 import frappe
 from frappe.utils import today
 
-<<<<<<< HEAD
-from erpnext.stock.get_item_details import get_item_details, get_price_list_currency_and_exchange_rate
-=======
 from erpnext.stock.get_item_details import (
 	get_batch_qty,
 	get_bin_details,
@@ -14,7 +11,6 @@ from erpnext.stock.get_item_details import (
 )
 from erpnext.stock.utils import get_latest_stock_qty
 from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
->>>>>>> 29bd552 (test(stock): stock qty methods apply warehouse user permission)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -75,8 +71,6 @@ class TestGetItemDetail(ERPNextTestSuite):
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
 
-<<<<<<< HEAD
-=======
 	def make_stock_item_in_two_warehouses(self):
 		"""Stock item defaulting to `_Test Warehouse - _TC` (rate 100), also stocked in `_Test Warehouse 1 - _TC` (rate 50)."""
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -150,9 +144,6 @@ class TestGetItemDetail(ERPNextTestSuite):
 			self.assertEqual(details.valuation_rate, 50)
 			self.assertEqual(details.actual_qty, 1)
 
-<<<<<<< HEAD
->>>>>>> 151df09 (test(stock): get_item_details applies warehouse user permission)
-=======
 	def test_stock_qty_methods_apply_warehouse_user_permission(self):
 		item_code = self.make_stock_item_in_two_warehouses()
 
@@ -164,7 +155,6 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 			assert_refused(self, get_batch_qty, "_Test Batch", "_Test Warehouse - _TC", item_code)
 
->>>>>>> 29bd552 (test(stock): stock qty methods apply warehouse user permission)
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
 		# create item
