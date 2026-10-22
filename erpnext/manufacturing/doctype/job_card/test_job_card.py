@@ -1551,6 +1551,54 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.submit()
 		self.assertEqual(job_card.docstatus, 1)
 
+	def test_shop_floor_keeps_work_order_open_for_pending_job_card_qty(self):
+		from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
+
+		def get_status_groups():
+			return [
+				group
+				for group in ("open", "completed")
+				if get_work_orders(group, search=work_order.name)["work_orders"]
+			]
+
+		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
+		job_card = self.get_first_job_card(work_order.name)
+		job_card.pending_qty = 3
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": "2024-03-01 08:00:00",
+				"to_time": "2024-03-01 09:00:00",
+				"completed_qty": 2,
+			},
+		)
+		job_card.submit()
+		self.assertEqual(get_status_groups(), ["open"])
+
+		make_job_card(
+			work_order.name,
+			[
+				{
+					"name": work_order.operations[0].name,
+					"operation": job_card.operation,
+					"qty": 3,
+					"pending_qty": 3,
+				}
+			],
+		)
+		follow_up = frappe.get_last_doc("Job Card", {"work_order": work_order.name, "docstatus": 0})
+		follow_up.process_loss_qty = 1
+		follow_up.append(
+			"time_logs",
+			{
+				"from_time": "2024-03-01 10:00:00",
+				"to_time": "2024-03-01 11:00:00",
+				"completed_qty": 2,
+			},
+		)
+		follow_up.submit()
+		self.assertEqual(get_status_groups(), ["completed"])
+
 	def test_completion_overwrites_existing_completed_qty_with_zero(self):
 		work_order = make_wo_order_test_record(item="_Test FG Item 2", qty=5)
 

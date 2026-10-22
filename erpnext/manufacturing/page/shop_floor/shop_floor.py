@@ -355,16 +355,23 @@ def _has_job_cards_criterion(wo, docstatus):
 
 
 def _bucket_criterion(wo, status_group):
-	"""The floor is done with a Work Order once every job card is submitted, even though the
-	Work Order stays "In Process" until the finished goods are received. Such operationally
-	complete orders belong on the Completed tab — not stranded under Pending / In Progress."""
+	"""Submitted cards can leave quantity for another card. Require completed operations
+	before moving an open Work Order to Completed, even before finished goods are received."""
 	open_statuses = WORK_ORDER_STATUS_GROUPS["open"]
-	all_job_cards_done = _has_job_cards_criterion(wo, 1) & _has_job_cards_criterion(wo, 0).negate()
-	if status_group == "completed":
-		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_job_cards_done)
-	return wo.status.isin(open_statuses) & (
-		_has_job_cards_criterion(wo, 1).negate() | _has_job_cards_criterion(wo, 0)
+	operation = frappe.qb.DocType("Work Order Operation")
+	incomplete_operations = ExistsCriterion(
+		frappe.qb.from_(operation)
+		.select(operation.name)
+		.where((operation.parent == wo.name) & (operation.status != "Completed"))
 	)
+	all_operations_done = (
+		_has_job_cards_criterion(wo, 1)
+		& _has_job_cards_criterion(wo, 0).negate()
+		& incomplete_operations.negate()
+	)
+	if status_group == "completed":
+		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_operations_done)
+	return wo.status.isin(open_statuses) & all_operations_done.negate()
 
 
 def _apply_work_order_filters(query, wo, status_group, search, with_job_cards_only):
