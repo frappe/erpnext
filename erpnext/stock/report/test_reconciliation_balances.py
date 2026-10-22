@@ -159,6 +159,17 @@ class TestReconciliationBalances(ERPNextTestSuite):
 		(row,) = self.get_balance_rows(item, from_date=add_days(today(), -3))
 		self.assertEqual((row.opening_qty, row.out_qty), (10, 6))
 
+	def test_opening_stock_reconciliation_in_the_period_is_the_opening(self):
+		item = self.make_stock_item()
+		batch_item = self.make_batch_item()
+		for item_code in (item, batch_item):
+			self.reconcile(item_code, 5, days_ago=10, purpose="Opening Stock")
+			self.receive(item_code, 2, days_ago=1)
+
+			self.assertReportsMatchLedger(item_code, 7, 700)
+			(row,) = self.get_balance_rows(item_code)
+			self.assertEqual((row.opening_qty, row.opening_val, row.in_qty), (5, 500, 2))
+
 	def test_reconciliations_of_items_and_warehouses_are_kept_apart(self):
 		items = [self.make_stock_item() for _item in range(2)]
 		for item, qty in zip(items, (5, 7), strict=True):
