@@ -487,11 +487,6 @@ class StatusUpdater(Document):
 					{"detail_id": args["detail_id"]},
 				)
 
-	@staticmethod
-	def snap_full_percentage(percentage):
-		# Status rules require a full 100.
-		return 100 if flt(percentage) >= 99.999999 else percentage
-
 	def _update_percent_field_in_targets(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
 		if args.get("percent_join_field_parent"):
@@ -529,9 +524,12 @@ class StatusUpdater(Document):
 
 			frappe.db.set_value(
 				args["target_parent_dt"],
-				{"name": args["name"], args["target_parent_field"]: [">=", 99.999999]},
+				args["name"],
 				args["target_parent_field"],
-				100,
+				flt(
+					frappe.db.get_value(args["target_parent_dt"], args["name"], args["target_parent_field"]),
+					frappe.get_precision(args["target_parent_dt"], args["target_parent_field"]),
+				),
 				update_modified=False,
 			)
 
@@ -601,7 +599,10 @@ class StatusUpdater(Document):
 				)[0][0]
 			)
 
-			per_billed = self.snap_full_percentage(safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100)
+			per_billed = flt(
+				safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100,
+				frappe.get_precision(ref_dt, "per_billed"),
+			)
 
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
