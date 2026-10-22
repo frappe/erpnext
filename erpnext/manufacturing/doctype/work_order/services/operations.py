@@ -159,7 +159,7 @@ class OperationsService:
 		if not (self.doc.production_plan and plan_row):
 			return []
 
-		if flt(row.job_card_qty) != flt(self.doc.qty):
+		if flt(row.job_card_qty) != row.get_qty_to_produce(self.doc.qty):
 			return []
 
 		if sum(1 for d in self.doc.operations if d.operation == row.operation) > 1:
