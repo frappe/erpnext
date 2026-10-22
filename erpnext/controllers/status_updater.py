@@ -239,6 +239,11 @@ class StatusUpdater(Document):
 				# if target_ref_field is not specified or validate_qty is explicitly set to False, skip validation
 				continue
 
+			is_installation = args.get("overflow_type") == "installation"
+			# a later return can lower the installation limit below an already-installed qty;
+			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
+			skip_on_cancel = is_installation and self.docstatus == 2
+
 			# get unique transactions to update
 			for d in self.get_all_children():
 				if hasattr(d, "qty") and flt(d.qty) < 0 and not self.get("is_return"):
@@ -259,15 +264,22 @@ class StatusUpdater(Document):
 							),
 						)
 
-				if d.doctype == args["source_dt"] and d.get(args["join_field"]):
+				if d.doctype == args["source_dt"] and d.get(args["join_field"]) and not skip_on_cancel:
 					args["name"] = d.get(args["join_field"])
+
+					# installation consumes delivered-minus-returned qty (returned_qty is in stock UOM)
+					ref_expr = (
+						"(`{}` - `returned_qty` / `conversion_factor`)".format(args["target_ref_field"])
+						if is_installation
+						else "`{}`".format(args["target_ref_field"])
+					)
 
 					# get all qty where qty > target_field
 					item = frappe.db.sql(
-						"""select item_code, `{target_ref_field}`,
+						"""select item_code, {ref_expr} as `{target_ref_field}`,
 						`{target_field}`, parenttype, parent from `tab{target_dt}`
-						where `{target_ref_field}` < `{target_field}`
-						and name=%s and docstatus=1""".format(**args),
+						where {ref_expr} < `{target_field}`
+						and name=%s and docstatus=1""".format(ref_expr=ref_expr, **args),
 						args["name"],
 						as_dict=1,
 					)
@@ -277,8 +289,10 @@ class StatusUpdater(Document):
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
 						# skip qty over-allowance check for non-stock items
-						if "qty" in args.get("target_ref_field", "") and not frappe.get_cached_value(
-							"Item", item["item_code"], "is_stock_item"
+						if (
+							"qty" in args.get("target_ref_field", "")
+							and not is_installation
+							and not frappe.get_cached_value("Item", item["item_code"], "is_stock_item")
 						):
 							continue
 
@@ -291,6 +305,11 @@ class StatusUpdater(Document):
 
 						elif item[args["target_ref_field"]]:
 							self.check_overflow_with_allowance(item, args)
+
+						elif is_installation and flt(item[args["target_field"]]) > 0:
+							# nothing left to install (e.g. fully returned) but a positive qty was entered
+							item["reduce_by"] = flt(item[args["target_field"]])
+							self.limits_crossed_error(args, item, "qty")
 
 	def check_overflow_with_allowance(self, item, args):
 		"""
