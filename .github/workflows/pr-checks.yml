@@ -28,25 +28,14 @@ jobs:
         password: ${{ secrets.GHCR_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 200
 
       - name: Install and Run Pre-commit
         uses: pre-commit/action@v3.0.1
 
-  commitlint:
-    name: Check Commit Titles
-    if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
-    runs-on: erpnext-arc-light
-    container:
-      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24
-      credentials:
-        username: ${{ secrets.GHCR_USERNAME || github.actor }}
-        password: ${{ secrets.GHCR_TOKEN || github.token }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 200
-
       - name: Check commit titles
+        if: ${{ !cancelled() }}
         run: |
           npm install @commitlint/cli @commitlint/config-conventional
           npx commitlint --verbose --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
