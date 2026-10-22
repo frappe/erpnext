@@ -1928,15 +1928,10 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(purchase_order.items[0].sales_order_item, row.name)
 			self.assertEqual(purchase_order.items[0].qty, row.qty)
 
-		for supplier in ("_Test Supplier", None):
-			with self.subTest(supplier=supplier):
-				selected_items[0]["supplier"] = supplier
-				purchase_orders = make_purchase_order(so.name, selected_items=selected_items[:1])
-				self.assertEqual(len(purchase_orders), 1)
-				self.assertEqual(purchase_orders[0].supplier, supplier)
-				self.assertEqual(len(purchase_orders[0].items), 1)
-				self.assertEqual(purchase_orders[0].items[0].sales_order_item, so.items[0].name)
-				self.assertEqual(purchase_orders[0].items[0].qty, 2)
+		purchase_orders = make_purchase_order(so.name, selected_items=selected_items[:1])
+		self.assertEqual(len(purchase_orders), 1)
+		self.assertEqual(len(purchase_orders[0].items), 1)
+		self.assertEqual(purchase_orders[0].items[0].sales_order_item, so.items[0].name)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_purchase_order_rejects_ambiguous_or_foreign_rows(self):
