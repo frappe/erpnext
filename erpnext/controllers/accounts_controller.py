@@ -4713,6 +4713,7 @@ def update_child_qty_rate(
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
 	parent.set_total_in_words()
+	parent.validate_party_specific_items()
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()
