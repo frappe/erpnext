@@ -2596,6 +2596,22 @@ class TestSalesInvoice(ERPNextTestSuite):
 		current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"sales_update_frequency": "Daily"})
+	def test_daily_frequency_updates_company_monthly_sales(self):
+		from erpnext.setup.doctype.company.company import cache_companies_monthly_sales_history
+
+		company = "_Test Company"
+		frappe.db.set_value("Company", company, "total_monthly_sales", 0)
+
+		si = create_sales_invoice()
+		# "Daily" does not refresh the figure on submit
+		self.assertEqual(frappe.db.get_value("Company", company, "total_monthly_sales"), 0)
+
+		cache_companies_monthly_sales_history()
+		self.assertGreaterEqual(
+			frappe.db.get_value("Company", company, "total_monthly_sales"), si.base_grand_total
+		)
+
 	def test_rounding_adjustment(self):
 		si = create_sales_invoice(rate=24900, do_not_save=True)
 		for tax in ["Tax 1", "Tax2"]:
