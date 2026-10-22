@@ -1934,6 +1934,52 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(purchase_order.items[0].item_code, "_Test Bundle Item 1")
 		self.assertEqual(purchase_order.items[1].item_code, "_Test Bundle Item 2")
 
+	def test_purchase_order_bundle_items_are_filtered_by_supplier(self):
+		so_items = []
+		for index, supplier in enumerate(["_Test Supplier", "_Test Supplier 1"], start=1):
+			bundle = make_item(f"_Test Supplier Bundle {index}", {"is_stock_item": 0})
+			component = make_item(f"_Test Supplier Bundle Component {index}", {"is_stock_item": 1})
+			make_product_bundle(bundle.name, [component.name], qty=2)
+			so_items.append(
+				{
+					"item_code": bundle.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": index + 1,
+					"rate": 400,
+					"supplier": supplier,
+				}
+			)
+		so_items.append(
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 100,
+				"supplier": "_Test Supplier",
+			}
+		)
+		so = make_sales_order(item_list=so_items)
+
+		purchase_orders = make_purchase_order(so.name, selected_items=so_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		for purchase_order in purchase_orders:
+			with self.subTest(supplier=purchase_order.supplier):
+				self.assertCountEqual(
+					[(item.item_code, item.qty) for item in purchase_order.items],
+					[("_Test Item", 1), ("_Test Supplier Bundle Component 1", 4)]
+					if purchase_order.supplier == "_Test Supplier"
+					else [("_Test Supplier Bundle Component 2", 6)],
+				)
+
+		purchase_orders = make_purchase_order(so.name, selected_items=[so_items[0]])
+		self.assertEqual(len(purchase_orders), 1)
+		self.assertEqual(purchase_orders[0].supplier, "_Test Supplier")
+		self.assertEqual(
+			[(item.item_code, item.qty) for item in purchase_orders[0].items],
+			[("_Test Supplier Bundle Component 1", 4)],
+		)
+
 	def test_purchase_order_updates_packed_item_ordered_qty(self):
 		"""
 		Tests if the packed item's `ordered_qty` is updated with the quantity of the Purchase Order
