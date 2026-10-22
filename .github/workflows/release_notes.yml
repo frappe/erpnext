@@ -27,6 +27,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Get Frappe Release Bot token
+      id: app-token
+      uses: actions/create-github-app-token@v3
+      with:
+        client-id: ${{ vars.FRAPPE_BOT_CLIENT_ID }}
+        private-key: ${{ secrets.FRAPPE_BOT_PRIVATE_KEY }}
+        permission-contents: write
     - name: Update notes
       run: |
         NEW_NOTES=$(gh api --method POST -H "Accept: application/vnd.github+json"  /repos/frappe/erpnext/releases/generate-notes  -f tag_name=$RELEASE_TAG \
@@ -38,5 +45,5 @@ jobs:
         gh api --method PATCH -H "Accept: application/vnd.github+json" /repos/frappe/erpnext/releases/$RELEASE_ID -f body="$NEW_NOTES"
 
       env:
-        GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
         RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
