@@ -4616,23 +4616,6 @@ def allow_overproduction(fieldname, percentage):
 	doc.save()
 
 
-<<<<<<< HEAD
-=======
-def allow_alternative_item(work_order, item_code, alternative_item_code):
-	work_order.db_set("allow_alternative_item", 1)
-	frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
-	if not frappe.db.exists(
-		"Item Alternative", {"item_code": item_code, "alternative_item_code": alternative_item_code}
-	):
-		frappe.get_doc(
-			{
-				"doctype": "Item Alternative",
-				"item_code": item_code,
-				"alternative_item_code": alternative_item_code,
-			}
-		).insert()
-
-
 def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
 	"""Work order that turned 4 of a raw material's stock UOM into 3 Nos of a finished good. rm_row_uom
 	is the (uom, conversion_factor) the manufacture entry consumes the raw material in."""
@@ -4664,7 +4647,6 @@ def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
 	return wo, rm_item
 
 
->>>>>>> a030b6b (test: partial disassemblies round whole-number components)
 def make_wo_order_test_record(**args):
 	args = frappe._dict(args)
 	if args.company and args.company != "_Test Company":
