@@ -18,6 +18,8 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 )
 from erpnext.accounts.utils import get_fiscal_year
 
+OTHER_BALANCE_SHEET_ACCOUNTS = "Other Balance Sheet Accounts"
+
 
 def execute(filters=None):
 	period_list = get_period_list(
@@ -92,15 +94,7 @@ def execute(filters=None):
 			row_data = get_account_type_based_data(
 				filters.company, row["account_type"], period_list, filters.accumulated_values, filters
 			)
-			accounts = frappe.get_all(
-				"Account",
-				filters={
-					"account_type": row["account_type"],
-					"is_group": 0,
-					"company": filters.company,
-				},
-				pluck="name",
-			)
+			accounts = get_row_accounts(filters.company, row["account_type"])
 			row_data.update(
 				{
 					"section_name": row["label"],
@@ -156,6 +150,10 @@ def get_cash_flow_accounts():
 			{"account_type": "Receivable", "label": _("Net Change in Accounts Receivable")},
 			{"account_type": "Payable", "label": _("Net Change in Accounts Payable")},
 			{"account_type": "Stock", "label": _("Net Change in Inventory")},
+			{
+				"account_type": OTHER_BALANCE_SHEET_ACCOUNTS,
+				"label": _("Net Change in Other Balance Sheet Accounts"),
+			},
 		],
 	}
 
@@ -175,6 +173,38 @@ def get_cash_flow_accounts():
 
 	# combine all cash flow accounts for iteration
 	return [operation_accounts, investing_accounts, financing_accounts]
+
+
+def get_row_accounts(company: str, account_type: str) -> list[str]:
+	return frappe.db.sql_list(
+		f"""select name from tabAccount
+		where is_group = 0 and company = %(company)s and {get_row_account_condition(account_type)}""",
+		{"company": company, "account_type": account_type},
+	)
+
+
+def get_row_account_condition(account_type: str) -> str:
+	"""SQL condition on Account for the accounts of a cash flow row; uses the %(account_type)s parameter."""
+	if account_type != OTHER_BALANCE_SHEET_ACCOUNTS:
+		return "account_type = %(account_type)s"
+
+	# Balance sheet accounts not reported on another row, so that Net Change in Cash equals the movement
+	# on Cash and Bank. Depreciation accounts offset the charge credited to accumulated depreciation,
+	# since the Depreciation row already adds it back.
+	excluded_types = ", ".join(
+		frappe.db.escape(account_type) for account_type in [*get_mapped_account_types(), "Cash", "Bank"]
+	)
+	return f"""((root_type in ('Asset', 'Liability', 'Equity')
+		and ifnull(account_type, '') not in ({excluded_types})) or account_type = 'Depreciation')"""
+
+
+def get_mapped_account_types() -> list[str]:
+	return [
+		row["account_type"]
+		for section in get_cash_flow_accounts()
+		for row in section["account_types"]
+		if row["account_type"] != OTHER_BALANCE_SHEET_ACCOUNTS
+	]
 
 
 def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
@@ -228,7 +258,9 @@ def get_account_type_based_gl_data(company, filters=None):
 		from `tabGL Entry`
 		where company=%(company)s and posting_date >= %(start_date)s and posting_date <= %(end_date)s
 			and voucher_type != 'Period Closing Voucher'
-			and account in ( SELECT name FROM tabAccount WHERE account_type = %(account_type)s) {cond}
+			and account in (
+				select name from tabAccount where is_group = 0 and {get_row_account_condition(filters.account_type)}
+			) {cond}
 	""",
 		filters,
 	)
