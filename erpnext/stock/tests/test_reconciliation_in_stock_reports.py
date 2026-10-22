@@ -18,12 +18,19 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+from erpnext.stock.report.serial_and_batch_wise_stock_balance.serial_and_batch_wise_stock_balance import (
+	execute as serial_and_batch_wise_stock_balance,
+)
 from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
 from erpnext.stock.report.stock_balance.test_stock_balance_snapshot import execute_from_snapshot
 from erpnext.stock.report.stock_ledger.stock_ledger import execute as stock_ledger
 from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
 from erpnext.stock.tests.test_valuation_adjustment import WAREHOUSE as ADJUSTED_WAREHOUSE
-from erpnext.stock.tests.test_valuation_adjustment import ValuationFixTestCase, get_adjustment_date
+from erpnext.stock.tests.test_valuation_adjustment import (
+	ValuationFixTestCase,
+	get_adjustment_date,
+	last_year,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -489,3 +496,41 @@ class TestStockReportsAfterAnAdjustmentEntry(ValuationFixTestCase, StockReportTe
 				)
 				self.assertEqual((rows[0].qty_after_transaction, rows[0].stock_value), (6, 600))
 				self.assertEqual((rows[-1].qty_after_transaction, rows[-1].stock_value), (5, 500))
+
+	def make_wrong_batch_balance_qty(self) -> str:
+		"""The issue of 4 from a batch left a balance of 7 at 700 behind, where 6 at 600 are on hand."""
+		item = self.make_batch_item("RSR-WBQ-.#####")
+		batch_no = self.receive_batch(item, 10, 100, last_year(60))
+		issue = make_stock_entry(
+			item_code=item, source=ADJUSTED_WAREHOUSE, qty=4, batch_no=batch_no, posting_date=last_year(50)
+		)
+		self.corrupt_entry(issue.name, qty_after_transaction=7, stock_value=700, stock_value_difference=-300)
+		return item
+
+	def test_serial_and_batch_wise_stock_balance(self):
+		"""The item row shows the balance the Adjustment Entry sets, as its batch rows do."""
+		for scenario, balance in (
+			("make_wrong_batch_balance_qty", (6, 600)),
+			("make_batch_issued_at_wrong_value", (5, 500)),
+		):
+			item_code = getattr(self, scenario)()
+			self.fix_by_adjustment_entry(item_code)
+			with self.subTest(scenario=scenario):
+				filters = frappe._dict(
+					company=COMPANY,
+					from_date=get_adjustment_date(),
+					to_date=today(),
+					item_code=[item_code],
+					warehouse=[ADJUSTED_WAREHOUSE],
+				)
+				item_row, *batch_rows = (
+					frappe._dict(row) for row in serial_and_batch_wise_stock_balance(filters)[1]
+				)
+				self.assertEqual((flt(item_row.bal_qty), flt(item_row.bal_val, 2)), balance)
+				self.assertEqual(
+					(
+						sum(flt(row.bal_qty) for row in batch_rows),
+						sum(flt(row.bal_val, 2) for row in batch_rows),
+					),
+					balance,
+				)
