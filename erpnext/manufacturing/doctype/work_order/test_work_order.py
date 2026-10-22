@@ -1562,6 +1562,19 @@ class TestWorkOrder(FrappeTestCase):
 		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
 		self.assertEqual(len(get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)), 2)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_no_reset_message_for_empty_finished_good_row(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+
+		wo_order = make_wo_order_test_record(
+			item=fg_item, qty=2, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
+		)
+		frappe.clear_messages()
+		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2)).insert()
+		self.assertNotIn("has been reset", str(frappe.message_log))
+
 	def get_serial_nos_for_fg(self, work_order):
 		serial_nos = []
 		for row in frappe.get_all("Serial No", filters={"work_order": work_order}):
