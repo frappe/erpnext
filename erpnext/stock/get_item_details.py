@@ -233,11 +233,13 @@ def maintain_same_rate_enabled(transaction_args):
 	if (transaction_args.parenttype or transaction_args.doctype) in purchase_doctypes:
 		if transaction_args.get("is_internal_supplier"):
 			return False
-		return bool(cint(frappe.get_cached_value("Buying Settings", "None", "maintain_same_rate")))
+		return bool(cint(frappe.get_cached_value("Buying Settings", "Buying Settings", "maintain_same_rate")))
 
 	if transaction_args.get("is_internal_customer"):
 		return False
-	return bool(cint(frappe.get_cached_value("Selling Settings", "None", "maintain_same_sales_rate")))
+	return bool(
+		cint(frappe.get_cached_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate"))
+	)
 
 
 def lock_source_rate(out, source_row):
