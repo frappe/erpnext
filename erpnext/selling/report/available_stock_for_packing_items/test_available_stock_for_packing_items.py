@@ -117,7 +117,19 @@ class TestAvailableStockForPackingItems(ERPNextTestSuite):
 		parent = self.make_bundle_parent()
 
 		self.set_bin_projected_qty(comp_a, WAREHOUSE, 10)
-		self.make_active_bundle(parent, [(comp_a, 2), (comp_a, 3)])
+		bundle = self.make_active_bundle(parent, [(comp_a, 2)])
+		# validation now blocks duplicate rows, but legacy bundles can still hold two rows for one component; the report must sum them (2 + 3 -> 10 / 5 == 2)
+		frappe.get_doc(
+			{
+				"doctype": "Product Bundle Item",
+				"parent": bundle.name,
+				"parenttype": "Product Bundle",
+				"parentfield": "items",
+				"item_code": comp_a,
+				"qty": 3,
+				"idx": 2,
+			}
+		).db_insert()
 
 		rows = self.report_rows_for(parent)
 

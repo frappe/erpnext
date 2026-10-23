@@ -32,8 +32,12 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
-		self.validate_not_nested()
-		self.validate_child_items_uom()
+		if not self.disabled:
+			# a disabled bundle is being retired and is never packed, so don't let these
+			# integrity checks block saving (e.g. disabling) a pre-existing bad bundle
+			self.validate_not_nested()
+			self.validate_duplicate_items()
+			self.validate_child_items_uom()
 		self.validate_child_items_qty_non_zero()
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -140,6 +144,18 @@ class ProductBundle(Document):
 					"Row #{0}: UOM {1} is not configured for Item {2}. Add a UOM conversion on the Item or use its stock UOM."
 				).format(item.idx, frappe.bold(item.uom), frappe.bold(item.item_code))
 			)
+
+	def validate_duplicate_items(self):
+		# a component repeated across rows breaks the packed-item keying downstream
+		seen = set()
+		for item in self.items:
+			if item.item_code in seen:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} is already added. Combine the quantities into a single row."
+					).format(item.idx, frappe.bold(item.item_code))
+				)
+			seen.add(item.item_code)
 
 	def validate_child_items_qty_non_zero(self):
 		for item in self.items:
