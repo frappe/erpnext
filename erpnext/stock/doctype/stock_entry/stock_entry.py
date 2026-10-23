@@ -1443,11 +1443,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		expected_by_name, expected_by_item = {}, defaultdict(float)
 		for source_row, qty in expected_rows:
 			if source_row.get("name"):
-				expected_by_name[source_row.name] = qty
+				expected_by_name[source_row.name] = (qty, flt(source_row.conversion_factor))
 			expected_by_item[source_row.item_code] += qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		tolerance = _qty_tolerance(precision)
+		qty_precision = frappe.get_precision("Stock Entry Detail", "qty")
 		self.validate_no_missing_components(expected_rows, precision, tolerance)
 
 		for row in self.items:
@@ -1455,9 +1456,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue  # covered by validate_finished_good_consumption
 
 			if row.ste_detail and row.ste_detail in expected_by_name:
-				expected = expected_by_name[row.ste_detail]
+				expected, conversion_factor = expected_by_name[row.ste_detail]
 			elif row.item_code in expected_by_item:
-				expected = expected_by_item[row.item_code]
+				expected, conversion_factor = expected_by_item[row.item_code], 1
 			else:
 				frappe.throw(
 					_(
@@ -1467,6 +1468,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					title=_("Invalid Disassembly Item"),
 				)
 
+			# rows are populated with qty rounded in the source UOM, so expect the same rounding
+			expected = flt(expected / conversion_factor, qty_precision) * conversion_factor
 			if abs(flt(row.transfer_qty, precision) - flt(expected, precision)) > tolerance:
 				frappe.throw(
 					_(
