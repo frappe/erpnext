@@ -24,6 +24,7 @@ def get_data():
 				"label": _("Fulfillment"),
 				"items": ["Sales Invoice", "Pick List", "Delivery Note", "Maintenance Visit"],
 			},
+			{"label": _("Proforma"), "items": ["Proforma Invoice"]},
 			{"label": _("Purchasing"), "items": ["Material Request", "Purchase Order"]},
 			{"label": _("Projects"), "items": ["Project"]},
 			{"label": _("Manufacturing"), "items": ["Work Order", "BOM", "Blanket Order"]},

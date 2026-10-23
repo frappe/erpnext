@@ -48,6 +48,9 @@
   "allow_zero_qty_in_sales_order",
   "blanket_orders_section",
   "blanket_order_allowance",
+  "proforma_invoice_section",
+  "enable_proforma_invoice",
+  "default_proforma_print_format",
   "advanced_features_tab",
   "section_break_avhb",
   "enable_tracking_sales_commissions",
@@ -340,6 +343,26 @@
    "fieldname": "deliver_secondary_items",
    "fieldtype": "Check",
    "label": "Deliver secondary Items"
+  },
+  {
+   "fieldname": "proforma_invoice_section",
+   "fieldtype": "Section Break",
+   "label": "Proforma Invoice"
+  },
+  {
+   "default": "0",
+   "description": "Allow issuing Proforma Invoices against a Sales Order.",
+   "fieldname": "enable_proforma_invoice",
+   "fieldtype": "Check",
+   "label": "Enable Proforma Invoice"
+  },
+  {
+   "depends_on": "enable_proforma_invoice",
+   "description": "Default print format used when generating a Proforma Invoice PDF.",
+   "fieldname": "default_proforma_print_format",
+   "fieldtype": "Link",
+   "label": "Default Proforma Print Format",
+   "options": "Print Format"
   },
   {
    "fieldname": "customer_defaults_tab",

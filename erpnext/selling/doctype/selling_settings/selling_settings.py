@@ -41,6 +41,7 @@ class SellingSettings(Document):
 		blanket_order_allowance: DF.Float
 		cust_master_name: DF.Literal["Customer Name", "Naming Series", "Auto Name"]
 		customer_group: DF.Link | None
+		default_proforma_print_format: DF.Link | None
 		deliver_secondary_items: DF.Check
 		dn_required: DF.Literal["No", "Yes"]
 		dont_reserve_sales_order_qty_on_sales_return: DF.Check
@@ -48,6 +49,7 @@ class SellingSettings(Document):
 		editable_price_list_rate: DF.Check
 		enable_cutoff_date_on_bulk_delivery_note_creation: DF.Check
 		enable_discount_accounting: DF.Check
+		enable_proforma_invoice: DF.Check
 		enable_tracking_sales_commissions: DF.Check
 		enable_utm: DF.Check
 		fallback_to_default_price_list: DF.Check
