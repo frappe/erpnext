@@ -6,18 +6,12 @@ on:
 
 permissions:
   contents: read
-  packages: read
   issues: write
   pull-requests: write
 
 jobs:
   label:
-    runs-on: erpnext-arc-light
-    container:
-      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.11-node18
-      credentials:
-        username: ${{ secrets.GHCR_USERNAME || github.actor }}
-        password: ${{ secrets.GHCR_TOKEN || github.token }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@v3
         with:
