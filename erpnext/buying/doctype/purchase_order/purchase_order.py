@@ -538,6 +538,7 @@ class PurchaseOrder(BuyingController):
 
 	@frappe.whitelist()
 	def update_dropship_received_qty(self, data: list[dict]):
+		self.check_permission("write")
 		DropShipService(self).update_dropship_received_qty(data)
 
 	def is_against_so(self):
