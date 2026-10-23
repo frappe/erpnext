@@ -82,6 +82,28 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		self.assertFalse(invoice.consolidated_invoice)
 		self.assertEqual(invoice.sales_team[0].incentives, 10)
 
+	def test_amounts_use_pos_profile_currency(self):
+		from frappe.model.meta import get_field_currency
+
+		company_currency = frappe.get_cached_value("Company", self.pos_profile.company, "default_currency")
+		self.assertNotEqual(company_currency, "CDF")
+		self.pos_profile.db_set("currency", "CDF")
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=True)
+		self.assertEqual(opening_entry.currency, "CDF")
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		self.assertEqual(closing_entry.currency, "CDF")
+		closing_entry.append(
+			"payment_reconciliation", {"mode_of_payment": "Cash", "opening_amount": 0, "closing_amount": 0}
+		)
+		closing_entry.insert()
+
+		meta = frappe.get_meta("POS Closing Entry")
+		self.assertEqual(get_field_currency(meta.get_field("grand_total"), closing_entry), "CDF")
+		row = closing_entry.payment_reconciliation[0]
+		row_meta = frappe.get_meta("POS Closing Entry Detail")
+		self.assertEqual(get_field_currency(row_meta.get_field("closing_amount"), row), "CDF")
+
 	def test_pos_closing_without_item_code(self):
 		"""
 		Test if POS Closing Entry is created without item code
