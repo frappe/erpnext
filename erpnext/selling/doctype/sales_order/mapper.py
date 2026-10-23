@@ -837,15 +837,28 @@ def make_purchase_order(
 		if (
 			item.ordered_qty < item.stock_qty
 			and not is_product_bundle(item.item_code)
-			and items_to_map.get(item.item_code) == supplier
+			and item.name in items_to_map
+			and items_to_map[item.name] == supplier
 		):
 			return True
 
 		return False
 
-	items_to_map = {
-		item.get("item_code"): item.get("supplier") for item in selected_items if item.get("item_code")
-	}
+	sales_order = frappe.get_doc("Sales Order", source_name)
+	sales_order.check_permission("read")
+	items_to_map = {}
+	for item in selected_items:
+		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}
+		rows = sales_order.get("items", filters)
+		if len(rows) != 1:
+			frappe.throw(
+				_("Select a valid Sales Order row for Item {0}.").format(
+					frappe.bold(item.get("item_code") or item.get("name"))
+				),
+				title=_("Invalid Item Selection"),
+			)
+		items_to_map[rows[0].name] = item.get("supplier")
+
 	suppliers = list(set(items_to_map.values()))
 
 	if not suppliers:
@@ -905,8 +918,8 @@ def make_purchase_order(
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc, s=supplier: doc.parent_item in items_to_map
-					and items_to_map[doc.parent_item] == s
+					"condition": lambda doc, s=supplier: doc.parent_detail_docname in items_to_map
+					and items_to_map[doc.parent_detail_docname] == s
 					and flt(doc.ordered_qty) < flt(doc.qty)
 					and not is_bundle_of_closed_row(doc),
 				},
