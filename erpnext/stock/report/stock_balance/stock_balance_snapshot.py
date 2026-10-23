@@ -183,7 +183,8 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		self.prepare_stock_reco_voucher_wise_count()
 
 		changes = [*self.run_sql(REPLAY_ROWS_SQL), *self.run_sql(self.get_segments_sql())]
-		for change in AdjustmentNetting().net(sorted(changes, key=itemgetter("row_no"))):
+		self.adjustment_netting = AdjustmentNetting()
+		for change in self.adjustment_netting.net(sorted(changes, key=itemgetter("row_no"))):
 			self.apply_change(change)
 
 		self.item_warehouse_map = filter_items_with_no_transactions(
