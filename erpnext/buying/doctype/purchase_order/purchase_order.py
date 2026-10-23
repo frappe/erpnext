@@ -619,6 +619,7 @@ class PurchaseOrder(BuyingController):
 
 	@frappe.whitelist()
 	def update_dropship_received_qty(self, data: list[dict]):
+		self.check_permission("write")
 		if not data:
 			frappe.throw(_("Please select at least one item to update delivered quantity."))
 
