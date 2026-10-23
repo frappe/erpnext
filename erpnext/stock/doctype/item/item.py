@@ -1637,7 +1637,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
 		return
 
-	ref_uom = frappe.db.get_value("Stock Ledger Entry", {"item_code": item}, "stock_uom")
+	ref_uom = frappe.db.get_value("Stock Ledger Entry", {"item_code": item, "is_cancelled": 0}, "stock_uom")
 
 	if ref_uom:
 		if cstr(ref_uom) != cstr(stock_uom):
