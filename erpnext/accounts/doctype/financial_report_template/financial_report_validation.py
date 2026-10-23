@@ -182,7 +182,7 @@ class TemplateStructureValidator(Validator):
 				result.add_error(
 					ValidationIssue(
 						message=_(
-							"Invalid line reference format: '{0}'. Must start with a letter and contain only letters, numbers and underscores"
+							"Invalid line reference format: '{0}'. Must start with a letter and contain only letters, numbers and underscores."
 						).format(ref_code),
 						row_idx=row.idx,
 					)
@@ -190,7 +190,7 @@ class TemplateStructureValidator(Validator):
 			elif keyword.iskeyword(ref_code) or ref_code in FORMULA_FUNCTIONS:
 				result.add_error(
 					ValidationIssue(
-						message=_("'{0}' is a reserved name and cannot be used as a line reference").format(
+						message=_("'{0}' is a reserved name and cannot be used as a line reference.").format(
 							ref_code
 						),
 						row_idx=row.idx,
@@ -201,7 +201,7 @@ class TemplateStructureValidator(Validator):
 			if ref_code in used_codes:
 				result.add_error(
 					ValidationIssue(
-						message=_("Duplicate line reference: '{0}'").format(ref_code),
+						message=_("Duplicate line reference: '{0}'.").format(ref_code),
 						row_idx=row.idx,
 					)
 				)
@@ -217,7 +217,7 @@ class TemplateStructureValidator(Validator):
 			if row.data_source == "Account Data" and not row.balance_type:
 				result.add_error(
 					ValidationIssue(
-						message=_("Balance Type is required for Account Data"),
+						message=_("Balance Type is required for Account Data."),
 						row_idx=row.idx,
 					)
 				)
@@ -227,7 +227,7 @@ class TemplateStructureValidator(Validator):
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
-							message=_("{0} is required when {1} is {2}").format(
+							message=_("{0} is required when {1} is {2}.").format(
 								get_formula_field_label(row.data_source),
 								row.meta.get_translated_label("data_source"),
 								_(row.data_source),
@@ -288,7 +288,7 @@ class DependencyValidator(Validator):
 				cycle = [*path[cycle_start:], node]
 				result.add_error(
 					ValidationIssue(
-						message=_("Circular dependency detected: {0}").format(" → ".join(cycle)),
+						message=_("Circular dependency detected: {0}.").format(" → ".join(cycle)),
 					)
 				)
 				return
@@ -339,21 +339,21 @@ class CalculationFormulaValidator(Validator):
 			result.add_error(
 				ValidationIssue(
 					# e.msg, not str(e): str would add "(<unknown>, line 1)"
-					message=_("Formula has invalid syntax: {0}").format(e.msg),
+					message=_("Formula has invalid syntax: {0}.").format(e.msg),
 					row_idx=row.idx,
 				)
 			)
 			return result
 		except RecursionError:
 			result.add_error(
-				ValidationIssue(message=_("Formula exceeds maximum recursion depth"), row_idx=row.idx)
+				ValidationIssue(message=_("Formula exceeds maximum recursion depth."), row_idx=row.idx)
 			)
 			return result
 
 		if unsupported := self._unsupported_reason(tree, formula):
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula is not allowed: {0}").format(unsupported),
+					message=_("Formula is not allowed: {0}.").format(unsupported),
 					row_idx=row.idx,
 				)
 			)
@@ -399,7 +399,7 @@ class CalculationFormulaValidator(Validator):
 		if unknown_functions:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula uses unknown functions: {0}").format(
+					message=_("Formula uses unknown functions: {0}.").format(
 						", ".join(sorted(unknown_functions))
 					),
 					row_idx=row.idx,
@@ -409,7 +409,7 @@ class CalculationFormulaValidator(Validator):
 		if unknown_codes:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula references undefined codes: {0}").format(
+					message=_("Formula references undefined codes: {0}.").format(
 						", ".join(sorted(unknown_codes))
 					),
 					row_idx=row.idx,
@@ -419,7 +419,7 @@ class CalculationFormulaValidator(Validator):
 		if row.reference_code and row.reference_code in used_codes:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula references itself ('{0}')").format(row.reference_code),
+					message=_("Formula references itself ('{0}').").format(row.reference_code),
 					row_idx=row.idx,
 				)
 			)
@@ -491,7 +491,7 @@ class AccountFilterValidator(Validator):
 				ValidationIssue(
 					message=_("[{0}] {1}", context="Financial Report Template").format(
 						get_formula_field_label("Account Data"),
-						_("Invalid JSON format: {0}").format(str(e)),
+						_("Invalid JSON format: {0}.").format(str(e)),
 					),
 					row_idx=row.idx,
 				)
@@ -508,36 +508,36 @@ class AccountFilterValidator(Validator):
 		# simple condition: [field, operator, value]
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
-				return _("Filter must be [field, operator, value]")
+				return _("Filter must be [field, operator, value].")
 
 			field, operator, value = filter_config
 
 			if not isinstance(field, str) or not isinstance(operator, str):
-				return _("Field and operator must be strings")
+				return _("Field and operator must be strings.")
 
 			if field not in account_fields:
-				return _("Field '{0}' is not a valid Account field").format(field)
+				return _("Field '{0}' is not a valid Account field.").format(field)
 
 			normalized_operator = operator.casefold()
 
 			if normalized_operator not in OPERATOR_MAP:
-				return _("Invalid operator '{0}'").format(operator)
+				return _("Invalid operator '{0}'.").format(operator)
 
 			if normalized_operator in ["in", "not in"] and not isinstance(value, list):
-				return _("Operator '{0}' requires a list value").format(operator)
+				return _("Operator '{0}' requires a list value.").format(operator)
 
 		# logical condition: {"and": [condition1, condition2]}
 		elif isinstance(filter_config, dict):
 			if len(filter_config) != 1:
-				return _("Logical condition must have exactly one operator")
+				return _("Logical condition must have exactly one operator.")
 
 			op = next(iter(filter_config.keys())).lower()
 			if op not in ["and", "or"]:
-				return _("Logical operators must be 'and' or 'or'")
+				return _("Logical operators must be 'and' or 'or'.")
 
 			conditions = filter_config[next(iter(filter_config.keys()))]
 			if not isinstance(conditions, list) or len(conditions) < 1:
-				return _("Logical conditions need at least 1 sub-condition")
+				return _("Logical conditions need at least 1 sub-condition.")
 
 			# recursive
 			for condition in conditions:
@@ -545,7 +545,7 @@ class AccountFilterValidator(Validator):
 				if error:
 					return error
 		else:
-			return _("Filter must be a list or dict")
+			return _("Filter must be a list or dict.")
 
 		return None
 
@@ -581,7 +581,7 @@ class FormulaValidator(Validator):
 		if "." not in api_path:
 			result.add_error(
 				ValidationIssue(
-					message=_("{0} should be in format: app.module.method").format(
+					message=_("{0} should be in format: app.module.method.").format(
 						get_formula_field_label(row.data_source)
 					),
 					row_idx=row.idx,
@@ -599,10 +599,10 @@ class FormulaValidator(Validator):
 			if isinstance(e, frappe.PermissionError):
 				message = _("[{0}] {1}", context="Financial Report Template").format(
 					get_formula_field_label(row.data_source),
-					_("Method '{0}' must be whitelisted and permit GET requests").format(api_path),
+					_("Method '{0}' must be whitelisted and permit GET requests.").format(api_path),
 				)
 			else:
-				message = _("Could not validate {0}: {1}").format(
+				message = _("Could not validate {0}: {1}.").format(
 					get_formula_field_label(row.data_source), str(e)
 				)
 

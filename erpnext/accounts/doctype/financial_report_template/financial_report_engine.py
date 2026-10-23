@@ -1333,7 +1333,7 @@ class FormulaCalculator:
 
 		if validation_result.issues:
 			frappe.throw(
-				"<br><br>".join(str(issue) for issue in validation_result.issues),
+				"<br>".join(str(issue) for issue in validation_result.issues),
 				title=_("Formula Error"),
 			)
 
@@ -1361,13 +1361,13 @@ class FormulaCalculator:
 		except ZeroDivisionError:
 			frappe.throw(
 				_("{0}: formula {1} divides by zero. Check the divisor first, for example {2}.").format(
-					where, shown_formula, frappe.bold('"A / B if B else 0"')
+					where, shown_formula, '"A / B if B else 0"'
 				),
 				title=_("Formula Error"),
 			)
 		except Exception as e:
 			frappe.throw(
-				_("{0}: formula {1} couldn't be calculated: {2}").format(
+				_("{0}: formula {1} couldn't be calculated: {2}.").format(
 					where, shown_formula, escape_html(str(e))
 				),
 				title=_("Formula Error"),
