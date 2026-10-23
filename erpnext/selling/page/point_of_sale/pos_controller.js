@@ -45,8 +45,13 @@ erpnext.PointOfSale.Controller = class {
 		const fetch_pos_payment_methods = () => {
 			const pos_profile = dialog.fields_dict.pos_profile.get_value();
 			if (!pos_profile) return;
-			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
+			frappe.db.get_doc("POS Profile", pos_profile).then(({ currency, payments }) => {
 				dialog.fields_dict.balance_details.df.data = [];
+				dialog.fields_dict.balance_details.grid.update_docfield_property(
+					"opening_amount",
+					"options",
+					currency
+				);
 				payments.forEach((pay) => {
 					const { mode_of_payment } = pay;
 					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: "0" });
@@ -309,6 +314,7 @@ erpnext.PointOfSale.Controller = class {
 		voucher.pos_profile = this.frm.doc.pos_profile;
 		voucher.user = frappe.session.user;
 		voucher.company = this.frm.doc.company;
+		voucher.currency = this.frm.doc.currency;
 		voucher.pos_opening_entry = this.pos_opening;
 		voucher.period_end_date = frappe.datetime.now_datetime();
 		voucher.posting_date = frappe.datetime.now_date();
