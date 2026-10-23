@@ -67,3 +67,16 @@ class TestDeliveryScheduleItem(IntegrationTestCase):
 
 		self.assertFalse(frappe.db.exists("Sales Order", so.name))
 		self.assertFalse(frappe.db.exists("Delivery Schedule Item", {"sales_order": so.name}))
+
+	def test_service_creates_schedules_on_system_managed_doctype(self):
+		so = make_sales_order(qty=10, do_not_submit=True)
+		row = so.items[0]
+		DeliveryScheduleService(so).create_delivery_schedule(row, [{"delivery_date": today(), "qty": 10}])
+
+		schedules = frappe.get_all(
+			"Delivery Schedule Item",
+			filters={"sales_order": so.name, "sales_order_item": row.name},
+			fields=["qty", "stock_qty"],
+		)
+		self.assertEqual(len(schedules), 1)
+		self.assertEqual(schedules[0].qty, 10)
