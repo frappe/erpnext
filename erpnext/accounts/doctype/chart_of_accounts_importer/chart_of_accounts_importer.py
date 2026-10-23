@@ -393,6 +393,18 @@ def validate_accounts(file_doc, extension):
 
 	validate_root(accounts_dict)
 
+	account_types = {account.get("account_type") for account in accounts}
+	missing = [
+		_(account["account_type"])
+		for account in get_mandatory_account_types()
+		if account["account_type"] not in account_types
+	]
+	if missing:
+		frappe.throw(
+			_("Please add accounts for the following Account Types: {0}").format(", ".join(missing)),
+			title=_("Missing Account Types"),
+		)
+
 	return [True, len(accounts)]
 
 
