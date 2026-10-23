@@ -56,6 +56,7 @@ class SellingSettings(Document):
 		hide_tax_id: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		maintain_same_sales_rate: DF.Check
+		proforma_email_template: DF.Link | None
 		role_to_override_stop_action: DF.Link | None
 		sales_update_frequency: DF.Literal["Monthly", "Each Transaction", "Daily"]
 		selling_price_list: DF.Link | None
