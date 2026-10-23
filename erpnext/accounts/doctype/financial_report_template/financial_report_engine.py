@@ -1337,23 +1337,23 @@ class FormulaCalculator:
 				title=_("Formula Error"),
 			)
 
-		where = _("Template row {0} ({1})").format(
-			report_row.idx, report_row.display_name or report_row.reference_code
-		)
-
 		results = []
 		for i in range(len(self.period_list)):
-			result = self._evaluate_for_period(where, formula, i, negation_factor)
+			result = self._evaluate_for_period(report_row, formula, i, negation_factor)
 			results.append(result)
 
 		return results
 
-	def _evaluate_for_period(
-		self, where: str, formula: str, period_index: int, negation_factor: int
-	) -> float:
-		# quoted, because a Prepared Report strips the bold and the formula runs into the sentence
-		shown_formula = frappe.bold(f'"{escape_html(formula)}"')
+	@staticmethod
+	def _row_label(report_row: dict[str, Any]) -> str:
+		"""Name the template row the reader has to go and fix."""
+		return _("Template row {0} ({1})").format(
+			report_row.idx, report_row.display_name or report_row.reference_code
+		)
 
+	def _evaluate_for_period(
+		self, report_row: dict[str, Any], formula: str, period_index: int, negation_factor: int
+	) -> float:
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
@@ -1361,14 +1361,14 @@ class FormulaCalculator:
 		except ZeroDivisionError:
 			frappe.throw(
 				_("{0}: formula {1} divides by zero. Check the divisor first, for example {2}.").format(
-					where, shown_formula, '"A / B if B else 0"'
+					self._row_label(report_row), f'"{escape_html(formula)}"', '"A / B if B else 0"'
 				),
 				title=_("Formula Error"),
 			)
 		except Exception as e:
 			frappe.throw(
 				_("{0}: formula {1} couldn't be calculated: {2}.").format(
-					where, shown_formula, escape_html(str(e))
+					self._row_label(report_row), f'"{escape_html(formula)}"', escape_html(str(e))
 				),
 				title=_("Formula Error"),
 			)
@@ -1376,7 +1376,7 @@ class FormulaCalculator:
 		if type(result) not in (int, float):
 			frappe.throw(
 				_("{0}: formula {1} must return a number, got {2}.").format(
-					where, shown_formula, frappe.bold(type(result).__name__)
+					self._row_label(report_row), f'"{escape_html(formula)}"', type(result).__name__
 				),
 				title=_("Formula Error"),
 			)

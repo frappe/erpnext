@@ -437,7 +437,8 @@ class CalculationFormulaValidator(Validator):
 
 		# skip names the formula made itself, like REV in [REV for REV in ...]
 		names = read - created
-		functions, codes = names & called, names - called
+		functions = names & called
+		codes = names - called
 
 		unknown_functions = functions - ALLOWED_FUNCTIONS
 		unknown_codes = codes - self.reference_codes - ALLOWED_FUNCTIONS
