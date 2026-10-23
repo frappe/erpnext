@@ -40,6 +40,7 @@ frappe.ui.form.on("Dunning", {
 		frm.set_df_property("overdue_payments", "cannot_add_rows", true);
 	},
 	refresh: function (frm) {
+		frm.dunning_fee_conversion_rate = frm.doc.conversion_rate;
 		frm.set_df_property("company", "read_only", frm.doc.__islocal ? 0 : 1);
 		if (frm.doc.docstatus === 1 && frm.doc.status === "Unresolved") {
 			frm.add_custom_button(__("Resolve"), () => {
@@ -154,6 +155,10 @@ frappe.ui.form.on("Dunning", {
 
 		// Make read only if Accounts Settings doesn't allow stale rates
 		frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
+		return frappe.run_serially([
+			() => frm.trigger("set_default_dunning_fee"),
+			() => frm.trigger("calculate_totals"),
+		]);
 	},
 	customer_address: function (frm) {
 		erpnext.utils.get_address_display(frm, "customer_address");
@@ -162,7 +167,35 @@ frappe.ui.form.on("Dunning", {
 		erpnext.utils.get_address_display(frm, "company_address");
 	},
 	dunning_type: function (frm) {
-		frm.trigger("get_dunning_letter_text");
+		return frappe.run_serially([
+			() => frm.set_value("dunning_fee", null),
+			() => frm.trigger("set_default_dunning_fee"),
+			() => frm.trigger("get_dunning_letter_text"),
+		]);
+	},
+	set_default_dunning_fee: function (frm) {
+		const { dunning_type, conversion_rate, dunning_fee } = frm.doc;
+		const previous_rate = frm.dunning_fee_conversion_rate;
+		if (!dunning_type || flt(conversion_rate) <= 0) return;
+
+		return frappe.db.get_value("Dunning Type", dunning_type, "dunning_fee").then(({ message }) => {
+			if (
+				frm.doc.dunning_type !== dunning_type ||
+				frm.doc.conversion_rate !== conversion_rate ||
+				frm.doc.dunning_fee !== dunning_fee
+			)
+				return;
+			frm.dunning_fee_conversion_rate = conversion_rate;
+
+			if (
+				dunning_fee == null ||
+				(flt(previous_rate) > 0 &&
+					flt(dunning_fee, precision("dunning_fee", frm.doc)) ===
+						flt(message.dunning_fee / previous_rate, precision("dunning_fee", frm.doc)))
+			) {
+				return frm.set_value("dunning_fee", flt(message.dunning_fee) / conversion_rate);
+			}
+		});
 	},
 	language: function (frm) {
 		frm.trigger("get_dunning_letter_text");
