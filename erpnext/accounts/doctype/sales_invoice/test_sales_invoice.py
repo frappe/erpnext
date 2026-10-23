@@ -162,6 +162,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		si.reload()
 		si.run_method("onload")
+		self.assertFalse(si.tc_name)
 		si.save()
 
 	def test_sales_invoice_calculation_base_currency(self):

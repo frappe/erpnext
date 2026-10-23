@@ -286,6 +286,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pi.reload()
 		pi.run_method("onload")
+		self.assertFalse(pi.tc_name)
 		pi.save()
 
 	def test_payment_entry_unlink_against_purchase_invoice(self):
