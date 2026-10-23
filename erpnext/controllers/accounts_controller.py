@@ -4460,6 +4460,10 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 		d.cancel()
 		d.delete()
 
+	if parent.doctype == "Sales Order" and deleted_children:
+		for d in deleted_children:
+			parent.delete_delivery_schedule_items(d.name)
+
 	if parent.doctype == "Purchase Order":
 		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
 
@@ -4851,6 +4855,10 @@ def update_child_qty_rate(
 			child_item.insert()
 		else:
 			child_item.save(ignore_permissions=True)
+			if parent_doctype == "Sales Order" and not (
+				qty_unchanged and uom_unchanged and conversion_factor_unchanged
+			):
+				parent.sync_schedule_with_item(child_item)
 
 	parent.reload()
 	if had_mapped_discount:

@@ -998,6 +998,44 @@ class SalesOrder(SellingController):
 
 		self.save()
 
+	def sync_schedule_with_item(self, child_row):
+		"""Rescale and refresh an item's schedules after its qty, UOM or conversion factor changed."""
+		schedules = frappe.get_all(
+			"Delivery Schedule Item",
+			filters={"sales_order_item": child_row.name, "sales_order": self.name},
+			fields=["name", "qty"],
+			order_by="delivery_date asc, creation asc",
+		)
+		if not schedules:
+			return
+
+		conversion_factor = child_row.conversion_factor or 1.0
+		remaining = flt(child_row.qty)
+		stale = []
+		for schedule in schedules:
+			kept_qty = min(flt(schedule.qty), remaining) if remaining > 0 else 0
+			if not kept_qty:
+				stale.append(schedule.name)
+				continue
+
+			remaining -= kept_qty
+			frappe.db.set_value(
+				"Delivery Schedule Item",
+				schedule.name,
+				{
+					"qty": kept_qty,
+					"uom": child_row.uom,
+					"stock_uom": child_row.stock_uom,
+					"conversion_factor": conversion_factor,
+					"warehouse": child_row.warehouse,
+					"stock_qty": kept_qty * conversion_factor,
+				},
+			)
+
+		if stale:
+			doctype = frappe.qb.DocType("Delivery Schedule Item")
+			frappe.qb.from_(doctype).delete().where(doctype.name.isin(stale)).run()
+
 	def delete_delivery_schedule_items(self, sales_order_item=None, ignore_names=None):
 		"""Delete delivery schedule items."""
 		doctype = frappe.qb.DocType("Delivery Schedule Item")
