@@ -25,6 +25,7 @@ class POSOpeningEntry(StatusUpdater):
 		amended_from: DF.Link | None
 		balance_details: DF.Table[POSOpeningEntryDetail]
 		company: DF.Link
+		currency: DF.Link | None
 		period_end_date: DF.Date | None
 		period_start_date: DF.Datetime
 		pos_closing_entry: DF.Data | None
