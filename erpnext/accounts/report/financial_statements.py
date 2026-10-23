@@ -412,6 +412,8 @@ def calculate_values(
 ):
 	grouped_by_dimension = is_dimension_grouped(period_list)
 	year_start_date = period_list[0].year_start_date
+	dimension_field = period_list[0].get("dimension_field")
+	dimension_values = {period.get("dimension_value") for period in period_list}
 
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
@@ -425,11 +427,6 @@ def calculate_values(
 
 			amount = flt(entry.debit) - flt(entry.credit)
 
-			# Balance Sheet only: opening balance is kept per column, so each dimension gets its own
-			before_year_start = entry.posting_date < year_start_date
-			if before_year_start:
-				opening_balance = account_row.setdefault("opening_balance", {})
-
 			for period in period_list:
 				if grouped_by_dimension and entry.get(period.dimension_field) != period.dimension_value:
 					continue
@@ -441,8 +438,14 @@ def calculate_values(
 					):
 						account_row[period.key] = account_row.get(period.key, 0.0) + amount
 
-				if before_year_start:
-					opening_balance[period.key] = opening_balance.get(period.key, 0.0) + amount
+			# Balance Sheet only: opening balance per dimension, {None: amount} if not grouped
+			if entry.posting_date < year_start_date:
+				dimension = entry.get(dimension_field) if dimension_field else None
+
+				# skip values without a column, e.g. blank cost center
+				if dimension in dimension_values:
+					opening_balance = account_row.setdefault("opening_balance", {})
+					opening_balance[dimension] = opening_balance.get(dimension, 0.0) + amount
 
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
@@ -452,14 +455,13 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 			continue
 
 		parent = accounts_by_name[account_row.parent_account]
-		opening_balance = account_row.get("opening_balance") or {}
 		parent_opening_balance = parent.setdefault("opening_balance", {})
 
 		for period in period_list:
-			key = period.key
+			parent[period.key] = parent.get(period.key, 0.0) + account_row.get(period.key, 0.0)
 
-			parent[key] = parent.get(key, 0.0) + account_row.get(key, 0.0)
-			parent_opening_balance[key] = parent_opening_balance.get(key, 0.0) + opening_balance.get(key, 0.0)
+		for dimension, amount in (account_row.get("opening_balance") or {}).items():
+			parent_opening_balance[dimension] = parent_opening_balance.get(dimension, 0.0) + amount
 
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency, accumulated_values):

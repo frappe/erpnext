@@ -90,11 +90,13 @@ def execute(filters=None):
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
+
 	if opening_balance and filters.accumulated_values:
 		data.append(get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency))
 
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
+
 	if total_credit:
 		data.append(total_credit)
 
@@ -179,7 +181,7 @@ def set_provisional_profit_loss_labels(provisional_profit_loss: dict, currency: 
 
 def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency):
 	"""Row for profit or loss of earlier years not yet closed, taken out of the provisional profit or loss."""
-	total = get_total_opening_balance(opening_balance, period_list)
+	total = sum(opening_balance.values())
 	unclosed = {
 		"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 		"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
@@ -188,7 +190,7 @@ def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_li
 		"total": total,
 	}
 	for period in period_list:
-		amount = flt(opening_balance.get(period.key))
+		amount = flt(opening_balance.get(period.get("dimension_value")))
 		unclosed[period.key] = amount
 		if provisional_profit_loss:
 			provisional_profit_loss[period.key] -= amount
@@ -213,19 +215,11 @@ def check_opening_balance(asset, liability, equity):
 
 	opening_balance = {key: flt(value, float_precision) for key, value in opening_balance.items()}
 
-	# check each column: one dimension's profit can cancel another's loss in the total
+	# check each dimension: one dimension's profit can cancel another's loss in the total
 	if any(opening_balance.values()):
 		return _("Previous Financial Year is not closed"), opening_balance
+
 	return None, None
-
-
-def get_total_opening_balance(opening_balance, period_list):
-	"""A dimension's opening is the same in all its columns, so add it once per dimension."""
-	per_dimension = {
-		period.get("dimension_value"): flt(opening_balance.get(period.key)) for period in period_list
-	}
-
-	return sum(per_dimension.values())
 
 
 def get_total_row(rows: list) -> dict:
