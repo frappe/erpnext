@@ -4,9 +4,6 @@ import frappe
 from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
-	ALL_USER_ROLE,
-	GUEST_ROLE,
-	SYSTEM_USER_ROLE,
 	add_user_permission,
 	get_doc_permissions,
 	has_permission,
@@ -77,14 +74,13 @@ class Employee(NestedSet):
 			self.validate_user_access()
 
 	def validate_user_access(self, user: str | None = None):
-		"""Only a System Manager may link or update a User holding roles the editor lacks."""
-		editor_roles = frappe.get_roles()
+		"""Only a System Manager may link, unlink or update a User holding an admin role."""
+		editor_roles = set(frappe.get_roles())
 		if "System Manager" in editor_roles:
 			return
 
 		user = user or self.user_id
-		ignored_roles = {GUEST_ROLE, ALL_USER_ROLE, SYSTEM_USER_ROLE, "Employee"}
-		if set(frappe.get_roles(user)) - set(editor_roles) - ignored_roles:
+		if set(frappe.get_roles(user)) & (get_admin_roles() - editor_roles):
 			frappe.throw(
 				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
 				frappe.PermissionError,
@@ -255,6 +251,16 @@ class Employee(NestedSet):
 		if cell_number != prev_number or self.get("user_id") != prev_doc.get("user_id"):
 			frappe.cache().hdel("employees_with_number", cell_number)
 			frappe.cache().hdel("employees_with_number", prev_number)
+
+
+def get_admin_roles() -> set[str]:
+	"""Roles that administer the site: System Manager, Administrator and roles that can edit users or roles."""
+	roles = {"Administrator", "System Manager"}
+	for doctype in ("User", "Role"):
+		roles.update(
+			perm.role for perm in frappe.get_meta(doctype).permissions if perm.write and not perm.permlevel
+		)
+	return roles
 
 
 def validate_employee_role(doc, method=None, ignore_emp_check=False):
