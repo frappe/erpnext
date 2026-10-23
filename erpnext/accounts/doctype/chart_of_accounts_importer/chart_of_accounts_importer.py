@@ -473,21 +473,19 @@ def get_mandatory_account_types():
 def unset_existing_data(company):
 	# remove accounts data from company
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
-	linked = [{"fieldname": name} for name in fieldnames]
-	update_values = {d.get("fieldname"): "" for d in linked}
+	frappe.db.set_value("Company", company, dict.fromkeys(fieldnames, ""))
 
-	frappe.db.set_value("Company", company, update_values, update_values)
+	# import_coa authorizes company replacement; Accounts Manager cannot delete purchase templates.
+	for doctype in ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"):
+		for name in frappe.get_all(doctype, filters={"company": company}, pluck="name"):
+			frappe.delete_doc(doctype, name, ignore_permissions=True)
 
-	# remove accounts data from various doctypes
-	for doctype in [
-		"Account",
-		"Sales Taxes and Charges Template",
-		"Purchase Taxes and Charges Template",
-		"Party Account",
-		"Mode of Payment Account",
-		"Tax Withholding Account",
-	]:
-		frappe.get_query(doctype, delete=True, filters={"company": company}).run()
+	for doctype in ("Party Account", "Mode of Payment Account", "Tax Withholding Account"):
+		frappe.db.delete(doctype, {"company": company})
+
+	# Delete children before their parents, preserving link checks and account validation.
+	for name in frappe.get_all("Account", filters={"company": company}, order_by="lft desc", pluck="name"):
+		frappe.delete_doc("Account", name)
 
 
 def validate_user_perms(company):
