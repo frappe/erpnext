@@ -453,6 +453,26 @@ class TestSalesOrder(ERPNextTestSuite):
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
 
+	def test_billing_within_rounding_of_full_completes_order(self):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, rate=100)
+		so = make_sales_order(qty=1, rate=1000000)
+
+		# 999999.99 / 1000000 rounds to 99.999999%, which already counts as fully billed
+		si = make_sales_invoice(so.name)
+		si.items[0].rate = 999999.99
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.per_billed, 100)
+		self.assertEqual(so.billing_status, "Fully Billed")
+		self.assertEqual(so.status, "To Deliver")
+
+		make_delivery_note(so.name).submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
 	def test_make_sales_invoice_for_pending_qty_with_item_billing_allowance(self):
 		item = make_item(
 			"_Test Over Billed Pending Qty Item",
