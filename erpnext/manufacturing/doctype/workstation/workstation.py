@@ -202,7 +202,7 @@ class Workstation(Document):
 @frappe.whitelist()
 def get_job_cards(workstation):
 	if frappe.has_permission("Job Card", "read"):
-		jc_data = frappe.get_all(
+		jc_data = frappe.get_list(
 			"Job Card",
 			fields=[
 				"name",
