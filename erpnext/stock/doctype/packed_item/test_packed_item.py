@@ -212,6 +212,27 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertFalse(so.items[0].product_bundle)
 		self.assertFalse(so.get("packed_items"))
 
+	def test_disabled_bundle_can_still_be_returned(self):
+		"Disabling a version must not block returns of documents delivered with it."
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse)
+		version = so.items[0].product_bundle
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		# retire the version the usual way (cancel is link-blocked once delivered)
+		frappe.db.set_value("Product Bundle", version, "disabled", 1)
+
+		dn_ret = make_sales_return(dn.name)
+		dn_ret.save()  # must not raise despite the disabled version
+		dn_ret.submit()
+
+		self.assertTrue(dn_ret.packed_items)
+		self.assertTrue(all(pi.qty < 0 for pi in dn_ret.packed_items))
+
 	def test_get_items_from_product_bundle_endpoint(self):
 		"The buying dialog passes the chosen version by document name (legacy: parent item code)."
 		import json
