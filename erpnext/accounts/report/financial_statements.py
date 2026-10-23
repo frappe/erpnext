@@ -485,8 +485,8 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 				"account_type": d.account_type,
 				"is_group": d.is_group,
 				"opening_balance": {
-					key: value * (1 if balance_must_be == "Debit" else -1)
-					for key, value in (d.get("opening_balance") or {}).items()
+					dimension: amount * (1 if balance_must_be == "Debit" else -1)
+					for dimension, amount in (d.get("opening_balance") or {}).items()
 				},
 				"account_name": (
 					f"{_(d.account_number)} - {_(d.account_name)}" if d.account_number else _(d.account_name)
@@ -555,18 +555,22 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 		total_row.setdefault("total", 0.0)
 		total_row["total"] += flt(row["total"])
 
-		for key, value in row["opening_balance"].items():
-			total_row["opening_balance"][key] = total_row["opening_balance"].get(key, 0.0) + value
+		for dimension, amount in row["opening_balance"].items():
+			total_row["opening_balance"][dimension] = (
+				total_row["opening_balance"].get(dimension, 0.0) + amount
+			)
 
-	if "total" in total_row:
-		# rows don't need opening_balance anymore; the total row keeps it for the Balance Sheet
-		for row in out:
-			row.pop("opening_balance", None)
+	if "total" not in total_row:
+		return
 
-		out.append(total_row)
+	# rows don't need opening_balance anymore; the total row keeps it for the Balance Sheet
+	for row in out:
+		row.pop("opening_balance", None)
 
-		# blank row after Total
-		out.append({})
+	out.append(total_row)
+
+	# blank row after Total
+	out.append({})
 
 
 def get_accounts(company, root_type):

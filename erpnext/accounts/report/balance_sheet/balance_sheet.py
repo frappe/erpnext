@@ -182,6 +182,7 @@ def set_provisional_profit_loss_labels(provisional_profit_loss: dict, currency: 
 def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency):
 	"""Row for profit or loss of earlier years not yet closed, taken out of the provisional profit or loss."""
 	total = sum(opening_balance.values())
+
 	unclosed = {
 		"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 		"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
@@ -189,15 +190,19 @@ def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_li
 		"currency": currency,
 		"total": total,
 	}
+
 	for period in period_list:
 		amount = flt(opening_balance.get(period.get("dimension_value")))
 		unclosed[period.key] = amount
+
 		if provisional_profit_loss:
 			provisional_profit_loss[period.key] -= amount
 
 	if provisional_profit_loss:
 		provisional_profit_loss["total"] -= total
+		# label may be missing if the row was 0 before this, e.g. this year's loss = last year's profit
 		set_provisional_profit_loss_labels(provisional_profit_loss, currency)
+
 	return unclosed
 
 
@@ -210,10 +215,12 @@ def check_opening_balance(asset, liability, equity):
 		if not rows:
 			continue
 
-		for key, value in (get_total_row(rows).get("opening_balance") or {}).items():
-			opening_balance[key] = opening_balance.get(key, 0.0) + sign * flt(value)
+		for dimension, amount in (get_total_row(rows).get("opening_balance") or {}).items():
+			opening_balance[dimension] = opening_balance.get(dimension, 0.0) + sign * flt(amount)
 
-	opening_balance = {key: flt(value, float_precision) for key, value in opening_balance.items()}
+	opening_balance = {
+		dimension: flt(amount, float_precision) for dimension, amount in opening_balance.items()
+	}
 
 	# check each dimension: one dimension's profit can cancel another's loss in the total
 	if any(opening_balance.values()):
