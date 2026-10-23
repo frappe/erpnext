@@ -269,6 +269,22 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.submit()
 		self.assertEqual(job_card.status, "Completed")
 
+	def test_shop_floor_save_and_continue_holds_only_unfinished_job(self):
+		from erpnext.manufacturing.page.shop_floor.shop_floor import save_and_continue
+
+		job_card = self.get_first_job_card(self.work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
+		job_card.save()
+
+		save_and_continue(job_card.name, 1, 2, 1, 0, "2024-03-01 09:00:00")
+		job_card.reload()
+		self.assertEqual((job_card.is_paused, job_card.status), (1, "On Hold"))
+
+		job_card.resume_job(start_time="2024-03-01 10:00:00")
+		save_and_continue(job_card.name, 1, 1, 0, 0, "2024-03-01 11:00:00")
+		job_card.reload()
+		self.assertEqual((job_card.is_paused, job_card.status), (0, "Work In Progress"))
+
 	def test_work_order_job_card_timers(self):
 		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		employee = frappe.db.get_all("Employee", {"first_name": "_Test Employee"})[0].name
