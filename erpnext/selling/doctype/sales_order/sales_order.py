@@ -1532,8 +1532,7 @@ def make_purchase_order_for_default_supplier(
 	suppliers = [item.get("supplier") for item in selected_items if item.get("supplier")]
 	suppliers = list(dict.fromkeys(suppliers))  # remove duplicates while preserving order
 
-	items_to_map = [item.get("item_code") for item in selected_items if item.get("item_code")]
-	items_to_map = list(set(items_to_map))
+	items_to_map = get_purchase_order_item_map(source_name, selected_items)
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
@@ -1573,7 +1572,7 @@ def make_purchase_order_for_default_supplier(
 					"postprocess": update_item,
 					"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 					and doc.supplier == supplier
-					and doc.item_code in items_to_map
+					and doc.name in items_to_map
 					and not is_product_bundle(doc.item_code),
 				},
 				"Packed Item": {
@@ -1595,7 +1594,8 @@ def make_purchase_order_for_default_supplier(
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc: doc.parent_item in items_to_map
+					"condition": lambda doc, s=supplier: doc.parent_detail_docname in items_to_map
+					and items_to_map[doc.parent_detail_docname] == s
 					and flt(doc.ordered_qty) < flt(doc.qty),
 				},
 			},
@@ -1621,8 +1621,7 @@ def make_purchase_order(
 	if isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
 
-	items_to_map = [item.get("item_code") for item in selected_items if item.get("item_code")]
-	items_to_map = list(set(items_to_map))
+	items_to_map = get_purchase_order_item_map(source_name, selected_items)
 
 	def is_drop_ship_order(target):
 		drop_ship = True
@@ -1705,7 +1704,7 @@ def make_purchase_order(
 				],
 				"postprocess": update_item,
 				"condition": lambda doc: doc.ordered_qty < doc.stock_qty
-				and doc.item_code in items_to_map
+				and doc.name in items_to_map
 				and not is_product_bundle(doc.item_code),
 			},
 			"Packed Item": {
@@ -1727,7 +1726,7 @@ def make_purchase_order(
 					"pricing_rules",
 				],
 				"postprocess": update_item_for_packed_item,
-				"condition": lambda doc: doc.parent_item in items_to_map
+				"condition": lambda doc: doc.parent_detail_docname in items_to_map
 				and flt(doc.ordered_qty) < flt(doc.qty),
 			},
 		},
@@ -1739,6 +1738,25 @@ def make_purchase_order(
 	doc.set_onload("load_after_mapping", False)
 
 	return doc
+
+
+def get_purchase_order_item_map(source_name, selected_items):
+	sales_order = frappe.get_doc("Sales Order", source_name)
+	sales_order.check_permission("read")
+	items_to_map = {}
+	for item in selected_items:
+		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}
+		rows = sales_order.get("items", filters)
+		if len(rows) != 1:
+			frappe.throw(
+				_("Select a valid Sales Order row for Item {0}.").format(
+					frappe.bold(item.get("item_code") or item.get("name"))
+				),
+				title=_("Invalid Item Selection"),
+			)
+		items_to_map[rows[0].name] = item.get("supplier")
+
+	return items_to_map
 
 
 def set_delivery_date(items, sales_order):
