@@ -211,8 +211,10 @@ frappe.ui.form.on("Request for Quotation", {
 		const field = frm.get_field("quotations_html");
 		const tab = field?.tab;
 
+		frm._quotations_tab_shown = show;
 		if (show) {
 			frm.events.draw_quotations_comparison_table(frm, field.$wrapper, quotes);
+			frm.dashboard.links_area.hide();
 		} else {
 			field?.$wrapper.empty();
 		}
@@ -238,6 +240,8 @@ frappe.ui.form.on("Request for Quotation", {
 
 		if (frm._quotations_rendered_for !== frm.doc.name) {
 			frm.events.toggle_quotations_tab(frm, false);
+		} else if (frm._quotations_tab_shown) {
+			frm.dashboard.links_area.hide();
 		}
 		const rfq_name = frm.doc.name;
 
@@ -295,7 +299,12 @@ frappe.ui.form.on("Request for Quotation", {
 
 		const quote_map = {};
 		const get_quote = (item, offer) => quote_map[`${item.name}:::${offer.key}`];
-		const format_qty = (val) => (flt(val) % 1 === 0 ? cint(val) : flt(val, 2));
+		const qty_precision =
+			precision("qty", (frm.doc.items || [])[0]) || cint(frappe.boot.sysdefaults.float_precision) || 3;
+		const format_qty = (val) => {
+			const rounded = flt(val, qty_precision);
+			return rounded % 1 === 0 ? cint(rounded) : rounded;
+		};
 
 		function combine_quotes(item, matching_quotes) {
 			if (!matching_quotes || matching_quotes.length === 0) return null;
@@ -395,8 +404,7 @@ frappe.ui.form.on("Request for Quotation", {
 				}
 			});
 
-			// Group unassigned quotes by item_code
-			const unassigned_by_code = {};
+			const unassigned_by_code = Object.create(null);
 			unassigned_quotes.forEach((q) => {
 				if (!unassigned_by_code[q.item_code]) {
 					unassigned_by_code[q.item_code] = [];
