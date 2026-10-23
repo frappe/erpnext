@@ -81,7 +81,7 @@ def create_or_update_cheque_print_format(template_name: str):
 	<div style="width:{cheque_width}cm;height:{cheque_height}cm;">
 		<span style="top:{acc_pay_dist_from_top_edge}cm; left:{acc_pay_dist_from_left_edge}cm;
 			border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">
-				{message_to_show}
+				{{{{ {message_to_show} | e }}}}
 		</span>
 		<span style="top:{date_dist_from_top_edge}cm; left:{date_dist_from_left_edge}cm;
 			position: absolute;">
@@ -117,7 +117,7 @@ def create_or_update_cheque_print_format(template_name: str):
 		cheque_height=doc.cheque_height,
 		acc_pay_dist_from_top_edge=doc.acc_pay_dist_from_top_edge,
 		acc_pay_dist_from_left_edge=doc.acc_pay_dist_from_left_edge,
-		message_to_show=doc.message_to_show if doc.message_to_show else _("Account Pay Only"),
+		message_to_show=frappe.as_json(doc.message_to_show or _("Account Pay Only"), ensure_ascii=False),
 		date_dist_from_top_edge=doc.date_dist_from_top_edge,
 		date_dist_from_left_edge=doc.date_dist_from_left_edge,
 		acc_no_dist_from_top_edge=doc.acc_no_dist_from_top_edge,
