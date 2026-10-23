@@ -583,6 +583,9 @@ class SalesOrder(SellingController):
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
+	def on_trash(self):
+		DeliveryScheduleService(self).delete_delivery_schedule_items()
+
 	def update_project(self):
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction":
 			return
