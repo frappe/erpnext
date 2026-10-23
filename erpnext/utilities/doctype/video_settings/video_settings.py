@@ -19,11 +19,29 @@ class VideoSettings(Document):
 
 		api_key: DF.Data | None
 		enable_youtube_tracking: DF.Check
-		frequency: DF.Literal["30 mins", "1 hr", "6 hrs", "Daily"]
+		frequency: DF.Literal["1 hr", "6 hrs", "Daily"]
+		last_youtube_update: DF.Datetime | None
 	# end: auto-generated types
 
 	def validate(self):
+		self.replace_removed_frequency()
+		self.validate_tracking_settings()
 		self.validate_youtube_api_key()
+
+	def replace_removed_frequency(self):
+		# "30 mins" was removed because the update job runs hourly
+		if self.frequency == "30 mins":
+			self.frequency = "1 hr"
+
+	def validate_tracking_settings(self):
+		if not self.enable_youtube_tracking:
+			return
+
+		for fieldname in ("api_key", "frequency"):
+			if not self.get(fieldname):
+				frappe.throw(
+					_("{0} is required to enable YouTube tracking").format(_(self.meta.get_label(fieldname)))
+				)
 
 	def validate_youtube_api_key(self):
 		if self.enable_youtube_tracking and self.api_key:

@@ -3,10 +3,12 @@
 
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, today
 
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.report.job_card_summary.job_card_summary import execute
+from erpnext.manufacturing.report.job_card_summary.job_card_summary import execute, get_chart_data
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -62,22 +64,42 @@ class TestJobCardSummary(ERPNextTestSuite):
 		self.assertEqual({row.get("name") for row in rows}, matching)
 
 	def test_status_filter(self):
-		self.assertTrue(self.job_cards, "Work Order did not produce any Job Cards")
+		job_card = self.job_cards[0].name
+		frappe.db.set_value("Job Card", job_card, "status", "Work In Progress")
+		rows = self.run_report(status="Work In Progress", work_order=[self.work_order.name])
+		self.assertEqual([(row.name, row.status) for row in rows], [(job_card, "Work In Progress")])
 
-		# The status filter matches the Job Card's *stored* status, so derive the
-		# expected set from that rather than assuming fresh cards are literally "Open".
-		stored_status = self.job_cards[0].status
-		expected = {jc.name for jc in self.job_cards if jc.status == stored_status}
+	def test_chart_respects_job_card_permissions(self):
+		user = create_user("job-card-summary@example.com", "Manufacturing User")
+		workstation = frappe.get_doc(
+			doctype="Workstation", workstation_name="_Test Summary Workstation"
+		).insert()
+		add_user_permission("Workstation", workstation.name, user.name)
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=today(),
+			to_date=today(),
+			work_order=[self.work_order.name],
+		)
 
-		rows = self.rows_for_work_order(self.run_report(status=stored_status))
-		self.assertEqual({row.get("name") for row in rows}, expected)
-		# any non-completed card is displayed as "Open" regardless of its stored status
-		for row in rows:
-			self.assertEqual(row.get("status"), "Open")
+		self.assertEqual(self.get_row_and_chart_counts(user.name, filters), (0, 0))
 
-		# None of the freshly created job cards are Completed yet.
-		completed_rows = self.rows_for_work_order(self.run_report(status="Completed"))
-		self.assertEqual(completed_rows, [])
+		frappe.db.set_value("Job Card", self.job_cards[0].name, "workstation", workstation.name)
+		self.assertEqual(self.get_row_and_chart_counts(user.name, filters), (1, 1))
+
+	def get_row_and_chart_counts(self, user, filters):
+		with self.set_user(user):
+			_columns, rows, _message, chart = execute(filters)
+		return len(rows), sum(sum(dataset["values"]) for dataset in chart["data"]["datasets"])
+
+	def test_chart_includes_period_boundaries_and_empty_months(self):
+		filters = frappe._dict(from_date="2026-01-01", to_date="2026-02-28")
+		cards = [
+			frappe._dict(posting_date="2026-01-01", status="Work In Progress"),
+			frappe._dict(posting_date="2026-01-31", status="Completed"),
+		]
+		chart = get_chart_data(cards, filters)
+		self.assertEqual([row["values"] for row in chart["data"]["datasets"]], [[1, 0], [1, 0]])
 
 	def test_date_filter_excludes_out_of_range(self):
 		# Job Card posting_date defaults to today; a past-only window should exclude them.

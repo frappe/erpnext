@@ -10,13 +10,34 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Case, Interval
 from frappe.query_builder.functions import Count, CurDate, Date, Locate, Lower, Sum, UnixTimestamp
-from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
+from frappe.utils import (
+	add_days,
+	create_batch,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	nowtime,
+	today,
+)
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.user import is_website_user
 from pypika import Order
 
 from erpnext import get_default_company
 from erpnext.controllers.website_list_for_contact import get_customers_suppliers
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+
+CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
+
+LANDED_COST_RECEIPT_ITEMS = (
+	"Purchase Receipt Item",
+	"Purchase Invoice Item",
+	"Subcontracting Receipt Item",
+	"Stock Entry Detail",
+)
+
+PORTAL_LIST_FIELDS = ["name", "project_name", "status", "percent_complete", "_assign", "modified"]
 
 
 class Project(Document):
@@ -179,38 +200,42 @@ class Project(Document):
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
 	def set_consumed_material_cost(self):
-		parent_doc = frappe.qb.DocType("Stock Entry")
-		child_doc = frappe.qb.DocType("Stock Entry Detail")
-		lcv_doc = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		self.total_consumed_material_cost = (
+			self.get_stock_value_consumed() + self.get_stock_entry_capitalised_costs()
+		)
 
+	def get_stock_value_consumed(self) -> float:
+		sle = qb.DocType("Stock Ledger Entry")
+		stock_entry = qb.DocType("Stock Entry")
+		value_change = (
+			qb.from_(sle)
+			.left_join(stock_entry)
+			.on((sle.voucher_type == "Stock Entry") & (stock_entry.name == sle.voucher_no))
+			.select(Sum(sle.stock_value_difference))
+			.where(
+				(sle.project == self.name)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_type.isin(CONSUMPTION_VOUCHER_TYPES)
+				& (stock_entry.purpose.isnull() | (stock_entry.purpose != "Material Receipt"))
+			)
+		).run()
+		return -flt(value_change[0][0])
+
+	def get_stock_entry_capitalised_costs(self) -> float:
+		stock_entry = qb.DocType("Stock Entry")
+		stock_entry_item = qb.DocType("Stock Entry Detail")
 		amount = (
-			qb.from_(child_doc)
-			.select(Sum(child_doc.amount))
+			qb.from_(stock_entry_item)
+			.join(stock_entry)
+			.on(stock_entry.name == stock_entry_item.parent)
+			.select(Sum(stock_entry_item.additional_cost + stock_entry_item.landed_cost_voucher_amount))
 			.where(
-				(child_doc.project == self.name)
-				& (child_doc.docstatus == 1)
-				& ((child_doc.t_warehouse.isnull()) | (child_doc.t_warehouse == ""))
+				(stock_entry_item.project == self.name)
+				& (stock_entry.docstatus == 1)
+				& (stock_entry.purpose != "Material Receipt")
 			)
-		).run(as_list=1)
-
-		amount = flt(amount[0][0]) if amount else 0
-
-		additional_costs = (
-			qb.from_(parent_doc)
-			.join(lcv_doc)
-			.on(parent_doc.name == lcv_doc.parent)
-			.select(Sum(lcv_doc.base_amount))
-			.where(
-				(parent_doc.project == self.name)
-				& (parent_doc.docstatus == 1)
-				& (parent_doc.purpose == "Manufacture")
-			)
-		).run(as_list=1)
-
-		additional_cost_amt = flt(additional_costs[0][0]) if additional_costs else 0
-
-		amount += additional_cost_amt
-		self.total_consumed_material_cost = amount
+		).run()
+		return flt(amount[0][0])
 
 	def check_depends_on_value(self, template_task, project_task, project_tasks):
 		if template_task.get("depends_on") and not project_task.get("depends_on"):
@@ -389,9 +414,55 @@ class Project(Document):
 		else:
 			self.per_gross_margin = 0
 
+	def db_set_cost(self, cost_field: str):
+		self.calculate_gross_margin()
+		self.db_set(
+			{
+				cost_field: self.get(cost_field),
+				"gross_margin": self.gross_margin,
+				"per_gross_margin": self.per_gross_margin,
+			},
+			update_modified=False,
+		)
+
 	def update_purchase_costing(self):
-		total_purchase_cost = calculate_total_purchase_cost(self.name)
-		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
+		self.total_purchase_cost = self.get_non_stock_purchase_cost() - self.get_capitalised_landed_cost()
+
+	def get_non_stock_purchase_cost(self) -> float:
+		invoice_item = qb.DocType("Purchase Invoice Item")
+		item = qb.DocType("Item")
+		purchase_order = qb.DocType("Purchase Order")
+		amount = (
+			qb.from_(invoice_item)
+			.left_join(item)
+			.on(item.name == invoice_item.item_code)
+			.left_join(purchase_order)
+			.on(purchase_order.name == invoice_item.purchase_order)
+			.select(Sum(invoice_item.base_net_amount))
+			.where(
+				(invoice_item.project == self.name)
+				& (invoice_item.docstatus == 1)
+				& (
+					item.is_stock_item.isnull()
+					| (item.is_stock_item == 0)
+					| (invoice_item.delivered_by_supplier == 1)
+				)
+				& (purchase_order.is_subcontracted.isnull() | (purchase_order.is_subcontracted == 0))
+			)
+		).run()
+		return flt(amount[0][0])
+
+	def get_capitalised_landed_cost(self) -> float:
+		amount = 0
+		for doctype in LANDED_COST_RECEIPT_ITEMS:
+			receipt_item = qb.DocType(doctype)
+			charges = (
+				qb.from_(receipt_item)
+				.select(Sum(receipt_item.landed_cost_voucher_amount))
+				.where((receipt_item.project == self.name) & (receipt_item.docstatus == 1))
+			).run()
+			amount += flt(charges[0][0])
+		return amount
 
 	def update_sales_amount(self):
 		so = frappe.qb.DocType("Sales Order")
@@ -543,11 +614,11 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 			else:
 				filters.append([doctype, "name", "like", "%" + txt + "%"])
 
-	# No distinct=True: it never dedupes here (single table, fields="*" carries PK `name`) but makes
+	# No distinct=True: it never dedupes here (single table, the fields carry PK `name`) but makes
 	# frappe drop ORDER BY on Postgres, leaving the portal list unordered there.
 	return frappe.get_list(
 		doctype,
-		fields="*",
+		fields=PORTAL_LIST_FIELDS,
 		filters=filters,
 		or_filters=or_filters,
 		limit_start=limit_start,
@@ -653,7 +724,7 @@ def daily_reminder():
 	projects = get_projects_for_collect_progress("Daily", fields)
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.daily_time_to_send):
+		if get_due_project_updates(project.name, project.daily_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
@@ -661,7 +732,7 @@ def twice_daily_reminder():
 	projects = get_projects_for_collect_progress("Twice Daily", ["first_email", "second_email"])
 
 	for project in projects:
-		if allow_to_make_project_update(project.name, project.first_email, project.second_email):
+		for _due in range(get_due_project_updates(project.name, project.first_email, project.second_email)):
 			send_project_update_email_to_users(project.name)
 
 
@@ -674,15 +745,15 @@ def weekly_reminder():
 		if current_day != project.day_to_send:
 			continue
 
-		if allow_to_make_project_update(project.name, project.weekly_time_to_send):
+		if get_due_project_updates(project.name, project.weekly_time_to_send):
 			send_project_update_email_to_users(project.name)
 
 
-def allow_to_make_project_update(project, *times):
-	"""Whether fewer updates were made today than there are send times already passed."""
+def get_due_project_updates(project: str, *times) -> int:
+	"""Send times already passed today that have no Project Update yet."""
 	now = get_time(nowtime())
 	times_passed = sum(now >= get_time(time) for time in times)
-	return frappe.db.count("Project Update", {"project": project, "date": today()}) < times_passed
+	return max(times_passed - frappe.db.count("Project Update", {"project": project, "date": today()}), 0)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -829,8 +900,9 @@ def get_project_update_replies(project_update):
 				"user": user_data.name,
 				"full_name": user_data.full_name,
 				"image": user_data.user_image,
-				"project_status": frappe.utils.md_to_html(
-					EmailReplyParser.parse_reply(d.text_content) or d.content
+				"project_status": sanitize_html(
+					frappe.utils.md_to_html(EmailReplyParser.parse_reply(d.text_content) or d.content),
+					linkify=True,
 				),
 			}
 		)
@@ -872,15 +944,87 @@ def update_project_sales_billing():
 
 
 @frappe.whitelist()
-def create_kanban_board_if_not_exists(project: str):
+def create_kanban_board_if_not_exists(project: str) -> str:
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
+	from frappe.model.naming import append_number_if_name_exists
 
 	project = frappe.get_doc("Project", project)
 	project.check_permission("read")
-	if not frappe.db.exists("Kanban Board", project.project_name):
-		quick_kanban_board("Task", project.project_name, "status", project.name)
 
-	return True
+	if board := get_project_kanban_board(project.name):
+		return board
+
+	board_name = append_number_if_name_exists("Kanban Board", project.project_name)
+	return quick_kanban_board("Task", board_name, "status", project.name).name
+
+
+def get_project_kanban_board(project: str) -> str | None:
+	for board in frappe.get_list(
+		"Kanban Board", filters={"reference_doctype": "Task"}, fields=["name", "filters"]
+	):
+		filters = frappe.parse_json(board.filters or "[]")
+		if any(isinstance(f, list) and f[1:4] == ["project", "=", project] for f in filters):
+			return board.name
+
+
+@frappe.whitelist()
+def get_project_tasks(
+	project: str,
+	sort_by: str = "creation",
+	sort_order: str = "asc",
+	start: int = 0,
+	page_length: int = 50,
+	txt: str | None = None,
+) -> list[dict]:
+	"""One page of a project's tasks the user can read, for the Project form's Tasks tab.
+
+	`sort_by` can be any Task field the user may read. A Select field is ordered by its options (so
+	Priority runs Low to Urgent and Status follows the workflow) rather than alphabetically. Empty
+	values come last either way, and ties keep the order tasks were created in.
+	"""
+	if not frappe.has_permission("Project", "read", doc=project):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	sortable = set(frappe.model.get_permitted_fields("Task")) - set(frappe.model.optional_fields)
+	if sort_by not in sortable or sort_order not in ("asc", "desc"):
+		frappe.throw(_("Tasks cannot be sorted by {0} {1}").format(sort_by, sort_order))
+
+	Task = frappe.qb.DocType("Task")
+	df = frappe.get_meta("Task").get_field(sort_by)
+	sort_field = Task[sort_by]
+	is_empty = sort_field.isnull()
+	if df and df.fieldtype not in (*frappe.model.numeric_fieldtypes, *frappe.model.datetime_fields):
+		is_empty = is_empty | (sort_field == "")
+	if df and df.fieldtype == "Select" and df.options:
+		rank = Case()
+		for position, option in enumerate(df.options.split("\n")):
+			rank = rank.when(Task[sort_by] == option, position)
+		sort_field = rank
+
+	query = (
+		frappe.qb.get_query(
+			"Task",
+			fields=[
+				"name",
+				"subject",
+				"status",
+				"priority",
+				"_assign",
+				"exp_start_date",
+				"exp_end_date",
+				"progress",
+			],
+			filters={"project": project},
+			ignore_permissions=False,
+		)
+		.orderby(Case().when(is_empty, 1).else_(0))
+		.orderby(sort_field, order=Order.desc if sort_order == "desc" else Order.asc)
+		.orderby(Task.creation)
+		.limit(page_length)
+		.offset(start)
+	)
+	if txt:
+		query = query.where(Task.subject.like(f"%{txt}%") | Task.name.like(f"%{txt}%"))
+	return query.run(as_dict=True)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -897,6 +1041,7 @@ def set_project_status(project: str, status: str):
 	for task_name in get_tasks_in_dependency_order(project.name, status):
 		task = frappe.get_doc("Task", task_name)
 		task.status = status
+		task.flags.ignore_reschedule = True
 		task.save(ignore_permissions=True)
 
 	project.status = status
@@ -934,22 +1079,43 @@ def get_users_email(doc):
 	return [d.email for d in doc.users if frappe.db.get_value("User", d.user, "enabled")]
 
 
-def calculate_total_purchase_cost(project: str | None = None):
-	if project:
-		pitem = qb.DocType("Purchase Invoice Item")
-		total_purchase_cost = (
-			qb.from_(pitem)
-			.select(Sum(pitem.base_net_amount))
-			.where((pitem.project == project) & (pitem.docstatus == 1))
-			.run(as_list=True)
+def update_purchase_cost(projects: set[str]):
+	for name in projects:
+		project = frappe.get_doc("Project", name, for_update=True)
+		project.update_purchase_costing()
+		project.db_set_cost("total_purchase_cost")
+
+
+def update_consumed_material_cost(projects: set[str]):
+	for name in projects:
+		project = frappe.get_doc("Project", name, for_update=True)
+		project.set_consumed_material_cost()
+		project.db_set_cost("total_consumed_material_cost")
+
+
+def update_consumed_material_cost_for_vouchers(vouchers: list[tuple[str, str]]):
+	sle = qb.DocType("Stock Ledger Entry")
+	projects = set()
+	for voucher_nos in create_batch([voucher_no for _voucher_type, voucher_no in vouchers], 1000):
+		projects.update(
+			qb.from_(sle)
+			.select(sle.project)
+			.distinct()
+			.where(
+				sle.voucher_no.isin(voucher_nos)
+				& sle.voucher_type.isin(CONSUMPTION_VOUCHER_TYPES)
+				& sle.project.isnotnull()
+				& (sle.project != "")
+			)
+			.run(pluck=True)
 		)
-		return total_purchase_cost
-	return None
+	update_consumed_material_cost(projects)
 
 
 @frappe.whitelist()
 def update_costing_and_billing(project: str | None = None):
 	project = frappe.get_doc("Project", project)
 	project.check_permission("write")
+	project.set_consumed_material_cost()
 	project.update_costing()
 	project.db_update()

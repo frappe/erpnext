@@ -2,8 +2,9 @@
 # See license.txt
 
 import frappe
-from frappe.utils.data import today
+from frappe.utils.data import getdate, today
 
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.support.doctype.warranty_claim.warranty_claim import make_maintenance_visit
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -85,19 +86,110 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		self.assertTrue(target.is_new())
 		self.assertEqual(target.doctype, "Maintenance Visit")
 
-	def test_on_cancel_blocked_by_active_maintenance_visit(self):
-		# on_cancel's converted query joins Maintenance Visit Purpose -> Maintenance Visit and
-		# filters the PARENT visit's docstatus != 2; a submitted (non-cancelled) visit referencing
-		# the claim must block cancellation.
+	def test_cancel_blocked_by_active_maintenance_visit(self):
 		claim = self.make_warranty_claim()
 		self.make_maintenance_visit_for_claim(claim, "Partially Completed")
 
-		self.assertRaises(frappe.ValidationError, claim.on_cancel)
+		claim.reload()
+		claim.status = "Cancelled"
+		self.assertRaises(frappe.ValidationError, claim.save)
 
-	def test_on_cancel_allowed_when_no_active_visit(self):
-		# No referencing visit -> the query returns nothing -> the claim is marked Cancelled.
+	def test_cancel_allowed_when_no_active_visit(self):
 		claim = self.make_warranty_claim()
 
-		claim.on_cancel()
+		claim.status = "Cancelled"
+		claim.save()
 
 		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Cancelled")
+
+	def test_visit_records_the_user_of_the_service_person(self):
+		user = "test_warranty_service_person@example.com"
+		frappe.db.set_value(
+			"Sales Person", "_Test Sales Person", "employee", make_employee(user, company="_Test Company")
+		)
+		claim = self.make_warranty_claim()
+		self.make_maintenance_visit_for_claim(claim, "Partially Completed")
+
+		claim.reload()
+		self.assertEqual(claim.resolved_by, user)
+
+		frappe.db.set_value("Sales Person", "_Test Sales Person", "employee", None)
+		claim = self.make_warranty_claim()
+		self.make_maintenance_visit_for_claim(claim, "Partially Completed")
+
+		claim.reload()
+		self.assertFalse(claim.resolved_by)
+		claim.save()
+
+	def test_partial_visit_submitted_or_cancelled_after_completion_keeps_claim_closed(self):
+		claim = self.make_warranty_claim()
+		self.make_maintenance_visit_for_claim(claim, "Fully Completed")
+		partial_visit = self.make_maintenance_visit_for_claim(claim, "Partially Completed")
+		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
+
+		partial_visit.cancel()
+		self.assertEqual(frappe.db.get_value("Warranty Claim", claim.name, "status"), "Closed")
+
+	def test_reopening_clears_resolution(self):
+		claim = self.make_warranty_claim()
+		claim.status = "Closed"
+		claim.save()
+		claim.db_set("resolution_date", "2020-09-01 10:00:00")
+
+		claim.reload()
+		claim.status = "Open"
+		claim.save()
+		self.assertFalse(claim.resolution_date)
+
+		claim.status = "Closed"
+		claim.save()
+		self.assertEqual(getdate(claim.resolution_date), getdate())
+
+	def test_warranty_status_is_taken_on_the_complaint_date(self):
+		claim = self.make_warranty_claim()
+		claim.complaint_date = "2025-12-15"
+		claim.warranty_expiry_date = "2026-01-31"
+		claim.warranty_amc_status = "Out of Warranty"
+		claim.save()
+		self.assertEqual(claim.warranty_amc_status, "Under Warranty")
+
+		claim.complaint_date = "2026-02-15"
+		claim.amc_expiry_date = "2026-12-31"
+		claim.save()
+		self.assertEqual(claim.warranty_amc_status, "Under AMC")
+
+	def test_warns_when_serial_no_is_not_delivered_to_the_claim_customer(self):
+		serial_no = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"serial_no": frappe.generate_hash(length=10),
+				"item_code": "_Test Serialized Item",
+				"company": "_Test Company",
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Serial No", serial_no.name, "warehouse", "_Test Warehouse - _TC")
+
+		claim = self.make_warranty_claim()
+		claim.item_code = "_Test Serialized Item"
+		claim.serial_no = serial_no.name
+		self.assertIn("still in stock", self.get_warning_on_save(claim))
+
+		frappe.db.set_value(
+			"Serial No",
+			serial_no.name,
+			{"warehouse": None, "customer": "_Test Customer 1", "status": "Delivered"},
+		)
+		self.assertIsNone(self.get_warning_on_save(claim), "warning must not repeat on an unchanged save")
+
+		claim.customer = "_Test Customer 2"
+		self.assertIn("_Test Customer 1", self.get_warning_on_save(claim))
+
+		claim.customer = "_Test Customer 1"
+		self.assertIsNone(self.get_warning_on_save(claim))
+
+	def get_warning_on_save(self, claim) -> str | None:
+		frappe.clear_messages()
+		claim.save()
+		return next(
+			(log.message for log in frappe.local.message_log if log.get("indicator") == "orange"), None
+		)

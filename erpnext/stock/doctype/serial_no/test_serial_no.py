@@ -46,6 +46,64 @@ class TestSerialNo(ERPNextTestSuite):
 		sr.warehouse = "_Test Warehouse - _TC"
 		self.assertTrue(SerialNoCannotCannotChangeError, sr.save)
 
+	def test_cancelled_stock_reconciliation_marks_serials_inactive(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		item_code = make_item(
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "SNRECO-.#####"}
+		).name
+		reco = create_stock_reconciliation(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=2, rate=100
+		)
+		serial_nos = get_serial_nos_from_bundle(reco.items[0].serial_and_batch_bundle)
+		reco.cancel()
+
+		for serial_no in serial_nos:
+			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Inactive")
+
+	def test_purchase_return_marks_serial_inactive(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		item_code = make_item(
+			properties={
+				"has_serial_no": 1,
+				"is_stock_item": 1,
+				"serial_no_series": "SNPRET-.#####",
+				"warranty_period": 365,
+			}
+		).name
+		receipt = make_purchase_receipt(item_code=item_code, qty=1)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+
+		make_purchase_return(receipt.name).submit()
+
+		status, warranty_expiry_date = frappe.db.get_value(
+			"Serial No", serial_no, ["status", "warranty_expiry_date"]
+		)
+		self.assertEqual((status, warranty_expiry_date), ("Inactive", None))
+
+	def test_stock_managed_fields_cannot_be_edited(self):
+		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
+
+		item_code = make_item(
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "SNEDIT-.#####"}
+		).name
+		receipt = make_purchase_receipt(item_code=item_code, qty=1)
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+
+		for fieldname, value in (
+			("status", "Inactive"),
+			("purchase_rate", 1),
+			("customer", "_Test Customer"),
+		):
+			doc = frappe.get_doc("Serial No", serial_no)
+			doc.set(fieldname, value)
+			self.assertRaises(SerialNoCannotCannotChangeError, doc.save)
+
 	def test_inter_company_transfer(self):
 		se = make_serialized_item(self, target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)

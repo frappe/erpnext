@@ -5,6 +5,7 @@
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
@@ -30,8 +31,8 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		self.assertIn(po.name, {row.get("purchase_order") for row in self.run_report()})
 
-	def make_priced_request(self):
-		mr = make_material_request(do_not_submit=True)
+	def make_priced_request(self, **args):
+		mr = make_material_request(do_not_submit=True, **args)
 		mr.items[0].update({"rate": 90, "amount": 900})
 		mr.submit()
 		return mr
@@ -48,6 +49,33 @@ class TestProcurementTracker(ERPNextTestSuite):
 		rows = [row for row in self.run_report() if row.get("purchase_order") == po.name]
 		self.assertCountEqual([row["estimated_cost"] for row in rows], [360, 540])
 		self.assertEqual(sum(row["estimated_cost"] for row in rows), mr.items[0].amount)
+
+	def test_subcontracted_estimate_is_shared_by_finished_good_qty(self):
+		mr = self.make_priced_request(
+			material_request_type="Subcontracting", item_code="Subcontracted Item SA7"
+		)
+		orders = [
+			create_purchase_order(
+				is_subcontracted=1,
+				supplier_warehouse="_Test Warehouse 1 - _TC",
+				rm_items=[
+					{
+						"item_code": "Subcontracted Service Item 7",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 1,
+						"rate": 100,
+						"fg_item": "Subcontracted Item SA7",
+						"fg_item_qty": fg_item_qty,
+						"material_request": mr.name,
+						"material_request_item": mr.items[0].name,
+					}
+				],
+			).name
+			for fg_item_qty in (4, 6)
+		]
+
+		rows = {row.get("purchase_order"): row["estimated_cost"] for row in self.run_report()}
+		self.assertEqual([rows[order] for order in orders], [360, 540])
 
 	def test_filtered_out_order_keeps_its_share_of_the_estimate(self):
 		mr = self.make_priced_request()
@@ -92,6 +120,16 @@ class TestProcurementTracker(ERPNextTestSuite):
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_cost"], 630)
 
+	def test_fully_returned_invoice_shows_zero_actual_cost(self):
+		po = create_purchase_order(qty=10, rate=90)
+		invoice = make_purchase_invoice(po.name)
+		invoice.items[0].qty = 4
+		invoice.submit()
+		make_debit_note(invoice.name).submit()
+
+		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
+		self.assertEqual(row["actual_cost"], 0)
+
 	def test_unordered_rows_of_a_partly_ordered_request_are_listed(self):
 		mr = make_material_request_for_items(["_Test Item", "_Test Item Home Desktop 100"])
 		po = make_purchase_order(mr.name)
@@ -113,10 +151,13 @@ class TestProcurementTracker(ERPNextTestSuite):
 		row = next(row for row in self.run_report() if row.get("purchase_order") == po.name)
 		self.assertEqual(row["actual_delivery_date"], getdate(receipt.posting_date))
 
-	def test_cost_center_and_project_filters_both_apply(self):
-		project = frappe.get_doc(
+	def make_project(self):
+		return frappe.get_doc(
 			{"doctype": "Project", "project_name": "_Test Procurement Tracker", "company": "_Test Company"}
 		).insert()
+
+	def test_cost_center_and_project_filters_both_apply(self):
+		project = self.make_project()
 		with_project = create_purchase_order(do_not_submit=True)
 		with_project.items[0].project = project.name
 		with_project.submit()
@@ -126,6 +167,18 @@ class TestProcurementTracker(ERPNextTestSuite):
 		orders = {row.get("purchase_order") for row in rows}
 		self.assertIn(with_project.name, orders)
 		self.assertNotIn(without_project.name, orders)
+
+	def test_filters_do_not_drop_the_estimate_of_a_linked_request(self):
+		project = self.make_project()
+		mr = self.make_priced_request()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].update({"cost_center": "_Test Cost Center 2 - _TC", "project": project.name})
+		po.submit()
+
+		rows = self.run_report(cost_center="_Test Cost Center 2 - _TC", project=project.name)
+		row = next(row for row in rows if row.get("purchase_order") == po.name)
+		self.assertEqual(row["estimated_cost"], 900)
 
 	def test_transfer_request_is_not_listed(self):
 		mr = make_material_request(

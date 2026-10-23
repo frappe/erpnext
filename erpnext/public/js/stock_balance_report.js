@@ -84,7 +84,7 @@ erpnext.get_stock_balance_report_settings = function () {
 						...(company && { company }),
 					};
 
-					return frappe.db.get_link_options("Warehouse", txt, filters);
+					return erpnext.utils.get_link_options("Warehouse", txt, filters);
 				},
 			},
 			{

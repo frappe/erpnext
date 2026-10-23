@@ -35,6 +35,59 @@ class PaymentOrder(Document):
 		references: DF.Table[PaymentOrderReference]
 	# end: auto-generated types
 
+	def validate(self):
+		self.validate_company_bank_account()
+		self.validate_reference_company()
+
+	def validate_reference_company(self):
+		if not self.payment_order_type:
+			return
+
+		ref_field = "payment_request" if self.payment_order_type == "Payment Request" else "reference_name"
+		references = {d.get(ref_field) for d in self.references if d.get(ref_field)}
+		if not references:
+			return
+
+		reference_company = frappe._dict(
+			frappe.get_all(
+				self.payment_order_type,
+				filters={"name": ["in", list(references)]},
+				fields=["name", "company"],
+				as_list=True,
+			)
+		)
+		for d in self.references:
+			company = reference_company.get(d.get(ref_field))
+			if company and company != self.company:
+				frappe.throw(
+					_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
+						d.idx, _(self.payment_order_type), d.get(ref_field), company, self.company
+					)
+				)
+
+	def validate_company_bank_account(self):
+		if not self.company_bank_account:
+			return
+
+		bank_account = frappe.get_cached_value(
+			"Bank Account",
+			self.company_bank_account,
+			["is_company_account", "company", "disabled", "bank", "account"],
+			as_dict=True,
+		)
+		if not bank_account or bank_account.disabled:
+			frappe.throw(_("Bank Account {0} is missing or disabled").format(self.company_bank_account))
+
+		if not bank_account.is_company_account or bank_account.company != self.company:
+			frappe.throw(
+				_("Bank Account {0} must be a company account belonging to {1}").format(
+					self.company_bank_account, self.company
+				)
+			)
+
+		self.company_bank = bank_account.bank
+		self.account = bank_account.account
+
 	def on_submit(self):
 		self.update_payment_status()
 
@@ -119,6 +172,7 @@ def make_payment_records(name: str, supplier: str, mode_of_payment: str | None =
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je = frappe.new_doc("Journal Entry")
+	je.company = doc.company
 	je.payment_order = doc.name
 	je.posting_date = nowdate()
 	mode_of_payment_type = frappe._dict(frappe.get_all("Mode of Payment", fields=["name", "type"], as_list=1))

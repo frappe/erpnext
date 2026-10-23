@@ -3,9 +3,13 @@
 
 import frappe
 from frappe.utils import random_string
+from frappe.utils.logging import get_log_db
 
 from erpnext.tests.utils import ERPNextTestSuite
-from erpnext.www.support.index import get_favorite_articles_by_page_view
+from erpnext.www.support.index import (
+	FAVORITE_ARTICLE_LIMIT,
+	get_favorite_articles_by_page_view,
+)
 
 
 class TestSupportIndex(ERPNextTestSuite):
@@ -35,7 +39,9 @@ class TestSupportIndex(ERPNextTestSuite):
 
 	def seed_page_views(self, path, count):
 		# Web Page View is in_create/read_only; insert the minimal row the
-		# converted JOIN reads (path == Help Article.route) directly.
+		# lookup reads (path matched against Help Article.route) directly.
+		# The log database is not rolled back between tests, so delete the rows afterwards.
+		self.addCleanup(get_log_db().delete, "Web Page View", {"path": path})
 		for _ in range(count):
 			view = frappe.new_doc("Web Page View")
 			view.path = path
@@ -66,24 +72,102 @@ class TestSupportIndex(ERPNextTestSuite):
 
 		by_route = {row.route: row for row in results if row.route in (route_hi, route_lo)}
 
-		# Both of our routes are surfaced by the INNER JOIN on route == path.
+		# Both of our routes are surfaced by matching path against route.
 		self.assertIn(route_hi, by_route, "High-viewed route missing from results")
 		self.assertIn(route_lo, by_route, "Low-viewed route missing from results")
 
-		# Count(route) reflects the real number of seeded Web Page View rows.
+		# The aliased count reflects the real number of seeded Web Page View rows.
 		self.assertEqual(by_route[route_hi]["count"], 3)
 		self.assertEqual(by_route[route_lo]["count"], 1)
 
-		# Max()-wrapped columns carry the article's own data (one row per route).
+		# The display fields come from the article's own row.
 		self.assertEqual(by_route[route_hi].name, name_hi)
 		self.assertEqual(by_route[route_hi].title, "High Views Article")
 		self.assertEqual(by_route[route_hi].category, category)
+		self.assertEqual(by_route[route_hi].content, "<p>High views content</p>")
 		self.assertEqual(by_route[route_lo].name, name_lo)
 
-		# ORDER BY count desc: the higher-viewed route precedes the lower one.
+		# Ranked by count, descending: the higher-viewed route precedes the lower one.
 		ordered_routes = [row.route for row in results if row.route in (route_hi, route_lo)]
 		self.assertEqual(
 			ordered_routes,
 			[route_hi, route_lo],
 			"Results not ordered by page-view count descending",
 		)
+
+	def test_mixed_case_route_is_matched_and_counted(self):
+		"""A route stored with capitals must still find the views recorded against it."""
+		category = self.make_help_category()
+		route = "Support-Mixed-" + random_string(10)
+		self.assertNotEqual(route, route.lower(), "route must contain capitals to be a regression")
+
+		name = self.make_help_article(category, route, "Mixed Case Route", "<p>Mixed</p>")
+		self.seed_page_views(route, 4)
+
+		by_name = {row.name: row for row in get_favorite_articles_by_page_view()}
+
+		self.assertIn(name, by_name, "article with a mixed-case route was dropped")
+		self.assertEqual(by_name[name]["count"], 4)
+		self.assertEqual(by_name[name].route, route)
+
+	def test_routes_differing_only_in_case_are_separate_articles(self):
+		"""Each article keeps its own views when two routes differ only in case."""
+		category = self.make_help_category()
+		route = "support-case-" + random_string(10)
+		name_lower = self.make_help_article(category, route, "Lower Article", "<p>Lower</p>")
+		name_upper = self.make_help_article(category, route.upper(), "Upper Article", "<p>Upper</p>")
+
+		self.seed_page_views(route, 2)
+		self.seed_page_views(route.upper(), 5)
+
+		by_name = {row.name: row for row in get_favorite_articles_by_page_view()}
+
+		self.assertEqual(by_name[name_lower]["count"], 2)
+		self.assertEqual(by_name[name_upper]["count"], 5)
+
+	def test_view_paths_without_an_article_are_ignored(self):
+		"""A page view whose path matches no published article contributes nothing."""
+		category = self.make_help_category()
+		route = "support-real-" + random_string(10)
+		name = self.make_help_article(category, route, "Real Article", "<p>Real</p>")
+
+		self.seed_page_views(route, 2)
+		self.seed_page_views("support-ghost-" + random_string(10), 50)
+
+		results = get_favorite_articles_by_page_view()
+		by_name = {row.name: row for row in results}
+
+		self.assertIn(name, by_name)
+		self.assertEqual(by_name[name]["count"], 2)
+		# The ghost path's 50 views were not attributed to any article.
+		self.assertNotIn(50, [row["count"] for row in results])
+
+	def test_unviewed_article_is_not_returned(self):
+		"""A published article with no page views is not a favorite article."""
+		category = self.make_help_category()
+		route = "support-unviewed-" + random_string(10)
+		name = self.make_help_article(category, route, "Unviewed Article", "<p>Unviewed</p>")
+
+		names = [row.name for row in get_favorite_articles_by_page_view()]
+
+		self.assertNotIn(name, names)
+
+	def test_result_is_limited_to_six_articles(self):
+		"""At most FAVORITE_ARTICLE_LIMIT articles come back, and they are the most viewed."""
+		# Articles already on the site could outrank ours; this is rolled back after the test
+		frappe.db.set_value("Help Article", {"published": 1}, "published", 0)
+		category = self.make_help_category()
+
+		# Eight candidates with distinct, descending view counts
+		expected = []
+		for index in range(8):
+			route = f"support-limit-{index}-" + random_string(10)
+			name = self.make_help_article(category, route, f"Limit Article {index}", "<p>Limit</p>")
+			self.seed_page_views(route, 20 - index)
+			expected.append(name)
+
+		results = get_favorite_articles_by_page_view()
+
+		self.assertEqual(len(results), FAVORITE_ARTICLE_LIMIT)
+		self.assertEqual([row.name for row in results], expected[:FAVORITE_ARTICLE_LIMIT])
+		self.assertEqual([row["count"] for row in results], [20, 19, 18, 17, 16, 15])

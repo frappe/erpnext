@@ -233,9 +233,14 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 
 def get_other_conditions(conditions, values, args):
 	for field in ["company", "customer", "supplier", "campaign", "sales_partner"]:
-		if args.get(field):
+		value = args.get(field)
+		if field == "campaign":
+			# transactions carry the campaign in utm_campaign
+			value = value or args.get("utm_campaign")
+
+		if value:
 			conditions += f" and coalesce(`tabPricing Rule`.{field}, '') in (%({field})s, '')"
-			values[field] = args.get(field)
+			values[field] = value
 		else:
 			conditions += f" and coalesce(`tabPricing Rule`.{field}, '') = ''"
 

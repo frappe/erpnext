@@ -61,3 +61,6 @@ class TestVoucherWiseBalance(ERPNextTestSuite):
 		self.assertNotEqual(
 			row.get("debit"), row.get("credit"), msg="Flagged rows must have debit != credit."
 		)
+
+	def test_company_is_mandatory(self):
+		self.assertRaises(frappe.ValidationError, execute, frappe._dict(from_date="2026-01-01"))

@@ -1,0 +1,74 @@
+name: PR Checks
+
+on:
+  pull_request: {}
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: pr-checks-erpnext-${{ github.event.number }}
+  cancel-in-progress: true
+
+env:
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: safe.directory
+  GIT_CONFIG_VALUE_0: '*'
+
+jobs:
+  linters:
+    name: linters
+    if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
+    runs-on: erpnext-arc-light
+    container:
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24-mariadb11.8
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 200
+          filter: blob:none
+
+      - name: Install and Run Pre-commit
+        uses: pre-commit/action@v3.0.1
+
+      - name: Check commit titles
+        if: ${{ !cancelled() }}
+        run: |
+          npm install @commitlint/cli @commitlint/config-conventional
+          npx commitlint --verbose --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
+
+  advisory:
+    name: advisory checks
+    if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
+    runs-on: erpnext-arc-light
+    container:
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24-mariadb11.8
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run JS unit tests
+        if: ${{ !cancelled() }}
+        run: yarn test:js
+
+      - name: Download Semgrep rules
+        if: ${{ !cancelled() }}
+        run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
+
+      - name: Run Semgrep rules
+        if: ${{ !cancelled() }}
+        run: uvx semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
+
+      - name: Semgrep for Test Correctness
+        if: ${{ !cancelled() }}
+        run: uvx semgrep ci --include=**/test_*.py --config ./semgrep/test-correctness.yml
+
+      - name: Run pip-audit
+        if: ${{ !cancelled() }}
+        run: uvx pip-audit --desc on .

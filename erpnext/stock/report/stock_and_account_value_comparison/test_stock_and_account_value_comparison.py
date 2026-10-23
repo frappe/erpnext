@@ -450,3 +450,21 @@ class TestStockAndAccountValueComparison(ERPNextTestSuite):
 		filters = {"company": COMPANY, "as_on_date": "2026-12-31"}
 		filters.update(extra)
 		return execute(frappe._dict(filters))[1]
+
+	def test_blank_as_on_date_reports_up_to_today(self):
+		warehouse = create_warehouse("_Test SAVC Blank Date WH", company=COMPANY)
+		account = frappe.get_value("Warehouse", warehouse, "account")
+		receipt = make_stock_entry(
+			item_code="_Test Item", to_warehouse=warehouse, qty=2, rate=100, company=COMPANY
+		)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": receipt.name, "account": account, "is_cancelled": 0},
+			"debit_in_account_currency",
+			150,
+			update_modified=False,
+		)
+
+		rows = execute(frappe._dict(company=COMPANY, account=account, as_on_date=None))[1]
+
+		self.assertEqual([row["voucher_no"] for row in rows], [receipt.name])

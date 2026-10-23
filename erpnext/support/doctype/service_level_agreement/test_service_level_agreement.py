@@ -160,6 +160,22 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 				json.loads(field["link_filters"]) if field.get("link_filters") else None,
 			)
 
+	def test_sla_on_any_doctype_needs_tracking_enabled(self):
+		with self.change_settings("Support Settings", track_service_level_agreement=0):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"Track Service Level Agreement",
+				create_service_level_agreement,
+				default_service_level_agreement=1,
+				holiday_list="__Test Holiday List",
+				entity_type=None,
+				entity=None,
+				response_time=14400,
+				resolution_time=21600,
+				doctype="Lead",
+				sla_fulfilled_on=[{"status": "Converted"}],
+			)
+
 	def test_docfield_creation_for_sla_on_custom_dt(self):
 		doctype = create_custom_doctype()
 		sla = create_service_level_agreement(
@@ -186,6 +202,16 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 				get_link_filters("DocField", filters),
 				json.loads(field["link_filters"]) if field.get("link_filters") else None,
 			)
+
+	def test_sla_fields_leave_standard_fields_alone(self):
+		sla = frappe.new_doc("Service Level Agreement")
+		sla.document_type = "Task"
+		priority_field = [
+			field for field in get_service_level_agreement_fields("Task") if field["fieldname"] == "priority"
+		]
+
+		sla.create_custom_fields(frappe.get_meta("Task"), priority_field)
+		self.assertEqual(frappe.get_meta("Task").get_field("priority").fieldtype, "Select")
 
 	def test_reset_field_properties_does_not_clobber_other_doctypes_field(self):
 		"""Two doctypes each get their own "service_level_agreement" custom field
@@ -297,7 +323,8 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 
 		lead.reload()
 		self.assertEqual(flt(lead.total_hold_time, 2), 3000)
-		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2020, 3, 4, 16, 50))
+		# the hold was before working hours
+		self.assertEqual(lead.sla_resolution_by, datetime.datetime(2020, 3, 4, 16, 0))
 
 	def test_failed_sla_for_response_only(self):
 		doctype = "Lead"

@@ -143,6 +143,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "apply_discount_on", function (frm) {
+			if (frm.doc.apply_discount_on !== "Net Total") {
+				frm.cscript.clear_mapped_discounts();
+			}
+
 			if (frm.doc.additional_discount_percentage) {
 				frm.trigger("additional_discount_percentage");
 			} else {
@@ -157,6 +161,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 
 			frm.via_discount_percentage = true;
+
+			if (frm.doc.additional_discount_percentage) {
+				frm.cscript.clear_mapped_discounts();
+			}
 
 			if (frm.doc.additional_discount_percentage && frm.doc.discount_amount) {
 				// Reset discount amount and net / grand total
@@ -175,6 +183,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		frappe.ui.form.on(this.frm.doctype, "discount_amount", function (frm) {
 			frm.cscript.set_dynamic_labels();
+			frm.cscript.clear_mapped_discounts();
 
 			if (!frm.via_discount_percentage) {
 				frm.doc.additional_discount_percentage = 0;
@@ -214,6 +223,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				) {
 					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 				}
+
+				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, "items");
 			},
 		});
 
@@ -595,8 +606,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 			],
 			primary_action_label: __("Create Payment Request"),
-			primary_action: async () => {
-				const values = dialog.get_values();
+			primary_action: async (values) => {
 				const selected = values.payment_schedules.filter((r) => r.__checked);
 
 				if (!selected.length) {
@@ -808,6 +818,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		item.uom = null; // make UOM blank to update the existing UOM when item changes
 		item.conversion_factor = 0;
 		item.barcode = null;
+		this.drop_mapped_discount(item);
 
 		if (item.item_code || item.serial_no) {
 			if (!this.validate_company_and_party()) {
@@ -1406,6 +1417,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.refresh_field("payment_schedule");
 	}
 
+	cost_center(doc, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
+	}
+
 	due_date(doc, cdt, cdn) {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
@@ -1572,6 +1587,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_gross_profit(item);
 	}
 
+	disable_rounded_total() {
+		this.calculate_taxes_and_totals();
+	}
+
 	shipping_rule() {
 		var me = this;
 		if (this.frm.doc.shipping_rule) {
@@ -1630,9 +1649,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	get_exchange_rate(transaction_date, from_currency, to_currency, callback) {
 		var args;
-		if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"].includes(this.frm.doctype)) {
+		if (
+			["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"].includes(
+				this.frm.doctype
+			)
+		) {
 			args = "for_selling";
-		} else if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
+		} else if (
+			["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(
+				this.frm.doctype
+			)
+		) {
 			args = "for_buying";
 		}
 
@@ -1848,6 +1875,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 			});
 		}
+	}
+
+	before_items_remove(doc, cdt, cdn) {
+		this.drop_mapped_discount(frappe.get_doc(cdt, cdn));
 	}
 
 	process_item_removal() {
@@ -2296,7 +2327,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 			company: me.frm.doc.company,
 			transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
-			campaign: me.frm.doc.campaign,
+			campaign: me.frm.doc.utm_campaign,
 			sales_partner: me.frm.doc.sales_partner,
 			ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 			doctype: me.frm.doc.doctype,
@@ -2378,6 +2409,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			const existing_pricing_rule = frappe.model.get_value(child.doctype, child.name, "pricing_rules");
 
 			for (const [key, value] of Object.entries(child)) {
+				// The percentage handler calculates the amount; triggering both clears the discount.
+				if (key === "discount_amount" && child.discount_percentage) continue;
+
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
 						const doc = frappe.get_doc(child.doctype, child.name);
@@ -3011,8 +3045,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
 			fields: fields,
-			primary_action: function () {
-				const data = dialog.get_values();
+			primary_action: function (data) {
 				const selected_data = data.items.filter((item) => item?.__checked == 1);
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
@@ -3347,6 +3380,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => (this.frm._last_coupon_code = this.frm.doc.coupon_code),
 			]);
 		}
+	}
+
+	setup_accounting_dimension_triggers() {
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			callback: (r) => {
+				if (r.message && r.message[0]) {
+					let dimensions = r.message[0].map((d) => d.fieldname);
+					dimensions.forEach((dim) => {
+						this.frm.cscript[dim] = function (doc, cdt, cdn) {
+							erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", dim);
+						};
+					});
+				}
+			},
+		});
 	}
 };
 

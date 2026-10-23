@@ -27,6 +27,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_keys_for_total,
 	prepare_data,
 )
+from erpnext.accounts.report.utils import has_gl_entry_restrictions
 
 
 def execute(filters=None):
@@ -94,7 +95,7 @@ def execute(filters=None):
 		compute_growth_view_data(data, period_list)
 
 	if filters.get("selected_view") == "Margin":
-		compute_margin_view_data(data, period_list)
+		compute_margin_view_data(data, period_list, income[-2] if income else None)
 
 	return columns, data, None, chart, report_summary, primitive_summary
 
@@ -222,6 +223,9 @@ def get_chart_data(filters, chart_columns, income, expense, net_profit_loss, cur
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if not (conn := get_latest_sync("GL Entry")):
@@ -259,7 +263,7 @@ def execute_snapshot_report(filters):
 		compute_growth_view_data(data, period_list)
 
 	if filters.get("selected_view") == "Margin":
-		compute_margin_view_data(data, period_list, filters.accumulated_values)
+		compute_margin_view_data(data, period_list, income[-2] if income else None)
 
 	return columns, data, None, chart, report_summary, primitive_summary
 

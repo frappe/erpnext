@@ -18,6 +18,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, parse_json
 from pypika import functions as fn
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
@@ -90,7 +91,6 @@ class WorkOrderStockReservation:
 			self.doc.reserve_stock = 1
 
 	def update_stock_reservation(self):
-		self.doc.set_qty_change()
 		reserve_stock_for_work_order(self.doc)
 		self.doc.db_set("status", self.doc.get_status())
 
@@ -100,20 +100,32 @@ class WorkOrderStockReservation:
 		# A fully-transferred entry is "Closed"; it must stay eligible here, otherwise cancelling the
 		# transfer can never reset its transferred_qty and the Store reservation is lost. Only truly
 		# cancelled entries (docstatus 2) are excluded.
-		names = frappe.get_all(
+		filters = {
+			"voucher_no": self.doc.name,
+			"item_code": row.item_code,
+			"voucher_detail_no": row.name,
+			"warehouse": row.source_warehouse,
+		}
+		for name in self.get_reservations_to_update(filters, "transferred_qty"):
+			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
+
+	def get_reservations_to_update(self, filters: dict, field: str) -> list[str]:
+		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
+		filters, or_filters = self.get_holding_filters(filters, field)
+		return frappe.get_all(
 			"Stock Reservation Entry",
-			filters={
-				"voucher_no": self.doc.name,
-				"item_code": row.item_code,
-				"voucher_detail_no": row.name,
-				"warehouse": row.source_warehouse,
-				"docstatus": 1,
-			},
+			filters=filters,
+			or_filters=or_filters,
 			pluck="name",
 			order_by="creation",
 		)
-		for name in names:
-			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
+
+	def get_holding_filters(self, filters: dict, field: str) -> tuple[dict, dict | None]:
+		"""Filters for submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
+		if self.doc.status == "Closed":
+			return {**filters, "docstatus": ("in", [1, 2])}, {"docstatus": 1, field: (">", 0)}
+
+		return {**filters, "docstatus": 1}, None
 
 	def _apply_transferred_qty(self, name, transferred_qty, row_wise_serial_batch):
 		if transferred_qty < 0:
@@ -124,15 +136,18 @@ class WorkOrderStockReservation:
 		if qty_to_update < 0:
 			return transferred_qty
 
+		if doc.docstatus == 2:
+			doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
+			doc.release_reversed_usage("transferred_qty", row_wise_serial_batch)
+			return transferred_qty
+
 		self._apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch)
 		return transferred_qty
 
 	@staticmethod
 	def _split_transferred_qty(doc, transferred_qty):
-		if transferred_qty > flt(doc.reserved_qty - doc.consumed_qty):
-			qty_to_update = doc.reserved_qty - doc.transferred_qty
-			return qty_to_update, transferred_qty - qty_to_update
-		return transferred_qty, 0.0
+		qty_to_update = min(flt(transferred_qty), flt(doc.reserved_qty - doc.consumed_qty))
+		return qty_to_update, flt(transferred_qty) - qty_to_update
 
 	@staticmethod
 	def _apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch):
@@ -154,14 +169,12 @@ class WorkOrderStockReservation:
 			"item_code": item.item_code,
 			"voucher_detail_no": item.name,
 			"warehouse": wip_warehouse,
-			"docstatus": 1,
 		}
 		if not self.doc.skip_transfer:
 			filters["from_voucher_no"] = ("is", "set")
 
 		row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name, CONSUMPTION_PURPOSES)
-		names = frappe.get_all("Stock Reservation Entry", filters=filters, pluck="name", order_by="creation")
-		for name in names:
+		for name in self.get_reservations_to_update(filters, "consumed_qty"):
 			consumed_qty = self._apply_consumed_qty(name, consumed_qty, row_wise_serial_batch)
 
 	@staticmethod
@@ -172,6 +185,10 @@ class WorkOrderStockReservation:
 		if qty_to_update >= 0:
 			doc.db_set("consumed_qty", flt(qty_to_update), update_modified=False)
 			consumed_qty -= qty_to_update
+
+		if doc.docstatus == 2:
+			doc.release_reversed_usage("consumed_qty", row_wise_serial_batch)
+			return consumed_qty
 
 		if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
 			doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
@@ -591,12 +608,13 @@ def _reserve_or_transfer(sre, doc, is_transfer):
 			doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
 		)
 	elif doc.subcontracting_inward_order and is_transfer:
+		doc.set_qty_change()
 		sre.transfer_reservation_entries_to(
 			doc.subcontracting_inward_order,
 			from_doctype="Subcontracting Inward Order",
 			to_doctype="Work Order",
 			against_fg_item=doc.subcontracting_inward_order_item,
-			qty_change=doc.qty_change,
+			qty_change=doc.get("qty_change"),
 		)
 	elif sre.make_stock_reservation_entries():
 		frappe.msgprint(_("Stock Reservation Entries Created"), alert=True)
@@ -670,7 +688,7 @@ def _consumed_qty_filter(stock_entry, stock_entry_detail, work_order, item_code)
 		(stock_entry.work_order == work_order)
 		& (stock_entry.purpose.isin(CONSUMPTION_PURPOSES))
 		& (stock_entry.docstatus == 1)
-		& (stock_entry_detail.s_warehouse.isnotnull())
+		& (IfNull(stock_entry_detail.s_warehouse, "") != "")
 		# An attributed row belongs to its original requirement, not both item codes.
 		& (fn.Coalesce(stock_entry_detail.original_item, stock_entry_detail.item_code) == item_code)
 	)
@@ -695,9 +713,24 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 				(wo_item.required_qty > wo_item.transferred_qty)
 				| (wo_item.required_qty > wo_item.consumed_qty)
 			)
+			& ExistsCriterion(_earlier_operation_making_item(wo, wo_item)).negate()
 		)
 	)
 	return query.run()[0][0] or 0.0
+
+
+def _earlier_operation_making_item(wo, wo_item):
+	"""An earlier operation of the Work Order that makes the row's item for the operation using it."""
+	operation = frappe.qb.DocType("Work Order Operation")
+	return (
+		frappe.qb.from_(operation)
+		.select(operation.name)
+		.where(
+			(operation.parent == wo.name)
+			& (operation.finished_good == wo_item.item_code)
+			& (operation.idx < wo_item.operation_row_id)
+		)
+	)
 
 
 def _production_reserved_qty_field(wo, wo_item):
@@ -706,7 +739,16 @@ def _production_reserved_qty_field(wo, wo_item):
 		(wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty), 0.0
 	)
 	qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-	return qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+	qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
+	# what Subcontracting Orders took over is their demand, not the Work Order's, even when they
+	# send what the Work Order already transferred
+	not_subcontracted = wo_item.required_qty - wo_item.subcontracted_qty
+	return (
+		Case()
+		.when(not_subcontracted <= 0, 0.0)
+		.when(not_subcontracted < qty_field, not_subcontracted)
+		.else_(qty_field)
+	)
 
 
 def get_row_wise_serial_batch(work_order, purpose=None):

@@ -19,6 +19,7 @@ from frappe.query_builder.functions import Cast, Coalesce, Max
 from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
 
+from erpnext import get_company_currency
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
@@ -28,6 +29,7 @@ from erpnext.controllers.website_list_for_contact import (
 	add_role_for_portal_user,
 	link_portal_users_to_contacts,
 )
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 from erpnext.utilities.transaction_base import TransactionBase
 
 from .mapper import (
@@ -197,8 +199,10 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.validate_prospect_not_converted()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+		validate_default_price_list_side(self.default_price_list, "selling")
 
 		# set loyalty program tier
 		if not self.is_new() and (customer := self.get_doc_before_save()):
@@ -230,8 +234,8 @@ class Customer(TransactionBase):
 		self.payment_terms = self.default_price_list = ""
 
 		tables = [
-			["accounts", ["account"]],
-			["credit_limits", ["credit_limit", "overdue_billing_threshold"]],
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold", "bypass_credit_limit_check"]],
 		]
 		fields = ["payment_terms", "default_price_list"]
 
@@ -360,7 +364,9 @@ class Customer(TransactionBase):
 		if not self.lead_name:
 			return
 
-		frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
+		lead = frappe.get_doc("Lead", self.lead_name)
+		lead.db_set("status", "Converted")
+		lead.update_prospect()
 		for doctype, party_type_field in (("Quotation", "quotation_to"), ("Opportunity", "opportunity_from")):
 			self.link_lead_records(doctype, party_type_field)
 
@@ -425,6 +431,21 @@ class Customer(TransactionBase):
 				),
 				frappe.NameError,
 			)
+
+	def validate_prospect_not_converted(self):
+		if not (self.is_new() and self.prospect_name):
+			return
+
+		customer = frappe.db.exists("Customer", {"prospect_name": self.prospect_name})
+		if not customer:
+			return
+
+		message = _("Prospect {0} is already converted to a Customer").format(frappe.bold(self.prospect_name))
+		if frappe.has_permission("Customer", "read", customer):
+			message = _("Prospect {0} is already converted to Customer {1}").format(
+				frappe.bold(self.prospect_name), get_link_to_form("Customer", customer)
+			)
+		frappe.throw(message, frappe.DuplicateEntryError)
 
 	def validate_customer_group(self):
 		if not self.customer_group:
@@ -578,8 +599,12 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
+	customer_outstanding = flt(
+		customer_outstanding,
+		frappe.get_precision("Customer Credit Limit", "credit_limit", get_company_currency(company)),
+	)
 
-	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
+	if credit_limit > 0 and customer_outstanding > credit_limit:
 		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 			customer, customer_outstanding, credit_limit
 		)
@@ -813,12 +838,16 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	SalesInvoice = frappe.qb.DocType("Sales Invoice")
 	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 
 	si_subquery = (
 		frappe.qb.from_(SalesInvoiceItem)
-		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.amount).as_("billed_amount"))
+		.join(SalesInvoice)
+		.on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.stock_qty).as_("billed_qty"))
 		.where(SalesInvoiceItem.docstatus == 1)
+		.where((SalesInvoice.is_return == 0) | (SalesInvoice.update_billed_amount_in_delivery_note == 1))
 		.groupby(SalesInvoiceItem.dn_detail)
 	)
 
@@ -831,7 +860,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.select(
 			Sum(
 				(
-					(DeliveryNoteItem.amount - IfNull(si_subquery.billed_amount, 0.0))
+					DeliveryNoteItem.base_net_amount
+					* (DeliveryNoteItem.stock_qty - IfNull(si_subquery.billed_qty, 0.0))
+					/ DeliveryNoteItem.stock_qty
 					/ DeliveryNote.base_net_total
 				)
 				* DeliveryNote.base_grand_total
@@ -842,7 +873,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.where(DeliveryNote.docstatus == 1)
 		.where(DeliveryNote.base_net_total > 0)
 		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
-		.where(DeliveryNoteItem.amount > IfNull(si_subquery.billed_amount, 0.0))
+		.where(DeliveryNoteItem.stock_qty > IfNull(si_subquery.billed_qty, 0.0))
 		.where(
 			Criterion.any(
 				[DeliveryNoteItem.against_sales_order.isnull(), DeliveryNoteItem.against_sales_order == ""]

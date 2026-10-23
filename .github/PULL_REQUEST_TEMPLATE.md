@@ -18,6 +18,8 @@ Also, if you're new here
 
 - Pull Request Checklist => https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist
 
+- frappe-pr-bot review => comment `@frappe-pr-bot review`. All commands: https://github.com/frappe/erpnext/blob/develop/.github/frappe-pr-bot.md
+
 -->
 
 > Please provide enough information so that others can review your pull request:

@@ -2,14 +2,16 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, flt, today
+from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.report import utils as report_utils
 from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
+	CurrencyTranslator,
 	execute,
 	get_subsidiary_companies,
 	prepare_companywise_opening_balance,
 )
-from erpnext.accounts.report.utils import convert
+from erpnext.accounts.report.consolidated_trial_balance import consolidated_trial_balance
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -188,11 +190,11 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		data = self.run_report(report="Profit and Loss Statement", accumulated_in_group_company=1)
 
 		row = self.get_row(data, "_Test Consolidated Consulting")
-		year_end_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_end_date")
-		self.assertEqual(flt(row.get(FOREIGN_CHILD_COMPANY)), 100)
-		self.assertAlmostEqual(
-			flt(row.get(PARENT_COMPANY)), flt(convert(100, "INR", "USD", year_end_date), 3)
+		reporting_amount = frappe.db.get_value(
+			"GL Entry", {"account": account.name}, "credit_in_reporting_currency"
 		)
+		self.assertEqual(flt(row.get(FOREIGN_CHILD_COMPANY)), 100)
+		self.assertAlmostEqual(flt(row.get(PARENT_COMPANY)), flt(reporting_amount, 3))
 
 	def test_cash_flow_accumulates_working_capital_into_group(self):
 		filters = {"report": "Cash Flow", "accumulated_in_group_company": 1}
@@ -202,8 +204,9 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 
 		profit_change = self.get_change(before, after, "Profit for the year")
 		receivable_change = self.get_change(before, after, "Net Change in Accounts Receivable")
+		translation_change = self.get_change(before, after, "Foreign Currency Translation Reserve")
 		self.assertGreater(profit_change, 100)
-		self.assertAlmostEqual(receivable_change, -profit_change, 2)
+		self.assertAlmostEqual(receivable_change, -(profit_change + translation_change), 2)
 		self.assertAlmostEqual(self.get_change(before, after, "Net Change in Cash"), 0, 2)
 
 	def test_cash_flow_totals_fill_every_company_column(self):
@@ -234,7 +237,8 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 
 	def get_change(self, before, after, account_name, company=PARENT_COMPANY):
 		before_row = self.get_row(before, account_name) or {}
-		return flt(self.get_row(after, account_name).get(company)) - flt(before_row.get(company))
+		after_row = self.get_row(after, account_name) or {}
+		return flt(after_row.get(company)) - flt(before_row.get(company))
 
 	def test_cash_flow_converts_working_capital_to_presentation_currency(self):
 		filters = {"report": "Cash Flow", "presentation_currency": "USD"}
@@ -284,3 +288,155 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		message, opening_balance = prepare_companywise_opening_balance([asset_root], [], [], companies)
 		self.assertTrue(message)
 		self.assertEqual(opening_balance[CHILD_COMPANY], 500)
+
+	def test_income_is_translated_at_the_transaction_rate(self):
+		self.set_closing_rate(70)
+		filters = {"report": "Profit and Loss Statement", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		journal_entry = self.post_journal_entry(
+			"Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY
+		)
+		after = self.run_report(**filters)
+
+		transaction_rate = frappe.db.get_value(
+			"GL Entry", {"voucher_no": journal_entry.name}, "reporting_currency_exchange_rate"
+		)
+		self.assertNotEqual(transaction_rate, 70)
+		self.assertAlmostEqual(self.get_change(before, after, "Sales"), 100 * transaction_rate, 2)
+		self.assertAlmostEqual(
+			flt(self.get_row(after, "Sales", last_match=True)[PARENT_COMPANY]),
+			self.get_trial_balance_sales(),
+			2,
+		)
+
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": journal_entry.name},
+			{"debit_in_reporting_currency": 0, "credit_in_reporting_currency": 0},
+		)
+		without_reporting_amounts = self.run_report(**filters)
+		self.assertAlmostEqual(
+			self.get_change(before, without_reporting_amounts, "Sales"), 100 * transaction_rate, 2
+		)
+
+	def test_balance_sheet_shows_translation_reserve(self):
+		self.set_closing_rate(70)
+		filters = {"report": "Balance Sheet", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		journal_entry = self.post_journal_entry(
+			"Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY
+		)
+		after = self.run_report(**filters)
+
+		transaction_rate = frappe.db.get_value(
+			"GL Entry", {"voucher_no": journal_entry.name}, "reporting_currency_exchange_rate"
+		)
+		changes = {
+			label: self.get_change(before, after, label)
+			for label in (
+				"Total Asset (Debit)",
+				"Foreign Currency Translation Reserve",
+				"Provisional Profit / Loss (Credit)",
+				"Total (Credit)",
+			)
+		}
+		self.assertAlmostEqual(changes["Total Asset (Debit)"], 100 * 70, 2)
+		self.assertAlmostEqual(changes["Provisional Profit / Loss (Credit)"], 100 * transaction_rate, 2)
+		self.assertAlmostEqual(
+			changes["Foreign Currency Translation Reserve"], 100 * (70 - transaction_rate), 2
+		)
+		self.assertAlmostEqual(changes["Total (Credit)"], changes["Total Asset (Debit)"], 2)
+
+	def test_balance_sheet_reserve_with_entries_without_reporting_amounts(self):
+		self.set_closing_rate(70)
+		filters = {"report": "Balance Sheet", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		self.post_journal_entry("Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY)
+		older_entry = self.post_journal_entry("Cash - CCU", "Sales - CCU", 50, company=FOREIGN_CHILD_COMPANY)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": older_entry.name},
+			{"debit_in_reporting_currency": 0, "credit_in_reporting_currency": 0},
+		)
+		after = self.run_report(**filters)
+
+		transaction_rate = frappe.db.get_value(
+			"GL Entry", {"voucher_no": older_entry.name}, "reporting_currency_exchange_rate"
+		)
+		profit_change = self.get_change(before, after, "Provisional Profit / Loss (Credit)")
+		self.assertAlmostEqual(profit_change, 150 * transaction_rate, 2)
+
+	def test_closed_year_leaves_no_provisional_profit(self):
+		self.set_closing_rate(70)
+		year_start_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_start_date")
+		self.set_exchange_rate(60, year_start_date)
+		filters = {"report": "Balance Sheet", "accumulated_in_group_company": 1}
+		before = self.run_report(**filters)
+		self.post_journal_entry(
+			"Cash - CCU", "Sales - CCU", 100, company=FOREIGN_CHILD_COMPANY, posting_date=year_start_date
+		)
+		closing_voucher = self.close_period(FOREIGN_CHILD_COMPANY, year_start_date, today())
+		after = self.run_report(**filters)
+
+		closing_rate_of_voucher = frappe.db.get_value(
+			"GL Entry", {"voucher_no": closing_voucher.name}, "reporting_currency_exchange_rate"
+		)
+		self.assertAlmostEqual(self.get_change(before, after, "Provisional Profit / Loss (Credit)"), 0, 2)
+		self.assertAlmostEqual(
+			self.get_change(before, after, "Foreign Currency Translation Reserve"),
+			100 * (70 - closing_rate_of_voucher),
+			2,
+		)
+
+		closing_voucher.db_set("gle_processing_status", "In Progress")
+		fiscal_year = frappe._dict(
+			frappe.db.get_value(
+				"Fiscal Year", self.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True
+			)
+		)
+		translator = CurrencyTranslator({}, frappe._dict(filter_based_on="Fiscal Year"), fiscal_year)
+		self.assertEqual(translator.get_unclosed_from_date(FOREIGN_CHILD_COMPANY), getdate(year_start_date))
+
+	def close_period(self, company, period_start_date, period_end_date):
+		closing_voucher = frappe.get_doc(
+			{
+				"doctype": "Period Closing Voucher",
+				"transaction_date": period_end_date,
+				"period_start_date": period_start_date,
+				"period_end_date": period_end_date,
+				"company": company,
+				"fiscal_year": self.fiscal_year,
+				"cost_center": frappe.get_cached_value("Company", company, "cost_center"),
+				"closing_account_head": frappe.db.get_value(
+					"Account", {"company": company, "root_type": "Equity", "is_group": 0}
+				),
+				"remarks": "test",
+			}
+		)
+		closing_voucher.submit()
+		return closing_voucher
+
+	def set_closing_rate(self, rate):
+		year_end_date = frappe.db.get_value("Fiscal Year", self.fiscal_year, "year_end_date")
+		self.set_exchange_rate(rate, year_end_date)
+
+	def set_exchange_rate(self, rate, date):
+		for from_currency, to_currency, exchange_rate in (("USD", "INR", rate), ("INR", "USD", 1 / rate)):
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": date,
+					"from_currency": from_currency,
+					"to_currency": to_currency,
+					"exchange_rate": exchange_rate,
+				}
+			).insert()
+
+		vars(report_utils)["__exchange_rates"].clear()
+		self.addCleanup(vars(report_utils)["__exchange_rates"].clear)
+
+	def get_trial_balance_sales(self):
+		filters = frappe._dict({"company": [PARENT_COMPANY], "fiscal_year": self.fiscal_year})
+		data = consolidated_trial_balance.execute(filters)[1]
+		row = next(row for row in data if row.get("account_name") == "Sales")
+		return flt(row["closing_credit"]) - flt(row["closing_debit"])

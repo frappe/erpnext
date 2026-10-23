@@ -200,6 +200,45 @@ class TestSupplier(ERPNextTestSuite):
 		make_supplier_entry("_Test Account Cost for Goods Sold - _TC").insert()
 		make_supplier_entry("_Test Bank - _TC", amount=-100).insert()
 
+		negative_bank_debit = make_supplier_entry("_Test Bank - _TC")
+		negative_bank_debit.accounts[1].update(
+			{"credit_in_account_currency": 0, "debit_in_account_currency": -100}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is blocked", negative_bank_debit.insert)
+
+		refund_with_other_payment = make_supplier_entry("_Test Bank - _TC")
+		refund_with_other_payment.accounts[0].update({"party": create_supplier().name})
+		refund_with_other_payment.accounts[1].credit_in_account_currency = 70
+		refund_with_other_payment.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Supplier",
+				"party": supplier.name,
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": 30,
+			},
+		)
+		refund_with_other_payment.insert()
+
+	def test_hold_payments_ignores_is_return_on_payment_entry(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		supplier = create_supplier()
+		payment_entry = get_payment_entry(
+			"Purchase Order",
+			create_purchase_order(supplier=supplier.name).name,
+			bank_account="_Test Bank - _TC",
+		)
+		supplier.update({"on_hold": 1, "hold_type": "Payments"})
+		supplier.save()
+
+		payment_entry.update(
+			{"references": [], "reference_no": "1", "reference_date": nowdate(), "is_return": 1}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is blocked", payment_entry.insert)
+
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType
 		supplier = frappe.get_doc("Supplier", "_Test Supplier with Country")

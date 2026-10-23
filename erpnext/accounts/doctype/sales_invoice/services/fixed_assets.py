@@ -5,10 +5,12 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_asset_disposal_values,
+	get_last_depreciation_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
 )
@@ -45,7 +47,9 @@ class FixedAssetService:
 		if doc.update_stock:
 			frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-		asset_status = frappe.db.get_value("Asset", item.asset, "status")
+		asset_status, asset_docstatus = frappe.db.get_value("Asset", item.asset, ["status", "docstatus"])
+		if asset_docstatus == 0:
+			frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(item.idx, item.asset))
 		if asset_status in ("Scrapped", "Cancelled", "Capitalized"):
 			frappe.throw(
 				_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(
@@ -54,6 +58,17 @@ class FixedAssetService:
 			)
 		if asset_status == "Sold":
 			frappe.throw(_("Row #{0}: Asset {1} is already sold").format(item.idx, item.asset))
+
+		self._validate_sale_date(item)
+
+	def _validate_sale_date(self, item) -> None:
+		last_depreciation_date = get_last_depreciation_date(item.asset)
+		if last_depreciation_date and getdate(self.doc.posting_date) < last_depreciation_date:
+			frappe.throw(
+				_("Row #{0}: Asset {1} cannot be sold before its last depreciation entry dated {2}").format(
+					item.idx, item.asset, frappe.format(last_depreciation_date, "Date")
+				)
+			)
 
 	def set_income_account_for_fixed_assets(self) -> None:
 		for item in self.doc.items:
@@ -70,6 +85,22 @@ class FixedAssetService:
 			self._restore_asset()
 
 		self._update_asset()
+
+	def set_asset_disposal_values(self) -> None:
+		"""Store the asset values the sale or return entries are built from, so a repost reproduces them."""
+		if self.doc.is_internal_transfer():
+			return
+
+		for item in self.doc.get("items"):
+			if item.is_fixed_asset and item.asset:
+				asset = frappe.get_doc("Asset", item.asset)
+				values = get_asset_disposal_values(asset, item.finance_book)
+				item.db_set(
+					{
+						"asset_value_after_depreciation": values["value_after_depreciation"],
+						"asset_gross_value": values["gross_asset_value"],
+					}
+				)
 
 	def split_asset_based_on_sale_qty(self) -> None:
 		asset_qty_map = self._get_asset_qty()
@@ -124,7 +155,7 @@ class FixedAssetService:
 				note = _("Asset sold") if not doc.is_return else _("Return invoice of asset cancelled")
 				asset_status = "Sold"
 
-			frappe.db.set_value("Asset", d.asset, "disposal_date", disposal_date)
+			asset.db_set("disposal_date", disposal_date)
 			add_asset_activity(asset.name, note)
 			asset.set_status(asset_status)
 

@@ -8,11 +8,13 @@ from frappe import _
 from frappe.utils import flt
 
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
+from erpnext.setup.utils import get_exchange_rate
 
 
 class TimesheetBillingService:
 	def __init__(self, doc):
 		self.doc = doc
+		self.exchange_rates = {}
 
 	def validate_time_sheets_are_submitted(self) -> None:
 		listed = set()
@@ -61,7 +63,7 @@ class TimesheetBillingService:
 			timesheet.db_update_all()
 
 	def set_billing_hours_and_amount(self) -> None:
-		"""Fill rows from their time logs; a row without one is replaced by its timesheet's unbilled logs."""
+		"""Fill rows from their time logs; a row without one gets its timesheet's unbilled logs."""
 		doc = self.doc
 		if doc.is_return:
 			return
@@ -84,7 +86,7 @@ class TimesheetBillingService:
 	def fill_from_time_log(self, row, time_logs: list) -> None:
 		if log := next((log for log in time_logs if log.name == row.timesheet_detail), None):
 			row.billing_hours = row.billing_hours or log.billing_hours
-			row.billing_amount = row.billing_amount or log.billing_amount
+			row.billing_amount = row.billing_amount or self.get_billing_amount(log)
 
 	def replace_with_time_logs(self, row, time_logs: list) -> None:
 		listed = {d.timesheet_detail for d in self.doc.timesheets}
@@ -96,9 +98,25 @@ class TimesheetBillingService:
 				)
 			)
 
+		if row.billing_amount:
+			self.link_time_log(row, time_logs)
+			return
+
 		self.doc.remove(row)
 		for log in time_logs:
 			self.doc.append("timesheets", self.get_timesheet_row(log))
+
+	def link_time_log(self, row, time_logs: list) -> None:
+		"""Bill a row's own amount against the only unbilled log of its timesheet."""
+		if len(time_logs) > 1:
+			frappe.throw(
+				_("Row {0}: Select the time log of Timesheet {1} that this amount bills").format(
+					row.idx, frappe.bold(row.time_sheet)
+				)
+			)
+
+		row.timesheet_detail = time_logs[0].name
+		row.billing_hours = row.billing_hours or time_logs[0].billing_hours
 
 	def update_timesheet_billing_for_project(self) -> None:
 		doc = self.doc
@@ -121,16 +139,37 @@ class TimesheetBillingService:
 				doc.append("timesheets", self.get_timesheet_row(data))
 			self.calculate_billing_amount_for_timesheet()
 
-	@staticmethod
-	def get_timesheet_row(time_log) -> dict:
+	def get_timesheet_row(self, time_log) -> dict:
 		return {
 			"time_sheet": time_log.time_sheet,
 			"billing_hours": time_log.billing_hours,
-			"billing_amount": time_log.billing_amount,
+			"billing_amount": self.get_billing_amount(time_log),
 			"timesheet_detail": time_log.name,
 			"activity_type": time_log.activity_type,
 			"description": time_log.description,
 		}
+
+	def get_billing_amount(self, time_log) -> float:
+		"""Time log billing amount in the invoice currency."""
+		if not time_log.currency or time_log.currency == self.doc.currency:
+			return time_log.billing_amount
+
+		return flt(time_log.billing_amount) * self.get_exchange_rate(time_log.currency)
+
+	def get_exchange_rate(self, from_currency: str) -> float:
+		"""Exchange rate to the invoice currency, looked up once per currency."""
+		doc = self.doc
+		if from_currency not in self.exchange_rates:
+			exchange_rate = get_exchange_rate(from_currency, doc.currency, doc.posting_date)
+			if not exchange_rate:
+				frappe.throw(
+					_(
+						"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+					).format(from_currency, doc.currency, doc.posting_date)
+				)
+			self.exchange_rates[from_currency] = exchange_rate
+
+		return self.exchange_rates[from_currency]
 
 	def calculate_billing_amount_for_timesheet(self) -> None:
 		doc = self.doc

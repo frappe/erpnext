@@ -8,7 +8,8 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
-	GROUP_BY_FIELDS = ("party_type", "party", "tax_withholding_category")
+	# a lower deduction certificate or a mid-year rate change must not merge into the normal rate
+	GROUP_BY_FIELDS = ("party_type", "party", "tax_withholding_category", "rate")
 	CARRY_OVER_FIELDS = (
 		"tax_id",
 		"party",

@@ -6,7 +6,7 @@
 import frappe
 from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt
 
 from erpnext.controllers.item_close import validate_parent_reopen
@@ -48,9 +48,15 @@ class BillingStatusService:
 	def make_return_invoice(self) -> None:
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
+		creditable_qty = get_creditable_qty(self.doc)
+		if not any(creditable_qty.values()):
+			frappe.msgprint(_("No Credit Note was created because the returned items were not invoiced"))
+			return
+
 		try:
 			return_invoice = make_sales_invoice(self.doc.name)
 			return_invoice.is_return = True
+			limit_to_creditable_qty(return_invoice, creditable_qty)
 			return_invoice.save()
 			return_invoice.submit()
 
@@ -63,6 +69,152 @@ class BillingStatusService:
 					"Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 				)
 			)
+
+
+def get_creditable_qty(return_doc) -> dict:
+	original_rows = get_original_rows(return_doc)
+	if not original_rows:
+		return {}
+
+	available = get_billed_stock_qty({row.name for row in original_rows})
+	apply_earlier_credits(available, original_rows, return_doc)
+
+	creditable_qty = {}
+	rows = [d for d in return_doc.items if d.dn_detail] + [d for d in return_doc.items if not d.dn_detail]
+	for row in rows:
+		sources = (
+			[row.dn_detail]
+			if row.dn_detail
+			else [d.name for d in original_rows if d.item_code == row.item_code]
+		)
+		factor = flt(row.conversion_factor) or 1
+		needed = abs(flt(row.stock_qty) or flt(row.qty) * factor)
+		creditable_qty[row.name] = flt(take_credit(available, sources, needed) / factor, 6)
+
+	return creditable_qty
+
+
+def get_original_rows(return_doc) -> list:
+	linked = {d.dn_detail for d in return_doc.items if d.dn_detail}
+	item_codes = {d.item_code for d in return_doc.items}
+	rows = {}
+	fields = ["name", "item_code", "idx"]
+	if linked:
+		for row in frappe.get_all(
+			"Delivery Note Item", filters={"name": ("in", list(linked))}, fields=fields
+		):
+			rows[row.name] = row
+
+	if return_doc.return_against:
+		for row in frappe.get_all(
+			"Delivery Note Item",
+			filters={"parent": return_doc.return_against, "item_code": ("in", list(item_codes))},
+			fields=fields,
+		):
+			rows[row.name] = row
+
+	return sorted(rows.values(), key=lambda row: row.idx)
+
+
+def take_credit(available: dict, sources: list, needed: float) -> float:
+	taken = 0.0
+	for source in sources:
+		take = min(needed - taken, max(flt(available.get(source)), 0))
+		available[source] = flt(available.get(source)) - take
+		taken += take
+
+	return taken
+
+
+def apply_earlier_credits(available: dict, original_rows: list, return_doc) -> None:
+	earlier_credits = get_earlier_credits(original_rows, return_doc)
+	for earlier in earlier_credits:
+		if earlier.dn_detail in available:
+			take_credit(available, [earlier.dn_detail], earlier.stock_qty)
+
+	for earlier in earlier_credits:
+		if not earlier.dn_detail:
+			sources = [d.name for d in original_rows if d.item_code == earlier.item_code]
+			take_credit(available, sources, earlier.stock_qty)
+
+
+def get_billed_stock_qty(original_rows: set) -> dict:
+	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	invoiced = {
+		row.dn_detail: row
+		for row in (
+			frappe.qb.from_(sii)
+			.join(si)
+			.on(si.name == sii.parent)
+			.select(sii.dn_detail, Sum(sii.stock_qty).as_("stock_qty"), Sum(sii.amount).as_("amount"))
+			.where(
+				sii.dn_detail.isin(list(original_rows))
+				& (sii.docstatus == 1)
+				& ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
+			)
+			.groupby(sii.dn_detail)
+		).run(as_dict=True)
+	}
+
+	billed_qty = {}
+	for row in frappe.get_all(
+		"Delivery Note Item",
+		filters={"name": ("in", list(original_rows))},
+		fields=["name", "billed_amt", "rate", "qty", "conversion_factor"],
+	):
+		factor = flt(row.conversion_factor) or 1
+		billed_qty[row.name] = get_row_billed_qty(row, invoiced.get(row.name)) * factor
+
+	return billed_qty
+
+
+def get_row_billed_qty(row, invoiced) -> float:
+	direct_qty = flt(invoiced.stock_qty) / (flt(row.conversion_factor) or 1) if invoiced else 0.0
+	if not flt(row.rate):
+		return direct_qty if invoiced else flt(row.qty)
+
+	direct_amount = flt(invoiced.amount) if invoiced else 0.0
+	order_billed_amount = max(flt(row.billed_amt) - direct_amount, 0.0)
+	return direct_qty + flt(order_billed_amount / flt(row.rate), 6)
+
+
+def get_earlier_credits(original_rows: list, return_doc) -> list:
+	dn = frappe.qb.DocType("Delivery Note")
+	dni = frappe.qb.DocType("Delivery Note Item")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	condition = dni.dn_detail.isin([row.name for row in original_rows])
+	if return_doc.return_against:
+		condition |= dn.return_against == return_doc.return_against
+
+	return (
+		frappe.qb.from_(sii)
+		.join(dni)
+		.on(dni.name == sii.dn_detail)
+		.join(dn)
+		.on(dn.name == dni.parent)
+		.select(dni.dn_detail, dni.item_code, Abs(Sum(sii.stock_qty)).as_("stock_qty"))
+		.where(
+			condition
+			& (dn.docstatus == 1)
+			& (dn.is_return == 1)
+			& (dn.name != return_doc.name)
+			& (sii.docstatus == 1)
+			& (sii.qty < 0)
+		)
+		.groupby(dni.name, dni.dn_detail, dni.item_code)
+	).run(as_dict=True)
+
+
+def limit_to_creditable_qty(return_invoice, creditable_qty: dict) -> None:
+	rows = []
+	for row in return_invoice.items:
+		qty = flt(creditable_qty.get(row.dn_detail))
+		if qty:
+			row.qty = -min(abs(flt(row.qty)), qty)
+			rows.append(row)
+
+	return_invoice.set("items", rows)
 
 
 def update_billed_amount_based_on_so(so_detail: str, update_modified: bool = True) -> list[str]:

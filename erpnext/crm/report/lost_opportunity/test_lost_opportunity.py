@@ -27,6 +27,18 @@ class TestLostOpportunity(ERPNextTestSuite):
 		data = run_report(territory="All Territories")
 		self.assertIn(opportunity.name, [row.name for row in data])
 
+	def test_later_edit_keeps_opportunity_in_its_lost_period(self):
+		opportunity = make_lost_opportunity(["_Test Lost Reason A"])
+		lost_on = add_days(today(), -30)
+		opportunity.db_set("lost_on", lost_on)
+		opportunity.reload()
+		opportunity.order_lost_reason = "Edited after it was lost"
+		opportunity.save()
+
+		lost_period = run_report(from_date=lost_on, to_date=lost_on)
+		self.assertIn(opportunity.name, [row.name for row in lost_period])
+		self.assertNotIn(opportunity.name, [row.name for row in run_report()])
+
 	def test_lost_reason_filter_keeps_every_reason(self):
 		opportunity = make_lost_opportunity(["_Test Lost Reason A", "_Test Lost Reason B"])
 
@@ -53,6 +65,5 @@ def make_lost_opportunity(lost_reasons: list, **fields):
 
 
 def run_report(**filters):
-	return execute(
-		frappe._dict(company="_Test Company", from_date=add_days(today(), -1), to_date=today(), **filters)
-	)[1]
+	defaults = {"company": "_Test Company", "from_date": add_days(today(), -1), "to_date": today()}
+	return execute(frappe._dict({**defaults, **filters}))[1]

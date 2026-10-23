@@ -6,6 +6,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+	get_subcontracted_received_qty,
+)
+
 
 def execute(filters=None):
 	return get_column(filters), get_data(filters)
@@ -32,7 +36,7 @@ def get_data(filters):
 
 
 def get_finished_good_row(row, fg_work_orders):
-	produced_qty = sum(flt(d.produced_qty) for d in fg_work_orders)
+	produced_qty, pending_qty = get_produced_and_pending_qty(row.planned_qty, fg_work_orders)
 	return {
 		"indent": 0,
 		"item_code": row.item_code,
@@ -41,8 +45,16 @@ def get_finished_good_row(row, fg_work_orders):
 		"bom_level": 0,
 		"qty": flt(row.planned_qty),
 		"produced_qty": produced_qty,
-		"pending_qty": flt(row.planned_qty) - produced_qty,
+		"pending_qty": pending_qty,
 	}
+
+
+def get_produced_and_pending_qty(qty, documents):
+	produced_qty = sum(flt(d.produced_qty) for d in documents)
+	ordered_beyond_plan = max(sum(flt(d.qty) for d in documents) - flt(qty), 0)
+	process_loss_qty = sum(flt(d.get("process_loss_qty")) for d in documents)
+	unreplaced_loss_qty = max(process_loss_qty - ordered_beyond_plan, 0)
+	return produced_qty, get_pending_qty(qty, produced_qty, unreplaced_loss_qty)
 
 
 def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
@@ -53,7 +65,7 @@ def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
 			documents = [d for d in work_orders if d.production_plan_sub_assembly_item == item.name]
 
 		indent = 1 + (item.indent or 0)
-		produced_qty = sum(flt(d.produced_qty) for d in documents)
+		produced_qty, pending_qty = get_produced_and_pending_qty(item.qty, documents)
 		data.append(
 			{
 				"indent": indent,
@@ -62,7 +74,7 @@ def add_sub_assembly_rows(items, data, work_orders, purchase_orders):
 				"bom_level": item.bom_level,
 				"qty": flt(item.qty),
 				"produced_qty": produced_qty,
-				"pending_qty": flt(item.qty) - produced_qty,
+				"pending_qty": pending_qty,
 			}
 		)
 		data.extend(get_document_row(d, indent=indent + 1) for d in documents)
@@ -79,8 +91,14 @@ def get_document_row(doc, indent):
 		"status": doc.status,
 		"qty": flt(doc.qty),
 		"produced_qty": flt(doc.produced_qty),
-		"pending_qty": flt(doc.qty) - flt(doc.produced_qty),
+		"pending_qty": get_pending_qty(doc.qty, doc.produced_qty, doc.get("process_loss_qty")),
 	}
+
+
+def get_pending_qty(qty, produced_qty, process_loss_qty):
+	return flt(
+		flt(qty) - flt(produced_qty) - flt(process_loss_qty), frappe.get_precision("Work Order", "qty")
+	)
 
 
 def get_work_orders(filters):
@@ -91,6 +109,7 @@ def get_work_orders(filters):
 			"name",
 			"qty",
 			"produced_qty",
+			"process_loss_qty",
 			"status",
 			"sales_order",
 			"production_item as item_code",
@@ -117,6 +136,7 @@ def get_purchase_orders(filters):
 		.on(po_item.parent == purchase_order.name)
 		.select(
 			po_item.parent.as_("document_name"),
+			po_item.name.as_("po_detail"),
 			po_item.qty.as_("order_qty"),
 			po_item.received_qty,
 			po_item.item_code.as_("po_item_code"),
@@ -130,13 +150,14 @@ def get_purchase_orders(filters):
 		.run(as_dict=True)
 	)
 
-	return [get_purchase_order_row(row) for row in purchase_orders]
+	subcontracted_qty = get_subcontracted_received_qty(
+		[row.po_detail for row in purchase_orders if row.fg_item]
+	)
+	return [get_purchase_order_row(row, subcontracted_qty) for row in purchase_orders]
 
 
-def get_purchase_order_row(row):
-	produced_qty = flt(row.received_qty)
-	if row.fg_item:
-		produced_qty = flt(row.received_qty) / (flt(row.order_qty) / flt(row.fg_item_qty) or 1)
+def get_purchase_order_row(row, subcontracted_qty):
+	produced_qty = flt(subcontracted_qty.get(row.po_detail)) if row.fg_item else flt(row.received_qty)
 
 	item_code = row.fg_item or row.po_item_code
 	return frappe._dict(

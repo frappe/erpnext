@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import frappe
+from frappe.desk.query_report import run
 from frappe.utils import today
 
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import (
@@ -19,8 +21,8 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 	def setUp(self):
 		self.maxDiff = None
 		# deliberately unrelated companies, no parent/child link
-		self.company_a = self.create_test_company("_Test Unrelated A", "_TUNA")
-		self.company_b = self.create_test_company("_Test Unrelated B", "_TUNB")
+		self.company_a = "_Test Unrelated A"
+		self.company_b = "_Test Unrelated B"
 		self.create_customer("_Test Consolidation Customer")
 		# the mixin would otherwise pass company=None, which Item Default rejects
 		self.create_item("_Test Consolidation Item", company=self.company_a)
@@ -82,14 +84,39 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 		self.assertEqual([r.outstanding for r in rows], [200.0, 200.0])
 
 	def test_no_total_when_companies_use_different_currencies(self):
-		usd = self.create_test_company("_Test Unrelated USD", "_TUNU", currency="USD")
+		usd = "_Test Company 1"
 		self.create_invoice(self.company_a, "_TUNA", 200)
-		self.create_invoice(usd, "_TUNU", 300, currency="USD")
+		self.create_invoice(usd, "_TC1", 300, currency="USD")
 
 		rows = execute(self.filters(companies=[self.company_a, usd]))[1]
 
 		self.assertEqual([r.company for r in rows], [self.company_a, usd])
 		self.assertFalse(any(row.get("bold") for row in rows))
+
+	def test_user_restricted_to_a_subsidiary_sees_its_rows(self):
+		child = "Child Company India"
+		self.create_invoice(child, "CCI", 400)
+		user = self.restricted_user(child)
+
+		frappe.set_user(user)
+		try:
+			rows = run("Consolidated Accounts Receivable Summary", self.filters(companies=[child]))["result"]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([r.get("company") for r in rows], [child, ""])
+		self.assertEqual([r.get("outstanding") for r in rows], [400.0, 400.0])
+
+	def restricted_user(self, company):
+		user = "test_consolidated_ar_summary@example.com"
+		if not frappe.db.exists("User", user):
+			doc = frappe.new_doc("User")
+			doc.email = user
+			doc.first_name = "Consolidated AR"
+			doc.append("roles", {"role": "Accounts User"})
+			doc.insert()
+		frappe.permissions.add_user_permission("Company", company, user)
+		return user
 
 	def company_outstanding(self, company):
 		filters = {"company": company, "report_date": today(), "range": "30, 60, 90, 120"}

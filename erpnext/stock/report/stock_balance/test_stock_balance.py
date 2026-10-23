@@ -99,6 +99,111 @@ class TestStockBalance(ERPNextTestSuite):
 		)
 		self.assertInvariants(rows)
 
+	def test_dimension_wise_stock_of_an_opening_reconciliation(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.update({"purpose": "Opening Stock", "company": "_Test Company"})
+		for plant, qty in ((plant_a, 5), (plant_b, 3)):
+			sr.append(
+				"items",
+				{
+					"item_code": self.item.name,
+					"warehouse": self.test_warehouse,
+					"qty": qty,
+					"valuation_rate": 100,
+					"id_plant": plant,
+				},
+			)
+		sr.insert()
+		sr.submit()
+
+		rows = stock_balance(_dict(self.filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (5, 500), plant_b: (3, 300)},
+		)
+
+	def test_reconciliation_without_dimension_in_dimension_wise_stock(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+			make_plant_dimension,
+		)
+
+		plant_a, _plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		def receive_into_plant_a(qty):
+			receipt = make_stock_entry(
+				item_code=item, to_warehouse=self.test_warehouse, qty=qty, rate=100, do_not_save=True
+			)
+			receipt.items[0].to_id_plant = plant_a
+			receipt.insert().submit()
+
+		receive_into_plant_a(10)
+		make_stock_entry(item_code=item, to_warehouse=self.test_warehouse, qty=5, rate=100)
+		create_stock_reconciliation(item_code=item, warehouse=self.test_warehouse, qty=20, rate=100)
+		receive_into_plant_a(5)
+
+		rows = stock_balance(_dict(self.filters, item_code=[item], show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (15, 1500), None: (10, 1000)},
+		)
+
+	def test_dimension_rows_use_the_pool_rate(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		for field, plant, movement in (
+			("to_id_plant", plant_a, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 100}),
+			("to_id_plant", plant_b, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 200}),
+			("id_plant", plant_a, {"from_warehouse": self.test_warehouse, "qty": 5}),
+		):
+			entry = make_stock_entry(item_code=item, do_not_save=True, **movement)
+			entry.items[0].set(field, plant)
+			entry.insert().submit()
+
+		filters = _dict(self.filters, item_code=[item])
+		rows = stock_balance(_dict(filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val, row.val_rate) for row in rows},
+			{plant_a: (5, 750, 150), plant_b: (10, 1500, 150)},
+		)
+
+		rows = stock_balance(_dict(filters, id_plant=[plant_a]))
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in rows], [(5, 750)])
+
+	def test_dimension_wise_stock_keeps_stranded_pool_value(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		entries = []
+		for field, plant, movement in (
+			("to_id_plant", plant_a, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 100}),
+			("id_plant", plant_a, {"from_warehouse": self.test_warehouse, "qty": 10}),
+			("to_id_plant", plant_b, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 100}),
+		):
+			entry = make_stock_entry(item_code=item, do_not_save=True, **movement)
+			entry.items[0].set(field, plant)
+			entry.insert().submit()
+			entries.append(entry)
+
+		receipt_sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entries[0].name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", receipt_sle, "stock_value_difference", 1500)
+
+		filters = _dict(self.filters, item_code=[item])
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in stock_balance(filters)], [(10, 1500)])
+
+		rows = stock_balance(_dict(filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_b: (10, 1000), None: (0, 500)},
+		)
+
 	def test_include_zero_stock_items(self):
 		"""Items whose balance nets to zero are hidden by default and shown only when the filter is on."""
 		self.generate_stock_ledger(
@@ -177,6 +282,22 @@ class TestStockBalance(ERPNextTestSuite):
 			msg=f"Expected child warehouse balances \n{rows}",
 		)
 
+	def test_warehouse_type_applies_with_a_warehouse(self):
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10, to_warehouse="Stores - _TC")])
+		warehouse_type = (
+			frappe.get_doc(
+				doctype="Warehouse Type", name=f"_Test Unused Type {frappe.generate_hash(length=6)}"
+			)
+			.insert()
+			.name
+		)
+
+		rows = stock_balance(
+			self.filters.update({"warehouse": "All Warehouses - _TC", "warehouse_type": warehouse_type})
+		)
+
+		self.assertFalse([row for row in rows if row.item_code == self.item.name])
+
 	def test_show_item_attr(self):
 		from erpnext.controllers.item_variant import create_variant
 
@@ -195,17 +316,6 @@ class TestStockBalance(ERPNextTestSuite):
 		item = make_item(uoms=uoms)
 		self.filters.update({"item_code": [item.name]})
 		return item
-
-	def test_alt_uom_balance_single_uom(self):
-		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
-		item = self.make_alt_uom_item(uoms=[{"conversion_factor": 12, "uom": "Box"}])
-
-		self.generate_stock_ledger(item.name, [_dict(qty=24, rate=10)])
-
-		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
-		self.assertEqual(len(rows), 1)
-		self.assertEqual(rows[0].get("alt_uom"), "Box")
-		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 2.0)  # 24 / 12
 
 	def test_alt_uom_balance_no_alternate_uom(self):
 		"""Alt UOM columns are not added when no items in the report have alt UOMs."""

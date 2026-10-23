@@ -74,7 +74,11 @@ class TestDowntimeAnalysis(ERPNextTestSuite):
 		self.assertIsNone(self.row_for_entry(rows, self.entry.name))
 
 	def test_chart_aggregates_downtime_per_workstation(self):
-		self.make_downtime_entry(self.workstation)
+		self.make_downtime_entry(
+			self.workstation,
+			from_time=get_datetime(f"{today()} 11:00:00"),
+			to_time=get_datetime(f"{today()} 13:00:00"),
+		)
 
 		chart = execute(
 			frappe._dict(
@@ -90,3 +94,20 @@ class TestDowntimeAnalysis(ERPNextTestSuite):
 		index = chart["data"]["labels"].index(self.workstation)
 		# Two entries of 2 hours each for this workstation -> 4 hours aggregated.
 		self.assertEqual(chart["data"]["datasets"][0]["values"][index], 4.0)
+
+	def test_entry_crossing_the_range_is_clipped(self):
+		rows = self.run_report(
+			from_date=get_datetime(f"{today()} 10:00:00"), to_date=get_datetime(f"{today()} 10:30:00")
+		)
+		row = self.row_for_entry(rows, self.entry.name)
+		self.assertIsNotNone(row)
+		self.assertEqual(row.get("downtime"), 0.5)
+
+	def test_reversed_date_range_is_refused(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"From Date must be before To Date",
+			self.run_report,
+			from_date=get_datetime(f"{today()} 10:30:00"),
+			to_date=get_datetime(f"{today()} 10:00:00"),
+		)

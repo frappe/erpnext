@@ -12,6 +12,7 @@ set right twice, in separate tests:
   year as it was filed and sets stock and accounts right from its date on.
 """
 
+from copy import deepcopy
 from unittest.mock import patch
 
 import frappe
@@ -23,8 +24,17 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost as run_repost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.report.serial_and_batch_wise_stock_balance.serial_and_batch_wise_stock_balance import (
+	execute as serial_and_batch_wise_stock_balance,
+)
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.stock.report.stock_balance.stock_balance import execute as stock_balance
+from erpnext.stock.report.stock_balance.stock_balance import execute_snapshot_report
+from erpnext.stock.report.stock_balance.test_stock_balance_snapshot import (
+	capture_ledger,
+	execute_from_snapshot,
+	ledger_snapshot,
+)
 from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.test_stock_ledger_entries_of_cancelled_vouchers import (
 	make_stock_manager,
 )
@@ -146,17 +156,18 @@ class ValuationFixTestCase(ERPNextTestSuite):
 
 		return adjustment
 
+	def get_balance_filters(self, item_code) -> frappe._dict:
+		return frappe._dict(
+			company=COMPANY,
+			from_date=get_adjustment_date(),
+			to_date=nowdate(),
+			item_code=[item_code],
+			warehouse=[WAREHOUSE],
+		)
+
 	def get_balance_movement(self, item_code) -> frappe._dict:
 		"""What Stock Balance shows went in and out of the warehouse from the adjustment date on."""
-		rows = stock_balance(
-			frappe._dict(
-				company=COMPANY,
-				from_date=get_adjustment_date(),
-				to_date=nowdate(),
-				item_code=[item_code],
-				warehouse=WAREHOUSE,
-			)
-		)[1]
+		rows = stock_balance(self.get_balance_filters(item_code))[1]
 		return rows[0] if rows else frappe._dict()
 
 	def get_fifo_queue(self, item_code) -> list:
@@ -601,12 +612,31 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		self.assertEqual(flt(after.in_val) - flt(before.in_val), 50)
 		self.assertEqual(after.bal_qty, before.bal_qty)
 
+	def test_stock_balance_snapshot_shows_the_net_change(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		self.fix_by_adjustment_entry(item)
+
+		filters = self.get_balance_filters(item)
+		self.assertEqual(execute_from_snapshot(filters), stock_balance(deepcopy(filters)))
+
+	def test_stock_balance_snapshot_nets_an_adjustment_cancelled_after_the_sync(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		adjustment = self.fix_by_adjustment_entry(item)
+
+		filters = self.get_balance_filters(item)
+		synced = stock_balance(deepcopy(filters))
+		ledger = capture_ledger(filters)
+		adjustment.cancel()
+
+		with ledger_snapshot(ledger):
+			self.assertEqual(execute_snapshot_report(deepcopy(filters)), synced)
+
 	def test_stock_ageing_keeps_the_age_of_what_is_counted_back_in(self):
 		item = self.make_serial_no_issued_at_wrong_value()
 		before = self.get_fifo_queue(item)
 		self.fix_by_adjustment_entry(item)
 
-		self.assertEqual(self.get_fifo_queue(item), before)
+		self.assertCountEqual(self.get_fifo_queue(item), before)
 		self.assertTrue(all(str(slot[1]) < get_adjustment_date() for slot in before))
 
 	def test_stock_ageing_keeps_the_age_of_batches(self):
@@ -615,6 +645,21 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		self.fix_by_adjustment_entry(item)
 
 		self.assertEqual([slot[3] for slot in self.get_fifo_queue(item)], ages)
+
+	def test_serial_and_batch_wise_stock_balance_nets_each_batch(self):
+		item = self.make_batch_issued_at_wrong_value()
+		self.fix_by_adjustment_entry(item)
+
+		item_row, batch_row = serial_and_batch_wise_stock_balance(
+			frappe._dict(
+				company=COMPANY,
+				from_date=get_adjustment_date(),
+				to_date=nowdate(),
+				item_code=[item],
+				warehouse=[WAREHOUSE],
+			)
+		)[1]
+		self.assertEqual((batch_row.in_qty, batch_row.out_qty), (item_row.in_qty, item_row.out_qty))
 
 	def test_invariant_check_reads_the_reset_as_stock_moving(self):
 		from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import get_data

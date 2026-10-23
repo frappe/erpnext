@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: server-postgres-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
+  group: server-postgres-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}${{ github.event.action == 'labeled' && github.event.label.name != 'postgres' && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -38,7 +38,10 @@ jobs:
     runs-on: ubuntu-latest
     # Runs on the daily schedule (and workflow_dispatch). On PRs it runs ONLY when the PR carries
     # the 'postgres' label — the test job needs setup, so it's skipped too when this is.
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'postgres')
+    if: >-
+      (github.event.action != 'labeled' || github.event.label.name == 'postgres')
+      && (github.event_name != 'pull_request'
+      || contains(github.event.pull_request.labels.*.name, 'postgres'))
     timeout-minutes: 40
     outputs:
       python-version: ${{ steps.setup-python.outputs.python-version }}
