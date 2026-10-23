@@ -8,7 +8,7 @@ on:
         required: true
         type: number
       review:
-        description: base64 of a review JSON ({event, body, comments, replies, discussion, resolve}); event must be COMMENT or REQUEST_CHANGES; replies are [{in_reply_to, body}] posted into existing threads; discussion is [body] posted as conversation comments; resolve is [thread node id] and only the bot's own unresolved threads on this PR are closed
+        description: base64 of a review JSON ({event, body, comments, replies, discussion, resolve, dismiss}); event must be COMMENT or REQUEST_CHANGES; replies are [{in_reply_to, body}] posted into existing threads; discussion is [body] posted as conversation comments; resolve is [thread node id] and only the bot's own unresolved threads on this PR are closed; dismiss is {reviews, message}, allowed only with COMMENT; reviews are [review id] and only the bot's own open change requests on this PR are dismissed
         required: false
         type: string
         default: ""
@@ -69,6 +69,7 @@ jobs:
           jq -e '(.replies // []) | all((.in_reply_to | type == "number") and (.body | type == "string") and (.body | length > 0))' review.json > /dev/null
           jq -e '(.resolve // []) | all(type == "string" and startswith("PRRT_"))' review.json > /dev/null
           jq -e '((.discussion // []) | type == "array") and ((.discussion // []) | all(type == "string" and length > 0))' review.json > /dev/null
+          jq -e '.dismiss == null or (.event == "COMMENT" and (.dismiss.message | type == "string" and length > 0) and (.dismiss.reviews | type == "array" and all(type == "number")))' review.json > /dev/null
           if [ -n "$REVIEW_ID" ]; then
             jq -e '.event == "COMMENT"' review.json > /dev/null || { echo "an update replaces only the body; the event must be COMMENT" >&2; exit 1; }
           fi
@@ -110,6 +111,17 @@ jobs:
                   mutation($id:ID!){ resolveReviewThread(input:{threadId:$id}){ thread{ isResolved } } }' --jq '"resolved \(.data.resolveReviewThread.thread.isResolved)"'
               else
                 echo "skipped $thread: not an unresolved frappe-pr-bot thread on this PR" >&2
+              fi
+            done
+          fi
+          if jq -e '.dismiss != null' review.json > /dev/null; then
+            jq '{message: .dismiss.message}' review.json > dismissal.json
+            gh api --paginate "repos/${{ github.repository }}/pulls/$PR/reviews" --jq '.[] | select(.user.login == "frappe-pr-bot" and .state == "CHANGES_REQUESTED") | .id' > own-change-requests.txt
+            jq -r '.dismiss.reviews[]' review.json | while read -r review; do
+              if grep -qxF "$review" own-change-requests.txt; then
+                gh api -X PUT "repos/${{ github.repository }}/pulls/$PR/reviews/$review/dismissals" --input dismissal.json --jq '"dismissed \(.id)"'
+              else
+                echo "skipped $review: not an open frappe-pr-bot change request on this PR" >&2
               fi
             done
           fi
