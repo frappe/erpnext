@@ -47,3 +47,20 @@ class TestProductBundle(FrappeTestCase):
 		doc.append("items", {"item_code": child, "qty": 1, "uom": "Kg"})
 		doc.insert()  # must not raise
 		self.assertTrue(doc.name)
+
+	def test_bundle_cannot_reference_itself(self):
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": self.parent})
+		doc.append("items", {"item_code": self.parent, "qty": 1})
+		self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_parent_used_as_component_cannot_become_a_bundle(self):
+		# OUTER bundles INNER while INNER is still a plain item; turning INNER into its
+		# own bundle afterwards would nest it under OUTER, so it must be rejected
+		suffix = frappe.generate_hash(length=8)
+		inner = make_item(f"_Test PB Nest Inner {suffix}", {"is_stock_item": 0, "is_sales_item": 1}).name
+		outer = make_item(f"_Test PB Nest Outer {suffix}", {"is_stock_item": 0, "is_sales_item": 1}).name
+		make_product_bundle(outer, [inner])
+
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": inner})
+		doc.append("items", {"item_code": self.child, "qty": 1})
+		self.assertRaises(frappe.ValidationError, doc.insert)
