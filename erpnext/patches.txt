@@ -559,3 +559,4 @@ erpnext.patches.v16_0.apply_selling_settings_section_toggles
 erpnext.patches.v16_0.set_output_qty_in_work_order_operations
 execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
 execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
