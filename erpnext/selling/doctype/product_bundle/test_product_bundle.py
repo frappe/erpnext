@@ -41,6 +41,12 @@ class TestProductBundle(FrappeTestCase):
 		doc.append("items", {"item_code": self.parent, "qty": 1})
 		self.assertRaises(frappe.ValidationError, doc.insert)
 
+	def test_duplicate_component_is_rejected(self):
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": self.parent})
+		doc.append("items", {"item_code": self.child, "qty": 2})
+		doc.append("items", {"item_code": self.child, "qty": 3})
+		self.assertRaises(frappe.ValidationError, doc.insert)
+
 	def test_parent_used_as_component_cannot_become_a_bundle(self):
 		# OUTER bundles INNER while INNER is still a plain item; turning INNER into its
 		# own bundle afterwards would nest it under OUTER, so it must be rejected
