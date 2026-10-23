@@ -26,7 +26,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 @frappe.whitelist()
 def get_item_details(item: str, project: str | None = None, skip_bom_info: bool = False, throw: bool = True):
-	frappe.has_permission("Item", "read", throw=True)
+	frappe.has_permission("Item", "read", doc=item, throw=True)
 
 	res = _item_master_details(item)
 	if not res:
