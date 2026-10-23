@@ -426,32 +426,36 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 		"currency": currency,
 	}
 
-	# one entry per cost center / dimension (just one entry if not grouped)
-	openings, running_total = {}, {}
+	# clear the dimension left by the rows above, else only that one is fetched
+	filters.dimension_field = filters.dimension_value = None
+
+	openings = get_opening_balance(
+		filters.company,
+		period_list,
+		filters,
+		group_by=period_list[0].get("dimension_field"),
+	)
+	running_total = {}
 
 	for period in period_list:
 		key = period["key"]
 		dimension = period.get("dimension_value")
 
-		# first column of this dimension: fetch its own opening cash
-		if dimension not in openings:
-			filters.dimension_field = period.get("dimension_field")
-			filters.dimension_value = dimension
-			openings[dimension] = get_opening_balance(filters.company, period_list, filters) or 0.0
-			running_total[dimension] = openings[dimension]
+		if dimension not in running_total:
+			running_total[dimension] = openings.get(dimension, 0.0)
 
 		opening_balance[key] = running_total[dimension]
 		running_total[dimension] += net_change_in_cash.get(key, 0.0)
 		closing_balance[key] = running_total[dimension]
 
-	opening_balance["total"] = sum(openings.values())
+	opening_balance["total"] = sum(openings.get(dimension, 0.0) for dimension in running_total)
 	closing_balance["total"] = sum(running_total.values())
 
 	out.extend([opening_balance, net_change_in_cash, closing_balance, {}])
 
 
-def get_opening_balance(company, period_list, filters):
-	"""Balance of the Cash and Bank accounts before the first period, plus their opening entries."""
+def get_opening_balance(company, period_list, filters, group_by=None):
+	"""Cash and Bank balance before the first period: {dimension: amount}, or {None: amount} if not grouped."""
 	gl = frappe.qb.DocType("GL Entry")
 	account = frappe.qb.DocType("Account")
 
@@ -477,8 +481,11 @@ def get_opening_balance(company, period_list, filters):
 		query = query.where(before_first_period | (gl.is_opening == "Yes"))
 	query = apply_gl_filters(query, gl, company, filters)
 
-	result = query.run()
-	return flt(result[0][0]) if result else 0.0
+	if not group_by:
+		return {None: flt(query.run()[0][0])}
+
+	query = query.select(gl[group_by]).groupby(gl[group_by])
+	return {dimension: flt(amount) for amount, dimension in query.run()}
 
 
 def get_report_summary(summary_data, currency):
