@@ -3593,6 +3593,7 @@ def make_payment_order(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Entry"
+		target.company = target.company or source.company
 		target.append(
 			"references",
 			dict(
@@ -3613,6 +3614,8 @@ def make_payment_order(source_name, target_doc=None):
 			"Payment Entry": {
 				"doctype": "Payment Order",
 				"validation": {"docstatus": ["=", 1]},
+				# keep the company of an existing order; references are validated against it
+				"field_no_map": ["company"] if target_doc else [],
 			}
 		},
 		target_doc,
