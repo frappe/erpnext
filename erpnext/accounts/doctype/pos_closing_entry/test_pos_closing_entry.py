@@ -368,6 +368,32 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertIn(pos_rsi1.name, [d.sales_invoice for d in pcv_doc2.sales_invoices])
 			self.assertEqual(pcv_doc2.grand_total, 200)
 
+	def test_invoice_type_switch_requires_all_pos_invoices_to_be_consolidated(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		pos_inv1, pos_inv2 = create_multiple_pos_invoices(self.pos_profile)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.set(
+			"pos_invoices", [row for row in closing_entry.pos_invoices if row.pos_invoice == pos_inv1.name]
+		)
+		closing_entry.flags.in_test = True
+		closing_entry.submit()
+
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Closed")
+		pos_inv1.reload()
+		self.assertTrue(pos_inv1.consolidated_invoice)
+		pos_inv2.reload()
+		self.assertFalse(pos_inv2.consolidated_invoice)
+
+		settings = frappe.get_doc("POS Settings")
+		settings.invoice_type = "Sales Invoice"
+		with self.assertRaisesRegex(frappe.ValidationError, "Consolidate all submitted POS Invoices"):
+			settings.save()
+
+		pos_inv2.cancel()
+		settings.reload()
+		settings.invoice_type = "Sales Invoice"
+		settings.save()
+
 	def test_pos_invoice_in_sales_invoice_mode(self):
 		"""
 		Test POS Invoice and Return POS Invoice creation during Sales Invoice mode.
@@ -408,9 +434,17 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertRaises(frappe.ValidationError, pos_inv3.save)
 
 			# Creating Return POS Invoice
-			pos_rinv2 = make_sales_return(pos_inv2.name)
-			pos_rinv2.save()
-			pos_rinv2.submit()
+			with self.change_settings(
+				"POS Settings",
+				{
+					"invoice_fields": [
+						frappe.get_doc({"doctype": "POS Field", "fieldname": "named_place", "reqd": 1})
+					]
+				},
+			):
+				pos_rinv2 = make_sales_return(pos_inv2.name)
+				pos_rinv2.save()
+				pos_rinv2.submit()
 
 			pos_rinv2.reload()
 			self.assertIsNotNone(pos_rinv2.consolidated_invoice)

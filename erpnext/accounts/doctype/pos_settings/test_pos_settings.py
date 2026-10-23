@@ -3,7 +3,9 @@
 
 import frappe
 
+from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
 from erpnext.patches.v16_0.append_fieldname_to_pos_search_fields import execute as append_fieldname
+from erpnext.tests.permission_test_utils import make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -12,6 +14,48 @@ class TestPOSSettings(ERPNextTestSuite):
 		self.settings = frappe.get_single("POS Settings")
 		self.settings.invoice_fields = []
 		self.settings.pos_search_fields = []
+
+	def test_pos_settings_write_access_is_limited_to_managers(self):
+		for role in ("Sales User", "Accounts User", "Accounts Manager", "System Manager"):
+			with self.subTest(role=role):
+				user = make_fenced_user(f"pos-settings-{frappe.scrub(role)}@example.com", [role])
+				with self.set_user(user):
+					settings = frappe.get_doc("POS Settings")
+					settings.check_permission("read")
+					settings.post_change_gl_entries = not settings.post_change_gl_entries
+					if role in ("Sales User", "Accounts User"):
+						with self.assertRaises(frappe.PermissionError):
+							settings.save()
+					else:
+						settings.save()
+
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				frappe.get_doc("POS Settings").check_permission("read")
+
+	def test_required_invoice_field_cannot_be_empty(self):
+		for invoice_type in ("POS Invoice", "Sales Invoice"):
+			with self.subTest(invoice_type=invoice_type):
+				self.settings.invoice_type = invoice_type
+				self.settings.set("invoice_fields", [])
+				self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+				self.settings.save()
+
+				invoice = frappe.new_doc(invoice_type)
+				invoice.po_no = None
+				POSService(invoice).validate_mandatory_invoice_fields()
+
+				invoice.docstatus = 1
+				with self.assertRaises(frappe.MandatoryError):
+					POSService(invoice).validate_mandatory_invoice_fields()
+
+				if invoice_type == "POS Invoice":
+					invoice.is_consolidated = 1
+					with self.assertRaises(frappe.MandatoryError):
+						POSService(invoice).validate_mandatory_invoice_fields()
+
+				invoice.po_no = "PO-2026-001"
+				POSService(invoice).validate_mandatory_invoice_fields()
 
 	def assertInvalid(self, message):
 		with self.assertRaises(frappe.ValidationError) as context:
