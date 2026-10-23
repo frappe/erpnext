@@ -1536,8 +1536,8 @@ class TestWorkOrder(FrappeTestCase):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
-	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_manufacture_entry_without_work_order_serial_nos(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
@@ -1562,7 +1562,7 @@ class TestWorkOrder(FrappeTestCase):
 		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
 		self.assertEqual(len(get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)), 2)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_no_reset_message_for_empty_finished_good_row(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
