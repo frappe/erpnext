@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 200
+          filter: blob:none
 
       - name: Install and Run Pre-commit
         uses: pre-commit/action@v3.0.1
