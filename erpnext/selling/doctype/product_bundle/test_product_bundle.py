@@ -74,6 +74,13 @@ class TestProductBundle(ERPNextTestSuite):
 		self.assertIn("stock_quantity", fieldnames)
 		self.assertNotIn("is_default", fieldnames)
 
+	def test_component_uom_must_be_convertible(self):
+		suffix = frappe.generate_hash(length=8)
+		child = make_item(f"_Test PB UOM Child {suffix}", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": self.parent})
+		doc.append("items", {"item_code": child, "qty": 1, "uom": "Box"})  # no Box conversion on the item
+		self.assertRaises(frappe.ValidationError, doc.insert)
+
 	def test_child_cannot_be_active_bundle(self):
 		make_product_bundle(self.parent, [self.child])
 		outer = make_item(
