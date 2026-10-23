@@ -850,7 +850,6 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.where(DeliveryNote.company == company)
 		.where(DeliveryNote.docstatus == 1)
 		.where(DeliveryNote.is_return == 1)
-		.where(DeliveryNoteItem.dn_detail != "")
 	).as_("returned_items")
 	# Credits against a return delivery reduce the original delivery row's billed quantity.
 	billed_dn_detail = Coalesce(returned_items.dn_detail, SalesInvoiceItem.dn_detail)
