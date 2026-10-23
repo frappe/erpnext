@@ -1249,6 +1249,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		frappe.qb.from_(sle)
 		.select(UnixTimestamp(sle.posting_date), Count("*"))
 		.where(sle.item_code == name)
+		.where(sle.is_cancelled == 0)
 		.where(sle.posting_date > CurDate() - Interval(years=1))
 		.groupby(sle.posting_date)
 		.run()
