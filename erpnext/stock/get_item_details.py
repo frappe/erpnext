@@ -1456,6 +1456,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 @frappe.whitelist()
 def get_pos_profile(company, pos_profile=None, user=None):
 	if pos_profile:
+		frappe.has_permission("POS Profile", "read", doc=pos_profile, throw=True)
 		return frappe.get_cached_doc("POS Profile", pos_profile)
 
 	if not user:
