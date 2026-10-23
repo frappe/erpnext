@@ -493,14 +493,21 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 		account = round_off_account
 
 	if gl_map[0].voucher_type != "Period Closing Voucher":
+		allowance = get_debit_credit_allowance(gl_map[0].voucher_type, precision)
+
+		# The round off account can also be used by regular postings (for example, Cost of Goods Sold
+		# is the fallback round off account and also holds the stock entries). Only a small entry on
+		# the account can be an existing round off entry, and only one of them is reused.
 		for d in gl_map:
-			if d.account == account:
+			if d.account == account and abs(flt(d.debit) - flt(d.credit)) <= allowance:
 				round_off_gle = d
-				if d.debit:
-					debit_credit_diff -= flt(d.debit) - flt(d.credit)
-				else:
-					debit_credit_diff += flt(d.credit)
 				round_off_account_exists = True
+
+		if round_off_account_exists:
+			if round_off_gle.debit:
+				debit_credit_diff -= flt(round_off_gle.debit) - flt(round_off_gle.credit)
+			else:
+				debit_credit_diff += flt(round_off_gle.credit)
 
 		debit_credit_diff = flt(debit_credit_diff, precision)
 
