@@ -16,7 +16,7 @@ export function open_item_link(cell, options) {
 
 export function open_link_field(
 	cell,
-	{ doctype, value, placeholder, on_change, get_new_item_values, focus = true, open_list = true }
+	{ doctype, value, placeholder, on_change, get_new_item_values, get_query, focus = true, open_list = true }
 ) {
 	let created_new_doc = false;
 	const control = frappe.ui.form.make_control({
@@ -26,6 +26,7 @@ export function open_link_field(
 			options: doctype,
 			fieldname: frappe.scrub(doctype),
 			placeholder,
+			get_query,
 			get_route_options_for_new_doc: () => {
 				created_new_doc = true;
 				return get_new_item_values?.() || {};
@@ -41,7 +42,7 @@ export function open_link_field(
 	control.set_input(value || "");
 	keep_list_in_view(control.$input.get(0), control.awesomplete);
 	if (!open_list) keep_list_closed_until_typing(control);
-	if (focus) control.$input.trigger("focus");
+	if (focus) control.$input.trigger("focus").trigger("select");
 	return control;
 }
 
