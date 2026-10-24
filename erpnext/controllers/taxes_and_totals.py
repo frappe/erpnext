@@ -13,7 +13,11 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule_margin
-from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.accounts.doctype.pricing_rule.utils import (
+	get_applied_pricing_rules,
+	get_rate_rounding_rule,
+	round_rate,
+)
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	get_billed_qty,
 	get_billed_stock_qty,
@@ -191,6 +195,8 @@ class calculate_taxes_and_totals:
 			)
 
 		calculated_rate = flt(item.rate_with_margin - item.discount_amount, item.precision("rate"))
+		if has_pricing_rules:
+			calculated_rate = self.apply_rate_rounding(item, calculated_rate)
 
 		# if rate is 0 or pricing rules are applicable, calculated rate is preferred
 		if has_pricing_rules or not item.rate:
@@ -215,6 +221,16 @@ class calculate_taxes_and_totals:
 		item.discount_amount = flt(item.rate_with_margin - item.rate, item.precision("discount_amount"))
 		item.discount_percentage = 0
 		remove_margin(item)
+
+	def apply_rate_rounding(self, item, rate):
+		rounding_rule = get_rate_rounding_rule(item.pricing_rules)
+		if not rounding_rule:
+			return rate
+
+		rounded_rate = round_rate(rate, rounding_rule.rate_rounding, rounding_rule.rounding_increment)
+		rounded_rate = flt(min(rounded_rate, item.rate_with_margin), item.precision("rate"))
+		item.discount_amount = flt(item.rate_with_margin - rounded_rate, item.precision("discount_amount"))
+		return rounded_rate
 
 	def calculate_item_values(self):
 		if self.doc.get("is_consolidated") or self.discount_amount_applied:

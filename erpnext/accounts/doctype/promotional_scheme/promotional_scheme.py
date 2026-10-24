@@ -54,6 +54,8 @@ price_discount_fields = [
 	"validate_applied_rule",
 	"apply_multiple_pricing_rules",
 	"for_price_list",
+	"rate_rounding",
+	"rounding_increment",
 ]
 
 product_discount_fields = [

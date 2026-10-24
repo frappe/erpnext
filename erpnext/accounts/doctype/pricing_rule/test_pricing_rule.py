@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -1702,6 +1702,146 @@ class TestPricingRule(ERPNextTestSuite):
 		debit_note.delete()
 		pi.cancel()
 
+	def test_rate_rounding_on_discount_percentage(self):
+		item = make_item("_Test Rate Rounding Item", {"is_stock_item": 0}).name
+		for rate_rounding, rounding_increment, expected_rate in [
+			("Up", 1, 21302),
+			("Down", 1, 21301),
+			("Nearest", 1, 21301),
+			("Nearest", 0.05, 21301.15),
+			("Down", 10, 21300),
+		]:
+			with self.subTest(rate_rounding=rate_rounding, rounding_increment=rounding_increment):
+				pricing_rule = make_pricing_rule(
+					item_code=item,
+					selling=1,
+					discount_percentage=4.2,
+					rate_rounding=rate_rounding,
+					rounding_increment=rounding_increment,
+				)
+				so = make_sales_order(item_code=item, qty=1, price_list_rate=22235, do_not_submit=True)
+				self.assertEqual(so.items[0].rate, expected_rate)
+				self.assertEqual(so.items[0].discount_percentage, 4.2)
+				self.assertEqual(so.items[0].discount_amount, flt(22235 - expected_rate, 2))
+
+				so.save()
+				self.assertEqual(so.items[0].rate, expected_rate)
+
+				so.delete()
+				pricing_rule.delete()
+
+	def test_rate_rounding_on_discount_amount(self):
+		item = make_item("_Test Rate Rounding Item", {"is_stock_item": 0}).name
+		make_pricing_rule(
+			item_code=item,
+			selling=1,
+			rate_or_discount="Discount Amount",
+			discount_amount=933.87,
+			rate_rounding="Up",
+			rounding_increment=1,
+		)
+		so = make_sales_order(item_code=item, qty=1, price_list_rate=22235, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 21302)
+		self.assertEqual(so.items[0].discount_amount, 933)
+
+	def test_rate_rounding_never_exceeds_price_list_rate(self):
+		item = make_item("_Test Rate Rounding Item", {"is_stock_item": 0}).name
+		make_pricing_rule(
+			item_code=item, selling=1, discount_percentage=0.1, rate_rounding="Up", rounding_increment=10
+		)
+		so = make_sales_order(item_code=item, qty=1, price_list_rate=100.4, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 100.4)
+		self.assertEqual(so.items[0].discount_amount, 0)
+
+	def test_rate_rounding_is_opt_in(self):
+		item = make_item("_Test Rate Rounding Item", {"is_stock_item": 0}).name
+		make_pricing_rule(item_code=item, selling=1, discount_percentage=4.2)
+		so = make_sales_order(item_code=item, qty=1, price_list_rate=22235, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 21301.13)
+		self.assertEqual(so.items[0].discount_amount, 933.87)
+
+	def test_rate_rounding_cleared_for_rate_rule(self):
+		pricing_rule = make_pricing_rule(
+			selling=1, rate_or_discount="Rate", rate=100, rate_rounding="Up", rounding_increment=1
+		)
+		self.assertFalse(pricing_rule.rate_rounding)
+		self.assertEqual(pricing_rule.rounding_increment, 0)
+
+	def test_rate_rounding_matches_on_apply_and_save(self):
+		item = make_item("_Test Rate Rounding Item", {"is_stock_item": 0}).name
+		make_pricing_rule(
+			item_code=item, selling=1, discount_percentage=4.2, rate_rounding="Down", rounding_increment=1
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item,
+				"price_list": "_Test Price List",
+				"price_list_rate": 125.26,
+			}
+		).insert()
+		details = get_item_details(
+			{
+				"item_code": item,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"price_list": "_Test Price List",
+				"currency": "INR",
+				"price_list_currency": "INR",
+				"conversion_rate": 1,
+				"plc_conversion_rate": 1,
+				"doctype": "Sales Order",
+				"child_doctype": "Sales Order Item",
+				"transaction_type": "selling",
+				"price_list_rate": 125.26,
+				"qty": 1,
+				"name": None,
+			}
+		)
+		self.assertEqual(flt(details.discount_amount, 2), 5.26)
+
+		so = make_sales_order(item_code=item, qty=1, price_list_rate=125.26, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 120)
+		so.save()
+		self.assertEqual(so.items[0].rate, 120)
+
+	def test_rate_rounding_cleared_for_validation_only_rule(self):
+		pricing_rule = make_pricing_rule(
+			selling=1, discount_percentage=10, rate_rounding="Up", rounding_increment=1
+		)
+		pricing_rule.validate_applied_rule = 1
+		pricing_rule.save()
+		self.assertFalse(pricing_rule.rate_rounding)
+		self.assertEqual(pricing_rule.rounding_increment, 0)
+
+	def test_rate_rounding_from_promotional_scheme(self):
+		item = make_item("_Test Rate Rounding Item", {"is_stock_item": 0}).name
+		scheme = frappe.get_doc(
+			{
+				"doctype": "Promotional Scheme",
+				"name": "_Test Rate Rounding Scheme",
+				"company": "_Test Company",
+				"selling": 1,
+				"apply_on": "Item Code",
+				"items": [{"item_code": item}],
+				"price_discount_slabs": [
+					{
+						"rule_description": "4.2% rounded up",
+						"rate_or_discount": "Discount Percentage",
+						"discount_percentage": 4.2,
+						"rate_rounding": "Up",
+						"rounding_increment": 1,
+					}
+				],
+			}
+		).insert()
+		pricing_rule = frappe.get_doc("Pricing Rule", {"promotional_scheme": scheme.name})
+		self.assertEqual(pricing_rule.rate_rounding, "Up")
+		self.assertEqual(pricing_rule.rounding_increment, 1)
+
+		so = make_sales_order(item_code=item, qty=1, price_list_rate=22235, do_not_submit=True)
+		self.assertEqual(so.items[0].rate, 21302)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -1739,6 +1879,8 @@ def make_pricing_rule(**args):
 		"priority",
 		"margin_type",
 		"price_or_product_discount",
+		"rate_rounding",
+		"rounding_increment",
 	]:
 		if args.get(field):
 			doc.set(field, args.get(field))
