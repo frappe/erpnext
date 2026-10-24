@@ -697,6 +697,7 @@ global_search_doctypes = {
 }
 
 ignore_links_on_delete = [
+	"Asset Activity",
 	"Tax Withholding Entry",
 ]
 
