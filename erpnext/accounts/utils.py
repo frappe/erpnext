@@ -208,6 +208,7 @@ def get_balance_on(
 	start_date=None,
 	finance_book=None,
 	include_default_fb_balances=False,
+	apply_gl_entry_permissions=False,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -316,6 +317,9 @@ def get_balance_on(
 
 	cond.append("(gle.finance_book IS NULL OR gle.finance_book IN %s)")
 
+	if apply_gl_entry_permissions:
+		cond.extend(get_gl_entry_match_conditions())
+
 	if account or (party_type and party) or account_type:
 		precision = get_currency_precision()
 		if in_account_currency:
@@ -335,6 +339,18 @@ def get_balance_on(
 		)[0][0]
 		# if bal is None, return 0
 		return flt(bal)
+
+
+def get_gl_entry_match_conditions() -> list[str]:
+	"""The user's GL Entry permission conditions, for queries aliasing GL Entry as `gle`."""
+	from frappe.desk.reportview import build_match_conditions
+
+	match_conditions = build_match_conditions("GL Entry")
+	if not match_conditions:
+		return []
+	for quoted_table in ("`tabGL Entry`.", '"tabGL Entry".'):
+		match_conditions = match_conditions.replace(quoted_table, "gle.")
+	return [f"({match_conditions})"]
 
 
 def get_count_on(account, fieldname, date):
