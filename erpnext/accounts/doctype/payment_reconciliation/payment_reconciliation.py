@@ -18,7 +18,10 @@ from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_rec
 	is_any_doc_running,
 )
 from erpnext.accounts.services.advances import get_advance_payment_entries_for_regional
-from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
+from erpnext.accounts.services.exchange_gain_loss import (
+	get_exchange_gain_loss_account,
+	get_revalued_exchange_rate,
+)
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	create_gain_loss_journal,
@@ -465,11 +468,17 @@ class PaymentReconciliation(Document):
 		self, payment_entry: list, invoice: list, allocated_amount: float
 	):
 		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
-		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
+		invoice[0]["exchange_rate"] = get_revalued_exchange_rate(
+			invoice[0].get("invoice_type"),
+			invoice[0].get("invoice_number"),
+			payment_entry[0].get("posting_date"),
+		) or invoice_exchange_map.get(invoice[0].get("invoice_number"))
 		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
-			payment_entry[0]["exchange_rate"] = invoice_exchange_map.get(
-				payment_entry[0].get("reference_name")
-			)
+			payment_entry[0]["exchange_rate"] = get_revalued_exchange_rate(
+				payment_entry[0].get("reference_type"),
+				payment_entry[0].get("reference_name"),
+				payment_entry[0].get("posting_date"),
+			) or invoice_exchange_map.get(payment_entry[0].get("reference_name"))
 
 		new_difference_amount = self.get_difference_amount(payment_entry[0], invoice[0], allocated_amount)
 		return new_difference_amount
@@ -509,9 +518,13 @@ class PaymentReconciliation(Document):
 					)
 					pay["amount"] = 0
 
-				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
+				inv["exchange_rate"] = get_revalued_exchange_rate(
+					inv.get("invoice_type"), inv.get("invoice_number"), pay.get("posting_date")
+				) or invoice_exchange_map.get(inv.get("invoice_number"))
 				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
-					pay["exchange_rate"] = invoice_exchange_map.get(pay.get("reference_name"))
+					pay["exchange_rate"] = get_revalued_exchange_rate(
+						pay.get("reference_type"), pay.get("reference_name"), pay.get("posting_date")
+					) or invoice_exchange_map.get(pay.get("reference_name"))
 
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
 				is_gain = (
