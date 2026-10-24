@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, sbool
 
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
 from erpnext.manufacturing.doctype.bom_creator.material_cost import MaterialCost
@@ -435,6 +435,36 @@ class BOMCreator(Document):
 			return
 
 		self.set_status(save=True)
+
+
+@frappe.whitelist()
+def get_bom_tree(bom_no: str, include_sub_assemblies: bool = False) -> list[dict]:
+	frappe.has_permission("BOM", "read", doc=bom_no, throw=True)
+	return get_bom_rows(bom_no, sbool(include_sub_assemblies), {bom_no})
+
+
+def get_bom_rows(bom_no: str, include_sub_assemblies: bool, visited: set) -> list[dict]:
+	bom = frappe.get_doc("BOM", bom_no)
+	rows = []
+	for item in bom.items:
+		expand = include_sub_assemblies and item.bom_no and item.bom_no not in visited
+		rows.append(
+			{
+				"item_code": item.item_code,
+				"item_name": item.item_name,
+				"description": item.description,
+				"qty": flt(item.qty) / (flt(bom.quantity) or 1),
+				"uom": item.uom,
+				"conversion_factor": item.conversion_factor,
+				"do_not_explode": 1 if expand or not item.bom_no else item.do_not_explode,
+				"bom_no": "" if expand else item.bom_no,
+				"is_phantom_item": item.is_phantom_item,
+				"sourced_by_supplier": item.sourced_by_supplier,
+				"children": get_bom_rows(item.bom_no, True, visited | {item.bom_no}) if expand else [],
+			}
+		)
+
+	return rows
 
 
 def read_design_file(file_url: str) -> dict:

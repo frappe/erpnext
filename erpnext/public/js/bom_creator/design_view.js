@@ -47,15 +47,15 @@ export class DesignView {
 					display: flex; gap: var(--margin-lg); height: 560px; margin-bottom: var(--margin-md);
 				}
 				.bom-creator-view.without-model { height: auto; }
-				.bom-creator-view :is(.design-item-cell, .design-link-cell) .frappe-control,
-				.bom-creator-view :is(.design-item-cell, .design-link-cell) .form-group {
+				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .frappe-control,
+				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .form-group {
 					width: 100%; margin: 0;
 				}
-				.bom-creator-view :is(.design-item-cell, .design-link-cell) input.form-control,
-				.bom-creator-view .design-item-link {
+				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) input.form-control,
+				.bom-creator-view :is(.design-item-link, .design-uom-link) {
 					height: 28px; background-color: var(--fg-color); border: 1px solid var(--border-color);
 				}
-				.bom-creator-view .design-item-link { width: 100%; padding: 0 8px; text-align: left; cursor: text; }
+				.bom-creator-view :is(.design-item-link, .design-uom-link) { width: 100%; padding: 0 8px; text-align: left; cursor: text; }
 				.bom-creator-view.without-model .design-body { max-height: 560px; }
 				.bom-creator-view .design-model {
 					flex: 0 0 34%; position: relative; border: 1px solid var(--border-color);

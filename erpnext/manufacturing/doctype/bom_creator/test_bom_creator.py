@@ -450,6 +450,35 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("BOM", bom, "default_source_warehouse"), "Stores - _TC")
 
+	def test_items_from_a_bom_come_as_a_tree_for_one_unit(self):
+		from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_bom_tree
+
+		for item_code in (
+			"_Test Creator Kit",
+			"_Test Creator Hinge",
+			"_Test Creator Pin",
+			"_Test Creator Plate",
+		):
+			make_item(item_code, {"is_stock_item": 1, "valuation_rate": 10})
+
+		hinge_bom = make_test_bom("_Test Creator Hinge", 2, {"_Test Creator Pin": 4})
+		kit_bom = make_test_bom(
+			"_Test Creator Kit",
+			1,
+			{"_Test Creator Hinge": 1, "_Test Creator Plate": 3},
+			{"_Test Creator Hinge": hinge_bom},
+		)
+
+		self.assertEqual(
+			[(row["item_code"], row["qty"], row["bom_no"], row["children"]) for row in get_bom_tree(kit_bom)],
+			[("_Test Creator Hinge", 1, hinge_bom, []), ("_Test Creator Plate", 3, "", [])],
+		)
+		hinge = get_bom_tree(kit_bom, include_sub_assemblies=True)[0]
+		self.assertEqual((hinge["bom_no"], hinge["do_not_explode"]), ("", 1))
+		self.assertEqual(
+			[(row["item_code"], row["qty"]) for row in hinge["children"]], [("_Test Creator Pin", 2)]
+		)
+
 	def test_unit_of_measure_sets_stock_quantity_and_amount(self):
 		material = make_item(
 			"_Test Creator Box Material",
@@ -645,6 +674,24 @@ def make_mapped_design(produce_item_at_each_operation: bool = False):
 
 	design.save()
 	return design
+
+
+def make_test_bom(item_code: str, quantity: float, materials: dict, boms: dict | None = None) -> str:
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": item_code,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": quantity,
+			"items": [
+				{"item_code": code, "qty": qty, "bom_no": (boms or {}).get(code, "")}
+				for code, qty in materials.items()
+			],
+		}
+	).insert()
+	bom.submit()
+	return bom.name
 
 
 def set_valuation_rates(rates: dict):

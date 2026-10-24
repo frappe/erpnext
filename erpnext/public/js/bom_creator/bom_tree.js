@@ -1,5 +1,5 @@
 import { get_placements } from "./placement_panel";
-import { get_item_link_html, open_item_link } from "./link_field";
+import { get_item_link_html, open_item_link, open_link_field } from "./link_field";
 
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
@@ -13,6 +13,9 @@ export class BomTree {
 			if ($(event.target).closest("input, button").length) return;
 			this.view.highlight_nodes([cint($(event.currentTarget).attr("data-node-id"))]);
 		});
+		view.wrapper.on("click", ".design-uom-link", (event) =>
+			this.open_uom_cell(cint($(event.currentTarget).attr("data-part-node")))
+		);
 		view.wrapper.on("click", ".design-tree [data-action]", (event) =>
 			this.handle_action($(event.currentTarget))
 		);
@@ -44,7 +47,7 @@ export class BomTree {
 			this.show_items ? `<span style="width:130px;">${__("Item")}</span>` : ""
 		}
 			<span style="width:64px;text-align:right;">${__("Quantity")}</span>
-			${this.show_items ? `<span style="width:36px;"></span>` : ""}
+			${this.show_items ? `<span style="width:64px;">${__("UOM")}</span>` : ""}
 			<span style="width:96px;text-align:right;">${__("Amount")}</span>${this.get_actions_cell("")}</div>`;
 		const rows = [this.get_finished_good_row()];
 		if (!this.collapsed.has(0)) this.add_rows(0, 1, rows);
@@ -76,7 +79,7 @@ export class BomTree {
 		)}</span></span>
 			${this.get_item_cell(0, doc.item_code)}
 			<span style="width:64px;">${this.get_finished_good_quantity()}</span>
-			${this.show_items ? `<span style="width:36px;"></span>` : ""}
+			${this.show_items ? `<span style="width:64px;"></span>` : ""}
 			${this.get_amount_cell(doc.raw_material_cost)}
 			${this.get_actions_cell(this.get_add_button(0) + this.get_empty_slot() + this.get_menu_button(0))}</div>`;
 	}
@@ -115,9 +118,7 @@ export class BomTree {
 		const quantity = excluded
 			? `<span class="text-muted" style="display:block;text-align:right;">${flt(part.qty)}</span>`
 			: this.get_quantity_cell(part);
-		const uom = this.show_items
-			? `<span class="text-muted ellipsis" style="width:36px;">${escape(part.uom || "")}</span>`
-			: "";
+		const uom = this.show_items ? this.get_uom_cell(part) : "";
 
 		return `<div data-node-id="${part.node_id}" style="${ROW}cursor:pointer;${
 			excluded ? "opacity:0.55;" : ""
@@ -168,6 +169,32 @@ export class BomTree {
 		});
 	}
 
+	get_uom_cell(part) {
+		if (!this.editable || !part.item_code || part.exclude_from_bom) {
+			return `<span class="text-muted ellipsis" style="width:64px;">${escape(part.uom || "")}</span>`;
+		}
+
+		return `<span class="design-uom-cell" data-part-node="${
+			part.node_id
+		}" style="width:64px;display:flex;min-width:0;">
+			<button type="button" class="design-uom-link form-control input-sm ellipsis" data-part-node="${part.node_id}"
+				title="${escape(part.uom || "")}">${escape(part.uom || "")}</button></span>`;
+	}
+
+	open_uom_cell(node_id) {
+		const part = this.view.get_part(node_id);
+		const cell = this.view.wrapper.find(`.design-uom-cell[data-part-node="${node_id}"]`);
+		open_link_field(cell, {
+			doctype: "UOM",
+			value: part.uom,
+			get_query: () => ({
+				query: "erpnext.controllers.queries.get_item_uom_query",
+				filters: { item_code: part.item_code },
+			}),
+			on_change: (uom) => this.update(part, { uom, conversion_factor: 0 }),
+		});
+	}
+
 	get_actions_cell(content) {
 		if (!this.editable) return "";
 		return `<span style="width:84px;flex:none;display:flex;justify-content:flex-end;">${content}</span>`;
@@ -190,7 +217,12 @@ export class BomTree {
 		const part = this.view.get_part(node_id);
 		const item_code = node_id ? part.item_code : this.frm.doc.item_code;
 		const items = [];
-		if (part?.item_code) items.push({ label: __("Edit"), action: () => this.edit_part(part) });
+		if (item_code && !part?.exclude_from_bom) {
+			items.push({
+				label: __("Get Items from BOM"),
+				action: () => this.get_items_from_bom(node_id, item_code),
+			});
+		}
 		if (item_code) {
 			items.push({
 				label: this.view.has_geometry(node_id) ? __("Set Item Image") : __("Upload Item Image"),
@@ -244,22 +276,6 @@ export class BomTree {
 		this.menu?.remove();
 		this.menu = null;
 		$(document).off(".bom-tree-menu");
-	}
-
-	edit_part(part) {
-		const is_assembly = this.has_children(part);
-		const dialog = new frappe.ui.Dialog({
-			title: __("Edit {0}", [part.part_name || part.part_number]),
-			fields: get_part_fields(part, is_assembly, this.frm.doc.routing),
-			primary_action_label: __("Update"),
-			primary_action: (values) => {
-				if (values.uom !== part.uom) values.conversion_factor = 0;
-				this.update(part, values);
-				dialog.hide();
-			},
-		});
-		dialog.set_values(part);
-		dialog.show();
 	}
 
 	has_children(part) {
@@ -375,6 +391,62 @@ export class BomTree {
 		}
 	}
 
+	async get_items_from_bom(node_id, item_code) {
+		const default_bom = (await frappe.db.get_value("Item", item_code, "default_bom")).message
+			?.default_bom;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Get Items from BOM"),
+			fields: [
+				{
+					fieldname: "bom_no",
+					fieldtype: "Link",
+					options: "BOM",
+					label: __("BOM"),
+					reqd: 1,
+					default: default_bom,
+					get_query: () => ({ filters: { docstatus: 1 } }),
+				},
+				{
+					fieldname: "include_sub_assemblies",
+					fieldtype: "Check",
+					label: __("Include Items of Sub-Assemblies"),
+					description: __("Add the items of each sub-assembly BOM under the sub-assembly."),
+				},
+			],
+			primary_action_label: __("Get Items"),
+			primary_action: async (values) => {
+				const { message: rows } = await frappe.call({
+					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_bom_tree",
+					args: values,
+				});
+				dialog.hide();
+				this.collapsed.delete(node_id);
+				const count = this.add_bom_rows(node_id, rows);
+				this.frm.dirty();
+				this.view.render();
+				frappe.show_alert({ message: __("{0} items added", [count]), indicator: "green" });
+			},
+		});
+		dialog.show();
+	}
+
+	add_bom_rows(parent_node_id, rows) {
+		let count = 0;
+		for (const { children, ...values } of rows) {
+			const node_id = Math.max(0, ...(this.frm.doc.items || []).map((row) => cint(row.node_id))) + 1;
+			const row = frappe.model.add_child(this.frm.doc, "BOM Creator Item", "items");
+			Object.assign(row, values, {
+				node_id,
+				parent_node_id,
+				part_number: values.item_code,
+				part_name: values.item_name || values.item_code,
+				source: "Manual",
+			});
+			count += 1 + this.add_bom_rows(node_id, children);
+		}
+		return count;
+	}
+
 	async add_material(parent_node_id, item_code) {
 		const item = await this.get_item(item_code);
 		const last_node_id = Math.max(0, ...(this.frm.doc.items || []).map((row) => cint(row.node_id)));
@@ -446,41 +518,6 @@ export class BomTree {
 
 function escape(value) {
 	return frappe.utils.escape_html(value);
-}
-
-function get_part_fields(part, is_assembly, routing) {
-	return [
-		{ fieldname: "uom", fieldtype: "Link", options: "UOM", label: __("UOM"), reqd: 1 },
-		{
-			fieldname: "is_phantom_item",
-			fieldtype: "Check",
-			label: __("Is Phantom Item"),
-			hidden: !is_assembly,
-		},
-		{ fieldname: "do_not_explode", fieldtype: "Check", label: __("Do Not Explode"), hidden: is_assembly },
-		{
-			fieldname: "bom_no",
-			fieldtype: "Link",
-			options: "BOM",
-			label: __("BOM No"),
-			hidden: is_assembly,
-			depends_on: "eval:!doc.do_not_explode",
-			get_query: () => ({ filters: { item: part.item_code, docstatus: 1 } }),
-		},
-		{ fieldname: "sourced_by_supplier", fieldtype: "Check", label: __("Sourced by Supplier") },
-		{
-			fieldname: "operation",
-			fieldtype: "Link",
-			options: "Operation",
-			label: __("Operation"),
-			hidden: !routing,
-			get_query: () => ({
-				query: "erpnext.manufacturing.doctype.routing.routing.get_operations",
-				filters: { routing },
-			}),
-		},
-		{ fieldname: "instruction", fieldtype: "Small Text", label: __("Instruction") },
-	];
 }
 
 function get_change_dot(part) {
