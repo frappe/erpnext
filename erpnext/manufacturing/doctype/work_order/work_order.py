@@ -268,7 +268,7 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = self.qty - flt(operation_details.get(d.name))
+			job_card_qty = get_operation_qty(self, d) - flt(operation_details.get(d.name))
 			if job_card_qty > 0:
 				return True
 
@@ -525,6 +525,14 @@ class WorkOrder(Document):
 			self.get_items_and_operations_from_bom()
 		elif flt(previous.qty) != flt(self.qty) and flt(previous.qty):
 			self.scale_saved_operation_time(previous)
+			self.scale_saved_output_qty(previous)
+
+	def scale_saved_output_qty(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		for d in self.get("operations"):
+			saved = saved_rows.get(d.name)
+			if saved and flt(saved.output_qty) and flt(saved.output_qty) == flt(d.output_qty):
+				d.output_qty = flt(saved.output_qty) * flt(self.qty) / flt(previous.qty)
 
 	def scale_saved_operation_time(self, previous):
 		saved_rows = {row.name: row for row in previous.get("operations")}
@@ -1051,9 +1059,16 @@ class WorkOrder(Document):
 				quantities.validate_work_order(self, process_loss_qty=process_loss_qty)
 		self.db_set("process_loss_qty", process_loss_qty)
 
+	def _process_loss_in_finished_good_units(self, row):
+		operation_qty = get_operation_qty(self, row)
+		if not operation_qty:
+			return 0.0
+
+		return flt(row.process_loss_qty) * flt(self.qty) / operation_qty
+
 	def _process_loss_qty(self):
 		if self.track_semi_finished_goods:
-			return flt(sum(flt(row.process_loss_qty) for row in self.operations))
+			return flt(sum(self._process_loss_in_finished_good_units(row) for row in self.operations))
 
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
@@ -1398,7 +1413,7 @@ class WorkOrder(Document):
 		plan_days = get_capacity_planning_days()
 
 		for idx, row in enumerate(self.operations):
-			qty = self.qty
+			qty = get_operation_qty(self, row)
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self, row, qty)
 				if row.job_card_qty > 0:
@@ -1657,6 +1672,7 @@ class WorkOrder(Document):
 					"workstation",
 					"idx",
 					"finished_good",
+					"finished_good_qty",
 					"is_subcontracted",
 					"wip_warehouse",
 					"source_warehouse",
@@ -1684,6 +1700,7 @@ class WorkOrder(Document):
 					d.time_in_mins = get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 				d.status = "Pending"
+				d.output_qty = self._operation_output_qty(d, qty, exploded)
 
 				if self.track_semi_finished_goods and not d.sequence_id:
 					d.sequence_id = d.idx
@@ -1720,6 +1737,17 @@ class WorkOrder(Document):
 		self.set("operations", operations)
 		self.calculate_time()
 		self.set_operation_warehouses()
+
+	def _operation_output_qty(self, d, qty, exploded):
+		finished_good_qty = flt(d.pop("finished_good_qty", 0))
+		if not (finished_good_qty and flt(qty) and d.finished_good):
+			return 0
+
+		if d.finished_good == self.production_item:
+			return 0
+
+		per_unit = finished_good_qty * flt(qty) if exploded else finished_good_qty / flt(qty)
+		return per_unit * flt(self.qty)
 
 	def set_operation_warehouses(self):
 		if not self.track_semi_finished_goods or not self.operations:
@@ -1770,16 +1798,17 @@ class WorkOrder(Document):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		max_allowed_qty_for_wo = flt(self.qty) + (allowance_percentage / 100 * flt(self.qty))
 
 		for d in self.get("operations"):
 			precision = d.precision("completed_qty")
+			operation_qty = get_operation_qty(self, d)
+			max_allowed_qty_for_wo = operation_qty + (allowance_percentage / 100 * operation_qty)
 			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
 			if not qty:
 				d.status = "Pending"
-			elif qty < flt(self.qty, precision):
+			elif qty < flt(operation_qty, precision):
 				d.status = "Work in Progress"
-			elif qty == flt(self.qty, precision):
+			elif qty == flt(operation_qty, precision):
 				d.status = "Completed"
 			elif qty <= flt(max_allowed_qty_for_wo, precision) or d.name != operation_id:
 				d.status = "Completed"
@@ -3460,6 +3489,7 @@ def get_operation_details(name, work_order, parent_bom):
 				"finished_good": row.finished_good,
 				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
+				"output_qty": row.output_qty,
 			}
 
 
@@ -3495,9 +3525,16 @@ def close_work_order(work_order: str, status: str):
 	return work_order.status
 
 
+def get_operation_qty(work_order, operation):
+	if work_order.get("track_semi_finished_goods") and flt(operation.get("output_qty")):
+		return flt(operation.get("output_qty"))
+
+	return flt(work_order.get("qty"))
+
+
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
-		row.batch_size = row.get("qty") or wo_doc.qty
+		row.batch_size = row.get("qty") or get_operation_qty(wo_doc, row)
 
 	row.job_card_qty = row.batch_size
 	if row.batch_size and qty >= row.batch_size:
@@ -3580,7 +3617,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"sequence_id": row.get("sequence_id"),
 			"hour_rate": row.get("hour_rate"),
 			"serial_no": row.get("serial_no"),
-			"time_required": (row.get("time_in_mins", 0) / work_order.qty) * qty,
+			"time_required": (row.get("time_in_mins", 0) / get_operation_qty(work_order, row)) * qty,
 			"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 			"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse")
