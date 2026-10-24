@@ -7041,6 +7041,16 @@ class TestWorkOrder(ERPNextTestSuite):
 		wheel_jc.db_set("for_quantity", 4)
 		self.assertEqual(filter_covered_schedule_rows([block]), [])
 
+	def test_semi_fg_fractional_output_qty_completes_work_order(self):
+		wo = self.make_car_with_four_wheels_work_order(
+			"Stores - _TC", prefix="Test JCO Kg", stock_uom="Kg", bom_qty=3, wheel_qty=1
+		)
+		wheel_operation = wo.operations[0]
+		self.assertEqual(wheel_operation.output_qty, flt(1 / 3, wheel_operation.precision("output_qty")))
+
+		self.complete_semi_fg_work_order(wo)
+		self.assertEqual(wo.reload().produced_qty, 1)
+
 	def get_additional_operating_cost(self, stock_entry):
 		return sum(
 			flt(row.amount)
@@ -7059,13 +7069,16 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		return entries
 
-	def make_car_with_four_wheels_work_order(self, warehouse):
+	def make_car_with_four_wheels_work_order(
+		self, warehouse, prefix="Test JCO", stock_uom=None, bom_qty=1, wheel_qty=4
+	):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
 		)
 
+		properties = {"is_stock_item": 1, "stock_uom": stock_uom} if stock_uom else {"is_stock_item": 1}
 		items = {
-			name: make_item(f"Test JCO {name}", {"is_stock_item": 1}).name
+			name: make_item(f"{prefix} {name}", properties).name
 			for name in ("Rubber", "Rim", "Wheel", "Body", "Car")
 		}
 		if not frappe.db.exists("Workstation", "Test JCO Workstation"):
@@ -7080,7 +7093,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		wheel_bom.insert()
 		wheel_bom.submit()
 
-		car_bom = self.make_car_bom(items, wheel_bom.name)
+		car_bom = self.make_car_bom(items, wheel_bom.name, bom_qty, wheel_qty)
 		for item_code, qty in ((items["Rubber"], 4), (items["Rim"], 4), (items["Body"], 1)):
 			make_stock_entry_test_record(item_code=item_code, target=warehouse, qty=qty, basic_rate=100)
 
@@ -7094,12 +7107,12 @@ class TestWorkOrder(ERPNextTestSuite):
 			fg_warehouse=warehouse,
 		)
 
-	def make_car_bom(self, items, wheel_bom):
+	def make_car_bom(self, items, wheel_bom, bom_qty=1, wheel_qty=4):
 		car_bom = frappe.new_doc(
 			"BOM",
 			company="_Test Company",
 			item=items["Car"],
-			quantity=1,
+			quantity=bom_qty,
 			with_operations=1,
 			track_semi_finished_goods=1,
 		)
@@ -7110,7 +7123,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				**operation,
 				"operation": "Test JCO Wheel Making",
 				"finished_good": items["Wheel"],
-				"finished_good_qty": 4,
+				"finished_good_qty": wheel_qty,
 				"bom_no": wheel_bom,
 				"sequence_id": 1,
 			},
@@ -7126,7 +7139,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				"sequence_id": 2,
 			},
 		)
-		car_bom.append("items", {"item_code": items["Wheel"], "qty": 4, "operation_row_id": 2})
+		car_bom.append("items", {"item_code": items["Wheel"], "qty": wheel_qty, "operation_row_id": 2})
 		car_bom.append("items", {"item_code": items["Body"], "qty": 1, "operation_row_id": 2})
 		car_bom.insert()
 		car_bom.submit()

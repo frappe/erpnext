@@ -365,7 +365,8 @@ class StatusService:
 		if not operation_qty:
 			return 0.0
 
-		return flt(row.process_loss_qty) * flt(self.doc.qty) / operation_qty
+		process_loss_qty = flt(row.process_loss_qty) * flt(self.doc.qty) / operation_qty
+		return flt(process_loss_qty, self.doc.precision("process_loss_qty"))
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
