@@ -12,7 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
 
 
 class PackedItem(Document):
@@ -79,7 +79,7 @@ def make_packing_list(doc):
 	for item_row in doc.get("items"):
 		# Pack from the version chosen on the row (default: the item's active version)
 		# and record it so the document keeps a reference to the exact version used.
-		bundle_name = get_bundle_version_for_row(item_row)
+		bundle_name = get_bundle_version_for_row(item_row, doc)
 		if item_row.meta.has_field("product_bundle"):
 			item_row.product_bundle = bundle_name
 		if item_row.meta.has_field("is_product_bundle"):
@@ -183,14 +183,15 @@ def get_product_bundle_items_by_name(bundle_name):
 	).run(as_dict=True)
 
 
-def get_bundle_version_for_row(item_row):
+def get_bundle_version_for_row(item_row, doc=None):
 	"""Product Bundle version to pack ``item_row`` from.
 
 	Honours a version explicitly chosen on the row (validated to be a submitted
 	bundle of that item); otherwise falls back to the item's active version. A stale
 	choice (e.g. left over after changing the item) self-heals back to the active
 	one, but a disabled choice blocks the transaction instead of silently switching
-	versions behind the user's back.
+	versions behind the user's back. A return reuses the exact version of the document
+	it reverses, so a since-disabled version must not block it.
 	"""
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 
@@ -200,7 +201,7 @@ def get_bundle_version_for_row(item_row):
 			"Product Bundle", chosen, ["new_item_code", "docstatus", "disabled"], as_dict=True
 		)
 		if bundle and bundle.new_item_code == item_row.item_code and bundle.docstatus == 1:
-			if bundle.disabled:
+			if bundle.disabled and not (doc and doc.get("is_return")):
 				frappe.throw(
 					_("Row #{0}: Product Bundle {1} is disabled and cannot be used in transactions.").format(
 						item_row.idx, frappe.bold(chosen)
@@ -271,12 +272,21 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	pi_row.qty = flt(packing_item.qty) * flt(main_item_row.stock_qty)
+	# component qty is in the bundle row's UOM; convert to stock qty before scaling by bundle qty
+	component_factor = get_component_conversion_factor(packing_item, item_data.stock_uom)
+	pi_row.qty = flt(packing_item.qty) * component_factor * flt(main_item_row.stock_qty)
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
+
+
+def get_component_conversion_factor(packing_item, stock_uom):
+	uom = packing_item.get("uom")
+	if not uom or uom == stock_uom:
+		return 1.0
+	return flt(get_conversion_factor(packing_item.item_code, uom).get("conversion_factor")) or 1.0
 
 
 def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
@@ -464,7 +474,8 @@ def get_items_from_product_bundle(row: str | dict):
 		row.update(
 			{
 				"item_code": item.item_code,
-				"qty": flt(row["quantity"]) * flt(item.qty),
+				# convert the component's bundle-row UOM to stock qty, as packing does
+				"qty": flt(row["quantity"]) * flt(item.qty) * get_component_conversion_factor(item, None),
 				"conversion_rate": 1,
 				"currency": frappe.defaults.get_defaults().currency,
 			}

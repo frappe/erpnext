@@ -203,6 +203,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 	"""Hold the components of returned bundles to what is left of each delivered component."""
 	from erpnext.stock.doctype.packed_item.packed_item import (
 		get_bundle_version_for_row,
+		get_component_conversion_factor,
 		get_product_bundle_items_by_name,
 	)
 
@@ -221,7 +222,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 
 		bundle_key = (row.item_code, row.get("product_bundle"))
 		if bundle_key not in bundles:
-			bundles[bundle_key] = get_bundle_version_for_row(row)
+			bundles[bundle_key] = get_bundle_version_for_row(row, doc)
 		bundle = bundles[bundle_key]
 		if not bundle:
 			continue
@@ -239,7 +240,9 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 				component.item_code, frappe._dict(qty=0, stock_qty=0)
 			)
 			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
-			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * flt(component.qty)
+			# component.qty is in the bundle-row UOM; convert to stock qty, as packing does
+			component_stock_qty = flt(component.qty) * get_component_conversion_factor(component, None)
+			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * component_stock_qty
 			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
 				ref.stock_qty, row.precision("stock_qty")
 			):

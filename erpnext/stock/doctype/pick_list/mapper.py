@@ -352,10 +352,16 @@ def add_product_bundles_to_target(
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
+		bundle_items = product_bundle_qty_map.get(value.product_bundle)
+		if not bundle_items:
+			frappe.throw(
+				_("Row #{0}: cannot resolve the Product Bundle version for Item {1}.").format(
+					sales_order_item.idx, frappe.bold(sales_order_item.item_code)
+				)
+			)
+
 		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
-		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
-			so_row, product_bundle_qty_map[value.item_code]
-		)
+		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(so_row, bundle_items)
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
 
