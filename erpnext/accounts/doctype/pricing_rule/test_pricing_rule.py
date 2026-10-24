@@ -103,6 +103,39 @@ class TestPricingRule(ERPNextTestSuite):
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 15)
 
+	def test_campaign_pricing_rule_applies_to_transaction_utm_campaign(self):
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Pricing Rule for UTM Campaign",
+				"apply_on": "Item Code",
+				"items": [{"item_code": "_Test Item"}],
+				"selling": 1,
+				"applicable_for": "Campaign",
+				"campaign": "_Test Campaign",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 10,
+				"company": "_Test Company",
+			}
+		).insert()
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": "Standard Selling",
+				"item_code": "_Test Item",
+				"price_list_rate": 100,
+			}
+		).insert()
+
+		quotation = make_quotation(do_not_save=1)
+		quotation.utm_campaign = "_Test Campaign"
+		quotation.insert()
+
+		self.assertEqual(quotation.items[0].discount_percentage, 10)
+
 	def test_pricing_rule_for_margin(self):
 		from erpnext.stock.get_item_details import get_item_details
 
