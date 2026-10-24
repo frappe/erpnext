@@ -37,6 +37,7 @@ from erpnext.stock.stock_ledger import (
 	get_item_wh_first_reposted_from_reposting_data,
 	get_items_to_be_repost,
 	get_reposting_data,
+	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -169,10 +170,7 @@ class RepostItemValuation(Document):
 			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
 
 		if self.voucher_type == "Stock Entry":
-			return not frappe.db.exists(
-				"Stock Entry Detail",
-				{"parent": self.voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
-			)
+			return not is_transfer_stock_entry(self.voucher_no)
 
 		return False
 
