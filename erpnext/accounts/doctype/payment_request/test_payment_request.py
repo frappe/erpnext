@@ -565,6 +565,147 @@ class TestPaymentRequest(FrappeTestCase):
 
 		so.load_from_db()
 
+	def test_payment_cancel_process_multi_currency(self):
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+
+		po = create_purchase_order(
+			company="_Test Company",
+			supplier="_Test Supplier",
+			currency="USD",
+			qty=1,
+			rate=100,
+			do_not_save=True,
+		)
+		po.conversion_rate = 80.0
+		po.price_list_currency = "USD"
+		po.plc_conversion_rate = 80.0
+		po.save()
+		po.submit()
+
+		pr = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			recipient_id="supplier@example.com",
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.status, "Initiated")
+		self.assertEqual(pr.grand_total, 100)
+		self.assertEqual(pr.outstanding_amount, po.base_grand_total)
+
+		pe = pr.create_payment_entry(submit=False)
+		pe.submit()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+
+		pe.cancel()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Initiated")
+		self.assertEqual(pr.outstanding_amount, po.base_grand_total)
+
+	def test_payment_cancel_process_multi_currency_sales_order(self):
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+
+		so = make_sales_order(currency="USD", qty=1, rate=100, do_not_save=True)
+		so.conversion_rate = 80.0
+		so.save()
+		so.submit()
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="customer@example.com",
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.status, "Requested")
+		self.assertEqual(pr.grand_total, 100)
+		self.assertEqual(pr.outstanding_amount, so.base_grand_total)
+
+		pe = pr.create_payment_entry(submit=False)
+		pe.submit()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+
+		pe.cancel()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Requested")
+		self.assertEqual(pr.outstanding_amount, so.base_grand_total)
+
+	def test_requested_amount_currency_based_precision(self):
+		from unittest.mock import patch
+
+		import frappe.model.meta as meta_module
+
+		import erpnext.accounts.doctype.payment_request.payment_request as pr_module
+
+		orig_get_default = frappe.db.get_default
+
+		precision_patch = (
+			patch.object(meta_module, "get_currency_precision", return_value=None)
+			if hasattr(meta_module, "get_currency_precision")
+			else patch.object(
+				frappe.db,
+				"get_default",
+				side_effect=lambda k, *a, **kw: None
+				if k == "currency_precision"
+				else orig_get_default(k, *a, **kw),
+			)
+		)
+
+		with (
+			precision_patch,
+			patch.object(
+				frappe,
+				"get_system_settings",
+				side_effect=lambda k: 1
+				if k == "use_number_format_from_currency"
+				else frappe.db.get_single_value("System Settings", k),
+			),
+			patch.object(pr_module, "get_company_currency", return_value="JPY"),
+			patch.object(
+				frappe,
+				"get_value",
+				side_effect=lambda dt, dn, fields=None, as_dict=False, **kw: (
+					{
+						"rounded_total": 100,
+						"grand_total": 100,
+						"base_rounded_total": 15001,
+						"base_grand_total": 15001,
+					}
+					if dt == "Purchase Order"
+					else frappe.db.get_value(dt, dn, fields, as_dict=as_dict, **kw)
+				),
+			),
+		):
+			# Dictionary representation as used in update_payment_requests_as_per_pe_references
+			doc = frappe._dict(
+				currency="USD",
+				party_account_currency="JPY",
+				company="_Test Company",
+				reference_doctype="Purchase Order",
+				reference_name="DUMMY-PO",
+				grand_total=20,
+			)
+
+			# 20 / 100 * 15001 = 3000.20, which in JPY (0 decimal places) must round to 3000.0
+			amount = pr_module.get_requested_amount_in_party_account_currency(doc)
+			self.assertEqual(amount, 3000.0)
+
 	def test_partial_paid_invoice_with_payment_request(self):
 		si = create_sales_invoice(currency="INR", qty=1, rate=5000)
 		si.save()
