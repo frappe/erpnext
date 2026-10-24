@@ -1479,7 +1479,7 @@ frappe.tour["Item"] = [
 	},
 	{
 		fieldname: "include_item_in_manufacturing",
-		title: "Include Item in Manufacturing",
+		title: __("Include Item in Manufacturing"),
 		description: __(
 			"This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked."
 		),
