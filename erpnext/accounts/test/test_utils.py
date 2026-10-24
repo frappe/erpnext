@@ -8,6 +8,7 @@ from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
 	get_account_balances_coa,
 	get_balance_on,
+	get_coa,
 	get_currency_precision,
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
@@ -216,6 +217,20 @@ class TestUtils(ERPNextTestSuite):
 		self.assertEqual(get_zero_cutoff(None), 0.005)
 		self.assertEqual(get_zero_cutoff("EUR"), 0.005)
 		self.assertEqual(get_zero_cutoff("BHD"), 0.0005)
+
+	def test_get_coa_root_ignores_translated_label(self):
+		# the setup wizard sends the root label translated, e.g. "All Accounts" in Chinese
+		accounts = get_coa("Account", "所有科目", is_root=True, chart="Standard")
+		self.assertEqual(
+			{d["value"] for d in accounts},
+			{
+				"Application of Funds (Assets)",
+				"Source of Funds (Liabilities)",
+				"Equity",
+				"Income",
+				"Expenses",
+			},
+		)
 
 	def test_get_currency_precision_respects_zero_and_fallback(self):
 		currency_precision = frappe.db.get_default("currency_precision")
