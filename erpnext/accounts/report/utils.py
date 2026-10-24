@@ -119,12 +119,16 @@ def throw_missing_exchange_rate(date: DateTimeLikeObject, from_currency: str, to
 	)
 
 
-def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
+def convert_to_presentation_currency(
+	gl_entries, currency_info, filters=None, use_account_currency: bool = False
+):
 	"""
 	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
 	in `currency_info`.
 	:param gl_entries:
 	:param currency_info:
+	:param use_account_currency: Use the account-currency amounts as is when every entry is on an
+	        account in the presentation currency. Only the General Ledger sets it.
 	:return:
 	"""
 	converted_gl_list = []
@@ -148,10 +152,12 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 		account_currency = entry["account_currency"]
 
 		if (
-			len(account_currencies) == 1
+			use_account_currency
+			and len(account_currencies) == 1
 			and account_currency == presentation_currency
 			and not exchange_gain_or_loss
-		) and not (filters and filters.get("show_amount_in_company_currency")):
+			and not (filters and filters.get("show_amount_in_company_currency"))
+		):
 			entry["debit"] = debit_in_account_currency
 			entry["credit"] = credit_in_account_currency
 		else:

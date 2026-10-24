@@ -394,3 +394,30 @@ class TestGeneralLedger(ERPNextTestSuite):
 		).insert()
 		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
 		self.assertEqual(total["debit"], 100)
+
+	def test_foreign_currency_account_keeps_its_own_amounts(self):
+		account = frappe.get_doc(
+			doctype="Account",
+			account_name="Test USD Account for Presentation Currency",
+			company=self.company,
+			parent_account="Bank Accounts - _TC",
+			account_type="Bank",
+			account_currency="USD",
+		).insert(ignore_if_duplicate=True)
+		jv = frappe.new_doc("Journal Entry", posting_date=today(), company=self.company, multi_currency=1)
+		jv.append(
+			"accounts", {"account": account.name, "debit_in_account_currency": 100, "exchange_rate": 80}
+		)
+		jv.append("accounts", {"account": "Cash - _TC", "credit_in_account_currency": 8000})
+		jv.submit()
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			account=[account.name],
+			presentation_currency="USD",
+		)
+		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
+
+		self.assertEqual(total["debit"], 100)
