@@ -75,7 +75,7 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(
 			[(row.part_number, row.qty) for row in frame_parts], [("TUBE-25", 3), ("BOLT-M6", 4)]
 		)
-		self.assertTrue(all(row.source == "CAD File" for row in design.items))
+		self.assertTrue(all(row.source == "CAD File" and row.do_not_explode for row in design.items))
 
 	def test_design_without_file_is_built_by_hand(self):
 		for item_code in (

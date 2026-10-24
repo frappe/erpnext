@@ -205,6 +205,7 @@ class BOMCreator(Document):
 					"qty": get_quantity(old_rows.get(path), node["quantity"]),
 					"design_quantity": node["quantity"],
 					"source": "CAD File",
+					"do_not_explode": 1,
 					**get_mapping(old_rows.get(path)),
 				},
 			)
