@@ -123,6 +123,59 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.set_process_loss_qty()
 		self.assertEqual(wo.process_loss_qty, 0.25)
 
+	def test_semi_finished_fractional_output_qty_completes_next_operation(self):
+		steel, paint, car = (make_item(properties={"stock_uom": "Kg"}).name for _ in range(3))
+		operation, workstation = make_review_operation()
+		step = {
+			"operation": operation,
+			"workstation": workstation,
+			"time_in_mins": 60,
+			"skip_material_transfer": 1,
+		}
+		bom = make_review_bom(
+			car,
+			[
+				{"item_code": steel, "qty": 1, "operation_row_id": 1},
+				{"item_code": paint, "qty": 1, "operation_row_id": 2},
+			],
+			quantity=3,
+			operations=[
+				{**step, "finished_good": paint, "finished_good_qty": 1},
+				{**step, "finished_good": car, "finished_good_qty": 3, "is_final_finished_good": 1},
+			],
+			track_semi_finished_goods=1,
+		)
+		wo = make_review_work_order(car, bom.name, 1, skip_transfer=1, track_semi_finished_goods=1)
+		paint_card, car_card = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": wo.name}, order_by="operation_row_id", pluck="name"
+			)
+		)
+		self.assertEqual(paint_card.for_quantity, 0.33)
+
+		test_stock_entry.make_stock_entry(
+			item_code=steel, target="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+
+		def complete(card, hours):
+			card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date(now(), hours=hours - 1),
+					"to_time": add_to_date(now(), hours=hours),
+					"completed_qty": card.for_quantity,
+				},
+			)
+			card.submit()
+			frappe.get_doc(card.make_stock_entry_for_semi_fg_item()).submit()
+
+		complete(paint_card, -3)
+		self.assertEqual(car_card.get_max_completable_qty(), 1)
+		complete(car_card, -1)
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Completed")
+
 	def test_form_saved_work_order_keeps_job_card_qty(self):
 		item = make_item().name
 		operation, workstation = make_review_operation()
