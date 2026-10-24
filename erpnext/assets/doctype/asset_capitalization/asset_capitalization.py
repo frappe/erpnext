@@ -165,7 +165,7 @@ class AssetCapitalization(StockController):
 			args.update(d.as_dict())
 			args.doctype = self.doctype
 			args.name = self.name
-			consumed_stock_item_details = get_consumed_stock_item_details(args)
+			consumed_stock_item_details = _get_consumed_stock_item_details(args)
 			for k, v in consumed_stock_item_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_fields):
 					d.set(k, v)
@@ -362,7 +362,7 @@ class AssetCapitalization(StockController):
 		for d in self.get("stock_items"):
 			if d.item_code and d.warehouse:
 				args = self.get_args_for_incoming_rate(d)
-				warehouse_details = get_warehouse_details(args)
+				warehouse_details = _get_warehouse_details(args)
 				d.update(warehouse_details)
 
 		self.split_valuation_rate_for_grouped_stock_items()
@@ -751,12 +751,24 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	frappe.has_permission("Stock Ledger Entry", throw=True)
+	if ctx.item_code:
+		frappe.get_cached_doc("Item", ctx.item_code).check_permission()
+
+	out = _get_consumed_stock_item_details(ctx)
+	if out.warehouse:
+		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
+
+	return out
+
+
+@erpnext.normalize_ctx_input(ItemDetailsCtx)
+def _get_consumed_stock_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
+	"""Row defaults for a consumed stock item; the capitalization's own permission covers them."""
 	out = frappe._dict()
 
 	item = frappe._dict()
 	if ctx.item_code:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
-		item.check_permission()
 
 	out.item_name = item.item_name
 	out.batch_no = None
@@ -766,8 +778,6 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	out.stock_uom = item.stock_uom
 
 	out.warehouse = get_item_warehouse_(ctx, item, overwrite_warehouse=True) if item else None
-	if out.warehouse:
-		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
 
 	# Cost Center
 	item_defaults = get_item_defaults(item.name, ctx.company)
@@ -791,7 +801,7 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 				"serial_and_batch_bundle": ctx.serial_and_batch_bundle,
 			}
 		)
-		out.update(get_warehouse_details(incoming_rate_args))
+		out.update(_get_warehouse_details(incoming_rate_args))
 	else:
 		out.valuation_rate = 0
 		out.actual_qty = 0
@@ -805,17 +815,23 @@ def get_warehouse_details(args):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
-
-	out = {}
 	if args.warehouse and args.item_code:
 		frappe.has_permission("Item", doc=args.item_code, throw=True)
 		frappe.has_permission("Warehouse", doc=args.warehouse, throw=True)
 		frappe.has_permission("Stock Ledger Entry", throw=True)
-		out = {
-			"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
-			"valuation_rate": _get_incoming_rate(args, raise_error_if_no_rate=False),
-		}
-	return out
+
+	return _get_warehouse_details(args)
+
+
+def _get_warehouse_details(args) -> dict:
+	args = frappe._dict(args)
+	if not (args.warehouse and args.item_code):
+		return {}
+
+	return {
+		"actual_qty": get_previous_sle(args).get("qty_after_transaction") or 0,
+		"valuation_rate": _get_incoming_rate(args, raise_error_if_no_rate=False),
+	}
 
 
 @frappe.whitelist()
