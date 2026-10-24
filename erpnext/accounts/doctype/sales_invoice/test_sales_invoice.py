@@ -159,6 +159,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertTrue(si.payment_schedule)
 		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(si.due_date))
 
+	def test_update_after_submit_with_company_default_terms(self):
+		si = create_sales_invoice()
+		terms = frappe.get_doc(
+			{"doctype": "Terms and Conditions", "title": "_Test Default Selling Terms", "terms": "Terms"}
+		).insert()
+		frappe.db.set_value("Company", si.company, "default_selling_terms", terms.name)
+
+		si.reload()
+		si.run_method("onload")
+		self.assertFalse(si.tc_name)
+		si.save()
+
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.insert()
