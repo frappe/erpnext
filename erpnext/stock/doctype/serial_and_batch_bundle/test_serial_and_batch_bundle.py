@@ -2975,6 +2975,13 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 
 		self.assertEqual(writes_before_insert, [])
 
+	def test_bundle_is_indexed_on_voucher_and_item_on_mariadb(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("Postgres has its own partial indexes")
+
+		for index in ("voucher_no_voucher_type_index", "item_code_posting_datetime_index"):
+			self.assertTrue(frappe.db.has_index("tabSerial and Batch Bundle", index))
+
 	def test_get_bundle_wise_serial_nos(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			get_bundle_wise_serial_nos,
