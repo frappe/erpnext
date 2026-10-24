@@ -487,10 +487,23 @@ def clear_clearing_date(voucher_type: str, voucher_name: str):
 	"""
 	Clear the clearing date of a voucher
 	"""
-	# using db_set to trigger notification
-	payment_entry = frappe.get_doc(voucher_type, voucher_name)
+	frappe.has_permission("Bank Clearance", ptype="write", throw=True)
+	if voucher_type not in get_doctypes_for_bank_reconciliation():
+		frappe.throw(
+			_("{0} is not a voucher this tool can clear").format(voucher_type), title=_("Invalid Voucher")
+		)
 
-	if payment_entry.has_permission("write"):
+	payment_entry = frappe.get_doc(voucher_type, voucher_name)
+	validate_clearance_date(payment_entry, None, None)
+
+	if voucher_type == "Sales Invoice":
+		frappe.db.set_value(
+			"Sales Invoice Payment",
+			{"parent": voucher_name, "amount": ["!=", 0]},
+			"clearance_date",
+			None,
+		)
+	else:
 		payment_entry.db_set("clearance_date", None)
 
 

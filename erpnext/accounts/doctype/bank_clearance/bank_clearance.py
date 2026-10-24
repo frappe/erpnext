@@ -170,6 +170,9 @@ class BankClearance(Document):
 				)
 
 			voucher = frappe.get_doc(row.payment_document, row.payment_entry)
+			if not has_clearance_date_changed(voucher, row.clearance_date, self.account):
+				continue
+
 			if not row.clearance_date:
 				row.clearance_date = None
 
@@ -232,20 +235,11 @@ def validate_clearance_date(voucher, clearance_date, account, row_idx=None, cheq
 			_("{0}: Only submitted vouchers can be cleared.").format(label), title=_("Invalid Voucher")
 		)
 
-	clearance_date = getdate(clearance_date) if clearance_date else None
-	clearance_dates = (
-		[
-			payment.clearance_date
-			for payment in voucher.payments
-			if payment.account == account and payment.amount != 0
-		]
-		if voucher.doctype == "Sales Invoice"
-		else [voucher.clearance_date]
-	)
-	if all((getdate(date) if date else None) == clearance_date for date in clearance_dates):
+	if not has_clearance_date_changed(voucher, clearance_date, account):
 		return
 
 	if clearance_date:
+		clearance_date = getdate(clearance_date)
 		if clearance_date < getdate(voucher.posting_date):
 			frappe.throw(
 				_("{0}: Clearance date cannot be before posting date.").format(label),
@@ -273,7 +267,7 @@ def validate_clearance_date(voucher, clearance_date, account, row_idx=None, cheq
 		)
 		.limit(1)
 	)
-	if voucher.doctype == "Sales Invoice":
+	if voucher.doctype == "Sales Invoice" and account:
 		bank_account = frappe.qb.DocType("Bank Account")
 		allocated = allocated.where(
 			transaction.bank_account.isin(
@@ -287,6 +281,20 @@ def validate_clearance_date(voucher, clearance_date, account, row_idx=None, cheq
 			).format(label),
 			title=_("Voucher Already Reconciled"),
 		)
+
+
+def has_clearance_date_changed(voucher, clearance_date, account):
+	clearance_date = getdate(clearance_date) if clearance_date else None
+	clearance_dates = (
+		[
+			payment.clearance_date
+			for payment in voucher.payments
+			if (not account or payment.account == account) and payment.amount != 0
+		]
+		if voucher.doctype == "Sales Invoice"
+		else [voucher.clearance_date]
+	)
+	return any((getdate(date) if date else None) != clearance_date for date in clearance_dates)
 
 
 def get_payment_entries_for_bank_clearance(
