@@ -926,6 +926,13 @@ def validate_account_party_type(self):
 	if self.is_cancelled:
 		return
 
+	if (
+		not self.flags.from_reversal
+		and self.party_type
+		and not frappe.db.exists("Party Type", self.party_type)
+	):
+		frappe.throw(_("{0} is not a valid Party Type").format(self.party_type))
+
 	if self.party_type and self.party:
 		account_type = frappe.get_cached_value("Account", self.account, "account_type")
 		if account_type and (account_type not in ["Receivable", "Payable", "Equity"]):
