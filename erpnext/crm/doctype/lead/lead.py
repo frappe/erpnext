@@ -14,6 +14,7 @@ from frappe.utils import comma_and, get_link_to_form, validate_email_address
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
+from erpnext.exceptions import PartyDisabled
 from erpnext.selling.doctype.customer.customer import parse_full_name
 
 
@@ -338,6 +339,7 @@ class Lead(SellingController, CRMNote):
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
+	validate_lead_is_enabled(source_name, "Customer")
 	return _make_customer(source_name, target_doc)
 
 
@@ -385,6 +387,8 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
+	validate_lead_is_enabled(source_name, "Opportunity")
+
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -415,6 +419,8 @@ def make_opportunity(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
+	validate_lead_is_enabled(source_name, "Quotation")
+
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -462,6 +468,14 @@ def _set_missing_values(source, target):
 
 	if contact:
 		target.contact_person = contact[0].parent
+
+
+def validate_lead_is_enabled(lead: str, doctype: str) -> None:
+	if frappe.db.get_value("Lead", lead, "disabled"):
+		frappe.throw(
+			_("Lead {0} is disabled. Enable it to create a new {1}.").format(lead, _(doctype)),
+			PartyDisabled,
+		)
 
 
 @frappe.whitelist()

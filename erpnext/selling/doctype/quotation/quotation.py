@@ -145,6 +145,7 @@ class Quotation(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.set_default_valid_till()
 		self.validate_valid_till()
+		self.validate_lead()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -167,6 +168,12 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_lead(self):
+		from erpnext.crm.doctype.lead.lead import validate_lead_is_enabled
+
+		if self.quotation_to == "Lead" and self.party_name and self.is_new() and not self.amended_from:
+			validate_lead_is_enabled(self.party_name, self.doctype)
 
 	def set_has_alternative_item(self):
 		"""Mark 'Has Alternative Item' for rows."""
