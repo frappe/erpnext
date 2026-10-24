@@ -38,9 +38,14 @@ class TestBin(ERPNextTestSuite):
 
 		from frappe.database import get_db
 
-		item_code = make_item(properties={"is_stock_item": 1}).name
-		warehouse = "_Test Warehouse - _TC"
-		self.assertIsNone(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}))
+		item_code = "_Test Item"
+		warehouses_with_bin = frappe.get_all("Bin", filters={"item_code": item_code}, pluck="warehouse")
+		warehouse = frappe.get_all(
+			"Warehouse",
+			filters={"company": "_Test Company", "is_group": 0, "name": ("not in", warehouses_with_bin)},
+			pluck="name",
+			limit=1,
+		)[0]
 
 		other_connection = get_db(
 			socket=frappe.db.socket,
