@@ -652,6 +652,24 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(se, [{"incoming_rate": 150}])
 
+	def test_recalculate_valuation_rate_not_allowed_for_material_transfer(self):
+		item = self.make_item().name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		transfer = make_stock_entry(
+			item_code=item, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=transfer.doctype,
+			voucher_no=transfer.name,
+			recalculate_valuation_rate=1,
+			posting_date=transfer.posting_date,
+			posting_time=transfer.posting_time,
+		)
+		self.assertRaises(frappe.ValidationError, riv.save)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
