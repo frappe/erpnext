@@ -31,6 +31,36 @@ class TestBin(ERPNextTestSuite):
 		bin = _create_bin(item_code, warehouse)
 		self.assertEqual(bin.item_code, item_code)
 
+	def test_create_bin_finds_bin_committed_after_snapshot(self):
+		"""The loser of a concurrent insert must get the bin the winner committed after its snapshot"""
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("Postgres repeatable read does not show rows committed after the snapshot")
+
+		from frappe.database import get_db
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		self.assertIsNone(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}))
+
+		other_connection = get_db(
+			socket=frappe.db.socket,
+			host=frappe.db.host,
+			user=frappe.db.user,
+			password=frappe.db.password,
+			port=frappe.db.port,
+			cur_db_name=frappe.db.cur_db_name,
+		)
+		self.addCleanup(other_connection.close)
+		bin_name = frappe.generate_hash()
+		other_connection.bulk_insert(
+			"Bin", ["name", "item_code", "warehouse"], [(bin_name, item_code, warehouse)]
+		)
+		other_connection.commit()
+		self.addCleanup(other_connection.commit)
+		self.addCleanup(other_connection.delete, "Bin", {"name": bin_name})
+
+		self.assertEqual(_create_bin(item_code, warehouse).name, bin_name)
+
 	def test_update_bin_qty_keeps_stock_movement_after_read(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		warehouse = "_Test Warehouse - _TC"
