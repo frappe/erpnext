@@ -57,7 +57,9 @@ def get_data(filters, period_list, partner_doctype):
 
 	date_field = "transaction_date" if filters.get("doctype") == "Sales Order" else "posting_date"
 
-	actual_data = get_actual_data(filters, sales_users, date_field, sales_field)
+	sales_user_map = get_sales_user_map(partner_doctype, sales_users)
+	actual_users = {name for names in sales_user_map.values() for name in names}
+	actual_data = get_actual_data(filters, list(actual_users), date_field, sales_field)
 
 	return prepare_data(
 		filters,
@@ -67,7 +69,21 @@ def get_data(filters, period_list, partner_doctype):
 		date_field,
 		period_list,
 		sales_field,
+		sales_user_map,
 	)
+
+
+def get_sales_user_map(partner_doctype, sales_users):
+	if partner_doctype not in ("Territory", "Sales Person"):
+		return {name: {name} for name in sales_users}
+
+	nodes = frappe.get_all(partner_doctype, fields=["name", "lft", "rgt"])
+	by_name = {node.name: node for node in nodes}
+	return {
+		name: {node.name for node in nodes if by_name[name].lft <= node.lft <= by_name[name].rgt}
+		for name in sales_users
+		if name in by_name
+	}
 
 
 def get_columns(filters, period_list, partner_doctype):
@@ -160,6 +176,7 @@ def prepare_data(
 	date_field,
 	period_list,
 	sales_field,
+	sales_user_map=None,
 ):
 	rows = {}
 
@@ -184,7 +201,7 @@ def prepare_data(
 			details[p_key] = sum(
 				r.get(qty_or_amount_field, 0)
 				for r in actual_data
-				if r.get(sales_field) == parent
+				if r.get(sales_field) in (sales_user_map or {}).get(parent, {parent})
 				and period.from_date <= r.get(date_field) <= period.to_date
 				and (
 					not item_group

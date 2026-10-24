@@ -124,6 +124,13 @@ class TestSalesPersonTargetVarianceBasedOnItemGroup(ERPNextTestSuite):
 
 		check_duplicate_targets(self, "Sales Person", "sales_person_name", execute)
 
+	def test_group_target_includes_descendant_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_group_target,
+		)
+
+		check_group_target(self, "Sales Person", "sales_person_name", execute)
+
 
 def create_target_distribution(fiscal_year):
 	distribution = frappe.new_doc("Monthly Distribution")

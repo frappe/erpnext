@@ -161,6 +161,9 @@ class TestTerritoryTargetVarianceBasedOnItemGroup(ERPNextTestSuite):
 
 		check_duplicate_targets(self, "Territory", "territory_name", execute)
 
+	def test_group_target_includes_descendant_sales(self):
+		check_group_target(self, "Territory", "territory_name", execute)
+
 
 def create_territory_with_target(name, fiscal_year, distribution_id, target_qty=50):
 	doc = frappe.new_doc("Territory")
@@ -293,3 +296,43 @@ def check_duplicate_targets(test, doctype, name_field, execute_report):
 	test.assertEqual(
 		sorted(flt(v, 2) for k, v in row.items() if k.startswith("target_")), [0] * 10 + [1000, 1000]
 	)
+
+
+def check_group_target(test, doctype, name_field, execute_report):
+	from erpnext.selling.report.sales_person_target_variance_based_on_item_group.test_sales_person_target_variance_based_on_item_group import (
+		create_sales_target_doc,
+	)
+
+	distribution = create_target_distribution(test.fiscal_year)
+	group = create_sales_target_doc(
+		doctype, name_field, frappe.generate_hash(length=10), test.fiscal_year, distribution.name
+	)
+	group.is_group = 1
+	group.save()
+	parent_field = "parent_" + frappe.scrub(doctype)
+	middle = frappe.get_doc(
+		dict(
+			doctype=doctype,
+			is_group=1,
+			**{name_field: frappe.generate_hash(length=10), parent_field: group.name},
+		)
+	).insert()
+	leaf = frappe.get_doc(
+		dict(doctype=doctype, **{name_field: frappe.generate_hash(length=10), parent_field: middle.name})
+	).insert()
+	order = make_sales_order(rate=700, qty=1, do_not_submit=True)
+	field = frappe.scrub(doctype)
+	if doctype == "Sales Person":
+		order.set("sales_team", [{"sales_person": leaf.name, "allocated_percentage": 100}])
+	else:
+		order.set(field, leaf.name)
+	order.submit()
+	filters = frappe._dict(
+		company=order.company,
+		fiscal_year=test.fiscal_year,
+		doctype="Sales Order",
+		period="Yearly",
+		target_on="Amount",
+	)
+	row = next(row for row in execute_report(filters)[1] if row[field] == group.name)
+	test.assertEqual(flt(row["total_achieved"], 2), 700)
