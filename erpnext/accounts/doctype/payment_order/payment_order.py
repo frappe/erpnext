@@ -36,8 +36,33 @@ class PaymentOrder(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_reference_type()
 		self.validate_company_bank_account()
 		self.validate_reference_company()
+
+	def before_mapping(self, source_doc, table_maps):
+		self.validate_reference_type(source_doc.doctype)
+
+	def validate_reference_type(self, payment_order_type=None):
+		payment_order_type = payment_order_type or self.payment_order_type
+		if not payment_order_type:
+			return
+
+		for row in self.references:
+			if payment_order_type == "Payment Request" and row.payment_request:
+				continue
+			if (
+				payment_order_type == "Payment Entry"
+				and row.reference_doctype == "Payment Entry"
+				and not row.payment_request
+			):
+				continue
+
+			frappe.throw(
+				_("Row #{0}: Only {1} references are allowed in this Payment Order.").format(
+					row.idx, _(payment_order_type)
+				)
+			)
 
 	def validate_reference_company(self):
 		if not self.payment_order_type:
