@@ -610,8 +610,6 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
 
-<<<<<<< HEAD
-=======
 	def test_reference_count_needs_voucher_read(self):
 		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import doc_has_references
 
@@ -632,11 +630,6 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		with as_user(outside):
 			self.assertRaises(frappe.PermissionError, doc_has_references, si.doctype, si.name)
 
-	def test_unreconcile_selection_fences_the_voucher(self):
-		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
-			create_unreconcile_doc_for_selection,
-		)
->>>>>>> 0ce7848 (fix: check document access in SLA reset and payment reference count)
 
 class TestUnreconcilePaymentPermissions(AccountsTestMixin, FrappeTestCase):
 	def setUp(self):

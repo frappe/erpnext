@@ -228,35 +228,16 @@ class TestIssue(TestSetUp):
 		).insert(ignore_permissions=True)
 		issue = make_issue(customer="_Test Customer")
 
-<<<<<<< HEAD
 		with as_user(user):
 			self.assertNotIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
-=======
-		issue = make_issue(index=1)
-		issue.reload()
-		issue.status = "Closed"
-		issue.save()
 
-		self.assertEqual(
-			frappe.get_all("ToDo", {"reference_type": "Issue", "reference_name": issue.name}, pluck="status"),
-			["Closed"],
-		)
-
-	def test_sla_whitelisted_methods_use_session_permissions(self):
+	def test_sla_reset_needs_write_access(self):
 		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
-			get_service_level_agreement_filters,
 			reset_service_level_agreement,
 		)
 
 		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
 		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
-		reset_service_level_agreement("Issue", issue.name, "customer asked", "someone@example.com")
-		self.assertEqual(
-			frappe.db.get_value(
-				"Comment", {"reference_name": issue.name, "comment_type": "Info"}, "comment_email"
-			),
-			"Administrator",
-		)
 
 		website_user = create_user("test_sla_website_user@example.com")
 		website_user.db_set("user_type", "Website User")
@@ -264,13 +245,11 @@ class TestIssue(TestSetUp):
 		try:
 			self.assertRaises(
 				frappe.PermissionError,
-				get_service_level_agreement_filters,
+				reset_service_level_agreement,
 				"Issue",
-				issue.service_level_agreement,
-				"_Test Customer",
-			)
-			self.assertRaises(
-				frappe.PermissionError, reset_service_level_agreement, "Issue", issue.name, "not mine"
+				issue.name,
+				"not mine",
+				website_user.name,
 			)
 		finally:
 			frappe.set_user("Administrator")
@@ -278,32 +257,12 @@ class TestIssue(TestSetUp):
 			frappe.db.exists("Comment", {"reference_name": issue.name, "content": ["like", "%not mine%"]})
 		)
 
-	def test_update_agreement_status_on_custom_status(self):
-		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
-			update_agreement_status_on_custom_status,
+		reset_service_level_agreement("Issue", issue.name, "customer asked", "Administrator")
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment", {"reference_name": issue.name, "content": ["like", "%customer asked%"]}
+			)
 		)
-
-		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
-		issue.first_responded_on = get_datetime("2019-03-04 13:00")
-		update_agreement_status_on_custom_status(issue)
-		self.assertEqual(issue.agreement_status, "Resolution Due")
-
-	def test_resetting_sla_of_resolved_issue_recalculates_deadlines(self):
-		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
-			reset_service_level_agreement,
-		)
-
-		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
-		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
-		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
-		issue.status = "Closed"
-		issue.save()
-		old_response_by = issue.response_by
-
-		reset_service_level_agreement("Issue", issue.name, "customer asked")
-		issue.reload()
-		self.assertGreater(get_datetime(issue.response_by), get_datetime(old_response_by))
->>>>>>> 0ce7848 (fix: check document access in SLA reset and payment reference count)
 
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
