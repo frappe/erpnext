@@ -1,22 +1,14 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-<<<<<<< HEAD
-# import frappe
-import unittest
-=======
 
 import frappe
 import frappe.client
->>>>>>> 7c88594 (fix(telephony): scope voice call settings to their user)
 
 from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestVoiceCallSettings(ERPNextTestSuite):
-<<<<<<< HEAD
-	pass
-=======
 	def test_user_creates_own_settings(self):
 		user = make_user("voice-call-owner@example.com")
 		other_user = make_user("voice-call-other@example.com")
@@ -96,4 +88,3 @@ def make_settings(user: str, **values) -> "frappe.model.document.Document":
 		frappe.get_doc({"doctype": "Voice Call Settings", "user": user}).insert(ignore_permissions=True)
 	frappe.db.set_value("Voice Call Settings", user, values)
 	return frappe.get_doc("Voice Call Settings", user)
->>>>>>> 7c88594 (fix(telephony): scope voice call settings to their user)
