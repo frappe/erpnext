@@ -377,7 +377,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			{
 				fieldname: "edit_in_full_page",
 				fieldtype: "Button",
-				label: "Edit in Full Page",
+				label: __("Edit in Full Page"),
 				click: () => {
 					this.edit_in_full_page();
 				},
