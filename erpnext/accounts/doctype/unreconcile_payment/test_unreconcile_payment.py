@@ -21,6 +21,7 @@ from erpnext.tests.permission_test_utils import (
 	assert_refused,
 	assert_refused_for_names,
 	assert_refused_without,
+	make_company_fenced_user,
 	make_fenced_user,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -612,9 +613,6 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
 
-<<<<<<< HEAD
-	def create_allocated_payment(self, cost_center):
-=======
 	def test_reference_count_needs_voucher_read(self):
 		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import doc_has_references
 
@@ -635,12 +633,7 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		with as_user(outside):
 			self.assertRaises(frappe.PermissionError, doc_has_references, si.doctype, si.name)
 
-	def test_unreconcile_selection_fences_the_voucher(self):
-		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
-			create_unreconcile_doc_for_selection,
-		)
-
->>>>>>> 0ce7848 (fix: check document access in SLA reset and payment reference count)
+	def create_allocated_payment(self, cost_center):
 		si = self.create_sales_invoice()
 		pe = self.create_payment_entry()
 		pe.cost_center = cost_center
