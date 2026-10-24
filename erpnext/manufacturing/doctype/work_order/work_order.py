@@ -532,7 +532,8 @@ class WorkOrder(Document):
 		for d in self.get("operations"):
 			saved = saved_rows.get(d.name)
 			if saved and flt(saved.output_qty) and flt(saved.output_qty) == flt(d.output_qty):
-				d.output_qty = flt(saved.output_qty) * flt(self.qty) / flt(previous.qty)
+				output_qty = flt(saved.output_qty) * flt(self.qty) / flt(previous.qty)
+				d.output_qty = flt(output_qty, d.precision("output_qty"))
 
 	def scale_saved_operation_time(self, previous):
 		saved_rows = {row.name: row for row in previous.get("operations")}
@@ -1064,7 +1065,8 @@ class WorkOrder(Document):
 		if not operation_qty:
 			return 0.0
 
-		return flt(row.process_loss_qty) * flt(self.qty) / operation_qty
+		process_loss_qty = flt(row.process_loss_qty) * flt(self.qty) / operation_qty
+		return flt(process_loss_qty, self.precision("process_loss_qty"))
 
 	def _process_loss_qty(self):
 		if self.track_semi_finished_goods:
@@ -1747,7 +1749,7 @@ class WorkOrder(Document):
 			return 0
 
 		per_unit = finished_good_qty * flt(qty) if exploded else finished_good_qty / flt(qty)
-		return per_unit * flt(self.qty)
+		return flt(per_unit * flt(self.qty), self.precision("output_qty", "operations"))
 
 	def set_operation_warehouses(self):
 		if not self.track_semi_finished_goods or not self.operations:

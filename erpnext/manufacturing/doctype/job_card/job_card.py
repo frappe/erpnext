@@ -372,13 +372,14 @@ class JobCard(Document):
 
 	def convert_to_current_operation_qty(self, rows, fields):
 		work_order = self.get_work_order_qty_details()
+		precision = self.precision("total_completed_qty")
 		for row in rows:
 			operation_qty = get_operation_qty(work_order, row)
 			if not operation_qty or operation_qty == work_order.operation_qty:
 				continue
 
 			for field in fields:
-				row[field] = flt(row.get(field)) * work_order.operation_qty / operation_qty
+				row[field] = flt(flt(row.get(field)) * work_order.operation_qty / operation_qty, precision)
 
 	def set_secondary_items(self):
 		if not self.semi_fg_bom and not self.bom_no:
@@ -1223,7 +1224,10 @@ class JobCard(Document):
 
 		operation = next((row for row in wo.operations if row.name == self.operation_id), {})
 		operation_total = (for_quantity + process_loss_qty + pending_qty) * flt(wo.qty)
-		if wo.produced_qty > operation_total / get_operation_qty(wo, operation):
+		operation_total = flt(
+			operation_total / get_operation_qty(wo, operation), wo.precision("produced_qty")
+		)
+		if wo.produced_qty > operation_total:
 			first_part_msg = _(
 				"The {0} {1} is used to calculate the valuation cost for the finished good {2}."
 			).format(frappe.bold(_("Job Card")), frappe.bold(self.name), frappe.bold(self.production_item))
@@ -1474,9 +1478,10 @@ class JobCard(Document):
 		qty = 0.0
 		if doc.transfer_material_against == "Job Card" and not doc.skip_transfer:
 			min_qty = []
+			precision = self.precision("total_completed_qty")
 			for d in doc.operations:
 				completed_qty = (flt(d.completed_qty) + flt(d.process_loss_qty)) * flt(doc.qty)
-				completed_qty /= get_operation_qty(doc, d)
+				completed_qty = flt(completed_qty / get_operation_qty(doc, d), precision)
 				if completed_qty:
 					min_qty.append(completed_qty)
 				else:

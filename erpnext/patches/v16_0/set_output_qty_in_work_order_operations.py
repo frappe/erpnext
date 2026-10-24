@@ -5,8 +5,9 @@ from pypika.terms import ExistsCriterion
 
 
 def execute():
+	precision = frappe.get_precision("Work Order Operation", "output_qty")
 	updates = {
-		row.name: {"output_qty": flt(row.finished_good_qty) * flt(row.qty) / flt(row.bom_qty)}
+		row.name: {"output_qty": flt(flt(row.finished_good_qty) * flt(row.qty) / flt(row.bom_qty), precision)}
 		for row in get_operations_without_output_qty()
 		if flt(row.bom_qty)
 	}
