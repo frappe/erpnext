@@ -39,7 +39,10 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import get_output_qty_per_unit
+from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import (
+	get_output_qty_per_unit,
+	get_qty_to_produce,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -1783,9 +1786,21 @@ class JobCard(Document):
 		return flt(min_completed_qty - self.get_current_operation_completed_qty(), precision)
 
 	def get_qty_in_operation_units(self, qty, operation):
-		"""Converts `qty` of another Work Order Operation's Output Item to this operation's units."""
-		qty = flt(qty) / flt(operation.output_qty_per_unit or 1) * self.get_output_qty_per_unit()
-		return flt(qty, self.precision("total_completed_qty"))
+		"""Converts `qty` of another Work Order Operation's Output Item to this operation's units.
+		Scales by both operations' rounded qty to produce, so a finished operation covers this one in full."""
+		precision = self.precision("total_completed_qty")
+		output_qty_per_unit = self.get_output_qty_per_unit()
+		other_output_qty_per_unit = flt(operation.output_qty_per_unit) or 1
+		if output_qty_per_unit == other_output_qty_per_unit:
+			return flt(qty, precision)
+
+		work_order_qty = frappe.get_cached_value("Work Order", self.work_order, "qty")
+		other_qty = get_qty_to_produce(work_order_qty, other_output_qty_per_unit)
+		if not other_qty:
+			return 0.0
+
+		qty = flt(qty) * get_qty_to_produce(work_order_qty, output_qty_per_unit) / other_qty
+		return flt(qty, precision)
 
 	def validate_previous_operation(self, row, current_operation_qty):
 		if not row.completed_qty or (row.status != "Completed" and row.completed_qty < current_operation_qty):

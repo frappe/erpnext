@@ -56,7 +56,13 @@ class WorkOrderOperation(Document):
 
 	def get_qty_to_produce(self, work_order_qty):
 		"""Output Item qty this operation makes for `work_order_qty` units of the Work Order item."""
-		return flt(flt(work_order_qty) * self.output_qty_per_unit, self.precision("completed_qty"))
+		return get_qty_to_produce(work_order_qty, self.output_qty_per_unit)
+
+
+def get_qty_to_produce(work_order_qty, output_qty_per_unit):
+	"""Output Item qty an operation makes for `work_order_qty` units of the Work Order item."""
+	precision = frappe.get_precision("Work Order Operation", "completed_qty")
+	return flt(flt(work_order_qty) * flt(output_qty_per_unit), precision)
 
 
 def get_output_qty_per_unit(operation_id):
