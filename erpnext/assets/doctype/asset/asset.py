@@ -640,12 +640,25 @@ class Asset(AccountsController):
 			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 		self.validate_depreciation_start_date(row)
 		self.validate_total_number_of_depreciations_and_frequency(row)
+		self.validate_written_down_value_rate(row)
 
 		if self.asset_type != "Existing Asset":
 			self.opening_accumulated_depreciation = 0
 			self.opening_number_of_booked_depreciations = 0
 		else:
 			self.validate_opening_depreciation_values(row)
+
+	def validate_written_down_value_rate(self, row):
+		if (
+			row.depreciation_method == "Written Down Value"
+			and not flt(row.rate_of_depreciation)
+			and not flt(row.expected_value_after_useful_life)
+		):
+			frappe.throw(
+				_(
+					"Row #{0}: Set a Rate of Depreciation or an Expected Value After Useful Life for the Written Down Value method"
+				).format(row.idx)
+			)
 
 	def validate_opening_depreciation_values(self, row):
 		row.expected_value_after_useful_life = flt(
@@ -855,6 +868,17 @@ class Asset(AccountsController):
 		for row in self.get("finance_books"):
 			if finance_book == row.finance_book:
 				return flt(row.value_after_depreciation, self.precision("net_purchase_amount"))
+
+	def sync_value_after_depreciation(self) -> None:
+		"""Set the header value after depreciation to the default finance book's value."""
+		if not self.calculate_depreciation or not self.get("finance_books"):
+			return
+
+		row = self.finance_books[self.get_default_finance_book_idx() or 0]
+		self.db_set(
+			"value_after_depreciation",
+			frappe.db.get_value("Asset Finance Book", row.name, "value_after_depreciation"),
+		)
 
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
@@ -1573,6 +1597,7 @@ def reschedule_depr_for_updated_asset(existing_asset, new_asset, fb_row, scaling
 
 	update_depreciation_terms(new_depr_schedule_doc, scaling_factor)
 	add_depr_schedule_notes(new_depr_schedule_doc, existing_asset, new_asset, is_new_asset)
+	new_depr_schedule_doc.flags.is_rescheduled = True
 
 	if not is_new_asset:
 		current_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True

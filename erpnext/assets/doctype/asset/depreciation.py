@@ -167,17 +167,13 @@ def get_depr_cost_center_and_series():
 def make_depreciation_entry(
 	depr_schedule_name,
 	date=None,
-	sch_start_idx=None,
-	sch_end_idx=None,
 	accounting_dimensions=None,
 ):
 	depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", depr_schedule_name)
 	frappe.has_permission("Asset Depreciation Schedule", "write", depr_schedule_doc, throw=True)
 	frappe.has_permission("Asset", "write", depr_schedule_doc.asset, throw=True)
 
-	return _make_depreciation_entry(
-		depr_schedule_name, date, sch_start_idx, sch_end_idx, accounting_dimensions
-	)
+	return _make_depreciation_entry(depr_schedule_name, date, accounting_dimensions=accounting_dimensions)
 
 
 def _make_depreciation_entry(
@@ -207,8 +203,6 @@ def _make_depreciation_entry(
 				asset,
 				date,
 				d,
-				sch_start_idx,
-				sch_end_idx,
 				depr_cost_center,
 				depr_series,
 				credit_account,
@@ -234,17 +228,13 @@ def _make_journal_entry_for_depreciation(
 	asset,
 	date,
 	depr_schedule,
-	sch_start_idx,
-	sch_end_idx,
 	depr_cost_center,
 	depr_series,
 	credit_account,
 	debit_account,
 	accounting_dimensions,
 ):
-	if not (sch_start_idx and sch_end_idx) and not (
-		not depr_schedule.journal_entry and getdate(depr_schedule.schedule_date) <= getdate(date)
-	):
+	if depr_schedule.journal_entry or getdate(depr_schedule.schedule_date) > getdate(date):
 		return
 
 	je = frappe.new_doc("Journal Entry")
@@ -534,6 +524,8 @@ def reverse_depreciation_entry_made_on_disposal(asset):
 				) or disposal_happens_in_the_future(asset.disposal_date):
 					je = create_reverse_depreciation_entry(asset.name, schedule.journal_entry)
 					update_value_after_depreciation_on_asset_restore(schedule, row, je)
+
+	asset.sync_value_after_depreciation()
 
 
 def disposal_was_made_on_original_schedule_date(schedule_idx, row, disposal_date):
