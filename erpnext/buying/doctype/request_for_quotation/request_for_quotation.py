@@ -8,6 +8,7 @@ from frappe.contacts.doctype.contact.contact import get_full_name
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
@@ -519,3 +520,85 @@ def get_rfq_containing_supplier(
 		limit_start=start,
 		limit_page_length=page_len,
 	)
+
+
+@frappe.whitelist()
+def get_supplier_quotations_data(rfq_name: str) -> list[dict]:
+	"""Returns supplier quotation items linked to the RFQ"""
+	frappe.has_permission("Request for Quotation", "read", doc=rfq_name, throw=True)
+
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
+	sq = frappe.qb.DocType("Supplier Quotation")
+
+	rfq_items = frappe.get_all(
+		"Request for Quotation Item",
+		filters={"parent": rfq_name},
+		fields=["name", "item_code"],
+	)
+	rfq_item_names = [d.name for d in rfq_items]
+	rfq_item_codes = list({d.item_code for d in rfq_items if d.item_code})
+
+	linked_sq_conditions = sq_item.request_for_quotation == rfq_name
+	if rfq_item_names:
+		linked_sq_conditions = linked_sq_conditions | (
+			sq_item.request_for_quotation_item.isin(rfq_item_names)
+		)
+
+	linked_sq_names = (
+		frappe.qb.from_(sq_item).select(sq_item.parent).where(linked_sq_conditions).distinct().run(pluck=True)
+	)
+	if not linked_sq_names or not frappe.has_permission("Supplier Quotation", "read"):
+		return []
+
+	# only quotations the user is allowed to open, so their prices are not exposed through the RFQ
+	permitted_sq_names = frappe.get_list(
+		"Supplier Quotation",
+		filters={"name": ["in", linked_sq_names], "docstatus": ["<", 2]},
+		pluck="name",
+		limit_page_length=0,
+	)
+	if not permitted_sq_names:
+		return []
+
+	conditions = linked_sq_conditions
+	if rfq_item_codes:
+		# rows added manually to a linked quotation, but not rows that belong to another RFQ
+		conditions = conditions | (
+			sq_item.parent.isin(permitted_sq_names)
+			& sq_item.item_code.isin(rfq_item_codes)
+			& (Coalesce(sq_item.request_for_quotation, "") == "")
+			& (Coalesce(sq_item.request_for_quotation_item, "") == "")
+		)
+
+	query = (
+		frappe.qb.from_(sq_item)
+		.inner_join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(
+			sq_item.parent.as_("supplier_quotation"),
+			sq.supplier,
+			sq_item.request_for_quotation_item,
+			sq_item.item_code,
+			sq_item.item_name,
+			sq_item.qty,
+			sq_item.uom,
+			sq_item.stock_uom,
+			sq_item.conversion_factor,
+			sq_item.stock_qty,
+			sq_item.rate,
+			sq_item.amount,
+			sq_item.base_rate,
+			sq_item.base_amount,
+			sq_item.lead_time_days,
+			sq.valid_till,
+			sq.currency,
+			sq.conversion_rate,
+			sq.status,
+			sq.docstatus,
+		)
+		.where(conditions & sq.name.isin(permitted_sq_names))
+		.orderby(sq.transaction_date)
+		.orderby(sq_item.idx)
+	)
+
+	return query.run(as_dict=True)
