@@ -25,10 +25,9 @@ PRICING_TRANSACTION_DOCTYPES = frozenset(
 		"Purchase Receipt",
 		"Purchase Invoice",
 		"Material Request",
-		# these three also extend a controller that calls the pricing engine: BOM and BOM Creator
-		# through TransactionController, Request for Quotation through BuyingController
+		# these two also extend a controller that calls the pricing engine: BOM through
+		# TransactionController, Request for Quotation through BuyingController
 		"BOM",
-		"BOM Creator",
 		"Request for Quotation",
 		# no client sends this one, but set_transaction_type below still branches on it
 		"Opportunity",
@@ -802,7 +801,7 @@ def validate_pricing_parties(ctx: frappe._dict) -> None:
 
 
 def validate_pricing_price_lists(ctx: frappe._dict, doctype: str) -> None:
-	if doctype in ("BOM", "BOM Creator"):
+	if doctype == "BOM":
 		return
 
 	meta = frappe.get_meta(doctype)
