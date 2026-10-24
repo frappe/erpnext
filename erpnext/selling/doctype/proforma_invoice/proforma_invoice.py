@@ -145,11 +145,7 @@ class ProformaInvoice(Document):
 		prorate_fixed_charges(sales_order, self.get_order_share(sales_order))
 		sales_order.items = [item for item in sales_order.items if item.name in lines]
 		for item in sales_order.items:
-			item.qty = lines[item.name].qty
-			item.rate = lines[item.name].rate
-			item.description = lines[item.name].description
-			item.discount_amount = 0
-			item.discount_percentage = 0
+			set_proforma_line(item, lines[item.name])
 		sales_order.run_method("calculate_taxes_and_totals")
 		if flt(sales_order.grand_total) < 0:
 			frappe.throw(_("The grand total of a Proforma Invoice cannot be negative."))
@@ -292,6 +288,19 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	)
 	proforma.db_set("sent_on", now())
 	proforma.db_set("emailed_to", recipients)
+
+
+def set_proforma_line(item: Document, line: Document) -> None:
+	"""Bill the Sales Order line at the proforma qty and rate, so pricing rules or margins cannot recompute it."""
+	item.qty = line.qty
+	item.rate = line.rate
+	item.price_list_rate = line.rate
+	item.description = line.description
+	item.pricing_rules = None
+	item.margin_type = None
+	item.margin_rate_or_amount = 0
+	item.discount_amount = 0
+	item.discount_percentage = 0
 
 
 def prorate_fixed_charges(sales_order: Document, share: float) -> None:
