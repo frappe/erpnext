@@ -1,57 +1,85 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "prompt",
+ "autoname": "naming_series:",
  "creation": "2023-07-18 14:56:34.477800",
  "default_view": "List",
- "description": "Build a multi-level BOM in one place.",
+ "description": "Build a multi-level BOM by hand or from a CAD design, plan its operations, and create the BOMs.",
  "doctype": "DocType",
- "document_type": "Setup",
+ "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bom-creator",
  "engine": "InnoDB",
  "field_order": [
-  "tab_2_tab",
-  "bom_creator",
-  "details_tab",
-  "section_break_ylsl",
+  "design_tab",
+  "design_name",
   "item_code",
-  "is_phantom",
-  "item_name",
-  "item_group",
-  "column_break_ikj7",
+  "column_break_design_name",
+  "company",
+  "design_file",
+  "track_semi_finished_goods",
   "qty",
-  "project",
-  "uom",
-  "section_break_xvld",
-  "routing",
-  "raw_materials_tab",
-  "currency_detail",
+  "design_view_section",
+  "design_view",
+  "items",
+  "operations",
+  "materials",
+  "costing_tab",
   "rm_cost_as_per",
-  "set_rate_based_on_warehouse",
   "buying_price_list",
   "price_list_currency",
   "plc_conversion_rate",
-  "column_break_ivyw",
+  "set_rate_based_on_warehouse",
+  "default_warehouse",
+  "column_break_costing",
   "currency",
   "conversion_rate",
-  "section_break_zcfg",
-  "default_warehouse",
-  "column_break_tzot",
-  "company",
-  "materials_section",
-  "items",
-  "costing_detail",
   "raw_material_cost",
-  "remarks_tab",
-  "remarks",
-  "section_break_yixm",
+  "details_tab",
+  "naming_series",
+  "item_group",
+  "part_number",
+  "project",
+  "is_phantom",
+  "routing",
+  "column_break_details",
+  "revision",
+  "previous_revision",
+  "item_name",
+  "uom",
+  "more_info_section",
   "status",
+  "remarks",
   "column_break_irab",
   "error_log",
-  "connections_tab",
-  "amended_from"
+  "amended_from",
+  "connections_tab"
  ],
  "fields": [
+  {
+   "fieldname": "design_tab",
+   "fieldtype": "Tab Break",
+   "label": "Design"
+  },
+  {
+   "fieldname": "design_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Design Name"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Finished Good",
+   "options": "Item",
+   "allow_on_submit": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_design_name",
+   "fieldtype": "Column Break"
+  },
   {
    "fieldname": "company",
    "fieldtype": "Link",
@@ -61,9 +89,72 @@
    "reqd": 1
   },
   {
-   "fieldname": "currency_detail",
-   "fieldtype": "Section Break",
-   "label": "Costing"
+   "fieldname": "design_file",
+   "fieldtype": "Attach",
+   "label": "Design File",
+   "description": "STEP file (.step or .stp) or CSV file. A CSV file needs a Level or Item Number column, a Part Number or Part Name column, and a Quantity column.",
+   "show_description_on_click": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "eval:!doc.is_phantom",
+   "fieldname": "track_semi_finished_goods",
+   "fieldtype": "Check",
+   "label": "Produce an Item at Each Operation",
+   "description": "Each operation makes an item that a later operation can use. The last operation makes the finished good.",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Quantity",
+   "reqd": 1,
+   "default": "1",
+   "non_negative": 1,
+   "allow_on_submit": 1,
+   "description": "The BOM of the finished good is made for this quantity. Part quantities are for one finished good.",
+   "show_description_on_click": 1,
+   "depends_on": "track_semi_finished_goods"
+  },
+  {
+   "fieldname": "design_view_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "design_view",
+   "fieldtype": "HTML",
+   "label": "Design View"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "BOM Creator Item",
+   "allow_on_submit": 1,
+   "hidden": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "operations",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Operations",
+   "options": "BOM Creator Operation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "materials",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Materials",
+   "options": "BOM Creator Material"
+  },
+  {
+   "fieldname": "costing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Costing",
+   "depends_on": "eval:!doc.__islocal"
   },
   {
    "allow_on_submit": 1,
@@ -100,13 +191,28 @@
    "label": "Price List Exchange Rate"
   },
   {
-   "fieldname": "column_break_ivyw",
+   "default": "0",
+   "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\"",
+   "fieldname": "set_rate_based_on_warehouse",
+   "fieldtype": "Check",
+   "label": "Set Valuation Rate Based on Source Warehouse",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Source Warehouse",
+   "options": "Warehouse",
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\""
+  },
+  {
+   "fieldname": "column_break_costing",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Currency",
    "options": "Currency",
    "reqd": 1
@@ -116,26 +222,8 @@
    "fieldname": "conversion_rate",
    "fieldtype": "Float",
    "label": "Conversion Rate",
-   "precision": "9"
-  },
-  {
-   "fieldname": "materials_section",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break"
-  },
-  {
-   "allow_bulk_edit": 1,
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Items",
-   "oldfieldname": "bom_materials",
-   "oldfieldtype": "Table",
-   "options": "BOM Creator Item"
-  },
-  {
-   "fieldname": "costing_detail",
-   "fieldtype": "Section Break",
-   "label": "Costing Details"
+   "precision": "9",
+   "allow_on_submit": 1
   },
   {
    "fieldname": "raw_material_cost",
@@ -144,16 +232,42 @@
    "label": "Total Cost",
    "no_copy": 1,
    "options": "currency",
-   "read_only": 1
+   "read_only": 1,
+   "allow_on_submit": 1
   },
   {
-   "fieldname": "remarks",
-   "fieldtype": "Text Editor",
-   "label": "Remarks"
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "depends_on": "eval:!doc.__islocal"
   },
   {
-   "fieldname": "column_break_ikj7",
-   "fieldtype": "Column Break"
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "BOM-CRE-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group for New Items",
+   "options": "Item Group",
+   "allow_on_submit": 1,
+   "description": "Item group of the items created from design parts.",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "part_number",
+   "fieldtype": "Data",
+   "label": "Part Number",
+   "description": "Part number of the top assembly in the design file.",
+   "show_description_on_click": 1,
+   "depends_on": "design_file"
   },
   {
    "fieldname": "project",
@@ -162,65 +276,93 @@
    "options": "Project"
   },
   {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Finished Good",
-   "options": "Item",
-   "reqd": 1
+   "default": "0",
+   "fieldname": "is_phantom",
+   "fieldtype": "Check",
+   "label": "Is Phantom BOM",
+   "depends_on": "eval:!doc.track_semi_finished_goods"
   },
   {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "label": "Quantity",
-   "reqd": 1
+   "fieldname": "routing",
+   "fieldtype": "Link",
+   "label": "Routing",
+   "options": "Routing",
+   "description": "The BOM of the finished good gets its operations from this routing.",
+   "show_description_on_click": 1,
+   "depends_on": "eval:!doc.is_phantom && !doc.track_semi_finished_goods"
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "revision",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Revision",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_revision",
+   "fieldtype": "Link",
+   "label": "Previous Revision",
+   "no_copy": 1,
+   "options": "BOM Creator",
+   "read_only": 1
   },
   {
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "hidden": 1
   },
   {
    "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
-   "options": "UOM"
+   "options": "UOM",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "hidden": 1
   },
   {
-   "fieldname": "tab_2_tab",
-   "fieldtype": "Tab Break",
-   "label": "BOM Tree"
+   "fieldname": "more_info_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
   },
   {
-   "fieldname": "details_tab",
-   "fieldtype": "Tab Break",
-   "label": "Final Product"
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nIn Progress\nCompleted\nFailed\nSuperseded\nCancelled",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
   },
   {
-   "fieldname": "raw_materials_tab",
-   "fieldtype": "Tab Break",
-   "label": "Sub Assemblies & Raw Materials"
-  },
-  {
-   "fieldname": "remarks_tab",
-   "fieldtype": "Tab Break",
+   "fieldname": "remarks",
+   "fieldtype": "Text Editor",
    "label": "Remarks"
   },
   {
-   "fieldname": "connections_tab",
-   "fieldtype": "Tab Break",
-   "label": "Connections",
-   "show_dashboard": 1
+   "fieldname": "column_break_irab",
+   "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "item_code.item_group",
-   "fieldname": "item_group",
-   "fieldtype": "Link",
-   "label": "Item Group",
-   "options": "Item Group"
+   "fieldname": "error_log",
+   "fieldtype": "Text",
+   "label": "Error Log",
+   "no_copy": 1,
+   "read_only": 1,
+   "depends_on": "error_log"
   },
   {
    "fieldname": "amended_from",
@@ -232,93 +374,31 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_zcfg",
-   "fieldtype": "Section Break",
-   "label": "Warehouse"
-  },
-  {
-   "fieldname": "column_break_tzot",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "default_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Source Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "fieldname": "bom_creator",
-   "fieldtype": "HTML"
-  },
-  {
-   "fieldname": "section_break_ylsl",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\"",
-   "fieldname": "set_rate_based_on_warehouse",
-   "fieldtype": "Check",
-   "label": "Set Valuation Rate Based on Source Warehouse"
-  },
-  {
-   "fieldname": "section_break_yixm",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "no_copy": 1,
-   "options": "Draft\nSubmitted\nIn Progress\nCompleted\nFailed\nCancelled",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_irab",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "error_log",
-   "fieldtype": "Text",
-   "label": "Error Log",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.is_phantom",
-   "fieldname": "section_break_xvld",
-   "fieldtype": "Section Break",
-   "label": "Operations Routing"
-  },
-  {
-   "fieldname": "routing",
-   "fieldtype": "Link",
-   "label": "Routing",
-   "options": "Routing"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_phantom",
-   "fieldtype": "Check",
-   "label": "Is Phantom Item",
-   "read_only": 1
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
- "hide_toolbar": 1,
  "icon": "list-plus",
  "is_submittable": 1,
  "links": [
   {
    "link_doctype": "BOM",
-   "link_fieldname": "bom_creator"
+   "link_fieldname": "bom_creator",
+   "group": "Bill of Materials"
+  },
+  {
+   "link_doctype": "BOM Creator",
+   "link_fieldname": "previous_revision",
+   "group": "Revisions"
   }
  ],
- "modified": "2026-10-14 10:00:00.000000",
+ "modified": "2026-10-24 17:39:02.377997",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
- "naming_rule": "Set by user",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -353,5 +433,8 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "title_field": "design_name",
+ "show_title_field_in_link": 1,
+ "search_fields": "design_name,item_code"
 }
