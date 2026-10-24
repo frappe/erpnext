@@ -1,7 +1,7 @@
 frappe.ui.form.on("Communication", {
 	refresh: (frm) => {
 		// setup custom Make button only if Communication is Email
-		if (frm.doc.communication_medium == "Email" && frm.doc.sent_or_received == "Received") {
+		if (frm.doc.communication_medium == "Email") {
 			frm.events.setup_custom_buttons(frm);
 		}
 	},
@@ -20,7 +20,10 @@ frappe.ui.form.on("Communication", {
 			);
 		}
 
-		if (!["Lead", "Opportunity"].includes(frm.doc.reference_doctype)) {
+		if (
+			frm.doc.sent_or_received == "Received" &&
+			!["Lead", "Opportunity"].includes(frm.doc.reference_doctype)
+		) {
 			frm.add_custom_button(
 				__("Lead"),
 				() => {
