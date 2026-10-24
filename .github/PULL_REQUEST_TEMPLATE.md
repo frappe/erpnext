@@ -1,5 +1,7 @@
 <!--
 
+Note: Your PR will be automatically closed if you're not in list of [vouched users](https://github.com/frappe/erpnext/blob/develop/.github/VOUCHED.td).
+
 Some key notes before you open a PR:
 
  1. Select which branch should this PR be merged in?
