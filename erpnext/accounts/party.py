@@ -661,19 +661,9 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 
 
 def validate_party_accounts(doc):
-	from erpnext.controllers.accounts_controller import validate_account_head
-
-	companies = []
+	validate_party_account_rows(doc, "Customer" if doc.doctype == "Customer Group" else doc.doctype)
 
 	for account in doc.get("accounts"):
-		if account.company in companies:
-			frappe.throw(
-				_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
-				DuplicatePartyAccountError,
-			)
-		else:
-			companies.append(account.company)
-
 		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value(
@@ -695,15 +685,33 @@ def validate_party_accounts(doc):
 					)
 				)
 
-		# validate if account is mapped for same company
-		if account.account:
-			validate_account_head(account.idx, account.account, account.company, _("Debtor/Creditor"))
-		if account.advance_account:
-			validate_account_head(
-				account.idx, account.advance_account, account.company, _("Debtor/Creditor Advance")
-			)
 
-		validate_party_account_type("Customer" if doc.doctype == "Customer Group" else doc.doctype, account)
+def validate_party_account_rows(doc, party_type):
+	from erpnext.controllers.accounts_controller import validate_account_head
+
+	companies = set()
+	for row in doc.get("accounts"):
+		if row.company in companies:
+			frappe.throw(
+				_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
+				DuplicatePartyAccountError,
+			)
+		companies.add(row.company)
+
+		for account, context in (
+			(row.account, _("Debtor/Creditor")),
+			(row.advance_account, _("Debtor/Creditor Advance")),
+		):
+			if not account:
+				continue
+			validate_account_head(row.idx, account, row.company, context)
+			if frappe.get_cached_value("Account", account, "disabled"):
+				frappe.throw(
+					_("Row {0}: Account {1} is disabled").format(row.idx, frappe.bold(account)),
+					title=_("Invalid Account"),
+				)
+
+		validate_party_account_type(party_type, row)
 
 
 def validate_party_account_type(party_type, row):
