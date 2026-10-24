@@ -38,6 +38,7 @@ from erpnext.accounts.utils import (
 )
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_asset_disposal_values,
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
@@ -502,6 +503,7 @@ class SalesInvoice(SellingController):
 			self.validate_produced_serial_nos_against_reservation()
 
 		self.process_asset_depreciation()
+		self.set_asset_disposal_values()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -1361,6 +1363,22 @@ class SalesInvoice(SellingController):
 
 		self.update_asset()
 
+	def set_asset_disposal_values(self) -> None:
+		"""Store the asset values the sale or return entries are built from, so a repost reproduces them."""
+		if self.is_internal_transfer():
+			return
+
+		for item in self.get("items"):
+			if item.is_fixed_asset and item.asset:
+				asset = frappe.get_doc("Asset", item.asset)
+				values = get_asset_disposal_values(asset, item.finance_book)
+				item.db_set(
+					{
+						"asset_value_after_depreciation": values["value_after_depreciation"],
+						"asset_gross_value": values["gross_asset_value"],
+					}
+				)
+
 	def depreciate_asset_on_sale(self):
 		"""
 		Depreciate asset on sale or cancellation of return sales invoice
@@ -1653,6 +1671,7 @@ class SalesInvoice(SellingController):
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		asset = frappe.get_cached_doc("Asset", item.asset)
+		disposal_values = get_stored_asset_disposal_values(item)
 
 		if self.is_return:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
@@ -1662,6 +1681,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 		else:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -1671,6 +1691,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 
 		for gle in fixed_asset_gl_entries:
@@ -3119,3 +3140,14 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
+
+
+def get_stored_asset_disposal_values(item) -> dict | None:
+	"""Asset values stored on the row at submit, so a repost does not pick up later changes to the asset."""
+	if not flt(item.asset_gross_value):
+		return None
+
+	return {
+		"value_after_depreciation": item.asset_value_after_depreciation,
+		"gross_asset_value": item.asset_gross_value,
+	}

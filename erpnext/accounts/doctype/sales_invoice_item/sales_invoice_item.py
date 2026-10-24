@@ -19,6 +19,8 @@ class SalesInvoiceItem(Document):
 		allow_zero_valuation_rate: DF.Check
 		amount: DF.Currency
 		asset: DF.Link | None
+		asset_gross_value: DF.Currency
+		asset_value_after_depreciation: DF.Currency
 		barcode: DF.Data | None
 		base_amount: DF.Currency
 		base_net_amount: DF.Currency
