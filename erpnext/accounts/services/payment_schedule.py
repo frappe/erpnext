@@ -3,6 +3,8 @@
 
 """Payment schedule and payment terms helpers."""
 
+from collections import Counter
+
 import frappe
 from frappe import _
 from frappe.utils import DateTimeLikeObject, add_days, add_months, cint, cstr, flt, get_last_day, getdate
@@ -326,6 +328,184 @@ class PaymentScheduleService:
 		self.set_payment_schedule()
 		self.validate_payment_schedule_dates()
 		self.validate_payment_schedule_amount()
+
+
+def clear_changed_payment_term_exchange_rates(doc) -> None:
+	table = "accounts" if doc.doctype == "Journal Entry" else "references"
+	source_name = doc.get("amended_from") or doc.get("reversal_of")
+	if not source_name:
+		for row in doc.get(table):
+			row.payment_term_exchange_rate = 0
+		return
+
+	source = frappe.get_doc(doc.doctype, source_name)
+	if doc.doctype == "Journal Entry":
+		fields = ("reference_type", "reference_name", "payment_term", "account_currency", "exchange_rate")
+	else:
+		fields = ("reference_doctype", "reference_name", "payment_term")
+		if (
+			doc.paid_from_account_currency,
+			doc.paid_to_account_currency,
+			doc.get_exchange_rate(),
+		) != (
+			source.paid_from_account_currency,
+			source.paid_to_account_currency,
+			source.get_exchange_rate(),
+		):
+			for row in doc.get(table):
+				row.payment_term_exchange_rate = 0
+			return
+
+	fields += ("payment_term_exchange_rate",)
+	original_references = {tuple(row.get(field) for field in fields) for row in source.get(table)}
+	for row in doc.get(table):
+		if tuple(row.get(field) for field in fields) not in original_references:
+			row.payment_term_exchange_rate = 0
+
+
+def clear_unavailable_journal_payment_terms(doc) -> None:
+	if not doc.amended_from:
+		return
+
+	fields = (
+		"reference_type",
+		"reference_name",
+		"payment_term",
+		"account_currency",
+		"exchange_rate",
+		"payment_term_exchange_rate",
+		"debit_in_account_currency",
+		"credit_in_account_currency",
+	)
+	source = frappe.get_doc("Journal Entry", doc.amended_from)
+	inherited_allocations = Counter(tuple(row.get(field) for field in fields) for row in source.accounts)
+	outstanding_by_term = {}
+	for row in doc.accounts:
+		if not row.payment_term or row.reference_type not in ("Sales Invoice", "Purchase Invoice"):
+			continue
+		allocation_key = tuple(row.get(field) for field in fields)
+		if not inherited_allocations[allocation_key]:
+			continue
+		inherited_allocations[allocation_key] -= 1
+
+		allocated_amount = flt(row.credit_in_account_currency) - flt(row.debit_in_account_currency)
+		if row.reference_type == "Purchase Invoice":
+			allocated_amount = -allocated_amount
+		_, allocated_amount, precision = get_invoice_payment_term_allocation(
+			row.reference_type,
+			row.reference_name,
+			allocated_amount,
+			row.account_currency,
+			row.exchange_rate,
+			row.payment_term_exchange_rate,
+		)
+		key = (row.reference_type, row.reference_name, row.payment_term)
+		if key not in outstanding_by_term:
+			outstanding_by_term[key] = flt(
+				frappe.db.get_value(
+					"Payment Schedule",
+					{"parenttype": key[0], "parent": key[1], "payment_term": key[2]},
+					"outstanding",
+					for_update=True,
+				)
+			)
+		if allocated_amount > 0 and flt(allocated_amount, precision) > flt(
+			outstanding_by_term[key], precision
+		):
+			# The inherited term can be paid by another document before this amendment is submitted.
+			row.payment_term = None
+			row.payment_term_exchange_rate = 0
+		else:
+			outstanding_by_term[key] -= allocated_amount
+
+
+def update_invoice_payment_schedule(
+	invoice_type: str,
+	invoice_name: str,
+	payment_term: str | None,
+	allocated_amount: float,
+	payment_currency: str | None,
+	payment_exchange_rate: float | None,
+	cancel: bool = False,
+	payment_term_exchange_rate: float | None = None,
+) -> None:
+	if not payment_term or invoice_type not in ("Sales Invoice", "Purchase Invoice"):
+		return
+
+	invoice, allocated_amount, precision = get_invoice_payment_term_allocation(
+		invoice_type,
+		invoice_name,
+		allocated_amount,
+		payment_currency,
+		payment_exchange_rate,
+		payment_term_exchange_rate,
+	)
+	if not frappe.db.get_value(
+		"Payment Terms Template", invoice.payment_terms_template, "allocate_payment_based_on_payment_terms"
+	):
+		return
+
+	if not cancel and allocated_amount > 0:
+		outstanding = frappe.db.get_value(
+			"Payment Schedule",
+			{"parenttype": invoice_type, "parent": invoice_name, "payment_term": payment_term},
+			"outstanding",
+			for_update=True,
+		)
+		if flt(allocated_amount, precision) > flt(outstanding, precision):
+			frappe.throw(
+				_("Allocated amount cannot exceed the outstanding amount of payment term {0} in {1}").format(
+					payment_term, invoice_name
+				)
+			)
+
+	company_currency = frappe.get_cached_value("Company", invoice.company, "default_currency")
+	base_precision = frappe.get_precision(invoice_type, "base_grand_total", currency=company_currency)
+	base_allocated_amount = flt(allocated_amount * invoice.conversion_rate, base_precision)
+	payment_schedule = frappe.qb.DocType("Payment Schedule")
+	change = 1 if cancel else -1
+	(
+		frappe.qb.update(payment_schedule)
+		.set(payment_schedule.paid_amount, payment_schedule.paid_amount - (change * allocated_amount))
+		.set(
+			payment_schedule.base_paid_amount,
+			payment_schedule.base_paid_amount - (change * base_allocated_amount),
+		)
+		.set(payment_schedule.outstanding, payment_schedule.outstanding + (change * allocated_amount))
+		.set(
+			payment_schedule.base_outstanding,
+			payment_schedule.base_outstanding + (change * base_allocated_amount),
+		)
+		.where(
+			(payment_schedule.parent == invoice_name)
+			& (payment_schedule.parenttype == invoice_type)
+			& (payment_schedule.payment_term == payment_term)
+		)
+	).run()
+
+
+def get_invoice_payment_term_allocation(
+	invoice_type,
+	invoice_name,
+	allocated_amount,
+	payment_currency,
+	payment_exchange_rate,
+	payment_term_exchange_rate,
+):
+	invoice = frappe.db.get_value(
+		invoice_type,
+		invoice_name,
+		["currency", "conversion_rate", "payment_terms_template", "company"],
+		as_dict=True,
+	)
+	precision = frappe.get_precision(invoice_type, "grand_total", currency=invoice.currency)
+	if payment_term_exchange_rate:
+		allocated_amount = flt(allocated_amount / payment_term_exchange_rate, precision)
+	elif payment_currency and payment_currency != invoice.currency:
+		allocated_amount = flt(
+			allocated_amount * flt(payment_exchange_rate) / invoice.conversion_rate, precision
+		)
+	return invoice, allocated_amount, precision
 
 
 def linked_order_has_payment_terms_template(po_or_so, doctype) -> str | None:
