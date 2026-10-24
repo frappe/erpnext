@@ -1593,6 +1593,20 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
+	def test_service_dates_kept_when_deferred_expense_is_not_enabled(self):
+		pi = make_purchase_invoice(do_not_save=True)
+		pi.items[0].service_start_date = "2019-01-10"
+		pi.items[0].service_end_date = "2019-03-15"
+		pi.insert()
+
+		pi.reload()
+		pi.save()
+		pi.submit()
+		pi.reload()
+
+		self.assertEqual(getdate(pi.items[0].service_start_date), getdate("2019-01-10"))
+		self.assertEqual(getdate(pi.items[0].service_end_date), getdate("2019-03-15"))
+
 	def test_deferred_expense_via_journal_entry(self):
 		deferred_account = create_account(
 			account_name="Deferred Expense", parent_account="Current Assets - _TC", company="_Test Company"

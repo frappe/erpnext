@@ -3160,6 +3160,43 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, si.save)
 
+	def test_service_dates_kept_when_deferred_revenue_is_not_enabled(self):
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.insert()
+
+		# a later draft save and the submit must keep them too
+		si.reload()
+		si.save()
+		si.submit()
+		si.reload()
+
+		self.assertEqual(getdate(si.items[0].service_start_date), getdate("2019-01-10"))
+		self.assertEqual(getdate(si.items[0].service_end_date), getdate("2019-03-15"))
+
+	def test_deferred_fields_cleared_when_deferred_revenue_is_disabled(self):
+		deferred_account = create_account(
+			account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC",
+			company="_Test Company",
+		)
+
+		si = create_sales_invoice(posting_date="2019-01-10", do_not_save=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.insert()
+
+		si.items[0].enable_deferred_revenue = 0
+		si.save()
+		si.reload()
+
+		self.assertIsNone(si.items[0].service_start_date)
+		self.assertIsNone(si.items[0].service_end_date)
+		self.assertIsNone(si.items[0].deferred_revenue_account)
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"book_deferred_entries_based_on": "Months", "book_deferred_entries_via_journal_entry": 0},
