@@ -25,7 +25,7 @@ export class PlacementPanel {
 	}
 
 	get_parts() {
-		return (this.frm.doc.parts || [])
+		return (this.frm.doc.items || [])
 			.filter((part) => part.model_file && !this.view.is_excluded(part))
 			.map((part) => ({
 				node_id: part.node_id,
@@ -74,11 +74,7 @@ export class PlacementPanel {
 		if (!object) return;
 
 		const part = this.view.get_part(node_id);
-		const label = __("{0}: placement {1} of {2}", [
-			this.get_label(node_id),
-			index + 1,
-			flt(part.quantity),
-		]);
+		const label = __("{0}: placement {1} of {2}", [this.get_label(node_id), index + 1, flt(part.qty)]);
 		this.show_toolbar(label, ["translate", "rotate", "remove", "done"]);
 	}
 

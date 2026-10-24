@@ -25,9 +25,9 @@ export class BomTree {
 			const node_id = cint($(event.currentTarget).attr("data-part-node"));
 			const quantity = flt(event.currentTarget.value);
 			if (node_id) {
-				this.update(this.view.get_part(node_id), { quantity });
+				this.update(this.view.get_part(node_id), { qty: quantity });
 			} else {
-				this.frm.set_value("quantity", quantity || 1).then(() => this.view.render());
+				this.frm.set_value("qty", quantity || 1).then(() => this.view.render());
 			}
 		});
 	}
@@ -44,7 +44,8 @@ export class BomTree {
 			this.show_items ? `<span style="width:130px;">${__("Item")}</span>` : ""
 		}
 			<span style="width:64px;text-align:right;">${__("Quantity")}</span>
-			${this.show_items ? `<span style="width:36px;"></span>` : ""}<span style="width:84px;"></span></div>`;
+			${this.show_items ? `<span style="width:36px;"></span>` : ""}
+			<span style="width:88px;text-align:right;">${__("Amount")}</span><span style="width:96px;"></span></div>`;
 		const rows = [this.get_finished_good_row()];
 		if (!this.collapsed.has(0)) this.add_rows(0, 1, rows);
 
@@ -76,11 +77,12 @@ export class BomTree {
 			${this.get_item_cell(0, doc.item_code)}
 			<span style="width:64px;">${this.get_finished_good_quantity()}</span>
 			${this.show_items ? `<span style="width:36px;"></span>` : ""}
-			<span style="width:84px;display:flex;justify-content:flex-end;">${this.get_add_button(0)}</span></div>`;
+			${this.get_amount_cell(doc.raw_material_cost)}
+			<span style="width:96px;display:flex;justify-content:flex-end;">${this.get_add_button(0)}</span></div>`;
 	}
 
 	get_finished_good_quantity() {
-		const quantity = flt(this.frm.doc.quantity) || 1;
+		const quantity = flt(this.frm.doc.qty) || 1;
 		if (!this.editable) return `<span style="display:block;text-align:right;">${quantity}</span>`;
 
 		return `<input class="form-control input-sm" data-field="quantity" data-part-node="0" value="${quantity}"
@@ -111,7 +113,7 @@ export class BomTree {
 			part.part_name || part.part_number
 		)}</span>`;
 		const quantity = excluded
-			? `<span class="text-muted" style="display:block;text-align:right;">${flt(part.quantity)}</span>`
+			? `<span class="text-muted" style="display:block;text-align:right;">${flt(part.qty)}</span>`
 			: this.get_quantity_cell(part);
 		const uom = this.show_items
 			? `<span class="text-muted ellipsis" style="width:36px;">${escape(part.uom || "")}</span>`
@@ -136,7 +138,8 @@ export class BomTree {
 					: this.get_item_cell(part.node_id, part.item_code)
 			}
 			<span style="width:64px;">${quantity}</span>${uom}
-			<span style="width:84px;display:flex;justify-content:flex-end;">${this.get_row_actions(part)}</span></div>`;
+			${excluded ? `<span style="width:88px;"></span>` : this.get_amount_cell(part.amount)}
+			<span style="width:96px;display:flex;justify-content:flex-end;">${this.get_row_actions(part)}</span></div>`;
 	}
 
 	get_row_actions(part) {
@@ -144,13 +147,37 @@ export class BomTree {
 			return this.get_icon_button("undo-2", __("Add Back to BOM"), "restore", part.node_id);
 		}
 
+		const edit = part.item_code ? this.get_icon_button("pencil", __("Edit"), "edit", part.node_id) : "";
 		if (part.source === "Manual") {
 			const remove = this.get_icon_button("x", __("Remove"), "remove", part.node_id);
-			return this.get_model_button(part) + this.get_add_button(part.node_id) + remove;
+			return this.get_model_button(part) + edit + this.get_add_button(part.node_id) + remove;
 		}
 
 		const remove = this.get_icon_button("x", __("Remove from BOM"), "exclude", part.node_id);
-		return this.get_add_button(part.node_id) + remove;
+		return edit + this.get_add_button(part.node_id) + remove;
+	}
+
+	get_amount_cell(amount) {
+		return `<span class="ellipsis" style="width:88px;text-align:right;">${format_currency(
+			flt(amount),
+			this.frm.doc.currency
+		)}</span>`;
+	}
+
+	edit_part(part) {
+		const is_assembly = this.has_children(part);
+		const dialog = new frappe.ui.Dialog({
+			title: __("Edit {0}", [part.part_name || part.part_number]),
+			fields: get_part_fields(part, is_assembly, this.frm.doc.routing),
+			primary_action_label: __("Update"),
+			primary_action: (values) => {
+				if (values.uom !== part.uom) values.conversion_factor = 0;
+				this.update(part, values);
+				dialog.hide();
+			},
+		});
+		dialog.set_values(part);
+		dialog.show();
 	}
 
 	has_children(part) {
@@ -164,7 +191,7 @@ export class BomTree {
 		}
 
 		const placed = get_placements(part).length;
-		const title = __("Place in Model ({0} of {1} placed)", [placed, flt(part.quantity)]);
+		const title = __("Place in Model ({0} of {1} placed)", [placed, flt(part.qty)]);
 		return this.get_icon_button("move-3d", title, "place", part.node_id);
 	}
 
@@ -228,7 +255,7 @@ export class BomTree {
 
 	get_quantity_cell(part) {
 		const design_quantity = flt(part.design_quantity);
-		const edited = part.source !== "Manual" && design_quantity && flt(part.quantity) !== design_quantity;
+		const edited = part.source !== "Manual" && design_quantity && flt(part.qty) !== design_quantity;
 		const title = edited ? __("Design file: {0}", [design_quantity]) : "";
 		const dot = edited
 			? `<span title="${title}" style="position:absolute;left:-10px;top:11px;width:6px;height:6px;
@@ -236,8 +263,8 @@ export class BomTree {
 			: "";
 		const value = this.editable
 			? `<input class="form-control input-sm" data-field="quantity" data-part-node="${part.node_id}"
-				value="${flt(part.quantity)}" title="${title}" style="${INPUT}text-align:right;">`
-			: `<span style="display:block;text-align:right;" title="${title}">${flt(part.quantity)}</span>`;
+				value="${flt(part.qty)}" title="${title}" style="${INPUT}text-align:right;">`
+			: `<span style="display:block;text-align:right;" title="${title}">${flt(part.qty)}</span>`;
 		return `<span style="position:relative;display:block;">${dot}${value}</span>`;
 	}
 
@@ -280,8 +307,8 @@ export class BomTree {
 
 	async add_material(parent_node_id, item_code) {
 		const item = await this.get_item(item_code);
-		const last_node_id = Math.max(0, ...(this.frm.doc.parts || []).map((row) => cint(row.node_id)));
-		const row = frappe.model.add_child(this.frm.doc, "Engineering Design Part", "parts");
+		const last_node_id = Math.max(0, ...(this.frm.doc.items || []).map((row) => cint(row.node_id)));
+		const row = frappe.model.add_child(this.frm.doc, "BOM Creator Item", "items");
 		Object.assign(row, {
 			node_id: last_node_id + 1,
 			parent_node_id,
@@ -290,7 +317,7 @@ export class BomTree {
 			item_code,
 			item_name: item.item_name,
 			uom: item.stock_uom,
-			quantity: 1,
+			qty: 1,
 			source: "Manual",
 		});
 		this.frm.dirty();
@@ -313,6 +340,7 @@ export class BomTree {
 			toggle: () =>
 				this.collapsed.has(node_id) ? this.collapsed.delete(node_id) : this.collapsed.add(node_id),
 			remove: () => this.remove_part(part),
+			edit: () => this.edit_part(part),
 			exclude: () => this.update(part, { exclude_from_bom: 1 }),
 			restore: () => this.update(part, { exclude_from_bom: 0 }),
 			image: () => this.set_image(node_id),
@@ -350,6 +378,41 @@ export class BomTree {
 
 function escape(value) {
 	return frappe.utils.escape_html(value);
+}
+
+function get_part_fields(part, is_assembly, routing) {
+	return [
+		{ fieldname: "uom", fieldtype: "Link", options: "UOM", label: __("UOM"), reqd: 1 },
+		{
+			fieldname: "is_phantom_item",
+			fieldtype: "Check",
+			label: __("Is Phantom Item"),
+			hidden: !is_assembly,
+		},
+		{ fieldname: "do_not_explode", fieldtype: "Check", label: __("Do Not Explode"), hidden: is_assembly },
+		{
+			fieldname: "bom_no",
+			fieldtype: "Link",
+			options: "BOM",
+			label: __("BOM No"),
+			hidden: is_assembly,
+			depends_on: "eval:!doc.do_not_explode",
+			get_query: () => ({ filters: { item: part.item_code, docstatus: 1 } }),
+		},
+		{ fieldname: "sourced_by_supplier", fieldtype: "Check", label: __("Sourced by Supplier") },
+		{
+			fieldname: "operation",
+			fieldtype: "Link",
+			options: "Operation",
+			label: __("Operation"),
+			hidden: !routing,
+			get_query: () => ({
+				query: "erpnext.manufacturing.doctype.routing.routing.get_operations",
+				filters: { routing },
+			}),
+		},
+		{ fieldname: "instruction", fieldtype: "Small Text", label: __("Instruction") },
+	];
 }
 
 function get_change_dot(part) {

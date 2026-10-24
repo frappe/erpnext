@@ -1,535 +1,408 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import random
+import json
+from unittest.mock import patch
 
 import frappe
 
+from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
+from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
+BICYCLE_PRODUCTS = {
+	"BIKE-100": "Bicycle",
+	"FRAME-ASM": "Frame Assembly",
+	"TUBE-25": "Frame Tube \\X2\\00D8\\X0\\25",
+	"BOLT-M6": "Bolt M6",
+	"WHEEL-26": "Wheel",
+}
+BICYCLE_LINKS = [
+	("BIKE-100", "FRAME-ASM", 1),
+	("FRAME-ASM", "TUBE-25", 3),
+	("FRAME-ASM", "BOLT-M6", 4),
+	("BIKE-100", "WHEEL-26", 2),
+	("BIKE-100", "BOLT-M6", 2),
+]
+
 
 class TestBOMCreator(ERPNextTestSuite):
-	def setUp(self) -> None:
-		create_items()
+	def test_step_file_gives_assembly_tree_with_quantities(self):
+		design = read_step_file(make_step_content(BICYCLE_PRODUCTS, BICYCLE_LINKS))
 
-	def test_bom_sub_assembly(self):
-		final_product = "Bicycle"
-		make_item(
-			final_product,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-			},
+		self.assertEqual(design["design_name"], "Bicycle")
+		frame, wheel, bolt = design["parts"]
+		self.assertEqual((frame["part_number"], frame["quantity"]), ("FRAME-ASM", 1))
+		self.assertEqual((wheel["part_number"], wheel["quantity"]), ("WHEEL-26", 2))
+		self.assertEqual((bolt["part_number"], bolt["quantity"]), ("BOLT-M6", 2))
+		self.assertEqual(
+			[(part["part_name"], part["quantity"]) for part in frame["children"]],
+			[("Frame Tube Ø25", 3), ("Bolt M6", 4)],
 		)
 
-		doc = make_bom_creator(
-			name="Bicycle BOM with Sub Assembly",
-			company="_Test Company",
-			item_code=final_product,
-			qty=1,
-			rm_cosy_as_per="Valuation Rate",
-			currency="INR",
-			plc_conversion_rate=1,
-			conversion_rate=1,
+	def test_csv_file_with_levels_or_item_numbers_gives_same_tree(self):
+		by_level = read_bom_csv_file(
+			"Level,Part Number,Part Name,Quantity\n1,FRAME-ASM,Frame Assembly,1\n2,TUBE-25,Frame Tube,3\n1,WHEEL-26,Wheel,2\n"
+		)
+		by_item_number = read_bom_csv_file(
+			"Item Number,Part Number,Part Name,Quantity\n1,FRAME-ASM,Frame Assembly,1\n1.1,TUBE-25,Frame Tube,3\n2,WHEEL-26,Wheel,2\n"
 		)
 
-		doc.add_sub_assembly(
-			fg_item=final_product,
-			fg_reference_id=doc.name,
-			bom_item={
-				"item_code": "Frame Assembly",
-				"qty": 1,
-				"items": [
-					{
-						"item_code": "Frame",
-						"qty": 1,
-					},
-					{
-						"item_code": "Fork",
-						"qty": 1,
-					},
-				],
-			},
-		)
+		self.assertEqual(by_level, by_item_number)
+		frame, wheel = by_level["parts"]
+		self.assertEqual(frame["children"][0]["part_number"], "TUBE-25")
+		self.assertEqual(wheel["quantity"], 2)
 
-		doc.reload()
-		self.assertEqual(doc.items[0].item_code, "Frame Assembly")
-
-		fg_valuation_rate = 0
-		for row in doc.items:
-			if row.fg_item == final_product:
-				fg_valuation_rate += row.amount
-
-			if not row.is_expandable:
-				self.assertEqual(row.fg_item, "Frame Assembly")
-				self.assertEqual(row.fg_reference_id, doc.items[0].name)
-
-		self.assertEqual(doc.items[0].amount, fg_valuation_rate)
-
-	def test_bom_raw_material(self):
-		final_product = "Bicycle"
-		make_item(
-			final_product,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-			},
-		)
-
-		doc = make_bom_creator(
-			name="Bicycle BOM with Raw Material",
-			company="_Test Company",
-			item_code=final_product,
-			qty=1,
-			rm_cosy_as_per="Valuation Rate",
-			currency="INR",
-			plc_conversion_rate=1,
-			conversion_rate=1,
-		)
-
-		doc.add_item(
-			fg_item=final_product,
-			fg_reference_id=doc.name,
-			item_code="Pedal Assembly",
-			qty=2,
-		)
-
-		doc.reload()
-		self.assertEqual(doc.items[0].item_code, "Pedal Assembly")
-		self.assertEqual(doc.items[0].qty, 2)
-
-		fg_valuation_rate = 0
-		for row in doc.items:
-			if row.fg_item == final_product:
-				fg_valuation_rate += row.amount
-
-			if not row.is_expandable:
-				self.assertEqual(row.fg_item, "Bicycle")
-				self.assertEqual(row.fg_reference_id, doc.name)
-
-		self.assertEqual(doc.raw_material_cost, fg_valuation_rate)
-
-	def test_convert_to_sub_assembly(self):
-		final_product = "Bicycle"
-		make_item(
-			final_product,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-			},
-		)
-
-		doc = make_bom_creator(
-			name="Bicycle BOM",
-			company="_Test Company",
-			item_code=final_product,
-			qty=1,
-			rm_cosy_as_per="Valuation Rate",
-			currency="INR",
-			plc_conversion_rate=1,
-			conversion_rate=1,
-		)
-
-		doc.add_item(
-			fg_item=final_product,
-			fg_reference_id=doc.name,
-			item_code="Pedal Assembly",
-			qty=2,
-		)
-
-		doc.reload()
-		self.assertEqual(doc.items[0].is_expandable, 0)
-
-		doc.add_sub_assembly(
-			convert_to_sub_assembly=1,
-			fg_item=final_product,
-			fg_reference_id=doc.items[0].name,
-			bom_item={
-				"item_code": "Pedal Assembly",
-				"qty": 2,
-				"items": [
-					{
-						"item_code": "Pedal Body",
-						"qty": 2,
-					},
-					{
-						"item_code": "Pedal Axle",
-						"qty": 2,
-					},
-				],
-			},
-		)
-
-		doc.reload()
-		self.assertEqual(doc.items[0].is_expandable, 1)
-
-		fg_valuation_rate = 0
-		for row in doc.items:
-			if row.fg_item == final_product:
-				fg_valuation_rate += row.amount
-
-			if not row.is_expandable:
-				self.assertEqual(row.fg_item, "Pedal Assembly")
-				self.assertEqual(row.qty, 2.0)
-				self.assertEqual(row.fg_reference_id, doc.items[0].name)
-
-		self.assertEqual(doc.raw_material_cost, fg_valuation_rate)
-
-	def test_make_boms_from_bom_creator(self):
-		final_product = "Bicycle Test"
-		make_item(
-			final_product,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-			},
-		)
-
-		doc = make_bom_creator(
-			name="Bicycle BOM Test",
-			company="_Test Company",
-			item_code=final_product,
-			qty=1,
-			rm_cosy_as_per="Valuation Rate",
-			currency="INR",
-			plc_conversion_rate=1,
-			conversion_rate=1,
-		)
-
-		doc.add_item(
-			fg_item=final_product,
-			fg_reference_id=doc.name,
-			item_code="Pedal Assembly",
-			qty=2,
-		)
-
-		doc.reload()
-		self.assertEqual(doc.items[0].is_expandable, 0)
-
-		doc.add_sub_assembly(
-			convert_to_sub_assembly=1,
-			fg_item=final_product,
-			fg_reference_id=doc.items[0].name,
-			bom_item={
-				"item_code": "Pedal Assembly",
-				"qty": 2,
-				"items": [
-					{
-						"item_code": "Pedal Body",
-						"qty": 2,
-					},
-					{
-						"item_code": "Pedal Axle",
-						"qty": 2,
-					},
-				],
-			},
-		)
-
-		doc.reload()
-		self.assertEqual(doc.items[0].is_expandable, 1)
-
-		doc.submit()
-		doc.create_boms()
-		doc.reload()
-
-		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
-		self.assertEqual(len(data), 2)
-
-		doc.create_boms()
-		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
-		self.assertEqual(len(data), 2)
-
-	def test_repeated_sub_assembly_keeps_own_raw_materials(self):
-		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom(
-			"Bicycle BOM with Repeated Sub Assembly"
-		)
-
-		self.assertEqual(child_items(doc, doc.name), ["Frame Assembly", "Seat Assembly"])
-		self.assertEqual(child_items(doc, first_wheel), ["Rim", "Spokes"])
-		self.assertEqual(child_items(doc, second_wheel), ["Hub"])
-
-	def test_delete_repeated_sub_assembly_keeps_sibling_raw_materials(self):
-		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom(
-			"Bicycle BOM with Deleted Sub Assembly"
-		)
-
-		doc.delete_node(doctype="BOM Creator Item", docname=second_wheel)
-		doc.reload()
-
-		self.assertEqual(child_items(doc, first_wheel), ["Rim", "Spokes"])
-		self.assertFalse([row for row in doc.items if row.item_code == "Hub"])
-
-	def test_parent_row_edit_moves_a_material_between_repeated_sub_assemblies(self):
-		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Moved Material")
-		first_wheel_idx = next(row.idx for row in doc.items if row.name == first_wheel)
-		hub = next(row for row in doc.items if row.item_code == "Hub")
-
-		hub.parent_row_no = str(first_wheel_idx)
-		doc.save()
-		doc.reload()
-
-		self.assertEqual(child_items(doc, first_wheel), ["Hub", "Rim", "Spokes"])
-		self.assertEqual(child_items(doc, second_wheel), [])
-
-	def test_edit_and_delete_reject_unknown_item(self):
-		final_product = "Bicycle"
-		make_item(
-			final_product,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-			},
-		)
-
-		doc = make_bom_creator(
-			name="Bicycle BOM Guarded",
-			company="_Test Company",
-			item_code=final_product,
-			qty=1,
-			rm_cosy_as_per="Valuation Rate",
-			currency="INR",
-			plc_conversion_rate=1,
-			conversion_rate=1,
-		)
-
-		# Editing a row that does not belong to this BOM Creator must be rejected.
+	def test_csv_file_with_level_gap_is_rejected(self):
 		self.assertRaises(
 			frappe.ValidationError,
-			doc.edit_bom_creator,
-			docname="non-existent-row",
-			data={"qty": 5},
+			read_bom_csv_file,
+			"Level,Part Number,Quantity\n1,FRAME-ASM,1\n3,TUBE-25,3\n",
 		)
 
-		# Deleting a row that does not belong to this BOM Creator must be rejected.
-		self.assertRaises(
-			frappe.ValidationError,
-			doc.delete_node,
-			fg_item=final_product,
-			docname="non-existent-row",
-		)
+	def test_importing_step_file_creates_parts_linked_to_their_assembly(self):
+		design = make_design()
 
-	def make_creator_with_item(self, operation=None, **kwargs):
-		doc = make_bom_creator(
-			name="Routing Check BOM Creator",
-			company="_Test Company",
-			item_code="_Test Item",
-			qty=1,
-			currency="INR",
-			conversion_rate=1,
-			plc_conversion_rate=1,
-			**kwargs,
-		)
-		doc.add_item(
-			fg_item="_Test Item",
-			fg_reference_id=doc.name,
-			item_code="_Test Item Home Desktop 100",
-			qty=1,
-			operation=operation,
-		)
-		return doc
+		self.assertEqual(design.design_name, "Bicycle")
+		parts = {row.part_number: row for row in design.items if row.parent_node_id == 0}
+		self.assertEqual(list(parts), ["FRAME-ASM", "WHEEL-26", "BOLT-M6"])
+		self.assertTrue(parts["FRAME-ASM"].is_expandable)
+		self.assertFalse(parts["WHEEL-26"].is_expandable)
 
-	def test_submit_rejects_item_operation_without_routing(self):
-		doc = self.make_creator_with_item(operation="_Test Operation 1")
-		self.assertRaisesRegex(frappe.ValidationError, "Set a Routing", doc.submit)
+		frame_parts = [row for row in design.items if row.parent_node_id == parts["FRAME-ASM"].node_id]
+		self.assertEqual(
+			[(row.part_number, row.qty) for row in frame_parts], [("TUBE-25", 3), ("BOLT-M6", 4)]
+		)
+		self.assertTrue(all(row.source == "CAD File" and row.do_not_explode for row in design.items))
 
-	def test_submit_allows_item_operation_with_routing(self):
-		routing = create_routing(
-			routing_name="BOM Creator Routing",
-			operations=[
-				{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 10}
+	def test_design_without_file_is_built_by_hand(self):
+		for item_code in (
+			"_Test Creator Hand Product",
+			"_Test Creator Hand Assembly",
+			"_Test Creator Hand Part",
+		):
+			make_item(item_code, {"is_stock_item": 1})
+
+		design = make_bom_creator(
+			item_code="_Test Creator Hand Product",
+			items=[
+				{"node_id": 1, "item_code": "_Test Creator Hand Assembly", "qty": 2},
+				{"node_id": 2, "parent_node_id": 1, "item_code": "_Test Creator Hand Part", "qty": 3},
 			],
 		)
-		doc = self.make_creator_with_item(operation="_Test Operation 1", routing=routing.name)
-		doc.submit()
-		self.assertEqual(doc.docstatus, 1)
+		self.assertEqual(design.design_name, "_Test Creator Hand Product")
+		self.assertEqual(design.items[0].part_number, "_Test Creator Hand Assembly")
+		design.submit()
 
-	def test_submit_allows_items_without_operation(self):
-		doc = self.make_creator_with_item()
-		doc.submit()
-		self.assertEqual(doc.docstatus, 1)
+		boms = make_boms(design)
 
-	def test_repeated_sub_assembly_is_costed_with_its_own_raw_materials(self):
-		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Repeated Costing")
-		rows = {row.name: row for row in doc.items}
-		rate = {row.item_code: row.rate for row in doc.items if not row.is_expandable}
-
-		self.assertEqual(rows[first_wheel].amount, rate["Rim"] + rate["Spokes"])
-		self.assertEqual(rows[second_wheel].amount, rate["Hub"])
+		self.assertEqual(get_bom_items(boms["_Test Creator Hand Assembly"]), {"_Test Creator Hand Part": 3})
 		self.assertEqual(
-			doc.raw_material_cost, rate["Frame"] + rate["Rim"] + rate["Spokes"] + rate["Seat"] + rate["Hub"]
+			get_bom_items(boms["_Test Creator Hand Product"]), {"_Test Creator Hand Assembly": 2}
 		)
 
-	def test_sub_assembly_reused_as_raw_material_is_not_expandable(self):
-		make_item("Tricycle", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Tricycle BOM Reused Sub Assembly",
-			company="_Test Company",
-			item_code="Tricycle",
-			qty=1,
-			currency="INR",
-			conversion_rate=1,
+	def test_part_tree_makes_a_bom_for_every_assembly(self):
+		design = make_mapped_design()
+		boms = make_boms(design)
+
+		self.assertEqual(get_bom_items(boms["FRAME-ASM"]), {"TUBE-25": 3, "BOLT-M6": 4})
+		finished_good_bom = frappe.get_doc("BOM", boms["BIKE-100"])
+		self.assertEqual(
+			[(row.item_code, row.qty, row.bom_no) for row in finished_good_bom.items],
+			[("FRAME-ASM", 1, boms["FRAME-ASM"]), ("WHEEL-26", 2, ""), ("BOLT-M6", 2, "")],
 		)
-		frame = add_test_sub_assembly(doc, "Tricycle", doc.name, "Frame Assembly", ["Frame"])
-		seat = add_test_sub_assembly(doc, "Tricycle", doc.name, "Seat Assembly", ["Seat"])
-		doc.add_item(fg_item="Seat Assembly", fg_reference_id=seat, item_code="Frame Assembly", qty=1)
-		doc.reload()
+		self.assertEqual(finished_good_bom.with_operations, 0)
+		self.assertEqual(design.status, "Completed")
 
-		reused = next(row for row in doc.items if row.item_code == "Frame Assembly" and row.name != frame)
-		self.assertEqual(reused.is_expandable, 0)
+	def test_finished_good_bom_is_made_for_the_finished_good_quantity(self):
+		design = make_mapped_design()
+		design.qty = 2
+		design.save()
 
-		doc.submit()
-		doc.create_boms()
-		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
+		boms = make_boms(design)
 
-	def test_sub_assembly_cycle_is_refused(self):
-		make_item("Unicycle", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Unicycle BOM Cycle", company="_Test Company", item_code="Unicycle", qty=1, currency="INR"
+		self.assertEqual(frappe.db.get_value("BOM", boms["BIKE-100"], "quantity"), 2)
+		self.assertEqual(get_bom_items(boms["BIKE-100"]), {"FRAME-ASM": 2, "WHEEL-26": 4, "BOLT-M6": 4})
+		self.assertEqual(frappe.db.get_value("BOM", boms["FRAME-ASM"], "quantity"), 1)
+		self.assertEqual(get_bom_items(boms["FRAME-ASM"]), {"TUBE-25": 3, "BOLT-M6": 4})
+
+	def test_part_tree_uses_edited_quantity_and_added_material(self):
+		make_item("PAINT-RED", {"is_stock_item": 1, "stock_uom": "Litre"})
+		design = make_mapped_design()
+		get_part(design, "TUBE-25").qty = 5
+		design.append(
+			"items",
+			{"item_code": "PAINT-RED", "qty": 0.5, "parent_node_id": get_part(design, "FRAME-ASM").node_id},
 		)
-		frame = add_test_sub_assembly(doc, "Unicycle", doc.name, "Frame Assembly", ["Frame"])
+		design.save()
 
-		self.assertRaisesRegex(
-			frappe.ValidationError,
-			"inside its own sub-assembly",
-			add_test_sub_assembly,
-			doc,
-			"Frame Assembly",
-			frame,
-			"Wheel Assembly",
-			["Frame Assembly"],
+		boms = make_boms(design)
+
+		self.assertEqual(get_bom_items(boms["FRAME-ASM"]), {"TUBE-25": 5, "BOLT-M6": 4, "PAINT-RED": 0.5})
+
+	def test_part_tree_leaves_out_excluded_parts_and_their_branch(self):
+		design = make_mapped_design()
+		get_part(design, "WHEEL-26").exclude_from_bom = 1
+		get_part(design, "BOLT-M6", parent="FRAME-ASM").exclude_from_bom = 1
+		get_part(design, "TUBE-25").item_code = None
+		design.save()
+
+		get_part(design, "FRAME-ASM").exclude_from_bom = 1
+		design.save()
+		boms = make_boms(design)
+
+		self.assertEqual(list(boms), ["BIKE-100"])
+		self.assertEqual(get_bom_items(boms["BIKE-100"]), {"BOLT-M6": 2})
+
+	def test_part_tree_adds_quantities_of_parts_mapped_to_one_item(self):
+		design = make_mapped_design()
+		get_part(design, "WHEEL-26").item_code = "BOLT-M6"
+		design.save()
+
+		boms = make_boms(design)
+
+		self.assertEqual(get_bom_items(boms["BIKE-100"]), {"FRAME-ASM": 1, "BOLT-M6": 4})
+
+	def test_assemblies_of_one_item_need_the_same_raw_materials(self):
+		design = make_mapped_design()
+		wheel = get_part(design, "WHEEL-26")
+		wheel.item_code = "FRAME-ASM"
+		design.append("items", {"item_code": "TUBE-25", "qty": 1, "parent_node_id": wheel.node_id})
+		design.save()
+
+		self.assertRaisesRegex(frappe.ValidationError, "different raw materials", design.enqueue_create_boms)
+
+	def test_part_mapped_to_its_own_assembly_is_refused(self):
+		design = make_mapped_design()
+		get_part(design, "TUBE-25").item_code = "FRAME-ASM"
+		design.save()
+
+		self.assertRaisesRegex(frappe.ValidationError, "its own assembly", design.enqueue_create_boms)
+
+	def test_each_operation_makes_an_item_that_the_next_operation_uses(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		welded_frame = make_item("_Test Creator Welded Frame", {"is_stock_item": 1}).name
+		welding = add_operation(design, "_Test Creator Welding", output_item=welded_frame)
+		assembly = add_operation(design, "_Test Creator Assembly")
+		add_material(design, part="TUBE-25", qty=3, operation=welding)
+		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 1})
+		add_material(design, part="WHEEL-26", qty=2, operation=assembly)
+		design.save()
+
+		bom = frappe.get_doc("BOM", make_boms(design)["BIKE-100"])
+
+		self.assertEqual(bom.track_semi_finished_goods, 1)
+		self.assertEqual(
+			[(row.finished_good, row.is_final_finished_good) for row in bom.operations],
+			[(welded_frame, 0), ("BIKE-100", 1)],
+		)
+		self.assertEqual(
+			[(row.item_code, row.operation_row_id) for row in bom.items],
+			[("TUBE-25", 1), (welded_frame, 2), ("WHEEL-26", 2)],
 		)
 
-	def test_deleting_a_grid_row_keeps_the_tree(self):
-		make_item("Scooter", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Scooter BOM Grid Delete",
-			company="_Test Company",
-			item_code="Scooter",
-			qty=1,
-			currency="INR",
-		)
-		frame = add_test_sub_assembly(doc, "Scooter", doc.name, "Frame Assembly", ["Frame", "Fork"])
-		seat = add_test_sub_assembly(doc, "Scooter", doc.name, "Seat Assembly", ["Seat"])
-
-		doc.items = [row for row in doc.items if row.item_code != "Frame"]
-		for idx, row in enumerate(doc.items, start=1):
-			row.idx = idx
-		doc.save()
-		doc.reload()
-
-		self.assertEqual(child_items(doc, frame), ["Fork"])
-		self.assertEqual(child_items(doc, seat), ["Seat"])
-
-		doc.submit()
-		doc.create_boms()
-		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
-
-	def test_boms_are_created_from_the_saved_creator(self):
-		import json
-		from unittest.mock import patch
-
-		from frappe.handler import run_doc_method
-
-		make_item("Kick Scooter", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Kick Scooter BOM Saved",
-			company="_Test Company",
-			item_code="Kick Scooter",
-			qty=1,
-			currency="INR",
-		)
-		doc.add_item(fg_item="Kick Scooter", fg_reference_id=doc.name, item_code="Frame", qty=1)
-		doc.reload()
-		doc.submit()
-
-		posted = doc.as_dict()
-		posted["qty"] = 7
-		posted["items"][0]["qty"] = 50
-		frappe.local.request = frappe._dict(method="POST")
-		self.addCleanup(delattr, frappe.local, "request")
-
-		with patch.object(frappe, "enqueue_doc") as enqueue_doc:
-			frappe.local.response = frappe._dict(docs=[])
-			run_doc_method("enqueue_create_boms", docs=json.dumps(posted, default=str))
-
-		self.assertEqual(enqueue_doc.call_args.args, ("BOM Creator", doc.name, "create_boms"))
-
-	def test_raw_material_keeps_its_own_bom(self):
+	def test_output_of_an_earlier_operation_is_not_exploded(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-		make_item("Balance Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		semi_bom = make_bom(item="Pedal Assembly", raw_materials=["Pedal Body"], currency="INR")
-		doc = make_bom_creator(
-			name="Balance Bike BOM Semi",
-			company="_Test Company",
-			item_code="Balance Bike",
-			qty=1,
-			currency="INR",
-		)
-		doc.add_item(fg_item="Balance Bike", fg_reference_id=doc.name, item_code="Pedal Assembly", qty=1)
-		doc.reload()
-		doc.items[0].do_not_explode = 0
-		doc.items[0].bom_no = semi_bom.name
-		doc.save()
-		doc.submit()
-		doc.create_boms()
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		welded_frame = make_item("_Test Creator Welded Frame", {"is_stock_item": 1}).name
+		make_bom(item=welded_frame, raw_materials=["_Test Item"], currency="INR")
+		welding = add_operation(design, "_Test Creator Welding", output_item=welded_frame)
+		assembly = add_operation(design, "_Test Creator Assembly")
+		add_material(design, part="TUBE-25", qty=3, operation=welding)
+		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 1})
+		design.save()
 
-		top_bom = frappe.db.get_value(
-			"BOM", {"bom_creator": doc.name, "item": "Balance Bike", "docstatus": 1}
+		bom = frappe.get_doc("BOM", make_boms(design)["BIKE-100"])
+
+		row = next(row for row in bom.items if row.item_code == welded_frame)
+		self.assertEqual((row.bom_no, row.do_not_explode), ("", 1))
+
+	def test_sub_assembly_gets_its_own_bom_used_in_the_finished_good_bom(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		frame = get_part(design, "FRAME-ASM").node_id
+		add_material(design, part="TUBE-25", qty=3, bom=frame)
+		add_material(design, part="BOLT-M6", qty=4, bom=frame)
+		add_material(design, part="FRAME-ASM", qty=1)
+		add_material(design, part="WHEEL-26", qty=2)
+		design.save()
+
+		boms = make_boms(design)
+
+		self.assertEqual(get_bom_items(boms["FRAME-ASM"]), {"TUBE-25": 3, "BOLT-M6": 4})
+		finished_good_bom = frappe.get_doc("BOM", boms["BIKE-100"])
+		self.assertEqual(
+			{row.item_code: row.bom_no for row in finished_good_bom.items},
+			{"FRAME-ASM": boms["FRAME-ASM"], "WHEEL-26": ""},
 		)
-		row = frappe.db.get_value(
-			"BOM Item",
-			{"parent": top_bom, "item_code": "Pedal Assembly"},
-			["bom_no", "do_not_explode"],
-			as_dict=True,
+		self.assertEqual(design.status, "Completed")
+
+	def test_operation_plan_cost_counts_sub_assembly_materials(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		set_valuation_rates({"TUBE-25": 10, "BOLT-M6": 1, "WHEEL-26": 50})
+		frame = get_part(design, "FRAME-ASM").node_id
+		add_material(design, part="TUBE-25", qty=3, bom=frame)
+		add_material(design, part="BOLT-M6", qty=4, bom=frame)
+		add_material(design, part="FRAME-ASM", qty=1)
+		add_material(design, part="WHEEL-26", qty=2)
+		design.qty = 2
+		design.save()
+
+		self.assertEqual(design.raw_material_cost, ((3 * 10 + 4 * 1) + 2 * 50) * 2)
+
+	def test_create_boms_lists_every_problem(self):
+		design = make_submitted_design()
+		design.track_semi_finished_goods = 1
+		operation = add_operation(design, "_Test Creator Welding", workstation_type="")
+		add_material(design, part="TUBE-25", qty=3, operation=operation)
+		design.save()
+
+		with self.assertRaises(frappe.ValidationError) as error:
+			design.enqueue_create_boms()
+
+		self.assertIn("map an item before creating its BOM", str(error.exception))
+		self.assertIn("set the Workstation Type", str(error.exception))
+		self.assertIn("map an item for every raw material", str(error.exception))
+
+	def test_material_needs_exactly_one_source(self):
+		design = make_design()
+		design.append("materials", {"item_code": "_Test Item", "part_node_id": 1, "qty": 1})
+
+		self.assertRaises(frappe.ValidationError, design.save)
+
+	def test_operation_output_is_used_only_when_each_operation_makes_an_item(self):
+		design = make_design()
+		welding = add_operation(design, "_Test Creator Welding")
+		assembly = add_operation(design, "_Test Creator Assembly")
+		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 1})
+
+		self.assertRaises(frappe.ValidationError, design.save)
+
+	def test_new_revision_keeps_edited_quantity_until_the_design_changes_it(self):
+		design = make_mapped_design()
+		get_part(design, "TUBE-25").qty = 5
+		get_part(design, "BOLT-M6", parent="FRAME-ASM").qty = 10
+		design.save()
+
+		revision = frappe.get_doc("BOM Creator", design.make_new_revision())
+		revision.design_file = make_step_file(
+			BICYCLE_PRODUCTS,
+			[
+				link if link != ("FRAME-ASM", "BOLT-M6", 4) else ("FRAME-ASM", "BOLT-M6", 6)
+				for link in BICYCLE_LINKS
+			],
 		)
-		self.assertEqual((row.bom_no, row.do_not_explode), (semi_bom.name, 0))
+		revision.save()
+
+		tube = get_part(revision, "TUBE-25")
+		self.assertEqual((tube.qty, tube.design_quantity), (5, 3))
+		bolt = get_part(revision, "BOLT-M6", parent="FRAME-ASM")
+		self.assertEqual((bolt.qty, bolt.design_quantity, bolt.change_type), (10, 6, "Quantity Changed"))
+
+	def test_create_boms_needs_submitted_design(self):
+		design = make_design()
+
+		self.assertRaises(frappe.ValidationError, design.enqueue_create_boms)
+
+	def test_part_model_must_be_a_supported_3d_file(self):
+		for model_file, is_valid in (("/files/handle.pdf", False), ("/files/handle.glb", True)):
+			design = make_design()
+			design.append(
+				"items",
+				{
+					"item_code": "_Test Item",
+					"qty": 1,
+					"model_file": model_file,
+					"placements": '[{"position": [0, 10, 0], "quaternion": [0, 0, 0, 1]}]',
+				},
+			)
+
+			if is_valid:
+				design.save()
+			else:
+				self.assertRaises(frappe.ValidationError, design.save)
+
+	def test_create_items_makes_items_only_for_parts_used_in_boms(self):
+		design = make_submitted_design()
+		design.track_semi_finished_goods = 1
+		add_material(design, part="TUBE-25", qty=3)
+		design.save()
+		design.create_items(item_group="_Test Item Group", stock_uom="Nos")
+
+		self.assertEqual(design.item_code, "BIKE-100")
+		self.assertEqual(get_part(design, "TUBE-25").item_code, "TUBE-25")
+		self.assertFalse(get_part(design, "WHEEL-26").item_code)
+
+	def test_parts_from_submitted_design_file_cannot_be_removed(self):
+		design = make_submitted_design()
+		design.items = [row for row in design.items if row.part_number != "WHEEL-26"]
+
+		self.assertRaises(frappe.ValidationError, design.save)
+
+	def test_new_revision_keeps_mapping_materials_and_shows_changes(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		add_material(design, part="TUBE-25", qty=3, bom=get_part(design, "FRAME-ASM").node_id)
+		add_material(design, part="WHEEL-26", qty=2)
+		design.save()
+
+		revision = frappe.get_doc("BOM Creator", design.make_new_revision())
+		revision.design_file = make_step_file(
+			{**BICYCLE_PRODUCTS, "BELL-01": "Bell"},
+			[
+				("BIKE-100", "BELL-01", 1),
+				("BIKE-100", "FRAME-ASM", 1),
+				("FRAME-ASM", "TUBE-25", 3),
+				("FRAME-ASM", "BOLT-M6", 6),
+				("BIKE-100", "BOLT-M6", 2),
+			],
+		)
+		revision.save()
+
+		self.assertEqual(revision.revision, 2)
+		self.assertEqual(get_part(revision, "FRAME-ASM").item_code, "FRAME-ASM")
+		self.assertEqual(get_part(revision, "BELL-01").change_type, "Added")
+		self.assertEqual(get_part(revision, "BOLT-M6", parent="FRAME-ASM").change_type, "Quantity Changed")
+		self.assertEqual(
+			[(row.bom_node_id, row.part_node_id) for row in revision.materials],
+			[(get_part(revision, "FRAME-ASM").node_id, get_part(revision, "TUBE-25").node_id)],
+		)
+
+		changes = revision.get_revision_changes()
+		self.assertEqual([row["part_number"] for row in changes["added"]], ["BELL-01"])
+		self.assertEqual([row["part_number"] for row in changes["removed"]], ["WHEEL-26"])
+		self.assertEqual(
+			[(row["path"], row["previous_quantity"], row["quantity"]) for row in changes["quantity_changed"]],
+			[("FRAME-ASM > BOLT-M6", 4, 6)],
+		)
+
+		revision.submit()
+		design.reload()
+		self.assertEqual(design.status, "Superseded")
+		self.assertRaises(frappe.ValidationError, design.make_new_revision)
+
+	def test_assembly_cost_is_the_cost_of_its_raw_materials(self):
+		design = make_mapped_design()
+		set_valuation_rates({"TUBE-25": 10, "BOLT-M6": 1, "WHEEL-26": 50})
+		design.qty = 2
+		design.save()
+
+		frame = get_part(design, "FRAME-ASM")
+		self.assertEqual((frame.rate, frame.amount), (34, 34))
+		self.assertEqual(get_part(design, "WHEEL-26").amount, 100)
+		self.assertEqual(design.raw_material_cost, (34 + 100 + 2) * 2)
 
 	def test_rates_are_converted_to_the_creator_currency(self):
-		make_item("Cargo Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		make_item("_Test BOM Creator USD RM", {"item_group": "Raw Material", "valuation_rate": 800})
-		doc = make_bom_creator(
-			name="Cargo Bike BOM USD",
-			company="_Test Company",
-			item_code="Cargo Bike",
-			qty=1,
+		make_item("_Test Creator USD Material", {"valuation_rate": 800})
+		design = make_bom_creator(
 			currency="USD",
 			conversion_rate=80,
-			rm_cost_as_per="Valuation Rate",
+			items=[{"item_code": "_Test Creator USD Material", "qty": 1}],
 		)
-		doc.add_item(
-			fg_item="Cargo Bike", fg_reference_id=doc.name, item_code="_Test BOM Creator USD RM", qty=1
-		)
-		doc.reload()
 
-		self.assertEqual(doc.items[0].rate, 10)
-		self.assertEqual(doc.raw_material_cost, 10)
-
-	def test_recreated_bom_keeps_its_own_sub_assembly(self):
-		doc, _first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM Recreated Children")
-		doc.submit()
-		doc.create_boms()
-
-		top_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Bicycle", "docstatus": 1})
-		seat_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Seat Assembly", "docstatus": 1})
-		second_wheel_bom = frappe.db.get_value(
-			"BOM", {"bom_creator": doc.name, "bom_creator_item": second_wheel, "docstatus": 1}
-		)
-		top_bom.cancel()
-		seat_bom.cancel()
-
-		doc.reload()
-		doc.create_boms()
-		new_seat_bom = frappe.get_doc(
-			"BOM", {"bom_creator": doc.name, "item": "Seat Assembly", "docstatus": 1}
-		)
-		self.assertEqual(
-			[row.bom_no for row in new_seat_bom.items if row.item_code == "Wheel Assembly"],
-			[second_wheel_bom],
-		)
+		self.assertEqual(design.items[0].rate, 10)
+		self.assertEqual(design.raw_material_cost, 10)
 
 	def test_currency_change_refreshes_the_exchange_rate(self):
 		if not frappe.db.exists("Currency", "TSR"):
@@ -546,318 +419,284 @@ class TestBOMCreator(ERPNextTestSuite):
 			}
 		).insert()
 
-		make_item("Cargo Bike Currency", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Cargo Bike BOM Currency Change",
-			company="_Test Company",
-			item_code="Cargo Bike Currency",
-			qty=1,
-			currency="USD",
-			conversion_rate=80,
-		)
-		doc.currency = "TSR"
-		doc.save()
-		self.assertEqual(doc.conversion_rate, 50)
+		design = make_bom_creator(currency="USD", conversion_rate=80)
+		design.currency = "TSR"
+		design.save()
 
-	def test_get_children_follows_user_permissions(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
-		from frappe.permissions import add_user_permission
-
-		from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_children
-
-		for item in ("Allowed Bike", "Restricted Bike"):
-			make_item(item, {"item_group": "Raw Material", "stock_uom": "Nos"})
-
-		make_bom_creator(
-			name="Allowed Bike BOM", company="_Test Company", item_code="Allowed Bike", qty=1, currency="INR"
-		)
-		restricted = make_bom_creator(
-			name="Restricted Bike BOM",
-			company="_Test Company",
-			item_code="Restricted Bike",
-			qty=1,
-			currency="INR",
-		)
-		restricted.add_item(
-			fg_item="Restricted Bike", fg_reference_id=restricted.name, item_code="Frame", qty=3
-		)
-
-		user = create_user("bom-creator-restricted@example.com", "Manufacturing User")
-		add_user_permission("Item", "Allowed Bike", user.name)
-
-		with self.set_user(user.name):
-			self.assertRaises(
-				frappe.PermissionError, get_children, parent=restricted.name, parent_id=restricted.name
-			)
-
-	def test_delete_node_saves_the_cost_without_the_deleted_rows(self):
-		make_item("Tandem Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Tandem Bike BOM Delete",
-			company="_Test Company",
-			item_code="Tandem Bike",
-			qty=1,
-			currency="INR",
-		)
-		frame = add_test_sub_assembly(doc, "Tandem Bike", doc.name, "Frame Assembly", ["Frame", "Fork"])
-		doc.add_item(fg_item="Tandem Bike", fg_reference_id=doc.name, item_code="Seat", qty=1)
-		doc.reload()
-
-		result = doc.delete_node(doctype="BOM Creator Item", docname=frame)
-		seat = next(row for row in doc.items if row.item_code == "Seat")
-
-		self.assertEqual([row.item_code for row in result.items], ["Seat"])
-		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "raw_material_cost"), seat.amount)
+		self.assertEqual(design.conversion_rate, 50)
 
 	def test_rate_is_taken_from_the_default_warehouse(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-		make_item("Fat Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		rm_item = make_item("_Test BOM Creator Warehouse RM", {"is_stock_item": 1}).name
-		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=100)
-		make_stock_entry(item_code=rm_item, target="Finished Goods - _TC", qty=10, basic_rate=300)
+		material = make_item("_Test Creator Warehouse Material", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=material, target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=material, target="Finished Goods - _TC", qty=10, basic_rate=300)
 
-		doc = make_bom_creator(
-			name="Fat Bike BOM Warehouse",
-			company="_Test Company",
-			item_code="Fat Bike",
-			qty=1,
-			currency="INR",
-			rm_cost_as_per="Valuation Rate",
+		design = make_bom_creator(
 			set_rate_based_on_warehouse=1,
 			default_warehouse="Stores - _TC",
+			items=[{"item_code": material, "qty": 1}],
 		)
-		doc.add_item(fg_item="Fat Bike", fg_reference_id=doc.name, item_code=rm_item, qty=1)
-		doc.reload()
 
-		self.assertEqual(doc.items[0].rate, 100)
+		self.assertEqual(design.items[0].rate, 100)
 
-	def test_cancelling_the_top_bom_reopens_the_creator(self):
-		make_item("Gravel Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Gravel Bike BOM Status",
-			company="_Test Company",
-			item_code="Gravel Bike",
-			qty=1,
-			currency="INR",
-		)
-		doc.add_item(fg_item="Gravel Bike", fg_reference_id=doc.name, item_code="Frame", qty=1)
-		doc.reload()
-		doc.submit()
-		doc.create_boms()
-		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
-
-		top_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Gravel Bike", "docstatus": 1})
-		top_bom.cancel()
-		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Submitted")
-
-	def test_successful_run_clears_the_error_log(self):
-		make_item("Road Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		doc = make_bom_creator(
-			name="Road Bike BOM Error Log",
-			company="_Test Company",
-			item_code="Road Bike",
-			qty=1,
-			currency="INR",
-		)
-		doc.add_item(fg_item="Road Bike", fg_reference_id=doc.name, item_code="Frame", qty=1)
-		doc.reload()
-		doc.submit()
-		doc.db_set({"status": "Failed", "error_log": "Disabled Item Frame cannot be used in BOMs"})
-
-		doc.reload()
-		doc.create_boms()
-		self.assertEqual(
-			frappe.db.get_value("BOM Creator", doc.name, ["status", "error_log"]), ("Completed", None)
-		)
-		self.assertTrue(frappe.get_meta("BOM Creator").get_field("error_log").no_copy)
-
-	def test_edit_root_qty_and_row_uom(self):
-		make_item("Touring Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
-		rm_item = make_item(
-			"_Test BOM Creator Box RM",
+	def test_unit_of_measure_sets_stock_quantity_and_amount(self):
+		material = make_item(
+			"_Test Creator Box Material",
 			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
 				"valuation_rate": 10,
 				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
 			},
 		).name
-		doc = make_bom_creator(
-			name="Touring Bike BOM Edit",
-			company="_Test Company",
-			item_code="Touring Bike",
-			qty=1,
-			currency="INR",
-		)
-		doc.edit_bom_creator(docname=doc.name, data={"qty": 5})
-		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "qty"), 5)
+		design = make_bom_creator(items=[{"item_code": material, "qty": 3, "uom": "Box"}])
 
-		doc.add_item(fg_item="Touring Bike", fg_reference_id=doc.name, item_code=rm_item, qty=3)
-		doc.reload()
-		self.assertEqual(doc.items[0].stock_qty, 3)
-
-		doc.edit_bom_creator(docname=doc.items[0].name, data={"uom": "Box"})
-		doc.reload()
-		row = doc.items[0]
+		row = design.items[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.amount), (12, 36, 360))
 
-	def test_tree_is_validated_on_insert(self):
-		make_item("City Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+	def test_raw_material_keeps_its_own_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-		def new_creator(name, items):
-			return frappe.get_doc(
-				{
-					"doctype": "BOM Creator",
-					"name": name,
-					"company": "_Test Company",
-					"item_code": "City Bike",
-					"qty": 1,
-					"currency": "INR",
-					"items": items,
-				}
+		make_item("_Test Creator Pedal", {"is_stock_item": 1})
+		pedal_bom = make_bom(item="_Test Creator Pedal", raw_materials=["_Test Item"], currency="INR")
+		design = make_bom_creator(
+			items=[
+				{"item_code": "_Test Creator Pedal", "qty": 1, "do_not_explode": 0, "bom_no": pedal_bom.name}
+			]
+		)
+		design.submit()
+
+		boms = make_boms(design)
+
+		row = frappe.db.get_value(
+			"BOM Item",
+			{"parent": boms[design.item_code], "item_code": "_Test Creator Pedal"},
+			["bom_no", "do_not_explode"],
+			as_dict=True,
+		)
+		self.assertEqual((row.bom_no, row.do_not_explode), (pedal_bom.name, 0))
+
+	def test_phantom_finished_good_must_be_a_non_stock_item(self):
+		self.assertRaisesRegex(frappe.ValidationError, "Phantom BOM cannot", make_bom_creator, is_phantom=1)
+
+		item_code = make_item("_Test Creator Phantom Kit", {"is_stock_item": 0}).name
+		design = make_bom_creator(
+			item_code=item_code, is_phantom=1, items=[{"item_code": "_Test Item", "qty": 1}]
+		)
+		design.submit()
+
+		boms = make_boms(design)
+
+		self.assertEqual(frappe.db.get_value("BOM", boms[item_code], "is_phantom_bom"), 1)
+
+	def test_submit_rejects_item_operation_without_routing(self):
+		design = make_bom_creator(
+			items=[{"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}]
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Set a Routing", design.submit)
+
+	def test_finished_good_bom_gets_the_operations_of_the_routing(self):
+		routing = create_routing(
+			routing_name="_Test Creator Routing",
+			operations=[
+				{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 10}
+			],
+		)
+		design = make_bom_creator(
+			routing=routing.name,
+			items=[{"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}],
+		)
+		design.submit()
+
+		bom = frappe.get_doc("BOM", make_boms(design)[design.item_code])
+
+		self.assertEqual((bom.with_operations, bom.routing), (1, routing.name))
+		self.assertEqual([row.operation for row in bom.operations], ["_Test Operation 1"])
+		self.assertEqual(bom.items[0].operation, "_Test Operation 1")
+
+	def test_boms_are_created_in_the_background_from_the_saved_creator(self):
+		from frappe.handler import run_doc_method
+
+		design = make_mapped_design()
+		posted = design.as_dict()
+		posted["qty"] = 7
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+
+		with patch.object(frappe, "enqueue_doc") as enqueue_doc:
+			frappe.local.response = frappe._dict(docs=[])
+			run_doc_method("enqueue_create_boms", docs=json.dumps(posted, default=str))
+
+		self.assertEqual(enqueue_doc.call_args.args, ("BOM Creator", design.name, "create_boms"))
+		self.assertEqual(
+			frappe.db.get_value("BOM Creator", design.name, ["status", "qty"]), ("In Progress", 1)
+		)
+
+	def test_failed_run_keeps_the_error_and_a_later_run_clears_it(self):
+		from erpnext.manufacturing.doctype.bom_creator.part_tree_plan import PartTreePlan
+
+		design = make_mapped_design()
+		failure = frappe.ValidationError("Item TUBE-25 is disabled")
+		with patch.object(PartTreePlan, "make_boms", side_effect=failure), patch.object(
+			frappe.db, "rollback"
+		):
+			design.create_boms()
+
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Failed")
+		self.assertIn(
+			"Item TUBE-25 is disabled", frappe.db.get_value("BOM Creator", design.name, "error_log")
+		)
+
+		design.reload()
+		design.create_boms()
+		self.assertEqual(
+			frappe.db.get_value("BOM Creator", design.name, ["status", "error_log"]), ("Completed", None)
+		)
+
+	def test_cancelling_the_top_bom_reopens_the_creator_and_keeps_sub_assembly_boms(self):
+		design = make_mapped_design()
+		boms = make_boms(design)
+
+		frappe.get_doc("BOM", boms["BIKE-100"]).cancel()
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Submitted")
+
+		design.reload()
+		new_boms = make_boms(design)
+		self.assertEqual(new_boms["FRAME-ASM"], boms["FRAME-ASM"])
+		self.assertNotEqual(new_boms["BIKE-100"], boms["BIKE-100"])
+		self.assertEqual(design.status, "Completed")
+
+
+def make_step_content(products: dict, links: list) -> str:
+	entities = ["#1=APPLICATION_CONTEXT('automotive design');", "#2=PRODUCT_CONTEXT('',#1,'mechanical');"]
+	definitions = {}
+	for index, (part_number, part_name) in enumerate(products.items()):
+		entity_id = 10 * (index + 1)
+		entities += [
+			f"#{entity_id}=PRODUCT('{part_number}','{part_name}','',(#2));",
+			f"#{entity_id + 1}=PRODUCT_DEFINITION_FORMATION('','',#{entity_id});",
+			f"#{entity_id + 2}=PRODUCT_DEFINITION('design','',#{entity_id + 1},#1);",
+		]
+		definitions[part_number] = entity_id + 2
+
+	entity_id = 1000
+	for parent, child, quantity in links:
+		for _index in range(quantity):
+			entity_id += 1
+			entities.append(
+				f"#{entity_id}=NEXT_ASSEMBLY_USAGE_OCCURRENCE('NAUO{entity_id}','','',"
+				f"#{definitions[parent]},#{definitions[child]},$);"
 			)
 
-		duplicate = new_creator(
-			"City Bike BOM Duplicate",
-			[
-				{"item_code": "Frame", "fg_item": "City Bike", "qty": 1},
-				{"item_code": "Frame", "fg_item": "City Bike", "qty": 1},
-			],
-		)
-		self.assertRaisesRegex(frappe.ValidationError, "added multiple times", duplicate.insert)
-
-		wrong_parent = new_creator(
-			"City Bike BOM Wrong Parent",
-			[
-				{"item_code": "Frame Assembly", "fg_item": "City Bike", "qty": 1},
-				{"item_code": "Fork", "fg_item": "City Bike", "qty": 1},
-				{"item_code": "Frame", "fg_item": "Frame Assembly", "parent_row_no": "2", "qty": 1},
-			],
-		)
-		self.assertRaisesRegex(frappe.ValidationError, "points to item", wrong_parent.insert)
+	return "ISO-10303-21;\nHEADER;\nENDSEC;\nDATA;\n" + "\n".join(entities) + "\nENDSEC;\nEND-ISO-10303-21;\n"
 
 
-def create_items():
-	raw_materials = [
-		"Frame",
-		"Fork",
-		"Rim",
-		"Spokes",
-		"Hub",
-		"Tube",
-		"Tire",
-		"Pedal Body",
-		"Pedal Axle",
-		"Ball Bearings",
-		"Chain Links",
-		"Chain Pins",
-		"Seat",
-		"Seat Post",
-		"Seat Clamp",
-	]
-
-	for item in raw_materials:
-		valuation_rate = random.choice([100, 200, 300, 500, 333, 222, 44, 20, 10])
-		make_item(
-			item,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-				"valuation_rate": valuation_rate,
-			},
-		)
-
-	sub_assemblies = [
-		"Frame Assembly",
-		"Wheel Assembly",
-		"Pedal Assembly",
-		"Chain Assembly",
-		"Seat Assembly",
-	]
-
-	for item in sub_assemblies:
-		make_item(
-			item,
-			{
-				"item_group": "Raw Material",
-				"stock_uom": "Nos",
-			},
-		)
+def make_step_file(products: dict, links: list) -> str:
+	file = frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": f"{frappe.generate_hash(length=8)}.step",
+			"content": make_step_content(products, links),
+			"is_private": 1,
+		}
+	).insert()
+	return file.file_url
 
 
-def make_repeated_sub_assembly_bom(name):
-	"""Bicycle > (Frame Assembly > Wheel Assembly > Rim, Spokes), (Seat Assembly > Wheel Assembly > Hub)"""
-	final_product = "Bicycle"
-	make_item(final_product, {"item_group": "Raw Material", "stock_uom": "Nos"})
-
-	doc = make_bom_creator(
-		name=name,
-		company="_Test Company",
-		item_code=final_product,
-		qty=1,
-		rm_cosy_as_per="Valuation Rate",
-		currency="INR",
-		plc_conversion_rate=1,
-		conversion_rate=1,
-	)
-
-	def add_sub_assembly(fg_item, fg_reference_id, item_code, raw_materials):
-		doc.add_sub_assembly(
-			fg_item=fg_item,
-			fg_reference_id=fg_reference_id,
-			bom_item={
-				"item_code": item_code,
-				"qty": 1,
-				"items": [{"item_code": item, "qty": 1} for item in raw_materials],
-			},
-		)
-		doc.reload()
-
-		return next(
-			row.name
-			for row in doc.items
-			if row.item_code == item_code and row.fg_reference_id == fg_reference_id
-		)
-
-	frame = add_sub_assembly(final_product, doc.name, "Frame Assembly", ["Frame"])
-	first_wheel = add_sub_assembly("Frame Assembly", frame, "Wheel Assembly", ["Rim", "Spokes"])
-
-	seat = add_sub_assembly(final_product, doc.name, "Seat Assembly", ["Seat"])
-	second_wheel = add_sub_assembly("Seat Assembly", seat, "Wheel Assembly", ["Hub"])
-
-	return doc, first_wheel, second_wheel
+def make_bom_creator(**values):
+	item_code = values.pop("item_code", None) or make_item("_Test Creator Product", {"is_stock_item": 1}).name
+	return frappe.get_doc(
+		{"doctype": "BOM Creator", "company": "_Test Company", "item_code": item_code, **values}
+	).insert()
 
 
-def child_items(doc, parent):
-	from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_children
-
-	return sorted(row.item_code for row in get_children(parent=parent, parent_id=doc.name))
-
-
-def make_bom_creator(**kwargs):
-	if isinstance(kwargs, str) or isinstance(kwargs, dict):
-		kwargs = frappe.parse_json(kwargs)
-
-	doc = frappe.new_doc("BOM Creator")
-	doc.update(kwargs)
-	doc.save()
-
-	return doc
+def make_design():
+	return frappe.get_doc(
+		{
+			"doctype": "BOM Creator",
+			"company": "_Test Company",
+			"design_file": make_step_file(BICYCLE_PRODUCTS, BICYCLE_LINKS),
+		}
+	).insert()
 
 
-def add_test_sub_assembly(doc, fg_item, fg_reference_id, item_code, raw_materials):
-	doc.add_sub_assembly(
-		fg_item=fg_item,
-		fg_reference_id=fg_reference_id,
-		bom_item={
-			"item_code": item_code,
-			"qty": 1,
-			"items": [{"item_code": item, "qty": 1} for item in raw_materials],
+def make_submitted_design():
+	design = make_design()
+	design.submit()
+	return design
+
+
+def make_mapped_design(produce_item_at_each_operation: bool = False):
+	design = make_submitted_design()
+	design.track_semi_finished_goods = 1 if produce_item_at_each_operation else 0
+	for part in design.items:
+		part.item_code = make_item(part.part_number, {"is_stock_item": 1}).name
+
+	design.item_code = make_item("BIKE-100", {"is_stock_item": 1}).name
+	design.save()
+	return design
+
+
+def set_valuation_rates(rates: dict):
+	for item_code, rate in rates.items():
+		frappe.db.set_value("Item", item_code, "valuation_rate", rate)
+
+
+def add_operation(design, operation: str, workstation_type: str = "_Test Creator Bench", **values) -> int:
+	if workstation_type and not frappe.db.exists("Workstation Type", workstation_type):
+		frappe.get_doc({"doctype": "Workstation Type", "workstation_type": workstation_type}).insert()
+
+	if not frappe.db.exists("Operation", operation):
+		frappe.get_doc({"doctype": "Operation", "name": operation}).insert()
+
+	operation_id = len(design.operations) + 1
+	design.append(
+		"operations",
+		{
+			"operation_id": operation_id,
+			"operation": operation,
+			"workstation_type": workstation_type,
+			"time_in_mins": 30,
+			**values,
 		},
 	)
-	doc.reload()
+	return operation_id
 
-	return next(
-		row.name for row in doc.items if row.item_code == item_code and row.fg_reference_id == fg_reference_id
+
+def add_material(design, part: str, qty: float, operation: int = 0, bom: int = 0):
+	design.append(
+		"materials",
+		{
+			"bom_node_id": bom,
+			"operation_id": operation,
+			"part_node_id": get_part(design, part).node_id,
+			"qty": qty,
+		},
 	)
+
+
+def make_boms(design) -> dict:
+	design.create_boms()
+	design.reload()
+	return dict(
+		frappe.get_all(
+			"BOM",
+			filters={"bom_creator": design.name, "docstatus": 1},
+			fields=["item", "name"],
+			order_by="creation",
+			as_list=True,
+		)
+	)
+
+
+def get_part(design, part_number: str, parent: str | None = None):
+	parent_node_ids = {row.node_id for row in design.items if row.part_number == parent}
+	return next(
+		row
+		for row in design.items
+		if row.part_number == part_number and (not parent or row.parent_node_id in parent_node_ids)
+	)
+
+
+def get_bom_items(bom: str) -> dict:
+	return {row.item_code: row.qty for row in frappe.get_doc("BOM", bom).items}

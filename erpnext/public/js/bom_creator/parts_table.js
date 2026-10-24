@@ -49,13 +49,13 @@ export class PartsTable {
 
 		return `<div data-node-id="${part.node_id}" style="${ROW}cursor:pointer;">
 			<span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding-left:${depth * 18}px;">
-				${change}<span class="ellipsis ${part.is_assembly ? "bold" : ""}" title="${frappe.utils.escape_html(
+				${change}<span class="ellipsis ${part.is_expandable ? "bold" : ""}" title="${frappe.utils.escape_html(
 			part.part_number
 		)}">${name}</span>
 				</span>
 			<span style="width:130px;display:flex;min-width:0;">${this.get_item_html(part)}</span>
 			<span style="width:140px;display:flex;min-width:0;">${this.get_usage_html(part)}</span>
-			<span style="width:48px;text-align:right;">${flt(part.quantity)}</span></div>`;
+			<span style="width:48px;text-align:right;">${flt(part.qty)}</span></div>`;
 	}
 
 	get_item_html(part) {
@@ -98,7 +98,7 @@ export class PartsTable {
 		if (this.materials.has(part.node_id))
 			return pill("gray", this.get_material_usage(this.materials.get(part.node_id)));
 		if (this.view.is_inside_used_part(part, this.used)) return muted(__("Inside a used assembly"));
-		if (part.is_assembly) return muted(__("Parts used directly"));
+		if (part.is_expandable) return muted(__("Parts used directly"));
 		return pill("red", __("Not Used"));
 	}
 

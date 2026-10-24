@@ -165,7 +165,9 @@ export class ModelViewer {
 function place_camera(camera, box) {
 	const center = box.getCenter(new THREE.Vector3());
 	const radius = box.getSize(new THREE.Vector3()).length() / 2 || 1;
-	const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2));
+	const half_fov = THREE.MathUtils.degToRad(camera.fov / 2);
+	const half_view = Math.min(half_fov, Math.atan(Math.tan(half_fov) * camera.aspect));
+	const distance = radius / Math.sin(half_view);
 	camera.position.copy(center).add(new THREE.Vector3(1, 0.8, 1).normalize().multiplyScalar(distance));
 	camera.near = distance / 100;
 	camera.far = distance * 100;

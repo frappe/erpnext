@@ -121,8 +121,8 @@ export class OperationsEditor {
 	get_material_row(row) {
 		const quantity = this.editable
 			? `<input class="form-control input-sm" data-field="quantity" data-material="${row.name}"
-				value="${flt(row.quantity)}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
-			: `<span style="display:block;text-align:right;">${flt(row.quantity)}</span>`;
+				value="${flt(row.qty)}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
+			: `<span style="display:block;text-align:right;">${flt(row.qty)}</span>`;
 		const remove = this.editable
 			? remove_button("remove-material", { "data-material": row.name }, __("Remove"))
 			: "";
@@ -358,21 +358,21 @@ export class OperationsEditor {
 
 	find_unused_part(item_code) {
 		const used = this.view.get_used_node_ids();
-		return (this.frm.doc.parts || []).find(
+		return (this.frm.doc.items || []).find(
 			(part) => part.item_code === item_code && !used.has(part.node_id)
 		);
 	}
 
 	add_material(operation_id, value) {
 		const [kind, key] = split_value(value);
-		const row = frappe.model.add_child(this.frm.doc, "Engineering Design Material", "materials");
+		const row = frappe.model.add_child(this.frm.doc, "BOM Creator Material", "materials");
 		Object.assign(row, {
 			bom_node_id: this.bom_node_id,
 			operation_id,
 			part_node_id: kind === "part" ? cint(key) : 0,
 			item_code: kind === "item" ? key : "",
 			from_operation_id: kind === "step" ? cint(key) : 0,
-			quantity: kind === "part" ? this.view.get_default_quantity(cint(key), this.bom_node_id) : 1,
+			qty: kind === "part" ? this.view.get_default_quantity(cint(key), this.bom_node_id) : 1,
 		});
 		this.frm.dirty();
 		this.view.render();
@@ -385,7 +385,7 @@ export class OperationsEditor {
 		const field = $input.attr("data-field");
 		const value = $input.val();
 		if (field === "quantity") {
-			this.update(this.get_row($input, "material"), { quantity: flt(value) });
+			this.update(this.get_row($input, "material"), { qty: flt(value) });
 		} else if (field === "time_in_mins") {
 			this.update(this.get_row($input, "operation"), { time_in_mins: flt(value) });
 		} else if (field === "new-bom" && value) {
@@ -415,7 +415,7 @@ export class OperationsEditor {
 
 	add_operation() {
 		const last_id = Math.max(0, ...(this.frm.doc.operations || []).map((row) => cint(row.operation_id)));
-		const row = frappe.model.add_child(this.frm.doc, "Engineering Design Operation", "operations");
+		const row = frappe.model.add_child(this.frm.doc, "BOM Creator Operation", "operations");
 		Object.assign(row, { operation_id: last_id + 1, bom_node_id: this.bom_node_id, output_quantity: 1 });
 		this.frm.dirty();
 	}

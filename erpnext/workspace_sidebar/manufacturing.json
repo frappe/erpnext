@@ -173,17 +173,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Engineering Design",
-   "link_to": "Engineering Design",
-   "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "BOM Creator",
    "link_to": "BOM Creator",
    "link_type": "DocType",
@@ -437,7 +426,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-23 07:54:52.496328",
+ "modified": "2026-07-03 11:01:50.260118",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",

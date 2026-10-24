@@ -43,33 +43,33 @@ export class DesignView {
 		this.geometry = {};
 		this.wrapper.html(`
 			<style>
-				.engineering-design-view {
+				.bom-creator-view {
 					display: flex; gap: var(--margin-lg); height: 560px; margin-bottom: var(--margin-md);
 				}
-				.engineering-design-view.without-model { height: auto; }
-				.engineering-design-view :is(.design-item-cell, .design-link-cell) .frappe-control,
-				.engineering-design-view :is(.design-item-cell, .design-link-cell) .form-group {
+				.bom-creator-view.without-model { height: auto; }
+				.bom-creator-view :is(.design-item-cell, .design-link-cell) .frappe-control,
+				.bom-creator-view :is(.design-item-cell, .design-link-cell) .form-group {
 					width: 100%; margin: 0;
 				}
-				.engineering-design-view :is(.design-item-cell, .design-link-cell) input.form-control,
-				.engineering-design-view .design-item-link {
+				.bom-creator-view :is(.design-item-cell, .design-link-cell) input.form-control,
+				.bom-creator-view .design-item-link {
 					height: 28px; background-color: var(--fg-color); border: 1px solid var(--border-color);
 				}
-				.engineering-design-view .design-item-link { width: 100%; padding: 0 8px; text-align: left; cursor: text; }
-				.engineering-design-view.without-model .design-body { max-height: 560px; }
-				.engineering-design-view .design-model {
-					flex: 0 0 40%; position: relative; border: 1px solid var(--border-color);
+				.bom-creator-view .design-item-link { width: 100%; padding: 0 8px; text-align: left; cursor: text; }
+				.bom-creator-view.without-model .design-body { max-height: 560px; }
+				.bom-creator-view .design-model {
+					flex: 0 0 34%; position: relative; border: 1px solid var(--border-color);
 					border-radius: var(--border-radius-md); overflow: hidden; background: var(--subtle-fg);
 				}
-				.engineering-design-view .design-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-				.engineering-design-view .design-body { flex: 1; min-height: 0; overflow-y: auto; }
+				.bom-creator-view .design-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+				.bom-creator-view .design-body { flex: 1; min-height: 0; overflow-y: auto; }
 				@media (max-width: 991px) {
-					.engineering-design-view { flex-direction: column; height: auto; }
-					.engineering-design-view .design-model { flex: none; height: 360px; }
-					.engineering-design-view .design-body { height: 480px; flex: none; }
+					.bom-creator-view { flex-direction: column; height: auto; }
+					.bom-creator-view .design-model { flex: none; height: 360px; }
+					.bom-creator-view .design-body { height: 480px; flex: none; }
 				}
 			</style>
-			<div class="engineering-design-view ${has_model ? "" : "without-model"}">
+			<div class="bom-creator-view ${has_model ? "" : "without-model"}">
 				<div class="design-model" style="${has_model ? "" : "display:none;"}">
 					<div class="design-model-message text-muted" style="position:absolute;inset:0;display:flex;
 						align-items:center;justify-content:center;pointer-events:none;">${__("Loading 3D model...")}</div>
@@ -190,7 +190,7 @@ export class DesignView {
 					value: "Operations",
 					suffix: count(this.frm.doc.operations?.length || 0),
 				},
-				{ label: __("Parts"), value: "Parts", suffix: count(this.frm.doc.parts?.length || 0) },
+				{ label: __("Parts"), value: "Parts", suffix: count(this.frm.doc.items?.length || 0) },
 			],
 			value: this.state.tab,
 			on_change: (value) => {
@@ -214,11 +214,12 @@ export class DesignView {
 			__("{0} minutes", [format_number(minutes, null, 0)]),
 			unused ? __("{0} parts not used", [unused]) : "",
 			__("{0} BOMs will be created", [this.get_bom_node_ids().length]),
+			this.get_cost_summary(),
 		].filter(Boolean);
 	}
 
 	get_tree_summary() {
-		const all_parts = this.frm.doc.parts || [];
+		const all_parts = this.frm.doc.items || [];
 		const parts = all_parts.filter((part) => !this.is_excluded(part));
 		const has_children = new Set(parts.map((part) => part.parent_node_id));
 		const assemblies = new Set(
@@ -233,7 +234,13 @@ export class DesignView {
 			removed ? __("{0} removed from BOM", [removed]) : "",
 			unmapped ? __("{0} parts not mapped", [unmapped]) : "",
 			__("{0} BOMs will be created", [assemblies.size + 1]),
+			this.get_cost_summary(),
 		].filter(Boolean);
+	}
+
+	get_cost_summary() {
+		const cost = flt(this.frm.doc.raw_material_cost);
+		return cost ? __("Total Cost {0}", [format_currency(cost, this.frm.doc.currency)]) : "";
 	}
 
 	is_excluded(part) {
@@ -246,14 +253,14 @@ export class DesignView {
 	index_parts() {
 		this.parts_by_node = {};
 		this.children = {};
-		for (const row of this.frm.doc.parts || []) {
+		for (const row of this.frm.doc.items || []) {
 			this.parts_by_node[row.node_id] = row;
 			(this.children[row.parent_node_id || 0] ??= []).push(row);
 		}
 	}
 
 	is_editable() {
-		return this.frm.doc.docstatus === 0 || this.frm.doc.status === "Approved";
+		return this.frm.doc.docstatus === 0 || ["Submitted", "Failed"].includes(this.frm.doc.status);
 	}
 
 	get_part(node_id) {
@@ -298,9 +305,9 @@ export class DesignView {
 
 	get_unused_parts() {
 		const used = this.get_used_node_ids();
-		return (this.frm.doc.parts || []).filter(
+		return (this.frm.doc.items || []).filter(
 			(part) =>
-				!part.is_assembly &&
+				!part.is_expandable &&
 				!used.has(part.node_id) &&
 				!this.is_excluded(part) &&
 				!this.is_inside_used_part(part, used)
@@ -311,7 +318,7 @@ export class DesignView {
 		let quantity = 1;
 		let part = this.get_part(node_id);
 		while (part && part.node_id !== bom_node_id) {
-			quantity *= flt(part.quantity) || 1;
+			quantity *= flt(part.qty) || 1;
 			part = this.get_part(part.parent_node_id);
 		}
 		return quantity;
@@ -353,15 +360,15 @@ export class DesignView {
 
 	get_node_ids_for_path(path) {
 		if (!path) return [];
-		const parts = (this.frm.doc.parts || []).filter(
-			(part) => !part.is_assembly && this.get_matcher(part)(path)
+		const parts = (this.frm.doc.items || []).filter(
+			(part) => !part.is_expandable && this.get_matcher(part)(path)
 		);
 		return parts.slice(0, 1).map((part) => part.node_id);
 	}
 
 	load_item_images(item_codes) {
 		const doc = this.frm.doc;
-		const codes = (item_codes || [doc.item_code, ...(doc.parts || []).map((part) => part.item_code)])
+		const codes = (item_codes || [doc.item_code, ...(doc.items || []).map((part) => part.item_code)])
 			.filter(Boolean)
 			.filter((code) => item_codes || !(code in this.item_images));
 		if (!codes.length) return Promise.resolve();
@@ -414,7 +421,7 @@ export class DesignView {
 		}
 
 		const matches = part ? this.get_matcher(part) : () => true;
-		return this.viewer.capture(matches, { single: Boolean(part && !part.is_assembly) });
+		return this.viewer.capture(matches, { single: Boolean(part && !part.is_expandable) });
 	}
 
 	async save_item_image(item_code, data_url) {
@@ -446,7 +453,7 @@ export class DesignView {
 			const node_id =
 				item_code === doc.item_code
 					? 0
-					: (doc.parts || []).find((part) => part.item_code === item_code)?.node_id;
+					: (doc.items || []).find((part) => part.item_code === item_code)?.node_id;
 			if (node_id === undefined || this.item_images[item_code] || !this.has_geometry(node_id)) continue;
 			await this.save_item_image(item_code, await this.capture_node_image(node_id));
 		}

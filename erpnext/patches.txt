@@ -531,3 +531,4 @@ erpnext.patches.v16_0.set_default_mins_between_operations
 erpnext.patches.v16_0.rebuild_production_plan_requested_qty
 erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
+erpnext.patches.v16_0.move_bom_creator_items_to_part_tree

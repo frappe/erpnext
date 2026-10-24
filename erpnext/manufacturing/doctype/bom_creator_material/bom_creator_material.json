@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2026-10-23 08:57:36.189243",
+ "creation": "2026-10-24 15:02:51.497413",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -11,7 +11,7 @@
   "part_node_id",
   "column_break_item",
   "item_code",
-  "quantity",
+  "qty",
   "uom"
  ],
  "fields": [
@@ -58,7 +58,7 @@
    "allow_on_submit": 1
   },
   {
-   "fieldname": "quantity",
+   "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "columns": 1,
@@ -79,10 +79,10 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-10-23 10:30:52.232952",
+ "modified": "2026-10-24 15:28:43.659518",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "Engineering Design Material",
+ "name": "BOM Creator Material",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

@@ -1,39 +1,33 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt, sbool
-from pypika.terms import ValueWrapper
+from frappe.utils import flt
 
-import erpnext
-from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
-from erpnext.setup.utils import get_exchange_rate
+from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
+from erpnext.manufacturing.doctype.bom_creator.material_cost import MaterialCost
+from erpnext.manufacturing.doctype.bom_creator.operation_plan import OperationPlan
+from erpnext.manufacturing.doctype.bom_creator.part_tree_plan import PartTreePlan
+from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
 
-BOM_FIELDS = [
-	"company",
-	"rm_cost_as_per",
-	"project",
-	"currency",
-	"conversion_rate",
-	"buying_price_list",
-]
-
-BOM_ITEM_FIELDS = [
+DESIGN_FILE_READERS = {"step": read_step_file, "stp": read_step_file, "csv": read_bom_csv_file}
+PART_MODEL_FORMATS = ("step", "stp", "stl", "glb")
+MAPPING_FIELDS = (
 	"item_code",
-	"qty",
+	"item_name",
 	"uom",
-	"rate",
-	"stock_qty",
-	"stock_uom",
-	"conversion_factor",
+	"exclude_from_bom",
 	"do_not_explode",
-	"operation",
+	"bom_no",
 	"is_phantom_item",
-]
+	"sourced_by_supplier",
+	"operation",
+	"instruction",
+)
 
 
 class BOMCreator(Document):
@@ -46,6 +40,10 @@ class BOMCreator(Document):
 		from frappe.types import DF
 
 		from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
+		from erpnext.manufacturing.doctype.bom_creator_material.bom_creator_material import BOMCreatorMaterial
+		from erpnext.manufacturing.doctype.bom_creator_operation.bom_creator_operation import (
+			BOMCreatorOperation,
+		)
 
 		amended_from: DF.Link | None
 		buying_price_list: DF.Link | None
@@ -53,70 +51,107 @@ class BOMCreator(Document):
 		conversion_rate: DF.Float
 		currency: DF.Link
 		default_warehouse: DF.Link | None
+		design_file: DF.Attach | None
+		design_name: DF.Data | None
 		error_log: DF.Text | None
 		is_phantom: DF.Check
-		item_code: DF.Link
+		item_code: DF.Link | None
 		item_group: DF.Link | None
 		item_name: DF.Data | None
 		items: DF.Table[BOMCreatorItem]
+		materials: DF.Table[BOMCreatorMaterial]
+		naming_series: DF.Literal["BOM-CRE-.YYYY.-"]
+		operations: DF.Table[BOMCreatorOperation]
+		part_number: DF.Data | None
 		plc_conversion_rate: DF.Float
+		previous_revision: DF.Link | None
 		price_list_currency: DF.Link | None
 		project: DF.Link | None
 		qty: DF.Float
 		raw_material_cost: DF.Currency
 		remarks: DF.TextEditor | None
+		revision: DF.Int
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		routing: DF.Link | None
 		set_rate_based_on_warehouse: DF.Check
-		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
+		status: DF.Literal[
+			"Draft", "Submitted", "In Progress", "Completed", "Failed", "Superseded", "Cancelled"
+		]
+		track_semi_finished_goods: DF.Check
 		uom: DF.Link | None
 	# end: auto-generated types
 
-	def before_save(self):
+	def validate(self):
+		if self.has_value_changed("design_file") and self.design_file:
+			self.import_design_file()
+
+		self.set_design_name()
+		self.item_group = self.item_group or frappe.db.get_single_value("Stock Settings", "item_group")
+		self.set_part_structure()
+		self.validate_part_models()
+		self.validate_finished_good()
+		OperationPlan(self).validate()
+		self.set_revision_changes()
+		MaterialCost(self).set_costs()
 		self.set_status()
 
-	def validate(self):
-		self.set_exchange_rates()
-		self.set_conversion_factor()
-		self.set_reference_id()
-		self.set_is_expandable()
-		self.validate_finished_good()
-		self.validate_items()
-		self.validate_parent_items()
-		self.validate_duplicate_item()
-		self.validate_no_cycles()
-		self.set_rate_for_items()
+	def before_submit(self):
+		self.validate_operations_have_routing()
 
-	def validate_parent_items(self):
-		rows = {row.name: row for row in self.items}
-		for row in self.items:
-			parent = rows.get(row.fg_reference_id)
-			if parent and parent.item_code != row.fg_item:
-				frappe.throw(
-					_("Row #{0}: Parent Row No points to item {1}, not {2}").format(
-						row.idx, bold(parent.item_code), bold(row.fg_item)
-					)
-				)
+	def on_submit(self):
+		self.update_previous_revision_status()
 
-	def validate_duplicate_item(self):
-		# If same items added multiple times under same parent, raise error
-		item_map = {}
-		for row in self.items:
-			if not row.fg_reference_id:
-				continue
+	def before_update_after_submit(self):
+		self.validate_cad_parts_unchanged()
+		self.set_part_structure()
+		self.validate_part_models()
+		OperationPlan(self).validate()
+		MaterialCost(self).set_costs()
 
-			key = (row.item_code, row.fg_reference_id)
-			if key in item_map:
-				frappe.throw(
-					_(
-						"Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-					).format(bold(row.item_code), bold(row.fg_item), item_map[key], row.idx),
-					title=_("Duplicate Item Under Same Parent"),
-				)
-			else:
-				item_map[key] = row.idx
+	def before_cancel(self):
+		self.set_status()
+
+	def on_cancel(self):
+		self.update_previous_revision_status()
+
+	def get_status(self) -> str:
+		if self.docstatus == 0:
+			return "Draft"
+
+		if self.docstatus == 2:
+			return "Cancelled"
+
+		if frappe.db.exists("BOM Creator", {"previous_revision": self.name, "docstatus": 1}):
+			return "Superseded"
+
+		if self.get_bom_plan().has_all_boms():
+			return "Completed"
+
+		return self.status if self.status in ("In Progress", "Failed") else "Submitted"
+
+	def set_status(self, save: bool = False):
+		self.status = self.get_status()
+		if save:
+			self.db_set("status", self.status, notify=True)
+
+	def update_previous_revision_status(self):
+		if self.previous_revision:
+			frappe.get_doc("BOM Creator", self.previous_revision).set_status(save=True)
+
+	def set_design_name(self):
+		if not self.design_name and self.item_code:
+			self.design_name = frappe.get_cached_value("Item", self.item_code, "item_name") or self.item_code
+
+		if not self.design_name:
+			frappe.throw(_("Set the Design Name or the Finished Good."), title=_("Missing Design Name"))
 
 	def validate_finished_good(self):
+		if self.is_phantom and self.track_semi_finished_goods:
+			frappe.throw(_("A phantom BOM cannot produce an item at each operation."))
+
+		if not self.item_code:
+			return
+
 		is_stock_item = frappe.get_cached_value("Item", self.item_code, "is_stock_item")
 		if is_stock_item and self.is_phantom:
 			frappe.throw(_("Phantom BOM cannot be created for stock item {0}.").format(self.item_code))
@@ -125,215 +160,8 @@ class BOMCreator(Document):
 				_("Non-phantom BOM cannot be created for non-stock item {0}.").format(self.item_code)
 			)
 
-	def validate_items(self):
-		for row in self.items:
-			if row.is_expandable and row.item_code == self.item_code:
-				frappe.throw(_("Item {0} cannot be added as a sub-assembly of itself").format(row.item_code))
-
-			if not row.parent_row_no and row.fg_item and row.fg_item != self.item_code:
-				frappe.throw(
-					_("At row {0}: set Parent Row No for item {1}").format(row.idx, row.item_code),
-					title=_("Set Parent Row No in Items Table"),
-				)
-
-			elif row.parent_row_no and row.fg_item == self.item_code:
-				frappe.throw(
-					_("At row {0}: Parent Row No cannot be set for item {1}").format(row.idx, row.item_code),
-					title=_("Remove Parent Row No in Items Table"),
-				)
-
-	def set_status(self, save=False):
-		self.status = {
-			0: "Draft",
-			1: "Submitted",
-			2: "Cancelled",
-		}[self.docstatus]
-
-		self.set_status_completed()
-		if save:
-			self.db_set("status", self.status)
-
-	def set_status_completed(self):
-		if self.docstatus != 1:
-			return
-
-		has_completed = True
-		for row in self.items:
-			if row.is_expandable and not row.bom_created:
-				has_completed = False
-				break
-
-		if not frappe.db.exists("BOM", {"bom_creator": self.name, "item": self.item_code, "docstatus": 1}):
-			has_completed = False
-
-		if has_completed:
-			self.status = "Completed"
-
-	def on_cancel(self):
-		self.set_status(True)
-
-	def before_submit(self):
-		self.validate_fields()
-		self.validate_operations_have_routing()
-		self.set_status()
-
-	def set_reference_id(self):
-		rows_by_name = {row.name: row for row in self.items}
-		rows_by_idx = {row.idx: row for row in self.items}
-		edited_rows = self.get_rows_with_edited_parent()
-
-		for row in self.items:
-			parent = rows_by_name.get(row.fg_reference_id)
-			if parent and parent.name != row.name and row.name not in edited_rows:
-				row.parent_row_no = str(parent.idx)
-				continue
-
-			if row.fg_reference_id == self.name:
-				row.parent_row_no = ""
-				continue
-
-			parent = rows_by_idx.get(cint(row.parent_row_no)) if row.parent_row_no else None
-			if parent and parent.name != row.name:
-				row.fg_reference_id = parent.name
-			elif row.fg_item == self.item_code:
-				row.fg_reference_id = self.name
-				row.parent_row_no = ""
-
-	@frappe.whitelist()
-	def add_boms(self):
-		self.submit()
-
-	def set_rate_for_items(self):
-		children = defaultdict(list)
-		for row in self.items:
-			children[row.fg_reference_id].append(row)
-
-		self.raw_material_cost = self.get_raw_material_cost(self.name, children, set())
-
-	def get_raw_material_cost(self, parent_id, children, visited):
-		visited.add(parent_id)
-		amount = 0
-		for row in children.get(parent_id, []):
-			if not row.is_expandable or row.name in visited:
-				row.rate = get_bom_item_rate(
-					{
-						"company": self.company,
-						"item_code": row.item_code,
-						"bom_no": "",
-						"qty": row.qty,
-						"uom": row.uom,
-						"stock_uom": row.stock_uom,
-						"conversion_factor": row.conversion_factor,
-						"sourced_by_supplier": row.sourced_by_supplier,
-						"set_rate_based_on_warehouse": self.set_rate_based_on_warehouse,
-						"warehouse": self.default_warehouse,
-					},
-					self,
-				)
-				row.rate = self.convert_to_bom_currency(row.rate)
-			else:
-				row.rate = flt(
-					self.get_raw_material_cost(row.name, children, visited)
-					/ flt(row.qty or 1)
-					* row.conversion_factor
-				)
-
-			row.amount = flt(row.rate) * flt(row.qty)
-			amount += flt(row.amount)
-
-		return amount
-
-	def convert_to_bom_currency(self, rate):
-		if self.rm_cost_as_per == "Price List":
-			rate = flt(rate) * flt(self.plc_conversion_rate or 1)
-
-		return flt(rate) / flt(self.conversion_rate or 1)
-
-	def get_rows_with_edited_parent(self):
-		before = self.get_doc_before_save()
-		if not before:
-			return set()
-
-		old_parent_row_no = {row.name: cstr(row.parent_row_no) for row in before.items}
-		return {
-			row.name
-			for row in self.items
-			if row.name in old_parent_row_no and cstr(row.parent_row_no) != old_parent_row_no[row.name]
-		}
-
-	def set_exchange_rates(self):
-		company_currency = erpnext.get_company_currency(self.company)
-		if self.currency == company_currency:
-			self.conversion_rate = 1
-		elif flt(self.conversion_rate) in (0, 1) or (
-			not self.is_new() and self.has_value_changed("currency")
-		):
-			self.conversion_rate = get_exchange_rate(self.currency, company_currency, args="for_buying")
-
-		if self.rm_cost_as_per != "Price List" or not self.buying_price_list:
-			self.plc_conversion_rate = 1
-			return
-
-		self.price_list_currency = frappe.get_cached_value("Price List", self.buying_price_list, "currency")
-		if self.price_list_currency == company_currency:
-			self.plc_conversion_rate = 1
-		elif flt(self.plc_conversion_rate) in (0, 1) or (
-			not self.is_new() and self.has_value_changed("price_list_currency")
-		):
-			self.plc_conversion_rate = get_exchange_rate(
-				self.price_list_currency, company_currency, args="for_buying"
-			)
-
-	def set_is_expandable(self):
-		parent_ids = {row.fg_reference_id for row in self.items}
-		for row in self.items:
-			row.is_expandable = 1 if row.name in parent_ids else 0
-
-	def validate_no_cycles(self):
-		rows = {row.name: row for row in self.items}
-		for row in self.items:
-			ancestor_items = set()
-			parent = rows.get(row.fg_reference_id)
-			while parent and parent.item_code not in ancestor_items:
-				ancestor_items.add(parent.item_code)
-				parent = rows.get(parent.fg_reference_id)
-
-			if row.item_code == self.item_code or row.item_code in ancestor_items:
-				frappe.throw(
-					_("Row #{0}: Item {1} cannot be used inside its own sub-assembly").format(
-						row.idx, bold(row.item_code)
-					)
-				)
-
-	def set_conversion_factor(self):
-		item_codes = list({row.item_code for row in self.items if not row.conversion_factor})
-		uom_factors = {}
-		if item_codes:
-			uom_factors = {
-				(row.parent, row.uom): row.conversion_factor
-				for row in frappe.get_all(
-					"UOM Conversion Detail",
-					filters={"parent": ("in", item_codes), "parenttype": "Item"},
-					fields=["parent", "uom", "conversion_factor"],
-				)
-			}
-
-		for row in self.items:
-			if not row.conversion_factor:
-				row.conversion_factor = flt(uom_factors.get((row.item_code, row.uom))) or 1.0
-			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
-
-	def validate_fields(self):
-		fields = {
-			"items": "Items",
-		}
-
-		for field, label in fields.items():
-			if not self.get(field):
-				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
-
 	def validate_operations_have_routing(self):
-		if self.is_phantom or self.routing:
+		if self.is_phantom or self.routing or self.track_semi_finished_goods:
 			return
 
 		for row in self.items:
@@ -345,385 +173,374 @@ class BOMCreator(Document):
 					title=_("Routing Required"),
 				)
 
-	def on_submit(self):
-		self.enqueue_bom_creation()
+	def import_design_file(self):
+		design = read_design_file(self.design_file)
+		self.design_name = self.design_name or design["design_name"]
+		self.part_number = self.part_number or design["part_number"]
+
+		old_paths = get_part_paths(self.items)
+		old_rows = {old_paths[row.node_id]: row for row in self.items}
+		manual_rows = [row for row in self.items if row.source == "Manual"]
+
+		self.set("items", [])
+		self.append_cad_parts(design["parts"], 0, (), old_rows)
+		self.append_manual_parts(manual_rows, old_paths)
+
+		new_node_ids = {path: node_id for node_id, path in get_part_paths(self.items).items()}
+		OperationPlan(self).remap_nodes(
+			{node_id: new_node_ids[path] for node_id, path in old_paths.items() if path in new_node_ids}
+		)
+
+	def append_cad_parts(self, nodes: list[dict], parent_node_id: int, parent_path: tuple, old_rows: dict):
+		for node in nodes:
+			path = (*parent_path, node["part_number"])
+			row = self.append(
+				"items",
+				{
+					"node_id": len(self.items) + 1,
+					"parent_node_id": parent_node_id,
+					"part_number": node["part_number"],
+					"part_name": node["part_name"],
+					"description": node["description"],
+					"qty": get_quantity(old_rows.get(path), node["quantity"]),
+					"design_quantity": node["quantity"],
+					"source": "CAD File",
+					"do_not_explode": 1,
+					**get_mapping(old_rows.get(path)),
+				},
+			)
+			self.append_cad_parts(node["children"], row.node_id, path, old_rows)
+
+	def append_manual_parts(self, manual_rows: list, old_paths: dict):
+		new_node_ids = {path: node_id for node_id, path in get_part_paths(self.items).items()}
+		new_node_ids[()] = 0
+		for row in manual_rows:
+			parent_path = old_paths.get(row.parent_node_id, ())
+			if parent_path not in new_node_ids:
+				frappe.msgprint(
+					_("Part {0} was removed because its assembly is not in the new design file.").format(
+						bold(row.part_number)
+					)
+				)
+				continue
+
+			new_row = self.append(
+				"items", {**row.as_dict(no_default_fields=True), "node_id": len(self.items) + 1}
+			)
+			new_row.parent_node_id = new_node_ids[parent_path]
+			new_node_ids[old_paths[row.node_id]] = new_row.node_id
+
+	def set_part_structure(self):
+		last_node_id = max((row.node_id or 0 for row in self.items), default=0)
+		for row in self.items:
+			self.set_part_number(row)
+			if not row.node_id:
+				last_node_id += 1
+				row.node_id = last_node_id
+
+		node_ids = {row.node_id for row in self.items}
+		for row in self.items:
+			if row.parent_node_id and row.parent_node_id not in node_ids:
+				frappe.throw(
+					_("Row #{0}: Parent Node {1} does not exist.").format(row.idx, row.parent_node_id),
+					title=_("Invalid Parent Node"),
+				)
+
+		parent_node_ids = {row.parent_node_id for row in self.items}
+		for row in self.items:
+			row.is_expandable = 1 if row.node_id in parent_node_ids else 0
+
+		get_part_paths(self.items)
+
+	def set_part_number(self, row):
+		row.part_number = row.part_number or row.item_code
+		if not row.part_number:
+			frappe.throw(_("Row #{0}: set the Part Number or the Item.").format(row.idx))
+
+		if not row.part_name and row.item_code:
+			row.part_name = row.item_name or frappe.get_cached_value("Item", row.item_code, "item_name")
+
+	def validate_part_models(self):
+		for row in self.items:
+			if row.model_file and row.model_file.rsplit(".", 1)[-1].lower() not in PART_MODEL_FORMATS:
+				frappe.throw(
+					_("Row #{0}: attach the 3D model as a STEP, STL or GLB file.").format(row.idx),
+					title=_("Invalid 3D Model"),
+				)
+
+			if row.placements and not isinstance(frappe.parse_json(row.placements), list):
+				frappe.throw(_("Row #{0}: the placements in the model are not valid.").format(row.idx))
+
+	def validate_cad_parts_unchanged(self):
+		before = self.get_doc_before_save()
+		cad_node_ids = {row.node_id for row in self.items if row.source == "CAD File"}
+		removed = [
+			row.part_number
+			for row in before.items
+			if row.source == "CAD File" and row.node_id not in cad_node_ids
+		]
+		if removed:
+			frappe.throw(
+				_("Parts from the submitted design file cannot be removed: {0}").format(", ".join(removed)),
+				title=_("Not Allowed"),
+			)
+
+	def set_revision_changes(self):
+		if not self.previous_revision:
+			return
+
+		previous_quantities = get_part_quantities(self.get_previous_parts())
+		paths = get_part_paths(self.items)
+		for row in self.items:
+			previous_quantity = previous_quantities.get(paths[row.node_id])
+			if previous_quantity is None:
+				row.change_type = "Added"
+			elif flt(previous_quantity) != get_design_quantity(row):
+				row.change_type = "Quantity Changed"
+			else:
+				row.change_type = ""
+
+	def get_previous_parts(self) -> list:
+		return frappe.get_all(
+			"BOM Creator Item",
+			filters={"parent": self.previous_revision, "parenttype": "BOM Creator"},
+			fields=["node_id", "parent_node_id", "part_number", "part_name", "qty", "design_quantity"],
+			order_by="idx",
+		)
 
 	@frappe.whitelist()
+	def get_revision_changes(self) -> dict:
+		if not self.previous_revision:
+			frappe.throw(_("This design has no previous revision."))
+
+		previous_parts = self.get_previous_parts()
+		previous_paths = get_part_paths(previous_parts)
+		previous_rows = {previous_paths[row.node_id]: row for row in previous_parts}
+		current_paths = get_part_paths(self.items)
+		changes = {"added": [], "removed": [], "quantity_changed": []}
+
+		for row in self.items:
+			path = current_paths[row.node_id]
+			previous = previous_rows.pop(path, None)
+			if not previous:
+				changes["added"].append(get_change(row, path, None))
+			elif get_design_quantity(previous) != get_design_quantity(row):
+				changes["quantity_changed"].append(get_change(row, path, previous))
+
+		changes["removed"] = [get_change(None, path, row) for path, row in previous_rows.items()]
+		return changes
+
+	@frappe.whitelist(methods=["POST"])
+	def make_new_revision(self) -> str:
+		self.check_permission("write")
+		if self.docstatus != 1:
+			frappe.throw(_("Submit this design before making a new revision."))
+
+		if frappe.db.exists("BOM Creator", {"previous_revision": self.name, "docstatus": ("<", 2)}):
+			frappe.throw(_("A newer revision of this design already exists."))
+
+		revision = frappe.copy_doc(self, ignore_no_copy=False)
+		revision.docstatus = 0
+		revision.revision = self.revision + 1
+		revision.previous_revision = self.name
+		revision.insert()
+		return revision.name
+
+	def get_bom_plan(self) -> OperationPlan | PartTreePlan:
+		return OperationPlan(self) if self.track_semi_finished_goods else PartTreePlan(self)
+
+	def get_used_parts(self) -> list:
+		node_ids = self.get_bom_plan().get_used_node_ids()
+		return [row for row in self.items if row.node_id in node_ids]
+
+	@frappe.whitelist()
+	def get_suggested_items(self) -> dict:
+		rows = [row for row in self.items if not row.item_code]
+		item_codes = set(
+			frappe.get_all(
+				"Item",
+				filters={"name": ("in", [row.part_number for row in rows]), "disabled": 0},
+				pluck="name",
+			)
+		)
+
+		items_by_name = defaultdict(list)
+		for item in frappe.get_all(
+			"Item",
+			filters={"item_name": ("in", [row.part_name for row in rows]), "disabled": 0},
+			fields=["name", "item_name"],
+		):
+			items_by_name[item.item_name].append(item.name)
+
+		suggestions = {}
+		for row in rows:
+			if row.part_number in item_codes:
+				suggestions[row.name] = row.part_number
+			elif len(items_by_name.get(row.part_name, [])) == 1:
+				suggestions[row.name] = items_by_name[row.part_name][0]
+
+		return suggestions
+
+	@frappe.whitelist(methods=["POST"])
+	def create_items(self, item_group: str, stock_uom: str) -> list[str]:
+		self.check_permission("write")
+		frappe.has_permission("Item", "create", throw=True)
+
+		created = []
+		if not self.item_code:
+			self.item_code = self.get_or_make_finished_good(item_group, stock_uom)
+			created.append(self.item_code)
+
+		rows = [row for row in self.get_used_parts() if not row.item_code]
+		items = get_items_by_code([row.part_number for row in rows])
+		for row in rows:
+			if row.part_number not in items:
+				item_code = make_item(row.part_number, row.part_name, row.description, item_group, stock_uom)
+				items[row.part_number] = frappe._dict(name=item_code, stock_uom=stock_uom)
+				created.append(item_code)
+
+			row.item_code = items[row.part_number].name
+			row.uom = items[row.part_number].stock_uom
+
+		self.save()
+		return created
+
+	def get_or_make_finished_good(self, item_group: str, stock_uom: str) -> str:
+		item_code = self.part_number or self.design_name
+		if get_items_by_code([item_code]):
+			return item_code
+
+		return make_item(item_code, self.design_name, None, item_group, stock_uom, self.is_phantom)
+
+	@frappe.whitelist(methods=["POST"])
 	def enqueue_create_boms(self):
 		self.check_permission("submit")
-		self.enqueue_bom_creation()
-
-	def enqueue_bom_creation(self):
+		self.validate_can_create_boms()
+		self.get_bom_plan().validate_can_make_boms()
+		self.db_set({"status": "In Progress", "error_log": None}, notify=True)
 		frappe.enqueue_doc(
 			"BOM Creator", self.name, "create_boms", queue="short", timeout=600, enqueue_after_commit=True
 		)
 
-		frappe.msgprint(
-			_("BOMs creation has been enqueued, kindly check the status after some time"), alert=True
-		)
+		frappe.msgprint(_("The BOMs are being created. The status changes when they are ready."), alert=True)
+
+	def validate_can_create_boms(self):
+		if self.docstatus != 1:
+			frappe.throw(_("Submit this design before creating BOMs."))
+
+		if self.status == "Superseded":
+			frappe.throw(_("This design has a newer revision. Create BOMs from the latest revision."))
+
+		if self.status == "Completed":
+			frappe.throw(_("BOMs are already created from this design. Cancel them to create them again."))
 
 	def create_boms(self):
-		"""
-		Sample data structure of production_item_wise_rm
-		production_item_wise_rm = {
-		        (fg_item_code, name): {
-		                "items": [],
-		                "bom_no": "",
-		                "fg_item_data": {}
-		        }
-		}
-		"""
-
 		self.db_set({"status": "In Progress", "error_log": None})
-
 		try:
-			production_item_wise_rm = self.get_production_item_wise_rm()
-			reverse_tree = OrderedDict(reversed(list(production_item_wise_rm.items())))
-			for d in reverse_tree:
-				fg_item_data = production_item_wise_rm.get(d).fg_item_data
-				self.create_bom(fg_item_data, production_item_wise_rm)
-
-			frappe.msgprint(_("BOMs created successfully"))
+			self.get_bom_plan().make_boms()
 		except Exception:
-			traceback = frappe.get_traceback(with_context=True)
+			frappe.db.rollback()
 			self.db_set(
-				{
-					"status": "Failed",
-					"error_log": traceback,
-				}
+				{"status": "Failed", "error_log": frappe.get_traceback(with_context=True)}, notify=True
 			)
-
-			frappe.msgprint(_("BOMs creation failed"))
-
-	def get_production_item_wise_rm(self):
-		production_item_wise_rm = OrderedDict({})
-		production_item_wise_rm.setdefault(
-			(self.item_code, self.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
-		)
-
-		for row in self.items:
-			if row.is_expandable and (row.item_code, row.name) not in production_item_wise_rm:
-				production_item_wise_rm.setdefault(
-					(row.item_code, row.name),
-					frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
-				)
-
-			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
-				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
-
-			key = (row.fg_item, row.fg_reference_id)
-			production_item_wise_rm.setdefault(
-				key, frappe._dict({"items": [], "bom_no": "", "fg_item_data": row})
-			)
-			production_item_wise_rm[key]["items"].append(row)
-
-		return production_item_wise_rm
-
-	def create_bom(self, row, production_item_wise_rm):
-		bom_creator_item = row.name if row.name != self.name else ""
-		existing_bom = frappe.db.get_value(
-			"BOM",
-			{
-				"bom_creator": self.name,
-				"item": row.item_code,
-				"bom_creator_item": bom_creator_item,
-				"docstatus": 1,
-			},
-		)
-		if existing_bom:
-			production_item_wise_rm[(row.item_code, row.name)].bom_no = existing_bom
 			return
 
-		bom = frappe.new_doc("BOM")
-		bom.update(
-			{
-				"item": row.item_code,
-				"bom_type": "Production",
-				"quantity": row.qty,
-				"allow_alternative_item": 1,
-				"bom_creator": self.name,
-				"bom_creator_item": bom_creator_item,
-				"is_phantom_bom": row.get("is_phantom_item"),
-			}
-		)
-
-		if row.item_code == self.item_code:
-			bom.is_phantom_bom = self.is_phantom
-			if not self.is_phantom and (self.routing or self.has_operations()):
-				bom.routing = self.routing
-				bom.with_operations = 1
-				bom.transfer_material_against = "Work Order"
-
-		for field in BOM_FIELDS:
-			if self.get(field):
-				bom.set(field, self.get(field))
-
-		if self.set_rate_based_on_warehouse and self.default_warehouse:
-			bom.default_source_warehouse = self.default_warehouse
-
-		for item in production_item_wise_rm[(row.item_code, row.name)]["items"]:
-			bom_no = "" if item.do_not_explode else item.bom_no
-			do_not_explode = item.do_not_explode
-			if (item.item_code, item.name) in production_item_wise_rm:
-				bom_no = production_item_wise_rm.get((item.item_code, item.name)).bom_no
-				do_not_explode = 0
-
-			item_args = {}
-			for field in BOM_ITEM_FIELDS:
-				item_args[field] = item.get(field)
-
-			item_args.update(
-				{
-					"bom_no": bom_no,
-					"do_not_explode": do_not_explode,
-					"allow_alternative_item": 1,
-					"include_item_in_manufacturing": 1,
-				}
-			)
-
-			bom.append("items", item_args)
-
-		bom.save(ignore_permissions=True)
-		bom.submit()
-
-		production_item_wise_rm[(row.item_code, row.name)].bom_no = bom.name
-
-	@frappe.whitelist()
-	def edit_bom_creator(self, docname: str, data: str | dict):
-		if docname != self.name and not frappe.db.exists(
-			"BOM Creator Item", {"parent": self.name, "name": docname}
-		):
-			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(docname))
-
-		if isinstance(data, str):
-			data = frappe.parse_json(data)
-
-		updated = False
-		if docname == self.name:
-			if data.get("qty") and flt(data.get("qty")) != flt(self.qty):
-				self.qty = flt(data.get("qty"))
-				updated = True
-
-		for row in self.items:
-			if row.name == docname:
-				for key, value in data.items():
-					if key in BOM_ITEM_FIELDS and row.get(key) != value:
-						if key == "uom":
-							row.conversion_factor = 0
-						row.set(key, value)
-						updated = True
-				break
-
-		if updated:
-			self.set_rate_for_items()
-			self.save()
-
-		frappe.msgprint(_("Updated successfully"), alert=True)
-
-		return self
-
-	def has_operations(self):
-		for row in self.items:
-			if row.operation:
-				return True
-
-		return False
-
-	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
-		return frappe.get_cached_value("Item", item_code, "default_bom")
-
-	@frappe.whitelist()
-	def add_item(self, **kwargs):
-		if isinstance(kwargs, str):
-			kwargs = frappe.parse_json(kwargs)
-
-		if isinstance(kwargs, dict):
-			kwargs = frappe._dict(kwargs)
-
-		item_info = get_item_details(kwargs.item_code)
-
-		parent_row_no = ""
-		if kwargs.fg_reference_id and self.name != kwargs.fg_reference_id:
-			parent_row_no = get_parent_row_no(self, kwargs.fg_reference_id)
-
-		kwargs.update(
-			{
-				"uom": item_info.stock_uom,
-				"stock_uom": item_info.stock_uom,
-				"conversion_factor": 1,
-			}
-		)
-
-		if parent_row_no:
-			kwargs.update({"parent_row_no": parent_row_no})
-
-		self.append("items", kwargs)
-		self.save()
-
-		return self
-
-	@frappe.whitelist()
-	def add_sub_assembly(self, **kwargs):
-		if isinstance(kwargs, str):
-			kwargs = frappe.parse_json(kwargs)
-
-		if isinstance(kwargs, dict):
-			kwargs = frappe._dict(kwargs)
-
-		bom_item = frappe.parse_json(kwargs.bom_item)
-
-		name = kwargs.fg_reference_id
-		parent_row_no = ""
-
-		if not kwargs.convert_to_sub_assembly:
-			item_info = get_item_details(bom_item.item_code)
-			parent_row_no = get_parent_row_no(self, kwargs.fg_reference_id)
-
-			item_row = self.append(
-				"items",
-				{
-					"item_code": bom_item.item_code,
-					"qty": bom_item.qty,
-					"uom": item_info.stock_uom,
-					"fg_item": kwargs.fg_item,
-					"conversion_factor": 1,
-					"parent_row_no": parent_row_no,
-					"fg_reference_id": name,
-					"stock_qty": bom_item.qty,
-					"do_not_explode": 1,
-					"is_expandable": 1,
-					"stock_uom": item_info.stock_uom,
-					"operation": bom_item.operation,
-					"is_phantom_item": sbool(kwargs.phantom),
-				},
-			)
-
-			parent_row_no = item_row.idx
-			name = ""
-		else:
-			if sbool(kwargs.phantom):
-				parent_row = next(item for item in self.items if item.name == kwargs.fg_reference_id)
-				parent_row.is_phantom_item = 1
-			parent_row_no = get_parent_row_no(self, kwargs.fg_reference_id)
-
-		for row in bom_item.get("items"):
-			row = frappe._dict(row)
-			item_info = get_item_details(row.item_code)
-			self.append(
-				"items",
-				{
-					"item_code": row.item_code,
-					"qty": row.qty,
-					"operation": row.operation,
-					"fg_item": bom_item.item_code,
-					"uom": item_info.stock_uom,
-					"fg_reference_id": name,
-					"parent_row_no": parent_row_no,
-					"conversion_factor": 1,
-					"do_not_explode": 1,
-					"stock_qty": row.qty,
-					"stock_uom": item_info.stock_uom,
-				},
-			)
-
-		self.save()
-
-		return self
-
-	@frappe.whitelist()
-	def delete_node(self, **kwargs):
-		if isinstance(kwargs, str):
-			kwargs = frappe.parse_json(kwargs)
-
-		if isinstance(kwargs, dict):
-			kwargs = frappe._dict(kwargs)
-
-		updated = False
-		if kwargs.docname:
-			row = next((row for row in self.items if row.name == kwargs.docname), None)
-			if not row:
-				frappe.throw(_("BOM Creator Item with name {0} does not exist").format(kwargs.docname))
-
-			self.remove(row)
-			updated = True
-
-		if self.remove_child_nodes(kwargs.docname or self.name):
-			updated = True
-
-		if updated:
-			self.set_rate_for_items()
-			self.save()
-
-			return self
-
-		return frappe._dict()
-
-	def remove_child_nodes(self, fg_reference_id: str):
-		removed = False
-		for row in [row for row in self.items if row.fg_reference_id == fg_reference_id]:
-			self.remove(row)
-			removed = True
-			self.remove_child_nodes(row.name)
-
-		return removed
+		self.set_status(save=True)
 
 
-@frappe.whitelist()
-def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
-	if isinstance(kwargs, str):
-		kwargs = frappe.parse_json(kwargs)
+def read_design_file(file_url: str) -> dict:
+	file = frappe.get_doc("File", {"file_url": file_url})
+	file.check_permission("read")
 
-	if isinstance(kwargs, dict):
-		kwargs = frappe._dict(kwargs)
+	extension = file.file_name.rsplit(".", 1)[-1].lower()
+	if extension not in DESIGN_FILE_READERS:
+		frappe.throw(_("Attach a STEP file (.step or .stp) or a CSV file."), title=_("Invalid Design File"))
 
-	if not kwargs.parent_id:
-		return []
+	content = file.get_content()
+	if isinstance(content, bytes):
+		content = content.decode("utf-8", errors="replace")
 
-	frappe.has_permission("BOM Creator", "read", doc=kwargs.parent_id, throw=True)
+	return DESIGN_FILE_READERS[extension](content)
 
-	fields = [
-		"name as value",
-		"item_name as title",
-		"is_expandable as expandable",
-		"parent as parent_id",
-		"qty",
-		"idx",
-		ValueWrapper("BOM Creator Item").as_("doctype"),
-		"name",
-		"item_code",
-		"uom",
-		"rate",
-		"amount",
-		"operation",
-		"is_subcontracted",
-	]
 
-	query_filters = {
-		"fg_reference_id": parent,
-		"parent": kwargs.parent_id,
+def get_part_paths(parts: list) -> dict[int, tuple]:
+	rows = {row.node_id: row for row in parts}
+	paths = {}
+	for row in parts:
+		path, current = [], row
+		while current:
+			if len(path) > len(rows):
+				frappe.throw(_("Part {0} is inside its own assembly.").format(bold(row.part_number)))
+
+			path.append(current.part_number)
+			current = rows.get(current.parent_node_id)
+
+		paths[row.node_id] = tuple(reversed(path))
+
+	return paths
+
+
+def get_part_quantities(parts: list) -> dict[tuple, float]:
+	paths = get_part_paths(parts)
+	return {paths[row.node_id]: get_design_quantity(row) for row in parts}
+
+
+def get_change(row, path: tuple, previous) -> dict:
+	current = row or previous
+	return {
+		"part_number": current.part_number,
+		"part_name": current.part_name,
+		"path": " > ".join(path),
+		"previous_quantity": get_design_quantity(previous) if previous else None,
+		"quantity": get_design_quantity(row) if row else None,
 	}
 
-	if kwargs.name:
-		query_filters["name"] = kwargs.name
 
-	return frappe.get_all("BOM Creator Item", fields=fields, filters=query_filters, order_by="idx")
+def get_design_quantity(row) -> float:
+	return flt(row.get("design_quantity")) or flt(row.qty)
 
 
-def get_item_details(item_code):
-	return frappe.get_cached_value(
-		"Item", item_code, ["item_name", "description", "image", "stock_uom", "default_bom"], as_dict=1
+def get_quantity(old_row, design_quantity: float) -> float:
+	if old_row and flt(old_row.qty) != get_design_quantity(old_row):
+		return old_row.qty
+
+	return design_quantity
+
+
+def get_mapping(row) -> dict:
+	if not row:
+		return {}
+
+	return {field: row.get(field) for field in MAPPING_FIELDS}
+
+
+def get_items_by_code(item_codes: list[str]) -> dict:
+	if not item_codes:
+		return {}
+
+	items = frappe.get_all("Item", filters={"name": ("in", item_codes)}, fields=["name", "stock_uom"])
+	return {item.name: item for item in items}
+
+
+def make_item(
+	item_code: str,
+	item_name: str,
+	description: str | None,
+	item_group: str,
+	stock_uom: str,
+	is_phantom: bool = False,
+) -> str:
+	item = frappe.new_doc("Item")
+	item.update(
+		{
+			"item_code": item_code,
+			"item_name": item_name or item_code,
+			"description": description or item_name or item_code,
+			"item_group": item_group,
+			"stock_uom": stock_uom,
+			"is_stock_item": 0 if is_phantom else 1,
+			"include_item_in_manufacturing": 1,
+		}
 	)
-
-
-def get_parent_row_no(doc, name):
-	for row in doc.items:
-		if row.name == name:
-			return row.idx
-
-	if name == doc.name:
-		return None
-
-	frappe.msgprint(_("Parent Row No not found for {0}").format(name), alert=True)
-
-	return None
+	item.insert()
+	return item.name

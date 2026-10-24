@@ -23,8 +23,8 @@ export function render_bom_bar(editor, $bar) {
 
 	if (!editor.editable) return;
 	if (editor.view.state.adding_bom) {
-		const options = (editor.frm.doc.parts || [])
-			.filter((part) => part.is_assembly && !node_ids.includes(part.node_id))
+		const options = (editor.frm.doc.items || [])
+			.filter((part) => part.is_expandable && !node_ids.includes(part.node_id))
 			.map(
 				(part) =>
 					`<option value="${part.node_id}">${escape(
@@ -68,7 +68,7 @@ export function get_unused_tray(editor) {
 				<span class="ellipsis" title="${frappe.utils.escape_html(part.part_number)}">
 				${frappe.utils.escape_html(part.part_name || part.part_number)}</span>
 				</span>
-			${assign}<span style="width:56px;text-align:right;">${flt(part.quantity)}</span></div>`;
+			${assign}<span style="width:56px;text-align:right;">${flt(part.qty)}</span></div>`;
 	});
 
 	return `<div style="${CARD}margin-top:var(--margin-md);">

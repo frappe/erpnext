@@ -7,11 +7,12 @@ import frappe
 from frappe import _, bold
 from frappe.utils import cint, flt
 
+from erpnext.manufacturing.doctype.bom_creator.bom_plan import BOMPlan
 
-class OperationPlan:
+
+class OperationPlan(BOMPlan):
 	def __init__(self, design):
-		self.design = design
-		self.parts = {row.node_id: row for row in design.parts}
+		super().__init__(design)
 		self.operations = defaultdict(list)
 		self.materials = defaultdict(list)
 		for row in design.operations:
@@ -23,6 +24,9 @@ class OperationPlan:
 	@property
 	def bom_node_ids(self) -> list[int]:
 		return sorted({0, *self.operations, *self.materials})
+
+	def get_bom_node_ids(self) -> list[int]:
+		return self.bom_node_ids
 
 	@property
 	def produces_item_at_each_operation(self) -> bool:
@@ -83,12 +87,6 @@ class OperationPlan:
 	def validate_node(self, node_id, label: str):
 		if cint(node_id) and cint(node_id) not in self.parts:
 			frappe.throw(_("{0}: design part node {1} does not exist.").format(label, node_id))
-
-	def get_node_item(self, node_id) -> str | None:
-		if not cint(node_id):
-			return self.design.item_code
-
-		return self.parts[cint(node_id)].item_code
 
 	def get_output_item(self, row, is_last: bool) -> str | None:
 		if is_last:
@@ -187,30 +185,12 @@ class OperationPlan:
 
 		return items
 
-	def get_bom_quantity(self, node_id: int) -> float:
-		return 1 if node_id else flt(self.design.quantity) or 1
-
-	def make_boms(self) -> dict[str, str]:
-		problems = self.get_problems()
-		if problems:
-			frappe.throw(problems, title=_("Fix These Before Creating BOMs"), as_list=True)
-
-		boms = {}
-		for node_id in self.get_bom_order():
-			boms[self.get_node_item(node_id)] = self.make_bom(node_id, boms)
-
-		return boms
-
 	def make_bom(self, node_id: int, boms: dict[str, str]) -> str:
 		operations = self.operations[node_id]
 		quantity = self.get_bom_quantity(node_id)
-		bom = frappe.new_doc("BOM")
+		bom = self.new_bom(node_id)
 		bom.update(
 			{
-				"item": self.get_node_item(node_id),
-				"company": self.design.company,
-				"quantity": quantity,
-				"rm_cost_as_per": "Valuation Rate",
 				"with_operations": 1 if operations else 0,
 				"track_semi_finished_goods": 1 if operations and self.produces_item_at_each_operation else 0,
 			}
@@ -221,11 +201,9 @@ class OperationPlan:
 
 		stock_uoms = self.get_stock_uoms(node_id)
 		for row in self.materials[node_id]:
-			bom.append("items", self.get_bom_item(row, operations, boms, stock_uoms, quantity))
+			bom.append("items", self.get_material_bom_item(row, operations, boms, stock_uoms, quantity))
 
-		bom.insert()
-		bom.submit()
-		return bom.name
+		return self.submit_bom(bom)
 
 	def get_bom_operation(self, row, is_last: bool, boms: dict[str, str], quantity: float) -> dict:
 		operation = {
@@ -246,16 +224,15 @@ class OperationPlan:
 
 		return operation
 
-	def get_bom_item(
+	def get_material_bom_item(
 		self, row, operations: list, boms: dict[str, str], stock_uoms: dict, quantity: float
 	) -> dict:
 		item_code = self.get_material_item(row)
-		bom_item = {
-			"item_code": item_code,
-			"qty": flt(row.quantity) * quantity,
-			"uom": row.uom or stock_uoms.get(item_code),
-			"bom_no": boms.get(item_code, ""),
-		}
+		part = self.parts.get(cint(row.part_node_id))
+		uom = row.uom or stock_uoms.get(item_code)
+		bom_item = self.get_bom_item(item_code, flt(row.qty) * quantity, uom, boms, part)
+		if row.from_operation_id:
+			bom_item.update({"do_not_explode": 1, "bom_no": ""})
 		operation_ids = [cint(operation.operation_id) for operation in operations]
 		if row.operation_id and self.produces_item_at_each_operation:
 			bom_item["operation_row_id"] = operation_ids.index(cint(row.operation_id)) + 1
