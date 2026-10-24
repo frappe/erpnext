@@ -213,6 +213,14 @@ class PickList(TransactionBase):
 
 		return held_qty
 
+	def get_own_vouchers(self):
+		"""Vouchers whose stock reservations this pick list may pick."""
+		vouchers = {row.sales_order for row in self.locations if row.sales_order}
+		if self.work_order:
+			vouchers.add(self.work_order)
+
+		return vouchers
+
 	def validate_free_stock_qty(self, picked_qty):
 		if not picked_qty:
 			return
@@ -220,13 +228,14 @@ class PickList(TransactionBase):
 		item_codes = list({key[0] for key in picked_qty})
 		warehouses = list({key[1] for key in picked_qty})
 		holders = get_pick_list_holders(item_codes, warehouses=warehouses, exclude_pick_list=self.name)
-		own_vouchers = {row.sales_order for row in self.locations if row.sales_order}
+		own_vouchers = self.get_own_vouchers()
 		reservations = [
 			d for d in get_reservation_holders(item_codes, warehouses) if d.voucher_no not in own_vouchers
 		]
 		bin_qty_map = get_bin_qty_map(item_codes, warehouses)
 
 		for (item_code, warehouse, _batch_no), (qty, row) in picked_qty.items():
+			qty = flt(qty, row.precision("stock_qty"))
 			free_qty = get_availability_row(
 				(item_code, warehouse), bin_qty_map, holders, reservations
 			).free_qty
@@ -757,7 +766,7 @@ class PickList(TransactionBase):
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
-		own_vouchers = {row.sales_order for row in self.get("locations") if row.sales_order}
+		own_vouchers = self.get_own_vouchers()
 
 		# reset
 		reset_rows = []
@@ -1375,7 +1384,7 @@ def get_remaining_pick_list_reservations(pick_lists):
 def get_reservation_holders(item_codes, warehouses):
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 
-	return (
+	reservations = (
 		frappe.qb.from_(sre)
 		.select(
 			sre.name,
@@ -1397,6 +1406,37 @@ def get_reservation_holders(item_codes, warehouses):
 			& (Coalesce(sre.from_voucher_type, "") != "Pick List")
 		)
 	).run(as_dict=True)
+
+	# stock picked for a work order is counted as a pick list hold, not as reserved
+	held_qty = get_work_order_pick_list_holds(item_codes, warehouses)
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	for row in reservations:
+		key = (row.voucher_no, row.item_code, row.warehouse)
+		if row.voucher_type == "Work Order" and held_qty.get(key):
+			released_qty = min(flt(row.reserved_qty), held_qty[key])
+			row.reserved_qty = flt(flt(row.reserved_qty) - released_qty, precision)
+			held_qty[key] -= released_qty
+
+	return reservations
+
+
+def get_work_order_pick_list_holds(item_codes, warehouses):
+	pi = frappe.qb.DocType("Pick List")
+	pi_item = frappe.qb.DocType("Pick List Item")
+
+	rows = (
+		get_open_pick_list_items_query(item_codes)
+		.select(
+			pi.work_order,
+			pi_item.item_code,
+			pi_item.warehouse,
+			Sum(get_holding_qty_case(pi_item)).as_("holding_qty"),
+		)
+		.where(pi.work_order.isnotnull() & pi_item.warehouse.isin(warehouses))
+		.groupby(pi.work_order, pi_item.item_code, pi_item.warehouse)
+	).run(as_dict=True)
+
+	return {(row.work_order, row.item_code, row.warehouse): flt(row.holding_qty) for row in rows}
 
 
 def get_bin_qty_map(item_codes, warehouses):
@@ -1446,7 +1486,9 @@ def get_availability_row(key, bin_qty_map, holders, reservations):
 		actual_qty=actual_qty,
 		picked_qty=picked_qty,
 		reserved_qty=reserved_qty,
-		free_qty=actual_qty - picked_qty - reserved_qty,
+		free_qty=flt(
+			actual_qty - picked_qty - reserved_qty, frappe.get_precision("Pick List Item", "stock_qty")
+		),
 		pick_lists=row_holders,
 		reservations=row_reservations,
 	)
@@ -1850,8 +1892,9 @@ def remove_stock_reserved_for_others(item_code, locations, own_vouchers=None):
 		if row.voucher_no not in (own_vouchers or ()):
 			reserved_qty[row.warehouse] += flt(row.reserved_qty)
 
+	precision = frappe.get_precision("Pick List Item", "stock_qty")
 	for location in locations:
-		location.qty = flt(location.qty) - reserved_qty[location.warehouse]
+		location.qty = flt(flt(location.qty) - reserved_qty[location.warehouse], precision)
 
 	return [location for location in locations if location.qty > 0]
 
