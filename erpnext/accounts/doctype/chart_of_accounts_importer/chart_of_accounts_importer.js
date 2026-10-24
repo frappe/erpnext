@@ -38,7 +38,7 @@ frappe.ui.form.on("Chart of Accounts Importer", {
 					options: ["Excel", "CSV"],
 				},
 				{
-					label: "Template Type",
+					label: __("Template Type"),
 					fieldname: "template_type",
 					fieldtype: "Select",
 					reqd: 1,
