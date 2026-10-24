@@ -4,11 +4,7 @@
 
 import frappe
 from frappe.rate_limiter import rate_limit
-<<<<<<< HEAD
-from frappe.utils import escape_html
-=======
-from frappe.utils import escape_html, strip_html, validate_email_address
->>>>>>> a48bf80 (fix(crm): store contact form subject as plain text)
+from frappe.utils import escape_html, strip_html
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public Contact Us form; only parses the sender and sets lead ownership
