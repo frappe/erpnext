@@ -109,7 +109,7 @@ class TestAppointment(ERPNextTestSuite):
 		settings.verification_link_expiry_duration = VERIFICATION_EXPIRY_MINUTES
 		settings.holiday_list = holiday_list.name
 		settings.set("agent_list", [])
-		for agent in agents or ["Administrator"]:
+		for agent in ["Administrator"] if agents is None else agents:
 			settings.append("agent_list", {"user": agent})
 		settings.set("availability_of_slots", [])
 		for day in ALL_WEEKDAYS:
@@ -314,6 +314,20 @@ class TestAppointment(ERPNextTestSuite):
 		self.assertFalse(availability["13:00"])
 		self.assertFalse(availability["13:30"])
 		self.assertTrue(availability["14:00"])
+
+	def test_portal_offers_slots_when_no_agents_are_set(self):
+		from frappe.utils.data import get_system_timezone
+
+		self._configure_booking_settings(agents=[])
+		create_test_appointment(customer_email="slot_taken@example.com", scheduled_time=slot_on(2, 10))
+
+		with self.set_user("Guest"):
+			slots = get_appointment_slots(
+				str(datetime.date.today() + datetime.timedelta(days=2)), get_system_timezone()
+			)
+
+		self.assertTrue(slots)
+		self.assertTrue(all(slot["availability"] for slot in slots))
 
 	def test_expired_unverified_appointments_are_closed(self):
 		stale = self._create_portal_appointment("portal_visitor_stale@example.com", days_from_now=8)
