@@ -850,6 +850,41 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual([call.args for call in gate.call_args_list], [(stock_item, "_Test Warehouse - _TC")])
 
+	def test_repack_takes_gate_of_finished_good_warehouse_before_posting(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=2, rate=100)
+		repack = make_stock_entry(
+			item_code=raw_material, source="_Test Warehouse - _TC", qty=2, purpose="Repack", do_not_save=True
+		)
+		repack.to_warehouse = "_Test Warehouse 1 - _TC"
+		repack.append(
+			"items", {"item_code": finished_good, "qty": 1, "conversion_factor": 1, "is_finished_item": 1}
+		)
+
+		events = []
+		update_stock_ledger = StockEntry.update_stock_ledger
+
+		def record_posting(doc, *args, **kwargs):
+			events.append("posting")
+			return update_stock_ledger(doc, *args, **kwargs)
+
+		with (
+			patch(
+				"erpnext.stock.stock_ledger.sle_processing_gate",
+				side_effect=lambda item, warehouse: events.append(warehouse),
+			),
+			patch.object(StockEntry, "update_stock_ledger", autospec=True, side_effect=record_posting),
+		):
+			repack.submit()
+
+		self.assertEqual(repack.items[1].t_warehouse, "_Test Warehouse 1 - _TC")
+		self.assertEqual(
+			set(events[: events.index("posting")]), {"_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"}
+		)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
