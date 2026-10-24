@@ -72,7 +72,7 @@ export class BomTree {
 			${this.get_caret(0, true)}${this.get_thumbnail(0, doc.item_code)}
 			<span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;">
 				<span class="bold ellipsis" title="${__("Finished Good")}">${escape(
-			doc.design_name || __("Finished Good")
+			doc.design_name || doc.item_name || ""
 		)}</span></span>
 			${this.get_item_cell(0, doc.item_code)}
 			<span style="width:64px;">${this.get_finished_good_quantity()}</span>

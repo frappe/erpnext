@@ -43,6 +43,21 @@ frappe.ui.form.on("BOM Creator", {
 		frm.design_view?.render();
 	},
 
+	item_code(frm) {
+		frm.design_view?.render();
+	},
+
+	item_name(frm) {
+		if (!frm.doc.design_name && frm.doc.item_name) {
+			frm.set_value("design_name", frm.doc.item_name);
+		}
+		frm.design_view?.render();
+	},
+
+	design_name(frm) {
+		frm.design_view?.render();
+	},
+
 	design_file(frm) {
 		if (frm.doc.design_file && frm.doc.company) {
 			frm.save();
