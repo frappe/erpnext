@@ -387,10 +387,6 @@ class BOMCreator(Document):
 		frappe.has_permission("Item", "create", throw=True)
 
 		created = []
-		if not self.item_code:
-			self.item_code = self.get_or_make_finished_good(item_group, stock_uom)
-			created.append(self.item_code)
-
 		rows = [row for row in self.get_used_parts() if not row.item_code]
 		items = get_items_by_code([row.part_number for row in rows])
 		for row in rows:
@@ -404,13 +400,6 @@ class BOMCreator(Document):
 
 		self.save()
 		return created
-
-	def get_or_make_finished_good(self, item_group: str, stock_uom: str) -> str:
-		item_code = self.part_number or self.design_name
-		if get_items_by_code([item_code]):
-			return item_code
-
-		return make_item(item_code, self.design_name, None, item_group, stock_uom, self.is_phantom)
 
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_create_boms(self):
@@ -523,12 +512,7 @@ def get_items_by_code(item_codes: list[str]) -> dict:
 
 
 def make_item(
-	item_code: str,
-	item_name: str,
-	description: str | None,
-	item_group: str,
-	stock_uom: str,
-	is_phantom: bool = False,
+	item_code: str, item_name: str, description: str | None, item_group: str, stock_uom: str
 ) -> str:
 	item = frappe.new_doc("Item")
 	item.update(
@@ -538,7 +522,7 @@ def make_item(
 			"description": description or item_name or item_code,
 			"item_group": item_group,
 			"stock_uom": stock_uom,
-			"is_stock_item": 0 if is_phantom else 1,
+			"is_stock_item": 1,
 			"include_item_in_manufacturing": 1,
 		}
 	)

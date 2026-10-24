@@ -257,6 +257,7 @@ class TestBOMCreator(ERPNextTestSuite):
 		design.track_semi_finished_goods = 1
 		operation = add_operation(design, "_Test Creator Welding", workstation_type="")
 		add_material(design, part="TUBE-25", qty=3, operation=operation)
+		add_material(design, part="BOLT-M6", qty=4, bom=get_part(design, "FRAME-ASM").node_id)
 		design.save()
 
 		with self.assertRaises(frappe.ValidationError) as error:
@@ -331,7 +332,6 @@ class TestBOMCreator(ERPNextTestSuite):
 		design.save()
 		design.create_items(item_group="_Test Item Group", stock_uom="Nos")
 
-		self.assertEqual(design.item_code, "BIKE-100")
 		self.assertEqual(get_part(design, "TUBE-25").item_code, "TUBE-25")
 		self.assertFalse(get_part(design, "WHEEL-26").item_code)
 
@@ -625,6 +625,7 @@ def make_design():
 		{
 			"doctype": "BOM Creator",
 			"company": "_Test Company",
+			"item_code": make_item("BIKE-100", {"is_stock_item": 1}).name,
 			"design_file": make_step_file(BICYCLE_PRODUCTS, BICYCLE_LINKS),
 		}
 	).insert()
@@ -642,7 +643,6 @@ def make_mapped_design(produce_item_at_each_operation: bool = False):
 	for part in design.items:
 		part.item_code = make_item(part.part_number, {"is_stock_item": 1}).name
 
-	design.item_code = make_item("BIKE-100", {"is_stock_item": 1}).name
 	design.save()
 	return design
 
