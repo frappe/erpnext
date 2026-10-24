@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 
@@ -9,6 +10,34 @@ test_records = frappe.get_test_records("Cost Center")
 
 
 class TestCostCenter(unittest.TestCase):
+	def test_autoname_requires_company_abbreviation(self):
+		cost_center = frappe.get_doc(
+			{
+				"doctype": "Cost Center",
+				"cost_center_name": "_Test Abbreviation",
+				"company": "_Test Missing Abbreviation Company",
+			}
+		)
+		self.assertFalse(frappe.db.exists("Company", cost_center.company))
+		with self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Company _Test Missing Abbreviation Company does not exist or has no abbreviation",
+		):
+			cost_center.autoname()
+
+		cost_center.company = "_Test Company"
+		with patch("frappe.get_cached_value", return_value=""):
+			with self.assertRaisesRegex(
+				frappe.ValidationError, "Company _Test Company does not exist or has no abbreviation"
+			):
+				cost_center.autoname()
+
+		for number, name in (("", "_Test Abbreviation - _TC"), ("100", "100 - _Test Abbreviation - _TC")):
+			with self.subTest(number=number):
+				cost_center.cost_center_number = number
+				cost_center.autoname()
+				self.assertEqual(cost_center.name, name)
+
 	def test_cost_center_creation_against_child_node(self):
 		if not frappe.db.get_value("Cost Center", {"name": "_Test Cost Center 2 - _TC"}):
 			frappe.get_doc(test_records[1]).insert()
