@@ -819,7 +819,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-20 06:00:04.000000",
+ "modified": "2026-10-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "stock",
@@ -1141,17 +1141,25 @@
      "type": "select"
     },
     {
-     "limit": 12,
-     "type": "limit"
-    },
-    {
      "data_type": "Integer",
      "expression": {
-      "expression": "ibis.row_number() + 1",
+      "expression": "row_number().over(group_by=company) + 1",
       "type": "expression"
      },
      "new_name": "months_back",
      "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "months_back <= 12",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
     },
     {
      "data_type": "Date",

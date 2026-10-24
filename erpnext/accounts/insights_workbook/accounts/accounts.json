@@ -932,7 +932,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-20 06:00:03.000000",
+ "modified": "2026-10-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "accounts",
@@ -1178,17 +1178,25 @@
      "type": "select"
     },
     {
-     "limit": 8,
-     "type": "limit"
-    },
-    {
      "data_type": "Integer",
      "expression": {
-      "expression": "ibis.row_number()",
+      "expression": "row_number().over(group_by=company)",
       "type": "expression"
      },
      "new_name": "row_index",
      "type": "mutate"
+    },
+    {
+     "filters": [
+      {
+       "expression": {
+        "expression": "row_index < 8",
+        "type": "expression"
+       }
+      }
+     ],
+     "logical_operator": "And",
+     "type": "filter_group"
     },
     {
      "data_type": "Date",
