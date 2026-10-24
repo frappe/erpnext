@@ -12,7 +12,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import comma_or, flt, get_fullname, get_link_to_form
+from frappe.utils import comma_or, flt, get_fullname, get_link_to_form, today
 from pypika.terms import Criterion
 
 from erpnext.accounts.party import validate_party_frozen_disabled
@@ -71,6 +71,7 @@ class Opportunity(TransactionBase, CRMNote):
 		items: DF.Table[OpportunityItem]
 		job_title: DF.Data | None
 		language: DF.Link | None
+		lost_on: DF.Date | None
 		lost_reasons: DF.TableMultiSelect[OpportunityLostReasonDetail]
 		market_segment: DF.Link | None
 		naming_series: DF.Literal["CRM-OPP-.YYYY.-"]
@@ -146,6 +147,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.map_fields()
 		self.validate_qty()
 		self.validate_status()
+		self.set_lost_on()
 		self.set_exchange_rate()
 
 		if not self.title:
@@ -240,6 +242,20 @@ class Opportunity(TransactionBase, CRMNote):
 			return "Converted"
 		if self.has_active_quotation():
 			return "Quotation"
+
+	def set_lost_on(self) -> None:
+		if self.has_value_changed("status"):
+			self.lost_on = self.get_lost_on()
+
+	def get_lost_on(self) -> str | None:
+		return today() if self.status == "Lost" else None
+
+	def set_status(self, update: bool = False, status: str | None = None, update_modified: bool = True):
+		"""Also keep Lost On in step when the status is changed from a linked Quotation."""
+		previous_status = self.status
+		super().set_status(update=update, status=status, update_modified=update_modified)
+		if update and self.status != previous_status:
+			self.db_set("lost_on", self.get_lost_on(), update_modified=update_modified)
 
 	def map_fields(self):
 		for field in self.meta.get_valid_columns():
