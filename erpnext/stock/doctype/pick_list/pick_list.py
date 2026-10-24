@@ -213,6 +213,14 @@ class PickList(TransactionBase):
 
 		return held_qty
 
+	def get_own_vouchers(self):
+		"""Vouchers whose stock reservations this pick list may pick."""
+		vouchers = {row.sales_order for row in self.locations if row.sales_order}
+		if self.work_order:
+			vouchers.add(self.work_order)
+
+		return vouchers
+
 	def validate_free_stock_qty(self, picked_qty):
 		if not picked_qty:
 			return
@@ -220,9 +228,7 @@ class PickList(TransactionBase):
 		item_codes = list({key[0] for key in picked_qty})
 		warehouses = list({key[1] for key in picked_qty})
 		holders = get_pick_list_holders(item_codes, warehouses=warehouses, exclude_pick_list=self.name)
-		own_vouchers = {row.sales_order for row in self.locations if row.sales_order}
-		# stock reserved for this pick list's work order is ours to pick
-		own_vouchers.add(self.work_order)
+		own_vouchers = self.get_own_vouchers()
 		reservations = [
 			d for d in get_reservation_holders(item_codes, warehouses) if d.voucher_no not in own_vouchers
 		]
@@ -759,8 +765,7 @@ class PickList(TransactionBase):
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
-		own_vouchers = {row.sales_order for row in self.get("locations") if row.sales_order}
-		own_vouchers.add(self.work_order)
+		own_vouchers = self.get_own_vouchers()
 
 		# reset
 		reset_rows = []
