@@ -108,6 +108,39 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertIn("'Provisional Profit / Loss (Credit)'", name_and_total)
 		self.assertEqual(name_and_total["'Provisional Profit / Loss (Credit)'"], 100)
 
+	def test_unclosed_profit_of_earlier_years_is_not_provisional(self):
+		create_account("My Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
+		filters = frappe._dict(
+			company=COMPANY,
+			filter_based_on="Date Range",
+			period_start_date="2026-01-01",
+			period_end_date="2026-12-31",
+			periodicity="Yearly",
+			accumulated_values=1,
+		)
+		unclosed, provisional = get_profit_loss_rows(filters)
+
+		for amount, posting_date in ((1000, "2025-06-01"), (300, "2026-06-01")):
+			make_journal_entry(
+				[
+					dict(account_name="My Bank", debit_in_account_currency=amount),
+					dict(account_name="Sales", credit_in_account_currency=amount),
+				],
+				posting_date=posting_date,
+			)
+
+		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional + 300))
+
+		# a current loss that exactly offsets all earlier profit must still be shown
+		make_journal_entry(
+			[
+				dict(account_name="Capital Stock", credit_in_account_currency=1300),
+				dict(account_name="Sales", debit_in_account_currency=1300),
+			],
+			posting_date="2026-07-01",
+		)
+		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional - 1000))
+
 	def test_presentation_currency_does_not_depend_on_unrelated_accounts(self):
 		create_account("USD Loan", f"Loans (Liabilities) - {COMPANY_SHORT_NAME}", COMPANY, "USD")
 		frappe.get_doc(
@@ -223,6 +256,14 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(bank_row[key_for(cc1)], 300)
 		self.assertEqual(bank_row[key_for(cc2.name)], 500)
 		self.assertEqual(bank_row["total"], 800)
+
+
+def get_profit_loss_rows(filters):
+	rows = {row.get("account"): flt(row.get("total")) for row in execute(frappe._dict(filters))[1]}
+	return (
+		rows.get("'Unclosed Fiscal Years Profit / Loss (Credit)'", 0),
+		rows.get("'Provisional Profit / Loss (Credit)'", 0),
+	)
 
 
 def get_loan_and_provisional_profit(filters):

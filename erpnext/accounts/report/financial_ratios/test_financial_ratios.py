@@ -2,10 +2,11 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.report.financial_ratios.financial_ratios import (
+	avg_ratio_balance,
 	execute,
 	get_gl_data,
 	update_balances,
@@ -117,6 +118,61 @@ class TestFinancialRatios(ERPNextTestSuite):
 
 		self.assertEqual(self.get_group_balance("Direct Expense", "Expense") - before, 500)
 
+	def test_income_is_for_the_selected_year_only(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+		self.make_journal_entry("Cash", "Sales", 1000, posting_date=add_days(filters.period_start_date, -10))
+
+		self.assertEqual(self.get_total_income(filters), before)
+
+	def test_income_survives_closing_the_selected_year(self):
+		filters = self.get_report_filters()
+		self.make_journal_entry("Cash", "Sales", 500)
+		before = self.get_total_income(filters)
+
+		period_closing_voucher = frappe.new_doc("Period Closing Voucher")
+		period_closing_voucher.update(
+			{
+				"transaction_date": today(),
+				"company": self.company,
+				"fiscal_year": filters.from_fiscal_year,
+				"period_start_date": filters.period_start_date,
+				"period_end_date": filters.period_end_date,
+				"cost_center": f"Main - {self.abbr}",
+				"closing_account_head": f"Capital Stock - {self.abbr}",
+				"remarks": "test",
+			}
+		)
+		period_closing_voucher.submit()
+
+		self.assertEqual(self.get_total_income(filters), before)
+
+	def test_average_debtors_in_company_currency(self):
+		filters = self.get_report_filters()
+		period_key = self.get_period_list(filters)[0].key
+
+		def average_debtors():
+			return avg_ratio_balance("Receivable", self.get_period_list(filters), 2, filters)[period_key]
+
+		before = average_debtors()
+		journal_entry = frappe.new_doc("Journal Entry")
+		journal_entry.update({"posting_date": today(), "company": self.company, "multi_currency": 1})
+		journal_entry.append(
+			"accounts",
+			{
+				"account": "_Test Receivable USD - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer USD",
+				"exchange_rate": 80,
+				"debit_in_account_currency": 100,
+			},
+		)
+		journal_entry.append("accounts", {"account": "Sales - _TC", "credit_in_account_currency": 8000})
+		journal_entry.submit()
+
+		self.assertEqual(average_debtors() - before, 4000)
+
 	def get_period_list(self, filters):
 		return get_period_list(
 			filters.from_fiscal_year,
@@ -179,9 +235,9 @@ class TestFinancialRatios(ERPNextTestSuite):
 			company=self.company,
 		)
 
-	def make_journal_entry(self, debit_account, credit_account, amount, party=None):
+	def make_journal_entry(self, debit_account, credit_account, amount, posting_date=None, party=None):
 		journal_entry = frappe.new_doc("Journal Entry")
-		journal_entry.posting_date = today()
+		journal_entry.posting_date = posting_date or today()
 		journal_entry.company = self.company
 		party_type, party_name = party or (None, None)
 		for account, debit, credit in ((debit_account, amount, 0), (credit_account, 0, amount)):
