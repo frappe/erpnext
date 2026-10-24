@@ -186,7 +186,6 @@ class JobCard(Document):
 
 	def validate(self):
 		self.validate_time_logs()
-		self.validate_on_hold()
 		self.set_status()
 		self.set_operation_id()
 		self.set_hour_rate()
@@ -196,6 +195,7 @@ class JobCard(Document):
 		if self.sub_operations:
 			self.set_total_completed_qty_from_sub_operations()
 
+		self.validate_on_hold()
 		self.validate_pending_qty()
 		self.validate_work_order()
 		self.set_employees()
@@ -295,8 +295,17 @@ class JobCard(Document):
 		self.validate_job_card_qty()
 
 	def validate_on_hold(self):
-		if self.is_paused and not self.time_logs:
-			self.is_paused = 0
+		if not self.is_paused or (self.time_logs and self.has_qty_left_to_make()):
+			return
+
+		self.is_paused = 0
+		self.set_status()
+		self.update_sub_operation_status()
+
+	def has_qty_left_to_make(self):
+		precision = self.precision("total_completed_qty")
+		made_qty = flt(self.total_completed_qty) + flt(self.process_loss_qty)
+		return flt(made_qty, precision) < flt(self.for_quantity, precision)
 
 	def set_manufactured_qty(self):
 		self.manufactured_qty = flt(self.get_manufactured_qty())
