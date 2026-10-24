@@ -8,12 +8,7 @@ from urllib.parse import urlencode
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.desk.form.assign_to import add as add_assignment
-=======
 from frappe.desk.form.assign_to import _add as add_assignment
-from frappe.desk.form.assign_to import clear as clear_assignments
->>>>>>> 3773a8e (fix(appointment): verify portal booking without switching user)
 from frappe.model.document import Document
 from frappe.share import add_docshare
 from frappe.utils import add_to_date, cint, date_diff, get_datetime, get_url, getdate, now, now_datetime
