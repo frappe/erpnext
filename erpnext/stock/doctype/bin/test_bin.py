@@ -31,6 +31,57 @@ class TestBin(ERPNextTestSuite):
 		bin = _create_bin(item_code, warehouse)
 		self.assertEqual(bin.item_code, item_code)
 
+	def test_create_bin_finds_bin_committed_after_snapshot(self):
+		"""The loser of a concurrent insert must get the bin the winner committed after its snapshot"""
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("Postgres repeatable read does not show rows committed after the snapshot")
+
+		from frappe.database import get_db
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		self.assertIsNone(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}))
+
+		other_connection = get_db(
+			socket=frappe.db.socket,
+			host=frappe.db.host,
+			user=frappe.db.user,
+			password=frappe.db.password,
+			port=frappe.db.port,
+			cur_db_name=frappe.db.cur_db_name,
+		)
+		self.addCleanup(other_connection.close)
+		bin_name = frappe.generate_hash()
+		other_connection.bulk_insert(
+			"Bin", ["name", "item_code", "warehouse"], [(bin_name, item_code, warehouse)]
+		)
+		other_connection.commit()
+		self.addCleanup(other_connection.commit)
+		self.addCleanup(other_connection.delete, "Bin", {"name": bin_name})
+
+		self.assertEqual(_create_bin(item_code, warehouse).name, bin_name)
+
+	def test_gates_make_missing_bins_before_taking_any_gate(self):
+		"""Making a bin locks the Item row, so it must happen before any bin row is locked"""
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("Postgres gates use advisory locks, not bin rows")
+
+		from erpnext.stock.stock_ledger import acquire_sle_processing_gates
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouses = ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		bins_at_each_gate = []
+
+		with patch(
+			"erpnext.stock.stock_ledger.sle_processing_gate",
+			side_effect=lambda item, warehouse: bins_at_each_gate.append(
+				frappe.db.count("Bin", {"item_code": item_code})
+			),
+		):
+			acquire_sle_processing_gates([{"item_code": item_code, "warehouse": w} for w in warehouses])
+
+		self.assertEqual(bins_at_each_gate, [2, 2])
+
 	def test_update_bin_qty_keeps_stock_movement_after_read(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		warehouse = "_Test Warehouse - _TC"

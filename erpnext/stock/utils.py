@@ -330,6 +330,9 @@ def get_or_make_bin(item_code: str, warehouse: str) -> str:
 
 def _create_bin(item_code, warehouse):
 	"""Create a bin and take care of concurrent inserts."""
+	if frappe.db.db_type == "mariadb":
+		# Creators wait here. Racing on the unique index, their shared locks deadlock each other.
+		frappe.db.get_value("Item", item_code, "name", for_update=True)
 
 	bin_creation_savepoint = "create_bin"
 	try:
@@ -339,7 +342,8 @@ def _create_bin(item_code, warehouse):
 		bin_obj.insert()
 	except frappe.UniqueValidationError:
 		frappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres
-		bin_obj = frappe.get_last_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		# A locking read sees the bin another transaction committed after this one's snapshot.
+		bin_obj = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse}, for_update=True)
 
 	return bin_obj
 
