@@ -408,9 +408,12 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertRaises(frappe.ValidationError, pos_inv3.save)
 
 			# Creating Return POS Invoice
-			pos_rinv2 = make_sales_return(pos_inv2.name)
-			pos_rinv2.save()
-			pos_rinv2.submit()
+			with self.change_settings(
+				"POS Settings", {"invoice_fields": [{"fieldname": "named_place", "reqd": 1}]}
+			):
+				pos_rinv2 = make_sales_return(pos_inv2.name)
+				pos_rinv2.save()
+				pos_rinv2.submit()
 
 			pos_rinv2.reload()
 			self.assertIsNotNone(pos_rinv2.consolidated_invoice)
