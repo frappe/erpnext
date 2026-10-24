@@ -4,12 +4,14 @@ from urllib.parse import urlsplit
 import frappe
 import requests
 from frappe import _
+from frappe.core.doctype.file.utils import get_safe_file_name
 from frappe.utils import escape_html
 from frappe.utils.file_manager import save_file
 from lxml import etree
 
 GENERICODE_FETCH_TIMEOUT = 15
 LOCAL_FILE_PREFIXES = ("/files/", "/private/files/")
+DEFAULT_FILE_NAME = "genericode.xml"
 
 
 class RemoteGenericodeUrlNotAllowedError(Exception):
@@ -55,7 +57,7 @@ def import_genericode_from_url(
 ):
 	"""Import a Code List from a trusted backend URL."""
 	content = fetch_genericode_from_url(url)
-	file_name = urlsplit(url).path.rsplit("/", 1)[-1] or "genericode.xml"
+	file_name = urlsplit(url).path.rsplit("/", 1)[-1] or DEFAULT_FILE_NAME
 
 	return import_genericode_content(
 		doctype=doctype,
@@ -134,7 +136,7 @@ def import_genericode_content(
 	code_list.save()
 
 	file_doc = save_file(
-		fname=file_name,
+		fname=get_safe_file_name(file_name or "").lstrip(".") or DEFAULT_FILE_NAME,
 		content=content,
 		dt=doctype,
 		dn=code_list.name,
