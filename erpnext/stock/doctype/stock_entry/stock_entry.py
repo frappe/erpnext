@@ -395,22 +395,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def acquire_sle_processing_gates(self):
 		"""Take the gates before submit inserts bundles or runs locking reads on their rows."""
-		item_codes = {row.item_code for row in self.items if row.item_code}
-		if not item_codes:
-			return
-
-		item = frappe.qb.DocType("Item")
-		stock_items = set(
-			frappe.qb.from_(item)
-			.select(item.name)
-			.where(item.name.isin(list(item_codes)) & (item.is_stock_item == 1))
-			.run(pluck=True)
-		)
 		stock_ledger.acquire_sle_processing_gates(
 			[
 				{"item_code": row.item_code, "warehouse": warehouse}
 				for row in self.items
-				if row.item_code in stock_items
 				for warehouse in (row.s_warehouse, row.t_warehouse)
 				if warehouse
 			]

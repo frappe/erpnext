@@ -87,6 +87,17 @@ class TestBin(ERPNextTestSuite):
 
 		self.assertEqual(bins_at_each_gate, [2, 2])
 
+	def test_gates_skip_non_stock_items(self):
+		from erpnext.stock.stock_ledger import acquire_sle_processing_gates
+
+		item_code = make_item(properties={"is_stock_item": 0}).name
+
+		with patch("erpnext.stock.stock_ledger.sle_processing_gate") as gate:
+			acquire_sle_processing_gates([{"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}])
+
+		gate.assert_not_called()
+		self.assertFalse(frappe.db.exists("Bin", {"item_code": item_code}))
+
 	def test_update_bin_qty_keeps_stock_movement_after_read(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		warehouse = "_Test Warehouse - _TC"

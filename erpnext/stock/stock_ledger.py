@@ -432,7 +432,16 @@ def acquire_sle_processing_gates(sl_entries):
 	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
 	On MariaDB the missing bins are made first: making one locks the Item row, and other
 	submits (e.g. last purchase rate) lock the Item row before the bins."""
-	pairs = sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries})
+	item_codes = list({d.get("item_code") for d in sl_entries})
+	if not item_codes:
+		return
+
+	stock_items = set(
+		frappe.db.get_values("Item", {"name": ["in", item_codes], "is_stock_item": 1}, pluck="name")
+	)
+	pairs = sorted(
+		{(d.get("item_code"), d.get("warehouse")) for d in sl_entries if d.get("item_code") in stock_items}
+	)
 	if frappe.db.db_type == "mariadb":
 		for pair in pairs:
 			get_or_make_bin(*pair)
