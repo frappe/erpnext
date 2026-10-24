@@ -404,7 +404,7 @@ export class BomTree {
 					label: __("BOM"),
 					reqd: 1,
 					default: default_bom,
-					get_query: () => ({ filters: { docstatus: 1 } }),
+					get_query: () => ({ filters: { item: item_code, docstatus: 1 } }),
 				},
 				{
 					fieldname: "include_sub_assemblies",
