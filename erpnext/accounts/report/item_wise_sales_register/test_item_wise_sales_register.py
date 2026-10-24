@@ -4,6 +4,7 @@ from frappe.utils import getdate, today
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -127,3 +128,51 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertEqual(grand_total_row[first_tax_amount_field], 5.0)
 		self.assertEqual(grand_total_row[second_tax_amount_field], 2.0)
+
+	def test_delivery_notes_for_invoice_made_from_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		so = make_sales_order(item_code=self.item, qty=2)
+		delivery_notes = []
+		for _delivery in range(2):
+			dn = make_delivery_note(so.name)
+			dn.items[0].qty = 1
+			delivery_notes.append(dn.submit().name)
+		si = make_sales_invoice(so.name).submit()
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual(row["delivery_doctype"], "Delivery Note")
+		self.assertCountEqual(row["delivery_note"].split(", "), delivery_notes)
+
+	def test_update_stock_invoice_is_its_own_delivery(self):
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		si = create_sales_invoice(item=self.item, update_stock=1)
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual((row["delivery_doctype"], row["delivery_note"]), ("Sales Invoice", si.name))
+
+	def test_update_stock_invoice_for_partly_delivered_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		so = make_sales_order(item_code=self.item, qty=2)
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 1
+		dn.submit()
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.items[0].qty = 1
+		si.submit()
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual((row["delivery_doctype"], row["delivery_note"]), ("Sales Invoice", si.name))
+
+	def get_invoice_row(self, invoice):
+		filters = frappe._dict(from_date=today(), to_date=today(), company=self.company)
+		return next(row for row in execute(filters)[1] if row["invoice"] == invoice)
