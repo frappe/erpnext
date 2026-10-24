@@ -2022,6 +2022,27 @@ def get_component_account(parent, company):
 	)
 
 
+def _add_additional_operating_cost(stock_entry, work_order, expense_account, job_card=None):
+	if not (work_order and work_order.additional_operating_cost and work_order.qty):
+		return
+
+	if job_card and job_card.finished_good and job_card.finished_good != work_order.production_item:
+		return
+
+	per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
+	if not per_unit:
+		return
+
+	stock_entry.append(
+		"additional_costs",
+		{
+			"expense_account": expense_account,
+			"description": "Additional Operating Cost",
+			"amount": per_unit * flt(stock_entry.fg_completed_qty),
+		},
+	)
+
+
 def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_card=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import (
 		get_remaining_operating_cost,
@@ -2047,18 +2068,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 					stock_entry, expense_account, remaining_operating_cost * flt(stock_entry.fg_completed_qty)
 				)
 
-	if work_order and work_order.additional_operating_cost and work_order.qty:
-		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
-
-		if additional_operating_cost_per_unit:
-			stock_entry.append(
-				"additional_costs",
-				{
-					"expense_account": expense_account,
-					"description": "Additional Operating Cost",
-					"amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
-				},
-			)
+	_add_additional_operating_cost(stock_entry, work_order, expense_account, job_card)
 
 	def get_max_operation_quantity():
 		table = frappe.qb.DocType("Job Card")
