@@ -1408,11 +1408,12 @@ def get_reservation_holders(item_codes, warehouses):
 
 	# stock picked for a work order is counted as a pick list hold, not as reserved
 	held_qty = get_work_order_pick_list_holds(item_codes, warehouses)
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	for row in reservations:
 		key = (row.voucher_no, row.item_code, row.warehouse)
 		if row.voucher_type == "Work Order" and held_qty.get(key):
 			released_qty = min(flt(row.reserved_qty), held_qty[key])
-			row.reserved_qty = flt(row.reserved_qty) - released_qty
+			row.reserved_qty = flt(flt(row.reserved_qty) - released_qty, precision)
 			held_qty[key] -= released_qty
 
 	return reservations
@@ -1484,7 +1485,9 @@ def get_availability_row(key, bin_qty_map, holders, reservations):
 		actual_qty=actual_qty,
 		picked_qty=picked_qty,
 		reserved_qty=reserved_qty,
-		free_qty=actual_qty - picked_qty - reserved_qty,
+		free_qty=flt(
+			actual_qty - picked_qty - reserved_qty, frappe.get_precision("Pick List Item", "stock_qty")
+		),
 		pick_lists=row_holders,
 		reservations=row_reservations,
 	)
@@ -1888,8 +1891,9 @@ def remove_stock_reserved_for_others(item_code, locations, own_vouchers=None):
 		if row.voucher_no not in (own_vouchers or ()):
 			reserved_qty[row.warehouse] += flt(row.reserved_qty)
 
+	precision = frappe.get_precision("Pick List Item", "stock_qty")
 	for location in locations:
-		location.qty = flt(location.qty) - reserved_qty[location.warehouse]
+		location.qty = flt(flt(location.qty) - reserved_qty[location.warehouse], precision)
 
 	return [location for location in locations if location.qty > 0]
 
