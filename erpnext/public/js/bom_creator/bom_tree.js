@@ -193,9 +193,7 @@ export class BomTree {
 		if (part?.item_code) items.push({ label: __("Edit"), action: () => this.edit_part(part) });
 		if (item_code) {
 			items.push({
-				label: this.view.has_geometry(node_id)
-					? __("Take Item Image from the 3D Model")
-					: __("Upload Item Image"),
+				label: this.view.has_geometry(node_id) ? __("Set Item Image") : __("Upload Item Image"),
 				action: () => this.set_image(node_id),
 			});
 		}
@@ -278,7 +276,7 @@ export class BomTree {
 		const content = image
 			? `<img src="${escape(image)}" alt="" style="width:100%;height:100%;object-fit:contain;">`
 			: frappe.utils.icon(from_model ? "camera" : "image-plus", "sm");
-		const title = from_model ? __("Take Item Image from the 3D Model") : __("Upload Item Image");
+		const title = from_model ? __("Set Item Image") : __("Upload Item Image");
 		return `<button class="btn btn-default" data-action="image" data-part-node="${node_id}" title="${title}"
 			style="${box}background:var(--fg-color);border:1px solid var(--border-color);">${content}</button>`;
 	}
