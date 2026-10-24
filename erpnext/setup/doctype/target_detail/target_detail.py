@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -25,3 +27,14 @@ class TargetDetail(Document):
 	# end: auto-generated types
 
 	pass
+
+
+def validate_duplicate_targets(targets):
+	seen = set()
+	for target in targets or []:
+		key = (target.fiscal_year, target.item_group or None)
+		if key in seen:
+			frappe.throw(
+				_("Row {0}: A target already exists for this fiscal year and item group.").format(target.idx)
+			)
+		seen.add(key)

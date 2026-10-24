@@ -169,43 +169,32 @@ def prepare_data(
 	item_group_parent_child_map = get_item_group_parent_child_map()
 
 	for d in sales_users_data:
-		key = (d.parent, d.item_group)
+		key = (d.parent, d.item_group or None)
 		dist_data = get_periodwise_distribution_data(d.distribution_id, period_list, filters.get("period"))
+		details = rows.setdefault(key, {"total_target": 0, "total_achieved": 0})
+		for period in period_list:
+			target_key = f"target_{period.key}"
+			target = (d.get(target_qty_amt_field) * dist_data.get(period.key)) / 100
+			details[target_key] = details.get(target_key, 0) + target
+			details["total_target"] += target
 
-		if key not in rows:
-			rows.setdefault(key, {"total_target": 0, "total_achieved": 0, "total_variance": 0})
-
-		details = rows[key]
+	for (parent, item_group), details in rows.items():
 		for period in period_list:
 			p_key = period.key
-			if p_key not in details:
-				details[p_key] = 0
-
-			target_key = f"target_{p_key}"
-			variance_key = f"variance_{p_key}"
-			details[target_key] = (d.get(target_qty_amt_field) * dist_data.get(p_key)) / 100
-			details[variance_key] = 0
-			details["total_target"] += details[target_key]
-
-			for r in actual_data:
-				if (
-					r.get(sales_field) == d.parent
-					and period.from_date <= r.get(date_field)
-					and r.get(date_field) <= period.to_date
-					and (
-						not d.item_group
-						or not sales_user_wise_item_groups.get(d.parent)
-						or r.item_group == d.item_group
-						or r.item_group in item_group_parent_child_map.get(d.item_group, [])
-					)
-				):
-					details[p_key] += r.get(qty_or_amount_field, 0)
-					details[variance_key] = details.get(p_key) - details.get(target_key)
-				else:
-					details[variance_key] = details.get(p_key) - details.get(target_key)
-
-			details["total_achieved"] += details.get(p_key)
-			details["total_variance"] = details.get("total_achieved") - details.get("total_target")
+			details[p_key] = sum(
+				r.get(qty_or_amount_field, 0)
+				for r in actual_data
+				if r.get(sales_field) == parent
+				and period.from_date <= r.get(date_field) <= period.to_date
+				and (
+					not item_group
+					or r.item_group == item_group
+					or r.item_group in item_group_parent_child_map.get(item_group, [])
+				)
+			)
+			details[f"variance_{p_key}"] = details[p_key] - details[f"target_{p_key}"]
+			details["total_achieved"] += details[p_key]
+		details["total_variance"] = details["total_achieved"] - details["total_target"]
 
 	return rows
 
