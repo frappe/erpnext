@@ -15,6 +15,7 @@ from frappe.utils.data import (
 	getdate,
 	nowdate,
 )
+from freezegun import freeze_time
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.subscription.subscription import (
@@ -131,6 +132,45 @@ class TestSubscription(ERPNextTestSuite):
 		subscription.process(posting_date=subscription.current_invoice_end)  # generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Active")
+
+	def test_subscription_grace_period_boundaries(self):
+		for grace_period in (0, 3):
+			for cancel_after_grace in (0, 1):
+				with self.subTest(grace_period=grace_period, cancel_after_grace=cancel_after_grace):
+					settings = frappe.get_single("Subscription Settings")
+					settings.grace_period = grace_period
+					settings.cancel_after_grace = cancel_after_grace
+					settings.save()
+
+					with freeze_time("2026-09-10 12:00:00.123456"):
+						subscription = create_subscription(
+							start_date=nowdate(),
+							generate_invoice_at="Prepaid (bill at period start)",
+							submit_invoice=1,
+						)
+						invoice = subscription.get_current_invoice()
+						self.assertEqual(getdate(invoice.due_date), getdate("2026-09-10"))
+						self.assertGreater(invoice.outstanding_amount, 0)
+						self.assertTrue(
+							subscription.is_past_grace_period(add_days(invoice.due_date, grace_period + 1))
+						)
+
+					for days_overdue in range(grace_period + 2):
+						posting_date = add_days(invoice.due_date, days_overdue)
+						with self.subTest(posting_date=posting_date), freeze_time(
+							f"{posting_date} 12:00:00.123456"
+						):
+							self.assertEqual(subscription.current_invoice_is_past_due(), days_overdue > 0)
+							self.assertEqual(subscription.is_past_grace_period(), days_overdue > grace_period)
+							subscription.process(posting_date=posting_date)
+							if days_overdue == 0:
+								self.assertEqual(subscription.status, "Active")
+							elif days_overdue <= grace_period:
+								self.assertEqual(subscription.status, "Grace Period")
+							else:
+								self.assertEqual(
+									subscription.status, "Cancelled" if cancel_after_grace else "Unpaid"
+								)
 
 	def test_subscription_is_past_due_doesnt_change_within_grace_period(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -744,8 +784,13 @@ class TestSubscription(ERPNextTestSuite):
 
 	def test_status_updates_immediately_when_invoice_paid(self):
 		subscription = create_subscription(
+<<<<<<< HEAD
 			start_date=nowdate(),
 			generate_invoice_at="Beginning of the current subscription period",
+=======
+			start_date=add_days(nowdate(), -1),
+			generate_invoice_at="Prepaid (bill at period start)",
+>>>>>>> fe897ec (test(accounts): cover subscription grace period boundaries)
 			submit_invoice=1,
 		)
 		subscription.process(posting_date=nowdate())
@@ -760,8 +805,13 @@ class TestSubscription(ERPNextTestSuite):
 
 	def test_invoice_update_hook_refreshes_subscription_status(self):
 		subscription = create_subscription(
+<<<<<<< HEAD
 			start_date=nowdate(),
 			generate_invoice_at="Beginning of the current subscription period",
+=======
+			start_date=add_days(nowdate(), -1),
+			generate_invoice_at="Prepaid (bill at period start)",
+>>>>>>> fe897ec (test(accounts): cover subscription grace period boundaries)
 			submit_invoice=1,
 		)
 		subscription.process(posting_date=nowdate())
@@ -779,8 +829,13 @@ class TestSubscription(ERPNextTestSuite):
 	def test_payment_entry_triggers_subscription_status_update(self):
 		# Test that payment entry → invoice → subscription status update chain works
 		subscription = create_subscription(
+<<<<<<< HEAD
 			start_date=nowdate(),
 			generate_invoice_at="Beginning of the current subscription period",
+=======
+			start_date=add_days(nowdate(), -1),
+			generate_invoice_at="Prepaid (bill at period start)",
+>>>>>>> fe897ec (test(accounts): cover subscription grace period boundaries)
 			submit_invoice=1,
 		)
 		subscription.process(posting_date=nowdate())
@@ -867,6 +922,134 @@ class TestSubscription(ERPNextTestSuite):
 		)
 		self.assertEqual(len(subscription.invoices), 0)
 
+<<<<<<< HEAD
+=======
+	def test_generate_invoice_at_migration_patch(self):
+		from erpnext.patches.v16_0.migrate_subscription_generate_invoice_at import VALUE_MAP, execute
+
+		subscription = create_subscription(start_date=add_days(nowdate(), 10))
+		for old_value, new_value in VALUE_MAP.items():
+			frappe.db.set_value("Subscription", subscription.name, "generate_invoice_at", old_value)
+			execute()
+			self.assertEqual(
+				frappe.db.get_value("Subscription", subscription.name, "generate_invoice_at"), new_value
+			)
+
+	def test_next_billing_period_populated_for_prepaid(self):
+		subscription = create_subscription(
+			start_date=add_days(nowdate(), 10),
+			generate_invoice_at="Prepaid (bill at period start)",
+		)
+		self.assertEqual(getdate(subscription.next_billing_period_start), getdate(add_days(nowdate(), 10)))
+		self.assertGreater(
+			getdate(subscription.next_billing_period_end), getdate(subscription.next_billing_period_start)
+		)
+
+	def test_status_becomes_refunded_when_only_invoice_credited(self):
+		subscription = create_subscription(
+			start_date=add_days(nowdate(), -1),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		self.assertEqual(subscription.status, "Unpaid")
+
+		make_full_credit_note(subscription.get_current_invoice().name)
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Refunded")
+
+	def test_status_stays_unpaid_when_one_of_two_invoices_credited(self):
+		subscription = create_subscription(
+			start_date=add_months(nowdate(), -2),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+			generate_new_invoices_past_due_date=1,
+		)
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name, "docstatus": 1, "is_return": 0},
+			pluck="name",
+			order_by="from_date asc",
+		)
+		self.assertGreaterEqual(len(invoices), 2)
+
+		make_full_credit_note(invoices[0])
+
+		subscription.reload()
+		self.assertNotEqual(subscription.status, "Refunded")
+
+	def test_refunded_reverts_to_active_after_full_settlement(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		make_full_credit_note(invoice.name)
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Refunded")
+
+		invoice.db_set("status", "Paid")
+		invoice.db_set("outstanding_amount", 0)
+		subscription.process()
+		self.assertEqual(subscription.status, "Active")
+
+	def test_heatmap_spans_twelve_months_from_start_month(self):
+		start_date = getdate("2024-03-14")
+		subscription = create_subscription(start_date=start_date)
+		heatmap = subscription.get_billing_heatmap()
+		self.assertEqual(getdate(heatmap[0]["date"]), get_first_day(start_date))
+		self.assertEqual(
+			getdate(heatmap[-1]["date"]), get_last_day(add_months(get_first_day(start_date), 11))
+		)
+		self.assertIn("status", heatmap[0])
+
+	def test_heatmap_marks_paid_days_green(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		invoice.db_set("status", "Paid")
+		invoice.db_set("outstanding_amount", 0)
+
+		subscription.reload()
+		cells = {cell["date"]: cell for cell in subscription.get_billing_heatmap()}
+		self.assertEqual(cells[str(getdate(invoice.from_date))]["status"], "paid")
+
+	def test_heatmap_marks_future_planned_days(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+		)
+		today = getdate(nowdate())
+		planned = [
+			cell
+			for cell in subscription.get_billing_heatmap()
+			if cell["status"] == "planned" and getdate(cell["date"]) > today
+		]
+		self.assertTrue(planned)
+
+	def test_heatmap_marks_refunded_days_for_credited_periods(self):
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		make_full_credit_note(invoice.name)
+
+		subscription.reload()
+		cells = {cell["date"]: cell for cell in subscription.get_billing_heatmap()}
+		self.assertEqual(cells[str(getdate(invoice.from_date))]["status"], "refunded")
+
+>>>>>>> fe897ec (test(accounts): cover subscription grace period boundaries)
 	def test_plan_dimensions_resolve_from_plan_then_item(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
