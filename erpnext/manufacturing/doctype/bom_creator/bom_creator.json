@@ -398,7 +398,8 @@
  "links": [
   {
    "link_doctype": "BOM",
-   "link_fieldname": "bom_creator"
+   "link_fieldname": "bom_creator",
+   "group": "Bill of Materials"
   },
   {
    "link_doctype": "BOM Creator",
@@ -406,7 +407,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-10-24 15:28:43.659518",
+ "modified": "2026-10-24 15:55:48.623911",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
