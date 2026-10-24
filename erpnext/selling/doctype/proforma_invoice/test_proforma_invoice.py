@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	get_sales_order_items,
@@ -90,6 +91,25 @@ class TestProformaInvoice(ERPNextTestSuite):
 		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 5)])
 		# half the order: 500 - 100 discount + 250 freight = 650
 		self.assertEqual(flt(proforma.grand_total), 650)
+
+	def test_pricing_rule_discount_is_kept(self):
+		pricing_rule = make_pricing_rule(selling=1, discount_percentage=10)
+		sales_order = make_sales_order(qty=2, do_not_submit=True)
+		sales_order.items[0].update(
+			{
+				"price_list_rate": 100,
+				"discount_percentage": 10,
+				"rate": 90,
+				"pricing_rules": json.dumps([pricing_rule.name]),
+			}
+		)
+		sales_order.submit()
+		self.assertEqual(flt(sales_order.grand_total), 180)
+
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 2)])
+
+		self.assertEqual(flt(proforma.items[0].rate), 90)
+		self.assertEqual(flt(proforma.grand_total), 180)
 
 	def test_amount_based_proforma(self):
 		"""Amount basis: qty and amount are both entered; the rate is derived from them."""
