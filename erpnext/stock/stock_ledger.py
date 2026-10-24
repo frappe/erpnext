@@ -3158,9 +3158,12 @@ def get_stock_value_difference(
 
 @frappe.request_cache
 def is_transfer_stock_entry(voucher_no):
-	purpose = frappe.get_cached_value("Stock Entry", voucher_no, "purpose")
-
-	return purpose in ["Material Transfer", "Material Transfer for Manufacture", "Send to Subcontractor"]
+	return bool(
+		frappe.db.exists(
+			"Stock Entry Detail",
+			{"parent": voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
+		)
+	)
 
 
 @frappe.request_cache
