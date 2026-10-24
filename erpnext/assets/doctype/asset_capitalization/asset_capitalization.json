@@ -72,7 +72,8 @@
    "in_standard_filter": 1,
    "label": "Target Asset",
    "no_copy": 1,
-   "options": "Asset"
+   "options": "Asset",
+   "reqd": 1
   },
   {
    "fetch_from": "target_asset.asset_name",
@@ -298,7 +299,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 01:52:41.890713",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
