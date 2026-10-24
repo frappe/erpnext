@@ -256,7 +256,8 @@ class OperationsService:
 		for d in self.doc.get("operations"):
 			saved = saved_rows.get(d.name)
 			if saved and flt(saved.output_qty) and flt(saved.output_qty) == flt(d.output_qty):
-				d.output_qty = flt(saved.output_qty) * flt(self.doc.qty) / flt(previous.qty)
+				output_qty = flt(saved.output_qty) * flt(self.doc.qty) / flt(previous.qty)
+				d.output_qty = flt(output_qty, d.precision("output_qty"))
 
 	def _scale_saved_operation_time(self, previous):
 		saved_rows = {row.name: row for row in previous.get("operations")}
@@ -366,7 +367,7 @@ class OperationsService:
 			return 0
 
 		per_unit = finished_good_qty * flt(qty) if exploded else finished_good_qty / flt(qty)
-		return per_unit * flt(self.doc.qty)
+		return flt(per_unit * flt(self.doc.qty), self.doc.precision("output_qty", "operations"))
 
 	def calculate_time(self):
 		for d in self.doc.get("operations"):
