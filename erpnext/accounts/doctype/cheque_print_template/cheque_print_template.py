@@ -66,6 +66,18 @@ def create_or_update_cheque_print_format(template_name):
 
 	doc = frappe.get_doc("Cheque Print Template", template_name)
 
+	account_payee = ""
+	if doc.is_account_payable:
+		account_payee = """
+		<span style="top:{acc_pay_dist_from_top_edge}cm; left:{acc_pay_dist_from_left_edge}cm;
+			border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">
+				{message_to_show}
+		</span>""".format(
+			acc_pay_dist_from_top_edge=doc.acc_pay_dist_from_top_edge,
+			acc_pay_dist_from_left_edge=doc.acc_pay_dist_from_left_edge,
+			message_to_show=doc.message_to_show or _("Account Pay Only"),
+		)
+
 	cheque_print.html = """
 <style>
 	.print-format {{
@@ -79,10 +91,7 @@ def create_or_update_cheque_print_format(template_name):
 </style>
 <div style="position: relative; top:{starting_position_from_top_edge}cm">
 	<div style="width:{cheque_width}cm;height:{cheque_height}cm;">
-		<span style="top:{acc_pay_dist_from_top_edge}cm; left:{acc_pay_dist_from_left_edge}cm;
-			border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">
-				{message_to_show}
-		</span>
+		{account_payee}
 		<span style="top:{date_dist_from_top_edge}cm; left:{date_dist_from_left_edge}cm;
 			position: absolute;">
 			{{{{ frappe.utils.formatdate(doc.reference_date) or '' }}}}
@@ -115,9 +124,7 @@ def create_or_update_cheque_print_format(template_name):
 		else 0.0,
 		cheque_width=doc.cheque_width,
 		cheque_height=doc.cheque_height,
-		acc_pay_dist_from_top_edge=doc.acc_pay_dist_from_top_edge,
-		acc_pay_dist_from_left_edge=doc.acc_pay_dist_from_left_edge,
-		message_to_show=doc.message_to_show if doc.message_to_show else _("Account Pay Only"),
+		account_payee=account_payee,
 		date_dist_from_top_edge=doc.date_dist_from_top_edge,
 		date_dist_from_left_edge=doc.date_dist_from_left_edge,
 		acc_no_dist_from_top_edge=doc.acc_no_dist_from_top_edge,
