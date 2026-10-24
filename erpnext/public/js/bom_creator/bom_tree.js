@@ -78,7 +78,7 @@ export class BomTree {
 			<span style="width:64px;">${this.get_finished_good_quantity()}</span>
 			${this.show_items ? `<span style="width:36px;"></span>` : ""}
 			${this.get_amount_cell(doc.raw_material_cost)}
-			${this.get_actions_cell(this.get_add_button(0) + this.get_empty_slot() + this.get_empty_slot())}</div>`;
+			${this.get_actions_cell(this.get_add_button(0) + this.get_empty_slot() + this.get_menu_button(0))}</div>`;
 	}
 
 	get_finished_good_quantity() {
@@ -151,10 +151,7 @@ export class BomTree {
 			part.source === "Manual"
 				? this.get_icon_button("x", __("Remove"), "remove", part.node_id)
 				: this.get_icon_button("x", __("Remove from BOM"), "exclude", part.node_id);
-		const menu = this.get_menu_items(part).length
-			? this.get_icon_button("ellipsis", __("More"), "menu", part.node_id)
-			: this.get_empty_slot();
-		return this.get_add_button(part.node_id) + remove + menu;
+		return this.get_add_button(part.node_id) + remove + this.get_menu_button(part.node_id);
 	}
 
 	get_empty_slot() {
@@ -183,10 +180,26 @@ export class BomTree {
 		)}</span>`;
 	}
 
-	get_menu_items(part) {
+	get_menu_button(node_id) {
+		return this.get_menu_items(node_id).length
+			? this.get_icon_button("ellipsis", __("More"), "menu", node_id)
+			: this.get_empty_slot();
+	}
+
+	get_menu_items(node_id) {
+		const part = this.view.get_part(node_id);
+		const item_code = node_id ? part.item_code : this.frm.doc.item_code;
 		const items = [];
-		if (part.item_code) items.push({ label: __("Edit"), action: () => this.edit_part(part) });
-		if (part.source === "Manual" && this.view.viewer) {
+		if (part?.item_code) items.push({ label: __("Edit"), action: () => this.edit_part(part) });
+		if (item_code) {
+			items.push({
+				label: this.view.has_geometry(node_id)
+					? __("Take Item Image from the 3D Model")
+					: __("Upload Item Image"),
+				action: () => this.set_image(node_id),
+			});
+		}
+		if (part?.source === "Manual" && this.view.viewer) {
 			items.push(
 				part.model_file
 					? {
@@ -202,10 +215,10 @@ export class BomTree {
 		return items;
 	}
 
-	open_menu(button, part) {
+	open_menu(button, node_id) {
 		this.close_menu();
 		const menu = $(`<div class="dropdown-menu show" style="position:fixed;z-index:1050;"></div>`);
-		for (const item of this.get_menu_items(part)) {
+		for (const item of this.get_menu_items(node_id)) {
 			$(`<a class="dropdown-item" href="#"></a>`)
 				.text(item.label)
 				.on("click", (event) => {
@@ -399,7 +412,7 @@ export class BomTree {
 			toggle: () =>
 				this.collapsed.has(node_id) ? this.collapsed.delete(node_id) : this.collapsed.add(node_id),
 			remove: () => this.remove_part(part),
-			menu: () => this.open_menu($element.get(0), part),
+			menu: () => this.open_menu($element.get(0), node_id),
 			exclude: () => this.update(part, { exclude_from_bom: 1 }),
 			restore: () => this.update(part, { exclude_from_bom: 0 }),
 			image: () => this.set_image(node_id),
