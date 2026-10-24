@@ -7024,6 +7024,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
 		self.assertEqual([flt(d.time_in_mins) for d in new_bom.operations], [60, 60])
 
+	def test_semi_fg_schedule_block_needs_full_operation_output_on_job_cards(self):
+		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
+
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
+		wo.db_set({"production_plan": "Test JCO Plan", "production_plan_item": "Test JCO Plan Row"})
+		wheel_operation = wo.operations[0]
+		wheel_jc = self.get_semi_fg_job_card(wo, wheel_operation)
+		wheel_jc.db_set({"for_quantity": 2, "total_time_in_mins": 60})
+
+		block = frappe._dict(
+			production_plan="Test JCO Plan", plan_row="Test JCO Plan Row", operation=wheel_operation.operation
+		)
+		self.assertEqual(filter_covered_schedule_rows([block]), [block])
+
+		wheel_jc.db_set("for_quantity", 4)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
+
 	def get_additional_operating_cost(self, stock_entry):
 		return sum(
 			flt(row.amount)
