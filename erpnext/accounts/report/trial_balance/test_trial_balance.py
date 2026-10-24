@@ -58,6 +58,16 @@ class TestTrialBalance(ERPNextTestSuite):
 			total_row = execute(frappe._dict(filters))[1][-1]
 		self.assertEqual((total_row["opening_debit"], total_row["opening_credit"]), (0, 0))
 
+		other_company_user = make_fenced_user(
+			"tb-other-company@example.com", ["Accounts User"], [("Company", "_Test Company 1")]
+		)
+		with as_user(other_company_user):
+			self.assertRaises(frappe.PermissionError, execute, frappe._dict(filters))
+
+		with as_user(make_fenced_user("tb-auditor@example.com", ["Auditor"])):
+			total_row = execute(frappe._dict(filters))[1][-1]
+		self.assertEqual(total_row["opening_debit"], total_row["opening_credit"])
+
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		"""
 		Checks if Trial Balance Report is balanced when filtered using a particular Accounting Dimension
