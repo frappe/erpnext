@@ -18,6 +18,7 @@ from erpnext.projects.doctype.project.project import update_consumed_material_co
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
+	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.utilities import clear_logs_with_references
@@ -121,10 +122,7 @@ class RepostItemValuation(Document):
 			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
 
 		if self.voucher_type == "Stock Entry":
-			return not frappe.db.exists(
-				"Stock Entry Detail",
-				{"parent": self.voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
-			)
+			return not is_transfer_stock_entry(self.voucher_no)
 
 		return False
 
