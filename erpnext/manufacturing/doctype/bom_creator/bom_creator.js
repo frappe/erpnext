@@ -25,6 +25,7 @@ frappe.ui.form.on("BOM Creator", {
 		frm.page.wrapper.css("--page-max-width", "100%");
 		frm.events.render_design_view(frm);
 		frm.events.add_actions(frm);
+		frm.previous_item_name = frm.doc.item_name;
 		if (frm.doc.status === "Failed") {
 			frm.dashboard.set_headline(
 				__("The BOMs could not be created. See the Error Log in the Details tab."),
@@ -48,9 +49,11 @@ frappe.ui.form.on("BOM Creator", {
 	},
 
 	item_name(frm) {
-		if (!frm.doc.design_name && frm.doc.item_name) {
+		const follows_item = !frm.doc.design_name || frm.doc.design_name === frm.previous_item_name;
+		if (follows_item && frm.doc.item_name) {
 			frm.set_value("design_name", frm.doc.item_name);
 		}
+		frm.previous_item_name = frm.doc.item_name;
 		frm.design_view?.render();
 	},
 
