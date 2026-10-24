@@ -207,6 +207,44 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_rate_quoted_from_portal_is_kept(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item_code = "_Test RFQ Quoted Rate Item"
+		if not frappe.db.exists("Item", item_code):
+			make_item(item_code, {"stock_uom": "_Test UOM"})
+		if not frappe.db.exists("Item Price", {"item_code": item_code, "price_list": "Standard Buying"}):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": "Standard Buying",
+					"price_list_rate": 100,
+				}
+			).insert()
+
+		def assert_quoted_rate_is_kept(rate):
+			rfq = make_request_for_quotation(item_code=item_code)
+			rfq.supplier = rfq.suppliers[0].supplier
+			rfq.buying_price_list = "Standard Buying"
+			rfq.items[0].rate = rate
+			supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+
+			self.assertEqual(supplier_quotation.items[0].price_list_rate, 100)
+			self.assertEqual(supplier_quotation.items[0].rate, rate)
+			self.assertEqual(supplier_quotation.items[0].amount, rate * 5)
+
+		for rate in (0, 50):
+			with self.subTest(rate=rate, pricing_rule=False):
+				assert_quoted_rate_is_kept(rate)
+
+		make_pricing_rule(
+			title="_Test RFQ Buying Discount", item_code=item_code, buying=1, discount_percentage=10
+		)
+		for rate in (0, 50):
+			with self.subTest(rate=rate, pricing_rule=True):
+				assert_quoted_rate_is_kept(rate)
+
 	def test_portal_page_embeds_only_the_quotation_fields(self):
 		from erpnext.templates.pages.rfq import get_portal_doc
 
