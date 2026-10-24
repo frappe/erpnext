@@ -835,6 +835,21 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(events[:2], [("gate", "_Test Warehouse - _TC"), ("gate", "_Test Warehouse 1 - _TC")])
 		self.assertIn(("bundle", "_Test Warehouse 1 - _TC"), events)
 
+	def test_gates_are_taken_only_for_stock_items(self):
+		stock_item = make_item(properties={"is_stock_item": 1}).name
+		non_stock_item = make_item(properties={"is_stock_item": 0}).name
+		stock_entry = frappe.new_doc("Stock Entry")
+		for item_code in (stock_item, non_stock_item):
+			stock_entry.append(
+				"items",
+				{"item_code": item_code, "s_warehouse": "_Test Warehouse - _TC", "t_warehouse": None},
+			)
+
+		with patch("erpnext.stock.stock_ledger.sle_processing_gate") as gate:
+			stock_entry.acquire_sle_processing_gates()
+
+		self.assertEqual([call.args for call in gate.call_args_list], [(stock_item, "_Test Warehouse - _TC")])
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"auto_create_serial_and_batch_bundle_for_outward": 1, "do_not_use_batchwise_valuation": 0},
