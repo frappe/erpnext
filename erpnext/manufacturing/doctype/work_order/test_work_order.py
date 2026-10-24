@@ -4685,6 +4685,88 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_pick_list_can_pick_stock_reserved_for_its_own_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=5, basic_rate=100)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+		self.assertTrue(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=5)
+		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(rm, 5)])
+
+		pick_list.pick_manually = 1
+		pick_list.save()
+		pick_list.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_stock_picked_for_reserved_work_order_is_not_held_twice(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=15, basic_rate=100)
+
+		reserved_work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=10, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+		create_pick_list(reserved_work_order.name, for_qty=10).save()
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, source_warehouse="Stores - _TC"
+		)
+		pick_list = create_pick_list(work_order.name, for_qty=5)
+		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(rm, 5)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_pick_list_can_pick_fractional_stock_left_after_reservation(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg, raw_materials=[rm], rm_qty=0.1, source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=0.3, basic_rate=100)
+
+		reserved_work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=2, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+		create_pick_list(reserved_work_order.name, for_qty=1).save()
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=1, source_warehouse="Stores - _TC"
+		)
+		pick_list = create_pick_list(work_order.name, for_qty=1)
+		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(rm, 0.1)])
+
+		pick_list.pick_manually = 1
+		pick_list.save()
+		pick_list.submit()
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"enable_stock_reservation": 1,
