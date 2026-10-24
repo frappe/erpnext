@@ -216,6 +216,74 @@ class TestCallLog(ERPNextTestSuite):
 		self.assertIn(("Customer", "_Test Customer"), links)
 		self.assertIn(("Lead", lead.name), links)
 
+	def test_call_links_all_contacts_and_leads_with_formatted_numbers(self):
+		number = "94" + "".join(random.choices(string.digits, k=8))
+		contacts = [
+			self._make_contact(f"+91 {number[:5]} {number[5:]}"),
+			self._make_contact(f"0{number[:3]}-{number[3:6]}-{number[6:]}"),
+			self._make_contact(f"(+91 {number}) "),
+		]
+		# shares the last 8 digits only
+		other_contact = self._make_contact(f"+91 93{number[2:]}")
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "first_name": f"_Test Caller {number}", "mobile_no": f"(+91) {number}"}
+		).insert(ignore_permissions=True)
+
+		call_log = frappe.get_doc(
+			"Call Log", self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+		)
+		linked_contacts = {d.link_name for d in call_log.links if d.link_doctype == "Contact"}
+		self.assertLessEqual(set(contacts), linked_contacts)
+		self.assertNotIn(other_contact, linked_contacts)
+		self.assertEqual([d.link_name for d in call_log.links if d.link_doctype == "Lead"], [lead.name])
+
+		short_call = frappe.get_doc(
+			"Call Log", self._make_call_log(**{"from": f"0{number[-5:]}"}, type="Incoming")
+		)
+		self.assertEqual(short_call.links, [])
+
+	def test_call_is_received_by_agent_with_same_number_only(self):
+		agent = make_employee(
+			"test_call_agent_a@example.com",
+			company="_Test Company",
+			cell_number=f"(+91 {self.number[:5]} {self.number[5:]}) ",
+		)
+		make_employee(
+			"test_call_agent_b@example.com", company="_Test Company", cell_number=f"1{self.number}5"
+		)
+
+		call_log = frappe.get_doc("Call Log", self._make_call_log(to=f"+91{self.number}", type="Incoming"))
+		self.assertEqual(call_log.call_received_by, agent)
+
+		short_call = frappe.get_doc("Call Log", self._make_call_log(to=self.number[-4:], type="Incoming"))
+		self.assertIsNone(short_call.call_received_by)
+
+	def test_new_contact_number_links_past_calls_in_any_format(self):
+		number = "93" + "".join(random.choices(string.digits, k=8))
+		call_log = self._make_call_log(**{"from": f"+91{number}"}, type="Incoming")
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Caller {number}",
+				"phone_nos": [{"phone": f"0{number[:5]} {number[5:]}", "is_primary_phone": 1}],
+			}
+		).insert(ignore_permissions=True)
+
+		links = frappe.get_all(
+			"Dynamic Link", {"parenttype": "Call Log", "parent": call_log}, pluck="link_name"
+		)
+		self.assertIn(contact.name, links)
+
+	def _make_contact(self, phone):
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": f"_Test Caller {phone}",
+				"phone_nos": [{"phone": phone, "is_primary_phone": 1}],
+			}
+		)
+		return contact.insert(ignore_permissions=True).name
+
 	def test_unassigned_call_is_visible_only_to_its_agent_and_privileged_roles(self):
 		agent, other = (f"test_call_log_{name}_{self.number}@example.com" for name in ("agent", "other"))
 		make_employee(agent, company="_Test Company", cell_number=f"+91{self.number}1")
