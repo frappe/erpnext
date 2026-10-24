@@ -98,6 +98,15 @@ class TestBin(ERPNextTestSuite):
 		gate.assert_not_called()
 		self.assertFalse(frappe.db.exists("Bin", {"item_code": item_code}))
 
+	def test_gate_does_not_make_missing_bin(self):
+		"""A direct gate, as a repost takes, must not lock the Item row after other bin rows"""
+		from erpnext.stock.stock_ledger import sle_processing_gate
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		sle_processing_gate(item_code, "_Test Warehouse - _TC")
+
+		self.assertFalse(frappe.db.exists("Bin", {"item_code": item_code}))
+
 	def test_update_bin_qty_keeps_stock_movement_after_read(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		warehouse = "_Test Warehouse - _TC"
