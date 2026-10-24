@@ -2445,7 +2445,8 @@ class WorkOrder(Document):
 			return row
 
 		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
-			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
+			completed_qty = flt(operation.completed_qty) * flt(self.qty) / get_operation_qty(self, operation)
+			time_per_unit = flt(operation.actual_operation_time) / completed_qty
 		else:
 			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 

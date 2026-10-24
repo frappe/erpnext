@@ -5855,6 +5855,13 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(self.get_additional_operating_cost(wheel_entry), 0)
 		self.assertEqual(self.get_additional_operating_cost(assembly_entry), 100)
 
+	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
+		self.complete_semi_fg_work_order(wo)
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual([flt(d.time_in_mins) for d in new_bom.operations], [60, 60])
+
 	def get_additional_operating_cost(self, stock_entry):
 		return sum(
 			flt(row.amount)
