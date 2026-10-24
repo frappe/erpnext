@@ -879,7 +879,12 @@ class PickList(TransactionBase):
 		product_bundle_qty_map = {}
 		for data in bundles:
 			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": data.item_code, "disabled": 0})
-			product_bundle_qty_map[data.item_code] = {item.item_code: item.qty for item in bundle.items}
+			# picked_qty is in the component's stock UOM, so convert the bundle qty too
+			product_bundle_qty_map[data.item_code] = {
+				item.item_code: flt(item.qty)
+				* flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor"))
+				for item in bundle.items
+			}
 		return product_bundle_qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
