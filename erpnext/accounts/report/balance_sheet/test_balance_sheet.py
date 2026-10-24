@@ -2,11 +2,15 @@
 # MIT License. See license.txt
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 from frappe.utils.data import today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
-from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
+from erpnext.accounts.report.financial_statements import (
+	build_period_list,
+	get_period_list,
+	is_dimension_grouped,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company 6"
@@ -256,6 +260,19 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(bank_row[key_for(cc1)], 300)
 		self.assertEqual(bank_row[key_for(cc2.name)], 500)
 		self.assertEqual(bank_row["total"], 800)
+
+	def test_yearly_date_range_starting_mid_month_has_one_period(self):
+		period_list = get_period_list(
+			None, None, "2025-07-17", "2026-07-16", "Date Range", "Yearly", ignore_fiscal_year=True
+		)
+		self.assertEqual(len(period_list), 1)
+		self.assertEqual(period_list[0].to_date, getdate("2026-07-16"))
+
+	def test_periods_ending_in_same_month_have_unique_keys(self):
+		period_list = get_period_list(
+			None, None, "2025-07-17", "2026-07-31", "Date Range", "Yearly", ignore_fiscal_year=True
+		)
+		self.assertEqual([period.key for period in period_list], ["jul_2026", "jul_2026_31"])
 
 
 def get_profit_loss_rows(filters):
