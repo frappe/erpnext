@@ -235,6 +235,7 @@ class PickList(TransactionBase):
 		bin_qty_map = get_bin_qty_map(item_codes, warehouses)
 
 		for (item_code, warehouse, _batch_no), (qty, row) in picked_qty.items():
+			qty = flt(qty, row.precision("stock_qty"))
 			free_qty = get_availability_row(
 				(item_code, warehouse), bin_qty_map, holders, reservations
 			).free_qty
