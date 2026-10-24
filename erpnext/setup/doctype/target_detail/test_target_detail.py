@@ -41,3 +41,21 @@ class TestTargetDetail(ERPNextTestSuite):
 				"targets", dict(holder.targets[0].as_dict(), name=None, item_group="_Test Item Group A")
 			)
 			holder.save()
+
+	def test_negative_targets_are_rejected(self):
+		fiscal_year = get_fiscal_year(nowdate())[0]
+		distribution = create_target_distribution(fiscal_year)
+		for doctype, name_field in (
+			("Territory", "territory_name"),
+			("Sales Person", "sales_person_name"),
+			("Sales Partner", "partner_name"),
+		):
+			holder = create_sales_target_doc(
+				doctype, name_field, frappe.generate_hash(length=10), fiscal_year, distribution.name
+			)
+			for field in ("target_qty", "target_amount"):
+				with self.subTest(doctype=doctype, field=field):
+					holder.reload()
+					holder.targets[0].set(field, -1)
+					with self.assertRaisesRegex(frappe.ValidationError, "cannot be negative"):
+						holder.save()
