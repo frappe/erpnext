@@ -18,6 +18,7 @@ from erpnext.projects.doctype.project.project import update_consumed_material_co
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
+	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.utilities import clear_logs_with_references
@@ -78,6 +79,7 @@ class RepostItemValuation(Document):
 		self.set_default_posting_time()
 		self.set_company()
 		self.validate_update_stock()
+		self.validate_recalculate_valuation_rate()
 		self.validate_period_closing_voucher()
 		self.set_status(write=False)
 		self.reset_field_values()
@@ -100,6 +102,29 @@ class RepostItemValuation(Document):
 					"Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
 				).format(get_link_to_form(self.voucher_type, self.voucher_no))
 				frappe.throw(msg)
+
+	def validate_recalculate_valuation_rate(self):
+		if self.recalculate_valuation_rate and not self.can_recalculate_valuation_rate():
+			frappe.throw(
+				_(
+					"Recalculate Valuation Rate is only allowed for a Purchase Receipt, a Purchase Invoice with Update Stock or a Stock Entry with no row that has both a Source and Target Warehouse"
+				)
+			)
+
+	def can_recalculate_valuation_rate(self):
+		if self.based_on != "Transaction":
+			return False
+
+		if self.voucher_type == "Purchase Receipt":
+			return True
+
+		if self.voucher_type == "Purchase Invoice":
+			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
+
+		if self.voucher_type == "Stock Entry":
+			return not is_transfer_stock_entry(self.voucher_no)
+
+		return False
 
 	def validate_recreate_stock_ledgers(self):
 		if not self.recreate_stock_ledgers:
