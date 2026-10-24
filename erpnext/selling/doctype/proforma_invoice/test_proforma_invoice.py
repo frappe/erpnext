@@ -69,6 +69,28 @@ class TestProformaInvoice(ERPNextTestSuite):
 		# partial (4 of 10): net 400 + 10% tax = 440
 		self.assertEqual(flt(proforma.grand_total), 440)
 
+	def test_fixed_discount_and_actual_charges_scale_to_partial_qty(self):
+		sales_order = make_sales_order(qty=10, do_not_submit=True)  # rate 100
+		sales_order.apply_discount_on = "Net Total"
+		sales_order.discount_amount = 200
+		sales_order.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account CST - _TC",
+				"description": "Freight",
+				"tax_amount": 500,
+			},
+		)
+		sales_order.submit()
+
+		# full order: 1000 - 200 discount + 500 freight = 1300
+		self.assertEqual(flt(sales_order.grand_total), 1300)
+
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 5)])
+		# half the order: 500 - 100 discount + 250 freight = 650
+		self.assertEqual(flt(proforma.grand_total), 650)
+
 	def test_amount_based_proforma(self):
 		"""Amount basis: qty and amount are both entered; the rate is derived from them."""
 		sales_order = make_sales_order(qty=10)  # rate 100
