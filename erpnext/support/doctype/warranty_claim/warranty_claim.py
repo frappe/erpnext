@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _, session
-from frappe.utils import getdate, now_datetime
+from frappe.utils import escape_html, getdate, now_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -50,6 +50,7 @@ class WarrantyClaim(TransactionBase):
 	# end: auto-generated types
 
 	def validate(self):
+		self.warn_if_serial_no_not_delivered_to_customer()
 		if self.status == "Cancelled" and self.has_value_changed("status"):
 			self.validate_no_active_visits()
 		if session["user"] != "Guest" and not self.customer:
@@ -81,6 +82,32 @@ class WarrantyClaim(TransactionBase):
 			self.warranty_amc_status = "Under AMC" if amc_expiry >= complaint_date else "Out of AMC"
 		else:
 			self.warranty_amc_status = "Out of Warranty"
+
+	def warn_if_serial_no_not_delivered_to_customer(self) -> None:
+		"""Warn only: a serial can change hands without a delivery, so the claim is still allowed."""
+		if not (self.serial_no and self.customer):
+			return
+		if not (self.has_value_changed("serial_no") or self.has_value_changed("customer")):
+			return
+
+		if message := self.get_serial_no_ownership_warning():
+			frappe.msgprint(message, title=_("Check Serial No"), indicator="orange")
+
+	def get_serial_no_ownership_warning(self) -> str | None:
+		serial = frappe.db.get_value("Serial No", self.serial_no, ["customer", "warehouse"], as_dict=True)
+		if not serial:
+			return None
+
+		serial_no = frappe.bold(escape_html(self.serial_no))
+		if serial.customer and serial.customer != self.customer:
+			return _("Serial No {0} was delivered to Customer {1}, not to {2}.").format(
+				serial_no, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(self.customer))
+			)
+		if not serial.customer and serial.warehouse:
+			return _(
+				"Serial No {0} is still in stock in Warehouse {1} and was not delivered to a customer."
+			).format(serial_no, frappe.bold(escape_html(serial.warehouse)))
+		return None
 
 	def validate_no_active_visits(self):
 		lst = frappe.db.sql(
