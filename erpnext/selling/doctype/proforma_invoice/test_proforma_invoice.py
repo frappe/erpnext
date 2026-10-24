@@ -156,6 +156,34 @@ class TestProformaInvoice(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
 
+	def test_pdf_and_grand_total_are_set_by_the_server(self):
+		sales_order = make_sales_order(qty=10)  # rate 100
+		other_file = frappe.get_doc(
+			{"doctype": "File", "file_name": "other.txt", "content": b"other", "is_private": 1}
+		).insert()
+		proforma = frappe.new_doc(
+			"Proforma Invoice",
+			sales_order=sales_order.name,
+			proforma_pdf=other_file.file_url,
+			grand_total=1,
+			items=[{"so_detail": sales_order.items[0].name, "qty": 4}],
+		)
+		proforma.insert()
+		proforma.submit()
+
+		self.assertNotEqual(proforma.proforma_pdf, other_file.file_url)
+		self.assertEqual(flt(proforma.grand_total), 400)
+
+	def test_email_sends_only_the_proforma_attachment(self):
+		sales_order = make_sales_order(qty=10)
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])
+		other_file = frappe.get_doc(
+			{"doctype": "File", "file_name": "other.txt", "content": b"other", "is_private": 1}
+		).insert()
+		proforma.db_set("proforma_pdf", other_file.file_url)
+
+		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
+
 	def test_email_content_uses_template_from_selling_settings(self):
 		template = make_email_template("Proforma {{ doc.name }}", "Advance payment for {{ doc.sales_order }}")
 		frappe.db.set_single_value("Selling Settings", "proforma_email_template", template)

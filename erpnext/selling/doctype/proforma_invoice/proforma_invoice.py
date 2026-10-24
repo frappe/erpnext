@@ -49,6 +49,7 @@ class ProformaInvoice(Document):
 		self.validate_sales_order()
 		self.set_item_values()
 		self.set_total_qty()
+		self.clear_generated_values()
 
 	def validate_sales_order(self) -> None:
 		if frappe.db.get_value("Sales Order", self.sales_order, "docstatus") != 1:
@@ -110,9 +111,12 @@ class ProformaInvoice(Document):
 	def set_total_qty(self) -> None:
 		self.total_qty = sum(flt(item.qty) for item in self.items)
 
+	def clear_generated_values(self) -> None:
+		"""The PDF and grand total are set on submit; never keep values sent by the client."""
+		self.proforma_pdf = None
+		self.grand_total = 0
+
 	def generate_and_attach_pdf(self) -> None:
-		if self.proforma_pdf:
-			return
 		printed = self.render_pdf()
 		file = save_file(printed["fname"], printed["fcontent"], self.doctype, self.name, is_private=1)
 		self.db_set("proforma_pdf", file.file_url)
@@ -256,7 +260,15 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	if not proforma.proforma_pdf:
 		frappe.throw(_("This Proforma Invoice has no PDF to send."))
 
-	file_name = frappe.db.get_value("File", {"file_url": proforma.proforma_pdf}, "name")
+	file_name = frappe.db.get_value(
+		"File",
+		{
+			"file_url": proforma.proforma_pdf,
+			"attached_to_doctype": proforma.doctype,
+			"attached_to_name": proforma.name,
+		},
+		"name",
+	)
 	if not file_name:
 		frappe.throw(_("The attached PDF file could not be found."))
 	subject, message = proforma.get_email_content()
