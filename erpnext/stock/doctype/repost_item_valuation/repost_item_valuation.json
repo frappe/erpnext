@@ -241,7 +241,7 @@
   },
   {
    "default": "0",
-   "description": "Only works for Purchase Receipt, Purchase Invoice with Update Stock and Stock Entry that is not a material transfer",
+   "description": "Only works for Purchase Receipt, Purchase Invoice with Update Stock and Stock Entry with no row that has both a Source and Target Warehouse",
    "fieldname": "recalculate_valuation_rate",
    "fieldtype": "Check",
    "label": "Recalculate Valuation Rate",
