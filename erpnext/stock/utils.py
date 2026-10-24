@@ -202,6 +202,14 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code, warehouse=None):
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
+
+	return _get_latest_stock_qty(item_code, warehouse)
+
+
+def _get_latest_stock_qty(item_code, warehouse=None):
+	# no warehouse check here: Work Order reads the warehouses already on the document
 	# same guard as get_stock_balance above, which returns the same Bin quantity. Loser-free for
 	# the only caller: Work Order write is held by Manufacturing User, who holds Item read.
 	frappe.has_permission("Item", "read", throw=True)
