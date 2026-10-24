@@ -130,6 +130,16 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(flt(item.amount), 250)
 		self.assertEqual(flt(proforma.grand_total), 250)
 
+	def test_amount_basis_total_matches_line_amount(self):
+		sales_order = make_sales_order(qty=10)
+		name = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": sales_order.items[0].name, "qty": 3, "amount": 100}]),
+			based_on="Amount",
+		)
+
+		self.assertEqual(flt(frappe.db.get_value("Proforma Invoice", name, "grand_total")), 100)
+
 	def test_cancelled_proforma_keeps_pdf(self):
 		"""Cancelling voids the proforma but keeps its PDF and status for the audit trail."""
 		sales_order = make_sales_order(qty=10)
