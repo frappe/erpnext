@@ -83,6 +83,7 @@ def create_supplier_quotation(doc: str | Document | dict):
 	add_items(sq_doc, supplier, rfq, doc.get("items"))
 	sq_doc.flags.ignore_permissions = True
 	sq_doc.run_method("set_missing_values")
+	keep_zero_quoted_rates(sq_doc)
 	sq_doc.save()
 	frappe.msgprint(_("Supplier Quotation {0} Created").format(sq_doc.name))
 	return sq_doc.name
@@ -166,6 +167,13 @@ def create_rfq_items(sq_doc, supplier, rfq_row, data):
 	)
 
 	sq_doc.append("items", args)
+
+
+def keep_zero_quoted_rates(sq_doc):
+	"""A supplier quoting 0 means 0; without a price list rate, totals won't fill it in from the price list."""
+	for row in sq_doc.items:
+		if not row.rate:
+			row.price_list_rate = 0
 
 
 @frappe.whitelist()
