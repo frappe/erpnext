@@ -931,7 +931,10 @@ class PickList(TransactionBase):
 		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles.values())
 
 		for so_row, value in product_bundles.items():
-			picked_qty = self._compute_picked_qty_for_bundle(so_row, product_bundle_qty_map[value.item_code])
+			bundle_items = product_bundle_qty_map.get(value.product_bundle)
+			if not bundle_items:
+				continue
+			picked_qty = self._compute_picked_qty_for_bundle(so_row, bundle_items)
 			item_table = "Sales Order Item"
 			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
 			frappe.db.set_value(
@@ -1026,27 +1029,44 @@ class PickList(TransactionBase):
 		return query.run(as_dict=True)
 
 	def _get_product_bundles(self) -> dict[str, frappe._dict]:
+		so_item_names = {item.sales_order_item for item in self.locations if item.product_bundle_item}
+		if not so_item_names:
+			return {}
+
+		so_items = {
+			row.name: row
+			for row in frappe.get_all(
+				"Sales Order Item",
+				filters={"name": ("in", list(so_item_names))},
+				fields=["name", "item_code", "product_bundle"],
+			)
+		}
+
 		product_bundles = {}
 		for item in self.locations:
-			if not item.product_bundle_item:
+			so_item = so_items.get(item.sales_order_item) if item.product_bundle_item else None
+			if not so_item:
 				continue
-
+			# count picked bundles against the version recorded on the order row, not the
+			# item's current active version (which may have changed since the order)
 			product_bundles[item.sales_order_item] = frappe._dict(
-				{
-					"item_code": frappe.db.get_value(
-						"Sales Order Item",
-						item.sales_order_item,
-						"item_code",
-					),
-				}
+				{"product_bundle": so_item.product_bundle or get_active_product_bundle(so_item.item_code)}
 			)
 		return product_bundles
 
 	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
 		product_bundle_qty_map = {}
 		for data in bundles:
-			bundle = frappe.get_doc("Product Bundle", get_active_product_bundle(data.item_code))
-			product_bundle_qty_map[data.item_code] = {item.item_code: item.qty for item in bundle.items}
+			bundle_name = data.product_bundle
+			if not bundle_name or bundle_name in product_bundle_qty_map:
+				continue
+			bundle = frappe.get_doc("Product Bundle", bundle_name)
+			# picked_qty is in the component's stock UOM, so convert the bundle qty too
+			product_bundle_qty_map[bundle_name] = {
+				item.item_code: flt(item.qty)
+				* flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor"))
+				for item in bundle.items
+			}
 		return product_bundle_qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
