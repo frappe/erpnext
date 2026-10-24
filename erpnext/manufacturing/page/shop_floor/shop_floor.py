@@ -129,7 +129,8 @@ def save_and_continue(
 	frappe.has_permission("Job Card", "write", throw=True)
 	doc = _record_session(job_card, qty, for_quantity, pending_qty, process_loss_qty, end_time)
 	if doc.docstatus == 0:
-		doc.db_set("is_paused", 1)
+		doc.is_paused = 1
+		doc.save()
 	return {"name": doc.name}
 
 
