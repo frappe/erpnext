@@ -23,6 +23,7 @@ class AssetFinanceBook(Document):
 		finance_book: DF.Link | None
 		frequency_of_depreciation: DF.Int
 		increase_in_asset_life: DF.Int
+		is_rate_of_depreciation_entered: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
