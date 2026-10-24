@@ -332,6 +332,14 @@ sounds = [
 
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
+permission_query_conditions = {
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
+}
+
+has_permission = {
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
+}
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
