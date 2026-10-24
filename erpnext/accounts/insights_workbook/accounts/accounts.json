@@ -932,7 +932,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-24 12:00:00.000000",
+ "modified": "2026-10-24 19:40:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "accounts",
@@ -1172,31 +1172,58 @@
      "type": "source"
     },
     {
-     "column_names": [
-      "company"
+     "dimensions": [
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
      ],
-     "type": "select"
+     "measures": [
+      {
+       "data_type": "Integer",
+       "expression": {
+        "expression": "count()",
+        "type": "expression"
+       },
+       "measure_name": "ledger_rows"
+      }
+     ],
+     "type": "summarize"
     },
     {
      "data_type": "Integer",
      "expression": {
-      "expression": "row_number().over(group_by=company)",
+      "expression": "ibis.literal(1)",
       "type": "expression"
      },
-     "new_name": "row_index",
+     "new_name": "one_company",
      "type": "mutate"
     },
     {
-     "filters": [
+     "join_condition": {
+      "left_column": {
+       "column_name": "one_company",
+       "type": "column"
+      },
+      "right_column": {
+       "column_name": "one_company",
+       "type": "column"
+      }
+     },
+     "join_type": "inner",
+     "select_columns": [
       {
-       "expression": {
-        "expression": "row_index < 8",
-        "type": "expression"
-       }
+       "column_name": "row_index",
+       "type": "column"
       }
      ],
-     "logical_operator": "And",
-     "type": "filter_group"
+     "table": {
+      "query_name": "accounts-week-spine",
+      "type": "query",
+      "workbook": "accounts"
+     },
+     "type": "join"
     },
     {
      "data_type": "Date",
@@ -2614,6 +2641,24 @@
    ],
    "sort_order": 5,
    "title": "Sales Invoice Lines",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-week-spine": {
+   "folder": null,
+   "is_builder_query": 0,
+   "is_native_query": 1,
+   "is_script_query": 0,
+   "name": "accounts-week-spine",
+   "operations": [
+    {
+     "data_source": "Site DB",
+     "raw_sql": "SELECT 0 AS row_index, 1 AS one_company\nUNION ALL SELECT 1, 1\nUNION ALL SELECT 2, 1\nUNION ALL SELECT 3, 1\nUNION ALL SELECT 4, 1\nUNION ALL SELECT 5, 1\nUNION ALL SELECT 6, 1\nUNION ALL SELECT 7, 1",
+     "type": "sql"
+    }
+   ],
+   "sort_order": 19,
+   "title": "Week Spine",
    "use_live_connection": 1,
    "workbook": "accounts"
   }
