@@ -188,7 +188,7 @@ class Issue(Document):
 
 		return referenced, linked
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def split_issue(self, subject: str, communication_id: str):
 		self.check_permission("write")
 
