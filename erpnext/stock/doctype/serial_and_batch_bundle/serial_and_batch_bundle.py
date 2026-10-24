@@ -142,7 +142,7 @@ class SerialandBatchBundle(Document):
 			self.validate_serial_no_status()
 
 		self.set_is_outward()
-		self.calculate_total_qty()
+		self.calculate_total_qty(save=False)
 		self.set_warehouse()
 
 		if self.voucher_type != "Stock Entry" or not self.voucher_no or self.docstatus == 1:
