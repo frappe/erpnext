@@ -45,7 +45,7 @@ export class BomTree {
 		}
 			<span style="width:64px;text-align:right;">${__("Quantity")}</span>
 			${this.show_items ? `<span style="width:36px;"></span>` : ""}
-			<span style="width:88px;text-align:right;">${__("Amount")}</span><span style="width:96px;"></span></div>`;
+			<span style="width:96px;text-align:right;">${__("Amount")}</span>${this.get_actions_cell("")}</div>`;
 		const rows = [this.get_finished_good_row()];
 		if (!this.collapsed.has(0)) this.add_rows(0, 1, rows);
 
@@ -78,7 +78,7 @@ export class BomTree {
 			<span style="width:64px;">${this.get_finished_good_quantity()}</span>
 			${this.show_items ? `<span style="width:36px;"></span>` : ""}
 			${this.get_amount_cell(doc.raw_material_cost)}
-			<span style="width:96px;display:flex;justify-content:flex-end;">${this.get_add_button(0)}</span></div>`;
+			${this.get_actions_cell(this.get_add_button(0) + this.get_empty_slot() + this.get_empty_slot())}</div>`;
 	}
 
 	get_finished_good_quantity() {
@@ -138,8 +138,8 @@ export class BomTree {
 					: this.get_item_cell(part.node_id, part.item_code)
 			}
 			<span style="width:64px;">${quantity}</span>${uom}
-			${excluded ? `<span style="width:88px;"></span>` : this.get_amount_cell(part.amount)}
-			<span style="width:96px;display:flex;justify-content:flex-end;">${this.get_row_actions(part)}</span></div>`;
+			${excluded ? `<span style="width:96px;"></span>` : this.get_amount_cell(part.amount)}
+			${this.get_actions_cell(this.get_row_actions(part))}</div>`;
 	}
 
 	get_row_actions(part) {
@@ -147,21 +147,92 @@ export class BomTree {
 			return this.get_icon_button("undo-2", __("Add Back to BOM"), "restore", part.node_id);
 		}
 
-		const edit = part.item_code ? this.get_icon_button("pencil", __("Edit"), "edit", part.node_id) : "";
-		if (part.source === "Manual") {
-			const remove = this.get_icon_button("x", __("Remove"), "remove", part.node_id);
-			return this.get_model_button(part) + edit + this.get_add_button(part.node_id) + remove;
-		}
+		const remove =
+			part.source === "Manual"
+				? this.get_icon_button("x", __("Remove"), "remove", part.node_id)
+				: this.get_icon_button("x", __("Remove from BOM"), "exclude", part.node_id);
+		const menu = this.get_menu_items(part).length
+			? this.get_icon_button("ellipsis", __("More"), "menu", part.node_id)
+			: this.get_empty_slot();
+		return this.get_add_button(part.node_id) + remove + menu;
+	}
 
-		const remove = this.get_icon_button("x", __("Remove from BOM"), "exclude", part.node_id);
-		return edit + this.get_add_button(part.node_id) + remove;
+	get_empty_slot() {
+		return frappe.ui.button.html({
+			icon: "ellipsis",
+			variant: "ghost",
+			size: "xs",
+			attrs: {
+				style: "visibility:hidden;",
+				tabindex: "-1",
+				"aria-hidden": "true",
+				"aria-label": __("More"),
+			},
+		});
+	}
+
+	get_actions_cell(content) {
+		if (!this.editable) return "";
+		return `<span style="width:84px;flex:none;display:flex;justify-content:flex-end;">${content}</span>`;
 	}
 
 	get_amount_cell(amount) {
-		return `<span class="ellipsis" style="width:88px;text-align:right;">${format_currency(
+		return `<span class="ellipsis" style="width:96px;flex:none;text-align:right;">${format_currency(
 			flt(amount),
 			this.frm.doc.currency
 		)}</span>`;
+	}
+
+	get_menu_items(part) {
+		const items = [];
+		if (part.item_code) items.push({ label: __("Edit"), action: () => this.edit_part(part) });
+		if (part.source === "Manual" && this.view.viewer) {
+			items.push(
+				part.model_file
+					? {
+							label: __("Place in Model ({0} of {1} placed)", [
+								get_placements(part).length,
+								flt(part.qty),
+							]),
+							action: () => this.view.placement_panel.start(part.node_id),
+					  }
+					: { label: __("Add 3D Model"), action: () => this.upload_model(part) }
+			);
+		}
+		return items;
+	}
+
+	open_menu(button, part) {
+		this.close_menu();
+		const menu = $(`<div class="dropdown-menu show" style="position:fixed;z-index:1050;"></div>`);
+		for (const item of this.get_menu_items(part)) {
+			$(`<a class="dropdown-item" href="#"></a>`)
+				.text(item.label)
+				.on("click", (event) => {
+					event.preventDefault();
+					this.close_menu();
+					item.action();
+					this.view.render();
+				})
+				.appendTo(menu);
+		}
+		menu.appendTo(document.body);
+		const bounds = button.getBoundingClientRect();
+		const opens_up = window.innerHeight - bounds.bottom < menu.outerHeight() + 8;
+		menu.css({
+			left: bounds.right - menu.outerWidth(),
+			top: opens_up ? bounds.top - menu.outerHeight() - 4 : bounds.bottom + 4,
+		});
+		this.menu = menu;
+		setTimeout(() =>
+			$(document).one("click.bom-tree-menu scroll.bom-tree-menu", () => this.close_menu())
+		);
+	}
+
+	close_menu() {
+		this.menu?.remove();
+		this.menu = null;
+		$(document).off(".bom-tree-menu");
 	}
 
 	edit_part(part) {
@@ -182,17 +253,6 @@ export class BomTree {
 
 	has_children(part) {
 		return Boolean(this.view.children[part.node_id]?.length);
-	}
-
-	get_model_button(part) {
-		if (!this.view.viewer) return "";
-		if (!part.model_file) {
-			return this.get_icon_button("box", __("Add 3D Model"), "model", part.node_id);
-		}
-
-		const placed = get_placements(part).length;
-		const title = __("Place in Model ({0} of {1} placed)", [placed, flt(part.qty)]);
-		return this.get_icon_button("move-3d", title, "place", part.node_id);
 	}
 
 	get_thumbnail(node_id, item_code) {
@@ -272,8 +332,7 @@ export class BomTree {
 		return `<div style="${ROW}"><span style="width:${depth * 16 + 16}px;flex:none;"></span>
 			<span class="design-item-cell design-tree-add" data-part-node="${parent_node_id}"
 				style="flex:1;min-width:0;display:flex;"></span>
-			<span style="width:84px;display:flex;justify-content:flex-end;">
-				${this.get_icon_button("x", __("Close"), "close-add", parent_node_id)}</span></div>`;
+			${this.get_actions_cell(this.get_icon_button("x", __("Close"), "close-add", parent_node_id))}</div>`;
 	}
 
 	open_add_link(container) {
@@ -340,12 +399,10 @@ export class BomTree {
 			toggle: () =>
 				this.collapsed.has(node_id) ? this.collapsed.delete(node_id) : this.collapsed.add(node_id),
 			remove: () => this.remove_part(part),
-			edit: () => this.edit_part(part),
+			menu: () => this.open_menu($element.get(0), part),
 			exclude: () => this.update(part, { exclude_from_bom: 1 }),
 			restore: () => this.update(part, { exclude_from_bom: 0 }),
 			image: () => this.set_image(node_id),
-			model: () => this.upload_model(part),
-			place: () => this.view.placement_panel.start(node_id),
 		};
 		actions[$element.attr("data-action")]?.();
 		this.view.render();
