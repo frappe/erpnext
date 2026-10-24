@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.model.naming import parse_naming_series
 from frappe.utils import flt
@@ -78,6 +80,49 @@ class TestGLEntry(ERPNextTestSuite):
 		self.assertIn(round_off_gle, gl_map)
 		self.assertEqual(round_off_gle.debit, 0.01)
 		self.assertEqual(round_off_gle.credit, 0)
+		self.assertEqual(flt(sum(d.debit - d.credit for d in gl_map), 2), 0)
+
+	def test_round_off_entry_does_not_touch_regular_postings_on_round_off_account(self):
+		# Round off account falls back to Cost of Goods Sold, which also holds the stock entries
+		cogs = "_Test Account Cost for Goods Sold - _TC"
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", cogs)
+		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
+
+		def make_entry(account, debit=0, credit=0):
+			return frappe._dict(
+				voucher_type="Sales Invoice",
+				voucher_no="_Test Round Off SINV",
+				company="_Test Company",
+				posting_date="2024-01-01",
+				remarks="",
+				is_opening="No",
+				account=account,
+				debit=debit,
+				credit=credit,
+				debit_in_account_currency=debit,
+				credit_in_account_currency=credit,
+			)
+
+		stock_cogs_gle = make_entry(cogs, debit=1384.98)
+		rounding_gle = make_entry(cogs, credit=0.18)
+		gl_map = [
+			make_entry("_Test Receivable - _TC", debit=1689),
+			make_entry("_Test Account Excise Duty - _TC", credit=16.72),
+			make_entry("Sales - _TC", credit=1672.11),
+			make_entry("_Test Account Stock In Hand - _TC", credit=1384.98),
+			stock_cogs_gle,
+			rounding_gle,
+		]
+
+		# total debit - credit = 3073.98 - 3073.99 = -0.01
+		# the voucher is not saved, so there are no accounting dimension values to copy
+		with patch("erpnext.accounts.general_ledger.update_accounting_dimensions"):
+			make_round_off_gle(gl_map, -0.01, -0.01, 2)
+
+		self.assertIn(stock_cogs_gle, gl_map)
+		self.assertEqual(stock_cogs_gle.debit, 1384.98)
+		self.assertEqual(stock_cogs_gle.credit, 0)
+		self.assertEqual(rounding_gle.credit, 0.17)
 		self.assertEqual(flt(sum(d.debit - d.credit for d in gl_map), 2), 0)
 
 	def test_rename_entries(self):
