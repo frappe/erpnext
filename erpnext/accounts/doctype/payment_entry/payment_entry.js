@@ -22,6 +22,10 @@ frappe.ui.form.on("Payment Entry", {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
 			if (!frm.doc.paid_to) frm.set_value("paid_to_account_currency", null);
 		}
+		// the form object is reused for the next payment, so start without an opt out
+		frm.cheque_book_cleared = false;
+		// an amendment or a copy brings the number of a used cheque, so the suggestion can replace it
+		frm.suggested_cheque_no = frm.doc.__islocal && frm.doc.cheque_book ? frm.doc.reference_no : null;
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
@@ -97,6 +101,17 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			};
 		});
+
+		frm.set_query("cheque_book", () => ({
+			filters: {
+				"bank_account.account": frm.doc.paid_from,
+				"bank_account.is_company_account": 1,
+				"bank_account.disabled": 0,
+				company: frm.doc.company,
+				docstatus: 1,
+				status: "Submitted",
+			},
+		}));
 
 		frm.set_query("contact_person", function () {
 			if (frm.doc.party) {
@@ -265,6 +280,11 @@ frappe.ui.form.on("Payment Entry", {
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
+		if (frm.is_new() && frm.cscript.is_onload) {
+			frm.events.set_cheque_book(frm);
+		} else if (frm.doc.docstatus === 0 && frm.doc.cheque_book) {
+			frm.events.cheque_book(frm);
+		}
 	},
 
 	validate: async function (frm) {
@@ -470,6 +490,80 @@ frappe.ui.form.on("Payment Entry", {
 			let payment_account_field = frm.doc.payment_type == "Receive" ? "paid_to" : "paid_from";
 			frm.set_value(payment_account_field, account);
 		});
+		frm.events.set_cheque_book(frm);
+	},
+
+	// Suggest a cheque book for a cheque payment. A book that the user picked or cleared stays.
+	set_cheque_book: async function (frm, reset) {
+		if (frm.doc.docstatus !== 0) return;
+		if (!is_cheque_payment(frm) || !frm.doc.paid_from) {
+			// choosing a cheque mode again is a fresh start, so forget an earlier clear
+			frm.cheque_book_cleared = false;
+			return set_cheque_book_value(frm, "");
+		}
+		if (frm.cheque_book_cleared) return;
+		if (frm.doc.cheque_book && !reset) return frm.events.cheque_book(frm);
+
+		const { name, paid_from: account, cheque_book: previous_book } = frm.doc;
+		const { cheque_book } = await frappe.xcall(
+			"erpnext.accounts.doctype.cheque.cheque_payment.get_next_cheque",
+			{ account }
+		);
+		// the user can change the form, submit it or open another payment while the server answers
+		if (
+			name !== frm.doc.name ||
+			frm.doc.docstatus !== 0 ||
+			frm.cheque_book_cleared ||
+			account !== frm.doc.paid_from ||
+			previous_book !== frm.doc.cheque_book ||
+			!is_cheque_payment(frm)
+		)
+			return;
+		if (cheque_book && cheque_book === frm.doc.cheque_book) return frm.events.cheque_book(frm);
+		await set_cheque_book_value(frm, cheque_book || "");
+	},
+
+	// Show the free count of the book, and suggest its next number in Cheque/Reference No
+	cheque_book: async function (frm) {
+		// only the user emptying the field opts this payment out of a cheque book
+		if (!frm.setting_cheque_book) frm.cheque_book_cleared = !frm.doc.cheque_book;
+		frm.set_df_property("cheque_book", "description", "");
+		const { name, cheque_book, paid_from: account } = frm.doc;
+		if (!cheque_book) {
+			// a number suggested from the removed book no longer belongs to this payment
+			if (frm.suggested_cheque_no && frm.doc.reference_no === frm.suggested_cheque_no) {
+				frm.suggested_cheque_no = null;
+				await frm.set_value("reference_no", "");
+			}
+			return;
+		}
+
+		const cheque = await frappe.xcall("erpnext.accounts.doctype.cheque.cheque_payment.get_next_cheque", {
+			account,
+			cheque_book,
+		});
+		// the user can submit the payment or open another one while the server answers
+		if (
+			name !== frm.doc.name ||
+			frm.doc.docstatus !== 0 ||
+			cheque_book !== frm.doc.cheque_book ||
+			account !== frm.doc.paid_from ||
+			!is_cheque_payment(frm)
+		)
+			return;
+
+		// the book name already shows its range
+		if (cheque.cheque_book) {
+			frm.set_df_property("cheque_book", "description", __("Free: {0}", [cheque.free]));
+		}
+		// never overwrite a number that the user typed
+		if (!frm.doc.reference_no || frm.doc.reference_no === frm.suggested_cheque_no) {
+			frm.suggested_cheque_no = cheque.cheque_no;
+			await frm.set_value("reference_no", cheque.cheque_no || "");
+			if (cheque.cheque_no && !frm.doc.reference_date) {
+				frm.set_value("reference_date", frm.doc.posting_date);
+			}
+		}
 	},
 
 	party_type: function (frm) {
@@ -609,6 +703,7 @@ frappe.ui.form.on("Payment Entry", {
 		if (frm.set_party_account_based_on_party) return;
 
 		frm.events.set_company_bank_account(frm);
+		frm.events.set_cheque_book(frm, true);
 
 		frm.events.set_account_currency_and_balance(
 			frm,
@@ -1756,8 +1851,8 @@ frappe.ui.form.on("Payment Entry", {
 		});
 	},
 
-	before_cancel: function (frm) {
-		return new Promise((resolve, reject) => {
+	before_cancel: async function (frm) {
+		await new Promise((resolve, reject) => {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_linked_bank_transactions",
 				args: { payment_entry: frm.doc.name },
@@ -1783,6 +1878,22 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			});
 		});
+		if (!frm.doc.cheque) return;
+
+		// A cancelled payment cancels its cheque, so ask why and let the server cancel both
+		const { reason, remarks } = await ask_cheque_cancellation_reason(frm);
+		frappe.validated = false;
+		try {
+			await frappe.xcall("erpnext.accounts.doctype.cheque.cheque_payment.cancel_cheque_payment", {
+				name: frm.doc.name,
+				reason,
+				remarks,
+				ignore_doctypes_on_cancel_all: frm.ignore_doctypes_on_cancel_all,
+			});
+			await frm.reload_doc();
+		} catch {
+			// the server message already explains the failure
+		}
 	},
 });
 
@@ -1946,6 +2057,54 @@ function prompt_for_missing_account(frm, account) {
 			(values) => resolve(values?.[account]),
 			__("Please Specify Account")
 		);
+	});
+}
+
+// the form's own writes must not look like the user clearing the field
+async function set_cheque_book_value(frm, value) {
+	frm.setting_cheque_book = true;
+	try {
+		await frm.set_value("cheque_book", value);
+	} finally {
+		frm.setting_cheque_book = false;
+	}
+}
+
+function is_cheque_payment(frm) {
+	return (
+		["Pay", "Internal Transfer"].includes(frm.doc.payment_type) &&
+		["Cheque", "Check"].includes(frm.doc.mode_of_payment)
+	);
+}
+
+async function ask_cheque_cancellation_reason(frm) {
+	await frappe.model.with_doctype("Cheque");
+	return new Promise((resolve, reject) => {
+		let answered = false;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Cancel Cheque {0}", [frm.doc.reference_no]),
+			// the reason list would otherwise open by itself, as the first input
+			no_focus: true,
+			fields: [
+				{
+					fieldname: "reason",
+					fieldtype: "Autocomplete",
+					label: __("Cancellation Reason"),
+					options: frappe.meta.get_docfield("Cheque", "cancellation_reason").options,
+					reqd: 1,
+					description: __("Cancelling this payment also cancels its cheque."),
+				},
+				{ fieldname: "remarks", fieldtype: "Small Text", label: __("Remarks") },
+			],
+			primary_action_label: __("Cancel Payment and Cheque"),
+			primary_action(values) {
+				answered = true;
+				dialog.hide();
+				resolve(values);
+			},
+		});
+		dialog.onhide = () => answered || reject();
+		dialog.show();
 	});
 }
 

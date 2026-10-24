@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_default_company_bank_account,
 	get_party_bank_account,
 )
+from erpnext.accounts.doctype.cheque.cheque_payment import issue_cheque, validate_cheque, void_cheque
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -96,6 +97,8 @@ class PaymentEntry(AccountsController):
 		base_total_allocated_amount: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		book_advance_payments_in_separate_party_account: DF.Check
+		cheque: DF.Link | None
+		cheque_book: DF.Link | None
 		clearance_date: DF.Date | None
 		company: DF.Link
 		contact_email: DF.Data | None
@@ -188,6 +191,7 @@ class PaymentEntry(AccountsController):
 		self.apply_taxes()
 		self.set_amounts_after_tax()
 		self.clear_unallocated_reference_document_rows()
+		validate_cheque(self)
 		self.validate_transaction_reference()
 		self.set_title()
 		self.set_remarks()
@@ -199,6 +203,15 @@ class PaymentEntry(AccountsController):
 		PaymentTaxWithholding(self).on_validate()
 		self.set_status()
 		self.set_total_in_words()
+
+	def get_invalid_links(self, is_submittable=False, link_value_cache=None):
+		invalid, cancelled = super().get_invalid_links(is_submittable, link_value_cache)
+		# Frappe checks links before validate, which rebuilds and checks the cheque link.
+		# So a link left by an earlier save must not stop this save.
+		return (
+			[link for link in invalid if link[0] != "cheque"],
+			[link for link in cancelled if link[0] != "cheque"],
+		)
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
@@ -214,6 +227,7 @@ class PaymentEntry(AccountsController):
 		self.update_linked_dunnings()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+		issue_cheque(self)
 
 	def update_linked_dunnings(self):
 		from erpnext.accounts.doctype.dunning.dunning import update_dunnings_linked_to_payment
@@ -328,6 +342,7 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
+		void_cheque(self)
 
 	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
