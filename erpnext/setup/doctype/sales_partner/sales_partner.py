@@ -7,6 +7,8 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils import cstr, filter_strip_join
 from frappe.website.website_generator import WebsiteGenerator
 
+from erpnext.setup.doctype.target_detail.target_detail import validate_duplicate_targets
+
 
 class SalesPartner(WebsiteGenerator):
 	# begin: auto-generated types
@@ -47,6 +49,7 @@ class SalesPartner(WebsiteGenerator):
 		pass
 
 	def validate(self):
+		validate_duplicate_targets(self.get("targets"))
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
 		super().validate()
