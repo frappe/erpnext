@@ -757,6 +757,40 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 		self.assertEqual(after_redeem_lp_details.loyalty_points, 9)
 
+	def test_cross_doctype_loyalty_points_redemption(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		customer_name = "Test Loyalty Customer"
+		frappe.db.set_value("Customer", customer_name, "loyalty_program", "Test Single Loyalty")
+
+		# 1. Earn loyalty points on POS Invoice
+		pos_inv = create_pos_invoice(customer=customer_name, rate=10000, do_not_save=1)
+		pos_inv.append(
+			"payments",
+			{"mode_of_payment": "Cash", "amount": 10000},
+		)
+		pos_inv.paid_amount = 10000
+		pos_inv.submit()
+
+		pos_lpe = frappe.get_doc(
+			"Loyalty Point Entry",
+			{"invoice_type": "POS Invoice", "invoice": pos_inv.name, "customer": customer_name},
+		)
+		self.assertEqual(pos_lpe.loyalty_points, 10)
+
+		# 2. Redeem loyalty points on Sales Invoice
+		si = create_sales_invoice(customer=customer_name, qty=1, rate=100, do_not_save=True)
+		si.redeem_loyalty_points = True
+		si.loyalty_points = 5
+		si.insert().submit()
+
+		si_lpe = frappe.get_doc(
+			"Loyalty Point Entry",
+			{"invoice_type": "Sales Invoice", "invoice": si.name, "loyalty_points": ("<", 0)},
+		)
+		self.assertEqual(si_lpe.loyalty_points, -5)
+		self.assertEqual(si_lpe.redeem_against, pos_lpe.name)
+
 	def test_pos_batch_reservation(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			get_auto_batch_nos,
