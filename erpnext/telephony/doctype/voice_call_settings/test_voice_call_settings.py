@@ -1,22 +1,17 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-<<<<<<< HEAD
-# import frappe
-import unittest
-
-
-class TestVoiceCallSettings(unittest.TestCase):
-	pass
-=======
 import frappe
 import frappe.client
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.tests.permission_test_utils import as_user, make_fenced_user
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestVoiceCallSettings(ERPNextTestSuite):
+class TestVoiceCallSettings(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_user_creates_own_settings(self):
 		user = make_user("voice-call-owner@example.com")
 		other_user = make_user("voice-call-other@example.com")
@@ -78,7 +73,7 @@ class TestVoiceCallSettings(ERPNextTestSuite):
 			"Voice Call Settings", owner, other_user, write=1, flags={"ignore_share_permission": True}
 		)
 		with as_user(other_user):
-			self.assertIn(owner, frappe.get_list("Voice Call Settings", pluck="name"))
+			self.assertEqual(frappe.client.get("Voice Call Settings", owner)["name"], owner)
 
 		execute()
 
@@ -96,4 +91,3 @@ def make_settings(user: str, **values) -> "frappe.model.document.Document":
 		frappe.get_doc({"doctype": "Voice Call Settings", "user": user}).insert(ignore_permissions=True)
 	frappe.db.set_value("Voice Call Settings", user, values)
 	return frappe.get_doc("Voice Call Settings", user)
->>>>>>> 7c88594 (fix(telephony): scope voice call settings to their user)

@@ -53,15 +53,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2020-12-14 18:49:34.600194",
-=======
- "modified": "2026-10-15 15:16:45.554169",
->>>>>>> 7c88594 (fix(telephony): scope voice call settings to their user)
-=======
  "modified": "2026-10-15 22:19:14.883211",
->>>>>>> 405153d (fix(telephony): disable sharing of voice call settings)
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Voice Call Settings",

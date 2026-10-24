@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 
-# import frappe
+import frappe
 from frappe.model.document import Document
 
 ADMIN_ROLE = "System Manager"
@@ -24,9 +24,6 @@ class VoiceCallSettings(Document):
 		user: DF.Link
 	# end: auto-generated types
 
-<<<<<<< HEAD
-	pass
-=======
 	def before_insert(self):
 		self.set_user_for_restricted_creator()
 
@@ -58,4 +55,3 @@ def get_permission_query_conditions(user: str | None = None) -> str | None:
 
 def is_admin(user: str) -> bool:
 	return ADMIN_ROLE in frappe.get_roles(user)
->>>>>>> 7c88594 (fix(telephony): scope voice call settings to their user)
