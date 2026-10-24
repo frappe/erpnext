@@ -856,8 +856,7 @@ class PickList(TransactionBase):
 
 		return query.run(as_dict=True)
 
-	def _get_product_bundles(self) -> dict[str, str]:
-		# Dict[so_item_row: item_code]
+	def _get_product_bundles(self) -> dict[str, frappe._dict]:
 		product_bundles = {}
 		for item in self.locations:
 			if not item.product_bundle_item:
@@ -870,7 +869,6 @@ class PickList(TransactionBase):
 						item.sales_order_item,
 						"item_code",
 					),
-					"pick_list_item": item.name,
 				}
 			)
 		return product_bundles
@@ -895,6 +893,112 @@ class PickList(TransactionBase):
 				possible_bundles[item.product_bundle_item] += item.picked_qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
+
+	def update_bundle_delivered_qty(self):
+		bundle_locations = defaultdict(list)
+		for location in self.locations:
+			if location.product_bundle_item:
+				bundle_locations[
+					(
+						location.sales_order_item,
+						location.item_code,
+						location.warehouse,
+						location.batch_no or "",
+						location.serial_no or "",
+					)
+				].append(location)
+
+		if not bundle_locations:
+			return
+
+		delivered_component_qty = self._get_delivered_bundle_component_qty(
+			{bundle_key[0] for bundle_key in bundle_locations}
+		)
+		updates = {}
+		for bundle_key, locations in bundle_locations.items():
+			remaining_qty = max(delivered_component_qty.get(bundle_key, 0), 0)
+			for location in locations:
+				precision = location.precision("delivered_qty")
+				delivered_qty = flt(min(flt(location.picked_qty), remaining_qty), precision)
+				remaining_qty -= delivered_qty
+				if flt(location.delivered_qty, precision) == delivered_qty:
+					continue
+
+				location.delivered_qty = delivered_qty
+				updates[location.name] = {"delivered_qty": delivered_qty}
+
+		if updates:
+			frappe.db.bulk_update("Pick List Item", updates, update_modified=False)
+
+		self._set_delivery_status_from_items()
+
+	def _get_delivered_bundle_component_qty(self, sales_order_items):
+		delivered_qty = defaultdict(float)
+		for row in self._get_delivered_packed_items(sales_order_items):
+			key = (
+				row.so_detail,
+				row.item_code,
+				row.warehouse,
+				row.batch_no or "",
+				row.serial_no or "",
+			)
+			delivered_qty[key] += flt(row.delivered_qty)
+
+		return delivered_qty
+
+	def _get_delivered_packed_items(self, sales_order_items):
+		packed_item = frappe.qb.DocType("Packed Item")
+		dn_item = frappe.qb.DocType("Delivery Note Item")
+		return (
+			frappe.qb.from_(dn_item)
+			.inner_join(packed_item)
+			.on(
+				(packed_item.parent == dn_item.parent)
+				& (packed_item.parent_detail_docname == dn_item.name)
+				& (packed_item.parenttype == "Delivery Note")
+			)
+			.select(
+				dn_item.so_detail,
+				packed_item.item_code,
+				packed_item.warehouse,
+				packed_item.batch_no,
+				packed_item.serial_no,
+				Sum(packed_item.qty).as_("delivered_qty"),
+			)
+			.where(
+				(dn_item.docstatus == 1)
+				& (dn_item.against_pick_list == self.name)
+				& dn_item.so_detail.isin(sales_order_items)
+			)
+			.groupby(
+				dn_item.so_detail,
+				packed_item.item_code,
+				packed_item.warehouse,
+				packed_item.batch_no,
+				packed_item.serial_no,
+			)
+		).run(as_dict=True)
+
+	def _set_delivery_status_from_items(self):
+		picked_qty = sum(abs(flt(row.picked_qty)) for row in self.locations)
+		delivered_qty = sum(
+			min(abs(flt(row.delivered_qty)), abs(flt(row.picked_qty))) for row in self.locations
+		)
+		per_delivered = round(delivered_qty / picked_qty * 100, 6) if picked_qty else 0
+
+		if per_delivered < 0.001:
+			delivery_status = "Not Delivered"
+		elif per_delivered >= 99.999999:
+			delivery_status = "Fully Delivered"
+		else:
+			delivery_status = "Partly Delivered"
+
+		self.per_delivered = per_delivered
+		self.delivery_status = delivery_status
+		self.db_set(
+			{"per_delivered": per_delivered, "delivery_status": delivery_status},
+			update_modified=False,
+		)
 
 	def has_unreserved_stock(self):
 		if self.purpose == "Delivery":
@@ -924,6 +1028,7 @@ class PickList(TransactionBase):
 def update_pick_list_status(pick_list):
 	if pick_list:
 		doc = frappe.get_doc("Pick List", pick_list)
+		doc.update_bundle_delivered_qty()
 		doc.run_method("update_status")
 
 
@@ -1513,7 +1618,6 @@ def add_product_bundles_to_delivery_note(
 		dn_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
 			so_row, product_bundle_qty_map[value.item_code]
 		)
-		dn_bundle_item.pick_list_item = value.pick_list_item
 		dn_bundle_item.against_pick_list = pick_list.name
 		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
 
