@@ -722,6 +722,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		super().on_submit_subcontracting_inward()
 
 	def on_cancel(self):
+		self.validate_asset_repair_is_cancelled()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
@@ -848,6 +849,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
+
+	def validate_asset_repair_is_cancelled(self):
+		if self.asset_repair and frappe.db.get_value("Asset Repair", self.asset_repair, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel Asset Repair {0} instead, it cancels this Stock Entry").format(
+					get_link_to_form("Asset Repair", self.asset_repair)
+				)
+			)
 
 	def delink_asset_repair_sabb(self):
 		if not self.asset_repair:
