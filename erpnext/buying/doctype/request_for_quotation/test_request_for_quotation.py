@@ -222,6 +222,21 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
 		self.assertEqual(supplier_quotation.items[0].amount, 500)
 
+	def test_zero_rate_quoted_from_portal_is_kept(self):
+		item_code = make_item("_Test Portal Zero Rate Item", {"stock_uom": "_Test UOM"}).name
+		if not frappe.db.exists("Item Price", {"item_code": item_code, "price_list": "Standard Buying"}):
+			frappe.get_doc(
+				doctype="Item Price", item_code=item_code, price_list="Standard Buying", price_list_rate=120
+			).insert()
+
+		rfq = make_request_for_quotation(item_code=item_code)
+		rfq.supplier = rfq.suppliers[0].supplier
+		rfq.buying_price_list = "Standard Buying"
+		rfq.items[0].rate = 0
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(rfq))
+
+		self.assertEqual((supplier_quotation.items[0].rate, supplier_quotation.items[0].amount), (0, 0))
+
 	def test_portal_supplier_quotation_is_built_from_the_rfq_rows(self):
 		make_request_for_quotation(
 			supplier_data=[{"supplier": "_Test Supplier 2", "supplier_name": "_Test Supplier 2"}]
