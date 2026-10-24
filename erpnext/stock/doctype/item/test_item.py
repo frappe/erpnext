@@ -318,29 +318,54 @@ class TestItem(ERPNextTestSuite):
 			)
 
 		data = expected_item_tax_template[-2]
+		sales_order_ctx = {
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Order",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"conversion_factor": 1,
+			"price_list_uom_dependant": 1,
+			"ignore_pricing_rule": 1,
+		}
 		details = get_item_details(
-			frappe._dict(
-				{
-					"item_code": data["item_code"],
-					"tax_category": data["tax_category"],
-					"company": "_Test Company",
-					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
-					"doctype": "Sales Order",
-					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
-					"plc_conversion_rate": 1,
-					"order_type": "Sales",
-					"customer": "_Test Customer",
-					"conversion_factor": 1,
-					"price_list_uom_dependant": 1,
-					"ignore_pricing_rule": 1,
-				}
-			)
+			frappe._dict(sales_order_ctx, item_code=data["item_code"], tax_category=data["tax_category"])
 		)
 
 		self.assertEqual(details.item_tax_template, data["item_tax_template"])
 		self.assertEqual(json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template])
+
+		# template is taxed @ 20, its item group @ 10, so the result shows which one a variant uses
+		template = make_item(
+			"_Test Variant Item With Item Tax Template",
+			{
+				"item_group": "_Test Item Group Tax Parent",
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"taxes": [{"item_tax_template": "_Test Account Excise Duty @ 20 - _TC"}],
+			},
+		)
+		variant = create_variant(template.name, {"Test Size": "Large"})
+		# Item Variant Settings may copy the template's taxes; clear them as an admin would
+		variant.taxes = []
+		# with no item defaults, Item.update_defaults_from_item_group copies the group's taxes in
+		variant.set("item_defaults", [{"company": "_Test Company"}])
+		variant.insert()
+
+		# a variant without taxes falls back to its item group, not its template, on every path
+		self.assertEqual(
+			get_item_tax_template(
+				frappe._dict(item_code=variant.name, tax_category="", company="_Test Company")
+			),
+			"_Test Account Excise Duty @ 10 - _TC",
+		)
+		details = get_item_details(frappe._dict(sales_order_ctx, item_code=variant.name, tax_category=""))
+		self.assertEqual(details.item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+		self.assertEqual(frappe.get_cached_doc("Item", variant.name).taxes, [])
 
 	def test_item_defaults(self):
 		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
