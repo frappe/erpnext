@@ -49,15 +49,10 @@ def get_timezones():
 	return pytz.all_timezones
 
 
-<<<<<<< HEAD
-@frappe.whitelist(allow_guest=True)
-def get_appointment_slots(date, timezone):
-=======
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; rate limited, returns free slots only, booking must be enabled
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=SLOT_REQUESTS_PER_MINUTE, seconds=60)
 def get_appointment_slots(date: str, timezone: str):
->>>>>>> acf0863 (fix(crm): rate limit appointment slot lookups on the booking page)
 	# Convert query to local timezones
 	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
