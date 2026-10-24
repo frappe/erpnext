@@ -1383,7 +1383,7 @@ def get_remaining_pick_list_reservations(pick_lists):
 def get_reservation_holders(item_codes, warehouses):
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 
-	return (
+	reservations = (
 		frappe.qb.from_(sre)
 		.select(
 			sre.name,
@@ -1405,6 +1405,36 @@ def get_reservation_holders(item_codes, warehouses):
 			& (Coalesce(sre.from_voucher_type, "") != "Pick List")
 		)
 	).run(as_dict=True)
+
+	# stock picked for a work order is counted as a pick list hold, not as reserved
+	held_qty = get_work_order_pick_list_holds(item_codes, warehouses)
+	for row in reservations:
+		key = (row.voucher_no, row.item_code, row.warehouse)
+		if row.voucher_type == "Work Order" and held_qty.get(key):
+			released_qty = min(flt(row.reserved_qty), held_qty[key])
+			row.reserved_qty = flt(row.reserved_qty) - released_qty
+			held_qty[key] -= released_qty
+
+	return reservations
+
+
+def get_work_order_pick_list_holds(item_codes, warehouses):
+	pi = frappe.qb.DocType("Pick List")
+	pi_item = frappe.qb.DocType("Pick List Item")
+
+	rows = (
+		get_open_pick_list_items_query(item_codes)
+		.select(
+			pi.work_order,
+			pi_item.item_code,
+			pi_item.warehouse,
+			Sum(get_holding_qty_case(pi_item)).as_("holding_qty"),
+		)
+		.where(pi.work_order.isnotnull() & pi_item.warehouse.isin(warehouses))
+		.groupby(pi.work_order, pi_item.item_code, pi_item.warehouse)
+	).run(as_dict=True)
+
+	return {(row.work_order, row.item_code, row.warehouse): flt(row.holding_qty) for row in rows}
 
 
 def get_bin_qty_map(item_codes, warehouses):
