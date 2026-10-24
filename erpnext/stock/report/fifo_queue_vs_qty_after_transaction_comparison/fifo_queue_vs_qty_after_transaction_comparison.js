@@ -7,6 +7,13 @@ frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
 	export_hidden_cols: true,
 	filters: [
 		{
+			fieldname: "company",
+			fieldtype: "Link",
+			label: __("Company"),
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
+		{
 			fieldname: "item_code",
 			fieldtype: "Link",
 			label: "Item",
@@ -25,9 +32,13 @@ frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
 		},
 		{
 			fieldname: "warehouse",
-			fieldtype: "Link",
-			label: "Warehouse",
+			fieldtype: "MultiSelectList",
+			label: __("Warehouse"),
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return erpnext.utils.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "from_date",

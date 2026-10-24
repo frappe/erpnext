@@ -6,6 +6,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import cint
 
+from erpnext.accounts.report.utils import get_qb_filter_condition
+
 
 def execute(filters: dict | None = None):
 	"""Return columns and data for the report.
@@ -14,6 +16,7 @@ def execute(filters: dict | None = None):
 	dictionary and should return columns and data. It is called by the framework
 	every time the report is refreshed or a filter is updated.
 	"""
+	filters = frappe._dict(filters or {})
 	columns = get_columns()
 	unlinked_bundles = get_unlinked_serial_batch_bundles(filters) or []
 	linked_cancelled_bundles = get_linked_cancelled_sabb(filters) or []
@@ -100,8 +103,7 @@ def get_unlinked_serial_batch_bundles(filters) -> list[list]:
 		)
 	)
 
-	for field in filters:
-		query = query.where(SABB[field] == filters[field])
+	query = apply_filters(query, SABB, filters)
 
 	data = query.run(as_dict=1)
 
@@ -133,11 +135,18 @@ def get_linked_cancelled_sabb(filters):
 		)
 	)
 
-	for field in filters:
-		query = query.where(SABB[field] == filters[field])
+	query = apply_filters(query, SABB, filters)
 
 	data = query.run(as_dict=1)
 	return data
+
+
+def apply_filters(query, doctype, filters):
+	for field, value in filters.items():
+		if (condition := get_qb_filter_condition(doctype[field], value)) is not None:
+			query = query.where(condition)
+
+	return query
 
 
 @frappe.whitelist(methods=["POST"])
