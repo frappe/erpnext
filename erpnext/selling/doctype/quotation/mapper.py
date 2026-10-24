@@ -238,20 +238,7 @@ def _make_customer(source_name, ignore_permissions=False):
 		as_dict=1,
 	)
 
-	if quotation.quotation_to == "Customer":
-		return frappe.get_doc("Customer", quotation.party_name)
-	elif quotation.quotation_to == "CRM Deal":
-		customer_name = frappe.get_value("Customer", {"crm_deal": quotation.party_name})
-		if customer_name:
-			return frappe.get_doc("Customer", customer_name)
-
-	# Check if a Customer already exists for the Lead or Prospect.
-	existing_customer = None
-	if quotation.quotation_to == "Lead":
-		existing_customer = frappe.db.get_value("Customer", {"lead_name": quotation.party_name})
-	elif quotation.quotation_to == "Prospect":
-		existing_customer = frappe.db.get_value("Customer", {"prospect_name": quotation.party_name})
-
+	existing_customer = get_existing_customer_name(quotation.quotation_to, quotation.party_name)
 	if existing_customer:
 		return frappe.get_doc("Customer", existing_customer)
 
@@ -262,6 +249,20 @@ def _make_customer(source_name, ignore_permissions=False):
 		return create_customer_from_prospect(quotation.party_name, ignore_permissions=ignore_permissions)
 
 	return None
+
+
+def get_existing_customer_name(quotation_to, party_name):
+	if not party_name:
+		return
+
+	if quotation_to == "Customer":
+		return party_name
+
+	customer_field = {"Lead": "lead_name", "Prospect": "prospect_name", "CRM Deal": "crm_deal"}.get(
+		quotation_to
+	)
+	if customer_field:
+		return frappe.db.get_value("Customer", {customer_field: party_name})
 
 
 def create_customer_from_lead(lead_name, ignore_permissions=False):

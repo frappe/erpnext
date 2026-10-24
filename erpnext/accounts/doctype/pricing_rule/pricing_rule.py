@@ -472,14 +472,68 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	update_args_for_pricing_rule(args)
 
+	applied_rules = get_applied_pricing_rules(args.get("pricing_rules"))
+	coupon_pricing_rule = (
+		frappe.get_cached_value("Coupon Code", args.coupon_code, "pricing_rule")
+		if args.get("coupon_code")
+		else None
+	)
+	coupon_changed = (
+		doc
+		and doc.get_doc_before_save()
+		and doc.meta.has_field("coupon_code")
+		and doc.has_value_changed("coupon_code")
+	)
+	if doc and not doc.get_doc_before_save() and applied_rules:
+		# Copies retain pricing rules, but have no saved coupon to compare against.
+		coupon_changed = (coupon_pricing_rule and coupon_pricing_rule not in applied_rules) or any(
+			rule != coupon_pricing_rule and frappe.get_cached_value("Pricing Rule", rule, "coupon_code_based")
+			for rule in applied_rules
+		)
 	pricing_rules = (
-		get_applied_pricing_rules(args.get("pricing_rules"))
-		if for_validate and args.get("pricing_rules")
+		applied_rules
+		if for_validate and args.get("pricing_rules") and not coupon_changed
 		else get_pricing_rules(args, doc)
 	)
 
+	selected_rules = {
+		rule if isinstance(rule, str) else rule.get("name") for rule in (pricing_rules or []) if rule
+	}
+	removed_rules = [rule for rule in applied_rules if rule not in selected_rules]
+
+	restore_rate = any(
+		frappe.get_cached_value("Pricing Rule", rule, "rate_or_discount") == "Rate" for rule in removed_rules
+	)
+	if restore_rate:
+		from erpnext.stock.get_item_details import get_price_list_rate
+
+		# A rate rule overwrites the row's price-list rate. Do not reuse it for the next coupon.
+		price_args = args.copy()
+		price_args.update(price_list_rate=0, rate=0)
+		item = frappe.get_cached_doc("Item", args.item_code)
+		price = get_price_list_rate(price_args, item)
+		if (
+			price.get("price_list_rate") is None
+			and args.transaction_type == "selling"
+			and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
+		):
+			price_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			price_args.price_list_uom_dependant = None
+			price = get_price_list_rate(price_args, item)
+		if price.get("price_list_rate") is not None:
+			args.price_list_rate = item_details.price_list_rate = flt(price.get("price_list_rate"))
+
+	rules = []
+
 	if pricing_rules:
-		rules = []
+		if removed_rules:
+			item_details = remove_pricing_rule_for_item(
+				frappe.as_json(removed_rules),
+				item_details,
+				item_code=args.item_code,
+				rate=args.price_list_rate,
+			)
+
 		price_rules = []
 
 		for pricing_rule in pricing_rules:
@@ -497,10 +551,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			if pricing_rule.get("coupon_code_based") == 1:
 				if not args.coupon_code:
 					continue
-				coupon_code = frappe.db.get_value(
-					doctype="Coupon Code", filters={"pricing_rule": pricing_rule.name}, fieldname="name"
-				)
-				if args.coupon_code != coupon_code:
+				if coupon_pricing_rule != pricing_rule.name:
 					continue
 
 			if pricing_rule.get("suggestion"):
@@ -559,10 +610,14 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 		item_details.pricing_rules = frappe.as_json([d.pricing_rule for d in rules])
 
-		if not doc:
-			return item_details
+	if restore_rate and item_details.get("price_list_rate") is None:
+		frappe.throw(
+			_("Set an Item Price for item {0} before removing or replacing its Rate pricing rule.").format(
+				args.item_code
+			)
+		)
 
-	elif args.get("pricing_rules"):
+	if not rules and args.get("pricing_rules"):
 		item_details = remove_pricing_rule_for_item(
 			args.get("pricing_rules"),
 			item_details,
@@ -715,13 +770,10 @@ def remove_pricing_rule_for_item(
 		pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 
 		if pricing_rule.price_or_product_discount == "Price":
-			if pricing_rule.rate_or_discount == "Discount Percentage":
+			if pricing_rule.rate_or_discount in ["Rate", "Discount Percentage", "Discount Amount"]:
 				item_details.discount_percentage = 0.0
 				item_details.discount_amount = 0.0
 				item_details.rate = rate or 0.0
-
-			if pricing_rule.rate_or_discount == "Discount Amount":
-				item_details.discount_amount = 0.0
 
 			if pricing_rule.margin_type in ["Percentage", "Amount"]:
 				item_details.margin_rate_or_amount = 0.0
