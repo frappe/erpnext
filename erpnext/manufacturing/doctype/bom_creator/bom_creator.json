@@ -153,7 +153,8 @@
   {
    "fieldname": "costing_tab",
    "fieldtype": "Tab Break",
-   "label": "Costing"
+   "label": "Costing",
+   "depends_on": "eval:!doc.__islocal"
   },
   {
    "allow_on_submit": 1,
@@ -237,7 +238,8 @@
   {
    "fieldname": "details_tab",
    "fieldtype": "Tab Break",
-   "label": "Details"
+   "label": "Details",
+   "depends_on": "eval:!doc.__islocal"
   },
   {
    "fieldname": "naming_series",
@@ -392,7 +394,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-10-24 17:32:19.171849",
+ "modified": "2026-10-24 17:39:02.377997",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
