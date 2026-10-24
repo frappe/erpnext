@@ -429,8 +429,15 @@ def repost_gate(item_code, warehouse):
 
 
 def acquire_sle_processing_gates(sl_entries):
-	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order."""
-	for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
+	On MariaDB the missing bins are made first: making one locks the Item row, and other
+	submits (e.g. last purchase rate) lock the Item row before the bins."""
+	pairs = sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries})
+	if frappe.db.db_type == "mariadb":
+		for pair in pairs:
+			get_or_make_bin(*pair)
+
+	for pair in pairs:
 		sle_processing_gate(*pair)
 
 

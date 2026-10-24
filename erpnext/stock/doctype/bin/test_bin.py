@@ -61,6 +61,27 @@ class TestBin(ERPNextTestSuite):
 
 		self.assertEqual(_create_bin(item_code, warehouse).name, bin_name)
 
+	def test_gates_make_missing_bins_before_taking_any_gate(self):
+		"""Making a bin locks the Item row, so it must happen before any bin row is locked"""
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("Postgres gates use advisory locks, not bin rows")
+
+		from erpnext.stock.stock_ledger import acquire_sle_processing_gates
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouses = ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		bins_at_each_gate = []
+
+		with patch(
+			"erpnext.stock.stock_ledger.sle_processing_gate",
+			side_effect=lambda item, warehouse: bins_at_each_gate.append(
+				frappe.db.count("Bin", {"item_code": item_code})
+			),
+		):
+			acquire_sle_processing_gates([{"item_code": item_code, "warehouse": w} for w in warehouses])
+
+		self.assertEqual(bins_at_each_gate, [2, 2])
+
 	def test_update_bin_qty_keeps_stock_movement_after_read(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		warehouse = "_Test Warehouse - _TC"
