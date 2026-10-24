@@ -440,6 +440,16 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(design.items[0].rate, 100)
 
+	def test_default_source_warehouse_is_set_on_the_boms(self):
+		design = make_bom_creator(
+			default_warehouse="Stores - _TC", items=[{"item_code": "_Test Item", "qty": 1}]
+		)
+		design.submit()
+
+		bom = make_boms(design)[design.item_code]
+
+		self.assertEqual(frappe.db.get_value("BOM", bom, "default_source_warehouse"), "Stores - _TC")
+
 	def test_unit_of_measure_sets_stock_quantity_and_amount(self):
 		material = make_item(
 			"_Test Creator Box Material",
