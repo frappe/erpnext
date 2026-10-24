@@ -86,7 +86,7 @@ class BOMPlan:
 			if self.design.get(field):
 				bom.set(field, self.design.get(field))
 
-		if self.design.set_rate_based_on_warehouse and self.design.default_warehouse:
+		if self.design.default_warehouse:
 			bom.default_source_warehouse = self.design.default_warehouse
 
 		return bom

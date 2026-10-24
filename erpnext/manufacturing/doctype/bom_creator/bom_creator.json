@@ -13,45 +13,41 @@
   "design_tab",
   "design_name",
   "design_file",
+  "company",
   "column_break_design_name",
   "item_code",
+  "qty",
   "track_semi_finished_goods",
+  "is_phantom",
   "design_view_section",
   "design_view",
   "items",
   "operations",
   "materials",
-  "details_tab",
-  "naming_series",
-  "company",
-  "part_number",
-  "item_group",
-  "is_phantom",
-  "column_break_details",
-  "item_name",
-  "qty",
-  "uom",
-  "project",
-  "column_break_revision",
-  "status",
-  "revision",
-  "previous_revision",
-  "currency_detail",
+  "costing_tab",
   "rm_cost_as_per",
-  "set_rate_based_on_warehouse",
   "buying_price_list",
   "price_list_currency",
   "plc_conversion_rate",
-  "column_break_ivyw",
+  "set_rate_based_on_warehouse",
+  "default_warehouse",
+  "column_break_costing",
   "currency",
   "conversion_rate",
   "raw_material_cost",
-  "section_break_zcfg",
-  "default_warehouse",
-  "column_break_tzot",
-  "section_break_xvld",
+  "details_tab",
+  "naming_series",
+  "item_group",
+  "part_number",
+  "project",
   "routing",
+  "column_break_details",
+  "revision",
+  "previous_revision",
+  "item_name",
+  "uom",
   "more_info_section",
+  "status",
   "remarks",
   "column_break_irab",
   "error_log",
@@ -78,6 +74,14 @@
    "show_description_on_click": 1
   },
   {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
    "fieldname": "column_break_design_name",
    "fieldtype": "Column Break"
   },
@@ -91,6 +95,18 @@
    "allow_on_submit": 1
   },
   {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Quantity",
+   "reqd": 1,
+   "default": "1",
+   "non_negative": 1,
+   "allow_on_submit": 1,
+   "description": "The BOM of the finished good is made for this quantity. Part quantities are for one finished good.",
+   "show_description_on_click": 1,
+   "depends_on": "track_semi_finished_goods"
+  },
+  {
    "allow_on_submit": 1,
    "default": "0",
    "depends_on": "eval:!doc.is_phantom",
@@ -99,6 +115,13 @@
    "label": "Produce an Item at Each Operation",
    "description": "Each operation makes an item that a later operation can use. The last operation makes the finished good.",
    "show_description_on_click": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_phantom",
+   "fieldtype": "Check",
+   "label": "Is Phantom BOM",
+   "depends_on": "eval:!doc.track_semi_finished_goods"
   },
   {
    "fieldname": "design_view_section",
@@ -134,124 +157,8 @@
    "options": "BOM Creator Material"
   },
   {
-   "fieldname": "details_tab",
+   "fieldname": "costing_tab",
    "fieldtype": "Tab Break",
-   "label": "Details"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "options": "BOM-CRE-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "remember_last_selected_value": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "part_number",
-   "fieldtype": "Data",
-   "label": "Part Number",
-   "description": "Part number of the top assembly in the design file. It becomes the item code when the system creates the finished good item.",
-   "show_description_on_click": 1
-  },
-  {
-   "fieldname": "item_group",
-   "fieldtype": "Link",
-   "label": "Item Group for New Items",
-   "options": "Item Group",
-   "allow_on_submit": 1,
-   "description": "Item group of the items created from design parts.",
-   "show_description_on_click": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_phantom",
-   "fieldtype": "Check",
-   "label": "Is Phantom BOM",
-   "depends_on": "eval:!doc.track_semi_finished_goods"
-  },
-  {
-   "fieldname": "column_break_details",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "item_code.item_name",
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "label": "Item Name",
-   "read_only": 1,
-   "allow_on_submit": 1
-  },
-  {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "label": "Quantity",
-   "reqd": 1,
-   "default": "1",
-   "non_negative": 1,
-   "allow_on_submit": 1,
-   "description": "The BOM of the finished good is made for this quantity. Part quantities are for one finished good.",
-   "show_description_on_click": 1
-  },
-  {
-   "fetch_from": "item_code.stock_uom",
-   "fieldname": "uom",
-   "fieldtype": "Link",
-   "label": "UOM",
-   "options": "UOM",
-   "read_only": 1,
-   "allow_on_submit": 1
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "column_break_revision",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "no_copy": 1,
-   "options": "Draft\nSubmitted\nIn Progress\nCompleted\nFailed\nSuperseded\nCancelled",
-   "read_only": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "revision",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Revision",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "previous_revision",
-   "fieldtype": "Link",
-   "label": "Previous Revision",
-   "no_copy": 1,
-   "options": "BOM Creator",
-   "read_only": 1
-  },
-  {
-   "fieldname": "currency_detail",
-   "fieldtype": "Section Break",
    "label": "Costing"
   },
   {
@@ -262,14 +169,6 @@
    "label": "Rate Of Materials Based On",
    "options": "Valuation Rate\nLast Purchase Rate\nPrice List",
    "reqd": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\"",
-   "fieldname": "set_rate_based_on_warehouse",
-   "fieldtype": "Check",
-   "label": "Set Valuation Rate Based on Source Warehouse",
-   "allow_on_submit": 1
   },
   {
    "allow_on_submit": 1,
@@ -297,7 +196,22 @@
    "label": "Price List Exchange Rate"
   },
   {
-   "fieldname": "column_break_ivyw",
+   "default": "0",
+   "depends_on": "eval:doc.rm_cost_as_per === \"Valuation Rate\"",
+   "fieldname": "set_rate_based_on_warehouse",
+   "fieldtype": "Check",
+   "label": "Set Valuation Rate Based on Source Warehouse",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Source Warehouse",
+   "options": "Warehouse",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "column_break_costing",
    "fieldtype": "Column Break"
   },
   {
@@ -326,26 +240,43 @@
    "allow_on_submit": 1
   },
   {
-   "fieldname": "section_break_zcfg",
-   "fieldtype": "Section Break",
-   "label": "Warehouse"
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
   },
   {
-   "fieldname": "default_warehouse",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "BOM-CRE-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "item_group",
    "fieldtype": "Link",
-   "label": "Default Source Warehouse",
-   "options": "Warehouse",
-   "allow_on_submit": 1
+   "label": "Item Group for New Items",
+   "options": "Item Group",
+   "allow_on_submit": 1,
+   "description": "Item group of the items created from design parts.",
+   "show_description_on_click": 1
   },
   {
-   "fieldname": "column_break_tzot",
-   "fieldtype": "Column Break"
+   "fieldname": "part_number",
+   "fieldtype": "Data",
+   "label": "Part Number",
+   "description": "Part number of the top assembly in the design file. It becomes the item code when the system creates the finished good item.",
+   "show_description_on_click": 1,
+   "depends_on": "design_file"
   },
   {
-   "depends_on": "eval:!doc.is_phantom && !doc.track_semi_finished_goods",
-   "fieldname": "section_break_xvld",
-   "fieldtype": "Section Break",
-   "label": "Operations Routing"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "routing",
@@ -353,12 +284,64 @@
    "label": "Routing",
    "options": "Routing",
    "description": "The BOM of the finished good gets its operations from this routing.",
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "depends_on": "eval:!doc.is_phantom && !doc.track_semi_finished_goods"
+  },
+  {
+   "fieldname": "column_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "revision",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Revision",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_revision",
+   "fieldtype": "Link",
+   "label": "Previous Revision",
+   "no_copy": 1,
+   "options": "BOM Creator",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "hidden": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "hidden": 1
   },
   {
    "fieldname": "more_info_section",
    "fieldtype": "Section Break",
    "label": "More Information"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nIn Progress\nCompleted\nFailed\nSuperseded\nCancelled",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
   },
   {
    "fieldname": "remarks",
@@ -407,7 +390,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-10-24 15:55:44.350920",
+ "modified": "2026-10-24 16:19:23.717874",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
