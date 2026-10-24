@@ -226,11 +226,7 @@ class ReceivablePayableReport:
 			"paid",
 			"credit_note",
 			"outstanding",
-			"range1",
-			"range2",
-			"range3",
-			"range4",
-			"range5",
+			*[f"range{i}" for i in self.range_numbers],
 			"future_amount",
 			"remaining_balance",
 		]
@@ -556,6 +552,7 @@ class ReceivablePayableReport:
 
 	def get_payment_terms(self, row):
 		# build payment_terms for row
+		order_by = "due_date" if self.is_historical_report() else "ps.paid_amount desc, due_date"
 		# nosemgrep
 		payment_terms_details = frappe.db.sql(
 			f"""
@@ -568,7 +565,7 @@ class ReceivablePayableReport:
 				si.name = ps.parent and ps.parenttype = '{row.voucher_type}' and
 				si.name = %s and
 				si.is_return = 0
-			order by ps.paid_amount desc, due_date
+			order by {order_by}
 		""",
 			row.voucher_no,
 			as_dict=1,
@@ -581,11 +578,11 @@ class ReceivablePayableReport:
 		if not payment_terms_details:
 			return
 
+		company_currency = frappe.get_value("Company", self.filters.get("company"), "default_currency")
+
 		# Advance allocated during invoicing is not considered in payment terms
 		# Deduct that from paid amount pre allocation
-		row.paid -= flt(payment_terms_details[0].total_advance)
-
-		company_currency = frappe.get_value("Company", self.filters.get("company"), "default_currency")
+		row.paid -= self.get_advance_in_report_currency(payment_terms_details[0], company_currency)
 
 		# If single payment terms, no need to split the row
 		if len(payment_terms_details) == 1 and payment_terms_details[0].payment_term:
@@ -595,6 +592,18 @@ class ReceivablePayableReport:
 		for d in payment_terms_details:
 			term = frappe._dict(original_row)
 			self.append_payment_term(row, d, term, company_currency)
+
+	def get_advance_in_report_currency(self, invoice, company_currency):
+		"""The invoice's total advance is in the party account currency."""
+		advance = flt(invoice.total_advance)
+		if (
+			self.filters.get("in_party_currency")
+			or self.filters.get("party_account")
+			or invoice.party_account_currency == company_currency
+		):
+			return advance
+
+		return advance * flt(invoice.conversion_rate)
 
 	def append_payment_term(self, row, d, term, company_currency):
 		invoiced = d.base_payment_amount
@@ -613,6 +622,11 @@ class ReceivablePayableReport:
 			invoiced = d.payment_amount
 			paid_amount = d.paid_amount
 
+		discounted_amount = d.discounted_amount
+		if self.is_historical_report():
+			# the schedule's paid and discounted amounts are as of today, so spread only the ledger up to the report date
+			paid_amount = discounted_amount = 0.0
+
 		row.payment_terms.append(
 			term.update(
 				{
@@ -620,15 +634,18 @@ class ReceivablePayableReport:
 					"invoiced": invoiced,
 					"invoice_grand_total": row.invoiced,
 					"payment_term": d.description or d.payment_term,
-					"paid": paid_amount + d.discounted_amount,
+					"paid": paid_amount + discounted_amount,
 					"credit_note": 0.0,
-					"outstanding": invoiced - paid_amount - d.discounted_amount,
+					"outstanding": invoiced - paid_amount - discounted_amount,
 				}
 			)
 		)
 
 		if paid_amount:
-			row["paid"] -= paid_amount + d.discounted_amount
+			row["paid"] -= paid_amount + discounted_amount
+
+	def is_historical_report(self) -> bool:
+		return self.filters.report_date < getdate(nowdate())
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
@@ -689,7 +706,7 @@ class ReceivablePayableReport:
 				).as_("future_amount_in_base_currency"),
 			)
 			.where(
-				(pe.docstatus < 2)
+				(pe.docstatus == 1)
 				& (pe.posting_date > self.filters.report_date)
 				& (pe.party_type.isin(self.party_type))
 			)
@@ -710,7 +727,7 @@ class ReceivablePayableReport:
 				je.cheque_no.as_("future_ref"),
 			)
 			.where(
-				(je.docstatus < 2)
+				(je.docstatus == 1)
 				& (je.posting_date > self.filters.report_date)
 				& (jea.party_type.isin(self.party_type))
 				& (jea.reference_name.isnotnull())
@@ -762,14 +779,10 @@ class ReceivablePayableReport:
 				future_amount_field = "future_amount_in_base_currency"
 
 			if row.remaining_balance != 0 and future.get(future_amount_field):
-				if future.get(future_amount_field) > row.outstanding:
-					row.future_amount = row.outstanding
-					future[future_amount_field] = future.get(future_amount_field) - row.outstanding
-					row.remaining_balance = 0
-				else:
-					row.future_amount += future.get(future_amount_field)
-					future[future_amount_field] = 0
-					row.remaining_balance = row.outstanding - row.future_amount
+				amount = min(future.get(future_amount_field), row.remaining_balance)
+				row.future_amount += amount
+				future[future_amount_field] -= amount
+				row.remaining_balance = row.outstanding - row.future_amount
 
 				row.setdefault("future_ref", []).append(
 					cstr(future.future_ref) + "/" + cstr(future.future_date)
