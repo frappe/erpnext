@@ -171,7 +171,7 @@
    "options": "Gender"
   },
   {
-   "depends_on": "eval:doc.source == 'Existing Customer'",
+   "depends_on": "eval:doc.utm_source == 'Existing Customer'",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "From Customer",
@@ -555,7 +555,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
