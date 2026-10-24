@@ -277,6 +277,18 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertTrue(pi.payment_schedule)
 		self.assertEqual(pi.payment_schedule[0].due_date, pi.due_date)
 
+	def test_update_after_submit_with_company_default_terms(self):
+		pi = make_purchase_invoice()
+		terms = frappe.get_doc(
+			{"doctype": "Terms and Conditions", "title": "_Test Default Buying Terms", "terms": "Terms"}
+		).insert()
+		frappe.db.set_value("Company", pi.company, "default_buying_terms", terms.name)
+
+		pi.reload()
+		pi.run_method("onload")
+		self.assertFalse(pi.tc_name)
+		pi.save()
+
 	def test_payment_entry_unlink_against_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
