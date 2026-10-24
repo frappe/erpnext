@@ -732,25 +732,24 @@ def get_asset_details(asset, finance_book=None):
 
 def get_gross_asset_value(asset, finance_book: str | None = None) -> float:
 	"""Value carried in the fixed asset account: cost, capitalised additions and revaluations."""
-	if not finance_book and asset.calculate_depreciation and asset.get("finance_books"):
-		finance_book = asset.finance_books[0].finance_book
-
-	value_adjustments = frappe.get_all(
-		"Asset Value Adjustment",
-		filters={
-			"asset": asset.name,
-			"docstatus": 1,
-			"finance_book": finance_book or ("is", "not set"),
-		},
-		pluck="difference_amount",
-	)
-
 	return flt(
 		flt(asset.net_purchase_amount)
 		+ flt(asset.additional_asset_cost)
-		+ sum(flt(amount) for amount in value_adjustments),
+		+ get_value_adjustment_amount(asset, finance_book),
 		asset.precision("net_purchase_amount"),
 	)
+
+
+def get_value_adjustment_amount(asset, finance_book: str | None = None) -> float:
+	"""Net Asset Value Adjustments, kept on the asset so that a split shares them."""
+	if not asset.calculate_depreciation:
+		return flt(asset.value_adjustment_amount)
+
+	row = next(
+		(row for row in asset.get("finance_books") if not finance_book or row.finance_book == finance_book),
+		None,
+	)
+	return flt(row.value_adjustment_amount) if row else 0.0
 
 
 def get_depreciation_accounts(asset_category, company):
