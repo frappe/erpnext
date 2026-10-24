@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, now
 from frappe.utils.file_manager import save_file
 
+from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.utilities.email_template import get_email_subject_and_message
 
 
@@ -146,7 +147,7 @@ class ProformaInvoice(Document):
 		sales_order.items = [item for item in sales_order.items if item.name in lines]
 		for item in sales_order.items:
 			set_proforma_line(item, lines[item.name])
-		sales_order.run_method("calculate_taxes_and_totals")
+		ProformaTotals(sales_order, {item.so_detail: item.amount for item in self.items})
 		if flt(sales_order.grand_total) < 0:
 			frappe.throw(_("The grand total of a Proforma Invoice cannot be negative."))
 		sales_order.proforma_no = self.name
@@ -167,6 +168,25 @@ class ProformaInvoice(Document):
 			default_subject=_("Proforma Invoice {0}").format(self.name),
 			default_message=_("Please find attached the proforma invoice {0}.").format(self.name),
 		)
+
+
+class ProformaTotals(calculate_taxes_and_totals):
+	"""Totals of the Sales Order copy, with each line at the proforma's own amount.
+
+	An Amount-basis rate is amount / qty, so the rounded rate x qty can differ from the amount.
+	"""
+
+	def __init__(self, doc: Document, amounts: dict[str, float]) -> None:
+		self.amounts = amounts
+		super().__init__(doc)
+
+	def calculate_item_values(self) -> None:
+		super().calculate_item_values()
+		if self.discount_amount_applied:
+			return
+		for item in self.doc.items:
+			item.amount = item.net_amount = flt(self.amounts[item.name], item.precision("amount"))
+			self._set_in_company_currency(item, ["amount", "net_amount"])
 
 
 @frappe.whitelist()
