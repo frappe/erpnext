@@ -435,15 +435,17 @@ def acquire_sle_processing_gates(sl_entries):
 
 
 def sle_processing_gate(item_code, warehouse):
-	"""Serialize all stock writes for an (item, warehouse) on postgres. MariaDB gets this from the
-	gap locks its previous-SLE locking reads take (which also block, then reveal, concurrent
-	inserts); postgres locking reads never see rows another transaction is inserting, so without
-	this gate two concurrent writers compute from the same stale previous SLE and the loser's Bin
-	write is lost. Txn-scoped and re-entrant; released at commit/rollback. hasattr keeps a frappe
-	predating transaction_advisory_lock on the status quo (serialization-failure retries) instead
-	of breaking every stock submission."""
+	"""Serialize all stock writes for an (item, warehouse). Txn-scoped and re-entrant; released at
+	commit/rollback. Postgres locking reads never see rows another transaction is inserting, so
+	without this gate two concurrent writers compute from the same stale previous SLE and the
+	loser's Bin write is lost. On MariaDB the Bin row lock makes concurrent writers wait here,
+	before they insert bundles and ledger rows that each other's range locks would then deadlock
+	on. hasattr keeps a frappe predating transaction_advisory_lock on the status quo
+	(serialization-failure retries) instead of breaking every stock submission."""
 	if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
 		frappe.db.transaction_advisory_lock(("stock-sle", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
+	elif frappe.db.db_type == "mariadb":
+		frappe.db.get_value("Bin", get_or_make_bin(item_code, warehouse), "name", for_update=True)
 
 
 def repost_future_sle(
