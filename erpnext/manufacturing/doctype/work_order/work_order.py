@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import CombineDatetime, Max, Min, Sum
+from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Min, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -385,7 +385,7 @@ class WorkOrder(Document):
 		# already ordered qty
 		ordered_qty_against_so = frappe.db.sql(
 			"""select sum(qty - process_loss_qty) from `tabWork Order`
-			where production_item = %s and sales_order = %s and docstatus < 2 and status != 'Closed' and name != %s""",
+			where production_item = %s and sales_order = %s and docstatus = 1 and status != 'Closed' and name != %s""",
 			(self.production_item, self.sales_order, self.name),
 		)[0][0]
 
@@ -394,13 +394,13 @@ class WorkOrder(Document):
 		# get qty from Sales Order Item table
 		so_item_qty = frappe.db.sql(
 			"""select sum(stock_qty) from `tabSales Order Item`
-			where parent = %s and item_code = %s""",
+			where parent = %s and item_code = %s and docstatus = 1""",
 			(self.sales_order, self.production_item),
 		)[0][0]
 		# get qty from Packing Item table
 		dnpi_qty = frappe.db.sql(
 			"""select sum(qty) from `tabPacked Item`
-			where parent = %s and parenttype = 'Sales Order' and item_code = %s""",
+			where parent = %s and parenttype = 'Sales Order' and item_code = %s and docstatus = 1""",
 			(self.sales_order, self.production_item),
 		)[0][0]
 		# total qty in SO
@@ -412,8 +412,10 @@ class WorkOrder(Document):
 
 		if total_qty > so_qty + (allowance_percentage / 100 * so_qty):
 			frappe.throw(
-				_("Cannot produce more Item {0} than Sales Order quantity {1}").format(
-					self.production_item, so_qty
+				_("Cannot produce more Item {0} than Sales Order quantity {1} {2}").format(
+					get_link_to_form("Item", self.production_item),
+					frappe.bold(so_qty),
+					frappe.bold(frappe.get_value("Item", self.production_item, "stock_uom")),
 				),
 				OverProductionError,
 			)
@@ -541,9 +543,21 @@ class WorkOrder(Document):
 		)
 
 		if purpose == "Manufacture":
-			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
+			child = frappe.qb.DocType("Stock Entry Detail")
+			query = (
+				query.join(child)
+				.on(table.name == child.parent)
+				.select(Sum(child.transfer_qty))
+				.where(child.is_finished_item == 1)
+			)
 		else:
-			query = query.select(Sum(table.fg_completed_qty))
+			job_card = frappe.qb.DocType("Job Card")
+			query = (
+				query.left_join(job_card)
+				.on(table.job_card == job_card.name)
+				.where(IfNull(job_card.is_corrective_job_card, 0) == 0)
+				.select(Sum(table.fg_completed_qty))
+			)
 
 		return flt(query.run()[0][0])
 
@@ -1286,11 +1300,14 @@ class WorkOrder(Document):
 	def update_transferred_qty_for_required_items(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
@@ -1301,6 +1318,7 @@ class WorkOrder(Document):
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 			)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
@@ -1377,7 +1395,8 @@ class WorkOrder(Document):
 		returned_dict = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
 		for row in self.required_items:
-			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
+			returned_qty = min(flt(returned_dict.get(row.item_code)), flt(row.transferred_qty))
+			row.db_set("returned_qty", returned_qty, update_modified=False)
 
 	def update_consumed_qty_for_required_items(self):
 		"""
