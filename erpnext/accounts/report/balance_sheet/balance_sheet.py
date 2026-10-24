@@ -91,11 +91,13 @@ def execute(filters=None):
 	data.extend(asset or [])
 	data.extend(liability or [])
 	data.extend(equity or [])
+
 	if opening_balance and filters.accumulated_values:
 		data.append(get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency))
 
 	if provisional_profit_loss:
 		data.append(provisional_profit_loss)
+
 	if total_credit:
 		data.append(total_credit)
 
@@ -180,38 +182,51 @@ def set_provisional_profit_loss_labels(provisional_profit_loss: dict, currency: 
 
 def get_unclosed_profit_loss(opening_balance, provisional_profit_loss, period_list, currency):
 	"""Row for profit or loss of earlier years not yet closed, taken out of the provisional profit or loss."""
+	total = sum(opening_balance.values())
+
 	unclosed = {
 		"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 		"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 		"warn_if_negative": True,
 		"currency": currency,
-		"total": opening_balance,
+		"total": total,
 	}
+
 	for period in period_list:
-		unclosed[period.key] = opening_balance
+		amount = flt(opening_balance.get(period.get("dimension_value")))
+		unclosed[period.key] = amount
+
 		if provisional_profit_loss:
-			provisional_profit_loss[period.key] -= opening_balance
+			provisional_profit_loss[period.key] -= amount
 
 	if provisional_profit_loss:
-		provisional_profit_loss["total"] -= opening_balance
+		provisional_profit_loss["total"] -= total
+		# label may be missing if the row was 0 before this, e.g. this year's loss = last year's profit
 		set_provisional_profit_loss_labels(provisional_profit_loss, currency)
+
 	return unclosed
 
 
 def check_opening_balance(asset, liability, equity):
 	# Check if previous year balance sheet closed
-	opening_balance = 0
+	opening_balance = {}
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
-	if asset:
-		opening_balance = flt(get_total_row(asset).get("opening_balance", 0), float_precision)
-	if liability:
-		opening_balance -= flt(get_total_row(liability).get("opening_balance", 0), float_precision)
-	if equity:
-		opening_balance -= flt(get_total_row(equity).get("opening_balance", 0), float_precision)
 
-	opening_balance = flt(opening_balance, float_precision)
-	if opening_balance:
+	for rows, sign in ((asset, 1), (liability, -1), (equity, -1)):
+		if not rows:
+			continue
+
+		for dimension, amount in (get_total_row(rows).get("opening_balance") or {}).items():
+			opening_balance[dimension] = opening_balance.get(dimension, 0.0) + sign * flt(amount)
+
+	opening_balance = {
+		dimension: flt(amount, float_precision) for dimension, amount in opening_balance.items()
+	}
+
+	# check each dimension: one dimension's profit can cancel another's loss in the total
+	if any(opening_balance.values()):
 		return _("Previous Financial Year is not closed"), opening_balance
+
 	return None, None
 
 
@@ -327,7 +342,13 @@ def execute_snapshot_report(filters):
 	equity = _get_data_duckdb(conn, filters, "Equity", "Credit", period_list)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(
-		asset, liability, equity, period_list, filters.company, currency
+		asset,
+		liability,
+		equity,
+		period_list,
+		filters.company,
+		currency,
+		accumulated_values=filters.accumulated_values,
 	)
 	message, opening_balance = check_opening_balance(asset, liability, equity)
 
