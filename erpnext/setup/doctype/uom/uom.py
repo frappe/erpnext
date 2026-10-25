@@ -35,4 +35,21 @@ class UOM(Document):
 		uom_name: DF.Data
 	# end: auto-generated types
 
-	pass
+	def before_rename(self, old_name, new_name, merge=False):
+		if not merge:
+			return
+
+		item_uoms = {}
+		for row in frappe.get_all(
+			"UOM Conversion Detail",
+			filters={"parenttype": "Item", "uom": ["in", [old_name, new_name]]},
+			fields=["parent", "uom"],
+		):
+			item_uoms.setdefault(row.parent, set()).add(row.uom)
+
+		if conflicting_items := [item for item, uoms in item_uoms.items() if len(uoms) == 2]:
+			frappe.throw(
+				_("Cannot merge Unit of Measure {0} into {1} because Item {2} uses both.").format(
+					frappe.bold(old_name), frappe.bold(new_name), frappe.bold(conflicting_items[0])
+				)
+			)
