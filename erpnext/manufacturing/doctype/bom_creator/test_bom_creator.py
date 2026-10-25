@@ -490,6 +490,31 @@ class TestBOMCreator(ERPNextTestSuite):
 		row = design.items[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.amount), (12, 36, 360))
 
+	def test_parts_of_one_item_in_different_units_stay_separate_bom_rows(self):
+		material = make_item(
+			"_Test Creator Box Material",
+			{
+				"valuation_rate": 10,
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		design = make_bom_creator(
+			items=[
+				{"item_code": material, "qty": 1, "uom": "Box"},
+				{"item_code": material, "qty": 2, "uom": "Nos"},
+			]
+		)
+		design.submit()
+		boms = make_boms(design)
+
+		self.assertEqual(
+			sorted(
+				(row.uom, row.qty, row.stock_qty)
+				for row in frappe.get_doc("BOM", boms[design.item_code]).items
+			),
+			[("Box", 1, 12), ("Nos", 2, 2)],
+		)
+
 	def test_raw_material_keeps_its_own_bom(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
@@ -645,6 +670,13 @@ class TestBOMCreator(ERPNextTestSuite):
 			design.enqueue_create_boms()
 
 		self.assertEqual(enqueue_doc.call_args.kwargs["job_id"], design.create_boms_job_id)
+
+	def test_migration_finds_old_designs_that_have_a_naming_series(self):
+		from erpnext.patches.v16_0.move_bom_creator_items_to_part_tree import get_creators
+
+		design = make_design()
+		self.assertEqual(design.naming_series, "BOM-CRE-.YYYY.-")
+		self.assertEqual([creator.name for creator in get_creators([design.name])], [design.name])
 
 	def test_migrated_tree_marks_assemblies_as_expandable(self):
 		from erpnext.patches.v16_0.move_bom_creator_items_to_part_tree import get_item_updates
