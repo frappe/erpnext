@@ -154,7 +154,7 @@ class BOMCreator(Document):
 
 	def validate_finished_good(self):
 		if self.is_phantom and self.track_semi_finished_goods:
-			frappe.throw(_("A phantom BOM cannot produce an item at each operation."))
+			frappe.throw(_("A phantom BOM cannot use 'Produce Item per Operation'."))
 
 		if not self.item_code:
 			return
