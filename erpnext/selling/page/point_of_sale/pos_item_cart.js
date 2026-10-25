@@ -49,7 +49,8 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="cart-header">
 						<div class="name-header">${__("Item")}</div>
 						<div class="qty-header">${__("Quantity")}</div>
-						<div class="rate-amount-header">${__("Amount")}</div>
+						<div class="rate-header">${__("Rate")}</div>
+						<div class="amount-header">${__("Amount")}</div>
 					</div>
 					<div class="cart-items-section"></div>
 					<div class="cart-totals-section"></div>
@@ -628,13 +629,14 @@ erpnext.PointOfSale.ItemCart = class {
 			${get_rate_discount_html()}`
 		);
 
-		set_dynamic_rate_header_width();
+		set_dynamic_header_width(".rate-header", ".item-rate");
+		set_dynamic_header_width(".amount-header", ".item-amount");
 
-		function set_dynamic_rate_header_width() {
-			const rate_cols = Array.from(me.$cart_items_wrapper.find(".item-rate-amount"));
-			me.$cart_header.find(".rate-amount-header").css("width", "");
-			me.$cart_items_wrapper.find(".item-rate-amount").css("width", "");
-			let max_width = rate_cols.reduce((max_width, elm) => {
+		function set_dynamic_header_width(header_class, column_class) {
+			const cols = Array.from(me.$cart_items_wrapper.find(column_class));
+			me.$cart_header.find(header_class).css("width", "");
+			me.$cart_items_wrapper.find(column_class).css("width", "");
+			let max_width = cols.reduce((max_width, elm) => {
 				if ($(elm).width() > max_width) max_width = $(elm).width();
 				return max_width;
 			}, 0);
@@ -642,29 +644,17 @@ erpnext.PointOfSale.ItemCart = class {
 			max_width += 1;
 			if (max_width == 1) max_width = "";
 
-			me.$cart_header.find(".rate-amount-header").css("width", max_width);
-			me.$cart_items_wrapper.find(".item-rate-amount").css("width", max_width);
+			me.$cart_header.find(header_class).css("width", max_width);
+			me.$cart_items_wrapper.find(column_class).css("width", max_width);
 		}
 
 		function get_rate_discount_html() {
-			if (item_data.rate && item_data.amount && item_data.rate !== item_data.amount) {
-				return `
-					<div class="item-qty-rate">
-						<div class="item-qty"><span>${item_data.qty || 0} ${frappe.utils.escape_html(item_data.uom)}</span></div>
-						<div class="item-rate-amount">
-							<div class="item-rate">${format_currency(item_data.amount, currency)}</div>
-							<div class="item-amount">${format_currency(item_data.rate, currency)}</div>
-						</div>
-					</div>`;
-			} else {
-				return `
-					<div class="item-qty-rate">
-						<div class="item-qty"><span>${item_data.qty || 0} ${frappe.utils.escape_html(item_data.uom)}</span></div>
-						<div class="item-rate-amount">
-							<div class="item-rate">${format_currency(item_data.rate, currency)}</div>
-						</div>
-					</div>`;
-			}
+			return `
+				<div class="item-qty-rate">
+					<div class="item-qty"><span>${item_data.qty || 0} ${frappe.utils.escape_html(item_data.uom)}</span></div>
+					<div class="item-rate">${format_currency(item_data.rate, currency)}</div>
+					<div class="item-amount">${format_currency(item_data.amount, currency)}</div>
+				</div>`;
 		}
 
 		function get_description_html() {
