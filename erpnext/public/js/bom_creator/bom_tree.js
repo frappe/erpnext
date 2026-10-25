@@ -4,11 +4,14 @@ import { get_item_link_html, open_item_link, open_link_field } from "./link_fiel
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
 const INPUT = "height:28px;background-color:var(--fg-color);border:1px solid var(--border-color);";
+const THUMBNAIL = `flex:none;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;
+	overflow:hidden;border-radius:var(--border-radius-sm);`;
 
 export class BomTree {
 	constructor(view) {
 		this.view = view;
 		this.collapsed = new Set();
+		this.bom_rows = {};
 		view.wrapper.on("click", ".design-tree [data-node-id]", (event) => {
 			if ($(event.target).closest("input, button").length) return;
 			this.view.highlight_nodes([cint($(event.currentTarget).attr("data-node-id"))]);
@@ -61,9 +64,15 @@ export class BomTree {
 	add_rows(parent_node_id, depth, rows) {
 		for (const part of this.view.children[parent_node_id] || []) {
 			rows.push(this.get_part_row(part, depth));
-			const is_open = this.has_children(part) || this.adding_to === part.node_id;
-			if (is_open && !part.exclude_from_bom && !this.collapsed.has(part.node_id))
+			if (part.exclude_from_bom || this.collapsed.has(part.node_id)) continue;
+
+			const bom_no = this.get_existing_bom(part);
+			if (bom_no) {
+				for (const row of this.get_bom_rows(bom_no))
+					rows.push(this.get_bom_row(row, bom_no, depth + 1));
+			} else if (this.has_children(part) || this.adding_to === part.node_id) {
 				this.add_rows(part.node_id, depth + 1, rows);
+			}
 		}
 		if (this.editable && this.adding_to === parent_node_id)
 			rows.push(this.get_add_row(parent_node_id, depth));
@@ -109,12 +118,12 @@ export class BomTree {
 
 	get_part_row(part, depth) {
 		const excluded = Boolean(part.exclude_from_bom);
-		const label = `<span class="ellipsis ${this.has_children(part) ? "bold" : ""}" title="${escape(
-			part.part_number
-		)}"
+		const bom_no = this.get_existing_bom(part);
+		const is_assembly = this.has_children(part) || Boolean(bom_no);
+		const label = `<span class="ellipsis ${is_assembly ? "bold" : ""}" title="${escape(part.part_number)}"
 			style="${excluded ? "text-decoration:line-through;" : ""}">${escape(
 			part.part_name || part.part_number
-		)}</span>`;
+		)}</span>${this.get_bom_badge(bom_no)}`;
 		const quantity = excluded
 			? `<span class="text-muted" style="display:block;text-align:right;">${flt(part.qty)}</span>`
 			: this.get_quantity_cell(part);
@@ -124,10 +133,7 @@ export class BomTree {
 			excluded ? "opacity:0.55;" : ""
 		}">
 			<span style="width:${depth * 16}px;flex:none;"></span>
-			${this.get_caret(part.node_id, this.has_children(part) && !excluded)}${this.get_thumbnail(
-			part.node_id,
-			part.item_code
-		)}
+			${this.get_caret(part.node_id, is_assembly && !excluded)}${this.get_thumbnail(part.node_id, part.item_code)}
 			<span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;">${get_change_dot(
 				part
 			)}${label}</span>
@@ -152,7 +158,97 @@ export class BomTree {
 			part.source === "Manual"
 				? this.get_icon_button("x", __("Remove"), "remove", part.node_id)
 				: this.get_icon_button("x", __("Remove from BOM"), "exclude", part.node_id);
-		return this.get_add_button(part.node_id) + remove + this.get_menu_button(part.node_id);
+		const bom_no = this.get_existing_bom(part);
+		const add = bom_no
+			? this.get_locked_button("plus", __("The materials come from BOM {0}.", [bom_no]))
+			: this.get_add_button(part.node_id);
+		return add + remove + this.get_menu_button(part.node_id);
+	}
+
+	get_existing_bom(part) {
+		const has_parts = (this.view.children[part.node_id] || []).some((child) => !child.exclude_from_bom);
+		const uses_bom = part.bom_no && !part.do_not_explode && !part.exclude_from_bom && !has_parts;
+		return uses_bom ? part.bom_no : "";
+	}
+
+	get_bom_badge(bom_no) {
+		if (!bom_no) return "";
+		const title = __("Uses existing BOM {0}", [bom_no]);
+		return `<span style="flex:none;">${frappe.ui.badge.html({
+			label: __("BOM"),
+			size: "sm",
+			title,
+		})}</span>`;
+	}
+
+	get_bom_rows(bom_no) {
+		if (!(bom_no in this.bom_rows)) this.load_bom_rows(bom_no);
+		return this.bom_rows[bom_no] || [];
+	}
+
+	async load_bom_rows(bom_no) {
+		this.bom_rows[bom_no] = null;
+		const { message: rows } = await frappe.call({
+			method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_bom_tree",
+			args: { bom_no },
+		});
+		this.bom_rows[bom_no] = rows || [];
+		const item_codes = this.bom_rows[bom_no]
+			.map((row) => row.item_code)
+			.filter((item_code) => !(item_code in this.view.item_images));
+		if (item_codes.length) this.view.load_item_images(item_codes);
+		else this.view.render();
+	}
+
+	get_bom_row(row, bom_no, depth) {
+		const locked = __("This item comes from BOM {0} and cannot be changed.", [bom_no]);
+		const image = this.view.item_images[row.item_code];
+		const thumbnail = image
+			? `<span style="${THUMBNAIL}border:1px solid var(--border-color);">
+				<img src="${escape(image)}" alt="" style="width:100%;height:100%;object-fit:contain;"></span>`
+			: `<span style="${THUMBNAIL}"></span>`;
+		const item = this.show_items
+			? `<span class="ellipsis text-muted" style="width:130px;">${escape(row.item_code)}</span>`
+			: "";
+		const uom = this.show_items
+			? `<span class="ellipsis text-muted" style="width:64px;">${escape(row.uom || "")}</span>`
+			: "";
+
+		return `<div class="design-bom-row" style="${ROW}">
+			<span style="width:${depth * 16}px;flex:none;"></span>${this.get_caret(0, false)}${thumbnail}
+			<span class="ellipsis" style="flex:1;min-width:0;" title="${escape(row.item_code)}">${escape(
+			row.item_name || row.item_code
+		)}</span>${item}
+			<span style="width:64px;">${this.get_locked_quantity(row.qty, locked)}</span>${uom}
+			<span style="width:96px;flex:none;"></span>
+			${this.get_actions_cell(
+				this.get_locked_button("plus", locked) +
+					this.get_locked_button("x", locked) +
+					this.get_empty_slot()
+			)}</div>`;
+	}
+
+	get_locked_quantity(quantity, title) {
+		if (!this.editable) return `<span style="display:block;text-align:right;">${flt(quantity)}</span>`;
+
+		return `<span title="${escape(title)}" style="display:block;cursor:not-allowed;">
+			<input class="form-control input-sm" value="${flt(quantity)}" disabled tabindex="-1"
+				style="${INPUT}text-align:right;background-color:var(--subtle-fg);pointer-events:none;"></span>`;
+	}
+
+	get_locked_button(icon, title) {
+		if (!this.editable) return "";
+
+		const button = frappe.ui.button.html({
+			icon,
+			variant: "ghost",
+			size: "xs",
+			disabled: true,
+			attrs: { "aria-label": title, style: "pointer-events:none;" },
+		});
+		return `<span title="${escape(
+			title
+		)}" style="display:inline-flex;cursor:not-allowed;">${button}</span>`;
 	}
 
 	get_empty_slot() {
@@ -217,11 +313,25 @@ export class BomTree {
 		const part = this.view.get_part(node_id);
 		const item_code = node_id ? part.item_code : this.frm.doc.item_code;
 		const items = [];
-		if (item_code && !part?.exclude_from_bom) {
+		if (part && this.get_existing_bom(part)) {
+			items.push(
+				{ label: __("Change Existing BOM"), action: () => this.include_existing_bom(part) },
+				{
+					label: __("Remove Existing BOM"),
+					action: () => this.update(part, { bom_no: "", do_not_explode: 1 }),
+				}
+			);
+		} else if (item_code && !part?.exclude_from_bom) {
 			items.push({
 				label: __("Get Items from BOM"),
 				action: () => this.get_items_from_bom(node_id, item_code),
 			});
+			if (part) {
+				items.push({
+					label: __("Include Existing BOM"),
+					action: () => this.include_existing_bom(part),
+				});
+			}
 		}
 		if (item_code) {
 			items.push({
@@ -283,9 +393,7 @@ export class BomTree {
 	}
 
 	get_thumbnail(node_id, item_code) {
-		const box = `flex:none;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;
-			overflow:hidden;border-radius:var(--border-radius-sm);`;
-		if (!item_code) return `<span style="${box}"></span>`;
+		if (!item_code) return `<span style="${THUMBNAIL}"></span>`;
 
 		const image = this.view.item_images[item_code];
 		const from_model = this.view.has_geometry(node_id);
@@ -294,7 +402,7 @@ export class BomTree {
 			: frappe.utils.icon(from_model ? "camera" : "image-plus", "sm");
 		const title = from_model ? __("Set Item Image") : __("Upload Item Image");
 		return `<button class="btn btn-default" data-action="image" data-part-node="${node_id}" title="${title}"
-			style="${box}background:var(--fg-color);border:1px solid var(--border-color);">${content}</button>`;
+			style="${THUMBNAIL}background:var(--fg-color);border:1px solid var(--border-color);">${content}</button>`;
 	}
 
 	upload_model(part) {
@@ -384,6 +492,7 @@ export class BomTree {
 				item_code,
 				item_name: item.item_name,
 				uom: item.stock_uom,
+				bom_no: "",
 			});
 		} else {
 			await this.frm.set_value("item_code", item_code);
@@ -425,6 +534,43 @@ export class BomTree {
 				this.frm.dirty();
 				this.view.render();
 				frappe.show_alert({ message: __("{0} items added", [count]), indicator: "green" });
+			},
+		});
+		dialog.show();
+	}
+
+	async include_existing_bom(part) {
+		const default_bom =
+			part.bom_no ||
+			(await frappe.db.get_value("Item", part.item_code, "default_bom")).message?.default_bom;
+		const parts = (this.view.children[part.node_id] || []).filter((child) => !child.exclude_from_bom);
+		const dialog = new frappe.ui.Dialog({
+			title: __("Include Existing BOM"),
+			fields: [
+				{
+					fieldname: "bom_no",
+					fieldtype: "Link",
+					options: "BOM",
+					label: __("BOM"),
+					reqd: 1,
+					default: default_bom,
+					get_query: () => ({ filters: { item: part.item_code, docstatus: 1, is_active: 1 } }),
+					description: parts.length
+						? __("The parts under {0} will be removed from the BOM.", [
+								escape(part.part_name || part.part_number),
+						  ])
+						: "",
+				},
+			],
+			primary_action_label: __("Include"),
+			primary_action: ({ bom_no }) => {
+				dialog.hide();
+				for (const child of parts) {
+					if (child.source === "Manual") this.remove_part(child);
+					else child.exclude_from_bom = 1;
+				}
+				this.collapsed.delete(part.node_id);
+				this.update(part, { bom_no, do_not_explode: 0 });
 			},
 		});
 		dialog.show();
