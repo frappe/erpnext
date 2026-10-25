@@ -4088,6 +4088,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		commission, so each sales person's allocated_amount is a share of
 		amount_eligible_for_commission rather than net_total.
 		"""
+		previous_rates = {
+			name: frappe.db.get_value("Sales Person", name, "commission_rate")
+			for name in ("_Test Sales Person 1", "_Test Sales Person 2")
+		}
+		frappe.db.set_value("Sales Person", "_Test Sales Person 1", "commission_rate", 10)
+		frappe.db.set_value("Sales Person", "_Test Sales Person 2", "commission_rate", 0)
 		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
 		frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 0)
 		try:
@@ -4123,6 +4129,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(second.allocated_amount, 400)
 			self.assertEqual(second.incentives, 0)
 		finally:
+			for name, rate in previous_rates.items():
+				frappe.db.set_value("Sales Person", name, "commission_rate", rate)
 			# grant_commission defaults to 1 for both items; restore
 			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
 			frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 1)
