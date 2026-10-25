@@ -1028,12 +1028,8 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
-<<<<<<< HEAD
-		elif self.is_inward_transfer_leg(sle) and not sle.serial_and_batch_bundle:
-=======
 
-		if self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
->>>>>>> 2730302 (fix(stock): value a transfer's inward leg at what left the source on repost)
+		if self.is_inward_transfer_leg(sle) and not sle.serial_and_batch_bundle:
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if self.is_produced_row(sle) and not sle.serial_and_batch_bundle:

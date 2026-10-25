@@ -627,7 +627,14 @@ class TestStockEntry(FrappeTestCase):
 		repost.submit()
 		repost_sl_entries(repost)
 
-		outward, inward = self.get_transfer_leg_values(transfer.name)
+		outward, inward = (
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": transfer.name, "warehouse": warehouse, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 
 	def test_half_cent_transfer_moves_no_value_after_target_warehouse_repost(self):
@@ -681,14 +688,7 @@ class TestStockEntry(FrappeTestCase):
 			batch_no=bundle and get_batch_from_bundle(bundle),
 		)
 
-		outward, inward = (
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": transfer.name, "warehouse": warehouse, "is_cancelled": 0},
-				"stock_value_difference",
-			)
-			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
-		)
+		outward, inward = self.get_transfer_leg_values(transfer.name)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 		return receipt, transfer
 
