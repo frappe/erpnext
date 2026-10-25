@@ -110,6 +110,7 @@ class BOMCreator(Document):
 		self.validate_part_models()
 		self.validate_existing_boms()
 		OperationPlan(self).validate()
+		self.set_revision_changes()
 		MaterialCost(self).set_costs()
 
 	def on_update_after_submit(self):

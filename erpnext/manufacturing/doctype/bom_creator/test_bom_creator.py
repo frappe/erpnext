@@ -811,6 +811,28 @@ class TestBOMCreator(ERPNextTestSuite):
 		with patch.object(frappe, "has_permission", side_effect=has_permission):
 			self.assertRaises(frappe.PermissionError, design.enqueue_create_boms)
 
+	def test_part_added_to_a_submitted_revision_is_marked_added(self):
+		design = make_mapped_design()
+		revision = frappe.get_doc("BOM Creator", design.make_new_revision())
+		revision.submit()
+		revision.append(
+			"items",
+			{"item_code": "_Test Item", "part_name": "_Test Item", "qty": 1, "source": "Manual"},
+		)
+		revision.save()
+
+		self.assertEqual(revision.items[-1].change_type, "Added")
+
+	def test_cancelling_a_revision_reopens_the_previous_revision(self):
+		design = make_mapped_design()
+		revision = frappe.get_doc("BOM Creator", design.make_new_revision())
+		revision.submit()
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Superseded")
+
+		revision.cancel()
+
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Submitted")
+
 	def test_revision_changes_need_read_permission_on_the_previous_revision(self):
 		design = make_mapped_design()
 		revision = frappe.get_doc("BOM Creator", design.make_new_revision())
