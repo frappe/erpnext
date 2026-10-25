@@ -90,6 +90,7 @@ class BOMCreator(Document):
 		self.item_group = self.item_group or frappe.db.get_single_value("Stock Settings", "item_group")
 		self.set_part_structure()
 		self.validate_part_models()
+		self.validate_existing_boms()
 		self.validate_finished_good()
 		OperationPlan(self).validate()
 		self.set_revision_changes()
@@ -107,6 +108,7 @@ class BOMCreator(Document):
 		self.validate_finished_good()
 		self.set_part_structure()
 		self.validate_part_models()
+		self.validate_existing_boms()
 		OperationPlan(self).validate()
 		MaterialCost(self).set_costs()
 
@@ -277,6 +279,31 @@ class BOMCreator(Document):
 
 			if row.placements and not isinstance(frappe.parse_json(row.placements), list):
 				frappe.throw(_("Row #{0}: the placements in the model are not valid.").format(row.idx))
+
+	def validate_existing_boms(self):
+		rows = [
+			row for row in self.items if row.bom_no and not row.do_not_explode and not row.exclude_from_bom
+		]
+		if not rows:
+			return
+
+		boms = {
+			bom.name: bom
+			for bom in frappe.get_all(
+				"BOM",
+				filters={"name": ("in", list({row.bom_no for row in rows}))},
+				fields=["name", "item", "docstatus", "is_active"],
+			)
+		}
+		for row in rows:
+			bom = boms.get(row.bom_no)
+			if not bom or bom.item != row.item_code or bom.docstatus != 1 or not bom.is_active:
+				frappe.throw(
+					_("Row #{0}: BOM {1} is not an active, submitted BOM of item {2}.").format(
+						row.idx, bold(row.bom_no), bold(row.item_code)
+					),
+					title=_("Invalid BOM"),
+				)
 
 	def validate_cad_parts_unchanged(self):
 		before = self.get_doc_before_save()

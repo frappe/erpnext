@@ -558,6 +558,32 @@ class TestBOMCreator(ERPNextTestSuite):
 		)
 		self.assertEqual((row.bom_no, row.do_not_explode), (pedal_bom.name, 0))
 
+	def test_assembly_uses_existing_bom_instead_of_a_new_one(self):
+		design = make_mapped_design()
+		frame_bom = make_test_bom("FRAME-ASM", 1, {"TUBE-25": 2})
+		frame = get_part(design, "FRAME-ASM")
+		for row in design.items:
+			if row.parent_node_id == frame.node_id:
+				row.exclude_from_bom = 1
+
+		frame.update({"bom_no": frame_bom, "do_not_explode": 0})
+		design.save()
+
+		boms = make_boms(design)
+
+		self.assertEqual(list(boms), ["BIKE-100"])
+		self.assertEqual(
+			frappe.db.get_value("BOM Item", {"parent": boms["BIKE-100"], "item_code": "FRAME-ASM"}, "bom_no"),
+			frame_bom,
+		)
+
+	def test_existing_bom_must_belong_to_the_part_item(self):
+		design = make_mapped_design()
+		wheel_bom = make_test_bom("WHEEL-26", 1, {"BOLT-M6": 1})
+		get_part(design, "FRAME-ASM").update({"bom_no": wheel_bom, "do_not_explode": 0})
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not an active, submitted BOM", design.save)
+
 	def test_phantom_finished_good_must_be_a_non_stock_item(self):
 		self.assertRaisesRegex(frappe.ValidationError, "Phantom BOM cannot", make_bom_creator, is_phantom=1)
 
