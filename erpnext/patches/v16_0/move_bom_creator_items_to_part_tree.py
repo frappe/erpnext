@@ -46,6 +46,7 @@ def get_rows_by_creator() -> dict:
 			item.item_name,
 			item.qty,
 			item.rate,
+			item.base_rate,
 			item.conversion_factor,
 			item.fg_reference_id,
 		)
@@ -81,6 +82,7 @@ def get_item_updates(creator, rows: list) -> dict:
 			"qty": qty,
 			"stock_qty": qty * (flt(row.conversion_factor) or 1),
 			"amount": flt(row.rate) * qty,
+			"base_amount": flt(row.base_rate) * qty,
 		}
 
 	return updates
