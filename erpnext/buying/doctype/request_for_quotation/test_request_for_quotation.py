@@ -36,6 +36,20 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		rfq.save()
 		self.assertEqual(rfq.items[0].qty, 1)
 
+	def test_whole_number_qty_must_not_be_fractional(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item = make_item(properties={"stock_uom": "Nos"})
+		rfq = make_request_for_quotation(
+			item_code=item.name,
+			qty=2.5,
+			uom="Nos",
+			stock_uom="Nos",
+			do_not_save=True,
+		)
+
+		self.assertRaises(UOMMustBeIntegerError, rfq.save)
+
 	def test_rfq_zero_qty_cannot_be_forced_by_the_client(self):
 		rfq = make_request_for_quotation(qty=0, do_not_save=True)
 		rfq.has_unit_price_items = 1
