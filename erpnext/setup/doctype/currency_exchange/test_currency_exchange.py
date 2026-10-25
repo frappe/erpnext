@@ -90,6 +90,10 @@ class TestCurrencyExchange(unittest.TestCase):
 			key = "currency_exchange_rate_{}:{}:{}".format(date, "USD", "INR")
 			cache.delete_value(key)
 
+	def setUp(self):
+		# unittest.TestCase does not roll back, so remove the 2031 records that earlier tests inserted
+		frappe.db.delete("Currency Exchange", {"date": (">=", "2031-01-01")})
+
 	def tearDown(self):
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
 		self.clear_cache()
@@ -187,3 +191,20 @@ class TestCurrencyExchange(unittest.TestCase):
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_buying")
 		self.assertFalse(exchange_rate == 65)
 		self.assertEqual(flt(exchange_rate, 3), 62.9)
+
+	def test_side_specific_record_wins_on_same_date(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		for for_buying, for_selling, rate in ((1, 1, 100), (0, 1, 101), (1, 0, 99)):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date="2031-03-10",
+				from_currency="GBP",
+				to_currency="INR",
+				exchange_rate=rate,
+				for_buying=for_buying,
+				for_selling=for_selling,
+			).insert()
+
+		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-10", "for_selling"), 101)
+		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-10", "for_buying"), 99)
+		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-11", "for_selling"), 101)
