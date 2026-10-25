@@ -13,6 +13,7 @@ COLUMNS = {
 	"part name": "part_name",
 	"description": "description",
 	"quantity": "quantity",
+	"qty": "quantity",
 }
 
 
@@ -37,6 +38,9 @@ def validate_columns(columns: list):
 		frappe.throw(
 			_("The CSV file needs a Part Number or a Part Name column."), title=_("Invalid Design File")
 		)
+
+	if "quantity" not in columns:
+		frappe.throw(_("The CSV file needs a Quantity column."), title=_("Invalid Design File"))
 
 
 def get_part(values: dict) -> dict:

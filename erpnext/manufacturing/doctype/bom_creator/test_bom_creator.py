@@ -77,6 +77,14 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(frame["children"][0]["part_number"], "TUBE-25")
 		self.assertEqual(wheel["part_number"], "WHEEL-26")
 
+	def test_csv_file_needs_a_quantity_column(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Quantity column", read_bom_csv_file, "Level,Part Number\n1,FRAME-ASM\n"
+		)
+
+		design = read_bom_csv_file("Level,Part Number,Qty\n1,FRAME-ASM,4\n")
+		self.assertEqual(design["parts"][0]["quantity"], 4)
+
 	def test_csv_file_with_level_gap_is_rejected(self):
 		self.assertRaises(
 			frappe.ValidationError,
