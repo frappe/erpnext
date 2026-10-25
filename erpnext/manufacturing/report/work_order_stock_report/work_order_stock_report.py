@@ -7,12 +7,14 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
-	wo_list = get_work_orders()
+	filters = frappe._dict(filters or {})
+	wo_list = get_work_orders(filters)
 	data = get_item_list(wo_list, filters)
 	columns = get_columns()
 	return columns, data
@@ -24,27 +26,33 @@ def get_item_list(wo_list, filters):
 
 	descriptions = get_bom_descriptions(wo_list)
 	items_by_order = get_work_order_items(wo_list)
-	stock = get_stock(items_by_order, filters)
+	selected_warehouses = get_filter_values(filters.get("warehouse"))
+	stock = get_stock(items_by_order, selected_warehouses)
 	set_aside_transferred_stock(wo_list, stock)
-	warehouses = set(get_child_warehouses(filters.warehouse)) if filters.get("warehouse") else None
+	warehouses = {child for w in selected_warehouses for child in get_child_warehouses(w)}
+	warehouses_by_company = get_warehouses_by_company(selected_warehouses)
 
 	out = []
 	for wo_details in wo_list:
 		for item in items_by_order.get(wo_details.name, []):
 			if warehouses and item.source_warehouse and item.source_warehouse not in warehouses:
 				continue
-			out.append(get_row(wo_details, item, descriptions, stock, filters))
+			out.append(get_row(wo_details, item, descriptions, stock, warehouses_by_company))
 
 	return sorted(out, key=lambda row: row.work_order)
 
 
-def get_row(wo_details, item, descriptions, stock, filters):
-	warehouse = item.source_warehouse or filters.get("warehouse")
+def get_row(wo_details, item, descriptions, stock, warehouses_by_company):
+	warehouses = (
+		[item.source_warehouse]
+		if item.source_warehouse
+		else warehouses_by_company.get(wo_details.company, [])
+	)
 	pending_qty = flt(wo_details.qty) - flt(wo_details.produced_qty)
 	qty_per_unit = flt(item.required_qty) / flt(wo_details.qty) if flt(wo_details.qty) else 0.0
 	in_wip_qty = get_in_wip_qty(item)
 	needed_qty = max(qty_per_unit * pending_qty - in_wip_qty, 0.0)
-	available_qty = allocate_stock(stock, (item.item_code, warehouse), needed_qty) + in_wip_qty
+	available_qty = allocate_stock(stock, item.item_code, warehouses, needed_qty) + in_wip_qty
 	build_qty = available_qty / qty_per_unit if qty_per_unit else flt(wo_details.qty)
 	in_stock = 1 if build_qty >= pending_qty else 0
 
@@ -121,9 +129,16 @@ def get_work_order_stock_moves(wo_list, purpose, is_return, warehouse_field):
 	return query.run(as_dict=True)
 
 
-def allocate_stock(stock, key, needed_qty):
-	available_qty = flt(stock.get(key))
-	stock[key] = available_qty - min(available_qty, needed_qty)
+def allocate_stock(stock, item_code, warehouses, needed_qty):
+	available_qty = 0.0
+	for warehouse in warehouses:
+		key = (item_code, warehouse)
+		qty = flt(stock.get(key))
+		used_qty = min(qty, needed_qty)
+		stock[key] = qty - used_qty
+		needed_qty -= used_qty
+		available_qty += qty
+
 	return available_qty
 
 
@@ -147,9 +162,9 @@ def get_work_order_items(wo_list):
 	return items_by_order
 
 
-def get_stock(items_by_order, filters):
+def get_stock(items_by_order, selected_warehouses):
 	rows = [row for items in items_by_order.values() for row in items]
-	warehouses = {row.source_warehouse or filters.get("warehouse") for row in rows} - {None, ""}
+	warehouses = ({row.source_warehouse for row in rows} | set(selected_warehouses)) - {None, ""}
 	if not rows or not warehouses:
 		return {}
 
@@ -167,24 +182,39 @@ def get_stock(items_by_order, filters):
 	return stock
 
 
-def get_work_orders():
+def get_work_orders(filters):
 	work_order_filters = [
 		{
 			"docstatus": 1,
 			"status": ("in", ["Not Started", "In Process", "Stock Reserved", "Stock Partially Reserved"]),
 		}
 	]
+	if filters.get("company"):
+		work_order_filters.append({"company": filters.company})
 	if condition := get_allowed_companies_condition(frappe.qb.DocType("Work Order").company, "Work Order"):
 		work_order_filters.append(condition)
 
 	out = frappe.get_all(
 		"Work Order",
 		filters=work_order_filters,
-		fields=["name", "status", "bom_no", "qty", "produced_qty", "planned_start_date"],
+		fields=["name", "status", "bom_no", "qty", "produced_qty", "planned_start_date", "company"],
 		order_by="planned_start_date asc, name asc",
 	)
 
 	return out
+
+
+def get_warehouses_by_company(warehouses):
+	warehouses_by_company = {}
+	if not warehouses:
+		return warehouses_by_company
+
+	for name, company in frappe.get_all(
+		"Warehouse", filters={"name": ["in", warehouses]}, fields=["name", "company"], as_list=True
+	):
+		warehouses_by_company.setdefault(company, []).append(name)
+
+	return warehouses_by_company
 
 
 def get_columns():

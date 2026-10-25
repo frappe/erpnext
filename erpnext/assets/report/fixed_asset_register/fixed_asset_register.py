@@ -14,6 +14,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 	validate_fiscal_year,
 )
+from erpnext.accounts.report.utils import get_filter_values, get_qb_filter_condition
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -173,10 +174,11 @@ def get_conditions(filters):
 
 	if filters.get("only_existing_assets"):
 		conditions["asset_type"] = "Existing Asset"
+
 	if filters.get("asset_category"):
 		conditions["asset_category"] = filters.get("asset_category")
-	if filters.get("cost_center"):
-		conditions["cost_center"] = filters.get("cost_center")
+	if cost_centers := get_filter_values(filters.get("cost_center")):
+		conditions["cost_center"] = ["in", cost_centers]
 
 	if status:
 		# In Store assets are those that are not sold or scrapped or capitalized
@@ -304,8 +306,8 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		query = query.where(asset.asset_type == "Existing Asset")
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
-	if filters.cost_center:
-		query = query.where(asset.cost_center == filters.cost_center)
+	if (cost_center_condition := get_qb_filter_condition(asset.cost_center, filters.cost_center)) is not None:
+		query = query.where(cost_center_condition)
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
@@ -355,8 +357,8 @@ def get_asset_value_adjustment_map(filters, finance_book):
 		query = query.where(asset.asset_type == "Existing Asset")
 	if filters.asset_category:
 		query = query.where(asset.asset_category == filters.asset_category)
-	if filters.cost_center:
-		query = query.where(asset.cost_center == filters.cost_center)
+	if (cost_center_condition := get_qb_filter_condition(asset.cost_center, filters.cost_center)) is not None:
+		query = query.where(cost_center_condition)
 	if filters.status:
 		if filters.status == "In Location":
 			query = query.where(asset.status.notin(["Sold", "Scrapped", "Capitalized"]))
