@@ -616,6 +616,17 @@ class TestBOMCreator(ERPNextTestSuite):
 			frappe.db.get_value("BOM Creator", design.name, ["status", "error_log"]), ("Completed", None)
 		)
 
+	def test_finished_run_does_not_stay_in_progress(self):
+		from erpnext.manufacturing.doctype.bom_creator.part_tree_plan import PartTreePlan
+
+		design = make_mapped_design()
+		with patch.object(PartTreePlan, "make_boms"), patch.object(
+			PartTreePlan, "has_all_boms", return_value=False
+		):
+			design.create_boms()
+
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Submitted")
+
 	def test_cancelling_the_top_bom_reopens_the_creator_and_keeps_sub_assembly_boms(self):
 		design = make_mapped_design()
 		boms = make_boms(design)

@@ -36,11 +36,16 @@ export class PlacementLayer {
 		return JSON.stringify(parts);
 	}
 
-	async sync(parts) {
+	sync(parts) {
 		const key = this.get_key(parts);
-		if (key === this.key) return;
-		this.key = key;
+		if (key !== this.key) {
+			this.key = key;
+			this.syncing = this.build(parts, key);
+		}
+		return this.syncing;
+	}
 
+	async build(parts, key) {
 		const objects = [];
 		for (const part of parts) {
 			const template = await this.get_template(part.model_file);

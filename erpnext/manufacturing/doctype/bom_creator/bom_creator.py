@@ -454,6 +454,7 @@ class BOMCreator(Document):
 			)
 			return
 
+		self.status = "Submitted"
 		self.set_status(save=True)
 
 
