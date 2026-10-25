@@ -556,6 +556,12 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("BOM", boms[item_code], "is_phantom_bom"), 1)
 
+	def test_finished_good_changed_after_submit_must_match_phantom_setting(self):
+		design = make_submitted_design()
+		design.item_code = make_item("_Test Creator Service Kit", {"is_stock_item": 0}).name
+
+		self.assertRaisesRegex(frappe.ValidationError, "Non-phantom BOM", design.save)
+
 	def test_submit_rejects_item_operation_without_routing(self):
 		design = make_bom_creator(
 			items=[{"item_code": "_Test Item", "qty": 1, "operation": "_Test Operation 1"}]
