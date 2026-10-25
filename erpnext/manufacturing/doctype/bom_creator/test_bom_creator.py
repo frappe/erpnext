@@ -387,6 +387,13 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, design.save)
 
+	def test_output_of_a_missing_operation_gives_no_item(self):
+		from erpnext.manufacturing.doctype.bom_creator.operation_plan import OperationPlan
+
+		material = frappe._dict(part_node_id=0, bom_node_id=0, from_operation_id=99, item_code=None)
+
+		self.assertIsNone(OperationPlan(make_design()).get_material_item(material))
+
 	def test_new_revision_keeps_edited_quantity_until_the_design_changes_it(self):
 		design = make_mapped_design()
 		get_part(design, "TUBE-25").qty = 5
@@ -940,12 +947,15 @@ class TestBOMCreator(ERPNextTestSuite):
 		from erpnext.patches.v16_0.move_bom_creator_items_to_part_tree import get_item_updates
 
 		rows = [
-			frappe._dict(name="frame", fg_reference_id="BOM-CRE-OLD", item_code="FRAME-ASM", qty=1),
-			frappe._dict(name="tube", fg_reference_id="frame", item_code="TUBE-25", qty=3),
+			frappe._dict(name="frame", fg_reference_id="BOM-CRE-OLD", item_code="FRAME-ASM", qty=2),
+			frappe._dict(
+				name="tube", fg_reference_id="frame", item_code="TUBE-25", qty=6, rate=5, base_rate=10
+			),
 		]
-		updates = get_item_updates(frappe._dict(name="BOM-CRE-OLD", qty=1), rows)
+		updates = get_item_updates(frappe._dict(name="BOM-CRE-OLD", qty=2), rows)
 
 		self.assertEqual((updates["frame"]["is_expandable"], updates["tube"]["is_expandable"]), (1, 0))
+		self.assertEqual([updates["tube"][field] for field in ("qty", "amount", "base_amount")], [3, 15, 30])
 
 	def test_item_matcher_maps_a_part_number_written_without_punctuation(self):
 		make_item("ZPH100", {"item_name": "Zephyr Plate"})

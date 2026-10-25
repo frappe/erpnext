@@ -100,8 +100,10 @@ class OperationPlan(BOMPlan):
 
 		if row.from_operation_id:
 			operations = self.operations[cint(row.bom_node_id)]
-			source = next(op for op in operations if cint(op.operation_id) == cint(row.from_operation_id))
-			return self.get_output_item(source, source is operations[-1])
+			source = next(
+				(op for op in operations if cint(op.operation_id) == cint(row.from_operation_id)), None
+			)
+			return self.get_output_item(source, source is operations[-1]) if source else None
 
 		return row.item_code
 
