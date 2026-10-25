@@ -217,3 +217,65 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		doc.reload()
 		doc.for_buying = 0
 		self.assertRaises(frappe.CannotChangeConstantError, doc.save)
+
+	def test_reverse_record_is_used_when_no_direct_record(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		self.disable_provider()
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date="2031-03-10",
+			from_currency="EUR",
+			to_currency="INR",
+			exchange_rate=82,
+			for_buying=1,
+			for_selling=0,
+		).insert()
+
+		self.assertAlmostEqual(get_exchange_rate("INR", "EUR", "2031-03-10"), 1 / 82)
+
+	def test_reverse_record_flips_buying_selling_side(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		self.disable_provider()
+		for from_currency, for_buying, for_selling, rate, args in (
+			("GBP", 0, 1, 82, "for_buying"),
+			("EUR", 1, 0, 90, "for_selling"),
+		):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date="2031-03-10",
+				from_currency=from_currency,
+				to_currency="INR",
+				exchange_rate=rate,
+				for_buying=for_buying,
+				for_selling=for_selling,
+			).insert()
+
+			self.assertAlmostEqual(get_exchange_rate("INR", from_currency, "2031-03-10", args), 1 / rate)
+
+	def test_direct_record_wins_over_reverse_record(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		self.disable_provider()
+		for from_currency, to_currency, rate, date in (
+			("USD", "INR", 82, "2031-03-10"),
+			("INR", "USD", 0.0125, "2031-03-09"),
+		):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date=date,
+				from_currency=from_currency,
+				to_currency=to_currency,
+				exchange_rate=rate,
+				for_buying=1,
+				for_selling=0,
+			).insert()
+
+		self.assertEqual(get_exchange_rate("INR", "USD", "2031-03-10"), 0.0125)
+
+	def test_no_record_in_either_direction(self, mock_get):
+		self.disable_provider()
+		self.assertEqual(get_exchange_rate("CHF", "JPY", "2031-03-10"), 0.0)
+
+	def disable_provider(self):
+		previous = frappe.db.get_single_value("Currency Exchange Settings", "disabled")
+		self.addCleanup(frappe.db.set_single_value, "Currency Exchange Settings", "disabled", previous)
+		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)
