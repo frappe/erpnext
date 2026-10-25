@@ -488,8 +488,13 @@
 						text-align: center;
 					}
 
-					> .rate-amount-header {
+					> .rate-header,
+					> .amount-header {
 						text-align: right;
+						margin-left: var(--margin-md);
+					}
+
+					> .amount-header {
 						margin-right: var(--margin-sm);
 					}
 				}
@@ -578,20 +583,17 @@
 								font-weight: 700;
 							}
 
-							> .item-rate-amount {
+							> .item-rate,
+							> .item-amount {
 								display: flex;
-								flex-direction: column;
+								align-items: center;
+								justify-content: flex-end;
 								flex-shrink: 0;
-								text-align: right;
+								margin-left: var(--margin-md);
+							}
 
-								> .item-rate {
-									font-weight: 700;
-								}
-
-								> .item-amount {
-									font-size: var(--text-md);
-									font-weight: 600;
-								}
+							> .item-amount {
+								font-weight: 700;
 							}
 						}
 					}
