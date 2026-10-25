@@ -107,8 +107,8 @@ erpnext.setup.slides_settings = [
 			},
 			{ fieldtype: "Column Break" },
 			{ fieldname: "module_assets", label: __("Assets"), fieldtype: "Check" },
-			{ fieldname: "module_projects", label: __("Project Management"), fieldtype: "Check" },
-			{ fieldname: "module_pos", label: __("Point of Sale"), fieldtype: "Check" },
+			{ fieldname: "module_projects", label: __("Projects"), fieldtype: "Check" },
+			{ fieldname: "module_pos", label: __("POS"), fieldtype: "Check" },
 		],
 
 		onload: function (slide) {
