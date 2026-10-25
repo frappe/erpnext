@@ -544,7 +544,10 @@ class TestGeneralLedger(ERPNextTestSuite):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 		from erpnext.accounts.report import utils as report_utils
 
-		frappe.db.delete("Currency Exchange", {"from_currency": "USD", "to_currency": "INR"})
+		for from_currency, to_currency in (("USD", "INR"), ("INR", "USD")):
+			frappe.db.delete(
+				"Currency Exchange", {"from_currency": from_currency, "to_currency": to_currency}
+			)
 		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)
 		exchange_rates = getattr(report_utils, "__exchange_rates")
 		exchange_rates.clear()
