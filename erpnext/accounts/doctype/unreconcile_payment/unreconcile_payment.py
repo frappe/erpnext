@@ -14,6 +14,7 @@ from frappe.utils.data import comma_and
 from erpnext import _refuse
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
+	is_immutable_ledger_enabled,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
@@ -85,6 +86,10 @@ def doc_has_references(doctype: str | None = None, docname: str | None = None):
 		frappe.throw(_("{0} and {1} are required").format(frappe.bold("doctype"), frappe.bold("docname")))
 	frappe.has_permission(doctype, "read", doc=docname, throw=True)
 
+	if is_immutable_ledger_enabled():
+		company = frappe.db.get_value(doctype, docname, "company")
+		return len(get_linked_payments_for_doc(company, doctype, docname))
+
 	count = 0
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
 		count = frappe.db.count(
@@ -119,13 +124,19 @@ def get_linked_payments_for_doc(
 		_dt = doctype
 		_dn = docname
 		ple = qb.DocType("Payment Ledger Entry")
+		immutable_ledger_enabled = is_immutable_ledger_enabled()
 		if _dt in ["Sales Invoice", "Purchase Invoice"]:
 			criteria = [
 				(ple.company == company),
 				(ple.delinked == 0),
 				(ple.against_voucher_no == _dn),
-				(ple.amount < 0),
+				(ple.voucher_no != _dn) if immutable_ledger_enabled else (ple.amount < 0),
 			]
+			linked_amount = (
+				Sum(ple.amount_in_account_currency) < 0
+				if immutable_ledger_enabled
+				else Abs(Sum(ple.amount_in_account_currency)) > 0
+			)
 
 			res = (
 				qb.from_(ple)
@@ -141,7 +152,7 @@ def get_linked_payments_for_doc(
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.voucher_no, ple.against_voucher_no)
-				.having(Abs(Sum(ple.amount_in_account_currency)) > 0)
+				.having(linked_amount)
 				# deterministic order across backends (postgres GROUP BY does not imply ordering)
 				.orderby(ple.voucher_no)
 				.run(as_dict=True)
@@ -172,6 +183,8 @@ def get_linked_payments_for_doc(
 				# deterministic order across backends (postgres GROUP BY does not imply ordering)
 				.orderby(ple.against_voucher_no)
 			)
+			if immutable_ledger_enabled:
+				query = query.having(Abs(Sum(ple.amount_in_account_currency)) > 0)
 
 			res = query.run(as_dict=True)
 

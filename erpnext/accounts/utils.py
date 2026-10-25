@@ -964,6 +964,10 @@ def cancel_common_party_journal(self):
 def update_accounting_ledgers_after_reference_removal(
 	ref_type: str | None = None, ref_no: str | None = None, payment_name: str | None = None
 ):
+	if is_immutable_ledger_enabled():
+		make_offsetting_entries_after_reference_removal(ref_type, ref_no, payment_name)
+		return
+
 	# General Ledger
 	gle = qb.DocType("GL Entry")
 	gle_update_query = (
@@ -1013,6 +1017,101 @@ def update_accounting_ledgers_after_reference_removal(
 		adv_ple = adv_ple.where(adv.voucher_no == payment_name)
 
 	adv_ple.run()
+
+
+def make_offsetting_entries_after_reference_removal(
+	ref_type: str | None = None, ref_no: str | None = None, payment_name: str | None = None
+):
+	posting_date = frappe.form_dict.get("posting_date") or getdate()
+
+	ple = qb.DocType("Payment Ledger Entry")
+	query = (
+		qb.from_(ple)
+		.select("*")
+		.where(
+			(ple.against_voucher_type == ref_type)
+			& (ple.against_voucher_no == ref_no)
+			& (ple.delinked == 0)
+			& ((ple.voucher_type != ref_type) | (ple.voucher_no != ref_no))
+		)
+		.orderby(ple.creation)
+	)
+	if payment_name:
+		query = query.where(ple.voucher_no == payment_name)
+
+	for entry, amount, amount_in_account_currency in _get_net_ledger_entries(
+		"Payment Ledger Entry",
+		query.run(as_dict=True),
+		("account", "party_type", "party", "voucher_type", "voucher_no", "voucher_detail_no"),
+		("amount", "amount_in_account_currency"),
+	):
+		for against_voucher_type, against_voucher_no, sign in (
+			(ref_type, ref_no, -1),
+			(entry.voucher_type, entry.voucher_no, 1),
+		):
+			ple_doc = frappe.get_doc(
+				{
+					**entry,
+					"posting_date": posting_date,
+					"against_voucher_type": against_voucher_type,
+					"against_voucher_no": against_voucher_no,
+					"amount": sign * amount,
+					"amount_in_account_currency": sign * amount_in_account_currency,
+				}
+			)
+			ple_doc.flags.ignore_links = True
+			ple_doc.flags.ignore_permissions = 1
+			ple_doc.flags.adv_adj = 1
+			ple_doc.flags.update_outstanding = "No"
+			ple_doc.submit()
+
+	adv = qb.DocType("Advance Payment Ledger Entry")
+	query = (
+		qb.from_(adv)
+		.select("*")
+		.where(adv.delinked == 0)
+		.where(
+			((adv.against_voucher_type == ref_type) & (adv.against_voucher_no == ref_no))
+			| ((adv.voucher_type == ref_type) & (adv.voucher_no == ref_no))
+		)
+		.orderby(adv.creation)
+	)
+	if payment_name:
+		query = query.where(adv.voucher_no == payment_name)
+
+	for entry, amount, base_amount in _get_net_ledger_entries(
+		"Advance Payment Ledger Entry",
+		query.run(as_dict=True),
+		("voucher_type", "voucher_no", "against_voucher_type", "against_voucher_no", "event"),
+		("amount", "base_amount"),
+	):
+		adv_doc = frappe.get_doc({**entry, "amount": -amount, "base_amount": -base_amount})
+		adv_doc.flags.ignore_links = True
+		adv_doc.flags.ignore_permissions = 1
+		adv_doc.flags.update_outstanding = "No"
+		adv_doc.submit()
+
+
+def _get_net_ledger_entries(doctype: str, entries: list, group_by: tuple, amount_fields: tuple) -> list:
+	groups = {}
+	for row in entries:
+		key = tuple(row.get(field) for field in group_by)
+		if key not in groups:
+			groups[key] = [row, *(0.0 for _field in amount_fields)]
+		for idx, field in enumerate(amount_fields, start=1):
+			groups[key][idx] += flt(row.get(field))
+
+	identity_fields = ("name", "creation", "modified", "modified_by", "owner", "docstatus", "idx")
+	net_entries = []
+	for row, *amounts in groups.values():
+		if any(flt(x, 9) for x in amounts):
+			entry = frappe._dict(
+				{k: v for k, v in row.items() if k not in identity_fields and not k.startswith("_")}
+			)
+			entry.doctype = doctype
+			net_entries.append((entry, *amounts))
+
+	return net_entries
 
 
 def remove_ref_from_advance_section(ref_doc: object = None, payment_name: str | None = None):
@@ -1123,6 +1222,16 @@ def remove_ref_doc_link_from_pe(
 	# Update payment request amount
 	update_payment_requests_as_per_pe_references(reference_rows, cancel=True)
 
+	immutable_ledger_enabled = is_immutable_ledger_enabled()
+	if immutable_ledger_enabled:
+		for pe in linked_pe:
+			try:
+				pe_doc = frappe.get_doc("Payment Entry", pe)
+				references = [x for x in pe_doc.references if x.name in row_names]
+				[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
+			except Exception:
+				throw_payment_entry_unlink_error(pe)
+
 	# Update allocated amounts and modified fields in one go
 	(
 		qb.update(per)
@@ -1139,17 +1248,14 @@ def remove_ref_doc_link_from_pe(
 			pe_doc = frappe.get_doc("Payment Entry", pe)
 			pe_doc.set_amounts()
 
-			# Call cancel on only removed reference
-			references = [x for x in pe_doc.references if x.name in row_names]
-			[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
+			if not immutable_ledger_enabled:
+				references = [x for x in pe_doc.references if x.name in row_names]
+				[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
 
 			pe_doc.clear_unallocated_reference_document_rows()
 			pe_doc.validate_payment_type_with_outstanding()
 		except Exception:
-			msg = _("There were issues unlinking payment entry {0}.").format(pe_doc.name)
-			msg += "<br>"
-			msg += _("Please cancel payment entry manually first")
-			frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
+			throw_payment_entry_unlink_error(pe)
 
 		if pe_doc.docstatus == 1 and not pe_doc.book_advance_payments_in_separate_party_account:
 			repost_advance_payment_ledger(pe_doc)
@@ -1171,13 +1277,54 @@ def remove_ref_doc_link_from_pe(
 	frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 
+def throw_payment_entry_unlink_error(payment_entry: str):
+	msg = _("There were issues unlinking payment entry {0}.").format(payment_entry)
+	msg += "<br>"
+	msg += _("Please cancel payment entry manually first")
+	frappe.throw(msg, exc=PaymentEntryUnlinkError, title=_("Payment Unlink Error"))
+
+
 def repost_advance_payment_ledger(doc):
+	if is_immutable_ledger_enabled():
+		offset_advance_payment_ledger(doc)
+		return
+
 	_delete_adv_pl_entries(doc.doctype, doc.name)
 	for entry in get_payment_ledger_entries(doc.build_gl_map()):
 		if entry.doctype == "Advance Payment Ledger Entry":
 			adv = frappe.get_doc(entry)
 			adv.flags.ignore_permissions = 1
 			adv.submit()
+
+
+def offset_advance_payment_ledger(doc):
+	adv = qb.DocType("Advance Payment Ledger Entry")
+	existing = (
+		qb.from_(adv)
+		.select("*")
+		.where((adv.voucher_type == doc.doctype) & (adv.voucher_no == doc.name) & (adv.delinked == 0))
+		.orderby(adv.creation)
+		.run(as_dict=True)
+	)
+	expected = [
+		frappe._dict(x)
+		for x in get_payment_ledger_entries(doc.build_gl_map())
+		if x.doctype == "Advance Payment Ledger Entry"
+	]
+	entries = expected + [
+		frappe._dict(x, amount=-flt(x.amount), base_amount=-flt(x.base_amount)) for x in existing
+	]
+
+	for entry, amount, base_amount in _get_net_ledger_entries(
+		"Advance Payment Ledger Entry",
+		entries,
+		("against_voucher_type", "against_voucher_no", "event"),
+		("amount", "base_amount"),
+	):
+		adv_doc = frappe.get_doc({**entry, "amount": amount, "base_amount": base_amount, "delinked": 0})
+		adv_doc.flags.ignore_permissions = 1
+		adv_doc.flags.update_outstanding = "No"
+		adv_doc.submit()
 
 
 @frappe.whitelist()
