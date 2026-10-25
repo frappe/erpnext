@@ -57,6 +57,9 @@ class PartTreePlan(BOMPlan):
 		for siblings in self.children.values():
 			seen = {}
 			for row in siblings:
+				if not row.item_code:
+					continue
+
 				other = seen.setdefault(row.item_code, row)
 				if other is not row and (self.children[row.node_id] or self.children[other.node_id]):
 					problems.append(

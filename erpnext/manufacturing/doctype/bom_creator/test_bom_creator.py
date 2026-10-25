@@ -48,6 +48,13 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "incomplete or damaged", read_step_file, content[:cut])
 
+	def test_step_file_with_a_damaged_reference_is_rejected_with_a_message(self):
+		content = make_step_content(BICYCLE_PRODUCTS, BICYCLE_LINKS).replace(
+			"'NAUO1001','','',#", "'NAUO1001','','',#X"
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "incomplete or damaged", read_step_file, content)
+
 	def test_csv_file_with_levels_or_item_numbers_gives_same_tree(self):
 		by_level = read_bom_csv_file(
 			"Level,Part Number,Part Name,Quantity\n1,FRAME-ASM,Frame Assembly,1\n2,TUBE-25,Frame Tube,3\n1,WHEEL-26,Wheel,2\n"
@@ -170,6 +177,25 @@ class TestBOMCreator(ERPNextTestSuite):
 		boms = make_boms(design)
 
 		self.assertEqual(get_bom_items(boms["BIKE-100"]), {"FRAME-ASM": 1, "BOLT-M6": 4})
+
+	def test_unmapped_parts_are_not_reported_as_mapped_to_one_item(self):
+		design = make_mapped_design()
+		get_part(design, "FRAME-ASM").item_code = None
+		get_part(design, "WHEEL-26").item_code = None
+
+		problems = design.get_bom_plan().get_problems()
+
+		self.assertFalse([problem for problem in problems if "in the same assembly" in problem])
+
+	def test_operation_plan_refuses_two_boms_for_one_item(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		get_part(design, "WHEEL-26").item_code = "FRAME-ASM"
+		for part_number in ("FRAME-ASM", "WHEEL-26"):
+			add_operation(design, "_Test Creator Welding", bom_node_id=get_part(design, part_number).node_id)
+
+		problems = design.get_bom_plan().get_problems()
+
+		self.assertTrue([problem for problem in problems if "Only one BOM can be made" in problem])
 
 	def test_assemblies_of_one_item_need_the_same_raw_materials(self):
 		design = make_mapped_design()

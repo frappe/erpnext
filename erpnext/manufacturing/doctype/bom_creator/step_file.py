@@ -20,7 +20,7 @@ LATIN_ESCAPE = re.compile(r"\\X\\([0-9A-F]{2})")
 def read_step_file(content: str) -> dict:
 	try:
 		roots = StepProductStructure(content).get_tree()
-	except (IndexError, KeyError, ValueError):
+	except (AttributeError, IndexError, KeyError, ValueError):
 		frappe.throw(_("The STEP file is incomplete or damaged."), title=_("Invalid Design File"))
 
 	if len(roots) == 1:
