@@ -174,6 +174,9 @@ class Employee(NestedSet):
 
 	def validate_user_access(self, user: str | None = None):
 		user = user or self.user_id
+		if self.flags.get("created_user") == user:
+			return
+
 		if not frappe.has_permission("User", "write", user):
 			frappe.throw(
 				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
@@ -226,9 +229,11 @@ class Employee(NestedSet):
 		if self.user_id:
 			return
 
+		email = self.prefered_email or self.company_email or self.personal_email
+		self.flags.created_user = email
 		create_user(
 			employee=self.name,
-			email=self.prefered_email or self.company_email or self.personal_email,
+			email=email,
 			create_user_permission=self.create_user_permission,
 		)
 
@@ -301,7 +306,6 @@ class Employee(NestedSet):
 	def update_user(self):
 		# add employee role if missing
 		user = frappe.get_doc("User", self.user_id)
-		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("roles"):
 			user.append_roles("Employee")
@@ -339,7 +343,7 @@ class Employee(NestedSet):
 					# already exists
 					pass
 
-		user.save()
+		user.save(ignore_permissions=self.flags.get("created_user") == user.name)
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -398,7 +402,7 @@ class Employee(NestedSet):
 		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
 			user.enabled = not enabled
 			# Keep linked User status in sync from the Employee lifecycle and record the audit log.
-			user.save(ignore_permissions=True)
+			user.save(ignore_permissions=self.flags.get("created_user") == user.name)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
@@ -589,16 +593,15 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 			"bio": emp.bio,
 		}
 	)
-	user.append_roles("Employee")
-	user.insert()
+	user.insert(ignore_permissions=True)
 
-	emp.user_id = user.name
-	emp.create_user_permission = cint(create_user_permission)
-	emp.save()
-
-	if cint(create_user_permission):
-		add_user_permission("Employee", emp.name, user.name)
-		add_user_permission("Company", emp.company, user.name)
+	emp.flags.created_user = user.name
+	try:
+		emp.user_id = user.name
+		emp.create_user_permission = cint(create_user_permission)
+		emp.save()
+	finally:
+		emp.flags.created_user = None
 
 	return user.name
 

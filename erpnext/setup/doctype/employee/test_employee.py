@@ -222,6 +222,54 @@ class TestEmployee(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
 
+	def test_hr_roles_can_create_employee_users(self):
+		from erpnext.setup.doctype.employee.employee import create_user
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for role in ("HR User", "HR Manager"):
+			hr_user = make_fenced_user(f"employee-create-{frappe.scrub(role)}@example.com", [role])
+			employee = frappe.get_doc(
+				{
+					"doctype": "Employee",
+					"first_name": role,
+					"company": "_Test Company",
+					"date_of_birth": "1990-05-08",
+					"date_of_joining": "2013-01-01",
+					"gender": "Female",
+				}
+			).insert()
+
+			with as_user(hr_user):
+				user = create_user(
+					employee.name,
+					f"employee-created-by-{frappe.scrub(role)}@example.com",
+					create_user_permission=1,
+				)
+
+			self.assertIn("Employee", frappe.get_roles(user))
+
+	def test_hr_roles_can_create_employee_users_automatically(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for role in ("HR User", "HR Manager"):
+			hr_user = make_fenced_user(f"employee-auto-create-{frappe.scrub(role)}@example.com", [role])
+			with as_user(hr_user):
+				employee = frappe.get_doc(
+					{
+						"doctype": "Employee",
+						"first_name": f"Auto {role}",
+						"company": "_Test Company",
+						"date_of_birth": "1990-05-08",
+						"date_of_joining": "2013-01-01",
+						"gender": "Female",
+						"personal_email": f"employee-auto-created-by-{frappe.scrub(role)}@example.com",
+						"create_user_automatically": 1,
+						"create_user_permission": 1,
+					}
+				).insert()
+
+			self.assertIn("Employee", frappe.get_roles(employee.user_id))
+
 	def test_salary_currency_set_from_company(self):
 		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
 		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")
