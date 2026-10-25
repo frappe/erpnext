@@ -162,6 +162,10 @@ class Employee(NestedSet):
 		if not self.user_id:
 			return
 
+		previous_doc = self.get_doc_before_save()
+		if previous_doc and previous_doc.user_id and previous_doc.user_id != self.user_id:
+			self.validate_user_access(previous_doc.user_id)
+
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
 		if self.has_user_details_changed() or any(
@@ -233,16 +237,63 @@ class Employee(NestedSet):
 		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
 			return
 
-		employee_user_permission_exists = frappe.db.exists(
-			"User Permission", {"allow": "Employee", "for_value": self.name, "user": self.user_id}
-		)
+		previous_doc = self.get_doc_before_save()
+		if previous_doc and previous_doc.user_id and previous_doc.user_id != self.user_id:
+			self.remove_user_permissions(previous_doc.user_id, previous_doc.company)
+			self.remove_employee_role(previous_doc.user_id)
 
-		if employee_user_permission_exists and not self.create_user_permission:
-			remove_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
-			remove_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
-		elif not employee_user_permission_exists and self.create_user_permission:
-			add_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
-			add_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
+		if self.create_user_permission:
+			self.add_user_permissions(self.user_id, self.company)
+		else:
+			self.remove_user_permissions(self.user_id, self.company)
+
+	def add_user_permissions(self, user, company):
+		add_user_permission("Employee", self.name, user, applicable_for="Employee", ignore_permissions=True)
+
+		company_permission_exists = frappe.db.exists(
+			"User Permission",
+			{
+				"allow": "Company",
+				"for_value": company,
+				"user": user,
+				"apply_to_all_doctypes": 1,
+			},
+		)
+		if not company_permission_exists:
+			add_user_permission("Company", company, user, ignore_permissions=True)
+			add_user_permission("Company", company, user, applicable_for="Employee", ignore_permissions=True)
+
+	def remove_user_permissions(self, user, company, include_employee=True):
+		if include_employee:
+			self.delete_user_permissions(
+				{"allow": "Employee", "for_value": self.name, "user": user, "applicable_for": "Employee"}
+			)
+
+		company_permission_marker = {
+			"allow": "Company",
+			"for_value": company,
+			"user": user,
+			"applicable_for": "Employee",
+		}
+		if frappe.db.exists("User Permission", company_permission_marker):
+			self.delete_user_permissions(
+				{
+					"allow": "Company",
+					"for_value": company,
+					"user": user,
+					"apply_to_all_doctypes": 1,
+				}
+			)
+			self.delete_user_permissions(company_permission_marker)
+
+	def delete_user_permissions(self, filters):
+		for user_permission in frappe.get_all("User Permission", filters=filters, pluck="name"):
+			frappe.delete_doc("User Permission", user_permission, force=True, ignore_permissions=True)
+
+	def remove_employee_role(self, user):
+		user_doc = frappe.get_doc("User", user)
+		validate_employee_role(user_doc)
+		user_doc.save(ignore_permissions=True)
 
 	def update_user(self):
 		# add employee role if missing

@@ -135,6 +135,38 @@ class TestEmployee(ERPNextTestSuite):
 			self.assertFalse(frappe.has_permission("Employee", "read", other_employee))
 			self.assertNotIn(other_employee, frappe.get_list("Employee", pluck="name"))
 
+	def test_changing_user_removes_old_user_access(self):
+		from erpnext.tests.permission_test_utils import make_fenced_user
+
+		old_user = "employee-old-user@example.com"
+		new_user = make_fenced_user("employee-new-user@example.com", ["Employee"])
+		employee = make_employee(old_user, company="_Test Company", create_user_permission=1)
+		company_permission = frappe.db.get_value(
+			"User Permission",
+			{
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"user": old_user,
+				"apply_to_all_doctypes": 1,
+			},
+			["apply_to_all_doctypes", "applicable_for"],
+			as_dict=True,
+		)
+		self.assertTrue(company_permission.apply_to_all_doctypes)
+		self.assertFalse(company_permission.applicable_for)
+
+		employee_doc = frappe.get_doc("Employee", employee)
+		employee_doc.user_id = new_user
+		employee_doc.save()
+
+		for allow, for_value in (("Employee", employee), ("Company", "_Test Company")):
+			self.assertFalse(
+				frappe.db.exists(
+					"User Permission", {"allow": allow, "for_value": for_value, "user": old_user}
+				)
+			)
+		self.assertNotIn("Employee", frappe.get_roles(old_user))
+
 	def test_salary_currency_set_from_company(self):
 		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
 		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")
