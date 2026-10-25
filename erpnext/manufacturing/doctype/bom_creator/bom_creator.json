@@ -37,20 +37,21 @@
   "details_tab",
   "naming_series",
   "item_group",
-  "part_number",
   "project",
-  "is_phantom",
   "routing",
   "column_break_details",
-  "revision",
-  "previous_revision",
+  "part_number",
+  "is_phantom",
   "item_name",
   "uom",
+  "remarks_section",
+  "remarks",
   "more_info_section",
   "status",
-  "remarks",
-  "column_break_irab",
+  "previous_revision",
   "error_log",
+  "column_break_irab",
+  "revision",
   "amended_from",
   "connections_tab"
  ],
@@ -334,7 +335,9 @@
   {
    "fieldname": "more_info_section",
    "fieldtype": "Section Break",
-   "label": "More Information"
+   "label": "More Information",
+   "collapsible": 1,
+   "collapsible_depends_on": "error_log"
   },
   {
    "default": "Draft",
@@ -378,6 +381,10 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "list-plus",
@@ -394,7 +401,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-10-24 17:39:02.377997",
+ "modified": "2026-10-25 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
