@@ -12,7 +12,7 @@ def execute():
 
 	rows_by_creator = get_rows_by_creator()
 	creator_updates, item_updates = {}, {}
-	for creator in get_creators():
+	for creator in get_creators(list(rows_by_creator)):
 		creator_updates[creator.name] = {
 			"design_name": creator.design_name or creator.item_name or creator.item_code or creator.name,
 			"naming_series": NAMING_SERIES,
@@ -24,12 +24,15 @@ def execute():
 	frappe.db.bulk_update("BOM Creator Item", item_updates, update_modified=False)
 
 
-def get_creators() -> list:
+def get_creators(names: list[str]) -> list:
+	if not names:
+		return []
+
 	creator = frappe.qb.DocType("BOM Creator")
 	return (
 		frappe.qb.from_(creator)
 		.select(creator.name, creator.qty, creator.item_code, creator.item_name, creator.design_name)
-		.where(creator.naming_series.isnull() | (creator.naming_series == ""))
+		.where(creator.name.isin(names))
 		.run(as_dict=True)
 	)
 
@@ -49,6 +52,7 @@ def get_rows_by_creator() -> dict:
 			item.fg_reference_id,
 		)
 		.where(item.parenttype == "BOM Creator")
+		.where(item.node_id.isnull() | (item.node_id == 0))
 		.orderby(item.parent)
 		.orderby(item.idx)
 		.run(as_dict=True)

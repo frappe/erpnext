@@ -73,7 +73,9 @@ class PartTreePlan(BOMPlan):
 			if row.node_id not in used or not row.item_code or not self.children[row.node_id]:
 				continue
 
-			materials = sorted((part.item_code or "", flt(qty)) for part, qty in self.merge_rows(row.node_id))
+			materials = sorted(
+				(part.item_code or "", part.uom or "", flt(qty)) for part, qty in self.merge_rows(row.node_id)
+			)
 			other, other_materials = assemblies.setdefault(row.item_code, (row, materials))
 			if other is not row and other_materials != materials:
 				problems.append(
@@ -146,7 +148,8 @@ class PartTreePlan(BOMPlan):
 	def merge_rows(self, node_id: int) -> list[tuple]:
 		merged = {}
 		for row in self.children[node_id]:
-			part, qty = merged.get(row.item_code, (row, 0))
-			merged[row.item_code] = (part, qty + flt(row.qty))
+			key = (row.item_code, row.uom)
+			part, qty = merged.get(key, (row, 0))
+			merged[key] = (part, qty + flt(row.qty))
 
 		return list(merged.values())
