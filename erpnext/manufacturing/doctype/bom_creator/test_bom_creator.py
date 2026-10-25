@@ -68,6 +68,15 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(frame["children"][0]["part_number"], "TUBE-25")
 		self.assertEqual(wheel["quantity"], 2)
 
+	def test_csv_file_with_a_blank_level_uses_the_item_number(self):
+		design = read_bom_csv_file(
+			"Level,Item Number,Part Number,Quantity\n1,1,FRAME-ASM,1\n,1.1,TUBE-25,3\n,2,WHEEL-26,2\n"
+		)
+
+		frame, wheel = design["parts"]
+		self.assertEqual(frame["children"][0]["part_number"], "TUBE-25")
+		self.assertEqual(wheel["part_number"], "WHEEL-26")
+
 	def test_csv_file_with_level_gap_is_rejected(self):
 		self.assertRaises(
 			frappe.ValidationError,
@@ -588,6 +597,22 @@ class TestBOMCreator(ERPNextTestSuite):
 			},
 		).name
 		design = make_bom_creator(items=[{"item_code": material, "qty": 3, "uom": "Box"}])
+		design.items[0].uom = "Nos"
+		design.save()
+
+		row = design.items[0]
+		self.assertEqual((row.conversion_factor, row.stock_qty), (1, 3))
+
+	def test_stock_unit_without_a_conversion_row_gets_factor_one(self):
+		material = make_item(
+			"_Test Creator Box Material",
+			{
+				"valuation_rate": 10,
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		design = make_bom_creator(items=[{"item_code": material, "qty": 3, "uom": "Box"}])
+		frappe.db.delete("UOM Conversion Detail", {"parent": material, "uom": "Nos"})
 		design.items[0].uom = "Nos"
 		design.save()
 

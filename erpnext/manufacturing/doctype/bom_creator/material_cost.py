@@ -57,7 +57,9 @@ class MaterialCost:
 			row.stock_uom = stock_uoms.get(row.item_code)
 			row.uom = row.uom or row.stock_uom
 			row.conversion_factor = (
-				flt(uom_factors.get((row.item_code, row.uom))) or flt(row.conversion_factor) or 1.0
+				1.0
+				if row.uom == row.stock_uom
+				else flt(uom_factors.get((row.item_code, row.uom))) or flt(row.conversion_factor) or 1.0
 			)
 
 			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
