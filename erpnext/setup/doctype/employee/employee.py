@@ -589,7 +589,6 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 			"bio": emp.bio,
 		}
 	)
-	emp.db_set("user_id", email)
 	user.append_roles("Employee")
 	user.insert()
 

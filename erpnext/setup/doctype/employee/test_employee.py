@@ -202,6 +202,26 @@ class TestEmployee(ERPNextTestSuite):
 
 		self.assertIn("Employee", frappe.get_roles(user))
 
+	def test_create_user_for_left_employee_is_disabled(self):
+		from erpnext.setup.doctype.employee.employee import create_user
+
+		employee = frappe.get_doc(
+			{
+				"doctype": "Employee",
+				"first_name": "Former Employee",
+				"company": "_Test Company",
+				"date_of_birth": "1990-05-08",
+				"date_of_joining": "2013-01-01",
+				"gender": "Female",
+				"status": "Left",
+				"relieving_date": "2024-01-01",
+			}
+		).insert()
+
+		user = create_user(employee.name, "employee-left-created@example.com")
+
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
+
 	def test_salary_currency_set_from_company(self):
 		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
 		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")
