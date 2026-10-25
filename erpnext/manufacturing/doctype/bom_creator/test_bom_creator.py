@@ -654,6 +654,41 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Submitted")
 
+	def test_saving_a_submitted_design_refreshes_its_status(self):
+		from erpnext.manufacturing.doctype.bom_creator.part_tree_plan import PartTreePlan
+
+		design = make_mapped_design()
+		make_boms(design)
+		self.assertEqual(design.status, "Completed")
+
+		with patch.object(PartTreePlan, "has_all_boms", return_value=False):
+			design.save()
+
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Submitted")
+
+	def test_create_boms_needs_permission_to_submit_boms(self):
+		design = make_mapped_design()
+
+		def has_permission(doctype, *args, **kwargs):
+			if doctype == "BOM":
+				raise frappe.PermissionError
+			return True
+
+		with patch.object(frappe, "has_permission", side_effect=has_permission):
+			self.assertRaises(frappe.PermissionError, design.enqueue_create_boms)
+
+	def test_revision_changes_need_read_permission_on_the_previous_revision(self):
+		design = make_mapped_design()
+		revision = frappe.get_doc("BOM Creator", design.make_new_revision())
+
+		def has_permission(doctype, ptype=None, doc=None, **kwargs):
+			if doc == design.name:
+				raise frappe.PermissionError
+			return True
+
+		with patch.object(frappe, "has_permission", side_effect=has_permission):
+			self.assertRaises(frappe.PermissionError, revision.get_revision_changes)
+
 	def test_cancelling_the_top_bom_reopens_the_creator_and_keeps_sub_assembly_boms(self):
 		design = make_mapped_design()
 		boms = make_boms(design)

@@ -110,6 +110,9 @@ class BOMCreator(Document):
 		OperationPlan(self).validate()
 		MaterialCost(self).set_costs()
 
+	def on_update_after_submit(self):
+		self.set_status(save=True)
+
 	def before_cancel(self):
 		self.set_status()
 
@@ -320,6 +323,7 @@ class BOMCreator(Document):
 		if not self.previous_revision:
 			frappe.throw(_("This design has no previous revision."))
 
+		frappe.has_permission("BOM Creator", "read", doc=self.previous_revision, throw=True)
 		previous_parts = self.get_previous_parts()
 		previous_paths = get_part_paths(previous_parts)
 		previous_rows = {previous_paths[row.node_id]: row for row in previous_parts}
@@ -415,6 +419,7 @@ class BOMCreator(Document):
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_create_boms(self):
 		self.check_permission("submit")
+		frappe.has_permission("BOM", "submit", throw=True)
 		self.validate_can_create_boms()
 		self.get_bom_plan().validate_can_make_boms()
 		self.db_set({"status": "In Progress", "error_log": None}, notify=True)
