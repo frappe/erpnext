@@ -73,18 +73,19 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
-def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass"):
+def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass", legacy=False):
 	for uom in (from_uom, to_uom):
 		if not frappe.db.exists("UOM", uom):
 			frappe.get_doc(doctype="UOM", uom_name=uom, category=category).insert()
 
-	return frappe.get_doc(
+	conversion_factor = frappe.get_doc(
 		doctype="UOM Conversion Factor",
 		category=category,
 		from_uom=from_uom,
 		to_uom=to_uom,
 		value=value,
-	).insert()
+	)
+	return conversion_factor.db_insert() if legacy else conversion_factor.insert()
 
 
 class TestItem(ERPNextTestSuite):
@@ -1054,20 +1055,24 @@ class TestItem(ERPNextTestSuite):
 		self.assertAlmostEqual(factor, 453.592, 3)
 
 	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 6)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 20)
+		from_uom = "_Test Duplicate UOM Factor From"
+		to_uom = "_Test Duplicate UOM Factor To"
+		make_uom_conversion_factor(from_uom, "Kg", 3, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 25, legacy=True)
+		make_uom_conversion_factor(from_uom, "Kg", 6, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 20, legacy=True)
 
-		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+		factor = get_uom_conv_factor(from_uom, to_uom)
 
 		self.assertEqual(factor, 0.12)
 
 	def test_uom_conv_intermediate_with_shared_target_ignores_zero_divisor(self):
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 0)
+		from_uom = "_Test Zero UOM Factor From"
+		to_uom = "_Test Zero UOM Factor To"
+		make_uom_conversion_factor(from_uom, "Kg", 3, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 0, legacy=True)
 
-		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+		factor = get_uom_conv_factor(from_uom, to_uom)
 
 		self.assertIsNone(factor)
 
