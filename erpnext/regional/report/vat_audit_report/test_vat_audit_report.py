@@ -262,7 +262,7 @@ def make_supplier():
 				"doctype": "Supplier",
 				"supplier_name": "_Test SA Supplier",
 				"supplier_type": "Company",
-				"supplier_group": "All Supplier Groups",
+				"supplier_group": "Services",
 			}
 		).insert()
 
