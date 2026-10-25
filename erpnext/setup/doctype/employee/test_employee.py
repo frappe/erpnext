@@ -186,6 +186,22 @@ class TestEmployee(ERPNextTestSuite):
 			)
 		)
 
+	def test_unlinking_left_employee_preserves_rehire_role(self):
+		user = "employee-rehire@example.com"
+		former_employee = make_employee(user, company="_Test Company")
+
+		former_employee_doc = frappe.get_doc("Employee", former_employee)
+		former_employee_doc.status = "Left"
+		former_employee_doc.relieving_date = "2024-01-01"
+		former_employee_doc.save()
+		new_employee(user).insert()
+
+		former_employee_doc.reload()
+		former_employee_doc.user_id = ""
+		former_employee_doc.save()
+
+		self.assertIn("Employee", frappe.get_roles(user))
+
 	def test_salary_currency_set_from_company(self):
 		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
 		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")

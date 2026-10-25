@@ -6,7 +6,6 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
 	add_user_permission,
 	get_doc_permissions,
-	remove_user_permission,
 )
 from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
@@ -140,9 +139,9 @@ class Employee(NestedSet):
 			if existing_user_id:
 				self.validate_user_access(existing_user_id)
 				user = frappe.get_doc("User", existing_user_id)
-				validate_employee_role(user, ignore_emp_check=True)
-				user.save(ignore_permissions=True)
-				remove_user_permission("Employee", self.name, existing_user_id, ignore_permissions=True)
+				validate_employee_role(user, excluded_employee=self.name)
+				user.save()
+				self.remove_user_permissions(existing_user_id, self.company)
 
 	def after_rename(self, old, new, merge):
 		self.db_set("employee", new)
@@ -438,10 +437,13 @@ class Employee(NestedSet):
 			frappe.cache().delete_value("employees_with_number")
 
 
-def validate_employee_role(doc, method=None, ignore_emp_check=False):
+def validate_employee_role(doc, method=None, ignore_emp_check=False, excluded_employee=None):
 	# called via User hook
 	if not ignore_emp_check:
-		if frappe.db.get_value("Employee", {"user_id": doc.name}):
+		filters = {"user_id": doc.name}
+		if excluded_employee:
+			filters["name"] = ["!=", excluded_employee]
+		if frappe.db.get_value("Employee", filters):
 			return
 
 	user_roles = [d.role for d in doc.get("roles")]
