@@ -104,6 +104,7 @@ class BOMCreator(Document):
 
 	def before_update_after_submit(self):
 		self.validate_cad_parts_unchanged()
+		self.validate_finished_good()
 		self.set_part_structure()
 		self.validate_part_models()
 		OperationPlan(self).validate()
