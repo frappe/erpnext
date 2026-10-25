@@ -120,6 +120,21 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+	def test_employee_role_can_only_read_linked_employee(self):
+		from erpnext.tests.permission_test_utils import as_user
+
+		user = "employee-read-own@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=0)
+		other_employee = make_employee(
+			"employee-read-other@example.com", company="_Test Company", create_user_permission=0
+		)
+		frappe.get_doc("User", user).add_roles("Accounts User")
+
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Employee", "read", employee))
+			self.assertFalse(frappe.has_permission("Employee", "read", other_employee))
+			self.assertNotIn(other_employee, frappe.get_list("Employee", pluck="name"))
+
 	def test_salary_currency_set_from_company(self):
 		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
 		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")

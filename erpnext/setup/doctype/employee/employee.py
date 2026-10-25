@@ -401,6 +401,37 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
 
 
+def has_permission(doc, ptype=None, user=None, **kwargs):
+	user = user or frappe.session.user
+	if ptype not in ("read", "select") or doc.user_id == user:
+		return True
+
+	if "Employee" not in frappe.get_roles(user):
+		return True
+
+	return has_unrestricted_employee_read_access(user)
+
+
+def get_permission_query_conditions(user=None, doctype=None):
+	user = user or frappe.session.user
+	if "Employee" not in frappe.get_roles(user) or has_unrestricted_employee_read_access(user):
+		return None
+
+	Employee = frappe.qb.DocType(doctype or "Employee")
+	return Employee.user_id == user
+
+
+def has_unrestricted_employee_read_access(user):
+	roles = set(frappe.get_roles(user))
+	return any(
+		permission.role != "Employee"
+		and permission.role in roles
+		and not permission.permlevel
+		and permission.read
+		for permission in frappe.get_meta("Employee").permissions
+	)
+
+
 def get_employee_email(employee_doc):
 	return (
 		employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
