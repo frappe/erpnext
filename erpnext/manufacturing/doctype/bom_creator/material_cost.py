@@ -51,13 +51,14 @@ class MaterialCost:
 
 	def set_conversion_factors(self):
 		rows = [row for row in self.design.items if row.item_code]
-		uom_factors = self.get_uom_factors([row.item_code for row in rows if not row.conversion_factor])
+		uom_factors = self.get_uom_factors([row.item_code for row in rows])
 		stock_uoms = self.get_stock_uoms([row.item_code for row in rows])
 		for row in rows:
 			row.stock_uom = stock_uoms.get(row.item_code)
 			row.uom = row.uom or row.stock_uom
-			if not row.conversion_factor:
-				row.conversion_factor = flt(uom_factors.get((row.item_code, row.uom))) or 1.0
+			row.conversion_factor = (
+				flt(uom_factors.get((row.item_code, row.uom))) or flt(row.conversion_factor) or 1.0
+			)
 
 			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
 

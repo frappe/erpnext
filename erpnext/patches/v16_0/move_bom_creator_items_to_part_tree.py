@@ -25,14 +25,12 @@ def execute():
 
 
 def get_creators(names: list[str]) -> list:
-	if not names:
-		return []
-
 	creator = frappe.qb.DocType("BOM Creator")
+	without_design_name = creator.design_name.isnull() | (creator.design_name == "")
 	return (
 		frappe.qb.from_(creator)
 		.select(creator.name, creator.qty, creator.item_code, creator.item_name, creator.design_name)
-		.where(creator.name.isin(names))
+		.where(creator.name.isin(names) | without_design_name if names else without_design_name)
 		.run(as_dict=True)
 	)
 

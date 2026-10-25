@@ -496,6 +496,21 @@ class TestBOMCreator(ERPNextTestSuite):
 		row = design.items[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.amount), (12, 36, 360))
 
+	def test_changed_unit_of_measure_gets_its_own_conversion_factor(self):
+		material = make_item(
+			"_Test Creator Box Material",
+			{
+				"valuation_rate": 10,
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		design = make_bom_creator(items=[{"item_code": material, "qty": 3, "uom": "Box"}])
+		design.items[0].uom = "Nos"
+		design.save()
+
+		row = design.items[0]
+		self.assertEqual((row.conversion_factor, row.stock_qty), (1, 3))
+
 	def test_parts_of_one_item_in_different_units_stay_separate_bom_rows(self):
 		material = make_item(
 			"_Test Creator Box Material",
@@ -700,6 +715,13 @@ class TestBOMCreator(ERPNextTestSuite):
 		design = make_design()
 		self.assertEqual(design.naming_series, "BOM-CRE-.YYYY.-")
 		self.assertEqual([creator.name for creator in get_creators([design.name])], [design.name])
+
+	def test_migration_finds_old_designs_without_rows(self):
+		from erpnext.patches.v16_0.move_bom_creator_items_to_part_tree import get_creators
+
+		design = make_bom_creator()
+		design.db_set("design_name", None)
+		self.assertIn(design.name, [creator.name for creator in get_creators([])])
 
 	def test_migrated_tree_marks_assemblies_as_expandable(self):
 		from erpnext.patches.v16_0.move_bom_creator_items_to_part_tree import get_item_updates
