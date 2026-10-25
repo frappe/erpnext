@@ -637,6 +637,43 @@ class TestStockEntry(FrappeTestCase):
 		)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 
+	def test_half_cent_transfer_moves_no_value_after_target_warehouse_repost(self):
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=10.005,
+			posting_date=add_days(today(), -10),
+		)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			basic_rate=7,
+			posting_date=add_days(today(), -8),
+		)
+
+		outward, inward = self.get_transfer_leg_values(transfer.name)
+		self.assertEqual(flt(inward, 2), -flt(outward, 2))
+
+	def get_transfer_leg_values(self, voucher_no):
+		return tuple(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		)
+
 	def assert_half_cent_transfer_moves_no_value(self, item_code):
 		receipt = make_stock_entry(
 			item_code=item_code, target="_Test Warehouse - _TC", qty=4000, basic_rate=7189.1616125
@@ -651,14 +688,7 @@ class TestStockEntry(FrappeTestCase):
 			batch_no=bundle and get_batch_from_bundle(bundle),
 		)
 
-		outward, inward = (
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": transfer.name, "warehouse": warehouse, "is_cancelled": 0},
-				"stock_value_difference",
-			)
-			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
-		)
+		outward, inward = self.get_transfer_leg_values(transfer.name)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 		return receipt, transfer
 
