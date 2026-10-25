@@ -50,15 +50,17 @@ frappe.ui.form.on("Chart of Accounts Importer", {
 							d.set_df_property(
 								"template_type",
 								"description",
-								`The Sample Template contains all the required accounts pre filled in the  template.
-								You can add more accounts or change existing accounts in the template as per your choice.`
+								__(
+									"The Sample Template contains all the required accounts pre filled in the template. You can add more accounts or change existing accounts in the template as per your choice."
+								)
 							);
 						} else {
 							d.set_df_property(
 								"template_type",
 								"description",
-								`The Blank Template contains just the account type and root type required to build the Chart
-								of Accounts. Please enter the account names and add more rows as per your requirement.`
+								__(
+									"The Blank Template contains just the account type and root type required to build the Chart of Accounts. Please enter the account names and add more rows as per your requirement."
+								)
 							);
 						}
 					},
