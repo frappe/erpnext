@@ -3,28 +3,37 @@
 import unittest
 
 import frappe
-from frappe.utils import random_string
+from frappe.utils import add_days, random_string
 
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestVehicle(ERPNextTestSuite):
+	def make_vehicle(self, **kwargs):
+		vehicle_args = {
+			"doctype": "Vehicle",
+			"license_plate": random_string(10).upper(),
+			"make": "Maruti",
+			"model": "PCM",
+			"last_odometer": 5000,
+			"acquisition_date": frappe.utils.nowdate(),
+			"location": "Mumbai",
+			"chassis_no": "1234ABCD",
+			"uom": "Litre",
+			"vehicle_value": frappe.utils.flt(500000),
+		}
+		vehicle_args.update(kwargs)
+		return frappe.get_doc(vehicle_args)
+
 	def test_make_vehicle(self):
-		vehicle = frappe.get_doc(
-			{
-				"doctype": "Vehicle",
-				"license_plate": random_string(10).upper(),
-				"make": "Maruti",
-				"model": "PCM",
-				"last_odometer": 5000,
-				"acquisition_date": frappe.utils.nowdate(),
-				"location": "Mumbai",
-				"chassis_no": "1234ABCD",
-				"uom": "Litre",
-				"vehicle_value": frappe.utils.flt(500000),
-			}
-		)
-		vehicle.insert()
+		self.make_vehicle().insert()
+
+	def test_incomplete_insurance_dates_are_valid(self):
+		for insurance_dates in (
+			{"start_date": add_days(frappe.utils.nowdate(), 1)},
+			{"end_date": add_days(frappe.utils.nowdate(), -1)},
+		):
+			self.make_vehicle(**insurance_dates).insert()
 
 	def test_renaming_vehicle(self):
 		license_plate = random_string(10).upper()
