@@ -121,9 +121,11 @@ def is_product_bundle(item_code: str) -> bool:
 def get_indexed_packed_items_table(doc):
 	"""
 	Create dict from stale packed items table like:
-	{(Parent Item 1, Bundle Item 1, ae4b5678): {...}, (key): {value}}
+	{(Parent Item 1, Bundle Item 1, ae4b5678): [{...}], (key): [{value}]}
 
-	Use: to quickly retrieve/check if row existed in table instead of looping n times
+	Use: to quickly retrieve/check if row existed in table instead of looping n times.
+	A component repeated on a bundle shares one key, so rows are kept as a list and
+	consumed per occurrence rather than collapsed onto a single row.
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
@@ -133,7 +135,7 @@ def get_indexed_packed_items_table(doc):
 			packed_item.parent_detail_docname,
 		)
 
-		indexed_table[key] = packed_item
+		indexed_table.setdefault(key, []).append(packed_item)
 
 	return indexed_table
 
@@ -229,8 +231,10 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 		packing_item.item_code,
 		main_item_row.idx if doc.is_new() else main_item_row.name,
 	)
-	if packed_items_table.get(key):
-		pi_row, exists = packed_items_table.get(key), True
+	# a component repeated on the bundle shares one key; consume stale rows in order so
+	# each occurrence keeps its own packed row instead of overwriting a single one
+	if stale_rows := packed_items_table.get(key):
+		pi_row, exists = stale_rows.pop(0), True
 
 	if not exists:
 		pi_row = doc.append("packed_items", {})
