@@ -167,6 +167,25 @@ class TestEmployee(ERPNextTestSuite):
 			)
 		self.assertNotIn("Employee", frappe.get_roles(old_user))
 
+	def test_changing_company_replaces_company_user_permission(self):
+		user = "employee-company-change@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		employee_doc = frappe.get_doc("Employee", employee)
+		employee_doc.company = "_Test Company 1"
+		employee_doc.save()
+
+		self.assertFalse(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": "_Test Company", "user": user}
+			)
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": "_Test Company 1", "user": user}
+			)
+		)
+
 	def test_salary_currency_set_from_company(self):
 		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
 		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")

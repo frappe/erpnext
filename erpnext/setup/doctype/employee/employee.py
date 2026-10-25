@@ -234,13 +234,17 @@ class Employee(NestedSet):
 		)
 
 	def update_user_permissions(self):
-		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
+		if not any(
+			self.has_value_changed(field) for field in ("user_id", "company", "create_user_permission")
+		):
 			return
 
 		previous_doc = self.get_doc_before_save()
 		if previous_doc and previous_doc.user_id and previous_doc.user_id != self.user_id:
 			self.remove_user_permissions(previous_doc.user_id, previous_doc.company)
 			self.remove_employee_role(previous_doc.user_id)
+		elif previous_doc and previous_doc.company != self.company:
+			self.remove_user_permissions(previous_doc.user_id, previous_doc.company, include_employee=False)
 
 		if self.create_user_permission:
 			self.add_user_permissions(self.user_id, self.company)
