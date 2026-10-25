@@ -425,6 +425,20 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(get_part(design, "WHEEL-26").amount, 100)
 		self.assertEqual(design.raw_material_cost, (34 + 100 + 2) * 2)
 
+	def test_part_using_an_existing_bom_costs_the_bom(self):
+		design = make_mapped_design()
+		set_valuation_rates({"TUBE-25": 10})
+		frame_bom = make_test_bom("FRAME-ASM", 2, {"TUBE-25": 6})
+		frame = get_part(design, "FRAME-ASM")
+		for row in design.items:
+			if row.parent_node_id == frame.node_id:
+				row.exclude_from_bom = 1
+
+		frame.update({"bom_no": frame_bom, "do_not_explode": 0})
+		design.save()
+
+		self.assertEqual(get_part(design, "FRAME-ASM").rate, 30)
+
 	def test_rates_are_converted_to_the_creator_currency(self):
 		make_item("_Test Creator USD Material", {"valuation_rate": 800})
 		design = make_bom_creator(

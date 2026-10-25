@@ -63,6 +63,7 @@ class MaterialCost:
 			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
 
 	def set_part_rates(self):
+		self.bom_costs = self.get_bom_costs()
 		children = defaultdict(list)
 		for row in self.design.items:
 			row.rate = row.amount = 0
@@ -80,6 +81,12 @@ class MaterialCost:
 				row.rate = self.get_part_cost(row.node_id, children, visited) * flt(
 					row.conversion_factor or 1
 				)
+			elif row.bom_no in self.bom_costs and not row.do_not_explode and not row.sourced_by_supplier:
+				row.rate = (
+					self.bom_costs[row.bom_no]
+					* flt(row.conversion_factor or 1)
+					/ flt(self.design.conversion_rate or 1)
+				)
 			else:
 				row.rate = self.get_rate(
 					row.item_code, row.qty, row.uom, row.stock_uom, row.conversion_factor, row
@@ -91,6 +98,18 @@ class MaterialCost:
 			cost += row.amount
 
 		return cost
+
+	def get_bom_costs(self) -> dict[str, float]:
+		bom_nos = list({row.bom_no for row in self.design.items if row.bom_no and not row.do_not_explode})
+		if not bom_nos:
+			return {}
+
+		boms = frappe.get_all(
+			"BOM",
+			filters={"name": ("in", bom_nos)},
+			fields=["name", "base_total_cost", "quantity", "process_loss_qty"],
+		)
+		return {bom.name: flt(bom.base_total_cost) / get_good_quantity(bom) for bom in boms}
 
 	def get_operation_plan_cost(self) -> float:
 		materials = defaultdict(list)
@@ -170,3 +189,8 @@ class MaterialCost:
 				as_list=True,
 			)
 		)
+
+
+def get_good_quantity(bom) -> float:
+	good_quantity = flt(bom.quantity) - flt(bom.process_loss_qty)
+	return good_quantity if good_quantity > 0 else flt(bom.quantity) or 1
