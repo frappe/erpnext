@@ -1665,7 +1665,7 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 				{
 					"doctype": "Supplier",
 					"supplier_name": supplier_name,
-					"supplier_group": "All Supplier Groups",
+					"supplier_group": "Services",
 				}
 			).insert(ignore_permissions=True)
 
