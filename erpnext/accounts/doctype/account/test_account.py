@@ -129,6 +129,37 @@ class TestAccount(ERPNextTestSuite):
 			"Receivable USD - _TC",
 		)
 
+	def test_merge_group_account_into_direct_child(self):
+		parent = create_account(
+			account_name="_Test Merge Parent",
+			is_group=1,
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+		target = create_account(
+			account_name="_Test Merge Child",
+			is_group=1,
+			parent_account=parent,
+			company="_Test Company",
+		)
+		leaf = create_account(account_name="_Test Merge Leaf", parent_account=parent, company="_Test Company")
+		user = frappe.get_doc(
+			doctype="User",
+			email="account-merge@example.com",
+			first_name="Account Merge",
+			send_welcome_email=0,
+			roles=[{"role": "Accounts Manager"}],
+		).insert()
+		with self.set_user(user.name):
+			merge_account(parent, target)
+		self.assertFalse(frappe.db.exists("Account", parent))
+		target_doc = frappe.get_doc("Account", target)
+		leaf_doc = frappe.get_doc("Account", leaf)
+		self.assertEqual(target_doc.parent_account, "Current Assets - _TC")
+		self.assertEqual(leaf_doc.parent_account, target)
+		self.assertLess(target_doc.lft, leaf_doc.lft)
+		self.assertLess(leaf_doc.rgt, target_doc.rgt)
+
 	def test_account_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
