@@ -67,7 +67,7 @@ frappe.ui.form.on("BOM Creator", {
 	},
 
 	read_design_file(frm) {
-		if (frm.doc.design_file && frm.doc.company && frm.doc.item_code) {
+		if (frm.doc.docstatus === 0 && frm.doc.design_file && frm.doc.company && frm.doc.item_code) {
 			frm.save();
 		}
 	},
@@ -99,6 +99,9 @@ frappe.ui.form.on("BOM Creator", {
 				() => frm.events.create_items(frm),
 				__("Map Items")
 			);
+		}
+
+		if (["Submitted", "Failed", "In Progress"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Create BOMs"), () => frm.events.create_boms(frm)).addClass(
 				"btn-primary"
 			);

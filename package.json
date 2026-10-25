@@ -12,7 +12,7 @@
     "url": "https://github.com/frappe/erpnext/issues"
   },
   "scripts": {
-    "postinstall": "mkdir -p erpnext/public/dist/occt-import-js && cp node_modules/occt-import-js/dist/occt-import-js.js node_modules/occt-import-js/dist/occt-import-js.wasm erpnext/public/dist/occt-import-js/ && cd banking && yarn install",
+    "postinstall": "cd banking && yarn install",
     "dev": "cd banking && yarn dev",
     "build": "cd banking && yarn build",
     "test:js": "node --test \"erpnext/tests/js/**/*.test.mjs\""

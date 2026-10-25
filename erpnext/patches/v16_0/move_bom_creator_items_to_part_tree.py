@@ -64,6 +64,7 @@ def get_rows_by_creator() -> dict:
 def get_item_updates(creator, rows: list) -> dict:
 	node_ids = {row.name: node_id for node_id, row in enumerate(rows, start=1)}
 	rows_by_name = {row.name: row for row in rows}
+	assemblies = {row.fg_reference_id for row in rows}
 	updates = {}
 	for row in rows:
 		parent = rows_by_name.get(row.fg_reference_id)
@@ -74,6 +75,7 @@ def get_item_updates(creator, rows: list) -> dict:
 			"part_number": row.item_code,
 			"part_name": row.item_name or row.item_code,
 			"source": "Manual",
+			"is_expandable": 1 if row.name in assemblies else 0,
 			"qty": qty,
 			"stock_qty": qty * (flt(row.conversion_factor) or 1),
 			"amount": flt(row.rate) * qty,
