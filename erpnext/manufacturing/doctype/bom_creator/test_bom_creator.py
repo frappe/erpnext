@@ -42,6 +42,12 @@ class TestBOMCreator(ERPNextTestSuite):
 			[("Frame Tube Ø25", 3), ("Bolt M6", 4)],
 		)
 
+	def test_incomplete_step_file_is_rejected_with_a_message(self):
+		content = make_step_content(BICYCLE_PRODUCTS, BICYCLE_LINKS)
+		cut = content.index("NEXT_ASSEMBLY_USAGE_OCCURRENCE") + len("NEXT_ASSEMBLY_USAGE_OCCURRENCE('NAUO")
+
+		self.assertRaisesRegex(frappe.ValidationError, "incomplete or damaged", read_step_file, content[:cut])
+
 	def test_csv_file_with_levels_or_item_numbers_gives_same_tree(self):
 		by_level = read_bom_csv_file(
 			"Level,Part Number,Part Name,Quantity\n1,FRAME-ASM,Frame Assembly,1\n2,TUBE-25,Frame Tube,3\n1,WHEEL-26,Wheel,2\n"
