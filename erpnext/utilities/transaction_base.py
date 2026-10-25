@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
 from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
 from erpnext.stock.utils import _get_incoming_rate
 
@@ -648,7 +649,9 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, str):
 		qty_fields = [qty_fields]
 
-	integer_uoms = get_whole_number_uoms(d.get(uom_field) for d in doc.get_all_children())
+	uoms = {d.get(uom_field) for d in doc.get_all_children()}
+	validate_uoms_are_enabled(uoms)
+	integer_uoms = get_whole_number_uoms(uoms)
 
 	if not integer_uoms:
 		return

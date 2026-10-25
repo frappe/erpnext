@@ -2,7 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
+
+
+def validate_uoms_are_enabled(uoms):
+	uoms = list(set(filter(None, uoms)))
+	if not uoms:
+		return
+
+	disabled_uoms = frappe.get_all("UOM", filters={"name": ["in", uoms], "enabled": 0}, pluck="name")
+	if disabled_uoms:
+		frappe.throw(_("Unit of Measure {0} is disabled.").format(frappe.bold(", ".join(disabled_uoms))))
 
 
 class UOM(Document):
