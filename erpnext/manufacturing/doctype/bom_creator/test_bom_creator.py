@@ -235,6 +235,20 @@ class TestBOMCreator(ERPNextTestSuite):
 			[("TUBE-25", 1), (welded_frame, 2), ("WHEEL-26", 2)],
 		)
 
+	def test_operation_output_quantity_is_for_one_finished_good(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		design.qty = 3
+		welded_frame = make_item("_Test Creator Welded Frame", {"is_stock_item": 1}).name
+		welding = add_operation(design, "_Test Creator Welding", output_item=welded_frame, output_quantity=2)
+		assembly = add_operation(design, "_Test Creator Assembly")
+		add_material(design, part="TUBE-25", qty=3, operation=welding)
+		design.append("materials", {"from_operation_id": welding, "operation_id": assembly, "qty": 2})
+		design.save()
+
+		bom = frappe.get_doc("BOM", make_boms(design)["BIKE-100"])
+
+		self.assertEqual([row.finished_good_qty for row in bom.operations], [6, 3])
+
 	def test_output_of_an_earlier_operation_is_not_exploded(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
