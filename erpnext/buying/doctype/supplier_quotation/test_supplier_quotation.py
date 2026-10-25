@@ -48,6 +48,31 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		sq.valid_till = add_days(today(), -1)
 		self.assertRaises(frappe.ValidationError, sq.insert)
 
+	def test_whole_number_stock_qty_must_not_be_fractional(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Kg", "conversion_factor": 0.5}])
+		sq = frappe.get_doc(
+			{
+				"doctype": "Supplier Quotation",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier",
+				"items": [
+					{
+						"item_code": item.name,
+						"qty": 3,
+						"uom": "Kg",
+						"conversion_factor": 0.5,
+						"rate": 10,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		)
+
+		self.assertRaises(UOMMustBeIntegerError, sq.insert)
+
 	def test_set_expired_status_expires_only_submitted_past_quotations(self):
 		rfq = make_request_for_quotation()
 
