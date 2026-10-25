@@ -810,7 +810,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:09:41.648045",
+ "modified": "2026-10-24 19:45:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "stock",
@@ -1119,30 +1119,11 @@
    "operations": [
     {
      "table": {
-      "data_source": "Site DB",
-      "table_name": "tabStock Ledger Entry",
-      "type": "table"
+      "query_name": "stock-month-spine",
+      "type": "query",
+      "workbook": "stock"
      },
      "type": "source"
-    },
-    {
-     "column_names": [
-      "name"
-     ],
-     "type": "select"
-    },
-    {
-     "limit": 12,
-     "type": "limit"
-    },
-    {
-     "data_type": "Integer",
-     "expression": {
-      "expression": "ibis.row_number() + 1",
-      "type": "expression"
-     },
-     "new_name": "months_back",
-     "type": "mutate"
     },
     {
      "data_type": "Date",
@@ -1172,6 +1153,24 @@
    ],
    "sort_order": 4,
    "title": "Last 12 Months",
+   "use_live_connection": 1,
+   "workbook": "stock"
+  },
+  "stock-month-spine": {
+   "folder": null,
+   "is_builder_query": 0,
+   "is_native_query": 1,
+   "is_script_query": 0,
+   "name": "stock-month-spine",
+   "operations": [
+    {
+     "data_source": "Site DB",
+     "raw_sql": "SELECT 1 AS months_back\nUNION ALL SELECT 2\nUNION ALL SELECT 3\nUNION ALL SELECT 4\nUNION ALL SELECT 5\nUNION ALL SELECT 6\nUNION ALL SELECT 7\nUNION ALL SELECT 8\nUNION ALL SELECT 9\nUNION ALL SELECT 10\nUNION ALL SELECT 11\nUNION ALL SELECT 12",
+     "type": "sql"
+    }
+   ],
+   "sort_order": 12,
+   "title": "Month Spine",
    "use_live_connection": 1,
    "workbook": "stock"
   },

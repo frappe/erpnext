@@ -160,7 +160,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 			stock_entry, work_order, expense_account, job_card, remaining_operating_cost
 		)
 
-	_add_additional_operating_cost(stock_entry, work_order, expense_account)
+	_add_additional_operating_cost(stock_entry, work_order, expense_account, job_card)
 	_add_corrective_operation_cost(stock_entry, work_order, expense_account)
 
 
@@ -217,8 +217,11 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 	)
 
 
-def _add_additional_operating_cost(stock_entry, work_order, expense_account):
+def _add_additional_operating_cost(stock_entry, work_order, expense_account, job_card=None):
 	if not (work_order and work_order.additional_operating_cost and work_order.qty):
+		return
+
+	if job_card and job_card.finished_good and job_card.finished_good != work_order.production_item:
 		return
 
 	per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)

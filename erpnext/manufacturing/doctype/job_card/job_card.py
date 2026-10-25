@@ -39,6 +39,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -345,11 +346,35 @@ class JobCard(Document):
 			self.throw_extra_qty_error()
 
 	def get_allowed_wo_qty(self):
-		wo_qty = flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
+		wo_qty = self.get_work_order_qty_details().operation_qty
 		over_production_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		return wo_qty + (wo_qty * over_production_percentage / 100)
+
+	def get_work_order_qty_details(self):
+		work_order = (
+			frappe.db.get_value(
+				"Work Order", self.work_order, ["qty", "track_semi_finished_goods"], as_dict=True
+			)
+			or frappe._dict()
+		)
+		output_qty = self.operation_id and frappe.db.get_value(
+			"Work Order Operation", self.operation_id, "output_qty"
+		)
+		work_order.operation_qty = get_operation_qty(work_order, {"output_qty": output_qty})
+		return work_order
+
+	def convert_to_current_operation_qty(self, rows, fields):
+		work_order = self.get_work_order_qty_details()
+		precision = self.precision("total_completed_qty")
+		for row in rows:
+			operation_qty = get_operation_qty(work_order, row)
+			if not operation_qty or operation_qty == work_order.operation_qty:
+				continue
+
+			for field in fields:
+				row[field] = flt(flt(row.get(field)) * work_order.operation_qty / operation_qty, precision)
 
 	def get_total_job_card_qty(self):
 		job_card = frappe.qb.DocType("Job Card")
@@ -392,10 +417,16 @@ class JobCard(Document):
 		if not self.semi_fg_bom and not self.bom_no:
 			return
 
+		qty = flt(self.for_quantity)
+		if not self.semi_fg_bom and self.work_order:
+			work_order = self.get_work_order_qty_details()
+			if work_order.operation_qty:
+				qty = qty * flt(work_order.qty) / work_order.operation_qty
+
 		items_dict = get_bom_items_as_dict(
 			self.semi_fg_bom or self.bom_no,
 			self.company,
-			qty=self.for_quantity,
+			qty=qty,
 			fetch_exploded=0,
 			fetch_secondary_items=1,
 		)
@@ -951,10 +982,12 @@ class JobCard(Document):
 		):
 			return
 
+		operation = next((row for row in doc.operations if row.name == self.operation_id), {})
+		operation_qty = get_operation_qty(doc, operation)
 		for d in doc.required_items:
-			self.append_required_item(doc, d)
+			self.append_required_item(doc, d, operation_qty)
 
-	def append_required_item(self, doc, d):
+	def append_required_item(self, doc, d, operation_qty=None):
 		if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
 			frappe.throw(
 				_("Row {0} : Operation is required against the raw material item {1}").format(
@@ -976,7 +1009,7 @@ class JobCard(Document):
 				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 				"item_name": d.item_name,
 				"description": d.description,
-				"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+				"required_qty": (d.required_qty * flt(self.for_quantity)) / flt(operation_qty or doc.qty),
 				"rate": d.rate,
 				"amount": d.amount,
 			},
@@ -1253,7 +1286,12 @@ class JobCard(Document):
 		if self.docstatus < 2:
 			return
 
-		if wo.produced_qty > for_quantity + process_loss_qty + pending_qty:
+		operation = next((row for row in wo.operations if row.name == self.operation_id), {})
+		operation_total = (for_quantity + process_loss_qty + pending_qty) * flt(wo.qty)
+		operation_total = flt(
+			operation_total / get_operation_qty(wo, operation), wo.precision("produced_qty")
+		)
+		if wo.produced_qty > operation_total:
 			first_part_msg = _(
 				"The {0} {1} is used to calculate the valuation cost for the finished good {2}."
 			).format(frappe.bold(_("Job Card")), frappe.bold(self.name), frappe.bold(self.production_item))
@@ -1450,7 +1488,7 @@ class JobCard(Document):
 		if not (self.work_order and flt(self.for_quantity)):
 			return False
 
-		wo_qty = flt(frappe.db.get_value("Work Order", self.work_order, "qty"))
+		wo_qty = self.get_work_order_qty_details().operation_qty
 		if not wo_qty:
 			return False
 
@@ -1511,8 +1549,10 @@ class JobCard(Document):
 
 	def get_min_completed_operation_qty(self, doc):
 		min_qty = []
+		precision = self.precision("total_completed_qty")
 		for d in doc.operations:
-			completed_qty = flt(d.completed_qty) + flt(d.process_loss_qty)
+			completed_qty = (flt(d.completed_qty) + flt(d.process_loss_qty)) * flt(doc.qty)
+			completed_qty = flt(completed_qty / get_operation_qty(doc, d), precision)
 			if completed_qty:
 				min_qty.append(completed_qty)
 			else:
@@ -1691,8 +1731,11 @@ class JobCard(Document):
 		later_operations = frappe.get_all(
 			"Work Order Operation",
 			filters={"parent": self.work_order, "sequence_id": (">", self.sequence_id)},
-			fields=["operation", "completed_qty"],
+			fields=["operation", "completed_qty", "output_qty"],
 		)
+		if self.track_semi_finished_goods:
+			self.convert_to_current_operation_qty(later_operations, ["completed_qty"])
+
 		for row in later_operations:
 			if flt(row.completed_qty) > operation_qty:
 				frappe.throw(
@@ -1710,7 +1753,15 @@ class JobCard(Document):
 	def get_previous_operations(self):
 		previous_operations = frappe.get_all(
 			"Work Order Operation",
-			fields=["name", "operation", "status", "completed_qty", "sequence_id", "finished_good"],
+			fields=[
+				"name",
+				"operation",
+				"status",
+				"completed_qty",
+				"sequence_id",
+				"finished_good",
+				"output_qty",
+			],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 			order_by="sequence_id, idx",
 		)
@@ -1722,6 +1773,10 @@ class JobCard(Document):
 				operation_totals = totals.get(row.name)
 				row.manufactured_qty = flt(operation_totals and operation_totals.manufactured_qty)
 				row.process_loss_qty = flt(operation_totals and operation_totals.process_loss_qty)
+
+			self.convert_to_current_operation_qty(
+				previous_operations, ["completed_qty", "manufactured_qty", "process_loss_qty"]
+			)
 
 		return previous_operations
 

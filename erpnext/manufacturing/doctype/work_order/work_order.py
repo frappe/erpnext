@@ -34,6 +34,7 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 	create_pick_list,
 	get_item_details,
 	get_operation_details,
+	get_operation_qty,
 	get_serial_nos_for_job_card,
 	get_serial_nos_for_work_order,
 	get_template_rm_item,
@@ -300,7 +301,7 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = self.qty - flt(operation_details.get(d.name))
+			job_card_qty = get_operation_qty(self, d) - flt(operation_details.get(d.name))
 			if job_card_qty > 0:
 				return True
 
@@ -1156,7 +1157,8 @@ class WorkOrder(Document):
 			return row
 
 		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
-			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
+			completed_qty = flt(operation.completed_qty) * flt(self.qty) / get_operation_qty(self, operation)
+			time_per_unit = flt(operation.actual_operation_time) / completed_qty
 		else:
 			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 

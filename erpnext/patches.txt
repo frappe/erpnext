@@ -555,4 +555,5 @@ erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
 erpnext.patches.v16_0.set_lost_on_in_opportunity
 erpnext.patches.v16_0.apply_selling_settings_section_toggles
+erpnext.patches.v16_0.set_output_qty_in_work_order_operations
 erpnext.patches.v16_0.enable_business_modules_on_existing_companies

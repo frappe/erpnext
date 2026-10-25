@@ -170,6 +170,7 @@ class MaterialRequest(BuyingController):
 					)
 
 	def validate(self):
+		self.clear_source_warehouse()
 		super().validate()
 
 		self.validate_schedule_date()
@@ -290,6 +291,14 @@ class MaterialRequest(BuyingController):
 
 	def before_update_after_submit(self):
 		self.validate_schedule_date()
+
+	def clear_source_warehouse(self):
+		"""Source Warehouse is only used by Material Transfer, so it stays hidden and stale otherwise."""
+		if self.material_request_type == "Material Transfer":
+			return
+
+		for item in self.items:
+			item.from_warehouse = None
 
 	def validate_material_request_type(self):
 		"""Validate fields in accordance with selected type"""

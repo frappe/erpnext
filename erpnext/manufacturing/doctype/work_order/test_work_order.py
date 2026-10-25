@@ -4685,6 +4685,88 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_pick_list_can_pick_stock_reserved_for_its_own_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=5, basic_rate=100)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+		self.assertTrue(
+			frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name, "docstatus": 1})
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=5)
+		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(rm, 5)])
+
+		pick_list.pick_manually = 1
+		pick_list.save()
+		pick_list.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_stock_picked_for_reserved_work_order_is_not_held_twice(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=15, basic_rate=100)
+
+		reserved_work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=10, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+		create_pick_list(reserved_work_order.name, for_qty=10).save()
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, source_warehouse="Stores - _TC"
+		)
+		pick_list = create_pick_list(work_order.name, for_qty=5)
+		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(rm, 5)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_pick_list_can_pick_fractional_stock_left_after_reservation(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg, raw_materials=[rm], rm_qty=0.1, source_warehouse="Stores - _TC")
+		make_stock_entry_test_record(item_code=rm, target="Stores - _TC", qty=0.3, basic_rate=100)
+
+		reserved_work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=2, reserve_stock=1, source_warehouse="Stores - _TC"
+		)
+		create_pick_list(reserved_work_order.name, for_qty=1).save()
+
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=1, source_warehouse="Stores - _TC"
+		)
+		pick_list = create_pick_list(work_order.name, for_qty=1)
+		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(rm, 0.1)])
+
+		pick_list.pick_manually = 1
+		pick_list.save()
+		pick_list.submit()
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"enable_stock_reservation": 1,
@@ -6968,6 +7050,195 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		wo.track_semi_finished_goods = 0
 		self.assertRaises(frappe.ValidationError, wo.validate_warehouse)
+
+	def test_semi_fg_job_card_qty_follows_operation_output_qty(self):
+		warehouse = "Stores - _TC"
+		wo = self.make_car_with_four_wheels_work_order(warehouse)
+		wheel_operation, assembly_operation = wo.operations
+		self.assertEqual(wheel_operation.output_qty, 4)
+		self.assertFalse(assembly_operation.output_qty)
+
+		wheel_jc = self.get_semi_fg_job_card(wo, wheel_operation)
+		self.assertEqual(wheel_jc.for_quantity, 4)
+		self.assertEqual(
+			{d.item_code: d.required_qty for d in wheel_jc.items}, {"Test JCO Rubber": 4, "Test JCO Rim": 4}
+		)
+
+		self.complete_semi_fg_job_card(wheel_jc, 4, "2024-01-01")
+		wheel_entry = frappe.get_doc(wheel_jc.make_stock_entry_for_semi_fg_item())
+		self.assertEqual(
+			{(d.item_code, d.qty) for d in wheel_entry.items},
+			{("Test JCO Rubber", 4), ("Test JCO Rim", 4), ("Test JCO Wheel", 4)},
+		)
+		wheel_entry.submit()
+		self.assertEqual(
+			frappe.db.get_value("Work Order Operation", wheel_operation.name, "status"), "Completed"
+		)
+
+		assembly_jc = self.get_semi_fg_job_card(wo, assembly_operation)
+		self.assertEqual(assembly_jc.for_quantity, 1)
+		self.assertEqual(
+			{d.item_code: d.required_qty for d in assembly_jc.items},
+			{"Test JCO Wheel": 4, "Test JCO Body": 1},
+		)
+
+		self.complete_semi_fg_job_card(assembly_jc, 1, "2024-01-02")
+		assembly_entry = frappe.get_doc(assembly_jc.make_stock_entry_for_semi_fg_item())
+		assembly_entry.submit()
+		self.assertEqual(
+			{(d.item_code, d.qty) for d in assembly_entry.items},
+			{("Test JCO Wheel", 4), ("Test JCO Body", 1), ("Test JCO Car", 1)},
+		)
+		self.assertEqual(wo.reload().produced_qty, 1)
+
+	def test_semi_fg_additional_operating_cost_is_booked_once(self):
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
+		wo.db_set("additional_operating_cost", 100)
+
+		wheel_entry, assembly_entry = self.complete_semi_fg_work_order(wo)
+		self.assertEqual(self.get_additional_operating_cost(wheel_entry), 0)
+		self.assertEqual(self.get_additional_operating_cost(assembly_entry), 100)
+
+	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
+		self.complete_semi_fg_work_order(wo)
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual([flt(d.time_in_mins) for d in new_bom.operations], [60, 60])
+
+	def test_semi_fg_schedule_block_needs_full_operation_output_on_job_cards(self):
+		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
+
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
+		wo.db_set({"production_plan": "Test JCO Plan", "production_plan_item": "Test JCO Plan Row"})
+		wheel_operation = wo.operations[0]
+		wheel_jc = self.get_semi_fg_job_card(wo, wheel_operation)
+		wheel_jc.db_set({"for_quantity": 2, "total_time_in_mins": 60})
+
+		block = frappe._dict(
+			production_plan="Test JCO Plan", plan_row="Test JCO Plan Row", operation=wheel_operation.operation
+		)
+		self.assertEqual(filter_covered_schedule_rows([block]), [block])
+
+		wheel_jc.db_set("for_quantity", 4)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
+
+	def test_semi_fg_fractional_output_qty_completes_work_order(self):
+		wo = self.make_car_with_four_wheels_work_order(
+			"Stores - _TC", prefix="Test JCO Kg", stock_uom="Kg", bom_qty=3, wheel_qty=1
+		)
+		wheel_operation = wo.operations[0]
+		self.assertEqual(wheel_operation.output_qty, flt(1 / 3, wheel_operation.precision("output_qty")))
+
+		self.complete_semi_fg_work_order(wo)
+		self.assertEqual(wo.reload().produced_qty, 1)
+
+	def get_additional_operating_cost(self, stock_entry):
+		return sum(
+			flt(row.amount)
+			for row in stock_entry.additional_costs
+			if row.description == "Additional Operating Cost"
+		)
+
+	def complete_semi_fg_work_order(self, wo):
+		entries = []
+		for day, operation in enumerate(wo.operations, start=1):
+			job_card = self.get_semi_fg_job_card(wo, operation)
+			self.complete_semi_fg_job_card(job_card, job_card.for_quantity, f"2024-02-0{day}")
+			entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+			entry.submit()
+			entries.append(entry)
+
+		return entries
+
+	def make_car_with_four_wheels_work_order(
+		self, warehouse, prefix="Test JCO", stock_uom=None, bom_qty=1, wheel_qty=4
+	):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		properties = {"is_stock_item": 1, "stock_uom": stock_uom} if stock_uom else {"is_stock_item": 1}
+		items = {
+			name: make_item(f"{prefix} {name}", properties).name
+			for name in ("Rubber", "Rim", "Wheel", "Body", "Car")
+		}
+		if not frappe.db.exists("Workstation", "Test JCO Workstation"):
+			make_workstation(workstation="Test JCO Workstation", production_capacity=1)
+		for operation in ("Test JCO Wheel Making", "Test JCO Assembly"):
+			if not frappe.db.exists("Operation", operation):
+				make_operation(operation=operation, workstation="Test JCO Workstation")
+
+		wheel_bom = frappe.new_doc("BOM", company="_Test Company", item=items["Wheel"], quantity=1)
+		wheel_bom.append("items", {"item_code": items["Rubber"], "qty": 1})
+		wheel_bom.append("items", {"item_code": items["Rim"], "qty": 1})
+		wheel_bom.insert()
+		wheel_bom.submit()
+
+		car_bom = self.make_car_bom(items, wheel_bom.name, bom_qty, wheel_qty)
+		for item_code, qty in ((items["Rubber"], 4), (items["Rim"], 4), (items["Body"], 1)):
+			make_stock_entry_test_record(item_code=item_code, target=warehouse, qty=qty, basic_rate=100)
+
+		return make_wo_order_test_record(
+			production_item=items["Car"],
+			qty=1,
+			bom_no=car_bom.name,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+			wip_warehouse=warehouse,
+			fg_warehouse=warehouse,
+		)
+
+	def make_car_bom(self, items, wheel_bom, bom_qty=1, wheel_qty=4):
+		car_bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=items["Car"],
+			quantity=bom_qty,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		operation = {"workstation": "Test JCO Workstation", "time_in_mins": 60}
+		car_bom.append(
+			"operations",
+			{
+				**operation,
+				"operation": "Test JCO Wheel Making",
+				"finished_good": items["Wheel"],
+				"finished_good_qty": wheel_qty,
+				"bom_no": wheel_bom,
+				"sequence_id": 1,
+			},
+		)
+		car_bom.append(
+			"operations",
+			{
+				**operation,
+				"operation": "Test JCO Assembly",
+				"finished_good": items["Car"],
+				"finished_good_qty": 1,
+				"is_final_finished_good": 1,
+				"sequence_id": 2,
+			},
+		)
+		car_bom.append("items", {"item_code": items["Wheel"], "qty": wheel_qty, "operation_row_id": 2})
+		car_bom.append("items", {"item_code": items["Body"], "qty": 1, "operation_row_id": 2})
+		car_bom.insert()
+		car_bom.submit()
+		return car_bom
+
+	def get_semi_fg_job_card(self, wo, operation):
+		return frappe.get_doc(
+			"Job Card",
+			frappe.db.get_value("Job Card", {"work_order": wo.name, "operation_id": operation.name}),
+		)
+
+	def complete_semi_fg_job_card(self, job_card, qty, day):
+		job_card.append(
+			"time_logs",
+			{"from_time": f"{day} 08:00:00", "to_time": f"{day} 09:00:00", "completed_qty": qty},
+		)
+		job_card.submit()
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
 	def test_change_finished_item_to_alternative_finished_good(self):
