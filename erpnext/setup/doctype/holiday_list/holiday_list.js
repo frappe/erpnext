@@ -66,7 +66,7 @@ frappe.tour["Holiday List"] = [
 	},
 	{
 		fieldname: "get_weekly_off_dates",
-		title: "Add Holidays",
+		title: __("Add Holidays"),
 		description: __(
 			"Click on Add to Holidays. This will populate the holidays table with all the dates that fall on the selected weekly off. Repeat the process for populating the dates for all your weekly holidays"
 		),
