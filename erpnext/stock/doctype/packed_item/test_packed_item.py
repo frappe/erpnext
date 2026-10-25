@@ -125,6 +125,22 @@ class TestPackedItem(FrappeTestCase):
 
 		self.assertEqual(len(so.packed_items), 0)
 
+	def test_updating_bundle_with_a_repeated_component(self):
+		component = make_item().name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.append("items", {"item_code": component, "qty": 3})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=1, do_not_submit=True)
+		self.assertEqual([pi.qty for pi in so.packed_items], [2, 3])
+
+		# both rows must scale with the bundle qty; the bug updated one and left the other stale
+		so.items[0].qty = 2
+		so.save()
+		self.assertEqual(sorted(pi.qty for pi in so.packed_items), [4, 6])
+
 	def test_recurring_bundle_item(self):
 		"Test impact on packed items if same bundle item is added and removed."
 		so_items = []
