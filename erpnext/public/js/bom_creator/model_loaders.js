@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
-const STEP_READER_PATH = "/assets/erpnext/dist/occt-import-js/";
+const STEP_READER_PATH = "/assets/erpnext/node_modules/occt-import-js/dist/";
 const DEFAULT_COLOR = 0xb4bcc4;
 let step_reader;
 

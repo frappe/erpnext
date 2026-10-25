@@ -6,7 +6,8 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import flt, sbool
+from frappe.utils import cint, flt, sbool
+from frappe.utils.background_jobs import is_job_enqueued
 
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
 from erpnext.manufacturing.doctype.bom_creator.material_cost import MaterialCost
@@ -192,8 +193,10 @@ class BOMCreator(Document):
 		)
 
 	def append_cad_parts(self, nodes: list[dict], parent_node_id: int, parent_path: tuple, old_rows: dict):
+		occurrences = defaultdict(int)
 		for node in nodes:
-			path = (*parent_path, node["part_number"])
+			occurrences[node["part_number"]] += 1
+			path = (*parent_path, get_path_name(node["part_number"], occurrences[node["part_number"]]))
 			row = self.append(
 				"items",
 				{
@@ -273,6 +276,9 @@ class BOMCreator(Document):
 
 	def validate_cad_parts_unchanged(self):
 		before = self.get_doc_before_save()
+		if not before:
+			return
+
 		cad_node_ids = {row.node_id for row in self.items if row.source == "CAD File"}
 		removed = [
 			row.part_number
@@ -401,6 +407,10 @@ class BOMCreator(Document):
 		self.save()
 		return created
 
+	@property
+	def create_boms_job_id(self) -> str:
+		return f"bom_creator_create_boms::{self.name}"
+
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_create_boms(self):
 		self.check_permission("submit")
@@ -408,7 +418,14 @@ class BOMCreator(Document):
 		self.get_bom_plan().validate_can_make_boms()
 		self.db_set({"status": "In Progress", "error_log": None}, notify=True)
 		frappe.enqueue_doc(
-			"BOM Creator", self.name, "create_boms", queue="short", timeout=600, enqueue_after_commit=True
+			"BOM Creator",
+			self.name,
+			"create_boms",
+			queue="short",
+			timeout=600,
+			enqueue_after_commit=True,
+			job_id=self.create_boms_job_id,
+			deduplicate=True,
 		)
 
 		frappe.msgprint(_("The BOMs are being created. The status changes when they are ready."), alert=True)
@@ -422,6 +439,9 @@ class BOMCreator(Document):
 
 		if self.status == "Completed":
 			frappe.throw(_("BOMs are already created from this design. Cancel them to create them again."))
+
+		if is_job_enqueued(self.create_boms_job_id):
+			frappe.throw(_("The BOMs of this design are being created. Wait until the status changes."))
 
 	def create_boms(self):
 		self.db_set({"status": "In Progress", "error_log": None})
@@ -448,6 +468,9 @@ def get_bom_rows(bom_no: str, include_sub_assemblies: bool, visited: set) -> lis
 	rows = []
 	for item in bom.items:
 		expand = include_sub_assemblies and item.bom_no and item.bom_no not in visited
+		if expand:
+			frappe.has_permission("BOM", "read", doc=item.bom_no, throw=True)
+
 		rows.append(
 			{
 				"item_code": item.item_code,
@@ -484,6 +507,7 @@ def read_design_file(file_url: str) -> dict:
 
 def get_part_paths(parts: list) -> dict[int, tuple]:
 	rows = {row.node_id: row for row in parts}
+	names = get_path_names(parts)
 	paths = {}
 	for row in parts:
 		path, current = [], row
@@ -491,12 +515,27 @@ def get_part_paths(parts: list) -> dict[int, tuple]:
 			if len(path) > len(rows):
 				frappe.throw(_("Part {0} is inside its own assembly.").format(bold(row.part_number)))
 
-			path.append(current.part_number)
+			path.append(names[current.node_id])
 			current = rows.get(current.parent_node_id)
 
 		paths[row.node_id] = tuple(reversed(path))
 
 	return paths
+
+
+def get_path_names(parts: list) -> dict[int, str]:
+	occurrences = defaultdict(int)
+	names = {}
+	for row in parts:
+		sibling = (cint(row.parent_node_id), row.part_number)
+		occurrences[sibling] += 1
+		names[row.node_id] = get_path_name(row.part_number, occurrences[sibling])
+
+	return names
+
+
+def get_path_name(part_number: str, occurrence: int) -> str:
+	return part_number if occurrence == 1 else f"{part_number} ({occurrence})"
 
 
 def get_part_quantities(parts: list) -> dict[tuple, float]:

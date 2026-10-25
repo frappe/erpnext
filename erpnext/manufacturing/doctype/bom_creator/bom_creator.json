@@ -251,7 +251,8 @@
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1,
-   "hidden": 1
+   "hidden": 1,
+   "default": "BOM-CRE-.YYYY.-"
   },
   {
    "fieldname": "item_group",
@@ -401,7 +402,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-10-25 10:00:00.000000",
+ "modified": "2026-10-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",

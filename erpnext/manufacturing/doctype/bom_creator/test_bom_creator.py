@@ -453,22 +453,7 @@ class TestBOMCreator(ERPNextTestSuite):
 	def test_items_from_a_bom_come_as_a_tree_for_one_unit(self):
 		from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_bom_tree
 
-		for item_code in (
-			"_Test Creator Kit",
-			"_Test Creator Hinge",
-			"_Test Creator Pin",
-			"_Test Creator Plate",
-		):
-			make_item(item_code, {"is_stock_item": 1, "valuation_rate": 10})
-
-		hinge_bom = make_test_bom("_Test Creator Hinge", 2, {"_Test Creator Pin": 4})
-		kit_bom = make_test_bom(
-			"_Test Creator Kit",
-			1,
-			{"_Test Creator Hinge": 1, "_Test Creator Plate": 3},
-			{"_Test Creator Hinge": hinge_bom},
-		)
-
+		kit_bom, hinge_bom = make_kit_bom()
 		self.assertEqual(
 			[(row["item_code"], row["qty"], row["bom_no"], row["children"]) for row in get_bom_tree(kit_bom)],
 			[("_Test Creator Hinge", 1, hinge_bom, []), ("_Test Creator Plate", 3, "", [])],
@@ -478,6 +463,19 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(
 			[(row["item_code"], row["qty"]) for row in hinge["children"]], [("_Test Creator Pin", 2)]
 		)
+
+	def test_items_of_a_sub_assembly_bom_need_read_permission_on_it(self):
+		from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_bom_tree
+
+		kit_bom, hinge_bom = make_kit_bom()
+
+		def has_permission(doctype, ptype, doc, throw):
+			if doc == hinge_bom:
+				raise frappe.PermissionError
+
+		with patch.object(frappe, "has_permission", side_effect=has_permission):
+			self.assertEqual(len(get_bom_tree(kit_bom)), 2)
+			self.assertRaises(frappe.PermissionError, get_bom_tree, kit_bom, include_sub_assemblies=True)
 
 	def test_unit_of_measure_sets_stock_quantity_and_amount(self):
 		material = make_item(
@@ -576,8 +574,9 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		design = make_mapped_design()
 		failure = frappe.ValidationError("Item TUBE-25 is disabled")
-		with patch.object(PartTreePlan, "make_boms", side_effect=failure), patch.object(
-			frappe.db, "rollback"
+		with (
+			patch.object(PartTreePlan, "make_boms", side_effect=failure),
+			patch.object(frappe.db, "rollback"),
 		):
 			design.create_boms()
 
@@ -604,6 +603,59 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(new_boms["FRAME-ASM"], boms["FRAME-ASM"])
 		self.assertNotEqual(new_boms["BIKE-100"], boms["BIKE-100"])
 		self.assertEqual(design.status, "Completed")
+
+	def test_new_design_file_keeps_the_mapping_of_each_repeated_part(self):
+		bolts = [
+			make_item(code, {"is_stock_item": 1}).name
+			for code in ("_Test Creator Bolt A", "_Test Creator Bolt B")
+		]
+		content = "Level,Part Number,Quantity\n1,FRAME-ASM,1\n2,BOLT-M6,2\n2,BOLT-M6,3\n"
+		design = make_bom_creator(design_file=make_csv_file(content))
+		for row, item_code in zip(get_parts(design, "BOLT-M6"), bolts, strict=True):
+			row.item_code = item_code
+		design.save()
+
+		design.design_file = make_csv_file(content + "1,WHEEL-26,2\n")
+		design.save()
+
+		self.assertEqual(
+			[(row.item_code, row.qty) for row in get_parts(design, "BOLT-M6")], [(bolts[0], 2), (bolts[1], 3)]
+		)
+
+	def test_parts_check_on_update_after_submit_needs_no_previous_version(self):
+		design = frappe.get_doc("BOM Creator", make_submitted_design().name)
+
+		design.validate_cad_parts_unchanged()
+
+	def test_cancelled_design_gets_status_cancelled(self):
+		design = make_submitted_design()
+		design.cancel()
+
+		self.assertEqual(frappe.db.get_value("BOM Creator", design.name, "status"), "Cancelled")
+
+	def test_create_boms_waits_for_a_running_job_and_retries_a_stuck_one(self):
+		design = make_mapped_design()
+		design.db_set("status", "In Progress")
+		job_check = "erpnext.manufacturing.doctype.bom_creator.bom_creator.is_job_enqueued"
+
+		with patch(job_check, return_value=True):
+			self.assertRaisesRegex(frappe.ValidationError, "being created", design.enqueue_create_boms)
+
+		with patch(job_check, return_value=False), patch.object(frappe, "enqueue_doc") as enqueue_doc:
+			design.enqueue_create_boms()
+
+		self.assertEqual(enqueue_doc.call_args.kwargs["job_id"], design.create_boms_job_id)
+
+	def test_migrated_tree_marks_assemblies_as_expandable(self):
+		from erpnext.patches.v16_0.move_bom_creator_items_to_part_tree import get_item_updates
+
+		rows = [
+			frappe._dict(name="frame", fg_reference_id="BOM-CRE-OLD", item_code="FRAME-ASM", qty=1),
+			frappe._dict(name="tube", fg_reference_id="frame", item_code="TUBE-25", qty=3),
+		]
+		updates = get_item_updates(frappe._dict(name="BOM-CRE-OLD", qty=1), rows)
+
+		self.assertEqual((updates["frame"]["is_expandable"], updates["tube"]["is_expandable"]), (1, 0))
 
 
 def make_step_content(products: dict, links: list) -> str:
@@ -640,6 +692,32 @@ def make_step_file(products: dict, links: list) -> str:
 		}
 	).insert()
 	return file.file_url
+
+
+def make_csv_file(content: str) -> str:
+	file = frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": f"{frappe.generate_hash(length=8)}.csv",
+			"content": content,
+			"is_private": 1,
+		}
+	).insert()
+	return file.file_url
+
+
+def make_kit_bom() -> tuple[str, str]:
+	for item_code in ("_Test Creator Kit", "_Test Creator Hinge", "_Test Creator Pin", "_Test Creator Plate"):
+		make_item(item_code, {"is_stock_item": 1, "valuation_rate": 10})
+
+	hinge_bom = make_test_bom("_Test Creator Hinge", 2, {"_Test Creator Pin": 4})
+	kit_bom = make_test_bom(
+		"_Test Creator Kit",
+		1,
+		{"_Test Creator Hinge": 1, "_Test Creator Plate": 3},
+		{"_Test Creator Hinge": hinge_bom},
+	)
+	return kit_bom, hinge_bom
 
 
 def make_bom_creator(**values):
@@ -753,6 +831,10 @@ def get_part(design, part_number: str, parent: str | None = None):
 		for row in design.items
 		if row.part_number == part_number and (not parent or row.parent_node_id in parent_node_ids)
 	)
+
+
+def get_parts(design, part_number: str) -> list:
+	return [row for row in design.items if row.part_number == part_number]
 
 
 def get_bom_items(bom: str) -> dict:
