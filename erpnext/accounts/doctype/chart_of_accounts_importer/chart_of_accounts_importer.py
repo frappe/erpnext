@@ -268,6 +268,13 @@ def build_forest(data):
 			parent_account = f"{cstr(parent_account_number).strip()} - {parent_account}"
 		parent_accounts[account_name] = parent_account
 
+		if account_name in charts_map:
+			error_messages.append(
+				_("Row {0}: Account {1} is duplicated. Use a different name or account number").format(
+					line_no, frappe.bold(account_name)
+				)
+			)
+
 		charts_map[account_name] = {}
 		charts_map[account_name]["account_name"] = name
 		if account_number:
