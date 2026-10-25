@@ -164,17 +164,14 @@ class Employee(NestedSet):
 
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
-		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
+		if self.has_user_details_changed() or any(
+			self.has_value_changed(field) for field in ("status", "create_user_permission")
+		):
 			self.validate_user_access()
 
 	def validate_user_access(self, user: str | None = None):
-		"""Only a System Manager may link, unlink or update a User holding an admin role."""
-		editor_roles = set(frappe.get_roles())
-		if "System Manager" in editor_roles:
-			return
-
 		user = user or self.user_id
-		if set(frappe.get_roles(user)) & (get_admin_roles() - editor_roles):
+		if not frappe.has_permission("User", "write", user):
 			frappe.throw(
 				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
 				frappe.PermissionError,
@@ -196,10 +193,25 @@ class Employee(NestedSet):
 	def on_update(self):
 		self.update_nsm_model()
 		if self.user_id:
-			self.update_user()
+			if self.has_user_details_changed():
+				self.update_user()
 			self.update_user_permissions()
 			self.update_user_status()
 		self.reset_employee_emails_cache()
+
+	def has_user_details_changed(self):
+		return any(
+			self.has_value_changed(field)
+			for field in (
+				"user_id",
+				"first_name",
+				"middle_name",
+				"last_name",
+				"date_of_birth",
+				"gender",
+				"image",
+			)
+		)
 
 	def before_insert(self):
 		self.validate_auto_user_creation()
@@ -369,16 +381,6 @@ class Employee(NestedSet):
 		prev_number = cstr(prev_doc.get("cell_number"))
 		if cell_number != prev_number or self.get("user_id") != prev_doc.get("user_id"):
 			frappe.cache().delete_value("employees_with_number")
-
-
-def get_admin_roles() -> set[str]:
-	"""Roles that administer the site: System Manager, Administrator and roles that can edit users or roles."""
-	roles = {"Administrator", "System Manager"}
-	for doctype in ("User", "Role"):
-		roles.update(
-			perm.role for perm in frappe.get_meta(doctype).permissions if perm.write and not perm.permlevel
-		)
-	return roles
 
 
 def validate_employee_role(doc, method=None, ignore_emp_check=False):

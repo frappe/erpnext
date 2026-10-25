@@ -6,9 +6,9 @@ import frappe.utils
 from frappe.query_builder import Criterion
 
 import erpnext
-from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.utilities.query import get_match_conditions_qb
 
 
 class TestEmployee(ERPNextTestSuite):
@@ -56,33 +56,17 @@ class TestEmployee(ERPNextTestSuite):
 			linked.save()
 		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 0)
 
-	def test_hr_roles_link_any_user_except_admins(self):
-		from frappe.permissions import add_permission, reset_perms
-
+	def test_hr_roles_cannot_link_users_without_user_write_access(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
-		user_admin_role = "_Test User Administrator"
-		if not frappe.db.exists("Role", user_admin_role):
-			frappe.get_doc({"doctype": "Role", "role_name": user_admin_role}).insert()
-		if not frappe.db.exists("Custom DocPerm", {"parent": "User"}):
-			self.addCleanup(reset_perms, "User")
-		add_permission("User", user_admin_role, ptype="write")
-		self.addCleanup(frappe.clear_cache, doctype="User")
-
-		admins = [
-			make_fenced_user("employee-manager@example.com", ["System Manager"]),
-			make_fenced_user("employee-user-admin@example.com", [user_admin_role]),
-		]
 		sales_user = make_fenced_user("employee-sales@example.com", ["Sales User"])
 		for hr_role in ("HR User", "HR Manager"):
-			frappe.db.delete("Employee", {"user_id": ("in", [*admins, sales_user])})
+			frappe.db.delete("Employee", {"user_id": sales_user})
 			hr_user = make_fenced_user(f"employee-{frappe.scrub(hr_role)}@example.com", [hr_role])
 			with as_user(hr_user):
-				for admin in admins:
-					self.assertRaises(frappe.PermissionError, new_employee(admin).insert)
-				new_employee(sales_user).insert()
+				self.assertRaises(frappe.PermissionError, new_employee(sales_user).insert)
 
-	def test_hr_user_toggles_user_permission_only_for_non_admin_users(self):
+	def test_hr_user_cannot_toggle_user_permission_without_user_write_access(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
@@ -95,19 +79,16 @@ class TestEmployee(ERPNextTestSuite):
 			employees[user] = make_employee(user, company="_Test Company", create_user_permission=1)
 
 		with as_user(hr_user):
-			manager_employee = frappe.get_doc("Employee", employees[manager])
-			manager_employee.create_user_permission = 0
-			self.assertRaises(frappe.PermissionError, manager_employee.save)
+			for user in (manager, staff):
+				employee = frappe.get_doc("Employee", employees[user])
+				employee.create_user_permission = 0
+				self.assertRaises(frappe.PermissionError, employee.save)
 
-			staff_employee = frappe.get_doc("Employee", employees[staff])
-			staff_employee.create_user_permission = 0
-			staff_employee.save()
-
-		for user, expected in ((manager, True), (staff, False)):
+		for user in (manager, staff):
 			has_permission = frappe.db.exists(
 				"User Permission", {"allow": "Employee", "for_value": employees[user], "user": user}
 			)
-			self.assertEqual(bool(has_permission), expected)
+			self.assertTrue(has_permission)
 
 	def test_employee_user_permission(self):
 		employee1 = make_employee(
@@ -131,7 +112,7 @@ class TestEmployee(ERPNextTestSuite):
 		qb_employee_list = (
 			frappe.qb.from_(Employee)
 			.select(Employee.name)
-			.where(Criterion.all(build_qb_match_conditions("Employee")))
+			.where(Criterion.all(get_match_conditions_qb("Employee")))
 			.orderby(Employee.name)
 		).run(pluck=Employee.name)
 		employee_list = frappe.db.get_list("Employee", pluck="name", order_by="name")
