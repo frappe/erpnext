@@ -107,3 +107,36 @@ class TestPaymentLedger(ERPNextTestSuite):
 		voucher_nos = {x.get("voucher_no") for x in data}
 		self.assertIn(own.name, voucher_nos)
 		self.assertNotIn(other.name, voucher_nos)
+
+	def test_party_permission_for_other_doctype_does_not_limit_rows(self):
+		parties = self.get_parties_visible_with_permission(applicable_for="Sales Invoice")
+		self.assertTrue({"_Test Customer", "_Test Customer 1"}.issubset(parties))
+
+	def get_parties_visible_with_permission(self, applicable_for=None):
+		for customer in ("_Test Customer", "_Test Customer 1"):
+			create_sales_invoice(
+				company=self.company,
+				customer=customer,
+				debit_to=self.debit_to,
+				expense_account=self.expense_account,
+				cost_center=self.cost_center,
+				income_account=self.income_account,
+				warehouse=self.warehouse,
+			)
+
+		user = "test_payment_ledger@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "PL", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission(
+			"Customer", "_Test Customer", user, applicable_for=applicable_for
+		)
+
+		frappe.set_user(user)
+		try:
+			data = execute(filters=frappe._dict({"company": self.company, "party_type": "Customer"}))[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		return {row.party for row in data if row.party}
