@@ -44,6 +44,9 @@ class TransactionBase(StatusUpdater):
 	def validate_uom_is_integer(self, uom_field, qty_fields, child_dt=None):
 		validate_uom_is_integer(self, uom_field, qty_fields, child_dt)
 
+	def validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt):
+		validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt)
+
 	def copy_terms_and_conditions_attachments(self):
 		if (
 			not self.name
@@ -653,18 +656,47 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	for d in doc.get_all_children(parenttype=child_dt):
 		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
-				qty = d.get(f)
-				if qty:
-					qty = flt(qty, d.precision(f))
-					if qty != cint(qty):
-						frappe.throw(
-							_(
-								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
-							).format(
-								qty,
-								d.idx,
-								frappe.bold(_("Must be Whole Number")),
-								frappe.bold(d.get(uom_field)),
-							),
-							UOMMustBeIntegerError,
-						)
+				validate_qty_is_integer(d.get(f), d.get(uom_field), d.precision(f), d.idx)
+
+
+def validate_item_stock_uom_is_integer(doc, item_field, qty_fields, child_dt):
+	if isinstance(qty_fields, str):
+		qty_fields = [qty_fields]
+
+	rows = doc.get_all_children(parenttype=child_dt)
+	item_codes = {d.get(item_field) for d in rows if d.get(item_field)}
+	if not item_codes:
+		return
+
+	item_stock_uoms = dict(
+		frappe.get_all(
+			"Item", filters={"name": ["in", item_codes]}, fields=["name", "stock_uom"], as_list=True
+		)
+	)
+	validate_uoms_are_enabled(item_stock_uoms.values())
+	integer_uoms = get_whole_number_uoms(item_stock_uoms.values())
+
+	for d in rows:
+		if stock_uom := item_stock_uoms.get(d.get(item_field)):
+			if stock_uom in integer_uoms:
+				for f in qty_fields:
+					validate_qty_is_integer(d.get(f), stock_uom, d.precision(f), d.idx)
+
+
+def validate_qty_is_integer(qty, uom, precision, row_idx):
+	if not qty:
+		return
+
+	qty = flt(qty, precision)
+	if qty != cint(qty):
+		frappe.throw(
+			_(
+				"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
+			).format(
+				qty,
+				row_idx,
+				frappe.bold(_("Must be Whole Number")),
+				frappe.bold(uom),
+			),
+			UOMMustBeIntegerError,
+		)
