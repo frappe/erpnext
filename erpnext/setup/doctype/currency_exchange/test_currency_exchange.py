@@ -243,3 +243,23 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-10", "for_selling"), 101)
 		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-10", "for_buying"), 99)
 		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-11", "for_selling"), 101)
+
+	def test_fields_in_name_cannot_change(self, mock_get):
+		doc = frappe.get_doc(
+			doctype="Currency Exchange",
+			date="2031-03-01",
+			from_currency="CHF",
+			to_currency="INR",
+			exchange_rate=70,
+			for_selling=1,
+		).insert()
+
+		doc.exchange_rate = 71
+		doc.save()
+
+		doc.date = "2031-03-10"
+		self.assertRaises(frappe.CannotChangeConstantError, doc.save)
+
+		doc.reload()
+		doc.for_buying = 0
+		self.assertRaises(frappe.CannotChangeConstantError, doc.save)
