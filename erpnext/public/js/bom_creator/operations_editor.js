@@ -339,6 +339,12 @@ export class OperationsEditor {
 				placeholder: __("Add raw material"),
 				on_change: (value) => this.add_item(cint($cell.attr("data-operation-id")), value),
 			}),
+			sub_assembly: () => ({
+				doctype: "Item",
+				placeholder: __("Sub-assembly item"),
+				get_query: () => ({ filters: { name: ["not in", this.get_bom_items()] } }),
+				on_change: (value) => this.add_sub_assembly(value),
+			}),
 		};
 		return options[kind]();
 	}
@@ -427,10 +433,6 @@ export class OperationsEditor {
 		} else if (field === "output_quantity") {
 			const output_quantity = flt(value) / this.bom_quantity || 1;
 			this.update(this.get_row($input, "operation"), { output_quantity });
-		} else if (field === "new-bom" && value) {
-			this.view.state.extra_bom_nodes.push(cint(value));
-			Object.assign(this.view.state, { bom_node_id: cint(value), adding_bom: false });
-			this.view.render();
 		} else if (field === "assign" && value !== "") {
 			this.add_material(cint(value), `part:${$input.attr("data-node-id")}`);
 		}
@@ -449,6 +451,32 @@ export class OperationsEditor {
 		} else if (action === "remove-material") {
 			this.remove_rows([this.get_row($button, "material")]);
 		}
+		this.view.render();
+		if (action === "add-bom")
+			this.view.wrapper.find(".design-bom-bar .design-link-cell input").trigger("focus");
+	}
+
+	get_bom_node_ids() {
+		return [...new Set([...this.view.get_bom_node_ids(), ...this.view.state.extra_bom_nodes])];
+	}
+
+	get_bom_items() {
+		return this.get_bom_node_ids()
+			.map((node_id) => this.view.get_node_item(node_id))
+			.filter(Boolean);
+	}
+
+	async add_sub_assembly(item_code) {
+		const node_ids = this.get_bom_node_ids();
+		let part = (this.frm.doc.items || []).find(
+			(row) => row.item_code === item_code && !node_ids.includes(row.node_id)
+		);
+		if (!part) {
+			part = await this.view.tree.add_part(0, item_code);
+			this.frm.dirty();
+		}
+		this.view.state.extra_bom_nodes.push(part.node_id);
+		Object.assign(this.view.state, { bom_node_id: part.node_id, adding_bom: false });
 		this.view.render();
 	}
 
