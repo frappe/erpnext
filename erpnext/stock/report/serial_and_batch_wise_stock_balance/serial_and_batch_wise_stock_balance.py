@@ -12,6 +12,9 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 
 def execute(filters: StockBalanceFilter | None = None):
@@ -29,11 +32,24 @@ def has_stock_closing_entry_before(from_date: str, company: str | None = None) -
 class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 	"""Stock Balance with a row per batch under each item row, and the serial nos in stock."""
 
+	def run(self):
+		columns, data = super().run()
+		columns, data = prepare_serial_batch_report(
+			columns, data, serial_fields=("serial_no",), batch_fields=("batch_no",)
+		)
+		for row in data:
+			sort_serial_nos_by_number(row)
+
+		return columns, data
+
 	def get_entries_from_stock_closing_balance(self) -> list:
 		return []
 
 	def prepare_new_data(self):
 		self.prepare_serial_batch_map()
+		self.pool_valuation_details = self.get_pool_valuation_details(
+			{row.item_code for row in self.item_warehouse_map.values()}
+		)
 		super().prepare_new_data()
 		self.data = [row for item_row in self.data for row in self.get_item_and_batch_rows(item_row)]
 
@@ -41,18 +57,31 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		self.batch_map = {}
 		self.serial_map = {}
 
+		adjustment_netting = AdjustmentNetting()
+		adjustment_changes = {}
 		query = self.get_serial_batch_query()
 		with frappe.db.unbuffered_cursor():
 			for entry in query.run(as_dict=True, as_iterator=True):
 				group_by_key = self.get_group_by_key(entry)
-				if entry.batch_no:
+				if entry.batch_no and adjustment_netting.is_adjustment(entry):
+					add_to_net_change(
+						adjustment_changes, (group_by_key, entry.voucher_no, entry.batch_no), entry
+					)
+				elif entry.batch_no:
 					self.add_batch_entry(group_by_key, entry)
 
 				if entry.serial_no:
 					self.add_serial_nos(group_by_key, entry)
 
+		for (group_by_key, _voucher_no, _batch_no), change in adjustment_changes.items():
+			self.add_batch_entry(group_by_key, change)
+
 		for batches in self.batch_map.values():
 			filter_items_with_no_transactions(batches, self.float_precision, self.inventory_dimensions)
+
+		self.batch_numbers = SerialBatchIdentity("Batch").get_number_map(
+			{batch_no for batches in self.batch_map.values() for batch_no in batches}
+		)
 
 	def get_serial_batch_query(self):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -72,6 +101,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 				sle.company,
 				sle.voucher_type,
 				sle.voucher_no,
+				sle.is_adjustment_entry,
 				Coalesce(bundle_entry.batch_no, sle.batch_no).as_("batch_no"),
 				Coalesce(bundle_entry.serial_no, sle.serial_no).as_("serial_no"),
 				Coalesce(bundle_entry.qty, sle.actual_qty).as_("actual_qty"),
@@ -123,7 +153,13 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		dimensions = {field: item_row.get(field) for field in self.inventory_dimensions}
 
 		rows = []
-		for batch_no, batch_data in sorted(self.batch_map.get(key, {}).items()):
+		batches = self.batch_map.get(key, {}).items()
+		for batch_no, batch_data in sorted(
+			batches, key=lambda item: self.batch_numbers.get(item[0], item[0])
+		):
+			if self.is_valued_in_pool(item_row, self.pool_valuation_details):
+				batch_data.bal_val = batch_data.bal_qty * item_row.val_rate
+
 			if self.is_hidden_zero_stock(batch_data):
 				continue
 
@@ -147,7 +183,7 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		for batch_no in batch_nos:
 			serial_nos += [serial_no for serial_no, qty in batches.get(batch_no, {}).items() if qty > 0]
 
-		return "\n".join(sorted(serial_nos))
+		return "\n".join(serial_nos)
 
 	def get_columns(self):
 		columns = super().get_columns()
@@ -158,3 +194,18 @@ class SerialAndBatchWiseStockBalanceReport(StockBalanceReport):
 		]
 
 		return columns
+
+
+def add_to_net_change(changes, key, entry):
+	"""Sums what one Adjustment Entry counts out and back in, as the item row shows it."""
+	change = changes.setdefault(key, frappe._dict(entry, actual_qty=0.0, stock_value_difference=0.0))
+	change.actual_qty += flt(entry.actual_qty)
+	change.stock_value_difference += flt(entry.stock_value_difference)
+
+
+def sort_serial_nos_by_number(row):
+	serial_nos = sorted(
+		zip((row.serial_no_number or "").split("\n"), (row.serial_no or "").split("\n"), strict=True)
+	)
+	row.serial_no_number = "\n".join(number for number, _name in serial_nos)
+	row.serial_no = "\n".join(name for _number, name in serial_nos)

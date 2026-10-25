@@ -3,6 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2017-05-29 21:35:13.136357",
+ "description": "A bank account of yours or of a customer or supplier.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bank-account",
@@ -53,6 +54,7 @@
    "depends_on": "is_company_account",
    "fieldname": "account",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Company Account",
    "mandatory_depends_on": "is_company_account",
@@ -68,6 +70,7 @@
   {
    "fieldname": "account_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Account Type",
    "options": "Bank Account Type"
   },
@@ -93,12 +96,14 @@
    "description": "Setting the account as a Company Account is necessary for Bank Reconciliation",
    "fieldname": "is_company_account",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Is Company Account"
   },
   {
    "depends_on": "is_company_account",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
@@ -114,6 +119,7 @@
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Party Type",
    "options": "DocType"
   },
@@ -124,6 +130,7 @@
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
+   "in_import_template": 1,
    "label": "Party",
    "options": "party_type"
   },
@@ -135,6 +142,7 @@
   {
    "fieldname": "iban",
    "fieldtype": "Data",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "IBAN",
    "length": 34,
@@ -147,6 +155,7 @@
   {
    "fieldname": "bank_account_no",
    "fieldtype": "Data",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Bank Account No",
    "length": 30
@@ -211,6 +220,7 @@
    "fieldname": "branch_code",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Branch Code"
   },
   {

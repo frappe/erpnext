@@ -209,6 +209,7 @@ def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, pl
 		Max(bom_item.source_warehouse).as_("source_warehouse"),
 		Count(bom_item.name).distinct().as_("line_count"),
 		Max(item.default_bom).as_("default_bom"),
+		Max(bom_item.bom_no).as_("line_bom_no"),
 		Max(bom_item.stock_uom).as_("stock_uom"),
 		Max(item.min_order_qty).as_("min_order_qty"),
 		Max(item.safety_stock).as_("safety_stock"),
@@ -234,21 +235,26 @@ def _subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items):
 def _process_subitem(
 	doc, data, item_details, d, company, include_non_stock_items, include_subcontracted_items
 ):
-	if not data.get("include_exploded_items") or not d.default_bom:
+	child_bom = d.line_bom_no or d.default_bom
+	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
+		return
+
+	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
+	explode = explodable and _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0
+	if not data.get("include_exploded_items") or not child_bom or not explode:
 		_merge_subitem(item_details, d)
 
-	if d.is_phantom_item or (data.get("include_exploded_items") and d.default_bom):
-		if _should_explode_subitem(d, include_subcontracted_items) and d.qty > 0:
-			get_subitems(
-				doc,
-				data,
-				item_details,
-				d.default_bom,
-				company,
-				include_non_stock_items,
-				include_subcontracted_items,
-				d.qty,
-			)
+	if explode:
+		get_subitems(
+			doc,
+			data,
+			item_details,
+			child_bom,
+			company,
+			include_non_stock_items,
+			include_subcontracted_items,
+			d.qty,
+		)
 
 
 def _merge_subitem(item_details, d):

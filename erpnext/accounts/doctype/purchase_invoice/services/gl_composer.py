@@ -10,6 +10,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
 from erpnext.accounts.utils import get_account_currency
+from erpnext.controllers.buying_controller import get_stock_qty
 
 
 class PurchaseInvoiceGLComposer(BaseGLComposer):
@@ -463,8 +464,13 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				self.update_net_purchase_amount_for_linked_assets(item)
 
 	def get_provisional_accounts(self):
+		from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
+			get_order_billing_provisional_reversals,
+		)
+
 		doc = self.doc
 		self.provisional_accounts = frappe._dict()
+		self.order_provisional_reversals = get_order_billing_provisional_reversals(doc)
 		linked_purchase_receipts = {d.purchase_receipt for d in doc.items if d.purchase_receipt}
 		if not linked_purchase_receipts:
 			return
@@ -501,23 +507,38 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			}
 
 	def make_provisional_gl_entry(self, gl_entries, item):
+		from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
+			ProvisionalAccountingService,
+		)
+
+		service = ProvisionalAccountingService(self.doc)
 		if item.purchase_receipt:
 			pr_item = self.provisional_accounts.get(item.pr_detail, {})
 			if pr_item.get("has_provisional_entry"):
-				purchase_receipt_doc = frappe.get_cached_doc("Purchase Receipt", item.purchase_receipt)
+				conversion_rate = frappe.get_cached_value(
+					"Purchase Receipt", item.purchase_receipt, "conversion_rate"
+				)
 
-				# Intentionally passing purchase invoice item to handle partial billing
-				purchase_receipt_doc.add_provisional_gl_entry(
+				service.add_provisional_gl_entry(
 					item,
 					gl_entries,
 					self.doc.posting_date,
 					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(
-						(min(item.qty, pr_item.get("qty")) * pr_item.get("rate"))
-						* purchase_receipt_doc.get("conversion_rate")
-					),
+					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("rate")) * conversion_rate,
 				)
+			return
+
+		for row, qty in self.order_provisional_reversals.get(item.name, []):
+			service.add_provisional_gl_entry(
+				item,
+				gl_entries,
+				self.doc.posting_date,
+				row.provisional_expense_account,
+				reverse=1,
+				item_amount=qty * flt(row.rate) * flt(row.conversion_rate),
+				pr_detail=row.name,
+			)
 
 	def update_net_purchase_amount_for_linked_assets(self, item):
 		doc = self.doc
@@ -531,7 +552,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
-			purchase_amount = flt(item.valuation_rate) * asset.asset_quantity
+			purchase_amount = (
+				flt(item.valuation_rate) * flt(item.conversion_factor or 1) * asset.asset_quantity
+			)
 			frappe.db.set_value(
 				"Asset",
 				asset.name,
@@ -622,7 +645,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
 		warehouse_debit_amount = flt(
-			flt(item.valuation_rate, val_rate_db_precision) * flt(item.qty) * flt(item.conversion_factor),
+			flt(item.valuation_rate, val_rate_db_precision) * get_stock_qty(item, item.qty),
 			net_amt_precision,
 		)
 

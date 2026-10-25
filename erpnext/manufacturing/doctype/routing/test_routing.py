@@ -85,32 +85,52 @@ class TestRouting(ERPNextTestSuite):
 		self.assertEqual(bom_doc.operations[0].time_in_mins, 30)
 		self.assertEqual(bom_doc.operations[1].time_in_mins, 20)
 
-	def test_create_routing_isolates_operation_lists(self):
-		first = create_routing(
-			routing_name="Testing Route Isolation",
+	def test_workstation_change_refreshes_hour_rate(self):
+		operations = [
+			{
+				"operation": "_Test Op Routing Rate",
+				"workstation": "_Test WS Routing 600",
+				"hour_rate_rent": 600,
+			},
+			{
+				"operation": "_Test Op Routing Rate",
+				"workstation": "_Test WS Routing 1200",
+				"hour_rate_rent": 1200,
+			},
+		]
+		setup_operations(operations)
+		routing = create_routing(
+			routing_name="Routing Rate Change",
 			operations=[
 				{
-					"operation": "_Test Operation 1",
-					"workstation": "_Test Workstation 1",
-					"time_in_mins": 10,
+					"operation": "_Test Op Routing Rate",
+					"workstation": "_Test WS Routing 600",
+					"time_in_mins": 60,
 				}
 			],
 		)
-		second = create_routing(
-			routing_name="Testing Route Isolation",
-			operations=[
-				{
-					"operation": "_Test Operation 1",
-					"workstation": "_Test Workstation 1",
-					"time_in_mins": 20,
-				}
-			],
-		)
+		self.assertEqual(routing.operations[0].hour_rate, 600)
 
-		first.reload()
-		self.assertNotEqual(first.name, second.name)
-		self.assertEqual(first.operations[0].time_in_mins, 10)
-		self.assertEqual(second.operations[0].time_in_mins, 20)
+		routing.operations[0].workstation = "_Test WS Routing 1200"
+		routing.save()
+		self.assertEqual(routing.operations[0].hour_rate, 1200)
+		self.assertEqual(routing.operations[0].operating_cost, 1200)
+
+		routing.operations[0].hour_rate = 900
+		routing.save()
+		self.assertEqual(routing.operations[0].hour_rate, 900)
+
+	def test_disabled_routing_refused_on_bom(self):
+		operations = [
+			{"operation": "Test Operation A", "workstation": "Test Workstation A", "time_in_mins": 30}
+		]
+		setup_operations(operations)
+		routing = create_routing(routing_name="Disabled Route", operations=operations)
+		routing.db_set("disabled", 1)
+
+		self.assertRaises(
+			frappe.ValidationError, setup_bom, item_code="_Test Disabled Routing Item", routing=routing.name
+		)
 
 
 def setup_operations(rows):

@@ -150,6 +150,7 @@ class SupplierQuotation(BuyingController):
 		If permitted in settings and any item has 0 qty, the SQ has unit price items.
 		"""
 		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_supplier_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -193,14 +194,13 @@ class SupplierQuotation(BuyingController):
 	def is_partially_ordered(self):
 		return self.get_ordered_status() == "Partially Ordered"
 
-	def update_rfq_supplier_status(self, include_me):
+	def get_request_for_quotations(self) -> set[str]:
+		return {item.request_for_quotation for item in self.items if item.request_for_quotation}
+
+	def update_rfq_supplier_status(self, include_me, previous_rfqs: set[str] | None = None):
 		from frappe.query_builder.functions import Count
 
-		rfq_list = set([])
-		for item in self.items:
-			if item.request_for_quotation:
-				rfq_list.add(item.request_for_quotation)
-		for rfq in rfq_list:
+		for rfq in self.get_request_for_quotations() | (previous_rfqs or set()):
 			doc = frappe.get_doc("Request for Quotation", rfq)
 			doc_sup = frappe.get_all(
 				"Request for Quotation Supplier",

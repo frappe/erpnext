@@ -7,6 +7,7 @@ import json
 
 import frappe
 from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -45,6 +46,11 @@ def get_bin_details(
 	return query.run(as_dict=True)
 
 
+@frappe.whitelist()
+def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
+	return aggregate_bin_details(get_bin_details(row, company, for_warehouse))
+
+
 def _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse):
 	wh = frappe.qb.DocType("Warehouse")
 	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
@@ -67,6 +73,21 @@ def _bin_qty_columns(bin):
 		IfNull(Sum(bin.reserved_qty_for_production), 0).as_("reserved_qty_for_production"),
 		IfNull(Sum(bin.planned_qty), 0).as_("planned_qty"),
 	]
+
+
+def aggregate_bin_details(bin_list):
+	qty_fields = (
+		"projected_qty",
+		"actual_qty",
+		"ordered_qty",
+		"reserved_qty_for_production",
+		"planned_qty",
+	)
+	aggregated = {field: 0 for field in qty_fields}
+	for row in bin_list or []:
+		for field in qty_fields:
+			aggregated[field] += flt(row.get(field))
+	return aggregated
 
 
 def get_warehouse_list(warehouses):
@@ -132,7 +153,7 @@ def _open_so_base_query(plan, so, so_item):
 			& (so.docstatus == 1)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == plan.company)
-			& (so_item.qty > so_item.production_plan_qty)
+			& (so_item.stock_qty > so_item.production_plan_qty)
 		)
 	)
 

@@ -16,6 +16,7 @@ from decimal import ROUND_CEILING, Decimal
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, ceil, cint, comma_and, flt, get_link_to_form, nowdate
 from frappe.utils.csvutils import build_csv_response
 
@@ -24,6 +25,7 @@ from erpnext.manufacturing.doctype.production_plan.services.bom_explosion import
 	get_subitems,
 )
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	aggregate_bin_details,
 	get_bin_details,
 	get_item_data,
 	get_sales_orders,
@@ -59,10 +61,18 @@ class MaterialRequestService:
 
 		material_request_map = {}
 		material_request_list = []
+		draft_qty = self.get_draft_requested_qty()
 		for item in self.doc.mr_items:
-			qty_to_request = flt(flt(item.quantity) - flt(item.requested_qty), item.precision("quantity"))
+			qty_to_request = flt(
+				flt(item.quantity)
+				- flt(item.requested_qty)
+				- flt(draft_qty.get(item.name)) / (flt(item.conversion_factor) or 1),
+				item.precision("quantity"),
+			)
 			if qty_to_request <= 0:
 				continue
+			if frappe.get_cached_value("UOM", item.uom, "must_be_whole_number"):
+				qty_to_request = ceil(qty_to_request)
 			self._add_item_to_material_request(
 				item, qty_to_request, material_request_map, material_request_list
 			)
@@ -72,6 +82,17 @@ class MaterialRequestService:
 			return
 
 		self._submit_material_requests(material_request_list)
+
+	def get_draft_requested_qty(self):
+		mr_item = frappe.qb.DocType("Material Request Item")
+		return frappe._dict(
+			(
+				frappe.qb.from_(mr_item)
+				.select(mr_item.material_request_plan_item, Sum(mr_item.stock_qty))
+				.where((mr_item.production_plan == self.doc.name) & (mr_item.docstatus == 0))
+				.groupby(mr_item.material_request_plan_item)
+			).run()
+		)
 
 	def _add_item_to_material_request(
 		self, item, qty_to_request, material_request_map, material_request_list
@@ -154,7 +175,7 @@ def get_items_for_material_requests(
 	doc = _normalize_mr_doc(doc)
 	_authorize_mr_request(doc, warehouses)
 	_validate_group_warehouse_target(doc)
-	warehouses = _filter_warehouses(doc, warehouses, get_parent_warehouse_data)
+	warehouses = _filter_warehouses(doc, warehouses)
 	doc["mr_items"] = []
 
 	po_items = _collect_po_items(doc)
@@ -162,11 +183,10 @@ def get_items_for_material_requests(
 
 	ignore_ordered_qty = _effective_ignore_ordered_qty(doc, po_items)
 	so_item_details = _collect_item_details(doc, po_items)
+	is_transfer = bool((ignore_ordered_qty or get_parent_warehouse_data) and warehouses)
 
-	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty)
-	mr_items = _apply_other_locations(
-		doc, mr_items, warehouses, ignore_ordered_qty, get_parent_warehouse_data
-	)
+	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer)
+	mr_items = _apply_other_locations(doc, mr_items, warehouses, is_transfer)
 	_set_default_suppliers(mr_items, doc.get("company"))
 	if doc.get("consider_minimum_order_qty"):
 		_apply_minimum_order_qty(mr_items)
@@ -242,14 +262,13 @@ def _validate_group_warehouse_target(doc):
 		)
 
 
-def _filter_warehouses(doc, warehouses, get_parent_warehouse_data):
+def _filter_warehouses(doc, warehouses):
 	if not warehouses:
 		return warehouses
 
 	warehouses = list(set(get_warehouse_list(warehouses)))
-	for_warehouse = doc.get("for_warehouse")
-	if for_warehouse and not get_parent_warehouse_data and for_warehouse in warehouses:
-		warehouses.remove(for_warehouse)
+	if doc.get("for_warehouse") in warehouses:
+		warehouses.remove(doc.get("for_warehouse"))
 	return warehouses
 
 
@@ -291,6 +310,8 @@ def _build_sub_assembly_map(doc):
 
 	sub_assembly_items = defaultdict(int)
 	for d in doc.get("sub_assembly_items"):
+		if d.get("type_of_manufacturing") == "Material Request":
+			continue
 		key = (d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
 		sub_assembly_items[key] += d.get("qty")
 	return {k[:2]: v for k, v in sub_assembly_items.items()}
@@ -303,9 +324,23 @@ def _collect_item_details(doc, po_items):
 	so_item_details = frappe._dict()
 	qty_precision = frappe.get_precision("Material Request Plan Item", "quantity")
 
+	requested_sub_assemblies = {}
+	for row in doc.get("sub_assembly_items") or []:
+		row = frappe._dict(row)
+		if row.type_of_manufacturing == "Material Request":
+			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
+				(row.production_item, row.bom_no)
+			)
+
+	all_requested = set().union(*requested_sub_assemblies.values())
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
+		data["requested_sub_assemblies"] = (
+			all_requested
+			if doc.get("combine_sub_items")
+			else requested_sub_assemblies.get(data.get("name"), set())
+		)
 		item_details = _item_details_for_row(
 			doc, data, company, sub_assembly_items, existing_sub_assembly_items
 		)
@@ -376,7 +411,11 @@ def _explode_bom_items(
 			sub_assembly_items,
 			planned_qty=planned_qty,
 		)
-	if data.get("include_exploded_items") and include_subcontracted_items:
+	if (
+		data.get("include_exploded_items")
+		and include_subcontracted_items
+		and not data.get("requested_sub_assemblies")
+	):
 		return get_exploded_items(
 			item_details, company, bom_no, include_non_stock_items, planned_qty=planned_qty, doc=doc
 		)
@@ -431,7 +470,7 @@ def _accumulate_so_items(so_item_details, sales_order, item_details, qty_precisi
 			so_item_details[sales_order][key] = details
 
 
-def _build_mr_items(doc, so_item_details, ignore_ordered_qty):
+def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
 	mr_items = []
 	consumed_qty = defaultdict(float)
 	# raw_material_group_warehouse (optional, group) only widens the availability
@@ -444,8 +483,6 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty):
 	for sales_order, item_dict in so_item_details.items():
 		for details in item_dict.values():
 			fallback = details.get("source_warehouse") or details.get("default_warehouse")
-			scope_warehouse = scope_warehouse or fallback
-			target_warehouse = target_warehouse or fallback
 			row = _mr_item_for_details(
 				doc,
 				details,
@@ -453,9 +490,10 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty):
 				company,
 				ignore_ordered_qty,
 				include_safety_stock,
-				scope_warehouse,
-				target_warehouse,
+				scope_warehouse or fallback,
+				target_warehouse or fallback,
 				consumed_qty,
+				is_transfer,
 			)
 			if row:
 				mr_items.append(row)
@@ -472,12 +510,19 @@ def _mr_item_for_details(
 	warehouse,
 	target_warehouse,
 	consumed_qty,
+	is_transfer,
 ):
+	"""When transferring, size the shortage on For Warehouse alone so group stock is not counted twice."""
 	# get_bin_details scopes to the warehouse's descendants, returning one row per
 	# child warehouse; sum them so a group warehouse reflects combined child stock.
-	bin_dict = _aggregate_bin_details(get_bin_details(details, doc.company, warehouse))
+	bins = get_bin_details(details, doc.company, warehouse)
+	bin_dict = aggregate_bin_details(bins)
 	if details.qty <= 0:
 		return None
+	shortage_warehouse, shortage_bin = warehouse, bin_dict
+	if is_transfer and warehouse != target_warehouse:
+		shortage_warehouse = target_warehouse
+		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
 	return get_material_request_items(
 		doc,
 		details,
@@ -485,30 +530,16 @@ def _mr_item_for_details(
 		company,
 		ignore_ordered_qty,
 		include_safety_stock,
-		warehouse,
+		shortage_warehouse,
 		target_warehouse,
 		bin_dict,
 		consumed_qty,
+		shortage_bin,
 	)
 
 
-def _aggregate_bin_details(bin_list):
-	qty_fields = (
-		"projected_qty",
-		"actual_qty",
-		"ordered_qty",
-		"reserved_qty_for_production",
-		"planned_qty",
-	)
-	aggregated = {field: 0 for field in qty_fields}
-	for row in bin_list or []:
-		for field in qty_fields:
-			aggregated[field] += flt(row.get(field))
-	return aggregated
-
-
-def _apply_other_locations(doc, mr_items, warehouses, ignore_ordered_qty, get_parent_warehouse_data):
-	if not ((ignore_ordered_qty or get_parent_warehouse_data) and warehouses):
+def _apply_other_locations(doc, mr_items, warehouses, is_transfer):
+	if not is_transfer:
 		return mr_items
 
 	new_mr_items = []
@@ -621,9 +652,10 @@ def get_material_request_items(
 	target_warehouse,
 	bin_dict,
 	consumed_qty,
+	shortage_bin,
 ):
 	required_qty = _required_qty_for_mr(
-		row, ignore_existing_ordered_qty, warehouse, bin_dict, consumed_qty, include_safety_stock
+		row, ignore_existing_ordered_qty, warehouse, shortage_bin, consumed_qty, include_safety_stock
 	)
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 	conversion_factor = _mr_purchase_conversion_factor(row)
@@ -738,8 +770,6 @@ def _adjust_required_qty_for_uom(row, required_qty):
 				)
 			)
 
-	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
-		required_qty = ceil(required_qty)
 	return required_qty
 
 
@@ -757,15 +787,26 @@ def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 	return quantity
 
 
+def _round_up_whole_uom(quantity, uom):
+	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
+		return ceil(quantity)
+	return quantity
+
+
 def _mr_purchase_conversion_factor(row):
+	if purchase_uom := _mr_purchase_uom(row):
+		return get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
+	return 1.0
+
+
+def _mr_purchase_uom(row):
 	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
 	if (
 		row.get("default_material_request_type") == "Purchase"
 		and item_details.purchase_uom
 		and item_details.purchase_uom != item_details.stock_uom
 	):
-		return get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
-	return 1.0
+		return item_details.purchase_uom
 
 
 def _material_request_item_row(
@@ -784,10 +825,13 @@ def _material_request_item_row(
 		or row.get("default_warehouse")
 		or item_group_defaults.get("default_warehouse")
 	)
+	uom = _mr_purchase_uom(row) or row.get("stock_uom")
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty),
+		"quantity": _round_up_whole_uom(
+			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
+		),
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -801,7 +845,7 @@ def _material_request_item_row(
 		"material_request_type": row.get("default_material_request_type"),
 		"sales_order": sales_order,
 		"description": row.get("description"),
-		"uom": row.get("purchase_uom") or row.get("stock_uom"),
+		"uom": uom,
 		"main_item_code": row.get("main_bom_item"),
 		"from_bom": row.get("main_bom"),
 	}
@@ -862,12 +906,9 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	if flt(required_qty, precision) <= 0:
 		return
 
-	purchase_uom = frappe.db.get_value("Item", item.get("item_code"), "purchase_uom")
-	if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
-		required_qty = ceil(required_qty)
-
 	min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
-	item["quantity"] = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
+	quantity = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
+	item["quantity"] = _round_up_whole_uom(quantity, item.get("uom"))
 	new_mr_items.append(item)
 
 

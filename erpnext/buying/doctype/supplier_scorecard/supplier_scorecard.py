@@ -7,12 +7,17 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, throw
+from frappe.email.doctype.email_account.email_account import EmailAccount
 from frappe.model.document import Document
-from frappe.utils import add_days, add_years, get_last_day, getdate, nowdate
+from frappe.utils import add_days, add_years, flt, get_last_day, getdate, nowdate
 
 from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+	get_overlapping_period_end,
 	make_supplier_scorecard,
 )
+from erpnext.setup.doctype.employee.employee import get_employee_emails
+
+STANDING_FLAGS = ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos")
 
 
 class SupplierScorecard(Document):
@@ -58,13 +63,39 @@ class SupplierScorecard(Document):
 		# Guard against recursion: the save() below re-enters on_update().
 		if self.flags.in_rescore:
 			return
-		if make_all_scorecards(self.name) > 0:
+		previous_status = (self.get_doc_before_save() or frappe._dict()).status
+		if create_scorecard_periods(self) > 0:
 			# New periods were created; re-save to refresh score and standings.
 			self.flags.in_rescore = True
 			try:
 				self.save()
 			finally:
 				self.flags.in_rescore = False
+		if self.status != previous_status:
+			self.notify_standing()
+
+	def notify_standing(self):
+		recipients = self.get_standing_recipients()
+		if not recipients or not EmailAccount.find_outgoing(match_by_doctype=self.doctype):
+			return
+		frappe.sendmail(
+			recipients=recipients,
+			subject=_("Supplier Scorecard standing of {0}: {1}").format(self.supplier, self.status),
+			message=_("The Supplier Scorecard standing of {0} is now {1}.").format(
+				self.supplier, self.status
+			),
+			reference_doctype=self.doctype,
+			reference_name=self.name,
+		)
+
+	def get_standing_recipients(self):
+		recipients = get_employee_emails([self.employee]) if self.notify_employee else []
+		if self.notify_supplier:
+			recipients.append(frappe.db.get_value("Supplier", self.supplier, "email_id"))
+		return [recipient for recipient in recipients if recipient]
+
+	def on_trash(self):
+		frappe.db.set_value("Supplier", self.supplier, dict.fromkeys(STANDING_FLAGS, 0))
 
 	def validate_standings(self):
 		# Standings must form a continuous chain of bands covering 0 to 100 with no gaps or overlaps
@@ -87,7 +118,7 @@ class SupplierScorecard(Document):
 		for c in self.criteria:
 			weight += c.weight
 
-		if weight != 100:
+		if flt(weight, 2) != 100:
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_total_score(self):
@@ -139,9 +170,9 @@ class SupplierScorecard(Document):
 		self.indicator_color = standing.standing_color
 		self.notify_supplier = standing.notify_supplier
 		self.notify_employee = standing.notify_employee
-		self.employee_link = standing.employee_link
+		self.employee = standing.employee_link
 
-		for fieldname in ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos"):
+		for fieldname in STANDING_FLAGS:
 			self.set(fieldname, standing.get(fieldname))
 			frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
 
@@ -174,15 +205,27 @@ def refresh_scorecards():
 	"""
 	scorecards = frappe.get_list("Supplier Scorecard", fields=["name"], pluck="name", limit_page_length=0)
 	for sc_name in scorecards:
-		# Check to see if any new scorecard periods are created
-		if make_all_scorecards(sc_name) > 0:
-			# Save the scorecard to update the score and standings
-			frappe.get_doc("Supplier Scorecard", sc_name).save()
+		frappe.db.savepoint("refresh_scorecard")
+		try:
+			make_all_scorecards(sc_name)
+		except Exception:
+			frappe.db.rollback(save_point="refresh_scorecard")
+			frappe.log_error(
+				_("Supplier Scorecard refresh failed"),
+				reference_doctype="Supplier Scorecard",
+				reference_name=sc_name,
+			)
 
 
-@frappe.whitelist(methods=["POST"])
 def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
+	scp_count = create_scorecard_periods(sc)
+	if scp_count > 0:
+		sc.save()
+	return scp_count
+
+
+def create_scorecard_periods(sc):
 	supplier = frappe.get_doc("Supplier", sc.supplier)
 	supplier.check_permission("write")
 
@@ -194,31 +237,22 @@ def make_all_scorecards(docname: str):
 	first_start_date = todays
 	last_end_date = todays
 
-	while (start_date < todays) and (end_date <= todays):
-		# check to make sure there is no scorecard period already created
-		# (inclusive bounds: a single-day period — supplier created on a month's
-		# last day — must match its own window, else it is re-created every run)
-		scorecards = frappe.get_all(
-			"Supplier Scorecard Period",
-			fields=["name"],
-			filters={
-				"scorecard": docname,
-				"docstatus": 1,
-				"start_date": ["<=", end_date],
-				"end_date": [">=", start_date],
-			},
-			order_by="end_date desc",
-		)
-		if len(scorecards) == 0:
-			period_card = make_supplier_scorecard(docname, None)
-			period_card.start_date = start_date
-			period_card.end_date = end_date
-			period_card.insert(ignore_permissions=True)
-			period_card.submit()
-			scp_count = scp_count + 1
-			if start_date < first_start_date:
-				first_start_date = start_date
-			last_end_date = end_date
+	while end_date < todays:
+		overlapping_end = get_overlapping_period_end(sc.name, start_date, end_date)
+		if overlapping_end:
+			start_date = getdate(add_days(overlapping_end, 1))
+			end_date = get_scorecard_date(sc.period, start_date)
+			continue
+
+		period_card = make_supplier_scorecard(sc.name, None)
+		period_card.start_date = start_date
+		period_card.end_date = end_date
+		period_card.insert(ignore_permissions=True)
+		period_card.submit()
+		scp_count = scp_count + 1
+		if start_date < first_start_date:
+			first_start_date = start_date
+		last_end_date = end_date
 
 		start_date = getdate(add_days(end_date, 1))
 		end_date = get_scorecard_date(sc.period, start_date)
@@ -235,7 +269,7 @@ def make_all_scorecards(docname: str):
 
 def get_scorecard_date(period, start_date):
 	if period == "Per Week":
-		end_date = getdate(add_days(start_date, 7))
+		end_date = getdate(add_days(start_date, 6))
 	elif period == "Per Month":
 		end_date = get_last_day(start_date)
 	elif period == "Per Year":

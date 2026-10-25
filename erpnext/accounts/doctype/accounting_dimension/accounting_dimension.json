@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:label",
  "creation": "2019-05-04 18:13:37.002352",
+ "description": "An extra way to tag entries, like branch or region, beyond cost centers.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/accounting-dimensions",
  "engine": "InnoDB",

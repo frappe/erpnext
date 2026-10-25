@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "PROJ-ACC-.#####",
  "creation": "2015-03-23 02:00:21.861546",
+ "description": "What an employee costs and bills per hour for an activity.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/activity-cost",
@@ -42,6 +43,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Employee Name",
@@ -88,7 +90,7 @@
  ],
  "icon": "coins",
  "links": [],
- "modified": "2024-03-27 13:05:57.800347",
+ "modified": "2026-10-05 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Activity Cost",

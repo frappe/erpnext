@@ -2,6 +2,7 @@
  "actions": [],
  "creation": "2023-08-22 10:26:34.421423",
  "default_view": "List",
+ "description": "Undo a payment's match against invoices.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/unreconciliation",
  "editable_grid": 1,

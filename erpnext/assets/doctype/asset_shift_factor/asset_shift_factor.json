@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:shift_name",
  "creation": "2023-11-27 18:16:03.980086",
+ "description": "How much faster an asset depreciates on a given shift.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

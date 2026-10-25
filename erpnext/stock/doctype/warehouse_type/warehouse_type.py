@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -18,4 +19,8 @@ class WarehouseType(Document):
 		description: DF.SmallText | None
 	# end: auto-generated types
 
-	pass
+	def on_trash(self):
+		if self.name == "Transit":
+			frappe.throw(
+				_("Warehouse Type {0} is required by the system and cannot be deleted").format(self.name)
+			)

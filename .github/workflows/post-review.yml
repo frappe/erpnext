@@ -1,0 +1,127 @@
+name: Post Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+        type: number
+      review:
+        description: base64 of a review JSON ({event, body, comments, replies, discussion, resolve, dismiss}); event must be COMMENT or REQUEST_CHANGES; replies are [{in_reply_to, body}] posted into existing threads; discussion is [body] posted as conversation comments; resolve is [thread node id] and only the bot's own unresolved threads on this PR are closed; dismiss is {reviews, message}, allowed only with COMMENT; reviews are [review id] and only the bot's own open change requests on this PR are dismissed
+        required: false
+        type: string
+        default: ""
+      react_comment:
+        description: Issue comment id to react to as frappe-pr-bot
+        required: false
+        type: string
+        default: ""
+      react_content:
+        description: Reaction to add, one of eyes, +1, confused
+        required: false
+        type: string
+        default: eyes
+      review_id:
+        description: Existing review id to update; only its body is replaced
+        required: false
+        type: string
+        default: ""
+      post_key:
+        description: Hash of the review input; runs with the same key wait for each other, so the same post never goes out twice
+        required: false
+        type: string
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: post-review-${{ inputs.pr }}-${{ inputs.post_key || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Post or update review as frappe-pr-bot
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          PR: ${{ inputs.pr }}
+          REVIEW_B64: ${{ inputs.review }}
+          REVIEW_ID: ${{ inputs.review_id }}
+          REACT_COMMENT: ${{ inputs.react_comment }}
+          REACT_CONTENT: ${{ inputs.react_content }}
+        run: |
+          if [ -n "$REACT_COMMENT" ]; then
+            [[ "$REACT_COMMENT" =~ ^[0-9]+$ ]] || { echo "react_comment must be a comment id" >&2; exit 1; }
+            case "$REACT_CONTENT" in eyes|+1|confused) ;; *) echo "react_content must be eyes, +1 or confused" >&2; exit 1 ;; esac
+            gh api -X POST "repos/${{ github.repository }}/issues/comments/$REACT_COMMENT/reactions" -f content="$REACT_CONTENT" --jq '.content'
+            if [ "$REACT_CONTENT" != "eyes" ]; then
+              gh api --paginate "repos/${{ github.repository }}/issues/comments/$REACT_COMMENT/reactions" --jq '.[] | select(.user.login == "frappe-pr-bot" and .content == "eyes") | .id' | while read -r id; do
+                gh api -X DELETE "repos/${{ github.repository }}/issues/comments/$REACT_COMMENT/reactions/$id"
+              done
+            fi
+          fi
+          [ -n "$REVIEW_B64" ] || exit 0
+          printf '%s' "$REVIEW_B64" | base64 -d > review.json
+          jq -e '(.event == "COMMENT" or .event == "REQUEST_CHANGES") and (.body | type == "string") and (.comments | type == "array") and ((.replies // []) | type == "array") and ((.resolve // []) | type == "array")' review.json > /dev/null
+          jq -e '(.replies // []) | all((.in_reply_to | type == "number") and (.body | type == "string") and (.body | length > 0))' review.json > /dev/null
+          jq -e '(.resolve // []) | all(type == "string" and startswith("PRRT_"))' review.json > /dev/null
+          jq -e '((.discussion // []) | type == "array") and ((.discussion // []) | all(type == "string" and length > 0))' review.json > /dev/null
+          jq -e '.dismiss == null or (.event == "COMMENT" and (.dismiss.message | type == "string" and length > 0) and (.dismiss.reviews | type == "array" and all(type == "number")))' review.json > /dev/null
+          if [ -n "$REVIEW_ID" ]; then
+            jq -e '.event == "COMMENT"' review.json > /dev/null || { echo "an update replaces only the body; the event must be COMMENT" >&2; exit 1; }
+          fi
+          if [ "$(jq -r '(.body | length) + (.comments | length)' review.json)" != "0" ]; then
+            if [ -n "$REVIEW_ID" ]; then
+              jq '{body: .body}' review.json > payload.json
+              gh api -X PUT "repos/${{ github.repository }}/pulls/$PR/reviews/$REVIEW_ID" --input payload.json --jq '.html_url'
+            else
+              jq '.comments |= map(with_entries(select(.value != null)))' review.json > payload.json
+              gh api --paginate "repos/${{ github.repository }}/pulls/$PR/reviews" --jq '.[] | select(.user.login == "frappe-pr-bot") | {id, state, body}' > posted-reviews.json
+              gh api --paginate "repos/${{ github.repository }}/pulls/$PR/comments" --jq '.[] | select(.user.login == "frappe-pr-bot") | {review: .pull_request_review_id, path, line: .original_line, body}' > posted-comments.json
+              if jq -e --slurpfile reviews posted-reviews.json --slurpfile comments posted-comments.json '. as $new | {COMMENT: "COMMENTED", REQUEST_CHANGES: "CHANGES_REQUESTED"}[$new.event] as $state | $reviews | any(. as $posted | .state == $state and .body == $new.body and ($new.comments | all(. as $c | $comments | any(.review == $posted.id and .path == $c.path and .line == $c.line and .body == $c.body))))' payload.json > /dev/null; then
+                echo "skipped the review: frappe-pr-bot already posted it" >&2
+              else
+                gh api -X POST "repos/${{ github.repository }}/pulls/$PR/reviews" --input payload.json --jq '.html_url'
+              fi
+            fi
+          fi
+          gh api --paginate "repos/${{ github.repository }}/pulls/$PR/comments" --jq '.[] | select(.user.login == "frappe-pr-bot" and .in_reply_to_id != null) | {body, in_reply_to: .in_reply_to_id}' > posted-replies.json
+          jq -c --slurpfile posted posted-replies.json '(.replies // [])[] | {body, in_reply_to} | select(. as $reply | $posted | any(. == $reply) | not)' review.json | while read -r reply; do
+            printf '%s' "$reply" > reply.json
+            gh api -X POST "repos/${{ github.repository }}/pulls/$PR/comments" --input reply.json --jq '.html_url'
+          done
+          gh api --paginate "repos/${{ github.repository }}/issues/$PR/comments" --jq '.[] | select(.user.login == "frappe-pr-bot") | {body}' > posted-notes.json
+          jq -c --slurpfile posted posted-notes.json '(.discussion // [])[] | {body: .} | select(. as $note | $posted | any(. == $note) | not)' review.json | while read -r note; do
+            printf '%s' "$note" > note.json
+            gh api -X POST "repos/${{ github.repository }}/issues/$PR/comments" --input note.json --jq '.html_url'
+          done
+          if [ "$(jq -r '(.resolve // []) | length' review.json)" != "0" ]; then
+            gh api graphql --paginate -F o="${GITHUB_REPOSITORY%%/*}" -F r="${GITHUB_REPOSITORY##*/}" -F n="$PR" -f query='
+              query($o:String!,$r:String!,$n:Int!,$endCursor:String){ repository(owner:$o,name:$r){ pullRequest(number:$n){
+                reviewThreads(first:100, after:$endCursor){ pageInfo{ hasNextPage endCursor }
+                  nodes{ id isResolved comments(first:1){ nodes{ author{ login } } } } } } } }' \
+              --jq '.data.repository.pullRequest.reviewThreads.nodes[]
+                    | select(.isResolved == false and .comments.nodes[0].author.login == "frappe-pr-bot") | .id' > own-threads.txt
+            jq -r '(.resolve // [])[]' review.json | while read -r thread; do
+              if grep -qxF "$thread" own-threads.txt; then
+                gh api graphql -f id="$thread" -f query='
+                  mutation($id:ID!){ resolveReviewThread(input:{threadId:$id}){ thread{ isResolved } } }' --jq '"resolved \(.data.resolveReviewThread.thread.isResolved)"'
+              else
+                echo "skipped $thread: not an unresolved frappe-pr-bot thread on this PR" >&2
+              fi
+            done
+          fi
+          if jq -e '.dismiss != null' review.json > /dev/null; then
+            jq '{message: .dismiss.message}' review.json > dismissal.json
+            gh api --paginate "repos/${{ github.repository }}/pulls/$PR/reviews" --jq '.[] | select(.user.login == "frappe-pr-bot" and .state == "CHANGES_REQUESTED") | .id' > own-change-requests.txt
+            jq -r '.dismiss.reviews[]' review.json | while read -r review; do
+              if grep -qxF "$review" own-change-requests.txt; then
+                gh api -X PUT "repos/${{ github.repository }}/pulls/$PR/reviews/$review/dismissals" --input dismissal.json --jq '"dismissed \(.id)"'
+              else
+                echo "skipped $review: not an open frappe-pr-bot change request on this PR" >&2
+              fi
+            done
+          fi

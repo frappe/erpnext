@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "ACC-SUB-.YYYY.-.#####",
  "creation": "2017-07-18 17:50:43.967266",
+ "description": "Bills a customer or supplier for the same things on a schedule.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/subscription",
  "editable_grid": 1,

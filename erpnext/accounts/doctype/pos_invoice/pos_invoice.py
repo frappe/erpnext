@@ -6,10 +6,11 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.query_builder.functions import IfNull, Lower, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import _refuse
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -18,11 +19,13 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyService
+from erpnext.accounts.doctype.sales_invoice.services.status import get_discounting_status
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 
@@ -472,12 +475,16 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Sales Invoice mode is activated in POS. Please create Sales Invoice instead."))
 
 	def validate_serialised_or_batched_item(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		auto_picks_serial_nos = SerialBatchBundleService(self).auto_picks_outward_serial_batch()
 		error_msg = []
 		for d in self.get("items"):
 			error_msg = ""
+			serial_no_missing = not d.serial_no and not (auto_picks_serial_nos and d.get("has_batch_no"))
 			if d.get("has_serial_no") and (
 				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
-				or (d.use_serial_batch_fields and not d.serial_no)
+				or (d.use_serial_batch_fields and serial_no_missing)
 			):
 				error_msg = f"Row #{d.idx}: Please select Serial No. for item {bold(d.item_code)}"
 
@@ -502,33 +509,27 @@ class POSInvoice(SalesInvoice):
 					).format(d.idx, frappe.bold(d.item_code)),
 					title=_("Invalid Item"),
 				)
-			if d.get("serial_no"):
-				serial_nos = get_serial_nos(d.serial_no)
-				for sr in serial_nos:
-					POI = frappe.qb.DocType("POS Invoice Item")
-					s = sr.lower()
-					serial_no_exists = (
-						frappe.qb.from_(POI)
-						.select(POI.name)
-						.where(POI.parent == self.return_against)
-						.where(
-							(Lower(POI.serial_no) == s)
-							| Lower(POI.serial_no).like(f"{s}\n%")
-							| Lower(POI.serial_no).like(f"%\n{s}")
-							| Lower(POI.serial_no).like(f"%\n{s}\n%")
-						)
-						.limit(1)
-						.run()
-					)
+			self.validate_return_serial_nos(d)
 
-					if not serial_no_exists:
-						bold_return_against = frappe.bold(self.return_against)
-						bold_serial_no = frappe.bold(sr)
-						frappe.throw(
-							_(
-								"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
-							).format(d.idx, bold_serial_no, bold_return_against)
-						)
+	def validate_return_serial_nos(self, item):
+		serial_ids = get_serial_batch_list_from_item(item)[0]
+		if not serial_ids:
+			return
+		original_serials = set()
+		for row in frappe.get_all(
+			"POS Invoice Item",
+			filters={"parent": self.return_against, "item_code": item.item_code},
+			fields=["item_code", "serial_no", "batch_no", "serial_and_batch_bundle"],
+		):
+			original_serials.update(get_serial_batch_list_from_item(row)[0])
+
+		invalid_serials = [name for name in serial_ids if name not in original_serials]
+		for number in SerialBatchIdentity("Serial No").get_numbers(item.item_code, invalid_serials):
+			frappe.throw(
+				_(
+					"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
+				).format(item.idx, bold(escape_html(number)), bold(escape_html(self.return_against)))
+			)
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -618,7 +619,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) < getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
@@ -626,7 +627,7 @@ class POSInvoice(SalesInvoice):
 				elif (
 					0 < flt(self.outstanding_amount) < total
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Partly Paid and Discounted"
 				elif 0 < flt(self.outstanding_amount) < total:
@@ -635,7 +636,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
@@ -1063,6 +1064,11 @@ def make_merge_log(invoices: str | list):
 
 	if len(invoices) == 0:
 		frappe.throw(_("At least one invoice has to be selected."))
+
+	for inv in invoices:
+		inv["name"] = cstr(inv.get("name"))
+		if not inv["name"] or not frappe.has_permission("POS Invoice", "read", doc=inv["name"]):
+			_refuse()
 
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())

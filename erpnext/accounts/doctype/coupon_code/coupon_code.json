@@ -3,6 +3,7 @@
  "allow_import": 1,
  "autoname": "field:coupon_name",
  "creation": "2018-01-22 14:34:39.701832",
+ "description": "A code customers enter to get a discount from a pricing rule.",
  "doctype": "DocType",
  "document_type": "Other",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/coupon-code",

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:maintenance_team_name",
  "creation": "2017-10-20 11:43:47.712616",
+ "description": "The people responsible for maintaining assets.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-maintenance-team",
  "editable_grid": 1,

@@ -2,7 +2,7 @@
  "actions": [],
  "allow_copy": 1,
  "creation": "2019-02-01 12:24:34.761380",
- "description": "Import Chart of Accounts from a csv file",
+ "description": "Bring in your chart of accounts from a spreadsheet.",
  "doctype": "DocType",
  "document_type": "Other",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/chart-of-accounts-importer",

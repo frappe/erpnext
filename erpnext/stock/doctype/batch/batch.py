@@ -9,15 +9,18 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form, today
 from frappe.utils.data import DateTimeLikeObject, add_days
+
+import erpnext
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
 
 
-def get_name_from_hash():
+def get_name_from_hash(item_code):
 	"""
 	Get a name for a Batch by generating a unique hash.
 	:return: The hash that was generated.
@@ -25,10 +28,14 @@ def get_name_from_hash():
 	temp = None
 	while not temp:
 		temp = frappe.generate_hash()[:7].upper()
-		if frappe.db.exists("Batch", temp):
+		if batch_id_exists(item_code, temp):
 			temp = None
 
 	return temp
+
+
+def batch_id_exists(item_code, batch_id):
+	return bool(SerialBatchIdentity("Batch").get_records(item_code, [batch_id], ["name"]))
 
 
 def batch_uses_naming_series():
@@ -114,11 +121,15 @@ class Batch(Document):
 		use_batchwise_valuation: DF.Check
 	# end: auto-generated types
 
-	def autoname(self):
-		"""Generate random ID for batch if not specified"""
+	def show_unique_validation_message(self, error):
+		SerialBatchIdentity("Batch").raise_duplicate(error, self.item, self.batch_id)
+		super().show_unique_validation_message(error)
 
+	def before_naming(self):
+		"""Generate the physical batch number separately from the document ID."""
+
+		self.batch_id = cstr(self.batch_id).strip()
 		if self.batch_id:
-			self.name = self.batch_id
 			return
 
 		create_new_batch, batch_number_series = frappe.db.get_value(
@@ -134,19 +145,17 @@ class Batch(Document):
 			elif batch_uses_naming_series():
 				self.batch_id = self.get_name_from_naming_series()
 			else:
-				self.batch_id = get_name_from_hash()
+				self.batch_id = get_name_from_hash(self.item)
 
 			# User might have manually created a batch with next number
-			if frappe.db.exists("Batch", self.batch_id):
+			if batch_id_exists(self.item, self.batch_id):
 				self.batch_id = None
-
-		self.name = self.batch_id
 
 	def onload(self):
 		self.image = frappe.db.get_value("Item", self.item, "image")
 
 	def after_delete(self):
-		revert_series_if_last(get_batch_naming_series(), self.name)
+		revert_series_if_last(get_batch_naming_series(), self.batch_id)
 
 	def validate(self):
 		self.item_has_batch_enabled()
@@ -178,11 +187,27 @@ class Batch(Document):
 
 		frappe.msgprint(_("Batch Qty updated to {0}").format(batch_qty), alert=True)
 
+	def get_company(self):
+		if self.flags.company:
+			return self.flags.company
+
+		if (
+			self.reference_doctype
+			and self.reference_name
+			and frappe.get_meta(self.reference_doctype).has_field("company")
+		):
+			if company := frappe.db.get_value(self.reference_doctype, self.reference_name, "company"):
+				return company
+
+		return erpnext.get_default_company()
+
 	def set_batchwise_valuation(self):
 		from erpnext.stock.utils import get_valuation_method
 
 		if self.is_new():
-			if get_valuation_method(self.item) == "Moving Average" and frappe.get_single_value(
+			if get_valuation_method(
+				self.item, self.get_company()
+			) == "Moving Average" and frappe.get_single_value(
 				"Stock Settings", "do_not_use_batchwise_valuation"
 			):
 				self.use_batchwise_valuation = 0
@@ -191,7 +216,23 @@ class Batch(Document):
 			self.use_batchwise_valuation = 1
 
 	def before_save(self):
+		self.set_manufacturing_date()
 		self.set_expiry_date()
+
+	def set_manufacturing_date(self):
+		if self.manufacturing_date:
+			return
+
+		if (
+			self.reference_doctype
+			and self.reference_name
+			and frappe.get_meta(self.reference_doctype).has_field("posting_date")
+		):
+			self.manufacturing_date = frappe.db.get_value(
+				self.reference_doctype, self.reference_name, "posting_date"
+			)
+
+		self.manufacturing_date = self.manufacturing_date or today()
 
 	def set_expiry_date(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value(
@@ -199,17 +240,7 @@ class Batch(Document):
 		)
 
 		if not self.expiry_date and has_expiry_date and shelf_life_in_days:
-			if (
-				not self.manufacturing_date
-				and self.reference_doctype in ["Stock Entry", "Purchase Receipt", "Purchase Invoice"]
-				and self.reference_name
-			):
-				self.manufacturing_date = frappe.db.get_value(
-					self.reference_doctype, self.reference_name, "posting_date"
-				)
-
-			if self.manufacturing_date:
-				self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
+			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
 			frappe.throw(
@@ -231,6 +262,10 @@ class Batch(Document):
 		name = make_autoname(key, doc=self)
 
 		return name
+
+
+def on_doctype_update():
+	SerialBatchIdentity("Batch").add_unique_constraint()
 
 
 @frappe.whitelist()
@@ -257,6 +292,8 @@ def get_batch_qty(
 	:param warehouse: Optional - give qty for this warehouse
 	:param item_code: Optional - give qty for this item
 	:param for_stock_levels: True consider expired batches"""
+
+	frappe.has_permission("Batch", "select", throw=True)
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 		combine_datetime,
@@ -297,6 +334,8 @@ def get_batch_qty(
 @frappe.whitelist()
 def get_batches_by_oldest(item_code: str, warehouse: str):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
+	frappe.has_permission("Batch", "select", throw=True)
+
 	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
 	if not batches:
 		return []
@@ -317,10 +356,9 @@ def get_batches_by_oldest(item_code: str, warehouse: str):
 @frappe.whitelist(methods=["POST"])
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
-	batch = frappe.get_doc(doctype="Batch", item=item_code, batch_id=new_batch_id).insert()
-	qty = flt(qty)
-
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
+	batch = make_split_batch(batch_no, item_code, new_batch_id, company)
+	qty = flt(qty)
 
 	from_bundle_id = make_batch_bundle(
 		item_code=item_code,
@@ -361,6 +399,21 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 	return batch.name
 
 
+def make_split_batch(batch_no, item_code, new_batch_id=None, company=None):
+	source_batch = frappe.db.get_value(
+		"Batch",
+		batch_no,
+		["manufacturing_date", "expiry_date", "supplier", "use_batchwise_valuation"],
+		as_dict=True,
+	)
+
+	batch = frappe.get_doc(
+		doctype="Batch", item=item_code, batch_id=new_batch_id, parent_batch=batch_no, **source_batch
+	)
+	batch.flags.company = company
+	return batch.insert()
+
+
 def make_batch_bundle(
 	item_code: str,
 	warehouse: str,
@@ -394,14 +447,16 @@ def make_batch_bundle(
 
 
 def validate_serial_no_with_batch(serial_nos, item_code):
+	identity = SerialBatchIdentity("Serial No")
 	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:
 		frappe.throw(
 			_("The serial no {0} does not belong to item {1}").format(
-				get_link_to_form("Serial No", serial_nos[0]), get_link_to_form("Item", item_code)
+				get_link_to_form("Serial No", serial_nos[0], identity.get_label(serial_nos[0])),
+				get_link_to_form("Item", item_code),
 			)
 		)
 
-	serial_no_link = ",".join(get_link_to_form("Serial No", sn) for sn in serial_nos)
+	serial_no_link = ",".join(get_link_to_form("Serial No", sn, identity.get_label(sn)) for sn in serial_nos)
 
 	message = _("Serial Nos") if len(serial_nos) > 1 else _("Serial No")
 	frappe.throw(_("There is no batch found against the {0}: {1}").format(message, serial_no_link))
@@ -416,6 +471,8 @@ def make_batch(kwargs):
 @frappe.whitelist()
 def get_pos_reserved_batch_qty(filters: dict | str):
 	import json
+
+	frappe.has_permission("Batch", "select", throw=True)
 
 	filters = frappe.parse_json(filters)
 

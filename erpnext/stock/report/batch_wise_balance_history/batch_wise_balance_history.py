@@ -5,17 +5,27 @@
 import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
+from pypika import Order
 from pypika import functions as fn
+from pypika.analytics import RowNumber
 
 from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import get_valuation_method
 
 SLE_COUNT_LIMIT = 100_000
 
 
 def execute(filters=None):
+	data = get_data(filters)
+	return prepare_serial_batch_report(get_columns(filters), data)
+
+
+def get_data(filters=None):
 	if not filters:
 		filters = {}
 
@@ -35,16 +45,16 @@ def execute(filters=None):
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
-	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
 	reserved_stock = get_reserved_stock(filters, iwb_map)
+	batch_numbers = get_batch_numbers(iwb_map)
 
 	data = []
 	for item in sorted(iwb_map):
 		if not filters.get("item") or filters.get("item") == item:
 			for wh in sorted(iwb_map[item]):
-				for batch in sorted(iwb_map[item][wh]):
+				for batch in sorted(iwb_map[item][wh], key=lambda batch: batch_numbers.get(batch, batch)):
 					qty_dict = iwb_map[item][wh][batch]
 					if qty_dict.opening_qty or qty_dict.in_qty or qty_dict.out_qty or qty_dict.bal_qty:
 						data.append(
@@ -68,7 +78,13 @@ def execute(filters=None):
 							]
 						)
 
-	return columns, data
+	return data
+
+
+def get_batch_numbers(iwb_map):
+	return SerialBatchIdentity("Batch").get_number_map(
+		{batch for warehouses in iwb_map.values() for batches in warehouses.values() for batch in batches}
+	)
 
 
 def get_columns(filters):
@@ -208,6 +224,9 @@ def get_stock_ledger_entries_for_batch_no(filters):
 	if filters.start_from:
 		query = query.where(sle.posting_datetime > get_datetime(filters.start_from))
 
+	if filters.to_datetime:
+		query = query.where(sle.posting_datetime <= get_datetime(filters.to_datetime))
+
 	return query.run(as_dict=True) or []
 
 
@@ -262,6 +281,9 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 	if filters.start_from:
 		query = query.where(sle.posting_date > getdate(filters.start_from))
 
+	if filters.to_datetime:
+		query = query.where(sle.posting_datetime <= get_datetime(filters.to_datetime))
+
 	return query.run(as_dict=True) or []
 
 
@@ -295,7 +317,64 @@ def get_item_warehouse_batch_map(filters, float_precision):
 		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
 		qty_dict.bal_value += flt(d.stock_value_difference)
 
+	set_pooled_batch_values(filters, iwb_map)
 	return iwb_map
+
+
+def set_pooled_batch_values(filters, iwb_map):
+	moving_average_is_pooled = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
+	pooled_items = [item for item in iwb_map if is_pooled(item, filters.company, moving_average_is_pooled)]
+	if not pooled_items:
+		return
+
+	warehouses = {warehouse for item in pooled_items for warehouse in iwb_map[item]}
+	cutoff = get_datetime(filters.to_datetime or f"{filters.to_date} 23:59:59")
+	rates = get_last_valuation_rates(pooled_items, warehouses, cutoff)
+
+	for item in pooled_items:
+		for warehouse, batches in iwb_map[item].items():
+			rate = flt(rates.get((item, warehouse)))
+			for balance in batches.values():
+				balance.bal_value = balance.bal_qty * rate
+
+
+def get_last_valuation_rates(items, warehouses, cutoff):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	ranked = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			sle.valuation_rate,
+			RowNumber()
+			.over(sle.item_code, sle.warehouse)
+			.orderby(sle.posting_datetime, sle.creation, order=Order.desc)
+			.as_("row_no"),
+		)
+		.where(
+			(sle.is_cancelled == 0)
+			& sle.item_code.isin(items)
+			& sle.warehouse.isin(list(warehouses))
+			& (sle.posting_datetime <= cutoff)
+		)
+	)
+	rows = (
+		frappe.qb.from_(ranked)
+		.select(ranked.item_code, ranked.warehouse, ranked.valuation_rate)
+		.where(ranked.row_no == 1)
+		.run(as_dict=True)
+	)
+	return {(row.item_code, row.warehouse): row.valuation_rate for row in rows}
+
+
+def is_pooled(item, company, moving_average_is_pooled):
+	has_serial_no, serial_no_wise = frappe.get_cached_value(
+		"Item", item, ["has_serial_no", "use_serial_no_wise_valuation"]
+	)
+	if has_serial_no:
+		return not serial_no_wise
+
+	return moving_average_is_pooled and get_valuation_method(item, company) == "Moving Average"
 
 
 def get_item_details(filters):

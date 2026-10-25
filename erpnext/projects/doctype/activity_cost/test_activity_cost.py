@@ -4,6 +4,7 @@
 import frappe
 
 from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -62,3 +63,24 @@ class TestActivityCost(ERPNextTestSuite):
 		).insert()
 		self.assertEqual(cost.employee_name, employee_name)
 		self.assertEqual(cost.title, f"{employee_name} for {activity_type}")
+
+	def test_duplication_is_checked_per_employee(self):
+		first = make_employee("_test_namesake_1@example.com", "_Test Company", first_name="_Test Namesake")
+		second = make_employee("_test_namesake_2@example.com", "_Test Company", first_name="_Test Namesake")
+		make_activity_cost(first)
+		cost = make_activity_cost(second)
+
+		cost.employee = first
+		self.assertRaises(DuplicationError, cost.save)
+
+
+def make_activity_cost(employee):
+	return frappe.get_doc(
+		{
+			"doctype": "Activity Cost",
+			"employee": employee,
+			"activity_type": "_Test Activity Type",
+			"billing_rate": 100,
+			"costing_rate": 50,
+		}
+	).insert()

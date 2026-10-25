@@ -32,6 +32,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1, party=None)
 					"stock_qty": qty,
 					"transaction_type": "selling",
 					"price_list": price_list,
+					"price_list_rate": price[0].price_list_rate,
 					"customer_group": customer_group,
 					"company": company,
 					"conversion_rate": 1,
@@ -51,6 +52,12 @@ def get_price(item_code, price_list, customer_group, company, qty=1, party=None)
 				# price without any rules applied
 				mrp = price_obj.price_list_rate or 0
 
+				price_obj.price_list_rate = pricing_rule.get("price_list_rate", mrp)
+				if pricing_rule.margin_type == "Percentage":
+					price_obj.price_list_rate *= 1 + flt(pricing_rule.margin_rate_or_amount) / 100
+				elif pricing_rule.margin_type == "Amount":
+					price_obj.price_list_rate += flt(pricing_rule.margin_rate_or_amount)
+
 				if pricing_rule.pricing_rule_for == "Discount Percentage":
 					price_obj.discount_percent = pricing_rule.discount_percentage
 					price_obj.formatted_discount_percent = str(flt(pricing_rule.discount_percentage, 0)) + "%"
@@ -58,13 +65,15 @@ def get_price(item_code, price_list, customer_group, company, qty=1, party=None)
 						price_obj.price_list_rate * (1.0 - (flt(pricing_rule.discount_percentage) / 100.0))
 					)
 
-				if pricing_rule.pricing_rule_for == "Rate":
-					rate_discount = flt(mrp) - flt(pricing_rule.price_list_rate)
+				elif pricing_rule.pricing_rule_for == "Discount Amount":
+					price_obj.price_list_rate -= flt(pricing_rule.discount_amount)
+
+				if pricing_rule.pricing_rule_for in ("Rate", "Discount Amount"):
+					rate_discount = flt(mrp) - flt(price_obj.price_list_rate)
 					if rate_discount > 0:
 						price_obj.formatted_discount_rate = fmt_money(
 							rate_discount, currency=price_obj["currency"]
 						)
-					price_obj.price_list_rate = pricing_rule.price_list_rate or 0
 
 			if price_obj:
 				price_obj["formatted_price"] = fmt_money(
@@ -79,8 +88,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1, party=None)
 						frappe.db.get_value("Currency", price_obj.currency, "symbol", cache=True)
 						or price_obj.currency
 					)
-					or ""
-				)
+				) or ""
 
 				uom_cd = frappe.qb.DocType("UOM Conversion Detail")
 				item_dt = frappe.qb.DocType("Item")

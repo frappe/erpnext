@@ -84,7 +84,6 @@
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_global_search": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data"
@@ -166,7 +165,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:07.307773",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Item",

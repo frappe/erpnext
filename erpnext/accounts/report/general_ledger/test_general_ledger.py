@@ -12,6 +12,36 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGeneralLedger(ERPNextTestSuite):
+	def test_snapshot_reports_use_live_data_for_restricted_users(self):
+		from importlib import import_module
+		from unittest.mock import patch
+
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		class SnapshotReached(Exception):
+			pass
+
+		restricted = make_fenced_user(
+			"gl-snapshot-fenced@example.com", ["Accounts User"], [("Company", "_Test Company")]
+		)
+		unrestricted = make_fenced_user("gl-snapshot-open@example.com", ["Accounts User"])
+		for report in ("general_ledger", "balance_sheet", "profit_and_loss_statement", "trial_balance"):
+			module = import_module(f"erpnext.accounts.report.{report}.{report}")
+			for user, expect_live in ((restricted, True), (unrestricted, False)):
+				with (
+					as_user(user),
+					patch.object(module, "execute", return_value="live") as live,
+					patch(
+						"frappe.database.duckdb.database.get_latest_sync", side_effect=SnapshotReached
+					) as sync,
+				):
+					try:
+						result = module.execute_snapshot_report(frappe._dict(company="_Test Company"))
+					except SnapshotReached:
+						result = "snapshot"
+				self.assertEqual(result, "live" if expect_live else "snapshot", f"{report} as {user}")
+				self.assertEqual((live.called, sync.called), (expect_live, not expect_live))
+
 	def setUp(self):
 		self.company = "_Test Company"
 
@@ -57,7 +87,8 @@ class TestGeneralLedger(ERPNextTestSuite):
 
 		self.clear_old_entries()
 		# reuse bootstrap non-party accounts; clear_old_entries() leaves them clean of GL
-		account = "_Test Account Cost for Goods Sold - _TC"
+		# balance sheet account, so the opening doesn't depend on whether -60 days crosses a fiscal year
+		account = "_Test Cash - _TC"
 		offset = "_Test Bank - _TC"
 		make_journal_entry(account, offset, 1000, posting_date=add_days(today(), -60), submit=True)  # opening
 		make_journal_entry(account, offset, 200, posting_date=today(), submit=True)  # in period
@@ -70,6 +101,35 @@ class TestGeneralLedger(ERPNextTestSuite):
 		self.assertEqual(labelled["'Opening'"]["debit"], 1000)
 		self.assertEqual(labelled["'Total'"]["debit"], 200)
 		self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 1200)
+
+	def test_pl_account_opening_excludes_previous_fiscal_years(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		# test fiscal years are calendar years
+		pl_account = "_Test Account Cost for Goods Sold - _TC"
+		bs_account = "_Test Cash - _TC"
+		make_journal_entry(pl_account, bs_account, 1000, posting_date="2024-12-15", submit=True)  # last FY
+		make_journal_entry(pl_account, bs_account, 300, posting_date="2025-03-10", submit=True)  # this FY
+		make_journal_entry(pl_account, bs_account, 200, posting_date="2025-06-10", submit=True)  # in period
+
+		def get_rows(account):
+			filters = frappe._dict(
+				company=self.company, from_date="2025-06-01", to_date="2025-06-30", account=[account]
+			)
+			return {row.get("account"): row for row in execute(filters)[1]}
+
+		pl_rows = get_rows(pl_account)
+		self.assertEqual(pl_rows["'Opening'"]["debit"] - pl_rows["'Opening'"]["credit"], 300)
+		self.assertEqual(
+			pl_rows["'Closing (Opening + Total)'"]["debit"]
+			- pl_rows["'Closing (Opening + Total)'"]["credit"],
+			500,
+		)
+
+		# balance sheet accounts still carry forward across fiscal years
+		bs_rows = get_rows(bs_account)
+		self.assertEqual(bs_rows["'Opening'"]["debit"] - bs_rows["'Opening'"]["credit"], -1300)
 
 	def test_categorize_by_account_subtotals(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -414,3 +474,120 @@ class TestGeneralLedger(ERPNextTestSuite):
 		)
 		actual = set([x.voucher_no for x in data if x.voucher_no])
 		self.assertEqual(expected, actual)
+
+	def test_categorize_by_party_separates_party_types(self):
+		self.clear_old_entries()
+		party = "_Test Customer"
+		if not frappe.db.exists("Supplier", party):
+			frappe.get_doc(
+				doctype="Supplier", supplier_name=party, supplier_group="_Test Supplier Group"
+			).insert(set_name=party)
+		opening_date, period_date = add_days(today(), -60), today()
+		self.make_party_journal_entry("Debtors - _TC", "Customer", party, 1000, opening_date)
+		self.make_party_journal_entry("Debtors - _TC", "Customer", party, 200, period_date)
+		self.make_party_journal_entry("Creditors - _TC", "Supplier", party, -400, opening_date)
+		self.make_party_journal_entry("Creditors - _TC", "Supplier", party, -50, period_date)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=add_days(today(), -30),
+			to_date=today(),
+			categorize_by="Categorize by Party",
+		)
+		closing_rows = [r for r in execute(filters)[1] if r.get("account") == "'Closing (Opening + Total)'"]
+
+		# one closing row per party type, then the grand closing
+		self.assertEqual(sorted(r["debit"] - r["credit"] for r in closing_rows[:-1]), [-450, 1200])
+
+	def make_party_journal_entry(self, account, party_type, party, amount, posting_date):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		jv = make_journal_entry(account, "_Test Bank - _TC", amount, posting_date=posting_date, save=False)
+		jv.accounts[0].update({"party_type": party_type, "party": party})
+		jv.insert()
+		jv.submit()
+		return jv
+
+	def test_company_currency_amounts_for_foreign_currency_account(self):
+		account = frappe.get_doc(
+			doctype="Account",
+			account_name="Test USD Account for Company Currency",
+			company=self.company,
+			parent_account="Bank Accounts - _TC",
+			account_type="Bank",
+			account_currency="USD",
+		).insert(ignore_if_duplicate=True)
+		jv = frappe.new_doc("Journal Entry", posting_date=today(), company=self.company, multi_currency=1)
+		jv.append(
+			"accounts", {"account": account.name, "debit_in_account_currency": 100, "exchange_rate": 80}
+		)
+		jv.append("accounts", {"account": "Cash - _TC", "credit_in_account_currency": 8000})
+		jv.submit()
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			account=[account.name],
+			show_amount_in_company_currency=1,
+		)
+		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
+
+		self.assertEqual(total["debit"], 8000)
+		self.assertEqual(total["presentation_currency"], "INR")
+
+		filters.update(show_amount_in_company_currency=0, presentation_currency="USD")
+		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
+		self.assertEqual(total["debit"], 100)
+
+	def test_presentation_currency_without_exchange_rate(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.accounts.report import utils as report_utils
+
+		frappe.db.delete("Currency Exchange", {"from_currency": "USD", "to_currency": "INR"})
+		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)
+		exchange_rates = getattr(report_utils, "__exchange_rates")
+		exchange_rates.clear()
+		self.addCleanup(exchange_rates.clear)
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 8000, submit=True)
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			account=["_Test Bank - _TC"],
+			voucher_no=jv.name,
+			presentation_currency="USD",
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Exchange rate from .*USD.* to .*INR", execute, filters
+		)
+
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date=today(),
+			from_currency="USD",
+			to_currency="INR",
+			exchange_rate=80,
+		).insert()
+		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
+		self.assertEqual(total["debit"], 100)
+
+	def test_categorize_by_voucher_separates_voucher_types(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		self.clear_old_entries()
+		shared_name = "_Test GL Shared Voucher Name"
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 300, save=False)
+		jv.insert(set_name=shared_name)
+		jv.submit()
+		si = create_sales_invoice(company=self.company, rate=1000, do_not_save=True)
+		si.insert(set_name=shared_name)
+		si.submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=today(), to_date=today(), categorize_by="Categorize by Voucher"
+		)
+		total_debits = [r["debit"] for r in execute(filters)[1] if r.get("account") == "'Total'"]
+
+		self.assertEqual(sorted(total_debits[:-1]), [300, 1000])

@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
@@ -130,13 +131,51 @@ class PaymentRequest(Document):
 		self.db_set("status", "Cancelled")
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		if self.get("__islocal"):
 			self.status = "Draft"
 		self.validate_reference_document()
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		ref_doc.check_permission("read")
+		self.validate_reference_company(ref_doc)
+		self.validate_bank_account()
+		self.validate_print_format()
 		self.validate_against_payment_reference()
-		self.validate_payment_request_amount()
+		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_bank_account(self):
+		if not self.bank_account:
+			return
+
+		bank_account = frappe.get_cached_value(
+			"Bank Account",
+			self.bank_account,
+			["disabled", "is_company_account", "company", "party_type", "party"],
+			as_dict=True,
+		)
+		if not bank_account or bank_account.disabled:
+			frappe.throw(_("Bank Account {0} is missing or disabled").format(self.bank_account))
+
+		if bank_account.is_company_account:
+			if not self.company or bank_account.company != self.company:
+				frappe.throw(
+					_("Bank Account {0} does not belong to Company {1}").format(
+						self.bank_account, self.company
+					)
+				)
+		elif (
+			not self.party_type
+			or not self.party
+			or bank_account.party_type != self.party_type
+			or bank_account.party != self.party
+		):
+			frappe.throw(
+				_("Bank Account {0} does not belong to {1} {2}").format(
+					self.bank_account, self.party_type, self.party
+				)
+			)
 
 	def validate_against_payment_reference(self):
 		if not self.payment_reference:
@@ -160,7 +199,38 @@ class PaymentRequest(Document):
 		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
-	def validate_payment_request_amount(self):
+		if self.reference_doctype not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
+			frappe.throw(
+				_("Payment Requests cannot be created against: {0}").format(
+					frappe.bold(self.reference_doctype)
+				)
+			)
+
+	def validate_print_format(self):
+		if not self.print_format or self.print_format == "Standard":
+			return
+
+		if frappe.db.get_value("Print Format", self.print_format, "doc_type") != self.reference_doctype:
+			frappe.throw(
+				_("Print Format {0} is not valid for {1}").format(
+					frappe.bold(self.print_format), _(self.reference_doctype)
+				),
+				title=_("Invalid Print Format"),
+			)
+
+	def validate_reference_company(self, ref_doc):
+		if self.company != ref_doc.company:
+			frappe.throw(
+				_("Company {0} does not match the company {1} of {2} {3}").format(
+					frappe.bold(self.company),
+					frappe.bold(ref_doc.company),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Company"),
+			)
+
+	def validate_payment_request_amount(self, ref_doc):
 		if self.payment_reference:
 			return
 		if self.grand_total == 0:
@@ -169,7 +239,6 @@ class PaymentRequest(Document):
 				title=_("Invalid Amount"),
 			)
 
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		if not hasattr(ref_doc, "order_type") or ref_doc.order_type != "Shopping Cart":
 			ref_amount = get_amount(ref_doc, self.payment_account)
 			if not ref_amount:
@@ -223,26 +292,7 @@ class PaymentRequest(Document):
 				)
 
 	def before_submit(self):
-		if (
-			self.currency != self.party_account_currency
-			and self.party_account_currency == get_company_currency(self.company)
-		):
-			# set outstanding amount in party account currency
-			invoice = frappe.get_value(
-				self.reference_doctype,
-				self.reference_name,
-				["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
-				as_dict=1,
-			)
-			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
-			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
-			self.outstanding_amount = flt(
-				self.grand_total / grand_total * base_grand_total,
-				self.precision("outstanding_amount"),
-			)
-
-		else:
-			self.outstanding_amount = self.grand_total
+		self.outstanding_amount = get_requested_amount_in_party_account_currency(self)
 
 		if self.payment_request_type == "Outward":
 			self.status = "Initiated"
@@ -591,6 +641,11 @@ class PaymentRequest(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def resend_payment_email(self):
+		# the caller can supply this document's values, so only the saved ones are trusted
+		self.reload()
+		self.check_permission("email")
+		frappe.has_permission(self.reference_doctype, "read", self.reference_name, throw=True)
+
 		if not (
 			self.docstatus == 1
 			and self.payment_request_type == "Inward"
@@ -1150,6 +1205,40 @@ def make_payment_entry(docname: str):
 	return doc.create_payment_entry(submit=False).as_dict()
 
 
+def get_requested_amount_in_party_account_currency(doc) -> float:
+	"""Return the total requested amount converted to party account currency when applicable."""
+	company = doc.get("company")
+	if (
+		doc.get("currency") != doc.get("party_account_currency")
+		and doc.get("party_account_currency") == get_company_currency(company)
+		and doc.get("reference_doctype")
+		and doc.get("reference_name")
+	):
+		invoice = frappe.get_value(
+			doc.get("reference_doctype"),
+			doc.get("reference_name"),
+			["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
+			as_dict=1,
+		)
+		if invoice:
+			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
+			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
+			if grand_total:
+				precision = (
+					doc.precision("outstanding_amount")
+					if callable(getattr(doc, "precision", None))
+					else frappe.get_precision(
+						"Payment Request", "outstanding_amount", currency=doc.get("party_account_currency")
+					)
+				)
+				return flt(
+					flt(doc.get("grand_total")) / grand_total * base_grand_total,
+					precision,
+				)
+
+	return flt(doc.get("grand_total"))
+
+
 def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	"""
 	Update Payment Request's `Status` and `Outstanding Amount` based on Payment Entry Reference's `Allocated Amount`.
@@ -1166,8 +1255,16 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			"grand_total",
 			"outstanding_amount",
 			"payment_request_type",
+			"currency",
+			"party_account_currency",
+			"company",
+			"reference_doctype",
+			"reference_name",
 		],
 	)
+
+	for pr in referenced_payment_requests:
+		pr.total_requested = get_requested_amount_in_party_account_currency(pr)
 
 	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
 	doc_updates = {}
@@ -1197,9 +1294,10 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			)
 
 		# determine status
-		if new_outstanding_amount == payment_request["grand_total"]:
+		total_requested = payment_request.total_requested
+		if total_requested > 0 and flt(new_outstanding_amount, precision) >= flt(total_requested, precision):
 			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
-		elif new_outstanding_amount == 0:
+		elif new_outstanding_amount <= 0:
 			status = "Paid"
 		elif new_outstanding_amount > 0:
 			status = "Partially Paid"
@@ -1265,12 +1363,14 @@ def make_payment_order(source_name: str, target_doc: str | dict | Document | Non
 
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Request"
+		target.company = target.company or source.company
 		target.append(
 			"references",
 			{
 				"reference_doctype": source.reference_doctype,
 				"reference_name": source.reference_name,
-				"amount": source.grand_total,
+				# Journal Entry debits the supplier in party account currency.
+				"amount": source.outstanding_amount,
 				"supplier": source.party,
 				"payment_request": source_name,
 				"mode_of_payment": source.mode_of_payment,
@@ -1285,6 +1385,8 @@ def make_payment_order(source_name: str, target_doc: str | dict | Document | Non
 		{
 			"Payment Request": {
 				"doctype": "Payment Order",
+				# keep the company of an existing order; references are validated against it
+				"field_no_map": ["company"] if target_doc else [],
 			}
 		},
 		target_doc,
@@ -1304,6 +1406,38 @@ def validate_payment(doc, method=None):
 		_("The Payment Request {0} is already paid, cannot process payment twice").format(
 			doc.reference_docname
 		)
+	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_bank_account_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	filters = frappe._dict(filters or {})
+	if not filters.company and not (filters.party_type and filters.party):
+		return []
+
+	bank_account = frappe.qb.DocType("Bank Account")
+	ownership = bank_account.name == ""
+	if filters.company:
+		ownership = (bank_account.is_company_account == 1) & (bank_account.company == filters.company)
+	if filters.party_type and filters.party:
+		ownership |= (
+			(bank_account.is_company_account == 0)
+			& (bank_account.party_type == filters.party_type)
+			& (bank_account.party == filters.party)
+		)
+
+	return (
+		frappe.qb.get_query("Bank Account", fields=["name", "bank", "account"], ignore_permissions=False)
+		.where(bank_account.disabled == 0)
+		.where(ownership)
+		.where(bank_account[searchfield].like(f"%{txt}%"))
+		.orderby(bank_account.name)
+		.limit(page_len)
+		.offset(start)
+		.run(as_list=True)
 	)
 
 

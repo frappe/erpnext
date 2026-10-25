@@ -10,6 +10,7 @@ from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	aggregate_bin_details,
 	get_bin_details,
 	get_uom_conversion_factor,
 )
@@ -91,38 +92,35 @@ def _add_sub_assembly_child(
 def _resolve_available_sub_assembly(
 	d, stock_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
 ):
-	if skip_available and d.item_code not in sub_assembly_items:
-		bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
-		return _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details)
+	if warehouse and d.item_code not in bin_details:
+		bins = get_bin_details(d, company, for_warehouse=warehouse)
+		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
-	if warehouse:
-		bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+	if skip_available and d.item_code not in sub_assembly_items:
+		return _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details)
 	return stock_qty
 
 
 def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
-	for _bin_dict in bin_details[d.item_code]:
-		_bin_dict.original_projected_qty = _bin_dict.projected_qty
-		if _bin_dict.original_projected_qty <= 0:
-			continue
+	bin_dict = bin_details[d.item_code]
+	available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
+	if available_qty <= 0:
+		return stock_qty
 
-		if _bin_dict.original_projected_qty >= stock_qty:
-			_bin_dict.original_projected_qty -= stock_qty
-			stock_qty = 0
-			continue
+	if available_qty >= stock_qty:
+		bin_dict.available_qty = available_qty - stock_qty
+		return 0
 
-		stock_qty -= _bin_dict.original_projected_qty
-		sub_assembly_items.append(d.item_code)
-	return stock_qty
+	bin_dict.available_qty = 0
+	sub_assembly_items.append(d.item_code)
+	return stock_qty - available_qty
 
 
 def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision):
-	bins = bin_details.get(d.item_code)
-	actual_qty = bins[0].get("actual_qty", 0) if bins else 0
-	projected_qty = bins[0].get("projected_qty", 0) if bins else 0
+	bin_dict = bin_details.get(d.item_code) or {}
 	return frappe._dict(
 		{
-			"actual_qty": actual_qty,
+			"actual_qty": bin_dict.get("actual_qty", 0),
 			"parent_item_code": parent_item_code,
 			"description": d.description,
 			"production_item": d.item_code,
@@ -135,7 +133,7 @@ def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, requi
 			"indent": indent,
 			"stock_qty": flt(stock_qty, precision),
 			"required_qty": flt(required_qty, precision),
-			"projected_qty": projected_qty,
+			"projected_qty": bin_dict.get("projected_qty", 0),
 			"main_bom": bom_no,
 		}
 	)
@@ -305,3 +303,34 @@ def _merge_sub_assembly_rm(item, item_details):
 		details.qty += item.get("qty")
 	else:
 		item_details.setdefault(key, item)
+
+
+def get_subcontracted_received_qty(po_details):
+	"""Accepted finished good qty from Subcontracting Receipts, by Purchase Order Item."""
+	if not po_details:
+		return {}
+
+	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	# return rows don't carry purchase_order_item, so link via the subcontracting order item
+	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
+
+	return frappe._dict(
+		frappe.qb.from_(scr_item)
+		.inner_join(sco_item)
+		.on(scr_item.subcontracting_order_item == sco_item.name)
+		.left_join(return_against)
+		.on(scr_item.subcontracting_receipt_item == return_against.name)
+		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
+		.where(
+			(scr_item.docstatus == 1)
+			& sco_item.purchase_order_item.isin(po_details)
+			# skip returns of rejected qty, they come out of the rejected warehouse
+			& (
+				return_against.name.isnull()
+				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
+			)
+		)
+		.groupby(sco_item.purchase_order_item)
+		.run()
+	)

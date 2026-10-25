@@ -5,7 +5,7 @@ from typing import Any
 
 import frappe
 from frappe import _, bold, scrub
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import delete_property_setter
 from frappe.model.document import Document
 from frappe.utils.caching import request_cache
 
@@ -93,29 +93,44 @@ class InventoryDimension(Document):
 				frappe.throw(_(msg), DoNotChangeError)
 
 	def on_trash(self):
+		if self.has_stock_ledger():
+			frappe.throw(
+				_("Inventory Dimension {0} cannot be deleted as stock transactions exist against it").format(
+					bold(self.name)
+				),
+				DoNotChangeError,
+			)
+
 		self.delete_custom_fields()
 
 	def delete_custom_fields(self):
-		filters = {
-			"fieldname": (
-				"in",
-				[
-					self.source_fieldname,
-					f"to_{self.source_fieldname}",
-					f"from_{self.source_fieldname}",
-					f"rejected_{self.source_fieldname}",
-				],
-			)
-		}
+		document_fieldnames = [
+			self.source_fieldname,
+			f"to_{self.source_fieldname}",
+			f"from_{self.source_fieldname}",
+			f"rejected_{self.source_fieldname}",
+		]
 
-		if self.document_type:
-			filters["dt"] = self.document_type
+		for doctype in self.get_dimension_doctypes():
+			for field in frappe.get_all(
+				"Custom Field", filters={"dt": doctype, "fieldname": ("in", document_fieldnames)}
+			):
+				delete_dimension_custom_field(field.name)
 
-		for field in frappe.get_all("Custom Field", filters=filters):
-			frappe.delete_doc("Custom Field", field.name)
+		for doctype in ("Stock Ledger Entry", "Stock Closing Balance"):
+			for field in frappe.get_all(
+				"Custom Field", filters={"dt": doctype, "fieldname": self.target_fieldname}
+			):
+				delete_dimension_custom_field(field.name)
 
 		msg = f"Deleted custom fields related to the dimension {self.name}"
 		frappe.msgprint(_(msg))
+
+	def get_dimension_doctypes(self):
+		if not self.apply_to_all_doctypes:
+			return [self.document_type]
+
+		return [row[0] for row in get_inventory_documents()]
 
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
@@ -240,7 +255,7 @@ class InventoryDimension(Document):
 				and not frappe.db.get_value("Custom Field", {"dt": dt, "fieldname": self.target_fieldname})
 				and not field_exists(dt, self.target_fieldname)
 			):
-				dimension_field = dimension_fields[1]
+				dimension_field = dimension_fields[1].copy()
 				dimension_field["mandatory_depends_on"] = ""
 				dimension_field["reqd"] = 0
 				dimension_field["fieldname"] = self.target_fieldname
@@ -266,7 +281,7 @@ class InventoryDimension(Document):
 					if not field_exists(doctype, field["fieldname"]):
 						filter_custom_fields.setdefault(doctype, []).append(field)
 
-		create_custom_fields(filter_custom_fields)
+		create_dimension_custom_fields(filter_custom_fields)
 
 	def add_transfer_field(self, doctype, dimension_fields):
 		if doctype not in [
@@ -373,10 +388,10 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 		if parent_doc:
 			evals["parent"] = parent_doc
 
-		if row.condition and frappe.safe_eval(row.condition, evals):
-			filter_dimensions.append(row)
-		else:
-			filter_dimensions.append(row)
+		if row.condition and not frappe.safe_eval(row.condition, evals):
+			continue
+
+		filter_dimensions.append(row)
 
 	return filter_dimensions
 
@@ -443,3 +458,60 @@ def get_parent_fields(child_doctype: str, dimension_name: str):
 	)
 
 	return fields
+
+
+def create_dimension_custom_fields(custom_fields):
+	frappe.flags.in_create_custom_fields = True
+	try:
+		for doctype, fields in custom_fields.items():
+			for df in fields:
+				save_dimension_custom_field(doctype, df)
+	finally:
+		frappe.flags.in_create_custom_fields = False
+
+	for doctype in custom_fields:
+		frappe.clear_cache(doctype=doctype)
+		frappe.db.updatedb(doctype)
+
+
+def save_dimension_custom_field(doctype, df):
+	name = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": df["fieldname"]})
+	if name:
+		custom_field = frappe.get_doc("Custom Field", name)
+		original_values = custom_field.as_dict()
+		custom_field.update(df)
+		if custom_field.as_dict() == original_values:
+			return
+	else:
+		custom_field = frappe.get_doc(
+			{
+				"doctype": "Custom Field",
+				"dt": doctype,
+				"permlevel": 0,
+				"fieldtype": "Data",
+				"hidden": 0,
+				"is_system_generated": 1,
+				**df,
+			}
+		)
+
+	custom_field.flags.ignore_permissions = True
+	custom_field.save()
+
+
+def delete_dimension_custom_field(name):
+	field = frappe.db.get_value("Custom Field", name, ["dt", "fieldname"], as_dict=True)
+	frappe.delete_doc("Custom Field", name, ignore_permissions=True, ignore_on_trash=True)
+	delete_property_setter(field.dt, field_name=field.fieldname)
+	remove_field_from_doctype_layouts(field.dt, field.fieldname)
+	frappe.clear_cache(doctype=field.dt)
+
+
+def remove_field_from_doctype_layouts(doctype, fieldname):
+	for layout in frappe.get_all("DocType Layout", filters={"document_type": doctype}, pluck="name"):
+		layout_doc = frappe.get_doc("DocType Layout", layout)
+		rows = [row for row in layout_doc.fields if row.fieldname == fieldname]
+		if rows:
+			layout_doc.remove(rows[0])
+			layout_doc.flags.ignore_permissions = True
+			layout_doc.save()

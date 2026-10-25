@@ -61,10 +61,6 @@ erpnext.SalesFunnel = class SalesFunnel {
 				),
 			});
 
-		this.elements.no_data = $('<div class="alert alert-warning">' + __("No Data") + "</div>")
-			.toggle(false)
-			.appendTo(this.elements.layout);
-
 		this.elements.funnel_wrapper = $('<div class="funnel-wrapper text-center"></div>').appendTo(
 			this.elements.layout
 		);
@@ -101,11 +97,6 @@ erpnext.SalesFunnel = class SalesFunnel {
 		this.elements.refresh_btn.on("click", function () {
 			me.get_data(this);
 		});
-
-		// bind resize
-		$(window).resize(function () {
-			me.render();
-		});
 	}
 
 	get_data(btn) {
@@ -133,8 +124,8 @@ erpnext.SalesFunnel = class SalesFunnel {
 				if (!r.exc) {
 					me.options.data = r.message;
 					if (me.options.data == "empty") {
-						const $parent = me.elements.funnel_wrapper;
-						$parent.html(__("No data for this period"));
+						me.destroy_chart();
+						me.elements.funnel_wrapper.html(__("No data for this period"));
 					} else {
 						me.render();
 					}
@@ -159,130 +150,40 @@ erpnext.SalesFunnel = class SalesFunnel {
 	}
 
 	render_funnel() {
-		var me = this;
-		this.prepare_funnel();
-
-		var context = this.elements.context,
-			x_start = 0.0,
-			x_end = this.options.width,
-			x_mid = (x_end - x_start) / 2.0,
-			y = 0,
-			y_old = 0.0;
-
-		if (this.options.total_value === 0) {
-			this.elements.no_data.toggle(true);
-			return;
-		}
-
-		this.options.data.forEach(function (d) {
-			context.fillStyle = d.color;
-			context.strokeStyle = d.color;
-			me.draw_triangle(x_start, x_mid, x_end, y, me.options.height);
-
-			y_old = y;
-
-			// new y
-			y = y + d.height;
-
-			// new x
-			var half_side = (me.options.height - y) / Math.sqrt(3);
-			x_start = x_mid - half_side;
-			x_end = x_mid + half_side;
-
-			var y_mid = y_old + (y - y_old) / 2.0;
-
-			me.draw_legend(x_mid, y_mid, me.options.width, me.options.height, d.value + " - " + d.title);
+		this.draw({
+			type: "funnel",
+			data: this.options.data,
+			category: "title",
+			value: "value",
+			fieldtype: "Int",
 		});
-	}
-
-	prepare_funnel() {
-		var me = this;
-
-		this.elements.no_data.toggle(false);
-
-		// calculate width and height options
-		this.options.width = ($(this.elements.funnel_wrapper).width() * 2.0) / 3.0;
-		this.options.height = (Math.sqrt(3) * this.options.width) / 2.0;
-
-		const min_height = (this.options.height * 0.1) / this.options.data.length;
-		const height = this.options.height * 0.9;
-
-		// calculate total weightage
-		// as height decreases, area decreases by the square of the reduction
-		// hence, compensating by squaring the index value
-		this.options.total_weightage = this.options.data.reduce(function (prev, curr, i) {
-			return prev + Math.pow(i + 1, 2) * curr.value;
-		}, 0.0);
-
-		// calculate height for each data
-		$.each(this.options.data, function (i, d) {
-			d.height = (height * d.value * Math.pow(i + 1, 2)) / me.options.total_weightage + min_height;
-		});
-
-		this.elements.canvas = $("<canvas></canvas>")
-			.appendTo(this.elements.funnel_wrapper.empty())
-			.attr("width", $(this.elements.funnel_wrapper).width())
-			.attr("height", this.options.height);
-
-		this.elements.context = this.elements.canvas.get(0).getContext("2d");
-	}
-
-	draw_triangle(x_start, x_mid, x_end, y, height) {
-		var context = this.elements.context;
-		context.beginPath();
-		context.moveTo(x_start, y);
-		context.lineTo(x_end, y);
-		context.lineTo(x_mid, height);
-		context.lineTo(x_start, y);
-		context.closePath();
-		context.fill();
-	}
-
-	draw_legend(x_mid, y_mid, width, height, title) {
-		var context = this.elements.context;
-
-		if (y_mid == 0) {
-			y_mid = 7;
-		}
-
-		// draw line
-		context.beginPath();
-		context.moveTo(x_mid, y_mid);
-		context.lineTo(width, y_mid);
-		context.closePath();
-		context.stroke();
-
-		// draw circle
-		context.beginPath();
-		context.arc(width, y_mid, 5, 0, Math.PI * 2, false);
-		context.closePath();
-		context.fill();
-
-		// draw text
-		context.fillStyle = getComputedStyle(document.body).getPropertyValue("--text-color");
-		context.textBaseline = "middle";
-		context.font = "1.1em sans-serif";
-		context.fillText(__(title), width + 20, y_mid);
 	}
 
 	render_chart(title) {
-		let me = this;
-		let currency = frappe.defaults.get_default("currency");
-
-		let chart_data = me.options.data ? me.options.data : null;
-
-		const parent = me.elements.funnel_wrapper[0];
-		this.chart = new frappe.Chart(parent, {
-			title: title,
-			height: 400,
-			data: chart_data,
+		const { labels, datasets } = this.options.data;
+		this.draw({
 			type: "bar",
-			barOptions: {
-				stacked: 1,
-			},
-			tooltipOptions: {
-				formatTooltipY: (d) => format_currency(d, currency),
-			},
+			title: title,
+			data: datasets.flatMap((dataset) =>
+				labels.map((label, i) => ({ label, stage: dataset.name, amount: dataset.values[i] }))
+			),
+			x: "label",
+			y: "amount",
+			splitBy: "stage",
+			stacked: true,
+			fieldtype: "Currency",
+			options: "currency",
+			currency: erpnext.get_currency(this.company),
 		});
+	}
+
+	draw(config) {
+		this.destroy_chart();
+		this.chart = frappe.ui.chart(this.elements.funnel_wrapper.empty(), { height: 400, ...config });
+	}
+
+	destroy_chart() {
+		this.chart?.destroy();
+		this.chart = null;
 	}
 };

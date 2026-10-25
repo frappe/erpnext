@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "timesheet_sb",
-  "ignore_workstation_time_overlap",
   "ignore_user_time_overlap",
   "ignore_employee_time_overlap",
   "fetch_timesheet_in_sales_invoice"
@@ -16,12 +15,6 @@
    "fieldname": "timesheet_sb",
    "fieldtype": "Section Break",
    "label": "Timesheets"
-  },
-  {
-   "default": "0",
-   "fieldname": "ignore_workstation_time_overlap",
-   "fieldtype": "Check",
-   "label": "Ignore Workstation Time Overlap"
   },
   {
    "default": "0",
@@ -47,7 +40,7 @@
  "icon": "settings",
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.265634",
+ "modified": "2026-10-05 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Settings",

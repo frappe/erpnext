@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"transaction_date\", \"label\": \"Date\"}, {\"fieldname\": \"per_billed\", \"label\": \"% Billed\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.776924",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Bill",
+ "filters": "[[\"Purchase Order\", \"status\", \"in\", [\"To Receive and Bill\", \"To Bill\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.776924",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Purchase Order-To Bill",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Order",
+ "route_signature": "status=[\"in\",[\"To Receive and Bill\",\"To Bill\"]]",
+ "sort_field": "transaction_date",
+ "sort_order": "asc"
+}

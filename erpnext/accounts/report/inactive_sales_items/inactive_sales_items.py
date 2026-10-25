@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import CurDate, DateDiff
 from frappe.utils import cint
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_companies_condition,
@@ -66,9 +67,10 @@ def get_data(filters):
 	data = []
 	items = get_items(filters)
 	territories = get_territories(filters)
-	sales_invoice_data = get_sales_details(filters)
+	last_sales = get_sales_details(filters)
 
 	for territory in territories:
+		subtree = {territory.name, *get_descendants_of("Territory", territory.name, ignore_permissions=True)}
 		for item in items:
 			row = {
 				"territory": territory.name,
@@ -77,24 +79,28 @@ def get_data(filters):
 				"item_name": item.item_name,
 			}
 
-			if sales_invoice_data.get((territory.name, item.item_code)):
-				item_obj = sales_invoice_data[(territory.name, item.item_code)]
-				if item_obj.days_since_last_order > cint(filters["days"]):
-					row.update(
-						{
-							"territory": item_obj.territory,
-							"customer": item_obj.customer,
-							"last_order_date": item_obj.last_order_date,
-							"qty": item_obj.qty,
-							"days_since_last_order": item_obj.days_since_last_order,
-						}
-					)
-				else:
+			last_sale = get_last_sale(last_sales, item.item_code, subtree)
+			if last_sale:
+				if last_sale.days_since_last_order <= cint(filters["days"]):
 					continue
+
+				row.update(
+					{
+						"customer": last_sale.customer,
+						"last_order_date": last_sale.last_order_date,
+						"qty": last_sale.qty,
+						"days_since_last_order": last_sale.days_since_last_order,
+					}
+				)
 
 			data.append(row)
 
 	return data
+
+
+def get_last_sale(last_sales: dict, item_code: str, territories: set[str]) -> dict | None:
+	sales = (last_sales[(item_code, t)] for t in territories if (item_code, t) in last_sales)
+	return min(sales, key=lambda d: d.days_since_last_order, default=None)
 
 
 def get_sales_details(filters):
@@ -130,13 +136,17 @@ def get_sales_details(filters):
 		.orderby(days_since_last_order)
 	)
 
+	if filters["based_on"] == "Sales Invoice":
+		query = query.where(parent.is_return == 0)
+
 	if condition := get_allowed_companies_condition(parent.company, filters["based_on"]):
 		query = query.where(condition)
 
 	sales_data = query.run(as_dict=True)
 
+	# rows are ordered by recency, so the first one per (item, territory) is the latest sale
 	for d in sales_data:
-		item_details_map.setdefault((d.territory, d.item_code), d)
+		item_details_map.setdefault((d.item_code, d.territory), d)
 
 	return item_details_map
 
@@ -155,7 +165,8 @@ def get_items(filters):
 	filters_dict = {"disabled": 0, "is_stock_item": 1}
 
 	if filters.get("item_group"):
-		filters_dict.update({"item_group": filters["item_group"]})
+		item_groups = [filters["item_group"], *get_descendants_of("Item Group", filters["item_group"])]
+		filters_dict.update({"item_group": ["in", item_groups]})
 
 	if filters.get("item"):
 		filters_dict.update({"name": filters["item"]})

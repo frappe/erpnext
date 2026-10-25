@@ -10,9 +10,15 @@ frappe.query_reports["Sales Analytics"] = {
 	reset_entity_filter() {
 		const entity_filter = frappe.query_report.get_filter("entity");
 		if (!entity_filter) return;
-		entity_filter.df.label = __(this.entity_tree_type());
-		entity_filter.set_value([]);
+		const tree_type = this.entity_tree_type();
+		entity_filter.df.label = __(tree_type);
+		if (entity_filter.tree_type !== tree_type) entity_filter.set_value([]);
+		entity_filter.tree_type = tree_type;
 		entity_filter.refresh();
+	},
+	onload(report) {
+		const entity_filter = report.get_filter("entity");
+		if (entity_filter) entity_filter.tree_type = this.entity_tree_type();
 	},
 	filters: [
 		{
@@ -42,7 +48,7 @@ frappe.query_reports["Sales Analytics"] = {
 			get_data: function (txt) {
 				const tree_type = frappe.query_reports["Sales Analytics"].entity_tree_type();
 				if (!tree_type || tree_type === "Order Type") return [];
-				return frappe.db.get_link_options(tree_type, txt);
+				return erpnext.utils.get_link_options(tree_type, txt);
 			},
 			depends_on: "eval:doc.tree_type != 'Order Type'",
 		},

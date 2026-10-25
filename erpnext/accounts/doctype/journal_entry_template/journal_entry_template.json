@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:template_title",
  "creation": "2020-04-09 01:32:51.332301",
+ "description": "A saved set of accounts to start journal entries from.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/journal-entry-template",

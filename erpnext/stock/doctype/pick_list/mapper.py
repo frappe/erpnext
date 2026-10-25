@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
-from frappe.utils import flt, get_link_to_form
+from frappe.utils import cstr, flt, get_link_to_form
 
 from erpnext.selling.doctype.sales_order.mapper import (
 	make_delivery_note as create_delivery_note_from_sales_order,
@@ -32,38 +32,14 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 def create_delivery(
 	source_name: str, target_doc: str | dict | Document | None = None, target: str | None = None
 ):
-	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list = frappe.get_doc("Pick List", source_name, check_permission=True)
 	target = target or (frappe.flags.args or {}).get("target") or "Delivery Note"
 	validate_item_locations(pick_list)
 	sales_dict = dict()
-	sales_orders = []
 	documents = []
-	for location in pick_list.locations:
-		if location.sales_order:
-			sales_orders.append(
-				frappe.db.get_value(
-					"Sales Order",
-					location.sales_order,
-					[
-						"customer",
-						"name as sales_order",
-						"company_address",
-						"dispatch_address_name",
-						"shipping_address_name",
-						"customer_address",
-					],
-					as_dict=True,
-				)
-			)
+	sales_orders = get_sales_order_headers({location.sales_order for location in pick_list.locations})
 
-	group_key = lambda so: (  # noqa
-		so["customer"],
-		so["company_address"] or "",
-		so["dispatch_address_name"] or "",
-		so["shipping_address_name"] or "",
-		so["customer_address"] or "",
-	)
-	for key, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
+	for key, rows in groupby(sorted(sales_orders, key=get_header_key), key=get_header_key):
 		sales_dict[key] = {row.sales_order for row in rows}
 
 	if sales_dict:
@@ -81,11 +57,92 @@ def create_delivery(
 		frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
 
 
+SALES_ORDER_HEADER_FIELDS = (
+	"customer",
+	"company_address",
+	"dispatch_address_name",
+	"shipping_address_name",
+	"customer_address",
+	"currency",
+	"selling_price_list",
+	"taxes_and_charges",
+	"apply_discount_on",
+	"additional_discount_percentage",
+	"discount_amount",
+	"tc_name",
+	"terms",
+	"payment_terms_template",
+)
+
+SALES_ORDER_TAX_KEY_FIELDS = (
+	"charge_type",
+	"account_head",
+	"rate",
+	"row_id",
+	"included_in_print_rate",
+	"cost_center",
+)
+
+
+def get_header_key(sales_order):
+	key = tuple(cstr(sales_order.get(field)) for field in SALES_ORDER_HEADER_FIELDS)
+	key += (
+		tuple(
+			tuple(cstr(tax.get(field)) for field in SALES_ORDER_TAX_KEY_FIELDS) for tax in sales_order.taxes
+		),
+	)
+	if has_order_specific_amounts(sales_order):
+		key += (sales_order.sales_order,)
+
+	return key
+
+
+def has_order_specific_amounts(sales_order):
+	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+		return True
+
+	return any(tax.charge_type == "Actual" for tax in sales_order.taxes)
+
+
+def get_sales_order_headers(sales_orders):
+	sales_orders = [so for so in sales_orders if so]
+	if not sales_orders:
+		return []
+
+	headers = frappe.get_all(
+		"Sales Order",
+		filters={"name": ("in", sales_orders)},
+		fields=["name as sales_order", *SALES_ORDER_HEADER_FIELDS],
+	)
+	taxes = get_sales_order_taxes(sales_orders)
+	for header in headers:
+		header.taxes = taxes.get(header.sales_order, [])
+
+	return headers
+
+
+def get_sales_order_taxes(sales_orders):
+	tax = frappe.qb.DocType("Sales Taxes and Charges")
+	rows = (
+		frappe.qb.from_(tax)
+		.select(tax.parent, *[tax[field] for field in SALES_ORDER_TAX_KEY_FIELDS])
+		.where((tax.parenttype == "Sales Order") & (tax.parent.isin(sales_orders)))
+		.orderby(tax.parent)
+		.orderby(tax.idx)
+	).run(as_dict=True)
+
+	taxes = {}
+	for row in rows:
+		taxes.setdefault(row.parent, []).append(row)
+
+	return taxes
+
+
 def create_dn_wo_so(pick_list, delivery_note=None):
 	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
 
 
-def create_delivery_wo_so(pick_list, target, target_doc=None):
+def create_delivery_wo_so(pick_list, target, target_doc=None, selected_locations=None):
 	if not target_doc:
 		target_doc = frappe.new_doc(target)
 
@@ -102,7 +159,9 @@ def create_delivery_wo_so(pick_list, target, target_doc=None):
 			"parent": "",
 		},
 	}
-	map_pl_locations(pick_list, item_table_mapper_without_so, target_doc)
+	map_pl_locations(
+		pick_list, item_table_mapper_without_so, target_doc, selected_locations=selected_locations
+	)
 	target_doc.flags.ignore_mandatory = True
 	if target == "Sales Invoice":
 		target_doc.update_stock = 1
@@ -120,7 +179,7 @@ def create_dn_for_pick_lists(
 		kwargs = {}
 	kwargs = frappe.parse_json(kwargs)
 
-	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list = frappe.get_doc("Pick List", source_name, check_permission=True)
 	validate_item_locations(pick_list)
 
 	sales_order_arg = kwargs.get("sales_order")
@@ -146,7 +205,9 @@ def create_dn_for_pick_lists(
 		if isinstance(delivery_note, str):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
-		delivery_note = create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
+		delivery_note = create_delivery_wo_so(
+			pick_list, "Delivery Note", delivery_note, set(kwargs.get("filtered_children") or [])
+		)
 
 	return delivery_note
 
@@ -186,11 +247,6 @@ def create_delivery_from_so(pick_list, sales_order_list, target, target_doc=None
 	if kwargs is None:
 		kwargs = {}
 
-	def select_item(d):
-		filtered_items = kwargs.get("filtered_children", [])
-		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
-
 	item_table_mapper = {
 		"doctype": f"{target} Item",
 		"field_map": {
@@ -198,37 +254,45 @@ def create_delivery_from_so(pick_list, sales_order_list, target, target_doc=None
 			"name": "so_detail",
 			"parent": "against_sales_order" if target == "Delivery Note" else "sales_order",
 		},
-		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-		and doc.delivered_by_supplier != 1
-		and select_item(doc),
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1,
 	}
+	selected_locations = set(kwargs.get("filtered_children") or [])
 
-	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
+	mapper_kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
 
 	target_doc = (
-		create_delivery_note_from_sales_order(next(iter(sales_order_list)), target_doc, kwargs=kwargs)
+		create_delivery_note_from_sales_order(next(iter(sales_order_list)), target_doc, kwargs=mapper_kwargs)
 		if target == "Delivery Note"
-		else create_sales_invoice_from_sales_order(next(iter(sales_order_list)), target_doc, args=kwargs)
+		else create_sales_invoice_from_sales_order(
+			next(iter(sales_order_list)), target_doc, args=mapper_kwargs
+		)
 	)
 
 	if not target_doc:
 		return
 
 	for so in sales_order_list:
-		map_pl_locations(pick_list, item_table_mapper, target_doc, so)
+		map_pl_locations(pick_list, item_table_mapper, target_doc, so, selected_locations)
 
 	return target_doc
 
 
-def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None):
+def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selected_locations=None):
+	sales_order_items = (
+		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
+	)
+	condition = item_mapper.get("condition")
+
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
 
-		if location.sales_order_item:
-			sales_order_item = frappe.get_doc("Sales Order Item", location.sales_order_item)
-		else:
-			sales_order_item = None
+		if selected_locations and location.name not in selected_locations:
+			continue
+
+		sales_order_item = sales_order_items.get(location.sales_order_item)
+		if sales_order_item and condition and not condition(sales_order_item):
+			continue
 
 		source_doc = sales_order_item or location
 
@@ -251,7 +315,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None):
 
 			update_child_item(source_doc, child_item, target_doc)
 
-	add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order)
+	if sales_order:
+		add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order, selected_locations)
+
 	set_target_missing_values(target_doc)
 
 	target_doc.company = pick_list.company
@@ -263,12 +329,22 @@ def add_product_bundles_to_delivery_note(pick_list, delivery_note, item_mapper, 
 	return add_product_bundles_to_target(pick_list, delivery_note, item_mapper, sales_order)
 
 
-def add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order=None) -> None:
+def add_product_bundles_to_target(
+	pick_list, target_doc, item_mapper, sales_order=None, selected_locations=None
+) -> None:
 	"""Add product bundles found in pick list to target document.
 
 	When mapping pick list items, the bundle item itself isn't part of the
 	locations. Dynamically fetch and add parent bundle item into target document."""
 	product_bundles = pick_list._get_product_bundles()
+	if selected_locations:
+		selected_bundles = {
+			row.sales_order_item
+			for row in pick_list.locations
+			if row.product_bundle_item and row.name in selected_locations
+		}
+		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+
 	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
 
 	for so_row, value in product_bundles.items():

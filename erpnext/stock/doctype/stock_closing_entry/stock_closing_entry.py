@@ -7,7 +7,17 @@ import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, get_date_str, get_link_to_form, getdate, nowtime, parse_json
+from frappe.utils import (
+	add_days,
+	flt,
+	get_date_str,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowdate,
+	nowtime,
+	parse_json,
+)
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.caching import request_cache
 
@@ -33,6 +43,40 @@ def get_closing_entry_for_closed_period(company):
 		return None
 
 	return _get_completed_closing_entry(company, str(closed_upto))
+
+
+def mark_closing_entries_outdated(company, posting_date):
+	names = frappe.db.get_values(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": "Completed",
+			"to_date": (">=", posting_date),
+		},
+		"name",
+		for_update=True,
+		skip_locked=True,
+		pluck=True,
+	)
+	for name in names:
+		frappe.db.set_value("Stock Closing Entry", name, "status", "Outdated")
+
+
+def has_closing_entry_to_coordinate(company, posting_date):
+	return frappe.db.exists(
+		"Stock Closing Entry",
+		{
+			"company": company,
+			"docstatus": 1,
+			"status": ("in", ["Queued", "In Progress", "Completed"]),
+			"to_date": (">=", posting_date),
+		},
+	)
+
+
+def lock_company_for_closing(company):
+	frappe.db.get_value("Company", company, "name", for_update=True)
 
 
 @request_cache
@@ -65,10 +109,10 @@ class StockClosingEntry(Document):
 		from frappe.types import DF
 
 		amended_from: DF.Link | None
-		company: DF.Link | None
+		company: DF.Link
 		from_date: DF.Date | None
 		naming_series: DF.Literal["CBAL-.#####"]
-		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Cancelled"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Outdated", "Failed", "Cancelled"]
 		to_date: DF.Date
 	# end: auto-generated types
 
@@ -90,8 +134,13 @@ class StockClosingEntry(Document):
 			self.db_set("status", self.status)
 
 	def validate(self):
+		self.validate_to_date()
 		self.set_from_date()
 		self.validate_duplicate()
+
+	def validate_to_date(self):
+		if self.to_date and getdate(self.to_date) > getdate(nowdate()):
+			frappe.throw(_("To Date cannot be a future date"))
 
 	def set_from_date(self):
 		"""Closing balances are chained, so a closing always starts the day after the previous one
@@ -174,7 +223,25 @@ class StockClosingEntry(Document):
 	def validate_later_closing_entry(self):
 		# A later closing is built on top of this one's balance, so cancelling this one would leave
 		# the later balance resting on figures that no longer exist.
-		later_entry = frappe.db.get_value(
+		if later_entry := self.get_later_closing_entry():
+			frappe.throw(
+				_(
+					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def validate_later_closing_entry_for_regenerate(self):
+		if later_entry := self.get_later_closing_entry():
+			frappe.throw(
+				_(
+					"Cannot regenerate Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
+				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
+				title=_("Later Stock Closing Entry Exists"),
+			)
+
+	def get_later_closing_entry(self):
+		return frappe.db.get_value(
 			"Stock Closing Entry",
 			{
 				"company": self.company,
@@ -185,14 +252,6 @@ class StockClosingEntry(Document):
 			"name",
 			order_by="to_date desc",
 		)
-
-		if later_entry:
-			frappe.throw(
-				_(
-					"Cannot cancel Stock Closing Entry {0} because the later Stock Closing Entry {1} is built on it. Cancel {1} first."
-				).format(self.name, get_link_to_form("Stock Closing Entry", later_entry)),
-				title=_("Later Stock Closing Entry Exists"),
-			)
 
 	def validate_closed_period_lock(self):
 		pcv = frappe.db.get_value(
@@ -209,6 +268,65 @@ class StockClosingEntry(Document):
 				title=_("Closed Period"),
 			)
 
+	def validate_submitted(self):
+		if self.docstatus != 1:
+			frappe.throw(
+				_("Stock Closing Entry {0} must be submitted to generate the closing balance").format(
+					self.name
+				)
+			)
+
+	def validate_no_pending_reposts(self):
+		from erpnext.stock.utils import PendingRepostingError
+
+		if self.has_pending_reposts():
+			frappe.throw(
+				self.get_pending_reposts_message(),
+				PendingRepostingError,
+				title=_("Stock Reposting Ongoing"),
+			)
+
+	def has_pending_reposts(self):
+		from erpnext.stock.utils import check_pending_reposting
+
+		return check_pending_reposting(self.to_date, self.company, throw_error=False)
+
+	def has_ledger_changes_since(self, started_at):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return bool(
+			frappe.qb.from_(sle)
+			.select(sle.name)
+			.where(
+				(sle.company == self.company)
+				& (sle.posting_date <= self.to_date)
+				& (sle.modified >= started_at)
+			)
+			.limit(1)
+			.for_update()
+			.run()
+		)
+
+	def has_pending_reposts_now(self):
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		return bool(
+			frappe.qb.from_(riv)
+			.select(riv.name)
+			.where(
+				(riv.docstatus == 1)
+				& (riv.status.isin(["Queued", "In Progress"]))
+				& (riv.posting_date <= self.to_date)
+				& (riv.company == self.company)
+			)
+			.limit(1)
+			.for_update()
+			.run()
+		)
+
+	def get_pending_reposts_message(self):
+		return _(
+			"Cannot generate the closing balance of Stock Closing Entry {0} while Repost Item Valuation entries dated on or before {1} are pending. Try again once they are completed."
+		).format(self.name, frappe.bold(frappe.format(self.to_date, "Date")))
+
 	def remove_stock_closing(self):
 		table = frappe.qb.DocType("Stock Closing Balance")
 		frappe.qb.from_(table).delete().where(table.stock_closing_entry == self.name).run()
@@ -216,6 +334,8 @@ class StockClosingEntry(Document):
 	@frappe.whitelist(methods=["POST"])
 	def enqueue_job(self):
 		self.check_permission("write")
+		self.validate_submitted()
+		self.validate_no_pending_reposts()
 
 		self.db_set("status", "In Progress")
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
@@ -228,8 +348,10 @@ class StockClosingEntry(Document):
 	@frappe.whitelist(methods=["POST"])
 	def regenerate_closing_balance(self):
 		self.check_permission("write")
+		self.validate_submitted()
 
 		self.validate_closed_period_lock()
+		self.validate_later_closing_entry_for_regenerate()
 		self.remove_stock_closing()
 		self.enqueue_job()
 
@@ -248,6 +370,7 @@ class StockClosingEntry(Document):
 			if row.fifo_queue is not None:
 				row.fifo_queue = json.dumps(row.fifo_queue)
 
+			set_stock_value_and_valuation_rate(row)
 			new_doc = frappe.new_doc("Stock Closing Balance")
 			new_doc.update(row)
 			new_doc.posting_date = self.to_date
@@ -270,17 +393,42 @@ class StockClosingEntry(Document):
 		return frappe._dict({})
 
 
+def set_stock_value_and_valuation_rate(row):
+	row.stock_value = flt(row.stock_value_difference)
+	row.valuation_rate = flt(row.stock_value / row.actual_qty) if row.actual_qty else 0.0
+
+
 def prepare_closing_stock_balance(name):
+	if not is_submitted_closing_entry(name):
+		return
+
 	doc = frappe.get_doc("Stock Closing Entry", name)
+	if doc.has_pending_reposts():
+		doc.db_set("status", "Failed")
+		doc.log_error(title=_("Stock Closing Entry Failed"), message=doc.get_pending_reposts_message())
+		return
+
 	doc.db_set("status", "In Progress")
+	started_at = now_datetime()
 
 	try:
 		doc.create_stock_closing_balance_entries()
-		doc.db_set("status", "Completed")
+		if not is_submitted_closing_entry(name, for_update=True):
+			doc.remove_stock_closing()
+			doc.db_set("status", "Cancelled")
+			return
+
+		lock_company_for_closing(doc.company)
+		is_outdated = doc.has_ledger_changes_since(started_at) or doc.has_pending_reposts_now()
+		doc.db_set("status", "Outdated" if is_outdated else "Completed")
 	except Exception:
 		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
+
+
+def is_submitted_closing_entry(name, for_update=False):
+	return frappe.db.get_value("Stock Closing Entry", name, "docstatus", for_update=for_update) == 1
 
 
 class StockClosing:
@@ -317,7 +465,7 @@ class StockClosing:
 							closing_stock[key].actual_qty = row.qty_after_transaction
 
 						fifo_queue = closing_stock[key].fifo_queue
-						if fifo_queue:
+						if fifo_queue is not None:
 							self.update_fifo_queue(fifo_queue, actual_qty, row.posting_date)
 							closing_stock[key].fifo_queue = fifo_queue
 					else:
@@ -353,17 +501,27 @@ class StockClosing:
 	def update_fifo_queue(self, fifo_queue, actual_qty, posting_date):
 		if actual_qty > 0:
 			fifo_queue.append([actual_qty, get_date_str(posting_date)])
-		else:
-			remaining_qty = actual_qty
-			for idx, queue in enumerate(fifo_queue):
-				if queue[0] + remaining_qty >= 0:
-					queue[0] += remaining_qty
-					if queue[0] == 0:
-						fifo_queue.pop(idx)
-					break
-				else:
-					remaining_qty += queue[0]
-					fifo_queue.pop(0)
+			return
+
+		qty_to_consume = abs(actual_qty)
+		while qty_to_consume > 0 and fifo_queue:
+			if fifo_queue[0][0] > qty_to_consume:
+				fifo_queue[0][0] -= qty_to_consume
+				break
+
+			qty_to_consume -= fifo_queue[0][0]
+			fifo_queue.pop(0)
+
+	def get_initial_fifo_queue(self, row, actual_qty, has_serial_no):
+		if has_serial_no:
+			return None
+
+		if row.from_closing_balance and row.fifo_queue:
+			fifo_queue = json.loads(row.fifo_queue)
+			if not flt(sum(slot[0] for slot in fifo_queue) - actual_qty, 6):
+				return fifo_queue
+
+		return [[actual_qty, get_date_str(row.posting_date)]] if actual_qty else []
 
 	def get_initialized_entry(self, row, dimension_fields, value_difference):
 		item_details = frappe.get_cached_value(
@@ -391,9 +549,7 @@ class StockClosing:
 				"item_name": item_details.item_name,
 				"stock_uom": item_details.stock_uom,
 				"inventory_dimension_key": inventory_dimension_key,
-				"fifo_queue": [[actual_qty, get_date_str(row.posting_date)]]
-				if not item_details.has_serial_no
-				else [],
+				"fifo_queue": self.get_initial_fifo_queue(row, actual_qty, item_details.has_serial_no),
 			}
 		)
 
@@ -426,6 +582,7 @@ class StockClosing:
 					"valuation_rate",
 					"stock_value",
 					"stock_value_difference",
+					"fifo_queue",
 				],
 				filters={
 					"company": self.company,
@@ -461,8 +618,8 @@ class StockClosing:
 			filters={
 				"company": self.company,
 				"posting_date": [self.from_date, self.to_date],
+				# `is_cancelled` defines live stock (like get_stock_value_on); docstatus would drop legacy docstatus=0 SLEs.
 				"is_cancelled": 0,
-				"docstatus": 1,
 			},
 		)
 

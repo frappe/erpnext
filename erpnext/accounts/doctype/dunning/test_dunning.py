@@ -19,6 +19,109 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestDunning(ERPNextTestSuite):
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_document_api_defaults_converted_fee_and_preserves_overrides(self):
+		from frappe.client import insert
+
+		create_dunning_type("API Fee Notice", 100, 0, 0)
+		invoice = create_sales_invoice(
+			posting_date=add_days(today(), -15),
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+			debit_to="Debtors - _TC",
+		)
+		for fee, expected in ((None, 1.25), (0, 0), (7, 7)):
+			with self.subTest(fee=fee):
+				payload = create_dunning_from_sales_invoice(invoice.name).as_dict()
+				payload.dunning_type = "API Fee Notice - _TC"
+				if fee is None:
+					payload.pop("dunning_fee")
+				else:
+					payload.dunning_fee = fee
+				dunning = frappe.get_doc("Dunning", insert(payload)["name"])
+				self.assertEqual(dunning.dunning_fee, expected)
+				dunning.conversion_rate = 100
+				dunning.save()
+				self.assertEqual(dunning.dunning_fee, 1 if fee is None else fee)
+				self.assertEqual(dunning.base_dunning_amount, dunning.dunning_amount * 100)
+
+	def test_missing_fee_requires_positive_conversion_rate(self):
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
+		for rate in (0, -1):
+			with self.subTest(rate=rate):
+				dunning.reload()
+				dunning.dunning_fee = None
+				dunning.conversion_rate = rate
+				with self.assertRaisesRegex(frappe.ValidationError, "Conversion Rate must be greater"):
+					dunning.save()
+
+	def test_unallocated_payments_reduce_oldest_installments(self):
+		create_payment_terms_template_for_dunning()
+		frappe.db.set_value(
+			"Payment Terms Template", "_Test 50-50 for Dunning", "allocate_payment_based_on_payment_terms", 0
+		)
+		for overdue_days, paid_amount, expected in (
+			(15, 20, [(0, 30), (1, 50)]),
+			(15, 60, [(1, 40)]),
+			(6, 20, [(0, 30)]),
+			(6, 50, []),
+		):
+			with self.subTest(overdue_days=overdue_days, paid_amount=paid_amount):
+				invoice = create_sales_invoice_against_cost_center(
+					posting_date=add_days(today(), -overdue_days), qty=1, rate=100, do_not_submit=True
+				)
+				invoice.payment_terms_template = "_Test 50-50 for Dunning"
+				invoice.submit()
+				draft = create_dunning_from_sales_invoice(invoice.name)
+				draft.save()
+				payment = get_payment_entry("Sales Invoice", invoice.name)
+				payment.paid_amount = payment.received_amount = paid_amount
+				payment.references[0].allocated_amount = paid_amount
+				payment.reference_no, payment.reference_date = "1", today()
+				payment.insert().submit()
+				invoice.reload()
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [50, 50])
+				with self.assertRaisesRegex(frappe.ValidationError, "cannot exceed the unpaid"):
+					draft.save()
+				draft.reload()
+				with self.assertRaisesRegex(frappe.ValidationError, "cannot exceed the unpaid"):
+					draft.submit()
+
+				if not expected:
+					with self.assertRaisesRegex(frappe.ValidationError, "There are no overdue payments"):
+						create_dunning_from_sales_invoice(invoice.name)
+					continue
+
+				dunning = create_dunning_from_sales_invoice(invoice.name)
+				dunning.rate_of_interest = 36.5
+				dunning.save()
+				self.assertEqual(
+					[(row.payment_schedule, row.outstanding) for row in dunning.overdue_payments],
+					[(invoice.payment_schedule[idx].name, amount) for idx, amount in expected],
+				)
+				for row in dunning.overdue_payments:
+					self.assertAlmostEqual(row.interest, row.outstanding * int(row.overdue_days) / 1000, 2)
+
+	def test_copied_payment_schedule_fields_cannot_be_changed(self):
+		dunning = create_dunning(overdue_days=15)
+		row = dunning.overdue_payments[0]
+		for field, value in (
+			("payment_term", "_Test Payment Term"),
+			("mode_of_payment", "Cash"),
+			("payment_amount", row.payment_amount + 1),
+			("invoice_portion", row.invoice_portion + 1),
+		):
+			with self.subTest(field=field):
+				original = row.get(field)
+				row.set(field, value)
+				with self.assertRaisesRegex(frappe.ValidationError, "must match the Payment Schedule"):
+					dunning.validate_overdue_payment_references()
+				row.set(field, original)
+		dunning.validate_overdue_payment_references()
+
 	def test_dunning_without_fees(self):
 		dunning = create_dunning(overdue_days=20)
 
@@ -203,6 +306,60 @@ class TestDunning(ERPNextTestSuite):
 
 		self.assertEqual(updated_dunning.overdue_payments[1].sales_invoice, si2.name)
 		self.assertEqual(updated_dunning.overdue_payments[1].outstanding, si2.outstanding_amount)
+
+	def test_fetch_overdue_payments_with_dialog_args(self):
+		create_payment_terms_template_for_dunning()
+		invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -15), qty=1, rate=100, do_not_submit=True
+		)
+		invoice.payment_terms_template = "_Test 50-50 for Dunning"
+		invoice.submit()
+		method = "erpnext.accounts.doctype.sales_invoice.mapper.create_dunning"
+
+		for selected in ([], [invoice.payment_schedule[1].name]):
+			with self.subTest(selected=selected):
+				dunning = mapper.map_docs(
+					method,
+					[invoice.name],
+					{"doctype": "Dunning", "company": invoice.company},
+					args={
+						"customer": invoice.customer,
+						"allow_child_item_selection": int(bool(selected)),
+						"filtered_children": selected,
+					},
+				)
+				self.assertEqual(
+					[row.payment_schedule for row in dunning.overdue_payments],
+					selected or [row.name for row in invoice.payment_schedule],
+				)
+				self.assertEqual(dunning.total_outstanding, 50 if selected else 100)
+
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				mapper.map_docs(
+					method,
+					[invoice.name],
+					{"doctype": "Dunning", "company": invoice.company},
+					args={"customer": invoice.customer, "filtered_children": []},
+				)
+
+	def test_fetch_overdue_payments_with_positional_ignore_permissions(self):
+		invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -15), qty=1, rate=100
+		)
+
+		for ignore_permissions in (False, True):
+			with self.subTest(ignore_permissions=ignore_permissions):
+				dunning = create_dunning_from_sales_invoice(invoice.name, None, ignore_permissions)
+				self.assertEqual(dunning.overdue_payments[0].sales_invoice, invoice.name)
+				self.assertEqual(dunning.total_outstanding, 100)
+
+		with self.set_user("Guest"):
+			# Ignoring mapper permissions does not bypass Customer permissions during validation.
+			for ignore_permissions in (False, True):
+				with self.subTest(ignore_permissions=ignore_permissions):
+					with self.assertRaises(frappe.PermissionError):
+						create_dunning_from_sales_invoice(invoice.name, None, ignore_permissions)
 
 	def test_dunning_and_payment_against_partially_due_invoice(self):
 		"""

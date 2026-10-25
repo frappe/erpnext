@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:mode_of_payment",
  "creation": "2012-12-04 17:49:20",
+ "description": "A way you pay or get paid, like cash, bank transfer or card.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/mode-of-payment",
@@ -28,6 +29,7 @@
   {
    "fieldname": "type",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_standard_filter": 1,
    "label": "Type",
    "options": "Cash\nBank\nGeneral\nPhone"

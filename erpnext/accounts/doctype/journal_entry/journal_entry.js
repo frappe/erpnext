@@ -375,8 +375,8 @@ Object.assign(erpnext.journal_entry, {
 			],
 		});
 
-		dialog.set_primary_action(__("Save"), () => {
-			erpnext.journal_entry.save_quick_entry(frm, dialog.get_values());
+		dialog.set_primary_action(__("Save"), (values) => {
+			erpnext.journal_entry.save_quick_entry(frm, values);
 			dialog.hide();
 		});
 		dialog.show();

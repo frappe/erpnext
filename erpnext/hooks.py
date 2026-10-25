@@ -16,26 +16,33 @@ add_to_apps_screen = [
 		"logo": "/assets/erpnext/images/erpnext-logo.svg",
 		"title": app_title,
 		"route": app_home,
+		"setup_wizard_text": "Let's give your business a home.",
 		"has_permission": "erpnext.check_app_permission",
 		"sequence_id": 1,
 	}
 ]
 
-# Modules that are a folder of code and nothing else. Their doctypes, reports and controllers stay
-# where they are; what they no longer own is navigation, which now sits in the sidebar named beside
-# each. Left in the dock, each would carry an entry of its own for two to four records. See
-# `frappe.utils.modules.get_code_only_modules`.
-#
-# The value names the modules that inherited that navigation, so a Call Log or a Code List resolves
-# to a sidebar the user can actually navigate to instead of dead-ending in a module the dock never
-# shows.
+# Modules that are only accessible via code and not via the UI. These modules are not shown in the sidebar or in the modules list.
 code_only_modules = {
-	"Telephony": ["ERPNext Integrations"],
+	# Integrations and Utilities are a handful of settings and tools each, so they sit in the Setup
+	# sidebar with the rest of the configuration rather than taking two places in the dock.
+	"ERPNext Integrations": ["Setup"],
+	"Utilities": ["Setup"],
+	"Telephony": ["Setup"],
 	# Its one doctype, Communication Medium, describes how a call reaches someone, so it sits in
-	# the Telephony section beside the call settings rather than in a shell of its own.
-	"Communication": ["ERPNext Integrations"],
-	"EDI": ["Utilities"],
-	"Bulk Transaction": ["Utilities"],
+	# the Integrations section beside the call settings rather than in a shell of its own.
+	"Communication": ["Setup"],
+	"EDI": ["Setup"],
+	"Bulk Transaction": ["Setup"],
+	# Subcontracting is sending work out to be manufactured, so its orders and receipts live in the
+	# Manufacturing sidebar.
+	"Subcontracting": ["Manufacturing"],
+	# Its records are country-specific tax settings and returns, so they sit with the rest of the
+	# tax setup and reports in Accounts.
+	"Regional": ["Accounts"],
+	# Maintenance schedules and visits are after-sales upkeep of what was sold, so they live in a
+	# Maintenance section of the Quality sidebar.
+	"Maintenance": ["Quality Management"],
 }
 
 develop_version = "17.x.x-develop"
@@ -56,11 +63,27 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Customer": [
+		"public/js/party_overview.js",
+		"public/js/customer_overview.js",
+		"public/js/party_items.js",
+	],
+	"Supplier": [
+		"public/js/party_overview.js",
+		"public/js/supplier_overview.js",
+		"public/js/party_items.js",
+	],
 	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
+	"Project": [
+		"public/js/project_overview.js",
+		"public/js/project_overview_progress.js",
+		"public/js/project_overview_attention.js",
+		"public/js/project_overview_breakdown.js",
+	],
 }
 doctype_list_js = {
 	"Code List": [
@@ -132,10 +155,6 @@ demo_master_doctypes = [
 	"supplier_group",
 	"customer",
 	"supplier",
-]
-demo_transaction_doctypes = [
-	"purchase_order",
-	"sales_order",
 ]
 
 jinja = {
@@ -345,16 +364,23 @@ sounds = [
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
 permission_query_conditions = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
+	"Contract": "erpnext.crm.doctype.contract.contract.get_permission_query_conditions",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.get_inherited_permission_query_conditions",
 }
 
 has_permission = {
+	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission",
 }
 
@@ -419,6 +445,7 @@ doc_events = {
 		"on_update": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.on_communication_update",
 			"erpnext.support.doctype.issue.issue.set_first_response_time",
+			"erpnext.support.doctype.issue.issue.reopen_issue_without_sla",
 		],
 		"after_insert": [
 			"erpnext.crm.utils.link_communications_with_prospect",
@@ -449,6 +476,9 @@ doc_events = {
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
+	"Company": {
+		"after_rename": "erpnext.regional.rename_vat_settings",
+	},
 	"Address": {
 		"validate": [
 			"erpnext.regional.italy.utils.set_state_code",
@@ -456,8 +486,11 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": ["erpnext.crm.utils.update_lead_phone_numbers"],
+	},
+	"Lead": {
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -504,6 +537,7 @@ scheduler_events = {
 	},
 	"hourly": [
 		"erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.fail_overdue_agreements",
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
@@ -701,45 +735,34 @@ global_search_doctypes = {
 		{"doctype": "Customer", "index": 0},
 		{"doctype": "Supplier", "index": 1},
 		{"doctype": "Item", "index": 2},
-		{"doctype": "Warehouse", "index": 3},
-		{"doctype": "Account", "index": 4},
-		{"doctype": "Employee", "index": 5},
-		{"doctype": "BOM", "index": 6},
-		{"doctype": "Sales Invoice", "index": 7},
-		{"doctype": "Sales Order", "index": 8},
-		{"doctype": "Quotation", "index": 9},
-		{"doctype": "Work Order", "index": 10},
-		{"doctype": "Purchase Order", "index": 11},
-		{"doctype": "Purchase Receipt", "index": 12},
-		{"doctype": "Purchase Invoice", "index": 13},
-		{"doctype": "Delivery Note", "index": 14},
-		{"doctype": "Stock Entry", "index": 15},
-		{"doctype": "Material Request", "index": 16},
-		{"doctype": "Delivery Trip", "index": 17},
-		{"doctype": "Pick List", "index": 18},
-		{"doctype": "Payment Entry", "index": 22},
-		{"doctype": "Lead", "index": 23},
-		{"doctype": "Opportunity", "index": 24},
-		{"doctype": "Item Price", "index": 25},
-		{"doctype": "Purchase Taxes and Charges Template", "index": 26},
-		{"doctype": "Sales Taxes and Charges", "index": 27},
-		{"doctype": "Asset", "index": 28},
-		{"doctype": "Project", "index": 29},
-		{"doctype": "Task", "index": 30},
-		{"doctype": "Timesheet", "index": 31},
-		{"doctype": "Issue", "index": 32},
-		{"doctype": "Serial No", "index": 33},
-		{"doctype": "Batch", "index": 34},
-		{"doctype": "Branch", "index": 35},
-		{"doctype": "Department", "index": 36},
-		{"doctype": "Designation", "index": 38},
-		{"doctype": "Maintenance Schedule", "index": 45},
-		{"doctype": "Maintenance Visit", "index": 46},
-		{"doctype": "Warranty Claim", "index": 47},
+		{"doctype": "Sales Invoice", "index": 3},
+		{"doctype": "Purchase Invoice", "index": 4},
+		{"doctype": "Sales Order", "index": 5},
+		{"doctype": "Purchase Order", "index": 6},
+		{"doctype": "Quotation", "index": 7},
+		{"doctype": "Delivery Note", "index": 8},
+		{"doctype": "Purchase Receipt", "index": 9},
+		{"doctype": "Payment Entry", "index": 10},
+		{"doctype": "Journal Entry", "index": 11},
+		{"doctype": "Lead", "index": 12},
+		{"doctype": "Opportunity", "index": 13},
+		{"doctype": "Supplier Quotation", "index": 14},
+		{"doctype": "Material Request", "index": 15},
+		{"doctype": "Stock Entry", "index": 16},
+		{"doctype": "Work Order", "index": 17},
+		{"doctype": "BOM", "index": 18},
+		{"doctype": "Project", "index": 19},
+		{"doctype": "Task", "index": 20},
+		{"doctype": "Issue", "index": 21},
+		{"doctype": "Asset", "index": 22},
+		{"doctype": "Serial No", "index": 23},
+		{"doctype": "Batch", "index": 24},
+		{"doctype": "Employee", "index": 25},
 	],
 }
 
 ignore_links_on_delete = [
+	"Asset Activity",
 	"Tax Withholding Entry",
 ]
 

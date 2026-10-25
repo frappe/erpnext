@@ -3,8 +3,9 @@
 
 import frappe
 
+from erpnext.projects.doctype.project.project import get_project_list
 from erpnext.projects.doctype.project.test_project import make_project
-from erpnext.templates.pages.projects import validate_and_get_project_user
+from erpnext.templates.pages.projects import get_timesheet_html, validate_and_get_project_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -70,3 +71,61 @@ class TestProjectsPage(ERPNextTestSuite):
 			project_user = validate_and_get_project_user(project.name)
 
 		self.assertIsNone(project_user)
+
+	def test_allows_customer_portal_user_for_own_customer_projects(self):
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		own = make_project({"project_name": f"_Test Portal Own {frappe.generate_hash(length=6)}"})
+		own.db_set("customer", "_Test Customer")
+		other = make_project({"project_name": f"_Test Portal Other {frappe.generate_hash(length=6)}"})
+		other.db_set("customer", "_Test Customer 1")
+
+		with self.set_user(portal_user):
+			self.assertIsNone(validate_and_get_project_user(own.name))
+			self.assertRaises(frappe.PermissionError, validate_and_get_project_user, other.name)
+
+	def test_customer_portal_user_not_in_project_users_cannot_load_timesheets(self):
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", portal_user).add_roles("Customer")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		project = make_project({"project_name": f"_Test Portal Timesheets {frappe.generate_hash(length=6)}"})
+		project.db_set("customer", "_Test Customer")
+
+		with self.set_user(portal_user):
+			self.assertRaises(frappe.PermissionError, get_timesheet_html, project.name)
+
+	def test_project_list_loads_for_member_without_customer_role(self):
+		member = self._create_user(f"member_{frappe.generate_hash(length=6)}@example.com")
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Portal List {frappe.generate_hash(length=6)}",
+			company="_Test Company",
+		)
+		project.append("users", {"user": member, "welcome_email_sent": 1})
+		project.insert()
+
+		with self.set_user(member):
+			projects = get_project_list("Project", None, None, 0)
+
+		self.assertEqual([row.name for row in projects], [project.name])
+
+	def test_portal_project_list_returns_display_columns_only(self):
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", portal_user).add_roles("Customer")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		project = make_project({"project_name": f"_Test Portal Columns {frappe.generate_hash(length=6)}"})
+		project.db_set({"customer": "_Test Customer", "estimated_costing": 5000})
+
+		with self.set_user(portal_user):
+			rows = get_project_list("Project", None, None, 0)
+
+		row = next(row for row in rows if row.name == project.name)
+		self.assertEqual(row.project_name, project.project_name)
+		self.assertNotIn("estimated_costing", row)
+		self.assertNotIn("gross_margin", row)

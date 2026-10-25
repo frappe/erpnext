@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"bill_no\", \"label\": \"Supplier Invoice No\"}, {\"fieldname\": \"bill_date\", \"label\": \"Supplier Invoice Date\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"owner\", \"label\": \"Created By\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.548303",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Purchase Invoice\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.548303",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Purchase Invoice-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Invoice",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

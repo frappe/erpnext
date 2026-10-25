@@ -8,22 +8,22 @@ from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_itemwise_batch
 from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
 WH = "Stores - _TC"
-# row indexes: 0 item, 1 name, 2 desc, 3 wh, 4 batch, 5 opening, 6 in, 7 out, 8 bal,
-# 9 rate, 10 value, 11 uom, 12 reserved stock
 
 
 class TestBatchWiseBalanceHistory(ERPNextTestSuite):
-	def make_batch_item(self):
+	def make_batch_item(self, **properties):
 		return make_item(
 			properties={
 				"is_stock_item": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
 				"batch_number_series": "BWB-.#####",
+				**properties,
 			}
 		).name
 
@@ -39,21 +39,67 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 		make_stock_entry(item_code=item, from_warehouse=WH, qty=4, posting_date="2026-06-02")
 
 		(row,) = self.run_report(item)
-		self.assertEqual(row[5], 0)  # opening
-		self.assertEqual(row[6], 10)  # in
-		self.assertEqual(row[7], 4)  # out
-		self.assertEqual(row[8], 6)  # balance
-		self.assertEqual(row[9], 100)  # valuation rate
-		self.assertEqual(row[10], 600)  # balance value
+		self.assertEqual(row.opening_qty, 0)
+		self.assertEqual(row.in_qty, 10)
+		self.assertEqual(row.out_qty, 4)
+		self.assertEqual(row.balance_qty, 6)
+		self.assertEqual(row.valuation_rate, 100)
+		self.assertEqual(row.balance_value, 600)
+
+	def test_pooled_batches_use_warehouse_rate(self):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		item = self.make_batch_item(valuation_method="Moving Average")
+		make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=100, posting_date="2026-06-01")
+		make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=300, posting_date="2026-06-02")
+		first_batch = frappe.get_all("Batch", {"item": item}, pluck="name", order_by="creation")[0]
+		make_stock_entry(
+			item_code=item, from_warehouse=WH, qty=5, batch_no=first_batch, posting_date="2026-06-03"
+		)
+		make_stock_entry(item_code=item, to_warehouse=WH, qty=5, rate=600, posting_date="2026-06-04")
+
+		rows = self.run_report(item, to_date="2026-06-03")
+		self.assertEqual([row.valuation_rate for row in rows], [200, 200])
+		self.assertEqual([row.balance_value for row in rows], [1000, 2000])
+
+	def test_serial_no_valuation_decides_batch_value(self):
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		for valuation_method, serial_no_wise, expected in (
+			("Moving Average", 1, [100, 300]),
+			("FIFO", 0, [200, 200]),
+		):
+			with self.subTest(valuation_method=valuation_method, serial_no_wise=serial_no_wise):
+				item = self.make_batch_item(
+					valuation_method=valuation_method,
+					has_serial_no=1,
+					serial_no_series="BWS-.#####",
+					use_serial_no_wise_valuation=serial_no_wise,
+				)
+				for rate in (100, 300):
+					make_stock_entry(
+						item_code=item, to_warehouse=WH, qty=1, rate=rate, posting_date="2026-06-01"
+					)
+
+				self.assertEqual([row.balance_value for row in self.run_report(item)], expected)
+
+	def test_reconciliation_uses_batch_ids(self):
+		item = self.make_batch_item()
+		make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=100, posting_date="2026-06-01")
+		(row,) = self.run_report(item)
+		batch = frappe.get_doc("Batch", row.batch)
+		self.assertNotEqual(batch.name, batch.batch_id)
+		self.assertEqual(row.batch_number, batch.batch_id)
+		batches = get_itemwise_batch(WH, "2026-06-01", "_Test Company", item)
+		self.assertEqual(batches[(item, WH)][0].batch_no, batch.name)
+		self.assertEqual(batches[(item, WH)][0].qty, 10)
 
 	def test_opening_qty_from_prior_period(self):
 		item = self.make_batch_item()
 		make_stock_entry(item_code=item, to_warehouse=WH, qty=8, rate=50, posting_date="2025-12-01")
 
 		(row,) = self.run_report(item)
-		self.assertEqual(row[5], 8)  # opening carried from 2025
-		self.assertEqual(row[6], 0)
-		self.assertEqual(row[8], 8)  # balance
+		self.assertEqual(row.opening_qty, 8)
+		self.assertEqual(row.in_qty, 0)
+		self.assertEqual(row.balance_qty, 8)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -70,12 +116,12 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 		item = self.make_batch_item()
 		make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=100, posting_date=posting_date)
 		(row,) = self.run_report(item, **report_dates)
-		batch = row[4]
-		self.assertEqual(row[12], 0)
+		batch = row.batch
+		self.assertEqual(row["reserved_stock_(current)"], 0)
 
 		order = make_sales_order(item_code=item, warehouse=WH, qty=6, transaction_date=posting_date)
 		order.create_stock_reservation_entries()
-		self.assertEqual(self.run_report(item, **report_dates)[0][12], 6)
+		self.assertEqual(self.run_report(item, **report_dates)[0]["reserved_stock_(current)"], 6)
 
 		for delivered_qty, expected_reserved_qty in [(2, 4), (4, 0)]:
 			delivery = make_delivery_note(order.name)
@@ -86,4 +132,6 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 			delivery.items[0].batch_no = batch
 			delivery.items[0].serial_and_batch_bundle = None
 			delivery.insert().submit()
-			self.assertEqual(self.run_report(item, **report_dates)[0][12], expected_reserved_qty)
+			self.assertEqual(
+				self.run_report(item, **report_dates)[0]["reserved_stock_(current)"], expected_reserved_qty
+			)

@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2025-04-09 12:09:40.634472",
+ "description": "An order to make a quantity of an item.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/work-order",
@@ -80,7 +81,6 @@
   "secondary_items_section",
   "secondary_items",
   "reference_section",
-  "update_consumed_material_cost_in_project",
   "project",
   "subcontracting_inward_order",
   "production_plan",
@@ -149,6 +149,7 @@
    "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "in_global_search": 1,
    "label": "Item Name",
    "read_only": 1
   },
@@ -508,12 +509,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
-   "fieldname": "update_consumed_material_cost_in_project",
-   "fieldtype": "Check",
-   "label": "Update Consumed Material Cost In Project"
-  },
-  {
    "description": "This is a location where raw materials are available.",
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
@@ -607,11 +602,12 @@
   },
   {
    "default": "0",
+   "description": "Each operation produces its own output item and puts it in stock, for example Cut Sheet, then Painted Sheet, then the final Box.",
    "fetch_from": "bom_no.track_semi_finished_goods",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Track Semi Finished Goods",
+   "label": "Produce an Item at Each Operation",
    "read_only": 1
   },
   {
@@ -766,7 +762,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-25 12:00:00.000000",
+ "modified": "2026-10-20 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
@@ -797,6 +793,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],

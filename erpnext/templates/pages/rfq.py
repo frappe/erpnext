@@ -13,20 +13,34 @@ def get_context(context):
 	context.no_cache = 1
 	context.show_sidebar = True
 	context.doc = frappe.get_doc(frappe.form_dict.doctype, frappe.form_dict.name)
+	if context.doc.docstatus != 1:
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
 	context.parents = frappe.form_dict.parents
 	context.doc.supplier = get_supplier()
 	context.doc.rfq_links = get_link_quotation(context.doc.supplier, context.doc.name)
 	unauthorized_user(context.doc.supplier)
 	update_supplier_details(context)
+	context.portal_doc = get_portal_doc(context.doc)
 	context["title"] = frappe.form_dict.name
+
+
+def get_portal_doc(rfq) -> dict:
+	"""The RFQ fields the supplier's quotation form needs."""
+	items = [{"name": item.name, "idx": item.idx, "qty": item.qty} for item in rfq.items]
+	return {"name": rfq.name, "items": items}
 
 
 def get_supplier():
 	doctype = frappe.form_dict.doctype
 	parties_doctype = "Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
 	customers, suppliers = get_customers_suppliers(parties_doctype, frappe.session.user)
+	if not suppliers:
+		return ""
 
-	return suppliers[0] if suppliers else ""
+	return next(
+		(supplier for supplier in suppliers if check_supplier_has_docname_access(supplier)), suppliers[0]
+	)
 
 
 def check_supplier_has_docname_access(supplier):

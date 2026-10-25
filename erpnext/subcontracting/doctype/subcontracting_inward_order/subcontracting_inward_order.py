@@ -5,10 +5,14 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	cancel_stock_reservation_entries,
+)
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
 
 
@@ -64,6 +68,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def validate(self):
 		super().validate()
+		check_on_hold_or_closed_status("Sales Order", self.sales_order)
 		self.set_is_customer_provided_item()
 		self.validate_customer_provided_items()
 		self.validate_customer_warehouse()
@@ -77,6 +82,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def on_cancel(self):
 		self.update_status()
 		self.update_subcontracted_quantity_in_so()
+		cancel_stock_reservation_entries(voucher_type=self.doctype, voucher_no=self.name, notify=False)
 
 	def update_status(self, status=None, update_modified=True):
 		if self.status == "Closed" and self.status != status:
@@ -245,6 +251,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def get_production_items(self):
 		item_list = []
+		pending_qty = self.get_pending_work_order_qty()
 
 		for d in self.items:
 			if d.produced_qty >= d.qty:
@@ -277,13 +284,31 @@ class SubcontractingInwardOrder(SubcontractingController):
 			)
 			qty = min(
 				int(qty) if frappe.get_cached_value("UOM", d.stock_uom, "must_be_whole_number") else qty,
-				d.qty - d.produced_qty,
+				d.qty - d.produced_qty - flt(pending_qty.get(d.name)),
 			)
 
 			item_details.update({"qty": qty, "max_producible_qty": qty})
 			item_list.append(item_details)
 
 		return item_list
+
+	def get_pending_work_order_qty(self):
+		"""Qty still to be produced by open Work Orders, per inward order item."""
+		wo = frappe.qb.DocType("Work Order")
+		query = (
+			frappe.qb.from_(wo)
+			.select(
+				wo.subcontracting_inward_order_item,
+				Sum(wo.qty - wo.produced_qty - wo.process_loss_qty),
+			)
+			.where(
+				(wo.subcontracting_inward_order == self.name)
+				& (wo.docstatus == 1)
+				& (wo.status.notin(["Completed", "Closed"]))
+			)
+			.groupby(wo.subcontracting_inward_order_item)
+		)
+		return frappe._dict(query.run())
 
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
@@ -390,7 +415,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 			for rm_item in source.received_items:
 				qty = rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty
-				if not qty:
+				if not rm_item.is_customer_provided_item or qty <= 0:
 					continue
 
 				target.append(
@@ -439,25 +464,24 @@ class SubcontractingInwardOrder(SubcontractingController):
 			allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
 			for fg_item in source.items:
 				qty = (
-					fg_item.produced_qty
-					if allow_over
-					else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
-				)
+					fg_item.produced_qty if allow_over else min(fg_item.qty, fg_item.produced_qty)
+				) - fg_item.delivered_qty
 				if qty < 0:
 					continue
 
 				scio_details.append(fg_item.name)
-				target.append(
-					"items",
-					{
-						"qty": qty,
-						"item_code": fg_item.item_code,
-						"s_warehouse": fg_item.delivery_warehouse,
-						"stock_uom": fg_item.stock_uom,
-						"scio_detail": fg_item.name,
-						"is_finished_item": 1,
-					},
-				)
+				if qty > 0:
+					target.append(
+						"items",
+						{
+							"qty": qty,
+							"item_code": fg_item.item_code,
+							"s_warehouse": fg_item.delivery_warehouse,
+							"stock_uom": fg_item.stock_uom,
+							"scio_detail": fg_item.name,
+							"is_finished_item": 1,
+						},
+					)
 
 			if (
 				frappe.get_single_value("Selling Settings", "deliver_secondary_items")
@@ -514,7 +538,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 			for fg_item in source.items:
 				qty = fg_item.delivered_qty - fg_item.returned_qty
-				if qty < 0:
+				if qty <= 0:
 					continue
 
 				target.append(
@@ -565,4 +589,9 @@ def update_subcontracting_inward_order_status(scio: str | Document, status: str 
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 
 	scio.check_permission("write")
+	if scio.docstatus != 1:
+		frappe.throw(_("Only a submitted Subcontracting Inward Order can be closed or re-opened."))
+	if status and status != "Closed":
+		frappe.throw(_("Status {0} cannot be set manually.").format(frappe.bold(status)))
+
 	set_subcontracting_inward_order_status(scio, status)

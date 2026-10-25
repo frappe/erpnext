@@ -11,15 +11,20 @@ from frappe.utils import flt, get_link_to_form
 
 from erpnext.accounts.party import get_party_account
 from erpnext.controllers.mapper import get_qty_already_mapped
-from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_invoiced_qty_against_po_items
 
 
 def set_missing_values(source, target):
+	target.set_transaction_date_exchange_rate()
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 	target.run_method("set_use_serial_batch_fields")
+
+
+def is_unit_price_row(po_item, has_unit_price_items) -> bool:
+	return bool(has_unit_price_items) and po_item.qty == 0
 
 
 @frappe.whitelist()
@@ -31,27 +36,19 @@ def make_purchase_receipt(
 	args = frappe.parse_json(args)
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
-
-	def is_unit_price_row(source):
-		return has_unit_price_items and source.qty == 0
-
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_order_item")
-
-	def get_max_receivable_qty(source):
-		tolerance = flt(get_allowance_for(source.item_code, qty_or_amount="qty")[0])
-		return flt(source.qty) * (100 + tolerance) / 100
 
 	def update_item(obj, target, source_parent):
 		received_qty = flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
 		qty = flt(obj.qty)
 		pending_qty = qty - received_qty
 
-		if is_unit_price_row(obj):
+		if is_unit_price_row(obj, has_unit_price_items):
 			target.qty = qty
 		elif pending_qty > 0:
 			target.qty = pending_qty
 		else:
-			target.qty = max(get_max_receivable_qty(obj) - received_qty, 0)
+			target.qty = flt(max(obj.max_receivable_qty - received_qty, 0), obj.precision("qty"))
 
 		target.stock_qty = target.qty * flt(obj.conversion_factor)
 		target.amount = target.qty * flt(obj.rate)
@@ -88,9 +85,9 @@ def make_purchase_receipt(
 				"postprocess": update_item,
 				"condition": lambda doc: (
 					doc.name not in mapped_qty_by_item
-					if is_unit_price_row(doc)
+					if is_unit_price_row(doc, has_unit_price_items)
 					else abs(doc.received_qty) + abs(mapped_qty_by_item.get(doc.name, 0))
-					< abs(get_max_receivable_qty(doc))
+					< abs(doc.max_receivable_qty)
 				)
 				and doc.delivered_by_supplier != 1
 				and not doc.closed
@@ -115,7 +112,9 @@ def make_purchase_invoice(
 @frappe.whitelist()
 def make_purchase_invoice_from_portal(purchase_order_name: str):
 	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
-	if frappe.session.user not in frappe.get_all("Portal User", {"parent": doc.supplier}, pluck="user"):
+	if frappe.session.user not in frappe.get_all(
+		"Portal User", {"parenttype": "Supplier", "parent": doc.supplier}, pluck="user"
+	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 	doc.save()
 	if not frappe.in_test:
@@ -142,24 +141,21 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		PaymentScheduleService(target).set_payment_schedule()
 		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
-	def get_billed_qty(po_item_name):
-		from frappe.query_builder.functions import Sum
-
-		table = frappe.qb.DocType("Purchase Invoice Item")
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.qty).as_("qty"))
-			.where((table.docstatus == 1) & (table.po_detail == po_item_name))
-		)
-		return query.run(pluck="qty")[0] or 0
-
+	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "po_detail")
+	po_items = frappe.get_all("Purchase Order Item", filters={"parent": source_name}, pluck="name")
+	billed_qty_by_item = get_invoiced_qty_against_po_items(po_items) if po_items else {}
 
-	def get_billed_and_mapped_qty(po_item_name):
-		return flt(get_billed_qty(po_item_name)) + flt(mapped_qty_by_item.get(po_item_name, 0))
+	def get_billed_and_mapped_qty(po_item):
+		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
+		return billed_qty + flt(mapped_qty_by_item.get(po_item.name, 0))
 
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - get_billed_and_mapped_qty(obj.name)
+		target.qty = (
+			0
+			if is_unit_price_row(obj, has_unit_price_items)
+			else flt(obj.qty) - get_billed_and_mapped_qty(obj)
+		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -198,11 +194,10 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: (
-				doc.base_amount == 0
-				or abs(doc.billed_amt) < abs(doc.amount)
-				or doc.qty > flt(get_billed_qty(doc.name))
+				doc.name not in mapped_qty_by_item
+				if is_unit_price_row(doc, has_unit_price_items)
+				else doc.qty > get_billed_and_mapped_qty(doc)
 			)
-			and (doc.name not in mapped_qty_by_item or doc.qty > get_billed_and_mapped_qty(doc.name))
 			and not doc.closed
 			and select_item(doc),
 		},
@@ -269,7 +264,7 @@ def is_po_fully_subcontracted(po_name: str) -> bool:
 	query = (
 		frappe.qb.from_(table)
 		.select(table.name)
-		.where((table.parent == po_name) & (table.qty != table.subcontracted_qty))
+		.where((table.parent == po_name) & (table.qty > table.subcontracted_qty) & (table.closed == 0))
 	)
 	return not query.run(as_dict=True)
 
@@ -279,6 +274,7 @@ def get_mapped_subcontracting_order(
 ) -> Document:
 	def post_process(source_doc, target_doc):
 		target_doc.populate_items_table()
+		source_rows = {row.name: row for row in source_doc.items}
 
 		if target_doc.set_warehouse:
 			for item in target_doc.items:
@@ -288,11 +284,11 @@ def get_mapped_subcontracting_order(
 				for item in target_doc.items:
 					item.warehouse = source_doc.set_warehouse
 			else:
-				for idx, item in enumerate(target_doc.items):
-					item.warehouse = source_doc.items[idx].warehouse
+				for item in target_doc.items:
+					item.warehouse = source_rows[item.purchase_order_item].warehouse
 
-		for idx, item in enumerate(target_doc.items):
-			item.job_card = source_doc.items[idx].job_card
+		for item in target_doc.items:
+			item.job_card = source_rows[item.purchase_order_item].job_card
 			if not target_doc.supplier_warehouse:
 				# WIP warehouse is set as Supplier Warehouse in Job Card
 				target_doc.supplier_warehouse = frappe.get_cached_value(
@@ -333,7 +329,7 @@ def get_mapped_subcontracting_order(
 					"material_request_item": "material_request_item",
 				},
 				"field_no_map": ["qty", "fg_item_qty", "amount"],
-				"condition": lambda item: item.qty != item.subcontracted_qty,
+				"condition": lambda item: not item.closed and item.qty > item.subcontracted_qty,
 			},
 		},
 		target_doc,

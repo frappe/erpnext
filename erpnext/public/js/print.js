@@ -8,23 +8,10 @@ const doctype_list = [
 	"Quotation",
 	"Request for Quotation",
 ];
-const allowed_print_formats = [
-	"Sales Order Standard",
-	"Sales Order with Item Image",
-	"Sales Invoice Standard",
-	"Sales Invoice with Item Image",
-	"Delivery Note Standard",
-	"Delivery Note with Item Image",
-	"Purchase Order Standard",
-	"Purchase Order with Item Image",
-	"Purchase Invoice Standard",
-	"Purchase Invoice with Item Image",
-	"POS Invoice Standard",
-	"POS Invoice with Item Image",
-	"Quotation Standard",
-	"Quotation with Item Image",
-	"Request for Quotation with Item Image",
-];
+const print_format_styles = ["Bordered", "Classic", "Modern", "Modern with Images"];
+const allowed_print_formats = doctype_list.flatMap((doctype) =>
+	print_format_styles.map((style) => `${doctype} ${style}`)
+);
 const allowed_letterheads = ["Company Letterhead", "Company Letterhead - Grey"];
 
 handle_route_event();

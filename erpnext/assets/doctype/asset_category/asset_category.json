@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:asset_category_name",
  "creation": "2016-03-01 17:41:39.778765",
+ "description": "Groups assets that share accounts and depreciation rules.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-category",

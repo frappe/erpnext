@@ -74,9 +74,7 @@ frappe.ui.form.on("Chart of Accounts Importer", {
 					default: frm.doc.company,
 				},
 			],
-			primary_action: function () {
-				let data = d.get_values();
-
+			primary_action: function (data) {
 				if (!data.template_type) {
 					frappe.throw(__("Please select <b>Template Type</b> to download template"));
 				}

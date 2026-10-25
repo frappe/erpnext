@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:company_name",
  "creation": "2021-08-19 00:21:06.995448",
+ "description": "A company you are trying to win as a customer, with its leads.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

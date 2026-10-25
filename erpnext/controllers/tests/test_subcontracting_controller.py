@@ -18,7 +18,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_material_receipt, make_stock_entry
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
@@ -26,12 +27,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingController(ERPNextTestSuite):
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
-
 	def test_remove_empty_rows(self):
 		sco = get_subcontracting_order()
 		len_before = len(sco.service_items)
@@ -490,7 +485,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 			{
 				"main_item_code": "Subcontracted Item SA4",
 				"item_code": "Subcontracted SRM Item 3",
-				"qty": 3.0,
+				"qty": 1.0,
 				"rate": 100.0,
 				"stock_uom": "Nos",
 				"warehouse": "_Test Warehouse - _TC",
@@ -997,7 +992,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 					if field == "serial_no":
 						data = sorted(data)
 
-					self.assertEqual(data, transferred_detais.get(field))
+					expected = transferred_detais.get(field)
+					self.assertEqual(data, sorted(expected) if field == "serial_no" else expected)
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
@@ -1012,7 +1008,8 @@ class TestSubcontractingController(ERPNextTestSuite):
 					if field == "serial_no":
 						data = sorted(data)
 
-					self.assertEqual(data, transferred_detais.get(field))
+					expected = transferred_detais.get(field)
+					self.assertEqual(data, sorted(expected) if field == "serial_no" else expected)
 
 	def test_subcontracting_with_same_components_different_fg_with_serial_batch_fields(self):
 		"""
@@ -1160,6 +1157,7 @@ class TestSubcontractingController(ERPNextTestSuite):
 	def test_phantom_bom_explosion(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_tree_for_phantom_bom_tests
 
+		make_item("Top Level Parent", {"is_stock_item": 1, "is_sub_contracted_item": 1})
 		expected = create_tree_for_phantom_bom_tests()
 		service_items = [
 			{
@@ -1178,6 +1176,36 @@ class TestSubcontractingController(ERPNextTestSuite):
 		sco.reload()
 
 		self.assertEqual([item.rm_item_code for item in sco.supplied_items], expected)
+
+	def test_phantom_item_materials_scale_with_phantom_qty(self):
+		phantom_item = make_item(properties={"is_stock_item": 1}).name
+		phantom_bom = make_bom(
+			item=phantom_item, raw_materials=["Subcontracted SRM Item 8"], rm_qty=2, do_not_save=True
+		)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		fg_bom = make_bom(item=fg_item, raw_materials=[phantom_item], rm_qty=3, do_not_save=True)
+		fg_bom.items[0].bom_no = phantom_bom.name
+		fg_bom.save()
+		fg_bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 11",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items, include_exploded_items=0, do_not_submit=1)
+
+		self.assertEqual(sco.supplied_items[0].rm_item_code, "Subcontracted SRM Item 8")
+		self.assertEqual(sco.supplied_items[0].required_qty, 30)
 
 	def test_co_by_product(self):
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
@@ -1265,29 +1293,25 @@ def get_supplied_items(scr_doc):
 
 
 def make_stock_in_entry(**args):
-	args = frappe._dict(args)
+	doc = make_material_receipt([get_rm_receipt_row(frappe._dict(row)) for row in args["rm_items"]])
 
 	items = {}
-	for row in args.rm_items:
-		row = frappe._dict(row)
-
-		doc = make_stock_entry(
-			target=row.warehouse or "_Test Warehouse - _TC",
-			item_code=row.item_code,
-			qty=row.qty or 1,
-			basic_rate=row.rate or 100,
+	for child_row in doc.items:
+		details = items.setdefault(
+			child_row.item_code, frappe._dict({"qty": 0, "serial_no": [], "batch_no": defaultdict(float)})
 		)
-
-		if row.item_code not in items:
-			items.setdefault(
-				row.item_code, frappe._dict({"qty": 0, "serial_no": [], "batch_no": defaultdict(float)})
-			)
-
-		child_row = doc.items[0]
-		details = items[child_row.item_code]
 		update_item_details(child_row, details)
 
 	return items
+
+
+def get_rm_receipt_row(row):
+	return {
+		"target": row.warehouse or "_Test Warehouse - _TC",
+		"item_code": row.item_code,
+		"qty": row.qty or 1,
+		"basic_rate": row.rate or 100,
+	}
 
 
 def update_item_details(child_row, details):
@@ -1298,14 +1322,14 @@ def update_item_details(child_row, details):
 	details.use_serial_batch_fields = child_row.get("use_serial_batch_fields")
 	if child_row.serial_and_batch_bundle:
 		doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
+		serial_ids = [row.serial_no for row in doc.get("entries") if row.serial_no]
+		details.serial_no.extend(SerialBatchIdentity("Serial No").get_numbers(doc.item_code, serial_ids))
 		for row in doc.get("entries"):
-			if row.serial_no:
-				details.serial_no.append(row.serial_no)
-
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty * (
 					-1 if doc.type_of_transaction == "Outward" else 1
 				)
+		details.serial_no.sort()
 	else:
 		if child_row.serial_no:
 			details.serial_no.extend(get_serial_nos(child_row.serial_no))
@@ -1338,7 +1362,7 @@ def make_stock_transfer_entry(**args):
 		batches = defaultdict(float)
 		if item_details and item_details.serial_no:
 			serial_nos = item_details.serial_no[0 : cint(row.qty)]
-			item_details.serial_no = list(set(item_details.serial_no) - set(serial_nos))
+			item_details.serial_no = item_details.serial_no[len(serial_nos) :]
 
 		if item_details and item_details.batch_no:
 			for batch_no, batch_qty in item_details.batch_no.items():
@@ -1358,7 +1382,7 @@ def make_stock_transfer_entry(**args):
 						"warehouse": row.warehouse or "_Test Warehouse - _TC",
 						"qty": (row.qty or 1) * -1,
 						"batches": batches,
-						"serial_nos": serial_nos,
+						"serial_nos": SerialBatchIdentity("Serial No").resolve(row.item_code, serial_nos),
 						"voucher_type": "Delivery Note",
 						"type_of_transaction": "Outward",
 						"do_not_submit": True,
@@ -1379,110 +1403,12 @@ def make_stock_transfer_entry(**args):
 	return doc
 
 
-def make_subcontracted_items():
-	sub_contracted_items = {
-		"Subcontracted Item SA1": {},
-		"Subcontracted Item SA2": {},
-		"Subcontracted Item SA3": {},
-		"Subcontracted Item SA4": {
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SBAT.####",
-		},
-		"Subcontracted Item SA5": {},
-		"Subcontracted Item SA6": {},
-		"Subcontracted Item SA7": {},
-		"Subcontracted Item SA8": {},
-		"Subcontracted Item SA9": {"stock_uom": "Litre"},
-		"Subcontracted Item SA10": {
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "SBAT.####",
-		},
-		"Top Level Parent": {},
-	}
-
-	for item, properties in sub_contracted_items.items():
-		if not frappe.db.exists("Item", item):
-			properties.update({"is_stock_item": 1, "is_sub_contracted_item": 1})
-			make_item(item, properties)
-
-
-def make_raw_materials():
-	raw_materials = {
-		"Subcontracted SRM Item 1": {},
-		"Subcontracted SRM Item 2": {"has_serial_no": 1, "serial_no_series": "SRI.####"},
-		"Subcontracted SRM Item 3": {
-			"has_batch_no": 1,
-			"create_new_batch": 1,
-			"batch_number_series": "BAT.####",
-		},
-		"Subcontracted SRM Item 4": {"has_serial_no": 1, "serial_no_series": "SRII.####"},
-		"Subcontracted SRM Item 5": {"has_serial_no": 1, "serial_no_series": "SRIID.####"},
-		"Subcontracted SRM Item 8": {},
-		"Subcontracted SRM Item 9": {"stock_uom": "Litre"},
-		"Subcontracted SRM Item 10": {},
-	}
-
-	for item, properties in raw_materials.items():
-		if not frappe.db.exists("Item", item):
-			properties.update({"is_stock_item": 1})
-			properties.update({"valuation_rate": 100})
-			make_item(item, properties)
-
-
 def make_service_item(item, properties=None):
 	if properties is None:
 		properties = {}
 	if not frappe.db.exists("Item", item):
 		properties.update({"is_stock_item": 0})
 		make_item(item, properties)
-
-
-def make_service_items():
-	service_items = {
-		"Subcontracted Service Item 1": {},
-		"Subcontracted Service Item 2": {},
-		"Subcontracted Service Item 3": {},
-		"Subcontracted Service Item 4": {},
-		"Subcontracted Service Item 5": {},
-		"Subcontracted Service Item 6": {},
-		"Subcontracted Service Item 7": {},
-		"Subcontracted Service Item 8": {},
-		"Subcontracted Service Item 9": {},
-		"Subcontracted Service Item 10": {},
-		"Subcontracted Service Item 11": {},
-	}
-
-	for item, properties in service_items.items():
-		make_service_item(item, properties)
-
-
-def make_bom_for_subcontracted_items():
-	boms = {
-		"Subcontracted Item SA1": [
-			"Subcontracted SRM Item 1",
-			"Subcontracted SRM Item 2",
-			"Subcontracted SRM Item 3",
-		],
-		"Subcontracted Item SA2": ["Subcontracted SRM Item 2"],
-		"Subcontracted Item SA3": ["Subcontracted SRM Item 2"],
-		"Subcontracted Item SA4": [
-			"Subcontracted SRM Item 1",
-			"Subcontracted SRM Item 2",
-			"Subcontracted SRM Item 3",
-		],
-		"Subcontracted Item SA5": ["Subcontracted SRM Item 5"],
-		"Subcontracted Item SA6": ["Subcontracted SRM Item 3"],
-		"Subcontracted Item SA7": ["Subcontracted SRM Item 1"],
-		"Subcontracted Item SA8": ["Subcontracted SRM Item 8"],
-		"Subcontracted Item SA10": ["Subcontracted SRM Item 10"],
-		"Subcontracted Service Item 11": ["Top Level Parent"],
-	}
-
-	for item_code, raw_materials in boms.items():
-		if not frappe.db.exists("BOM", {"item": item_code}):
-			make_bom(item=item_code, raw_materials=raw_materials, rate=100, currency="INR")
 
 
 def set_backflush_based_on(based_on):

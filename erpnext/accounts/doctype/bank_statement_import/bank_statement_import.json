@@ -3,6 +3,7 @@
  "allow_bulk_edit": 1,
  "autoname": "format:Bank Statement Import on {creation}",
  "creation": "2019-08-04 14:16:08.318714",
+ "description": "Bring in a bank statement to match its lines against your books.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",

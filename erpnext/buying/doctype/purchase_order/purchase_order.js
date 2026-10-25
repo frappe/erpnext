@@ -328,7 +328,10 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					}
 				}
 
-				if (is_drop_ship && !["Completed", "Delivered"].includes(doc.status)) {
+				if (
+					doc.items.some((item) => item.delivered_by_supplier == 1 && !item.closed) &&
+					!["Completed", "Delivered"].includes(doc.status)
+				) {
 					this.frm.add_custom_button(
 						__("Deliver (Dropship)"),
 						this.update_dropship_delivered_qty.bind(this),
@@ -668,8 +671,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				let reason_for_hold = "Reason for hold: " + data.reason_for_hold;
 
 				frappe.call({
@@ -716,7 +718,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 	update_dropship_delivered_qty() {
 		const data = this.frm.doc.items
-			.filter((item) => item.delivered_by_supplier == 1)
+			.filter((item) => item.delivered_by_supplier == 1 && !item.closed)
 			.map((item) => {
 				return {
 					__checked: item.qty > item.received_qty,

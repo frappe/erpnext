@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:uom_name",
  "creation": "2013-01-10 16:34:24",
+ "description": "A unit you measure items in, like kg or box.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/uom",
@@ -34,6 +35,7 @@
    "description": "Check this to disallow fractions. (for Nos)",
    "fieldname": "must_be_whole_number",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Must be Whole Number"
   },
   {

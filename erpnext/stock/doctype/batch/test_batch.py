@@ -277,6 +277,118 @@ class TestBatch(ERPNextTestSuite):
 			batch_no,
 		)
 
+	def make_delivery_note_with_bundle(self, receipt, batch_no, qty):
+		bundle_id = (
+			SerialBatchCreation(
+				{
+					"item_code": receipt.items[0].item_code,
+					"warehouse": receipt.items[0].warehouse,
+					"actual_qty": qty,
+					"voucher_type": "Delivery Note",
+					"batches": frappe._dict({batch_no: qty}),
+					"type_of_transaction": "Outward",
+					"company": receipt.company,
+					"do_not_submit": 1,
+				}
+			)
+			.make_serial_and_batch_bundle()
+			.name
+		)
+
+		return frappe.get_doc(
+			doctype="Delivery Note",
+			customer="_Test Customer",
+			company=receipt.company,
+			items=[
+				dict(
+					item_code=receipt.items[0].item_code,
+					qty=qty,
+					rate=10,
+					warehouse=receipt.items[0].warehouse,
+					serial_and_batch_bundle=bundle_id,
+				)
+			],
+		)
+
+	def test_expired_batch_in_bundle_cannot_be_delivered(self):
+		from erpnext.exceptions import BatchExpiredError
+
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_to_date(getdate(), days=-5))
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		self.assertRaises(BatchExpiredError, delivery_note.insert)
+
+	def test_disabled_batch_cannot_be_delivered(self):
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		self.assertRaises(frappe.ValidationError, delivery_note.insert)
+
+	def test_disabled_batch_cannot_be_issued(self):
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=receipt.items[0].item_code,
+			source=receipt.items[0].warehouse,
+			qty=2,
+			batch_no=batch_no,
+			purpose="Material Issue",
+		)
+
+	def test_expired_packed_item_batch_cannot_be_delivered(self):
+		from erpnext.exceptions import BatchExpiredError
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_to_date(getdate(), days=-5))
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		delivery_note.posting_date = getdate()
+		row = delivery_note.items[0]
+		delivery_note.append(
+			"packed_items",
+			{
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"qty": 2,
+				"serial_and_batch_bundle": row.serial_and_batch_bundle,
+			},
+		)
+		row.serial_and_batch_bundle = None
+
+		self.assertRaises(
+			BatchExpiredError, SerialBatchBundleService(delivery_note).validate_outward_bundle_batches
+		)
+
+	def test_batch_stock_endpoints_need_batch_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.batch.batch import get_batches_by_oldest, get_pos_reserved_batch_qty
+
+		portal_user = create_user("test_batch_portal@example.com", "Customer")
+		sales_user = create_user("test_batch_sales@example.com", "Sales User")
+		kwargs = {"item_code": "ITEM-BATCH-1", "warehouse": "_Test Warehouse - _TC"}
+
+		frappe.set_user(portal_user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, get_batch_qty, **kwargs)
+			self.assertRaises(frappe.PermissionError, get_batches_by_oldest, **kwargs)
+			self.assertRaises(frappe.PermissionError, get_pos_reserved_batch_qty, kwargs)
+
+			frappe.set_user(sales_user.name)
+			get_batch_qty(**kwargs)
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_batch_negative_stock_error(self):
 		"""Test automatic batch selection for outgoing items"""
 		receipt = self.test_purchase_receipt(100)
@@ -360,23 +472,47 @@ class TestBatch(ERPNextTestSuite):
 		self.assertEqual(get_batch_qty(batch_no, receipt.items[0].warehouse), 78)
 		self.assertEqual(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
 
+	def test_split_batch_keeps_source_dates_and_parent(self):
+		from erpnext.stock.doctype.batch.batch import split_batch
+
+		receipt = self.test_purchase_receipt()
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value(
+			"Batch",
+			batch_no,
+			{
+				"manufacturing_date": add_to_date(getdate(), days=-60),
+				"expiry_date": add_to_date(getdate(), days=5),
+			},
+		)
+
+		new_batch = split_batch(batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 4)
+
+		fields = ["manufacturing_date", "expiry_date"]
+		self.assertEqual(
+			frappe.db.get_value("Batch", new_batch, fields), frappe.db.get_value("Batch", batch_no, fields)
+		)
+		self.assertEqual(frappe.db.get_value("Batch", new_batch, "parent_batch"), batch_no)
+
 	def test_get_batch_qty(self):
 		"""Test getting batch quantities by batch_numbers, item_code or warehouse"""
 		self.make_batch_item("ITEM-BATCH-2")
 		self.make_new_batch_and_entry("ITEM-BATCH-2", "batch a", "_Test Warehouse - _TC")
 		self.make_new_batch_and_entry("ITEM-BATCH-2", "batch b", "_Test Warehouse - _TC")
 
-		self.assertEqual(
+		batch_a = frappe.db.get_value("Batch", {"item": "ITEM-BATCH-2", "batch_id": "batch a"}, "name")
+		batch_b = frappe.db.get_value("Batch", {"item": "ITEM-BATCH-2", "batch_id": "batch b"}, "name")
+		self.assertCountEqual(
 			get_batch_qty(item_code="ITEM-BATCH-2", warehouse="_Test Warehouse - _TC"),
 			[
 				{
-					"batch_no": "batch a",
+					"batch_no": batch_a,
 					"qty": 90.0,
 					"warehouse": "_Test Warehouse - _TC",
 					"expiry_date": None,
 				},
 				{
-					"batch_no": "batch b",
+					"batch_no": batch_b,
 					"qty": 90.0,
 					"warehouse": "_Test Warehouse - _TC",
 					"expiry_date": None,
@@ -384,7 +520,7 @@ class TestBatch(ERPNextTestSuite):
 			],
 		)
 
-		self.assertEqual(get_batch_qty("batch a", "_Test Warehouse - _TC"), 90)
+		self.assertEqual(get_batch_qty(batch_a, "_Test Warehouse - _TC"), 90)
 
 	def test_get_batch_no_search_returns_batches(self):
 		"""The batch-number picker must run on every engine.
@@ -422,8 +558,8 @@ class TestBatch(ERPNextTestSuite):
 			filters=filters,
 		)
 		returned = {row[0] for row in result}
-		self.assertIn("batch picker a", returned)
-		self.assertIn("batch picker b", returned)
+		expected = frappe.get_all("Batch", filters={"item": "ITEM-BATCH-PICKER"}, pluck="name")
+		self.assertEqual(returned, set(expected))
 
 		# These batches have no manufacturing/expiry date. MariaDB CONCAT('MFG-', NULL)
 		# is NULL, but Postgres CONCAT drops the NULL and would surface a bare "MFG-"/
@@ -457,7 +593,7 @@ class TestBatch(ERPNextTestSuite):
 		# Create Stock Reservation Entries
 		pl.create_stock_reservation_entries(notify=False)
 
-		batch = frappe.get_doc("Batch", batch_id)
+		batch = frappe.get_doc("Batch", {"item": batch_item_name, "batch_id": batch_id})
 		# Recalculate Batch Qty
 		batch.recalculate_batch_qty()
 		batch.reload()
@@ -466,25 +602,32 @@ class TestBatch(ERPNextTestSuite):
 
 	def test_total_batch_qty(self):
 		self.make_batch_item("ITEM-BATCH-3")
-		existing_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
+		existing_batch_qty = flt(
+			frappe.db.get_value("Batch", {"item": "ITEM-BATCH-3", "batch_id": "B100"}, "batch_qty")
+		)
 		stock_entry = self.make_new_batch_and_entry("ITEM-BATCH-3", "B100", "_Test Warehouse - _TC")
 
-		current_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
+		current_batch_qty = flt(
+			frappe.db.get_value("Batch", {"item": "ITEM-BATCH-3", "batch_id": "B100"}, "batch_qty")
+		)
 		self.assertEqual(current_batch_qty, existing_batch_qty + 90)
 
 		stock_entry.cancel()
-		current_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
+		current_batch_qty = flt(
+			frappe.db.get_value("Batch", {"item": "ITEM-BATCH-3", "batch_id": "B100"}, "batch_qty")
+		)
 		self.assertEqual(current_batch_qty, existing_batch_qty)
 
 	@classmethod
 	def make_new_batch_and_entry(cls, item_name, batch_name, warehouse):
 		"""Make a new stock entry for given target warehouse and batch name of item"""
 
-		if not frappe.db.exists("Batch", batch_name):
+		batch_id = frappe.db.get_value("Batch", {"item": item_name, "batch_id": batch_name}, "name")
+		if not batch_id:
 			batch = frappe.get_doc(doctype="Batch", item=item_name, batch_id=batch_name).insert(
 				ignore_permissions=True
 			)
-			batch.save()
+			batch_id = batch.name
 
 		sn_doc = SerialBatchCreation(
 			{
@@ -493,7 +636,7 @@ class TestBatch(ERPNextTestSuite):
 				"voucher_type": "Stock Entry",
 				"qty": 90,
 				"avg_rate": 10,
-				"batches": frappe._dict({batch_name: 90}),
+				"batches": frappe._dict({batch_id: 90}),
 				"type_of_transaction": "Inward",
 				"company": "_Test Company",
 				"do_not_submit": 1,
@@ -531,14 +674,14 @@ class TestBatch(ERPNextTestSuite):
 			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 1)
 
 		batch = self.make_new_batch("_Test Stock Item For Batch Test1")
-		batch_name = batch.name
+		batch_name = batch.batch_id
 
 		self.assertTrue(batch_name.startswith("BATCH-"))
 
 		batch.delete()
 		batch = self.make_new_batch("_Test Stock Item For Batch Test2")
 
-		self.assertEqual(batch_name, batch.name)
+		self.assertEqual(batch_name, batch.batch_id)
 
 		# reset Stock Settings
 		if not use_naming_series:
@@ -689,6 +832,29 @@ class TestBatch(ERPNextTestSuite):
 
 		self.assertEqual(getdate(batch.expiry_date), getdate(expiry_date))
 
+	def test_auto_created_batch_expiry_counts_from_receipt_date(self):
+		item_code = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"has_expiry_date": 1,
+				"shelf_life_in_days": 10,
+				"batch_number_series": "BEXPRD-.###",
+			}
+		).name
+		posting_date = add_to_date(getdate(), days=-30)
+
+		receipt = make_purchase_receipt(item_code=item_code, qty=5, posting_date=posting_date)
+
+		batch = frappe.db.get_value(
+			"Batch",
+			get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			["manufacturing_date", "expiry_date"],
+			as_dict=True,
+		)
+		self.assertEqual(batch.manufacturing_date, posting_date)
+		self.assertEqual(batch.expiry_date, add_to_date(posting_date, days=10))
+
 	def test_autocreation_of_batches(self):
 		"""
 		Test if auto created Serial No excludes existing serial numbers
@@ -714,7 +880,12 @@ class TestBatch(ERPNextTestSuite):
 			get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle),
 		)
 
-		self.assertEqual("BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle))
+		self.assertEqual(
+			"BATCHEXISTING002",
+			frappe.db.get_value(
+				"Batch", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle), "batch_id"
+			),
+		)
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):

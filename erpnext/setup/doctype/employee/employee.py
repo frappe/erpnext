@@ -4,6 +4,9 @@ import frappe
 from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
+	ALL_USER_ROLE,
+	GUEST_ROLE,
+	SYSTEM_USER_ROLE,
 	add_user_permission,
 	get_doc_permissions,
 	remove_user_permission,
@@ -11,6 +14,7 @@ from frappe.permissions import (
 from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
+import erpnext
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -124,6 +128,7 @@ class Employee(NestedSet):
 
 		self.employee = self.name
 		self.set_employee_name()
+		self.set_salary_currency()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()
@@ -149,12 +154,33 @@ class Employee(NestedSet):
 			filter(lambda x: x, [self.first_name, self.middle_name, self.last_name])
 		)
 
+	def set_salary_currency(self):
+		if self.salary_currency:
+			return
+
+		self.salary_currency = erpnext.get_company_currency(self.company)
+
 	def validate_user_details(self):
 		if not self.user_id:
 			return
 
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
+		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
+			self.validate_user_access()
+
+	def validate_user_access(self):
+		"""Only a System Manager may link or update a User holding roles the editor lacks."""
+		editor_roles = frappe.get_roles()
+		if "System Manager" in editor_roles:
+			return
+
+		ignored_roles = {GUEST_ROLE, ALL_USER_ROLE, SYSTEM_USER_ROLE, "Employee"}
+		if set(frappe.get_roles(self.user_id)) - set(editor_roles) - ignored_roles:
+			frappe.throw(
+				_("You are not permitted to link or update User {0}").format(frappe.bold(self.user_id)),
+				frappe.PermissionError,
+			)
 
 	def validate_auto_user_creation(self):
 		if self.create_user_automatically and not (
@@ -171,7 +197,6 @@ class Employee(NestedSet):
 
 	def on_update(self):
 		self.update_nsm_model()
-		frappe.clear_cache()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -345,8 +370,7 @@ class Employee(NestedSet):
 		cell_number = cstr(self.get("cell_number"))
 		prev_number = cstr(prev_doc.get("cell_number"))
 		if cell_number != prev_number or self.get("user_id") != prev_doc.get("user_id"):
-			frappe.cache().hdel("employees_with_number", cell_number)
-			frappe.cache().hdel("employees_with_number", prev_number)
+			frappe.cache().delete_value("employees_with_number")
 
 
 def validate_employee_role(doc, method=None, ignore_emp_check=False):

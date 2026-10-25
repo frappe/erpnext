@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2014-07-11 11:33:42.547339",
+ "description": "Adds freight, duty and other charges to the cost of received items.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/landed-cost-voucher",

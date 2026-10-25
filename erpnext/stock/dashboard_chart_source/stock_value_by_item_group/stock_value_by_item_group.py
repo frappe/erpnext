@@ -7,7 +7,10 @@ from typing import Any
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
+from frappe.utils import cstr
 from frappe.utils.dashboard import cache_source
+
+from erpnext import _refuse
 
 
 @frappe.whitelist()
@@ -30,6 +33,12 @@ def get(
 	if not company:
 		company = frappe.defaults.get_defaults().company
 
+	company = cstr(company)
+	if not frappe.has_permission("Company", "select"):
+		_refuse()
+	if not frappe.has_permission("Warehouse", "select"):
+		_refuse()
+
 	labels, datasets = get_stock_value_by_item_group(company)
 
 	return {
@@ -48,6 +57,9 @@ def get_stock_value_by_item_group(company):
 
 	warehouses = frappe.get_list("Warehouse", pluck="name", filters=warehouse_filters)
 
+	if not warehouses:
+		return [], []
+
 	stock_value = Sum(doctype.stock_value)
 
 	query = (
@@ -60,8 +72,10 @@ def get_stock_value_by_item_group(company):
 		.limit(10)
 	)
 
-	if warehouses:
-		query = query.where(doctype.warehouse.isin(warehouses))
+	query = query.where(doctype.warehouse.isin(warehouses))
+	query = query.where(
+		doctype.item_code.isin(frappe.qb.get_query("Item", fields=["name"], ignore_permissions=False))
+	)
 
 	results = query.run(as_dict=True)
 

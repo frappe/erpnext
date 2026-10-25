@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2018-07-20 16:43:08.505978",
+ "description": "A batch of payments to send to your bank.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/payment-order",
  "editable_grid": 1,

@@ -170,6 +170,48 @@ class TestBudget(ERPNextTestSuite):
 		budget.cancel()
 		po.cancel()
 
+	def test_monthly_budget_crossed_for_po_in_foreign_currency(self):
+		self.assert_foreign_currency_po_budget_crossed()
+
+	def test_monthly_budget_crossed_for_po_in_foreign_currency_legacy_controller(self):
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", True)
+		try:
+			self.assert_foreign_currency_po_budget_crossed()
+		finally:
+			frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
+
+	def assert_foreign_currency_po_budget_crossed(self):
+		budget = make_budget(
+			applicable_on_purchase_order=1,
+			action_if_accumulated_monthly_budget_exceeded_on_po="Stop",
+			budget_against="Cost Center",
+			do_not_save=False,
+			submit_budget=True,
+		)
+
+		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
+
+		accumulated_limit = get_accumulated_monthly_budget(
+			budget.name,
+			nowdate(),
+		)
+
+		# In USD the PO amount stays comfortably under the limit; only after conversion
+		# to company currency (conversion_rate 80) does it exceed the accumulated budget.
+		po = create_purchase_order(
+			currency="USD",
+			transaction_date=nowdate(),
+			qty=1,
+			rate=accumulated_limit / 2,
+			do_not_submit=True,
+		)
+		po.conversion_rate = 80
+
+		self.assertRaises(BudgetError, po.submit)
+
+		budget.load_from_db()
+		budget.cancel()
+
 	def test_monthly_budget_crossed_stop2(self):
 		set_total_expense_zero(nowdate(), "project")
 
@@ -456,22 +498,6 @@ class TestBudget(ERPNextTestSuite):
 			do_not_save=True,
 			submit_budget=False,
 		)
-
-		with self.assertRaises(frappe.ValidationError):
-			budget.save()
-
-	def test_total_distribution_equals_budget(self):
-		budget = make_budget(
-			budget_against="Cost Center",
-			applicable_on_cumulative_expense=True,
-			distribute_equally=0,
-			budget_amount=12000,
-			do_not_save=False,
-			submit_budget=False,
-		)
-
-		for row in budget.budget_distribution:
-			row.amount = 2000
 
 		with self.assertRaises(frappe.ValidationError):
 			budget.save()

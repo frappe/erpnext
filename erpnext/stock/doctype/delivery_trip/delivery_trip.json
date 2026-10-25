@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-16 16:45:48.293335",
+ "description": "A vehicle's route to deliver to several customers.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/delivery-trip",

@@ -39,12 +39,15 @@ def get(
 	account = filters.get("account")
 	company = filters.get("company")
 
-	if not company and not account:
-		frappe.throw(_("Company and account filters not set!"))
+	# the account defaults to the company's default bank account, which a new company has not set yet
 	if not company:
-		frappe.throw(_("Company filter not set!"))
+		frappe.throw(_("Choose a company in this chart's filters to see its bank balance."))
 	if not account:
-		frappe.throw(_("Account filter not set!"))
+		frappe.throw(
+			_(
+				"Choose a bank account in this chart's filters, or set a default bank account on {0}, to see its balance."
+			).format(company)
+		)
 
 	# authorise the account itself, as get_balance_on() does; doc= brings User Permissions with it
 	frappe.has_permission("Account", doc=account, throw=True)

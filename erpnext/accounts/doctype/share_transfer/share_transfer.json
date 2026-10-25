@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "ACC-SHT-.YYYY.-.#####",
  "creation": "2017-12-25 17:18:03.143726",
+ "description": "A record of shares issued, bought back or moved between shareholders.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/share-transfer",
  "editable_grid": 1,

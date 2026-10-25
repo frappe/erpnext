@@ -463,7 +463,7 @@ frappe.ui.form.on("Asset", {
 
 			let asset_depr_schedule_doc = (
 				await frappe.call(
-					"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_asset_depr_schedule_doc",
+					"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_asset_depreciation_schedule",
 					{
 						asset_name: frm.doc.name,
 						status: "Active",
@@ -659,8 +659,7 @@ frappe.ui.form.on("Asset", {
 			],
 		});
 
-		dialog.set_primary_action(__("Sell"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Sell"), function (dialog_data) {
 			const sell_qty = cint(dialog_data.sell_qty);
 			const asset_qty = cint(frm.doc.asset_quantity);
 
@@ -709,8 +708,7 @@ frappe.ui.form.on("Asset", {
 			fields: fields,
 		});
 
-		dialog.set_primary_action(__("Split"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Split"), function (dialog_data) {
 			frappe.call({
 				args: {
 					asset_name: frm.doc.name,

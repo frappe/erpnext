@@ -37,8 +37,8 @@ def boot_session(bootinfo):
 
 		remove_disabled_price_list_defaults(bootinfo)
 
-		bootinfo.sysdefaults.quotation_valid_till = cint(
-			frappe.db.get_single_value("CRM Settings", "default_valid_till")
+		bootinfo.sysdefaults.quotation_valid_till = max(
+			cint(frappe.db.get_single_value("CRM Settings", "default_valid_till")), 0
 		)
 
 		bootinfo.sysdefaults.allow_sales_order_creation_for_expired_quotation = cint(

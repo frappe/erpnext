@@ -88,21 +88,22 @@ payment_method = [
 )
 class TestPaymentRequest(ERPNextTestSuite):
 	def setUp(self):
-		for payment_gateway in payment_gateways:
-			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
-				frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
+		if frappe.db.table_exists("Payment Gateway"):
+			for payment_gateway in payment_gateways:
+				if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
+					frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
 
-		for method in payment_method:
-			if not frappe.db.get_value(
-				"Payment Gateway Account",
-				{
-					"payment_gateway": method["payment_gateway"],
-					"currency": method["currency"],
-					"company": method["company"],
-				},
-				"name",
-			):
-				frappe.get_doc(method).insert(ignore_permissions=True)
+			for method in payment_method:
+				if not frappe.db.get_value(
+					"Payment Gateway Account",
+					{
+						"payment_gateway": method["payment_gateway"],
+						"currency": method["currency"],
+						"company": method["company"],
+					},
+					"name",
+				):
+					frappe.get_doc(method).insert(ignore_permissions=True)
 
 		for mock in (SEND_EMAIL_MOCK, GET_PAYMENT_URL_MOCK, GET_PAYMENT_GATEWAY_CONTROLLER_MOCK):
 			mock.reset_mock()
@@ -728,6 +729,133 @@ class TestPaymentRequest(ERPNextTestSuite):
 		so.load_from_db()
 		self.assertEqual(so.advance_payment_status, "Requested")
 
+	def test_payment_cancel_process_multi_currency(self):
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+
+		po = create_purchase_order(
+			company="_Test Company",
+			supplier="_Test Supplier",
+			currency="USD",
+			qty=1,
+			rate=100,
+			do_not_save=True,
+		)
+		po.conversion_rate = 80.0
+		po.price_list_currency = "USD"
+		po.plc_conversion_rate = 80.0
+		po.save()
+		po.submit()
+
+		pr = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			recipient_id="supplier@example.com",
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.status, "Initiated")
+		self.assertEqual(pr.grand_total, 100)
+		self.assertEqual(pr.outstanding_amount, po.base_grand_total)
+
+		pe = pr.create_payment_entry(submit=False)
+		pe.submit()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+
+		pe.cancel()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Initiated")
+		self.assertEqual(pr.outstanding_amount, po.base_grand_total)
+
+	def test_payment_cancel_process_multi_currency_sales_order(self):
+		frappe.db.set_single_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account", 1
+		)
+
+		so = make_sales_order(currency="USD", qty=1, rate=100, do_not_save=True)
+		so.conversion_rate = 80.0
+		so.save()
+		so.submit()
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="customer@example.com",
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.status, "Requested")
+		self.assertEqual(pr.grand_total, 100)
+		self.assertEqual(pr.outstanding_amount, so.base_grand_total)
+
+		pe = pr.create_payment_entry(submit=False)
+		pe.submit()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+
+		pe.cancel()
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Requested")
+		self.assertEqual(pr.outstanding_amount, so.base_grand_total)
+
+	def test_requested_amount_currency_based_precision(self):
+		from unittest.mock import patch
+
+		import frappe.model.meta as meta_module
+
+		import erpnext.accounts.doctype.payment_request.payment_request as pr_module
+
+		with (
+			patch.object(meta_module, "get_currency_precision", return_value=None),
+			patch.object(
+				frappe,
+				"get_system_settings",
+				side_effect=lambda k: 1
+				if k == "use_number_format_from_currency"
+				else frappe.db.get_single_value("System Settings", k),
+			),
+			patch.object(pr_module, "get_company_currency", return_value="JPY"),
+			patch.object(
+				frappe,
+				"get_value",
+				side_effect=lambda dt, dn, fields=None, as_dict=False, **kw: (
+					{
+						"rounded_total": 100,
+						"grand_total": 100,
+						"base_rounded_total": 15001,
+						"base_grand_total": 15001,
+					}
+					if dt == "Purchase Order"
+					else frappe.db.get_value(dt, dn, fields, as_dict=as_dict, **kw)
+				),
+			),
+		):
+			# Dictionary representation as used in update_payment_requests_as_per_pe_references
+			doc = frappe._dict(
+				currency="USD",
+				party_account_currency="JPY",
+				company="_Test Company",
+				reference_doctype="Purchase Order",
+				reference_name="DUMMY-PO",
+				grand_total=20,
+			)
+
+			# 20 / 100 * 15001 = 3000.20, which in JPY (0 decimal places) must round to 3000.0
+			amount = pr_module.get_requested_amount_in_party_account_currency(doc)
+			self.assertEqual(amount, 3000.0)
+
 	def test_partial_paid_invoice_with_payment_request(self):
 		si = create_sales_invoice(currency="INR", qty=1, rate=5000)
 		si.save()
@@ -1011,6 +1139,130 @@ class TestPaymentRequest(ERPNextTestSuite):
 				return_doc=True,
 				schedules=schedules,
 			)
+
+	def test_payment_request_company_must_match_reference_company(self):
+		po = create_purchase_order()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": "_Test Company 1",
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"does not match the company"),
+			pr.insert,
+		)
+
+	def test_payment_request_requires_read_permission_on_reference(self):
+		po = create_purchase_order()
+
+		accounts_user = "accounts-user@example.com"
+		if not frappe.db.exists("User", accounts_user):
+			user = frappe.new_doc("User")
+			user.email = accounts_user
+			user.first_name = "Accounts"
+			user.send_welcome_email = 0
+			user.add_roles("Accounts User")
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": po.company,
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+			}
+		)
+
+		with self.set_user(accounts_user):
+			self.assertRaises(frappe.PermissionError, pr.insert)
+
+	def test_payment_request_reference_doctype_must_be_allowed(self):
+		todo = frappe.get_doc({"doctype": "ToDo", "description": "_Test Payment Request Reference"}).insert()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"company": "_Test Company",
+				"reference_doctype": "ToDo",
+				"reference_name": todo.name,
+				"grand_total": 100,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Requests cannot be created against"),
+			pr.insert,
+		)
+
+	def test_payment_request_print_format_must_match_reference(self):
+		print_format = frappe.get_doc(
+			{
+				"doctype": "Print Format",
+				"name": "_Test Sales Invoice Print Format",
+				"doc_type": "Sales Invoice",
+				"module": "Accounts",
+				"standard": "No",
+				"custom_format": 1,
+				"print_format_type": "Jinja",
+				"html": "{{ doc.name }}",
+			}
+		).insert()
+		po = create_purchase_order()
+
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_request_type": "Outward",
+				"company": po.company,
+				"reference_doctype": "Purchase Order",
+				"reference_name": po.name,
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"currency": po.currency,
+				"grand_total": po.grand_total,
+				"print_format": print_format.name,
+			}
+		)
+
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"is not valid for"),
+			pr.insert,
+		)
+
+	def test_resend_payment_email_uses_saved_values(self):
+		so = make_sales_order()
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="customer@example.com",
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		pr.email_to = "someone-else@example.com"
+		pr.resend_payment_email()
+
+		self.send_email.assert_called_once()
+		self.assertEqual(pr.email_to, "customer@example.com")
 
 
 class TestPaymentRequestV2Gateway(ERPNextTestSuite):

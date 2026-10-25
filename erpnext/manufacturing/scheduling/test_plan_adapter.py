@@ -545,6 +545,88 @@ class TestPlanAdapter(ERPNextTestSuite):
 		plan.cancel()
 		self.assertFalse(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
 
+	def make_draft_plan(self, planned_qty=2):
+		return create_production_plan(
+			item_code="Test PPS FG 2",
+			planned_qty=planned_qty,
+			do_not_submit=True,
+			skip_getting_mr_items=True,
+		)
+
+	def has_schedule(self, plan):
+		return bool(frappe.db.exists("Production Plan Schedule", {"production_plan": plan.name}))
+
+	def test_changing_the_manufacturing_type_changes_the_schedule_signature(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import get_schedule_signature
+
+		def plan_with(type_of_manufacturing):
+			row = frappe._dict(
+				name="row-1",
+				production_item="_Test Item",
+				bom_no="BOM-1",
+				qty=5,
+				type_of_manufacturing=type_of_manufacturing,
+			)
+			return frappe._dict(po_items=[], sub_assembly_items=[row])
+
+		self.assertNotEqual(
+			get_schedule_signature(plan_with("In House")), get_schedule_signature(plan_with("Subcontract"))
+		)
+
+	def test_editing_draft_plan_items_clears_schedule(self):
+		plan = self.make_draft_plan()
+		apply_schedule(plan.name, "2026-12-01 09:00:00")
+
+		plan.reload()
+		plan.save()
+		self.assertTrue(self.has_schedule(plan))
+
+		plan.po_items[0].planned_qty = 1
+		plan.save()
+		self.assertFalse(self.has_schedule(plan))
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"mins_between_operations": 10, "allow_overtime": 0, "disable_capacity_planning": 0},
+	)
+	def test_partial_work_order_not_seeded_from_full_row_block(self):
+		plan = self.make_draft_plan()
+		plan.submit()
+		apply_schedule(plan.name, "2026-12-07 09:00:00")
+
+		plan.reload()
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.qty = 1
+		work_order.set_work_order_operations()
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.fg_warehouse = work_order.fg_warehouse or "Finished Goods - _TC"
+		work_order.submit()
+
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		self.assertEqual(sum(flt(log.time_in_mins) for log in job_card.scheduled_time_logs), 30)
+
+	def test_closing_plan_releases_its_schedule(self):
+		plan = self.make_draft_plan()
+		plan.submit()
+		apply_schedule(plan.name, "2026-12-14 09:00:00")
+
+		plan.reload()
+		plan.set_status(close=True)
+		self.assertFalse(self.has_schedule(plan))
+
+		plan.reload()
+		plan.set_status(close=False)
+		self.assertFalse(self.has_schedule(plan))
+
+	def test_scheduled_draft_plan_can_be_deleted(self):
+		plan = self.make_draft_plan()
+		apply_schedule(plan.name, "2026-12-21 09:00:00")
+
+		frappe.delete_doc("Production Plan", plan.name)
+		self.assertFalse(frappe.db.exists("Production Plan", plan.name))
+		self.assertFalse(self.has_schedule(plan))
+
 	def test_incomplete_proposal_is_not_applied(self):
 		from unittest.mock import patch
 

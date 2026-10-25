@@ -1058,9 +1058,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					if (doc.is_subcontracted) {
 						if (
-							!doc.items
-								.filter((item) => !item.closed)
-								.every((item) => item.qty == item.subcontracted_qty)
+							doc.items.some(
+								(item) => !item.closed && flt(item.subcontracted_qty) < flt(item.stock_qty)
+							)
 						) {
 							this.frm.add_custom_button(
 								__("Subcontracting Inward Order"),
@@ -1093,19 +1093,20 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					// delivery note
-					if (
-						flt(doc.per_delivered) < 100 &&
-						(order_is_a_sale || order_is_a_custom_sale) &&
-						allow_delivery
-					) {
-						if (frappe.model.can_create("Delivery Note")) {
-							this.frm.add_custom_button(
-								__("Delivery Note"),
-								() => this.make_delivery_note_based_on_delivery_date(true),
-								__("Create")
-							);
-						}
+					const is_sale = order_is_a_sale || order_is_a_custom_sale;
+					const can_deliver = flt(doc.per_delivered) < 100 && is_sale && allow_delivery;
+					const can_over_deliver =
+						is_sale && !doc.skip_delivery_note && doc.__onload?.has_over_deliverable_rows;
 
+					if ((can_deliver || can_over_deliver) && frappe.model.can_create("Delivery Note")) {
+						this.frm.add_custom_button(
+							__("Delivery Note"),
+							() => this.make_delivery_note_based_on_delivery_date(true),
+							__("Create")
+						);
+					}
+
+					if (can_deliver) {
 						if (frappe.model.can_create("Work Order") && !doc.is_subcontracted) {
 							this.frm.add_custom_button(
 								__("Work Order"),
@@ -1535,8 +1536,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var d = new frappe.ui.Dialog({
 			title: __("Items for Raw Material Request"),
 			fields: fields,
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				me.frm.call({
 					method: "erpnext.selling.doctype.sales_order.mapper.make_raw_material_request",
 					args: {
@@ -1865,8 +1865,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				frappe.call({
 					method: "frappe.desk.form.utils.add_comment",
 					args: {

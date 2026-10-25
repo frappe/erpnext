@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "hash",
  "creation": "2013-05-24 19:29:10",
  "doctype": "DocType",
@@ -49,6 +50,7 @@
   "discount_percentage",
   "discount_amount",
   "distributed_discount_amount",
+  "mapped_additional_discount_amount",
   "base_rate_with_margin",
   "sec_break1",
   "rate",
@@ -94,6 +96,7 @@
   "purchase_invoice_item",
   "purchase_receipt_item",
   "delivery_note_item",
+  "delivery_note_packed_item",
   "putaway_rule",
   "section_break_45",
   "add_serial_batch_bundle",
@@ -151,7 +154,6 @@
    "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "in_list_view": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
@@ -176,7 +178,6 @@
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_global_search": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
@@ -236,6 +237,7 @@
    "columns": 2,
    "fieldname": "qty",
    "fieldtype": "Float",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Accepted Quantity",
    "oldfieldname": "qty",
@@ -361,6 +363,7 @@
    "columns": 2,
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Rate",
    "oldfieldname": "import_rate",
@@ -908,6 +911,15 @@
    "search_index": 1
   },
   {
+   "fieldname": "delivery_note_packed_item",
+   "fieldtype": "Data",
+   "label": "Delivery Note Packed Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "collapsible": 1,
    "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount || doc.distributed_discount_amount",
    "fieldname": "discount_and_margin_section",
@@ -1126,6 +1138,17 @@
    "print_hide": 1
   },
   {
+   "default": "0",
+   "description": "Tax-exclusive additional discount carried from a source document, per stock unit.",
+   "fieldname": "mapped_additional_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount per Stock Unit",
+   "options": "currency",
+   "precision": "9",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "amount_difference_with_purchase_invoice",
    "fieldtype": "Currency",
    "label": "Amount Difference with Purchase Invoice",
@@ -1155,7 +1178,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-07 18:00:00.000000",
+ "modified": "2026-10-15 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

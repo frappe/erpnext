@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.utils import nowdate, nowtime
@@ -11,6 +13,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	CanNotBeDefaultDimension,
 	DoNotChangeError,
 	delete_dimension,
+	get_evaluated_inventory_dimension,
 )
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -74,6 +77,61 @@ class TestInventoryDimension(ERPNextTestSuite):
 		)
 
 		self.assertFalse(custom_field)
+
+	def test_delete_dimension_removes_only_its_own_custom_fields(self):
+		dimension = create_inventory_dimension(
+			reference_document="Shelf",
+			dimension_name="Shelf Cleanup",
+			apply_to_all_doctypes=1,
+			do_not_save=True,
+		)
+		dimension.set_source_and_target_fieldname()
+		custom_field_filters = []
+		get_all = frappe.get_all
+
+		def record_custom_field_filters(doctype, *args, **kwargs):
+			if doctype == "Custom Field":
+				custom_field_filters.append(kwargs["filters"])
+				return []
+			return get_all(doctype, *args, **kwargs)
+
+		with patch("frappe.get_all", side_effect=record_custom_field_filters):
+			dimension.delete_custom_fields()
+
+		doctypes = {filters.get("dt") for filters in custom_field_filters}
+		self.assertNotIn(None, doctypes)
+		self.assertNotIn("Customer", doctypes)
+		self.assertTrue({"Stock Entry Detail", "Stock Ledger Entry", "Stock Closing Balance"} <= doctypes)
+
+		with patch.object(type(dimension), "has_stock_ledger", return_value=[frappe._dict(name="SLE")]):
+			self.assertRaises(DoNotChangeError, dimension.on_trash)
+
+	def test_stock_manager_can_create_dimension_fields(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		dimension = create_inventory_dimension(
+			reference_document="Pallet",
+			dimension_name="Pallet Stock Manager",
+			apply_to_all_doctypes=0,
+			document_type="Delivery Note Item",
+			do_not_save=True,
+		)
+		dimension.set_source_and_target_fieldname()
+		user = create_user("test_dimension_manager@example.com", "Stock Manager")
+
+		field_filters = {"dt": "Delivery Note Item", "fieldname": dimension.source_fieldname}
+		frappe.set_user(user.name)
+		try:
+			with patch("frappe.db.updatedb"):
+				dimension.add_custom_fields()
+				self.assertTrue(frappe.db.exists("Custom Field", field_filters))
+
+				dimension.delete_custom_fields()
+				self.assertFalse(frappe.db.exists("Custom Field", field_filters))
+
+			self.assertEqual(frappe.session.user, user.name)
+		finally:
+			frappe.set_user("Administrator")
 
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
@@ -229,6 +287,37 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		doc.reqd = 0
 		doc.save()
+
+	def test_new_mandatory_dimension_keeps_document_field_mandatory(self):
+		doc = create_inventory_dimension(
+			reference_document="Pallet",
+			dimension_name="Pallet Mandatory New",
+			apply_to_all_doctypes=0,
+			document_type="Delivery Note Item",
+			reqd=1,
+			do_not_save=True,
+		)
+		doc.set_source_and_target_fieldname()
+
+		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
+		with patch(f"{module}.create_dimension_custom_fields") as create_custom_fields:
+			doc.add_custom_fields()
+
+		custom_fields = create_custom_fields.call_args[0][0]
+		document_field = custom_fields["Delivery Note Item"][1]
+		ledger_field = custom_fields["Stock Ledger Entry"][0]
+		self.assertEqual((document_field["fieldname"], document_field["reqd"]), ("pallet_mandatory_new", 1))
+		self.assertEqual(ledger_field["reqd"], 0)
+
+	def test_dimension_condition_limits_rows(self):
+		dimension = frappe._dict(name="Pallet", condition="doc.qty > 100", type_of_transaction="Both")
+		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
+		with patch(f"{module}.get_document_wise_inventory_dimensions", return_value=[dimension]):
+			for qty, expected in ((5, []), (150, [dimension])):
+				row = frappe._dict(doctype="Purchase Receipt Item", docstatus=1, qty=qty)
+				self.assertEqual(
+					get_evaluated_inventory_dimension(row, frappe._dict(actual_qty=qty)), expected
+				)
 
 	def test_check_mandatory_depends_on_dimensions(self):
 		doc = create_inventory_dimension(
@@ -506,7 +595,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 		warehouse = create_warehouse("Serialized Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
-			apply_to_all_doctypes=1,
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
 			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
@@ -567,7 +657,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Empty Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -588,7 +678,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		issue.items[0].empty_serial_rack = "Rack 1"
+		issue.items[0].serial_rack = "Rack 1"
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
@@ -603,7 +693,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Required Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -616,7 +706,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		receipt.items[0].to_required_serial_rack = "Rack 1"
+		receipt.items[0].to_serial_rack = "Rack 1"
 		receipt.save()
 		receipt.submit()
 
@@ -647,8 +737,9 @@ class TestInventoryDimension(ERPNextTestSuite):
 		warehouse = create_warehouse("Serialized Legacy Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Legacy Serial Rack",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -661,14 +752,15 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		receipt.items[0].to_legacy_serial_rack = "Rack 2"
+		receipt.items[0].to_serial_rack = "Rack 2"
 		receipt.save()
 		receipt.submit()
+		serial_id = frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "name")
 
 		frappe.db.set_value(
 			"Stock Ledger Entry",
 			{"voucher_no": receipt.name, "actual_qty": (">", 0), "is_cancelled": 0},
-			{"serial_and_batch_bundle": None, "serial_no": f"Other Legacy Serial, {serial_no}"},
+			{"serial_and_batch_bundle": None, "serial_no": f"Other Legacy Serial, {serial_id}"},
 		)
 
 		issue = make_stock_entry(
@@ -679,12 +771,149 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		issue.items[0].legacy_serial_rack = "Rack 1"
+		issue.items[0].serial_rack = "Rack 1"
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_backdated_issue_cannot_make_later_dimension_balance_negative(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		inv_dimension = create_inventory_dimension(
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="SE Site",
+			reference_document="Inv Site",
+			validate_negative_stock=1,
+		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			make_stock_entry(
+				item_code=item_code, target=warehouse, qty=20, posting_date=add_days(nowdate(), -10)
+			)
+			for qty, days, field in ((10, -5, "to_se_site"), (-8, -1, "se_site"), (-5, -3, "se_site")):
+				kwargs = {"target": warehouse} if qty > 0 else {"source": warehouse}
+				doc = make_stock_entry(
+					item_code=item_code,
+					qty=abs(qty),
+					posting_date=add_days(nowdate(), days),
+					do_not_submit=True,
+					**kwargs,
+				)
+				doc.items[0].set(field, "Site 1")
+				if days == -3:
+					self.assertRaises(InventoryDimensionNegativeStockError, doc.submit)
+				else:
+					doc.submit()
+
+	def test_backdated_issue_before_a_transfer_within_the_dimension_is_allowed(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		for dimension_name, validate_negative_stock in (("Inv Site", 1), ("Rack", 0)):
+			create_inventory_dimension(
+				apply_to_all_doctypes=1,
+				dimension_name=dimension_name,
+				reference_document=dimension_name,
+				document_type=dimension_name,
+			).db_set("validate_negative_stock", validate_negative_stock)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			for site in ("Site 1", "Site 2"):
+				receipt = make_stock_entry(
+					item_code=item_code,
+					target=warehouse,
+					qty=10,
+					posting_date=add_days(nowdate(), -10),
+					do_not_submit=True,
+				)
+				receipt.items[0].update({"to_inv_site": site, "to_rack": "Rack 1"})
+				receipt.submit()
+
+			transfer = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				target=warehouse,
+				qty=10,
+				posting_date=add_days(nowdate(), -2),
+				do_not_submit=True,
+			)
+			transfer.items[0].update(
+				{"inv_site": "Site 1", "to_inv_site": "Site 1", "rack": "Rack 1", "to_rack": "Rack 2"}
+			)
+			transfer.submit()
+
+			issue = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				qty=1,
+				posting_date=add_days(nowdate(), -5),
+				do_not_submit=True,
+			)
+			issue.items[0].update({"inv_site": "Site 1", "rack": "Rack 1"})
+			issue.submit()
+			self.assertEqual(issue.docstatus, 1)
+
+	def test_backdated_transfer_keeping_checked_dimension_is_allowed(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		for dimension_name, reference_document, validate_negative_stock in (
+			("SE Site", "Inv Site", 1),
+			("SE Rack", "Rack", 0),
+		):
+			create_inventory_dimension(
+				apply_to_all_doctypes=0,
+				document_type="Stock Entry Detail",
+				dimension_name=dimension_name,
+				reference_document=reference_document,
+			).db_set("validate_negative_stock", validate_negative_stock)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			for site in ("Site 1", "Site 2"):
+				receipt = make_stock_entry(
+					item_code=item_code,
+					target=warehouse,
+					qty=10,
+					posting_date=add_days(nowdate(), -10),
+					do_not_submit=True,
+				)
+				receipt.items[0].update({"to_se_site": site, "to_se_rack": "Rack 1"})
+				receipt.submit()
+
+			issue = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				qty=10,
+				posting_date=add_days(nowdate(), -1),
+				do_not_submit=True,
+			)
+			issue.items[0].update({"se_site": "Site 1", "se_rack": "Rack 1"})
+			issue.submit()
+
+			transfer = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				target=warehouse,
+				qty=5,
+				posting_date=add_days(nowdate(), -5),
+				do_not_submit=True,
+			)
+			transfer.items[0].update(
+				{"se_site": "Site 1", "to_se_site": "Site 1", "se_rack": "Rack 1", "to_se_rack": "Rack 2"}
+			)
+			transfer.submit()
+
+			self.assertEqual(transfer.docstatus, 1)
+
 	def test_validate_negative_stock_with_multiple_dimension(self):
 		item_code = "Test Negative Multi Inventory Dimension Item"
 		create_item(item_code)
@@ -803,22 +1032,6 @@ def prepare_data_for_internal_transfer():
 	pr_doc = make_purchase_receipt(company=company, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
 	pr_doc.items[0].store = "Inter Transfer Store 1"
 	pr_doc.submit()
-
-	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
-		account = "Unrealized Profit and Loss - TCP1"
-		if not frappe.db.exists("Account", account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "Unrealized Profit and Loss",
-					"parent_account": "Direct Income - TCP1",
-					"company": company,
-					"is_group": 0,
-					"account_type": "Income Account",
-				}
-			).insert()
-
-		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
 
 	cost_center = frappe.db.get_value("Company", company, "cost_center") or frappe.db.get_value(
 		"Cost Center", {"company": company}, "name"

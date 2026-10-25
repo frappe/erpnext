@@ -169,13 +169,14 @@ class DeliveryNote(SellingController):
 				"target_parent_dt": "Sales Order",
 				"target_parent_field": "per_delivered",
 				"target_ref_field": "qty",
-				"source_field": "qty",
+				"source_field": "qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"percent_join_field": "against_sales_order",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
 				"exclude_field": "skip_delivery",
 				"second_source_dt": "Sales Invoice Item",
-				"second_source_field": "qty",
+				"second_source_field": "qty * conversion_factor",
 				"second_join_field": "so_detail",
 				"overflow_type": "delivery",
 				"second_source_extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -205,6 +206,11 @@ class DeliveryNote(SellingController):
 				"percent_join_field": "against_pick_list",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
+				"second_source_dt": "Sales Invoice Item",
+				"second_source_field": "stock_qty",
+				"second_join_field": "pick_list_item",
+				"second_source_extra_cond": """ and exists(select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 			},
 		]
 		if cint(self.is_return):
@@ -216,9 +222,10 @@ class DeliveryNote(SellingController):
 						"join_field": "so_detail",
 						"target_field": "returned_qty",
 						"target_parent_dt": "Sales Order",
-						"source_field": "-1 * qty",
+						"source_field": "-1 * qty * conversion_factor",
+						"target_conversion_factor": "conversion_factor",
 						"second_source_dt": "Sales Invoice Item",
-						"second_source_field": "-1 * qty",
+						"second_source_field": "-1 * qty * conversion_factor",
 						"second_join_field": "so_detail",
 						"extra_cond": """ and exists (select name from `tabDelivery Note`
 					where name=`tabDelivery Note Item`.parent and is_return=1)""",
@@ -267,13 +274,21 @@ class DeliveryNote(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
+		if self.is_return:
+			return
+
 		if frappe.get_single_value("Selling Settings", "so_required") == "Yes":
 			for d in self.get("items"):
 				if not d.against_sales_order:
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
+	def before_insert(self):
+		if self.amended_from:
+			self.delivery_trip = None
+
 	def validate(self):
 		self.validate_posting_time()
+		self.set_internal_return_target_warehouse()
 		super().validate()
 		self.validate_references()
 		self.validate_expense_account()
@@ -295,6 +310,48 @@ class DeliveryNote(SellingController):
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		pre_submit_validation(self, check_credit_limit=True, check_packed_qty=True)
+
+	def get_unbilled_original_rows(self) -> set:
+		"""Original rows the return comes from that were never billed: their cost still sits in SDBNB."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not original_rows:
+			return set()
+
+		return set(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows), "billed_amt": 0},
+				pluck="name",
+			)
+		)
+
+	def set_internal_return_target_warehouse(self):
+		"""An internal return brings material back from the warehouse the delivery put it in."""
+		original_rows = [d.dn_detail for d in self.items if d.dn_detail]
+		if not (self.is_return and self.return_against and self.is_internal_customer and original_rows):
+			return
+
+		target_warehouses = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", original_rows)},
+				fields=["name", "target_warehouse"],
+				as_list=True,
+			)
+		)
+		for row in self.items:
+			expected = target_warehouses.get(row.dn_detail)
+			if not expected:
+				continue
+
+			if not row.target_warehouse:
+				row.target_warehouse = expected
+			elif row.target_warehouse != expected:
+				frappe.throw(
+					_("Row #{0}: Target Warehouse must be {1}, as on Delivery Note {2}").format(
+						row.idx, frappe.bold(expected), frappe.bold(self.return_against)
+					)
+				)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -438,6 +495,11 @@ class DeliveryNote(SellingController):
 		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
 		default_expense_account = company_values.default_expense_account
 		is_enabled_sdbnb = company_values.enable_stock_delivered_but_not_billed
+		unbilled_rows = (
+			self.get_unbilled_original_rows()
+			if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb
+			else set()
+		)
 		for item in self.items:
 			if item.get("against_sales_invoice"):
 				if sdbnb_account and item.expense_account == sdbnb_account:
@@ -451,7 +513,13 @@ class DeliveryNote(SellingController):
 				# Only stock items
 				if is_stock_item and not item.get("is_fixed_asset") and not item.get("is_subcontracted"):
 					# Sales Return handling
-					if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb:
+					if (
+						self.is_return
+						and disable_sdbnb_in_sr
+						and sdbnb_account
+						and is_enabled_sdbnb
+						and item.dn_detail not in unbilled_rows
+					):
 						if default_expense_account and (
 							not item.expense_account or item.expense_account == sdbnb_account
 						):
@@ -497,6 +565,7 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -518,56 +587,16 @@ class DeliveryNote(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
+		self.update_project_consumed_material_cost()
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 
 		self.delete_auto_created_batches()
-
-	def validate_against_stock_reservation_entries(self):
-		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""
-
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_sre_reserved_warehouses_for_voucher,
-		)
-
-		# Don't validate if Return
-		if self.is_return:
-			return
-
-		for item in self.get("items"):
-			# Skip if `Sales Order` or `Sales Order Item` reference is not set.
-			if not item.against_sales_order or not item.so_detail:
-				continue
-
-			reserved_warehouses = get_sre_reserved_warehouses_for_voucher(
-				"Sales Order", item.against_sales_order, item.so_detail
-			)
-
-			# Skip if stock is not reserved.
-			if not reserved_warehouses:
-				continue
-
-			# Set `Warehouse` from SRE if not set.
-			if not item.warehouse:
-				item.warehouse = reserved_warehouses[0]
-			else:
-				# Throw if `Warehouse` not in Reserved Warehouses.
-				if item.warehouse not in reserved_warehouses:
-					msg = _("Row #{0}: Stock is reserved for item {1} in warehouse {2}.").format(
-						item.idx,
-						frappe.bold(item.item_code),
-						frappe.bold(reserved_warehouses[0])
-						if len(reserved_warehouses) == 1
-						else _("{0} and {1}").format(
-							frappe.bold(", ".join(reserved_warehouses[:-1])),
-							frappe.bold(reserved_warehouses[-1]),
-						),
-					)
-					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -589,8 +618,12 @@ class DeliveryNote(SellingController):
 			for d in self.get("items"):
 				if not d.against_sales_invoice:
 					validate_against_credit_limit = True
-					extra_amount = self.base_grand_total
-					break
+					# Only submitted standalone rows are already included in customer outstanding.
+					if (d.against_sales_order or self.docstatus == 0) and self.base_net_total:
+						extra_amount += d.base_net_amount / self.base_net_total * self.base_grand_total
+			if validate_against_credit_limit and not self.base_net_total:
+				# Customer outstanding excludes zero-net deliveries, including their freight charges.
+				extra_amount = self.base_grand_total
 		else:
 			for d in self.get("items"):
 				if not (d.against_sales_order or d.against_sales_invoice):
@@ -658,4 +691,7 @@ def get_list_context(context=None):
 def update_delivery_note_status(docname: str, status: str):
 	dn = frappe.get_lazy_doc("Delivery Note", docname)
 	dn.check_permission("submit")
+	if dn.docstatus != 1:
+		frappe.throw(_("Only a submitted Delivery Note can be closed or reopened"))
+
 	dn.update_status(status)

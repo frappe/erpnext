@@ -12,30 +12,44 @@
  "doctype": "Module Onboarding",
  "idx": 1,
  "is_complete": 0,
- "modified": "2026-02-25 16:59:32.154164",
+ "modified": "2026-10-04 01:25:22.767515",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Onboarding",
  "owner": "Administrator",
  "steps": [
   {
+   "is_optional": 0,
    "step": "Create Customer"
   },
   {
-   "step": "Create Item"
+   "is_optional": 0,
+   "step": "Create Selling Item"
   },
   {
+   "is_optional": 1,
+   "step": "Create Quotation"
+  },
+  {
+   "is_optional": 1,
    "step": "Create Sales Order"
   },
   {
+   "is_optional": 0,
    "step": "Create Sales Invoice"
   },
   {
-   "step": "View Sales Order Analysis"
+   "is_optional": 0,
+   "step": "Create Payment Entry"
   },
   {
-   "step": "Review Selling Settings"
+   "is_optional": 1,
+   "step": "View Accounts Receivable"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Sales Analytics"
   }
  ],
- "title": "Selling Setup"
+ "title": "Make your first sale"
 }

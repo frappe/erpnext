@@ -1,3 +1,24 @@
+shared:
+  pr_checks: &pr_checks
+    - base~=^(develop|version-15-hotfix|version-16-hotfix)$
+    - label!=dont-merge
+    - check-success=linters
+  suite_checks: &suite_checks
+    - check-success=Patch Test
+    - check-success=Python Unit Tests (1)
+    - check-success=Python Unit Tests (2)
+    - check-success=Python Unit Tests (3)
+    - check-success=Python Unit Tests (4)
+
+commands_restrictions:
+  queue:
+    conditions:
+      - or:
+          - sender=@erpnext-maintainers
+          - sender-permission=admin
+          - sender=barredterra
+          - sender=vorasmit
+
 pull_request_rules:
   - name: Auto-close PRs on stable branch
     conditions:
@@ -10,6 +31,7 @@ pull_request_rules:
               - author!=ankush
               - author!=deepeshgarg007
               - author!=frappe-pr-bot
+              - author!=frappe-release-bot[bot]
               - author!=mergify[bot]
           - or:
               - base=version-13
@@ -59,37 +81,23 @@ pull_request_rules:
           - version-16-hotfix
         assignees:
           - "{{ author }}"
-  - name: Automatic merge on CI success and review
-    conditions:
-      - status-success=linters
-      - status-success=Sider
-      - status-success=Semantic Pull Request
-      - status-success=Patch Test
-      - status-success=Python Unit Tests (1)
-      - status-success=Python Unit Tests (2)
-      - status-success=Python Unit Tests (3)
-      - label!=dont-merge
-      - label!=squash
-      - "#approved-reviews-by>=1"
-    actions:
-      merge:
-        method: merge
-  - name: Automatic squash on CI success and review
-    conditions:
-      - status-success=linters
-      - status-success=Sider
-      - status-success=Patch Test
-      - status-success=Python Unit Tests (1)
-      - status-success=Python Unit Tests (2)
-      - status-success=Python Unit Tests (3)
-      - label!=dont-merge
-      - label=squash
-      - "#approved-reviews-by>=1"
-    actions:
-      merge:
-        method: squash
-        commit_message_format:
-          title: pr-title
-          body: pr-body
+
+queue_rules:
+  - name: default
+    batch_size: 5
+    batch_max_wait_time: 10 min
+    max_checks_retries: 1
+    merge_method: merge
+    queue_conditions: *pr_checks
+    merge_conditions: *suite_checks
+  - name: alone
+    batch_size: 1
+    max_checks_retries: 1
+    merge_method: merge
+    queue_conditions: *pr_checks
+    merge_conditions: *suite_checks
+
 merge_queue:
+  max_parallel_checks: 2
   queue_controls_comment: false
+  skip_intermediate_results: true

@@ -10,6 +10,7 @@ from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
 from erpnext.controllers.item_close import validate_parent_reopen
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import validate_reopen_against_blanket_order
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
 	get_invoiced_qty_against_po_items,
 	get_qty_based_percent_billed,
@@ -24,13 +25,16 @@ class StatusService:
 		doc = self.doc
 		self.check_modified_date()
 
-		if status != "Closed" and doc.status == "Closed":
+		was_closed = doc.status == "Closed"
+		if status != "Closed" and was_closed:
 			validate_parent_reopen(doc)
+			validate_reopen_against_blanket_order(doc)
 
 		doc.set_status(update=True, status=status)
 		doc.update_requested_qty()
 		doc.update_ordered_qty()
-		SubcontractingService(doc).update_subcontracting_order_status()
+		if status == "Closed" or was_closed:
+			SubcontractingService(doc).update_subcontracting_order_status()
 		doc.update_blanket_order()
 		doc.notify_update()
 		clear_doctype_notifications(doc)

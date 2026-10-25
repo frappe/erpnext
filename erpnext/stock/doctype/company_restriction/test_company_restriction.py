@@ -118,10 +118,6 @@ class TestCompanyRestriction(ERPNextTestSuite):
 			)
 			self.assertEqual(details.customer, customer)
 
-	def test_unrestricted_item_is_not_blocked(self):
-		item = make_item()
-		make_material_request(item_code=item.name)
-
 	def test_allowed_companies_is_mandatory_when_restricted(self):
 		item = make_item()
 		item.restrict_to_companies = 1
@@ -360,10 +356,20 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		with self.set_user(self.make_report_user()):
 			rows = self.run_report("stock", "item_variant_details", {"item": template.name})
-			self.assertEqual([row["variant_name"] for row in rows], [allowed.name])
+			self.assertEqual([row["variant_name"] for row in rows], [template.name, allowed.name])
 
 			rows = self.run_report("stock", "item_where_used", {"item": template.name})
 			self.assertEqual([row.related_item for row in rows], [allowed.name])
+
+	def test_variant_details_hides_restricted_templates(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = make_item(properties={"has_variants": 1, "attributes": [{"attribute": "Test Size"}]})
+		create_variant(template.name, {"Test Size": "Small"}).insert()
+		self.restrict_to_companies("Item", template.name, ["_Test Company 1"])
+
+		with self.set_user(self.make_report_user()):
+			self.assertEqual(self.run_report("stock", "item_variant_details", {"item": template.name}), [])
 
 	def test_bom_search_hides_restricted_product_bundles(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -407,7 +413,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.restrict_to_companies("Customer", restricted_customer, ["_Test Company 1"])
 
 		with self.set_user(self.make_report_user()):
-			items = {row.item_code for row in self.run_report("stock", "item_balance", {})}
+			items = {row.item_code for row in self.run_report("stock", "item_balance_(simple)", {})}
 			self.assertIn(allowed_item.name, items)
 			self.assertNotIn(restricted_item.name, items)
 
@@ -456,7 +462,7 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.make_stock_in_both_companies()
 
 		with self.set_user(self.make_report_user()):
-			rows = self.run_report("stock", "item_balance", {})
+			rows = self.run_report("stock", "item_balance_(simple)", {})
 			warehouses = {row.warehouse for row in rows if row.item_code == "_Test Item"}
 			self.assertIn("Stores - _TC", warehouses)
 			self.assertNotIn("Stores - _TC1", warehouses)

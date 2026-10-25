@@ -802,11 +802,10 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 			if (doc.material_request_type == "Customer Provided") {
 				filters.customer = doc.customer;
-			} else if (
-				doc.material_request_type == "Purchase" ||
-				doc.material_request_type == "Subcontracting"
-			) {
+			} else if (doc.material_request_type == "Purchase") {
 				filters = { is_purchase_item: 1 };
+			} else if (doc.material_request_type == "Subcontracting") {
+				filters = { is_stock_item: 1, is_sub_contracted_item: 1 };
 			} else if (doc.material_request_type == "Manufacture") {
 				filters.include_item_in_manufacturing = 1;
 			}

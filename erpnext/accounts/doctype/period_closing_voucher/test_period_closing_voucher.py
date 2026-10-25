@@ -471,6 +471,58 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		pcv.submit()
 		self.assertEqual(pcv.docstatus, 1)
 
+	def test_stock_value_difference_within_tolerance_needs_confirmation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item("Test PCV Tolerance Item", {"is_stock_item": 1})
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=10,
+			rate=100,
+			to_warehouse="Stores - TPC",
+			company="Test PCV Company",
+			posting_date="2021-03-15",
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": se.name}, ["name", "stock_value_difference"], as_dict=1
+		)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 5
+		)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		result = pcv.get_stock_value_difference()
+		self.assertEqual(result["difference"], -5)
+		self.assertTrue(result["within_tolerance"])
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 100
+		)
+
+		pcv.reload()
+		result = pcv.get_stock_value_difference()
+		self.assertFalse(result["within_tolerance"])
+
+		pcv.stock_value_difference = result["difference"]
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", pcv.submit)
+
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "stock_value_difference", sle.stock_value_difference + 5
+		)
+		self.make_completed_stock_closing_entry(pcv.period_start_date, pcv.period_end_date)
+
+		pcv.reload()
+		pcv.stock_value_difference = -5
+		pcv.submit()
+
+		pcv.reload()
+		self.assertEqual(pcv.docstatus, 1)
+		self.assertEqual(pcv.stock_value_difference, -5)
+
 	def test_batch_valuation_seeded_from_stock_closing_after_period_closing(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (

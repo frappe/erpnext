@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2026-01-29 21:18:32.391385",
+ "description": "Prices you offer a customer or lead.",
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quotation",
@@ -180,7 +181,7 @@
    "bold": 1,
    "fieldname": "party_name",
    "fieldtype": "Dynamic Link",
-   "in_global_search": 1,
+   "in_import_template": 1,
    "in_standard_filter": 1,
    "label": "Party",
    "oldfieldname": "customer",
@@ -268,6 +269,7 @@
   {
    "fieldname": "valid_till",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Valid Till"
   },
   {
@@ -319,7 +321,6 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -1180,7 +1181,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-26 12:00:00.000000",
+ "modified": "2026-09-30 23:24:44.044604",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

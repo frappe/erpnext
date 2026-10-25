@@ -123,3 +123,31 @@ class TestAppointmentBookingSettings(ERPNextTestSuite):
 		settings.save()
 
 		self.assertEqual(frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents"), 1)
+
+	def test_appointment_duration_must_be_positive(self):
+		for duration in (0, -60):
+			with self.subTest(duration=duration):
+				settings = self.get_valid_scheduling_settings()
+				settings.appointment_duration = duration
+				with self.assertRaisesRegex(frappe.ValidationError, "must be greater than 0 minutes"):
+					settings.save()
+
+	def test_overlapping_slots_for_a_day_are_refused(self):
+		settings = self.get_valid_scheduling_settings()
+		settings.append(
+			"availability_of_slots",
+			{"day_of_week": "Monday", "from_time": "16:00:00", "to_time": "18:00:00"},
+		)
+		self.assert_invalid(settings)
+
+		# the failed save bumped the in-memory timestamp, so start from a fresh copy
+		settings = self.get_valid_scheduling_settings()
+		settings.append(
+			"availability_of_slots",
+			{"day_of_week": "Monday", "from_time": "17:00:00", "to_time": "18:00:00"},
+		)
+		settings.append(
+			"availability_of_slots",
+			{"day_of_week": "Tuesday", "from_time": "09:00:00", "to_time": "17:00:00"},
+		)
+		settings.save()

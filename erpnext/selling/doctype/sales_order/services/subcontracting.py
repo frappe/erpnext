@@ -61,9 +61,7 @@ class SubcontractingService:
 
 		doc = self.doc
 		if doc.is_subcontracted:
-			scio = frappe.get_cached_value(
-				"Subcontracting Inward Order", {"sales_order": doc.name, "docstatus": 1}, "name"
-			)
-
-			if scio:
+			for scio in frappe.get_all(
+				"Subcontracting Inward Order", {"sales_order": doc.name, "docstatus": 1}, pluck="name"
+			):
 				update_scio_status(scio, "Closed" if doc.status == "Closed" else None)

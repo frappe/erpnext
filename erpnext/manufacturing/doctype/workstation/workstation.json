@@ -4,6 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:workstation_name",
  "creation": "2013-01-10 16:34:17",
+ "description": "A machine or place where operations are done.",
  "doctype": "DocType",
  "document_type": "Setup",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/workstation",
@@ -86,6 +87,7 @@
   {
    "fieldname": "holiday_list",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Holiday List",
    "options": "Holiday List"
   },
@@ -112,6 +114,7 @@
    "bold": 1,
    "fieldname": "workstation_type",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Workstation Type",
    "options": "Workstation Type"
   },
@@ -163,6 +166,7 @@
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Warehouse",
    "options": "Warehouse"
   },

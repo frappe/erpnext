@@ -22,6 +22,7 @@ from erpnext.accounts.report.utils import (
 	get_query_columns,
 	get_taxes_query,
 	get_values_for_columns,
+	get_with_descendants,
 )
 
 
@@ -103,7 +104,7 @@ def _execute(filters=None, additional_table_columns=None):
 		# map expense values
 		base_net_total = 0
 		for expense_acc in expense_accounts:
-			if inv.is_internal_supplier and inv.company == inv.represents_company:
+			if is_internal_transfer(inv):
 				expense_amount = 0
 			else:
 				expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
@@ -147,15 +148,15 @@ def _execute(filters=None, additional_table_columns=None):
 		if inv.doctype == "Purchase Invoice":
 			row.update(
 				{
-					"debit": inv.base_grand_total,
-					"credit": 0.0,
+					"debit": get_in_invoice_payable_debit(inv),
+					"credit": get_payable_credit(inv),
 					"outstanding_amount": flt(
-						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+						get_outstanding_in_company_currency(inv, company_currency), outstanding_precision
 					),
 				}
 			)
 		else:
-			row.update({"debit": 0.0, "credit": inv.base_grand_total})
+			row.update({"debit": inv.debit, "credit": inv.credit})
 		data.append(row)
 
 	res += sorted(data, key=lambda x: x["posting_date"])
@@ -167,6 +168,39 @@ def _execute(filters=None, additional_table_columns=None):
 			res[row].update({"balance": running_balance})
 
 	return columns, res, None, None, None, include_payments
+
+
+def get_outstanding_in_company_currency(inv, company_currency):
+	"""Outstanding is in the party account currency."""
+	if inv.party_account_currency == company_currency:
+		return flt(inv.outstanding_amount)
+
+	return flt(inv.outstanding_amount) * (inv.conversion_rate or 1)
+
+
+def get_payable_credit(inv):
+	"""Amount the invoice credits to its payable, rounded like its GL entry."""
+	if is_internal_transfer(inv):
+		return 0
+
+	if inv.base_rounding_adjustment and inv.base_rounded_total:
+		return inv.base_rounded_total
+
+	return inv.base_grand_total
+
+
+def is_internal_transfer(inv) -> bool:
+	"""Transfers within the company post nothing to the payable or to expenses."""
+	return bool(inv.is_internal_supplier and inv.company == inv.represents_company)
+
+
+def get_in_invoice_payable_debit(inv):
+	"""Amount the invoice settles against its own payable, as in its GL entries."""
+	debit = flt(inv.base_write_off_amount)
+	if inv.is_paid:
+		debit += flt(inv.base_paid_amount)
+
+	return debit
 
 
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
@@ -361,6 +395,7 @@ def get_account_columns(invoice_list, include_payments):
 					"docstatus": 1,
 					"name": ["in", [inv.name for inv in invoice_list]],
 					"unrealized_profit_loss_account": ["is", "set"],
+					"is_internal_supplier": 1,
 				},
 				pluck="unrealized_profit_loss_account",
 				distinct=True,
@@ -395,7 +430,7 @@ def get_account_columns(invoice_list, include_payments):
 		unrealized_profit_loss_account_columns.append(
 			{
 				"label": account,
-				"fieldname": frappe.scrub(account),
+				"fieldname": frappe.scrub(account + "_unrealized"),
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120,
@@ -429,6 +464,14 @@ def get_invoices(filters, additional_query_columns):
 			pi.outstanding_amount,
 			pi.mode_of_payment,
 			pi.conversion_rate,
+			pi.party_account_currency,
+			pi.is_internal_supplier,
+			pi.represents_company,
+			pi.company,
+			pi.is_paid,
+			pi.base_paid_amount,
+			pi.base_write_off_amount,
+			pi.base_rounding_adjustment,
 		)
 		.where(pi.docstatus == 1)
 	)
@@ -446,7 +489,11 @@ def get_invoices(filters, additional_query_columns):
 			pi.supplier.isin(
 				frappe.qb.from_(supplier)
 				.select(supplier.name)
-				.where(supplier.supplier_group == filters.supplier_group)
+				.where(
+					supplier.supplier_group.isin(
+						get_with_descendants("Supplier Group", filters.supplier_group)
+					)
+				)
 			)
 		)
 
@@ -485,7 +532,6 @@ def get_conditions(filters, query, doctype):
 def get_payments(filters):
 	args = frappe._dict(
 		account="credit_to",
-		account_fieldname="paid_to",
 		party="supplier",
 		party_name="supplier_name",
 		party_account=get_party_account("Supplier", filters.supplier, filters.company, include_advance=True),

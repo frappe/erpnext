@@ -61,3 +61,33 @@ class TestDelayedOrderReport(ERPNextTestSuite):
 		self.assertEqual(frappe.utils.getdate(row.get("delivery_date")), frappe.utils.getdate("2026-06-05"))
 		self.assertEqual(frappe.utils.getdate(row.get("posting_date")), frappe.utils.getdate("2026-06-10"))
 		self.assertEqual(row.get("delayed_days"), 5)
+
+	def test_partly_delivered_order_shows_its_last_delivery(self):
+		make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100, posting_date="2026-06-01"
+		)
+		sales_order = make_sales_order(
+			item_code="_Test Item",
+			qty=10,
+			rate=100,
+			warehouse="Stores - _TC",
+			transaction_date="2026-06-01",
+			do_not_submit=True,
+		)
+		sales_order.delivery_date = "2026-06-05"
+		for item in sales_order.items:
+			item.delivery_date = "2026-06-05"
+		sales_order.submit()
+
+		for posting_date in ("2026-06-03", "2026-06-13"):
+			delivery_note = make_delivery_note(sales_order.name)
+			delivery_note.items[0].qty = 5
+			delivery_note.set_posting_time = 1
+			delivery_note.posting_date = posting_date
+			delivery_note.insert()
+			delivery_note.submit()
+
+		data = self.run_report(sales_order=sales_order.name)
+
+		self.assertEqual([(str(row.posting_date), row.delayed_days) for row in data], [("2026-06-13", 8)])
+		self.assertEqual(data[0].grand_total, 1000)

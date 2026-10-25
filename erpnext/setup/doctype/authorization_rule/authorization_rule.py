@@ -60,6 +60,9 @@ class AuthorizationRule(Document):
 				"approving_role": cstr(self.approving_role),
 				"to_emp": cstr(self.to_emp),
 				"to_designation": cstr(self.to_designation),
+				"master_name": cstr(self.master_name),
+				"company": cstr(self.company),
+				"value": self.value or 0,
 				"name": ["!=", self.name],
 			},
 			pluck="name",
@@ -87,13 +90,33 @@ class AuthorizationRule(Document):
 			"Item Group wise Discount",
 		]:
 			frappe.throw(_("Cannot set authorization on basis of Discount for {0}").format(self.transaction))
-		elif self.based_on == "Average Discount" and flt(self.value) > 100.00:
-			frappe.throw(_("Discount must be less than 100"))
+		elif (
+			self.based_on
+			in (
+				"Average Discount",
+				"Customerwise Discount",
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			)
+			and not 0 <= flt(self.value) <= 100
+		):
+			frappe.throw(_("Discount must be between 0 and 100"))
 		elif self.based_on == "Customerwise Discount" and not self.master_name:
 			frappe.throw(_("Customer required for 'Customerwise Discount'"))
 
+	def _validate_links(self):
+		# Frappe checks links before validate, on both insert and save.
+		self.customer_or_item = {
+			"Customerwise Discount": "Customer",
+			"Itemwise Discount": "Item",
+			"Item Group wise Discount": "Item Group",
+		}.get(self.based_on, "")
+		if not self.customer_or_item:
+			self.master_name = ""
+		super()._validate_links()
+
 	def validate(self):
-		self.check_duplicate_entry()
 		self.validate_rule()
+		self.check_duplicate_entry()
 		if not self.value:
 			self.value = 0.0

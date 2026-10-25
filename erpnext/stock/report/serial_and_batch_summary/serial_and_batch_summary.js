@@ -3,6 +3,8 @@
 /* eslint-disable */
 
 frappe.query_reports["Serial and Batch Summary"] = {
+	export_hidden_cols: true,
+	formatter: erpnext.utils.format_serial_batch_number,
 	filters: [
 		{
 			fieldname: "company",
@@ -57,7 +59,7 @@ frappe.query_reports["Serial and Batch Summary"] = {
 				let voucher_type = frappe.query_report.get_filter_value("voucher_type");
 				if (!voucher_type) return;
 
-				return frappe.db.get_link_options(voucher_type, txt);
+				return erpnext.utils.get_link_options(voucher_type, txt);
 			},
 		},
 		{

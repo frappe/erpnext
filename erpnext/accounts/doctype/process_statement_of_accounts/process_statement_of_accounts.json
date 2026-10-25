@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
+ "description": "Emails customers their statements on a schedule.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/process-statement-of-accounts",
  "editable_grid": 1,

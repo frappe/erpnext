@@ -385,33 +385,8 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	}
 	"""
 
-	args = frappe.parse_json(args)
-
-	args = frappe._dict(args)
-
-	# `args` is caller supplied, and what comes back is pricing: matched Pricing Rules, discounts
-	# and rates. The transaction being priced is what decides who may price it, so authorise that
-	# — and the document itself where the caller named an existing one, so User Permissions apply.
-	# an allow-list, not just a type check: `doctype` is caller-chosen, and any doctype the caller can
-	# read would otherwise satisfy has_permission below while the pricing engine still ran
-	transaction_doctype = args.get("doctype")
-	if transaction_doctype not in PRICING_TRANSACTION_DOCTYPES:
-		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
-
-	transaction_name = args.get("name")
-	if not isinstance(transaction_name, str) or not frappe.db.exists(transaction_doctype, transaction_name):
-		transaction_name = None
-
-	frappe.has_permission(transaction_doctype, doc=transaction_name, throw=True)
-
-	# scope by the caller's own Company restrictions, not a Company read: several roles that fill these forms hold none
-	company = args.get("company")
-	if company:
-		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
-
-		allowed_companies = get_allowed_companies(frappe.session.user, transaction_doctype)
-		if allowed_companies and company not in allowed_companies:
-			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+	args = frappe._dict(frappe.parse_json(args))
+	validate_pricing_context(args)
 
 	set_transaction_type(args)
 
@@ -505,6 +480,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	if pricing_rules:
 		rules = []
+		price_rules = []
 
 		for pricing_rule in pricing_rules:
 			if not pricing_rule:
@@ -554,9 +530,26 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 			if not pricing_rule.validate_applied_rule:
 				if pricing_rule.price_or_product_discount == "Price":
-					apply_price_discount_rule(pricing_rule, item_details, args)
+					price_rules.append(pricing_rule)
 				else:
 					get_product_discount_rule(pricing_rule, item_details, args, doc)
+
+		for pricing_rule in price_rules:
+			if pricing_rule.rate_or_discount == "Rate":
+				apply_price_discount_rule(pricing_rule, item_details, args)
+
+		for pricing_rule in price_rules:
+			apply_pricing_rule_margin(pricing_rule, item_details, args)
+
+		for pricing_rule in price_rules:
+			if pricing_rule.rate_or_discount != "Rate":
+				apply_price_discount_rule(pricing_rule, item_details, args)
+
+		# Preserve flat discounts instead of recalculating them from a rounded percentage.
+		if any(rule.rate_or_discount == "Discount Amount" and rule.discount_amount for rule in price_rules):
+			item_details.discount_percentage = 0.0
+			if item_details.pricing_rule_for == "Discount Percentage":
+				item_details.pricing_rule_for = "Discount Amount"
 
 		if not item_details.get("has_margin"):
 			item_details.margin_type = None
@@ -623,17 +616,6 @@ def get_pricing_rule_details(args, pricing_rule):
 def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-	if (pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency) or (
-		pricing_rule.margin_type == "Percentage"
-	):
-		item_details.margin_type = pricing_rule.margin_type
-		item_details.has_margin = True
-
-		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
-			item_details.margin_rate_or_amount += pricing_rule.margin_rate_or_amount
-		else:
-			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-
 	if pricing_rule.rate_or_discount == "Rate":
 		pricing_rule_rate = 0.0
 		if pricing_rule.currency == args.currency:
@@ -650,31 +632,39 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 					* (args.get("conversion_factor", 1) if is_blank_uom else 1),
 				}
 			)
+			item_details.has_pricing_rule_for_rate = True
 		item_details.update({"discount_percentage": 0.0})
+
+	discount_rate = flt(item_details.get("price_list_rate", args.price_list_rate))
+	if item_details.get("margin_type") == "Percentage":
+		discount_rate *= 1 + flt(item_details.margin_rate_or_amount) / 100
+	elif item_details.get("margin_type") == "Amount":
+		discount_rate += flt(item_details.margin_rate_or_amount)
 
 	for apply_on in ["Discount Amount", "Discount Percentage"]:
 		if pricing_rule.rate_or_discount != apply_on:
 			continue
 
 		field = frappe.scrub(apply_on)
-		if pricing_rule.apply_discount_on_rate and item_details.get("discount_percentage"):
-			# Apply discount on discounted rate
-			item_details[field] += (100 - item_details[field]) * (pricing_rule.get(field, 0) / 100)
-		elif args.price_list_rate:
+		if discount_rate:
 			value = pricing_rule.get(field, 0)
 			calculate_discount_percentage = False
 			if field == "discount_percentage":
 				field = "discount_amount"
-				value = args.price_list_rate * (value / 100)
+				discount_base = discount_rate
+				if pricing_rule.apply_discount_on_rate:
+					discount_base -= flt(item_details.get("discount_amount"))
+				value = discount_base * (value / 100)
 				calculate_discount_percentage = True
 
 			if field not in item_details:
 				item_details.setdefault(field, 0)
 
 			item_details[field] += value if pricing_rule else args.get(field, 0)
-			if calculate_discount_percentage and args.price_list_rate and item_details.discount_amount:
+			# Keep an existing percentage in sync when a later rule adds a flat discount.
+			if calculate_discount_percentage or item_details.get("discount_percentage"):
 				item_details.discount_percentage = flt(
-					(flt(item_details.discount_amount) / flt(args.price_list_rate)) * 100
+					(flt(item_details.discount_amount) / discount_rate) * 100
 				)
 		else:
 			if field not in item_details:
@@ -683,10 +673,32 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			item_details[field] += pricing_rule.get(field, 0) if pricing_rule else args.get(field, 0)
 
 
+def apply_pricing_rule_margin(pricing_rule, item_details, args):
+	if (pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency) or (
+		pricing_rule.margin_type == "Percentage"
+	):
+		margin_type = pricing_rule.margin_type
+		margin = flt(pricing_rule.margin_rate_or_amount)
+		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
+			existing_margin = item_details.margin_rate_or_amount
+			if item_details.margin_type and item_details.margin_type != margin_type:
+				price_list_rate = flt(item_details.get("price_list_rate", args.get("price_list_rate")))
+				if item_details.margin_type == "Percentage":
+					existing_margin *= price_list_rate / 100
+				else:
+					margin *= price_list_rate / 100
+				margin_type = "Amount"
+			margin += existing_margin
+
+		item_details.margin_type = margin_type
+		item_details.margin_rate_or_amount = margin
+		item_details.has_margin = True
+
+
 @frappe.whitelist()
 def remove_pricing_rule_for_item(
 	pricing_rules: str | None,
-	item_details: str | frappe._dict,
+	item_details: str | dict,
 	item_code: str | None = None,
 	rate: float | None = None,
 ):
@@ -749,6 +761,103 @@ def remove_pricing_rules(item_list: str | list):
 			)
 
 	return out
+
+
+def validate_pricing_context(ctx: frappe._dict) -> None:
+	"""Authorise the transaction, company, parties and price lists that a client-supplied pricing context names."""
+	# `ctx` is caller supplied, and what comes back is pricing: matched Pricing Rules, discounts
+	# and rates. The transaction being priced is what decides who may price it, so authorise that
+	# — and the document itself where the caller named an existing one, so User Permissions apply.
+	# an allow-list, not just a type check: `doctype` is caller-chosen, and any doctype the caller can
+	# read would otherwise satisfy has_permission below while the pricing engine still ran
+	transaction_doctype = ctx.get("doctype")
+	if transaction_doctype not in PRICING_TRANSACTION_DOCTYPES:
+		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
+
+	transaction_name = ctx.get("name")
+	if not isinstance(transaction_name, str) or not frappe.db.exists(transaction_doctype, transaction_name):
+		transaction_name = None
+
+	frappe.has_permission(transaction_doctype, doc=transaction_name, throw=True)
+
+	# scope by the caller's own Company restrictions, not a Company read: several roles that fill these forms hold none
+	company = ctx.get("company")
+	if company:
+		from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+		allowed_companies = get_allowed_companies(frappe.session.user, transaction_doctype)
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+	ctx.transaction_type = None
+	validate_pricing_parties(ctx)
+	validate_pricing_price_lists(ctx, transaction_doctype)
+
+
+def validate_pricing_parties(ctx: frappe._dict) -> None:
+	for party_type in ("Customer", "Supplier"):
+		party = ctx.get(frappe.scrub(party_type))
+		if party and frappe.db.exists(party_type, party):
+			frappe.has_permission(party_type, "select", doc=party, throw=True)
+
+
+def validate_pricing_price_lists(ctx: frappe._dict, doctype: str) -> None:
+	if doctype in ("BOM", "BOM Creator"):
+		return
+
+	meta = frappe.get_meta(doctype)
+	side = None
+	if meta.has_field("selling_price_list"):
+		side = "selling"
+	elif meta.has_field("buying_price_list"):
+		side = "buying"
+
+	for price_list in {ctx.get("price_list"), ctx.get("selling_price_list"), ctx.get("buying_price_list")}:
+		if price_list and not (side and fits_price_list_side(ctx, price_list, side)):
+			frappe.throw(
+				_("Price List {0} cannot be used in {1}").format(price_list, _(doctype)),
+				frappe.PermissionError,
+			)
+
+
+def fits_price_list_side(ctx: frappe._dict, price_list: str, side: str) -> bool:
+	if frappe.get_cached_value("Price List", price_list, side):
+		return True
+
+	if is_return_against_price_list(ctx, price_list, side):
+		return True
+
+	if side == "selling":
+		return bool(
+			ctx.get("customer") and frappe.get_cached_value("Customer", ctx.customer, "is_internal_customer")
+		)
+	return bool(
+		ctx.get("supplier") and frappe.get_cached_value("Supplier", ctx.supplier, "is_internal_supplier")
+	)
+
+
+def is_return_against_price_list(ctx: frappe._dict, price_list: str, side: str) -> bool:
+	return_against = ctx.get("return_against")
+	if not (
+		ctx.get("is_return")
+		and isinstance(return_against, str)
+		and frappe.get_meta(ctx.doctype).has_field("return_against")
+	):
+		return False
+
+	party_field = "customer" if side == "selling" else "supplier"
+	voucher = frappe.db.get_value(
+		ctx.doctype,
+		{"name": return_against, "docstatus": 1},
+		[f"{side}_price_list", party_field],
+		as_dict=True,
+	)
+	return bool(
+		voucher
+		and voucher[f"{side}_price_list"] == price_list
+		and voucher[party_field] == ctx.get(party_field)
+		and frappe.has_permission(ctx.doctype, doc=return_against)
+	)
 
 
 def set_transaction_type(pricing_ctx: frappe._dict) -> None:

@@ -1,8 +1,11 @@
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+from frappe.utils import flt, formatdate, get_datetime_str, get_link_to_form, get_table_name
+from frappe.utils.data import DateTimeLikeObject
+from frappe.utils.nestedset import get_descendants_of
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
@@ -76,7 +79,7 @@ def convert(value, from_, to, date):
 	:return: Result of converting `value`
 	"""
 	rate = get_rate_as_at(date, from_, to)
-	converted_value = flt(value) / (rate or 1)
+	converted_value = flt(value) / rate
 	return converted_value
 
 
@@ -91,21 +94,43 @@ def get_rate_as_at(date, from_currency, to_currency):
 	:param to_currency: Quote currency
 	:return: Retrieved exchange rate
 	"""
+	if from_currency == to_currency:
+		return 1
 
 	rate = __exchange_rates.get(f"{from_currency}-{to_currency}@{date}")
 	if not rate:
-		rate = get_exchange_rate(from_currency, to_currency, date) or 1
+		rate = get_exchange_rate(from_currency, to_currency, date)
+		if not rate:
+			throw_missing_exchange_rate(date, from_currency, to_currency)
 		__exchange_rates[f"{from_currency}-{to_currency}@{date}"] = rate
 
 	return rate
 
 
-def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
+def throw_missing_exchange_rate(date: DateTimeLikeObject, from_currency: str, to_currency: str) -> None:
+	frappe.throw(
+		_(
+			"Exchange rate from {0} to {1} on {2} not found. Create a {3} record and run the report again."
+		).format(
+			frappe.bold(from_currency),
+			frappe.bold(to_currency),
+			frappe.bold(formatdate(date)),
+			get_link_to_form("Currency Exchange", None, _("Currency Exchange")),
+		),
+		title=_("Exchange Rate Missing"),
+	)
+
+
+def convert_to_presentation_currency(
+	gl_entries, currency_info, filters=None, use_account_currency: bool = False
+):
 	"""
 	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
 	in `currency_info`.
 	:param gl_entries:
 	:param currency_info:
+	:param use_account_currency: Use the account-currency amounts as is when every entry is on an
+	        account in the presentation currency. Only the General Ledger sets it.
 	:return:
 	"""
 	converted_gl_list = []
@@ -129,10 +154,12 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 		account_currency = entry["account_currency"]
 
 		if (
-			len(account_currencies) == 1
+			use_account_currency
+			and len(account_currencies) == 1
 			and account_currency == presentation_currency
 			and not exchange_gain_or_loss
-		) and not (filters and filters.get("show_amount_in_company_currency")):
+			and not (filters and filters.get("show_amount_in_company_currency"))
+		):
 			entry["debit"] = debit_in_account_currency
 			entry["credit"] = credit_in_account_currency
 		else:
@@ -262,7 +289,7 @@ def get_journal_entries(filters, args):
 		.inner_join(journal_account)
 		.on(je.name == journal_account.parent)
 		.select(
-			je.voucher_type.as_("doctype"),
+			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
 			je.posting_date,
 			journal_account.account.as_(args.account),
@@ -275,10 +302,11 @@ def get_journal_entries(filters, args):
 			je.total_amount.as_("base_grand_total"),
 			je.mode_of_payment,
 			journal_account.project,
+			journal_account.debit,
+			journal_account.credit,
 		)
 		.where(
-			(je.voucher_type == "Journal Entry")
-			& (je.docstatus == 1)
+			(je.docstatus == 1)
 			& (journal_account.party == filters.get(args.party))
 			& (journal_account.account.isin(args.party_account))
 		)
@@ -294,13 +322,14 @@ def get_journal_entries(filters, args):
 
 def get_payment_entries(filters, args):
 	pe = frappe.qb.DocType("Payment Entry")
+	paid_from_party = pe.paid_from.isin(args.party_account)
 	query = (
 		frappe.qb.from_(pe)
 		.select(
 			ConstantColumn("Payment Entry").as_("doctype"),
 			pe.name,
 			pe.posting_date,
-			pe[args.account_fieldname].as_(args.account),
+			Case().when(paid_from_party, pe.paid_from).else_(pe.paid_to).as_(args.account),
 			pe.party.as_(args.party),
 			pe.party_name.as_(args.party_name),
 			pe.remarks,
@@ -316,7 +345,7 @@ def get_payment_entries(filters, args):
 		.where(
 			(pe.docstatus == 1)
 			& (pe.party == filters.get(args.party))
-			& (pe[args.account_fieldname].isin(args.party_account))
+			& (paid_from_party | pe.paid_to.isin(args.party_account))
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
@@ -338,7 +367,31 @@ def get_payment_entries(filters, args):
 			) or 1
 			d.base_grand_total = flt(d.base_grand_total) + flt(deduction_totals.get(d.name)) / exchange_rate
 
+		set_party_ledger_amounts(payment_entries, filters.get(args.party), args.party_account)
+
 	return payment_entries
+
+
+def set_party_ledger_amounts(payment_entries, party, party_account):
+	"""Set each entry's debit and credit to the party account, in company currency, from its GL."""
+	gle = frappe.qb.DocType("GL Entry")
+	amounts = (
+		frappe.qb.from_(gle)
+		.select(gle.voucher_no, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
+		.where(
+			(gle.voucher_type == "Payment Entry")
+			& (gle.voucher_no.isin([d.name for d in payment_entries]))
+			& (gle.party == party)
+			& (gle.account.isin(party_account))
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_no)
+		.run(as_dict=True)
+	)
+	amounts = {d.voucher_no: d for d in amounts}
+	for d in payment_entries:
+		d.debit = flt(amounts.get(d.name, {}).get("debit"))
+		d.credit = flt(amounts.get(d.name, {}).get("credit"))
 
 
 def apply_common_conditions(filters, query, doctype, child_doctype=None, payments=False):
@@ -357,18 +410,28 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 
 	if payments:
 		if doctype == "Journal Entry" and filters.get("cost_center"):
-			query = query.where(child_doc.cost_center == filters.cost_center)
+			query = query.where(
+				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+			)
 		elif filters.get("cost_center"):
-			query = query.where(parent_doc.cost_center == filters.cost_center)
+			query = query.where(
+				parent_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+			)
 	else:
 		if filters.get("cost_center"):
-			query = query.where(child_doc.cost_center == filters.cost_center)
+			query = query.where(
+				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+			)
 			join_required = True
 		if filters.get("warehouse"):
-			query = query.where(child_doc.warehouse == filters.warehouse)
+			query = query.where(
+				child_doc.warehouse.isin(get_with_descendants("Warehouse", filters.warehouse))
+			)
 			join_required = True
 		if filters.get("item_group"):
-			query = query.where(child_doc.item_group == filters.item_group)
+			query = query.where(
+				child_doc.item_group.isin(get_with_descendants("Item Group", filters.item_group))
+			)
 			join_required = True
 
 	if not payments:
@@ -385,6 +448,11 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 		query = filter_invoices_based_on_dimensions(filters, query, parent_doc)
 
 	return query
+
+
+def get_with_descendants(doctype: str, name: str) -> list[str]:
+	"""The tree node and all nodes under it."""
+	return [name, *get_descendants_of(doctype, name, ignore_permissions=True)]
 
 
 def get_advance_taxes_and_charges(invoice_list):
@@ -424,6 +492,7 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 
 
 def get_opening_row(party_type, party, from_date, company):
+	frappe.has_permission(party_type, "read", party, throw=True)
 	party_account = get_party_account(party_type, party, company, include_advance=True)
 	gle = frappe.qb.DocType("GL Entry")
 	return (
@@ -441,3 +510,10 @@ def get_opening_row(party_type, party, from_date, company):
 			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
+
+
+def has_gl_entry_restrictions() -> bool:
+	"""Snapshot reports read a DuckDB copy that cannot apply the user's GL Entry permission conditions."""
+	from frappe.desk.reportview import build_match_conditions
+
+	return bool(build_match_conditions("GL Entry"))

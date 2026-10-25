@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:dimension_name",
  "creation": "2022-06-17 13:04:16.554051",
+ "description": "An extra way to tag stock, like a rack or bin.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/inventory_dimension",
  "editable_grid": 1,

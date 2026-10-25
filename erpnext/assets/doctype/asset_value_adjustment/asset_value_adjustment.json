@@ -1,6 +1,7 @@
 {
  "actions": [],
  "creation": "2018-05-11 00:22:43.695151",
+ "description": "Changes an asset's value outside its depreciation.",
  "doctype": "DocType",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-value-adjustment",
  "editable_grid": 1,

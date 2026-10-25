@@ -29,14 +29,15 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 		self.companies = get_consolidated_companies(self.filters)
 		self.args = args  # the engine's get_data() takes no arguments
 		columns, data, _message, chart, _report_summary, skip_total_row = super().run(args)
+		mixed_currencies = len(row_currencies(data)) > 1
 
-		if (
-			self.filters.get("group_by_party")
-			or self.filters.get("group_by_company")
-			or len(row_currencies(data)) > 1
-		):
+		if self.filters.get("group_by_party") or self.filters.get("group_by_company") or mixed_currencies:
 			# a grand total would double count the subtotals or add unlike currencies
 			skip_total_row = 1
+
+		if mixed_currencies:
+			# the ageing chart would add unlike currencies too
+			chart = None
 
 		return columns, data, None, chart, None, skip_total_row
 
@@ -138,8 +139,8 @@ def add_company_columns(columns):
 		dict(
 			label=_("Parent Company"),
 			fieldname="parent_company",
-			fieldtype="Link",
-			options="Company",
+			# not a Link: frappe would hide the rows of users who cannot read the parent
+			fieldtype="Data",
 			width=160,
 		),
 	)
