@@ -89,7 +89,7 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		cache = frappe.cache()
 		for date in test_exchange_values.keys():
 			key = "currency_exchange_rate_{}:{}:{}".format(date, "USD", "INR")
-			cache.delete(key)
+			cache.delete_value(key)
 
 	def test_exchange_rate(self, mock_get):
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
