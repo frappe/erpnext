@@ -116,6 +116,21 @@ class OperationPlan(BOMPlan):
 		for node_id in self.bom_node_ids:
 			problems.extend(self.get_bom_problems(node_id))
 
+		problems.extend(self.get_duplicate_problems())
+		return problems
+
+	def get_duplicate_problems(self) -> list[str]:
+		problems, nodes = [], {}
+		for node_id in self.bom_node_ids:
+			item_code = self.get_node_item(node_id)
+			other = nodes.setdefault(item_code, node_id) if item_code else node_id
+			if other != node_id:
+				problems.append(
+					_("{0} and {1} are mapped to item {2}. Only one BOM can be made for an item.").format(
+						bold(self.get_bom_name(other)), bold(self.get_bom_name(node_id)), bold(item_code)
+					)
+				)
+
 		return problems
 
 	def get_bom_problems(self, node_id: int) -> list[str]:
