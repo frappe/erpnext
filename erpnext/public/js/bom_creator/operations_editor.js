@@ -232,11 +232,30 @@ export class OperationsEditor {
 		}
 
 		const item = is_last ? this.view.get_node_item(this.bom_node_id) : this.get_output_item(operation);
+		const node_id = is_last ? this.bom_node_id : cint(operation.output_node_id);
+		const part = node_id ? this.view.get_part(node_id) : null;
+		const uom = (part ? part.uom : is_last && this.frm.doc.uom) || "";
+		const heading = __("Output Item");
 		return `<div style="${ROW}background:var(--subtle-accent);min-height:42px;">
-			<span class="bold" style="width:56px;color:var(--text-color);">${__("Output")}</span>
+			<span class="bold" style="flex:none;width:92px;white-space:nowrap;color:var(--text-color);">${heading}</span>
 			<span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;">${label}</span>
 			<span class="ellipsis" style="width:120px;">${escape(item || "")}</span>
-			<span style="width:152px;"></span></div>`;
+			<span style="width:72px;">${this.get_output_quantity(operation, is_last)}</span>
+			<span class="text-muted ellipsis" style="width:36px;">${escape(uom)}</span>
+			<span style="width:28px;"></span></div>`;
+	}
+
+	get_output_quantity(operation, is_last) {
+		if (is_last) {
+			const title = __("Quantities are for one unit of the item that the last operation makes.");
+			return `<span title="${title}" style="display:block;text-align:right;">1</span>`;
+		}
+
+		const quantity = flt(operation.output_quantity) || 1;
+		return this.editable
+			? `<input class="form-control input-sm" data-field="output_quantity" data-operation="${operation.name}"
+				value="${quantity}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
+			: `<span style="display:block;text-align:right;">${quantity}</span>`;
 	}
 
 	get_connector(operation, next) {
@@ -372,13 +391,19 @@ export class OperationsEditor {
 			part_node_id: kind === "part" ? cint(key) : 0,
 			item_code: kind === "item" ? key : "",
 			from_operation_id: kind === "step" ? cint(key) : 0,
-			qty: kind === "part" ? this.view.get_default_quantity(cint(key), this.bom_node_id) : 1,
+			qty: this.get_default_quantity(kind, key),
 		});
 		this.frm.dirty();
 		this.view.render();
 		this.view.wrapper
 			.find(`.design-link-cell[data-link="material"][data-operation-id="${operation_id}"] input`)
 			.trigger("focus");
+	}
+
+	get_default_quantity(kind, key) {
+		if (kind === "part") return this.view.get_default_quantity(cint(key), this.bom_node_id);
+		if (kind === "step") return flt(this.get_operation(key)?.output_quantity) || 1;
+		return 1;
 	}
 
 	handle_change($input) {
@@ -388,6 +413,8 @@ export class OperationsEditor {
 			this.update(this.get_row($input, "material"), { qty: flt(value) });
 		} else if (field === "time_in_mins") {
 			this.update(this.get_row($input, "operation"), { time_in_mins: flt(value) });
+		} else if (field === "output_quantity") {
+			this.update(this.get_row($input, "operation"), { output_quantity: flt(value) || 1 });
 		} else if (field === "new-bom" && value) {
 			this.view.state.extra_bom_nodes.push(cint(value));
 			Object.assign(this.view.state, { bom_node_id: cint(value), adding_bom: false });
