@@ -19,8 +19,10 @@ export class DesignView {
 		this.wrapper.on("click", ".design-item-link", (event) =>
 			this.open_item_cell(cint($(event.currentTarget).attr("data-part-node")))
 		);
-		this.wrapper.on("focus", "input[data-field='quantity'], input[data-field='time_in_mins']", (event) =>
-			setTimeout(() => event.currentTarget.select())
+		this.wrapper.on(
+			"focus",
+			"input[data-field='quantity'], input[data-field='output_quantity'], input[data-field='time_in_mins']",
+			(event) => setTimeout(() => event.currentTarget.select())
 		);
 	}
 
