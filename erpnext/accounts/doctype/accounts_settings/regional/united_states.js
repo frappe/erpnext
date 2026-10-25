@@ -10,7 +10,7 @@ frappe.ui.form.on("Company", {
 		frm.set_df_property(
 			"role_allowed_for_frozen_entries",
 			"label",
-			"Role Allowed to Close Books & Make Changes to Closed Periods"
+			__("Role Allowed to Close Books & Make Changes to Closed Periods")
 		);
 	},
 });
