@@ -594,6 +594,13 @@ export class BomTree {
 	}
 
 	async add_material(parent_node_id, item_code) {
+		await this.add_part(parent_node_id, item_code);
+		this.frm.dirty();
+		this.view.render();
+		this.view.wrapper.find(`.design-tree-add[data-part-node="${parent_node_id}"] input`).trigger("focus");
+	}
+
+	async add_part(parent_node_id, item_code) {
 		const item = await this.get_item(item_code);
 		const last_node_id = Math.max(0, ...(this.frm.doc.items || []).map((row) => cint(row.node_id)));
 		const row = frappe.model.add_child(this.frm.doc, "BOM Creator Item", "items");
@@ -608,9 +615,7 @@ export class BomTree {
 			qty: 1,
 			source: "Manual",
 		});
-		this.frm.dirty();
-		this.view.render();
-		this.view.wrapper.find(`.design-tree-add[data-part-node="${parent_node_id}"] input`).trigger("focus");
+		return row;
 	}
 
 	update(part, values) {

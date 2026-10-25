@@ -4,7 +4,7 @@ const INPUT = "height:28px;background-color:var(--fg-color);border:1px solid var
 const CARD = "border:1px solid var(--border-color);border-radius:var(--border-radius-md);overflow:hidden;";
 
 export function render_bom_bar(editor, $bar) {
-	const node_ids = [...new Set([...editor.view.get_bom_node_ids(), ...editor.view.state.extra_bom_nodes])];
+	const node_ids = editor.get_bom_node_ids();
 	$bar.append(
 		frappe.ui.tab_buttons({
 			label: __("BOM"),
@@ -23,16 +23,9 @@ export function render_bom_bar(editor, $bar) {
 
 	if (!editor.editable) return;
 	if (editor.view.state.adding_bom) {
-		const options = (editor.frm.doc.items || [])
-			.filter((part) => part.is_expandable && !node_ids.includes(part.node_id))
-			.map(
-				(part) =>
-					`<option value="${part.node_id}">${escape(
-						editor.view.get_node_label(part.node_id)
-					)}</option>`
-			);
-		$bar.append(`<select class="form-control input-sm" data-field="new-bom" style="${INPUT}width:220px;">
-			<option value="">${__("Choose a sub-assembly")}</option>${options.join("")}</select>`);
+		$bar.append(
+			`<span class="design-link-cell" data-link="sub_assembly" style="width:220px;display:flex;min-width:0;"></span>`
+		);
 	} else {
 		$bar.append(
 			frappe.ui.button.html({
@@ -75,10 +68,6 @@ export function get_unused_tray(editor) {
 		<div style="${ROW}border-top:0;height:40px;background:var(--subtle-fg);font-weight:600;">
 			${__("Parts Not Used in Any BOM")}
 			${badge(String(parts.length), "red")}</div>${rows.join("")}</div>`;
-}
-
-function escape(value) {
-	return frappe.utils.escape_html(value);
 }
 
 function badge(label, theme) {

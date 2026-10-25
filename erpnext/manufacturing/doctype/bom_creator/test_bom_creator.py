@@ -285,6 +285,35 @@ class TestBOMCreator(ERPNextTestSuite):
 		)
 		self.assertEqual(design.status, "Completed")
 
+	def test_item_outside_the_design_gets_its_own_sub_assembly_bom(self):
+		design = make_mapped_design(produce_item_at_each_operation=True)
+		panel = make_item("_Test Creator Printed Panel", {"is_stock_item": 1}).name
+		node_id = max(row.node_id for row in design.items) + 1
+		design.append(
+			"items",
+			{
+				"node_id": node_id,
+				"part_number": panel,
+				"part_name": panel,
+				"item_code": panel,
+				"qty": 1,
+				"source": "Manual",
+			},
+		)
+		add_material(design, part="TUBE-25", qty=3, bom=node_id)
+		design.append("materials", {"item_code": panel, "qty": 2})
+		add_material(design, part="WHEEL-26", qty=2)
+		design.save()
+
+		boms = make_boms(design)
+
+		self.assertEqual(get_bom_items(boms[panel]), {"TUBE-25": 3})
+		finished_good_bom = frappe.get_doc("BOM", boms["BIKE-100"])
+		self.assertEqual(
+			{row.item_code: row.bom_no for row in finished_good_bom.items},
+			{panel: boms[panel], "WHEEL-26": ""},
+		)
+
 	def test_operation_plan_cost_counts_sub_assembly_materials(self):
 		design = make_mapped_design(produce_item_at_each_operation=True)
 		set_valuation_rates({"TUBE-25": 10, "BOLT-M6": 1, "WHEEL-26": 50})
