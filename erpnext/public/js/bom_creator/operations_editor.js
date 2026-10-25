@@ -33,6 +33,14 @@ export class OperationsEditor {
 		return Boolean(this.frm.doc.track_semi_finished_goods);
 	}
 
+	get bom_quantity() {
+		return this.bom_node_id ? 1 : flt(this.frm.doc.qty) || 1;
+	}
+
+	get_bom_value(quantity) {
+		return flt(flt(quantity) * this.bom_quantity, precision("qty", this.frm.doc));
+	}
+
 	get_operations() {
 		return (this.frm.doc.operations || []).filter((row) => cint(row.bom_node_id) === this.bom_node_id);
 	}
@@ -119,10 +127,11 @@ export class OperationsEditor {
 	}
 
 	get_material_row(row) {
+		const value = this.get_bom_value(row.qty);
 		const quantity = this.editable
 			? `<input class="form-control input-sm" data-field="quantity" data-material="${row.name}"
-				value="${flt(row.qty)}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
-			: `<span style="display:block;text-align:right;">${flt(row.qty)}</span>`;
+				value="${value}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
+			: `<span style="display:block;text-align:right;">${value}</span>`;
 		const remove = this.editable
 			? remove_button("remove-material", { "data-material": row.name }, __("Remove"))
 			: "";
@@ -247,11 +256,13 @@ export class OperationsEditor {
 
 	get_output_quantity(operation, is_last) {
 		if (is_last) {
-			const title = __("Quantities are for one unit of the item that the last operation makes.");
-			return `<span title="${title}" style="display:block;text-align:right;">1</span>`;
+			const title = this.bom_node_id
+				? __("A sub-assembly BOM is made for one unit.")
+				: __("Change the Finished Good Quantity to make more.");
+			return `<span title="${title}" style="display:block;text-align:right;">${this.bom_quantity}</span>`;
 		}
 
-		const quantity = flt(operation.output_quantity) || 1;
+		const quantity = this.get_bom_value(flt(operation.output_quantity) || 1);
 		return this.editable
 			? `<input class="form-control input-sm" data-field="output_quantity" data-operation="${operation.name}"
 				value="${quantity}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
@@ -410,11 +421,12 @@ export class OperationsEditor {
 		const field = $input.attr("data-field");
 		const value = $input.val();
 		if (field === "quantity") {
-			this.update(this.get_row($input, "material"), { qty: flt(value) });
+			this.update(this.get_row($input, "material"), { qty: flt(value) / this.bom_quantity });
 		} else if (field === "time_in_mins") {
 			this.update(this.get_row($input, "operation"), { time_in_mins: flt(value) });
 		} else if (field === "output_quantity") {
-			this.update(this.get_row($input, "operation"), { output_quantity: flt(value) || 1 });
+			const output_quantity = flt(value) / this.bom_quantity || 1;
+			this.update(this.get_row($input, "operation"), { output_quantity });
 		} else if (field === "new-bom" && value) {
 			this.view.state.extra_bom_nodes.push(cint(value));
 			Object.assign(this.view.state, { bom_node_id: cint(value), adding_bom: false });
