@@ -36,6 +36,28 @@ class TestTrialBalance(ERPNextTestSuite):
 		)
 		dim.save()
 
+	def test_opening_balances_follow_user_permissions(self):
+		from frappe.utils import add_days
+
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.accounts.utils import get_fiscal_year
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		fiscal_year, year_start, year_end = get_fiscal_year(today(), company="_Test Company")
+		make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, posting_date=year_start, submit=True)
+		filters = frappe._dict(
+			company="_Test Company",
+			fiscal_year=fiscal_year,
+			from_date=add_days(year_start, 5),
+			to_date=year_end,
+		)
+		user = make_fenced_user(
+			"tb-opening@example.com", ["Accounts User"], [("Account", "_Test Write Off - _TC")]
+		)
+		with as_user(user):
+			total_row = execute(frappe._dict(filters))[1][-1]
+		self.assertEqual((total_row["opening_debit"], total_row["opening_credit"]), (0, 0))
+
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		"""
 		Checks if Trial Balance Report is balanced when filtered using a particular Accounting Dimension

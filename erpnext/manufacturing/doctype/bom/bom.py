@@ -388,10 +388,10 @@ class BOM(WebsiteGenerator):
 
 		return [
 			_(
-				"{0}: has no raw materials. Choose an Output Item BOM, or open the step and click Add Raw Materials."
-			).format(self.get_step_label(row))
+				"{0} has no raw materials. Click Add Raw Materials for this step in the Steps section, or select a BOM for its output item {1}."
+			).format(self.get_step_label(row), bold(row.finished_good))
 			for row in self.operations
-			if not row.bom_no and row.idx not in steps_with_materials
+			if row.finished_good and not row.bom_no and row.idx not in steps_with_materials
 		]
 
 	def validate_secondary_items(self):
@@ -1751,13 +1751,29 @@ def get_bom_items_as_dict(
 		else:
 			item_dict[key] = item
 
+	fields = [
+		["Account", "expense_account", "stock_adjustment_account"],
+		["Cost Center", "cost_center", "cost_center"],
+		["Warehouse", "default_warehouse", ""],
+	]
+
+	company_of = {}
+	for d in fields:
+		names = {item_details.get(d[1]) for item_details in item_dict.values() if item_details.get(d[1])}
+		company_of[d[0]] = (
+			{
+				r.name: r.company
+				for r in frappe.get_all(
+					d[0], filters={"name": ("in", list(names))}, fields=["name", "company"]
+				)
+			}
+			if names
+			else {}
+		)
+
 	for item, item_details in item_dict.items():
-		for d in [
-			["Account", "expense_account", "stock_adjustment_account"],
-			["Cost Center", "cost_center", "cost_center"],
-			["Warehouse", "default_warehouse", ""],
-		]:
-			company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+		for d in fields:
+			company_in_record = company_of[d[0]].get(item_details.get(d[1]))
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
 

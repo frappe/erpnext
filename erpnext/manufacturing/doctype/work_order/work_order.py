@@ -45,7 +45,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_l
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 CONSUMPTION_PURPOSES = ("Manufacture", "Material Consumption for Manufacture")
@@ -656,10 +656,19 @@ class WorkOrder(Document):
 		if not self.wip_warehouse and not self.skip_transfer:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
 		if not self.fg_warehouse:
-			self.fg_warehouse = (
-				frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
-				or self.get_production_item_warehouse()
-			)
+			self.fg_warehouse = self.get_default_fg_warehouse()
+
+	def get_default_fg_warehouse(self):
+		return (
+			self.get_bom_target_warehouse()
+			or frappe.get_cached_value("Company", self.company, "default_fg_warehouse")
+			or self.get_production_item_warehouse()
+		)
+
+	def get_bom_target_warehouse(self):
+		warehouse = self.bom_no and frappe.get_cached_value("BOM", self.bom_no, "default_target_warehouse")
+		if warehouse and frappe.get_cached_value("Warehouse", warehouse, "company") == self.company:
+			return warehouse
 
 	def get_production_item_warehouse(self):
 		if not self.production_item:
@@ -1638,8 +1647,8 @@ class WorkOrder(Document):
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 
-		def _get_operations(bom_no, qty=1, units=1, exploded=False):
-			data = frappe.get_all(
+		def _get_operations(bom_no):
+			return frappe.get_all(
 				"BOM Operation",
 				filters={"parent": bom_no},
 				fields=[
@@ -1669,7 +1678,28 @@ class WorkOrder(Document):
 				order_by="idx",
 			)
 
-			batch_size_flags = get_batch_size_flags(d.operation for d in data)
+		self.set("operations", [])
+		if not self.bom_no or not frappe.get_cached_value("BOM", self.bom_no, "with_operations"):
+			return
+
+		groups = []
+
+		if self.use_multi_level_bom:
+			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
+			bom_traversal = reversed(bom_tree.level_order_traversal())
+
+			for node in bom_traversal:
+				if node.is_bom:
+					qty = node.exploded_qty / node.bom_qty
+					groups.append((_get_operations(node.name), qty, node.exploded_qty, True))
+
+		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
+		groups.append((_get_operations(self.bom_no), bom_qty, 1, False))
+
+		batch_size_flags = get_batch_size_flags(d.operation for data, *_ in groups for d in data)
+
+		operations = []
+		for data, qty, units, exploded in groups:
 			for d in data:
 				if not d.fixed_time:
 					d.time_in_mins = get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
@@ -1679,31 +1709,7 @@ class WorkOrder(Document):
 				if self.track_semi_finished_goods and not d.sequence_id:
 					d.sequence_id = d.idx
 
-			return data
-
-		self.set("operations", [])
-		if not self.bom_no or not frappe.get_cached_value("BOM", self.bom_no, "with_operations"):
-			return
-
-		operations = []
-
-		if self.use_multi_level_bom:
-			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
-			bom_traversal = reversed(bom_tree.level_order_traversal())
-
-			for node in bom_traversal:
-				if node.is_bom:
-					operations.extend(
-						_get_operations(
-							node.name,
-							qty=node.exploded_qty / node.bom_qty,
-							units=node.exploded_qty,
-							exploded=True,
-						)
-					)
-
-		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
-		operations.extend(_get_operations(self.bom_no, qty=bom_qty))
+				operations.append(d)
 
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index
@@ -1902,18 +1908,28 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
+		if not self.fg_warehouse:
+			self.fg_warehouse = self.get_default_fg_warehouse()
+
 		self.set_required_items()
 		self.set_work_order_operations()
 
 		return check_if_scrap_warehouse_mandatory(self.bom_no)
 
 	def set_available_qty(self):
+		items_by_warehouse = {}
+		for d in self.get("required_items"):
+			for warehouse in (d.source_warehouse, self.wip_warehouse):
+				if warehouse:
+					items_by_warehouse.setdefault(warehouse, set()).add(d.item_code)
+
+		available_qty = get_latest_stock_qty_for_items(items_by_warehouse)
 		for d in self.get("required_items"):
 			if d.source_warehouse:
-				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				d.available_qty_at_source_warehouse = available_qty.get((d.item_code, d.source_warehouse))
 
 			if self.wip_warehouse:
-				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
+				d.available_qty_at_wip_warehouse = available_qty.get((d.item_code, self.wip_warehouse))
 
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
 		"""set required_items for production to keep track of reserved qty"""
@@ -3007,6 +3023,8 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_item_details(item, project=None, skip_bom_info=False, throw=True):
+	frappe.has_permission("Item", "read", doc=item, throw=True)
+
 	res = frappe.db.sql(
 		"""
 		select stock_uom, description, item_name, allow_alternative_item,

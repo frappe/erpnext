@@ -58,6 +58,86 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.save()
 		self.assertEqual(dn.items[0].qty, 1)
 
+	def test_credit_limit_with_sales_order_bypass(self):
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		customer = frappe.get_doc("Customer", make_customer("_Test Delivery Credit Bypass"))
+		customer.append(
+			"credit_limits",
+			{"company": "_Test Company", "credit_limit": 1000, "bypass_credit_limit_check": 1},
+		)
+		customer.save()
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+
+		# A submitted standalone delivery is already in customer outstanding, so it is not counted twice.
+		create_delivery_note(customer=customer.name, qty=6, rate=100)
+
+		so = make_sales_order(customer=customer.name, qty=5, rate=100)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 5)
+
+	def test_customer_outstanding_uses_delivery_base_net_amount(self):
+		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=6, basic_rate=100)
+		for customer, currency, conversion_rate, discount_percentage in (
+			(make_customer("_Test Delivery Credit INR"), "INR", 1, 10),
+			("_Test Customer USD", "USD", 80, 0),
+			("_Test Customer USD", "USD", 80, 10),
+		):
+			with self.subTest(currency=currency, discount_percentage=discount_percentage):
+				outstanding = get_customer_outstanding(customer, "_Test Company", True)
+				dn = create_delivery_note(
+					customer=customer, currency=currency, qty=2, rate=300, do_not_save=True
+				)
+				dn.conversion_rate = conversion_rate
+				dn.apply_discount_on = "Net Total"
+				dn.additional_discount_percentage = discount_percentage
+				dn.insert()
+				dn.submit()
+				self.assertEqual(dn.base_grand_total, 600 * conversion_rate * (1 - discount_percentage / 100))
+				self.assertAlmostEqual(
+					get_customer_outstanding(customer, dn.company, True) - outstanding, dn.base_grand_total
+				)
+
+				# Billing moves exposure from the Delivery Note to the receivable without changing its total.
+				for billed_qty in (1, 1):
+					invoice = make_sales_invoice(dn.name)
+					invoice.items[0].qty = billed_qty
+					invoice.insert()
+					invoice.submit()
+					self.assertAlmostEqual(
+						get_customer_outstanding(customer, dn.company, True) - outstanding,
+						dn.base_grand_total,
+					)
+
+	def test_delivery_outstanding_clears_with_invoice_discount_and_exchange_rate(self):
+		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
+
+		customer = "_Test Customer USD"
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		outstanding = get_customer_outstanding(customer, "_Test Company", True)
+		dn = create_delivery_note(customer=customer, currency="USD", qty=2, rate=300, do_not_save=True)
+		dn.conversion_rate = 80
+		dn.insert()
+		dn.submit()
+
+		billed_amount = 0
+		for remaining_qty in (1, 0):
+			invoice = make_sales_invoice(dn.name)
+			invoice.items[0].qty = 1
+			invoice.conversion_rate = 70
+			invoice.apply_discount_on = "Net Total"
+			invoice.additional_discount_percentage = 10
+			invoice.insert()
+			invoice.submit()
+			self.assertEqual(invoice.base_grand_total, 18900)
+			billed_amount += invoice.base_grand_total
+			self.assertAlmostEqual(
+				get_customer_outstanding(customer, dn.company, True) - outstanding,
+				billed_amount + dn.base_grand_total * remaining_qty / 2,
+			)
+
 	def test_over_billing_against_dn(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
@@ -1122,6 +1202,67 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.items[1].returned_qty, 0)
 		self.assertEqual(dn.per_billed, 50)
 		self.assertEqual(dn.status, "Partially Billed")
+
+	def test_billing_status_repair_patch(self):
+		"""Returns submitted before #58869 left the original Delivery Note's per_billed stale.
+
+		The repair patch recalculates such notes: a directly invoiced one whose remaining
+		qty was returned becomes Completed, an uninvoiced Sales Order linked one goes back
+		to To Bill.
+		"""
+		from erpnext.patches.v16_0 import recalculate_returned_delivery_note_billing_status as patch
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		# Delivery Note invoiced for 2 of 5 qty, the remaining 3 returned -> fully billed
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		dn = create_delivery_note(qty=5)
+
+		si = make_sales_invoice(dn.name)
+		si.items[0].qty = 2
+		si.insert()
+		si.submit()
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = -3
+		dn_return.insert()
+		# Mimic the submit request, which reconstructs the document from client data.
+		frappe.get_doc(dn_return.as_dict()).submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.items[0].returned_qty, 3)
+		self.assertEqual(dn.per_billed, 100)
+
+		# Sales Order linked Delivery Note, nothing invoiced, partly returned -> unbilled
+		so = make_sales_order(qty=10)
+		so_dn = create_dn_against_so(so.name, delivered_qty=5)
+
+		so_dn_return = make_sales_return(so_dn.name)
+		so_dn_return.items[0].qty = -2
+		so_dn_return.insert()
+		frappe.get_doc(so_dn_return.as_dict()).submit()
+
+		so_dn.load_from_db()
+		self.assertEqual(so_dn.items[0].returned_qty, 2)
+		self.assertEqual(so_dn.per_billed, 0)
+
+		# Mimic the state left behind by a return submitted before the fix
+		for name, per_billed in ((dn.name, 40), (so_dn.name, 50)):
+			frappe.db.set_value(
+				"Delivery Note",
+				name,
+				{"per_billed": per_billed, "status": "Partially Billed"},
+				update_modified=False,
+			)
+
+		patch.execute()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+		so_dn.load_from_db()
+		self.assertEqual(so_dn.per_billed, 0)
+		self.assertEqual(so_dn.status, "To Bill")
 
 	def test_dn_billing_status_case2(self):
 		# SO -> SI and SO -> DN1, DN2

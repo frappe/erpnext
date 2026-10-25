@@ -205,8 +205,7 @@ frappe.ui.form.on("BOM", {
 		const rows = frm.doc.operations.map((row) => frm.events.get_stage_summary_row(frm, row, can_add));
 
 		wrapper.html(`
-			<div class="text-muted" style="margin-bottom:6px;">${__("Steps")}</div>
-			<div style="border:1px solid var(--border-color);border-radius:var(--border-radius-md);">
+			<div style="border:1px solid var(--border-color);border-radius:var(--border-radius-md);margin-bottom:var(--margin-lg);">
 				${rows.join("")}
 			</div>`);
 
@@ -243,7 +242,10 @@ frappe.ui.form.on("BOM", {
 				  )}</button>`
 				: "";
 
-		return `<div style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-bottom:1px solid var(--border-color);">
+		const border =
+			row.idx < frm.doc.operations.length ? "border-bottom:1px solid var(--border-color);" : "";
+
+		return `<div style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;${border}">
 			<span class="ellipsis" style="flex:2;">${row.idx}. ${escape(row.operation || "")}</span>
 			<span class="ellipsis" style="flex:3;">${__("Makes")} ${makes}${last}</span>
 			<span style="flex:2;"><span class="indicator-pill no-indicator-dot ${color}">${status}</span></span>

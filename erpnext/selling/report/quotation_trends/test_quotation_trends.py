@@ -290,3 +290,13 @@ class TestQuotationTrends(ERPNextTestSuite):
 		grouped_total = next(row for row in data if row[0] == f"'{_('Total')}'")
 		self.assertEqual(grouped_total[-1], 900)
 		self.assertEqual(sum(chart["data"]["datasets"][0]["values"]), 900)
+
+	def test_item_filter_restricts_rows(self):
+		# the Item filter is applied in the query, so the excluded item never reaches the rows
+		make_quotation(item="_Test Item", qty=4, rate=200, transaction_date=TXN_DATE)
+		make_quotation(item="_Test Item 2", qty=2, rate=200, transaction_date=TXN_DATE)
+
+		labels, data = self.run_report(item_code=["_Test Item"])
+		items = {row[labels.index("Item")] for row in data}
+		self.assertIn("_Test Item", items)
+		self.assertNotIn("_Test Item 2", items)
