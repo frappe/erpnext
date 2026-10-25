@@ -1,10 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, random_string
 
+from erpnext.setup.doctype.vehicle import vehicle_dashboard
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -34,6 +36,20 @@ class TestVehicle(ERPNextTestSuite):
 			{"end_date": add_days(frappe.utils.nowdate(), -1)},
 		):
 			self.make_vehicle(**insurance_dates).insert()
+
+	def test_dashboard_excludes_vehicle_log_without_doctype(self):
+		with patch("frappe.db.exists", autospec=True, return_value=False):
+			dashboard = vehicle_dashboard.get_data()
+
+		self.assertEqual(dashboard["transactions"], [{"items": ["Delivery Trip"]}])
+
+	def test_dashboard_includes_vehicle_log_with_doctype(self):
+		with patch("frappe.db.exists", autospec=True, return_value=True):
+			dashboard = vehicle_dashboard.get_data()
+
+		self.assertEqual(
+			dashboard["transactions"], [{"items": ["Vehicle Log"]}, {"items": ["Delivery Trip"]}]
+		)
 
 	def test_renaming_vehicle(self):
 		license_plate = random_string(10).upper()
