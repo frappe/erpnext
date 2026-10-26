@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe.permissions import add_permission
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
@@ -318,6 +319,28 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(item.item_code, so_item.item_code)
 		self.assertEqual(flt(item.rate), flt(so_item.rate))
 		self.assertEqual(flt(item.amount), 4 * flt(so_item.rate))
+
+	def test_requires_read_permission_on_sales_order(self):
+		sales_order = make_sales_order(qty=10)
+		role = "_Test Proforma Creator"
+		frappe.get_doc({"doctype": "Role", "role_name": role}).insert(ignore_if_duplicate=True)
+		add_permission("Proforma Invoice", role, ptype="create")
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "proforma-creator@example.com", "first_name": "Proforma"}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles(role)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				self.make_draft_proforma,
+				sales_order,
+				so_detail=sales_order.items[0].name,
+				qty=1,
+			)
+		finally:
+			frappe.set_user("Administrator")
 
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
