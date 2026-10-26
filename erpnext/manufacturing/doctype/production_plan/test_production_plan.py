@@ -1136,6 +1136,21 @@ class TestProductionPlan(ERPNextTestSuite):
 		# 10 Nos after 10% loss needs 11.11 Nos, so a Work Order for 12 Nos.
 		self.assertEqual(plan.sub_assembly_items[0].qty, 12)
 
+	def test_whole_number_sub_assembly_rounds_up_without_process_loss(self):
+		rm_item = make_item("_Test PP Whole Ratio RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test PP Whole Ratio Sub", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item("_Test PP Whole Ratio FG", {"is_stock_item": 1}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], quantity=10, rm_qty=3, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=5, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+
+		# 5 of a BOM for 10 that uses 3 Nos needs 1.5 Nos, so a Work Order for 2 Nos.
+		self.assertEqual(plan.sub_assembly_items[0].qty, 2)
+
 	def test_transfer_type_raw_material_stays_in_stock_uom(self):
 		rm_item = make_item(
 			"_Test PP Transfer Box RM",
