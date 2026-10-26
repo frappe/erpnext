@@ -67,6 +67,19 @@ class TestBOMCreator(ERPNextTestSuite):
 		with patch.object(File, "is_downloadable", return_value=False):
 			self.assertRaises(frappe.PermissionError, read_design_file, file_url)
 
+	def test_design_file_must_be_a_step_or_csv_file(self):
+		from erpnext.manufacturing.doctype.bom_creator.bom_creator import read_design_file
+
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"{frappe.generate_hash(length=8)}.txt",
+				"content": "Level,Part Number,Quantity\n1,FRAME-ASM,1\n",
+				"is_private": 1,
+			}
+		).insert()
+		self.assertRaisesRegex(frappe.ValidationError, "STEP file", read_design_file, file.file_url)
+
 	def test_csv_file_with_levels_or_item_numbers_gives_same_tree(self):
 		by_level = read_bom_csv_file(
 			"Level,Part Number,Part Name,Quantity\n1,FRAME-ASM,Frame Assembly,1\n2,TUBE-25,Frame Tube,3\n1,WHEEL-26,Wheel,2\n"
