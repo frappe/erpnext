@@ -560,12 +560,12 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 				total_row["opening_balance"].get(dimension, 0.0) + amount
 			)
 
-	if "total" not in total_row:
-		return
-
 	# rows don't need opening_balance anymore; the total row keeps it for the Balance Sheet
 	for row in out:
 		row.pop("opening_balance", None)
+
+	if "total" not in total_row:
+		return
 
 	out.append(total_row)
 
