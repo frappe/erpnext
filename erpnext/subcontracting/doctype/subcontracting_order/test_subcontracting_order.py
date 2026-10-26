@@ -37,6 +37,15 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingOrder(ERPNextTestSuite):
+	def test_finished_good_qty_uses_item_stock_uom(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].qty = 2.5
+		sco.items[0].stock_uom = "Kg"
+
+		self.assertRaises(UOMMustBeIntegerError, sco.save)
+
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}
