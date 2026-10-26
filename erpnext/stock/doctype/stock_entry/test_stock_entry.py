@@ -698,15 +698,45 @@ class TestStockEntry(ERPNextTestSuite):
 			serial_no=get_serial_nos_from_bundle(bundle)[:1] if has_serial_no else None,
 		)
 
-		outward, inward = (
+		outward, inward = self.get_transfer_leg_values(transfer.name)
+		self.assertEqual(flt(inward, 2), -flt(outward, 2))
+
+	def test_half_cent_transfer_moves_no_value_after_target_warehouse_repost(self):
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=10.005,
+			posting_date=add_days(today(), -10),
+		)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			basic_rate=7,
+			posting_date=add_days(today(), -8),
+		)
+
+		outward, inward = self.get_transfer_leg_values(transfer.name)
+		self.assertEqual(flt(inward, 2), -flt(outward, 2))
+
+	def get_transfer_leg_values(self, voucher_no):
+		return tuple(
 			frappe.db.get_value(
 				"Stock Ledger Entry",
-				{"voucher_no": transfer.name, "warehouse": warehouse, "is_cancelled": 0},
+				{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
 				"stock_value_difference",
 			)
 			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
 		)
-		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",

@@ -7,7 +7,7 @@ import frappe
 
 # import erpnext
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
@@ -808,7 +808,9 @@ def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
 def get_items_tagged_to_wip_composite_asset(params: dict | str):
 	params = frappe.parse_json(params)
 
-	check_capitalization_access(params.get("company") if isinstance(params, dict | frappe._dict) else None)
+	target_asset = cstr(params.get("target_asset"))
+	erpnext.require_permission("Asset", target_asset, "select")
+	check_capitalization_access(frappe.db.get_value("Asset", target_asset, "company"))
 
 	fields = [
 		"item_code",
@@ -829,9 +831,12 @@ def get_items_tagged_to_wip_composite_asset(params: dict | str):
 
 	pr_items = frappe.get_all(
 		"Purchase Receipt Item",
-		filters={"wip_composite_asset": params.get("target_asset"), "docstatus": 1},
+		filters={"wip_composite_asset": target_asset, "docstatus": 1},
 		fields=fields,
 	)
+
+	for purchase_receipt in {d.purchase_receipt for d in pr_items}:
+		erpnext.require_permission("Purchase Receipt", purchase_receipt)
 
 	stock_items = []
 	asset_items = []

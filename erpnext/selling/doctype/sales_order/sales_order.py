@@ -645,11 +645,10 @@ class SalesOrder(SellingController):
 		SalesOrderStockReservation(self).update_reserved_qty(so_item_rows)
 
 	def on_update_after_submit(self):
-		self.calculate_commission()
-		self.calculate_contribution()
 		self.check_credit_limit()
 
 	def before_update_after_submit(self):
+		super().before_update_after_submit()
 		self.validate_po()
 		self.validate_drop_ship()
 		self.validate_supplier_after_submit()
