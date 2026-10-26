@@ -461,6 +461,21 @@ class TestAccount(ERPNextTestSuite):
 		)
 		self.assertTrue(frappe.db.exists("Account", child_account))
 
+	def test_update_account_number_with_spaces(self):
+		company = "_Test Company"
+		owner = create_account(
+			account_name="Number Owner", parent_account="Current Assets - _TC", company=company
+		)
+		owner = update_account_number(owner, "Number Owner", "9627011")
+		other = create_account(
+			account_name="Number Taker", parent_account="Current Assets - _TC", company=company
+		)
+
+		self.assertRaises(frappe.ValidationError, update_account_number, other, "Number Taker", " 9627011")
+		self.assertRaises(frappe.ValidationError, update_account_number, other, "   ")
+		self.assertEqual(frappe.get_all("Account", {"account_number": "9627011"}, pluck="name"), [owner])
+		self.assertEqual(frappe.db.get_value("Account", other, "account_name"), "Number Taker")
+
 
 def walk_chart_tree(tree):
 	"""Yield (account_name, details) for every account in a chart of accounts tree"""

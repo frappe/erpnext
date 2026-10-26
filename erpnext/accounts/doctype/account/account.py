@@ -633,11 +633,13 @@ def update_child_company_account_number(name: str, account_name: str, account_nu
 
 
 def set_account_name_and_number(account: Account, account_name: str, account_number: str | None = None):
+	account_name, account_number = cstr(account_name).strip(), cstr(account_number).strip()
+	if not account_name:
+		throw(_("Account Name cannot be empty"))
+
 	account.validate_account_number(account_number)
 	frappe.db.set_value(
-		"Account",
-		account.name,
-		{"account_number": cstr(account_number).strip(), "account_name": account_name.strip()},
+		"Account", account.name, {"account_number": account_number, "account_name": account_name}
 	)
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
