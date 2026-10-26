@@ -8,7 +8,7 @@ import frappe
 from frappe import _, scrub
 from frappe.model.document import Document, bulk_insert
 from frappe.query_builder import functions
-from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
+from frappe.utils import cint, flt, get_link_to_form, round_based_on_smallest_currency_fraction
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
@@ -144,6 +144,30 @@ class calculate_taxes_and_totals:
 						# For correct tax_amount calculation re-computation is required
 						if self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total":
 							self.need_recomputation = True
+
+		self.validate_item_tax_templates_are_usable()
+
+	def validate_item_tax_templates_are_usable(self):
+		if self.doc.get("_action") not in ("save", "submit"):
+			return
+
+		for template in {item.item_tax_template for item in self.doc.items if item.get("item_tax_template")}:
+			disabled, company = frappe.get_cached_value(
+				"Item Tax Template", template, ["disabled", "company"]
+			)
+			if disabled:
+				frappe.throw(
+					_("Item Tax Template {0} is disabled").format(
+						get_link_to_form("Item Tax Template", template)
+					),
+					title=_("Disabled Item Tax Template"),
+				)
+			if company != self.doc.company:
+				frappe.throw(
+					_("Item Tax Template {0} does not belong to Company {1}").format(
+						get_link_to_form("Item Tax Template", template), frappe.bold(self.doc.company)
+					)
+				)
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:

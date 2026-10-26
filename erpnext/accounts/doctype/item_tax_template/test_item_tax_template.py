@@ -183,3 +183,16 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 			self.assertEqual(si.taxes[0].tax_amount, 100)
 			self.assertEqual(si.grand_total, 1100)
 			self.assertEqual(breakup, {normal_row: 100})
+
+	def test_group_account_throws(self):
+		doc = self.make_template([("Duties and Taxes - _TC", 7, 0)])
+		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
+
+	def test_disabled_template_on_transaction_throws(self):
+		template = self.make_template([(TAX_ACCOUNT, 28, 0)])
+		template.disabled = 1
+		template.insert()
+
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template.name
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", si.insert)
