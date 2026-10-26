@@ -60,11 +60,9 @@ def get_data(filters):
 		)
 		.where(gle.is_cancelled == 0)
 		.groupby(gle.voucher_type, gle.voucher_no)
+		.having(Sum(gle.debit) != Sum(gle.credit))
 	)
-	query = apply_filters(query, filters, gle)
-	gl_entries = query.run(as_dict=True)
-	unmatched = [entry for entry in gl_entries if entry.debit != entry.credit]
-	return unmatched
+	return apply_filters(query, filters, gle).run(as_dict=True)
 
 
 def apply_filters(query, filters, gle):

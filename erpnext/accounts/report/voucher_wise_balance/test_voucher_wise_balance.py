@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -95,3 +97,27 @@ class TestVoucherWiseBalance(ERPNextTestSuite):
 			if row.voucher_no == jv.name
 		}
 		self.assertEqual(rows, {("Journal Entry", 1500, 1000), ("Sales Invoice", 1000, 1500)})
+
+	def test_balanced_vouchers_are_not_fetched(self):
+		balanced = make_journal_entry(
+			"Sales - _TC", "_Test Bank - _TC", 1000, submit=True, posting_date="2026-06-01"
+		)
+		unbalanced = make_journal_entry(
+			"Sales - _TC", "_Test Bank - _TC", 1000, submit=True, posting_date="2026-06-01"
+		)
+		frappe.db.set_value("GL Entry", {"voucher_no": unbalanced.name, "debit": [">", 0]}, "debit", 400)
+
+		fetched = []
+		run_sql = frappe.db.sql
+
+		def capture_rows(*args, **kwargs):
+			rows = run_sql(*args, **kwargs)
+			fetched.extend(row.get("voucher_no") for row in rows if isinstance(row, dict))
+			return rows
+
+		with patch.object(frappe.db, "sql", side_effect=capture_rows):
+			data = self.run_report()
+
+		self.assertNotIn(balanced.name, fetched)
+		self.assertIn(unbalanced.name, fetched)
+		self.assertEqual({row.voucher_no for row in data}, set(fetched))
