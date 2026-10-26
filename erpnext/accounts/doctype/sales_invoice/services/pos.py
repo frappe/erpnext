@@ -232,7 +232,8 @@ class POSService:
 			doc.docstatus == 1
 			and not doc.is_return
 			and not allow_partial_payment
-			and flt(doc.paid_amount) + flt(doc.write_off_amount) < invoice_total
+			and flt(flt(doc.paid_amount) + flt(doc.write_off_amount), doc.precision("grand_total"))
+			< invoice_total
 		):
 			frappe.throw(
 				msg=_("Partial Payment in POS Transactions are not allowed."),

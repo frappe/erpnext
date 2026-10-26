@@ -1265,6 +1265,28 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 90}])
 		self.assertEqual((pos.outstanding_amount, pos.change_amount, pos.status), (0, 0, "Paid"))
 
+	def test_write_off_comparisons_are_rounded(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos = create_pos_invoice(rate=100, do_not_save=1)
+		pos.write_off_amount = 8.04
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 91.96})
+		pos.insert().submit()
+		self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been paid",
+			pos.update_payments,
+			payments=[{"mode_of_payment": "Cash", "amount": 1}],
+		)
+
+		set_allow_partial_payment(self.pos_profile, 0)
+		with self.change_settings("Global Defaults", {"disable_rounded_total": 1}):
+			pos = create_pos_invoice(rate=10.80, do_not_save=1)
+			pos.write_off_amount = 0.10
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 10.70})
+			pos.insert().submit()
+			self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
+
 	def test_return_updates_status_of_original(self):
 		pos = create_pos_invoice(qty=2, rate=100, do_not_save=1)
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200})

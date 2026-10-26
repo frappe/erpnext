@@ -607,8 +607,12 @@ class POSInvoice(SalesInvoice):
 			)
 
 	def set_outstanding_amount(self):
-		total = (flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount)
-		self.outstanding_amount = total - flt(self.paid_amount) if total > flt(self.paid_amount) else 0
+		precision = self.precision("outstanding_amount")
+		total = flt(
+			(flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount), precision
+		)
+		paid_amount = flt(self.paid_amount, precision)
+		self.outstanding_amount = flt(total - paid_amount, precision) if total > paid_amount else 0
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
@@ -907,8 +911,11 @@ class POSInvoice(SalesInvoice):
 
 		self.validate_payments_to_collect(payments)
 
-		paid_amount = flt(self.paid_amount)
-		total = (flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount)
+		paid_amount = flt(self.paid_amount, self.precision("paid_amount"))
+		total = flt(
+			(flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount),
+			self.precision("grand_total"),
+		)
 
 		if paid_amount >= total:
 			frappe.throw(title=_("Invoice Paid"), msg=_("This invoice has already been paid."))
