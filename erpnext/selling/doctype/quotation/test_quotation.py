@@ -502,6 +502,33 @@ class TestQuotation(ERPNextTestSuite):
 		raised = json.dumps([{"item_code": row.item_code, "qty": 5, "rate": row.rate, "docname": row.name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", raised, quotation.name)
 
+	def test_unordered_alternative_set_keeps_quotation_partially_ordered(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		simple = make_item(properties={"is_stock_item": 1}).item_code
+		main = make_item(properties={"is_stock_item": 1}).item_code
+		alt = make_item(properties={"is_stock_item": 1}).item_code
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": simple, "qty": 1, "rate": 100, "warehouse": warehouse},
+				{"item_code": main, "qty": 1, "rate": 100, "warehouse": warehouse},
+				{"item_code": alt, "qty": 1, "rate": 100, "is_alternative": True, "warehouse": warehouse},
+			]
+		)
+
+		frappe.flags.args = frappe._dict(selected_items=[quotation.items[0]])
+		so = make_sales_order(quotation.name)
+		frappe.flags.args = frappe._dict()
+		so.delivery_date = add_days(so.transaction_date, 10)
+		so.insert()
+		so.submit()
+
+		self.assertEqual(len(so.items), 1)
+		self.assertEqual(so.items[0].item_code, simple)
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 

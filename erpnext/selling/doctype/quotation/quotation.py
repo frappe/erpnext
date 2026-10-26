@@ -285,26 +285,38 @@ class Quotation(SellingController):
 		return "Ordered"
 
 	def get_valid_items(self):
-		"""
-		Filters out items in an alternatives set that were not ordered.
-		"""
+		"""Collapse each alternatives set to its ordered row, or keep the main row if none was ordered."""
 
 		def is_in_sales_order(row):
-			in_sales_order = bool(
+			return bool(
 				frappe.db.exists(
 					"Sales Order Item",
 					{"quotation_item": row.name, "item_code": row.item_code, "docstatus": 1},
 				)
 			)
-			return in_sales_order
 
-		def can_map(row) -> bool:
-			if row.is_alternative or row.has_alternative_item:
-				return is_in_sales_order(row)
+		valid_items = []
+		alternatives_set = []
 
-			return True
+		def collapse_set():
+			if not alternatives_set:
+				return
+			ordered_rows = [row for row in alternatives_set if is_in_sales_order(row)]
+			valid_items.extend(ordered_rows or alternatives_set[:1])
 
-		return list(filter(can_map, self.get("items")))
+		for row in self.get("items"):
+			if row.has_alternative_item:
+				collapse_set()
+				alternatives_set = [row]
+			elif row.is_alternative:
+				alternatives_set.append(row)
+			else:
+				collapse_set()
+				alternatives_set = []
+				valid_items.append(row)
+
+		collapse_set()
+		return valid_items
 
 	def is_fully_ordered(self):
 		return self.get_ordered_status() == "Ordered"
