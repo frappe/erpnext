@@ -891,6 +891,36 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
+	def test_disabled_uom_cannot_be_used_by_purchase_order(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 1}])
+		frappe.db.set_value("UOM", "Box", "enabled", 0)
+		po = create_purchase_order(item_code=item.name, do_not_save=True)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 1
+
+		self.assertRaises(frappe.ValidationError, po.insert)
+
+	def test_subcontracting_finished_good_qty_must_be_whole_number(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 1,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 2.5,
+				}
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_save=True,
+		)
+
+		self.assertRaises(UOMMustBeIntegerError, po.insert)
+
 	def test_min_order_qty_with_uom_conversion_dust(self):
 		item_doc = make_item(properties={"min_order_qty": 2000, "stock_uom": "Kg"})
 		item_doc.append("uoms", {"uom": "Litre", "conversion_factor": 0.6})
