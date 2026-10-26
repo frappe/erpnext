@@ -398,6 +398,48 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(sales_order.currency, "USD")
 		self.assertNotEqual(sales_order.currency, quotation.currency)
 
+	def test_sales_order_update_items_refreshes_quotation_ordered_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item1 = make_item().item_code
+		item2 = make_item().item_code
+		warehouse = "_Test Warehouse - _TC"
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": item1, "qty": 10, "rate": 100, "warehouse": warehouse},
+				{"item_code": item2, "qty": 4, "rate": 100, "warehouse": warehouse},
+			]
+		)
+
+		so = make_sales_order(quotation.name)
+		so.delivery_date = nowdate()
+		so.insert()
+		so.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+		self.assertEqual(quotation.items[0].ordered_qty, 10)
+		self.assertEqual(quotation.items[1].ordered_qty, 4)
+
+		# Update Items on the SO: shrink the first row, drop the second
+		trans_items = json.dumps(
+			[{"item_code": item1, "qty": 4, "rate": so.items[0].rate, "docname": so.items[0].name}]
+		)
+		update_child_qty_rate("Sales Order", trans_items, so.name)
+
+		quotation.reload()
+		self.assertEqual(quotation.items[0].ordered_qty, 4)
+		self.assertEqual(quotation.items[1].ordered_qty, 0)
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		# Cancelling the trimmed SO must release everything back to Open
+		so.reload()
+		so.cancel()
+		quotation.reload()
+		self.assertEqual(quotation.items[0].ordered_qty, 0)
+		self.assertEqual(quotation.items[1].ordered_qty, 0)
+		self.assertEqual(quotation.status, "Open")
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 

@@ -503,7 +503,12 @@ class SalesOrder(SellingController):
 		if enq:
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s", (flag, enq[0][0]))
 
-	def update_prevdoc_status(self, flag=None):
+	def update_prevdoc_status(self, flag=None, update_quotation_qty=False):
+		# Update Items edits ordered rows without going through on_submit/on_cancel,
+		# so recompute the quotation's ordered_qty and re-run the over-order check here.
+		if update_quotation_qty:
+			super().update_prevdoc_status()
+
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
@@ -512,6 +517,33 @@ class SalesOrder(SellingController):
 
 				doc.set_status(update=True)
 				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
+
+	def update_ordered_qty_in_quotation_for_removed_items(self, removed_items):
+		"""Recompute Quotation Item ordered_qty for rows removed via Update Items.
+
+		`update_qty` on the surviving rows never visits a removed row's quotation_item,
+		so without this it keeps counting as ordered even after the row (or the SO) is gone.
+		"""
+		soi = frappe.qb.DocType("Sales Order Item")
+		quotations = set()
+		for item in removed_items:
+			quotation_item = item.get("quotation_item")
+			if not quotation_item:
+				continue
+
+			ordered_qty = (
+				frappe.qb.from_(soi)
+				.select(Sum(soi.stock_qty))
+				.where((soi.quotation_item == quotation_item) & (soi.docstatus == 1))
+			).run()[0][0]
+			frappe.db.set_value("Quotation Item", quotation_item, "ordered_qty", flt(ordered_qty))
+
+			quotation = frappe.db.get_value("Quotation Item", quotation_item, "parent")
+			if quotation:
+				quotations.add(quotation)
+
+		for quotation in quotations:
+			frappe.get_doc("Quotation", quotation).set_status(update=True)
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):
