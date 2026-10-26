@@ -153,3 +153,23 @@ class TestPOSSettings(ERPNextTestSuite):
 			settings.save()
 
 		self.assertIn(sale.name, str(context.exception))
+
+	def test_only_managers_can_change_pos_settings(self):
+		for role, can_write in (
+			("Sales User", False),
+			("Accounts User", False),
+			("Accounts Manager", True),
+			("System Manager", True),
+		):
+			user = make_user_with_role(role)
+			self.assertTrue(frappe.has_permission("POS Settings", "read", user=user), role)
+			self.assertEqual(frappe.has_permission("POS Settings", "write", user=user), can_write, role)
+
+
+def make_user_with_role(role):
+	email = f"pos-settings-{frappe.scrub(role)}@example.com"
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": role, "roles": [{"role": role}]}
+		).insert(ignore_permissions=True)
+	return email
