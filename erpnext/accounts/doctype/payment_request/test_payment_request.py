@@ -1453,6 +1453,40 @@ class TestPaymentRequest(ERPNextTestSuite):
 		with as_user(sales_user):
 			self.assertRaises(frappe.PermissionError, make_payment_request, dt="Sales Order", dn=so.name)
 
+	def test_schedule_payment_request_counts_existing_payment_requests(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		make_payment_request(dt="Sales Invoice", dn=si.name, mute_email=1, submit_doc=1, return_doc=1)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Total Payment Request amount cannot be greater than",
+			make_payment_request,
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			schedules=get_payment_schedules_json(si),
+		)
+
+	def test_schedule_payment_request_counts_credit_note(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		credit_note = create_sales_invoice(
+			qty=-1, rate=400, is_return=1, return_against=si.name, do_not_save=1
+		)
+		credit_note.update_outstanding_for_self = 0
+		credit_note.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Total Payment Request amount cannot be greater than",
+			make_payment_request,
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			schedules=get_payment_schedules_json(si),
+		)
+
 
 def make_portal_user(email, customer):
 	user = make_fenced_user(email, ["Customer"])
@@ -1460,6 +1494,21 @@ def make_portal_user(email, customer):
 	customer_doc.append("portal_users", {"user": user})
 	customer_doc.save()
 	return user
+
+
+def get_payment_schedules_json(doc):
+	return json.dumps(
+		[
+			{
+				"name": row.name,
+				"payment_term": row.payment_term,
+				"due_date": str(row.due_date),
+				"payment_amount": row.payment_amount,
+				"description": row.description,
+			}
+			for row in doc.payment_schedule
+		]
+	)
 
 
 class TestPaymentRequestV2Gateway(ERPNextTestSuite):

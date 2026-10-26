@@ -234,8 +234,6 @@ class PaymentRequest(Document):
 			)
 
 	def validate_payment_request_amount(self, ref_doc):
-		if self.payment_reference:
-			return
 		if self.grand_total == 0:
 			frappe.throw(
 				_("{0} cannot be zero").format(self.get_label_from_fieldname("grand_total")),
