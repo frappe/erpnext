@@ -81,6 +81,10 @@ class UnreconcilePayment(Document):
 
 @frappe.whitelist()
 def doc_has_references(doctype: str | None = None, docname: str | None = None):
+	if not doctype or not docname:
+		frappe.throw(_("{0} and {1} are required").format(frappe.bold("doctype"), frappe.bold("docname")))
+	frappe.has_permission(doctype, "read", doc=docname, throw=True)
+
 	count = 0
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
 		count = frappe.db.count(
