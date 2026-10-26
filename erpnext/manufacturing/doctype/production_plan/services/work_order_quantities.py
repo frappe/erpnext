@@ -9,7 +9,7 @@ from frappe.utils import flt, get_link_to_form
 
 
 class ProductionPlanWorkOrderQuantities:
-	"""Count submitted Work Orders after recorded process loss, independently for each plan row."""
+	"""Count submitted Work Orders after unplanned process loss, independently for each plan row."""
 
 	def __init__(self, production_plan):
 		self.production_plan = production_plan
@@ -30,7 +30,10 @@ class ProductionPlanWorkOrderQuantities:
 		)
 		precision = work_order.precision("qty")
 		maximum_qty = flt(flt(row.planned_qty) * (1 + allowance / 100) - committed, precision)
-		committed_qty = flt(self._get_committed_qty(work_order, process_loss_qty), precision)
+		loss_percentage = self.get_planned_loss_percentages().get(
+			work_order.production_plan_sub_assembly_item
+		)
+		committed_qty = flt(self._get_committed_qty(work_order, process_loss_qty, loss_percentage), precision)
 		if committed_qty > maximum_qty:
 			frappe.throw(
 				_(
@@ -126,6 +129,7 @@ class ProductionPlanWorkOrderQuantities:
 			for_update=for_update,
 			order_by="name",
 		).run(as_dict=True)
+		loss_percentages = self.get_planned_loss_percentages()
 		quantities = {
 			"production_plan_item": defaultdict(float),
 			"production_plan_sub_assembly_item": defaultdict(float),
@@ -138,10 +142,26 @@ class ProductionPlanWorkOrderQuantities:
 			)
 			if work_order.get(field):
 				quantities[field][work_order[field]] += self._get_committed_qty(
-					work_order, work_order.process_loss_qty
+					work_order,
+					work_order.process_loss_qty,
+					loss_percentages.get(work_order.production_plan_sub_assembly_item),
 				)
 		return quantities
 
-	def _get_committed_qty(self, work_order, process_loss_qty):
+	def get_planned_loss_percentages(self):
+		"""Process loss % already included in each sub-assembly row's quantity."""
+		return dict(
+			frappe.get_all(
+				"Production Plan Sub Assembly Item",
+				filters={"parent": self.production_plan, "process_loss_percentage": (">", 0)},
+				fields=["name", "process_loss_percentage"],
+				as_list=True,
+			)
+		)
+
+	def _get_committed_qty(self, work_order, process_loss_qty, planned_loss_percentage):
+		# Only loss above what the plan row already covers frees quantity for a replacement.
+		planned_loss_qty = flt(work_order.qty) * flt(planned_loss_percentage) / 100
+		excess_loss_qty = max(0, flt(process_loss_qty) - planned_loss_qty)
 		# Excess loss in existing records must not erase finished goods already produced.
-		return max(0, flt(work_order.produced_qty), flt(work_order.qty) - flt(process_loss_qty))
+		return max(0, flt(work_order.produced_qty), flt(work_order.qty) - excess_loss_qty)
