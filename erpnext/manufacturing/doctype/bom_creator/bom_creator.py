@@ -10,6 +10,7 @@ from frappe.utils import cint, flt, sbool
 from frappe.utils.background_jobs import is_job_enqueued
 
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
+from erpnext.manufacturing.doctype.bom_creator.item_matcher import ItemMatcher
 from erpnext.manufacturing.doctype.bom_creator.material_cost import MaterialCost
 from erpnext.manufacturing.doctype.bom_creator.operation_plan import OperationPlan
 from erpnext.manufacturing.doctype.bom_creator.part_tree_plan import PartTreePlan
@@ -394,31 +395,8 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def get_suggested_items(self) -> dict:
-		rows = [row for row in self.items if not row.item_code]
-		item_codes = set(
-			frappe.get_all(
-				"Item",
-				filters={"name": ("in", [row.part_number for row in rows]), "disabled": 0},
-				pluck="name",
-			)
-		)
-
-		items_by_name = defaultdict(list)
-		for item in frappe.get_all(
-			"Item",
-			filters={"item_name": ("in", [row.part_name for row in rows]), "disabled": 0},
-			fields=["name", "item_name"],
-		):
-			items_by_name[item.item_name].append(item.name)
-
-		suggestions = {}
-		for row in rows:
-			if row.part_number in item_codes:
-				suggestions[row.name] = row.part_number
-			elif len(items_by_name.get(row.part_name, [])) == 1:
-				suggestions[row.name] = items_by_name[row.part_name][0]
-
-		return suggestions
+		parts = [row for row in self.items if not row.item_code and not row.exclude_from_bom]
+		return ItemMatcher(parts).get_matches()
 
 	@frappe.whitelist(methods=["POST"])
 	def create_items(self, item_group: str, stock_uom: str) -> list[str]:
