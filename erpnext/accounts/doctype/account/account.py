@@ -648,7 +648,7 @@ def merge_account(old: str, new: str):
 			exc=InvalidAccountMergeError,
 		)
 
-	if old_account.is_group and new_account.parent_account == old:
+	if old_account.is_group and old in get_ancestors_of("Account", new):
 		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)

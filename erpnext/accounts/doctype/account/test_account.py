@@ -7,6 +7,7 @@ import re
 
 import frappe
 from frappe.utils import nowdate
+from frappe.utils.nestedset import get_ancestors_of
 
 from erpnext.accounts.doctype.account.account import (
 	InvalidAccountMergeError,
@@ -363,6 +364,27 @@ class TestAccount(ERPNextTestSuite):
 			if details.get("account_type") == "Payable" and not details.get("is_group")
 		]
 		self.assertEqual(payable_ledgers, ["Accounts Payable - Trade"])
+
+	def test_merge_group_into_its_grandchild(self):
+		company = "_Test Company"
+		top = create_account(
+			account_name="Merge Top", is_group=1, parent_account="Current Assets - _TC", company=company
+		)
+		middle = create_account(account_name="Merge Middle", is_group=1, parent_account=top, company=company)
+		bottom = create_account(
+			account_name="Merge Bottom", is_group=1, parent_account=middle, company=company
+		)
+		ledger = create_account(account_name="Merge Ledger", parent_account=bottom, company=company)
+
+		merge_account(top, bottom)
+
+		self.assertEqual(frappe.db.get_value("Account", bottom, "parent_account"), "Current Assets - _TC")
+		self.assertEqual(frappe.db.get_value("Account", middle, "parent_account"), bottom)
+		self.assertEqual(get_ancestors_of("Account", middle)[0], bottom)
+		self.assertEqual(
+			get_ancestors_of("Account", ledger)[:3],
+			[bottom, "Current Assets - _TC", "Application of Funds (Assets) - _TC"],
+		)
 
 
 def walk_chart_tree(tree):
