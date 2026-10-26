@@ -73,6 +73,18 @@ class TestOpportunity(ERPNextTestSuite):
 		opp.set_status(update=True)
 		self.assertEqual(opp.status, "Open")
 
+		# a closed opportunity whose quotation expires stays closed
+		closed = make_opportunity(with_items=0)
+		quotation = submit_quotation(closed, transaction_date=add_days(today(), -5), valid_till=today())
+		quotation.db_set("valid_till", add_days(today(), -1))
+		closed.reload()
+		closed.status = "Closed"
+		closed.save()
+
+		set_expired_status()
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Expired")
+		self.assertEqual(frappe.db.get_value("Opportunity", closed.name, "status"), "Closed")
+
 	def test_quotation_found_after_items_are_added_to_opportunity(self):
 		opp = make_opportunity(with_items=0)
 		submit_quotation(opp)
@@ -271,7 +283,40 @@ class TestOpportunity(ERPNextTestSuite):
 		quoted = make_opportunity(with_items=0)
 		submit_quotation(quoted)
 		self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([quoted.name]), "Lost")
+		quoted.reload()
+		quoted.status = "Lost"
+		self.assertRaises(frappe.ValidationError, quoted.save)
 		self.assertEqual(frappe.db.get_value("Opportunity", quoted.name, "status"), "Quotation")
+
+	def test_status_can_be_changed_by_hand_while_a_quotation_is_open(self):
+		opportunity = make_opportunity(with_items=0)
+		submit_quotation(opportunity)
+
+		for status in ("Replied", "Open", "Closed"):
+			set_multiple_status(json.dumps([opportunity.name]), status)
+			self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), status)
+
+		self.assertRaises(
+			frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), "Converted"
+		)
+		set_multiple_status(json.dumps([opportunity.name]), "Quotation")
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Quotation")
+
+	def test_converted_opportunity_keeps_its_status_while_ordered(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		opportunity = make_opportunity(with_items=0)
+		quotation = submit_quotation(opportunity)
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = today()
+		sales_order.submit()
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
+
+		for status in ("Open", "Closed", "Quotation", "Lost"):
+			self.assertRaises(
+				frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), status
+			)
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
 
 	def test_lost_on_follows_the_lost_status(self):
 		lost_reason = _ensure_master("Opportunity Lost Reason", "lost_reason", "_Test Lost - Too Expensive")
