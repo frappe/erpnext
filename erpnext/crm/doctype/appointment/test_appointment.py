@@ -228,6 +228,36 @@ class TestAppointment(ERPNextTestSuite):
 		stored = frappe.db.get_value("Appointment", appointment.name, "verification_token")
 		self.assertEqual(stored, sha256_hash(params["key"]))
 
+	def test_guest_verification_keeps_the_visitor_session(self):
+		appointment = self._create_portal_appointment("portal_visitor_session@example.com")
+		_parsed, params = parse_verify_url(appointment._get_verify_url())
+		self.addCleanup(frappe.set_user, frappe.session.user)
+
+		frappe.set_user("Guest")
+		frappe.local.session.data = frappe._dict(csrf_token="token")
+		session = frappe.local.session
+		with patch.object(Appointment, "send_appointment_confirmed_email"):
+			frappe.local.form_dict = frappe._dict(params)
+			context = verify_index.get_context(frappe._dict())
+		frappe.local.flags.commit = False
+
+		self.assertTrue(context.success)
+		self.assertIs(frappe.local.session, session)
+		self.assertEqual((session.user, session.data.csrf_token), ("Guest", "token"))
+		appointment.reload()
+		self.assertEqual(appointment.status, "Open")
+		self.assertTrue(appointment.party and appointment.calendar_event)
+		self.assertEqual(get_assignees(appointment.name), ["Administrator"])
+
+	def test_verify_url_ignores_the_request_host(self):
+		appointment = self._create_portal_appointment("portal_visitor_host@example.com")
+		self.addCleanup(setattr, frappe.local, "request", getattr(frappe.local, "request", None))
+		set_request(method="GET", path="/book_appointment", headers={"Host": "attacker.example"})
+
+		# a configured host name would mask a regression to trusting the request host
+		with patch.dict(frappe.local.conf, {"host_name": None, "hostname": None}):
+			self.assertNotIn("attacker.example", appointment._get_verify_url())
+
 	def test_email_verification_within_expiry_window(self):
 		# Link used within the validity window - verification succeeds and the
 		# appointment gets linked, assigned and added to the calendar
@@ -306,6 +336,20 @@ class TestAppointment(ERPNextTestSuite):
 					"notes": "",
 				},
 			)
+
+	def test_portal_slot_requests_are_rate_limited(self):
+		from erpnext.www.book_appointment.index import SLOT_REQUESTS_PER_MINUTE
+
+		self.addCleanup(setattr, frappe.local, "request", getattr(frappe.local, "request", None))
+		self.addCleanup(frappe.cache.delete_keys, "rl:")
+		set_request(method="GET", path="/api/method/erpnext.www.book_appointment.index.get_appointment_slots")
+		self.addCleanup(setattr, frappe.local, "request_ip", getattr(frappe.local, "request_ip", None))
+		frappe.local.request_ip = "127.0.0.9"
+
+		with self.set_user("Guest"):
+			for _ in range(SLOT_REQUESTS_PER_MINUTE):
+				self.assertRaises(TypeError, get_appointment_slots)
+			self.assertRaises(frappe.RateLimitExceededError, get_appointment_slots)
 
 	def test_booked_slot_unavailable_on_portal(self):
 		from frappe.utils.data import get_system_timezone
