@@ -1,6 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe.model import mapper
@@ -48,15 +49,39 @@ class TestDunning(ERPNextTestSuite):
 				self.assertEqual(dunning.dunning_fee, 1 if fee is None else fee)
 				self.assertEqual(dunning.base_dunning_amount, dunning.dunning_amount * 100)
 
-	def test_missing_fee_requires_positive_conversion_rate(self):
+	def test_missing_fee_uses_company_currency_conversion_rate(self):
 		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
-		for rate in (0, -1):
+		for rate in (None, 0, -1):
 			with self.subTest(rate=rate):
 				dunning.reload()
 				dunning.dunning_fee = None
 				dunning.conversion_rate = rate
-				with self.assertRaisesRegex(frappe.ValidationError, "Conversion Rate must be greater"):
-					dunning.save()
+				dunning.save()
+				self.assertEqual(dunning.conversion_rate, 1)
+				self.assertEqual(dunning.dunning_fee, 10)
+				self.assertEqual(dunning.base_dunning_amount, dunning.dunning_amount)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_missing_fee_requires_positive_foreign_conversion_rate(self):
+		create_dunning_type("API Fee Notice", 100, 0, 0)
+		invoice = create_sales_invoice(
+			posting_date=add_days(today(), -15),
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+			debit_to="Debtors - _TC",
+		)
+		for rate in (None, 0, -1):
+			with self.subTest(rate=rate):
+				dunning = create_dunning_from_sales_invoice(invoice.name)
+				dunning.dunning_type = "API Fee Notice - _TC"
+				dunning.dunning_fee = None
+				dunning.conversion_rate = rate
+				with patch("erpnext.accounts.doctype.dunning.dunning.get_exchange_rate", return_value=0):
+					with self.assertRaisesRegex(frappe.ValidationError, "must be greater than zero"):
+						dunning.save()
 
 	def test_unallocated_payments_reduce_oldest_installments(self):
 		create_payment_terms_template_for_dunning()
@@ -196,11 +221,8 @@ class TestDunning(ERPNextTestSuite):
 		self.assertEqual(dunning.status, "Unresolved")
 		self.assertEqual(round(dunning.get_unpaid_dunning_amount(), 2), 10.41)
 
-	def test_dunning_can_be_cancelled_after_its_interest_was_paid(self):
-		"""
-		The payment collecting the interest links back to the dunning, which must not stand in
-		the way of cancelling it.
-		"""
+	def test_paid_dunning_requires_payment_cancellation(self):
+		"""Cancel the linked payment before cancelling a Dunning with paid charges."""
 		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
 		dunning.submit()
 
@@ -212,8 +234,18 @@ class TestDunning(ERPNextTestSuite):
 		dunning.reload()
 		self.assertEqual(dunning.status, "Resolved")
 
+		frappe.db.savepoint("dunning_cancellation")
+		with self.assertRaises(frappe.LinkExistsError):
+			dunning.cancel()
+		frappe.db.rollback(save_point="dunning_cancellation")
+
+		pe.reload()
+		pe.cancel()
+		dunning.reload()
 		dunning.cancel()
+		dunning.reload()
 		self.assertEqual(dunning.docstatus, 2)
+		self.assertEqual(dunning.status, "Cancelled")
 
 	def test_waived_interest_keeps_a_manually_resolved_dunning_resolved(self):
 		"""
