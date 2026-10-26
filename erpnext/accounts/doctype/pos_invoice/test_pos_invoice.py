@@ -1247,6 +1247,24 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		make_merge_log_for(pos)
 		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
 
+	def test_write_off_counts_as_paid(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 990})
+		pos.insert()
+		pos.submit()
+		self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
+
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 900})
+		pos.insert().submit()
+		self.assertEqual(pos.outstanding_amount, 90)
+
+		pos.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 90}])
+		self.assertEqual((pos.outstanding_amount, pos.change_amount, pos.status), (0, 0, "Paid"))
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name
