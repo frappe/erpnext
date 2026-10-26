@@ -53,10 +53,15 @@ export class DesignView {
 				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .form-group {
 					width: 100%; margin: 0;
 				}
-				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) input.form-control,
-				.bom-creator-view :is(.design-item-link, .design-uom-link) {
-					height: 28px; background-color: var(--fg-color); border: 1px solid var(--border-color);
+				.bom-creator-view .form-control {
+					height: 28px; background-color: var(--fg-color); border: 1px solid var(--outline-gray-2); box-shadow: none;
 				}
+				.bom-creator-view .form-control:hover { border-color: var(--outline-gray-3); box-shadow: var(--shadow-sm); }
+				.bom-creator-view .form-control:focus { border-color: var(--outline-gray-4); box-shadow: var(--shadow-sm); }
+				.bom-creator-view .awesomplete > [role="listbox"] { padding: 4px; border: none; box-shadow: var(--shadow-xl); }
+				.bom-creator-view .awesomplete > [role="listbox"] > [role="option"] { padding: 4px 8px; margin: 0; }
+				.bom-creator-view .awesomplete > [role="listbox"] strong { font-weight: 500; }
+				.bom-creator-view .awesomplete > [role="listbox"] .small { color: var(--ink-gray-5); }
 				.bom-creator-view :is(.design-item-link, .design-uom-link) { width: 100%; padding: 0 8px; text-align: left; cursor: text; }
 				.bom-creator-view.without-model .design-body { max-height: 560px; }
 				.bom-creator-view .design-model {

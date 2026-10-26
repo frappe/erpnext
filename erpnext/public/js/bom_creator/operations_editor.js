@@ -3,7 +3,6 @@ import { get_unused_tray, render_bom_bar } from "./operation_panels";
 
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
-const INPUT = "height:28px;background-color:var(--fg-color);border:1px solid var(--border-color);";
 const CARD = "border:1px solid var(--border-color);border-radius:var(--border-radius-md);overflow:hidden;";
 
 export class OperationsEditor {
@@ -112,7 +111,7 @@ export class OperationsEditor {
 			? `<input class="form-control input-sm" data-field="time_in_mins" data-operation="${
 					operation.name
 			  }"
-				value="${flt(operation.time_in_mins) || ""}" style="${INPUT}width:52px;text-align:right;">`
+				value="${flt(operation.time_in_mins) || ""}" style="width:52px;text-align:right;">`
 			: `<span style="width:52px;text-align:right;">${flt(operation.time_in_mins)}</span>`;
 		const remove = this.editable
 			? remove_button("remove-operation", { "data-operation": operation.name }, __("Remove Operation"))
@@ -130,7 +129,7 @@ export class OperationsEditor {
 		const value = this.get_bom_value(row.qty);
 		const quantity = this.editable
 			? `<input class="form-control input-sm" data-field="quantity" data-material="${row.name}"
-				value="${value}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
+				value="${value}" style="width:64px;text-align:right;margin-left:auto;">`
 			: `<span style="display:block;text-align:right;">${value}</span>`;
 		const remove = this.editable
 			? remove_button("remove-material", { "data-material": row.name }, __("Remove"))
@@ -265,7 +264,7 @@ export class OperationsEditor {
 		const quantity = this.get_bom_value(flt(operation.output_quantity) || 1);
 		return this.editable
 			? `<input class="form-control input-sm" data-field="output_quantity" data-operation="${operation.name}"
-				value="${quantity}" style="${INPUT}width:64px;text-align:right;margin-left:auto;">`
+				value="${quantity}" style="width:64px;text-align:right;margin-left:auto;">`
 			: `<span style="display:block;text-align:right;">${quantity}</span>`;
 	}
 
