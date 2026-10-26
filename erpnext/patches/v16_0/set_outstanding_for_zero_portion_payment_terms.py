@@ -6,7 +6,8 @@ def execute():
 	ps = DocType("Payment Schedule")
 	for parenttype in ("Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"):
 		parent = DocType(parenttype)
-		outstanding = ps.payment_amount - ps.paid_amount
+		settled = ps.paid_amount + ps.discounted_amount
+		outstanding = ps.payment_amount - settled
 
 		(
 			frappe.qb.update(ps)
@@ -20,6 +21,6 @@ def execute():
 				& (parent.docstatus == 1)
 				& (ps.invoice_portion == 0)
 				& (ps.outstanding == 0)
-				& (ps.paid_amount < ps.payment_amount)
+				& (settled < ps.payment_amount)
 			)
 		).run()
