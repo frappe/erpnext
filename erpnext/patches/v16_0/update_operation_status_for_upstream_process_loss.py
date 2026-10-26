@@ -6,7 +6,7 @@ def execute():
 		"Work Order",
 		filters=[
 			["docstatus", "=", 1],
-			["status", "in", ["Not Started", "In Process"]],
+			["status", "in", ["Not Started", "In Process", "Stopped"]],
 			["Work Order Operation", "process_loss_qty", ">", 0],
 		],
 		pluck="name",
