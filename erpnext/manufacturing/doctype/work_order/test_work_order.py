@@ -520,6 +520,25 @@ class TestWorkOrder(ERPNextTestSuite):
 		# 30 was lost against the 20 planned, so only 70 counts against the Sales Order.
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 70)
 
+	def test_sales_order_work_order_rounds_up_whole_units_for_process_loss(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		fg_item = make_item("_Test SO Whole Loss FG", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		rm_item = make_item("_Test SO Whole Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], quantity=10, process_loss_percentage=10)
+		so = make_sales_order(item_code=fg_item, qty=10, uom="Nos")
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+		# 10 Nos after 10% loss needs 11.11 Nos, so a Work Order for 12 Nos.
+		self.assertEqual(get_work_order_items(so.name)[0]["pending_qty"], 12)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, sales_order=so.name, qty=13, stock_uom="Nos", do_not_save=True
+		)
+		work_order.sales_order_item = so.items[0].name
+		self.assertRaises(OverProductionError, work_order.save)
+		work_order.qty = 12
+		work_order.submit()
+
 	def test_work_order_with_non_stock_item(self):
 		items = {
 			"Finished Good Test Item For non stock": 1,
