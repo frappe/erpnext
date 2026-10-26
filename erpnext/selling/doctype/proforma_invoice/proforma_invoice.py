@@ -53,7 +53,9 @@ class ProformaInvoice(Document):
 		self.clear_generated_values()
 
 	def validate_sales_order(self) -> None:
-		if frappe.db.get_value("Sales Order", self.sales_order, "docstatus") != 1:
+		# the proforma copies the order's lines, rates and totals into its PDF
+		sales_order = frappe.get_doc("Sales Order", self.sales_order, check_permission="read")
+		if sales_order.docstatus != 1:
 			frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
 
 	def set_item_values(self) -> None:
