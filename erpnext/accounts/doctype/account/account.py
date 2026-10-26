@@ -94,11 +94,14 @@ class Account(NestedSet):
 			super().on_update()
 
 	def onload(self):
-		role_allowed_for_frozen_entries = frappe.db.get_value(
+		if self.is_allowed_to_set_frozen_value():
+			self.set_onload("can_freeze_account", True)
+
+	def is_allowed_to_set_frozen_value(self) -> bool:
+		role_allowed_for_frozen_entries = frappe.get_cached_value(
 			"Company", self.company, "role_allowed_for_frozen_entries"
 		)
-		if not role_allowed_for_frozen_entries or role_allowed_for_frozen_entries in frappe.get_roles():
-			self.set_onload("can_freeze_account", True)
+		return bool(role_allowed_for_frozen_entries) and role_allowed_for_frozen_entries in frappe.get_roles()
 
 	def autoname(self):
 		from erpnext.accounts.utils import get_autoname_with_number
@@ -354,10 +357,10 @@ class Account(NestedSet):
 		if not doc_before_save or doc_before_save.freeze_account == self.freeze_account:
 			return
 
-		role_allowed_for_frozen_entries = frappe.get_cached_value(
-			"Company", self.company, "role_allowed_for_frozen_entries"
-		)
-		if not role_allowed_for_frozen_entries or role_allowed_for_frozen_entries not in frappe.get_roles():
+		if self.flags.ignore_root_company_validation:
+			return
+
+		if not self.is_allowed_to_set_frozen_value():
 			throw(_("You are not authorized to set Frozen value"))
 
 	def validate_balance_must_be_debit_or_credit(self):
@@ -461,6 +464,7 @@ class Account(NestedSet):
 			elif child_account:
 				# update the parent company's value in child companies
 				doc = frappe.get_doc("Account", child_account)
+				doc.flags.ignore_root_company_validation = True
 				parent_value_changed = False
 				for field in ["account_type", "freeze_account", "balance_must_be"]:
 					if doc.get(field) != self.get(field):
