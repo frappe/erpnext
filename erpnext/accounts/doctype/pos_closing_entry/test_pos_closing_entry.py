@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
@@ -558,6 +559,81 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			closing_entry.status = "Submitted"
 			closing_entry.retry()
 			consolidate_pos_invoices.assert_called_once()
+
+	def test_failed_cancel_keeps_closing_entry_submitted(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.cancel)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(1, "Submitted"),
+		)
+
+	def test_failed_submit_keeps_closing_entry_draft(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry).insert()
+
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.submit", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(0, "Draft"),
+		)
+
+	def test_failed_background_cancel_marks_cancelled_closing_entry_failed(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		for _ in range(10):
+			make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		job, job_arguments = enqueue.call_args.args[0], enqueue.call_args.kwargs
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(
+				frappe.ValidationError,
+				job,
+				merge_logs=job_arguments["merge_logs"],
+				closing_entry=job_arguments["closing_entry"],
+			)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Failed"),
+		)
+
+
+MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"
+
+
+@contextmanager
+def failures_handled_outside_tests():
+	frappe.db.savepoint("before_failure")
+	rollback = frappe.db.rollback
+	with (
+		patch.object(frappe, "in_test", False),
+		patch.dict(frappe.flags, {"in_test": False}),
+		patch.object(frappe.db, "rollback", lambda **kwargs: rollback(save_point="before_failure")),
+		patch.object(frappe.db, "commit"),
+	):
+		yield
 
 
 def init_user_and_profile(**args):
