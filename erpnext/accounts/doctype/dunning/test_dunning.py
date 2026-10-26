@@ -304,6 +304,62 @@ class TestDunning(ERPNextTestSuite):
 		self.assertEqual(updated_dunning.overdue_payments[1].sales_invoice, si2.name)
 		self.assertEqual(updated_dunning.overdue_payments[1].outstanding, si2.outstanding_amount)
 
+	def test_fetch_overdue_payments_with_dialog_args(self):
+		create_payment_terms_template_for_dunning()
+		invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -15), qty=1, rate=100, do_not_submit=True
+		)
+		invoice.payment_terms_template = "_Test 50-50 for Dunning"
+		invoice.submit()
+		method = "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning"
+
+		for selected in ([], [invoice.payment_schedule[1].name]):
+			with self.subTest(selected=selected):
+				dunning = mapper.map_docs(
+					method,
+					json.dumps([invoice.name]),
+					json.dumps({"doctype": "Dunning", "company": invoice.company}),
+					args=json.dumps(
+						{
+							"customer": invoice.customer,
+							"allow_child_item_selection": int(bool(selected)),
+							"filtered_children": selected,
+						}
+					),
+				)
+				self.assertEqual(
+					[row.payment_schedule for row in dunning.overdue_payments],
+					selected or [row.name for row in invoice.payment_schedule],
+				)
+				self.assertEqual(dunning.total_outstanding, 50 if selected else 100)
+
+		with self.set_user("Guest"):
+			with self.assertRaises(frappe.PermissionError):
+				mapper.map_docs(
+					method,
+					json.dumps([invoice.name]),
+					json.dumps({"doctype": "Dunning", "company": invoice.company}),
+					args=json.dumps({"customer": invoice.customer, "filtered_children": []}),
+				)
+
+	def test_fetch_overdue_payments_with_positional_ignore_permissions(self):
+		invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -15), qty=1, rate=100
+		)
+
+		for ignore_permissions in (False, True):
+			with self.subTest(ignore_permissions=ignore_permissions):
+				dunning = create_dunning_from_sales_invoice(invoice.name, None, ignore_permissions)
+				self.assertEqual(dunning.overdue_payments[0].sales_invoice, invoice.name)
+				self.assertEqual(dunning.total_outstanding, 100)
+
+		with self.set_user("Guest"):
+			# Ignoring mapper permissions does not bypass Customer permissions during validation.
+			for ignore_permissions in (False, True):
+				with self.subTest(ignore_permissions=ignore_permissions):
+					with self.assertRaises(frappe.PermissionError):
+						create_dunning_from_sales_invoice(invoice.name, None, ignore_permissions)
+
 	def test_dunning_and_payment_against_partially_due_invoice(self):
 		"""
 		Create SI with first installment overdue. Check impact of Dunning and Payment Entry.
