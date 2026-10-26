@@ -250,7 +250,13 @@ def _process_subitem(
 
 	if explode:
 		# A manufactured sub-assembly is made before its process loss; a phantom is not made at all.
-		loss_percentage = 0 if d.is_phantom_item else get_planned_process_loss_percentage(child_bom)
+		qty = (
+			d.qty
+			if d.is_phantom_item
+			else get_qty_before_process_loss(
+				d.qty, get_planned_process_loss_percentage(child_bom), d.stock_uom
+			)
+		)
 		get_subitems(
 			doc,
 			data,
@@ -259,7 +265,7 @@ def _process_subitem(
 			company,
 			include_non_stock_items,
 			include_subcontracted_items,
-			get_qty_before_process_loss(d.qty, loss_percentage, d.stock_uom),
+			qty,
 		)
 
 

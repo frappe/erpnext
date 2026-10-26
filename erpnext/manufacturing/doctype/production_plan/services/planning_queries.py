@@ -28,10 +28,7 @@ def get_planned_loss_percentage(loss_percentage):
 
 def get_qty_before_process_loss(qty, loss_percentage, uom):
 	"""Quantity to make so that `qty` is left after `loss_percentage` process loss."""
-	loss_percentage = flt(loss_percentage)
-	if not loss_percentage or loss_percentage >= 100:
-		return flt(qty)
-
+	loss_percentage = get_planned_loss_percentage(loss_percentage)
 	return round_up_to_whole_unit(flt(qty) / (1 - loss_percentage / 100), uom)
 
 
