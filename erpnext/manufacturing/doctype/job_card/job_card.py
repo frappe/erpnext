@@ -191,6 +191,8 @@ class JobCard(Document):
 		self.set_operation_id()
 		self.set_hour_rate()
 		self.validate_sequence_id()
+		if self.docstatus == 1:
+			self.validate_input_from_previous_operations()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
 		if self.sub_operations:
@@ -1852,6 +1854,41 @@ class JobCard(Document):
 					bold(row.operation),
 				)
 			)
+
+	def validate_input_from_previous_operations(self):
+		"""Completed qty and process loss together can't exceed what the previous operation completed."""
+		if self.is_corrective_job_card or self.track_semi_finished_goods or not flt(self.process_loss_qty):
+			return
+
+		previous_operations = self.get_previous_operations() if self.work_order and self.sequence_id else []
+		if not previous_operations:
+			return
+
+		previous = min(previous_operations, key=lambda row: flt(row.completed_qty))
+		data = self.get_current_operation_data()
+		precision = self.precision("total_completed_qty")
+		input_qty = flt(
+			self.get_current_operation_completed_qty()
+			+ flt(data[0].process_loss_qty if data else 0)
+			+ flt(self.process_loss_qty),
+			precision,
+		)
+		if input_qty <= flt(previous.completed_qty, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Job Card {0}: Completed Qty and Process Loss of operation {1} add up to {2}, but the previous operation {3} completed only {4}. Reduce For Quantity to {5}."
+			).format(
+				bold(self.name),
+				bold(self.operation),
+				bold(self.get_qty_with_uom(input_qty)),
+				bold(previous.operation),
+				bold(self.get_qty_with_uom(previous.completed_qty)),
+				bold(flt(self.for_quantity - input_qty + flt(previous.completed_qty), precision)),
+			),
+			OperationSequenceError,
+		)
 
 	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
 		manufactured_qty = flt(row.manufactured_qty)
