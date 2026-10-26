@@ -97,7 +97,7 @@ class LoyaltyService:
 
 		points_to_redeem = doc.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			if lp_entry.invoice_type != doc.doctype or lp_entry.invoice == doc.name:
+			if lp_entry.invoice == doc.name:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			redeemed_points = min(available_points, points_to_redeem)
