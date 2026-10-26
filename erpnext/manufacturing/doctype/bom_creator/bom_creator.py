@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
+from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.model.document import Document
 from frappe.utils import cint, flt, sbool
 from frappe.utils.background_jobs import is_job_enqueued
@@ -504,8 +505,9 @@ def get_bom_rows(bom_no: str, include_sub_assemblies: bool, visited: set) -> lis
 
 
 def read_design_file(file_url: str) -> dict:
-	file = frappe.get_doc("File", {"file_url": file_url})
-	file.check_permission("read")
+	file = find_file_by_url(file_url)
+	if not file:
+		frappe.throw(_("You cannot read the design file {0}.").format(file_url), frappe.PermissionError)
 
 	extension = file.file_name.rsplit(".", 1)[-1].lower()
 	if extension not in DESIGN_FILE_READERS:
