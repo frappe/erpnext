@@ -3292,6 +3292,7 @@ class TestJobCard(ERPNextTestSuite):
 		jc.process_loss_qty = 5
 		jc.validate_semi_finished_goods()
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_lowered_overproduction_allowance_checks_only_job_card_operation(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 
