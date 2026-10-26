@@ -113,7 +113,7 @@ def get_balance_sheet_data(fiscal_year, companies, company_columns, filters):
 		data.append(total_credit)
 
 	report_summary, primitive_summary = get_bs_summary(
-		companies,
+		get_summary_companies(companies, filters),
 		asset,
 		liability,
 		equity,
@@ -142,7 +142,7 @@ def prepare_companywise_opening_balance(asset_data, liability_data, equity_data,
 
 		opening_balance[company] = opening_value
 
-	if opening_balance:
+	if any(flt(value, 3) for value in opening_balance.values()):
 		return _("Previous Financial Year is not closed"), opening_balance
 
 	return "", {}
@@ -184,10 +184,26 @@ def get_profit_loss_data(fiscal_year, companies, company_columns, filters):
 	chart = get_pl_chart_data(filters, company_columns, income, expense, net_profit_loss, company_currency)
 
 	report_summary, primitive_summary = get_pl_summary(
-		companies, "", income, expense, net_profit_loss, company_currency, filters, True
+		get_summary_companies(companies, filters),
+		"",
+		income,
+		expense,
+		net_profit_loss,
+		company_currency,
+		filters,
+		True,
 	)
 
 	return data, None, chart, report_summary
+
+
+def get_summary_companies(companies, filters):
+	"""Company columns that can be added up in the summary cards without mixing currencies."""
+	if filters.get("presentation_currency"):
+		return list(companies)
+
+	currencies = {erpnext.get_company_currency(company) for company in companies}
+	return list(companies) if len(currencies) == 1 else [filters.company]
 
 
 def get_income_expense_data(companies, fiscal_year, filters):
@@ -255,7 +271,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			data.append(account_data)
 			section_data.append(account_data)
 
-		add_total_row_account(
+		add_cash_flow_total_row(
 			data,
 			section_data,
 			cash_flow_account["section_footer"],
@@ -263,11 +279,10 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			company_currency,
 			summary_data,
 			filters,
-			True,
 		)
 
-	add_total_row_account(
-		data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters, True
+	add_cash_flow_total_row(
+		data, data, _("Net Change in Cash"), companies, company_currency, summary_data, filters
 	)
 
 	report_summary = get_cash_flow_summary(summary_data, company_currency)
@@ -275,52 +290,79 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 	return data, report_summary
 
 
-def get_account_type_based_data(account_type, companies, fiscal_year, filters):
-	data = {}
-	total = 0
-	filters.account_type = account_type
-	filters.start_date = fiscal_year.year_start_date
-	filters.end_date = fiscal_year.year_end_date
-
-	for company in companies:
-		amount = get_account_type_based_gl_data(company, frappe._dict(filters, company=company))
-
-		if amount and account_type == "Depreciation":
-			amount *= -1
-
-		total += amount
-		data.setdefault(company, amount)
-
-	data["total"] = total
+def add_cash_flow_total_row(
+	out: list, rows: list, label: str, companies: dict, currency: str, summary_data: dict, filters: dict
+) -> None:
+	"""Total every company column; the summary card shows only the group company when accumulating."""
+	column_filters = frappe._dict(filters, accumulated_in_group_company=0)
+	total_row = add_total_row_account(
+		out, rows, label, companies, currency, summary_data, column_filters, True
+	)
 
 	if filters.get("accumulated_in_group_company"):
-		own_amounts = data.copy()
-		for company in companies:
-			data[company] = get_accumulated_amount(company, companies[company], own_amounts, filters)
+		summary_data[label] = total_row.get(filters.company, 0.0)
 
-	set_group_company_total(data, filters)
+
+def get_account_type_based_data(account_type, companies, fiscal_year, filters):
+	gl_filters = frappe._dict(filters, account_type=account_type)
+	gl_filters.start_date, gl_filters.end_date = get_period_dates(fiscal_year, filters)
+
+	own_amounts = {company: get_company_account_type_amount(company, gl_filters) for company in companies}
+	data = {company: get_column_amount(company, companies, own_amounts, gl_filters) for company in companies}
+
+	if filters.get("accumulated_in_group_company"):
+		data["total"] = data[filters.company]
+	else:
+		data["total"] = sum(own_amounts.values())
+
 	return data
 
 
-def get_accumulated_amount(company, subsidiaries, own_amounts, filters):
-	"""The company's amount plus its subsidiaries', converted to the company's currency."""
+def get_period_dates(fiscal_year, filters):
+	if filters.filter_based_on == "Date Range":
+		return filters.period_start_date, filters.period_end_date
+
+	return fiscal_year.year_start_date, fiscal_year.year_end_date
+
+
+def get_company_account_type_amount(company, filters):
+	amount = get_account_type_based_gl_data(company, filters)
+	if filters.account_type == "Depreciation":
+		amount *= -1
+
+	return convert_to_presentation_currency_amount(amount, company, filters)
+
+
+def convert_to_presentation_currency_amount(amount, company, filters):
+	presentation_currency = filters.get("presentation_currency")
 	company_currency = erpnext.get_company_currency(company)
 
-	accumulated_amount = 0
-	for subsidiary in subsidiaries:
-		amount = own_amounts[subsidiary]
-		subsidiary_currency = erpnext.get_company_currency(subsidiary)
-		if (
-			amount
-			and subsidiary != company
-			and not filters.get("presentation_currency")
-			and subsidiary_currency != company_currency
-		):
-			amount = convert(amount, company_currency, subsidiary_currency, filters.end_date)
+	if not presentation_currency or presentation_currency == company_currency:
+		return amount
 
-		accumulated_amount += amount
+	return flt(convert(amount, presentation_currency, company_currency, filters.end_date), 3)
 
-	return accumulated_amount
+
+def get_column_amount(company, companies, own_amounts, filters):
+	"""Amount for a company column, including its subsidiaries when accumulating into group companies."""
+	if not filters.get("accumulated_in_group_company"):
+		return own_amounts[company]
+
+	amount = sum(
+		convert_to_column_currency(own_amounts[subsidiary], subsidiary, company, filters)
+		for subsidiary in companies[company]
+	)
+	return flt(amount, 3)
+
+
+def convert_to_column_currency(amount, company, column_company, filters):
+	column_currency = erpnext.get_company_currency(column_company)
+	company_currency = erpnext.get_company_currency(company)
+
+	if filters.get("presentation_currency") or column_currency == company_currency:
+		return amount
+
+	return convert(amount, column_currency, company_currency, filters.end_date)
 
 
 def get_company_columns(companies, filters):
