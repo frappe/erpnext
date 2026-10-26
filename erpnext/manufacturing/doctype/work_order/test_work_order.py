@@ -1564,7 +1564,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
 
 		wo_order = make_wo_order_test_record(item=fg_item, qty=1, skip_transfer=True, do_not_submit=True)
-		self.assertRaisesRegex(frappe.ValidationError, "Serial No Series", wo_order.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "Serial Number Series", wo_order.submit)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_no_reset_message_for_empty_finished_good_row(self):

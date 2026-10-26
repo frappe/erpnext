@@ -911,14 +911,7 @@ class WorkOrder(Document):
 		batch_capacity = self.get_batch_capacity() if self.has_batch_no else []
 
 		if not item_details.serial_no_series:
-			frappe.throw(
-				_("Set Serial No Series in Item {0} or disable {1} in {2}").format(
-					get_link_to_form("Item", self.production_item),
-					frappe.bold(_("Make Serial No / Batch from Work Order")),
-					get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
-				),
-				title=_("Serial No Series Missing"),
-			)
+			self.throw_missing_serial_no_series()
 
 		serial_nos = get_available_serial_nos(
 			item_details.serial_no_series, qty or self.qty, self.production_item
@@ -981,6 +974,22 @@ class WorkOrder(Document):
 				).format(frappe.bold(self.production_item)),
 			)
 			raise
+
+	def throw_missing_serial_no_series(self):
+		frappe.throw(
+			_("Set {0} in Item {1} or disable {2} in {3}").format(
+				frappe.bold(_(frappe.get_meta("Item").get_label("serial_no_series"))),
+				get_link_to_form("Item", self.production_item),
+				frappe.bold(
+					_(
+						frappe.get_meta("Manufacturing Settings").get_label(
+							"make_serial_no_batch_from_work_order"
+						)
+					)
+				),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			)
+		)
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
