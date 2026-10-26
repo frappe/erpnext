@@ -2694,13 +2694,14 @@ def run_ledger_health_checks():
 	period_end = getdate()
 	period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
 	companies = [x.company for x in health_monitor_settings.companies]
+	scan = frappe._dict(companies=companies, from_date=period_start, to_date=period_end)
 	run_date = get_datetime()
 
 	if health_monitor_settings.debit_credit_mismatch:
 		vouchers = get_vouchers_reported_by(
 			"Voucher-wise Balance", companies, {"from_date": period_start, "to_date": period_end}
 		)
-		update_ledger_health("debit_credit_mismatch", vouchers, run_date)
+		update_ledger_health("debit_credit_mismatch", vouchers, run_date, scan)
 
 	if health_monitor_settings.general_and_payment_ledger_mismatch:
 		vouchers = get_vouchers_reported_by(
@@ -2708,7 +2709,7 @@ def run_ledger_health_checks():
 			companies,
 			{"period_start_date": period_start, "period_end_date": period_end},
 		)
-		update_ledger_health("general_and_payment_ledger_mismatch", vouchers, run_date)
+		update_ledger_health("general_and_payment_ledger_mismatch", vouchers, run_date, scan)
 
 
 def get_vouchers_reported_by(report_name, companies, filters):
@@ -2721,16 +2722,8 @@ def get_vouchers_reported_by(report_name, companies, filters):
 	return vouchers
 
 
-def update_ledger_health(check, vouchers, run_date):
-	still_reported, stale = {}, []
-	for row in frappe.get_all(
-		"Ledger Health", filters={check: 1}, fields=["name", "voucher_type", "voucher_no"], order_by="name"
-	):
-		voucher = (row.voucher_type, row.voucher_no)
-		if voucher in vouchers and voucher not in still_reported:
-			still_reported[voucher] = row.name
-		else:
-			stale.append(row.name)
+def update_ledger_health(check, vouchers, run_date, scan):
+	still_reported, stale = get_ledger_health_records(check, vouchers, scan)
 
 	if stale:
 		frappe.db.delete("Ledger Health", {"name": ("in", stale)})
@@ -2745,6 +2738,40 @@ def update_ledger_health(check, vouchers, run_date):
 		doc = frappe.new_doc("Ledger Health")
 		doc.update({"voucher_type": voucher_type, "voucher_no": voucher_no, check: 1, "checked_on": run_date})
 		doc.save()
+
+
+def get_ledger_health_records(check, vouchers, scan):
+	still_reported, not_reported = {}, {}
+	for row in frappe.get_all(
+		"Ledger Health", filters={check: 1}, fields=["name", "voucher_type", "voucher_no"], order_by="name"
+	):
+		voucher = (row.voucher_type, row.voucher_no)
+		if voucher in vouchers and voucher not in still_reported:
+			still_reported[voucher] = row.name
+		else:
+			not_reported.setdefault(voucher, []).append(row.name)
+
+	rechecked = vouchers | get_vouchers_in_scan(not_reported.keys() - vouchers, scan)
+	stale = [name for voucher in not_reported.keys() & rechecked for name in not_reported[voucher]]
+	return still_reported, stale
+
+
+def get_vouchers_in_scan(vouchers, scan):
+	if not vouchers or not scan.companies:
+		return set()
+
+	gle = frappe.qb.DocType("GL Entry")
+	scanned = (
+		frappe.qb.from_(gle)
+		.select(gle.voucher_type, gle.voucher_no)
+		.distinct()
+		.where(
+			gle.company.isin(scan.companies)
+			& gle.posting_date.between(scan.from_date, scan.to_date)
+			& gle.voucher_no.isin([voucher_no for _voucher_type, voucher_no in vouchers])
+		)
+	).run()
+	return {tuple(row) for row in scanned} & vouchers
 
 
 def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):

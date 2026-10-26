@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import qb
-from frappe.utils import nowdate
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import run_ledger_health_checks
@@ -34,11 +34,11 @@ class TestLedgerHealth(ERPNextTestSuite, AccountsTestMixin):
 		lh = qb.DocType("Ledger Health")
 		qb.from_(lh).delete().run()
 
-	def create_journal(self):
+	def create_journal(self, posting_date=None):
 		je = frappe.new_doc("Journal Entry")
 		je.company = self.company
 		je.voucher_type = "Journal Entry"
-		je.posting_date = nowdate()
+		je.posting_date = posting_date or nowdate()
 		je.append(
 			"accounts",
 			{
@@ -156,3 +156,27 @@ class TestLedgerHealth(ERPNextTestSuite, AccountsTestMixin):
 		frappe.db.set_value("GL Entry", gle, "credit", 10000)
 		run_ledger_health_checks()
 		self.assertEqual(self.get_ledger_health_rows(), [])
+
+	def record_unbalanced_journal(self, posting_date=None):
+		self.create_journal(posting_date)
+		gle = frappe.db.get_value("GL Entry", {"voucher_no": self.je.name, "account": self.income_account})
+		frappe.db.set_value("GL Entry", gle, "credit", 9000)
+		run_ledger_health_checks()
+		self.assertEqual(len(self.get_ledger_health_rows()), 1)
+
+	def test_mismatch_outside_monitored_days_is_kept(self):
+		frappe.db.set_single_value("Ledger Health Monitor", "monitor_for_last_x_days", 120)
+		self.record_unbalanced_journal(posting_date=add_days(nowdate(), -90))
+
+		frappe.db.set_single_value("Ledger Health Monitor", "monitor_for_last_x_days", 60)
+		run_ledger_health_checks()
+		self.assertEqual(len(self.get_ledger_health_rows()), 1)
+
+	def test_mismatch_kept_when_no_company_is_monitored(self):
+		self.record_unbalanced_journal()
+
+		monitor_settings = frappe.get_doc("Ledger Health Monitor")
+		monitor_settings.companies = []
+		monitor_settings.save()
+		run_ledger_health_checks()
+		self.assertEqual(len(self.get_ledger_health_rows()), 1)
