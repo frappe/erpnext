@@ -12,6 +12,9 @@ frappe.ui.form.on("BOM Creator", {
 			filters: { item: locals[cdt][cdn].item_code, docstatus: 1 },
 		}));
 		frm.set_query("default_warehouse", (doc) => ({ filters: { company: doc.company, is_group: 0 } }));
+		frm.get_field("design_file").df.options = {
+			restrictions: { allowed_file_types: [".step", ".stp", ".csv"] },
+		};
 	},
 
 	onload(frm) {
