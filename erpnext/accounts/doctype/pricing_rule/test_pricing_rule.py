@@ -2133,6 +2133,31 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].discount_percentage, 10)
 		self.assertEqual(si.items[0].rate, 90)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_cumulative_totals_are_read_once_per_document(self):
+		from unittest.mock import patch
+
+		item = make_item("PR Cumulative Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item,
+			is_cumulative=1,
+			discount_percentage=15,
+			applicable_for="Customer Group",
+			customer_group="All Customer Groups",
+			valid_from=add_days(today(), -30),
+			valid_upto=add_days(today(), 30),
+		)
+		si = create_sales_invoice(item_code=item, qty=1, do_not_save=True)
+		for _row in range(4):
+			si.append("items", {**si.items[0].as_dict(), "name": None, "idx": None})
+
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as sql:
+			si.insert()
+
+		cumulative_queries = [d for d in sql.call_args_list if "SUM(" in str(d.args[0]).upper()]
+		self.assertEqual(len(cumulative_queries), 1)
+		self.assertEqual(si.items[4].discount_percentage, 15)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)

@@ -11,6 +11,7 @@ import frappe
 from frappe import _, bold
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
+from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
@@ -534,7 +535,19 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
 
 
 def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
-	doctype = doc.get("parenttype") or doc.doctype
+	return get_cumulative_qty_and_amount(
+		pr_doc.name,
+		doc.get("parenttype") or doc.doctype,
+		doc.get("company"),
+		tuple(sorted(items or [])),
+		doc.get("name"),
+		str(doc.get("modified")),
+	)
+
+
+@request_cache
+def get_cumulative_qty_and_amount(pricing_rule, doctype, company, items, transaction, transaction_modified):
+	pr_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 	parent = frappe.qb.DocType(doctype)
 	child = frappe.qb.DocType(f"{doctype} Item")
 	date_field = (
@@ -550,8 +563,8 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 		.where(parent[date_field][pr_doc.valid_from : pr_doc.valid_upto])
 	)
 
-	if doc.get("company"):
-		query = query.where(parent.company == doc.get("company"))
+	if company:
+		query = query.where(parent.company == company)
 
 	if pr_doc.warehouse:
 		query = query.where(child.warehouse.isin(get_child_warehouses(pr_doc.warehouse)))
@@ -562,7 +575,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 	query = filter_cumulative_query_by_applicable_for(query, parent, pr_doc, doctype)
 	sum_qty, sum_amt = query.run()[0]
 
-	return [flt(sum_qty), flt(sum_amt)]
+	return (flt(sum_qty), flt(sum_amt))
 
 
 def filter_cumulative_query_by_applicable_for(query, parent, pr_doc, doctype):
