@@ -171,6 +171,13 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(finished_good_bom.with_operations, 0)
 		self.assertEqual(design.status, "Completed")
 
+	def test_design_with_created_boms_cannot_be_changed(self):
+		design = make_mapped_design()
+		make_boms(design)
+
+		design.qty = 2
+		self.assertRaisesRegex(frappe.ValidationError, "new revision", design.save)
+
 	def test_finished_good_bom_is_made_for_the_finished_good_quantity(self):
 		design = make_mapped_design()
 		design.qty = 2

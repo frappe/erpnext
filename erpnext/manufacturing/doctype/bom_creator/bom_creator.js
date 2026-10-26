@@ -28,6 +28,10 @@ frappe.ui.form.on("BOM Creator", {
 		frm.page.wrapper.css("--page-max-width", "100%");
 		frm.events.render_design_view(frm);
 		frm.events.add_actions(frm);
+		frm.toggle_enable(
+			frm.meta.fields.filter((df) => df.allow_on_submit && !df.read_only).map((df) => df.fieldname),
+			frm.doc.docstatus !== 1 || ["Submitted", "Failed"].includes(frm.doc.status)
+		);
 		frm.previous_item_name = frm.doc.item_name;
 		if (frm.doc.status === "Failed") {
 			frm.dashboard.set_headline(
