@@ -409,6 +409,21 @@ class TestAccount(ERPNextTestSuite):
 		account.parent_account = "Current Assets - _TC"
 		account.save()
 
+	def test_company_of_account_cannot_be_changed(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		ledger = create_account(
+			account_name="Company Change Ledger",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+		make_journal_entry(ledger, "Cash - _TC", 300, submit=True)
+
+		account = frappe.get_doc("Account", ledger)
+		account.company = "_Test Company 1"
+		account.parent_account = "Current Assets - _TC1"
+		self.assertRaises(frappe.CannotChangeConstantError, account.save)
+
 
 def walk_chart_tree(tree):
 	"""Yield (account_name, details) for every account in a chart of accounts tree"""
