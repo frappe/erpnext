@@ -260,18 +260,6 @@ class Employee(NestedSet):
 		if self.image:
 			if not user.user_image or self.has_value_changed("image"):
 				user.user_image = self.image
-				try:
-					frappe.get_doc(
-						{
-							"doctype": "File",
-							"file_url": self.image,
-							"attached_to_doctype": "User",
-							"attached_to_name": self.user_id,
-						}
-					).insert(ignore_if_duplicate=True)
-				except frappe.DuplicateEntryError:
-					# already exists
-					pass
 
 		user.save()
 
