@@ -147,7 +147,36 @@ class TestOpportunity(unittest.TestCase):
 		quoted = make_opportunity(with_items=0)
 		submit_quotation(quoted)
 		self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([quoted.name]), "Lost")
+		quoted.reload()
+		quoted.status = "Lost"
+		self.assertRaises(frappe.ValidationError, quoted.save)
 		self.assertEqual(frappe.db.get_value("Opportunity", quoted.name, "status"), "Quotation")
+
+	def test_status_can_be_changed_by_hand_while_a_quotation_is_open(self):
+		opportunity = make_opportunity(with_items=0)
+		submit_quotation(opportunity)
+
+		for status in ("Replied", "Open", "Closed"):
+			set_multiple_status(json.dumps([opportunity.name]), status)
+			self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), status)
+
+		self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), "Converted")
+		set_multiple_status(json.dumps([opportunity.name]), "Quotation")
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Quotation")
+
+	def test_converted_opportunity_keeps_its_status_while_ordered(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		opportunity = make_opportunity(with_items=0)
+		quotation = submit_quotation(opportunity)
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = today()
+		sales_order.submit()
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
+
+		for status in ("Open", "Closed", "Quotation", "Lost"):
+			self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), status)
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
 
 	def test_form_hides_contacts_of_a_customer_the_user_cannot_read(self):
 		contact = frappe.get_doc(
