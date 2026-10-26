@@ -569,15 +569,15 @@ class POSInvoice(SalesInvoice):
 
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
-		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
 		self.change_amount = self.base_change_amount = 0
-		if grand_total < flt(self.paid_amount):
+		if grand_total < flt(
+			flt(self.paid_amount) + flt(self.write_off_amount), self.precision("grand_total")
+		):
 			self.change_amount = flt(
 				self.paid_amount - grand_total + flt(self.write_off_amount), self.precision("change_amount")
 			)
 			self.base_change_amount = flt(
-				flt(self.base_paid_amount) - base_grand_total + flt(self.base_write_off_amount),
-				self.precision("base_change_amount"),
+				self.change_amount * flt(self.conversion_rate), self.precision("base_change_amount")
 			)
 
 		if flt(self.change_amount) and not self.account_for_change_amount:

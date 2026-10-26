@@ -1287,6 +1287,13 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			pos.insert().submit()
 			self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
 
+	def test_payment_and_write_off_above_total_gives_change(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 995})
+		pos.insert().submit()
+		self.assertEqual((pos.change_amount, pos.base_change_amount, pos.outstanding_amount), (5, 5, 0))
+
 	def test_return_updates_status_of_original(self):
 		pos = create_pos_invoice(qty=2, rate=100, do_not_save=1)
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200})
