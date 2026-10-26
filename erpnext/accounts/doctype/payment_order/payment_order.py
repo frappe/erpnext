@@ -10,6 +10,7 @@ from frappe.utils import nowdate
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	get_payment_request_status,
 	get_requested_amount_in_party_account_currency,
+	update_payment_requests_as_per_pe_references,
 )
 from erpnext.accounts.party import get_party_account
 
@@ -279,7 +280,7 @@ def get_supplier_query(doctype: str, txt: str, searchfield: str, start: int, pag
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_records(name: str, supplier: str, mode_of_payment: str | None = None):
 	doc = frappe.get_doc("Payment Order", name)
 	doc.check_permission()
@@ -287,6 +288,16 @@ def make_payment_records(name: str, supplier: str, mode_of_payment: str | None =
 
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
+	rows = [
+		d
+		for d in doc.references
+		if d.supplier == supplier
+		and not d.payment_reference
+		and (not mode_of_payment or mode_of_payment == d.mode_of_payment)
+	]
+	if not rows:
+		frappe.throw(_("Journal Entries are already created for Supplier {0}").format(supplier))
+
 	je = frappe.new_doc("Journal Entry")
 	je.company = doc.company
 	je.payment_order = doc.name
@@ -297,26 +308,65 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	if mode_of_payment and mode_of_payment_type.get(mode_of_payment) == "Cash":
 		je.voucher_type = "Cash Entry"
 
-	paid_amt = 0
 	party_account = get_party_account("Supplier", supplier, doc.company)
-	for d in doc.references:
-		if d.supplier == supplier and (not mode_of_payment or mode_of_payment == d.mode_of_payment):
-			je.append(
-				"accounts",
-				{
-					"account": party_account,
-					"debit_in_account_currency": d.amount,
-					"party_type": "Supplier",
-					"party": supplier,
-					"reference_type": d.reference_doctype,
-					"reference_name": d.reference_name,
-				},
-			)
+	for d in rows:
+		je.append(
+			"accounts",
+			{
+				"account": party_account,
+				"debit_in_account_currency": d.amount,
+				"party_type": "Supplier",
+				"party": supplier,
+				"reference_type": d.reference_doctype,
+				"reference_name": d.reference_name,
+			},
+		)
 
-			paid_amt += d.amount
-
-	je.append("accounts", {"account": doc.account, "credit_in_account_currency": paid_amt})
+	je.append("accounts", {"account": doc.account, "credit_in_account_currency": sum(d.amount for d in rows)})
 
 	je.flags.ignore_mandatory = True
 	je.save()
+	set_payment_reference([d.name for d in rows], je.name)
 	frappe.msgprint(_("{0} {1} created").format(je.doctype, je.name))
+
+
+def set_payment_reference(rows: list[str], journal_entry: str):
+	order_reference = frappe.qb.DocType("Payment Order Reference")
+	frappe.qb.update(order_reference).set(order_reference.payment_reference, journal_entry).where(
+		order_reference.name.isin(rows)
+	).run()
+
+
+def clear_payment_reference(journal_entry):
+	if not journal_entry.payment_order:
+		return
+
+	order_reference = frappe.qb.DocType("Payment Order Reference")
+	frappe.qb.update(order_reference).set(order_reference.payment_reference, None).where(
+		order_reference.parent == journal_entry.payment_order
+	).where(order_reference.payment_reference == journal_entry.name).run()
+
+
+def update_payment_requests_from_journal_entry(journal_entry, cancel=False):
+	if not journal_entry.payment_order:
+		return
+
+	references = [
+		frappe._dict(payment_request=row.payment_request, allocated_amount=row.amount)
+		for row in frappe.get_all(
+			"Payment Order Reference",
+			filters={
+				"parent": journal_entry.payment_order,
+				"parenttype": "Payment Order",
+				"payment_reference": journal_entry.name,
+				"payment_request": ["is", "set"],
+			},
+			fields=["payment_request", "amount"],
+		)
+	]
+	update_payment_requests_as_per_pe_references(references, cancel=cancel)
+
+	if cancel:
+		for row in references:
+			frappe.db.set_value("Payment Request", row.payment_request, "status", "Payment Ordered")
+		clear_payment_reference(journal_entry)
