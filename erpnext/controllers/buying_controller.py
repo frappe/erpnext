@@ -5,6 +5,7 @@
 import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import render_address
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, getdate
 from frappe.utils.data import nowtime
 
@@ -1101,3 +1102,16 @@ def update_regional_item_valuation_rate(doc):
 def get_stock_qty(row, qty) -> float:
 	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+
+def get_linked_asset_qty(detail_field, details, exclude_asset=None):
+	asset = frappe.qb.DocType("Asset")
+	query = (
+		frappe.qb.from_(asset)
+		.select(asset[detail_field], Sum(asset.asset_quantity))
+		.where((asset[detail_field].isin(details)) & (asset.docstatus < 2))
+		.groupby(asset[detail_field])
+	)
+	if exclude_asset:
+		query = query.where(asset.name != exclude_asset)
+	return dict(query.run())
