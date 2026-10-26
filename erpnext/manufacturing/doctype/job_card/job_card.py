@@ -1883,13 +1883,14 @@ class JobCard(Document):
 
 		frappe.throw(
 			_(
-				"Job Card {0}: Completed Qty and Process Loss of operation {1} add up to {2}, but the previous operation {3} completed only {4}. Reduce For Quantity to {5}."
+				"Job Card {0}: Completed Qty and Process Loss of operation {1} add up to {2}, but the previous operation {3} completed only {4}. Reduce {5} to {6}."
 			).format(
 				bold(self.name),
 				bold(self.operation),
 				bold(self.get_qty_with_uom(input_qty)),
 				bold(previous.operation),
 				bold(self.get_qty_with_uom(previous.completed_qty)),
+				_(self.meta.get_label("for_quantity")),
 				bold(flt(self.for_quantity - input_qty + flt(previous.completed_qty), precision)),
 			),
 			OperationSequenceError,
