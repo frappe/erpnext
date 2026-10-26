@@ -659,7 +659,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 		create_stock_reconciliation(
 			item_code="_Test Item Home Desktop 100",
@@ -667,7 +667,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 
 		dn = create_delivery_note(
@@ -738,7 +738,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 		create_stock_reconciliation(
 			item_code="_Test Item Home Desktop 100",
@@ -746,7 +746,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 
 		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
@@ -1004,14 +1004,14 @@ class TestDeliveryNote(ERPNextTestSuite):
 				item_code="_Test Item",
 				warehouse=warehouse,
 				company=company,
-				expense_account="Stock Adjustment - TCP1",
+				expense_account="Temporary Opening - TCP1",
 				qty=500,
 				rate=100,
 			)
 			create_stock_reconciliation(
 				item_code="_Test Item Home Desktop 100",
 				company=company,
-				expense_account="Stock Adjustment - TCP1",
+				expense_account="Temporary Opening - TCP1",
 				warehouse=warehouse,
 				qty=500,
 				rate=100,
