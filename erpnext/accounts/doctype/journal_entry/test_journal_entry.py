@@ -1117,3 +1117,35 @@ class TestJournalEntryQueries(ERPNextTestSuite):
 			search({"company": "_Test Company", "multi_currency": 1}),
 			{"company": "_Test Company", "is_group": 0},
 		)
+
+	def test_reference_name_query(self):
+		search = partial(get_search_filters, journal_entry.reference_name_query)
+		row = {"account": "Debtors - _TC", "party_type": "Customer", "party": "P", "cost_center": "CC"}
+
+		self.assertEqual(
+			search("Sales Invoice", row),
+			[
+				["Sales Invoice", "docstatus", "=", 1],
+				["Sales Invoice", "outstanding_amount", "!=", 0],
+				["Sales Invoice", "cost_center", "in", ["", "CC"]],
+				["Sales Invoice", "debit_to", "=", "Debtors - _TC"],
+				["Sales Invoice", "customer", "=", "P"],
+			],
+		)
+		self.assertEqual(
+			search("Purchase Order", row | {"party_type": "Supplier"}),
+			[
+				["Purchase Order", "docstatus", "=", 1],
+				["Purchase Order", "per_billed", "<", 100],
+				["Purchase Order", "supplier", "=", "P"],
+			],
+		)
+		self.assertEqual(
+			search(
+				"Journal Entry",
+				row,
+				"erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
+			),
+			{"account": "Debtors - _TC", "party": "P"},
+		)
+		self.assertRaises(frappe.ValidationError, search, "Sales Order", {"party_type": "Customer"})
