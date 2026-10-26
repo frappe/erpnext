@@ -2341,24 +2341,26 @@ class SalesInvoice(SellingController):
 				else:
 					round_off_account = round_off_for_opening
 
+			rounding_adjustment = flt(self.rounding_adjustment, self.precision("rounding_adjustment"))
+			base_rounding_adjustment = flt(
+				self.base_rounding_adjustment, self.precision("base_rounding_adjustment")
+			)
+			round_off_account_currency = get_account_currency(round_off_account)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
 						"against": self.customer,
-						"credit_in_account_currency": flt(
-							self.rounding_adjustment, self.precision("rounding_adjustment")
-						),
-						"credit_in_transaction_currency": flt(
-							self.rounding_adjustment, self.precision("rounding_adjustment")
-						),
-						"credit": flt(
-							self.base_rounding_adjustment, self.precision("base_rounding_adjustment")
-						),
+						"credit_in_account_currency": base_rounding_adjustment
+						if round_off_account_currency == self.company_currency
+						else rounding_adjustment,
+						"credit_in_transaction_currency": rounding_adjustment,
+						"credit": base_rounding_adjustment,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
 						else (self.cost_center or round_off_cost_center),
 					},
+					round_off_account_currency,
 					item=self,
 				)
 			)
