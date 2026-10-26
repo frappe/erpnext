@@ -698,6 +698,7 @@ def enqueue_job(job, **kwargs):
 			event="processing_merge_logs",
 			job_id=job_id,
 			now=frappe.conf.developer_mode or frappe.in_test,
+			enqueue_after_commit=True,
 		)
 
 		if job == create_merge_logs:

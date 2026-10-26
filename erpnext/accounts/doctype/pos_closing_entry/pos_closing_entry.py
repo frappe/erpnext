@@ -243,6 +243,7 @@ class POSClosingEntry(StatusUpdater):
 			self.check_pce_is_cancellable()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ("POS Invoice Merge Log", "Sales Invoice")
 		unconsolidate_pos_invoices(closing_entry=self)
 
 		self.update_sales_invoices_closing_entry(cancel=True)

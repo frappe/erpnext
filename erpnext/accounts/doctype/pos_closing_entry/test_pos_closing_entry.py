@@ -1,6 +1,8 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
@@ -517,6 +519,29 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		closing_entry = make_closing_entry_from_opening(opening_entry)
 		closing_entry.submit()
 		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
+
+	def test_cancel_with_ten_invoices_unconsolidates_after_commit(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		for _ in range(10):
+			make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		self.assertTrue(enqueue.call_args.kwargs["enqueue_after_commit"])
+		merge_logs = enqueue.call_args.kwargs["merge_logs"]
+		enqueue.call_args.args[0](
+			merge_logs=merge_logs, closing_entry=enqueue.call_args.kwargs["closing_entry"]
+		)
+
+		for merge_log in merge_logs:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
 
 
 def init_user_and_profile(**args):
