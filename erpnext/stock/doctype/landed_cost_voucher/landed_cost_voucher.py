@@ -163,6 +163,16 @@ class LandedCostVoucher(Document):
 					)
 					frappe.throw(msg, title=_("Incorrect Invoice"))
 
+			if d.receipt_document_type == "Stock Entry":
+				purpose = frappe.get_cached_value(d.receipt_document_type, d.receipt_document, "purpose")
+				if purpose not in ("Manufacture", "Repack"):
+					frappe.throw(
+						_(
+							"Row {0}: Landed Cost Voucher can only be made against a Manufacture or Repack Stock Entry. Stock Entry {1} is a {2}."
+						).format(d.idx, frappe.bold(d.receipt_document), _(purpose)),
+						title=_("Incorrect Stock Entry"),
+					)
+
 			receipt_documents.append(d.receipt_document)
 
 		for item in self.get("items"):
