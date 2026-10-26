@@ -183,7 +183,7 @@ class Issue(Document):
 
 		return referenced, linked
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def split_issue(self, subject: str, communication_id: str):
 		self.check_permission("write")
 
@@ -357,7 +357,7 @@ def make_task(source_name, target_doc=None):
 	return get_mapped_doc("Issue", source_name, {"Issue": {"doctype": "Task"}}, target_doc)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 

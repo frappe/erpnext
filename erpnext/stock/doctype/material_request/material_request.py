@@ -1236,7 +1236,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str, company: str):
 	mr = frappe.get_doc("Material Request", material_request)
 	mr.check_permission("read")

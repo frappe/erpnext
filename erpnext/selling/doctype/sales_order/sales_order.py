@@ -1969,7 +1969,7 @@ def is_product_bundle(item_code):
 	return frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0})
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_work_orders(items: str, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
 	frappe.has_permission("Sales Order", "read", sales_order, throw=True)

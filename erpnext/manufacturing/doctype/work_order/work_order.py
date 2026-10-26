@@ -3225,7 +3225,7 @@ def check_if_scrap_warehouse_mandatory(bom_no):
 	return res
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_work_order_ops(name):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()

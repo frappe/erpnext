@@ -712,7 +712,7 @@ def get_due_project_updates(project: str, *times) -> int:
 	return max(times_passed - frappe.db.count("Project Update", {"project": project, "date": today()}), 0)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_duplicate_project(prev_doc, project_name):
 	"""Create duplicate project based on the old project"""
 	import json
@@ -923,7 +923,7 @@ def get_project_kanban_board(project: str) -> str | None:
 			return board.name
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_project_status(project, status):
 	"""
 	set status for project and all related tasks
