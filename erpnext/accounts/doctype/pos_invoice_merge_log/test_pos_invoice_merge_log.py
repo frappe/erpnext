@@ -792,3 +792,42 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 
 		for credit_note in credit_notes:
 			self.assertEqual(frappe.db.get_value("Sales Invoice", credit_note, "docstatus"), 2)
+
+	def test_change_on_one_sale_is_not_netted_against_another_sale(self):
+		self.pos_profile.allow_partial_payment = 1
+		self.pos_profile.save()
+
+		overpaid_sale = create_pos_invoice(rate=900, do_not_submit=1)
+		overpaid_sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
+		overpaid_sale.save().submit()
+		self.assertEqual(overpaid_sale.change_amount, 100)
+
+		underpaid_sale = create_pos_invoice(rate=500, do_not_submit=1)
+		underpaid_sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		underpaid_sale.save().submit()
+
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", overpaid_sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.grand_total, 1400)
+		self.assertEqual(consolidated_invoice.change_amount, 100)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 400)
+
+		cash_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": consolidated_invoice.name, "account": "Cash - _TC", "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(sum(entry.debit - entry.credit for entry in cash_entries), 1000)
+		self.assertEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": consolidated_invoice.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			400,
+		)
