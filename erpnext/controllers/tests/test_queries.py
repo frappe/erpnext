@@ -330,3 +330,21 @@ class TestFormValueQueries(ERPNextTestSuite):
 			{"company": "C", "customer": "P"},
 		)
 		self.assertEqual(project({"company": "C", "party_type": "Supplier", "party": "P"}), {"company": "C"})
+
+	def test_company_address_query(self):
+		search = partial(
+			get_search_filters,
+			queries.company_address_query,
+			"Address",
+			search="frappe.contacts.doctype.address.address.address_query",
+		)
+
+		self.assertEqual(
+			search({"company": "C", "delivered_by_supplier": [0, 0]}),
+			{"link_doctype": "Company", "link_name": "C"},
+		)
+		self.assertEqual(search({"company": "C", "delivered_by_supplier": [0, 1]}), {})
+		self.assertEqual(
+			search({"company": "C", "customer": "P", "delivered_by_supplier": [1]}),
+			{"link_doctype": "Customer", "link_name": "P"},
+		)
