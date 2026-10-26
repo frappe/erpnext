@@ -553,6 +553,10 @@ class PaymentRequest(Document):
 			}
 		)
 
+	def on_payment_authorized(self, status: str | None = None):
+		if status in ("Authorized", "Completed"):
+			self.set_as_paid()
+
 	def set_as_paid(self):
 		if self.payment_channel == "Phone":
 			self.db_set({"status": "Paid", "outstanding_amount": 0})

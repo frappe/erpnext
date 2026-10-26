@@ -1487,6 +1487,27 @@ class TestPaymentRequest(ERPNextTestSuite):
 			schedules=get_payment_schedules_json(si),
 		)
 
+	def test_gateway_payment_authorization_books_payment(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		pr.run_method("on_payment_authorized", "Pending")
+		pr.reload()
+		self.assertEqual(pr.status, "Requested")
+
+		pr.run_method("on_payment_authorized", "Completed")
+		pr.reload()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
+
 
 def make_portal_user(email, customer):
 	user = make_fenced_user(email, ["Customer"])
