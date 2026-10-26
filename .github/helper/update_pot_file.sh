@@ -17,8 +17,8 @@ bench generate-pot-file --app erpnext
 cd ./apps/erpnext || exit
 
 echo "Configuring git user..."
-git config user.email "developers@erpnext.com"
-git config user.name "frappe-pr-bot"
+git config user.email "346168705+frappe-release-bot[bot]@users.noreply.github.com"
+git config user.name "frappe-release-bot[bot]"
 
 echo "Setting the correct git remote..."
 # Here, the git remote is a local file path by default. Let's change it to the upstream repo.

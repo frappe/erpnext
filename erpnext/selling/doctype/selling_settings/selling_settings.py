@@ -127,7 +127,7 @@ class SellingSettings(Document):
 		_hide_tax_id = cint(self.hide_tax_id)
 
 		# Make property setters to hide tax_id fields
-		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note"):
+		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note", "POS Invoice"):
 			make_property_setter(
 				doctype, "tax_id", "hidden", _hide_tax_id, "Check", validate_fields_for_doctype=False
 			)

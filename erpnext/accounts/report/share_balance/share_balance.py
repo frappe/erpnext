@@ -69,6 +69,9 @@ def get_all_shares(shareholder, date, company=None):
 	A share number is held when it was received more often than sent, so the result does not depend
 	on the order the transfers were saved or submitted in."""
 	holder = frappe.db.get_value("Shareholder", shareholder, ["name", "is_company", "company"], as_dict=True)
+	if not holder:
+		return []
+
 	transfers = get_transfers(holder, date, company)
 	received = [transfer for transfer in transfers if is_received(transfer, holder)]
 	sent = [transfer for transfer in transfers if not is_received(transfer, holder)]

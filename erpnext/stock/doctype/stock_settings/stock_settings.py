@@ -178,7 +178,7 @@ class StockSettings(Document):
 			# which does not have it's own valuation method
 			sle = frappe.db.sql(
 				"""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
+				where sle.is_cancelled=0 and exists(select name from tabItem
 					where name=sle.item_code and (valuation_method is null or valuation_method='')) limit 1
 			"""
 			)
