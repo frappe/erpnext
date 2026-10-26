@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from functools import partial
 from unittest.mock import patch
 
 from frappe.permissions import add_user_permission, remove_user_permission
@@ -28,6 +29,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.stock_entry import stock_entry
 from erpnext.stock.doctype.stock_entry.stock_entry import (
 	DuplicateEntryForWorkOrderError,
 	FinishedGoodError,
@@ -44,7 +46,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, get_search_filters
 
 
 def get_sle(**args):
@@ -6524,3 +6526,30 @@ class TestJobCardSecondaryItems(ERPNextTestSuite):
 def create_stock_entries(sequence_of_entries):
 	for entry_detail in sequence_of_entries:
 		make_stock_entry(**entry_detail)
+
+
+class TestStockEntryQueries(ERPNextTestSuite):
+	"""Stock Entry's link queries, worked out from the entry's values."""
+
+	def test_batch_query(self):
+		search = partial(
+			get_search_filters,
+			stock_entry.batch_query,
+			"Batch",
+			search="erpnext.controllers.queries.get_batch_no",
+		)
+		row = {"item_code": "I", "posting_date": "2026-01-01", "posting_time": "10:00:00"}
+
+		self.assertEqual(
+			search(row | {"purpose": "Material Transfer", "s_warehouse": "S", "t_warehouse": "T"}),
+			row | {"warehouse": "S", "include_expired_batches": 1},
+		)
+		self.assertEqual(
+			search(row | {"purpose": "Manufacture", "t_warehouse": "T"}),
+			row | {"warehouse": "T", "is_inward": 1},
+		)
+		self.assertEqual(
+			search(row | {"purpose": "Material Receipt", "t_warehouse": "T"}),
+			row | {"is_inward": 1, "include_expired_batches": 1},
+		)
+		self.assertRaises(frappe.ValidationError, search, {"purpose": "Material Issue"})
