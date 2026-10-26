@@ -54,6 +54,7 @@ from erpnext.controllers.accounts_controller import (
 	AccountsController,
 	validate_taxes_and_charges,
 )
+from erpnext.controllers.queries import has_ignored_field
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -2326,7 +2327,8 @@ def get_outstanding_reference_documents(args, validate=False):
 		return
 
 	if args.get("party_type") and args.get("party"):
-		frappe.has_permission(args["party_type"], "read", args["party"], throw=True)
+		party_to_check = None if has_ignored_field("Payment Entry", args["party_type"]) else args["party"]
+		frappe.has_permission(args["party_type"], "read", party_to_check, throw=True)
 
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
@@ -2730,7 +2732,8 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
 	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
-	frappe.has_permission(party_type, ptype, party, throw=True)
+	party_to_check = None if has_ignored_field("Payment Entry", party_type) else party
+	frappe.has_permission(party_type, ptype, party_to_check, throw=True)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
