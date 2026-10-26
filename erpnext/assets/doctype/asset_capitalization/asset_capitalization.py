@@ -7,11 +7,7 @@ import frappe
 
 # import erpnext
 from frappe import _
-<<<<<<< HEAD
-from frappe.utils import cint, flt, get_link_to_form
-=======
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
->>>>>>> 5a370d6 (fix(assets): validate target asset when fetching WIP composite asset items)
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
