@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.rate_limiter import rate_limit
-from frappe.utils import escape_html, validate_email_address
+from frappe.utils import escape_html, strip_html, validate_email_address
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public Contact Us form; only parses the sender and sets lead ownership
@@ -20,6 +20,7 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 	sender = validate_email_address(sender, throw=True)
 
 	message = escape_html(message)
+	subject = strip_html(subject)
 
 	oppotunity_creation = frappe.get_single_value(
 		"CRM Settings", "enable_opportunity_creation_from_contact_us"

@@ -535,4 +535,5 @@ erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
 erpnext.patches.v16_0.apply_selling_settings_section_toggles
 erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
 erpnext.patches.v16_0.set_output_qty_in_work_order_operations
+erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
 erpnext.patches.v16_0.set_lost_on_in_opportunity

@@ -335,11 +335,13 @@ has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.ha
 permission_query_conditions = {
 	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
 	"Contract": "erpnext.crm.doctype.contract.contract.get_permission_query_conditions",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
 }
 
 has_permission = {
 	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
 	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 }
 
 has_website_permission = {
