@@ -368,6 +368,17 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
 		)
 
+	def test_child_cost_center_must_be_usable_for_company(self):
+		frappe.db.set_value("Cost Center", "Sub Cost Center 4 - _TC", "disabled", 1)
+		for invalid_cost_center in ("_Test Company - _TC", "Main - _TC1", "Sub Cost Center 4 - _TC"):
+			cca = create_cost_center_allocation(
+				"_Test Company",
+				"Main Cost Center 1 - _TC",
+				{"Sub Cost Center 1 - _TC": 50, invalid_cost_center: 50},
+				save=False,
+			)
+			self.assertRaises(InvalidChildCostCenter, cca.save)
+
 
 def get_gl_entries(voucher_type, voucher_no):
 	gle = frappe.qb.DocType("GL Entry")

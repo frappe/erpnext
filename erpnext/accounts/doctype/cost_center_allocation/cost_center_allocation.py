@@ -64,6 +64,7 @@ class CostCenterAllocation(Document):
 			self.validate_from_date_based_on_existing_gle()
 		self.validate_duplicate_allocation()
 		self.validate_backdated_allocation()
+		self.validate_cost_centers()
 		self.validate_main_cost_center()
 		self.validate_child_cost_centers()
 
@@ -156,6 +157,33 @@ class CostCenterAllocation(Document):
 				alert=1,
 			)
 
+	def validate_cost_centers(self):
+		cost_centers = [self.main_cost_center, *[d.cost_center for d in self.allocation_percentages]]
+		for cost_center in frappe.get_all(
+			"Cost Center",
+			filters={"name": ("in", cost_centers)},
+			fields=["name", "company", "is_group", "disabled"],
+		):
+			if error := self.get_cost_center_error(cost_center):
+				exception = (
+					InvalidMainCostCenter
+					if cost_center.name == self.main_cost_center
+					else InvalidChildCostCenter
+				)
+				frappe.throw(error, exception)
+
+	def get_cost_center_error(self, cost_center):
+		if cost_center.company != self.company:
+			return _("Cost Center {0} does not belong to Company {1}").format(
+				frappe.bold(cost_center.name), frappe.bold(self.company)
+			)
+		if cost_center.is_group:
+			return _("Cost Center {0} is a group cost center and cannot be used in an allocation").format(
+				frappe.bold(cost_center.name)
+			)
+		if cost_center.disabled:
+			return _("Cost Center {0} is disabled").format(frappe.bold(cost_center.name))
+
 	def validate_main_cost_center(self):
 		# Main cost center itself cannot be entered in child table
 		if self.main_cost_center in [d.cost_center for d in self.allocation_percentages]:
@@ -187,14 +215,6 @@ class CostCenterAllocation(Document):
 		]
 
 		for d in self.allocation_percentages:
-			if frappe.get_cached_value("Cost Center", d.cost_center, "company") != self.company:
-				frappe.throw(
-					_("Row {0}: Cost Center {1} does not belong to Company {2}").format(
-						d.idx, d.cost_center, self.company
-					),
-					InvalidChildCostCenter,
-				)
-
 			if d.cost_center in main_cost_centers:
 				frappe.throw(
 					_(
