@@ -208,6 +208,25 @@ class POSClosingEntry(StatusUpdater):
 
 		frappe.throw(error_list, title=_("Invalid Sales Invoices"), as_list=True)
 
+	def before_submit(self):
+		self.validate_session_invoices_are_included()
+
+	def validate_session_invoices_are_included(self):
+		included_invoices = {d.pos_invoice for d in self.pos_invoices} | {
+			d.sales_invoice for d in self.sales_invoices
+		}
+		session_invoices = get_session_invoices(
+			self.period_start_date, frappe.utils.now_datetime(), self.pos_profile, self.user
+		)
+		missing_invoices = [d.name for d in session_invoices if d.name not in included_invoices]
+		if missing_invoices:
+			frappe.throw(
+				_(
+					"Invoices {0} of this POS session are not in this POS Closing Entry. Create the POS Closing Entry again to include them."
+				).format(", ".join(frappe.bold(name) for name in missing_invoices)),
+				title=_("Missing Invoices"),
+			)
+
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)
 		# only the cashier's POS page listens for this event
@@ -270,25 +289,23 @@ def get_cashiers(doctype: str, txt: str, searchfield: str, start: int, page_len:
 
 @frappe.whitelist()
 def get_invoices(start: str | datetime, end: str | datetime, pos_profile: str, user: str):
-	invoice_doctype = frappe.db.get_single_value("POS Settings", "invoice_type")
 	frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
-
 	frappe.has_permission("Sales Invoice", throw=True)
-	sales_inv_query = build_invoice_query("Sales Invoice", user, pos_profile, start, end)
-
-	query = sales_inv_query
-
-	if invoice_doctype == "POS Invoice":
+	if frappe.db.get_single_value("POS Settings", "invoice_type") == "POS Invoice":
 		frappe.has_permission("POS Invoice", throw=True)
-		pos_inv_query = build_invoice_query("POS Invoice", user, pos_profile, start, end)
-		query = query + pos_inv_query
+
+	invoices = get_session_invoices(start, end, pos_profile, user)
+
+	return {"invoices": invoices, "payments": get_payments(invoices), "taxes": get_taxes(invoices)}
+
+
+def get_session_invoices(start, end, pos_profile, user):
+	query = build_invoice_query("Sales Invoice", user, pos_profile, start, end)
+	if frappe.db.get_single_value("POS Settings", "invoice_type") == "POS Invoice":
+		query = query + build_invoice_query("POS Invoice", user, pos_profile, start, end)
 
 	query = query.orderby(query.timestamp)
-	invoices = query.run(as_dict=1)
-
-	data = {"invoices": invoices, "payments": get_payments(invoices), "taxes": get_taxes(invoices)}
-
-	return data
+	return query.run(as_dict=1)
 
 
 def get_payments(invoices):

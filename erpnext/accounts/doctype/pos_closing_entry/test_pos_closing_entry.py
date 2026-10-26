@@ -506,6 +506,18 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 90})
 
+	def test_closing_refuses_session_invoices_left_out(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+		self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
+
 
 def init_user_and_profile(**args):
 	user = "test-pos@example.com"
