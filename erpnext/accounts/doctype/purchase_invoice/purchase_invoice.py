@@ -1861,17 +1861,21 @@ class PurchaseInvoice(BuyingController):
 				else:
 					round_off_account = round_off_for_opening
 
+			round_off_account_currency = get_account_currency(round_off_account)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
 						"against": self.supplier,
-						"debit_in_account_currency": self.rounding_adjustment,
+						"debit_in_account_currency": self.base_rounding_adjustment
+						if round_off_account_currency == self.company_currency
+						else self.rounding_adjustment,
 						"debit": self.base_rounding_adjustment,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
 						else (self.cost_center or round_off_cost_center),
 					},
+					round_off_account_currency,
 					item=self,
 				)
 			)
