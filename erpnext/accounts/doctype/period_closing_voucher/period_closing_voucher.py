@@ -426,7 +426,7 @@ class PeriodClosingVoucher(AccountsController):
 			pl_entries = [
 				self.get_gle_for_pl_account(acc, balances, dimensions)
 				for acc, balances in account_balances.items()
-				if acc != "balances" and flt(balances.debit) - flt(balances.credit)
+				if acc != "balances" and has_balance(balances)
 			]
 			if not pl_entries:
 				continue
@@ -993,7 +993,7 @@ def post_summarized_ledger(pcv, result):
 		pl_entries = [
 			get_gle_for_pl_account(pcv, acc, balances, dimensions)
 			for acc, balances in account_balances.items()
-			if acc != "balances" and flt(balances.debit) - flt(balances.credit)
+			if acc != "balances" and has_balance(balances)
 		]
 		if not pl_entries:
 			continue
@@ -1018,6 +1018,13 @@ def post_summarized_ledger(pcv, result):
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
 	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
+
+
+def has_balance(balances):
+	return bool(
+		flt(balances.debit) - flt(balances.credit)
+		or flt(balances.debit_in_account_currency) - flt(balances.credit_in_account_currency)
+	)
 
 
 def is_within_stock_value_tolerance(stock_value, difference):
