@@ -85,11 +85,15 @@ frappe.ui.form.on("Work Order", {
 
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
-			const target_qty =
-				erpnext.work_order.get_operation_qty(frm, doc) -
-				erpnext.work_order.get_upstream_process_loss(frm, doc);
-			return flt(doc.completed_qty) + flt(doc.process_loss_qty) >= target_qty ? "green" : "orange";
+			return erpnext.work_order.get_operation_status(frm, doc) === "Completed" ? "green" : "orange";
 		});
+		frm.set_df_property(
+			"operations",
+			"formatter",
+			(value, df, options, doc) => __(erpnext.work_order.get_operation_status(frm, doc)),
+			frm.doc.name,
+			"status"
+		);
 
 		frm.fields_dict["non_stock_items"].grid.set_column_disp_in_list_view("secondary_item_type", false);
 		frm.fields_dict["secondary_items"].grid.set_column_disp_in_list_view("rate", false);
@@ -697,11 +701,12 @@ frappe.ui.form.on("Work Order", {
 					? Math.min((flt(d.completed_qty) + flt(d.process_loss_qty)) / operation_qty, 1) *
 					  frm.doc.qty
 					: frm.doc.qty;
-				if (!status_wise_oprtation_data[d.status]) {
-					status_wise_oprtation_data[d.status] = [completed_qty, d.operation];
+				const status = erpnext.work_order.get_operation_status(frm, d);
+				if (!status_wise_oprtation_data[status]) {
+					status_wise_oprtation_data[status] = [completed_qty, d.operation];
 				} else {
-					status_wise_oprtation_data[d.status][0] += completed_qty;
-					status_wise_oprtation_data[d.status][1] += ", " + d.operation;
+					status_wise_oprtation_data[status][0] += completed_qty;
+					status_wise_oprtation_data[status][1] += ", " + d.operation;
 				}
 			});
 
@@ -898,10 +903,24 @@ erpnext.work_order = {
 		return flt(frm.doc.qty);
 	},
 
+	get_operation_status(frm, operation) {
+		const qty = flt(
+			flt(operation.completed_qty) + flt(operation.process_loss_qty),
+			precision("completed_qty", operation)
+		);
+		const target_qty = flt(
+			this.get_operation_qty(frm, operation) - this.get_upstream_process_loss(frm, operation),
+			precision("completed_qty", operation)
+		);
+		if (!qty && target_qty) return "Pending";
+		return qty < target_qty ? "Work in Progress" : "Completed";
+	},
+
 	get_upstream_process_loss(frm, operation) {
 		if (frm.doc.track_semi_finished_goods) return 0;
 
 		let process_loss_qty = 0;
+		let available_qty = null;
 		const operations_by_sequence = {};
 		for (const row of frm.doc.operations || []) {
 			(operations_by_sequence[cint(row.sequence_id)] ||= []).push(row);
@@ -909,20 +928,19 @@ erpnext.work_order = {
 		for (const sequence_id of Object.keys(operations_by_sequence).sort((a, b) => a - b)) {
 			if (operation && cint(sequence_id) >= cint(operation.sequence_id)) break;
 
-			// Parallel operations share the same input. Older cards may repeat upstream losses.
+			const rows = operations_by_sequence[sequence_id];
+			// Cap new loss at the previous output; legacy cards can repeat upstream loss.
 			process_loss_qty += Math.max(
-				...operations_by_sequence[sequence_id].map((row) =>
-					Math.min(
-						flt(row.process_loss_qty),
-						Math.max(
-							Math.max(flt(frm.doc.qty), flt(row.completed_qty) + flt(row.process_loss_qty)) -
-								process_loss_qty -
-								flt(row.completed_qty),
-							0
-						)
-					)
+				...rows.map((row) =>
+					available_qty === null
+						? flt(row.process_loss_qty)
+						: Math.min(
+								flt(row.process_loss_qty),
+								Math.max(available_qty - flt(row.completed_qty), 0)
+						  )
 				)
 			);
+			available_qty = Math.min(...rows.map((row) => flt(row.completed_qty)));
 		}
 		return flt(process_loss_qty, precision("qty"));
 	},

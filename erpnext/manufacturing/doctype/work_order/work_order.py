@@ -199,8 +199,6 @@ class WorkOrder(Document):
 	# end: auto-generated types
 
 	def onload(self):
-		if self.docstatus == 1:
-			self.update_operation_status()
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)

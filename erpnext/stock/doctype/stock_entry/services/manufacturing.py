@@ -430,7 +430,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		total_completed_qty = flt(self.doc.fg_completed_qty) + flt(self.wo_doc.produced_qty)
+		total_completed_qty = (
+			flt(self.doc.fg_completed_qty) + flt(self.wo_doc.produced_qty) + flt(self.wo_doc.process_loss_qty)
+		)
 		precision = self.doc.precision("fg_completed_qty")
 
 		for row in self.wo_doc.operations:

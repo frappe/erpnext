@@ -411,6 +411,7 @@ def get_upstream_process_loss(work_order, operation=None):
 		return 0
 
 	process_loss_qty = 0
+	available_qty = None
 	for sequence_id, rows in groupby(
 		sorted(work_order.get("operations") or [], key=lambda row: cint(row.sequence_id)),
 		key=lambda row: cint(row.sequence_id),
@@ -418,19 +419,17 @@ def get_upstream_process_loss(work_order, operation=None):
 		if operation is not None and sequence_id >= cint(operation.get("sequence_id")):
 			break
 
-		# Parallel operations share the same input. Older cards may repeat upstream losses.
+		rows = list(rows)
+		# Cap new loss at the previous output; legacy cards can repeat upstream loss.
 		process_loss_qty += max(
-			min(
-				flt(row.process_loss_qty),
-				max(
-					max(flt(work_order.qty), flt(row.completed_qty) + flt(row.process_loss_qty))
-					- process_loss_qty
-					- flt(row.completed_qty),
-					0,
-				),
+			(
+				flt(row.process_loss_qty)
+				if available_qty is None
+				else min(flt(row.process_loss_qty), max(available_qty - flt(row.completed_qty), 0))
 			)
 			for row in rows
 		)
+		available_qty = min(flt(row.completed_qty) for row in rows)
 
 	return flt(process_loss_qty)
 
