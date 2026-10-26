@@ -924,7 +924,7 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 						)
 						.run()[0][0]
 					)
-					pending_qty = stock_qty - total_work_order_qty
+					pending_qty = flt(stock_qty - total_work_order_qty, precision)
 				else:
 					pending_qty = stock_qty
 
