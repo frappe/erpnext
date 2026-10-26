@@ -969,7 +969,7 @@ def _get_item_tax_template(
 	"""
 	if out is None:
 		out = frappe._dict()
-	taxes = sorted(get_applicable_item_taxes(ctx, taxes), key=get_item_tax_priority, reverse=True)
+	taxes = get_latest_item_taxes(get_applicable_item_taxes(ctx, taxes))
 
 	if for_validate:
 		return [
@@ -1009,6 +1009,18 @@ def get_applicable_item_taxes(ctx, taxes) -> list:
 			applicable_taxes.append(tax)
 
 	return applicable_taxes
+
+
+def get_latest_item_taxes(taxes) -> list:
+	latest_priority = {}
+	latest_taxes = []
+	for tax in sorted(taxes, key=get_item_tax_priority, reverse=True):
+		priority = get_item_tax_priority(tax)
+		key = (tax.get("parenttype"), tax.get("parent"), cstr(tax.tax_category))
+		if latest_priority.setdefault(key, priority) == priority:
+			latest_taxes.append(tax)
+
+	return latest_taxes
 
 
 def get_item_tax_priority(tax) -> tuple:
