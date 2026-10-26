@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import nowdate
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	get_payment_request_status,
@@ -351,22 +353,39 @@ def update_payment_requests_from_journal_entry(journal_entry, cancel=False):
 	if not journal_entry.payment_order:
 		return
 
-	references = [
-		frappe._dict(payment_request=row.payment_request, allocated_amount=row.amount)
-		for row in frappe.get_all(
-			"Payment Order Reference",
-			filters={
-				"parent": journal_entry.payment_order,
-				"parenttype": "Payment Order",
-				"payment_reference": journal_entry.name,
-				"payment_request": ["is", "set"],
-			},
-			fields=["payment_request", "amount"],
-		)
-	]
+	references = get_payment_request_allocations(journal_entry)
 	update_payment_requests_as_per_pe_references(references, cancel=cancel)
 
 	if cancel:
 		for row in references:
 			frappe.db.set_value("Payment Request", row.payment_request, "status", "Payment Ordered")
 		clear_payment_reference(journal_entry)
+
+
+def get_payment_request_allocations(journal_entry):
+	paid_amounts = defaultdict(float)
+	for row in journal_entry.accounts:
+		if row.reference_type and row.reference_name:
+			paid_amounts[(row.reference_type, row.reference_name)] += flt(row.debit_in_account_currency)
+
+	allocations = []
+	for row in frappe.get_all(
+		"Payment Order Reference",
+		filters={
+			"parent": journal_entry.payment_order,
+			"parenttype": "Payment Order",
+			"payment_reference": journal_entry.name,
+			"payment_request": ["is", "set"],
+		},
+		fields=["payment_request", "amount", "reference_doctype", "reference_name"],
+		order_by="idx",
+	):
+		key = (row.reference_doctype, row.reference_name)
+		allocated_amount = min(flt(row.amount), paid_amounts[key])
+		paid_amounts[key] -= allocated_amount
+		if allocated_amount > 0:
+			allocations.append(
+				frappe._dict(payment_request=row.payment_request, allocated_amount=allocated_amount)
+			)
+
+	return allocations

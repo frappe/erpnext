@@ -153,6 +153,33 @@ class TestPaymentOrder(ERPNextTestSuite):
 			)
 		)
 
+	def test_partial_journal_entry_from_payment_order_updates_payment_request(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		payment_order.submit()
+		make_payment_records(payment_order.name, "_Test Supplier")
+
+		journal_entry = frappe.get_doc(
+			"Journal Entry", frappe.db.get_value("Journal Entry", {"payment_order": payment_order.name})
+		)
+		journal_entry.accounts[0].debit_in_account_currency = 400
+		journal_entry.accounts[1].credit_in_account_currency = 400
+		journal_entry.cheque_no = "_Test_Payment_Order"
+		journal_entry.cheque_date = getdate()
+		journal_entry.submit()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, ["status", "outstanding_amount"]),
+			("Partially Paid", 600),
+		)
+
+		journal_entry.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, ["status", "outstanding_amount"]),
+			("Payment Ordered", 1000),
+		)
+
 	def make_payment_request(self, submit_doc=1, rate=1000):
 		purchase_invoice = make_purchase_invoice(qty=1, rate=rate)
 		if not frappe.db.exists("Bank Account", {"party_type": "Supplier", "party": "_Test Supplier"}):
