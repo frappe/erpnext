@@ -2451,8 +2451,7 @@ class TestStockEntry(ERPNextTestSuite):
 		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
 		mfg.insert()
 
-		duplicate = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
-		self.assertRaises(DuplicateEntryForWorkOrderError, duplicate.insert)
+		self.assertRaises(DuplicateEntryForWorkOrderError, make_wo_stock_entry, wo.name, "Manufacture", 1)
 
 		with self.change_settings(
 			"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
