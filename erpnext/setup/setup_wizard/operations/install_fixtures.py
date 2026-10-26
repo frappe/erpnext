@@ -12,11 +12,12 @@ from frappe.desk.doctype.global_search_settings.global_search_settings import (
 	update_global_search_doctypes,
 )
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
-from frappe.utils import cstr, getdate
+from frappe.utils import cint, cstr, getdate
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
+from erpnext.startup.boot import get_business_module_fields
 
 
 def read_lines(filename: str) -> list[str]:
@@ -460,7 +461,7 @@ def add_sale_stages():
 		frappe.get_doc(sales_stage).db_insert()
 
 
-def install_company(args):
+def install_company(args):  # nosemgrep
 	records = [
 		# Fiscal Year
 		{
@@ -480,10 +481,24 @@ def install_company(args):
 			"create_chart_of_accounts_based_on": "Standard Template",
 			"chart_of_accounts": args.chart_of_accounts,
 			"domain": args.domain,
+			**get_module_ticks(args),
 		},
 	]
 
 	make_records(records)
+
+
+def get_module_ticks(wizard_values) -> dict:
+	"""Module ticks for the new company, from the wizard's "module_<fieldname>" values.
+
+	A module the wizard did not ask about is on.
+
+	Example: get_module_ticks({"module_stock": 1, "module_pos": 0}) -> {"stock": 1, "pos": 0, "assets": 1, ...}
+	"""
+	return {
+		fieldname: cint(wizard_values.get("module_" + fieldname, 1))
+		for fieldname in get_business_module_fields()
+	}
 
 
 def install_defaults(args=None):  # nosemgrep

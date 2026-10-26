@@ -624,7 +624,8 @@
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_for_module": "Stock"
   },
   {
    "depends_on": "eval: parent.is_internal_customer",
@@ -723,7 +724,8 @@
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Stock"
   },
   {
    "collapsible": 1,
@@ -769,7 +771,8 @@
    "options": "Delivery Note",
    "print_hide": 1,
    "read_only": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "dn_detail",
@@ -877,7 +880,8 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project",
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "Projects"
   },
   {
    "depends_on": "eval:parent.update_stock == 1",
@@ -991,7 +995,8 @@
   },
   {
    "fieldname": "serial_batch_entries_html",
-   "fieldtype": "HTML"
+   "fieldtype": "HTML",
+   "show_for_module": "Stock"
   },
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
@@ -1037,7 +1042,8 @@
    "label": "Qty (Company)",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "Stock"
   },
   {
    "fieldname": "pos_invoice_item",
@@ -1046,7 +1052,8 @@
    "label": "POS Invoice Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_for_module": "POS"
   },
   {
    "fieldname": "column_break_vwhb",
@@ -1059,7 +1066,8 @@
    "no_copy": 1,
    "options": "POS Invoice",
    "print_hide": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_for_module": "POS"
   },
   {
    "fieldname": "scio_detail",
@@ -1105,7 +1113,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-19 12:00:00.000000",
+ "modified": "2026-10-24 13:30:12.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
