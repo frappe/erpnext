@@ -439,6 +439,28 @@ class TestAccount(ERPNextTestSuite):
 		self.assertRaises(InvalidAccountMergeError, merge_account, receivable, deposit)
 		self.assertTrue(frappe.db.exists("Account", receivable))
 
+	def test_child_company_account_rename_from_request_ignores_from_descendant(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Request Rename Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		child_account = frappe.db.get_value(
+			"Account", {"account_name": "Test Request Rename Account", "company": "_Test Company 4"}
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			frappe.call,
+			update_account_number,
+			name=child_account,
+			account_name="Local Name",
+			from_descendant=1,
+		)
+		self.assertTrue(frappe.db.exists("Account", child_account))
+
 
 def walk_chart_tree(tree):
 	"""Yield (account_name, details) for every account in a chart of accounts tree"""
