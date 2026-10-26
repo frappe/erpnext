@@ -4,13 +4,14 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.utils import nowdate
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, get_search_filters
 
 
 def add_default_params(func, doctype):
@@ -226,3 +227,32 @@ class TestQueries(ERPNextTestSuite):
 			# only one employee should be returned even though ignore_user_permissions is passed as 1
 			result = queries.employee_query(**params)
 			self.assertEqual(len(result), 1)
+
+
+class TestFormValueQueries(ERPNextTestSuite):
+	"""Queries that work out a form's link search from its values, as the form's JS did."""
+
+	def test_transaction_batch_query(self):
+		search = partial(get_search_filters, queries.transaction_batch_query, "Batch")
+		get_batch_no = "erpnext.controllers.queries.get_batch_no"
+
+		filters = {"voucher_type": "Sales Invoice", "item_code": "I", "is_return": 1, "warehouse": "W"}
+		self.assertEqual(
+			search(filters | {"posting_date": "2026-01-01"}, get_batch_no),
+			{
+				"item_code": "I",
+				"posting_date": "2026-01-01",
+				"is_return": 1,
+				"is_inward": 1,
+				"warehouse": "W",
+			},
+		)
+		self.assertEqual(
+			search({"voucher_type": "Purchase Invoice", "item_code": "I", "is_return": 1}, get_batch_no),
+			{"item_code": "I", "posting_date": nowdate(), "is_return": 1},
+		)
+		self.assertEqual(search({"voucher_type": "Purchase Receipt", "item_code": "I"}), {"item": "I"})
+		self.assertEqual(
+			search({"voucher_type": "Purchase Invoice", "item_code": "I", "update_stock": 1}), {"item": "I"}
+		)
+		self.assertRaises(frappe.ValidationError, search, {"voucher_type": "Sales Invoice"})

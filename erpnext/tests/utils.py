@@ -4,6 +4,7 @@
 import unittest
 from contextlib import contextmanager
 from typing import Any, NewType
+from unittest.mock import patch
 
 import frappe
 from frappe import _
@@ -3434,3 +3435,13 @@ def make_email_template(subject: str, response: str) -> str:
 		}
 	).insert()
 	return template.name
+
+
+def get_search_filters(query, doctype, filters, search=None):
+	"""The filters a link query that works them out from a form's values passes `search` (a query's
+	path), or Frappe's own search."""
+	with patch(search or "frappe.desk.search.search_widget", return_value=[]) as searched:
+		query(doctype, "", "name", 0, 20, filters)
+
+	call = searched.call_args
+	return call.args[5] if search else call.kwargs["filters"]
