@@ -762,3 +762,33 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 			),
 			0,
 		)
+
+	def test_cancel_cancels_every_consolidated_credit_note(self):
+		first_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		second_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		refund_over_the_counter(first_sale, qty=-1)
+		refund_over_the_counter(second_sale, qty=-1)
+		closing_entry = self.make_closing_entry()
+
+		consolidated_invoices = [
+			frappe.db.get_value("POS Invoice", sale.name, "consolidated_invoice")
+			for sale in (first_sale, second_sale)
+		]
+		credit_notes = frappe.get_all(
+			"Sales Invoice",
+			filters={"is_return": 1, "return_against": ["in", consolidated_invoices]},
+			pluck="name",
+		)
+		self.assertEqual(len(credit_notes), 2)
+
+		closing_entry.reload()
+		closing_entry.cancel()
+
+		for credit_note in credit_notes:
+			self.assertEqual(frappe.db.get_value("Sales Invoice", credit_note, "docstatus"), 2)
