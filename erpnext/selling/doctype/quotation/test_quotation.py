@@ -453,6 +453,19 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.items[1].ordered_qty, 0)
 		self.assertEqual(quotation.status, "Open")
 
+	def test_get_items_rejects_quotation_with_mismatched_header(self):
+		quotation_a = make_quotation(party_name="_Test Customer", qty=1)
+		sales_order = make_sales_order(quotation_a.name)
+
+		# A different customer cannot be merged into a target that already has rows
+		quotation_b = make_quotation(party_name="_Test Customer 1", qty=1)
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation_b.name, sales_order)
+
+		# The same customer still merges into the existing target
+		quotation_c = make_quotation(party_name="_Test Customer", qty=2)
+		merged = make_sales_order(quotation_c.name, sales_order)
+		self.assertEqual(len(merged.items), 2)
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
