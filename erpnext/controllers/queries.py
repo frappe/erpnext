@@ -1513,3 +1513,20 @@ def sales_item_query(
 		"company": filters.get("company"),
 	}
 	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def dimension_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""An accounting dimension's values for the first of `accounts` that is set."""
+	account = next((account for account in filters.get("accounts") or [] if account), None)
+	dimension_filters = {
+		"dimension": filters.get("dimension"),
+		"account": account,
+		"company": filters.get("company"),
+	}
+	return frappe.call(
+		get_filtered_dimensions, doctype, txt, searchfield, start, page_len, dimension_filters, **kwargs
+	)

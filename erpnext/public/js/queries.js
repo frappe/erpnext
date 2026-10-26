@@ -169,19 +169,11 @@ $.extend(erpnext.queries, {
 	},
 
 	get_filtered_dimensions: function (doc, child_fields, dimension, company) {
-		let account = "";
-
-		child_fields.forEach((field) => {
-			if (!account) {
-				account = doc[field];
-			}
-		});
-
 		return {
-			query: "erpnext.controllers.queries.get_filtered_dimensions",
+			query: "erpnext.controllers.queries.dimension_query",
 			filters: {
 				dimension: dimension,
-				account: account,
+				accounts: child_fields.map((field) => doc[field]),
 				company: company,
 			},
 		};
