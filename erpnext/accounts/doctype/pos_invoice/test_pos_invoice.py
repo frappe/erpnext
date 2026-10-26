@@ -1177,6 +1177,17 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.insert()
 		self.assertRaises(frappe.ValidationError, pos.submit)
 
+	def test_reserved_stock_is_checked_for_item_allowing_negative_stock(self):
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_stock_item_with_qty(20)
+		frappe.db.set_value("Item", item_code, "allow_negative_stock", 1)
+		frappe.db.set_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "reserved_stock", 15)
+
+		pos = create_pos_invoice(item=item_code, qty=10, rate=100, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
+		pos.insert()
+		self.assertRaisesRegex(frappe.ValidationError, "Available <strong>5.0</strong>", pos.submit)
+
 	def test_paid_and_change_amount_are_recomputed_on_submit(self):
 		pos = create_pos_invoice(rate=1000, do_not_save=1)
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 100})
