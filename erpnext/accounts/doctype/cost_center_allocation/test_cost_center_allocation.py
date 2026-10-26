@@ -7,6 +7,7 @@ from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation import (
+	DuplicateCostCenterAllocation,
 	InvalidChildCostCenter,
 	InvalidDateError,
 	InvalidMainCostCenter,
@@ -27,6 +28,7 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 			"Sub Cost Center 1",
 			"Sub Cost Center 2",
 			"Sub Cost Center 3",
+			"Sub Cost Center 4",
 		]
 		for cc in cost_centers:
 			create_cost_center(cost_center_name=cc, company="_Test Company")
@@ -329,6 +331,42 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 			save=False,
 		)
 		self.assertRaises(WrongPercentageAllocation, cca.save)
+
+	def test_two_allocations_with_same_valid_from(self):
+		create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50},
+		)
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
+			save=False,
+		)
+		self.assertRaises(DuplicateCostCenterAllocation, cca.save)
+
+	def test_latest_allocation_is_used_when_valid_from_is_same(self):
+		from erpnext.accounts.general_ledger import get_cost_center_allocation_data
+
+		create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50},
+		)
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
+			save=False,
+		)
+		cca.flags.ignore_validate = True
+		cca.submit()
+
+		self.assertEqual(
+			dict(get_cost_center_allocation_data("_Test Company", today(), "Main Cost Center 1 - _TC")),
+			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
+		)
 
 
 def get_gl_entries(voucher_type, voucher_no):
