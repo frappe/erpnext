@@ -1375,3 +1375,61 @@ def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, 
 		.limit(page_len)
 	)
 	return query.run(as_list=1)
+
+
+# Link queries that take the form's values as filters and work out the search from them, so the
+# form's JS only passes values. Each calls its search through `frappe.call`, which passes it the
+# args Frappe passes a query.
+
+
+def standard_search(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters, **kwargs):
+	"""Frappe's own link search, for a query that only works out its filters. Of `kwargs`, it takes
+	those Frappe passes a query for the field's user permissions."""
+	from frappe.desk.search import search_widget
+
+	if isinstance(filters, dict):
+		# as Desk leaves out filters without a value
+		filters = {fieldname: value for fieldname, value in filters.items() if value not in (None, "")}
+
+	permission_args = ("reference_doctype", "ignore_user_permissions", "link_fieldname")
+	return search_widget(
+		doctype,
+		txt,
+		searchfield=searchfield,
+		start=start,
+		page_length=page_len,
+		filters=filters,
+		**{arg: kwargs[arg] for arg in permission_args if arg in kwargs},
+	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def transaction_batch_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The batches of a transaction's item; `voucher_type` is the transaction's doctype."""
+	if not filters.get("item_code"):
+		frappe.throw(_("Please enter Item Code to get batch no"))
+
+	voucher_type = filters.get("voucher_type")
+	if voucher_type == "Purchase Receipt" or (
+		voucher_type == "Purchase Invoice" and filters.get("update_stock")
+	):
+		return standard_search(
+			doctype, txt, searchfield, start, page_len, {"item": filters["item_code"]}, **kwargs
+		)
+
+	batch_filters = {
+		"item_code": filters["item_code"],
+		"posting_date": filters.get("posting_date") or nowdate(),
+	}
+	if filters.get("is_return"):
+		batch_filters["is_return"] = 1
+		if voucher_type in ("Sales Invoice", "Delivery Note"):
+			batch_filters["is_inward"] = 1
+
+	if filters.get("warehouse"):
+		batch_filters["warehouse"] = filters["warehouse"]
+
+	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)

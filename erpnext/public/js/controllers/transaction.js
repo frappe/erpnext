@@ -3165,39 +3165,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	set_query_for_batch(doc, cdt, cdn) {
 		// Show item's batches in the dropdown of batch no
-
-		var me = this;
-		var item = frappe.get_doc(cdt, cdn);
-
-		if (!item.item_code) {
-			frappe.throw(__("Please enter Item Code to get batch no"));
-		} else if (
-			doc.doctype == "Purchase Receipt" ||
-			(doc.doctype == "Purchase Invoice" && doc.update_stock)
-		) {
-			return {
-				filters: { item: item.item_code },
-			};
-		} else {
-			let filters = {
+		const item = frappe.get_doc(cdt, cdn);
+		return {
+			query: "erpnext.controllers.queries.transaction_batch_query",
+			filters: {
+				voucher_type: doc.doctype,
 				item_code: item.item_code,
-				posting_date: me.frm.doc.posting_date || frappe.datetime.nowdate(),
-			};
-
-			if (doc.is_return) {
-				filters["is_return"] = 1;
-				if (["Sales Invoice", "Delivery Note"].includes(doc.doctype)) {
-					filters["is_inward"] = 1;
-				}
-			}
-
-			if (item.warehouse) filters["warehouse"] = item.warehouse;
-
-			return {
-				query: "erpnext.controllers.queries.get_batch_no",
-				filters: filters,
-			};
-		}
+				warehouse: item.warehouse,
+				posting_date: doc.posting_date,
+				is_return: doc.is_return,
+				update_stock: doc.update_stock,
+			},
+		};
 	}
 
 	set_query_for_item_tax_template(doc, cdt, cdn) {
