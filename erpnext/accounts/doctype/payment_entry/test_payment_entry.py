@@ -3298,3 +3298,26 @@ class TestPaymentEntryQueries(ERPNextTestSuite):
 		self.assertEqual(
 			search("Shareholder", {"party_type": "Shareholder", "company": "C"}), {"company": "C"}
 		)
+
+	def test_reference_queries(self):
+		self.assertEqual(
+			get_search_filters(payment_entry.reference_doctype_query, "DocType", {"party_type": "Supplier"}),
+			{"name": ["in", ["Purchase Order", "Purchase Invoice", "Journal Entry"]]},
+		)
+
+		reference_name = partial(get_search_filters, payment_entry.reference_name_query)
+		filters = {"company": "C", "party_type": "Customer", "party": "P"}
+		self.assertEqual(
+			reference_name("Sales Invoice", filters), {"docstatus": 1, "company": "C", "customer": "P"}
+		)
+		self.assertEqual(reference_name("Journal Entry", filters), {"docstatus": 1, "company": "C"})
+
+		payment_term = partial(get_search_filters, payment_entry.payment_term_query, "Payment Term")
+		self.assertEqual(
+			payment_term(
+				{"reference_doctype": "Sales Invoice", "reference_name": "S"},
+				"erpnext.controllers.queries.get_payment_terms_for_references",
+			),
+			{"reference": "S"},
+		)
+		self.assertEqual(payment_term({"reference_doctype": "Sales Order", "reference_name": "S"}), {})
