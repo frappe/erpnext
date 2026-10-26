@@ -1631,7 +1631,15 @@ class TestJobCard(ERPNextTestSuite):
 		# A later card without loss can't use the qty already lost.
 		make_job_card(
 			work_order.name,
-			[{"name": second.operation_id, "operation": second.operation, "qty": 5, "pending_qty": 5}],
+			[
+				{
+					"name": second.operation_id,
+					"operation": second.operation,
+					"sequence_id": second.sequence_id,
+					"qty": 5,
+					"pending_qty": 5,
+				}
+			],
 		)
 		extra = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
 		extra.append(
