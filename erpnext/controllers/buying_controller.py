@@ -15,7 +15,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
-from erpnext.accounts.services.taxes import _get_taxes_and_charges
+from erpnext.accounts.services.taxes import _get_taxes_and_charges, validate_deduct_with_valuation_category
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
 	is_rejected_material_valued,
@@ -59,6 +59,7 @@ class BuyingController(SubcontractingController):
 		validate_item_uoms(self.get("items"))
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
+		validate_deduct_with_valuation_category(self.get("taxes"))
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
