@@ -2296,3 +2296,18 @@ def batch_query(doctype: str, txt: str, searchfield: str, start: int, page_len: 
 		batch_filters["include_expired_batches"] = 1
 
 	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def target_warehouse_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The company's warehouses to move stock to: transit ones for a transfer to transit."""
+	from erpnext.controllers.queries import standard_search
+
+	warehouse_filters = {"is_group": 0, "company": filters.get("company")}
+	if filters.get("purpose") == "Material Transfer" and filters.get("add_to_transit"):
+		warehouse_filters["warehouse_type"] = "Transit"
+
+	return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)

@@ -1373,17 +1373,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		super.setup_warehouse_query();
 
 		const transit_warehouse_query = () => {
-			const filters = {
-				is_group: 0,
-				company: this.frm.doc.company,
-			};
-
-			if (this.frm.doc.purpose === "Material Transfer" && this.frm.doc.add_to_transit) {
-				filters["warehouse_type"] = "Transit";
-			}
-
 			return {
-				filters: filters,
+				query: "erpnext.stock.doctype.stock_entry.stock_entry.target_warehouse_query",
+				filters: {
+					company: this.frm.doc.company,
+					purpose: this.frm.doc.purpose,
+					add_to_transit: this.frm.doc.add_to_transit,
+				},
 			};
 		};
 
