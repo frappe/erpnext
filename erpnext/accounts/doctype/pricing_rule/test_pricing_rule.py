@@ -2027,6 +2027,24 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.additional_discount_percentage, 10)
 		self.assertEqual(si.grand_total, 450)
 
+	def test_free_qty_with_apply_recursion_over(self):
+		item = make_item("PR Recursion Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item,
+			min_qty=3,
+			price_or_product_discount="Product",
+			same_item=1,
+			free_qty=1,
+			is_recursive=1,
+			recurse_for=2,
+			apply_recursion_over=3,
+			round_free_qty=1,
+		)
+
+		for qty, free_qty in ((3, 1), (4, 1), (5, 2), (7, 3)):
+			si = create_sales_invoice(item_code=item, qty=qty, do_not_submit=True)
+			self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), free_qty)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
