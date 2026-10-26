@@ -35,6 +35,7 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 	get_item_details,
 	get_operation_details,
 	get_operation_qty,
+	get_operation_target_qty,
 	get_serial_nos_for_job_card,
 	get_serial_nos_for_work_order,
 	get_template_rm_item,
@@ -210,6 +211,10 @@ class WorkOrder(Document):
 			self.set_onload("has_alternative_finished_goods", self.has_alternative_finished_goods())
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
+			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
+		)
+		self.set_onload("upstream_process_loss", get_upstream_process_loss(self))
+		self.set_onload(
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
@@ -302,10 +307,9 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = (
-				get_operation_qty(self, d)
-				- get_upstream_process_loss(self, d)
-				- flt(operation_details.get(d.name))
+			job_card_qty = flt(
+				get_operation_target_qty(self, d) - flt(operation_details.get(d.name)),
+				d.precision("completed_qty"),
 			)
 			if job_card_qty > 0:
 				return True

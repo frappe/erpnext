@@ -434,6 +434,14 @@ def get_upstream_process_loss(work_order, operation=None):
 	return flt(process_loss_qty)
 
 
+def get_operation_target_qty(work_order, operation):
+	"""Operation qty less the process loss booked before it."""
+	return flt(
+		get_operation_qty(work_order, operation) - get_upstream_process_loss(work_order, operation),
+		operation.precision("completed_qty"),
+	)
+
+
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
 		row.batch_size = row.get("qty") or get_operation_qty(wo_doc, row)
