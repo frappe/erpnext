@@ -904,6 +904,17 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, quotation.name)
 
+	def test_lost_or_expired_quotation_cannot_be_invoiced(self):
+		lost = make_quotation()
+		lost.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, lost.name)
+
+		expired = make_quotation(do_not_submit=1)
+		expired.transaction_date = add_days(nowdate(), -10)
+		expired.valid_till = add_days(nowdate(), -5)
+		expired.submit()
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, expired.name)
+
 	def test_sales_order_cannot_be_submitted_against_a_lost_quotation(self):
 		quotation = make_quotation()
 		sales_order = make_sales_order(quotation.name)
