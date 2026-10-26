@@ -2835,7 +2835,7 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
-				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments():
+				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments(in_account_currency=True):
 					pe.append(
 						"references",
 						{
@@ -3153,8 +3153,14 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 		outstanding_amount = doc.outstanding_amount
 	elif dt == "Dunning":
 		# only what is left to collect, the totals on the dunning are the ones it was raised with
-		grand_total = sum(outstanding for _row, outstanding in doc.get_unpaid_overdue_payments())
-		grand_total += doc.get_unpaid_dunning_amount()
+		grand_total = sum(
+			outstanding for _row, outstanding in doc.get_unpaid_overdue_payments(in_account_currency=True)
+		)
+		grand_total += (
+			doc.get_unpaid_dunning_amount()
+			if party_account_currency == doc.currency
+			else doc.get_unpaid_base_dunning_amount()
+		)
 		outstanding_amount = grand_total
 	else:
 		if party_account_currency == doc.company_currency:
