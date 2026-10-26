@@ -3,7 +3,7 @@ import { get_unused_tray, render_bom_bar } from "./operation_panels";
 
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
-const CARD = "border:1px solid var(--border-color);border-radius:var(--border-radius-md);overflow:hidden;";
+const CARD = "border:1px solid var(--border-color);border-radius:var(--radius-md);overflow:hidden;";
 
 export class OperationsEditor {
 	constructor(view) {

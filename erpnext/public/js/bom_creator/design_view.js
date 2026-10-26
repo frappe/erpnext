@@ -66,7 +66,7 @@ export class DesignView {
 				.bom-creator-view.without-model .design-body { max-height: 560px; }
 				.bom-creator-view .design-model {
 					flex: 0 0 34%; position: relative; border: 1px solid var(--border-color);
-					border-radius: var(--border-radius-md); overflow: hidden; background: var(--subtle-fg);
+					border-radius: var(--radius-md); overflow: hidden; background: var(--subtle-fg);
 				}
 				.bom-creator-view .design-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 				.bom-creator-view .design-body { flex: 1; min-height: 0; overflow-y: auto; }

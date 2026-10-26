@@ -4,7 +4,7 @@ import { get_item_link_html, open_item_link, open_link_field } from "./link_fiel
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
 const THUMBNAIL = `flex:none;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;
-	overflow:hidden;border-radius:var(--border-radius-sm);`;
+	overflow:hidden;border:0;border-radius:var(--radius-sm);background:var(--subtle-fg);`;
 
 export class BomTree {
 	constructor(view) {
@@ -55,7 +55,7 @@ export class BomTree {
 		if (!this.collapsed.has(0)) this.add_rows(0, 1, rows);
 
 		container.html(`<div class="design-tree" style="border:1px solid var(--border-color);
-			border-radius:var(--border-radius-md);overflow:hidden;">${header}${rows.join("")}</div>`);
+			border-radius:var(--radius-md);overflow:hidden;">${header}${rows.join("")}</div>`);
 		if (this.editable) this.open_add_link(container);
 		this.mark_selected(this.view.selected_node_ids || new Set());
 	}
@@ -203,9 +203,9 @@ export class BomTree {
 		const locked = __("This item comes from BOM {0} and cannot be changed.", [bom_no]);
 		const image = this.view.item_images[row.item_code];
 		const thumbnail = image
-			? `<span style="${THUMBNAIL}border:1px solid var(--border-color);">
+			? `<span style="${THUMBNAIL}">
 				<img src="${escape(image)}" alt="" style="width:100%;height:100%;object-fit:contain;"></span>`
-			: `<span style="${THUMBNAIL}"></span>`;
+			: `<span style="${THUMBNAIL}background:none;"></span>`;
 		const item = this.show_items
 			? `<span class="ellipsis text-muted" style="width:130px;">${escape(row.item_code)}</span>`
 			: "";
@@ -413,7 +413,7 @@ export class BomTree {
 	}
 
 	get_thumbnail(node_id, item_code) {
-		if (!item_code) return `<span style="${THUMBNAIL}"></span>`;
+		if (!item_code) return `<span style="${THUMBNAIL}background:none;"></span>`;
 
 		const image = this.view.item_images[item_code];
 		const from_model = this.view.has_geometry(node_id);
@@ -422,7 +422,7 @@ export class BomTree {
 			: frappe.utils.icon(from_model ? "camera" : "image-plus", "sm");
 		const title = from_model ? __("Set Item Image") : __("Upload Item Image");
 		return `<button class="btn btn-default" data-action="image" data-part-node="${node_id}" title="${title}"
-			style="${THUMBNAIL}background:var(--fg-color);border:1px solid var(--border-color);">${content}</button>`;
+			style="${THUMBNAIL}">${content}</button>`;
 	}
 
 	upload_model(part) {
