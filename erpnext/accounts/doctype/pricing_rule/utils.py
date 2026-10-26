@@ -592,11 +592,12 @@ def apply_pricing_rule_on_transaction(doc):
 	applied_rules = []
 
 	if pricing_rules:
+		transaction_rules = {d.name for d in pricing_rules}
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
 		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 		if not pricing_rules:
-			remove_free_item(doc)
+			remove_free_item(doc, transaction_rules)
 
 		for d in pricing_rules:
 			if d.price_or_product_discount == "Price":
@@ -757,9 +758,9 @@ def remove_transaction_discount(doc, pricing_rules):
 	)
 
 
-def remove_free_item(doc):
-	for d in doc.items:
-		if d.is_free_item:
+def remove_free_item(doc, pricing_rules):
+	for d in list(doc.items):
+		if d.is_free_item and d.pricing_rules in pricing_rules:
 			doc.remove(d)
 
 
