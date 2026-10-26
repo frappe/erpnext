@@ -549,8 +549,24 @@ def set_expired_status():
 		(nowdate()),
 	)
 
-	for name in expired_quotations:
-		frappe.get_doc("Quotation", name).update_opportunity(None)
+	for opportunity in get_opportunities_of_quotations(expired_quotations):
+		frappe.get_doc("Opportunity", opportunity).set_status(update=True)
+
+
+def get_opportunities_of_quotations(quotations: list[str]) -> set[str]:
+	"""Opportunities linked in the header or the items of the quotations."""
+	if not quotations:
+		return set()
+
+	header_links = frappe.get_all(
+		"Quotation", {"name": ("in", quotations), "opportunity": ("is", "set")}, pluck="opportunity"
+	)
+	item_links = frappe.get_all(
+		"Quotation Item",
+		{"parent": ("in", quotations), "prevdoc_docname": ("is", "set")},
+		pluck="prevdoc_docname",
+	)
+	return set(header_links + item_links)
 
 
 @frappe.whitelist()
