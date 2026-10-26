@@ -584,7 +584,7 @@ class PaymentRequest(Document):
 		)
 
 	def on_payment_authorized(self, status: str | None = None):
-		if status in ("Authorized", "Completed"):
+		if status in ("Authorized", "Completed") and self.status != "Paid":
 			self.set_as_paid()
 
 	def set_as_paid(self):

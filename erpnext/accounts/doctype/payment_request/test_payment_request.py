@@ -1556,6 +1556,26 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Payment Request", order_pr.name, "status"), "Paid")
 		self.assertTrue(frappe.db.exists("Sales Invoice Item", {"sales_order": so.name, "docstatus": 1}))
 
+	def test_repeated_gateway_payment_authorization_is_ignored(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		pr.run_method("on_payment_authorized", "Completed")
+		pr.reload()
+		pr.run_method("on_payment_authorized", "Completed")
+
+		self.assertEqual(
+			frappe.db.count("Payment Entry Reference", {"payment_request": pr.name, "docstatus": 1}),
+			1,
+		)
+
 	def test_make_payment_request_checks_submit_and_cancel_permission(self):
 		si = create_sales_invoice(qty=1, rate=1000)
 		so = make_sales_order(qty=1, rate=1000)
