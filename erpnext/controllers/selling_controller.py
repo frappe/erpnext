@@ -310,10 +310,16 @@ class SellingController(StockController):
 			fields=["name", "enabled", "is_group", "commission_rate"],
 		)
 
+		inherited = set()
+		if any(not row.enabled for row in sales_person_status):
+			# rows carried over from a source document are historical references,
+			# but a sales person newly assigned here is still a new assignment
+			inherited = self.get_inherited_sales_persons()
+
 		for row in sales_person_status:
 			if row.is_group:
 				frappe.throw(_("Sales Person {0} is a group.").format(frappe.bold(row.name)))
-			if not row.enabled:
+			if not row.enabled and row.name not in inherited:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
 
 		seen = set()
@@ -343,6 +349,44 @@ class SellingController(StockController):
 			if any(not 0 <= flt(rate) <= 100 for rate in (row.commission_rate, commission_rate)):
 				frappe.throw(_("Row #{0}: Commission Rate must be between 0 and 100").format(row.idx))
 			row.commission_rate = commission_rate
+
+	def get_inherited_sales_persons(self):
+		"""Return the sales persons already on the documents this one inherits its sales team from."""
+		inherited = set()
+
+		for doctype, names in self.get_sales_team_sources().items():
+			inherited.update(
+				frappe.get_all(
+					"Sales Team",
+					filters={"parenttype": doctype, "parent": ["in", list(names)]},
+					pluck="sales_person",
+				)
+			)
+
+		return inherited
+
+	def get_sales_team_sources(self):
+		"""Return the documents whose sales team may be carried over here, grouped by doctype."""
+		sources = {}
+
+		def add(doctype, name):
+			if name:
+				sources.setdefault(doctype, set()).add(name)
+
+		# a pos invoice is settled within the day, so a sales person disabled by the time it is
+		# returned or amended is a real problem rather than a historical reference
+		if self.doctype != "POS Invoice":
+			if self.get("is_return"):
+				add(self.doctype, self.get("return_against"))
+			add(self.doctype, self.get("amended_from"))
+
+		# goods are already out, so billing them must not be blocked. every earlier step
+		# in the flow can still be corrected, and is left to the enabled check
+		if self.doctype == "Sales Invoice":
+			for item in self.get("items") or []:
+				add("Delivery Note", item.get("delivery_note"))
+
+		return sources
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
