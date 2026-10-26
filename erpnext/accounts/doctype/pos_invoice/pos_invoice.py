@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyService
+from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
 from erpnext.accounts.doctype.sales_invoice.services.status import get_discounting_status
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
@@ -225,6 +226,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
+		self.set_paid_amount()
 		self.validate_change_amount()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
@@ -546,13 +548,23 @@ class POSInvoice(SalesInvoice):
 				)
 			)
 
+	def set_paid_amount(self):
+		POSService(self).update_paid_amount()
+		if self.redeem_loyalty_points and self.loyalty_amount:
+			self.base_paid_amount += flt(self.loyalty_amount)
+			self.paid_amount += flt(self.loyalty_amount) / flt(self.conversion_rate)
+
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
 		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
-		if not flt(self.change_amount) and grand_total < flt(self.paid_amount):
-			self.change_amount = flt(self.paid_amount - grand_total + flt(self.write_off_amount))
-			self.base_change_amount = (
-				flt(self.base_paid_amount) - base_grand_total + flt(self.base_write_off_amount)
+		self.change_amount = self.base_change_amount = 0
+		if grand_total < flt(self.paid_amount):
+			self.change_amount = flt(
+				self.paid_amount - grand_total + flt(self.write_off_amount), self.precision("change_amount")
+			)
+			self.base_change_amount = flt(
+				flt(self.base_paid_amount) - base_grand_total + flt(self.base_write_off_amount),
+				self.precision("base_change_amount"),
 			)
 
 		if flt(self.change_amount) and not self.account_for_change_amount:

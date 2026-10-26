@@ -1177,6 +1177,20 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.insert()
 		self.assertRaises(frappe.ValidationError, pos.submit)
 
+	def test_paid_and_change_amount_are_recomputed_on_submit(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		pos.insert()
+		pos.paid_amount = pos.base_paid_amount = 1000
+		self.assertRaises(PartialPaymentValidationError, pos.submit)
+
+		pos = create_pos_invoice(rate=900, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
+		pos.insert()
+		pos.change_amount = pos.base_change_amount = 600
+		pos.submit()
+		self.assertEqual((pos.paid_amount, pos.change_amount, pos.base_change_amount), (1000, 100, 100))
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name
