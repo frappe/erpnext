@@ -301,6 +301,33 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		self.assertEqual(work_order.reload().produced_qty, 100)
 		self.assert_pending_qty(plan, field, 0)
 
+	def test_whole_number_replacement_rounds_up(self):
+		field = "production_plan_sub_assembly_item"
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10}).name
+		sub_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], quantity=10, process_loss_percentage=10)
+		make_bom(item=fg_item, raw_materials=[sub_item])
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=90,
+			warehouse=self.warehouse,
+			sub_assembly_warehouse=self.warehouse,
+			stock_uom="Nos",
+			skip_getting_mr_items=True,
+			do_not_submit=True,
+		)
+		plan.get_sub_assembly_items()
+		plan.submit()
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		self.manufacture_with_loss(work_order, loss_qty=25)
+
+		# 15 good is short: 16.67 Nos before loss, so 17 Nos.
+		replacement = self.create_work_order(plan, field)
+		self.assertEqual(replacement.qty, 17)
+		replacement.submit()
+
 	def test_finished_good_plan_includes_process_loss(self):
 		field = "production_plan_item"
 		plan = self.make_plan(qty=90, plan_process_loss=True)
