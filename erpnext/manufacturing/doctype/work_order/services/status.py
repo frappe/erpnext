@@ -515,10 +515,13 @@ class StatusService:
 		)
 
 		work_order = frappe.qb.DocType("Work Order")
+		bom = frappe.qb.DocType("BOM")
 		ordered_qty = flt(
 			(
 				frappe.qb.from_(work_order)
-				.select(Sum(work_order.qty))
+				.left_join(bom)
+				.on(bom.name == work_order.bom_no)
+				.select(Sum(qty_against_sales_order(work_order, bom)))
 				.where(
 					(work_order.production_plan_item == self.doc.production_plan_item)
 					& (work_order.docstatus == 1)
