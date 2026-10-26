@@ -32,15 +32,24 @@ class StatusService:
 		self.doc = doc
 
 	def validate_work_order_against_so(self):
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			get_planned_process_loss_percentage,
+			get_qty_before_process_loss,
+		)
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
-		total_qty = flt(self._ordered_qty_against_so()) + self._expected_output_qty()
 		so_qty = flt(self._so_item_qty()) + flt(self._packed_item_qty())
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
+		# This Work Order is made before its planned loss, so it may exceed the good qty left.
+		max_qty = get_qty_before_process_loss(
+			so_qty + (allowance_percentage / 100 * so_qty) - flt(self._ordered_qty_against_so()),
+			get_planned_process_loss_percentage(self.doc.bom_no),
+			self.doc.stock_uom,
+		)
 		precision = self.doc.precision("qty")
-		if flt(total_qty, precision) <= flt(so_qty + (allowance_percentage / 100 * so_qty), precision):
+		if flt(self.doc.qty, precision) <= flt(max_qty, precision):
 			return
 
 		frappe.throw(
@@ -51,12 +60,6 @@ class StatusService:
 			),
 			OverProductionError,
 		)
-
-	def _expected_output_qty(self):
-		"""Good output of this Work Order after its recorded or planned process loss."""
-		loss_percentage = frappe.get_cached_value("BOM", self.doc.bom_no, "process_loss_percentage")
-		loss_qty = max(flt(self.doc.process_loss_qty), flt(self.doc.qty) * flt(loss_percentage) / 100)
-		return max(flt(self.doc.produced_qty), flt(self.doc.qty) - loss_qty)
 
 	def _ordered_qty_against_so(self):
 		wo = frappe.qb.DocType("Work Order")
