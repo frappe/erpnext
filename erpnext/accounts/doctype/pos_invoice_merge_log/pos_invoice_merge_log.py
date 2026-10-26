@@ -316,7 +316,11 @@ class POSInvoiceMergeLog(Document):
 		invoice.set("base_rounding_adjustment", base_rounding_adjustment)
 		invoice.set("rounded_total", rounded_total)
 		invoice.set("base_rounded_total", base_rounded_total)
-		set_summed_amounts(invoice, data, ["change_amount", "base_change_amount"])
+		set_summed_amounts(
+			invoice,
+			data,
+			["change_amount", "base_change_amount", "write_off_amount", "base_write_off_amount"],
+		)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
