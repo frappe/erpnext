@@ -419,22 +419,9 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	return out
 
 
-def update_pricing_rule_uom(pricing_rule, args):
-	child_doc = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}.get(
-		pricing_rule.apply_on
-	)
-
-	apply_on_field = frappe.scrub(pricing_rule.apply_on)
-
-	for row in pricing_rule.get(child_doc):
-		if row.get(apply_on_field) == args.get(apply_on_field):
-			pricing_rule.uom = row.uom
-
-
-def get_pricing_rule_for_item(args, doc=None, for_validate=False):
+def get_pricing_rule_for_item(args, doc=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
-		get_pricing_rule_items,
 		get_pricing_rules,
 		get_product_discount_rule,
 	)
@@ -477,23 +464,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		if args.get("coupon_code")
 		else None
 	)
-	coupon_changed = (
-		doc
-		and doc.get_doc_before_save()
-		and doc.meta.has_field("coupon_code")
-		and doc.has_value_changed("coupon_code")
-	)
-	if doc and not doc.get_doc_before_save() and applied_rules:
-		# Copies retain pricing rules, but have no saved coupon to compare against.
-		coupon_changed = (coupon_pricing_rule and coupon_pricing_rule not in applied_rules) or any(
-			rule != coupon_pricing_rule and frappe.get_cached_value("Pricing Rule", rule, "coupon_code_based")
-			for rule in applied_rules
-		)
-	pricing_rules = (
-		applied_rules
-		if for_validate and args.get("pricing_rules") and not coupon_changed
-		else get_pricing_rules(args, doc)
-	)
+	pricing_rules = get_pricing_rules(args, doc)
 
 	selected_rules = {
 		rule if isinstance(rule, str) else rule.get("name") for rule in (pricing_rules or []) if rule
@@ -537,14 +508,6 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		for pricing_rule in pricing_rules:
 			if not pricing_rule:
 				continue
-
-			if isinstance(pricing_rule, str):
-				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
-				update_pricing_rule_uom(pricing_rule, args)
-				fetch_other_item = True if pricing_rule.apply_rule_on_other else False
-				pricing_rule.apply_rule_on_other_items = (
-					get_pricing_rule_items(pricing_rule, other_items=fetch_other_item) or []
-				)
 
 			if pricing_rule.get("coupon_code_based") == 1:
 				if not args.coupon_code:
