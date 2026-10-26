@@ -909,7 +909,9 @@ def make_payment_request(**args):
 				grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
 			else:
 				# If PR's are processed, cancel all of them.
-				cancel_old_payment_requests(ref_doc.doctype, ref_doc.name)
+				cancel_old_payment_requests(
+					ref_doc.doctype, ref_doc.name, ignore_permissions=is_portal_payment
+				)
 		elif not selected_payment_schedules:
 			grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
 	# a portal payer must not pay through a draft prepared by staff
@@ -1187,7 +1189,7 @@ def get_irequest_status(payment_requests: None | list = None) -> list:
 	return res
 
 
-def cancel_old_payment_requests(ref_dt, ref_dn):
+def cancel_old_payment_requests(ref_dt, ref_dn, ignore_permissions=False):
 	PR = frappe.qb.DocType("Payment Request")
 
 	if res := (
@@ -1204,7 +1206,7 @@ def cancel_old_payment_requests(ref_dt, ref_dn):
 		else:
 			for x in res:
 				doc = frappe.get_doc("Payment Request", x.name)
-				doc.flags.ignore_permissions = True
+				doc.flags.ignore_permissions = ignore_permissions
 				doc.cancel()
 
 				if ireqs := get_irequests_of_payment_request(doc.name):
