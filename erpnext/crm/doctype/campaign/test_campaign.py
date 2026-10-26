@@ -86,11 +86,11 @@ class TestCampaign(ERPNextTestSuite):
 		sales_user = make_user("_test_campaign_sales@example.com", "Sales User")
 		accounts_user = make_user("_test_campaign_accounts@example.com", "Accounts User")
 
-		frappe.set_user(sales_user)
-		self.assertEqual(get_utm_campaign(campaign.name), mirror)
+		with self.set_user(sales_user):
+			self.assertEqual(get_utm_campaign(campaign.name), mirror)
 
-		frappe.set_user(accounts_user)
-		self.assertRaises(frappe.PermissionError, get_utm_campaign, campaign.name)
+		with self.set_user(accounts_user):
+			self.assertRaises(frappe.PermissionError, get_utm_campaign, campaign.name)
 
 
 def make_user(email: str, role: str) -> str:
