@@ -19,8 +19,8 @@ bench get-app --skip-assets "${APP_NAME}" "${GITHUB_WORKSPACE}"
 
 echo "=== Setting up sync_translations_${HOTFIX_BRANCH} branch ==="
 cd "./apps/${APP_NAME}" || exit
-git config user.email "developers@erpnext.com"
-git config user.name "frappe-pr-bot"
+git config user.email "346168705+frappe-release-bot[bot]@users.noreply.github.com"
+git config user.name "frappe-release-bot[bot]"
 git remote set-url upstream "https://github.com/${GITHUB_REPOSITORY}.git"
 git config remote.upstream.fetch "+refs/heads/*:refs/remotes/upstream/*"
 gh auth setup-git
