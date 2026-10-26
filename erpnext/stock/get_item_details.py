@@ -700,6 +700,8 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 		out.conversion_factor = ctx.conversion_factor or get_conversion_factor(item.name, ctx.uom).get(
 			"conversion_factor"
 		)
+		if not out.conversion_factor:
+			throw(_("UOM {0} has no conversion factor in Item {1}.").format(ctx.uom, item.name))
 
 	ctx.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
@@ -1710,7 +1712,9 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 
 @frappe.whitelist()
 def get_conversion_factor(item_code: str | None, uom: str):
-	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+	item = frappe.get_cached_value(
+		"Item", item_code, ["variant_of", "stock_uom", "is_stock_item"], as_dict=True
+	)
 	if not item_code or not item or uom == item.stock_uom:
 		return {"conversion_factor": 1.0}
 
@@ -1735,6 +1739,9 @@ def get_conversion_factor(item_code: str | None, uom: str):
 		conversion_factor = get_uom_conv_factor(uom, item.stock_uom)
 	else:
 		conversion_factor = conversion_factor[0]
+
+	if not conversion_factor and item.is_stock_item:
+		throw(_("UOM {0} has no conversion factor in Item {1}.").format(uom, item_code))
 
 	return {"conversion_factor": conversion_factor or 1.0}
 
