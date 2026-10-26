@@ -8,11 +8,13 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
-from frappe.utils.data import comma_and, cstr
+from frappe.utils import cstr, flt
+from frappe.utils.data import comma_and
 
 from erpnext import _refuse
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
+	get_linked_exchange_gain_loss_journal,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
 )
@@ -60,6 +62,7 @@ class UnreconcilePayment(Document):
 			self.append("allocations", alloc)
 
 	def on_submit(self):
+		self.cancel_legacy_return_exchange_journal()
 		# todo: more granular unreconciliation
 		for alloc in self.allocations:
 			doc = frappe.get_doc(alloc.reference_doctype, alloc.reference_name)
@@ -76,6 +79,145 @@ class UnreconcilePayment(Document):
 			)
 
 			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)
+
+	def cancel_legacy_return_exchange_journal(self):
+		if self.voucher_type != "Journal Entry":
+			return
+
+		journal = frappe.get_doc("Journal Entry", self.voucher_no)
+		if not (
+			journal.docstatus == 1
+			and journal.is_system_generated
+			and journal.voucher_type in ("Credit Note", "Debit Note")
+			and len(journal.accounts) == 2
+		):
+			return
+
+		journal.check_permission("write")
+		return_rows = [
+			row
+			for row in journal.accounts
+			if row.reference_type in ("Sales Invoice", "Purchase Invoice")
+			and row.reference_name
+			and frappe.get_cached_value(row.reference_type, row.reference_name, "is_return")
+		]
+		if len(return_rows) != 1:
+			return
+
+		return_row = return_rows[0]
+		invoice_row = next(row for row in journal.accounts if row.name != return_row.name)
+		if not any(
+			row.reference_doctype == return_row.reference_type
+			and row.reference_name == return_row.reference_name
+			for row in self.allocations
+		):
+			return
+
+		legacy_journals = self.get_legacy_return_exchange_journals(journal, invoice_row, return_row)
+		if not legacy_journals:
+			return
+
+		self.validate_legacy_return_exchange_journal(journal, invoice_row, return_row, legacy_journals)
+		gain_loss = legacy_journals[0]
+		precision = gain_loss.precision("total_debit")
+		amount = return_row.debit_in_account_currency - return_row.credit_in_account_currency
+		return_rate = frappe.get_cached_value(
+			return_row.reference_type, return_row.reference_name, "conversion_rate"
+		)
+		difference = flt(amount * return_rate, precision) - flt(amount * return_row.exchange_rate, precision)
+		if gain_loss.creation < journal.creation or flt(
+			sum(row.debit - row.credit for row in gain_loss.accounts if row.account == return_row.account)
+			- difference,
+			precision,
+		):
+			frappe.throw(
+				_("Exchange journal {0} could not be matched to reconciliation journal {1}.").format(
+					frappe.bold(gain_loss.name), frappe.bold(journal.name)
+				),
+				title=_("Exchange Journal Mismatch"),
+			)
+
+		gain_loss.cancel()
+
+	def get_legacy_return_exchange_journals(self, journal, invoice_row, return_row):
+		legacy_journals = []
+		for name in get_linked_exchange_gain_loss_journal(
+			return_row.reference_type, return_row.reference_name, 1
+		):
+			gain_loss = frappe.get_doc("Journal Entry", name)
+			if any(
+				row.reference_type == "Journal Entry" and row.reference_name == journal.name
+				for row in gain_loss.accounts
+			):
+				return []
+
+			if len(gain_loss.accounts) != 2 or gain_loss.company != journal.company:
+				continue
+
+			party_rows = gain_loss.get("accounts", {"account": return_row.account})
+			if len(party_rows) != 1:
+				continue
+
+			party_row = party_rows[0]
+			reference_row = next(row for row in gain_loss.accounts if row.name != party_row.name)
+			if (
+				party_row.reference_type == return_row.reference_type
+				and party_row.reference_name == return_row.reference_name
+				and party_row.party_type == return_row.party_type
+				and party_row.party == return_row.party
+				and reference_row.reference_type == return_row.reference_type
+				and (
+					not invoice_row.reference_name
+					or reference_row.reference_name == invoice_row.reference_name
+				)
+			):
+				legacy_journals.append(gain_loss)
+
+		return legacy_journals
+
+	def validate_legacy_return_exchange_journal(self, journal, invoice_row, return_row, legacy_journals):
+		# Old exchange journals identify the invoice pair, not the individual reconciliation.
+		linked_journals = frappe.get_all(
+			"Journal Entry Account",
+			filters={
+				"reference_type": return_row.reference_type,
+				"reference_name": return_row.reference_name,
+				"docstatus": 1,
+			},
+			pluck="parent",
+		)
+		if invoice_row.reference_name:
+			linked_journals = frappe.get_all(
+				"Journal Entry Account",
+				filters={
+					"parent": ("in", linked_journals),
+					"reference_type": invoice_row.reference_type,
+					"reference_name": invoice_row.reference_name,
+					"docstatus": 1,
+				},
+				pluck="parent",
+			)
+
+		linked_journals = frappe.get_all(
+			"Journal Entry",
+			filters={
+				"name": ("in", linked_journals),
+				"company": journal.company,
+				"voucher_type": journal.voucher_type,
+				"is_system_generated": 1,
+				"docstatus": 1,
+			},
+			pluck="name",
+		)
+		if len(legacy_journals) != 1 or linked_journals != [journal.name]:
+			frappe.throw(
+				_(
+					"Cannot uniquely match exchange journals {0} to {1}. Review and cancel the matching exchange journal and reconciliation journal instead."
+				).format(
+					comma_and([frappe.bold(row.name) for row in legacy_journals]), frappe.bold(journal.name)
+				),
+				title=_("Ambiguous Exchange Journal"),
+			)
 
 
 @frappe.whitelist()
