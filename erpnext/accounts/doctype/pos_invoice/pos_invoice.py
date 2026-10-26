@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyService
+from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
 from erpnext.accounts.doctype.sales_invoice.services.status import get_discounting_status
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
@@ -240,6 +241,7 @@ class POSInvoice(SalesInvoice):
 			validate_coupon_code(self.coupon_code, self.customer)
 
 	def before_submit(self):
+		POSService(self).validate_mandatory_pos_fields()
 		self.set_outstanding_amount()
 
 	def on_submit(self):

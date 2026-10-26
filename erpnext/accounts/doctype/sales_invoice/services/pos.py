@@ -211,6 +211,24 @@ class POSService:
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
+	def validate_mandatory_pos_fields(self) -> None:
+		doc = self.doc
+		pos_settings = frappe.get_cached_doc("POS Settings")
+		if pos_settings.invoice_type != doc.doctype or doc.get("is_consolidated"):
+			return
+
+		missing_fields = [
+			_(field.label)
+			for field in pos_settings.invoice_fields
+			if field.reqd and not doc.get(field.fieldname)
+		]
+		if missing_fields:
+			frappe.throw(
+				_("{0} are mandatory in POS Settings").format(", ".join(map(frappe.bold, missing_fields))),
+				frappe.MandatoryError,
+				title=_("Missing POS Fields"),
+			)
+
 	def validate_created_using_pos(self) -> None:
 		doc = self.doc
 		if doc.is_created_using_pos and not doc.pos_profile:

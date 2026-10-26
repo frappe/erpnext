@@ -6,6 +6,7 @@ import frappe
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.patches.v16_0.append_fieldname_to_pos_search_fields import execute as append_fieldname
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -164,6 +165,35 @@ class TestPOSSettings(ERPNextTestSuite):
 			user = make_user_with_role(role)
 			self.assertTrue(frappe.has_permission("POS Settings", "read", user=user), role)
 			self.assertEqual(frappe.has_permission("POS Settings", "write", user=user), can_write, role)
+
+	def test_mandatory_pos_field_is_required_on_submit(self):
+		self.settings.invoice_type = "POS Invoice"
+		self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+		self.settings.save()
+
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+		sale = create_pos_invoice(rate=100, do_not_save=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sale.insert()
+		self.assertRaises(frappe.MandatoryError, sale.submit)
+
+		sale.reload()
+		sale.po_no = "Counter 1"
+		sale.submit()
+		self.assertEqual(sale.docstatus, 1)
+
+	def test_mandatory_pos_field_is_required_on_pos_sales_invoice(self):
+		self.settings.invoice_type = "Sales Invoice"
+		self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+		self.settings.save()
+
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+		sale = create_sales_invoice(is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sale.insert()
+		self.assertRaises(frappe.MandatoryError, sale.submit)
 
 
 def make_user_with_role(role):
