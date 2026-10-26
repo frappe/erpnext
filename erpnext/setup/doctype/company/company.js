@@ -335,34 +335,24 @@ erpnext.company.setup_queries = function (frm) {
 			["service_expense_account", { root_type: "Expense" }],
 			["expenses_added_to_stock_account", { root_type: "Expense" }],
 			["expenses_added_to_stock_contra_account", { root_type: "Expense" }],
+			["stock_adjustment_account", { root_type: "Expense", account_type: "Stock Adjustment" }],
+			[
+				"stock_received_but_not_billed",
+				{ root_type: "Liability", account_type: "Stock Received But Not Billed" },
+			],
+			[
+				"stock_delivered_but_not_billed",
+				{ root_type: "Asset", account_type: "Stock Delivered But Not Billed" },
+			],
+			[
+				"service_received_but_not_billed",
+				{ root_type: "Liability", account_type: "Service Received But Not Billed" },
+			],
 		],
 		function (i, v) {
 			erpnext.company.set_custom_query(frm, v);
 		}
 	);
-
-	if (frm.doc.enable_perpetual_inventory) {
-		$.each(
-			[
-				["stock_adjustment_account", { root_type: "Expense", account_type: "Stock Adjustment" }],
-				[
-					"stock_received_but_not_billed",
-					{ root_type: "Liability", account_type: "Stock Received But Not Billed" },
-				],
-				[
-					"stock_delivered_but_not_billed",
-					{ root_type: "Asset", account_type: "Stock Delivered But Not Billed" },
-				],
-				[
-					"service_received_but_not_billed",
-					{ root_type: "Liability", account_type: "Service Received But Not Billed" },
-				],
-			],
-			function (i, v) {
-				erpnext.company.set_custom_query(frm, v);
-			}
-		);
-	}
 };
 
 erpnext.company.set_custom_query = function (frm, v) {
