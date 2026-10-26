@@ -582,6 +582,7 @@ def reconcile_against_document(
 				entry.account,
 				entry.party_type,
 				entry.party,
+				update_payment_schedule=True,
 			)
 		frappe.flags.ignore_party_validation = False
 
@@ -2203,7 +2204,9 @@ def create_payment_ledger_entry(
 			ple.submit()
 
 
-def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
+def update_voucher_outstanding(
+	voucher_type, voucher_no, account, party_type, party, update_payment_schedule=False
+):
 	from erpnext.accounts.doctype.dunning.dunning import update_linked_dunnings
 
 	if not voucher_type or not voucher_no:
@@ -2249,9 +2252,50 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		outstanding_amount,
 	)
 
+	if update_payment_schedule:
+		update_payment_schedule_outstanding(ref_doc, flt(previous_outstanding_amount) - outstanding_amount)
+
 	update_linked_dunnings(ref_doc, previous_outstanding_amount)
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
+
+
+def update_payment_schedule_outstanding(ref_doc, amount):
+	"""Apply a change in invoice outstanding to its Payment Schedule.
+	A payment (positive amount) clears the earliest terms first, a reversal restores the latest first."""
+	if ref_doc.get("is_return") or not ref_doc.get("payment_schedule"):
+		return
+
+	if ref_doc.party_account_currency != ref_doc.currency:
+		# outstanding is in company currency, the schedule is in transaction currency
+		amount = amount / flt(ref_doc.conversion_rate or 1)
+
+	precision = ref_doc.precision("outstanding_amount")
+	amount = flt(amount, precision)
+	terms = sorted(ref_doc.payment_schedule, key=lambda t: (getdate(t.due_date), t.idx), reverse=amount < 0)
+	for term in terms:
+		if not amount:
+			break
+
+		if amount > 0:
+			change = min(amount, flt(term.outstanding))
+		else:
+			change = max(amount, flt(term.outstanding) - flt(term.payment_amount))
+
+		if not change:
+			continue
+
+		base_change = flt(change * flt(ref_doc.conversion_rate or 1), term.precision("base_outstanding"))
+		term.db_set(
+			{
+				"outstanding": flt(term.outstanding) - change,
+				"paid_amount": flt(term.paid_amount) + change,
+				"base_outstanding": flt(term.base_outstanding) - base_change,
+				"base_paid_amount": flt(term.base_paid_amount) + base_change,
+			},
+			update_modified=False,
+		)
+		amount = flt(amount - change, precision)
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):

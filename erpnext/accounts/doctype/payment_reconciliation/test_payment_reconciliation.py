@@ -721,6 +721,49 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
 
+	def test_journal_reconciliation_updates_payment_schedule(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		si.payment_terms_template = "Test Receivable Template"
+		si.set("payment_schedule", [])
+		si.save().submit()
+
+		je = self.create_journal_entry(self.bank, self.debit_to, 90)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices") if x.invoice_number == si.name]
+		payments = [x.as_dict() for x in pr.get("payments") if x.reference_name == je.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		# earliest term is cleared first
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 10)
+		self.assertEqual([t.outstanding for t in si.payment_schedule], [0, 10])
+		self.assertEqual([t.paid_amount for t in si.payment_schedule], [84.75, 5.25])
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": je.doctype,
+				"voucher_no": je.name,
+			}
+		)
+		unreconcile.add_references()
+		unreconcile.save().submit()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 100)
+		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
+		self.assertEqual([t.paid_amount for t in si.payment_schedule], [0, 0])
+
 	def test_negative_debit_or_credit_journal_against_invoice(self):
 		transaction_date = nowdate()
 		amount = 100
