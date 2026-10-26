@@ -1143,7 +1143,7 @@ def get_billing_shipping_address(name, billing_address=None, shipping_address=No
 
 
 @frappe.whitelist(methods=["POST"])
-def create_transaction_deletion_request(company):
+def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
 	# User Permission check
 	frappe.has_permission("Company", ptype="delete", doc=company, throw=True)

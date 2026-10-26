@@ -713,7 +713,7 @@ def get_due_project_updates(project: str, *times) -> int:
 
 
 @frappe.whitelist(methods=["POST"])
-def create_duplicate_project(prev_doc, project_name):
+def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	"""Create duplicate project based on the old project"""
 	import json
 
@@ -924,7 +924,7 @@ def get_project_kanban_board(project: str) -> str | None:
 
 
 @frappe.whitelist(methods=["POST"])
-def set_project_status(project, status):
+def set_project_status(project: str, status: str):
 	"""
 	set status for project and all related tasks
 	"""

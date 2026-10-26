@@ -552,7 +552,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def set_multiple_status(names, status):
+def set_multiple_status(names: str | list[str], status: str):
 	names = json.loads(names)
 	for name in names:
 		opp = frappe.get_doc("Opportunity", name)
