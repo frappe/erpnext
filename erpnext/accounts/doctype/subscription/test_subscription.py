@@ -12,6 +12,7 @@ from frappe.utils.data import (
 	date_diff,
 	flt,
 	get_date_str,
+	get_first_day,
 	getdate,
 	nowdate,
 )
@@ -569,6 +570,63 @@ class TestSubscription(ERPNextTestSuite):
 		)
 
 		self.assertEqual(len(subscription.invoices), 2)
+
+	def test_subscription_days_before_with_end_date_does_not_rebill(self):
+		# first of next month keeps periods clear of month-end clamping
+		start_date = get_first_day(add_months(nowdate(), 1))
+		end_date = add_to_date(start_date, months=2, days=-1)
+		subscription = create_subscription(
+			start_date=start_date,
+			end_date=end_date,
+			generate_invoice_at="Days before the current subscription period",
+			number_of_days=10,
+			generate_new_invoices_past_due_date=1,
+		)
+
+		period_1_end = add_to_date(start_date, months=1, days=-1)
+		period_2_start = add_days(period_1_end, 1)
+
+		trigger_1 = add_days(start_date, -10)
+		trigger_2 = add_days(period_2_start, -10)
+		end_date_plus_1 = add_days(end_date, 1)
+		end_date_plus_cycle = add_to_date(end_date, months=1)
+
+		# Only process on the critical dates: each trigger date, End Date, End Date + 1,
+		# and End Date + one billing cycle.
+		for posting_date in [trigger_1, trigger_2, end_date, end_date_plus_1, end_date_plus_cycle]:
+			subscription.process(posting_date=posting_date)
+
+		# Exactly 2 invoices generated (no rebilling past end date)
+		self.assertEqual(len(subscription.invoices), 2)
+
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name, "docstatus": ("<", 2)},
+			fields=["name", "from_date", "to_date"],
+			order_by="from_date asc",
+		)
+		self.assertEqual(len(invoices), 2)
+		for inv in invoices:
+			self.assertLessEqual(getdate(inv.from_date), getdate(inv.to_date))
+
+		self.assertEqual(getdate(invoices[0].from_date), getdate(start_date))
+		self.assertEqual(getdate(invoices[0].to_date), getdate(period_1_end))
+		self.assertEqual(getdate(invoices[1].from_date), getdate(period_2_start))
+		self.assertEqual(getdate(invoices[1].to_date), getdate(end_date))
+
+		# Prevent reversed period after End Date ("To Date cannot be before From Date")
+		self.assertLessEqual(
+			getdate(subscription.current_invoice_start), getdate(subscription.current_invoice_end)
+		)
+		self.assertEqual(getdate(subscription.current_invoice_start), getdate(period_2_start))
+		self.assertEqual(getdate(subscription.current_invoice_end), getdate(end_date))
+
+		# Final status should be Completed once both invoices are paid
+		for inv in invoices:
+			get_payment_entry("Sales Invoice", inv.name).submit()
+		subscription.reload()
+		subscription.process(posting_date=end_date_plus_cycle)
+		self.assertEqual(subscription.status, "Completed")
 
 	def test_future_subscription(self):
 		"""Force-Fetch should not process future subscriptions"""
