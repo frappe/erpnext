@@ -66,36 +66,18 @@ frappe.ui.form.on("Stock Entry", {
 		});
 
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
-			let item = locals[cdt][cdn];
-
-			if (!item.item_code) {
-				frappe.throw(__("Please enter Item Code to get Batch Number"));
-			} else {
-				const filters = {
+			const item = locals[cdt][cdn];
+			return {
+				query: "erpnext.stock.doctype.stock_entry.stock_entry.batch_query",
+				filters: {
 					item_code: item.item_code,
-					posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
-					posting_time: frm.doc.posting_time || frappe.datetime.now_time(),
-				};
-
-				// User could want to select a manually created empty batch (no warehouse)
-				// or a pre-existing batch
-				if (frm.doc.purpose != "Material Receipt") {
-					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
-				}
-
-				if (!item.s_warehouse && item.t_warehouse) {
-					filters["is_inward"] = 1;
-				}
-
-				if (["Material Receipt", "Material Transfer", "Material Issue"].includes(doc.purpose)) {
-					filters["include_expired_batches"] = 1;
-				}
-
-				return {
-					query: "erpnext.controllers.queries.get_batch_no",
-					filters: filters,
-				};
-			}
+					s_warehouse: item.s_warehouse,
+					t_warehouse: item.t_warehouse,
+					purpose: doc.purpose,
+					posting_date: doc.posting_date,
+					posting_time: doc.posting_time,
+				},
+			};
 		});
 
 		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {

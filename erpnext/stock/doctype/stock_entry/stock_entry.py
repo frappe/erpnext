@@ -16,6 +16,7 @@ from frappe.utils import (
 	flt,
 	get_link_to_form,
 	nowdate,
+	nowtime,
 )
 
 import erpnext
@@ -2267,3 +2268,31 @@ def get_warehouse_details(args: str | dict):
 			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def batch_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs):
+	"""The batches of a row's item: of its source warehouse, or its target one when it has none."""
+	from erpnext.controllers.queries import get_batch_no
+
+	if not filters.get("item_code"):
+		frappe.throw(_("Please enter Item Code to get Batch Number"))
+
+	purpose = filters.get("purpose")
+	batch_filters = {
+		"item_code": filters["item_code"],
+		"posting_date": filters.get("posting_date") or nowdate(),
+		"posting_time": filters.get("posting_time") or nowtime(),
+	}
+	# User could want to select a manually created empty batch (no warehouse) or a pre-existing batch
+	if purpose != "Material Receipt":
+		batch_filters["warehouse"] = filters.get("s_warehouse") or filters.get("t_warehouse")
+
+	if not filters.get("s_warehouse") and filters.get("t_warehouse"):
+		batch_filters["is_inward"] = 1
+
+	if purpose in ("Material Receipt", "Material Transfer", "Material Issue"):
+		batch_filters["include_expired_batches"] = 1
+
+	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
