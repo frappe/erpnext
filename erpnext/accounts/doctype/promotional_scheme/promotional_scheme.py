@@ -210,6 +210,7 @@ class PromotionalScheme(Document):
 
 	def on_update(self):
 		self.validate()
+		self.remove_pricing_rules_of_deleted_slabs()
 		pricing_rules = (
 			frappe.get_all(
 				"Pricing Rule",
@@ -220,6 +221,28 @@ class PromotionalScheme(Document):
 			or {}
 		)
 		self.update_pricing_rules(pricing_rules)
+
+	def remove_pricing_rules_of_deleted_slabs(self):
+		slabs = [d.name for d in self.price_discount_slabs + self.product_discount_slabs]
+		pricing_rules = frappe.get_all(
+			"Pricing Rule",
+			filters={"promotional_scheme": self.name, "promotional_scheme_id": ["not in", slabs]},
+			pluck="name",
+		)
+		if not pricing_rules:
+			return
+
+		used_pricing_rules = frappe.get_all(
+			"Pricing Rule Detail",
+			filters={"pricing_rule": ["in", pricing_rules], "docstatus": ["<", 2]},
+			pluck="pricing_rule",
+			distinct=True,
+		)
+		for pricing_rule in pricing_rules:
+			if pricing_rule in used_pricing_rules:
+				frappe.db.set_value("Pricing Rule", pricing_rule, "disable", 1)
+			else:
+				frappe.delete_doc("Pricing Rule", pricing_rule)
 
 	def validate_mixed_with_recursion(self):
 		if self.mixed_conditions:

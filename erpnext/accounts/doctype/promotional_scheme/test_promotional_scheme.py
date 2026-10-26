@@ -172,6 +172,32 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		ps.mixed_conditions = True
 		self.assertRaises(frappe.ValidationError, ps.save)
 
+	def test_pricing_rule_of_removed_slab_is_deleted(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertFalse(frappe.db.exists("Pricing Rule", pricing_rule))
+		self.assertEqual(len(frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})), 1)
+
+	def test_pricing_rule_of_removed_slab_used_in_transaction_is_disabled(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		so = make_sales_order(qty=10, price_list_rate=100, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 30)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+		so = make_sales_order(qty=10, price_list_rate=100, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 0)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)
@@ -201,4 +227,15 @@ def make_promotional_scheme(**args):
 
 	ps.save()
 
+	return ps
+
+
+def make_promotional_scheme_with_two_slabs():
+	ps = make_promotional_scheme()
+	ps.price_discount_slabs[0].max_qty = 9
+	ps.append(
+		"price_discount_slabs",
+		{"min_qty": 10, "discount_percentage": 30, "rule_description": "Ten or more"},
+	)
+	ps.save()
 	return ps
