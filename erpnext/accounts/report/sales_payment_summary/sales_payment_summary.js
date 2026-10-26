@@ -23,6 +23,7 @@ frappe.query_reports["Sales Payment Summary"] = {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1,
 		},
 		{
 			fieldname: "owner",
