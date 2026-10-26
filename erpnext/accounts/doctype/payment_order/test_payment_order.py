@@ -47,6 +47,28 @@ class TestPaymentOrder(ERPNextTestSuite):
 		self.assertEqual(reference_doc.supplier, "_Test Supplier")
 		self.assertEqual(reference_doc.amount, 250)
 
+	def test_payment_order_from_payment_entry_uses_its_own_naming_series(self):
+		payment_entry = self.make_payment_entry()
+
+		payment_order = make_payment_order(payment_entry.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+
+		self.assertEqual(payment_order.naming_series, "PMO-")
+		self.assertTrue(payment_order.name.startswith("PMO-"))
+
+	def make_payment_entry(self):
+		purchase_invoice = make_purchase_invoice()
+		payment_entry = get_payment_entry(
+			"Purchase Invoice", purchase_invoice.name, bank_account=self.gl_account
+		)
+		payment_entry.reference_no = "_Test_Payment_Order"
+		payment_entry.reference_date = getdate()
+		payment_entry.party_bank_account = self.bank_account
+		payment_entry.insert()
+		payment_entry.submit()
+		return payment_entry
+
 
 def create_payment_order_against_payment_entry(ref_doc, order_type, bank_account):
 	payment_order = frappe.get_doc(
