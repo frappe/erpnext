@@ -1316,21 +1316,8 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = self.qty
 
-<<<<<<< HEAD
-		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
-		if not batch_auto_creation:
-			frappe.msgprint(
-				_("Batch not created for item {} since it does not have a batch series.").format(
-					frappe.bold(self.production_item)
-				),
-				alert=True,
-				indicator="orange",
-			)
-			return
-=======
 		if not frappe.get_cached_value("Item", self.production_item, "create_new_batch"):
 			self.throw_missing_item_setting("create_new_batch")
->>>>>>> 5fe3b81 (fix(manufacturing): require automatic batch creation on work order submit)
 
 		while total_qty > 0:
 			qty = self.batch_size
@@ -1361,33 +1348,10 @@ class WorkOrder(Document):
 
 		batch_capacity = self.get_batch_capacity() if self.has_batch_no else []
 
-<<<<<<< HEAD
-		serial_nos = []
-		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(item_details.serial_no_series, qty or self.qty)
-=======
 		if not item_details.serial_no_series:
-<<<<<<< HEAD
-<<<<<<< HEAD
-			frappe.throw(
-				_("Set Serial No Series in Item {0} or disable {1} in {2}").format(
-					get_link_to_form("Item", self.production_item),
-					frappe.bold(_("Make Serial No / Batch from Work Order")),
-					get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
-				),
-				title=_("Serial No Series Missing"),
-			)
->>>>>>> 52f1f52 (fix(manufacturing): require serial no series on work order submit)
-=======
-			self.throw_missing_serial_no_series()
->>>>>>> a154980 (fix(manufacturing): take field labels from meta in serial no series error)
-=======
 			self.throw_missing_item_setting("serial_no_series")
->>>>>>> 5fe3b81 (fix(manufacturing): require automatic batch creation on work order submit)
 
-		serial_nos = get_available_serial_nos(
-			item_details.serial_no_series, qty or self.qty, self.production_item
-		)
+		serial_nos = get_available_serial_nos(item_details.serial_no_series, qty or self.qty)
 		if not serial_nos:
 			return
 
