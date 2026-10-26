@@ -21,6 +21,12 @@ def get_scheduled_employees_for_popup(communication_medium):
 	if not communication_medium:
 		return []
 
+	medium = frappe.db.get_value(
+		"Communication Medium", communication_medium, ["disabled", "catch_all"], as_dict=True
+	)
+	if medium and medium.disabled:
+		return []
+
 	now_time = frappe.utils.nowtime()
 	weekday = frappe.utils.get_weekday()
 
@@ -36,6 +42,8 @@ def get_scheduled_employees_for_popup(communication_medium):
 	)
 
 	available_employee_groups = tuple([emp.employee_group for emp in available_employee_groups])
+	if not available_employee_groups and medium and medium.catch_all:
+		available_employee_groups = (medium.catch_all,)
 
 	employees = frappe.get_all(
 		"Employee Group Table", filters={"parent": ["in", available_employee_groups]}, fields=["user_id"]
