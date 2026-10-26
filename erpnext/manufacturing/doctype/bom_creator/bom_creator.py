@@ -106,6 +106,7 @@ class BOMCreator(Document):
 		self.update_previous_revision_status()
 
 	def before_update_after_submit(self):
+		self.validate_design_can_change()
 		self.validate_cad_parts_unchanged()
 		self.validate_finished_good()
 		self.set_part_structure()
@@ -307,6 +308,16 @@ class BOMCreator(Document):
 					),
 					title=_("Invalid BOM"),
 				)
+
+	def validate_design_can_change(self):
+		status = self.get_doc_before_save().get_status()
+		if status not in ("Submitted", "Failed"):
+			frappe.throw(
+				_("A design with the status {0} cannot be changed. Make a new revision to change it.").format(
+					bold(_(status))
+				),
+				title=_("Not Allowed"),
+			)
 
 	def validate_cad_parts_unchanged(self):
 		before = self.get_doc_before_save()
