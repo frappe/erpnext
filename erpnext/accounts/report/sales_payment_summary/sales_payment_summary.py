@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cstr
 
 
@@ -114,9 +115,10 @@ def get_conditions(filters):
 		conditions += " and a.owner = %(owner)s"
 	if filters.get("is_pos"):
 		conditions += " and a.is_pos = %(is_pos)s"
-	if "permitted_invoices" not in filters:
-		filters["permitted_invoices"] = get_permitted_invoices(filters)
-	conditions += " and a.name in %(permitted_invoices)s"
+	if is_restricted_user():
+		if "permitted_invoices" not in filters:
+			filters["permitted_invoices"] = get_permitted_invoices(filters)
+		conditions += " and a.name in %(permitted_invoices)s"
 	return conditions
 
 
@@ -300,6 +302,13 @@ def get_mode_of_payment_details(filters):
 			)
 
 	return mode_of_payment_details
+
+
+def is_restricted_user() -> bool:
+	"""Whether the session user may read only some Sales Invoices."""
+	if not frappe.has_permission("Sales Invoice", "read"):
+		return True
+	return bool(DatabaseQuery("Sales Invoice").build_match_conditions(as_condition=True))
 
 
 def get_permitted_invoices(filters) -> tuple[str, ...]:
