@@ -136,3 +136,23 @@ class TestLedgerHealth(ERPNextTestSuite, AccountsTestMixin):
 				}
 			],
 		)
+
+	def test_mismatch_recorded_once_and_cleared_after_fix(self):
+		self.create_journal()
+		gle = frappe.db.get_value("GL Entry", {"voucher_no": self.je.name, "account": self.income_account})
+		frappe.db.set_value("GL Entry", gle, "credit", 9000)
+
+		run_ledger_health_checks()
+		first_check = frappe.db.get_value(
+			"Ledger Health", {"voucher_no": self.je.name}, ["name", "checked_on"]
+		)
+		run_ledger_health_checks()
+
+		rows = frappe.db.get_all("Ledger Health", fields=["name", "checked_on"])
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].name, first_check[0])
+		self.assertGreater(rows[0].checked_on, first_check[1])
+
+		frappe.db.set_value("GL Entry", gle, "credit", 10000)
+		run_ledger_health_checks()
+		self.assertEqual(self.get_ledger_health_rows(), [])

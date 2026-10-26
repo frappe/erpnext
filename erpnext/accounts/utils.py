@@ -2688,43 +2688,63 @@ def get_advance_payment_doctypes(payment_type=None):
 
 def run_ledger_health_checks():
 	health_monitor_settings = frappe.get_doc("Ledger Health Monitor")
-	if health_monitor_settings.enable_health_monitor:
-		period_end = getdate()
-		period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
+	if not health_monitor_settings.enable_health_monitor:
+		return
 
-		run_date = get_datetime()
+	period_end = getdate()
+	period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
+	companies = [x.company for x in health_monitor_settings.companies]
+	run_date = get_datetime()
 
-		# Debit-Credit mismatch report
-		if health_monitor_settings.debit_credit_mismatch:
-			for x in health_monitor_settings.companies:
-				filters = {"company": x.company, "from_date": period_start, "to_date": period_end}
-				voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
-				res = voucher_wise.execute_script_report(filters=filters)
-				for x in res[1]:
-					doc = frappe.new_doc("Ledger Health")
-					doc.voucher_type = x.voucher_type
-					doc.voucher_no = x.voucher_no
-					doc.debit_credit_mismatch = True
-					doc.checked_on = run_date
-					doc.save()
+	if health_monitor_settings.debit_credit_mismatch:
+		vouchers = get_vouchers_reported_by(
+			"Voucher-wise Balance", companies, {"from_date": period_start, "to_date": period_end}
+		)
+		update_ledger_health("debit_credit_mismatch", vouchers, run_date)
 
-		# General Ledger and Payment Ledger discrepancy
-		if health_monitor_settings.general_and_payment_ledger_mismatch:
-			for x in health_monitor_settings.companies:
-				filters = {
-					"company": x.company,
-					"period_start_date": period_start,
-					"period_end_date": period_end,
-				}
-				gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
-				res = gl_pl_comparison.execute_script_report(filters=filters)
-				for x in res[1]:
-					doc = frappe.new_doc("Ledger Health")
-					doc.voucher_type = x.voucher_type
-					doc.voucher_no = x.voucher_no
-					doc.general_and_payment_ledger_mismatch = True
-					doc.checked_on = run_date
-					doc.save()
+	if health_monitor_settings.general_and_payment_ledger_mismatch:
+		vouchers = get_vouchers_reported_by(
+			"General and Payment Ledger Comparison",
+			companies,
+			{"period_start_date": period_start, "period_end_date": period_end},
+		)
+		update_ledger_health("general_and_payment_ledger_mismatch", vouchers, run_date)
+
+
+def get_vouchers_reported_by(report_name, companies, filters):
+	report = frappe.get_doc("Report", report_name)
+	vouchers = set()
+	for company in companies:
+		data = report.execute_script_report(filters={"company": company, **filters})[1]
+		vouchers.update((row.voucher_type, row.voucher_no) for row in data)
+
+	return vouchers
+
+
+def update_ledger_health(check, vouchers, run_date):
+	still_reported, stale = {}, []
+	for row in frappe.get_all(
+		"Ledger Health", filters={check: 1}, fields=["name", "voucher_type", "voucher_no"], order_by="name"
+	):
+		voucher = (row.voucher_type, row.voucher_no)
+		if voucher in vouchers and voucher not in still_reported:
+			still_reported[voucher] = row.name
+		else:
+			stale.append(row.name)
+
+	if stale:
+		frappe.db.delete("Ledger Health", {"name": ("in", stale)})
+
+	if still_reported:
+		ledger_health = frappe.qb.DocType("Ledger Health")
+		frappe.qb.update(ledger_health).set(ledger_health.checked_on, run_date).where(
+			ledger_health.name.isin(list(still_reported.values()))
+		).run()
+
+	for voucher_type, voucher_no in vouchers - still_reported.keys():
+		doc = frappe.new_doc("Ledger Health")
+		doc.update({"voucher_type": voucher_type, "voucher_no": voucher_no, check: 1, "checked_on": run_date})
+		doc.save()
 
 
 def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
