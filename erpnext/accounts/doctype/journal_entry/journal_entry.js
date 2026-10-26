@@ -566,12 +566,10 @@ Object.assign(erpnext.journal_entry, {
 	},
 
 	account_query(frm) {
-		const filters = { company: frm.doc.company, is_group: 0 };
-		if (!frm.doc.multi_currency) {
-			const company_currency = erpnext.get_currency(frm.doc.company);
-			filters.account_currency = ["in", [company_currency, null]];
-		}
-		return { filters };
+		return {
+			query: "erpnext.accounts.doctype.journal_entry.journal_entry.account_query",
+			filters: { company: frm.doc.company, multi_currency: frm.doc.multi_currency },
+		};
 	},
 
 	toggle_fields_based_on_currency(frm) {

@@ -1358,3 +1358,20 @@ def get_exchange_rate(
 
 	# don't return None or 0 as it is multipled with a value and that value could be lost
 	return exchange_rate or 1
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def account_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The company's ledger accounts, in its currency unless the entry is multi-currency."""
+	from erpnext.controllers.queries import standard_search
+
+	company = filters.get("company")
+	account_filters = {"company": company, "is_group": 0}
+	if not filters.get("multi_currency"):
+		currency = erpnext.get_company_currency(company) or frappe.db.get_default("currency")
+		account_filters["account_currency"] = ["in", [currency, None]]
+
+	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
