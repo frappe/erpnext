@@ -1,11 +1,14 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.patches.v16_0.append_fieldname_to_pos_search_fields import execute as append_fieldname
 from erpnext.tests.utils import ERPNextTestSuite
@@ -194,6 +197,24 @@ class TestPOSSettings(ERPNextTestSuite):
 		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 		sale.insert()
 		self.assertRaises(frappe.MandatoryError, sale.submit)
+
+	def test_mandatory_pos_field_check_does_not_load_pos_settings_document(self):
+		self.settings.invoice_type = "POS Invoice"
+		self.settings.append("invoice_fields", {"fieldname": "po_no", "reqd": 1})
+		self.settings.save()
+
+		sale = frappe.new_doc("POS Invoice")
+		get_cached_doc = frappe.get_cached_doc
+
+		def refuse_pos_settings(doctype, *args, **kwargs):
+			if doctype == "POS Settings":
+				raise frappe.DoesNotExistError
+			return get_cached_doc(doctype, *args, **kwargs)
+
+		with patch.object(frappe, "get_cached_doc", side_effect=refuse_pos_settings):
+			self.assertRaises(frappe.MandatoryError, POSService(sale).validate_mandatory_pos_fields)
+			sale.po_no = "Counter 1"
+			POSService(sale).validate_mandatory_pos_fields()
 
 
 def make_user_with_role(role):

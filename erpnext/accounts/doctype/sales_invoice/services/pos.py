@@ -213,15 +213,17 @@ class POSService:
 
 	def validate_mandatory_pos_fields(self) -> None:
 		doc = self.doc
-		pos_settings = frappe.get_cached_doc("POS Settings")
-		if pos_settings.invoice_type != doc.doctype or doc.get("is_consolidated"):
+		if doc.get("is_consolidated") or (
+			frappe.db.get_single_value("POS Settings", "invoice_type") != doc.doctype
+		):
 			return
 
-		missing_fields = [
-			_(field.label)
-			for field in pos_settings.invoice_fields
-			if field.reqd and not doc.get(field.fieldname)
-		]
+		mandatory_fields = frappe.get_all(
+			"POS Field",
+			filters={"parent": "POS Settings", "parenttype": "POS Settings", "reqd": 1},
+			fields=["fieldname", "label"],
+		)
+		missing_fields = [_(field.label) for field in mandatory_fields if not doc.get(field.fieldname)]
 		if missing_fields:
 			frappe.throw(
 				_("{0} are mandatory in POS Settings").format(", ".join(map(frappe.bold, missing_fields))),
