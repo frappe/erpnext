@@ -249,7 +249,9 @@ class Opportunity(TransactionBase, CRMNote):
 			return
 
 		if not self.conversion_rate or self.conversion_rate == 1.0 or self.is_currency_changed_alone():
-			self.conversion_rate = get_exchange_rate(self.currency, company_currency, self.transaction_date)
+			self.conversion_rate = get_exchange_rate(
+				self.currency, company_currency, self.transaction_date, "for_selling"
+			)
 
 	def is_currency_changed_alone(self) -> bool:
 		return (
