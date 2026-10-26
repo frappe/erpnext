@@ -261,7 +261,7 @@ class Employee(NestedSet):
 							"attached_to_doctype": "User",
 							"attached_to_name": self.user_id,
 						}
-					).insert(ignore_if_duplicate=True)
+					).insert(ignore_permissions=True, ignore_if_duplicate=True)
 				except frappe.DuplicateEntryError:
 					# already exists
 					pass
