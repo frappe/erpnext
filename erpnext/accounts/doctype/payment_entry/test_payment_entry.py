@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from functools import partial
 
 import frappe
 from frappe import qb
@@ -9,6 +10,7 @@ from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.payment_entry import payment_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
 	get_party_details,
@@ -27,7 +29,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.permission_test_utils import as_user, make_bank_account, make_fenced_user
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, get_search_filters
 
 
 class TestPaymentEntry(ERPNextTestSuite):
@@ -3255,3 +3257,26 @@ class TestPaymentEntryValidation(ERPNextTestSuite):
 		doc.reference_no = "TXN-1"
 		doc.reference_date = "2026-06-15"
 		doc.validate_transaction_reference()
+
+
+class TestPaymentEntryQueries(ERPNextTestSuite):
+	"""Payment Entry's link queries, worked out from the payment's values."""
+
+	def test_account_query(self):
+		search = partial(get_search_filters, payment_entry.account_query, "Account")
+		pay = {"payment_type": "Pay", "bank_payment_type": "Pay", "party_type": "Supplier", "company": "C"}
+
+		self.assertEqual(
+			search(pay), {"account_type": ["in", ["Bank", "Cash"]], "is_group": 0, "company": "C"}
+		)
+		self.assertEqual(
+			search(pay | {"bank_payment_type": "Receive"})["account_type"],
+			["in", [frappe.db.get_value("Party Type", "Supplier", "account_type")]],
+		)
+		self.assertEqual(
+			search(pay | {"bank_payment_type": "Receive", "party_type": "Shareholder"})["account_type"],
+			["in", [frappe.db.get_value("Party Type", "Shareholder", "account_type") or "", "Equity"]],
+		)
+		self.assertEqual(
+			search(pay | {"payment_type": "Internal Transfer", "other_account": "A"})["name"], ["!=", "A"]
+		)
