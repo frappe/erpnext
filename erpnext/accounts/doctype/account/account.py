@@ -176,7 +176,7 @@ class Account(NestedSet):
 			if par.root_type:
 				self.root_type = par.root_type
 
-		self.validate_root_type_change()
+		self.validate_report_type_change()
 
 		if cint(self.is_group):
 			db_value = self.get_doc_before_save()
@@ -200,16 +200,16 @@ class Account(NestedSet):
 				"Balance Sheet" if self.root_type in ("Asset", "Liability", "Equity") else "Profit and Loss"
 			)
 
-	def validate_root_type_change(self):
+	def validate_report_type_change(self):
 		doc_before_save = self.get_doc_before_save()
-		if not doc_before_save or doc_before_save.root_type == self.root_type:
+		if not doc_before_save or doc_before_save.report_type == self.report_type:
 			return
 
 		if has_ledger_entries_in_subtree(doc_before_save.lft, doc_before_save.rgt):
 			throw(
 				_(
-					"Cannot change Root Type of {0} from {1} to {2} because the account or its child accounts have ledger entries."
-				).format(frappe.bold(self.name), doc_before_save.root_type, self.root_type)
+					"Cannot change Report Type of {0} from {1} to {2} because the account or its child accounts have ledger entries."
+				).format(frappe.bold(self.name), _(doc_before_save.report_type), _(self.report_type))
 			)
 
 	def validate_receivable_payable_account_type(self):

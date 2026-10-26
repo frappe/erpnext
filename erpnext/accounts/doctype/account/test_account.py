@@ -386,7 +386,7 @@ class TestAccount(ERPNextTestSuite):
 			[bottom, "Current Assets - _TC", "Application of Funds (Assets) - _TC"],
 		)
 
-	def test_move_account_with_ledger_entries_to_another_root_type(self):
+	def test_move_account_with_ledger_entries_to_another_report_type(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 		company = "_Test Company"
@@ -398,16 +398,17 @@ class TestAccount(ERPNextTestSuite):
 
 		account = frappe.get_doc("Account", ledger)
 		account.parent_account = "Indirect Income - _TC"
-		self.assertRaises(frappe.ValidationError, account.save)
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change Report Type", account.save)
 
 		account = frappe.get_doc("Account", group)
 		account.parent_account = "Indirect Expenses - _TC"
-		self.assertRaises(frappe.ValidationError, account.save)
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change Report Type", account.save)
 		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Asset")
 
 		account = frappe.get_doc("Account", ledger)
-		account.parent_account = "Current Assets - _TC"
+		account.parent_account = "Current Liabilities - _TC"
 		account.save()
+		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Liability")
 
 	def test_company_of_account_cannot_be_changed(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
