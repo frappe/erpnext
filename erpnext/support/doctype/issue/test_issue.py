@@ -235,6 +235,39 @@ class TestIssue(TestSetUp):
 		with as_user(user):
 			self.assertNotIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
 
+	def test_resetting_sla_needs_write_on_the_document(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+
+		website_user = create_user("test_sla_website_user@example.com")
+		website_user.db_set("user_type", "Website User")
+		frappe.set_user(website_user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				reset_service_level_agreement,
+				"Issue",
+				issue.name,
+				"not mine",
+				website_user.name,
+			)
+		finally:
+			frappe.set_user("Administrator")
+		self.assertFalse(
+			frappe.db.exists("Comment", {"reference_name": issue.name, "content": ["like", "%not mine%"]})
+		)
+
+		reset_service_level_agreement("Issue", issue.name, "customer asked", "Administrator")
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment", {"reference_name": issue.name, "content": ["like", "%customer asked%"]}
+			)
+		)
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 

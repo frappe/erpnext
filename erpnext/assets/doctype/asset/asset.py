@@ -39,6 +39,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.buying_controller import get_linked_asset_qty
 
 
 class Asset(AccountsController):
@@ -304,26 +305,40 @@ class Asset(AccountsController):
 		if not purchase_doc:
 			return
 
-		linked_item = self.get_linked_item(purchase_doc_type, purchase_doc)
-
-		if linked_item:
-			if purchase_doc_type == "Purchase Receipt":
-				self.purchase_receipt_item = linked_item
-			else:
-				self.purchase_invoice_item = linked_item
+		self.set(
+			frappe.scrub(purchase_doc_type) + "_item", self.get_linked_item(purchase_doc_type, purchase_doc)
+		)
 
 	def get_linked_item(self, purchase_doc_type, purchase_doc):
 		purchase_doc = frappe.get_doc(purchase_doc_type, purchase_doc)
+		fieldname = frappe.scrub(purchase_doc_type) + "_item"
+		matching_items = purchase_doc.get("items", {"item_code": self.item_code})
 
-		for item in purchase_doc.items:
-			if self.asset_quantity > 1:
-				if item.base_net_amount == self.net_purchase_amount and item.qty == self.asset_quantity:
+		for item in matching_items:
+			if item.name == self.get(fieldname) and (not self.is_new() or self.flags.is_split_asset):
+				return item.name
+
+		linked_asset_qty = get_linked_asset_qty(fieldname, [item.name for item in matching_items], self.name)
+		matching_items = [
+			item
+			for item in matching_items
+			if flt(item.qty) - flt(linked_asset_qty.get(item.name)) >= self.asset_quantity
+		]
+		for item in matching_items:
+			if item.name == self.get(fieldname):
+				return item.name
+
+		precision = self.precision("net_purchase_amount")
+		for item in matching_items:
+			for rate in (
+				flt(item.base_net_rate),
+				flt(item.valuation_rate) * flt(item.conversion_factor or 1),
+			):
+				if flt(rate * self.asset_quantity, precision) == flt(self.net_purchase_amount, precision):
 					return item.name
-				elif item.qty == self.asset_quantity:
-					return item.name
-			else:
-				if item.base_net_rate == self.net_purchase_amount and item.qty == self.asset_quantity:
-					return item.name
+
+		if len(matching_items) == 1:
+			return matching_items[0].name
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -1483,7 +1498,9 @@ def has_active_capitalization(asset):
 
 
 @frappe.whitelist()
-def get_values_from_purchase_doc(purchase_doc_name: str, item_code: str, doctype: str):
+def get_values_from_purchase_doc(
+	purchase_doc_name: str, item_code: str, doctype: str, asset: str | None = None
+):
 	# `doctype` is caller-supplied and reaches frappe.get_doc(), so without this list any document with
 	# an `items` table could be read for its valuation rates.
 	if doctype not in ("Purchase Receipt", "Purchase Invoice"):
@@ -1497,22 +1514,42 @@ def get_values_from_purchase_doc(purchase_doc_name: str, item_code: str, doctype
 	# Asset write is not authority to read a Purchase Receipt or Invoice.
 	purchase_doc = frappe.get_doc(doctype, purchase_doc_name, check_permission="read")
 
-	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
+	matching_items = purchase_doc.get("items", {"item_code": item_code})
 
 	if not matching_items:
-		frappe.throw(_(f"Selected {doctype} does not contain the Item Code {item_code}"))
+		frappe.throw(_("Selected {0} does not contain the Item Code {1}").format(doctype, item_code))
 
-	first_item = matching_items[0]
+	if asset:
+		asset = frappe.get_doc("Asset", asset, check_permission="write")
+
+	fieldname = frappe.scrub(doctype)
+	linked_asset_qty = get_linked_asset_qty(
+		fieldname + "_item", [item.name for item in matching_items], asset.name if asset else None
+	)
+	if asset and asset.get(fieldname) == purchase_doc_name:
+		matching_items.sort(key=lambda item: item.name != asset.get(fieldname + "_item"))
+
+	for item in matching_items:
+		asset_quantity = flt(item.qty) - flt(linked_asset_qty.get(item.name))
+		if asset_quantity > 0:
+			break
+	else:
+		frappe.throw(
+			_("All quantities of Item {0} in {1} are already linked to Assets.").format(
+				frappe.bold(item_code), get_link_to_form(doctype, purchase_doc_name)
+			),
+			title=_("No Available Purchase Row"),
+		)
 
 	return {
 		"company": purchase_doc.company,
 		"purchase_date": purchase_doc.get("posting_date"),
-		"net_purchase_amount": flt(first_item.valuation_rate) * flt(first_item.qty),
-		"asset_quantity": first_item.qty,
-		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
-		"asset_location": first_item.get("asset_location"),
-		"purchase_receipt_item": first_item.name if doctype == "Purchase Receipt" else None,
-		"purchase_invoice_item": first_item.name if doctype == "Purchase Invoice" else None,
+		"net_purchase_amount": flt(item.valuation_rate) * flt(item.conversion_factor or 1) * asset_quantity,
+		"asset_quantity": asset_quantity,
+		"cost_center": item.cost_center or purchase_doc.get("cost_center"),
+		"asset_location": item.get("asset_location"),
+		"purchase_receipt_item": item.name if doctype == "Purchase Receipt" else None,
+		"purchase_invoice_item": item.name if doctype == "Purchase Invoice" else None,
 	}
 
 
