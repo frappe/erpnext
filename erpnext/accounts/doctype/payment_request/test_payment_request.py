@@ -1264,6 +1264,34 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.send_email.assert_called_once()
 		self.assertEqual(pr.email_to, "customer@example.com")
 
+	def test_portal_pay_form_post_redirects_to_payment_url(self):
+		from frappe.handler import execute_cmd
+		from frappe.utils import set_request
+
+		so = make_sales_order()
+		cmd = "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request"
+		portal_form = {"dn": so.name, "dt": "Sales Order", "submit_doc": "1", "order_type": "Shopping Cart"}
+
+		try:
+			set_request(method="GET", path=f"/api/method/{cmd}")
+			frappe.local.form_dict = frappe._dict(portal_form)
+			self.assertRaises(frappe.PermissionError, execute_cmd, cmd)
+
+			set_request(method="POST", path=f"/api/method/{cmd}")
+			frappe.local.form_dict = frappe._dict(portal_form)
+			execute_cmd(cmd)
+			response = frappe.local.response
+		finally:
+			frappe.local.request = None
+			frappe.local.response = frappe._dict()
+
+		self.assertEqual(response.get("type"), "redirect")
+		self.assertEqual(response.get("location"), PAYMENT_URL)
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", {"reference_name": so.name}, "docstatus"),
+			1,
+		)
+
 
 class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 	"""Tests for PaymentController v2 gateway integration."""
