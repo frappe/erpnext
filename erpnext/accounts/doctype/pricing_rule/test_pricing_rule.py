@@ -1922,6 +1922,27 @@ class TestPricingRule(ERPNextTestSuite):
 		si = create_sales_invoice(item_code=item, qty=2, do_not_submit=True)
 		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
 
+	def test_cumulative_pricing_rule_counts_only_the_customers_sales(self):
+		item = make_item("PR Cumulative Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item,
+			is_cumulative=1,
+			min_qty=10,
+			discount_percentage=15,
+			applicable_for="Customer",
+			customer="_Test Customer",
+			valid_from=add_days(today(), -30),
+			valid_upto=add_days(today(), 30),
+		)
+		create_sales_invoice(item_code=item, qty=9, customer="_Test Customer 1")
+
+		si = create_sales_invoice(item_code=item, qty=1, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 0)
+
+		create_sales_invoice(item_code=item, qty=9)
+		si = create_sales_invoice(item_code=item, qty=1, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 15)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
