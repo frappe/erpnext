@@ -1,16 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from functools import partial
 from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.journal_entry import journal_entry
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, get_search_filters
 
 
 class TestJournalEntry(ERPNextTestSuite):
@@ -1098,3 +1100,20 @@ def make_journal_entry(
 			jv.submit()
 
 	return jv
+
+
+class TestJournalEntryQueries(ERPNextTestSuite):
+	"""Journal Entry's link queries, worked out from the entry's values."""
+
+	def test_account_query(self):
+		search = partial(get_search_filters, journal_entry.account_query, "Account")
+		currency = frappe.get_cached_value("Company", "_Test Company", "default_currency")
+
+		self.assertEqual(
+			search({"company": "_Test Company"}),
+			{"company": "_Test Company", "is_group": 0, "account_currency": ["in", [currency, None]]},
+		)
+		self.assertEqual(
+			search({"company": "_Test Company", "multi_currency": 1}),
+			{"company": "_Test Company", "is_group": 0},
+		)
