@@ -2301,6 +2301,77 @@ def delink_original_entry(pl_entry, partial_cancel=False):
 		query.run()
 
 
+def cancel_remaining_payment_ledger_entries(voucher_type, voucher_no):
+	ple = qb.DocType("Payment Ledger Entry")
+	filters = (ple.voucher_type == voucher_type) & (ple.voucher_no == voucher_no) & (ple.delinked == 0)
+
+	if is_immutable_ledger_enabled():
+		fields = [
+			"company",
+			"account_type",
+			"account",
+			"party_type",
+			"party",
+			"project",
+			"cost_center",
+			"finance_book",
+			"due_date",
+			"voucher_type",
+			"voucher_no",
+			"voucher_detail_no",
+			"against_voucher_type",
+			"against_voucher_no",
+			"account_currency",
+			"remarks",
+		]
+		fields.extend(dimension.fieldname for dimension in get_dimensions()[0])
+		entries = (
+			qb.from_(ple)
+			.select(*(ple[field] for field in fields), ple.amount, ple.amount_in_account_currency)
+			.where(filters)
+			.run(as_dict=True)
+		)
+
+		grouped_entries = {}
+		for entry in entries:
+			key = tuple(entry.get(field) for field in fields)
+			group = grouped_entries.setdefault(
+				key,
+				frappe._dict({field: entry.get(field) for field in fields}),
+			)
+			group.amount = flt(group.get("amount")) + flt(entry.amount)
+			group.amount_in_account_currency = flt(group.get("amount_in_account_currency")) + flt(
+				entry.amount_in_account_currency
+			)
+
+		for entry in grouped_entries.values():
+			if not entry.amount and not entry.amount_in_account_currency:
+				continue
+
+			entry.update(
+				doctype="Payment Ledger Entry",
+				posting_date=frappe.form_dict.get("posting_date") or getdate(),
+				amount=-entry.amount,
+				amount_in_account_currency=-entry.amount_in_account_currency,
+				delinked=0,
+			)
+			reversal = frappe.get_doc(entry)
+			reversal.flags.ignore_links = True
+			reversal.flags.ignore_permissions = 1
+			reversal.flags.update_outstanding = "Yes"
+			reversal.submit()
+		return
+
+	(
+		qb.update(ple)
+		.set(ple.modified, now())
+		.set(ple.modified_by, frappe.session.user)
+		.set(ple.delinked, 1)
+		.where(filters)
+		.run()
+	)
+
+
 class QueryPaymentLedger:
 	"""
 	Helper Class for Querying Payment Ledger Entry
