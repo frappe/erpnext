@@ -192,6 +192,8 @@ class ChildItemUpdater:
 		if self.parent_doctype == "Sales Order" and not parent.is_subcontracted:
 			make_packing_list(parent)
 			parent.set_gross_profit()
+		elif self.parent_doctype == "Quotation":
+			make_packing_list(parent)
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			parent.doctype, parent.company, parent.base_grand_total, parent
