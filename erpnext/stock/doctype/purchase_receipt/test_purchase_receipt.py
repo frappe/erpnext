@@ -7337,6 +7337,32 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
 
+	def test_non_stock_receipt_in_closed_period_can_be_cancelled(self):
+		from erpnext.accounts.doctype.payment_reconciliation.test_payment_reconciliation import (
+			make_period_closing_voucher,
+		)
+		from erpnext.accounts.utils import get_fiscal_year
+
+		closed_date = add_days(get_fiscal_year(today(), company="_Test Company")[1], -1)
+		make_period_closing_voucher(
+			company="_Test Company", cost_center="Main - _TC", posting_date=closed_date
+		)
+		item = make_item("_Test Non Stock Closed Period Item", {"is_stock_item": 0}).name
+
+		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
+			receipt = make_purchase_receipt(item_code=item, posting_date=closed_date)
+			receipt.cancel()
+
+		self.assertEqual(receipt.docstatus, 2)
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
+	def test_stock_receipt_cancel_still_queues_voucher_repost(self):
+		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
+			receipt = make_purchase_receipt(qty=1, rate=100)
+			receipt.cancel()
+
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
 	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
 		from erpnext.buying.doctype.purchase_order.purchase_order import (
 			make_purchase_receipt as make_receipt_from_order,
