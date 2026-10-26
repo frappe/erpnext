@@ -1191,6 +1191,27 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.submit()
 		self.assertEqual((pos.paid_amount, pos.change_amount, pos.base_change_amount), (1000, 100, 100))
 
+	def test_loyalty_amount_is_recomputed_and_negative_points_refused(self):
+		customer = "Test Loyalty Customer"
+		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
+		conversion_factor = frappe.db.get_value("Loyalty Program", "Test Single Loyalty", "conversion_factor")
+		earning = create_pos_invoice(customer=customer, rate=10000, do_not_save=1)
+		earning.append("payments", {"mode_of_payment": "Cash", "amount": 10000})
+		earning.insert().submit()
+
+		pos = create_pos_invoice(customer=customer, rate=1000, do_not_save=1)
+		pos.redeem_loyalty_points = 1
+		pos.loyalty_points = 1
+		pos.loyalty_amount = 900
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		pos.insert()
+		self.assertEqual(pos.loyalty_amount, conversion_factor)
+		self.assertRaises(PartialPaymentValidationError, pos.submit)
+
+		pos.reload()
+		pos.loyalty_points = -5
+		self.assertRaises(frappe.ValidationError, pos.save)
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name
