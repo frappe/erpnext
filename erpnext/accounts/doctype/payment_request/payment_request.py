@@ -1,4 +1,5 @@
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
@@ -31,6 +32,19 @@ ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 ]
 
 PORTAL_PAYABLE_DOCTYPES = ("Sales Order", "Sales Invoice")
+
+
+@contextmanager
+def run_as_administrator():
+	previous_session = frappe._dict(frappe.session)
+	previous_form_dict = frappe.local.form_dict
+	frappe.set_user("Administrator")
+	try:
+		yield
+	finally:
+		frappe.set_user(previous_session.user)
+		frappe.local.session.update(previous_session)
+		frappe.local.form_dict = previous_form_dict
 
 
 def _get_payment_gateway_controller(*args, **kwargs):
@@ -578,9 +592,10 @@ class PaymentRequest(Document):
 			self.db_set({"status": "Paid", "outstanding_amount": 0})
 
 		else:
-			payment_entry = self.create_payment_entry()
-			if self.make_sales_invoice:
-				self.make_invoice()
+			with run_as_administrator():
+				payment_entry = self.create_payment_entry()
+				if self.make_sales_invoice:
+					self.make_invoice()
 
 			return payment_entry
 

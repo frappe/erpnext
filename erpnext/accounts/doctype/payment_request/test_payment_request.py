@@ -1524,6 +1524,38 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(pr.outstanding_amount, 0)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
 
+	def test_gateway_payment_authorization_as_guest_books_payment(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		so = make_sales_order(qty=1, rate=1000)
+		order_pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			make_sales_invoice=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		with self.set_user("Guest"):
+			for name in (pr.name, order_pr.name):
+				frappe.get_doc("Payment Request", name).run_method("on_payment_authorized", "Completed")
+				self.assertEqual(frappe.session.user, "Guest")
+
+		self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
+		self.assertEqual(frappe.db.get_value("Payment Request", order_pr.name, "status"), "Paid")
+		self.assertTrue(frappe.db.exists("Sales Invoice Item", {"sales_order": so.name, "docstatus": 1}))
+
 	def test_make_payment_request_checks_submit_and_cancel_permission(self):
 		si = create_sales_invoice(qty=1, rate=1000)
 		so = make_sales_order(qty=1, rate=1000)
