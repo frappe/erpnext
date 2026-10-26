@@ -656,24 +656,26 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				else:
 					round_off_account = round_off_for_opening
 
+			rounding_adjustment = flt(doc.rounding_adjustment, doc.precision("rounding_adjustment"))
+			base_rounding_adjustment = flt(
+				doc.base_rounding_adjustment, doc.precision("base_rounding_adjustment")
+			)
+			round_off_account_currency = get_account_currency(round_off_account)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
 						"against": doc.customer,
-						"credit_in_account_currency": flt(
-							doc.rounding_adjustment, doc.precision("rounding_adjustment")
+						"credit_in_account_currency": self._get_amount_in_account_currency(
+							round_off_account_currency, base_rounding_adjustment, rounding_adjustment
 						),
-						"credit_in_transaction_currency": flt(
-							doc.rounding_adjustment, doc.precision("rounding_adjustment")
-						),
-						"credit": flt(
-							doc.base_rounding_adjustment, doc.precision("base_rounding_adjustment")
-						),
+						"credit_in_transaction_currency": rounding_adjustment,
+						"credit": base_rounding_adjustment,
 						"cost_center": round_off_cost_center
 						if doc.use_company_roundoff_cost_center
 						else (doc.cost_center or round_off_cost_center),
 					},
+					round_off_account_currency,
 					item=doc,
 				)
 			)
