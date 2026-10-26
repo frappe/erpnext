@@ -9,6 +9,9 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, cint, flt, get_datetime, getdate
 
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_capacity_planning_days,
+)
 from erpnext.manufacturing.scheduling import loaders
 from erpnext.manufacturing.scheduling.engine import SchedulingEngine
 from erpnext.manufacturing.scheduling.models import Task
@@ -108,8 +111,8 @@ def run_engine(plan, start_date, use_item_dates=0, item_dates=None):
 	engine = SchedulingEngine(
 		resources,
 		existing_load=load,
-		gap_mins=cint(settings.mins_between_operations) or 10,
-		horizon_days=cint(settings.capacity_planning_for_days) or 365,
+		gap_mins=cint(settings.mins_between_operations),
+		horizon_days=get_capacity_planning_days(),
 	)
 
 	result = engine.schedule(tasks, anchor=start_date)

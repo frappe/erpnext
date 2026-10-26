@@ -10,7 +10,7 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import comma_or, flt, get_fullname
+from frappe.utils import comma_or, flt, get_fullname, today
 from pypika.terms import Criterion
 
 from erpnext.accounts.party import validate_party_frozen_disabled
@@ -25,6 +25,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 
 PARTY_DOCTYPES = ("Lead", "Customer", "Prospect")
+PARTY_DERIVED_FIELDS = ("territory", "customer_group")
 
 
 class Opportunity(TransactionBase, CRMNote):
@@ -67,6 +68,7 @@ class Opportunity(TransactionBase, CRMNote):
 		items: DF.Table[OpportunityItem]
 		job_title: DF.Data | None
 		language: DF.Link | None
+		lost_on: DF.Date | None
 		lost_reasons: DF.TableMultiSelect[OpportunityLostReasonDetail]
 		market_segment: DF.Link | None
 		naming_series: DF.Literal["CRM-OPP-.YYYY.-"]
@@ -136,9 +138,13 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.validate_party()
+		self.validate_party_specific_items()
+		self.validate_party_contact_and_address()
+		self.refresh_party_fields()
 		self.map_fields()
 		self.validate_qty()
 		self.validate_status()
+		self.set_lost_on()
 		self.set_exchange_rate()
 
 		if not self.title:
@@ -160,6 +166,11 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def on_trash(self):
 		frappe.db.delete("Prospect Opportunity", {"opportunity": self.name})
+
+	def validate_party_specific_items(self):
+		from erpnext.accounts.services.party_validation import PartyValidator
+
+		PartyValidator(self).validate_party_specific_items()
 
 	def validate_opportunity_from(self):
 		if self.opportunity_from not in PARTY_DOCTYPES:
@@ -203,6 +214,20 @@ class Opportunity(TransactionBase, CRMNote):
 			return "Converted"
 		if self.has_active_quotation():
 			return "Quotation"
+
+	def set_lost_on(self) -> None:
+		if self.has_value_changed("status"):
+			self.lost_on = self.get_lost_on()
+
+	def get_lost_on(self) -> str | None:
+		return today() if self.status == "Lost" else None
+
+	def set_status(self, update: bool = False, status: str | None = None, update_modified: bool = True):
+		"""Also keep Lost On in step when the status is changed from a linked Quotation."""
+		previous_status = self.status
+		super().set_status(update=update, status=status, update_modified=update_modified)
+		if update and self.status != previous_status:
+			self.db_set("lost_on", self.get_lost_on(), update_modified=update_modified)
 
 	def map_fields(self):
 		for field in self.meta.get_valid_columns():
@@ -407,6 +432,60 @@ class Opportunity(TransactionBase, CRMNote):
 		if self.opportunity_from == "Customer":
 			validate_party_frozen_disabled(self.company, "Customer", self.party_name)
 
+	def validate_party_contact_and_address(self):
+		"""Contact and address must be linked to the party, as the form's filters require."""
+		if not self.party_name:
+			return
+
+		for fieldname, doctype in (("contact_person", "Contact"), ("customer_address", "Address")):
+			value = self.get(fieldname)
+			if not value or not (self.has_value_changed(fieldname) or self.has_party_changed()):
+				continue
+
+			if not self.is_linked_to_party(doctype, value):
+				frappe.throw(
+					_("{0} {1} is not linked to {2} {3}").format(
+						_(doctype), frappe.bold(value), _(self.opportunity_from), frappe.bold(self.party_name)
+					)
+				)
+
+	def is_linked_to_party(self, doctype: str, name: str) -> bool:
+		return bool(
+			frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": doctype,
+					"parent": name,
+					"link_doctype": self.opportunity_from,
+					"link_name": self.party_name,
+				},
+			)
+		)
+
+	def refresh_party_fields(self):
+		"""On a party change, replace the title and party fields still holding the previous party's values."""
+		if self.is_new() or not self.has_party_changed():
+			return
+
+		previous = self.get_doc_before_save()
+		if not self.has_value_changed("title") and self.title == previous.customer_name:
+			self.title = self.customer_name
+
+		party_meta = frappe.get_meta(self.opportunity_from)
+		for fieldname in PARTY_DERIVED_FIELDS:
+			if party_meta.has_field(fieldname) and self.holds_previous_party_value(previous, fieldname):
+				self.set(fieldname, frappe.db.get_value(self.opportunity_from, self.party_name, fieldname))
+
+	def holds_previous_party_value(self, previous: "Opportunity", fieldname: str) -> bool:
+		"""True if `fieldname` was not edited in this save and still matches what the previous party supplies."""
+		if self.has_value_changed(fieldname):
+			return False
+
+		return self.get(fieldname) == get_party_field_value(previous, fieldname)
+
+	def has_party_changed(self) -> bool:
+		return self.has_value_changed("party_name") or self.has_value_changed("opportunity_from")
+
 	def validate_cust_name(self):
 		if self.party_name:
 			if self.opportunity_from == "Customer":
@@ -452,6 +531,14 @@ def get_party_prospect(opportunity_from: str, party_name: str | None) -> str | N
 		return party_name
 	if opportunity_from == "Lead":
 		return frappe.db.get_value("Prospect Lead", {"lead": party_name}, "parent")
+
+
+def get_party_field_value(opportunity: "Opportunity", fieldname: str) -> str | None:
+	"""Return the value the opportunity's party supplies for `fieldname`, if the party has that field."""
+	if not opportunity.party_name or not frappe.get_meta(opportunity.opportunity_from).has_field(fieldname):
+		return None
+
+	return frappe.db.get_value(opportunity.opportunity_from, opportunity.party_name, fieldname)
 
 
 @frappe.whitelist()

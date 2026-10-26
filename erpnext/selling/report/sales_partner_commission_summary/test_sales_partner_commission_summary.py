@@ -81,23 +81,17 @@ class SalesPartnerSummaryReportTestMixin(ERPNextTestSuite):
 
 			from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 
-			pos_opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=1)
+			create_opening_entry(self.pos_profile, self.test_user.name)
 
 		self.transaction_doc_with_7pc_commision()
 		self.transaction_doc_with_5pc_commission()
+		if doctype != "Sales Order":
+			self.transaction_doc_returned()
 		self.transaction_doc_with_no_sales_partner()
-		self.transaction_doc_date_out_of_range_of_filters()
 		self.transaction_doc_with_revoked_commission()
 		self.transaction_doc_not_submitted()
 		self.transaction_doc_cancelled()
-
-		if doctype == "Sales Order":
-			return
-
-		self.transaction_doc_returned()
-
-		if doctype == "POS Invoice":
-			pos_opening_entry.cancel()
+		self.transaction_doc_date_out_of_range_of_filters()
 
 	def transaction_doc_with_7pc_commision(self):
 		args = {"rate": 100, "qty": 10, self.date_field: "2026-01-14", "do_not_save": 1}
@@ -267,6 +261,43 @@ class TestSalesPartnerSummaryReports(
 
 	def test_posting_date_column_label(self):
 		self.assert_posting_date_label()
+
+	def test_company_restriction_not_leaked(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(transaction_date="2026-01-14", do_not_save=1)
+		so.sales_partner = "_Test Sales Partner India - 1"
+		so.save()
+		so.submit()
+
+		filters = {
+			"company": "_Test Company",
+			"doctype": "Sales Order",
+			"from_date": "2026-01-01",
+			"to_date": "2026-01-31",
+		}
+		user = create_user("sp_summary_restricted@example.com", "Sales Manager").name
+
+		# A user permitted on the order's company still sees it
+		add_user_permission("Company", "_Test Company", user)
+		try:
+			with self.set_user(user):
+				permitted_rows = run(self.report_name, filters).get("result")[:-1]
+		finally:
+			remove_user_permission("Company", "_Test Company", user)
+		self.assertTrue(any(row.get("name") == so.name for row in permitted_rows))
+
+		# A user restricted to another company does not see it
+		add_user_permission("Company", "_Test Company 1", user)
+		try:
+			with self.set_user(user):
+				restricted_rows = run(self.report_name, filters).get("result")[:-1]
+		finally:
+			remove_user_permission("Company", "_Test Company 1", user)
+		self.assertFalse(any(row.get("name") == so.name for row in restricted_rows))
 
 	def test_sales_order_sp_summaries(self):
 		self.filters["doctype"] = "Sales Order"

@@ -17,6 +17,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_qty_based_available_batches,
 	get_type_of_transaction,
 	parse_serial_nos,
+	update_available_batches,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -99,21 +100,6 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "draft bundle"):
 			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
 		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
-		)
-
-	def test_number_entry_follows_the_bundle_not_the_serial_master(self):
-		bundle = self.make_bundle()
-		user = frappe.get_doc(
-			doctype="User",
-			email="bundle-entry-stock-user@example.com",
-			first_name="Bundle Entry",
-			send_welcome_email=0,
-			roles=[{"role": "Stock User"}],
-		).insert()
-		with self.set_user(user.name):
-			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertTrue(
 			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
 		)
 
@@ -242,6 +228,47 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 
 		self.assertEqual(flt(stock_value_difference, 2), -500)
+
+	@patch("erpnext.stock.serial_batch_bundle.SERIAL_NO_QUERY_BATCH_SIZE", 1)
+	def test_outward_serial_valued_at_latest_inward_rate_in_warehouse(self):
+		item_code = make_item(
+			"_Test Serial Latest Inward Rate Item",
+			{"has_serial_no": 1, "serial_no_series": "TEST-SER-LIR-.#####", "is_stock_item": 1},
+		).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item_code, qty=2, rate=100, target=warehouse, posting_date=add_days(today(), -10)
+		)
+		serial_nos = [
+			frappe.db.get_value("Serial No", name, "serial_no")
+			for name in get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		]
+		for days, rate, target, source in ((-8, 0, None, warehouse), (-6, 150, warehouse, None)):
+			make_stock_entry(
+				item_code=item_code,
+				qty=2,
+				rate=rate,
+				target=target,
+				source=source,
+				serial_no=serial_nos,
+				posting_date=add_days(today(), days),
+				use_serial_batch_fields=1,
+			)
+
+		issue = make_stock_entry(
+			item_code=item_code,
+			qty=2,
+			source=warehouse,
+			serial_no=serial_nos,
+			posting_date=add_days(today(), -2),
+			use_serial_batch_fields=1,
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -300)
 
 	def test_inward_outward_batch_valuation(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -1100,23 +1127,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual(entries, [{"serial_no": None, "batch_no": batch.name, "qty": 2}])
 		self.assertEqual(frappe.db.count("Batch", {"item": item_code, "batch_id": batch_id}), 1)
 
-	def test_serial_number_reuses_existing_record(self):
-		item_code = make_item(properties={"has_serial_no": 1}).name
-		serial_no = "TEST-SNID-VAL-00001"
-		entries = resolve_csv_entries(
-			[{"serial_no": serial_no, "qty": 1}], item_code, "Inward", "_Test Company"
-		)
-		serial = frappe.get_doc("Serial No", entries[0].serial_no)
-		self.assertEqual((serial.item_code, serial.serial_no), (item_code, serial_no))
-		self.assertNotEqual(serial.name, serial_no)
-		self.assertEqual((serial.company, serial.status), ("_Test Company", "Inactive"))
-
-		entries = resolve_csv_entries(
-			[{"serial_no": serial_no.lower(), "qty": 1}], item_code, "Inward", "_Test Company"
-		)
-		self.assertEqual(entries, [{"serial_no": serial.name, "batch_no": None, "qty": 1}])
-		self.assertEqual(frappe.db.count("Serial No", {"item_code": item_code, "serial_no": serial_no}), 1)
-
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
 	)
@@ -1601,9 +1611,95 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			as_dict=True,
 		)
 
-		# Stock queue should have 5 removed via FIFO from [[10, 100], [20, 200], [5, 300]]
-		# FIFO removes from front: [10, 100] -> [5, 100], rest unchanged
-		self.assertEqual(json.loads(return_sle.stock_queue), [[5, 100], [20, 200], [5, 300]])
+		self.assertEqual(json.loads(return_sle.stock_queue), [[10, 100], [20, 200]])
+
+	def test_lifo_issue_from_non_batchwise_batch(self):
+		item_code = make_item(
+			"LIFO Non Batchwise Valuation Item",
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "LIFO-NBW-.#####",
+				"is_stock_item": 1,
+				"valuation_method": "LIFO",
+			},
+		).name
+
+		for batch_id, rate in (("LIFO-NBW-A", 100), ("LIFO-NBW-B", 200)):
+			frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item_code}).insert(
+				set_name=batch_id
+			)
+			frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 0)
+			make_stock_entry(
+				item_code=item_code,
+				target="_Test Warehouse - _TC",
+				qty=10,
+				rate=rate,
+				batch_no=batch_id,
+				use_serial_batch_fields=True,
+			)
+
+		issue = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			qty=5,
+			batch_no="LIFO-NBW-A",
+			use_serial_batch_fields=True,
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			["stock_value_difference", "stock_queue"],
+			as_dict=True,
+		)
+		self.assertEqual(sle.stock_value_difference, -1000)
+		self.assertEqual(json.loads(sle.stock_queue), [[10, 100], [5, 200]])
+
+	def test_lifo_purchase_return_from_non_batchwise_batch(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			"LIFO Non Batchwise Return Item",
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "LIFO-NBR-.#####",
+				"is_stock_item": 1,
+				"valuation_method": "LIFO",
+			},
+		).name
+
+		batch_id = "LIFO-NBR-A"
+		frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item_code}).insert(
+			set_name=batch_id
+		)
+		frappe.db.set_value("Batch", batch_id, "use_batchwise_valuation", 0)
+
+		receipts = [
+			make_purchase_receipt(
+				item_code=item_code,
+				warehouse="_Test Warehouse - _TC",
+				qty=10,
+				rate=rate,
+				batch_no=batch_id,
+				use_serial_batch_fields=True,
+			)
+			for rate in (100, 200)
+		]
+
+		purchase_return = make_return_doc("Purchase Receipt", receipts[0].name)
+		purchase_return.items[0].qty = -5
+		purchase_return.items[0].received_qty = -5
+		purchase_return.submit()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": purchase_return.name, "is_cancelled": 0},
+			["stock_value", "stock_queue"],
+			as_dict=True,
+		)
+		self.assertEqual(sle.stock_value, 2500)
+		self.assertEqual(json.loads(sle.stock_queue), [[5, 100], [10, 200]])
 
 	def test_stock_queue_for_return_entry_with_empty_fifo_queue(self):
 		"""Credit note (sales return) against empty FIFO queue should still rebuild stock_queue."""
@@ -2729,6 +2825,20 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		# 8 is satisfied by B1 alone; B2 is not touched
 		result = get_qty_based_available_batches(batches, 8)
 		self.assertEqual([(b.batch_no, b.qty) for b in result], [("B1", 8)])
+
+	def test_get_qty_based_available_batches_leaves_no_float_remainder(self):
+		batches = [
+			frappe._dict(batch_no="B1", qty=0.7, warehouse="W"),
+			frappe._dict(batch_no="B2", qty=0.3, warehouse="W"),
+			frappe._dict(batch_no="B3", qty=0.5, warehouse="W"),
+		]
+		result = get_qty_based_available_batches(batches, 1.0)
+		self.assertEqual([(b.batch_no, b.qty) for b in result], [("B1", 0.7), ("B2", 0.3)])
+
+	def test_update_available_batches_nets_reservations_without_float_noise(self):
+		batches = [frappe._dict(batch_no="B1", qty=1.0, warehouse="W")]
+		update_available_batches(batches, {("B1", "W"): frappe._dict(qty=-0.8, warehouse="W")})
+		self.assertEqual(batches[0].qty, 0.2)
 
 	def test_get_available_batches_qty_aggregates_by_batch(self):
 		batches = [

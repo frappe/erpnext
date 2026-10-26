@@ -249,6 +249,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	erpnext.buying.BuyingController
 ) {
 	setup() {
+		this.setup_accounting_dimension_triggers();
 		this.frm.custom_make_buttons = {
 			"Purchase Receipt": "Purchase Receipt",
 			"Purchase Invoice": "Purchase Invoice",
@@ -327,7 +328,10 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					}
 				}
 
-				if (is_drop_ship && !["Completed", "Delivered"].includes(doc.status)) {
+				if (
+					doc.items.some((item) => item.delivered_by_supplier == 1 && !item.closed) &&
+					!["Completed", "Delivered"].includes(doc.status)
+				) {
 					this.frm.add_custom_button(
 						__("Deliver (Dropship)"),
 						this.update_dropship_delivered_qty.bind(this),
@@ -635,10 +639,20 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	}
 
 	items_add(doc, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		const field_copy = [];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
 		if (doc.schedule_date) {
 			frappe.model.set_value(cdt, cdn, "schedule_date", doc.schedule_date);
 		} else {
-			this.frm.script_manager.copy_from_first_row("items", frappe.get_doc(cdt, cdn), ["schedule_date"]);
+			field_copy.push("schedule_date");
+		}
+		if (field_copy.length) {
+			this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 		}
 	}
 
@@ -657,8 +671,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				let reason_for_hold = "Reason for hold: " + data.reason_for_hold;
 
 				frappe.call({
@@ -705,7 +718,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 	update_dropship_delivered_qty() {
 		const data = this.frm.doc.items
-			.filter((item) => item.delivered_by_supplier == 1)
+			.filter((item) => item.delivered_by_supplier == 1 && !item.closed)
 			.map((item) => {
 				return {
 					__checked: item.qty > item.received_qty,

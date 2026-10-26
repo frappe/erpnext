@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, now
 from frappe.utils.file_manager import save_file
 
+from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.utilities.email_template import get_email_subject_and_message
 
 
@@ -49,9 +50,12 @@ class ProformaInvoice(Document):
 		self.validate_sales_order()
 		self.set_item_values()
 		self.set_total_qty()
+		self.clear_generated_values()
 
 	def validate_sales_order(self) -> None:
-		if frappe.db.get_value("Sales Order", self.sales_order, "docstatus") != 1:
+		# the proforma copies the order's lines, rates and totals into its PDF
+		sales_order = frappe.get_doc("Sales Order", self.sales_order, check_permission="read")
+		if sales_order.docstatus != 1:
 			frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
 
 	def set_item_values(self) -> None:
@@ -110,34 +114,19 @@ class ProformaInvoice(Document):
 	def set_total_qty(self) -> None:
 		self.total_qty = sum(flt(item.qty) for item in self.items)
 
+	def clear_generated_values(self) -> None:
+		"""The PDF and grand total are set on submit; never keep values sent by the client."""
+		self.proforma_pdf = None
+		self.grand_total = 0
+
 	def generate_and_attach_pdf(self) -> None:
-		if self.proforma_pdf:
-			return
 		printed = self.render_pdf()
 		file = save_file(printed["fname"], printed["fcontent"], self.doctype, self.name, is_private=1)
 		self.db_set("proforma_pdf", file.file_url)
 
 	def render_pdf(self) -> dict:
-		"""Render the proforma PDF from an in-memory, adjusted copy of the Sales Order.
-
-		The Sales Order copy is never saved; it exists only to reuse the standard tax/total
-		calculation and print format so the proforma shows the accurate gross. Each line's qty
-		and rate are set from the proforma (amount-based lines carry a derived rate), so the
-		recomputed amount matches whichever basis the proforma was created on.
-		"""
-		sales_order = frappe.get_doc("Sales Order", self.sales_order)
-		lines = {item.so_detail: item for item in self.items}
-		sales_order.items = [item for item in sales_order.items if item.name in lines]
-		for item in sales_order.items:
-			item.qty = lines[item.name].qty
-			item.rate = lines[item.name].rate
-			item.description = lines[item.name].description
-			item.discount_amount = 0
-			item.discount_percentage = 0
-		sales_order.run_method("calculate_taxes_and_totals")
-		sales_order.proforma_no = self.name
-		sales_order.proforma_date = self.proforma_date
-		sales_order.hide_item_qty = self.hide_item_qty
+		"""Render the proforma PDF from an in-memory, adjusted copy of the Sales Order."""
+		sales_order = self.get_sales_order_copy()
 		self.db_set("grand_total", sales_order.grand_total)
 		return frappe.attach_print(
 			"Sales Order",
@@ -148,6 +137,32 @@ class ProformaInvoice(Document):
 			letterhead=self.letter_head,
 		)
 
+	def get_sales_order_copy(self) -> Document:
+		"""A Sales Order copy with only the proformed lines, reusing the standard tax/total calculation.
+
+		The copy is never saved. Each line's qty and rate are set from the proforma, and the
+		order-level fixed discount and Actual charges are scaled to the proformed share.
+		"""
+		sales_order = frappe.get_doc("Sales Order", self.sales_order)
+		lines = {item.so_detail: item for item in self.items}
+		prorate_fixed_charges(sales_order, self.get_order_share(sales_order))
+		sales_order.items = [item for item in sales_order.items if item.name in lines]
+		for item in sales_order.items:
+			set_proforma_line(item, lines[item.name])
+		ProformaTotals(sales_order, {item.so_detail: item.amount for item in self.items})
+		if flt(sales_order.grand_total) < 0:
+			frappe.throw(_("The grand total of a Proforma Invoice cannot be negative."))
+		sales_order.proforma_no = self.name
+		sales_order.proforma_date = self.proforma_date
+		sales_order.hide_item_qty = self.hide_item_qty
+		return sales_order
+
+	def get_order_share(self, sales_order: Document) -> float:
+		"""Share of the Sales Order total that this proforma covers."""
+		if not flt(sales_order.total):
+			return 1
+		return sum(flt(item.amount) for item in self.items) / flt(sales_order.total)
+
 	def get_email_content(self) -> tuple[str, str]:
 		return get_email_subject_and_message(
 			frappe.db.get_single_value("Selling Settings", "proforma_email_template"),
@@ -155,6 +170,25 @@ class ProformaInvoice(Document):
 			default_subject=_("Proforma Invoice {0}").format(self.name),
 			default_message=_("Please find attached the proforma invoice {0}.").format(self.name),
 		)
+
+
+class ProformaTotals(calculate_taxes_and_totals):
+	"""Totals of the Sales Order copy, with each line at the proforma's own amount.
+
+	An Amount-basis rate is amount / qty, so the rounded rate x qty can differ from the amount.
+	"""
+
+	def __init__(self, doc: Document, amounts: dict[str, float]) -> None:
+		self.amounts = amounts
+		super().__init__(doc)
+
+	def calculate_item_values(self) -> None:
+		super().calculate_item_values()
+		if self.discount_amount_applied:
+			return
+		for item in self.doc.items:
+			item.amount = item.net_amount = flt(self.amounts[item.name], item.precision("amount"))
+			self._set_in_company_currency(item, ["amount", "net_amount"])
 
 
 @frappe.whitelist()
@@ -256,7 +290,15 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	if not proforma.proforma_pdf:
 		frappe.throw(_("This Proforma Invoice has no PDF to send."))
 
-	file_name = frappe.db.get_value("File", {"file_url": proforma.proforma_pdf}, "name")
+	file_name = frappe.db.get_value(
+		"File",
+		{
+			"file_url": proforma.proforma_pdf,
+			"attached_to_doctype": proforma.doctype,
+			"attached_to_name": proforma.name,
+		},
+		"name",
+	)
 	if not file_name:
 		frappe.throw(_("The attached PDF file could not be found."))
 	subject, message = proforma.get_email_content()
@@ -268,6 +310,30 @@ def send_proforma_email(proforma_name: str, recipients: str) -> None:
 	)
 	proforma.db_set("sent_on", now())
 	proforma.db_set("emailed_to", recipients)
+
+
+def set_proforma_line(item: Document, line: Document) -> None:
+	"""Bill the Sales Order line at the proforma qty and rate, so pricing rules or margins cannot recompute it."""
+	item.qty = line.qty
+	item.rate = line.rate
+	item.price_list_rate = line.rate
+	item.description = line.description
+	item.pricing_rules = None
+	item.margin_type = None
+	item.margin_rate_or_amount = 0
+	item.discount_amount = 0
+	item.discount_percentage = 0
+
+
+def prorate_fixed_charges(sales_order: Document, share: float) -> None:
+	"""Scale the fixed additional discount and Actual charges; percentage-based ones scale by themselves."""
+	if not sales_order.additional_discount_percentage:
+		sales_order.discount_amount = flt(
+			flt(sales_order.discount_amount) * share, sales_order.precision("discount_amount")
+		)
+	for tax in sales_order.taxes:
+		if tax.charge_type == "Actual":
+			tax.tax_amount = flt(flt(tax.tax_amount) * share, tax.precision("tax_amount"))
 
 
 def validate_feature_enabled() -> None:

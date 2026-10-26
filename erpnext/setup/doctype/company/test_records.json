@@ -235,5 +235,33 @@
 		"default_holiday_list": "_Test Holiday List",
 		"enable_perpetual_inventory": 1,
 		"enable_stock_delivered_but_not_billed": 1
+	},
+	{
+		"abbr": "_TUNA",
+		"company_name": "_Test Unrelated A",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TUNB",
+		"company_name": "_Test Unrelated B",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TCIF",
+		"company_name": "_Test Company Inventory Fallback",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"enable_perpetual_inventory": 0,
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
 	}
 ]

@@ -13,8 +13,12 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+)
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 
 DEBIT_CREDIT_DICT = {
 	"debit": 0.0,
@@ -221,7 +225,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
 	else:
 		return gl_entries
 
@@ -562,8 +566,21 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	show_opening_entries = filters.get("show_opening_entries")
 
+	# P&L accounts reset every fiscal year, so their entries before the year start don't count in opening
+	pl_accounts, year_start_date = set(), None
+	if fiscal_year := get_fiscal_year(from_date, company=filters.company, raise_on_missing=False):
+		year_start_date = getdate(fiscal_year[1])
+		pl_accounts = set(
+			frappe.get_all(
+				"Account", {"company": filters.company, "report_type": "Profit and Loss"}, pluck="name"
+			)
+		)
+
 	totals = get_totals_dict()
 	for gle in gl_entries:
+		if year_start_date and gle.posting_date < year_start_date and gle.account in pl_accounts:
+			continue
+
 		group_by_value = get_group_by_value(gle, group_by)
 		gle.voucher_subtype = _(gle.voucher_subtype)
 		gle.remarks = _(gle.remarks)
@@ -840,6 +857,9 @@ def get_columns(filters):
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
@@ -979,7 +999,7 @@ def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
 	return gl_entries
 
 

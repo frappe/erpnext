@@ -282,6 +282,8 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and (is_return=0 or update_billed_amount_in_sales_order=1))""",
 			}
 		]
 		self.closed_source_links = [
@@ -438,10 +440,9 @@ class SalesInvoice(SellingController):
 	def on_submit(self):
 		POSService(self).validate_pos_paid_amount()
 
-		if not self.auto_repeat:
-			frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-				self.doctype, self.company, self.base_grand_total, self
-			)
+		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
+			self.doctype, self.company, self.base_grand_total, self
+		)
 
 		self.check_prev_docstatus()
 
@@ -473,6 +474,7 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			FixedAssetService(self).process_asset_depreciation()
 
+		FixedAssetService(self).set_asset_disposal_values()
 		self.make_gl_entries()
 
 		if self.is_return:
@@ -482,12 +484,14 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.check_credit_limit()
-			self.check_overdue_billing_threshold()
+			if self.is_opening != "Yes":
+				self.check_credit_limit()
+				self.check_overdue_billing_threshold()
 
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -564,6 +568,7 @@ class SalesInvoice(SellingController):
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		self.db_set("status", "Cancelled")
 
@@ -627,14 +632,15 @@ class SalesInvoice(SellingController):
 					"target_parent_field": "per_delivered",
 					"target_field": "delivered_qty",
 					"target_ref_field": "qty",
-					"source_field": "qty",
+					"source_field": "qty * conversion_factor",
+					"target_conversion_factor": "conversion_factor",
 					"join_field": "so_detail",
 					"percent_join_field": "sales_order",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
 					"exclude_field": "skip_delivery",
 					"second_source_dt": "Delivery Note Item",
-					"second_source_field": "qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "so_detail",
 					"overflow_type": "delivery",
 					"extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -671,9 +677,10 @@ class SalesInvoice(SellingController):
 				"join_field": "so_detail",
 				"target_field": "returned_qty",
 				"target_parent_dt": "Sales Order",
-				"source_field": "-1 * qty",
+				"source_field": "-1 * qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"second_source_dt": "Delivery Note Item",
-				"second_source_field": "-1 * qty",
+				"second_source_field": "-1 * qty * conversion_factor",
 				"second_join_field": "so_detail",
 				"extra_cond": """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)""",
 				"second_source_extra_cond": """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)""",
@@ -931,11 +938,28 @@ class SalesInvoice(SellingController):
 				if frappe.get_value("Customer", self.customer, value[0]):
 					continue
 
+				# service rows flagged skip_delivery never reach a Delivery Note, so don't demand one
+				skip_delivery_rows = self.get_skip_delivery_rows() if key == "Delivery Note" else set()
+
 				for d in self.get("items"):
+					if d.so_detail in skip_delivery_rows:
+						continue
 					if d.item_code and not d.get(key.lower().replace(" ", "_")) and not self.get(value[1]):
 						msgprint(
 							_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1
 						)
+
+	def get_skip_delivery_rows(self):
+		so_details = [d.so_detail for d in self.get("items") if d.so_detail]
+		if not so_details:
+			return set()
+		return set(
+			frappe.get_all(
+				"Sales Order Item",
+				filters={"name": ("in", so_details), "skip_delivery": 1},
+				pluck="name",
+			)
+		)
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -1190,6 +1214,7 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.po_no = reference_doc.po_no
 		# The payment schedule is rebuilt from the template, relative to the new posting date.

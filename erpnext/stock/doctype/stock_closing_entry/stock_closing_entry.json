@@ -40,7 +40,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Status",
-   "options": "Draft\nQueued\nIn Progress\nCompleted\nFailed\nCancelled",
+   "options": "Draft\nQueued\nIn Progress\nCompleted\nOutdated\nFailed\nCancelled",
    "read_only": 1
   },
   {
@@ -76,7 +76,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-07 12:00:00.000000",
+ "modified": "2026-10-16 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Closing Entry",

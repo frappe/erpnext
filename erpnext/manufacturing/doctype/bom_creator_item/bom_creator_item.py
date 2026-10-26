@@ -17,6 +17,7 @@ class BOMCreatorItem(Document):
 		amount: DF.Currency
 		base_amount: DF.Currency
 		base_rate: DF.Currency
+		bom_no: DF.Link | None
 		bom_created: DF.Check
 		conversion_factor: DF.Float
 		description: DF.SmallText | None

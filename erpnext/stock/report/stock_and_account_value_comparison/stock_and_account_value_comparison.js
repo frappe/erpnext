@@ -36,6 +36,7 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 			fieldname: "as_on_date",
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
+			reqd: 1,
 		},
 	],
 

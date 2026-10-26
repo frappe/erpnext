@@ -1,8 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from unittest.mock import patch
-
 import frappe
 
 from erpnext.regional.south_africa.setup import add_permissions
@@ -27,23 +25,13 @@ class TestSouthAfricaVATSettings(ERPNextTestSuite):
 
 		make_settings([vat_account]).insert()
 
-	@patch("erpnext.setup.doctype.company.company.install_country_fixtures")
-	def test_company_cannot_be_changed(self, install_country_fixtures):
-		other_company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "_Test SA Other",
-				"abbr": "_TSAO",
-				"default_currency": "ZAR",
-				"country": "South Africa",
-			}
-		).insert()
+	def test_company_cannot_be_changed(self):
 		settings = make_settings([get_account(COMPANY)]).insert()
 
-		settings.company = other_company.name
+		settings.company = "_Test Company"
 		settings.vat_accounts = []
-		settings.append("vat_accounts", {"account": get_account(other_company.name)})
-		self.assertRaises(frappe.ValidationError, settings.save)
+		settings.append("vat_accounts", {"account": get_account("_Test Company")})
+		self.assertRaisesRegex(frappe.ValidationError, "Company cannot be changed", settings.save)
 
 	def test_regional_setup_does_not_share_the_settings_with_all_users(self):
 		frappe.db.delete("Custom DocPerm", {"parent": "South Africa VAT Settings"})

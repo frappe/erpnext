@@ -23,6 +23,8 @@
   "routing",
   "operations_section",
   "operations",
+  "steps_section",
+  "stage_summary",
   "fg_based_section_section",
   "fg_based_operating_cost",
   "column_break_omye",
@@ -295,6 +297,20 @@
    "oldfieldname": "bom_operations",
    "oldfieldtype": "Table",
    "options": "BOM Operation"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.docstatus === 0",
+   "depends_on": "eval:doc.with_operations && doc.track_semi_finished_goods",
+   "fieldname": "steps_section",
+   "fieldtype": "Section Break",
+   "label": "Steps"
+  },
+  {
+   "depends_on": "eval:doc.with_operations && doc.track_semi_finished_goods",
+   "fieldname": "stage_summary",
+   "fieldtype": "HTML",
+   "label": "Steps"
   },
   {
    "fieldname": "materials_section",
@@ -620,10 +636,10 @@
   {
    "default": "0",
    "depends_on": "with_operations",
-   "description": "Users can make manufacture entry against Job Cards",
+   "description": "Each operation produces its own output item and puts it in stock, for example Cut Sheet, then Painted Sheet, then the final Box.",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
-   "label": "Track semi finished goods"
+   "label": "Produce an Item at Each Operation"
   },
   {
    "fieldname": "default_source_warehouse",
@@ -746,7 +762,7 @@
    "label": "Consume Components"
   },
   {
-   "description": "Controls how raw materials are consumed during the \u2018Manufacture\u2019 stock entry.",
+   "description": "Controls how raw materials are consumed during the ‘Manufacture’ stock entry.",
    "fieldname": "backflush_based_on",
    "fieldtype": "Select",
    "label": "Based on",
@@ -767,7 +783,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-20 23:10:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

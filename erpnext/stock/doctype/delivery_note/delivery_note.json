@@ -479,6 +479,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_reference",
    "reqd": 1
   },
   {
@@ -1519,7 +1520,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-11 12:00:00.000000",
+ "modified": "2026-10-12 18:16:58.531757",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

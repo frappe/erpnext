@@ -207,6 +207,21 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_portal_page_embeds_only_the_quotation_fields(self):
+		from erpnext.templates.pages.rfq import get_portal_doc
+
+		rfq = make_request_for_quotation()
+		portal_doc = get_portal_doc(rfq)
+		embedded = frappe.as_json(portal_doc)
+		for supplier in rfq.suppliers:
+			self.assertNotIn(supplier.supplier, embedded)
+
+		portal_doc["supplier"] = rfq.suppliers[0].supplier
+		for item in portal_doc["items"]:
+			item["rate"] = 100
+		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
+		self.assertEqual(supplier_quotation.items[0].amount, 500)
+
 	def test_portal_supplier_quotation_is_built_from_the_rfq_rows(self):
 		make_request_for_quotation(
 			supplier_data=[{"supplier": "_Test Supplier 2", "supplier_name": "_Test Supplier 2"}]

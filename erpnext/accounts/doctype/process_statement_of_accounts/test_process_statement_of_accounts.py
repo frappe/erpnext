@@ -1,6 +1,7 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, getdate, today
@@ -100,12 +101,17 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		)
 		self.check_ageing_summary(ageing_summary, expected_summary)
 
-	def test_auto_email_for_process_soa_ar(self):
+	@patch(
+		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_pdf",
+		return_value=b"%PDF",
+	)
+	def test_auto_email_for_process_soa_ar(self, get_pdf):
 		process_soa = create_process_soa(
 			name="_Test Process SOA", enable_auto_email=1, report="Accounts Receivable"
 		)
 
 		send_emails(process_soa.name, from_scheduler=True)
+		get_pdf.assert_called()
 		process_soa.load_from_db()
 		self.assertEqual(process_soa.posting_date, getdate(add_days(today(), 7)))
 

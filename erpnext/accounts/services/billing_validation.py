@@ -102,7 +102,8 @@ class BillingValidationService:
 			if not key:
 				continue
 
-			ref_amt = flt(reference_details.get(key), precision)
+			reference = reference_details.get(key, frappe._dict())
+			ref_amt = flt(reference.get(reference_field), precision)
 			current_amount = flt(item.get(based_on), precision)
 
 			if not ref_amt:
@@ -116,6 +117,11 @@ class BillingValidationService:
 					)
 				continue
 
+			billed_before = flt(already_billed.pop(key, 0))
+			if based_on == "qty":
+				current_amount = flt(item.qty) * flt(item.conversion_factor) / reference.conversion_factor
+				billed_before /= reference.conversion_factor
+
 			ref_wise_billed_amount.setdefault(
 				key,
 				frappe._dict(
@@ -124,9 +130,7 @@ class BillingValidationService:
 			)
 			ref_wise_billed_amount[key]["rows"].append(item.idx)
 			ref_wise_billed_amount[key]["ref_amt"] = ref_amt
-			ref_wise_billed_amount[key]["billed_amt"] += current_amount
-			if key in already_billed:
-				ref_wise_billed_amount[key]["billed_amt"] += flt(already_billed.pop(key, 0), precision)
+			ref_wise_billed_amount[key]["billed_amt"] += current_amount + flt(billed_before, precision)
 
 		return ref_wise_billed_amount
 
@@ -134,11 +138,11 @@ class BillingValidationService:
 		self, reference_names: list, reference_doctype: str, based_on: str
 	) -> frappe._dict:
 		return frappe._dict(
-			frappe.get_all(
+			(row.name, row)
+			for row in frappe.get_all(
 				reference_doctype,
 				filters={"name": ("in", reference_names)},
-				fields=["name", based_on],
-				as_list=1,
+				fields=["name", based_on, "conversion_factor"],
 			)
 		)
 
@@ -147,6 +151,8 @@ class BillingValidationService:
 	) -> frappe._dict:
 		item_doctype = frappe.qb.DocType(self.doc.items[0].doctype)
 		based_on_field = item_doctype[based_on]
+		if based_on == "qty":
+			based_on_field = based_on_field * item_doctype.conversion_factor
 		join_field = item_doctype[item_ref_dn]
 
 		query = (

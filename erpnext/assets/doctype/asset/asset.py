@@ -36,6 +36,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.buying_controller import get_linked_asset_qty
 
 
 class Asset(AccountsController):
@@ -116,6 +117,7 @@ class Asset(AccountsController):
 		supplier: DF.Link | None
 		total_asset_cost: DF.Currency
 		total_number_of_depreciations: DF.Int
+		value_adjustment_amount: DF.Currency
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
 
@@ -284,16 +286,10 @@ class Asset(AccountsController):
 		add_asset_activity(self.name, _("Asset cancelled"))
 
 	def after_insert(self):
-		if not frappe.db.exists(
-			{
-				"doctype": "Asset Activity",
-				"asset": self.name,
-			}
-		):
-			add_asset_activity(self.name, _("Asset created"))
+		add_asset_activity(self.name, _("Asset created"))
 
 	def after_delete(self):
-		add_asset_activity(self.name, _("Asset deleted"))
+		frappe.db.delete("Asset Activity", {"asset": self.name})
 
 	def set_purchase_doc_row_item(self):
 		if self.asset_type == "Existing Asset" or self.asset_type == "Composite Asset":
@@ -306,26 +302,40 @@ class Asset(AccountsController):
 		if not purchase_doc:
 			return
 
-		linked_item = self.get_linked_item(purchase_doc_type, purchase_doc)
-
-		if linked_item:
-			if purchase_doc_type == "Purchase Receipt":
-				self.purchase_receipt_item = linked_item
-			else:
-				self.purchase_invoice_item = linked_item
+		self.set(
+			frappe.scrub(purchase_doc_type) + "_item", self.get_linked_item(purchase_doc_type, purchase_doc)
+		)
 
 	def get_linked_item(self, purchase_doc_type, purchase_doc):
 		purchase_doc = frappe.get_doc(purchase_doc_type, purchase_doc)
+		fieldname = frappe.scrub(purchase_doc_type) + "_item"
+		matching_items = purchase_doc.get("items", {"item_code": self.item_code})
 
-		for item in purchase_doc.items:
-			if self.asset_quantity > 1:
-				if item.base_net_amount == self.net_purchase_amount and item.qty == self.asset_quantity:
+		for item in matching_items:
+			if item.name == self.get(fieldname) and (not self.is_new() or self.flags.is_split_asset):
+				return item.name
+
+		linked_asset_qty = get_linked_asset_qty(fieldname, [item.name for item in matching_items], self.name)
+		matching_items = [
+			item
+			for item in matching_items
+			if flt(item.qty) - flt(linked_asset_qty.get(item.name)) >= self.asset_quantity
+		]
+		for item in matching_items:
+			if item.name == self.get(fieldname):
+				return item.name
+
+		precision = self.precision("net_purchase_amount")
+		for item in matching_items:
+			for rate in (
+				flt(item.base_net_rate),
+				flt(item.valuation_rate) * flt(item.conversion_factor or 1),
+			):
+				if flt(rate * self.asset_quantity, precision) == flt(self.net_purchase_amount, precision):
 					return item.name
-				elif item.qty == self.asset_quantity:
-					return item.name
-			else:
-				if item.base_net_rate == self.net_purchase_amount and item.qty == self.asset_quantity:
-					return item.name
+
+		if len(matching_items) == 1:
+			return matching_items[0].name
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -623,6 +633,11 @@ class Asset(AccountsController):
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
 			self.validate_asset_finance_books(d)
+			d.db_set(
+				"is_rate_of_depreciation_entered",
+				self.is_entered_depreciation_rate(d),
+				update_modified=False,
+			)
 			d.rate_of_depreciation = self.get_depreciation_rate(d, on_validate=True)
 
 	def validate_asset_finance_books(self, row):
@@ -808,8 +823,18 @@ class Asset(AccountsController):
 	def set_status(self, status=None):
 		"""Get and update status"""
 		if not status:
-			status = self.get_status()
+			status = "Out of Order" if self.has_pending_repair() else self.get_status()
 		self.db_set("status", status)
+
+	def has_pending_repair(self) -> bool:
+		if self.docstatus != 1 or self.disposal_date:
+			return False
+
+		return bool(
+			frappe.db.exists(
+				"Asset Repair", {"asset": self.name, "repair_status": "Pending", "docstatus": ("<", 2)}
+			)
+		)
 
 	def get_status(self):
 		"""Returns status based on whether it is draft, submitted, scrapped or depreciated"""
@@ -1068,6 +1093,28 @@ class Asset(AccountsController):
 		elif args.get("depreciation_method") == "Written Down Value":
 			return self.get_written_down_value_rate(args, rate_field_precision, on_validate)
 
+	def is_entered_depreciation_rate(self, settings: Document | dict) -> bool:
+		"""A Written Down Value rate is entered when it differs from the rate derived from the salvage value.
+
+		`settings` is a finance book row or a depreciation schedule that recorded its original values."""
+		rate = flt(settings.get("rate_of_depreciation"))
+		if settings.get("depreciation_method") != "Written Down Value" or not rate:
+			return False
+		if not flt(settings.get("expected_value_after_useful_life")):
+			return True
+
+		precision = frappe.get_precision("Asset Finance Book", "rate_of_depreciation")
+		return flt(rate, precision) != flt(self.get_initial_depreciation_rate(settings), precision)
+
+	def get_initial_depreciation_rate(self, settings: Document | dict) -> float:
+		fieldnames = (
+			"depreciation_method",
+			"expected_value_after_useful_life",
+			"total_number_of_depreciations",
+			"frequency_of_depreciation",
+		)
+		return self.get_depreciation_rate({fieldname: settings.get(fieldname) for fieldname in fieldnames})
+
 	def get_double_declining_balance_rate(self, args, rate_field_precision):
 		return flt(
 			200.0
@@ -1132,12 +1179,26 @@ def update_maintenance_status():
 
 	for asset in assets:
 		asset = frappe.get_doc("Asset", asset.name)
-		if frappe.db.exists("Asset Repair", {"asset_name": asset.name, "repair_status": "Pending"}):
+		if asset.has_pending_repair():
 			asset.set_status("Out of Order")
-		elif frappe.db.exists("Asset Maintenance Task", {"parent": asset.name, "next_due_date": today()}):
+		elif has_due_maintenance(asset.name):
 			asset.set_status("In Maintenance")
 		else:
 			asset.set_status()
+
+
+def has_due_maintenance(asset_name: str) -> bool:
+	return bool(
+		frappe.db.exists(
+			"Asset Maintenance Log",
+			{
+				"asset_name": asset_name,
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+				"due_date": ("<=", today()),
+			},
+		)
+	)
 
 
 def make_post_gl_entry():
@@ -1285,6 +1346,7 @@ def get_values_from_purchase_doc(
 	purchase_doc_name: str,
 	item_code: str,
 	doctype: str,
+	asset: str | None = None,
 ):
 	# `doctype` is caller-supplied and reaches frappe.get_doc() as the doctype itself, so without
 	# this list any document with an `items` table could be read for its valuation rates. The two
@@ -1300,20 +1362,40 @@ def get_values_from_purchase_doc(
 
 	_check_asset_company(purchase_doc.company)
 
-	matching_items = [item for item in purchase_doc.items if item.item_code == item_code]
+	matching_items = purchase_doc.get("items", {"item_code": item_code})
 
 	if not matching_items:
 		frappe.throw(_("Selected {0} does not contain the Item Code {1}").format(doctype, item_code))
 
-	first_item = matching_items[0]
+	if asset:
+		asset = frappe.get_doc("Asset", asset, check_permission="write")
+
+	fieldname = frappe.scrub(doctype)
+	linked_asset_qty = get_linked_asset_qty(
+		fieldname + "_item", [item.name for item in matching_items], asset.name if asset else None
+	)
+	if asset and asset.get(fieldname) == purchase_doc_name:
+		matching_items.sort(key=lambda item: item.name != asset.get(fieldname + "_item"))
+
+	for item in matching_items:
+		asset_quantity = flt(item.qty) - flt(linked_asset_qty.get(item.name))
+		if asset_quantity > 0:
+			break
+	else:
+		frappe.throw(
+			_("All quantities of Item {0} in {1} are already linked to Assets.").format(
+				frappe.bold(item_code), get_link_to_form(doctype, purchase_doc_name)
+			),
+			title=_("No Available Purchase Row"),
+		)
 
 	return {
 		"company": purchase_doc.company,
 		"purchase_date": purchase_doc.get("posting_date"),
-		"net_purchase_amount": flt(first_item.valuation_rate) * flt(first_item.qty),
-		"asset_quantity": first_item.qty,
-		"cost_center": first_item.cost_center or purchase_doc.get("cost_center"),
-		"asset_location": first_item.get("asset_location"),
-		"purchase_receipt_item": first_item.name if doctype == "Purchase Receipt" else None,
-		"purchase_invoice_item": first_item.name if doctype == "Purchase Invoice" else None,
+		"net_purchase_amount": flt(item.valuation_rate) * flt(item.conversion_factor or 1) * asset_quantity,
+		"asset_quantity": asset_quantity,
+		"cost_center": item.cost_center or purchase_doc.get("cost_center"),
+		"asset_location": item.get("asset_location"),
+		"purchase_receipt_item": item.name if doctype == "Purchase Receipt" else None,
+		"purchase_invoice_item": item.name if doctype == "Purchase Invoice" else None,
 	}

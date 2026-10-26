@@ -263,8 +263,10 @@ def reschedule_depreciation(asset_doc, notes, disposal_date=None):
 
 		if current_schedule and current_schedule.docstatus == 1:
 			current_schedule.flags.should_not_cancel_depreciation_entries = True
+			current_schedule.flags.ignore_permissions = True
 			current_schedule.cancel()
 
+		new_schedule.flags.ignore_permissions = True
 		new_schedule.submit()
 
 
@@ -272,13 +274,39 @@ def set_modified_depreciation_rate(asset_doc, row, new_schedule):
 	if row.depreciation_method in (
 		"Written Down Value",
 		"Double Declining Balance",
-	):
+	) and not is_depreciation_rate_entered(asset_doc, row):
 		new_rate_of_depreciation = flt(
 			asset_doc.get_depreciation_rate(row), row.precision("rate_of_depreciation")
 		)
 
 		row.db_set("rate_of_depreciation", new_rate_of_depreciation)
 		new_schedule.rate_of_depreciation = new_rate_of_depreciation
+
+
+def is_depreciation_rate_entered(asset_doc, row) -> bool:
+	"""Finance books saved before the flag existed are judged by their first schedule."""
+	if row.is_rate_of_depreciation_entered:
+		return True
+
+	first_schedule = get_first_depreciation_schedule(asset_doc.name, row.finance_book)
+	return bool(first_schedule) and asset_doc.is_entered_depreciation_rate(first_schedule)
+
+
+def get_first_depreciation_schedule(asset: str, finance_book: str | None) -> dict | None:
+	schedules = frappe.get_all(
+		"Asset Depreciation Schedule",
+		filters={"asset": asset, "finance_book": finance_book or ["is", "not set"]},
+		fields=[
+			"depreciation_method",
+			"rate_of_depreciation",
+			"expected_value_after_useful_life",
+			"total_number_of_depreciations",
+			"frequency_of_depreciation",
+		],
+		order_by="creation asc",
+		limit=1,
+	)
+	return schedules[0] if schedules else None
 
 
 def get_temp_depr_schedule_doc(asset_doc, fb_row, disposal_date=None, updated_depr_schedule=None):

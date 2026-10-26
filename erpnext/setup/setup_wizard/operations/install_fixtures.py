@@ -552,11 +552,9 @@ def update_stock_settings():
 	stock_settings.save()
 
 
-def create_bank_account(args, demo=False):
+def create_bank_account(args):
 	if not args.get("bank_account"):
-		if not demo:
-			return
-		args["bank_account"] = _("Demo Bank Account")
+		return
 
 	company_name = args.get("company_name")
 	bank_account_group = frappe.db.get_value(

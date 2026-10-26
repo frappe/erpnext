@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import POSInvoiceTestMixin, create_pos_invoice
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.incorrect_serial_and_batch_bundle.incorrect_serial_and_batch_bundle import (
@@ -81,3 +82,62 @@ class TestIncorrectSerialAndBatchBundle(ERPNextTestSuite):
 		flagged = {row.get("name"): row for row in self.run_report()}
 		self.assertIn(bundle, flagged)
 		self.assertEqual(flagged[bundle]["is_cancelled"], 0)
+
+	def test_fix_leaves_draft_bundles_alone(self):
+		from erpnext.stock.report.incorrect_serial_and_batch_bundle.incorrect_serial_and_batch_bundle import (
+			fix_sabb_entries,
+		)
+
+		batch_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+		entry = make_stock_entry(item_code=batch_item, qty=5, rate=100, to_warehouse="Stores - _TC")
+		bundle = frappe.db.get_value("Serial and Batch Bundle", {"voucher_no": entry.name}, "name")
+		frappe.db.delete("Stock Ledger Entry", {"serial_and_batch_bundle": bundle})
+		frappe.db.set_value("Serial and Batch Bundle", bundle, "docstatus", 0)
+
+		fix_sabb_entries([{"name": bundle}])
+
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", bundle, ["docstatus", "is_cancelled"]), (0, 0)
+		)
+
+
+class TestIncorrectSerialAndBatchBundleForPOS(POSInvoiceTestMixin):
+	def setUp(self):
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+
+		super().setUp()
+		create_opening_entry(self.pos_profile, self.test_user.name)
+
+	def test_bundle_of_unconsolidated_pos_invoice_is_not_flagged(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_nos_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		entry = make_serialized_item(
+			self,
+			company="_Test Company",
+			target_warehouse="Stores - _TC",
+			cost_center="Main - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+		)
+		pos = create_pos_invoice(
+			company="_Test Company",
+			debit_to="Debtors - _TC",
+			account_for_change_amount="Cash - _TC",
+			warehouse="Stores - _TC",
+			income_account="Sales - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			item=entry.items[0].item_code,
+			serial_no=[get_serial_nos_from_bundle(entry.items[0].serial_and_batch_bundle)[0]],
+			rate=1000,
+			do_not_save=1,
+		)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		data = execute(frappe._dict({"company": "_Test Company"}))[1]
+
+		self.assertNotIn(pos.items[0].serial_and_batch_bundle, [row.name for row in data])

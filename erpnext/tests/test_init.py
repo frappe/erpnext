@@ -70,19 +70,28 @@ class TestInit(ERPNextTestSuite):
 		check_patch_files("erpnext")
 
 	def test_no_unrendered_title_templates(self):
-		import frappe
-
 		modules = frappe.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
-		for doctype in frappe.get_all("DocType", filters={"module": ("in", modules)}, pluck="name"):
-			meta = frappe.get_meta(doctype)
-			field = meta.get_field("title")
-			if not field or not field.default or "{" not in field.default:
-				continue
+		title_fields = dict(
+			frappe.get_all(
+				"DocType", filters={"module": ("in", modules)}, fields=["name", "title_field"], as_list=True
+			)
+		)
+		templated_titles = frappe.get_all(
+			"DocField",
+			filters={
+				"parenttype": "DocType",
+				"parent": ("in", list(title_fields)),
+				"fieldname": "title",
+				"default": ("like", "%{%"),
+			},
+			fields=["parent", "default"],
+		)
 
+		for field in templated_titles:
 			self.assertEqual(
-				meta.title_field,
+				title_fields[field.parent],
 				"title",
-				f"{doctype}: title default {field.default!r} is stored verbatim because "
+				f"{field.parent}: title default {field.default!r} is stored verbatim because "
 				"Document.set_title_field() only renders it when title_field is 'title'",
 			)
 

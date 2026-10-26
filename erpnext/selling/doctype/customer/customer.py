@@ -19,6 +19,7 @@ from frappe.query_builder.functions import Cast, Coalesce, Max
 from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
 
+from erpnext import get_company_currency
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
@@ -233,8 +234,8 @@ class Customer(TransactionBase):
 		self.payment_terms = self.default_price_list = ""
 
 		tables = [
-			["accounts", ["account"]],
-			["credit_limits", ["credit_limit", "overdue_billing_threshold"]],
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold", "bypass_credit_limit_check"]],
 		]
 		fields = ["payment_terms", "default_price_list"]
 
@@ -598,8 +599,12 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
+	customer_outstanding = flt(
+		customer_outstanding,
+		frappe.get_precision("Customer Credit Limit", "credit_limit", get_company_currency(company)),
+	)
 
-	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
+	if credit_limit > 0 and customer_outstanding > credit_limit:
 		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 			customer, customer_outstanding, credit_limit
 		)
@@ -833,12 +838,16 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	SalesInvoice = frappe.qb.DocType("Sales Invoice")
 	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 
 	si_subquery = (
 		frappe.qb.from_(SalesInvoiceItem)
-		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.amount).as_("billed_amount"))
+		.join(SalesInvoice)
+		.on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.stock_qty).as_("billed_qty"))
 		.where(SalesInvoiceItem.docstatus == 1)
+		.where((SalesInvoice.is_return == 0) | (SalesInvoice.update_billed_amount_in_delivery_note == 1))
 		.groupby(SalesInvoiceItem.dn_detail)
 	)
 
@@ -851,7 +860,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.select(
 			Sum(
 				(
-					(DeliveryNoteItem.amount - IfNull(si_subquery.billed_amount, 0.0))
+					DeliveryNoteItem.base_net_amount
+					* (DeliveryNoteItem.stock_qty - IfNull(si_subquery.billed_qty, 0.0))
+					/ DeliveryNoteItem.stock_qty
 					/ DeliveryNote.base_net_total
 				)
 				* DeliveryNote.base_grand_total
@@ -862,7 +873,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.where(DeliveryNote.docstatus == 1)
 		.where(DeliveryNote.base_net_total > 0)
 		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
-		.where(DeliveryNoteItem.amount > IfNull(si_subquery.billed_amount, 0.0))
+		.where(DeliveryNoteItem.stock_qty > IfNull(si_subquery.billed_qty, 0.0))
 		.where(
 			Criterion.any(
 				[DeliveryNoteItem.against_sales_order.isnull(), DeliveryNoteItem.against_sales_order == ""]

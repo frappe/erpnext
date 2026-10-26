@@ -1,6 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+import os
+import re
+
 import frappe
 from frappe.utils import nowdate
 
@@ -9,6 +13,7 @@ from erpnext.accounts.doctype.account.account import (
 	merge_account,
 	update_account_number,
 )
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_chart
 from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -43,8 +48,6 @@ class TestAccount(ERPNextTestSuite):
 
 		self.assertEqual(new_acc.account_name, "Debtors 1 - Test -")
 		self.assertEqual(new_acc.account_number, "1211-11-4 - 6 -")
-
-		frappe.delete_doc("Account", "1211-11-4 - 6 - Debtors 1 - Test - - _TC")
 
 	def test_merge_account(self):
 		create_account(
@@ -189,10 +192,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC3")
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
-
 	def test_account_currency_sync(self):
 		"""
 		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
@@ -240,9 +239,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
-		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
-
 	def test_child_company_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
@@ -275,16 +271,6 @@ class TestAccount(ERPNextTestSuite):
 				"Account", {"name": "Test Modified Account - _TC5", "company": "_Test Company 5"}
 			)
 		)
-
-		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 0)
-
-		to_delete = [
-			"Test Group Account - _TC3",
-			"Test Group Account - _TC4",
-			"Test Modified Account - _TC5",
-		]
-		for doc in to_delete:
-			frappe.delete_doc("Account", doc)
 
 	def test_validate_account_currency(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -343,6 +329,50 @@ class TestAccount(ERPNextTestSuite):
 
 		balance = get_balance_on(account="Test Percent Account %5 - _TC", date=nowdate())
 		self.assertEqual(balance, 0)
+
+	def test_verified_charts_have_no_demo_accounts(self):
+		verified_path = os.path.join(os.path.dirname(__file__), "chart_of_accounts", "verified")
+
+		for fname in os.listdir(verified_path):
+			if not fname.endswith(".json"):
+				continue
+
+			with open(os.path.join(verified_path, fname)) as f:
+				tree = json.load(f).get("tree", {})
+
+			demo_accounts = [
+				account_name
+				for account_name, _details in walk_chart_tree(tree)
+				if re.search(r"\bdemo\b", account_name, re.IGNORECASE)
+			]
+			self.assertEqual(demo_accounts, [], msg=f"Demo account(s) found in verified chart {fname}")
+
+	def test_philippines_chart_payable_account_types(self):
+		tree = get_chart("Philippines")
+		accounts = dict(walk_chart_tree(tree))
+
+		self.assertNotIn("Raw Materials - Demo", accounts)
+		self.assertIn("Raw Materials", accounts)
+
+		# pick it as default_payable_account
+		self.assertNotEqual(accounts["Customer Deposits"].get("account_type"), "Payable")
+
+		payable_ledgers = [
+			account_name
+			for account_name, details in accounts.items()
+			if details.get("account_type") == "Payable" and not details.get("is_group")
+		]
+		self.assertEqual(payable_ledgers, ["Accounts Payable - Trade"])
+
+
+def walk_chart_tree(tree):
+	"""Yield (account_name, details) for every account in a chart of accounts tree"""
+	for account_name, details in tree.items():
+		if not isinstance(details, dict):
+			continue
+
+		yield account_name, details
+		yield from walk_chart_tree(details)
 
 
 def get_inventory_account(company, warehouse=None):

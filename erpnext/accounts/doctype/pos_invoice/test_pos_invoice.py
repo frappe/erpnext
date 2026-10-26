@@ -876,7 +876,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		batch_no = create_batch_item_with_batch("_BATCH ITEM", "TestBatch 01")
 		item = frappe.get_doc("Item", "_BATCH ITEM")
 
-		se = make_stock_entry(
+		make_stock_entry(
 			target="_Test Warehouse - _TC",
 			item_code="_BATCH ITEM",
 			qty=2,
@@ -909,14 +909,6 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 
 		self.assertRaises(BatchNegativeStockError, sn_doc.make_serial_and_batch_bundle)
-
-		# teardown
-		pos_inv1.reload()
-		pos_inv1.cancel()
-		pos_inv1.delete()
-		pos_inv2.reload()
-		pos_inv2.delete()
-		se.cancel()
 
 	def test_ignore_pricing_rule(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
@@ -1059,7 +1051,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_inv_insufficient.save()
 		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
 
-		frappe.set_user("test@example.com")
+		frappe.set_user(self.test_user.name)
 
 	def test_make_merge_log_refuses_empty_and_malformed_names(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_merge_log
@@ -1091,6 +1083,44 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		with as_user(inside):
 			merge_log = make_merge_log([{"name": invoice.name}])
 		self.assertEqual(merge_log["pos_invoices"][0]["pos_invoice"], invoice.name)
+
+	def test_serial_and_batch_item_with_only_batch_in_fields(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PSB-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "PSS-.#####",
+			}
+		).name
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		with self.change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}):
+			pos = create_pos_invoice(
+				item=item_code, qty=2, rate=100, use_serial_batch_fields=1, batch_no=batch_no, do_not_save=1
+			)
+			pos.items[0].update({"has_serial_no": 1, "has_batch_no": 1})
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+			pos.insert()
+			self.assertFalse(pos.items[0].serial_no)
+
+			pos.submit()
+			pos.reload()
+			entries = frappe.get_all(
+				"Serial and Batch Entry",
+				{"parent": pos.items[0].serial_and_batch_bundle},
+				["serial_no", "batch_no"],
+			)
+			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
+			self.assertEqual({d.batch_no for d in entries}, {batch_no})
 
 
 def create_pos_invoice(**args):

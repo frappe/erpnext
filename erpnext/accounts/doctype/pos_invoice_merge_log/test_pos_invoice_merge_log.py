@@ -110,10 +110,22 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		pos_inv2.save()
 		pos_inv2.submit()
 
+		mode = frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "_Test Retired Payment Mode",
+				"type": "Cash",
+				"enabled": 1,
+				"accounts": [{"company": "_Test Company", "default_account": "Cash - _TC"}],
+			}
+		).insert()
 		pos_inv3 = create_pos_invoice(customer="_Test Customer 2", rate=2300, do_not_submit=1)
-		pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
+		pos_inv3.append("payments", {"mode_of_payment": mode.name, "account": "Cash - _TC", "amount": 2300})
 		pos_inv3.save()
 		pos_inv3.submit()
+
+		mode.enabled = 0
+		mode.save()
 
 		self.make_closing_entry()
 
@@ -124,6 +136,10 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv3.consolidated_invoice))
 
 		self.assertNotEqual(pos_inv.consolidated_invoice, pos_inv3.consolidated_invoice)
+
+		consolidated = frappe.get_doc("Sales Invoice", pos_inv3.consolidated_invoice)
+		self.assertEqual(consolidated.docstatus, 1)
+		self.assertTrue(any(payment.mode_of_payment == mode.name for payment in consolidated.payments))
 
 	def test_consolidated_credit_note_creation(self):
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
@@ -490,7 +506,6 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
 		create_cost_center(cost_center_name="_Test POS Cost Center 1", is_group=0)
-		create_cost_center(cost_center_name="_Test POS Cost Center 2", is_group=0)
 
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
@@ -500,13 +515,11 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
-		pos_inv.cost_center = "_Test POS Cost Center 2 - _TC"
 		pos_inv2.save()
 		pos_inv2.submit()
 
 		pos_inv3 = create_pos_invoice(rate=2300, do_not_submit=1)
 		pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
-		pos_inv.cost_center = "_Test POS Cost Center 2 - _TC"
 		pos_inv3.save()
 		pos_inv3.submit()
 
@@ -518,10 +531,10 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		pos_inv2.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv2.consolidated_invoice))
 
-		self.assertNotEqual(pos_inv.consolidated_invoice, pos_inv3.consolidated_invoice)
-
 		pos_inv3.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv3.consolidated_invoice))
+
+		self.assertNotEqual(pos_inv.consolidated_invoice, pos_inv3.consolidated_invoice)
 
 		self.assertEqual(pos_inv2.consolidated_invoice, pos_inv3.consolidated_invoice)
 

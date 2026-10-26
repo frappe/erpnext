@@ -40,6 +40,7 @@
   "discount_percentage",
   "discount_amount",
   "distributed_discount_amount",
+  "mapped_additional_discount_amount",
   "base_rate_with_margin",
   "sec_break2",
   "rate",
@@ -1013,6 +1014,17 @@
    "print_hide": 1
   },
   {
+   "default": "0",
+   "description": "Tax-exclusive additional discount carried from a source document, per stock unit.",
+   "fieldname": "mapped_additional_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount per Stock Unit",
+   "options": "currency",
+   "precision": "9",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -1033,7 +1045,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-15 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

@@ -35,7 +35,7 @@ def set_task_counts(projects):
 	if not projects:
 		return
 
-	task_counts = frappe.get_list(
+	task_counts = frappe.get_all(
 		"Task",
 		filters={"project": ["in", [project.name for project in projects]]},
 		fields=["project", "status", {"COUNT": "*", "as": "count"}],

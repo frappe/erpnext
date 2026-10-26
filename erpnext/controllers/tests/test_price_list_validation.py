@@ -57,12 +57,8 @@ class TestPriceListValidation(ERPNextTestSuite):
 		is flagged for the opposite side."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			prepare_data_for_internal_transfer,
-		)
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		selling_only = self.create_price_list(selling=1)
 

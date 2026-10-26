@@ -18,6 +18,7 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -26,13 +27,16 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 def get_invoiced_qty_map(delivery_note: str) -> dict:
 	"""returns a map: {dn_detail: invoiced_qty}"""
 	sii = DocType("Sales Invoice Item")
+	dni = DocType("Delivery Note Item")
 
 	invoiced_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(sii)
-			.select(sii.dn_detail, Sum(sii.qty).as_("qty"))
+			.join(dni)
+			.on(dni.name == sii.dn_detail)
+			.select(dni.name, (Sum(sii.qty * sii.conversion_factor) / dni.conversion_factor).as_("qty"))
 			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
-			.groupby(sii.dn_detail)
+			.groupby(dni.name)
 		).run()
 	)
 
@@ -43,20 +47,26 @@ def get_returned_qty_map(delivery_note: str) -> dict:
 	"""returns a map: {so_detail: returned_qty}"""
 	dn = DocType("Delivery Note")
 	dni = DocType("Delivery Note Item")
+	returned_against = DocType("Delivery Note Item").as_("returned_against")
 
 	returned_qty_map = frappe._dict(
 		(
 			frappe.qb.from_(dni)
 			.join(dn)
 			.on(dn.name == dni.parent)
-			.select(dni.dn_detail, Sum(Abs(dni.qty)).as_("qty"))
+			.join(returned_against)
+			.on(returned_against.name == dni.dn_detail)
+			.select(
+				returned_against.name,
+				(Sum(Abs(dni.qty) * dni.conversion_factor) / returned_against.conversion_factor).as_("qty"),
+			)
 			.where(
 				(dn.docstatus == 1)
 				& (dn.is_return == 1)
 				& (dn.return_against == delivery_note)
 				& (dni.qty <= 0)
 			)
-			.groupby(dni.dn_detail)
+			.groupby(returned_against.name)
 		).run()
 	)
 
@@ -215,6 +225,9 @@ def make_sales_invoice(
 def make_delivery_trip(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
+	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
+
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 
@@ -247,9 +260,16 @@ def make_delivery_trip(
 def make_installation_note(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
+	# returned_qty_map is keyed by DN Item row and already in the row's stock-to-sales UOM
+	returned_qty_map = get_returned_qty_map(source_name)
+
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.installed_qty)
+		target.qty = flt(obj.qty) - flt(returned_qty_map.get(obj.name, 0)) - flt(obj.installed_qty)
+
 		serial_ids = get_serial_batch_list_from_item(obj)[0]
+		if serial_ids:
+			returned = set(get_returned_serial_nos(obj, source_parent))
+			serial_ids = [s for s in serial_ids if s not in returned]
 		target.serial_no = "\n".join(SerialBatchIdentity("Serial No").get_numbers(obj.item_code, serial_ids))
 		target.serial_and_batch_bundle = None
 
@@ -266,7 +286,9 @@ def make_installation_note(
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty and not doc.closed,
+				"condition": lambda doc: doc.installed_qty
+				< flt(doc.qty) - flt(returned_qty_map.get(doc.name, 0))
+				and not doc.closed,
 			},
 		},
 		target_doc,
@@ -421,6 +443,16 @@ def make_inter_company_purchase_receipt(source_name: str, target_doc: str | dict
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 
+def has_pending_inter_company_qty(item, doctype: str, accepted_returns: dict | None = None) -> bool:
+	if item.closed:
+		return False
+
+	if doctype == "Purchase Receipt":
+		return flt(item.qty) - flt((accepted_returns or {}).get(item.name)) > 0
+
+	return get_pending_receipt_qty(item) > 0
+
+
 def make_inter_company_transaction(doctype: str, source_name: str, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import (
 		get_inter_company_details,
@@ -443,8 +475,10 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
+	accepted_returns = get_accepted_returned_qty(source_doc) if doctype == "Purchase Receipt" else {}
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 
@@ -458,6 +492,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				target.append("taxes", tax)
 
 		if not target.get("items"):
+			if target.doctype == "Delivery Note":
+				frappe.throw(_("All items have already been delivered"))
+
 			frappe.throw(_("All items have already been received"))
 
 	def update_details(source_doc, target_doc, source_parent):
@@ -561,6 +598,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		if source_parent.doctype == "Delivery Note":
 			target.qty = get_pending_receipt_qty(source)
 
+		if source_parent.doctype == "Purchase Receipt":
+			target.qty = flt(source.qty) - flt(accepted_returns.get(source.name))
+
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
 
@@ -572,6 +612,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	table_maps = {
 		doctype: {
 			"doctype": target_doctype,
+			"validation": {"docstatus": ["=", 1]},
 			"postprocess": update_details,
 			"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 		},
@@ -586,8 +627,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				"Material_request_item": "material_request_item",
 			},
 			"field_no_map": ["warehouse"],
-			"condition": lambda item: get_pending_receipt_qty(item) > 0
-			and not item.closed
+			"condition": lambda item: has_pending_inter_company_qty(item, doctype, accepted_returns)
 			and item.name not in bundle_rows,
 			"postprocess": update_item,
 		},
@@ -600,8 +640,15 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	return doclist
 
 
+def get_accepted_returned_qty(receipt) -> dict:
+	from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_item_wise_returned_qty
+
+	return get_item_wise_returned_qty([d.name for d in receipt.items])
+
+
 def get_pending_receipt_qty(item) -> float:
-	return flt(item.qty) - flt(item.get("returned_qty")) - flt(item.get("received_qty"))
+	returned_qty = flt(item.get("returned_qty")) / (flt(item.get("conversion_factor")) or 1)
+	return flt(item.qty) - returned_qty - flt(item.get("received_qty"))
 
 
 def get_component_receipt_map(bundle_rows: dict) -> dict:

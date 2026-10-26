@@ -26,6 +26,7 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -53,6 +54,7 @@ from erpnext.controllers.accounts_controller import (
 	AccountsController,
 	validate_taxes_and_charges,
 )
+from erpnext.controllers.queries import has_ignored_field
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -114,9 +116,11 @@ class PaymentEntry(AccountsController):
 		paid_from: DF.Link
 		paid_from_account_currency: DF.Link
 		paid_from_account_type: DF.Data | None
+		paid_from_bank_account: DF.Link | None
 		paid_to: DF.Link
 		paid_to_account_currency: DF.Link
 		paid_to_account_type: DF.Data | None
+		paid_to_bank_account: DF.Link | None
 		party: DF.DynamicLink | None
 		party_bank_account: DF.Link | None
 		party_name: DF.Data | None
@@ -170,12 +174,14 @@ class PaymentEntry(AccountsController):
 			self.party_account_currency = self.paid_to_account_currency
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_internal_transfer_accounts()
+		self.set_internal_transfer_bank_accounts()
 		self.validate_party_details()
 		self.set_exchange_rate()
 		self.validate_mandatory()
@@ -348,6 +354,13 @@ class PaymentEntry(AccountsController):
 				)
 
 			reference_names.add(key)
+
+	def set_internal_transfer_bank_accounts(self):
+		for side in ("paid_from", "paid_to"):
+			bank_account = None
+			if self.payment_type == "Internal Transfer" and self.get(side):
+				bank_account = frappe.db.get_value("Bank Account", {"account": self.get(side), "disabled": 0})
+			self.set(f"{side}_bank_account", bank_account)
 
 	def set_bank_account_data(self):
 		if not self.bank_account:
@@ -647,6 +660,24 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Paid From and Paid To accounts must be different for an Internal Transfer."))
 
 	def validate_party_details(self):
+		if self.party_type:
+			if not frappe.db.exists("Party Type", self.party_type):
+				frappe.throw(_("{0} is not a valid Party Type").format(self.party_type))
+
+			if self.get("party_account") and self.party_type != "Employee":
+				account_type = frappe.get_cached_value("Account", self.party_account, "account_type")
+				party_account_type = frappe.get_cached_value("Party Type", self.party_type, "account_type")
+				if (
+					account_type != party_account_type
+					and not (self.party_type == "Shareholder" and account_type == "Equity")
+					and not self.book_advance_payments_in_separate_party_account
+				):
+					frappe.throw(
+						_("Account {0} and Party Type {1} have different account types").format(
+							self.party_account, self.party_type
+						)
+					)
+
 		if self.party and not frappe.db.exists(self.party_type, self.party):
 			frappe.throw(_("{0} {1} does not exist").format(_(self.party_type), self.party))
 
@@ -680,8 +711,11 @@ class PaymentEntry(AccountsController):
 
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
+			self.set(field, flt(self.get(field)))
 			if not self.get(field):
 				frappe.throw(_("{0} is mandatory").format(self.meta.get_translated_label(field)))
+			if self.get(field) < 0:
+				frappe.throw(_("{0} must be greater than zero").format(self.meta.get_translated_label(field)))
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -894,7 +928,7 @@ class PaymentEntry(AccountsController):
 					.set(ps.base_paid_amount, ps.base_paid_amount - base_paid_amount)
 					.set(ps.discounted_amount, ps.discounted_amount - discounted_amt)
 					.set(ps.outstanding, ps.outstanding + allocated_amount)
-					.set(ps.base_outstanding, ps.base_outstanding - base_outstanding)
+					.set(ps.base_outstanding, ps.base_outstanding + base_outstanding)
 					.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
 				).run()
 			else:
@@ -2053,7 +2087,8 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 		return
 
 	if args.get("party_type") and args.get("party"):
-		frappe.has_permission(args["party_type"], "read", args["party"], throw=True)
+		party_to_check = None if has_ignored_field("Payment Entry", args["party_type"]) else args["party"]
+		frappe.has_permission(args["party_type"], "read", party_to_check, throw=True)
 
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
@@ -2452,12 +2487,13 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
 	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
-	frappe.has_permission(party_type, ptype, party, throw=True)
+	party_to_check = None if has_ignored_field("Payment Entry", party_type) else party
+	frappe.has_permission(party_type, ptype, party_to_check, throw=True)
 	validate_party_company(party_type, party, company)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
-	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
+	_party_name = frappe.get_meta(party_type).get_title_field()
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 
 	if party_type in ["Customer", "Supplier"]:
@@ -2704,7 +2740,9 @@ def get_payment_entry(
 	pe.received_amount = received_amount
 	pe.letter_head = doc.get("letter_head")
 	pe.bank_account = frappe.db.get_value(
-		"Bank Account", {"is_company_account": 1, "is_default": 1, "company": doc.company}, "name"
+		"Bank Account",
+		{"is_company_account": 1, "is_default": 1, "company": doc.company, "disabled": 0},
+		"name",
 	)
 
 	if dt in ["Purchase Order", "Sales Order", "Sales Invoice", "Purchase Invoice"]:
@@ -3317,6 +3355,7 @@ def make_payment_order(source_name: str, target_doc: str | dict | Document | Non
 
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Entry"
+		target.company = target.company or source.company
 		target.append(
 			"references",
 			dict(
@@ -3337,6 +3376,8 @@ def make_payment_order(source_name: str, target_doc: str | dict | Document | Non
 			"Payment Entry": {
 				"doctype": "Payment Order",
 				"validation": {"docstatus": ["=", 1]},
+				# keep the company of an existing order; references are validated against it
+				"field_no_map": ["company"] if target_doc else [],
 			}
 		},
 		target_doc,

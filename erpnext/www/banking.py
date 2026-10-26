@@ -1,10 +1,12 @@
 import json
 import re
+from urllib.parse import urlencode
 
 import frappe
 import frappe.sessions
 from frappe import _
 from frappe.utils.jinja_globals import is_rtl
+from frappe.utils.user import is_website_user
 
 no_cache = 1
 
@@ -13,6 +15,7 @@ CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>", re.IGNORECASE)
 
 
 def get_context(context):
+	validate_desk_user()
 	csrf_token = frappe.sessions.get_csrf_token()
 
 	context = frappe._dict()
@@ -29,10 +32,21 @@ def get_context(context):
 	return context
 
 
+def validate_desk_user():
+	if frappe.session.user == "Guest":
+		frappe.response["status_code"] = 403
+		frappe.msgprint(_("Log in to access this page."))
+		frappe.redirect(f"/login?{urlencode({'redirect-to': frappe.request.path})}")
+
+	elif is_website_user():
+		frappe.throw(_("You are not permitted to access this page."), frappe.PermissionError)
+
+
 @frappe.whitelist(methods=["POST"], allow_guest=True)
 def get_context_for_dev():
 	if not frappe.conf.developer_mode:
 		frappe.throw(_("This method is only meant for developer mode"))
+	validate_desk_user()
 	return {
 		"boot": json.loads(get_boot()),
 		"layout_direction": "rtl" if is_rtl() else "ltr",

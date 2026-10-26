@@ -29,6 +29,7 @@ from erpnext.exceptions import (
 	QualityInspectionRejectedError,
 	QualityInspectionRequiredError,
 )
+from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account, get_warehouse_account_map
@@ -413,9 +414,9 @@ class StockController(AccountsController):
 		return QualityInspectionService(self).validate_inspection()
 
 	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
+		blanket_orders = sorted({d.blanket_order for d in self.items if d.blanket_order})
 		for blanket_order in blanket_orders:
-			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
+			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
 		for d in self.get("items"):
@@ -440,6 +441,10 @@ class StockController(AccountsController):
 		from erpnext.stock.services.stock_ledger_service import StockLedgerService
 
 		return StockLedgerService(self).repost_future_sle_and_gle(force, via_landed_cost_voucher)
+
+	def update_project_consumed_material_cost(self):
+		projects = {self.get("project"), *(d.get("project") for d in self.get("items"))}
+		update_consumed_material_cost(projects - {None, ""})
 
 	def add_gl_entry(
 		self,
@@ -561,7 +566,12 @@ class StockController(AccountsController):
 						if sre_doc.has_serial_no:
 							serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos:
+								is_open = (
+									entry.qty > entry.delivered_qty
+									if self._action == "submit"
+									else entry.delivered_qty
+								)
+								if entry.serial_no in serial_nos and is_open:
 									entry.delivered_qty = 1 if self._action == "submit" else 0
 									entry.db_update()
 									working_qty += 1

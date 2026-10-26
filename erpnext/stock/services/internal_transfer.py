@@ -135,12 +135,13 @@ class StockInternalTransferService:
 			.where((parent_tab.name == inter_company_reference) & (parent_tab.docstatus == 1))
 		)
 		if parent_doctype == "Delivery Note":
-			query = query.select(child_tab.returned_qty, child_tab.stock_qty)
+			query = query.select(child_tab.returned_qty, child_tab.stock_qty, child_tab.conversion_factor)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - flt(row.get("returned_qty"))
+			returned_qty = flt(row.get("returned_qty")) / (flt(row.get("conversion_factor")) or 1)
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - returned_qty
 
 		if parent_doctype == "Delivery Note":
 			self.add_component_transfer_qty(item_wise_transfer_qty, inter_company_reference, data)

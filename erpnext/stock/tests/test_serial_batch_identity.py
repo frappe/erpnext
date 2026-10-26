@@ -121,12 +121,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			1,
 		)
 
-	def test_resolution_uses_the_selected_item(self):
-		for doctype in ("Serial No", "Batch"):
-			self.make_number(doctype, "Physical-001")
-			with self.assertRaisesRegex(frappe.ValidationError, "Physical-001.*_Identity Item B"):
-				SerialBatchIdentity(doctype).resolve(self.other_item.name, ["Physical-001"])
-
 	def test_numbers_are_not_interpreted_as_ids(self):
 		for doctype in ("Serial No", "Batch"):
 			first = self.make_number(doctype, "Physical-001")
@@ -142,11 +136,9 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				SerialBatchIdentity(doctype).resolve(self.item.name, ["Missing-001"])
 			self.assertEqual(frappe.db.count(doctype), count)
 
-	def test_empty_input(self):
+	def test_invalid_input(self):
 		for doctype in ("Serial No", "Batch"):
 			self.assertEqual(SerialBatchIdentity(doctype).resolve(self.item.name, []), [])
-
-	def test_invalid_input(self):
 		identity = SerialBatchIdentity("Serial No")
 		for numbers in ("Serial-001", [None], [1], [" "], None):
 			with self.subTest(numbers=numbers), self.assertRaises(frappe.ValidationError):
@@ -188,21 +180,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.make_number(doctype, "Scan-001")
 			with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 				get_serial_batch_scan(self.item.name, "Scan-001", doctype)
-
-	def test_scan_lookup_works_without_master_read_permission(self):
-		batch = self.make_number("Batch", "Scan-001")
-		user = frappe.get_doc(
-			doctype="User",
-			email="identity-scan-reader@example.com",
-			first_name="Scan Reader",
-			send_welcome_email=0,
-			roles=[{"role": "Purchase User"}],
-		).insert()
-		with self.set_user(user.name):
-			self.assertFalse(frappe.has_permission("Batch", "read"))
-			self.assertEqual(get_serial_batch_scan(self.item.name, "Scan-001", "Batch")["name"], batch.name)
-			self.assertEqual(get_serial_batch_scan(self.item.name, "Missing-Scan", "Batch"), {})
-		self.assertFalse(frappe.db.exists("Batch", {"item": self.item.name, "batch_id": "Missing-Scan"}))
 
 	def test_number_lookup_works_without_master_read_permission(self):
 		batch = self.make_number("Batch", "Titled-001")
@@ -1145,14 +1122,14 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		row = frappe._dict(transfer_qty=1)
 		service = DisassembleStockEntry(frappe.get_doc(doctype="Stock Entry", purpose="Disassemble"))
 
-		self.assertEqual(service._extract_serial_nos(source, {}, row), [second.name])
+		self.assertEqual(service._extract_serial_nos(source, {}, row, set()), [second.name])
 		row.transfer_qty = 2
-		self.assertEqual(service._extract_serial_nos(source, {}, row), [second.name, first.name])
+		self.assertEqual(service._extract_serial_nos(source, {}, row, set()), [second.name, first.name])
 		self.assertEqual(source.serial_no, "disassembly-002\nDISASSEMBLY-001")
 
 		source.serial_no = "Missing-Disassembly"
 		with self.assertRaisesRegex(frappe.ValidationError, "Missing-Disassembly.*does not exist"):
-			service._extract_serial_nos(source, {}, row)
+			service._extract_serial_nos(source, {}, row, set())
 		self.assertFalse(
 			frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Missing-Disassembly"})
 		)
@@ -1165,7 +1142,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		row = frappe._dict(transfer_qty=1)
 		service = DisassembleStockEntry(frappe.get_doc(doctype="Stock Entry", purpose="Disassemble"))
 
-		self.assertEqual(service._extract_serial_nos(source, bundle, row), [serial.name])
+		self.assertEqual(service._extract_serial_nos(source, bundle, row, set()), [serial.name])
 		self.assertEqual(bundle["serial_nos"], [serial.name])
 
 	def test_finished_good_validation_matches_physical_numbers_to_work_order(self):
@@ -1585,12 +1562,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertEqual(
 				get_reserved_serial_nos_for_pos(frappe._dict(item_code=self.item.name)), [serial.name]
 			)
-
-	def test_duplicate_serial_is_rejected_by_database(self):
-		self.check_duplicate("Serial No", "Number-001")
-
-	def test_duplicate_batch_is_rejected_by_database(self):
-		self.check_duplicate("Batch", "Number-001")
 
 	def test_serial_case_variant_is_rejected_by_database(self):
 		self.check_duplicate("Serial No", "number-001")

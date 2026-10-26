@@ -76,7 +76,78 @@ class TestDimensionWiseAccountsBalance(ERPNextTestSuite):
 		self.assertEqual(rows[expense_parent][column], 300.0)
 		self.assertEqual(rows[cash_parent][column], -300.0)
 
+	def test_user_sees_only_permitted_dimension_values(self):
+		permitted = self._make_cost_center("Test Dimension Permitted CC")
+		for cost_center, amount in ((permitted, 400), ("Main - _TC", 1000)):
+			make_journal_entry(
+				self.expense_account, self.cash_account, amount, cost_center=cost_center, submit=True
+			)
+		user = make_user_restricted_to_cost_center(permitted)
+
+		frappe.set_user(user)
+		try:
+			columns, data = execute(self._filters())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertNotIn(frappe.scrub("Main - _TC"), [column["fieldname"] for column in columns])
+		rows = {row["account"]: row for row in data}
+		self.assertEqual(rows[self.expense_account]["total"], 400)
+
+	def test_finance_book_filter(self):
+		cost_center = self._make_cost_center("Test Dimension Finance Book CC")
+		finance_book = make_finance_book("_Test Dimension Finance Book")
+		jv = make_journal_entry(
+			self.expense_account, self.cash_account, 500, cost_center=cost_center, save=False
+		)
+		jv.finance_book = finance_book
+		jv.submit()
+		column = frappe.scrub(cost_center)
+
+		def balance(**filters):
+			data = execute(self._filters(**filters))[1]
+			return next((row[column] for row in data if row["account"] == self.expense_account), 0)
+
+		self.assertEqual(balance(), 0)
+		self.assertEqual(balance(finance_book=finance_book), 500)
+
+	def test_period_closing_entries_are_excluded(self):
+		cost_center = self._make_cost_center("Test Dimension Closing CC")
+		make_journal_entry(self.expense_account, self.cash_account, 700, cost_center=cost_center, submit=True)
+		closing = make_journal_entry(
+			self.cash_account, self.expense_account, 700, cost_center=cost_center, submit=True
+		)
+		# stands in for the closing voucher's reversal of the year's P&L
+		frappe.db.set_value(
+			"GL Entry", {"voucher_no": closing.name}, "voucher_type", "Period Closing Voucher"
+		)
+
+		data = execute(self._filters())[1]
+		row = next(row for row in data if row["account"] == self.expense_account)
+		self.assertEqual(row[frappe.scrub(cost_center)], 700)
+
 	def test_requires_fiscal_year(self):
 		filters = self._filters()
 		filters.pop("fiscal_year")
 		self.assertRaises(frappe.ValidationError, execute, filters)
+
+
+def make_user_restricted_to_cost_center(cost_center):
+	user = "test_dimension_wise_balance@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Dimension-wise Balance",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Cost Center", cost_center, user)
+	return user
+
+
+def make_finance_book(name):
+	if not frappe.db.exists("Finance Book", name):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": name}).insert()
+	return name

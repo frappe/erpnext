@@ -9,6 +9,7 @@ from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_asset_disposal_values,
 	get_last_depreciation_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_on_disposal,
@@ -84,6 +85,22 @@ class FixedAssetService:
 			self._restore_asset()
 
 		self._update_asset()
+
+	def set_asset_disposal_values(self) -> None:
+		"""Store the asset values the sale or return entries are built from, so a repost reproduces them."""
+		if self.doc.is_internal_transfer():
+			return
+
+		for item in self.doc.get("items"):
+			if item.is_fixed_asset and item.asset:
+				asset = frappe.get_doc("Asset", item.asset)
+				values = get_asset_disposal_values(asset, item.finance_book)
+				item.db_set(
+					{
+						"asset_value_after_depreciation": values["value_after_depreciation"],
+						"asset_gross_value": values["gross_asset_value"],
+					}
+				)
 
 	def split_asset_based_on_sale_qty(self) -> None:
 		asset_qty_map = self._get_asset_qty()

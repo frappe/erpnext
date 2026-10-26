@@ -12,10 +12,6 @@ from erpnext.buying.report.subcontracted_item_to_be_received.test_subcontracted_
 )
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_subcontracting_order,
-	make_bom_for_subcontracted_items,
-	make_raw_materials,
-	make_service_items,
-	make_subcontracted_items,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -25,12 +21,6 @@ FG_ITEM = "Subcontracted Item SA7"
 class TestSubcontractOrderSummary(ERPNextTestSuite):
 	"""The report lists Subcontracting Order finished items with their ordered and
 	received quantities within the transaction-date window."""
-
-	def setUp(self):
-		make_subcontracted_items()
-		make_raw_materials()
-		make_service_items()
-		make_bom_for_subcontracted_items()
 
 	def run_report(self, **extra):
 		filters = frappe._dict(

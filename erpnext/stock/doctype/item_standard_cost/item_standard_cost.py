@@ -384,13 +384,8 @@ def clear_item_standard_rate_cache():
 
 
 def get_purchase_price_variance_account(item_code, company):
-	"""Resolve the Purchase Price Variance account for a Standard Cost item: the per-company
-	Item Default override if set, otherwise the Company default."""
-	account = frappe.db.get_value(
-		"Item Default",
-		{"parent": item_code, "company": company},
-		"purchase_price_variance_account",
-	)
+	"""Resolve the Purchase Price Variance account for a Standard Cost item."""
+	account = get_variance_account(item_code, company, "purchase_price_variance_account")
 
 	if not account:
 		account = frappe.get_cached_value("Company", company, "default_purchase_price_variance_account")
@@ -406,14 +401,8 @@ def get_purchase_price_variance_account(item_code, company):
 
 
 def get_manufacturing_variance_account(item_code, company):
-	"""Resolve the Manufacturing Variance account for a Standard Cost item: the per-company Item Default
-	override if set, otherwise the Company default. During Manufacture/Repack this account absorbs the
-	difference between the consumed (raw material + additional) cost and the finished good's standard rate."""
-	account = frappe.db.get_value(
-		"Item Default",
-		{"parent": item_code, "company": company},
-		"manufacturing_variance_account",
-	)
+	"""Resolve the Manufacturing Variance account for a Standard Cost item."""
+	account = get_variance_account(item_code, company, "manufacturing_variance_account")
 
 	if not account:
 		account = frappe.get_cached_value("Company", company, "default_manufacturing_variance_account")
@@ -426,6 +415,20 @@ def get_manufacturing_variance_account(item_code, company):
 		)
 
 	return account
+
+
+def get_variance_account(item_code, company, fieldname):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+	from erpnext.stock.doctype.item.item import get_item_defaults
+
+	for defaults in (
+		get_item_defaults(item_code, company),
+		get_item_group_defaults(item_code, company),
+		get_brand_defaults(item_code, company),
+	):
+		if account := defaults.get(fieldname):
+			return account
 
 
 @frappe.whitelist()

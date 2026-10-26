@@ -1,4 +1,4 @@
-.customer-overview {
+.party-overview {
 	.co-period,
 	.co-subtitle,
 	.co-note,
@@ -97,17 +97,12 @@
 		margin-top: 0;
 	}
 
-	.co-chart {
-		margin: 0 calc(-1 * var(--padding-sm));
-	}
-
-	.co-panel .co-chart,
-	.co-panel .co-age-chart {
+	.co-panel .co-chart {
 		padding-top: var(--margin-md);
 	}
 
-	.co-age-chart {
-		margin-top: var(--margin-sm);
+	.co-two-col .co-panel > .co-chart:last-child {
+		margin-top: auto;
 	}
 
 	.co-loading .co-chart,
@@ -126,6 +121,7 @@
 
 	.co-empty {
 		display: flex;
+		flex: 1;
 		align-items: center;
 		justify-content: center;
 		font-size: var(--text-sm);

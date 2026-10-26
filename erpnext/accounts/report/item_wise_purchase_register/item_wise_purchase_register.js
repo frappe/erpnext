@@ -56,7 +56,15 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		if (column.fieldname === "purchase_receipt" && value && value.includes(", ")) {
+			// an order item received in parts lists every receipt; link each one separately
+			value = value
+				.split(", ")
+				.map((receipt) => default_formatter(receipt, row, column, data))
+				.join(", ");
+		} else {
+			value = default_formatter(value, row, column, data);
+		}
 		if (data && data.bold) {
 			value = value.bold();
 		}

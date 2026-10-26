@@ -537,3 +537,316 @@ class TestSerialNoAndBatchTraceability(ERPNextTestSuite):
 			fg_targets,
 			"SE",
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_raw_batches_show_their_own_consumed_qty(self):
+		raw_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRQ-.#####",
+			}
+		).name
+		fg_item = self.make_fg_item(batch=True)
+		raw_batches = []
+		for qty in (4, 6):
+			receipt = make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=qty, rate=100)
+			raw_batches.append(
+				frappe.db.get_value(
+					"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "batch_no"
+				)
+			)
+
+		repack = self.make_repack([(raw_item, 10, None)], [(fg_item, 2, None)])
+		repack.reload()
+		fg_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": repack.items[1].serial_and_batch_bundle}, "batch_no"
+		)
+
+		rows = self.run_report(item_code=fg_item, batches=[fg_batch], traceability_direction="Backward")
+
+		self.assertEqual(
+			sorted((row["batch_no"], row["qty"]) for row in rows if row.get("indent") == 1),
+			sorted([(raw_batches[0], 4), (raw_batches[1], 6)]),
+		)
+
+	def test_batch_filter_lists_serial_nos_of_a_serial_and_batch_item(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TRSB-.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRSBB-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=2, rate=100)
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": receipt.items[0].serial_and_batch_bundle},
+			fields=["serial_no", "batch_no"],
+		)
+
+		rows = self.run_report(
+			item_code=item, batches=[entries[0].batch_no], traceability_direction="Backward"
+		)
+
+		self.assertEqual(
+			sorted(row["serial_no"] for row in rows if row.get("serial_no")),
+			sorted(e.serial_no for e in entries),
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_backward_trace_uses_the_entry_that_produced_the_batch(self):
+		raw_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRW-.#####",
+			}
+		).name
+		fg_item = self.make_fg_item(batch=True)
+		make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=4, rate=100)
+		repack = self.make_repack([(raw_item, 4, None)], [(fg_item, 2, None)])
+		repack.reload()
+		fg_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": repack.items[1].serial_and_batch_bundle}, "batch_no"
+		)
+		frappe.db.set_value(
+			"Batch", fg_batch, {"reference_doctype": "Work Order", "reference_name": "WO-0001"}
+		)
+
+		rows = self.run_report(item_code=fg_item, batches=[fg_batch], traceability_direction="Backward")
+
+		self.assertEqual(
+			[(row["item_code"], row["qty"]) for row in rows if row.get("indent") == 1], [(raw_item, 4)]
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}
+	)
+	def test_forward_trace_follows_the_finished_good_to_the_customer(self):
+		raw_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRF-.#####",
+			}
+		).name
+		fg_item = self.make_fg_item(batch=True)
+		receipt = make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=4, rate=100)
+		raw_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "batch_no"
+		)
+		repack = self.make_repack([(raw_item, 4, None)], [(fg_item, 2, None)])
+		repack.reload()
+		fg_batch = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": repack.items[1].serial_and_batch_bundle}, "batch_no"
+		)
+		delivery_note = create_delivery_note(
+			item_code=fg_item,
+			qty=1,
+			batch_no=fg_batch,
+			use_serial_batch_fields=1,
+			warehouse="Finished Goods - _TC",
+			customer="_Test Customer",
+			company="_Test Company",
+		)
+
+		rows = self.run_report(item_code=raw_item, batches=[raw_batch], traceability_direction="Forward")
+
+		self.assertIn(
+			(delivery_note.name, "_Test Customer"),
+			[(row.get("reference_name"), row.get("customer")) for row in rows],
+		)
+
+	def make_batch_item(self, prefix):
+		return make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{prefix}-.#####",
+			}
+		).name
+
+	def get_batch(self, entry, idx):
+		return frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": entry.items[idx].serial_and_batch_bundle}, "batch_no"
+		)
+
+	def make_batch_repack(self, raw, finished_good, qty, source="Stores - _TC"):
+		repack = frappe.new_doc("Stock Entry")
+		repack.update({"purpose": "Repack", "stock_entry_type": "Repack", "company": "_Test Company"})
+		for (item_code, batch_no, item_qty), warehouse in (
+			(raw, "s_warehouse"),
+			(finished_good, "t_warehouse"),
+		):
+			repack.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": item_qty,
+					warehouse: source if warehouse == "s_warehouse" else "Finished Goods - _TC",
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
+					"basic_rate": 100,
+				},
+			)
+		repack.insert()
+		repack.submit()
+		repack.reload()
+		return repack
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 1})
+	def test_backward_trace_scales_raw_qty_of_a_partly_used_batch(self):
+		raw_item, middle_item, fg_item = (self.make_batch_item(p) for p in ("TRS-R", "TRS-M", "TRS-F"))
+		raw_batch = self.get_batch(
+			make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=20, rate=100), 0
+		)
+		first = self.make_batch_repack((raw_item, raw_batch, 20), (middle_item, None, 10), 10)
+		middle_batch = self.get_batch(first, 1)
+		second = self.make_batch_repack(
+			(middle_item, middle_batch, 2), (fg_item, None, 2), 2, source="Finished Goods - _TC"
+		)
+
+		rows = self.run_report(
+			item_code=fg_item, batches=[self.get_batch(second, 1)], traceability_direction="Backward"
+		)
+
+		self.assertEqual(
+			[(row["item_code"], row["indent"], row["qty"]) for row in rows if row.get("indent")],
+			[(middle_item, 1, 2), (raw_item, 2, 4)],
+		)
+
+	def test_forward_trace_gives_customers_to_every_entry_making_the_batch(self):
+		raw_item, fg_item = self.make_batch_item("TRB-R"), self.make_batch_item("TRB-F")
+		raw_batch = self.get_batch(
+			make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=4, rate=100), 0
+		)
+		fg_batch = self.get_batch(self.make_batch_repack((raw_item, raw_batch, 2), (fg_item, None, 2), 2), 1)
+		self.make_batch_repack((raw_item, raw_batch, 2), (fg_item, fg_batch, 2), 2)
+		delivery_note = create_delivery_note(
+			item_code=fg_item,
+			qty=1,
+			batch_no=fg_batch,
+			use_serial_batch_fields=1,
+			warehouse="Finished Goods - _TC",
+			customer="_Test Customer",
+			company="_Test Company",
+		)
+
+		rows = self.run_report(item_code=raw_item, batches=[raw_batch], traceability_direction="Forward")
+
+		self.assertEqual(
+			[row.get("customer") for row in rows if row.get("reference_name") == delivery_note.name],
+			["_Test Customer", "_Test Customer"],
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 1})
+	def test_backward_trace_sums_every_output_row_of_the_batch(self):
+		raw_item, fg_item = self.make_batch_item("TRO-R"), self.make_batch_item("TRO-F")
+		raw_batch = self.get_batch(
+			make_stock_entry(item_code=raw_item, to_warehouse="Stores - _TC", qty=10, rate=100), 0
+		)
+		fg_batch = (
+			frappe.get_doc({"doctype": "Batch", "item": fg_item, "batch_id": frappe.generate_hash(length=10)})
+			.insert()
+			.name
+		)
+		repack = frappe.new_doc("Stock Entry")
+		repack.update({"purpose": "Repack", "stock_entry_type": "Repack", "company": "_Test Company"})
+		rows = [(raw_item, raw_batch, 10, "s_warehouse", "Stores - _TC")]
+		rows += [(fg_item, fg_batch, qty, "t_warehouse", "Finished Goods - _TC") for qty in (4, 6)]
+		for item_code, batch_no, qty, field, warehouse in rows:
+			repack.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": qty,
+					field: warehouse,
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
+					"set_basic_rate_manually": 1,
+					"basic_rate": 100,
+				},
+			)
+		repack.insert()
+		repack.submit()
+
+		data = self.run_report(item_code=fg_item, batches=[fg_batch], traceability_direction="Backward")
+
+		self.assertEqual(
+			[(row["item_code"], row["qty"]) for row in data if row.get("item_code")],
+			[(fg_item, 10), (raw_item, 10)],
+		)
+
+	def test_backward_trace_reaches_materials_of_an_intermediate_batch(self):
+		raw, intermediate, finished_good = (self.make_batch_item(p) for p in ("TRL", "TRM", "TRN"))
+		receipt = make_stock_entry(item_code=raw, to_warehouse="Stores - _TC", qty=4, rate=100)
+		first = self.make_batch_repack((raw, self.get_batch(receipt, 0), 4), (intermediate, None, 2), 2)
+		intermediate_batch = self.get_batch(first, 1)
+		frappe.db.set_value(
+			"Batch", intermediate_batch, {"reference_doctype": "Work Order", "reference_name": "WO-0002"}
+		)
+		second = self.make_batch_repack(
+			(intermediate, intermediate_batch, 2), (finished_good, None, 1), 1, source="Finished Goods - _TC"
+		)
+
+		rows = self.run_report(
+			item_code=finished_good,
+			batches=[self.get_batch(second, 1)],
+			traceability_direction="Backward",
+		)
+
+		self.assertIn(raw, [row["item_code"] for row in rows if row.get("indent") == 2])
+
+	def test_backward_trace_of_a_batch_repacked_into_itself(self):
+		item = self.make_batch_item("TRP")
+		receipt = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=4, rate=100)
+		batch = self.get_batch(receipt, 0)
+		self.make_batch_repack((item, batch, 4), (item, batch, 4), 4)
+
+		rows = self.run_report(item_code=item, batches=[batch], traceability_direction="Backward")
+
+		self.assertIn(receipt.name, [row.get("reference_name") for row in rows])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_map_raw_materials_to_finished_goods": 1})
+	def test_backward_trace_splits_qty_across_entries_that_made_a_batch(self):
+		raw, intermediate, finished_good = (self.make_batch_item(p) for p in ("TRS", "TRT", "TRU"))
+		receipt = make_stock_entry(item_code=raw, to_warehouse="Stores - _TC", qty=10, rate=100)
+		raw_batch = self.get_batch(receipt, 0)
+		intermediate_batch = (
+			frappe.get_doc(
+				{"doctype": "Batch", "item": intermediate, "batch_id": frappe.generate_hash(length=10)}
+			)
+			.insert()
+			.name
+		)
+		makers = [
+			self.make_batch_repack((raw, raw_batch, qty), (intermediate, intermediate_batch, qty), qty).name
+			for qty in (6, 4)
+		]
+		consumer = self.make_batch_repack(
+			(intermediate, intermediate_batch, 5), (finished_good, None, 5), 5, source="Finished Goods - _TC"
+		)
+
+		rows = self.run_report(
+			item_code=finished_good,
+			batches=[self.get_batch(consumer, 1)],
+			traceability_direction="Backward",
+		)
+
+		intermediate_rows = {
+			row["reference_name"]: row["qty"] for row in rows if row.get("item_code") == intermediate
+		}
+		self.assertEqual(intermediate_rows, {makers[0]: 3, makers[1]: 2})
+		self.assertEqual(sorted(row["qty"] for row in rows if row.get("item_code") == raw), [2, 3])

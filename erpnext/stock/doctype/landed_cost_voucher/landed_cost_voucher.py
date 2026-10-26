@@ -15,6 +15,7 @@ from frappe.utils import cint, flt
 import erpnext
 from erpnext import is_perpetual_inventory_enabled
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -352,7 +353,12 @@ class LandedCostVoucher(Document):
 			item.applicable_charges = flt(flt(item.get(based_on_field)) * charges_per_unit, precision)
 
 		diff = flt(self.total_taxes_and_charges) - sum(flt(item.applicable_charges) for item in items)
-		absorb_rounding_difference(items, flt(diff, precision), precision, self.total_taxes_and_charges)
+		absorb_rounding_difference(
+			self.get_rows_following_the_basis_total(),
+			flt(diff, precision),
+			precision,
+			self.total_taxes_and_charges,
+		)
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
@@ -387,21 +393,35 @@ class LandedCostVoucher(Document):
 				)
 			)
 
-		absorb_rounding_difference(self.items, diff, precision, self.total_taxes_and_charges)
+		absorb_rounding_difference(
+			self.get_rows_following_the_basis_total(), diff, precision, self.total_taxes_and_charges
+		)
 		self.validate_charges_follow_total_sign()
 
+	def get_charge_sign_basis(self):
+		based_on = frappe.scrub(self.distribute_charges_based_on)
+		if based_on == "distribute_manually":
+			based_on = "amount"
+
+		basis_sign = -1 if sum(flt(row.get(based_on)) for row in self.get("items")) < 0 else 1
+		return based_on, basis_sign
+
+	def get_rows_following_the_basis_total(self):
+		based_on, basis_sign = self.get_charge_sign_basis()
+		return [row for row in self.get("items") if flt(row.get(based_on)) * basis_sign >= 0]
+
 	def validate_charges_follow_total_sign(self):
-		sign = -1 if flt(self.total_taxes_and_charges) < 0 else 1
+		total_sign = -1 if flt(self.total_taxes_and_charges) < 0 else 1
+		based_on, basis_sign = self.get_charge_sign_basis()
 		for row in self.get("items"):
-			if flt(row.applicable_charges) * sign >= 0:
+			expected_sign = total_sign * (-1 if flt(row.get(based_on)) * basis_sign < 0 else 1)
+			if flt(row.applicable_charges) * expected_sign >= 0:
 				continue
 
 			message = (
 				_("Row {0}: Applicable Charges for Item {1} cannot be negative")
-				if sign > 0
-				else _(
-					"Row {0}: Applicable Charges for Item {1} cannot be positive when Total Taxes and Charges are negative"
-				)
+				if expected_sign > 0
+				else _("Row {0}: Applicable Charges for Item {1} cannot be positive")
 			)
 			frappe.throw(message.format(row.idx, frappe.bold(row.item_code)))
 
@@ -435,10 +455,20 @@ class LandedCostVoucher(Document):
 		self.validate_applicable_charges_for_item()
 		self.update_landed_cost()
 		self.update_claimed_landed_cost()
+		self.update_project_purchase_cost()
 
 	def on_cancel(self):
 		self.update_landed_cost()
 		self.update_claimed_landed_cost()
+		self.update_project_purchase_cost()
+
+	def update_project_purchase_cost(self):
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") != "Each Transaction":
+			return
+
+		receipts = {}
+		projects = {self.get_receipt_dimension(receipts, item, "project") for item in self.get("items")}
+		update_purchase_cost(projects - {None, ""})
 
 	def update_claimed_landed_cost(self):
 		for vendor_invoice in {row.vendor_invoice for row in self.vendor_invoices}:

@@ -26,12 +26,18 @@ import erpnext
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.services.gl_validator import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
-from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import get_closing_entry_for_closed_period
+from erpnext.projects.doctype.project.project import update_consumed_material_cost_for_vouchers
+from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import (
+	get_closing_entry_for_closed_period,
+	mark_closing_entries_outdated,
+)
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_item_wh_first_reposted_from_reposting_data,
 	get_items_to_be_repost,
+	get_reposting_data,
+	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -99,6 +105,7 @@ class RepostItemValuation(Document):
 		self.validate_repost_only_accounting_ledgers()
 		self.set_company()
 		self.validate_update_stock()
+		self.validate_recalculate_valuation_rate()
 		self.validate_period_closing_voucher()
 		self.validate_later_vouchers_in_closed_period()
 		self.set_status(write=False)
@@ -143,6 +150,29 @@ class RepostItemValuation(Document):
 					"Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
 				).format(get_link_to_form(self.voucher_type, self.voucher_no))
 				frappe.throw(msg)
+
+	def validate_recalculate_valuation_rate(self):
+		if self.recalculate_valuation_rate and not self.can_recalculate_valuation_rate():
+			frappe.throw(
+				_(
+					"Recalculate Valuation Rate is only allowed for a Purchase Receipt, a Purchase Invoice with Update Stock or a Stock Entry with no row that has both a Source and Target Warehouse"
+				)
+			)
+
+	def can_recalculate_valuation_rate(self):
+		if self.based_on != "Transaction":
+			return False
+
+		if self.voucher_type == "Purchase Receipt":
+			return True
+
+		if self.voucher_type == "Purchase Invoice":
+			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
+
+		if self.voucher_type == "Stock Entry":
+			return not is_transfer_stock_entry(self.voucher_no)
+
+		return False
 
 	def validate_recreate_stock_ledgers(self):
 		if not self.recreate_stock_ledgers:
@@ -350,6 +380,8 @@ class RepostItemValuation(Document):
 		        These flags are useful for asserting real time behaviour like quantity updates.
 		"""
 
+		mark_closing_entries_outdated(self.company, self.posting_date)
+
 		if not frappe.in_test:
 			return
 		if self.flags.dont_run_in_test or frappe.flags.dont_execute_stock_reposts:
@@ -370,6 +402,7 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def restart_reposting(self):
+		self.load_from_db()
 		self.check_permission("write")
 		if self.docstatus != 1 or self.status != "Failed":
 			frappe.throw(_("Only a submitted Repost Item Valuation with status Failed can be restarted"))
@@ -442,6 +475,10 @@ class RepostItemValuation(Document):
 
 	def get_repost_started_at(self):
 		return self.flags.repost_started_at or now()
+
+	def get_saved_repost_started_at(self):
+		if self.reposting_data_file:
+			return get_reposting_data(self.reposting_data_file).get("repost_started_at")
 
 	def skip_reposts_covered_by_dependents(self):
 		if self.repost_only_accounting_ledgers:
@@ -636,8 +673,9 @@ def repost(doc):
 		# This is to avoid TooManyWritesError in case of large reposts
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
-		doc.flags.repost_started_at = now()
+		doc.flags.repost_started_at = doc.get_saved_repost_started_at() or now()
 		doc.set_status("In Progress")
+		mark_closing_entries_outdated(doc.company, doc.posting_date)
 		if not frappe.in_test:
 			frappe.db.commit()
 
@@ -650,10 +688,13 @@ def repost(doc):
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
 
-		if not doc.repost_only_accounting_ledgers:
+		if doc.repost_only_accounting_ledgers:
+			repost_gl_entries(doc)
+		else:
 			repost_sl_entries(doc)
-
-		repost_gl_entries(doc)
+			vouchers = get_reposted_vouchers(doc)
+			repost_gl_entries(doc, vouchers)
+			update_consumed_material_cost_for_vouchers(vouchers)
 
 		doc.skip_reposts_covered_by_dependents()
 
@@ -742,7 +783,7 @@ def repost_sl_entries(doc):
 		)
 
 
-def repost_gl_entries(doc):
+def repost_gl_entries(doc, transactions: list | None = None):
 	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 		return
 
@@ -756,11 +797,8 @@ def repost_gl_entries(doc):
 		)
 		return
 
-	# directly modified transactions
-	directly_dependent_transactions = _get_directly_dependent_vouchers(doc)
-	repost_affected_transaction = get_affected_transactions(doc)
-
-	transactions = directly_dependent_transactions + list(repost_affected_transaction)
+	if transactions is None:
+		transactions = get_reposted_vouchers(doc)
 
 	# handle stock delivered but not billed ledger entries
 	if frappe.get_cached_value("Company", doc.company, "enable_stock_delivered_but_not_billed"):
@@ -787,6 +825,10 @@ def repost_gl_entries(doc):
 			doc.company,
 			repost_doc=doc,
 		)
+
+
+def get_reposted_vouchers(doc):
+	return _get_directly_dependent_vouchers(doc) + list(get_affected_transactions(doc))
 
 
 def _get_directly_dependent_vouchers(doc):

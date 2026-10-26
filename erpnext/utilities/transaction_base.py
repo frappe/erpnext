@@ -150,11 +150,15 @@ class TransactionBase(StatusUpdater):
 
 		if self.doctype in buying_doctypes:
 			action, role_allowed_to_override = frappe.get_cached_value(
-				"Buying Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+				"Buying Settings",
+				"Buying Settings",
+				["maintain_same_rate_action", "role_to_override_stop_action"],
 			)
 		else:
 			action, role_allowed_to_override = frappe.get_cached_value(
-				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+				"Selling Settings",
+				"Selling Settings",
+				["maintain_same_rate_action", "role_to_override_stop_action"],
 			)
 
 		stop_actions = []
@@ -371,6 +375,9 @@ class TransactionBase(StatusUpdater):
 			):
 				item_obj.set(fieldname, None)
 
+			if item_obj.get("mapped_additional_discount_amount"):
+				self.drop_mapped_discount(item_obj)
+
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
 
@@ -527,7 +534,7 @@ class TransactionBase(StatusUpdater):
 		# Field order precedance
 		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
 		if item_obj.parenttype in ["Sales Order", "Quotation"] and item_obj.blanket_order_rate:
-			effective_item_rate = item_obj.blanket_order_rate
+			effective_item_rate = flt(item_obj.blanket_order_rate) * (flt(item_obj.conversion_factor) or 1)
 
 		if item_obj.margin_type == "Percentage":
 			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (
@@ -624,17 +631,21 @@ def delete_events(ref_type, ref_name):
 		frappe.delete_doc("Event", events, for_reload=True)
 
 
-def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
-	if isinstance(qty_fields, str):
-		qty_fields = [qty_fields]
-
-	distinct_uoms = tuple(set(uom for uom in (d.get(uom_field) for d in doc.get_all_children()) if uom))
-	integer_uoms = set(
+def get_whole_number_uoms(uoms):
+	distinct_uoms = tuple(set(uom for uom in uoms if uom))
+	return set(
 		d[0]
 		for d in frappe.db.get_values(
 			"UOM", (("name", "in", distinct_uoms), ("must_be_whole_number", "=", 1)), cache=True
 		)
 	)
+
+
+def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
+	if isinstance(qty_fields, str):
+		qty_fields = [qty_fields]
+
+	integer_uoms = get_whole_number_uoms(d.get(uom_field) for d in doc.get_all_children())
 
 	if not integer_uoms:
 		return

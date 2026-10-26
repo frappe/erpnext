@@ -10,6 +10,7 @@ from frappe.utils import add_days, cint, formatdate, get_datetime, getdate, nowd
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
 
 from .mapper import (
 	get_ordered_items,
@@ -172,6 +173,7 @@ class Quotation(SellingController):
 		self.set_default_valid_till()
 		self.validate_valid_till()
 		self.validate_revision()
+		self.validate_lead()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -194,6 +196,10 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_lead(self):
+		if self.quotation_to == "Lead" and self.party_name and self.is_new() and not self.amended_from:
+			validate_lead_is_enabled(self.party_name, self.doctype)
 
 	def validate_revision(self):
 		if not self.revision_of:
@@ -253,6 +259,7 @@ class Quotation(SellingController):
 		If permitted in settings and any item has 0 qty, the SO has unit price items.
 		"""
 		if not frappe.get_single_value("Selling Settings", "allow_zero_qty_in_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -344,6 +351,9 @@ class Quotation(SellingController):
 		self.check_permission("write")
 
 		if not (self.is_fully_ordered() or self.is_partially_ordered() or self.has_ordered_versions):
+			if not lost_reasons_list:
+				frappe.throw(_("Please select at least one Lost Reason"))
+
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			self.db_set({"status": "Lost", "is_active": 1})
@@ -495,6 +505,7 @@ class Quotation(SellingController):
 		return print_lst
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.valid_till = None
 
 	def get_rows_with_alternatives(self):

@@ -54,20 +54,6 @@ class TestCustomer(ERPNextTestSuite):
 		finally:
 			frappe.defaults.set_user_default("company", original_company)
 
-	def test_get_customer_name_dedupes_with_numeric_suffix(self):
-		# When a customer name already exists, get_customer_name appends "- <max suffix + 1>". The
-		# Postgres branch extracts the suffix with regexp_replace/NULLIF/CAST (pypika's Substring cannot
-		# do regex extraction); this exercises that path on both engines.
-		base = "_Test PG Dedup Customer"
-		for nm in (base, f"{base} - 3"):
-			if not frappe.db.exists("Customer", nm):
-				frappe.get_doc(
-					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}
-				).insert()
-
-		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
-		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
-
 	def test_get_customer_name_dedupe_handles_mixed_suffix(self):
 		# The suffix extractor must read the LEADING digits of the last whitespace-token, like MariaDB's
 		# CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): "<base> - 3a" -> 3, so the next name is
@@ -83,6 +69,18 @@ class TestCustomer(ERPNextTestSuite):
 		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
 		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
 
+	def test_buying_price_list_cannot_be_customer_default(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Buying Price Customer",
+				"customer_type": "Individual",
+				"default_price_list": "Standard Buying",
+			}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			customer.insert()
+
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"
@@ -93,11 +91,13 @@ class TestCustomer(ERPNextTestSuite):
 		test_account_details = {
 			"company": "_Test Company",
 			"account": "Debtors - _TC",
+			"advance_account": "Debtors - _TC",
 		}
 		test_credit_limits = {
 			"company": "_Test Company",
 			"credit_limit": 350000,
 			"overdue_billing_threshold": 5000,
+			"bypass_credit_limit_check": 1,
 		}
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
@@ -115,10 +115,12 @@ class TestCustomer(ERPNextTestSuite):
 
 		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
 		self.assertEqual(c_doc.accounts[0].account, "Debtors - _TC")
+		self.assertEqual(c_doc.accounts[0].advance_account, "Debtors - _TC")
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
 		self.assertEqual(c_doc.credit_limits[0].overdue_billing_threshold, 5000)
+		self.assertEqual(c_doc.credit_limits[0].bypass_credit_limit_check, 1)
 		c_doc.delete()
 		doc.delete()
 

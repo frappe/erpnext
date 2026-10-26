@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, Sum
+from frappe.query_builder.functions import Coalesce, Round, Sum
 from frappe.utils import cstr, flt, nowdate, nowtime
 
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
@@ -164,7 +164,7 @@ def get_indented_qty(item_code, warehouse):
 	)
 
 	pending_qty = mr_item.stock_qty - mr_item.ordered_qty
-	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer"]
+	inward_types = ["Purchase", "Manufacture", "Customer Provided", "Material Transfer", "Subcontracting"]
 	quantities = (
 		frappe.qb.from_(mr_item)
 		.inner_join(mr)
@@ -184,25 +184,34 @@ def get_ordered_qty(item_code, warehouse):
 	"""Return total pending ordered quantity for an item in a warehouse.
 	Includes outstanding quantities from Purchase Orders and Subcontracting Orders"""
 
-	purchase_order_qty = get_purchase_order_qty(item_code, warehouse)
-	subcontracting_order_qty = get_subcontracting_order_qty(item_code, warehouse)
+	precision = get_whole_number_qty_precision(item_code)
+	purchase_order_qty = get_purchase_order_qty(item_code, warehouse, precision)
+	subcontracting_order_qty = get_subcontracting_order_qty(item_code, warehouse, precision)
 
 	return flt(purchase_order_qty) + flt(subcontracting_order_qty)
 
 
-def get_purchase_order_qty(item_code, warehouse):
+def get_whole_number_qty_precision(item_code):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	if stock_uom and frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"):
+		return frappe.get_precision("Bin", "ordered_qty")
+
+
+def get_purchase_order_qty(item_code, warehouse, precision=None):
 	PurchaseOrder = frappe.qb.DocType("Purchase Order")
 	PurchaseOrderItem = frappe.qb.DocType("Purchase Order Item")
+
+	pending_qty = (
+		PurchaseOrderItem.qty - PurchaseOrderItem.received_qty
+	) * PurchaseOrderItem.conversion_factor
+	if precision is not None:
+		pending_qty = Round(pending_qty, precision)
 
 	purchase_order_qty = (
 		frappe.qb.from_(PurchaseOrderItem)
 		.join(PurchaseOrder)
 		.on(PurchaseOrderItem.parent == PurchaseOrder.name)
-		.select(
-			Sum(
-				(PurchaseOrderItem.qty - PurchaseOrderItem.received_qty) * PurchaseOrderItem.conversion_factor
-			)
-		)
+		.select(Sum(pending_qty))
 		.where(
 			(PurchaseOrderItem.item_code == item_code)
 			& (PurchaseOrderItem.warehouse == warehouse)
@@ -218,20 +227,21 @@ def get_purchase_order_qty(item_code, warehouse):
 	return purchase_order_qty[0][0] if purchase_order_qty else 0
 
 
-def get_subcontracting_order_qty(item_code, warehouse):
+def get_subcontracting_order_qty(item_code, warehouse, precision=None):
 	SubcontractingOrder = frappe.qb.DocType("Subcontracting Order")
 	SubcontractingOrderItem = frappe.qb.DocType("Subcontracting Order Item")
+
+	pending_qty = (
+		SubcontractingOrderItem.qty - SubcontractingOrderItem.received_qty
+	) * SubcontractingOrderItem.conversion_factor
+	if precision is not None:
+		pending_qty = Round(pending_qty, precision)
 
 	subcontracting_order_qty = (
 		frappe.qb.from_(SubcontractingOrderItem)
 		.join(SubcontractingOrder)
 		.on(SubcontractingOrderItem.parent == SubcontractingOrder.name)
-		.select(
-			Sum(
-				(SubcontractingOrderItem.qty - SubcontractingOrderItem.received_qty)
-				* SubcontractingOrderItem.conversion_factor
-			)
-		)
+		.select(Sum(pending_qty))
 		.where(
 			(SubcontractingOrderItem.item_code == item_code)
 			& (SubcontractingOrderItem.warehouse == warehouse)
@@ -249,13 +259,13 @@ def get_planned_qty(item_code, warehouse):
 	wo = frappe.qb.DocType("Work Order")
 	planned_qty = (
 		frappe.qb.from_(wo)
-		.select(Sum(wo.qty - wo.produced_qty))
+		.select(Sum(wo.qty - wo.produced_qty - wo.process_loss_qty))
 		.where(
 			(wo.production_item == item_code)
 			& (wo.fg_warehouse == warehouse)
 			& wo.status.notin(["Stopped", "Completed", "Closed"])
 			& (wo.docstatus == 1)
-			& (wo.qty > wo.produced_qty)
+			& (wo.qty > wo.produced_qty + wo.process_loss_qty)
 		)
 		.run()
 	)

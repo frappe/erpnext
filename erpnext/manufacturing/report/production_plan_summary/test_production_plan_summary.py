@@ -115,6 +115,88 @@ class TestProductionPlanSummary(ERPNextTestSuite):
 		self.assertEqual(summary.get("produced_qty"), 1)
 		self.assertEqual(summary.get("pending_qty"), 1)
 
+	def test_process_loss_is_not_pending(self):
+		plan = self.make_plan(planned_qty=2)
+		wo = self.make_submitted_work_order(plan, qty=2)
+		self.stock_required_materials(wo)
+
+		se = frappe.get_doc(make_se_from_wo(wo.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.qty = 1
+		se.submit()
+		wo.reload()
+		self.assertEqual((wo.produced_qty, wo.process_loss_qty, wo.status), (1, 1, "Completed"))
+
+		data = self.run_report(plan.name)
+
+		self.assertEqual(self.get_work_order_row(data, "_Test FG Item").get("pending_qty"), 0)
+		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 0)
+
+	def test_replacement_work_order_for_lost_qty_is_not_negative(self):
+		plan = self.make_plan(planned_qty=2)
+		first = self.make_submitted_work_order(plan, qty=2)
+		self.stock_required_materials(first)
+		se = frappe.get_doc(make_se_from_wo(first.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.qty = 1
+		se.submit()
+
+		second = self.make_submitted_work_order(plan, qty=1)
+		self.stock_required_materials(second)
+		frappe.get_doc(make_se_from_wo(second.name, "Manufacture", 1)).submit()
+
+		data = self.run_report(plan.name)
+
+		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 0)
+
+	def test_replacement_work_order_keeps_lost_qty_pending(self):
+		plan = self.make_plan(planned_qty=2)
+		first = self.make_submitted_work_order(plan, qty=2)
+		self.stock_required_materials(first)
+		se = frappe.get_doc(make_se_from_wo(first.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.qty = 1
+		se.submit()
+
+		self.make_submitted_work_order(plan, qty=1)
+
+		data = self.run_report(plan.name)
+
+		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 1)
+
+	def test_split_work_orders_with_lost_qty_leave_nothing_pending(self):
+		plan = self.make_plan(planned_qty=4)
+		first = self.make_submitted_work_order(plan, qty=2)
+		self.stock_required_materials(first)
+		se = frappe.get_doc(make_se_from_wo(first.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.qty = 1
+		se.submit()
+
+		second = self.make_submitted_work_order(plan, qty=2)
+		self.stock_required_materials(second)
+		frappe.get_doc(make_se_from_wo(second.name, "Manufacture", 2)).submit()
+
+		data = self.run_report(plan.name)
+
+		self.assertEqual(self.get_summary_row(data, "_Test FG Item").get("pending_qty"), 0)
+
+	def test_pending_qty_is_rounded_to_the_qty_precision(self):
+		from erpnext.manufacturing.report.production_plan_summary.production_plan_summary import (
+			get_document_row,
+		)
+
+		row = get_document_row(
+			frappe._dict(qty=11.4, produced_qty=11.2, process_loss_qty=0.2, item_code="_Test FG Item"),
+			indent=1,
+		)
+
+		self.assertEqual(row["pending_qty"], 0)
+
 	def test_summary_scoped_to_its_own_plan(self):
 		"""Each plan's report only reports its own work order documents."""
 		plan_a = self.make_plan(planned_qty=2)

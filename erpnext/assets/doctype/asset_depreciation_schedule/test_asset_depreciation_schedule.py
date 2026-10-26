@@ -1363,6 +1363,50 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		frappe.get_doc("Journal Entry", schedule.depreciation_schedule[-1].journal_entry).cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "value_after_depreciation"), 600)
 
+	def test_reschedule_keeps_entered_wdv_rate(self):
+		asset = create_yearly_wdv_asset(rate_of_depreciation=40)
+		finance_book = asset.finance_books[0]
+		self.assertTrue(finance_book.is_rate_of_depreciation_entered)
+
+		adjust_asset_value(asset.name, "2023-03-31", 120000, 110000)
+		self.assertEqual(get_depr_schedule(asset.name, "Active")[0].depreciation_amount, 44000)
+
+		# Finance books saved before the flag existed are judged by their first schedule
+		finance_book.db_set("is_rate_of_depreciation_entered", 0)
+		adjust_asset_value(asset.name, "2023-06-30", 110000, 100000)
+		self.assertEqual(get_depr_schedule(asset.name, "Active")[0].depreciation_amount, 40000)
+		self.assertEqual(
+			frappe.db.get_value(finance_book.doctype, finance_book.name, "rate_of_depreciation"), 40
+		)
+
+	def test_reschedule_recomputes_derived_wdv_rate(self):
+		asset = create_yearly_wdv_asset()
+		finance_book = asset.finance_books[0]
+		self.assertFalse(finance_book.is_rate_of_depreciation_entered)
+
+		rates = []
+		for date, current_value, new_value in (
+			("2023-03-31", 120000, 110000),
+			("2023-06-30", 110000, 100000),
+		):
+			adjust_asset_value(asset.name, date, current_value, new_value)
+			rate = frappe.db.get_value(finance_book.doctype, finance_book.name, "rate_of_depreciation")
+			rates.append(flt(rate, 2))
+
+		self.assertEqual(rates, [38.1, 36.9])
+
+	def test_reschedule_recomputes_derived_wdv_rate_after_salvage_adjustment(self):
+		asset = create_yearly_wdv_asset(expected_value_after_useful_life=12000, salvage_value_percentage=10)
+		finance_book = asset.finance_books[0]
+		initial_rate = finance_book.rate_of_depreciation
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-12-31")
+		current_value = frappe.db.get_value("Asset", asset.name, "value_after_depreciation")
+
+		adjust_asset_value(asset.name, "2024-01-15", current_value, 70000)
+
+		rate = frappe.db.get_value(finance_book.doctype, finance_book.name, "rate_of_depreciation")
+		self.assertNotEqual(flt(rate, 2), flt(initial_rate, 2))
+
 
 def create_monthly_asset(**args):
 	defaults = {
@@ -1390,3 +1434,21 @@ def get_depreciation_entry_count(asset_name: str) -> int:
 		"Journal Entry Account",
 		{"reference_type": "Asset", "reference_name": asset_name, "docstatus": 1, "debit": [">", 0]},
 	)
+
+
+def create_yearly_wdv_asset(**args):
+	defaults = {
+		"net_purchase_amount": 120000,
+		"depreciation_method": "Written Down Value",
+		"expected_value_after_useful_life": 10000,
+		"depreciation_start_date": "2023-12-31",
+		"frequency_of_depreciation": 12,
+		"total_number_of_depreciations": 5,
+	}
+	return create_monthly_asset(**{**defaults, **args})
+
+
+def adjust_asset_value(asset_name: str, date: str, current_value: float, new_value: float):
+	make_asset_value_adjustment(
+		asset=asset_name, date=date, current_asset_value=current_value, new_asset_value=new_value
+	).submit()

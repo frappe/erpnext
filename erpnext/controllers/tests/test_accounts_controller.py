@@ -50,58 +50,15 @@ class TestAccountsController(ERPNextTestSuite):
 		self.cash = "Cash - _TC"
 		self.creditors = "Creditors - _TC"
 		self.creditors_usd = "_Test Payable USD - _TC"
+		self.advance_received_usd = "Advance Received USD - _TC"
+		self.advance_paid_usd = "Advance Paid USD - _TC"
 		self.item = "_Test Item"
 		self.customer = "_Test Customer USD"
 		self.supplier = "_Test Supplier USD"
 		frappe.flags.is_reverse_depr_entry = False
 
-	def create_account(self):
-		# Advance accounts are not in persistent test data — create them on demand.
-		accounts = [
-			frappe._dict(
-				{
-					"attribute_name": "advance_received_usd",
-					"name": "Advance Received USD",
-					"account_type": "Receivable",
-					"account_currency": "USD",
-					"parent_account": "Current Liabilities - " + self.company_abbr,
-				}
-			),
-			frappe._dict(
-				{
-					"attribute_name": "advance_paid_usd",
-					"name": "Advance Paid USD",
-					"account_type": "Payable",
-					"account_currency": "USD",
-					"parent_account": "Current Assets - " + self.company_abbr,
-				}
-			),
-		]
-
-		for x in accounts:
-			if not frappe.db.get_value("Account", filters={"account_name": x.name, "company": self.company}):
-				acc = frappe.new_doc("Account")
-				acc.account_name = x.name
-				acc.parent_account = x.parent_account
-				acc.company = self.company
-				acc.account_currency = x.account_currency
-				acc.account_type = x.account_type
-				acc.insert()
-			else:
-				name = frappe.db.get_value(
-					"Account",
-					filters={"account_name": x.name, "company": self.company},
-					fieldname="name",
-					pluck=True,
-				)
-				acc = frappe.get_doc("Account", name)
-			setattr(self, x.attribute_name, acc.name)
-
 	def setup_advance_accounts_in_party_master(self):
-		self.create_account()
-		company = frappe.get_doc("Company", self.company)
-		company.book_advance_payments_in_separate_party_account = 1
-		company.save()
+		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", 1)
 
 		customer = frappe.get_doc("Customer", self.customer)
 		customer.accounts = []
@@ -125,17 +82,6 @@ class TestAccountsController(ERPNextTestSuite):
 				"advance_account": self.advance_paid_usd,
 			},
 		)
-		supplier.save()
-
-	def remove_advance_accounts_from_party_master(self):
-		company = frappe.get_doc("Company", self.company)
-		company.book_advance_payments_in_separate_party_account = 0
-		company.save()
-		customer = frappe.get_doc("Customer", self.customer)
-		customer.accounts = []
-		customer.save()
-		supplier = frappe.get_doc("Supplier", self.supplier)
-		supplier.accounts = []
 		supplier.save()
 
 	def create_sales_invoice(
@@ -724,7 +670,7 @@ class TestAccountsController(ERPNextTestSuite):
 
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
-		target_warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
+		target_warehouse = "_Test Transfer From - TCP1"
 		warehouse = create_warehouse("_Test Internal Warehouse New 2", company=company)
 		arms_length_price = 40
 
@@ -1950,8 +1896,6 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(len(exc_je_for_si), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
 
-		self.remove_advance_accounts_from_party_master()
-
 	def test_71_advance_payment_against_purchase_invoice_in_foreign_currency(self):
 		"""
 		Supplier advance booked under Asset
@@ -2018,8 +1962,6 @@ class TestAccountsController(ERPNextTestSuite):
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
 		self.assertEqual(len(exc_je_for_pi), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
-
-		self.remove_advance_accounts_from_party_master()
 
 	def test_difference_posting_date_in_pi_and_si(self):
 		self.setup_advance_accounts_in_party_master()
