@@ -5,6 +5,8 @@
 from urllib.parse import urlparse
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.tests import change_settings
 from frappe.utils import nowdate
 
@@ -14,6 +16,7 @@ from erpnext.buying.doctype.request_for_quotation.mapper import (
 )
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 	get_pdf,
+	get_supplier_quotations_data,
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.mapper import make_request_for_quotation as make_rfq
@@ -394,6 +397,199 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
 
 		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+
+	def test_get_supplier_quotations_data(self):
+		rfq = make_request_for_quotation()
+
+		# Before any SQ is created, result must be empty
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(data, [])
+
+		supplier_1 = rfq.suppliers[0].supplier
+		sq1 = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_1)
+		sq1.items[0].rate = 150
+		sq1.save()
+		sq1.submit()
+
+		supplier_2 = rfq.suppliers[1].supplier
+		sq2 = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_2)
+		sq2.items[0].rate = 120
+		sq2.save()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 2)
+
+		suppliers_found = [row.get("supplier") for row in data]
+		self.assertIn(supplier_1, suppliers_found)
+		self.assertIn(supplier_2, suppliers_found)
+
+		sq1_row = next(row for row in data if row.get("supplier") == supplier_1)
+		self.assertEqual(sq1_row.get("item_code"), "_Test Item")
+		self.assertEqual(sq1_row.get("rate"), 150)
+		self.assertEqual(sq1_row.get("qty"), 5)
+		self.assertEqual(sq1_row.get("supplier_quotation"), sq1.name)
+		self.assertEqual(sq1_row.get("request_for_quotation_item"), rfq.items[0].name)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_get_supplier_quotations_data_duplicate_item_code_rows(self):
+		rfq = frappe.new_doc("Request for Quotation")
+		rfq.transaction_date = nowdate()
+		rfq.company = "_Test Company"
+		rfq.message_for_supplier = "Please quote"
+		rfq.append("suppliers", {"supplier": "_Test Supplier"})
+		rfq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"description": "Batch A",
+				"qty": 5,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": nowdate(),
+			},
+		)
+		rfq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"description": "Batch B",
+				"qty": 10,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": nowdate(),
+			},
+		)
+		rfq.insert()
+		rfq.submit()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+		sq.items[0].rate = 100
+		sq.items[1].rate = 90
+		sq.save()
+		sq.submit()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 2)
+		rfq_item_names = {item.name for item in rfq.items}
+		returned_rfq_item_names = {row.get("request_for_quotation_item") for row in data}
+		self.assertEqual(rfq_item_names, returned_rfq_item_names)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_get_supplier_quotations_data_segregated_in_sq_not_in_rfq(self):
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.items[0].rate = 300
+
+		# Manually add a second row for the same item code without request_for_quotation link
+		sq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 5,
+				"rate": 200,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+			},
+		)
+		sq.save()
+		sq.submit()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 2)
+		self.assertEqual(sum(row.get("qty") for row in data), 10)
+		rates = [row.get("rate") for row in data]
+		self.assertIn(300, rates)
+		self.assertIn(200, rates)
+
+	def test_get_supplier_quotations_data_excludes_cancelled(self):
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.items[0].rate = 200
+		sq.save()
+		sq.submit()
+		sq.cancel()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(data, [])
+
+	def test_get_supplier_quotations_data_non_existent_rfq(self):
+		data = get_supplier_quotations_data("NON-EXISTENT-RFQ-12345")
+		self.assertEqual(data, [])
+
+	def test_get_supplier_quotations_data_for_unlisted_supplier(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}]
+		)
+		self.assertEqual(len(rfq.suppliers), 1)
+
+		# a supplier outside the RFQ can only hold a draft quotation against it
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier 1")
+		sq.items[0].rate = 180
+		sq.save()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0].get("supplier"), "_Test Supplier 1")
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_get_supplier_quotations_data_excludes_rows_of_other_rfq(self):
+		rfq = make_request_for_quotation()
+		other_rfq = make_request_for_quotation(qty=7)
+		supplier = rfq.suppliers[0].supplier
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier)
+		sq.items[0].rate = 100
+		sq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 7,
+				"rate": 90,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"request_for_quotation": other_rfq.name,
+				"request_for_quotation_item": other_rfq.items[0].name,
+			},
+		)
+		sq.save()
+
+		data = get_supplier_quotations_data(rfq.name)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0].get("request_for_quotation_item"), rfq.items[0].name)
+
+		other_data = get_supplier_quotations_data(other_rfq.name)
+		self.assertEqual(len(other_data), 1)
+		self.assertEqual(other_data[0].get("request_for_quotation_item"), other_rfq.items[0].name)
+
+	def test_get_supplier_quotations_data_respects_supplier_quotation_permissions(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}]
+		)
+
+		own_quote = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+		own_quote.items[0].rate = 150
+		own_quote.save()
+		other_quote = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier 1")
+		other_quote.items[0].rate = 120
+		other_quote.save()
+
+		user = create_user("rfq-quotations-buyer@example.com", "Purchase User")
+		add_user_permission("Supplier", "_Test Supplier", user.name)
+
+		with self.set_user(user.name):
+			data = get_supplier_quotations_data(rfq.name)
+
+		self.assertEqual({row.get("supplier_quotation") for row in data}, {own_quote.name})
 
 
 def make_request_for_quotation(**args):
