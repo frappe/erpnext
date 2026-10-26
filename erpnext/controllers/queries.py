@@ -1460,3 +1460,22 @@ def item_tax_template_query(
 	return frappe.call(
 		get_tax_template, doctype, txt, searchfield, start, page_len, template_filters, **kwargs
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def item_warehouse_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""A row's warehouses of the company, with the item's stock in each once the row has an item."""
+	warehouse_filters = [
+		["Warehouse", "company", "in", ["", filters.get("company") or ""]],
+		["Warehouse", "is_group", "=", 0],
+	]
+	if not filters.get("item_code"):
+		return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)
+
+	warehouse_filters.append(["Bin", "item_code", "=", filters["item_code"]])
+	return frappe.call(
+		warehouse_query, doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs
+	)

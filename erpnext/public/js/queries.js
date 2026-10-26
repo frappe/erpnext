@@ -221,12 +221,9 @@ erpnext.queries.setup_queries = function (frm, options, query_fn) {
 */
 erpnext.queries.setup_warehouse_query = function (frm) {
 	frm.set_query("warehouse", "items", function (doc, cdt, cdn) {
-		var row = locals[cdt][cdn];
-		var filters = erpnext.queries.warehouse(frm.doc);
-		if (row.item_code) {
-			$.extend(filters, { query: "erpnext.controllers.queries.warehouse_query" });
-			filters["filters"].push(["Bin", "item_code", "=", row.item_code]);
-		}
-		return filters;
+		return {
+			query: "erpnext.controllers.queries.item_warehouse_query",
+			filters: { company: frm.doc.company, item_code: locals[cdt][cdn].item_code },
+		};
 	});
 };
