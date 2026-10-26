@@ -192,6 +192,8 @@ class ChildItemUpdater:
 		if self.parent_doctype == "Sales Order" and not parent.is_subcontracted:
 			make_packing_list(parent)
 			parent.set_gross_profit()
+		elif self.parent_doctype == "Quotation":
+			make_packing_list(parent)
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			parent.doctype, parent.company, parent.base_grand_total, parent
@@ -255,6 +257,9 @@ class ChildItemUpdater:
 
 		elif self.parent_doctype == "Supplier Quotation":
 			parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), self._rfqs_before_update)
+			parent.set_status(update=True)
+
+		elif self.parent_doctype == "Quotation":
 			parent.set_status(update=True)
 
 		parent.reload()
@@ -323,6 +328,24 @@ class ChildItemUpdater:
 					self.parent.name, _(self.parent.status)
 				)
 			)
+
+		# The Quotation form hides Update Items for these states; enforce it server-side too.
+		if self.parent_doctype == "Quotation":
+			quotation = self.parent
+			if quotation.status in ("Lost", "Ordered"):
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it is {1}.").format(
+						quotation.name, _(quotation.status)
+					)
+				)
+			if not quotation.is_active:
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it is not active.").format(quotation.name)
+				)
+			if quotation.valid_till and getdate(quotation.valid_till) < getdate():
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it has expired.").format(quotation.name)
+				)
 
 	def _validate_changed_uoms(self, data: list) -> None:
 		current_uoms = {row.name: row.uom for row in self.parent.get(self.child_docname)}
