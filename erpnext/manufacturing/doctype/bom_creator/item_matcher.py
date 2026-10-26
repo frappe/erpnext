@@ -36,8 +36,11 @@ class ItemMatcher:
 		return {part.name: matches[get_part_key(part)] for part in self.parts if matches[get_part_key(part)]}
 
 	def set_items(self):
-		items = frappe.get_all(
-			"Item", filters={"disabled": 0, "has_variants": 0}, fields=["name", "item_name"]
+		items = frappe.get_list(
+			"Item",
+			filters={"disabled": 0, "has_variants": 0},
+			fields=["name", "item_name"],
+			limit_page_length=0,
 		)
 		self.item_codes = {item.name for item in items}
 		self.items_by_code_key = defaultdict(list)
@@ -55,19 +58,16 @@ class ItemMatcher:
 		if not part_numbers:
 			return {}
 
-		part = frappe.qb.DocType("BOM Creator Item")
-		design = frappe.qb.DocType("BOM Creator")
-		rows = (
-			frappe.qb.from_(part)
-			.join(design)
-			.on(design.name == part.parent)
-			.select(part.part_number, part.item_code)
-			.where(part.parenttype == "BOM Creator")
-			.where(part.part_number.isin(part_numbers))
-			.where(part.item_code.isnotnull() & (part.item_code != ""))
-			.where(design.docstatus < 2)
-			.orderby(design.modified)
-			.run(as_dict=True)
+		rows = frappe.get_list(
+			"BOM Creator",
+			filters=[
+				["BOM Creator", "docstatus", "<", 2],
+				["BOM Creator Item", "part_number", "in", part_numbers],
+				["BOM Creator Item", "item_code", "is", "set"],
+			],
+			fields=["`tabBOM Creator Item`.part_number", "`tabBOM Creator Item`.item_code"],
+			order_by="`tabBOM Creator`.modified asc",
+			limit_page_length=0,
 		)
 		return {row.part_number: row.item_code for row in rows if row.item_code in self.item_codes}
 
