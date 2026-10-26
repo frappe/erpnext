@@ -30,6 +30,34 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPickList(ERPNextTestSuite):
+	def test_whole_number_qty_must_not_be_fractional(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item = make_item(properties={"stock_uom": "Nos"})
+		make_stock_entry(item_code=item.name, qty=5, target="_Test Warehouse - _TC", basic_rate=10)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item.name,
+						"qty": 2.5,
+						"uom": "Nos",
+						"stock_uom": "Nos",
+						"stock_qty": 2.5,
+						"picked_qty": 2.5,
+						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		)
+
+		self.assertRaises(UOMMustBeIntegerError, pick_list.insert)
+
 	def test_filter_locations_consumes_picked_qty_across_rows(self):
 		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
 
