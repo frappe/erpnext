@@ -197,7 +197,7 @@ def _get_item_details(
 		ctx.price_list_rate = out.price_list_rate
 
 	if not source_row:
-		out.update(get_pricing_rule_for_item(ctx, doc=doc))
+		out.update(get_pricing_rule_for_item(ctx, doc=doc, for_validate=for_validate))
 
 	if (
 		frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward")

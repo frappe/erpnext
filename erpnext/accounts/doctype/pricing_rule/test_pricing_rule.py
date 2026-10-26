@@ -1878,9 +1878,11 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].discount_percentage, 10)
 
 		si.items[0].qty = 1
+		frappe.clear_messages()
 		si.save()
 		self.assertEqual(si.items[0].discount_percentage, 0)
 		self.assertEqual(si.items[0].rate, 100)
+		self.assertTrue(any(d.get("title") == "Pricing Rule Removed" for d in frappe.get_message_log()))
 
 		si.items[0].qty = 6
 		si.save()
@@ -2113,6 +2115,23 @@ class TestPricingRule(ERPNextTestSuite):
 
 		details = remove_pricing_rule_for_item(rule.name, frappe.as_json(item_details))
 		self.assertTrue(details.pricing_rule_removed)
+
+	def test_saved_pricing_rule_stays_on_submit(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(item, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, do_not_submit=True)
+		self.assertEqual(si.items[0].rate, 90)
+
+		rule.valid_from = add_days(today(), -10)
+		rule.valid_upto = add_days(today(), -1)
+		rule.save()
+		make_item_pricing_rule(item, discount_percentage=20)
+
+		si.reload()
+		si.submit()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+		self.assertEqual(si.items[0].rate, 90)
 
 
 def make_pricing_rule(**args):
