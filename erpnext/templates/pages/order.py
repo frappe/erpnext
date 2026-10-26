@@ -3,9 +3,9 @@
 
 import frappe
 from frappe import _
+from frappe.sessions import get_csrf_token
 
 from erpnext.accounts.doctype.payment_request.payment_request import (
-	ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST,
 	get_amount,
 )
 
@@ -50,6 +50,9 @@ def get_context(context):
 			context.available_loyalty_points = int(loyalty_details.get("loyalty_points"))
 
 	context.show_pay_button, context.pay_amount = get_payment_details(context.doc)
+	if context.show_pay_button:
+		context.csrf_token = get_csrf_token()
+
 	context.show_make_pi_button = False
 	if context.doc.get("supplier"):
 		# show Make Purchase Invoice button based on permission
@@ -65,19 +68,14 @@ def get_attachments(dt, dn):
 
 
 def get_payment_details(doc):
-	show_pay_button, amount = (
-		(
-			"payments" in frappe.get_installed_apps()
-			and doc.doctype in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST
-			and (
-				doc.doctype not in ("Purchase Order", "Purchase Invoice")
-				or frappe.db.get_single_value("Buying Settings", "show_pay_button")
-			)
-		),
-		0,
-	)
-	if not show_pay_button:
-		return show_pay_button, amount
+	if (
+		"payments" not in frappe.get_installed_apps()
+		or doc.doctype not in ("Sales Order", "Sales Invoice")
+		or doc.docstatus != 1
+		or not frappe.has_permission("Payment Request", "create")
+		or not doc.has_permission("read")
+	):
+		return False, 0
 
 	amount = get_amount(doc)
-	return bool(amount), amount
+	return (True, amount) if amount > 0 else (False, 0)
