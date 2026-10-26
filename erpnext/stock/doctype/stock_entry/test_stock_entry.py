@@ -6553,3 +6553,17 @@ class TestStockEntryQueries(ERPNextTestSuite):
 			row | {"is_inward": 1, "include_expired_batches": 1},
 		)
 		self.assertRaises(frappe.ValidationError, search, {"purpose": "Material Issue"})
+
+	def test_warehouse_and_type_queries(self):
+		target = partial(get_search_filters, stock_entry.target_warehouse_query, "Warehouse")
+		transfer = {"company": "C", "purpose": "Material Transfer"}
+
+		self.assertEqual(target(transfer), {"is_group": 0, "company": "C"})
+		self.assertEqual(
+			target(transfer | {"add_to_transit": 1}),
+			{"is_group": 0, "company": "C", "warehouse_type": "Transit"},
+		)
+
+		entry_type = partial(get_search_filters, stock_entry.stock_entry_type_query, "Stock Entry Type")
+		self.assertEqual(entry_type({"subcontracting_inward_order": "O"})["purpose"][0], "in")
+		self.assertEqual(entry_type({})["purpose"][0], "not in")
