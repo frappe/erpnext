@@ -535,6 +535,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			closing_entry.cancel()
 
 		self.assertTrue(enqueue.call_args.kwargs["enqueue_after_commit"])
+		self.assertEqual(closing_entry.ignore_linked_doctypes, ("POS Invoice Merge Log", "Sales Invoice"))
 		merge_logs = enqueue.call_args.kwargs["merge_logs"]
 		enqueue.call_args.args[0](
 			merge_logs=merge_logs, closing_entry=enqueue.call_args.kwargs["closing_entry"]
@@ -637,6 +638,16 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			(2, "Cancelled"),
 		)
 		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_cancel_without_queue_keeps_back_link_check(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		closing_entry.cancel()
+		self.assertFalse(closing_entry.get("ignore_linked_doctypes"))
 
 
 MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"
