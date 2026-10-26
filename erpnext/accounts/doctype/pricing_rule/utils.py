@@ -587,8 +587,9 @@ def filter_cumulative_query_by_applicable_for(query, parent, pr_doc, doctype):
 def apply_pricing_rule_on_transaction(doc):
 	conditions = "apply_on = 'Transaction'"
 
-	values = {}
+	values = {"price_list": doc.get("selling_price_list") or doc.get("buying_price_list") or ""}
 	conditions = get_other_conditions(conditions, values, doc)
+	conditions += " and coalesce(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
 
 	pricing_rules = frappe.db.sql(
 		f""" Select `tabPricing Rule`.* from `tabPricing Rule`
