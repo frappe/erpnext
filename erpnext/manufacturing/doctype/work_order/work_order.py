@@ -1316,6 +1316,7 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = self.qty
 
+<<<<<<< HEAD
 		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
 		if not batch_auto_creation:
 			frappe.msgprint(
@@ -1326,6 +1327,10 @@ class WorkOrder(Document):
 				indicator="orange",
 			)
 			return
+=======
+		if not frappe.get_cached_value("Item", self.production_item, "create_new_batch"):
+			self.throw_missing_item_setting("create_new_batch")
+>>>>>>> 5fe3b81 (fix(manufacturing): require automatic batch creation on work order submit)
 
 		while total_qty > 0:
 			qty = self.batch_size
@@ -1363,6 +1368,7 @@ class WorkOrder(Document):
 =======
 		if not item_details.serial_no_series:
 <<<<<<< HEAD
+<<<<<<< HEAD
 			frappe.throw(
 				_("Set Serial No Series in Item {0} or disable {1} in {2}").format(
 					get_link_to_form("Item", self.production_item),
@@ -1375,6 +1381,9 @@ class WorkOrder(Document):
 =======
 			self.throw_missing_serial_no_series()
 >>>>>>> a154980 (fix(manufacturing): take field labels from meta in serial no series error)
+=======
+			self.throw_missing_item_setting("serial_no_series")
+>>>>>>> 5fe3b81 (fix(manufacturing): require automatic batch creation on work order submit)
 
 		serial_nos = get_available_serial_nos(
 			item_details.serial_no_series, qty or self.qty, self.production_item
@@ -1498,10 +1507,10 @@ class WorkOrder(Document):
 		if row.planned_start_time == row.planned_end_time:
 			frappe.throw(_("Capacity Planning Error, planned start time can not be same as end time"))
 
-	def throw_missing_serial_no_series(self):
+	def throw_missing_item_setting(self, fieldname):
 		frappe.throw(
 			_("Set {0} in Item {1} or disable {2} in {3}").format(
-				frappe.bold(_(frappe.get_meta("Item").get_label("serial_no_series"))),
+				frappe.bold(_(frappe.get_meta("Item").get_label(fieldname))),
 				get_link_to_form("Item", self.production_item),
 				frappe.bold(
 					_(
