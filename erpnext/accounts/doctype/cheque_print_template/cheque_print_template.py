@@ -177,13 +177,14 @@ def update_existing_cheque_print_formats():
 			print_format.html or "",
 			flags=re.DOTALL,
 		)
-		if message and re.fullmatch(r'{{ "(?:[^"\\]|\\.)*" \| e }}', message["message"], flags=re.DOTALL):
+		saved_message = frappe.db.get_value("Cheque Print Template", template_name, "message_to_show") or _(
+			"Account Pay Only"
+		)
+		escaped_message = "{{ " + frappe.as_json(saved_message, ensure_ascii=False) + " | e }}"
+		if message and message["message"] == escaped_message:
 			continue
 
-		if not message or message["message"] != (
-			frappe.db.get_value("Cheque Print Template", template_name, "message_to_show")
-			or _("Account Pay Only")
-		):
+		if not message or message["message"] != saved_message:
 			frappe.log_error(
 				title=_("Cheque Print Format Requires Review"),
 				message=_(
@@ -199,9 +200,7 @@ def update_existing_cheque_print_formats():
 
 		print_format.html = (
 			print_format.html[: message.start("message")]
-			+ "{{ "
-			+ frappe.as_json(message["message"], ensure_ascii=False)
-			+ " | e }}"
+			+ escaped_message
 			+ print_format.html[message.end("message") :]
 		)
 		print_format.save()
