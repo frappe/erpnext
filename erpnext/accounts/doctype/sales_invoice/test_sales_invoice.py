@@ -4365,6 +4365,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	def test_sales_commission(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
+		si.sales_partner = (
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test Invoice Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": 0,
+				}
+			)
+			.insert()
+			.name
+		)
 
 		frappe.db.set_value("Item", si.get("items")[0].item_code, "grant_commission", 1)
 		frappe.db.set_value("Item", si.get("items")[1].item_code, "grant_commission", 0)
