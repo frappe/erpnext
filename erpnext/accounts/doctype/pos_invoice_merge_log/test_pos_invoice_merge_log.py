@@ -208,6 +208,202 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		try:
 			inv = create_pos_invoice(qty=1, rate=100, do_not_save=True)
 
+<<<<<<< HEAD
+=======
+		inv2 = create_pos_invoice(qty=1, rate=100, do_not_save=True)
+		inv2.get("items")[0].item_code = "_Test Item 2"
+		inv2.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 5,
+			},
+		)
+		inv2.insert()
+		inv2.payments[0].amount = inv.grand_total
+		inv2.save()
+		inv2.submit()
+
+		self.make_closing_entry()
+
+		inv.load_from_db()
+
+		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
+
+		expected_item_wise_tax_details = [
+			{
+				"item_row": consolidated_invoice.items[0].name,
+				"tax_row": consolidated_invoice.taxes[0].name,
+				"rate": 9.0,
+				"amount": 9.0,
+				"taxable_amount": 100.0,
+			},
+			{
+				"item_row": consolidated_invoice.items[1].name,
+				"tax_row": consolidated_invoice.taxes[0].name,
+				"rate": 5.0,
+				"amount": 5.0,
+				"taxable_amount": 100.0,
+			},
+		]
+
+		actual = [
+			{
+				"item_row": d.item_row,
+				"tax_row": d.tax_row,
+				"rate": d.rate,
+				"amount": d.amount,
+				"taxable_amount": d.taxable_amount,
+			}
+			for d in consolidated_invoice.get("item_wise_tax_details")
+		]
+
+		self.assertEqual(actual, expected_item_wise_tax_details)
+
+	def test_consolidation_round_off_error_1(self):
+		"""
+		Test round off error in consolidated invoice creation if POS Invoice has inclusive tax
+		"""
+
+		make_stock_entry(
+			to_warehouse="_Test Warehouse - _TC",
+			item_code="_Test Item",
+			rate=8000,
+			qty=10,
+		)
+
+		inv = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
+		inv.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1,
+			},
+		)
+		inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 30000})
+		inv.insert()
+		inv.submit()
+
+		inv2 = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
+		inv2.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1,
+			},
+		)
+		inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 30000})
+		inv2.insert()
+		inv2.submit()
+
+		self.make_closing_entry()
+
+		inv.load_from_db()
+		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+		self.assertEqual(consolidated_invoice.status, "Paid")
+
+	def test_consolidation_round_off_error_2(self):
+		"""
+		Test the same case as above but with an Unpaid POS Invoice
+		"""
+		make_stock_entry(
+			to_warehouse="_Test Warehouse - _TC",
+			item_code="_Test Item",
+			rate=8000,
+			qty=10,
+		)
+
+		inv = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
+		inv.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1,
+			},
+		)
+		inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 60000})
+		inv.insert()
+		inv.submit()
+
+		inv2 = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
+		inv2.append(
+			"taxes",
+			{
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1,
+			},
+		)
+		inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 60000})
+		inv2.insert()
+		inv2.submit()
+
+		inv3 = create_pos_invoice(qty=3, rate=600, do_not_save=True)
+		inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1800})
+		inv3.insert()
+		inv3.submit()
+
+		self.make_closing_entry()
+
+		inv.load_from_db()
+		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
+		self.assertNotEqual(consolidated_invoice.outstanding_amount, 800)
+		self.assertEqual(consolidated_invoice.status, "Paid")
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"round_row_wise_tax": 0})
+	@ERPNextTestSuite.change_settings(
+		"System Settings", {"number_format": "#,###.###", "currency_precision": 3, "float_precision": 3}
+	)
+	def test_consolidation_round_off_error_3(self):
+		make_stock_entry(
+			to_warehouse="_Test Warehouse - _TC",
+			item_code="_Test Item",
+			rate=8000,
+			qty=10,
+		)
+
+		item_rates = [69, 59, 29]
+		for _i in [1, 2]:
+			inv = create_pos_invoice(is_return=1, do_not_save=1)
+			inv.items = []
+			for rate in item_rates:
+				inv.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": -1,
+						"rate": rate,
+						"income_account": "Sales - _TC",
+						"expense_account": "Cost of Goods Sold - _TC",
+						"cost_center": "_Test Cost Center - _TC",
+					},
+				)
+>>>>>>> e148da0 (test(accounts): cover inclusive net rounding)
 			inv.append(
 				"taxes",
 				{
@@ -223,6 +419,10 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			inv.payments[0].amount = inv.grand_total
 			inv.save()
 			inv.submit()
+			self.assertEqual(inv.net_total, -136.522)
+			self.assertEqual(inv.total_taxes_and_charges, -20.478)
+			self.assertEqual(inv.grand_total, -157)
+			self.assertEqual(inv.rounding_adjustment, 0)
 
 			inv2 = create_pos_invoice(qty=1, rate=100, do_not_save=True)
 			inv2.get("items")[0].item_code = "_Test Item 2"
@@ -242,6 +442,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			inv2.save()
 			inv2.submit()
 
+<<<<<<< HEAD
 			consolidate_pos_invoices()
 			inv.load_from_db()
 
@@ -451,6 +652,16 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+=======
+		inv.load_from_db()
+		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
+		self.assertEqual(consolidated_invoice.status, "Return")
+		self.assertEqual(consolidated_invoice.net_total, -273.044)
+		self.assertEqual(consolidated_invoice.total_taxes_and_charges, -40.956)
+		self.assertEqual(consolidated_invoice.grand_total, -314)
+		self.assertEqual(consolidated_invoice.rounding_adjustment, 0)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+>>>>>>> e148da0 (test(accounts): cover inclusive net rounding)
 
 	def test_consolidation_rounding_adjustment(self):
 		"""
