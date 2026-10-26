@@ -665,6 +665,7 @@ def merge_account(old: str, new: str):
 		throw(_("Account {0} does not exist").format(new))
 
 	validate_accounts_can_be_merged(old_account, new_account)
+	validate_balance_after_merge(old_account, new_account)
 
 	if old_account.is_group and old in get_ancestors_of("Account", new):
 		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
@@ -683,6 +684,39 @@ def validate_accounts_can_be_merged(old_account: Account, new_account: Account):
 			title=("Invalid Accounts"),
 			exc=InvalidAccountMergeError,
 		)
+
+
+def validate_balance_after_merge(old_account: Account, new_account: Account):
+	if not new_account.balance_must_be:
+		return
+
+	balance = get_balance_after_merge(old_account.name, new_account.name)
+	if (balance > 0 and new_account.balance_must_be == "Credit") or (
+		balance < 0 and new_account.balance_must_be == "Debit"
+	):
+		throw(
+			_(
+				"Cannot merge into {0}. Its balance after the merge would be in {1}, but its Balance must be is {2}."
+			).format(
+				frappe.bold(new_account.name),
+				_("Debit") if balance > 0 else _("Credit"),
+				_(new_account.balance_must_be),
+			),
+			title=_("Invalid Accounts"),
+			exc=InvalidAccountMergeError,
+		)
+
+
+def get_balance_after_merge(old: str, new: str) -> float:
+	from erpnext.accounts.utils import get_balance_on
+
+	old_lft, old_rgt = frappe.db.get_value("Account", old, ["lft", "rgt"])
+	new_lft, new_rgt = frappe.db.get_value("Account", new, ["lft", "rgt"])
+	if old_lft <= new_lft and new_rgt <= old_rgt:
+		return get_balance_on(old)
+	if new_lft <= old_lft and old_rgt <= new_rgt:
+		return get_balance_on(new)
+	return get_balance_on(old) + get_balance_on(new)
 
 
 def get_merge_properties(account: Account) -> tuple:

@@ -510,6 +510,26 @@ class TestAccount(ERPNextTestSuite):
 			"Yes",
 		)
 
+	def test_merge_into_account_with_balance_must_be(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		company = "_Test Company"
+		source = create_account(
+			account_name="Merge Debit Source", parent_account="Current Assets - _TC", company=company
+		)
+		target = create_account(
+			account_name="Merge Credit Target", parent_account="Current Assets - _TC", company=company
+		)
+		frappe.db.set_value("Account", target, "balance_must_be", "Credit")
+		make_journal_entry(source, "Cash - _TC", 100, submit=True)
+
+		self.assertRaises(InvalidAccountMergeError, merge_account, source, target)
+		self.assertTrue(frappe.db.exists("Account", source))
+
+		frappe.db.set_value("Account", target, "balance_must_be", "Debit")
+		merge_account(source, target)
+		self.assertFalse(frappe.db.exists("Account", source))
+
 
 def walk_chart_tree(tree):
 	"""Yield (account_name, details) for every account in a chart of accounts tree"""
