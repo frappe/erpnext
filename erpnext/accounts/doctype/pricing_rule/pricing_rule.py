@@ -561,7 +561,8 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		if not doc:
 			return item_details
 
-	elif args.get("pricing_rules"):
+	# "[]" means no rule was applied, so there is none to remove and the rate typed in stays
+	elif get_applied_pricing_rules(args.get("pricing_rules")):
 		item_details = remove_pricing_rule_for_item(
 			args.get("pricing_rules"),
 			item_details,
