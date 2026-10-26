@@ -210,6 +210,7 @@ frappe.ui.form.on("Request for Quotation", {
 	toggle_quotations_tab: function (frm, show, quotes) {
 		const field = frm.get_field("quotations_html");
 		const tab = field?.tab;
+		const was_shown = frm._quotations_tab_shown;
 
 		frm._quotations_tab_shown = show;
 		if (show) {
@@ -217,6 +218,9 @@ frappe.ui.form.on("Request for Quotation", {
 			frm.dashboard.links_area.hide();
 		} else {
 			field?.$wrapper.empty();
+			if (was_shown && frm.doc.docstatus === 1 && frappe.boot.desk_settings.dashboard) {
+				frm.dashboard.links_area.show();
+			}
 		}
 
 		if (!tab) {
