@@ -876,6 +876,10 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+		get_planned_process_loss_percentage,
+		get_qty_before_process_loss,
+	)
 	from erpnext.manufacturing.doctype.work_order.services.status import qty_against_sales_order
 
 	if sales_order:
@@ -883,6 +887,8 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
+		bom_table = qb.DocType("BOM")
+		precision = frappe.get_precision("Work Order", "qty")
 
 		items = []
 		item_codes = [i.item_code for i in so.items]
@@ -907,7 +913,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+						.left_join(bom_table)
+						.on(bom_table.name == wo.bom_no)
+						.select(Sum(qty_against_sales_order(wo, bom_table)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
@@ -924,6 +932,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 					pending_qty = stock_qty * overproduction_percentage_for_sales_order
 
 				if pending_qty > 0 and i.item_code not in product_bundle_parents and bom:
+					# The Work Order is made before the BOM's process loss.
+					loss_percentage = get_planned_process_loss_percentage(bom)
+					pending_qty = flt(get_qty_before_process_loss(pending_qty, loss_percentage), precision)
 					items.append(
 						dict(
 							name=i.name,

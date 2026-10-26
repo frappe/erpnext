@@ -34,12 +34,13 @@ class StatusService:
 	def validate_work_order_against_so(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
-		total_qty = flt(self._ordered_qty_against_so()) + flt(self.doc.qty)
+		total_qty = flt(self._ordered_qty_against_so()) + self._expected_output_qty()
 		so_qty = flt(self._so_item_qty()) + flt(self._packed_item_qty())
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
-		if total_qty <= so_qty + (allowance_percentage / 100 * so_qty):
+		precision = self.doc.precision("qty")
+		if flt(total_qty, precision) <= flt(so_qty + (allowance_percentage / 100 * so_qty), precision):
 			return
 
 		frappe.throw(
@@ -51,11 +52,20 @@ class StatusService:
 			OverProductionError,
 		)
 
+	def _expected_output_qty(self):
+		"""Good output of this Work Order after its recorded or planned process loss."""
+		loss_percentage = frappe.get_cached_value("BOM", self.doc.bom_no, "process_loss_percentage")
+		loss_qty = max(flt(self.doc.process_loss_qty), flt(self.doc.qty) * flt(loss_percentage) / 100)
+		return max(flt(self.doc.produced_qty), flt(self.doc.qty) - loss_qty)
+
 	def _ordered_qty_against_so(self):
 		wo = frappe.qb.DocType("Work Order")
+		bom = frappe.qb.DocType("BOM")
 		return (
 			frappe.qb.from_(wo)
-			.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+			.left_join(bom)
+			.on(bom.name == wo.bom_no)
+			.select(Sum(qty_against_sales_order(wo, bom)))
 			.where(
 				(wo.production_item == self.doc.production_item)
 				& (wo.sales_order == self.doc.sales_order)
@@ -478,9 +488,12 @@ class StatusService:
 
 	def _sales_order_work_order_qty(self):
 		wo = frappe.qb.DocType("Work Order")
+		bom = frappe.qb.DocType("BOM")
 		query = (
 			frappe.qb.from_(wo)
-			.select(Sum(qty_against_sales_order(wo, wo.qty)))
+			.left_join(bom)
+			.on(bom.name == wo.bom_no)
+			.select(Sum(qty_against_sales_order(wo, bom)))
 			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1))
 		)
 		if self.doc.product_bundle_item:
@@ -545,5 +558,11 @@ class StatusService:
 			)
 
 
-def qty_against_sales_order(wo, open_qty):
-	return Case().when(wo.status == "Closed", wo.produced_qty).else_(open_qty)
+def qty_against_sales_order(wo, bom):
+	"""Good output a Work Order counts against its Sales Order, after recorded or planned process loss."""
+	planned_loss_qty = wo.qty * IfNull(bom.process_loss_percentage, 0) / 100
+	loss_qty = (
+		Case().when(wo.process_loss_qty > planned_loss_qty, wo.process_loss_qty).else_(planned_loss_qty)
+	)
+	output_qty = Case().when(wo.produced_qty > wo.qty - loss_qty, wo.produced_qty).else_(wo.qty - loss_qty)
+	return Case().when(wo.status == "Closed", wo.produced_qty).else_(output_qty)
