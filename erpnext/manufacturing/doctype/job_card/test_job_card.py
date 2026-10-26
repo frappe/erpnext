@@ -1402,11 +1402,12 @@ class TestJobCard(ERPNextTestSuite):
 			)
 
 		jc2.time_logs[0].completed_qty = 8
+		jc2.for_quantity = 8
 		jc2.save()
 		jc2.submit()
 
-		self.assertEqual(jc2.for_quantity, 10)
-		self.assertEqual(jc2.process_loss_qty, 2)
+		self.assertEqual(jc2.for_quantity, 8)
+		self.assertEqual(jc2.process_loss_qty, 0)
 
 		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 10))
 		s.submit()
@@ -1414,9 +1415,8 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(s.process_loss_qty, 2)
 
 		wo_doc.reload()
-		for row in wo_doc.operations:
-			self.assertEqual(row.completed_qty, 8)
-			self.assertEqual(row.process_loss_qty, 2)
+		self.assertEqual([row.completed_qty for row in wo_doc.operations], [8, 8])
+		self.assertEqual([row.process_loss_qty for row in wo_doc.operations], [2, 0])
 
 		self.assertEqual(wo_doc.produced_qty, 8)
 		self.assertEqual(wo_doc.process_loss_qty, 2)
@@ -1506,7 +1506,6 @@ class TestJobCard(ERPNextTestSuite):
 		for upstream_qty, upstream_output, downstream_qty, downstream_output, manufacture_entries in (
 			(100, 95, 95, 95, [(100, 5, 95)]),
 			(100, 95, 95, 90, [(50, 10, 40), (50, 0, 50)]),
-			(50, 45, 50, 45, [(50, 5, 45)]),
 			(50, 45, 45, 45, [(50, 5, 45)]),
 		):
 			with self.subTest(
@@ -1598,6 +1597,61 @@ class TestJobCard(ERPNextTestSuite):
 					frappe.get_doc("Job Card", name).cancel()
 				self.assertTrue(all(row.status == "Pending" for row in work_order.reload().operations))
 
+	def test_job_card_input_limited_to_previous_operation_output(self):
+		work_order = self.make_two_operation_work_order(qty=100)
+		first, second = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+			)
+		)
+		for index, job_card in enumerate((first, second)):
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date("2024-04-10 08:00:00", hours=index),
+					"to_time": add_to_date("2024-04-10 08:00:00", hours=index, minutes=30),
+					"completed_qty": 95,
+				},
+			)
+			job_card.save()
+			if job_card is first:
+				job_card.submit()
+
+		self.assertEqual(second.process_loss_qty, 5)
+		self.assertRaises(OperationSequenceError, second.submit)
+
+		second.reload()
+		second.for_quantity = 95
+		second.time_logs[0].completed_qty = 90
+		second.save()
+		second.submit()
+		self.assertEqual(second.process_loss_qty, 5)
+
+		# A later card without loss can't use the qty already lost.
+		make_job_card(
+			work_order.name,
+			[
+				{
+					"name": second.operation_id,
+					"operation": second.operation,
+					"sequence_id": second.sequence_id,
+					"qty": 5,
+					"pending_qty": 5,
+				}
+			],
+		)
+		extra = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		extra.append(
+			"time_logs",
+			{
+				"from_time": "2024-04-10 10:00:00",
+				"to_time": "2024-04-10 10:30:00",
+				"completed_qty": 5,
+			},
+		)
+		self.assertRaises(OperationSequenceError, extra.submit)
+
 	def complete_second_operation_and_finish(self, wo_doc, job_card):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
@@ -1606,8 +1660,9 @@ class TestJobCard(ERPNextTestSuite):
 		jc2 = frappe.get_doc("Job Card", job_card)
 		jc2.time_logs[0].completed_qty = 7
 		jc2.time_logs[0].to_time = add_to_date(now(), minutes=70)
+		jc2.for_quantity = 8
 		jc2.save()
-		self.assertEqual(jc2.process_loss_qty, 3)
+		self.assertEqual(jc2.process_loss_qty, 1)
 		jc2.submit()
 
 		se = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 10))
