@@ -1156,7 +1156,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.append("items", copy.deepcopy(pos.items[0]))
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 3000})
 		pos.insert()
-		self.assertRaises(frappe.ValidationError, pos.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "Needed <strong>30.0</strong>", pos.submit)
 
 		pos.reload()
 		pos.items[1].qty = 5
@@ -1175,7 +1175,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos = create_pos_invoice(item=item_code, qty=10, rate=100, do_not_save=1)
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
 		pos.insert()
-		self.assertRaises(frappe.ValidationError, pos.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "Available <strong>5.0</strong>", pos.submit)
 
 	def test_reserved_stock_is_checked_for_item_allowing_negative_stock(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -1221,7 +1221,7 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		pos.reload()
 		pos.loyalty_points = -5
-		self.assertRaises(frappe.ValidationError, pos.save)
+		self.assertRaisesRegex(frappe.ValidationError, "must be greater than 0", pos.save)
 
 	def test_consolidation_does_not_count_coupon_again(self):
 		rule = frappe.get_doc(
@@ -1340,12 +1340,14 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.append("payments", {"mode_of_payment": "Cash", "amount": 400})
 		pos.insert().submit()
 
-		for payment in (
-			{"mode_of_payment": "Cash", "amount": -300},
-			{"mode_of_payment": "Bank Draft", "amount": 200},
+		for payment, message in (
+			({"mode_of_payment": "Cash", "amount": -300}, "must be greater than 0"),
+			({"mode_of_payment": "Bank Draft", "amount": 200}, "is not allowed in POS Profile"),
 		):
 			with self.subTest(payment=payment):
-				self.assertRaises(frappe.ValidationError, pos.update_payments, payments=[payment])
+				self.assertRaisesRegex(
+					frappe.ValidationError, message, pos.update_payments, payments=[payment]
+				)
 				self.assertEqual(frappe.db.get_value("POS Invoice", pos.name, "paid_amount"), 400)
 
 	def test_split_payment_matching_total_is_full_payment(self):
