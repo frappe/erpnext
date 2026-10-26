@@ -23,9 +23,24 @@ class ERPNextAddress(Address):
 		return super().link_address()
 
 	def update_company_address(self):
-		for link in self.get("links"):
-			if link.link_doctype == "Company":
-				self.is_your_company_address = 1
+		"""A Company link marks the address as the company's own; the flag is reset before validate
+		for users without its permlevel, so a 0 here means this user may not add that link."""
+		if not any(link.link_doctype == "Company" for link in self.get("links")):
+			return
+
+		if (
+			not self.is_your_company_address
+			and not self.flags.ignore_permissions
+			and frappe.session.user != "Administrator"
+			and not self.has_permlevel_access_to("is_your_company_address", permission_type="write")
+		):
+			frappe.throw(
+				_("You are not permitted to link an address to a Company"),
+				frappe.PermissionError,
+				title=_("Not Permitted"),
+			)
+
+		self.is_your_company_address = 1
 
 	def validate_reference(self):
 		if self.get("is_your_company_address") and not [
