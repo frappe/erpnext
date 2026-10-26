@@ -882,7 +882,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		duplicate.cancel()
 		self.assertEqual([row.outstanding for row in si.reload().payment_schedule], [0, 70])
 
-	def test_amended_journal_clears_unavailable_payment_term(self):
+	def test_amended_journal_rejects_paid_payment_term(self):
 		create_payment_terms_template()
 		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
 		template.terms[0].invoice_portion = 30
@@ -933,17 +933,63 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 				amendment = frappe.copy_doc(je)
 				amendment.docstatus = 0
 				amendment.amended_from = je.name
-				amendment.save().submit()
-				self.assertFalse(amendment.reload().accounts[1 if is_sales else 0].payment_term)
-				self.assertFalse(amendment.accounts[1 if is_sales else 0].payment_term_exchange_rate)
-				self.assertEqual(invoice.reload().outstanding_amount, (70 - paid_amount) * conversion_rate)
+				frappe.db.savepoint("paid_payment_term")
+				try:
+					with self.assertRaisesRegex(frappe.ValidationError, "outstanding.*payment term"):
+						amendment.save().submit()
+				finally:
+					frappe.db.rollback(save_point="paid_payment_term")
+				self.assertEqual(invoice.reload().outstanding_amount, (100 - paid_amount) * conversion_rate)
 				self.assertEqual(
 					[row.outstanding for row in invoice.payment_schedule], [30 - paid_amount, 70]
 				)
-				amendment.cancel()
-				self.assertEqual(
-					[row.outstanding for row in invoice.reload().payment_schedule], [30 - paid_amount, 70]
+
+	def test_journal_payment_term_restored_after_template_flag_is_cleared(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion, template.terms[1].invoice_portion = 30, 70
+		template.save()
+		for action in ("cancel", "unreconcile"):
+			with self.subTest(action=action):
+				template.reload()
+				template.allocate_payment_based_on_payment_terms = 1
+				template.save()
+				si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+				si.payment_terms_template = template.name
+				si.save().submit()
+				je = self.create_journal_entry(self.bank, self.debit_to, 10)
+				je.accounts[1].party_type = "Customer"
+				je.accounts[1].party = self.customer
+				je.save().submit()
+				pr = self.create_payment_reconciliation()
+				pr.invoice_name, pr.payment_name = si.name, je.name
+				pr.get_unreconciled_entries()
+				pr.allocate_entries(
+					frappe._dict(
+						invoices=[row.as_dict() for row in pr.invoices],
+						payments=[row.as_dict() for row in pr.payments],
+					)
 				)
+				pr.reconcile()
+				self.assertEqual([row.outstanding for row in si.reload().payment_schedule], [20, 70])
+
+				template.reload()
+				template.allocate_payment_based_on_payment_terms = 0
+				template.save()
+				if action == "cancel":
+					je.reload().cancel()
+				else:
+					unreconcile = frappe.get_doc(
+						doctype="Unreconcile Payment",
+						company=self.company,
+						voucher_type=je.doctype,
+						voucher_no=je.name,
+					)
+					unreconcile.add_references()
+					unreconcile.save().submit()
+				si.reload()
+				self.assertEqual(si.outstanding_amount, 100)
+				self.assertEqual([row.outstanding for row in si.payment_schedule], [30, 70])
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_invoice_cancellation_does_not_restore_draft_payment_terms(self):

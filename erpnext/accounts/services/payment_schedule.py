@@ -3,8 +3,6 @@
 
 """Payment schedule and payment terms helpers."""
 
-from collections import Counter
-
 import frappe
 from frappe import _
 from frappe.utils import DateTimeLikeObject, add_days, add_months, cint, cstr, flt, get_last_day, getdate
@@ -363,62 +361,6 @@ def clear_changed_payment_term_exchange_rates(doc) -> None:
 			row.payment_term_exchange_rate = 0
 
 
-def clear_unavailable_journal_payment_terms(doc) -> None:
-	if not doc.amended_from:
-		return
-
-	fields = (
-		"reference_type",
-		"reference_name",
-		"payment_term",
-		"account_currency",
-		"exchange_rate",
-		"payment_term_exchange_rate",
-		"debit_in_account_currency",
-		"credit_in_account_currency",
-	)
-	source = frappe.get_doc("Journal Entry", doc.amended_from)
-	inherited_allocations = Counter(tuple(row.get(field) for field in fields) for row in source.accounts)
-	outstanding_by_term = {}
-	for row in doc.accounts:
-		if not row.payment_term or row.reference_type not in ("Sales Invoice", "Purchase Invoice"):
-			continue
-		allocation_key = tuple(row.get(field) for field in fields)
-		if not inherited_allocations[allocation_key]:
-			continue
-		inherited_allocations[allocation_key] -= 1
-
-		allocated_amount = flt(row.credit_in_account_currency) - flt(row.debit_in_account_currency)
-		if row.reference_type == "Purchase Invoice":
-			allocated_amount = -allocated_amount
-		_, allocated_amount, precision = get_invoice_payment_term_allocation(
-			row.reference_type,
-			row.reference_name,
-			allocated_amount,
-			row.account_currency,
-			row.exchange_rate,
-			row.payment_term_exchange_rate,
-		)
-		key = (row.reference_type, row.reference_name, row.payment_term)
-		if key not in outstanding_by_term:
-			outstanding_by_term[key] = flt(
-				frappe.db.get_value(
-					"Payment Schedule",
-					{"parenttype": key[0], "parent": key[1], "payment_term": key[2]},
-					"outstanding",
-					for_update=True,
-				)
-			)
-		if allocated_amount > 0 and flt(allocated_amount, precision) > flt(
-			outstanding_by_term[key], precision
-		):
-			# The inherited term can be paid by another document before this amendment is submitted.
-			row.payment_term = None
-			row.payment_term_exchange_rate = 0
-		else:
-			outstanding_by_term[key] -= allocated_amount
-
-
 def update_invoice_payment_schedule(
 	invoice_type: str,
 	invoice_name: str,
@@ -429,7 +371,7 @@ def update_invoice_payment_schedule(
 	cancel: bool = False,
 	payment_term_exchange_rate: float | None = None,
 ) -> None:
-	if not payment_term or invoice_type not in ("Sales Invoice", "Purchase Invoice"):
+	if not payment_term or not invoice_name or invoice_type not in ("Sales Invoice", "Purchase Invoice"):
 		return
 
 	invoice, allocated_amount, precision = get_invoice_payment_term_allocation(
@@ -440,11 +382,6 @@ def update_invoice_payment_schedule(
 		payment_exchange_rate,
 		payment_term_exchange_rate,
 	)
-	if not frappe.db.get_value(
-		"Payment Terms Template", invoice.payment_terms_template, "allocate_payment_based_on_payment_terms"
-	):
-		return
-
 	if not cancel and allocated_amount > 0:
 		outstanding = frappe.db.get_value(
 			"Payment Schedule",
@@ -454,9 +391,15 @@ def update_invoice_payment_schedule(
 		)
 		if flt(allocated_amount, precision) > flt(outstanding, precision):
 			frappe.throw(
-				_("Allocated amount cannot exceed the outstanding amount of payment term {0} in {1}").format(
-					payment_term, invoice_name
-				)
+				_(
+					"Allocated amount {0} cannot exceed the outstanding amount {1} of payment term {2} in {3}"
+				).format(
+					flt(allocated_amount, precision),
+					flt(outstanding, precision),
+					payment_term,
+					invoice_name,
+				),
+				title=_("Payment Term Overallocated"),
 			)
 
 	company_currency = frappe.get_cached_value("Company", invoice.company, "default_currency")
@@ -495,7 +438,7 @@ def get_invoice_payment_term_allocation(
 	invoice = frappe.db.get_value(
 		invoice_type,
 		invoice_name,
-		["currency", "conversion_rate", "payment_terms_template", "company"],
+		["currency", "conversion_rate", "company"],
 		as_dict=True,
 	)
 	precision = frappe.get_precision(invoice_type, "grand_total", currency=invoice.currency)

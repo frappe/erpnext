@@ -234,13 +234,9 @@ class JournalEntry(AccountsController):
 
 	def before_submit(self):
 		"""Ensure total debit equals total credit before submission (skipped on data import)."""
-		from erpnext.accounts.services.payment_schedule import (
-			clear_changed_payment_term_exchange_rates,
-			clear_unavailable_journal_payment_terms,
-		)
+		from erpnext.accounts.services.payment_schedule import clear_changed_payment_term_exchange_rates
 
 		clear_changed_payment_term_exchange_rates(self)
-		clear_unavailable_journal_payment_terms(self)
 		# Do not validate while importing via data import
 		if not frappe.flags.in_import:
 			self.validate_total_debit_and_credit()
