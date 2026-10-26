@@ -57,6 +57,36 @@ class TestEmployee(ERPNextTestSuite):
 			linked.save()
 		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 0)
 
+	def test_hr_user_cannot_reenable_user_through_employee_status(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-disabled-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+		frappe.db.set_value("User", staff, "enabled", 0)
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.status = "Inactive"
+			linked.save()
+			linked.status = "Active"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
+		linked = frappe.get_doc("Employee", employee)
+		linked.status = "Inactive"
+		linked.save()
+		linked.status = "Active"
+		linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 1)
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.status = "Inactive"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
 	def test_hr_roles_link_any_user_except_admins(self):
 		from frappe.permissions import add_permission, reset_perms
 
