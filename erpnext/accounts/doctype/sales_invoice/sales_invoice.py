@@ -537,6 +537,9 @@ class SalesInvoice(SellingController):
 
 		self.process_common_party_accounting()
 
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
+
 	def validate_pos_return(self):
 		if self.is_consolidated:
 			# pos return is already validated in pos invoice
@@ -639,6 +642,9 @@ class SalesInvoice(SellingController):
 		)
 
 		self.delete_auto_created_batches()
+
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
