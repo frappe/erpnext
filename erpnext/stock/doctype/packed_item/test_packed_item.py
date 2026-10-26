@@ -62,6 +62,53 @@ class TestPackedItem(FrappeTestCase):
 		self.assertEqual(so.packed_items[0].item_code, self.bundle_items[0])
 		self.assertEqual(so.packed_items[0].qty, 2)
 
+	def test_component_uom_is_converted_to_stock_qty(self):
+		"A component measured in a non-stock UOM packs the converted stock quantity."
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		make_stock_entry(item=component, to_warehouse=self.warehouse, qty=100, rate=100)
+
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=True)
+		# 1 Box (= 12 Nos) x 2 bundles = 24 Nos, packed in the component's stock UOM
+		self.assertEqual(so.packed_items[0].qty, 24)
+		self.assertEqual(so.packed_items[0].uom, "Nos")
+
+	def test_get_items_from_product_bundle_converts_component_uom(self):
+		"The buying dialog returns component qty in stock units, like packing."
+		import json
+
+		from erpnext.stock.doctype.packed_item.packed_item import get_items_from_product_bundle
+
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+
+		items = get_items_from_product_bundle(
+			json.dumps(
+				{
+					"item_code": bundle,
+					"quantity": 2,
+					"doctype": "Purchase Order",
+					"parenttype": "Purchase Order",
+					"company": "_Test Company",
+					"currency": "INR",
+					"conversion_rate": 1,
+					"transaction_date": nowdate(),
+				}
+			)
+		)
+		self.assertEqual([i.qty for i in items], [24])  # 2 x 1 Box (= 12 Nos)
+
 	def test_updating_bundle_item(self):
 		"Test impact on packed items if bundle item row is updated."
 		so = make_sales_order(item_code=self.bundle, qty=1, do_not_submit=True)
@@ -77,6 +124,22 @@ class TestPackedItem(FrappeTestCase):
 		so.save()
 
 		self.assertEqual(len(so.packed_items), 0)
+
+	def test_updating_bundle_with_a_repeated_component(self):
+		component = make_item().name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.append("items", {"item_code": component, "qty": 3})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=1, do_not_submit=True)
+		self.assertEqual([pi.qty for pi in so.packed_items], [2, 3])
+
+		# both rows must scale with the bundle qty; the bug updated one and left the other stale
+		so.items[0].qty = 2
+		so.save()
+		self.assertEqual(sorted(pi.qty for pi in so.packed_items), [4, 6])
 
 	def test_recurring_bundle_item(self):
 		"Test impact on packed items if same bundle item is added and removed."
