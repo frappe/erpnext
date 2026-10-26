@@ -15,7 +15,11 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
-from erpnext.accounts.services.taxes import _get_taxes_and_charges, validate_deduct_with_valuation_category
+from erpnext.accounts.services.taxes import (
+	_get_taxes_and_charges,
+	is_deduct_with_valuation,
+	validate_deduct_with_valuation_category,
+)
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
 	is_rejected_material_valued,
@@ -59,7 +63,7 @@ class BuyingController(SubcontractingController):
 		validate_item_uoms(self.get("items"))
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
-		validate_deduct_with_valuation_category(self.get("taxes"))
+		self.validate_deduct_with_valuation_taxes()
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
@@ -451,6 +455,34 @@ class BuyingController(SubcontractingController):
 		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
 			msg = _('Tax Category has been changed to "Total" because all the Items are non-stock items')
 			self.update_tax_category(msg)
+
+	def validate_deduct_with_valuation_taxes(self):
+		taxes = [tax for tax in self.get("taxes") or [] if is_deduct_with_valuation(tax)]
+		if not taxes or self.get("is_return") or self.get("amended_from"):
+			return
+
+		validate_deduct_with_valuation_category(taxes, self.get_deduct_with_valuation_heads_from_source())
+
+	def get_deduct_with_valuation_heads_from_source(self) -> set:
+		source_fields = ("purchase_order", "purchase_receipt", "purchase_invoice", "supplier_quotation")
+		source_names = {item.get(field) for item in self.get("items") for field in source_fields} - {None, ""}
+		if not source_names:
+			return set()
+
+		taxes = frappe.qb.DocType("Purchase Taxes and Charges")
+		account_heads = (
+			frappe.qb.from_(taxes)
+			.select(taxes.account_head)
+			.distinct()
+			.where(
+				taxes.parent.isin(source_names)
+				& (taxes.docstatus == 1)
+				& (taxes.category == "Valuation")
+				& (taxes.add_deduct_tax == "Deduct")
+			)
+			.run(pluck=True)
+		)
+		return set(account_heads)
 
 	def update_tax_category(self, msg):
 		tax_for_valuation = [

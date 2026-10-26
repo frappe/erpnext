@@ -369,9 +369,15 @@ def validate_inclusive_tax(tax, doc) -> None:
 			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
-def validate_deduct_with_valuation_category(taxes: list | None) -> None:
+def is_deduct_with_valuation(tax) -> bool:
+	return tax.get("category") == "Valuation" and tax.get("add_deduct_tax") == "Deduct"
+
+
+def validate_deduct_with_valuation_category(
+	taxes: list | None, allowed_account_heads: set | None = None
+) -> None:
 	for tax in taxes or []:
-		if tax.get("category") == "Valuation" and tax.get("add_deduct_tax") == "Deduct":
+		if is_deduct_with_valuation(tax) and tax.account_head not in (allowed_account_heads or set()):
 			throw(
 				_("Row {0}: {1} cannot be {2} when {3} is {4}").format(
 					tax.idx,
