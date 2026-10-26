@@ -2253,25 +2253,34 @@ def update_voucher_outstanding(
 	)
 
 	if update_payment_schedule:
-		update_payment_schedule_outstanding(ref_doc, flt(previous_outstanding_amount) - outstanding_amount)
+		sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc)
 
 	update_linked_dunnings(ref_doc, previous_outstanding_amount)
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
 
 
-def update_payment_schedule_outstanding(ref_doc, amount):
-	"""Apply a change in invoice outstanding to its Payment Schedule.
-	A payment (positive amount) clears the earliest terms first, a reversal restores the latest first."""
-	if ref_doc.get("is_return") or not ref_doc.get("payment_schedule"):
+def sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc=None):
+	"""Make the Payment Schedule total outstanding match the invoice outstanding.
+
+	Reconciliation, unreconciliation and cancellation change the invoice outstanding through the
+	Payment Ledger only. Syncing to the absolute outstanding (not a delta) is idempotent and does not
+	depend on what else already touched the outstanding. Earliest due terms are cleared first, and
+	terms are restored latest first. ponytail: no per-term choice, add if users need to pick the term.
+	"""
+	ref_doc = ref_doc or frappe.get_doc(voucher_type, voucher_no)
+	if ref_doc.docstatus != 1 or ref_doc.get("is_return") or not ref_doc.get("payment_schedule"):
 		return
 
+	rate = 1
+	outstanding = flt(ref_doc.outstanding_amount)
 	if ref_doc.party_account_currency != ref_doc.currency:
 		# outstanding is in company currency, the schedule is in transaction currency
-		amount = amount / flt(ref_doc.conversion_rate or 1)
+		rate = flt(ref_doc.conversion_rate) or 1
+		outstanding /= rate
 
 	precision = ref_doc.precision("outstanding_amount")
-	amount = flt(amount, precision)
+	amount = flt(sum(flt(term.outstanding) for term in ref_doc.payment_schedule) - outstanding, precision)
 	terms = sorted(ref_doc.payment_schedule, key=lambda t: (getdate(t.due_date), t.idx), reverse=amount < 0)
 	for term in terms:
 		if not amount:
@@ -2285,7 +2294,7 @@ def update_payment_schedule_outstanding(ref_doc, amount):
 		if not change:
 			continue
 
-		base_change = flt(change * flt(ref_doc.conversion_rate or 1), term.precision("base_outstanding"))
+		base_change = flt(change * rate, term.precision("base_outstanding"))
 		term.db_set(
 			{
 				"outstanding": flt(term.outstanding) - change,

@@ -764,6 +764,93 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
 		self.assertEqual([t.paid_amount for t in si.payment_schedule], [0, 0])
 
+	def make_invoice_with_terms(self, **kwargs):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		si = self.create_sales_invoice(do_not_submit=True, **kwargs)
+		si.payment_terms_template = "Test Receivable Template"
+		si.set("payment_schedule", [])
+		return si.save().submit()
+
+	def reconcile_invoice_with_journal(self, si):
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices") if x.invoice_number == si.name]
+		payments = [x.as_dict() for x in pr.get("payments") if x.reference_type == "Journal Entry"]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+	def assert_schedule_matches_outstanding(self, si):
+		si.reload()
+		self.assertEqual(
+			flt(sum(t.outstanding for t in si.payment_schedule), 2), flt(si.outstanding_amount, 2)
+		)
+
+	def test_cancelling_reconciled_journal_restores_payment_schedule(self):
+		si = self.make_invoice_with_terms()
+		je = self.create_journal_entry(self.bank, self.debit_to, 90)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+		self.reconcile_invoice_with_journal(si)
+		self.assert_schedule_matches_outstanding(si)
+
+		je.reload().cancel()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 100)
+		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
+
+	def test_journal_reconciliation_after_partial_payment_against_first_term(self):
+		si = self.make_invoice_with_terms()
+		pe = get_payment_entry(si.doctype, si.name, party_amount=50)
+		pe.references = pe.references[:1]
+		pe.references[0].allocated_amount = 50
+		pe.save().submit()
+		self.assert_schedule_matches_outstanding(si)
+
+		je = self.create_journal_entry(self.bank, self.debit_to, 20)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+		self.reconcile_invoice_with_journal(si)
+		self.assert_schedule_matches_outstanding(si)
+		self.assertEqual(si.outstanding_amount, 30)
+
+		pe.reload().cancel()
+		self.assert_schedule_matches_outstanding(si)
+		self.assertEqual(si.outstanding_amount, 80)
+
+	def test_foreign_currency_journal_reconciliation_updates_payment_schedule(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		self.setup_split_exchange_accounts()
+		create_payment_terms_template()
+		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		si.customer, si.currency, si.conversion_rate = self.customer_usd, "USD", 80
+		si.debit_to = self.debtors_usd
+		si.payment_terms_template = "Test Receivable Template"
+		si.set("payment_schedule", [])
+		si.save().submit()
+		self.create_foreign_currency_journal_payment(self.debtors_usd, 85)
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer_usd
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [x.as_dict() for x in pr.get("invoices")],
+					"payments": [x.as_dict() for x in pr.get("payments")],
+				}
+			)
+		)
+		pr.reconcile()
+
+		self.assert_schedule_matches_outstanding(si)
+		self.assertEqual(si.outstanding_amount, 0)
+
 	def test_negative_debit_or_credit_journal_against_invoice(self):
 		transaction_date = nowdate()
 		amount = 100
