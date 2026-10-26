@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import get_default_company
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -130,8 +132,12 @@ def get_columns(filters):
 def get_data(filters):
 	data = []
 
-	company_list = get_descendants_of("Company", filters.get("company"))
-	company_list.append(filters.get("company"))
+	company = filters.get("company") or get_default_company()
+	if not company:
+		return data
+
+	company_list = get_descendants_of("Company", company)
+	company_list.append(company)
 
 	customer_details = get_customer_details()
 	item_details = get_item_details()
