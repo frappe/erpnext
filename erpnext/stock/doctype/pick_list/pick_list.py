@@ -112,6 +112,8 @@ class PickList(TransactionBase):
 
 	def validate(self):
 		self.set_stock_qty()
+		self.validate_uom_is_integer("uom", "qty", "Pick List Item")
+		self.validate_uom_is_integer("stock_uom", ["stock_qty", "picked_qty"], "Pick List Item")
 		self.validate_expired_batches()
 		self.validate_for_qty()
 		self.validate_stock_qty()
