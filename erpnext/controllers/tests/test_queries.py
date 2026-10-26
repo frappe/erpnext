@@ -307,3 +307,26 @@ class TestFormValueQueries(ERPNextTestSuite):
 		)
 		self.assertEqual(sales({"quotation_to": "Lead", "party_name": "L"})["customer"], None)
 		self.assertEqual(sales({"customer": "P"})["customer"], "P")
+
+	def test_dimension_and_project_queries(self):
+		self.assertEqual(
+			get_search_filters(
+				queries.dimension_query,
+				"Cost Center",
+				{"dimension": "cost_center", "accounts": [None, "", "A", "B"], "company": "C"},
+				"erpnext.controllers.queries.get_filtered_dimensions",
+			),
+			{"dimension": "cost_center", "account": "A", "company": "C"},
+		)
+
+		project = partial(
+			get_search_filters,
+			queries.project_query,
+			"Project",
+			search="erpnext.controllers.queries.get_project_name",
+		)
+		self.assertEqual(
+			project({"company": "C", "party_type": "Customer", "party": "P"}),
+			{"company": "C", "customer": "P"},
+		)
+		self.assertEqual(project({"company": "C", "party_type": "Supplier", "party": "P"}), {"company": "C"})
