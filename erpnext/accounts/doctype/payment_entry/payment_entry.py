@@ -2739,8 +2739,19 @@ def get_reference_details(
 
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		if ref_doc.multi_currency:
-			exchange_rate = get_journal_entry_exchange_rate(
-				reference_name, party_type, party, party_account_currency, party_account
+			exchange_rate = get_revalued_exchange_rate(
+				reference_doctype,
+				reference_name,
+				posting_date,
+				account=party_account,
+				party_type=party_type,
+				party=party,
+			) or get_journal_entry_exchange_rate(
+				reference_name,
+				party_type,
+				party,
+				party_account_currency,
+				party_account,
 			)
 		else:
 			exchange_rate = 1
