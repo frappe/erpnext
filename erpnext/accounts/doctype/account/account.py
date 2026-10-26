@@ -652,7 +652,7 @@ def set_account_name_and_number(account: Account, account_name: str, account_num
 		return new_name
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def merge_account(old: str, new: str):
 	_ensure_idle_system()
 	new_account = frappe.get_cached_doc("Account", new)
