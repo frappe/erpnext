@@ -269,7 +269,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 
 	def test_sub_assembly_plan_includes_process_loss(self):
 		field = "production_plan_sub_assembly_item"
-		plan = self.make_plan(qty=90, plan_process_loss=True)
+		plan = self.make_plan(qty=81, plan_process_loss=True)
 		row = self.plan_row(plan, field)
 		self.assertEqual((row.required_qty, row.process_loss_percentage, row.qty), (90, 10, 100))
 
@@ -284,11 +284,26 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 
 	def test_unplanned_sub_assembly_loss_creates_replacement(self):
 		field = "production_plan_sub_assembly_item"
-		plan = self.make_plan(qty=90, plan_process_loss=True)
+		plan = self.make_plan(qty=81, plan_process_loss=True)
 		work_order = self.create_work_order(plan, field)
 		work_order.submit()
 		self.manufacture_with_loss(work_order, loss_qty=25)
 		self.assert_pending_qty(plan, field, 15)
+
+	def test_finished_good_plan_includes_process_loss(self):
+		field = "production_plan_item"
+		plan = self.make_plan(qty=90, plan_process_loss=True)
+		row = self.plan_row(plan, field)
+		self.assertEqual((row.planned_qty, row.process_loss_percentage), (90, 10))
+
+		work_order = self.create_work_order(plan, field)
+		self.assertEqual(work_order.qty, 100)
+		self.assert_overproduction(work_order, 101)
+		work_order.qty = 100
+		work_order.submit()
+		self.manufacture_with_loss(work_order)
+		self.assertEqual(work_order.reload().produced_qty, 90)
+		self.assert_pending_qty(plan, field, 0)
 
 	def test_stopped_and_closed_orders_consume_quantity(self):
 		plan = self.make_plan()
@@ -324,6 +339,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		row["planned_qty"] = 50
 		plan.append("po_items", row)
 		plan.submit()
+		self.clear_planned_loss(plan)
 		first = self.create_work_order(plan, "production_plan_item")
 		first.submit()
 		plan.onload()
@@ -341,6 +357,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		plan = self.make_plan(submit=False)
 		plan.get_items_from = "Material Request"
 		plan.submit()
+		self.clear_planned_loss(plan)
 		first = self.create_work_order(plan, "production_plan_item")
 		first.qty = 50
 		first.submit()
@@ -378,12 +395,19 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		)
 		plan.get_sub_assembly_items()
 		if not plan_process_loss:
-			# As planned before rows included process loss: only recorded loss frees quantity.
+			# The fixture BOMs are 1:1, so the sub-assembly needs the planned quantity.
 			for row in plan.sub_assembly_items:
-				row.update({"qty": row.required_qty, "process_loss_percentage": 0})
+				row.update({"required_qty": qty, "qty": qty, "process_loss_percentage": 0})
 		if submit:
 			plan.submit()
+			if not plan_process_loss:
+				self.clear_planned_loss(plan)
 		return plan
+
+	def clear_planned_loss(self, plan):
+		"""Keep rows as planned before they included process loss: only recorded loss frees quantity."""
+		for row in plan.po_items:
+			row.db_set("process_loss_percentage", 0)
 
 	def make_bom_with_operation(self, item, material):
 		bom = make_bom(item=item, raw_materials=[material], with_operations=1, do_not_save=True)
