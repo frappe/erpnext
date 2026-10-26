@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import qb
+from frappe.desk.notifications import get_open_count
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, nowdate
 
@@ -33,6 +34,20 @@ test_dependencies = ["Item"]
 class TestPaymentEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
+
+	def test_dashboard_shows_linked_exchange_gain_loss_journal(self):
+		payment_entry = create_payment_entry(save=True)
+		journal_entry = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 100, save=False)
+		journal_entry.accounts[0].reference_type = payment_entry.doctype
+		journal_entry.accounts[0].reference_name = payment_entry.name
+		journal_entry.insert()
+
+		dashboard = get_open_count(payment_entry.doctype, payment_entry.name)
+		linked_counts = {
+			link["doctype"]: link["count"] for link in dashboard["count"]["external_links_found"]
+		}
+
+		self.assertEqual(linked_counts["Journal Entry"], 1)
 
 	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
 		journals = []
