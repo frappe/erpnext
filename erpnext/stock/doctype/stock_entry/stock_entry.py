@@ -3354,6 +3354,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.items = []
 
 		if self.outgoing_stock_entry and self.purpose == "Material Transfer":
+			erpnext.require_permission("Stock Entry", self.outgoing_stock_entry)
 			doc = frappe.get_doc("Stock Entry", self.outgoing_stock_entry)
 
 			if doc.per_transferred == 100:
