@@ -224,12 +224,18 @@ class POSService:
 			fields=["fieldname", "label"],
 		)
 		missing_fields = [_(field.label) for field in mandatory_fields if not doc.get(field.fieldname)]
-		if missing_fields:
-			frappe.throw(
-				_("{0} are mandatory in POS Settings").format(", ".join(map(frappe.bold, missing_fields))),
-				frappe.MandatoryError,
-				title=_("Missing POS Fields"),
-			)
+		if not missing_fields:
+			return
+
+		message = _("{0} is mandatory in POS Settings")
+		if len(missing_fields) > 1:
+			message = _("{0} are mandatory in POS Settings")
+
+		frappe.throw(
+			message.format(", ".join(map(frappe.bold, missing_fields))),
+			frappe.MandatoryError,
+			title=_("Missing POS Fields"),
+		)
 
 	def validate_created_using_pos(self) -> None:
 		doc = self.doc

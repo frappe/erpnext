@@ -179,7 +179,9 @@ class TestPOSSettings(ERPNextTestSuite):
 		sale = create_pos_invoice(rate=100, do_not_save=1)
 		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 		sale.insert()
-		self.assertRaises(frappe.MandatoryError, sale.submit)
+		with self.assertRaises(frappe.MandatoryError) as context:
+			sale.submit()
+		self.assertIn("is mandatory in POS Settings", str(context.exception))
 
 		sale.reload()
 		sale.po_no = "Counter 1"
