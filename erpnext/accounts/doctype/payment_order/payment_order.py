@@ -7,6 +7,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import nowdate
 
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_payment_request_status,
+	get_requested_amount_in_party_account_currency,
+)
 from erpnext.accounts.party import get_party_account
 
 
@@ -103,18 +107,26 @@ class PaymentOrder(Document):
 		if not self.payment_order_type or not references:
 			return
 
-		reference_docstatus = frappe._dict(
-			frappe.get_all(
+		reference_status = {
+			reference.name: reference
+			for reference in frappe.get_all(
 				self.payment_order_type,
 				filters={"name": ["in", references]},
-				fields=["name", "docstatus"],
-				as_list=True,
+				fields=["name", "docstatus", "status"],
 			)
-		)
+		}
 		for d in self.references:
-			if reference_docstatus.get(d.get(self.reference_field)) != 1:
+			reference = reference_status.get(d.get(self.reference_field))
+			if not reference or reference.docstatus != 1:
 				frappe.throw(
 					_("Row #{0}: {1} {2} must be submitted").format(
+						d.idx, _(self.payment_order_type), d.get(self.reference_field)
+					)
+				)
+
+			if reference.status == "Paid":
+				frappe.throw(
+					_("Row #{0}: {1} {2} is already paid").format(
 						d.idx, _(self.payment_order_type), d.get(self.reference_field)
 					)
 				)
@@ -175,19 +187,43 @@ class PaymentOrder(Document):
 		self.update_payment_status(cancel=True)
 
 	def update_payment_status(self, cancel=False):
-		status = "Payment Ordered"
-		if cancel:
-			status = "Initiated"
-
 		if self.payment_order_type == "Payment Request":
-			ref_field = "status"
-			ref_doc_field = frappe.scrub(self.payment_order_type)
-		else:
-			ref_field = "payment_order_status"
-			ref_doc_field = "reference_name"
+			self.update_payment_request_status(cancel)
+			return
 
+		status = "Initiated" if cancel else "Payment Ordered"
 		for d in self.references:
-			frappe.db.set_value(self.payment_order_type, d.get(ref_doc_field), ref_field, status)
+			frappe.db.set_value(self.payment_order_type, d.reference_name, "payment_order_status", status)
+
+	def update_payment_request_status(self, cancel=False):
+		precision = frappe.get_precision("Payment Request", "outstanding_amount")
+		payment_requests = frappe.get_all(
+			"Payment Request",
+			filters={"name": ["in", self.get_reference_names()]},
+			fields=[
+				"name",
+				"grand_total",
+				"outstanding_amount",
+				"payment_request_type",
+				"currency",
+				"party_account_currency",
+				"company",
+				"reference_doctype",
+				"reference_name",
+			],
+		)
+
+		for payment_request in payment_requests:
+			status = "Payment Ordered"
+			if cancel:
+				status = get_payment_request_status(
+					payment_request,
+					payment_request.outstanding_amount,
+					get_requested_amount_in_party_account_currency(payment_request),
+					precision,
+				)
+
+			frappe.db.set_value("Payment Request", payment_request.name, "status", status)
 
 
 def _readable_payment_order(filters: dict) -> str | None:

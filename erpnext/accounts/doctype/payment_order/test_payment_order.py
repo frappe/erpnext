@@ -76,8 +76,35 @@ class TestPaymentOrder(ERPNextTestSuite):
 		payment_order.company_bank_account = self.bank_account
 		self.assertRaisesRegex(frappe.ValidationError, "must be submitted", payment_order.insert)
 
+	def test_payment_order_keeps_payment_request_status(self):
+		payment_request = self.make_payment_request()
+		payment_entry = payment_request.create_payment_entry(submit=False)
+		payment_entry.paid_amount = payment_entry.received_amount = 400
+		payment_entry.references[0].allocated_amount = 400
+		payment_entry.submit()
+
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		payment_order.submit()
+		self.assertEqual(payment_order.references[0].amount, 600)
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, "status"), "Payment Ordered"
+		)
+
+		payment_order.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, "status"), "Partially Paid"
+		)
+
+		payment_request.reload()
+		payment_request.create_payment_entry()
+		paid_order = make_payment_order_from_payment_request(payment_request.name)
+		paid_order.company_bank_account = self.bank_account
+		self.assertRaisesRegex(frappe.ValidationError, "is already paid", paid_order.insert)
+
 	def make_payment_request(self, submit_doc=1, rate=1000):
-		purchase_invoice = make_purchase_invoice(rate=rate)
+		purchase_invoice = make_purchase_invoice(qty=1, rate=rate)
 		if not frappe.db.exists("Bank Account", {"party_type": "Supplier", "party": "_Test Supplier"}):
 			frappe.get_doc(
 				{
