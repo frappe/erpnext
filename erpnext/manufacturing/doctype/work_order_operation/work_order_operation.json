@@ -22,6 +22,7 @@
   "section_break_insy",
   "bom_no",
   "finished_good",
+  "output_qty",
   "is_subcontracted",
   "skip_material_transfer",
   "backflush_from_wip_warehouse",
@@ -265,6 +266,14 @@
    "read_only": 1
   },
   {
+   "description": "Quantity of the output item this operation makes for the whole Work Order",
+   "fieldname": "output_qty",
+   "fieldtype": "Float",
+   "label": "Output Qty",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
    "columns": 1,
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
@@ -326,7 +335,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-20 15:00:00.000000",
+ "modified": "2026-10-24 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
