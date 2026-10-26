@@ -508,10 +508,22 @@ def set_default_accounts(company):
 	company.update(
 		{
 			"default_receivable_account": frappe.db.get_value(
-				"Account", {"company": company.name, "account_type": "Receivable", "is_group": 0}
+				"Account",
+				{
+					"company": company.name,
+					"account_type": "Receivable",
+					"is_group": 0,
+					"account_currency": company.default_currency,
+				},
 			),
 			"default_payable_account": frappe.db.get_value(
-				"Account", {"company": company.name, "account_type": "Payable", "is_group": 0}
+				"Account",
+				{
+					"company": company.name,
+					"account_type": "Payable",
+					"is_group": 0,
+					"account_currency": company.default_currency,
+				},
 			),
 			"default_provisional_account": frappe.db.get_value(
 				"Account",
