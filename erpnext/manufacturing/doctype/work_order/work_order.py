@@ -687,10 +687,25 @@ class WorkOrder(Document):
 				"Batch", filters={"reference_name": self.name}, order_by="creation", pluck="name"
 			)
 
+<<<<<<< HEAD
 		serial_nos = []
 		if item_details.serial_no_series:
 			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
+=======
+		if not item_details.serial_no_series:
+			frappe.throw(
+				_("Set Serial No Series in Item {0} or disable {1} in {2}").format(
+					get_link_to_form("Item", self.production_item),
+					frappe.bold(_("Make Serial No / Batch from Work Order")),
+					get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+				),
+				title=_("Serial No Series Missing"),
+			)
+>>>>>>> 52f1f52 (fix(manufacturing): require serial no series on work order submit)
 
+		serial_nos = get_available_serial_nos(
+			item_details.serial_no_series, qty or self.qty, self.production_item
+		)
 		if not serial_nos:
 			return
 
