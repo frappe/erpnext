@@ -312,6 +312,12 @@ export class BomTree {
 		const part = this.view.get_part(node_id);
 		const item_code = node_id ? part.item_code : this.frm.doc.item_code;
 		const items = [];
+		if (!part || this.is_group(part)) {
+			items.push(
+				{ label: __("Expand All"), action: () => this.set_collapsed(node_id, false) },
+				{ label: __("Collapse All"), action: () => this.set_collapsed(node_id, true) }
+			);
+		}
 		if (part && this.get_existing_bom(part)) {
 			items.push(
 				{ label: __("Change Existing BOM"), action: () => this.include_existing_bom(part) },
@@ -389,6 +395,21 @@ export class BomTree {
 
 	has_children(part) {
 		return Boolean(this.view.children[part.node_id]?.length);
+	}
+
+	is_group(part) {
+		return !part.exclude_from_bom && (this.has_children(part) || Boolean(this.get_existing_bom(part)));
+	}
+
+	set_collapsed(node_id, collapsed) {
+		for (const group_node_id of this.get_group_node_ids(node_id)) {
+			collapsed ? this.collapsed.add(group_node_id) : this.collapsed.delete(group_node_id);
+		}
+	}
+
+	get_group_node_ids(node_id) {
+		const groups = (this.view.children[node_id] || []).filter((part) => this.is_group(part));
+		return [node_id, ...groups.flatMap((part) => this.get_group_node_ids(part.node_id))];
 	}
 
 	get_thumbnail(node_id, item_code) {
