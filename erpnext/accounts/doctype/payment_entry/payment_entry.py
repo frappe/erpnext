@@ -3482,3 +3482,33 @@ def get_linked_bank_transactions(payment_entry: str) -> list:
 		},
 		pluck="parent",
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def account_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The accounts Paid From or Paid To can take: `bank_payment_type` is the payment type that
+	pays from (or to) a bank, and `other_account` the account on the other side."""
+	from erpnext.controllers.queries import standard_search
+
+	party_type = filters.get("party_type")
+	payment_type = filters.get("payment_type")
+	if payment_type in (filters.get("bank_payment_type"), "Internal Transfer"):
+		account_types = ["Bank", "Cash"]
+	else:
+		account_types = [erpnext.get_party_account_type(party_type) if party_type else None]
+
+	if party_type == "Shareholder":
+		account_types.append("Equity")
+
+	account_filters = {
+		"account_type": ["in", account_types],
+		"is_group": 0,
+		"company": filters.get("company"),
+	}
+	if payment_type == "Internal Transfer" and filters.get("other_account"):
+		account_filters["name"] = ["!=", filters["other_account"]]
+
+	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)

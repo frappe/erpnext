@@ -44,25 +44,15 @@ frappe.ui.form.on("Payment Entry", {
 
 		frm.set_query("paid_from", function (doc) {
 			frm.events.validate_company(frm);
-
-			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type)
-				? ["Bank", "Cash"]
-				: [frappe.boot.party_account_types[frm.doc.party_type]];
-			let filters = {
-				account_type: ["in", account_types],
-				is_group: 0,
-				company: doc.company,
-			};
-
-			if (frm.doc.party_type == "Shareholder") {
-				account_types.push("Equity");
-			}
-			if (doc.payment_type == "Internal Transfer" && doc.paid_to) {
-				filters.name = ["!=", doc.paid_to];
-			}
-
 			return {
-				filters,
+				query: "erpnext.accounts.doctype.payment_entry.payment_entry.account_query",
+				filters: {
+					payment_type: doc.payment_type,
+					bank_payment_type: "Pay",
+					party_type: doc.party_type,
+					company: doc.company,
+					other_account: doc.paid_to,
+				},
 			};
 		});
 
@@ -108,23 +98,15 @@ frappe.ui.form.on("Payment Entry", {
 
 		frm.set_query("paid_to", function (doc) {
 			frm.events.validate_company(frm);
-
-			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type)
-				? ["Bank", "Cash"]
-				: [frappe.boot.party_account_types[frm.doc.party_type]];
-			let filters = {
-				account_type: ["in", account_types],
-				is_group: 0,
-				company: doc.company,
-			};
-			if (frm.doc.party_type == "Shareholder") {
-				account_types.push("Equity");
-			}
-			if (doc.payment_type == "Internal Transfer" && doc.paid_from) {
-				filters.name = ["!=", doc.paid_from];
-			}
 			return {
-				filters,
+				query: "erpnext.accounts.doctype.payment_entry.payment_entry.account_query",
+				filters: {
+					payment_type: doc.payment_type,
+					bank_payment_type: "Receive",
+					party_type: doc.party_type,
+					company: doc.company,
+					other_account: doc.paid_from,
+				},
 			};
 		});
 
