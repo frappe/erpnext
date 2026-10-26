@@ -77,8 +77,14 @@ class General_Payment_Ledger_Comparison:
 
 				if acc_type == "receivable":
 					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
+					outstanding_in_account_currency = (
+						Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency)
+					).as_("outstanding_in_account_currency")
 				else:
 					outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
+					outstanding_in_account_currency = (
+						Sum(gle.credit_in_account_currency) - Sum(gle.debit_in_account_currency)
+					).as_("outstanding_in_account_currency")
 
 				# unallocated amounts have no against voucher in GL but point to themselves in Payment Ledger
 				against_voucher_type = IfNull(NullIf(gle.against_voucher_type, ""), gle.voucher_type)
@@ -96,6 +102,7 @@ class General_Payment_Ledger_Comparison:
 						against_voucher_type,
 						against_voucher,
 						outstanding,
+						outstanding_in_account_currency,
 					)
 					.where(
 						(gle.company == self.filters.company)
@@ -149,6 +156,7 @@ class General_Payment_Ledger_Comparison:
 						ple.against_voucher_type,
 						ple.against_voucher_no,
 						Sum(ple.amount).as_("outstanding"),
+						Sum(ple.amount_in_account_currency).as_("outstanding_in_account_currency"),
 					)
 					.where(
 						(ple.company == self.filters.company)
@@ -184,24 +192,28 @@ class General_Payment_Ledger_Comparison:
 		self.diff = frappe._dict({})
 
 		for x in self.variation_in_payment_ledger:
-			self.diff[x[:-1]] = frappe._dict({"gl_balance": x[-1]})
+			self.diff[x[:-2]] = frappe._dict({"gl_balance": x[-2], "gl_balance_in_account_currency": x[-1]})
 
 		for x in self.variation_in_general_ledger:
-			self.diff.setdefault(x[:-1], frappe._dict({"gl_balance": 0.0})).update(
-				frappe._dict({"pl_balance": x[-1]})
-			)
+			self.diff.setdefault(
+				x[:-2], frappe._dict({"gl_balance": 0.0, "gl_balance_in_account_currency": 0.0})
+			).update(frappe._dict({"pl_balance": x[-2], "pl_balance_in_account_currency": x[-1]}))
 
 	def fold_reconciled_allocations(self) -> set[tuple]:
 		"""Reconciliation re-points Payment Ledger rows to invoices but leaves the GL entry unallocated,
 		so count such rows under the voucher's unallocated GL row."""
-		gl_keys = {row[:-1] for row in self.gle_balances}
+		gl_keys = {row[:-2] for row in self.gle_balances}
 		balances = {}
 		for row in self.ple_balances:
-			key, unallocated = row[:-1], (*row[:6], row[2], row[3])
+			key, unallocated = row[:-2], (*row[:6], row[2], row[3])
 			if key not in gl_keys and unallocated in gl_keys:
 				key = unallocated
-			balances[key] = flt(balances[key] + row[-1], 9) if key in balances else row[-1]
-		return {(*key, amount) for key, amount in balances.items()}
+			balances[key] = (
+				tuple(flt(total + amount, 9) for total, amount in zip(balances[key], row[-2:], strict=True))
+				if key in balances
+				else row[-2:]
+			)
+		return {(*key, *amounts) for key, amounts in balances.items()}
 
 	def remove_restricted_parties(self):
 		permitted = self.get_permitted_parties()
@@ -238,6 +250,9 @@ class General_Payment_Ledger_Comparison:
 						"against_voucher_no": key[7],
 						"gl_balance": val.gl_balance,
 						"pl_balance": val.pl_balance,
+						"account_currency": frappe.get_cached_value("Account", key[1], "account_currency"),
+						"gl_balance_in_account_currency": val.gl_balance_in_account_currency,
+						"pl_balance_in_account_currency": val.pl_balance_in_account_currency,
 					}
 				)
 			)
@@ -341,6 +356,26 @@ class General_Payment_Ledger_Comparison:
 				fieldtype="Currency",
 				options="Company:company:default_currency",
 				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("GL Balance (Account Currency)"),
+				fieldname="gl_balance_in_account_currency",
+				fieldtype="Currency",
+				options="account_currency",
+				width="200",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Payment Ledger Balance (Account Currency)"),
+				fieldname="pl_balance_in_account_currency",
+				fieldtype="Currency",
+				options="account_currency",
+				width="200",
 			)
 		)
 

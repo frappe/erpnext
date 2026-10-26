@@ -60,6 +60,9 @@ class TestGeneralAndPaymentLedger(ERPNextTestSuite, AccountsTestMixin):
 			"against_voucher_no": sinv.name,
 			"gl_balance": sinv.grand_total,
 			"pl_balance": sinv.grand_total - 1,
+			"account_currency": "INR",
+			"gl_balance_in_account_currency": sinv.grand_total,
+			"pl_balance_in_account_currency": sinv.grand_total,
 		}
 		self.assertEqual(expected, data[0])
 
