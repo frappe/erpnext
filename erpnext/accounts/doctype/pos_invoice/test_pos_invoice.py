@@ -1277,6 +1277,23 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_return.cancel()
 		self.assertEqual(frappe.db.get_value("POS Invoice", pos.name, "status"), "Paid")
 
+	def test_cancel_return_made_in_sales_invoice_mode(self):
+		pos = create_pos_invoice(qty=2, rate=100, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200})
+		pos.insert().submit()
+		make_merge_log_for(pos)
+
+		frappe.db.set_single_value("POS Settings", "invoice_type", "Sales Invoice")
+		pos_return = make_sales_return(pos.name)
+		pos_return.items[0].qty = -1
+		for payment in pos_return.payments:
+			payment.amount = -100 if payment.idx == 1 else 0
+		pos_return.paid_amount = pos_return.base_paid_amount = -100
+		pos_return.insert().submit()
+		pos_return.reload()
+
+		self.assertRaisesRegex(frappe.ValidationError, pos_return.consolidated_invoice, pos_return.cancel)
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name
