@@ -456,7 +456,7 @@ def get_pricing_rule_for_item(args, doc=None):
 
 	if args.ignore_pricing_rule or not args.item_code:
 		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rules"):
-			item_details = remove_pricing_rule_for_item(
+			item_details = reset_pricing_rule_details(
 				args.get("pricing_rules"),
 				item_details,
 				item_code=args.get("item_code"),
@@ -504,7 +504,7 @@ def get_pricing_rule_for_item(args, doc=None):
 
 	if pricing_rules:
 		if removed_rules:
-			item_details = remove_pricing_rule_for_item(
+			item_details = reset_pricing_rule_details(
 				frappe.as_json(removed_rules),
 				item_details,
 				item_code=args.item_code,
@@ -588,7 +588,7 @@ def get_pricing_rule_for_item(args, doc=None):
 
 	# "[]" means no rule was applied, so keep the manually entered rate.
 	if not rules and applied_rules:
-		item_details = remove_pricing_rule_for_item(
+		item_details = reset_pricing_rule_details(
 			args.get("pricing_rules"),
 			item_details,
 			item_code=args.get("item_code"),
@@ -727,12 +727,17 @@ def remove_pricing_rule_for_item(
 	item_code: str | None = None,
 	rate: float | None = None,
 ):
+	item_details = frappe._dict(frappe.parse_json(item_details))
+	validate_pricing_context(frappe._dict(doctype=item_details.parenttype, name=item_details.parent))
+
+	return reset_pricing_rule_details(pricing_rules, item_details, item_code=item_code, rate=rate)
+
+
+def reset_pricing_rule_details(pricing_rules, item_details, item_code=None, rate=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 	)
-
-	item_details = frappe._dict(frappe.parse_json(item_details))
 
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d):
@@ -770,14 +775,15 @@ def remove_pricing_rule_for_item(
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list: str | list):
-	item_list = frappe.parse_json(item_list)
+	item_list = [frappe._dict(item) for item in frappe.parse_json(item_list)]
+	for doctype, name in {(item.parenttype, item.parent) for item in item_list}:
+		validate_pricing_context(frappe._dict(doctype=doctype, name=name))
 
 	out = []
 	for item in item_list:
-		item = frappe._dict(item)
 		if item.get("pricing_rules"):
 			out.append(
-				remove_pricing_rule_for_item(
+				reset_pricing_rule_details(
 					item.get("pricing_rules"), item, item.item_code, item.get("price_list_rate")
 				)
 			)
