@@ -277,6 +277,14 @@ class PricingRule(Document):
 			if flt(self.recurse_for) <= 0:
 				self.recurse_for = 1
 		if self.is_recursive:
+			if self.apply_on == "Transaction":
+				throw(
+					_("{0} is not supported when {1} is {2}").format(
+						frappe.bold(_("Is Recursive")),
+						frappe.bold(_("Apply On")),
+						frappe.bold(_("Transaction")),
+					)
+				)
 			if flt(self.apply_recursion_over) > flt(self.min_qty):
 				throw(_("Min Qty should be greater than Recurse Over Qty"))
 			if flt(self.apply_recursion_over) < 0:

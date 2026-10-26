@@ -2065,6 +2065,25 @@ class TestPricingRule(ERPNextTestSuite):
 			row.stock_qty = row.qty
 			self.assertEqual(get_pricing_details_for_row(si, row).discount_percentage, 5)
 
+	def test_recursive_product_rule_on_transaction_is_not_allowed(self):
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Transaction Rule",
+				"apply_on": "Transaction",
+				"selling": 1,
+				"company": "_Test Company",
+				"currency": "INR",
+				"price_or_product_discount": "Product",
+				"free_item": free_item,
+				"free_qty": 1,
+				"is_recursive": 1,
+				"recurse_for": 1,
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is not supported", rule.insert)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
