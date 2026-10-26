@@ -1001,6 +1001,16 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			frappe.PermissionError, get_period_start_end_date, "_Test Fiscal Year 2021", "Test PCV Company"
 		)
 
+	def test_incomplete_previous_closing_blocks_next_closing(self):
+		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
+		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
+		failed_pcv = self.make_period_closing_voucher_with_mapreduce(posting_date="2021-12-31")
+		self.assertEqual(failed_pcv.gle_processing_status, "Failed")
+
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
+		with self.assertRaisesRegex(frappe.ValidationError, f"{failed_pcv.name}.*GL Entry Processing Status"):
+			self.make_period_closing_voucher(posting_date="2022-12-31")
+
 
 def create_account():
 	account = frappe.get_doc(

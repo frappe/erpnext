@@ -92,19 +92,30 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.throw(_("Period End Date cannot be greater than Fiscal Year End Date"))
 
 	def check_if_previous_year_closed(self):
-		last_closed_date = self.get_last_closed_date()
+		last_closing = self.get_last_closing()
+		if last_closing and last_closing.gle_processing_status != "Completed":
+			frappe.throw(
+				_(
+					"Period Closing Voucher {0} has GL Entry Processing Status {1}. Complete or cancel it before closing the next period."
+				).format(
+					get_link_to_form(self.doctype, last_closing.name), _(last_closing.gle_processing_status)
+				)
+			)
+
+		last_closed_date = last_closing.period_end_date if last_closing else None
 		if last_closed_date and getdate(add_days(last_closed_date, 1)) == getdate(self.period_start_date):
 			return
 
 		if self.has_unclosed_gl_entries(last_closed_date):
 			frappe.throw(_("Previous Year is not closed, please close it first"))
 
-	def get_last_closed_date(self):
+	def get_last_closing(self):
 		return frappe.db.get_value(
 			"Period Closing Voucher",
 			{"company": self.company, "docstatus": 1, "period_end_date": ("<", self.period_start_date)},
-			"period_end_date",
+			["name", "period_end_date", "gle_processing_status"],
 			order_by="period_end_date desc",
+			as_dict=True,
 		)
 
 	def has_unclosed_gl_entries(self, last_closed_date):
