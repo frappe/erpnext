@@ -88,25 +88,14 @@ erpnext.buying = {
 				erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
 				this.frm.set_query("item_code", "items", function () {
-					if (me.frm.doc.is_subcontracted) {
-						var filters = { supplier: me.frm.doc.supplier, company: me.frm.doc.company };
-						filters["is_stock_item"] = 0;
-
-						return {
-							query: "erpnext.controllers.queries.item_query",
-							filters: filters,
-						};
-					} else {
-						return {
-							query: "erpnext.controllers.queries.item_query",
-							filters: {
-								supplier: me.frm.doc.supplier,
-								is_purchase_item: 1,
-								has_variants: 0,
-								company: me.frm.doc.company,
-							},
-						};
-					}
+					return {
+						query: "erpnext.controllers.queries.purchase_item_query",
+						filters: {
+							supplier: me.frm.doc.supplier,
+							company: me.frm.doc.company,
+							is_subcontracted: me.frm.doc.is_subcontracted,
+						},
+					};
 				});
 
 				this.frm.set_query("manufacturer", "items", function (doc, cdt, cdn) {

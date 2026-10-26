@@ -1479,3 +1479,37 @@ def item_warehouse_query(
 	return frappe.call(
 		warehouse_query, doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def purchase_item_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The items a purchase can buy: non-stock ones when subcontracted, else purchase items."""
+	item_filters = {"supplier": filters.get("supplier"), "company": filters.get("company")}
+	if filters.get("is_subcontracted"):
+		item_filters["is_stock_item"] = 0
+	else:
+		item_filters.update({"is_purchase_item": 1, "has_variants": 0})
+
+	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def sales_item_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The items a sale can sell, to its customer: a Quotation's party when it is a customer."""
+	customer = filters.get("customer")
+	if filters.get("quotation_to") == "Customer":
+		customer = filters.get("party_name")
+
+	item_filters = {
+		"is_sales_item": 1,
+		"customer": customer,
+		"has_variants": 0,
+		"company": filters.get("company"),
+	}
+	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
