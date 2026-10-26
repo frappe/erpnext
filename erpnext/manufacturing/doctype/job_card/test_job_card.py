@@ -1623,9 +1623,26 @@ class TestJobCard(ERPNextTestSuite):
 
 		second.reload()
 		second.for_quantity = 95
+		second.time_logs[0].completed_qty = 90
 		second.save()
 		second.submit()
-		self.assertEqual(second.process_loss_qty, 0)
+		self.assertEqual(second.process_loss_qty, 5)
+
+		# A later card without loss can't use the qty already lost.
+		make_job_card(
+			work_order.name,
+			[{"name": second.operation_id, "operation": second.operation, "qty": 5, "pending_qty": 5}],
+		)
+		extra = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		extra.append(
+			"time_logs",
+			{
+				"from_time": "2024-04-10 10:00:00",
+				"to_time": "2024-04-10 10:30:00",
+				"completed_qty": 5,
+			},
+		)
+		self.assertRaises(OperationSequenceError, extra.submit)
 
 	def complete_second_operation_and_finish(self, wo_doc, job_card):
 		from erpnext.manufacturing.doctype.work_order.mapper import (

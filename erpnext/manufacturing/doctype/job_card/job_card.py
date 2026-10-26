@@ -191,12 +191,13 @@ class JobCard(Document):
 		self.set_operation_id()
 		self.set_hour_rate()
 		self.validate_sequence_id()
-		if self.docstatus == 1:
-			self.validate_input_from_previous_operations()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
 		if self.sub_operations:
 			self.set_total_completed_qty_from_sub_operations()
+
+		if self.docstatus == 1:
+			self.validate_input_from_previous_operations()
 
 		self.validate_on_hold()
 		self.validate_pending_qty()
@@ -1735,19 +1736,23 @@ class JobCard(Document):
 		later_operations = frappe.get_all(
 			"Work Order Operation",
 			filters={"parent": self.work_order, "sequence_id": (">", self.sequence_id)},
-			fields=["operation", "completed_qty", "output_qty"],
+			fields=["operation", "completed_qty", "process_loss_qty", "output_qty"],
 		)
 		if self.track_semi_finished_goods:
 			self.convert_to_current_operation_qty(later_operations, ["completed_qty"])
 
 		for row in later_operations:
-			if flt(row.completed_qty) > operation_qty:
+			used_qty = flt(
+				flt(row.completed_qty) + (0 if self.track_semi_finished_goods else flt(row.process_loss_qty)),
+				self.precision("total_completed_qty"),
+			)
+			if used_qty > operation_qty:
 				frappe.throw(
 					_(
-						"Operation {0} has already completed {1}, more than the {2} that operation {3} would have. Cancel the Job Cards of operation {0} first."
+						"Operation {0} has already completed or lost {1}, more than the {2} that operation {3} would have. Cancel the Job Cards of operation {0} first."
 					).format(
 						bold(row.operation),
-						bold(self.get_qty_with_uom(row.completed_qty)),
+						bold(self.get_qty_with_uom(used_qty)),
 						bold(self.get_qty_with_uom(operation_qty)),
 						bold(self.operation),
 					),
@@ -1857,7 +1862,7 @@ class JobCard(Document):
 
 	def validate_input_from_previous_operations(self):
 		"""Completed qty and process loss together can't exceed what the previous operation completed."""
-		if self.is_corrective_job_card or self.track_semi_finished_goods or not flt(self.process_loss_qty):
+		if self.is_corrective_job_card or self.track_semi_finished_goods:
 			return
 
 		previous_operations = self.get_previous_operations() if self.work_order and self.sequence_id else []
