@@ -56,6 +56,17 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "incomplete or damaged", read_step_file, content)
 
+	def test_design_file_must_be_readable_by_the_user(self):
+		from frappe.core.doctype.file.file import File
+
+		from erpnext.manufacturing.doctype.bom_creator.bom_creator import read_design_file
+
+		file_url = make_step_file(BICYCLE_PRODUCTS, BICYCLE_LINKS)
+		self.assertEqual(read_design_file(file_url)["design_name"], "Bicycle")
+
+		with patch.object(File, "is_downloadable", return_value=False):
+			self.assertRaises(frappe.PermissionError, read_design_file, file_url)
+
 	def test_design_file_must_be_a_step_or_csv_file(self):
 		from erpnext.manufacturing.doctype.bom_creator.bom_creator import read_design_file
 
