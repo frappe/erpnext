@@ -259,7 +259,7 @@ def _process_subitem(
 			company,
 			include_non_stock_items,
 			include_subcontracted_items,
-			get_qty_before_process_loss(d.qty, loss_percentage),
+			get_qty_before_process_loss(d.qty, loss_percentage, d.stock_uom),
 		)
 
 

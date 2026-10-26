@@ -67,7 +67,7 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_value(
 				row_doctype,
 				{"name": reference_name, "parent": self.production_plan},
-				["name", "idx", QTY_FIELDS[reference_field], "process_loss_percentage"],
+				["name", "idx", QTY_FIELDS[reference_field], "process_loss_percentage", "stock_uom"],
 				as_dict=True,
 				for_update=True,
 			)
@@ -96,7 +96,7 @@ class ProductionPlanWorkOrderQuantities:
 		qty = flt(row.get(QTY_FIELDS[reference_field]))
 		if reference_field == "production_plan_sub_assembly_item":
 			return qty
-		return get_qty_before_process_loss(qty, row.process_loss_percentage)
+		return get_qty_before_process_loss(qty, row.process_loss_percentage, row.stock_uom)
 
 	def get_pending_quantities(self, plan):
 		committed = self.get_committed_quantities(include_drafts=True)

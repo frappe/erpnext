@@ -4,6 +4,7 @@
 """Small query helpers shared by Production Plan material planning."""
 
 import json
+import math
 
 import frappe
 from frappe.query_builder.functions import IfNull, Sum
@@ -20,10 +21,17 @@ def get_planned_process_loss_percentage(bom_no):
 	return loss_percentage if loss_percentage < 100 else 0
 
 
-def get_qty_before_process_loss(qty, loss_percentage):
+def get_qty_before_process_loss(qty, loss_percentage, uom):
 	"""Quantity to make so that `qty` is left after `loss_percentage` process loss."""
 	loss_percentage = flt(loss_percentage)
-	return flt(qty) / (1 - loss_percentage / 100) if loss_percentage < 100 else flt(qty)
+	if not loss_percentage or loss_percentage >= 100:
+		return flt(qty)
+
+	qty = flt(qty) / (1 - loss_percentage / 100)
+	if frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
+		# A fraction of a whole number UOM cannot be made, so make the next whole unit.
+		return math.ceil(flt(qty, frappe.get_precision("Work Order", "qty")))
+	return qty
 
 
 def get_uom_conversion_factor(item_code, uom):

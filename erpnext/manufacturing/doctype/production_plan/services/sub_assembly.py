@@ -56,7 +56,9 @@ class SubAssemblyService:
 			bin_details,
 			row.bom_no,
 			bom_data,
-			get_qty_before_process_loss(row.planned_qty, get_planned_process_loss_percentage(row.bom_no)),
+			get_qty_before_process_loss(
+				row.planned_qty, get_planned_process_loss_percentage(row.bom_no), row.stock_uom
+			),
 			self.doc.company,
 			warehouse=self.doc.sub_assembly_warehouse,
 			skip_available_sub_assembly_item=self.doc.skip_available_sub_assembly_item,

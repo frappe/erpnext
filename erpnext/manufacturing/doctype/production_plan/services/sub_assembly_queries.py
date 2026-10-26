@@ -84,7 +84,7 @@ def _add_sub_assembly_child(
 	)
 	if not d.is_phantom_item:
 		d.process_loss_percentage = get_planned_process_loss_percentage(d.value)
-		stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage)
+		stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage, d.stock_uom)
 		bom_data.append(
 			_sub_assembly_row(
 				d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision

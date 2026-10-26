@@ -934,7 +934,12 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if pending_qty > 0 and i.item_code not in product_bundle_parents and bom:
 					# The Work Order is made before the BOM's process loss.
 					loss_percentage = get_planned_process_loss_percentage(bom)
-					pending_qty = flt(get_qty_before_process_loss(pending_qty, loss_percentage), precision)
+					pending_qty = flt(
+						get_qty_before_process_loss(
+							pending_qty, loss_percentage, i.get("stock_uom") or i.uom
+						),
+						precision,
+					)
 					items.append(
 						dict(
 							name=i.name,
