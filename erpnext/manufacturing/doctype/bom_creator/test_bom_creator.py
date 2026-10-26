@@ -946,6 +946,7 @@ class TestBOMCreator(ERPNextTestSuite):
 
 	def test_item_matcher_maps_a_part_number_written_without_punctuation(self):
 		make_item("ZPH100", {"item_name": "Zephyr Plate"})
+		make_item("_Test Zephyr Other Plate", {"item_name": "Plate"})
 
 		self.assertEqual(
 			get_item_match(part_number="ZPH-100", part_name="Plate"),
