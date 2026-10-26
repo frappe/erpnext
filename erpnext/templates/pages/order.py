@@ -3,11 +3,13 @@
 
 import frappe
 from frappe import _
+from frappe.sessions import get_csrf_token
 
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST,
 	get_amount,
 )
+from erpnext.controllers.website_list_for_contact import has_website_permission
 
 
 def get_context(context):
@@ -50,6 +52,9 @@ def get_context(context):
 			context.available_loyalty_points = int(loyalty_details.get("loyalty_points"))
 
 	context.show_pay_button, context.pay_amount = get_payment_details(context.doc)
+	if context.show_pay_button:
+		context.csrf_token = get_csrf_token()
+
 	context.show_make_pi_button = False
 	if context.doc.get("supplier"):
 		# show Make Purchase Invoice button based on permission
@@ -65,6 +70,7 @@ def get_attachments(dt, dn):
 
 
 def get_payment_details(doc):
+<<<<<<< HEAD
 	show_pay_button, amount = (
 		(
 			"payments" in frappe.get_installed_apps()
@@ -78,6 +84,15 @@ def get_payment_details(doc):
 	)
 	if not show_pay_button:
 		return show_pay_button, amount
+=======
+	if (
+		"payments" not in frappe.get_installed_apps()
+		or doc.doctype not in PORTAL_PAYABLE_DOCTYPES
+		or doc.docstatus != 1
+		or not has_website_permission(doc, "read", frappe.session.user)
+	):
+		return False, 0
+>>>>>>> a747589 (fix(accounts): align portal payments with endpoint permissions)
 
 	amount = get_amount(doc)
-	return bool(amount), amount
+	return (True, amount) if amount > 0 else (False, 0)
