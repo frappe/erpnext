@@ -1311,7 +1311,7 @@ class RowProcessor:
 			)
 
 			# percent rows: average, not sum
-			row_data.total = total / len(keys) if row.fieldtype == "Percent" else total
+			row_data.total = total / len(keys) if row.fieldtype == "Percent" and keys else total
 
 		if row.reference_code:
 			self.row_totals[row.reference_code] = row_data.total
