@@ -1003,6 +1003,28 @@ class TestBOMCreator(ERPNextTestSuite):
 			{"item_code": item, "score": 100, "matched_on": "Earlier Design", "is_selected": True},
 		)
 
+	def test_item_matcher_skips_designs_the_user_cannot_read(self):
+		design = make_design()
+		item = make_item("_Test Zephyr Hidden Tube", {"is_stock_item": 1}).name
+		get_part(design, "TUBE-25").item_code = item
+		design.save()
+		user = make_manufacturing_user()
+		frappe.permissions.add_user_permission("BOM Creator", make_design().name, user)
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+
+		match = get_item_match(part_number="TUBE-25", part_name="Frame Tube") or {}
+		self.assertNotEqual(match.get("item_code"), item)
+
+	def test_item_matcher_skips_items_the_user_cannot_read(self):
+		make_item("ZPH200", {"item_name": "Zephyr Hidden Plate"})
+		user = make_manufacturing_user()
+		frappe.permissions.add_user_permission("Item", make_item("_Test Zephyr Visible Item").name, user)
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+
+		self.assertIsNone(get_item_match(part_number="ZPH-200", part_name="Zephyr Hidden Plate"))
+
 	def test_item_matcher_skips_a_part_without_a_close_item(self):
 		self.assertIsNone(get_item_match(part_number="QX-0", part_name="Qwyzzle Gnarf"))
 
@@ -1185,6 +1207,21 @@ def make_boms(design) -> dict:
 			as_list=True,
 		)
 	)
+
+
+def make_manufacturing_user() -> str:
+	user = "test_bom_creator_matcher@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "BOM Creator",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Manufacturing User"}],
+			}
+		).insert()
+	return user
 
 
 def get_item_match(**part) -> dict | None:
