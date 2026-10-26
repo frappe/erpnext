@@ -36,6 +36,7 @@ def after_install():
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
 	create_address_and_contact_custom_fields()
+	setup_company_address_permissions()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -237,6 +238,7 @@ def create_address_and_contact_custom_fields():
 					"fieldtype": "Check",
 					"default": "0",
 					"insert_after": "linked_with",
+					"permlevel": 1,
 				},
 			],
 			"Contact": [
@@ -249,6 +251,15 @@ def create_address_and_contact_custom_fields():
 			],
 		}
 	)
+
+
+def setup_company_address_permissions():
+	"""Only Accounts Manager and System Manager may mark an address as the company's own (permlevel 1)."""
+	from frappe.permissions import add_permission, update_permission_property
+
+	for role in ("System Manager", "Accounts Manager"):
+		add_permission("Address", role, 1)
+		update_permission_property("Address", role, 1, "write", 1)
 
 
 def create_default_success_action():
