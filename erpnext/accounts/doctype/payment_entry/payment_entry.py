@@ -2559,7 +2559,9 @@ def get_reference_details(
 
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		if ref_doc.multi_currency:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+			exchange_rate = get_revalued_exchange_rate(
+				reference_doctype, reference_name, posting_date, party_type=party_type, party=party
+			) or get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
 		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)

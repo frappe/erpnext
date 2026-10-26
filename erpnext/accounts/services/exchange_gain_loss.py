@@ -214,30 +214,64 @@ def set_transaction_currency_and_rate_in_gl_map(doc, gl_entries: list) -> None:
 		entry["transaction_exchange_rate"] = doc.get("conversion_rate") or 1
 
 
-def get_revalued_exchange_rate(invoice_doctype: str, invoice_name: str, on_date) -> float | None:
+def get_revalued_exchange_rate(
+	invoice_doctype: str,
+	invoice_name: str,
+	on_date,
+	account: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+) -> float | None:
 	"""Rate of the latest Exchange Rate Revaluation of the invoice's party account, posted between
 	the invoice date and `on_date`, covering the invoice and not reversed by `on_date`.
+	For a Journal Entry, `account`, `party_type` and `party` narrow down its party row.
 	None if there is no such revaluation."""
-	if invoice_doctype not in ("Sales Invoice", "Purchase Invoice") or not invoice_name or not on_date:
+	if not invoice_name or not on_date:
 		return None
 
-	is_sales = invoice_doctype == "Sales Invoice"
-	inv = frappe.db.get_value(
-		invoice_doctype,
-		invoice_name,
-		[
-			"company",
-			"docstatus",
-			"posting_date",
-			"debit_to" if is_sales else "credit_to",
-			"customer" if is_sales else "supplier",
-		],
-		as_dict=True,
-	)
-	if not inv or inv.docstatus != 1:
+	if invoice_doctype in ("Sales Invoice", "Purchase Invoice"):
+		is_sales = invoice_doctype == "Sales Invoice"
+		inv = frappe.db.get_value(
+			invoice_doctype,
+			invoice_name,
+			[
+				"company",
+				"docstatus",
+				"posting_date",
+				"debit_to" if is_sales else "credit_to",
+				"customer" if is_sales else "supplier",
+			],
+			as_dict=True,
+		)
+		if not inv or inv.docstatus != 1:
+			return None
+		account = inv.debit_to if is_sales else inv.credit_to
+		party_type, party = ("Customer", inv.customer) if is_sales else ("Supplier", inv.supplier)
+	elif invoice_doctype == "Journal Entry":
+		inv = frappe.db.get_value(
+			"Journal Entry",
+			invoice_name,
+			["company", "docstatus", "posting_date", "voucher_type"],
+			as_dict=True,
+		)
+		if not inv or inv.docstatus != 1 or inv.voucher_type == "Exchange Rate Revaluation":
+			return None
+		filters = {"parent": invoice_name, "party_type": ("is", "set"), "party": ("is", "set")}
+		for field, value in (("account", account), ("party_type", party_type), ("party", party)):
+			if value:
+				filters[field] = value
+		party_rows = frappe.db.get_all(
+			"Journal Entry Account",
+			filters=filters,
+			fields=["account", "party_type", "party"],
+			distinct=True,
+		)
+		# more than one party row matches: can't tell which one is being settled
+		if len(party_rows) != 1:
+			return None
+		account, party_type, party = party_rows[0].account, party_rows[0].party_type, party_rows[0].party
+	else:
 		return None
-	account = inv.debit_to if is_sales else inv.credit_to
-	party_type, party = ("Customer", inv.customer) if is_sales else ("Supplier", inv.supplier)
 	invoice_booked_at = _booked_at(invoice_doctype, invoice_name)
 
 	je = qb.DocType("Journal Entry")

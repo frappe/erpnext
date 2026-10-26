@@ -570,6 +570,63 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 		self.assertEqual(pe.references[0].exchange_rate, 84)
 		self.assertEqual(pe.references[0].exchange_gain_loss, 100)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_13_journal_entry_receivable_settled_at_revalued_rate(self):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details
+
+		# only used to build the payment below
+		si = self._usd_invoice_at_80(add_days(today(), -10))
+		# $100 receivable booked by a journal at 80, then revalued to 84
+		jv = frappe.new_doc("Journal Entry")
+		jv.company = self.company
+		jv.posting_date = add_days(today(), -10)
+		jv.multi_currency = 1
+		jv.append(
+			"accounts",
+			{
+				"account": self.debtors_usd,
+				"party_type": "Customer",
+				"party": self.customer,
+				"debit_in_account_currency": 100,
+				"exchange_rate": 80,
+				"cost_center": self.cost_center,
+			},
+		)
+		jv.append(
+			"accounts",
+			{"account": "Sales - _TC", "credit_in_account_currency": 8000, "cost_center": self.cost_center},
+		)
+		jv.save().submit()
+		self._revalue_at_84()
+
+		self.assertEqual(
+			get_reference_details(
+				"Journal Entry", jv.name, "USD", "Customer", self.customer, today()
+			).exchange_rate,
+			84,
+		)
+		self.assertEqual(
+			get_exchange_rate(today(), self.debtors_usd, "USD", self.company, "Journal Entry", jv.name), 84
+		)
+
+		# unallocated $100 payment at 85, reconciled against the journal
+		pe = self._pay_at_85(si, allocate=False)
+		pr = frappe.new_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Customer"
+		pr.party = self.customer
+		pr.receivable_payable_account = self.debtors_usd
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.invoices if x.invoice_number == jv.name]
+		payments = [x.as_dict() for x in pr.payments if x.reference_name == pe.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		# gain is 85 - 84, not 85 - 80
+		self.assertEqual(pr.allocation[0].difference_amount, 100)
+
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
 	"""Validation and gain/loss calculation paths, exercised on the document directly

@@ -472,12 +472,14 @@ class PaymentReconciliation(Document):
 			invoice[0].get("invoice_type"),
 			invoice[0].get("invoice_number"),
 			payment_entry[0].get("posting_date"),
+			*self.party_details(),
 		) or invoice_exchange_map.get(invoice[0].get("invoice_number"))
-		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
+		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice", "Journal Entry"]:
 			payment_entry[0]["exchange_rate"] = get_revalued_exchange_rate(
 				payment_entry[0].get("reference_type"),
 				payment_entry[0].get("reference_name"),
 				payment_entry[0].get("posting_date"),
+				*self.party_details(),
 			) or invoice_exchange_map.get(payment_entry[0].get("reference_name"))
 
 		new_difference_amount = self.get_difference_amount(payment_entry[0], invoice[0], allocated_amount)
@@ -519,11 +521,17 @@ class PaymentReconciliation(Document):
 					pay["amount"] = 0
 
 				inv["exchange_rate"] = get_revalued_exchange_rate(
-					inv.get("invoice_type"), inv.get("invoice_number"), pay.get("posting_date")
+					inv.get("invoice_type"),
+					inv.get("invoice_number"),
+					pay.get("posting_date"),
+					*self.party_details(),
 				) or invoice_exchange_map.get(inv.get("invoice_number"))
-				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
+				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice", "Journal Entry"]:
 					pay["exchange_rate"] = get_revalued_exchange_rate(
-						pay.get("reference_type"), pay.get("reference_name"), pay.get("posting_date")
+						pay.get("reference_type"),
+						pay.get("reference_name"),
+						pay.get("posting_date"),
+						*self.party_details(),
 					) or invoice_exchange_map.get(pay.get("reference_name"))
 
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
@@ -677,6 +685,9 @@ class PaymentReconciliation(Document):
 
 		if not self.get("payments"):
 			frappe.throw(_("No records found in the Payments table"))
+
+	def party_details(self):
+		return self.receivable_payable_account, self.party_type, self.party
 
 	def get_invoice_exchange_map(self, invoices, payments):
 		sales_invoices = [

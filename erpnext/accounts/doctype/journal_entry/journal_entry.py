@@ -1334,6 +1334,11 @@ def get_exchange_rate(
 				reference_type, reference_name, posting_date
 			) or frappe.db.get_value(reference_type, reference_name, "conversion_rate")
 
+		elif reference_type == "Journal Entry" and (
+			revalued_rate := get_revalued_exchange_rate(reference_type, reference_name, posting_date, account)
+		):
+			exchange_rate = revalued_rate
+
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
 		elif (not flt(exchange_rate) or flt(exchange_rate) == 1) and account_currency and posting_date:
