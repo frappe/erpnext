@@ -3180,25 +3180,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_query_for_item_tax_template(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		if (!item.item_code) {
-			return doc.company ? { filters: { company: doc.company } } : {};
-		} else {
-			let filters = {
+		const item = frappe.get_doc(cdt, cdn);
+		return {
+			query: "erpnext.controllers.queries.item_tax_template_query",
+			filters: {
 				item_code: item.item_code,
-				valid_from: ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
 				item_group: item.item_group,
 				base_net_rate: item.base_net_rate,
-				disabled: 0,
-			};
-
-			if (doc.tax_category) filters["tax_category"] = doc.tax_category;
-			if (doc.company) filters["company"] = doc.company;
-			return {
-				query: "erpnext.controllers.queries.get_tax_template",
-				filters: filters,
-			};
-		}
+				transaction_date: doc.transaction_date,
+				bill_date: doc.bill_date,
+				posting_date: doc.posting_date,
+				tax_category: doc.tax_category,
+				company: doc.company,
+			},
+		};
 	}
 
 	payment_terms_template() {

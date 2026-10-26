@@ -1433,3 +1433,30 @@ def transaction_batch_query(
 		batch_filters["warehouse"] = filters["warehouse"]
 
 	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def item_tax_template_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The tax templates of a transaction's item: its own and its item group's, else the company's."""
+	if not filters.get("item_code"):
+		company_filters = {"company": filters.get("company")}
+		return standard_search(doctype, txt, searchfield, start, page_len, company_filters, **kwargs)
+
+	template_filters = {
+		"item_code": filters["item_code"],
+		"valid_from": [
+			"<=",
+			filters.get("transaction_date") or filters.get("bill_date") or filters.get("posting_date"),
+		],
+		"item_group": filters.get("item_group"),
+		"base_net_rate": filters.get("base_net_rate"),
+		"tax_category": filters.get("tax_category"),
+		"company": filters.get("company"),
+		"disabled": 0,
+	}
+	return frappe.call(
+		get_tax_template, doctype, txt, searchfield, start, page_len, template_filters, **kwargs
+	)
