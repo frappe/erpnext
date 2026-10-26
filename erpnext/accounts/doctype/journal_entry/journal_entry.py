@@ -1375,3 +1375,48 @@ def account_query(
 		account_filters["account_currency"] = ["in", [currency, None]]
 
 	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def reference_name_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The documents a row can reference, `filters` being the row's values; `doctype` is its
+	reference type."""
+	from erpnext.controllers.queries import standard_search
+
+	if doctype == "Journal Entry":
+		validate_missing(filters, "account")
+		jv_filters = {"account": filters.get("account"), "party": filters.get("party")}
+		return frappe.call(get_against_jv, doctype, txt, searchfield, start, page_len, jv_filters, **kwargs)
+
+	reference_filters = [[doctype, "docstatus", "=", 1]]
+	if doctype in ("Sales Invoice", "Purchase Invoice"):
+		reference_filters.append([doctype, "outstanding_amount", "!=", 0])
+		if filters.get("cost_center"):
+			reference_filters.append([doctype, "cost_center", "in", ["", filters["cost_center"]]])
+
+		validate_missing(filters, "account")
+		party_account_field = "debit_to" if doctype == "Sales Invoice" else "credit_to"
+		reference_filters.append([doctype, party_account_field, "=", filters["account"]])
+
+	if doctype in ("Sales Order", "Purchase Order"):
+		validate_missing(filters, "party_type")
+		validate_missing(filters, "party")
+		reference_filters.append([doctype, "per_billed", "<", 100])
+
+	party_field = (
+		"customer" if doctype.startswith("Sales") else "supplier" if doctype.startswith("Purchase") else None
+	)
+	if party_field and filters.get("party_type") and filters.get("party"):
+		reference_filters.append([doctype, party_field, "=", filters["party"]])
+
+	return standard_search(doctype, txt, searchfield, start, page_len, reference_filters, **kwargs)
+
+
+def validate_missing(row: dict, fieldname: str):
+	"""Throws when the Journal Entry Account values `row` lack `fieldname`."""
+	if not row.get(fieldname):
+		label = frappe.get_meta("Journal Entry Account").get_label(fieldname)
+		frappe.throw(_("Please specify: {0}").format(_(label)))

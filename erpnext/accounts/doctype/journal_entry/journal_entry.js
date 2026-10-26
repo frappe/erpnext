@@ -526,43 +526,15 @@ Object.assign(erpnext.journal_entry, {
 	},
 
 	reference_name_query(row) {
-		if (row.reference_type === "Journal Entry") {
-			frappe.model.validate_missing(row, "account");
-			return {
-				query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
-				filters: { account: row.account, party: row.party },
-			};
-		}
-
-		const out = { filters: [[row.reference_type, "docstatus", "=", 1]] };
-
-		if (["Sales Invoice", "Purchase Invoice"].includes(row.reference_type)) {
-			out.filters.push([row.reference_type, "outstanding_amount", "!=", 0]);
-			if (row.cost_center) {
-				out.filters.push([row.reference_type, "cost_center", "in", ["", row.cost_center]]);
-			}
-			frappe.model.validate_missing(row, "account");
-			const party_account_field = row.reference_type === "Sales Invoice" ? "debit_to" : "credit_to";
-			out.filters.push([row.reference_type, party_account_field, "=", row.account]);
-		}
-
-		if (["Sales Order", "Purchase Order"].includes(row.reference_type)) {
-			frappe.model.validate_missing(row, "party_type");
-			frappe.model.validate_missing(row, "party");
-			out.filters.push([row.reference_type, "per_billed", "<", 100]);
-		}
-
-		if (row.party_type && row.party) {
-			let party_field = "";
-			if (row.reference_type.indexOf("Sales") === 0) {
-				party_field = "customer";
-			} else if (row.reference_type.indexOf("Purchase") === 0) {
-				party_field = "supplier";
-			}
-			if (party_field) out.filters.push([row.reference_type, party_field, "=", row.party]);
-		}
-
-		return out;
+		return {
+			query: "erpnext.accounts.doctype.journal_entry.journal_entry.reference_name_query",
+			filters: {
+				account: row.account,
+				party_type: row.party_type,
+				party: row.party,
+				cost_center: row.cost_center,
+			},
+		};
 	},
 
 	account_query(frm) {
