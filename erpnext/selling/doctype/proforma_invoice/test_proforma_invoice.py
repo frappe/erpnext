@@ -342,6 +342,21 @@ class TestProformaInvoice(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_duplicate_sales_order_line_is_rejected(self):
+		sales_order = make_sales_order(qty=10)
+		so_detail = sales_order.items[0].name
+		proforma = frappe.new_doc(
+			"Proforma Invoice",
+			sales_order=sales_order.name,
+			based_on="Amount",
+			items=[
+				{"so_detail": so_detail, "qty": 1, "amount": 100},
+				{"so_detail": so_detail, "qty": 2, "amount": 200},
+			],
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "already in row #1", proforma.insert)
+
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})
 
