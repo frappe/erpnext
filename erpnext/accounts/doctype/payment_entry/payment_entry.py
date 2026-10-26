@@ -3512,3 +3512,25 @@ def account_query(
 		account_filters["name"] = ["!=", filters["other_account"]]
 
 	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def payment_party_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The parties of the payment's party type."""
+	from erpnext.controllers import queries
+
+	party_type = filters.get("party_type")
+	if party_type == "Employee":
+		return frappe.call(queries.employee_query, doctype, txt, searchfield, start, page_len, {}, **kwargs)
+
+	if party_type in ("Customer", "Supplier"):
+		party_filters = {"disabled": 0, "company": filters.get("company")}
+		return frappe.call(
+			queries.party_query, doctype, txt, searchfield, start, page_len, party_filters, **kwargs
+		)
+
+	party_filters = {"company": filters.get("company")} if party_type == "Shareholder" else {}
+	return queries.standard_search(doctype, txt, searchfield, start, page_len, party_filters, **kwargs)

@@ -458,19 +458,10 @@ frappe.ui.form.on("Payment Entry", {
 		}
 
 		frm.set_query("party", function () {
-			if (frm.doc.party_type == "Employee") {
-				return {
-					query: "erpnext.controllers.queries.employee_query",
-				};
-			} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
-				return erpnext.queries.party(frm.doc);
-			} else if (frm.doc.party_type == "Shareholder") {
-				return {
-					filters: {
-						company: frm.doc.company,
-					},
-				};
-			}
+			return {
+				query: "erpnext.accounts.doctype.payment_entry.payment_entry.payment_party_query",
+				filters: { party_type: frm.doc.party_type, company: frm.doc.company },
+			};
 		});
 
 		if (frm.doc.party) {
