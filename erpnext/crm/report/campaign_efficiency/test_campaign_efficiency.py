@@ -131,6 +131,7 @@ class TestCampaignEfficiency(ERPNextTestSuite):
 		quotation.quotation_to = "Customer"
 		quotation.party_name = customer.name
 		quotation.save()
+		quotation.submit()
 
 		user = create_user_with_roles("campaign_eff_customer@example.com", "Sales User")
 		frappe.permissions.add_user_permission("Customer", "_Test Customer", user.name)
