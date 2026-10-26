@@ -1,11 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher import (
+	aggregate_partial_result,
+	process_date_range,
+	summarize_and_post_ledger,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.accounts.utils import get_fiscal_year
@@ -747,6 +754,38 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 		self.make_period_closing_voucher(posting_date="2021-12-31")
 		self.make_period_closing_voucher(posting_date="2023-12-31")
+
+	def make_period_closing_voucher_with_mapreduce(self, posting_date):
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 0)
+		with patch("frappe.utils.background_jobs.mapreduce"):
+			pcv = self.make_period_closing_voucher(posting_date=posting_date)
+
+		result = None
+		for task in pcv.get_data_for_mapreduce():
+			result = aggregate_partial_result(result, process_date_range(frappe._dict(task)))
+
+		summarize_and_post_ledger(frappe.parse_json(frappe.as_json(result)), pcv.doctype, pcv.name)
+		pcv.reload()
+		return pcv
+
+	def test_closing_error_fails_submit_in_legacy_controller(self):
+		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
+		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled accounts"):
+			pcv.submit()
+
+	def test_closing_error_marks_voucher_failed_in_mapreduce_controller(self):
+		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
+		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
+
+		pcv = self.make_period_closing_voucher_with_mapreduce(posting_date="2021-03-31")
+
+		self.assertEqual(pcv.gle_processing_status, "Failed")
+		self.assertIn("disabled accounts", pcv.error_message)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": pcv.name}))
+		self.assertFalse(frappe.db.exists("Account Closing Balance", {"period_closing_voucher": pcv.name}))
 
 
 def create_account():

@@ -378,7 +378,25 @@ class PeriodClosingVoucher(AccountsController):
 				alert=True,
 			)
 		else:
-			process_gl_and_closing_entries(self)
+			self.post_closing_entries()
+
+	def post_closing_entries(self):
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		gl_entries = self.get_pcv_gl_entries()
+		if gl_entries:
+			make_gl_entries(gl_entries, merge_entries=False)
+
+		closing_entries = self.get_account_closing_balances()
+		make_closing_entries(closing_entries, self.name, self.company, self.period_end_date)
+		self.db_set("gle_processing_status", "Completed")
+
+	def reverse_closing_entries(self):
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		delete_closing_entries(self.name)
+		self.db_set("gle_processing_status", "Completed")
 
 	def get_pcv_gl_entries(self):
 		self.pl_accounts_reverse_gle = []
@@ -652,7 +670,7 @@ class PeriodClosingVoucher(AccountsController):
 				alert=True,
 			)
 		else:
-			process_cancellation(voucher_type="Period Closing Voucher", voucher_no=self.name)
+			self.reverse_closing_entries()
 
 	def get_gle_count_against_current_pcv(self):
 		return frappe.db.count(
@@ -791,49 +809,32 @@ class PeriodClosingVoucher(AccountsController):
 
 
 def process_gl_and_closing_entries(doc):
-	from erpnext.accounts.general_ledger import make_gl_entries
-
-	try:
-		gl_entries = doc.get_pcv_gl_entries()
-		if gl_entries:
-			make_gl_entries(gl_entries, merge_entries=False)
-
-		closing_entries = doc.get_account_closing_balances()
-		make_closing_entries(closing_entries, doc.name, doc.company, doc.period_end_date)
-
-		frappe.db.set_value(doc.doctype, doc.name, "gle_processing_status", "Completed")
-	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error(title=_("Period Closing Voucher {0} GL Entry Processing Failed").format(doc.name))
-		frappe.db.set_value(
-			doc.doctype,
-			doc.name,
-			{
-				"error_message": str(e),
-				"gle_processing_status": "Failed",
-			},
-		)
+	run_and_record_failure(
+		doc.name,
+		_("Period Closing Voucher {0} GL Entry Processing Failed").format(doc.name),
+		doc.post_closing_entries,
+	)
 
 
 def process_cancellation(voucher_type, voucher_no):
-	from erpnext.accounts.general_ledger import make_reverse_gl_entries
+	run_and_record_failure(
+		voucher_no,
+		_("Period Closing Voucher {0} GL Entry Cancellation Failed").format(voucher_no),
+		frappe.get_doc(voucher_type, voucher_no).reverse_closing_entries,
+	)
 
+
+def run_and_record_failure(pcv_name, title, method, *args):
+	frappe.db.savepoint("period_closing")
 	try:
-		make_reverse_gl_entries(voucher_type=voucher_type, voucher_no=voucher_no)
-		delete_closing_entries(voucher_no)
-		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Completed")
+		method(*args)
 	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error(
-			title=_("Period Closing Voucher {0} GL Entry Cancellation Failed").format(voucher_no)
-		)
+		frappe.db.rollback(save_point="period_closing")
+		frappe.log_error(title=title)
 		frappe.db.set_value(
-			voucher_type,
-			voucher_no,
-			{
-				"error_message": str(e),
-				"gle_processing_status": "Failed",
-			},
+			"Period Closing Voucher",
+			pcv_name,
+			{"error_message": str(e), "gle_processing_status": "Failed"},
 		)
 
 
@@ -938,8 +939,16 @@ def get_dimensions():
 
 
 def summarize_and_post_ledger(result, ref_dt, ref_dn):
-	pcv = frappe.get_doc(ref_dt, ref_dn)
+	run_and_record_failure(
+		ref_dn,
+		_("Period Closing Voucher {0} GL Entry Processing Failed").format(ref_dn),
+		post_summarized_ledger,
+		frappe.get_doc(ref_dt, ref_dn),
+		result,
+	)
 
+
+def post_summarized_ledger(pcv, result):
 	from erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher import (
 		build_dimension_wise_balance_dict,
 		get_bs_closing_entries,
