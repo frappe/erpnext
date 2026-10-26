@@ -3,7 +3,6 @@ import { get_item_link_html, open_item_link, open_link_field } from "./link_fiel
 
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
-const INPUT = "height:28px;background-color:var(--fg-color);border:1px solid var(--border-color);";
 const THUMBNAIL = `flex:none;width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;
 	overflow:hidden;border-radius:var(--border-radius-sm);`;
 
@@ -98,7 +97,7 @@ export class BomTree {
 		if (!this.editable) return `<span style="display:block;text-align:right;">${quantity}</span>`;
 
 		return `<input class="form-control input-sm" data-field="quantity" data-part-node="0" value="${quantity}"
-			title="${__("Quantity of the finished good the BOM is made for")}" style="${INPUT}text-align:right;">`;
+			title="${__("Quantity of the finished good the BOM is made for")}" style="text-align:right;">`;
 	}
 
 	get_add_button(node_id) {
@@ -233,7 +232,7 @@ export class BomTree {
 
 		return `<span title="${escape(title)}" style="display:block;cursor:not-allowed;">
 			<input class="form-control input-sm" value="${flt(quantity)}" disabled tabindex="-1"
-				style="${INPUT}text-align:right;background-color:var(--subtle-fg);pointer-events:none;"></span>`;
+				style="text-align:right;background-color:var(--subtle-fg);pointer-events:none;"></span>`;
 	}
 
 	get_locked_button(icon, title) {
@@ -458,7 +457,7 @@ export class BomTree {
 			: "";
 		const value = this.editable
 			? `<input class="form-control input-sm" data-field="quantity" data-part-node="${part.node_id}"
-				value="${flt(part.qty)}" title="${title}" style="${INPUT}text-align:right;">`
+				value="${flt(part.qty)}" title="${title}" style="text-align:right;">`
 			: `<span style="display:block;text-align:right;" title="${title}">${flt(part.qty)}</span>`;
 		return `<span style="position:relative;display:block;">${dot}${value}</span>`;
 	}

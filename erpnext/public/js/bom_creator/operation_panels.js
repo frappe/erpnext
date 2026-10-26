@@ -1,6 +1,5 @@
 const ROW =
 	"display:flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-top:1px solid var(--border-color);";
-const INPUT = "height:28px;background-color:var(--fg-color);border:1px solid var(--border-color);";
 const CARD = "border:1px solid var(--border-color);border-radius:var(--border-radius-md);overflow:hidden;";
 
 export function render_bom_bar(editor, $bar) {
@@ -54,7 +53,7 @@ export function get_unused_tray(editor) {
 	const rows = parts.map((part) => {
 		const assign = editor.editable
 			? `<select class="form-control input-sm" data-field="assign" data-node-id="${part.node_id}"
-				style="${INPUT}width:160px;"><option value="">${__("Add to")}</option>${options.join("")}</select>`
+				style="width:160px;"><option value="">${__("Add to")}</option>${options.join("")}</select>`
 			: "";
 		return `<div style="${ROW}">
 			<span style="flex:1;min-width:0;display:flex;gap:8px;">
