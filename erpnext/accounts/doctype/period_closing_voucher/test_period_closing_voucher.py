@@ -4,7 +4,7 @@
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import flt, getdate, today
+from frappe.utils import flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -741,7 +741,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.make_income_entry("2021-06-15", 700)
 		self.make_period_closing_voucher(posting_date="2021-02-28", period_start_date="2021-01-01")
 
-		with self.assertRaisesRegex(frappe.ValidationError, "Previous Year is not closed"):
+		with self.assertRaisesRegex(frappe.ValidationError, f"from <strong>{formatdate('2021-03-01')}"):
 			self.make_period_closing_voucher(posting_date="2022-12-31")
 
 		self.make_period_closing_voucher(posting_date="2021-12-31", period_start_date="2021-03-01")
@@ -750,7 +750,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 	def test_unclosed_earlier_year_blocks_closing(self):
 		self.make_income_entry("2021-06-15", 500)
 
-		with self.assertRaisesRegex(frappe.ValidationError, "Previous Year is not closed"):
+		with self.assertRaisesRegex(frappe.ValidationError, f"from <strong>{formatdate('2021-06-15')}"):
 			self.make_period_closing_voucher(posting_date="2023-12-31")
 
 		self.make_period_closing_voucher(posting_date="2021-12-31")

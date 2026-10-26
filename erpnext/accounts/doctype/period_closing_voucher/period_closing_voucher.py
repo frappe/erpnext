@@ -106,8 +106,14 @@ class PeriodClosingVoucher(AccountsController):
 		if last_closed_date and getdate(add_days(last_closed_date, 1)) == getdate(self.period_start_date):
 			return
 
-		if self.has_unclosed_gl_entries(last_closed_date):
-			frappe.throw(_("Previous Year is not closed, please close it first"))
+		first_unclosed_date = self.get_first_unclosed_date(last_closed_date)
+		if first_unclosed_date:
+			open_from = add_days(last_closed_date, 1) if last_closed_date else first_unclosed_date
+			frappe.throw(
+				_("Previous period is not closed. Close the period from {0} first.").format(
+					frappe.bold(formatdate(open_from))
+				)
+			)
 
 	def get_last_closing(self):
 		return frappe.db.get_value(
@@ -118,12 +124,12 @@ class PeriodClosingVoucher(AccountsController):
 			as_dict=True,
 		)
 
-	def has_unclosed_gl_entries(self, last_closed_date):
+	def get_first_unclosed_date(self, last_closed_date):
 		posting_date = ("<", self.period_start_date)
 		if last_closed_date:
 			posting_date = ("between", [add_days(last_closed_date, 1), add_days(self.period_start_date, -1)])
 
-		return frappe.db.exists(
+		return frappe.db.get_value(
 			"GL Entry",
 			{
 				"company": self.company,
@@ -132,6 +138,8 @@ class PeriodClosingVoucher(AccountsController):
 				"is_opening": "No",
 				"voucher_type": ("!=", "Period Closing Voucher"),
 			},
+			"posting_date",
+			order_by="posting_date asc",
 		)
 
 	def block_if_future_closing_voucher_exists(self):
