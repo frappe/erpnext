@@ -2311,3 +2311,24 @@ def target_warehouse_query(
 		warehouse_filters["warehouse_type"] = "Transit"
 
 	return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def stock_entry_type_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The stock entry types of a subcontracting inward order's purposes for an entry against one,
+	the others otherwise."""
+	from erpnext.controllers.queries import standard_search
+
+	operator = "in" if filters.get("subcontracting_inward_order") else "not in"
+	purposes = [
+		"Receive from Customer",
+		"Return Raw Material to Customer",
+		"Subcontracting Delivery",
+		"Subcontracting Return",
+	]
+	return standard_search(
+		doctype, txt, searchfield, start, page_len, {"purpose": [operator, purposes]}, **kwargs
+	)
