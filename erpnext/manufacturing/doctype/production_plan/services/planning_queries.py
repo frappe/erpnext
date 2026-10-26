@@ -14,6 +14,12 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 
 
+def get_planned_process_loss_percentage(bom_no):
+	"""BOM process loss % to add to the quantity, 0 when the BOM loses everything."""
+	loss_percentage = flt(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
+	return loss_percentage if loss_percentage < 100 else 0
+
+
 def get_uom_conversion_factor(item_code, uom):
 	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
 	conversion_factor = frappe.db.get_value(

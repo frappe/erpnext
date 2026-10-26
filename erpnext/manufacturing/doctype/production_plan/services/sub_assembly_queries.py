@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_childr
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	aggregate_bin_details,
 	get_bin_details,
+	get_planned_process_loss_percentage,
 	get_uom_conversion_factor,
 )
 
@@ -89,12 +90,6 @@ def _add_sub_assembly_child(
 			)
 		)
 	return stock_qty
-
-
-def get_planned_process_loss_percentage(bom_no):
-	"""BOM process loss % to add to the quantity, 0 when the BOM loses everything."""
-	loss_percentage = flt(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
-	return loss_percentage if loss_percentage < 100 else 0
 
 
 def _resolve_available_sub_assembly(

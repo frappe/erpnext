@@ -7,7 +7,10 @@ import frappe
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
 from frappe.utils.caching import request_cache
 
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_uom_conversion_factor
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_planned_process_loss_percentage,
+	get_uom_conversion_factor,
+)
 
 
 def get_exploded_items(item_details, company, bom_no, include_non_stock_items, planned_qty=1, doc=None):
@@ -245,6 +248,8 @@ def _process_subitem(
 		_merge_subitem(item_details, d)
 
 	if explode:
+		# A manufactured sub-assembly is made before its process loss; a phantom is not made at all.
+		loss_percentage = 0 if d.is_phantom_item else get_planned_process_loss_percentage(child_bom)
 		get_subitems(
 			doc,
 			data,
@@ -253,7 +258,7 @@ def _process_subitem(
 			company,
 			include_non_stock_items,
 			include_subcontracted_items,
-			d.qty,
+			d.qty / (1 - loss_percentage / 100),
 		)
 
 
