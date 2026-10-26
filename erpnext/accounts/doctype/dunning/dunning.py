@@ -323,12 +323,12 @@ class Dunning(AccountsController):
 			self.precision("dunning_amount"),
 		)
 
-	def get_unpaid_overdue_payments(self):
+	def get_unpaid_overdue_payments(self, in_account_currency=False):
 		"""Overdue payments with their outstanding as of now, not as of dunning creation."""
 		return [
 			(row, outstanding)
 			for row in self.overdue_payments
-			if (outstanding := get_current_outstanding(row)) > 0
+			if (outstanding := get_current_outstanding(row, in_account_currency=in_account_currency)) > 0
 		]
 
 	def before_cancel(self):
@@ -519,12 +519,12 @@ def get_paid_dunning_amount(dunning: str) -> float:
 	return -flt(paid[0][0]) if paid else 0.0
 
 
-def get_current_outstanding(overdue_payment) -> float:
-	"""Outstanding of an overdue payment as of now, in the invoice's transaction currency."""
+def get_current_outstanding(overdue_payment, in_account_currency=False) -> float:
+	"""Return the live outstanding in transaction currency, or in receivable-account currency."""
 	invoice = frappe.db.get_value(
 		"Sales Invoice",
 		overdue_payment.sales_invoice,
-		["outstanding_amount", "currency", "party_account_currency"],
+		["outstanding_amount", "currency", "party_account_currency", "conversion_rate"],
 		as_dict=True,
 	)
 	if overdue_payment.payment_schedule:
@@ -543,7 +543,11 @@ def get_current_outstanding(overdue_payment) -> float:
 		return 0.0
 
 	outstanding = min(schedule_outstanding, flt(overdue_payment.outstanding))
-	if invoice.currency == invoice.party_account_currency:
+	if in_account_currency and invoice.currency != invoice.party_account_currency:
+		outstanding = flt(
+			outstanding * flt(invoice.conversion_rate), overdue_payment.precision("outstanding")
+		)
+	if in_account_currency or invoice.currency == invoice.party_account_currency:
 		outstanding = min(outstanding, flt(invoice.outstanding_amount))
 
 	return outstanding
