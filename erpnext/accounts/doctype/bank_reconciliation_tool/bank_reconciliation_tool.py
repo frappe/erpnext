@@ -119,7 +119,7 @@ def get_account_balance(bank_account, till_date, company):
 	return flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_bank_transaction(bank_transaction_name, reference_number, party_type=None, party=None):
 	# updates bank transaction based on the new parameters provided by the user from Vouchers
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
@@ -147,7 +147,7 @@ def update_bank_transaction(bank_transaction_name, reference_number, party_type=
 	)[0]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_journal_entry_bts(
 	bank_transaction_name,
 	reference_number=None,
@@ -315,7 +315,7 @@ def create_journal_entry_bts(
 	return _reconcile_vouchers(bank_transaction_name, vouchers)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_payment_entry_bts(
 	bank_transaction_name,
 	reference_number=None,
@@ -519,7 +519,7 @@ def get_reconcilable_doctypes():
 	return [*get_doctypes_for_bank_reconciliation(), "Bank Transaction"]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def reconcile_vouchers(bank_transaction_name, vouchers):
 	bank_transaction_name = cstr(bank_transaction_name)
 	if not bank_transaction_name or not frappe.has_permission(

@@ -323,7 +323,7 @@ def deactivate_sales_person(status=None, employee=None):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_user(employee, user=None, email=None):
 	emp = frappe.get_doc("Employee", employee)
 	emp.check_permission("write")

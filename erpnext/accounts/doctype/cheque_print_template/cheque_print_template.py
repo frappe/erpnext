@@ -46,7 +46,7 @@ class ChequePrintTemplate(Document):
 	pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_or_update_cheque_print_format(template_name):
 	frappe.only_for("System Manager")
 

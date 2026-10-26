@@ -355,7 +355,7 @@ def check_opening_entry(user):
 	return open_vouchers
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_opening_voucher(pos_profile, company, balance_details):
 	# submit() enforces POS Opening Entry rights per document, but only after the profile and company
 	# have been accepted from the caller — check the profile the session is being opened against.
@@ -411,7 +411,7 @@ def get_past_order_list(search_term, status, limit=20):
 	return invoice_list
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_customer_info(fieldname, customer, value=""):
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_doc.check_permission("write")

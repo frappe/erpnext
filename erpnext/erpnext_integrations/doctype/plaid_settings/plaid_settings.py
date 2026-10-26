@@ -54,7 +54,7 @@ def get_plaid_configuration():
 	return "disabled"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_institution(token, response):
 	frappe.has_permission("Plaid Settings", throw=True)
 
@@ -84,7 +84,7 @@ def add_institution(token, response):
 	return bank
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_bank_accounts(response, bank, company):
 	frappe.has_permission("Plaid Settings", throw=True)
 

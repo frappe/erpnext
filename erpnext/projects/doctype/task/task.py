@@ -498,7 +498,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_multiple_status(names, status):
 	names = json.loads(names)
 	for name in names:
@@ -572,7 +572,7 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 	return tasks
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -586,7 +586,7 @@ def add_node():
 	frappe.get_doc(args).insert()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_multiple_tasks(data, parent, project=None):
 	data = json.loads(data)
 	is_root = parent in ("All Tasks", project)

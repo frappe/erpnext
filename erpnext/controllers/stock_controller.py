@@ -1811,7 +1811,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_quality_inspections(company, doctype, docname, items):
 	if isinstance(items, str):
 		items = json.loads(items)

@@ -918,7 +918,7 @@ def make_subcontract_return(source_name, target_doc=None):
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False, notify=False):
 	if isinstance(source_name, str):
 		source_doc = frappe.get_doc("Subcontracting Receipt", source_name)

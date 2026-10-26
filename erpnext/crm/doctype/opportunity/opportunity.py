@@ -544,7 +544,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_multiple_status(names, status):
 	names = json.loads(names)
 	for name in names:
@@ -574,7 +574,7 @@ def auto_close_opportunity():
 		doc.save()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_opportunity_from_communication(
 	communication: str, company: str, ignore_communication_links: bool = False
 ):
