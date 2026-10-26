@@ -134,6 +134,20 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
+	def test_scan_cannot_override_outward_transaction_type(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		doc = frappe.get_doc(
+			{
+				"doctype": "Delivery Note",
+				"company": "_Test Company",
+				"items": [{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": 1}],
+			}
+		)
+		doc.items[0].type_of_transaction = "Inward"
+		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
+			self.upsert(doc, serial_numbers=[{"serial_number": "Missing-Scan"}])
+		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
+
 	def test_incremental_append_preserves_existing_entries(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=3)
