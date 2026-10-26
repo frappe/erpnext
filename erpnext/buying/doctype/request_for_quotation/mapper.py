@@ -155,7 +155,7 @@ def create_rfq_items(sq_doc, supplier, rfq_row, data):
 			"cost_center",
 		]
 	}
-	rate = flt(data.get("rate"))
+	rate = flt(data.get("rate"), sq_doc.precision("rate", "items"))
 	args.update(
 		{
 			"qty": flt(data.get("qty")),
