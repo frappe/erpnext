@@ -1164,6 +1164,19 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.submit()
 		self.assertEqual(pos.docstatus, 1)
 
+	def test_stock_check_excludes_reserved_stock(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
+
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_stock_item_with_qty(20)
+		frappe.db.set_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "reserved_stock", 15)
+		self.assertEqual(get_stock_availability(item_code, warehouse)[0], 5)
+
+		pos = create_pos_invoice(item=item_code, qty=10, rate=100, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
+		pos.insert()
+		self.assertRaises(frappe.ValidationError, pos.submit)
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name

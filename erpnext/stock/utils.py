@@ -284,7 +284,7 @@ def get_latest_stock_balance():
 
 
 def get_bin_qty_map(rows) -> dict[tuple[str, str], frappe._dict]:
-	"""Map ``(item_code, warehouse)`` to its Bin's actual and projected qty.
+	"""Map ``(item_code, warehouse)`` to its Bin's actual, projected and reserved qty.
 
 	Fetched in a single query so a document costs one query instead of one per
 	row. Rows without an item or warehouse are skipped, and item/warehouse pairs
@@ -303,7 +303,7 @@ def get_bin_qty_map(rows) -> dict[tuple[str, str], frappe._dict]:
 	bins = frappe.get_all(
 		"Bin",
 		filters={"item_code": ["in", item_codes], "warehouse": ["in", warehouses]},
-		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+		fields=["item_code", "warehouse", "actual_qty", "projected_qty", "reserved_stock"],
 	)
 
 	return {(bin.item_code, bin.warehouse): bin for bin in bins}

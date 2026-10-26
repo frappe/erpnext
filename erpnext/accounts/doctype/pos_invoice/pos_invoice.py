@@ -967,9 +967,14 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 
 def get_bin_qty(item_code, warehouse):
-	actual_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+	bin_qty = frappe.db.get_value(
+		"Bin",
+		{"item_code": item_code, "warehouse": warehouse},
+		["actual_qty", "reserved_stock"],
+		as_dict=True,
+	)
 
-	return actual_qty or 0
+	return flt(bin_qty.actual_qty) - flt(bin_qty.reserved_stock) if bin_qty else 0
 
 
 def get_pos_reserved_qty(item_code, warehouse):
@@ -1043,7 +1048,8 @@ def get_available_stock_qty(required_qty):
 
 	available_qty = {}
 	for key in required_qty:
-		available_qty[key] = flt(bin_qty[key].actual_qty if key in bin_qty else 0) - reserved_qty[key]
+		bin_data = bin_qty.get(key) or frappe._dict()
+		available_qty[key] = flt(bin_data.actual_qty) - flt(bin_data.reserved_stock) - reserved_qty[key]
 
 	return available_qty
 
