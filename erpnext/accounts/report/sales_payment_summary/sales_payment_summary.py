@@ -114,7 +114,9 @@ def get_conditions(filters):
 		conditions += " and a.owner = %(owner)s"
 	if filters.get("is_pos"):
 		conditions += " and a.is_pos = %(is_pos)s"
-	conditions += f" and a.name in ({get_permitted_invoices()})"
+	if "permitted_invoices" not in filters:
+		filters["permitted_invoices"] = get_permitted_invoices(filters)
+	conditions += " and a.name in %(permitted_invoices)s"
 	return conditions
 
 
@@ -300,7 +302,14 @@ def get_mode_of_payment_details(filters):
 	return mode_of_payment_details
 
 
-def get_permitted_invoices() -> str:
-	"""Sales Invoices the session user may read, as a subquery."""
-	query = frappe.qb.get_query("Sales Invoice", fields=["name"], ignore_permissions=False)
-	return query.get_sql().replace("%", "%%")
+def get_permitted_invoices(filters) -> tuple[str, ...]:
+	"""Submitted Sales Invoices of the period that the session user may read."""
+	invoice_filters = [["docstatus", "=", 1], ["company", "=", filters.get("company")]]
+	if filters.get("from_date"):
+		invoice_filters.append(["posting_date", ">=", filters.get("from_date")])
+	if filters.get("to_date"):
+		invoice_filters.append(["posting_date", "<=", filters.get("to_date")])
+
+	names = frappe.get_list("Sales Invoice", filters=invoice_filters, pluck="name", limit_page_length=0)
+	# an empty tuple is not valid SQL, and no invoice has an empty name
+	return tuple(names) or ("",)
