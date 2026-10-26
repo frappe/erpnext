@@ -535,12 +535,5 @@ erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
 erpnext.patches.v16_0.apply_selling_settings_section_toggles
 erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
 erpnext.patches.v16_0.set_output_qty_in_work_order_operations
-<<<<<<< HEAD
 erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
-=======
-execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
-execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
-execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
-erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
 erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
->>>>>>> ad6bcef (fix(manufacturing): restore finished good qty on job card transfers made from a material request)
