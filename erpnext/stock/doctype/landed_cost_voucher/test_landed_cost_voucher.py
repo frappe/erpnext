@@ -1644,8 +1644,6 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 			self.assertFalse(gl_entries)
 
-<<<<<<< HEAD
-=======
 	def test_lcv_rejects_material_transfer_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -1659,8 +1657,6 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "Manufacture or Repack", lcv.insert)
 
-	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
->>>>>>> 360c2b1 (test: Landed Cost Voucher rejects a Material Transfer stock entry)
 	def test_landed_cost_voucher_does_not_change_qty_across_stock_reco(self):
 		"""LCV cost updates must not change quantity after a batch stock reconciliation."""
 		from erpnext.stock.doctype.item.test_item import make_item
