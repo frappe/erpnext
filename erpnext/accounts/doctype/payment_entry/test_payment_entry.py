@@ -3280,3 +3280,21 @@ class TestPaymentEntryQueries(ERPNextTestSuite):
 		self.assertEqual(
 			search(pay | {"payment_type": "Internal Transfer", "other_account": "A"})["name"], ["!=", "A"]
 		)
+
+	def test_payment_party_query(self):
+		search = partial(get_search_filters, payment_entry.payment_party_query)
+
+		self.assertEqual(
+			search(
+				"Customer",
+				{"party_type": "Customer", "company": "C"},
+				"erpnext.controllers.queries.party_query",
+			),
+			{"disabled": 0, "company": "C"},
+		)
+		self.assertEqual(
+			search("Employee", {"party_type": "Employee"}, "erpnext.controllers.queries.employee_query"), {}
+		)
+		self.assertEqual(
+			search("Shareholder", {"party_type": "Shareholder", "company": "C"}), {"company": "C"}
+		)
