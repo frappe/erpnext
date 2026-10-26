@@ -334,7 +334,12 @@ class TestBankReconciliationToolPermissions(AccountsTestMixin, FrappeTestCase):
 		fenced = make_company_fenced_user("bank-rec-fenced@example.com", ["Accounts User"], OTHER_COMPANY)
 		with as_user(fenced):
 			assert_refused_for_names(
-				self, reconcile_vouchers, self.reconcile_kwargs, [self.transaction_a], caller_supplied=True
+				self,
+				reconcile_vouchers,
+				self.reconcile_kwargs,
+				[self.transaction_a],
+				type_gated=True,
+				caller_supplied=True,
 			)
 			assert_refused_without(
 				self,
@@ -412,6 +417,7 @@ class TestBankReconciliationToolPermissions(AccountsTestMixin, FrappeTestCase):
 				create_payment_entry_bts,
 				self.payment_entry_kwargs,
 				[self.transaction_a],
+				type_gated=True,
 				caller_supplied=True,
 			)
 

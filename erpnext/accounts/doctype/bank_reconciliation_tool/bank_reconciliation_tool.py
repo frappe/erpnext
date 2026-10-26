@@ -120,7 +120,9 @@ def get_account_balance(bank_account, till_date, company):
 
 
 @frappe.whitelist(methods=["POST"])
-def update_bank_transaction(bank_transaction_name, reference_number, party_type=None, party=None):
+def update_bank_transaction(
+	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
+):
 	# updates bank transaction based on the new parameters provided by the user from Vouchers
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_transaction.reference_number = reference_number
@@ -149,16 +151,16 @@ def update_bank_transaction(bank_transaction_name, reference_number, party_type=
 
 @frappe.whitelist(methods=["POST"])
 def create_journal_entry_bts(
-	bank_transaction_name,
-	reference_number=None,
-	reference_date=None,
-	posting_date=None,
-	entry_type=None,
-	second_account=None,
-	mode_of_payment=None,
-	party_type=None,
-	party=None,
-	allow_edit=None,
+	bank_transaction_name: str,
+	reference_number: str | None = None,
+	reference_date: str | None = None,
+	posting_date: str | date | None = None,
+	entry_type: str | None = None,
+	second_account: str | None = None,
+	mode_of_payment: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	allow_edit: bool | None = None,
 ):
 	bank_transaction_name = cstr(bank_transaction_name)
 	if not bank_transaction_name or not frappe.has_permission(
@@ -317,17 +319,17 @@ def create_journal_entry_bts(
 
 @frappe.whitelist(methods=["POST"])
 def create_payment_entry_bts(
-	bank_transaction_name,
-	reference_number=None,
-	reference_date=None,
-	party_type=None,
-	party=None,
-	posting_date=None,
-	mode_of_payment=None,
-	project=None,
-	cost_center=None,
-	allow_edit=None,
-	company_bank_account=None,
+	bank_transaction_name: str,
+	reference_number: str | None = None,
+	reference_date: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+	posting_date: str | None = None,
+	mode_of_payment: str | None = None,
+	project: str | None = None,
+	cost_center: str | None = None,
+	allow_edit: bool | None = None,
+	company_bank_account: str | None = None,
 ):
 	bank_transaction_name = cstr(bank_transaction_name)
 	if not bank_transaction_name or not frappe.has_permission(
@@ -520,7 +522,7 @@ def get_reconcilable_doctypes():
 
 
 @frappe.whitelist(methods=["POST"])
-def reconcile_vouchers(bank_transaction_name, vouchers):
+def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list):
 	bank_transaction_name = cstr(bank_transaction_name)
 	if not bank_transaction_name or not frappe.has_permission(
 		"Bank Transaction", "write", doc=bank_transaction_name

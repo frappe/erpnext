@@ -499,7 +499,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist(methods=["POST"])
-def set_multiple_status(names, status):
+def set_multiple_status(names: str | list, status: str):
 	names = json.loads(names)
 	for name in names:
 		task = frappe.get_doc("Task", name)
@@ -587,7 +587,7 @@ def add_node():
 
 
 @frappe.whitelist(methods=["POST"])
-def add_multiple_tasks(data, parent, project=None):
+def add_multiple_tasks(data: str | list, parent: str, project: str | None = None):
 	data = json.loads(data)
 	is_root = parent in ("All Tasks", project)
 	new_doc = {

@@ -913,7 +913,7 @@ def get_project_kanban_board(project: str) -> str | None:
 
 
 @frappe.whitelist(methods=["POST"])
-def set_project_status(project, status):
+def set_project_status(project: str, status: str):
 	"""
 	set status for project and all related tasks
 	"""

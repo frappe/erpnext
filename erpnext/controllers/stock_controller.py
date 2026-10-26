@@ -1812,7 +1812,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 
 @frappe.whitelist(methods=["POST"])
-def make_quality_inspections(company, doctype, docname, items):
+def make_quality_inspections(company: str, doctype: str, docname: str, items: str | list):
 	if isinstance(items, str):
 		items = json.loads(items)
 

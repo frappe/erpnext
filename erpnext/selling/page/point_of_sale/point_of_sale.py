@@ -356,7 +356,7 @@ def check_opening_entry(user):
 
 
 @frappe.whitelist(methods=["POST"])
-def create_opening_voucher(pos_profile, company, balance_details):
+def create_opening_voucher(pos_profile: str, company: str, balance_details: str | list):
 	# submit() enforces POS Opening Entry rights per document, but only after the profile and company
 	# have been accepted from the caller — check the profile the session is being opened against.
 	check_pos_profile_access(pos_profile)
@@ -412,7 +412,7 @@ def get_past_order_list(search_term, status, limit=20):
 
 
 @frappe.whitelist(methods=["POST"])
-def set_customer_info(fieldname, customer, value=""):
+def set_customer_info(fieldname: str, customer: str, value: str = ""):
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_doc.check_permission("write")
 

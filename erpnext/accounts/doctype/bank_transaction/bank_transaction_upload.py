@@ -38,7 +38,7 @@ def upload_bank_statement():
 
 
 @frappe.whitelist(methods=["POST"])
-def create_bank_entries(columns, data, bank_account):
+def create_bank_entries(columns: str, data: str | list, bank_account: str):
 	# insert()/submit() enforce this per document, but only after the row loop has written an
 	# Error Log for every rejected row -- so check once up front.
 	frappe.has_permission("Bank Transaction", "create", throw=True)
