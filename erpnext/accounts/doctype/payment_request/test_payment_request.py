@@ -8,8 +8,9 @@ from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, cint, nowdate
 
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import (
@@ -1607,11 +1608,17 @@ class TestPaymentRequest(ERPNextTestSuite):
 		customer = frappe.db.get_value("Customer", {"customer_name": "Test Loyalty Customer"})
 		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
 		create_sales_invoice(customer=customer, qty=1, rate=10000)
+		points = cint(
+			get_loyalty_details(customer, "Test Single Loyalty", company="_Test Company").get(
+				"loyalty_points"
+			)
+		)
+		rate = points + 1000
 
-		normal_order = make_sales_order(customer=customer, qty=1, rate=1000)
-		first_cart_order = make_shopping_cart_order(customer)
-		second_cart_order = make_shopping_cart_order(customer)
-		order_without_program = make_shopping_cart_order("_Test Customer")
+		normal_order = make_sales_order(customer=customer, qty=1, rate=rate)
+		first_cart_order = make_shopping_cart_order(customer, rate)
+		second_cart_order = make_shopping_cart_order(customer, rate)
+		order_without_program = make_shopping_cart_order("_Test Customer", rate)
 
 		self.assertRaisesRegex(
 			frappe.ValidationError,
@@ -1644,19 +1651,19 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=first_cart_order.name,
-			loyalty_points=10,
+			loyalty_points=points,
 			mute_email=1,
 			submit_doc=1,
 			return_doc=1,
 		)
-		self.assertEqual(pr.grand_total, 990)
+		self.assertEqual(pr.grand_total, 1000)
 		self.assertRaisesRegex(
 			frappe.ValidationError,
 			"Only 0 Loyalty Points",
 			make_payment_request,
 			dt="Sales Order",
 			dn=second_cart_order.name,
-			loyalty_points=10,
+			loyalty_points=1,
 			mute_email=1,
 		)
 
@@ -1692,8 +1699,8 @@ class TestPaymentRequest(ERPNextTestSuite):
 		)
 
 
-def make_shopping_cart_order(customer):
-	so = make_sales_order(customer=customer, qty=1, rate=1000, do_not_save=True)
+def make_shopping_cart_order(customer, rate=1000):
+	so = make_sales_order(customer=customer, qty=1, rate=rate, do_not_save=True)
 	so.order_type = "Shopping Cart"
 	so.save()
 	so.submit()
