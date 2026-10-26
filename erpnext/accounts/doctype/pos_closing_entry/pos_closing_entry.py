@@ -248,8 +248,13 @@ class POSClosingEntry(StatusUpdater):
 
 		self.update_sales_invoices_closing_entry(cancel=True)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def retry(self):
+		self.load_from_db()
+		self.check_permission("submit")
+		if self.docstatus != 1 or self.status != "Failed":
+			frappe.throw(_("Only a submitted POS Closing Entry with status Failed can be retried"))
+
 		consolidate_pos_invoices(closing_entry=self)
 
 	def update_opening_entry(self, for_cancel=False):
