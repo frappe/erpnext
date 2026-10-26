@@ -543,6 +543,35 @@ class TestAccount(ERPNextTestSuite):
 
 		self.assertEqual(new_name, "Deprecated Argument Renamed - _TC")
 
+	def test_parent_company_account_checks_run_before_child_company_rename(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		number_holder = frappe.new_doc("Account")
+		number_holder.account_name = "Test Number Holder Account"
+		number_holder.account_number = "8800"
+		number_holder.parent_account = "Temporary Accounts - _TC3"
+		number_holder.company = "_Test Company 3"
+		number_holder.flags.ignore_root_company_validation = True
+		number_holder.insert()
+
+		account = frappe.new_doc("Account")
+		account.account_name = "Test Rename Order Account"
+		account.parent_account = "Temporary Accounts - _TC3"
+		account.company = "_Test Company 3"
+		account.insert()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already used",
+			update_account_number,
+			account.name,
+			"Test Rename Order Account",
+			"8800",
+		)
+		self.assertFalse(
+			frappe.db.exists("Account", {"account_number": "8800", "company": "_Test Company 4"})
+		)
+
 
 def walk_chart_tree(tree):
 	"""Yield (account_name, details) for every account in a chart of accounts tree"""

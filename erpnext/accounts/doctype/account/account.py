@@ -601,13 +601,16 @@ def update_account_number(
 	account.check_permission("write")
 	validate_rename_in_child_company(account)
 
+	old_account_name, old_account_number = account.account_name, account.account_number
+	new_name = set_account_name_and_number(account, account_name, account_number)
+
 	descendants = get_descendants_of("Company", account.company)
 	if descendants:
 		sync_update_account_number_in_child(
-			descendants, account.account_name, account_name, account_number, account.account_number
+			descendants, old_account_name, account_name, account_number, old_account_number
 		)
 
-	return set_account_name_and_number(account, account_name, account_number)
+	return new_name
 
 
 def validate_rename_in_child_company(account: Account):
