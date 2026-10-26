@@ -908,6 +908,8 @@ class ProductionPlan(Document):
 	@frappe.whitelist()
 	def make_material_request(self):
 		"""Create Material Requests grouped by Sales Order and Material Request Type"""
+		self.load_saved_plan_for_material_request()
+
 		material_request_list = []
 		material_request_map = {}
 
@@ -979,6 +981,15 @@ class ProductionPlan(Document):
 			msgprint(_("{0} created").format(comma_and(material_request_list)))
 		else:
 			msgprint(_("No material request created"))
+
+	def load_saved_plan_for_material_request(self):
+		submit_material_request = cint(self.get("submit_material_request"))
+		if not (self.name and frappe.db.exists("Production Plan", self.name)):
+			frappe.throw(_("Save the Production Plan before creating Material Requests"))
+
+		self.load_from_db()
+		self.check_permission("write")
+		self.submit_material_request = submit_material_request
 
 	@frappe.whitelist()
 	def get_sub_assembly_items(self, manufacturing_type=None):
