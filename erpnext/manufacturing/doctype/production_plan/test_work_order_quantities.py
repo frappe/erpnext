@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
@@ -288,7 +289,17 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		work_order = self.create_work_order(plan, field)
 		work_order.submit()
 		self.manufacture_with_loss(work_order, loss_qty=25)
-		self.assert_pending_qty(plan, field, 15)
+		# 15 good is short, and the replacement loses 10% of itself too.
+		self.assert_pending_qty(plan, field, flt(15 / 0.9, frappe.get_precision("Work Order", "qty")))
+
+	def test_work_order_losing_less_than_planned_completes(self):
+		field = "production_plan_sub_assembly_item"
+		plan = self.make_plan(qty=81, plan_process_loss=True)
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		self.manufacture_with_loss(work_order, loss_qty=0)
+		self.assertEqual(work_order.reload().produced_qty, 100)
+		self.assert_pending_qty(plan, field, 0)
 
 	def test_finished_good_plan_includes_process_loss(self):
 		field = "production_plan_item"
