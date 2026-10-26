@@ -267,6 +267,29 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				second.submit()
 				self.assert_pending_qty(plan, field, 0)
 
+	def test_sub_assembly_plan_includes_process_loss(self):
+		field = "production_plan_sub_assembly_item"
+		plan = self.make_plan(qty=90, plan_process_loss=True)
+		row = self.plan_row(plan, field)
+		self.assertEqual((row.required_qty, row.process_loss_percentage, row.qty), (90, 10, 100))
+
+		work_order = self.create_work_order(plan, field)
+		self.assertEqual(work_order.qty, 100)
+		self.assert_overproduction(work_order, 101)
+		work_order.qty = 100
+		work_order.submit()
+		self.manufacture_with_loss(work_order)
+		self.assertEqual(work_order.reload().process_loss_qty, 10)
+		self.assert_pending_qty(plan, field, 0)
+
+	def test_unplanned_sub_assembly_loss_creates_replacement(self):
+		field = "production_plan_sub_assembly_item"
+		plan = self.make_plan(qty=90, plan_process_loss=True)
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		self.manufacture_with_loss(work_order, loss_qty=25)
+		self.assert_pending_qty(plan, field, 15)
+
 	def test_stopped_and_closed_orders_consume_quantity(self):
 		plan = self.make_plan()
 		for field in REFERENCE_FIELDS:
@@ -343,7 +366,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "must reference a row"):
 			work_order.submit()
 
-	def make_plan(self, qty=100, submit=True):
+	def make_plan(self, qty=100, submit=True, plan_process_loss=False):
 		plan = create_production_plan(
 			item_code=self.finished_good,
 			planned_qty=qty,
@@ -354,6 +377,10 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 			do_not_submit=True,
 		)
 		plan.get_sub_assembly_items()
+		if not plan_process_loss:
+			# As planned before rows included process loss: only recorded loss frees quantity.
+			for row in plan.sub_assembly_items:
+				row.update({"qty": row.required_qty, "process_loss_percentage": 0})
 		if submit:
 			plan.submit()
 		return plan
