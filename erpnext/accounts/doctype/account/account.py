@@ -8,6 +8,7 @@ from frappe.utils import add_to_date, cint, cstr, pretty_date
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 import erpnext
+from erpnext.deprecation_dumpster import deprecation_warning
 
 
 class RootNotEditable(frappe.ValidationError):
@@ -585,7 +586,16 @@ def get_account_autoname(account_number, account_name, company):
 
 
 @frappe.whitelist(methods=["POST"])
-def update_account_number(name: str, account_name: str, account_number: str | None = None):
+def update_account_number(
+	name: str, account_name: str, account_number: str | None = None, from_descendant: bool = False
+):
+	if from_descendant:
+		deprecation_warning(
+			"2026-10-26",
+			"v18",
+			"The from_descendant argument of update_account_number is ignored. Use update_child_company_account_number to rename a synced child company account.",
+		)
+
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
 	account.check_permission("write")

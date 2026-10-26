@@ -531,6 +531,18 @@ class TestAccount(ERPNextTestSuite):
 		merge_account(source, target)
 		self.assertFalse(frappe.db.exists("Account", source))
 
+	def test_update_account_number_with_deprecated_from_descendant(self):
+		account = create_account(
+			account_name="Deprecated Argument Account",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+
+		with self.assertWarns(Warning):
+			new_name = update_account_number(account, "Deprecated Argument Renamed", from_descendant=True)
+
+		self.assertEqual(new_name, "Deprecated Argument Renamed - _TC")
+
 
 def walk_chart_tree(tree):
 	"""Yield (account_name, details) for every account in a chart of accounts tree"""
