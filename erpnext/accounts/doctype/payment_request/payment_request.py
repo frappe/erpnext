@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, nowdate
+from frappe.utils import cint, flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext import get_company_currency
@@ -886,11 +886,7 @@ def make_payment_request(**args):
 		frappe.throw(_("Payment Entry is already created"))
 
 	if args.loyalty_points and ref_doc.doctype == "Sales Order":
-		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
-
-		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))  # sets fields on ref_doc
-		ref_doc.db_update()
-		grand_total = grand_total - loyalty_amount
+		grand_total -= apply_loyalty_points(ref_doc, cint(args.loyalty_points))
 	# fetches existing payment request `grand_total` amount
 	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc)
 
@@ -1059,6 +1055,57 @@ def is_unbilled_shopping_cart_order(args: frappe._dict, ref_doc: Document) -> bo
 		and ref_doc.doctype == "Sales Order"
 		and flt(ref_doc.get("per_billed")) < 100
 	)
+
+
+def apply_loyalty_points(sales_order, loyalty_points: int) -> float:
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+
+	if sales_order.order_type != "Shopping Cart":
+		frappe.throw(_("Loyalty Points can be redeemed in a Payment Request only for Shopping Cart orders"))
+
+	sales_order.check_permission("write")
+	loyalty_amount = validate_loyalty_points(sales_order, loyalty_points)
+	if loyalty_amount is None:
+		frappe.throw(_("Customer {0} is not enrolled in a Loyalty Program").format(sales_order.customer))
+
+	validate_loyalty_points_used_in_other_orders(sales_order, loyalty_points)
+	sales_order.db_update()
+	return loyalty_amount
+
+
+def validate_loyalty_points_used_in_other_orders(sales_order, loyalty_points: int):
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
+
+	loyalty_program = frappe.db.get_value("Customer", sales_order.customer, "loyalty_program")
+	available_points = cint(
+		get_loyalty_details(sales_order.customer, loyalty_program, company=sales_order.company).get(
+			"loyalty_points"
+		)
+	)
+
+	so = frappe.qb.DocType("Sales Order")
+	points_in_other_orders = (
+		frappe.qb.from_(so)
+		.select(Sum(so.loyalty_points))
+		.where(
+			(so.customer == sales_order.customer)
+			& (so.company == sales_order.company)
+			& (so.order_type == "Shopping Cart")
+			& (so.docstatus == 1)
+			& (so.per_billed == 0)
+			& (so.status != "Closed")
+			& (so.name != sales_order.name)
+		)
+		.run()[0][0]
+	)
+
+	free_points = max(available_points - cint(points_in_other_orders), 0)
+	if loyalty_points > free_points:
+		frappe.throw(
+			_(
+				"Only {0} Loyalty Points of Customer {1} are free. The other points are used in open Shopping Cart orders."
+			).format(free_points, sales_order.customer)
+		)
 
 
 def apply_payment_references(pr, payment_reference):

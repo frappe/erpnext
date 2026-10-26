@@ -1551,6 +1551,71 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Payment Request", existing_pr.name, "status"), "Requested")
 
+	def test_loyalty_points_in_payment_request(self):
+		customer = frappe.db.get_value("Customer", {"customer_name": "Test Loyalty Customer"})
+		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
+		create_sales_invoice(customer=customer, qty=1, rate=10000)
+
+		normal_order = make_sales_order(customer=customer, qty=1, rate=1000)
+		first_cart_order = make_shopping_cart_order(customer)
+		second_cart_order = make_shopping_cart_order(customer)
+		order_without_program = make_shopping_cart_order("_Test Customer")
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"only for Shopping Cart orders",
+			make_payment_request,
+			dt="Sales Order",
+			dn=normal_order.name,
+			loyalty_points=10,
+			mute_email=1,
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not enrolled in a Loyalty Program",
+			make_payment_request,
+			dt="Sales Order",
+			dn=order_without_program.name,
+			loyalty_points=10,
+			mute_email=1,
+		)
+		with self.set_user(get_accounts_user()):
+			self.assertRaises(
+				frappe.PermissionError,
+				make_payment_request,
+				dt="Sales Order",
+				dn=first_cart_order.name,
+				loyalty_points=10,
+				mute_email=1,
+			)
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=first_cart_order.name,
+			loyalty_points=10,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+		self.assertEqual(pr.grand_total, 990)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Only 0 Loyalty Points",
+			make_payment_request,
+			dt="Sales Order",
+			dn=second_cart_order.name,
+			loyalty_points=10,
+			mute_email=1,
+		)
+
+
+def make_shopping_cart_order(customer):
+	so = make_sales_order(customer=customer, qty=1, rate=1000, do_not_save=True)
+	so.order_type = "Shopping Cart"
+	so.save()
+	so.submit()
+	return so
+
 
 def get_accounts_user():
 	accounts_user = "accounts-user@example.com"
