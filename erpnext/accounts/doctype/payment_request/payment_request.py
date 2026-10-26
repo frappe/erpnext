@@ -164,10 +164,21 @@ class PaymentRequest(Document):
 		self.validate_subscription_details()
 
 	def validate_party(self, ref_doc):
-		if not (self.party_type and self.party):
+		if not self.party_type:
 			return
 
-		if self.party != ref_doc.get(frappe.scrub(self.party_type)):
+		party_field = frappe.scrub(self.party_type)
+		if not ref_doc.meta.has_field(party_field):
+			frappe.throw(
+				_("Party Type {0} is not valid for {1} {2}").format(
+					frappe.bold(_(self.party_type)),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Party Type"),
+			)
+
+		if self.party and self.party != ref_doc.get(party_field):
 			frappe.throw(
 				_("{0} {1} is not the {0} of {2} {3}").format(
 					_(self.party_type),
@@ -955,7 +966,9 @@ def make_payment_request(**args):
 			pr.save()
 
 	else:
-		party_type = args.get("party_type") or "Customer"
+		party_type = args.get("party_type") or (
+			"Supplier" if ref_doc.doctype in ["Purchase Order", "Purchase Invoice"] else "Customer"
+		)
 		party_field = frappe.scrub(party_type)
 		party = ref_doc.get(party_field)
 		bank_account = get_party_bank_account(party_type, party) if args.get("party_type") else ""

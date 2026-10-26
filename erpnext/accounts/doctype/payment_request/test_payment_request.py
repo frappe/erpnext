@@ -1680,6 +1680,17 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr.party = "_Test Customer 1"
 		self.assertRaisesRegex(frappe.ValidationError, "is not the Customer of", pr.save)
 
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not valid for Sales Invoice",
+			make_payment_request,
+			dt="Sales Invoice",
+			dn=create_sales_invoice(qty=1, rate=1000).name,
+			party_type="Supplier",
+			mute_email=1,
+			submit_doc=1,
+		)
+
 
 def make_shopping_cart_order(customer):
 	so = make_sales_order(customer=customer, qty=1, rate=1000, do_not_save=True)
