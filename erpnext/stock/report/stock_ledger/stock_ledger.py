@@ -150,6 +150,16 @@ def execute(filters=None):
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no",))
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	if column.fieldname == "out_qty" and data.out_qty < 0:
+		value = f"<span style='color:red'>{value}</span>"
+	elif column.fieldname == "in_qty" and data.in_qty > 0:
+		value = f"<span style='color:green'>{value}</span>"
+
+	return value
+
+
 def set_bundle_qty_and_value(sle, bundle_info):
 	"""Keep only the qty and value of the filtered batch, as a bundle can hold other batches too."""
 	sle.actual_qty = sum(flt(row.qty) for row in bundle_info)
