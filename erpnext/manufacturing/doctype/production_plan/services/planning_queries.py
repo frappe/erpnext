@@ -20,6 +20,12 @@ def get_planned_process_loss_percentage(bom_no):
 	return loss_percentage if loss_percentage < 100 else 0
 
 
+def get_qty_before_process_loss(qty, loss_percentage):
+	"""Quantity to make so that `qty` is left after `loss_percentage` process loss."""
+	loss_percentage = flt(loss_percentage)
+	return flt(qty) / (1 - loss_percentage / 100) if loss_percentage < 100 else flt(qty)
+
+
 def get_uom_conversion_factor(item_code, uom):
 	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
 	conversion_factor = frappe.db.get_value(

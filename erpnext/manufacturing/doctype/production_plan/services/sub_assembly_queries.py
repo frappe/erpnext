@@ -13,6 +13,7 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	aggregate_bin_details,
 	get_bin_details,
 	get_planned_process_loss_percentage,
+	get_qty_before_process_loss,
 	get_uom_conversion_factor,
 )
 
@@ -83,7 +84,7 @@ def _add_sub_assembly_child(
 	)
 	if not d.is_phantom_item:
 		d.process_loss_percentage = get_planned_process_loss_percentage(d.value)
-		stock_qty = stock_qty / (1 - d.process_loss_percentage / 100)
+		stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage)
 		bom_data.append(
 			_sub_assembly_row(
 				d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision

@@ -7,6 +7,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_planned_process_loss_percentage,
+	get_qty_before_process_loss,
+)
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
 	get_sub_assembly_items,
 )
@@ -52,7 +56,7 @@ class SubAssemblyService:
 			bin_details,
 			row.bom_no,
 			bom_data,
-			row.planned_qty,
+			get_qty_before_process_loss(row.planned_qty, get_planned_process_loss_percentage(row.bom_no)),
 			self.doc.company,
 			warehouse=self.doc.sub_assembly_warehouse,
 			skip_available_sub_assembly_item=self.doc.skip_available_sub_assembly_item,

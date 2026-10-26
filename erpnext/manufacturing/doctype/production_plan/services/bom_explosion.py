@@ -9,6 +9,7 @@ from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_planned_process_loss_percentage,
+	get_qty_before_process_loss,
 	get_uom_conversion_factor,
 )
 
@@ -258,7 +259,7 @@ def _process_subitem(
 			company,
 			include_non_stock_items,
 			include_subcontracted_items,
-			d.qty / (1 - loss_percentage / 100),
+			get_qty_before_process_loss(d.qty, loss_percentage),
 		)
 
 
