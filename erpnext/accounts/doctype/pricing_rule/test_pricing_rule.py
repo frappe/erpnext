@@ -2045,6 +2045,26 @@ class TestPricingRule(ERPNextTestSuite):
 			si = create_sales_invoice(item_code=item, qty=qty, do_not_submit=True)
 			self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), free_qty)
 
+	def test_mixed_conditions_with_same_item_in_two_rows(self):
+		item = make_item(
+			"PR Mixed Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_amt=250,
+			discount_percentage=5,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=1, do_not_save=True)
+		si.append("items", {**si.items[0].as_dict(), "name": None, "idx": 2, "qty": 2})
+		si.items[0].name = "row-1"
+		si.items[1].name = "row-2"
+		for row in si.items:
+			row.stock_qty = row.qty
+			self.assertEqual(get_pricing_details_for_row(si, row).discount_percentage, 5)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)

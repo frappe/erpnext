@@ -491,7 +491,7 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 
 			if pr_doc.mixed_conditions:
 				amt = args.get("qty") * args.get("price_list_rate")
-				if args.get("item_code") != row.get("item_code"):
+				if row.get("name") != args.get("child_docname"):
 					amt = flt(row.get("qty")) * flt(row.get("price_list_rate") or args.get("rate"))
 
 				sum_qty += flt(row.get("stock_qty")) or flt(args.get("stock_qty")) or flt(args.get("qty"))
