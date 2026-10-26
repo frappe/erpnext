@@ -130,50 +130,24 @@ frappe.ui.form.on("Payment Entry", {
 		});
 
 		frm.set_query("reference_doctype", "references", function () {
-			let doctypes = ["Journal Entry"];
-			if (frm.doc.party_type == "Customer") {
-				doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"];
-			} else if (frm.doc.party_type == "Supplier") {
-				doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
-			}
-
 			return {
-				filters: { name: ["in", doctypes] },
+				query: "erpnext.accounts.doctype.payment_entry.payment_entry.reference_doctype_query",
+				filters: { party_type: frm.doc.party_type },
 			};
 		});
 
 		frm.set_query("payment_term", "references", function (frm, cdt, cdn) {
 			const child = locals[cdt][cdn];
-			if (
-				["Purchase Invoice", "Sales Invoice"].includes(child.reference_doctype) &&
-				child.reference_name
-			) {
-				return {
-					query: "erpnext.controllers.queries.get_payment_terms_for_references",
-					filters: {
-						reference: child.reference_name,
-					},
-				};
-			}
+			return {
+				query: "erpnext.accounts.doctype.payment_entry.payment_entry.payment_term_query",
+				filters: { reference_doctype: child.reference_doctype, reference_name: child.reference_name },
+			};
 		});
 
-		frm.set_query("reference_name", "references", function (doc, cdt, cdn) {
-			const child = locals[cdt][cdn];
-			const filters = { docstatus: 1, company: doc.company };
-			const party_type_doctypes = [
-				"Sales Invoice",
-				"Sales Order",
-				"Purchase Invoice",
-				"Purchase Order",
-				"Dunning",
-			];
-
-			if (party_type_doctypes.includes(child.reference_doctype)) {
-				filters[doc.party_type.toLowerCase()] = doc.party;
-			}
-
+		frm.set_query("reference_name", "references", function (doc) {
 			return {
-				filters: filters,
+				query: "erpnext.accounts.doctype.payment_entry.payment_entry.reference_name_query",
+				filters: { company: doc.company, party_type: doc.party_type, party: doc.party },
 			};
 		});
 

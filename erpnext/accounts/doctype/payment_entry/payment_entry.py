@@ -3534,3 +3534,61 @@ def payment_party_query(
 
 	party_filters = {"company": filters.get("company")} if party_type == "Shareholder" else {}
 	return queries.standard_search(doctype, txt, searchfield, start, page_len, party_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def reference_doctype_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The doctypes a payment of the party type can reference."""
+	from erpnext.controllers.queries import standard_search
+
+	doctypes = {
+		"Customer": ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"],
+		"Supplier": ["Purchase Order", "Purchase Invoice", "Journal Entry"],
+	}.get(filters.get("party_type"), ["Journal Entry"])
+	return standard_search(doctype, txt, searchfield, start, page_len, {"name": ["in", doctypes]}, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def reference_name_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The submitted documents of the company a payment can reference, of the party for an order,
+	invoice or dunning; `doctype` is the reference's."""
+	from erpnext.controllers.queries import standard_search
+
+	reference_filters = {"docstatus": 1, "company": filters.get("company")}
+	party_doctypes = ("Sales Invoice", "Sales Order", "Purchase Invoice", "Purchase Order", "Dunning")
+	if doctype in party_doctypes and filters.get("party_type"):
+		reference_filters[filters["party_type"].lower()] = filters.get("party")
+
+	return standard_search(doctype, txt, searchfield, start, page_len, reference_filters, **kwargs)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def payment_term_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The payment terms of the referenced invoice, or all of them for another reference."""
+	from erpnext.controllers.queries import get_payment_terms_for_references, standard_search
+
+	if filters.get("reference_doctype") in ("Purchase Invoice", "Sales Invoice") and filters.get(
+		"reference_name"
+	):
+		reference_filters = {"reference": filters["reference_name"]}
+		return frappe.call(
+			get_payment_terms_for_references,
+			doctype,
+			txt,
+			searchfield,
+			start,
+			page_len,
+			reference_filters,
+			**kwargs,
+		)
+
+	return standard_search(doctype, txt, searchfield, start, page_len, {}, **kwargs)
