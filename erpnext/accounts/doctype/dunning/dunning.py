@@ -21,6 +21,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.setup.utils import get_exchange_rate
 
 
 class Dunning(AccountsController):
@@ -71,12 +72,40 @@ class Dunning(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_currency()
 		self.set_dunning_fee()
 		self.validate_overdue_payment_references()
 		self.validate_overdue_payments()
 		self.validate_totals()
+		if self.docstatus == 0:
+			self.status = "Draft"
 		self.set_party_details()
 		self.set_dunning_level()
+
+	def validate_currency(self):
+		self.currency = self.currency or self.company_currency
+		if self.currency == self.company_currency:
+			self.conversion_rate = 1
+		elif not self.conversion_rate or (
+			self.get_doc_before_save()
+			and not self.has_value_changed("conversion_rate")
+			and any(self.has_value_changed(field) for field in ("currency", "company", "posting_date"))
+		):
+			self.conversion_rate = get_exchange_rate(
+				self.currency, self.company_currency, self.posting_date, "for_selling"
+			)
+
+		if flt(self.conversion_rate) <= 0:
+			frappe.throw(
+				_("Conversion Rate from {0} to {1} must be greater than zero.").format(
+					self.currency, self.company_currency
+				)
+			)
+
+	def before_submit(self):
+		if self.dunning_amount and not self.income_account:
+			frappe.throw(_("Income Account is required to collect dunning fees or interest."))
+		self.status = "Unresolved"
 
 	def set_dunning_fee(self):
 		if not self.dunning_type:
@@ -302,6 +331,10 @@ class Dunning(AccountsController):
 			if (outstanding := get_current_outstanding(row)) > 0
 		]
 
+	def before_cancel(self):
+		super().before_cancel()
+		self.status = "Cancelled"
+
 	def on_cancel(self):
 		super().on_cancel()
 		self.ignore_linked_doctypes = [
@@ -316,7 +349,6 @@ class Dunning(AccountsController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
-			"Payment Entry",
 		]
 
 	@frappe.whitelist()
@@ -462,13 +494,25 @@ def get_paid_dunning_amount(dunning: str) -> float:
 	"""Interest and fee collected for this dunning, in company currency."""
 	deduction = frappe.qb.DocType("Payment Entry Deduction")
 	payment_entry = frappe.qb.DocType("Payment Entry")
+	dunning_doc = frappe.qb.DocType("Dunning")
 
 	paid = (
 		frappe.qb.from_(deduction)
 		.join(payment_entry)
 		.on(payment_entry.name == deduction.parent)
+		.join(dunning_doc)
+		.on(dunning_doc.name == deduction.dunning)
 		.select(Sum(deduction.amount))
-		.where((deduction.dunning == dunning) & (payment_entry.docstatus == 1))
+		.where(
+			(deduction.dunning == dunning)
+			& (payment_entry.docstatus == 1)
+			& (payment_entry.payment_type == "Receive")
+			& (payment_entry.party_type == "Customer")
+			& (payment_entry.party == dunning_doc.customer)
+			& (payment_entry.company == dunning_doc.company)
+			& (deduction.account == dunning_doc.income_account)
+			& (deduction.amount < 0)
+		)
 	).run()
 
 	# the dunning amount is booked as a negative deduction, against the income account
@@ -510,7 +554,7 @@ def get_linked_dunnings_as_per_state(sales_invoice, state):
 		.select(dunning.name)
 		.where(
 			(dunning.status == state)
-			& (dunning.docstatus != 2)
+			& (dunning.docstatus == 1)
 			& (overdue_payment.sales_invoice == sales_invoice)
 		)
 	).run(as_dict=True)
