@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import datetime
 import json
 from collections import defaultdict
 from typing import Any
@@ -989,7 +990,7 @@ def _get_item_tax_template(
 				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key=lambda i: i.valid_from or tax.maximum_net_rate, reverse=True)
+		taxes = sorted(taxes_with_validity, key=get_item_tax_valid_from, reverse=True)
 	else:
 		taxes = taxes_with_no_validity
 
@@ -1017,6 +1018,10 @@ def _get_item_tax_template(
 			out.item_tax_template = tax.item_tax_template
 			return tax.item_tax_template
 	return None
+
+
+def get_item_tax_valid_from(tax) -> datetime.date:
+	return getdate(tax.valid_from) if tax.valid_from else datetime.date.min
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)

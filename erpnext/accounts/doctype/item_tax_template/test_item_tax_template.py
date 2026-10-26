@@ -2,7 +2,11 @@
 # See license.txt
 
 import frappe
+from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.get_item_details import get_item_tax_template
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -60,3 +64,31 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		doc = self.make_template([(TAX_ACCOUNT, -5, 0)])
 		doc.insert()
 		self.assertEqual(doc.taxes[0].tax_rate, -5)
+
+	def make_tax_template(self, rate):
+		return self.make_template([(TAX_ACCOUNT, rate, 0)]).insert().name
+
+	def make_item_with_taxes(self, taxes):
+		return make_item(properties={"taxes": taxes}).name
+
+	def get_template_for(self, item_code, **kwargs):
+		ctx = {"item_code": item_code, "company": COMPANY, "posting_date": today(), "tax_category": None}
+		ctx.update(kwargs)
+		return get_item_tax_template(ctx)
+
+	def make_tax_category(self, title):
+		if not frappe.db.exists("Tax Category", title):
+			frappe.get_doc({"doctype": "Tax Category", "title": title}).insert()
+		return title
+
+	def test_dated_and_rate_band_rows_together(self):
+		template_18 = self.make_tax_template(18)
+		template_5 = self.make_tax_template(5)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_18, "valid_from": add_days(today(), -10)},
+				{"item_tax_template": template_5, "minimum_net_rate": 0, "maximum_net_rate": 1000},
+			]
+		)
+
+		self.assertEqual(self.get_template_for(item_code, base_net_rate=500), template_18)
