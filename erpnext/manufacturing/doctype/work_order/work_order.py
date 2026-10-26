@@ -1362,6 +1362,7 @@ class WorkOrder(Document):
 			serial_nos = get_available_serial_nos(item_details.serial_no_series, qty or self.qty)
 =======
 		if not item_details.serial_no_series:
+<<<<<<< HEAD
 			frappe.throw(
 				_("Set Serial No Series in Item {0} or disable {1} in {2}").format(
 					get_link_to_form("Item", self.production_item),
@@ -1371,6 +1372,9 @@ class WorkOrder(Document):
 				title=_("Serial No Series Missing"),
 			)
 >>>>>>> 52f1f52 (fix(manufacturing): require serial no series on work order submit)
+=======
+			self.throw_missing_serial_no_series()
+>>>>>>> a154980 (fix(manufacturing): take field labels from meta in serial no series error)
 
 		serial_nos = get_available_serial_nos(
 			item_details.serial_no_series, qty or self.qty, self.production_item
@@ -1493,6 +1497,22 @@ class WorkOrder(Document):
 
 		if row.planned_start_time == row.planned_end_time:
 			frappe.throw(_("Capacity Planning Error, planned start time can not be same as end time"))
+
+	def throw_missing_serial_no_series(self):
+		frappe.throw(
+			_("Set {0} in Item {1} or disable {2} in {3}").format(
+				frappe.bold(_(frappe.get_meta("Item").get_label("serial_no_series"))),
+				get_link_to_form("Item", self.production_item),
+				frappe.bold(
+					_(
+						frappe.get_meta("Manufacturing Settings").get_label(
+							"make_serial_no_batch_from_work_order"
+						)
+					)
+				),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			)
+		)
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
