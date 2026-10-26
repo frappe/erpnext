@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import re
 from unittest.mock import Mock, patch
 
 import frappe
@@ -118,6 +119,20 @@ class TestCodeListImport(FrappeTestCase):
 
 		file_doc = frappe.get_doc("File", import_result["file"])
 		self.assertEqual(code_list_import.read_file_bytes(file_doc), SAMPLE_GENERICODE)
+
+	def test_uploaded_file_is_saved_under_a_plain_name(self):
+		cases = (("../../sub/list.xml", "_.._sub_list.xml"), ("..", "genericode.xml"))
+		for index, (file_name, expected) in enumerate(cases):
+			frappe.db.delete("Code List", "test-code-list-v1")
+			content = SAMPLE_GENERICODE + f"<!-- {index} {frappe.generate_hash()} -->".encode()
+			self.set_upload_context(content=content, file_name=file_name)
+			import_result = code_list_import.import_genericode()
+
+			file_doc = frappe.get_doc("File", import_result["file"])
+			# v15 File.before_insert adds a content-hash suffix when the name is already on disk
+			stem, extension = expected.rsplit(".", 1)
+			self.assertRegex(file_doc.file_name, rf"^{re.escape(stem)}([0-9a-f]{{6}})?\.{extension}$")
+			self.assertEqual(file_doc.file_url, f"/private/files/{file_doc.file_name}")
 
 	def test_process_genericode_import_reads_file_doc_content(self):
 		self.set_upload_context(content=SAMPLE_GENERICODE, file_name="uploaded_genericode.xml")
