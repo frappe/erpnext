@@ -62,7 +62,7 @@ class CostCenterAllocation(Document):
 	def validate_total_allocation_percentage(self):
 		total_percentage = sum([flt(d.percentage) for d in self.get("allocation_percentages", [])])
 
-		if total_percentage != 100:
+		if flt(total_percentage, self.precision("percentage", "allocation_percentages")) != 100:
 			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
 
 	def validate_from_date_based_on_existing_gle(self):
