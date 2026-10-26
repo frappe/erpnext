@@ -980,6 +980,15 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 	def test_close_foreign_currency_balance_in_mapreduce_controller(self):
 		self.close_and_cancel_foreign_currency_income(self.make_period_closing_voucher_with_mapreduce)
 
+	def test_future_closing_voucher_message_shows_full_name(self):
+		self.make_income_entry("2021-03-15", 1000)
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		next_pcv = self.make_period_closing_voucher(posting_date="2022-12-31")
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, f"Period Closing Entry {next_pcv.name} exists after", pcv.cancel
+		)
+
 
 def create_account():
 	account = frappe.get_doc(
