@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import re
+from collections import defaultdict
 
 import frappe
 from frappe.utils import strip_html
@@ -39,6 +40,9 @@ class ItemMatcher:
 			"Item", filters={"disabled": 0, "has_variants": 0}, fields=["name", "item_name"]
 		)
 		self.item_codes = {item.name for item in items}
+		self.items_by_code_key = defaultdict(list)
+		for item in items:
+			self.items_by_code_key[get_code_key(item.name)].append(item.name)
 		self.codes = ([item.name for item in items], [get_code_key(item.name) for item in items])
 		named_items = [item for item in items if item.item_name]
 		self.names = (
@@ -73,6 +77,10 @@ class ItemMatcher:
 
 		if part.part_number in self.item_codes:
 			return get_match(part.part_number, 100, "Item Code", True)
+
+		same_code = self.items_by_code_key.get(get_code_key(part.part_number), [])
+		if len(same_code) == 1:
+			return get_match(same_code[0], 100, "Item Code", True)
 
 	def get_candidates(self, part) -> dict[str, tuple[float, str]]:
 		candidates = {}
