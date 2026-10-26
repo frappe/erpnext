@@ -6,10 +6,12 @@ import unittest
 import frappe
 from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import flt, get_datetime
+from frappe.utils import flt, get_datetime, get_time
 
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import (
+	create_service_level_agreement,
 	create_service_level_agreements_for_issues,
+	get_service_level_agreement,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -99,7 +101,7 @@ class TestIssue(TestSetUp):
 		issue.save()
 
 		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
-		self.assertFalse(issue.sla_resolution_by)
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:00"))
 
 		creation = get_datetime("2020-03-04 5:00")
 		frappe.flags.current_time = get_datetime("2020-03-04 5:00")
@@ -107,7 +109,8 @@ class TestIssue(TestSetUp):
 
 		issue.reload()
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:45"))
+		# the hold was before working hours
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2020-03-04 16:00"))
 
 		creation = get_datetime("2020-03-04 5:05")
 		create_communication(issue.name, "test@admin.com", "Sent", creation)
@@ -141,7 +144,8 @@ class TestIssue(TestSetUp):
 		issue.status = "Closed"
 		issue.save()
 
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-22 06:00:00"))
+		# 5 working hours were left when it was put on hold
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-22 15:00:00"))
 		self.assertEqual(issue.sla_resolution_date, get_datetime("2021-11-22 01:00:00"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 
@@ -190,8 +194,8 @@ class TestIssue(TestSetUp):
 		issue.save()
 		# Hold Time + 6 Hrs
 		self.assertEqual(issue.total_hold_time, 3600 + 21600)
-		# Resolution By should increase by 6 hrs
-		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 02:00"))
+		# Resolution By should increase by 6 hrs; the 24-hour SLA's day ends at 23:59:59
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2021-11-02 02:00:01"))
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
@@ -471,6 +475,338 @@ class TestIssue(TestSetUp):
 			self.assertFalse(frappe.has_website_permission(staff_issue, "delete"))
 			self.assertTrue(frappe.has_website_permission(own_issue, "write"))
 
+	def test_most_specific_sla_is_applied(self):
+		create_service_level_agreement(
+			default_service_level_agreement=0,
+			holiday_list="__Test Holiday List",
+			entity_type=None,
+			entity=None,
+			response_time=14400,
+			resolution_time=21600,
+			service_level="__Test Generic SLA",
+		)
+		customer_sla = get_service_level_agreement(entity_type="Customer", entity="_Test Customer")
+		group_sla = get_service_level_agreement(
+			entity_type="Customer Group", entity="_Test SLA Customer Group"
+		)
+
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+		self.assertEqual(issue.service_level_agreement, customer_sla.name)
+
+		# the customer's SLA no longer applies once the customer changes
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		issue.customer = "__Test Customer"
+		issue.save()
+		self.assertEqual(issue.service_level_agreement, group_sla.name)
+
+	def test_sla_outside_its_validity_is_not_applied(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			check_agreement_status,
+		)
+
+		today = frappe.utils.getdate()
+		customer_sla = get_service_level_agreement(entity_type="Customer", entity="_Test Customer")
+		customer_sla.db_set("start_date", frappe.utils.add_days(today, 1))
+		default_sla = get_service_level_agreement(default_service_level_agreement=1)
+
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+		self.assertEqual(issue.service_level_agreement, default_sla.name)
+
+		default_sla.db_set(
+			{"start_date": frappe.utils.add_days(today, -10), "end_date": frappe.utils.add_days(today, -1)}
+		)
+		check_agreement_status()
+		self.assertFalse(frappe.db.get_value("Service Level Agreement", default_sla.name, "enabled"))
+
+	def test_hold_time_when_closed_issue_is_reopened_as_replied(self):
+		issue = make_issue(get_datetime("2019-03-04 11:00"), index=1)
+
+		for status, time in (("Closed", "12:00"), ("Replied", "13:00"), ("Open", "14:00")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+			if status == "Replied":
+				self.assertEqual(issue.agreement_status, "Resolution Due")
+				self.assertFalse(issue.sla_resolution_date)
+
+		self.assertEqual(issue.total_hold_time, 7200)
+		# the 5 hours left at 14:00 run past closing time and over the holiday on 2019-03-05
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-06 11:00"))
+
+	def test_hold_moves_resolution_by_in_working_hours(self):
+		# Resolution By Wed 12:00: 4 hours on Mon 2019-03-04, Tue is a holiday, 2 hours on Wed
+		issue = make_issue(get_datetime("2019-03-04 14:00"), index=1)
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-06 12:00"))
+
+		# 3 working hours are left when it is put on hold Mon 17:00
+		for status, time, resolution_by in (
+			("Replied", "2019-03-04 17:00", "2019-03-06 12:00"),
+			("Open", "2019-03-06 11:00", "2019-03-06 14:00"),
+			("Open", "2019-03-06 11:30", "2019-03-06 14:00"),
+			# Thu 2019-03-07 is a holiday
+			("Replied", "2019-03-06 13:00", "2019-03-06 14:00"),
+			("Open", "2019-03-08 10:00", "2019-03-08 11:00"),
+		):
+			frappe.flags.current_time = get_datetime(time)
+			issue.reload()
+			issue.status = status
+			issue.save()
+			self.assertEqual(issue.sla_resolution_by, get_datetime(resolution_by), time)
+
+		# the hold time stays in calendar seconds: Mon 17:00 to Wed 11:00 and Wed 13:00 to Fri 10:00
+		self.assertEqual(issue.total_hold_time, 151200 + 162000)
+
+		# changing the priority keeps the working hours spent on hold
+		issue.priority = "High"
+		issue.save()
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-08 11:00"))
+
+	def test_switching_sla_keeps_hold_in_working_hours(self):
+		late_shift_sla = create_service_level_agreement(
+			default_service_level_agreement=0,
+			holiday_list="__Test Holiday List",
+			entity_type=None,
+			entity=None,
+			response_time=14400,
+			resolution_time=21600,
+			service_level="__Test Late Shift SLA",
+			start_time="12:00:00",
+			end_time="20:00:00",
+			condition="doc.issue_type == 'Late Shift'",
+		)
+		if not frappe.db.exists("Issue Type", "Late Shift"):
+			issue_type = frappe.new_doc("Issue Type")
+			issue_type.name = "Late Shift"
+			issue_type.insert()
+		issue = make_issue(get_datetime("2019-03-04 10:00"), index=1)
+
+		# 10:00 to 18:00: Resolution By 16:00, and 17:00 after the hold from 13:00 to 14:00
+		for status, time in (("Replied", "13:00"), ("Open", "14:00")):
+			frappe.flags.current_time = get_datetime(f"2019-03-04 {time}")
+			issue.reload()
+			issue.status = status
+			issue.save()
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 17:00"))
+
+		# 12:00 to 20:00: Resolution By 18:00, and the held working hour still counts
+		issue.issue_type = "Late Shift"
+		issue.service_level_agreement = late_shift_sla.name
+		issue.save()
+		self.assertEqual(issue.sla_resolution_by, get_datetime("2019-03-04 19:00"))
+
+	def test_overdue_agreement_fails_unless_on_hold(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			fail_overdue_agreements,
+		)
+
+		# Response By 16:00 and Resolution By 18:00
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		unanswered = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		on_hold = make_issue(get_datetime("2019-03-04 12:00"), index=2)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		on_hold.status = "Replied"
+		on_hold.save()
+
+		# Tue 2019-03-05 is a holiday
+		frappe.flags.current_time = get_datetime("2019-03-06 12:00")
+		fail_overdue_agreements()
+		self.assertEqual(frappe.db.get_value("Issue", unanswered.name, "agreement_status"), "Failed")
+		self.assertEqual(frappe.db.get_value("Issue", on_hold.name, "agreement_status"), "Resolution Due")
+
+		# the 5 hours left run from the resume, and the agreement fails on save once they pass
+		on_hold.reload()
+		on_hold.status = "Open"
+		on_hold.save()
+		self.assertEqual(on_hold.sla_resolution_by, get_datetime("2019-03-06 17:00"))
+		self.assertEqual(on_hold.agreement_status, "Resolution Due")
+
+		frappe.flags.current_time = get_datetime("2019-03-06 17:30")
+		on_hold.save()
+		self.assertEqual(on_hold.agreement_status, "Failed")
+
+	def test_overdue_agreement_is_rechecked_before_failing(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			fail_agreement_if_overdue,
+			get_overdue_documents,
+		)
+
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 17:00")
+		self.assertIn(issue.name, get_overdue_documents("Issue"))
+
+		# the deadline moves after the job selected the issue, as a reset would
+		issue.db_set("response_by", get_datetime("2019-03-04 18:00"))
+		fail_agreement_if_overdue("Issue", issue.name)
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, "agreement_status"), "First Response Due")
+
+	def test_late_first_response_fails_the_agreement(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+
+		# answered and closed after Response By 16:00, before Resolution By 18:00
+		frappe.flags.current_time = get_datetime("2019-03-04 16:30")
+		issue.status = "Closed"
+		issue.save()
+		self.assertEqual(issue.agreement_status, "Failed")
+
+	def test_status_change_times_are_in_system_time_zone(self):
+		user = create_user("test_sla_timezone@example.com")
+		user.time_zone = "Pacific/Kiritimati"
+		user.save(ignore_permissions=True)
+
+		issue = make_issue(index=1)
+		issue.db_set("owner", user.name)
+		frappe.flags.current_time = None
+
+		issue.reload()
+		issue.status = "Replied"
+		issue.save()
+
+		delay = frappe.utils.time_diff_in_seconds(frappe.utils.now_datetime(), issue.first_responded_on)
+		self.assertLess(abs(delay), 60)
+		self.assertEqual(issue.on_hold_since, issue.first_responded_on)
+
+	def test_bulk_status_change_applies_sla(self):
+		from erpnext.support.doctype.issue.issue import set_multiple_status
+
+		issue = make_issue(get_datetime("2019-03-04 11:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 12:00")
+		set_multiple_status([issue.name], "Closed")
+
+		issue.reload()
+		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
+		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.agreement_status, "Fulfilled")
+
+	def test_changing_sla_keeps_outcome_of_resolved_issues(self):
+		resolved_issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		resolved_issue.status = "Closed"
+		resolved_issue.save()
+		open_issue = make_issue(get_datetime("2019-03-04 12:00"), index=2)
+
+		default_sla = get_service_level_agreement(default_service_level_agreement=1)
+		for priority in default_sla.priorities:
+			priority.response_time, priority.resolution_time = 1800, 3600
+		default_sla.save()
+
+		resolved_issue.reload()
+		resolved_issue.save()
+		self.assertEqual(resolved_issue.response_by, get_datetime("2019-03-04 16:00"))
+		self.assertEqual(resolved_issue.agreement_status, "Fulfilled")
+
+		default_sla.reload()
+		default_sla.enabled = 0
+		default_sla.save()
+
+		resolved_issue.reload()
+		resolved_issue.save()
+		self.assertEqual(resolved_issue.service_level_agreement, default_sla.name)
+
+		open_issue.reload()
+		open_issue.save()
+		self.assertFalse(open_issue.service_level_agreement)
+		self.assertFalse(open_issue.agreement_status)
+
+	def test_sla_whitelisted_methods_use_session_permissions(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			get_service_level_agreement_filters,
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+		reset_service_level_agreement("Issue", issue.name, "customer asked", "someone@example.com")
+		self.assertEqual(
+			frappe.db.get_value(
+				"Comment", {"reference_name": issue.name, "comment_type": "Info"}, "comment_email"
+			),
+			"Administrator",
+		)
+
+		website_user = create_user("test_sla_website_user@example.com")
+		website_user.db_set("user_type", "Website User")
+		frappe.set_user(website_user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				get_service_level_agreement_filters,
+				"Issue",
+				issue.service_level_agreement,
+				"_Test Customer",
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_update_agreement_status_on_custom_status(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			update_agreement_status_on_custom_status,
+		)
+
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		issue.first_responded_on = frappe.flags.current_time
+		update_agreement_status_on_custom_status(issue)
+		self.assertEqual(issue.agreement_status, "Resolution Due")
+
+	def test_resetting_sla_of_resolved_issue_recalculates_deadlines(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 13:00")
+		issue.status = "Closed"
+		issue.save()
+		old_response_by = issue.response_by
+
+		reset_service_level_agreement("Issue", issue.name, "customer asked")
+		issue.reload()
+		self.assertGreater(get_datetime(issue.response_by), get_datetime(old_response_by))
+
+	def test_issue_without_sla_records_resolution_metrics(self):
+		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 0)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		create_communication(issue.name, "test@admin.com", "Sent", get_datetime("2019-03-04 13:00"))
+
+		frappe.flags.current_time = get_datetime("2019-03-04 16:00")
+		issue.reload()
+		issue.status = "Closed"
+		issue.save()
+		self.assertFalse(issue.service_level_agreement)
+		# insert stamps creation with the real time; resolution time runs from service_level_agreement_creation
+		self.assertEqual(get_time(issue.opening_time), get_time(issue.creation))
+		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.resolution_time, 14400)
+
+		# a received mail reopens it, which must clear the resolution like a reopen from the form
+		frappe.flags.current_time = get_datetime("2019-03-04 17:00")
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		issue.reload()
+		self.assertEqual(issue.status, "Open")
+		self.assertFalse(issue.sla_resolution_date)
+		self.assertFalse(issue.resolution_time)
+		self.assertEqual(issue.total_hold_time, 3600)
+
+		# insert stamps creation with the real time, so put the mails back at their times
+		for sent_or_received, creation in (("Sent", "13:00"), ("Received", "17:00")):
+			frappe.db.set_value(
+				"Communication",
+				{"reference_name": issue.name, "sent_or_received": sent_or_received},
+				"creation",
+				get_datetime(f"2019-03-04 {creation}"),
+				update_modified=False,
+			)
+
+		frappe.flags.current_time = get_datetime("2019-03-04 18:00")
+		issue.status = "Resolved"
+		issue.save()
+		self.assertEqual(issue.resolution_time, 21600)
+		# the 13:00 to 17:00 wait for the customer's reply is not the user's time
+		self.assertEqual(issue.user_resolution_time, 7200)
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
@@ -739,6 +1075,21 @@ class TestFirstResponseTime(TestSetUp):
 			get_datetime("06-25-2021 20:00"), get_datetime("06-27-2021 11:00")
 		)
 		self.assertEqual(issue.first_response_time, 1.0)
+
+	def test_first_response_time_on_same_day_of_a_later_month(self):
+		"""
+		Test frt when the first response falls on the same day of the month as the issue creation.
+		"""
+		issue = create_issue_and_communication(
+			get_datetime("04-01-2019 11:00"), get_datetime("05-01-2019 12:00")
+		)
+		self.assertEqual(issue.first_response_time, 637200)
+
+		# response on a Saturday, which has no working hours
+		issue = create_issue_and_communication(
+			get_datetime("04-01-2019 11:00"), get_datetime("06-01-2019 11:00")
+		)
+		self.assertEqual(issue.first_response_time, 1292400)
 
 	def _get_no_perm_user(self):
 		email = "test_no_issue_perm@example.com"
