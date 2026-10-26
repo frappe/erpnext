@@ -256,3 +256,24 @@ class TestFormValueQueries(ERPNextTestSuite):
 			search({"voucher_type": "Purchase Invoice", "item_code": "I", "update_stock": 1}), {"item": "I"}
 		)
 		self.assertRaises(frappe.ValidationError, search, {"voucher_type": "Sales Invoice"})
+
+	def test_item_tax_template_query(self):
+		search = partial(get_search_filters, queries.item_tax_template_query, "Item Tax Template")
+
+		self.assertEqual(search({"company": "C"}), {"company": "C"})
+		self.assertEqual(search({}), {})
+		self.assertEqual(
+			search(
+				{"item_code": "I", "bill_date": "2026-01-02", "posting_date": "2026-01-03", "company": "C"},
+				"erpnext.controllers.queries.get_tax_template",
+			),
+			{
+				"item_code": "I",
+				"valid_from": ["<=", "2026-01-02"],
+				"item_group": None,
+				"base_net_rate": None,
+				"tax_category": None,
+				"company": "C",
+				"disabled": 0,
+			},
+		)
