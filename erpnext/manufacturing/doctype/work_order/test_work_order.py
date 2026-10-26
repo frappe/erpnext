@@ -628,6 +628,21 @@ class TestWorkOrder(ERPNextTestSuite):
 				work_order.track_semi_finished_goods = 1
 				self.assertEqual(get_upstream_process_loss(work_order), 0)
 
+	def test_operation_target_rounds_upstream_process_loss(self):
+		work_order = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"qty": 0.3,
+				"operations": [
+					{"sequence_id": 1, "completed_qty": 0.2, "process_loss_qty": 0.1},
+					{"sequence_id": 2, "completed_qty": 0, "process_loss_qty": 0.2},
+					{"sequence_id": 3},
+				],
+			}
+		)
+		work_order.update_operation_status()
+		self.assertEqual(work_order.operations[2].status, "Completed")
+
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
 		item_code = make_item("_Test Item For Process Loss", {"is_stock_item": 1}).name
