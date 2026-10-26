@@ -3946,6 +3946,23 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
 		self.assertEqual(batch_nos, batches_in_bundle)
 
+	def test_sales_team_disabled_sales_person_blocks_downstream(self):
+		sales_person = "_Test Sales Person 2"
+
+		so = make_sales_order(do_not_save=True)
+		so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		so.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		try:
+			with self.subTest("delivery note against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, so.name)
+
+			with self.subTest("sales invoice against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_sales_invoice, so.name)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
