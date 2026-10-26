@@ -95,6 +95,15 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, opening_entry.cancel)
 
+	def test_user_not_in_pos_profile_cannot_open_session(self):
+		test_user, pos_profile = self.init_user_and_profile()
+		other_user = create_user("test_other_cashier@example.com", "Sales User")
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			create_opening_entry(pos_profile, other_user.name)
+
+		self.assertIn("Applicable for Users", str(context.exception))
+
 
 def create_opening_entry(pos_profile, user, get_obj=False):
 	entry = frappe.new_doc("POS Opening Entry")
