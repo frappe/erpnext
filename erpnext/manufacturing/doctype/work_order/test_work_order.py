@@ -1551,6 +1551,32 @@ class TestWorkOrder(ERPNextTestSuite):
 		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
 		self.assertEqual(len(get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)), 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"make_serial_no_batch_from_work_order": 1, "overproduction_percentage_for_work_order": 100},
+	)
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_manufacture_entry_after_work_order_batches_are_used_up(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=2, basic_rate=100
+		)
+
+		wo_order = make_wo_order_test_record(
+			item=fg_item, qty=1, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
+		)
+		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1)).submit()
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
+		stock_entry.submit()
+
+		stock_entry.reload()
+		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
+		batch_no = get_batch_from_bundle(fg_row.serial_and_batch_bundle)
+		self.assertNotEqual(frappe.db.get_value("Batch", batch_no, "reference_name"), wo_order.name)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_work_order_without_serial_no_series_is_not_submitted(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
