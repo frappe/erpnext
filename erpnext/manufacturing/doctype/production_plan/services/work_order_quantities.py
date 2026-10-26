@@ -99,6 +99,10 @@ class ProductionPlanWorkOrderQuantities:
 		return get_qty_before_process_loss(qty, row.process_loss_percentage, row.stock_uom)
 
 	def get_pending_quantities(self, plan):
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			round_up_to_whole_unit,
+		)
+
 		committed = self.get_committed_quantities(include_drafts=True)
 		precision = frappe.get_precision("Work Order", "qty")
 		pending = {}
@@ -110,8 +114,11 @@ class ProductionPlanWorkOrderQuantities:
 				row.name: max(
 					0,
 					flt(
-						self.get_order_qty(row, reference_field)
-						- committed[reference_field].get(row.name, 0),
+						round_up_to_whole_unit(
+							self.get_order_qty(row, reference_field)
+							- committed[reference_field].get(row.name, 0),
+							row.stock_uom,
+						),
 						precision,
 					),
 				)
@@ -182,8 +189,16 @@ class ProductionPlanWorkOrderQuantities:
 		return loss_percentages
 
 	def _get_committed_qty(self, work_order, process_loss_qty, planned_loss_percentage):
-		# Only loss above what the plan row already covers frees quantity for a replacement.
-		planned_loss_qty = flt(work_order.qty) * flt(planned_loss_percentage) / 100
-		excess_loss_qty = max(0, flt(process_loss_qty) - planned_loss_qty)
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			get_planned_loss_percentage,
+		)
+
+		loss_percentage = get_planned_loss_percentage(planned_loss_percentage)
+		good_qty = flt(work_order.qty) - max(
+			flt(process_loss_qty), flt(work_order.qty) * loss_percentage / 100
+		)
+		# Count the qty that makes this good output after the planned loss, so a replacement
+		# for unplanned loss also covers its own planned loss.
+		committed_qty = good_qty / (1 - loss_percentage / 100)
 		# Excess loss in existing records must not erase finished goods already produced.
-		return max(0, flt(work_order.produced_qty), flt(work_order.qty) - excess_loss_qty)
+		return max(0, flt(work_order.produced_qty), committed_qty)

@@ -17,7 +17,12 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor
 
 def get_planned_process_loss_percentage(bom_no):
 	"""BOM process loss % to add to the quantity, 0 when the BOM loses everything."""
-	loss_percentage = flt(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
+	return get_planned_loss_percentage(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
+
+
+def get_planned_loss_percentage(loss_percentage):
+	"""Process loss % to plan for, 0 when everything is lost."""
+	loss_percentage = flt(loss_percentage)
 	return loss_percentage if loss_percentage < 100 else 0
 
 
@@ -27,9 +32,12 @@ def get_qty_before_process_loss(qty, loss_percentage, uom):
 	if not loss_percentage or loss_percentage >= 100:
 		return flt(qty)
 
-	qty = flt(qty) / (1 - loss_percentage / 100)
+	return round_up_to_whole_unit(flt(qty) / (1 - loss_percentage / 100), uom)
+
+
+def round_up_to_whole_unit(qty, uom):
+	"""A fraction of a whole number UOM cannot be made, so make the next whole unit."""
 	if frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
-		# A fraction of a whole number UOM cannot be made, so make the next whole unit.
 		return math.ceil(flt(qty, frappe.get_precision("Work Order", "qty")))
 	return qty
 
