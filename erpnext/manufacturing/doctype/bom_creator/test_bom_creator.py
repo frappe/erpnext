@@ -7,6 +7,7 @@ from unittest.mock import patch
 import frappe
 
 from erpnext.manufacturing.doctype.bom_creator.bom_csv_file import read_bom_csv_file
+from erpnext.manufacturing.doctype.bom_creator.item_matcher import ItemMatcher
 from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
 from erpnext.manufacturing.doctype.routing.test_routing import create_routing
 from erpnext.stock.doctype.item.test_item import make_item
@@ -933,6 +934,81 @@ class TestBOMCreator(ERPNextTestSuite):
 
 		self.assertEqual((updates["frame"]["is_expandable"], updates["tube"]["is_expandable"]), (1, 0))
 
+	def test_item_matcher_maps_a_part_number_written_without_punctuation(self):
+		make_item("ZPH100", {"item_name": "Zephyr Plate"})
+
+		self.assertEqual(
+			get_item_match(part_number="ZPH-100", part_name="Plate"),
+			{"item_code": "ZPH100", "score": 100, "matched_on": "Item Code", "is_selected": True},
+		)
+
+	def test_item_matcher_ticks_an_item_name_with_the_words_in_another_order(self):
+		item = make_item("_Test Zephyr Bracket", {"item_name": "Bracket Zephyr Steel 2 mm"}).name
+		match = get_item_match(part_number="ZB-77", part_name="Zephyr Steel Bracket 2mm")
+
+		self.assertEqual(
+			(match["item_code"], match["matched_on"], match["is_selected"]), (item, "Item Name", True)
+		)
+
+	def test_item_matcher_does_not_tick_an_item_with_other_numbers(self):
+		make_item("ZEPHYR-SEAT-POST-30")
+		match = get_item_match(part_number="ZEPHYRSEATPOST31", part_name="Seat Post")
+
+		self.assertEqual((match["item_code"], match["is_selected"]), ("ZEPHYR-SEAT-POST-30", False))
+		self.assertLess(match["score"], 90)
+
+	def test_item_matcher_ticks_a_number_written_with_a_leading_zero(self):
+		make_item("ZEPHYR-SEAT-LUG-01")
+		match = get_item_match(part_number="ZEPHYRSEATLUG1", part_name="Seat Lug")
+
+		self.assertEqual((match["item_code"], match["is_selected"]), ("ZEPHYR-SEAT-LUG-01", True))
+
+	def test_item_matcher_does_not_tick_one_of_two_equal_matches(self):
+		for item_code in ("_Test Zephyr Clamp A", "_Test Zephyr Clamp B"):
+			make_item(item_code, {"item_name": "Zephyr Saddle Clamp"})
+		match = get_item_match(part_number="ZSC-1", part_name="Zephyr Saddle Clamp")
+
+		self.assertEqual((match["score"], match["is_selected"]), (100, False))
+
+	def test_item_matcher_suggests_a_description_match_without_ticking_it(self):
+		item = make_item(
+			"_Test Zephyr Lever",
+			{"item_name": "Zephyr Lever", "description": "<p>Zephyr brake lever for the left hand</p>"},
+		).name
+		match = get_item_match(part_number="ZBL-9", part_name="Zephyr Brake Lever")
+
+		self.assertEqual(
+			(match["item_code"], match["matched_on"], match["is_selected"]), (item, "Description", False)
+		)
+
+	def test_item_matcher_reuses_the_item_of_the_part_in_an_earlier_design(self):
+		design = make_design()
+		item = make_item("_Test Zephyr Tube", {"is_stock_item": 1}).name
+		get_part(design, "TUBE-25").item_code = item
+		design.save()
+
+		self.assertEqual(
+			get_item_match(part_number="TUBE-25", part_name="Frame Tube"),
+			{"item_code": item, "score": 100, "matched_on": "Earlier Design", "is_selected": True},
+		)
+
+	def test_item_matcher_skips_a_part_without_a_close_item(self):
+		self.assertIsNone(get_item_match(part_number="QX-0", part_name="Qwyzzle Gnarf"))
+
+	def test_suggested_items_skip_mapped_and_excluded_parts(self):
+		design = make_design()
+		for part_number in ("FRAME-ASM", "TUBE-25", "BOLT-M6", "WHEEL-26"):
+			make_item(part_number, {"is_stock_item": 1})
+		get_part(design, "FRAME-ASM").item_code = "FRAME-ASM"
+		get_part(design, "WHEEL-26").exclude_from_bom = 1
+		design.save()
+
+		suggested_rows = set(design.get_suggested_items())
+		self.assertEqual(
+			sorted(row.part_number for row in design.items if row.name in suggested_rows),
+			["BOLT-M6", "BOLT-M6", "TUBE-25"],
+		)
+
 
 def make_step_content(products: dict, links: list) -> str:
 	entities = ["#1=APPLICATION_CONTEXT('automotive design');", "#2=PRODUCT_CONTEXT('',#1,'mechanical');"]
@@ -1098,6 +1174,10 @@ def make_boms(design) -> dict:
 			as_list=True,
 		)
 	)
+
+
+def get_item_match(**part) -> dict | None:
+	return ItemMatcher([frappe._dict(name="part", **part)]).get_matches().get("part")
 
 
 def get_part(design, part_number: str, parent: str | None = None):

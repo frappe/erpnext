@@ -117,15 +117,144 @@ frappe.ui.form.on("BOM Creator", {
 	},
 
 	async suggest_items(frm) {
-		const { message: suggestions } = await frm.call("get_suggested_items");
-		const rows = frm.doc.items.filter((row) => suggestions[row.name]);
-		if (!rows.length) {
-			frappe.show_alert({ message: __("No matching items found"), indicator: "orange" });
+		const { message: matches } = await frm.call({
+			method: "get_suggested_items",
+			doc: frm.doc,
+			freeze: true,
+			freeze_message: __("Matching parts to items..."),
+		});
+		const groups = frm.events.get_unmapped_part_groups(frm);
+		if (!groups.length) {
+			frappe.show_alert({ message: __("All parts are mapped to items"), indicator: "green" });
 			return;
 		}
 
+		const dialog = new frappe.ui.Dialog({
+			title: __("Map Items"),
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "parts",
+					fieldtype: "Table",
+					label: __("Parts Without an Item"),
+					cannot_add_rows: 1,
+					cannot_delete_rows: 1,
+					in_place_edit: 1,
+					data: groups.map((rows) => frm.events.get_mapping_row(rows, matches[rows[0].name])),
+					fields: [
+						{
+							fieldname: "part_number",
+							fieldtype: "Data",
+							label: __("Part Number"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 2,
+						},
+						{
+							fieldname: "part_name",
+							fieldtype: "Data",
+							label: __("Part Name"),
+							read_only: 1,
+							in_list_view: 1,
+							columns: 3,
+						},
+						{
+							fieldname: "item_code",
+							fieldtype: "Link",
+							options: "Item",
+							label: __("Item"),
+							in_list_view: 1,
+							columns: 3,
+							get_query: () => ({ filters: { disabled: 0, has_variants: 0 } }),
+							onchange() {
+								frm.events.update_mapping_row(this.grid_row, this.get_value());
+							},
+						},
+						{
+							fieldname: "matched_on",
+							fieldtype: "Data",
+							label: __("Matched On"),
+							placeholder: " ",
+							read_only: 1,
+							in_list_view: 1,
+							columns: 1,
+						},
+						{
+							fieldname: "score",
+							fieldtype: "Data",
+							label: __("Score"),
+							placeholder: " ",
+							read_only: 1,
+							in_list_view: 1,
+							columns: 1,
+						},
+					],
+				},
+			],
+			primary_action_label: __("Map"),
+			primary_action: async () => {
+				const rows = dialog.fields_dict.parts.grid
+					.get_selected_children()
+					.filter((row) => row.item_code);
+				if (!rows.length) {
+					frappe.msgprint(__("Select the parts to map and set their items."));
+					return;
+				}
+
+				dialog.hide();
+				await frm.events.map_parts(frm, rows);
+			},
+		});
+		dialog.$wrapper.addClass("bom-creator-map-items").append(`<style>
+			.bom-creator-map-items .grid-row > .row .col.grid-data-last { justify-content: flex-end; align-items: flex-start; text-align: right; }
+		</style>`);
+		dialog.show();
+	},
+
+	get_unmapped_part_groups(frm) {
+		const groups = {};
+		for (const row of frm.doc.items || []) {
+			const key = row.part_number || row.part_name;
+			if (!row.item_code && !row.exclude_from_bom && key) (groups[key] ||= []).push(row);
+		}
+		return Object.values(groups);
+	},
+
+	get_mapping_row(rows, match = {}) {
+		const suggestion = {
+			item_code: match.item_code,
+			score: match.score ? `${match.score}%` : "",
+			matched_on: match.matched_on ? __(match.matched_on) : "",
+		};
+		return {
+			...suggestion,
+			suggestion,
+			part_number: rows[0].part_number,
+			part_name: rows[0].part_name,
+			part_names: rows.map((row) => row.name),
+			__checked: match.is_selected ? 1 : 0,
+		};
+	},
+
+	update_mapping_row(grid_row, item_code) {
+		const { suggestion } = grid_row.doc;
+		const is_suggested = item_code === suggestion.item_code;
+		Object.assign(grid_row.doc, {
+			score: is_suggested ? suggestion.score : "",
+			matched_on: is_suggested ? suggestion.matched_on : item_code ? __("Manual") : "",
+		});
+		grid_row.select(!!item_code);
+		grid_row.refresh_check();
+		for (const fieldname of ["score", "matched_on"]) {
+			grid_row.refresh_field(fieldname, grid_row.doc[fieldname]);
+		}
+	},
+
+	async map_parts(frm, rows) {
 		for (const row of rows) {
-			await frappe.model.set_value(row.doctype, row.name, "item_code", suggestions[row.name]);
+			for (const name of row.part_names) {
+				await frappe.model.set_value("BOM Creator Item", name, "item_code", row.item_code);
+			}
 		}
 		await frm.save("Update");
 		frappe.show_alert({ message: __("{0} parts mapped", [rows.length]), indicator: "green" });
