@@ -1,12 +1,14 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import math
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull
+from frappe.utils import cint, flt
 
 pricing_rule_fields = [
 	"apply_on",
@@ -149,6 +151,7 @@ class PromotionalScheme(Document):
 			frappe.throw(_("Price or product discount slabs are required"))
 
 		self.validate_applicable_for()
+		self.validate_overlapping_slabs()
 		self.validate_pricing_rules()
 		self.validate_mixed_with_recursion()
 
@@ -159,6 +162,28 @@ class PromotionalScheme(Document):
 			if not self.get(applicable_for):
 				msg = f"The field {frappe.bold(self.applicable_for)} is required"
 				frappe.throw(_(msg))
+
+	def validate_overlapping_slabs(self):
+		if self.disable:
+			return
+
+		slabs = [d for d in self.price_discount_slabs + self.product_discount_slabs if not d.disable]
+		for index, slab in enumerate(slabs):
+			for other_slab in slabs[index + 1 :]:
+				if are_slabs_conflicting(slab, other_slab):
+					frappe.throw(
+						_(
+							"Row {0} in {1} and row {2} in {3} apply to the same quantity and amount. Change the ranges, set a different {4}, or enable {5} on both rows."
+						).format(
+							slab.idx,
+							frappe.bold(_(self.meta.get_label(slab.parentfield))),
+							other_slab.idx,
+							frappe.bold(_(self.meta.get_label(other_slab.parentfield))),
+							frappe.bold(_("Priority")),
+							frappe.bold(_("Apply Multiple Pricing Rules")),
+						),
+						title=_("Overlapping Slabs"),
+					)
 
 	def validate_pricing_rules(self):
 		if self.is_new():
@@ -278,6 +303,29 @@ class PromotionalScheme(Document):
 	def on_trash(self):
 		for rule in frappe.get_all("Pricing Rule", {"promotional_scheme": self.name}):
 			frappe.delete_doc("Pricing Rule", rule.name)
+
+
+def are_slabs_conflicting(slab, other_slab):
+	if cint(slab.priority) != cint(other_slab.priority):
+		return False
+
+	if slab.apply_multiple_pricing_rules and other_slab.apply_multiple_pricing_rules:
+		return False
+
+	for fieldname in ("warehouse", "for_price_list"):
+		if (slab.get(fieldname) or "") != (other_slab.get(fieldname) or ""):
+			return False
+
+	return are_ranges_overlapping(
+		slab.min_qty, slab.max_qty, other_slab.min_qty, other_slab.max_qty
+	) and are_ranges_overlapping(
+		slab.min_amount, slab.max_amount, other_slab.min_amount, other_slab.max_amount
+	)
+
+
+def are_ranges_overlapping(min_value, max_value, other_min_value, other_max_value):
+	upper_limit = min(flt(max_value) or math.inf, flt(other_max_value) or math.inf)
+	return max(flt(min_value), flt(other_min_value)) <= upper_limit
 
 
 def raise_for_transaction_exists(name):

@@ -198,6 +198,38 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		so = make_sales_order(qty=10, price_list_rate=100, do_not_submit=True)
 		self.assertEqual(so.items[0].discount_percentage, 0)
 
+	def test_overlapping_slabs_are_not_allowed(self):
+		ps = make_promotional_scheme()
+		add_price_slab(ps, max_qty=10, other_slab={"min_qty": 10, "max_qty": 20})
+		self.assertRaisesRegex(frappe.ValidationError, "apply to the same quantity", ps.save)
+
+		ps.reload()
+		add_price_slab(ps, max_qty=10, other_slab={"min_qty": 11, "max_qty": 20})
+		ps.save()
+
+		ps.price_discount_slabs[1].min_qty = 10
+		ps.price_discount_slabs[1].priority = "2"
+		ps.save()
+
+	def test_price_and_product_slab_for_the_same_quantity(self):
+		ps = make_promotional_scheme()
+		free_item_slab = {
+			"min_qty": 4,
+			"free_item": "_Test Item 2",
+			"free_qty": 1,
+			"rule_description": "Free",
+		}
+		ps.append("product_discount_slabs", free_item_slab)
+		self.assertRaisesRegex(frappe.ValidationError, "apply to the same quantity", ps.save)
+
+		ps.reload()
+		ps.price_discount_slabs[0].apply_multiple_pricing_rules = 1
+		ps.append("product_discount_slabs", {**free_item_slab, "apply_multiple_pricing_rules": 1})
+		ps.save()
+
+		so = make_sales_order(qty=4, price_list_rate=100, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 20)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)
@@ -239,3 +271,8 @@ def make_promotional_scheme_with_two_slabs():
 	)
 	ps.save()
 	return ps
+
+
+def add_price_slab(ps, max_qty, other_slab):
+	ps.price_discount_slabs[0].max_qty = max_qty
+	ps.append("price_discount_slabs", {"discount_percentage": 30, "rule_description": "Second", **other_slab})
