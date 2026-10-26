@@ -1530,3 +1530,18 @@ def dimension_query(
 	return frappe.call(
 		get_filtered_dimensions, doctype, txt, searchfield, start, page_len, dimension_filters, **kwargs
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def project_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The company's projects, of the party too when it is a customer."""
+	project_filters = {"company": filters.get("company")}
+	if filters.get("party_type") == "Customer":
+		project_filters["customer"] = filters.get("party")
+
+	return frappe.call(
+		get_project_name, doctype, txt, searchfield, start, page_len, project_filters, **kwargs
+	)

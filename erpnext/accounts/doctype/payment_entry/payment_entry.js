@@ -27,13 +27,9 @@ frappe.ui.form.on("Payment Entry", {
 
 		// project excluded in setup_dimension_filters
 		frm.set_query("project", function (doc) {
-			let filters = {
-				company: doc.company,
-			};
-			if (doc.party_type == "Customer") filters.customer = doc.party;
 			return {
-				query: "erpnext.controllers.queries.get_project_name",
-				filters,
+				query: "erpnext.controllers.queries.project_query",
+				filters: { company: doc.company, party_type: doc.party_type, party: doc.party },
 			};
 		});
 

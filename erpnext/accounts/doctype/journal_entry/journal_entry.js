@@ -505,9 +505,10 @@ Object.assign(erpnext.journal_entry, {
 
 		frm.set_query("project", "accounts", (doc, cdt, cdn) => {
 			const row = frappe.get_doc(cdt, cdn);
-			const filters = { company: doc.company };
-			if (row.party_type == "Customer") filters.customer = row.party;
-			return { query: "erpnext.controllers.queries.get_project_name", filters };
+			return {
+				query: "erpnext.controllers.queries.project_query",
+				filters: { company: doc.company, party_type: row.party_type, party: row.party },
+			};
 		});
 
 		frm.set_query("account", "accounts", () => erpnext.journal_entry.account_query(frm));
