@@ -4024,6 +4024,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_batches_to_be_consume(batches, row, qty)
 
 		if not row.batches_to_be_consume:
+			if not existing_row:
+				self.add_finished_goods(args, item)
 			return
 
 		_id = create_serial_and_batch_bundle(
