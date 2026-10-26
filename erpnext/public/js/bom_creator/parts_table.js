@@ -27,7 +27,7 @@ export class PartsTable {
 		const rows = [];
 		this.add_rows(0, 0, rows);
 		container.html(`<div class="design-parts" style="border:1px solid var(--border-color);
-			border-radius:var(--border-radius-md);overflow:hidden;">${header}${rows.join("")}</div>`);
+			border-radius:var(--radius-md);overflow:hidden;">${header}${rows.join("")}</div>`);
 
 		this.mark_selected(this.view.selected_node_ids || new Set());
 	}

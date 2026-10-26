@@ -20,7 +20,7 @@ export class PlacementPanel {
 		viewer.placement.on_change = (object) => this.save(object);
 		this.toolbar = $(`<div class="design-placement" style="position:absolute;top:8px;left:8px;right:8px;
 			display:none;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 8px;background:var(--fg-color);
-			border:1px solid var(--border-color);border-radius:var(--border-radius-md);
+			border:1px solid var(--border-color);border-radius:var(--radius-md);
 			box-shadow:var(--shadow-sm);z-index:2;"></div>`).appendTo(viewer.container);
 	}
 
