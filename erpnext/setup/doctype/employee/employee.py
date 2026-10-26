@@ -328,11 +328,23 @@ class Employee(NestedSet):
 			return
 
 		user = frappe.get_doc("User", self.user_id)
-		enabled = user.enabled
-		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
-			user.enabled = not enabled
-			# Keep linked User status in sync from the Employee lifecycle and record the audit log.
-			user.save(ignore_permissions=True)
+		enable = self.status == "Active"
+		if user.enabled == enable:
+			return
+
+		# Re-enabling restores access, so it needs write access on the User; disabling does not.
+		if enable and not user.has_permission("write"):
+			frappe.msgprint(
+				_("User {0} is disabled. Only a user who can edit Users can enable it.").format(
+					frappe.bold(self.user_id)
+				),
+				alert=True,
+			)
+			return
+
+		user.enabled = enable
+		# Keep linked User status in sync from the Employee lifecycle and record the audit log.
+		user.save(ignore_permissions=True)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
