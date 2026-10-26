@@ -213,7 +213,7 @@ frappe.ui.form.on("Work Order", {
 
 		let pending_ops = frm.doc?.operations?.filter(
 			(op) =>
-				flt(op.completed_qty) + flt(op.process_loss_qty) <
+				flt(flt(op.completed_qty) + flt(op.process_loss_qty), precision("completed_qty", op)) <
 				erpnext.work_order.get_operation_target_qty(frm, op)
 		);
 		// Jump to the operator Shop Floor view, pre-filtered to this work order.
@@ -538,7 +538,10 @@ frappe.ui.form.on("Work Order", {
 		frm.doc.operations.forEach((data) => {
 			let operation_qty = erpnext.work_order.get_operation_target_qty(frm, data);
 			if (data.completed_qty + data.process_loss_qty != operation_qty) {
-				pending_qty = operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+				pending_qty = flt(
+					operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty),
+					precision("completed_qty", data)
+				);
 
 				if (pending_qty > 0) {
 					dialog.fields_dict.operations.df.data.push({
