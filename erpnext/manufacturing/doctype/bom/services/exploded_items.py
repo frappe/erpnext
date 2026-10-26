@@ -6,8 +6,9 @@
 from operator import itemgetter
 
 import frappe
-from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
+
+from erpnext.manufacturing.doctype.bom.services.costing import get_good_qty
 
 
 class BOMExplodedItemsService:
@@ -67,8 +68,7 @@ class BOMExplodedItemsService:
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		bom_item = frappe.qb.DocType("BOM Explosion Item")
 		bom = frappe.qb.DocType("BOM")
-		qty_consumed_per_unit = (bom_item.stock_qty / IfNull(bom.quantity, 1)).as_("qty_consumed_per_unit")
-		return (
+		items = (
 			frappe.qb.from_(bom_item)
 			.join(bom)
 			.on(bom_item.parent == bom.name)
@@ -84,10 +84,15 @@ class BOMExplodedItemsService:
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
-				qty_consumed_per_unit,
+				bom.quantity,
+				bom.process_loss_qty,
 			)
 			.where((bom.name == bom_no) & (bom.docstatus == 1))
 		).run(as_dict=1)
+		for d in items:
+			# Each good unit of the child also covers its process loss.
+			d.qty_consumed_per_unit = flt(d.stock_qty) / get_good_qty(d)
+		return items
 
 	@staticmethod
 	def _child_exploded_row(d, stock_qty, operation):
