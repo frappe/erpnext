@@ -287,3 +287,23 @@ class TestFormValueQueries(ERPNextTestSuite):
 			search({"company": "C", "item_code": "I"}, "erpnext.controllers.queries.warehouse_query"),
 			[*company_filters, ["Bin", "item_code", "=", "I"]],
 		)
+
+	def test_purchase_and_sales_item_queries(self):
+		item_query = "erpnext.controllers.queries.item_query"
+		purchase = partial(get_search_filters, queries.purchase_item_query, "Item", search=item_query)
+		sales = partial(get_search_filters, queries.sales_item_query, "Item", search=item_query)
+
+		self.assertEqual(
+			purchase({"supplier": "S", "company": "C", "is_subcontracted": 1}),
+			{"supplier": "S", "company": "C", "is_stock_item": 0},
+		)
+		self.assertEqual(
+			purchase({"supplier": "S", "company": "C"}),
+			{"supplier": "S", "company": "C", "is_purchase_item": 1, "has_variants": 0},
+		)
+		self.assertEqual(
+			sales({"quotation_to": "Customer", "party_name": "P", "company": "C"}),
+			{"is_sales_item": 1, "customer": "P", "has_variants": 0, "company": "C"},
+		)
+		self.assertEqual(sales({"quotation_to": "Lead", "party_name": "L"})["customer"], None)
+		self.assertEqual(sales({"customer": "P"})["customer"], "P")
