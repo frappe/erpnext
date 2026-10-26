@@ -38,6 +38,7 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 	get_serial_nos_for_job_card,
 	get_serial_nos_for_work_order,
 	get_template_rm_item,
+	get_upstream_process_loss,
 	get_work_order_operation_data,
 	make_job_card,
 	make_material_request,
@@ -198,6 +199,8 @@ class WorkOrder(Document):
 	# end: auto-generated types
 
 	def onload(self):
+		if self.docstatus == 1:
+			self.update_operation_status()
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
@@ -301,7 +304,11 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = get_operation_qty(self, d) - flt(operation_details.get(d.name))
+			job_card_qty = (
+				get_operation_qty(self, d)
+				- get_upstream_process_loss(self, d)
+				- flt(operation_details.get(d.name))
+			)
 			if job_card_qty > 0:
 				return True
 

@@ -29,6 +29,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.work_order.mapper import (
 	create_job_card,
 	get_operation_qty,
+	get_upstream_process_loss,
 	split_qty_based_on_batch_size,
 )
 
@@ -417,9 +418,10 @@ class OperationsService:
 
 	def _operation_status(self, d):
 		qty = self._operation_qty(d)
-		if not qty:
+		operation_qty = get_operation_qty(self.doc, d) - get_upstream_process_loss(self.doc, d)
+		if not qty and operation_qty:
 			return "Pending"
-		if qty < flt(get_operation_qty(self.doc, d), d.precision("completed_qty")):
+		if qty < flt(operation_qty, d.precision("completed_qty")):
 			return "Work in Progress"
 		return "Completed"
 

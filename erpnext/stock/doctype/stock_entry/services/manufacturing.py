@@ -8,6 +8,7 @@ from frappe.query_builder.functions import Coalesce, IfNull, Max, Min, NullIf, S
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import (
@@ -130,7 +131,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 
 	def set_process_loss_qty(self):
 		process_loss_qty = self.doc.get_pending_process_loss_qty()
-		if not process_loss_qty:
+		if not process_loss_qty and not (self.wo_doc and get_upstream_process_loss(self.wo_doc)):
 			process_loss_percentage = frappe.get_cached_value(
 				"BOM", self.doc.bom_no, "process_loss_percentage"
 			)
@@ -434,7 +435,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 		for row in self.wo_doc.operations:
 			allowed_qty = (
-				row.completed_qty + row.process_loss_qty + (allowance_percentage / 100 * row.completed_qty)
+				row.completed_qty
+				+ row.process_loss_qty
+				+ get_upstream_process_loss(self.wo_doc, row)
+				+ (allowance_percentage / 100 * row.completed_qty)
 			)
 			if flt(total_completed_qty, precision) > flt(allowed_qty, precision):
 				self.throw_operations_not_complete_error(row, total_completed_qty)

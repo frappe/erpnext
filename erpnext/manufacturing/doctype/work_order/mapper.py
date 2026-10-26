@@ -11,6 +11,7 @@ the controller; work_order.py re-exports them for backward compatibility.
 import json
 import math
 from functools import partial
+from itertools import groupby
 
 import frappe
 from frappe import _
@@ -402,6 +403,36 @@ def get_operation_qty(work_order, operation):
 		return flt(operation.get("output_qty"))
 
 	return flt(work_order.get("qty"))
+
+
+def get_upstream_process_loss(work_order, operation=None):
+	"""Loss before an operation, or before finished goods when no operation is supplied."""
+	if work_order.get("track_semi_finished_goods"):
+		return 0
+
+	process_loss_qty = 0
+	for sequence_id, rows in groupby(
+		sorted(work_order.get("operations") or [], key=lambda row: cint(row.sequence_id)),
+		key=lambda row: cint(row.sequence_id),
+	):
+		if operation is not None and sequence_id >= cint(operation.get("sequence_id")):
+			break
+
+		# Parallel operations share the same input. Older cards may repeat upstream losses.
+		process_loss_qty += max(
+			min(
+				flt(row.process_loss_qty),
+				max(
+					max(flt(work_order.qty), flt(row.completed_qty) + flt(row.process_loss_qty))
+					- process_loss_qty
+					- flt(row.completed_qty),
+					0,
+				),
+			)
+			for row in rows
+		)
+
+	return flt(process_loss_qty)
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):

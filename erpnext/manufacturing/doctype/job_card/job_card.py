@@ -39,7 +39,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
+from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty, get_upstream_process_loss
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -1551,7 +1551,9 @@ class JobCard(Document):
 		min_qty = []
 		precision = self.precision("total_completed_qty")
 		for d in doc.operations:
-			completed_qty = (flt(d.completed_qty) + flt(d.process_loss_qty)) * flt(doc.qty)
+			completed_qty = (
+				flt(d.completed_qty) + flt(d.process_loss_qty) + get_upstream_process_loss(doc, d)
+			) * flt(doc.qty)
 			completed_qty = flt(completed_qty / get_operation_qty(doc, d), precision)
 			if completed_qty:
 				min_qty.append(completed_qty)
