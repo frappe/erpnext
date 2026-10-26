@@ -577,7 +577,9 @@ class StatusService:
 
 def qty_against_sales_order(wo, bom):
 	"""Good output a Work Order counts against its Sales Order, after recorded or planned process loss."""
-	planned_loss_qty = wo.qty * IfNull(bom.process_loss_percentage, 0) / 100
+	# As in planning, a BOM that loses everything plans no loss.
+	loss_percentage = Case().when(bom.process_loss_percentage < 100, bom.process_loss_percentage).else_(0)
+	planned_loss_qty = wo.qty * loss_percentage / 100
 	loss_qty = (
 		Case().when(wo.process_loss_qty > planned_loss_qty, wo.process_loss_qty).else_(planned_loss_qty)
 	)
