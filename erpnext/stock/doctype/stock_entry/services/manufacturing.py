@@ -232,6 +232,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		self.update_batches_to_be_consume(batches, row, qty)
 		if row.batches_to_be_consume:
 			self._link_fg_bundle_and_append(item_details, row, existing_row=existing_row)
+		elif not existing_row:
+			self.doc.append("items", item_details)
 
 	def _link_fg_bundle_and_append(self, item_details, row, existing_row=None):
 		_id = create_serial_and_batch_bundle(

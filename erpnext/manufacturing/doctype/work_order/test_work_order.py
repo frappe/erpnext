@@ -1428,10 +1428,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		item.create_new_batch = 0
 		item.save()
 
-		try:
-			make_wo_order_test_record(item=fg_item)
-		except frappe.MandatoryError:
-			self.fail("Batch generation causing failing in Work Order")
+		wo_order = make_wo_order_test_record(item=fg_item, do_not_submit=True)
+		self.assertRaisesRegex(frappe.ValidationError, "Automatically Create New Batch", wo_order.submit)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
@@ -1531,43 +1529,87 @@ class TestWorkOrder(ERPNextTestSuite):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"make_serial_no_batch_from_work_order": 1, "overproduction_percentage_for_work_order": 100},
+	)
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_manufacture_entry_without_work_order_serial_nos(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		frappe.db.set_value("Item", fg_item, "serial_no_series", f"{fg_item}-.#####")
 		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
 		test_stock_entry.make_stock_entry(
 			item_code=rm_item, target="_Test Warehouse - _TC", qty=2, basic_rate=100
 		)
 
 		wo_order = make_wo_order_test_record(
-			item=fg_item, qty=2, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
+			item=fg_item, qty=1, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
 		)
-		self.assertFalse(self.get_serial_nos_for_fg(wo_order.name))
+		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1)).submit()
 
-		item = frappe.get_doc("Item", fg_item)
-		item.serial_no_series = f"{fg_item}-.#####"
-		item.save()
-
-		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
 		stock_entry.submit()
 
 		stock_entry.reload()
 		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
-		self.assertEqual(len(get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)), 2)
+		self.assertEqual(len(get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle)), 1)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
-	def test_no_reset_message_for_empty_finished_good_row(self):
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"make_serial_no_batch_from_work_order": 1, "overproduction_percentage_for_work_order": 100},
+	)
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_manufacture_entry_after_work_order_batches_are_used_up(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
-		fg_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
 		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=2, basic_rate=100
+		)
 
 		wo_order = make_wo_order_test_record(
-			item=fg_item, qty=2, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
+			item=fg_item, qty=1, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
 		)
+		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1)).submit()
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
+		stock_entry.submit()
+
+		stock_entry.reload()
+		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
+		batch_no = get_batch_from_bundle(fg_row.serial_and_batch_bundle)
+		self.assertNotEqual(frappe.db.get_value("Batch", batch_no, "reference_name"), wo_order.name)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_work_order_without_serial_no_series_is_not_submitted(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+
+		wo_order = make_wo_order_test_record(item=fg_item, qty=1, skip_transfer=True, do_not_submit=True)
+		self.assertRaisesRegex(frappe.ValidationError, "Serial Number Series", wo_order.submit)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"make_serial_no_batch_from_work_order": 1, "overproduction_percentage_for_work_order": 100},
+	)
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_no_reset_message_for_empty_finished_good_row(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=2, basic_rate=100
+		)
+
+		wo_order = make_wo_order_test_record(
+			item=fg_item, qty=1, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
+		)
+		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1)).submit()
+
 		frappe.clear_messages()
-		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2)).insert()
+		frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1)).insert()
 		self.assertNotIn("has been reset", str(frappe.message_log))
 
 	def get_serial_nos_for_fg(self, work_order):
