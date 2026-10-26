@@ -277,3 +277,13 @@ class TestFormValueQueries(ERPNextTestSuite):
 				"disabled": 0,
 			},
 		)
+
+	def test_item_warehouse_query(self):
+		search = partial(get_search_filters, queries.item_warehouse_query, "Warehouse")
+		company_filters = [["Warehouse", "company", "in", ["", "C"]], ["Warehouse", "is_group", "=", 0]]
+
+		self.assertEqual(search({"company": "C"}), company_filters)
+		self.assertEqual(
+			search({"company": "C", "item_code": "I"}, "erpnext.controllers.queries.warehouse_query"),
+			[*company_filters, ["Bin", "item_code", "=", "I"]],
+		)
