@@ -156,6 +156,7 @@ def update_existing_cheque_print_formats():
 	if not template_names:
 		return
 
+	default_messages = None
 	for template_name in frappe.get_all(
 		"Print Format",
 		filters={
@@ -177,13 +178,18 @@ def update_existing_cheque_print_formats():
 			print_format.html or "",
 			flags=re.DOTALL,
 		)
-		if message and re.fullmatch(r'{{ "(?:[^"\\]|\\.)*" \| e }}', message["message"], flags=re.DOTALL):
-			continue
+		saved_message = frappe.db.get_value("Cheque Print Template", template_name, "message_to_show")
+		if not saved_message and default_messages is None:
+			default_messages = {"Account Pay Only"}
+			default_messages.update(
+				_("Account Pay Only", lang=language) for language in frappe.get_all("Language", pluck="name")
+			)
 
-		if not message or message["message"] != (
-			frappe.db.get_value("Cheque Print Template", template_name, "message_to_show")
-			or _("Account Pay Only")
-		):
+		for message_text in [saved_message] if saved_message else default_messages:
+			escaped_message = "{{ " + frappe.as_json(message_text, ensure_ascii=False) + " | e }}"
+			if message and message["message"] in (message_text, escaped_message):
+				break
+		else:
 			frappe.log_error(
 				title=_("Cheque Print Format Requires Review"),
 				message=_(
@@ -197,11 +203,12 @@ def update_existing_cheque_print_formats():
 			)
 			continue
 
+		if message["message"] == escaped_message:
+			continue
+
 		print_format.html = (
 			print_format.html[: message.start("message")]
-			+ "{{ "
-			+ frappe.as_json(message["message"], ensure_ascii=False)
-			+ " | e }}"
+			+ escaped_message
 			+ print_format.html[message.end("message") :]
 		)
 		print_format.save()
