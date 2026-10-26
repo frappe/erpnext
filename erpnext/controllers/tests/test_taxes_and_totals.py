@@ -20,6 +20,58 @@ def resolve_on_mrp(calc, item, tax):
 
 
 class TestTaxesAndTotals(ERPNextTestSuite):
+	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
+	def test_inclusive_rounding_with_tax_groups_and_alternative_items(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Inclusive Rounding",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 10}],
+			}
+		).insert()
+		quotation = frappe.get_doc(
+			{
+				"doctype": "Quotation",
+				"company": "_Test Company",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"qty": 1,
+						"rate": 379,
+						"is_alternative": alternative,
+						"item_tax_template": template.name if rate == 10 else None,
+					}
+					for rate, alternative in [(21, 0), (21, 1), (10, 0), (21, 0), (10, 1), (10, 0), (21, 1)]
+				],
+				"taxes": [
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Service Tax - _TC",
+						"rate": 21,
+						"included_in_print_rate": 1,
+					}
+				],
+			}
+		)
+		for row_wise, expected in (
+			(0, [313.22, 313.22, 344.55, 313.23, 344.55, 344.54, 313.22]),
+			(1, [313.22, 313.22, 344.55, 313.22, 344.55, 344.55, 313.22]),
+		):
+			with (
+				self.subTest(round_row_wise_tax=row_wise),
+				self.change_settings("Accounts Settings", round_row_wise_tax=row_wise),
+			):
+				calculate_taxes_and_totals(quotation)
+				for field in ("net_amount", "net_rate", "base_net_amount", "base_net_rate"):
+					self.assertEqual([item.get(field) for item in quotation.items], expected)
+				self.assertEqual(quotation.net_total, 1315.54)
+				self.assertEqual(quotation.taxes[0].tax_amount, 200.46)
+				self.assertEqual(quotation.taxes[0].total, 1516)
+				self.assertEqual(quotation.grand_total, 1516)
+
 	def test_regional_round_off_accounts(self):
 		"""
 		Regional overrides cannot extend the list in-place — the return
