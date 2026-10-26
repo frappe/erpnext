@@ -4,7 +4,11 @@
 
 import frappe
 from frappe import qb
+<<<<<<< HEAD
 from frappe.tests.utils import FrappeTestCase, change_settings
+=======
+from frappe.desk.notifications import get_open_count
+>>>>>>> df29f4a (test(accounts): cover payment entry journal connections)
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -28,9 +32,50 @@ from erpnext.setup.doctype.employee.test_employee import make_employee
 test_dependencies = ["Item"]
 
 
+<<<<<<< HEAD
 class TestPaymentEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
+=======
+class TestPaymentEntry(ERPNextTestSuite):
+	def test_dashboard_shows_linked_exchange_gain_loss_journal(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		payment_entry = create_payment_entry(save=True)
+		journal_entry = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 100, save=False)
+		journal_entry.accounts[0].reference_type = payment_entry.doctype
+		journal_entry.accounts[0].reference_name = payment_entry.name
+		journal_entry.insert()
+
+		dashboard = get_open_count(payment_entry.doctype, payment_entry.name)
+		linked_counts = {
+			link["doctype"]: link["count"] for link in dashboard["count"]["external_links_found"]
+		}
+
+		self.assertEqual(linked_counts["Journal Entry"], 1)
+
+	def test_payment_creation_excludes_disabled_bank_default(self):
+		bank_account = frappe.get_doc(
+			"Bank Account", make_bank_account("_Test Payment Bank Default", "_Test Company", "HDFC - _TC")
+		)
+		bank_account.disabled = 0
+		bank_account.is_default = 1
+		bank_account.save()
+
+		for make_document in (create_sales_invoice, make_sales_order):
+			doc = make_document()
+			with self.subTest(doctype=doc.doctype):
+				bank_account.db_set("disabled", 0)
+				self.assertEqual(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account,
+					bank_account.name,
+				)
+				# Preserve is_default to reproduce disabled accounts saved before the fix.
+				bank_account.db_set("disabled", 1)
+				self.assertIsNone(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account
+				)
+>>>>>>> df29f4a (test(accounts): cover payment entry journal connections)
 
 	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
 		journals = []
