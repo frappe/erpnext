@@ -250,7 +250,7 @@ class ChildItemUpdater:
 			parent.validate_warehouse()
 			parent.update_reserved_qty()
 			parent.update_project()
-			parent.update_prevdoc_status("submit")
+			parent.update_prevdoc_status("submit", update_quotation_qty=True)
 			parent.update_delivery_status()
 
 		elif self.parent_doctype == "Supplier Quotation":
@@ -709,6 +709,8 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype == "Purchase Order":
 		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
+	elif parent.doctype == "Sales Order":
+		parent.update_ordered_qty_in_quotation_for_removed_items(deleted_children)
 
 	if parent.doctype not in ("Quotation", "Supplier Quotation"):
 		parent.update_prevdoc_status()
