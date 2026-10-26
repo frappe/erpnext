@@ -714,3 +714,51 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		pos_return.load_from_db()
 		credit_note = frappe.get_doc("Sales Invoice", pos_return.consolidated_invoice)
 		self.assertEqual(credit_note.items[0].incoming_rate, 80)
+
+	def test_consolidated_invoice_posts_redeemed_loyalty_amount(self):
+		customer = "Test Loyalty Customer"
+		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
+
+		earning_sale = create_pos_invoice(customer=customer, rate=10000, do_not_save=1)
+		earning_sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 10000})
+		earning_sale.insert().submit()
+
+		redeeming_sale = create_pos_invoice(customer=customer, rate=10000, do_not_save=1)
+		redeeming_sale.redeem_loyalty_points = 1
+		redeeming_sale.loyalty_points = 10
+		redeeming_sale.loyalty_amount = 10
+		redeeming_sale.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 9990}
+		)
+		redeeming_sale.paid_amount = 10000
+		redeeming_sale.submit()
+		self.assertEqual(redeeming_sale.loyalty_amount, 10)
+
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", redeeming_sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.loyalty_amount, 10)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+		self.assertEqual(consolidated_invoice.status, "Paid")
+		redemption_debit = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": consolidated_invoice.name,
+				"account": consolidated_invoice.loyalty_redemption_account,
+				"is_cancelled": 0,
+			},
+			pluck="debit",
+		)
+		self.assertEqual(redemption_debit, [10])
+		self.assertEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": consolidated_invoice.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+		)
