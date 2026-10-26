@@ -888,3 +888,19 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 
 		merge_log.customer_group = "All Customer Groups"
 		merge_log.insert()
+
+	def test_copy_of_consolidated_invoice_computes_its_own_change_amount(self):
+		sale = create_pos_invoice(rate=900, do_not_submit=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
+		sale.save().submit()
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.change_amount, 100)
+
+		copied_invoice = frappe.copy_doc(consolidated_invoice)
+		copied_invoice.change_amount = copied_invoice.base_change_amount = 0
+		copied_invoice.calculate_taxes_and_totals()
+		self.assertEqual(copied_invoice.change_amount, 100)

@@ -1297,7 +1297,7 @@ class calculate_taxes_and_totals:
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))
 
 	def calculate_change_amount(self):
-		if self.doc.get("is_consolidated") and any(d.type == "Cash" for d in self.doc.payments):
+		if self.doc.flags.keep_change_amount and any(d.type == "Cash" for d in self.doc.payments):
 			return
 
 		self.doc.change_amount = 0.0

@@ -347,6 +347,7 @@ class POSInvoiceMergeLog(Document):
 			data,
 			["change_amount", "base_change_amount", "write_off_amount", "base_write_off_amount"],
 		)
+		invoice.flags.keep_change_amount = True
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
