@@ -219,13 +219,19 @@ class POSClosingEntry(StatusUpdater):
 			self.period_start_date, frappe.utils.now_datetime(), self.pos_profile, self.user
 		)
 		missing_invoices = [d.name for d in session_invoices if d.name not in included_invoices]
-		if missing_invoices:
-			frappe.throw(
-				_(
-					"Invoices {0} of this POS session are not in this POS Closing Entry. Create the POS Closing Entry again to include them."
-				).format(", ".join(frappe.bold(name) for name in missing_invoices)),
-				title=_("Missing Invoices"),
-			)
+		if not missing_invoices:
+			return
+
+		invoice_list = ", ".join(frappe.bold(name) for name in missing_invoices[:10])
+		if len(missing_invoices) > 10:
+			invoice_list += " " + _("and {0} more").format(len(missing_invoices) - 10)
+
+		frappe.throw(
+			_(
+				"Invoices {0} of this POS session are not in this POS Closing Entry. Create the POS Closing Entry again to include them."
+			).format(invoice_list),
+			title=_("Missing Invoices"),
+		)
 
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)

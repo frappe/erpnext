@@ -649,6 +649,19 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		closing_entry.cancel()
 		self.assertFalse(closing_entry.get("ignore_linked_doctypes"))
 
+	def test_missing_invoices_message_lists_first_ten(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sales = [make_paid_pos_invoice([("Cash", 90)]).name for _ in range(11)]
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			closing_entry.submit()
+
+		message = str(context.exception)
+		self.assertIn("and 1 more", message)
+		self.assertEqual(sum(name in message for name in late_sales), 10)
+
 
 MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"
 
