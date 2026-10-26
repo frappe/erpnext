@@ -196,3 +196,20 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		si = create_sales_invoice(rate=1000, do_not_save=True)
 		si.items[0].item_tax_template = template.name
 		self.assertRaisesRegex(frappe.ValidationError, "is disabled", si.insert)
+
+	def test_draft_submits_after_its_template_is_disabled(self):
+		template = self.make_tax_template(28)
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template
+		si.insert()
+
+		frappe.db.set_value("Item Tax Template", template, "disabled", 1)
+		si.reload()
+		si.submit()
+		self.assertEqual(si.docstatus, 1)
+
+		draft = create_sales_invoice(rate=1000, do_not_submit=True)
+		draft.append(
+			"items", {"item_code": "_Test Item", "qty": 1, "rate": 1000, "item_tax_template": template}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", draft.save)

@@ -148,10 +148,10 @@ class calculate_taxes_and_totals:
 		self.validate_item_tax_templates_are_usable()
 
 	def validate_item_tax_templates_are_usable(self):
-		if self.doc.get("_action") not in ("save", "submit"):
+		if self.doc.get("_action") not in ("save", "submit") or self.doc.get("is_consolidated"):
 			return
 
-		for template in {item.item_tax_template for item in self.doc.items if item.get("item_tax_template")}:
+		for template in self.get_changed_item_tax_templates():
 			disabled, company = frappe.get_cached_value(
 				"Item Tax Template", template, ["disabled", "company"]
 			)
@@ -168,6 +168,17 @@ class calculate_taxes_and_totals:
 						get_link_to_form("Item Tax Template", template), frappe.bold(self.doc.company)
 					)
 				)
+
+	def get_changed_item_tax_templates(self) -> set:
+		doc_before_save = self.doc.get_doc_before_save()
+		saved_templates = (
+			{item.name: item.item_tax_template for item in doc_before_save.items} if doc_before_save else {}
+		)
+		return {
+			item.item_tax_template
+			for item in self.doc.items
+			if item.get("item_tax_template") and item.item_tax_template != saved_templates.get(item.name)
+		}
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:
