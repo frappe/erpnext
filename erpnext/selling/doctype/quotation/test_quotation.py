@@ -466,6 +466,42 @@ class TestQuotation(ERPNextTestSuite):
 		merged = make_sales_order(quotation_c.name, sales_order)
 		self.assertEqual(len(merged.items), 2)
 
+	def test_quotation_update_items_recomputes_status(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item1 = make_item().item_code
+		item2 = make_item().item_code
+		warehouse = "_Test Warehouse - _TC"
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": item1, "qty": 2, "rate": 100, "warehouse": warehouse},
+				{"item_code": item2, "qty": 2, "rate": 100, "warehouse": warehouse},
+			]
+		)
+
+		so = make_sales_order(quotation.name, args={"filtered_children": [quotation.items[0].name]})
+		so.delivery_date = nowdate()
+		so.insert()
+		so.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		# Dropping the un-ordered row makes the quotation fully ordered; status must follow
+		row = quotation.items[0]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "qty": row.qty, "rate": row.rate, "docname": row.name}]
+		)
+		update_child_qty_rate("Quotation", trans_items, quotation.name)
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+
+		# An Ordered quotation refuses further Update Items, even from the API
+		row = quotation.items[0]
+		raised = json.dumps([{"item_code": row.item_code, "qty": 5, "rate": row.rate, "docname": row.name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", raised, quotation.name)
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
