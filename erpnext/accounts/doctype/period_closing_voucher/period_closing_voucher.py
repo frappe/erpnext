@@ -404,14 +404,15 @@ class PeriodClosingVoucher(AccountsController):
 
 		pl_account_balances = self.get_account_balances_based_on_dimensions(report_type="Profit and Loss")
 		for dimensions, account_balances in pl_account_balances.items():
-			for acc, balances in account_balances.items():
-				balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-				if balance_in_company_currency and acc != "balances":
-					self.pl_accounts_reverse_gle.append(
-						self.get_gle_for_pl_account(acc, balances, dimensions)
-					)
+			pl_entries = [
+				self.get_gle_for_pl_account(acc, balances, dimensions)
+				for acc, balances in account_balances.items()
+				if acc != "balances" and flt(balances.debit) - flt(balances.credit)
+			]
+			if not pl_entries:
+				continue
 
-			# closing liability account
+			self.pl_accounts_reverse_gle.extend(pl_entries)
 			self.closing_account_gle.append(
 				self.get_gle_for_closing_account(account_balances["balances"], dimensions)
 			)
@@ -969,11 +970,15 @@ def post_summarized_ledger(pcv, result):
 	closing_account_gle = []
 
 	for dimensions, account_balances in pl_dimension_wise_acc_balance.items():
-		for acc, balances in account_balances.items():
-			balance_in_company_currency = flt(balances.debit) - flt(balances.credit)
-			if balance_in_company_currency:
-				pl_accounts_reverse_gle.append(get_gle_for_pl_account(pcv, acc, balances, dimensions))
+		pl_entries = [
+			get_gle_for_pl_account(pcv, acc, balances, dimensions)
+			for acc, balances in account_balances.items()
+			if acc != "balances" and flt(balances.debit) - flt(balances.credit)
+		]
+		if not pl_entries:
+			continue
 
+		pl_accounts_reverse_gle.extend(pl_entries)
 		closing_account_gle.append(get_gle_for_closing_account(pcv, account_balances["balances"], dimensions))
 
 	gl_entries = pl_accounts_reverse_gle + closing_account_gle
