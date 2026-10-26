@@ -147,6 +147,14 @@ class CostCenterAllocation(Document):
 		]
 
 		for d in self.allocation_percentages:
+			if frappe.get_cached_value("Cost Center", d.cost_center, "company") != self.company:
+				frappe.throw(
+					_("Row {0}: Cost Center {1} does not belong to Company {2}").format(
+						d.idx, d.cost_center, self.company
+					),
+					InvalidChildCostCenter,
+				)
+
 			if d.cost_center in main_cost_centers:
 				frappe.throw(
 					_(
