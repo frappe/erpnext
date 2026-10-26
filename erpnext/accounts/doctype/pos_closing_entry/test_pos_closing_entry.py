@@ -591,7 +591,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			(0, "Draft"),
 		)
 
-	def test_failed_background_cancel_marks_cancelled_closing_entry_failed(self):
+	def test_failed_background_cancel_is_marked_failed_and_can_be_retried(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 		for _ in range(10):
@@ -618,6 +618,25 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
 			(2, "Failed"),
 		)
+
+		new_opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=True)
+		self.assertRaises(frappe.ValidationError, closing_entry.retry)
+		new_opening_entry.cancel()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.retry()
+		enqueue.call_args.args[0](
+			merge_logs=enqueue.call_args.kwargs["merge_logs"],
+			closing_entry=enqueue.call_args.kwargs["closing_entry"],
+		)
+
+		for merge_log in job_arguments["merge_logs"]:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Cancelled"),
+		)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
 
 
 MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"

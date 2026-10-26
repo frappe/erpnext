@@ -34,7 +34,7 @@ frappe.ui.form.on("POS Closing Entry", {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.status == "Failed") {
+		if (frm.doc.docstatus > 0 && frm.doc.status == "Failed") {
 			const issue = '<a id="jump_to_error" style="text-decoration: underline;">issue</a>';
 			frm.dashboard.set_headline(
 				__(
