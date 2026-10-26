@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.finance_book.test_finance_book import create_finan
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher import (
 	aggregate_partial_result,
+	get_period_start_end_date,
 	process_date_range,
 	summarize_and_post_ledger,
 )
@@ -987,6 +988,17 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 		self.assertRaisesRegex(
 			frappe.ValidationError, f"Period Closing Entry {next_pcv.name} exists after", pcv.cancel
+		)
+
+	def test_period_dates_need_read_permission(self):
+		from erpnext.crm.doctype.lead.test_lead import make_user
+
+		user = make_user("pcv_stock_user@example.com", "Stock User")
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+
+		self.assertRaises(
+			frappe.PermissionError, get_period_start_end_date, "_Test Fiscal Year 2021", "Test PCV Company"
 		)
 
 
