@@ -117,7 +117,6 @@ class Issue(Document):
 		communication.flags.ignore_mandatory = True
 		communication.save()
 
-	@frappe.whitelist()
 	def get_timeline_communications(self, after=None):
 		"""Return the Communications on this Issue's timeline, split by how they are attached.
 
@@ -150,6 +149,7 @@ class Issue(Document):
 
 		return set(referenced), set(linked)
 
+	@frappe.whitelist(methods=["POST"])
 	def split_issue(self, subject: str, communication_id: str):
 		from copy import deepcopy
 

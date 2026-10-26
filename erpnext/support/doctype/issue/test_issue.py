@@ -626,6 +626,38 @@ class TestFirstResponseTime(TestSetUp):
 		self.assertRaises(frappe.PermissionError, set_multiple_status, json.dumps([issue.name]), "Closed")
 		frappe.set_user("Administrator")
 
+	def test_split_issue_is_whitelisted_for_post(self):
+		from erpnext.support.doctype.issue.issue import Issue
+
+		self.assertTrue(Issue.split_issue in frappe.whitelisted)
+		self.assertEqual(frappe.allowed_http_methods_for_whitelisted_func[Issue.split_issue], ["POST"])
+
+	def test_split_issue_through_run_doc_method(self):
+		from frappe.handler import run_doc_method
+		from frappe.utils import set_request
+
+		issue = make_issue(index=1)
+		create_communication(issue.name, "test@example.com", "Received", get_datetime())
+		communication = frappe.get_all(
+			"Communication", {"reference_doctype": "Issue", "reference_name": issue.name}, pluck="name"
+		)[0]
+
+		previous_request = getattr(frappe.local, "request", None)
+		try:
+			set_request(method="POST", path="/api/method/run_doc_method")
+			run_doc_method(
+				"split_issue",
+				dt="Issue",
+				dn=issue.name,
+				args={"subject": "_Test Split Issue", "communication_id": communication},
+			)
+		finally:
+			frappe.local.request = previous_request
+
+		new_issue = frappe.response["message"]
+		self.assertEqual(frappe.db.get_value("Issue", new_issue, "issue_split_from"), issue.name)
+		self.assertEqual(frappe.db.get_value("Communication", communication, "reference_name"), new_issue)
+
 
 def create_issue_and_communication(issue_creation, first_responded_on):
 	issue = make_issue(issue_creation, index=1)
