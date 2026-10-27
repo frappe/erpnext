@@ -1134,8 +1134,8 @@ class StockReconciliation(StockController):
 					frappe.bold(self.expense_account)
 				)
 			)
-		elif self.purpose == "Opening Stock" or not frappe.db.sql(
-			"""select name from `tabStock Ledger Entry` limit 1"""
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all(
+			"Stock Ledger Entry", filters={"company": self.company, "is_cancelled": 0}, limit=1
 		):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
