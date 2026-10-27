@@ -61,6 +61,7 @@ class StockReconciliation(StockController):
 		cost_center: DF.Link | None
 		difference_amount: DF.Currency
 		expense_account: DF.Link | None
+		is_made_from_valuation_comparison: DF.Check
 		items: DF.Table[StockReconciliationItem]
 		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
 		posting_date: DF.Date

@@ -321,6 +321,7 @@ def make_adjustment_entry(
 	doc.update(
 		{
 			"purpose": ADJUSTMENT_ENTRY,
+			"is_made_from_valuation_comparison": 1,
 			"company": company,
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -336,7 +337,6 @@ def make_adjustment_entry(
 				doc.append("items", make_item_row(plan, row))
 
 	if doc.items:
-		doc.flags.made_from_stock_valuation_comparison = True
 		doc.insert()
 
 	return doc, plans
@@ -435,7 +435,7 @@ class AdjustmentEntry:
 		)
 
 	def validate_made_from_report(self) -> None:
-		if self.doc.flags.made_from_stock_valuation_comparison or not self.doc.has_value_changed("purpose"):
+		if self.doc.is_made_from_valuation_comparison:
 			return
 
 		frappe.throw(
