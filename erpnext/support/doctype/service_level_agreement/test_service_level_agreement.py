@@ -160,6 +160,22 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 				json.loads(field["link_filters"]) if field.get("link_filters") else None,
 			)
 
+	def test_sla_on_any_doctype_needs_tracking_enabled(self):
+		with self.change_settings("Support Settings", track_service_level_agreement=0):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"Track Service Level Agreement",
+				create_service_level_agreement,
+				default_service_level_agreement=1,
+				holiday_list="__Test Holiday List",
+				entity_type=None,
+				entity=None,
+				response_time=14400,
+				resolution_time=21600,
+				doctype="Lead",
+				sla_fulfilled_on=[{"status": "Converted"}],
+			)
+
 	def test_docfield_creation_for_sla_on_custom_dt(self):
 		doctype = create_custom_doctype()
 		sla = create_service_level_agreement(
