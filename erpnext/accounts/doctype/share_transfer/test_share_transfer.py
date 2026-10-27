@@ -86,6 +86,38 @@ class TestShareTransfer(ERPNextTestSuite):
 			st = frappe.get_doc(d)
 			st.submit()
 
+	def test_fractional_rate_submission_after_reload(self):
+		for rate, amount in ((10.1, 30.3), (0.1, 0.3), (10.25, 30.75)):
+			with self.subTest(rate=rate):
+				doc = frappe.get_doc(
+					{
+						"doctype": "Share Transfer",
+						"transfer_type": "Issue",
+						"date": "2018-01-06",
+						"to_shareholder": "SH-00001",
+						"share_type": "Equity",
+						"from_no": 501,
+						"to_no": 503,
+						"no_of_shares": 3,
+						"rate": rate,
+						"amount": rate * 3,
+						"company": "_Test Company",
+						"asset_account": "Cash - _TC",
+						"equity_or_liability_account": "Creditors - _TC",
+					}
+				).insert()
+				self.assertEqual(doc.amount, amount)
+				doc.reload()
+				self.assertEqual(doc.amount, amount)
+				doc.save()
+				doc.reload()
+				doc.submit()
+				doc.reload()
+				self.assertEqual(doc.docstatus, 1)
+				self.assertEqual(doc.amount, amount)
+				doc.cancel()
+				self.assertEqual(doc.docstatus, 2)
+
 	def test_shareholders_stay_protected_after_buyback(self):
 		from frappe.client import set_value
 
