@@ -10,6 +10,113 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmailDigest(ERPNextTestSuite):
+	def test_dates_before_first_fiscal_year_have_zero_income_and_count(self):
+		from erpnext.setup.doctype.email_digest.email_digest import (
+			get_count_for_period,
+			get_incomes_expenses_for_period,
+		)
+
+		date = getdate("1900-01-01")
+		account = frappe.db.get_value("Account", {"company": "_Test Company", "is_group": 0}, "name")
+		self.assertEqual(get_incomes_expenses_for_period(account, date, date), 0)
+		self.assertEqual(get_count_for_period(account, "income", date, date), 0)
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		digest.future_to_date = date
+		self.assertEqual(digest.get_income_year_to_date()["value"], 0)
+
+	def test_missing_future_fiscal_year_still_raises(self):
+		from erpnext.accounts.utils import FiscalYearError
+		from erpnext.setup.doctype.email_digest.email_digest import get_digest_fiscal_year
+
+		with self.assertRaises(FiscalYearError):
+			get_digest_fiscal_year(getdate("2200-01-01"))
+
+	def test_scheduler_continues_after_a_digest_fails(self):
+		from unittest.mock import patch
+
+		from erpnext.setup.doctype.email_digest.email_digest import EmailDigest, send
+
+		first = create_email_digest(name="Failing Email Digest", enabled=1)
+		second = create_email_digest(name="Working Email Digest", enabled=1)
+		delivered = []
+		get_all = frappe.get_all
+
+		def get_digests(doctype, *args, **kwargs):
+			if doctype == "Email Digest":
+				return [(first.name,), (second.name,)]
+			return get_all(doctype, *args, **kwargs)
+
+		def send_digest(digest, continue_on_error=False):
+			if digest.name == first.name:
+				raise ValueError("digest failed")
+			delivered.append(digest.name)
+
+		with (
+			patch("frappe.get_all", side_effect=get_digests),
+			patch.object(EmailDigest, "_send", send_digest),
+			patch("frappe.log_error"),
+		):
+			send()
+		self.assertEqual(delivered, [second.name])
+
+	def test_scheduler_preserves_queued_mail_after_recipient_failure(self):
+		self.check_recipient_failure("render")
+
+	def test_scheduler_rolls_back_partial_queue_insertion(self):
+		self.check_recipient_failure("queue")
+
+	def check_recipient_failure(self, failure):
+		from unittest.mock import patch
+
+		from erpnext.setup.doctype.email_digest.email_digest import EmailDigest, send
+
+		users = [
+			make_digest_test_user(f"digest-{failure}-{i}@example.com", system_user=True).name
+			for i in range(3)
+		]
+		digest = create_email_digest(name="Recipient Failure Digest", enabled=1, recipients=users)
+		other = create_email_digest(name="Subsequent Digest", enabled=1, recipients=[users[0]])
+		get_all = frappe.get_all
+
+		def get_digests(doctype, *args, **kwargs):
+			if doctype == "Email Digest":
+				return [(digest.name,), (other.name,)]
+			return get_all(doctype, *args, **kwargs)
+
+		def render(doc):
+			if failure == "render" and frappe.session.user == users[1]:
+				raise ValueError("recipient rendering failed")
+			return "Digest queue regression"
+
+		from frappe.email.doctype.email_queue.email_queue import EmailQueue
+
+		new_queue = EmailQueue.new
+
+		def insert_queue(data, **kwargs):
+			queue = new_queue(data, **kwargs)
+			if failure == "queue" and users[1] in data["recipients"]:
+				raise ValueError("queue insertion failed")
+			return queue
+
+		with patch("frappe.get_all", side_effect=get_digests), patch.object(
+			EmailDigest, "get_msg_html", render
+		), patch.object(EmailQueue, "new", side_effect=insert_queue), patch("frappe.log_error"):
+			send()
+		queued = frappe.get_all(
+			"Email Queue",
+			filters={"reference_doctype": "Email Digest", "reference_name": digest.name},
+			pluck="name",
+		)
+		self.assertEqual(len(queued), 2)
+		self.assertEqual(
+			set(
+				frappe.get_all("Email Queue Recipient", filters={"parent": ["in", queued]}, pluck="recipient")
+			),
+			{users[0], users[2]},
+		)
+		self.assertTrue(frappe.db.exists("Email Queue", {"reference_name": other.name}))
+		self.assertEqual(frappe.session.user, "Administrator")
+
 	def test_project_list_links_to_projects(self):
 		if not frappe.db.exists("Project Type", "External"):
 			frappe.get_doc({"doctype": "Project Type", "project_type": "External"}).insert()
