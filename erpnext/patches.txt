@@ -542,4 +542,3 @@ execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_p
 execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
 execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
 erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
-execute:frappe.db.set_value("Stock Reconciliation", {"purpose": "Adjustment Entry"}, "is_made_from_valuation_comparison", 1, update_modified=False)
