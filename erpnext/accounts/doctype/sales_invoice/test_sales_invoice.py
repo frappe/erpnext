@@ -35,6 +35,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
+from erpnext.controllers.status_updater import OverAllowanceError
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -4486,6 +4487,92 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		with self.assertRaises(frappe.ValidationError):
 			si.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	def test_return_against_over_billed_so_is_not_blocked(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+		so_detail = so.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		for update_billed_amount in (0, 1):
+			return_si = make_sales_return(si.name)
+			return_si.items[0].qty = -1
+			return_si.update_billed_amount_in_sales_order = update_billed_amount
+			return_si.insert()
+			return_si.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1350)
+
+		# cancelling a return adds the billing back, so it is still checked
+		with self.assertRaises(OverAllowanceError):
+			return_si.cancel()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_row_with_negative_rate_is_checked_for_over_billing(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.insert()
+		si.submit()
+
+		# qty -1 at rate -100 adds 100 to the fully billed order line
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.update_billed_amount_in_sales_order = 1
+		return_si.insert()
+		with self.assertRaises(OverAllowanceError):
+			return_si.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_rate_correction_through_set_value_is_not_blocked(self):
+		from frappe.client import set_value
+
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+
+		# a user with the over billing role saves a draft return at a negative rate
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.insert()
+		self.assertEqual(return_si.items[0].amount, 100)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		# correcting the rate through the api saves the row before its amount is recomputed
+		set_value("Sales Invoice Item", return_si.items[0].name, "rate", 150)
+		return_si.reload()
+		self.assertEqual(return_si.items[0].rate, 150)
+		self.assertEqual(return_si.items[0].amount, -150)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
