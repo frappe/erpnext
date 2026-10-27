@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -9,10 +10,9 @@ from erpnext.selling.report.sales_person_target_variance_based_on_item_group.tes
 	create_sales_target_doc,
 	create_target_distribution,
 )
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestTargetDetail(ERPNextTestSuite):
+class TestTargetDetail(FrappeTestCase):
 	def test_duplicate_target_rows_are_rejected(self):
 		fiscal_year = get_fiscal_year(nowdate())[0]
 		distribution = create_target_distribution(fiscal_year)
