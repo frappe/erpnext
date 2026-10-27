@@ -206,7 +206,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						if (r.exc) return;
 						const received_items = r.message || {};
 						const has_pending_qty = me.frm.doc.items.some(
-							(item) => flt(item.qty) - flt(received_items[item.name] || 0) > 0
+							(item) => flt(item.stock_qty) - flt(received_items[item.name] || 0) > 0
 						);
 						if (!has_pending_qty) {
 							me.frm.remove_custom_button(__(button_label), __("Create"));
@@ -353,8 +353,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							default: me.frm.doc.project,
 						},
 					],
-					primary_action: function () {
-						const data = d.get_values();
+					primary_action: function (data) {
 						me.frm.events.add_timesheet_data(me.frm, {
 							from_time: data.from_time,
 							to_time: data.to_time,
@@ -720,7 +719,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.doc.is_cash_or_non_trade_discount
 		);
 
-		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+		if (this.frm.doc.is_cash_or_non_trade_discount) {
+			this.clear_mapped_discounts();
+		} else {
 			this.frm.set_value("additional_discount_account", "");
 		}
 

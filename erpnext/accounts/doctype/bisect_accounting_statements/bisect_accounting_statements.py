@@ -173,8 +173,8 @@ class BisectAccountingStatements(Document):
 
 	def fetch_summary_info_from_current_node(self):
 		current_node = frappe.get_doc("Bisect Nodes", self.current_node)
-		self.p_l_summary = current_node.balance_sheet_summary
-		self.b_s_summary = current_node.profit_loss_summary
+		self.p_l_summary = current_node.profit_loss_summary
+		self.b_s_summary = current_node.balance_sheet_summary
 		self.difference = abs(self.p_l_summary - self.b_s_summary)
 
 	def fetch_or_calculate(self):

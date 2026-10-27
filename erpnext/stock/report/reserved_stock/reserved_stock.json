@@ -9,7 +9,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2023-08-03 12:46:33.780222",
+ "modified": "2026-10-14 16:40:54.692921",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Reserved Stock",
@@ -21,6 +21,24 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase User"
   }
  ]
 }

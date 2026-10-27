@@ -403,6 +403,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_order_reference",
    "reqd": 1
   },
   {
@@ -1325,7 +1326,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-13 12:12:32.190935",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

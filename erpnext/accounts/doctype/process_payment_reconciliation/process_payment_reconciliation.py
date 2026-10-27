@@ -106,6 +106,8 @@ def get_pr_instance(doc: str):
 		"party",
 		"receivable_payable_account",
 		"default_advance_account",
+		"bank_cash_account",
+		"cost_center",
 		"from_invoice_date",
 		"to_invoice_date",
 		"from_payment_date",
@@ -250,7 +252,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 			log = frappe.new_doc("Process Payment Reconciliation Log")
 			log.process_pr = doc
 			log.status = "Running"
-			log = log.save()
+			log = log.save(ignore_permissions=True)
 
 			job_name = f"process_{doc}_fetch_and_allocate"
 			if not is_job_running(job_name):
@@ -368,7 +370,7 @@ def fetch_and_allocate(doc: str) -> None:
 				reconcile_log.allocated = True
 				reconcile_log.total_allocations = len(reconcile_log.get("allocations"))
 				reconcile_log.reconciled_entries = 0
-				reconcile_log.save()
+				reconcile_log.save(ignore_permissions=True)
 
 				# generate reconcile job name
 				allocation = get_next_allocation(log)
@@ -414,6 +416,15 @@ def reconcile(doc: None | str = None) -> None:
 					# pass allocation to PR instance
 					for x in allocations:
 						pr.append("allocation", x)
+
+					pr.get_nonreconciled_payment_entries()
+					pr.get_invoice_entries(
+						vouchers=[
+							frappe._dict(voucher_type=x.invoice_type, voucher_no=x.invoice_number)
+							for x in allocations
+						]
+					)
+					pr.validate_allocation()
 
 					skip_ref_details_update_for_pe = check_multi_currency(pr)
 					# reconcile

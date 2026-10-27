@@ -82,7 +82,7 @@ class ProductionPlanWorkOrderQuantities:
 		return row
 
 	def get_pending_quantities(self, plan):
-		committed = self.get_committed_quantities()
+		committed = self.get_committed_quantities(include_drafts=True)
 		precision = frappe.get_precision("Work Order", "qty")
 		pending = {}
 		for table, reference_field, qty_field in (
@@ -99,7 +99,12 @@ class ProductionPlanWorkOrderQuantities:
 		return pending
 
 	def get_committed_quantities(
-		self, exclude_work_order=None, reference_field=None, reference_name=None, for_update=False
+		self,
+		exclude_work_order=None,
+		reference_field=None,
+		reference_name=None,
+		for_update=False,
+		include_drafts=False,
 	):
 		table = frappe.qb.DocType("Work Order")
 		query = (
@@ -111,7 +116,8 @@ class ProductionPlanWorkOrderQuantities:
 				table.produced_qty,
 				table.process_loss_qty,
 			)
-			.where((table.production_plan == self.production_plan) & (table.docstatus == 1))
+			.where(table.production_plan == self.production_plan)
+			.where((table.docstatus < 2) if include_drafts else (table.docstatus == 1))
 			.orderby(table.name)
 		)
 		if exclude_work_order:
