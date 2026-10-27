@@ -348,3 +348,30 @@ class TestFormValueQueries(ERPNextTestSuite):
 			search({"company": "C", "customer": "P", "delivered_by_supplier": [1]}),
 			{"link_doctype": "Customer", "link_name": "P"},
 		)
+
+	def test_field_filters_are_kept(self):
+		self.assertEqual(
+			get_search_filters(
+				queries.purchase_item_query,
+				"Item",
+				{"supplier": "S", "company": "C", "item_group": ["=", "G"]},
+				"erpnext.controllers.queries.item_query",
+			),
+			{
+				"supplier": "S",
+				"company": "C",
+				"is_purchase_item": 1,
+				"has_variants": 0,
+				"item_group": ["=", "G"],
+			},
+		)
+		self.assertEqual(
+			get_search_filters(
+				queries.item_warehouse_query, "Warehouse", {"company": "C", "warehouse_type": ["=", "T"]}
+			),
+			[
+				["Warehouse", "company", "in", ["", "C"]],
+				["Warehouse", "is_group", "=", 0],
+				["Warehouse", "warehouse_type", "=", "T"],
+			],
+		)
