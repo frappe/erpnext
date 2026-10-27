@@ -562,3 +562,4 @@ execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", 
 execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
 erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
 erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
+erpnext.patches.v16_0.encrypt_bank_plaid_access_token
