@@ -25,6 +25,7 @@ from erpnext.stock.doctype.material_request.test_material_request import (
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
@@ -816,6 +817,103 @@ class TestStockEntry(ERPNextTestSuite):
 			)
 		)
 		self.assertEqual(inward_values, {d.name: d.amount for d in transfer.items})
+
+	def test_transfer_takes_sle_gates_before_inserting_bundles(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			SerialandBatchBundle,
+		)
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "GTBT-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "GTSN-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		bundle = frappe.db.get_value("Serial and Batch Bundle", {"voucher_no": receipt.name})
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=2,
+			serial_no="\n".join(get_serial_numbers_from_bundle(bundle)),
+			batch_no=get_batch_from_bundle(bundle),
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		events = []
+		db_insert = SerialandBatchBundle.db_insert
+
+		def record_bundle_insert(doc, *args, **kwargs):
+			events.append(("bundle", doc.warehouse))
+			return db_insert(doc, *args, **kwargs)
+
+		with (
+			patch(
+				"erpnext.stock.stock_ledger.sle_processing_gate",
+				side_effect=lambda item, warehouse: events.append(("gate", warehouse)),
+			),
+			patch.object(SerialandBatchBundle, "db_insert", autospec=True, side_effect=record_bundle_insert),
+		):
+			transfer.submit()
+
+		self.assertEqual(events[:2], [("gate", "_Test Warehouse - _TC"), ("gate", "_Test Warehouse 1 - _TC")])
+		self.assertIn(("bundle", "_Test Warehouse 1 - _TC"), events)
+
+	def test_gates_are_taken_only_for_stock_items(self):
+		stock_item = make_item(properties={"is_stock_item": 1}).name
+		non_stock_item = make_item(properties={"is_stock_item": 0}).name
+		stock_entry = frappe.new_doc("Stock Entry")
+		for item_code in (stock_item, non_stock_item):
+			stock_entry.append(
+				"items",
+				{"item_code": item_code, "s_warehouse": "_Test Warehouse - _TC", "t_warehouse": None},
+			)
+
+		with patch("erpnext.stock.stock_ledger.sle_processing_gate") as gate:
+			stock_entry.acquire_sle_processing_gates()
+
+		self.assertEqual([call.args for call in gate.call_args_list], [(stock_item, "_Test Warehouse - _TC")])
+
+	def test_repack_takes_gate_of_finished_good_warehouse_before_posting(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=2, rate=100)
+		repack = make_stock_entry(
+			item_code=raw_material, source="_Test Warehouse - _TC", qty=2, purpose="Repack", do_not_save=True
+		)
+		repack.to_warehouse = "_Test Warehouse 1 - _TC"
+		repack.append(
+			"items", {"item_code": finished_good, "qty": 1, "conversion_factor": 1, "is_finished_item": 1}
+		)
+
+		events = []
+		update_stock_ledger = StockEntry.update_stock_ledger
+
+		def record_posting(doc, *args, **kwargs):
+			events.append("posting")
+			return update_stock_ledger(doc, *args, **kwargs)
+
+		with (
+			patch(
+				"erpnext.stock.stock_ledger.sle_processing_gate",
+				side_effect=lambda item, warehouse: events.append(warehouse),
+			),
+			patch.object(StockEntry, "update_stock_ledger", autospec=True, side_effect=record_posting),
+		):
+			repack.submit()
+
+		self.assertEqual(repack.items[1].t_warehouse, "_Test Warehouse 1 - _TC")
+		self.assertEqual(
+			set(events[: events.index("posting")]), {"_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"}
+		)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",

@@ -142,7 +142,7 @@ class SerialandBatchBundle(Document):
 			self.validate_serial_no_status()
 
 		self.set_is_outward()
-		self.calculate_total_qty()
+		self.calculate_total_qty(save=False)
 		self.set_warehouse()
 
 		if self.voucher_type != "Stock Entry" or not self.voucher_no or self.docstatus == 1:
@@ -2141,6 +2141,11 @@ def on_doctype_update():
 			index_name="sabb_active_item_wh",
 			where="is_cancelled = 0",
 		)
+	elif frappe.db.db_type == "mariadb":
+		# Without these, bundle lookups by voucher (batch qty update) and the future entries
+		# check scan the whole table while the submit holds the stock gates.
+		frappe.db.add_index("Serial and Batch Bundle", ["voucher_no", "voucher_type"])
+		frappe.db.add_index("Serial and Batch Bundle", ["item_code", "posting_datetime"])
 
 
 @frappe.whitelist()
