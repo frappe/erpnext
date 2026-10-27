@@ -15,6 +15,7 @@ from frappe.utils import comma_and, get_link_to_form, validate_email_address
 
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.doctype.utils import get_phone_number_key, get_phone_number_like_pattern
 from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
 from erpnext.selling.doctype.customer.customer import parse_full_name
 
@@ -142,7 +143,7 @@ class Lead(SellingController, CRMNote):
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
 			elif self.company_name:
 				self.lead_name = self.company_name
-			else:
+			elif self.email_id:
 				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
@@ -199,17 +200,17 @@ class Lead(SellingController, CRMNote):
 			lead_row.db_update()
 
 	def remove_link_from_prospect(self):
-		prospects = self.get_linked_prospects()
+		linked_prospects = self.get_linked_prospects()
 
-		for d in prospects:
-			prospect = frappe.get_doc("Prospect", d.parent)
+		for linked_prospect in linked_prospects:
+			prospect = frappe.get_doc("Prospect", linked_prospect.parent)
 			if len(prospect.get("leads")) == 1:
 				prospect.delete(ignore_permissions=True)
 			else:
 				to_remove = None
-				for d in prospect.get("leads"):
-					if d.lead == self.name:
-						to_remove = d
+				for lead in prospect.get("leads"):
+					if lead.lead == self.name:
+						to_remove = lead
 
 				if to_remove:
 					prospect.remove(to_remove)
@@ -484,6 +485,14 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
+	# Communication grants read to `All` only for the owner and carries a has_permission hook, so doc=
+	# is what decides access.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
+	# both paths end in a Lead: the insert path checks `create`, but the path reusing an existing Lead
+	# required nothing at all.
+	frappe.has_permission("Lead", ptype="create", throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None
 	if doc.sender:
@@ -508,24 +517,22 @@ def make_lead_from_communication(communication: str, ignore_communication_links:
 	return lead_name
 
 
-def get_lead_with_phone_number(number):
-	if not number:
-		return
+def get_leads_with_phone_number(number: str | None) -> list[str]:
+	"""Return all leads with a phone, WhatsApp or mobile number matching the given number."""
+	if not (key := get_phone_number_key(number)):
+		return []
 
+	phone_fields = ["phone", "whatsapp_no", "mobile_no"]
+	pattern = get_phone_number_like_pattern(key)
 	leads = frappe.get_all(
 		"Lead",
-		or_filters={
-			"phone": ["like", f"%{number}"],
-			"whatsapp_no": ["like", f"%{number}"],
-			"mobile_no": ["like", f"%{number}"],
-		},
-		limit=1,
-		order_by="creation DESC",
+		or_filters={field: ["like", pattern] for field in phone_fields},
+		fields=["name", *phone_fields],
+		order_by="creation desc",
 	)
-
-	lead = leads[0].name if leads else None
-
-	return lead
+	return [
+		lead.name for lead in leads if any(get_phone_number_key(lead[field]) == key for field in phone_fields)
+	]
 
 
 @frappe.whitelist(methods=["POST"])

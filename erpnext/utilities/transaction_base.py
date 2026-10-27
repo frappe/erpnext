@@ -9,8 +9,8 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, get_item_details
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
+from erpnext.stock.utils import _get_incoming_rate
 
 
 class UOMMustBeIntegerError(frappe.ValidationError):
@@ -150,11 +150,15 @@ class TransactionBase(StatusUpdater):
 
 		if self.doctype in buying_doctypes:
 			action, role_allowed_to_override = frappe.get_cached_value(
-				"Buying Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+				"Buying Settings",
+				"Buying Settings",
+				["maintain_same_rate_action", "role_to_override_stop_action"],
 			)
 		else:
 			action, role_allowed_to_override = frappe.get_cached_value(
-				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+				"Selling Settings",
+				"Selling Settings",
+				["maintain_same_rate_action", "role_to_override_stop_action"],
 			)
 
 		stop_actions = []
@@ -296,7 +300,7 @@ class TransactionBase(StatusUpdater):
 					)
 
 	def fetch_item_details(self, item: dict) -> dict:
-		return get_item_details(
+		return _get_item_details(
 			frappe._dict(
 				{
 					"item_code": item.get("item_code"),
@@ -351,11 +355,13 @@ class TransactionBase(StatusUpdater):
 		)
 
 	@frappe.whitelist()
-	def process_item_selection(self, item_idx: int, reset_item_details: bool = False):
+	def process_item_selection(
+		self, item_idx: int, reset_item_details: bool = False, parentfield: str = "items"
+	):
 		# Server side 'item' doc. Update this to reflect in UI
-		item_obj = self.get("items", {"idx": item_idx})[0]
+		item_obj = self.get_selected_item_row(parentfield, item_idx)
 
-		if not item_obj.item_code:
+		if not item_obj or not item_obj.item_code:
 			return
 
 		if cint(reset_item_details):
@@ -369,6 +375,9 @@ class TransactionBase(StatusUpdater):
 				"pricing_rules",
 			):
 				item_obj.set(fieldname, None)
+
+			if item_obj.get("mapped_additional_discount_amount"):
+				self.drop_mapped_discount(item_obj)
 
 		# 'item_details' has latest item related values
 		item_details = self.fetch_item_details(item_obj)
@@ -384,6 +393,13 @@ class TransactionBase(StatusUpdater):
 		self.handle_internal_parties(item_obj, item_details)
 		self.conversion_factor(item_obj, item_details)
 		self.calculate_taxes_and_totals()
+
+	def get_selected_item_row(self, parentfield: str, item_idx: int):
+		if not self.get_table_field_doctype(parentfield):
+			frappe.throw(_("{0} is not a child table of {1}").format(parentfield, self.doctype))
+
+		rows = self.get(parentfield, {"idx": item_idx})
+		return rows[0] if rows else None
 
 	def set_fetched_values(self, item_obj: object, item_details: dict) -> None:
 		for k, v in item_details.items():
@@ -427,7 +443,7 @@ class TransactionBase(StatusUpdater):
 					}
 				)
 
-			rate = get_incoming_rate(args=args)
+			rate = _get_incoming_rate(args=args)
 			item_obj.rate = rate * item_obj.conversion_factor
 		else:
 			self.set_rate_based_on_price_list(item_obj, item_details)
@@ -458,31 +474,35 @@ class TransactionBase(StatusUpdater):
 			)
 
 	def copy_from_first_row(self, row, fields):
-		if self.items and row:
+		sibling_rows = self.get(row.parentfield) if row else None
+		if sibling_rows:
 			fields.extend([x.get("fieldname") for x in get_dimensions(True)[0]])
-			first_row = self.items[0]
+			first_row = sibling_rows[0]
 			[setattr(row, k, first_row.get(k)) for k in fields if hasattr(first_row, k)]
 
 	def add_free_item(self, item_obj: object, item_details: dict) -> None:
 		free_items = item_details.get("free_item_data")
-		if free_items and len(free_items):
-			existing_free_items = [x for x in self.items if x.is_free_item]
-			for free_item in free_items:
-				_matches = [
-					x
-					for x in existing_free_items
-					if x.item_code == free_item.get("item_code")
-					and x.pricing_rules == free_item.get("pricing_rules")
-				]
-				if _matches:
-					row_to_modify = _matches[0]
-				else:
-					row_to_modify = self.append("items")
+		if not free_items:
+			return
 
-				for k, _v in free_item.items():
-					setattr(row_to_modify, k, free_item.get(k))
+		parentfield = item_obj.parentfield
+		existing_free_items = [x for x in self.get(parentfield) if x.is_free_item]
+		for free_item in free_items:
+			_matches = [
+				x
+				for x in existing_free_items
+				if x.item_code == free_item.get("item_code")
+				and x.pricing_rules == free_item.get("pricing_rules")
+			]
+			if _matches:
+				row_to_modify = _matches[0]
+			else:
+				row_to_modify = self.append(parentfield)
 
-				self.copy_from_first_row(row_to_modify, ["expense_account", "income_account"])
+			for k, _v in free_item.items():
+				setattr(row_to_modify, k, free_item.get(k))
+
+			self.copy_from_first_row(row_to_modify, ["expense_account", "income_account"])
 
 	def conversion_factor(self, item_obj: object, item_details: dict) -> None:
 		if frappe.get_meta(item_obj.doctype).has_field("stock_qty"):
@@ -515,7 +535,7 @@ class TransactionBase(StatusUpdater):
 		# Field order precedance
 		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
 		if item_obj.parenttype in ["Sales Order", "Quotation"] and item_obj.blanket_order_rate:
-			effective_item_rate = item_obj.blanket_order_rate
+			effective_item_rate = flt(item_obj.blanket_order_rate) * (flt(item_obj.conversion_factor) or 1)
 
 		if item_obj.margin_type == "Percentage":
 			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (
@@ -558,7 +578,7 @@ class TransactionBase(StatusUpdater):
 
 		self.in_apply_price_list = True
 
-		from erpnext.stock.get_item_details import apply_price_list
+		from erpnext.stock.get_item_details import _apply_price_list
 
 		args = {
 			# pass child_docname so the maintain-same-rate lock in apply_price_list can
@@ -591,7 +611,7 @@ class TransactionBase(StatusUpdater):
 			"is_internal_customer": self.is_internal_customer,
 		}
 		# TODO: test method call impact on document
-		apply_price_list(cts=args, as_doc=True, doc=self)
+		_apply_price_list(cts=args, as_doc=True, doc=self)
 
 
 def delete_events(ref_type, ref_name):
@@ -615,17 +635,21 @@ def delete_events(ref_type, ref_name):
 		frappe.delete_doc("Event", events, for_reload=True)
 
 
-def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
-	if isinstance(qty_fields, str):
-		qty_fields = [qty_fields]
-
-	distinct_uoms = tuple(set(uom for uom in (d.get(uom_field) for d in doc.get_all_children()) if uom))
-	integer_uoms = set(
+def get_whole_number_uoms(uoms):
+	distinct_uoms = tuple(set(uom for uom in uoms if uom))
+	return set(
 		d[0]
 		for d in frappe.db.get_values(
 			"UOM", (("name", "in", distinct_uoms), ("must_be_whole_number", "=", 1)), cache=True
 		)
 	)
+
+
+def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
+	if isinstance(qty_fields, str):
+		qty_fields = [qty_fields]
+
+	integer_uoms = get_whole_number_uoms(d.get(uom_field) for d in doc.get_all_children())
 
 	if not integer_uoms:
 		return
@@ -635,13 +659,13 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					precision = d.precision(f)
-					if abs(cint(qty) - flt(qty, precision)) > 0.0000001:
+					qty = flt(qty, d.precision(f))
+					if qty != cint(qty):
 						frappe.throw(
 							_(
 								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 							).format(
-								flt(qty, precision),
+								qty,
 								d.idx,
 								frappe.bold(_("Must be Whole Number")),
 								frappe.bold(d.get(uom_field)),

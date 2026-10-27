@@ -35,6 +35,59 @@ class PaymentOrder(Document):
 		references: DF.Table[PaymentOrderReference]
 	# end: auto-generated types
 
+	def validate(self):
+		self.validate_company_bank_account()
+		self.validate_reference_company()
+
+	def validate_reference_company(self):
+		if not self.payment_order_type:
+			return
+
+		ref_field = "payment_request" if self.payment_order_type == "Payment Request" else "reference_name"
+		references = {d.get(ref_field) for d in self.references if d.get(ref_field)}
+		if not references:
+			return
+
+		reference_company = frappe._dict(
+			frappe.get_all(
+				self.payment_order_type,
+				filters={"name": ["in", list(references)]},
+				fields=["name", "company"],
+				as_list=True,
+			)
+		)
+		for d in self.references:
+			company = reference_company.get(d.get(ref_field))
+			if company and company != self.company:
+				frappe.throw(
+					_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
+						d.idx, _(self.payment_order_type), d.get(ref_field), company, self.company
+					)
+				)
+
+	def validate_company_bank_account(self):
+		if not self.company_bank_account:
+			return
+
+		bank_account = frappe.get_cached_value(
+			"Bank Account",
+			self.company_bank_account,
+			["is_company_account", "company", "disabled", "bank", "account"],
+			as_dict=True,
+		)
+		if not bank_account or bank_account.disabled:
+			frappe.throw(_("Bank Account {0} is missing or disabled").format(self.company_bank_account))
+
+		if not bank_account.is_company_account or bank_account.company != self.company:
+			frappe.throw(
+				_("Bank Account {0} must be a company account belonging to {1}").format(
+					self.company_bank_account, self.company
+				)
+			)
+
+		self.company_bank = bank_account.bank
+		self.account = bank_account.account
+
 	def on_submit(self):
 		self.update_payment_status()
 
@@ -57,26 +110,56 @@ class PaymentOrder(Document):
 			frappe.db.set_value(self.payment_order_type, d.get(ref_doc_field), ref_field, status)
 
 
+def _readable_payment_order(filters):
+	"""Authorise the parent before reading its rows.
+
+	A child table carries no permissions of its own, so a read of it has to be authorised on the
+	Payment Order the rows belong to.
+	"""
+	parent = filters.get("parent")
+	if not parent or not frappe.db.exists("Payment Order", parent):
+		return None
+
+	ptype = "select" if frappe.only_has_select_perm("Payment Order") else "read"
+	frappe.has_permission("Payment Order", ptype, doc=parent, throw=True)
+	return parent
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		""" select mode_of_payment from `tabPayment Order Reference`
-		where parent = %(parent)s and mode_of_payment like %(txt)s
-		limit %(page_len)s offset %(start)s""",
-		{"parent": filters.get("parent"), "start": start, "page_len": page_len, "txt": "%%%s%%" % txt},
+	if not _readable_payment_order(filters):
+		return []
+
+	return frappe.get_all(
+		"Payment Order Reference",
+		filters={"parent": filters.get("parent"), "mode_of_payment": ["like", f"%{txt}%"]},
+		fields=["mode_of_payment"],
+		limit_start=start,
+		limit_page_length=page_len,
+		order_by="",  # match the original query (no ORDER BY); avoid get_all's default sort
+		as_list=True,
 	)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_supplier_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		""" select supplier from `tabPayment Order Reference`
-		where parent = %(parent)s and supplier like %(txt)s and
-		(payment_reference is null or payment_reference='')
-		limit %(page_len)s offset %(start)s""",
-		{"parent": filters.get("parent"), "start": start, "page_len": page_len, "txt": "%%%s%%" % txt},
+	if not _readable_payment_order(filters):
+		return []
+
+	return frappe.get_all(
+		"Payment Order Reference",
+		filters={
+			"parent": filters.get("parent"),
+			"supplier": ["like", f"%{txt}%"],
+			"payment_reference": ["is", "not set"],
+		},
+		fields=["supplier"],
+		limit_start=start,
+		limit_page_length=page_len,
+		order_by="",  # match the original query (no ORDER BY); avoid get_all's default sort
+		as_list=True,
 	)
 
 
@@ -89,6 +172,7 @@ def make_payment_records(name, supplier, mode_of_payment=None):
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je = frappe.new_doc("Journal Entry")
+	je.company = doc.company
 	je.payment_order = doc.name
 	je.posting_date = nowdate()
 	mode_of_payment_type = frappe._dict(frappe.get_all("Mode of Payment", fields=["name", "type"], as_list=1))

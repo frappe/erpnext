@@ -93,6 +93,7 @@
    "label": "Upload XML Invoices"
   }
  ],
+ "icon": "file-input",
  "links": [],
  "modified": "2024-03-27 13:09:50.384173",
  "modified_by": "Administrator",

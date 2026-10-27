@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:variable_label",
  "creation": "2017-05-29 01:30:34.688389",
+ "description": "A value a scorecard criterion is calculated from.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -51,6 +52,7 @@
    "label": "Description"
   }
  ],
+ "icon": "variable",
  "links": [],
  "modified": "2024-03-27 13:10:50.711158",
  "modified_by": "Administrator",

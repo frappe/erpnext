@@ -46,6 +46,7 @@ def get_plan_rate(
 	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1, party=None
 ):
 	plan = frappe.get_doc("Subscription Plan", plan)
+	plan.check_permission("read")
 	if plan.price_determination == "Fixed Rate":
 		return plan.cost * prorate_factor
 
@@ -72,7 +73,9 @@ def get_plan_rate(
 		start_date = getdate(start_date)
 		end_date = getdate(end_date)
 
-		no_of_months = relativedelta.relativedelta(end_date, start_date).months + 1
+		delta = relativedelta.relativedelta(end_date, start_date)
+		# include the years component so cross-year spans aren't under-counted
+		no_of_months = delta.years * 12 + delta.months + 1
 		cost = plan.cost * no_of_months
 
 		# Adjust cost if start or end date is not month start or end

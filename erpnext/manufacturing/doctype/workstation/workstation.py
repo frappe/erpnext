@@ -101,7 +101,8 @@ class Workstation(Document):
 
 			if row.start_time and row.end_time:
 				row.hours = flt(time_diff_in_hours(row.end_time, row.start_time), row.precision("hours"))
-				self.total_working_hours += row.hours
+				if row.enabled:
+					self.total_working_hours += row.hours
 
 	def validate_working_hours(self, row):
 		if get_time(row.start_time) >= get_time(row.end_time):
@@ -144,40 +145,24 @@ class Workstation(Document):
 		self.validate_overlap_for_operation_timings()
 		self.update_bom_operation()
 
-		if self.plant_floor:
-			self.publish_workstation_status()
-
-	def publish_workstation_status(self):
-		if not self._doc_before_save:
-			return
-
-		if self._doc_before_save.get("status") == self.status:
-			return
-
-		data = get_workstations(plant_floor=self.plant_floor, workstation_name=self.name)[0]
-
-		color_map = get_color_map()
-		data["old_color"] = color_map.get(self._doc_before_save.get("status"), "red")
-
-		frappe.publish_realtime(
-			"update_workstation_status",
-			data,
-			doctype="Plant Floor",
-			docname=self.plant_floor,
-		)
-
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
 		for d in self.get("working_hours"):
-			existing = frappe.db.sql_list(
-				"""select idx from `tabWorkstation Working Hour`
-				where parent = %s and name != %s
-					and (
-						(start_time between %s and %s) or
-						(end_time between %s and %s) or
-						(%s between start_time and end_time))
-				""",
-				(self.name, d.name, d.start_time, d.end_time, d.start_time, d.end_time, d.start_time),
+			if not d.enabled:
+				continue
+
+			wh = frappe.qb.DocType("Workstation Working Hour")
+			existing = (
+				frappe.qb.from_(wh)
+				.select(wh.idx)
+				.where(
+					(wh.parent == self.name)
+					& (wh.name != d.name)
+					& (wh.enabled == 1)
+					& (wh.start_time < d.end_time)
+					& (wh.end_time > d.start_time)
+				)
+				.run(pluck=True)
 			)
 
 			if existing:
@@ -216,9 +201,7 @@ class Workstation(Document):
 
 	@frappe.whitelist()
 	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
-		doc = frappe.get_doc("Job Card", job_card)
-		doc.check_permission("write")
-
+		doc = self.get_open_job_card(job_card, "write")
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
 		doc.save()
 
@@ -226,16 +209,32 @@ class Workstation(Document):
 
 	@frappe.whitelist()
 	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
-		doc = frappe.get_doc("Job Card", job_card)
-		doc.check_permission("submit")
-
+		doc = self.get_open_job_card(job_card, "submit")
+		pending_qty = flt(qty)
 		for row in doc.time_logs:
 			if not row.to_time:
 				row.to_time = to_time
-				row.completed_qty = qty
+				row.completed_qty = pending_qty
+				pending_qty = 0
 
 		doc.save()
 		doc.submit()
+
+		return doc
+
+	def get_open_job_card(self, job_card, ptype):
+		doc = frappe.get_doc("Job Card", job_card)
+		doc.check_permission(ptype)
+
+		if doc.docstatus != 0:
+			frappe.throw(_("Job Card {0} is not open").format(get_link_to_form("Job Card", doc.name)))
+
+		if doc.workstation != self.name:
+			frappe.throw(
+				_("Job Card {0} is not for workstation {1}").format(
+					get_link_to_form("Job Card", doc.name), frappe.bold(self.name)
+				)
+			)
 
 		return doc
 
@@ -243,7 +242,7 @@ class Workstation(Document):
 @frappe.whitelist()
 def get_job_cards(workstation: str):
 	if frappe.has_permission("Job Card", "read"):
-		jc_data = frappe.get_all(
+		jc_data = frappe.get_list(
 			"Job Card",
 			fields=[
 				"name",
@@ -474,34 +473,35 @@ def get_workstations(**kwargs):
 	frappe.has_permission("Workstation", "read", throw=True)
 
 	kwargs = frappe._dict(kwargs)
-	_workstation = frappe.qb.DocType("Workstation")
 
-	query = (
-		frappe.qb.from_(_workstation)
-		.select(
-			_workstation.name,
-			_workstation.description,
-			_workstation.status,
-			_workstation.on_status_image,
-			_workstation.off_status_image,
-		)
-		.orderby(_workstation.creation, _workstation.workstation_type, _workstation.name)
-		.where((_workstation.plant_floor == kwargs.plant_floor) & (_workstation.disabled == 0))
-	)
+	if not kwargs.plant_floor:
+		# The original compared `plant_floor` with `=`, which no row satisfies when it is empty; get_list
+		# would read that as IS NULL and start returning floor-less workstations. Keep the contract.
+		return []
+
+	# A list, not a dict: `workstation` and `workstation_name` both constrain `name` and a dict would
+	# silently drop the first.
+	filters = [["plant_floor", "=", kwargs.plant_floor], ["disabled", "=", 0]]
 
 	if kwargs.workstation:
-		query = query.where(_workstation.name == kwargs.workstation)
+		filters.append(["name", "=", kwargs.workstation])
 
 	if kwargs.workstation_type:
-		query = query.where(_workstation.workstation_type == kwargs.workstation_type)
+		filters.append(["workstation_type", "=", kwargs.workstation_type])
 
 	if kwargs.workstation_status:
-		query = query.where(_workstation.status == kwargs.workstation_status)
+		filters.append(["status", "=", kwargs.workstation_status])
 
 	if kwargs.workstation_name:
-		query = query.where(_workstation.name == kwargs.workstation_name)
+		filters.append(["name", "=", kwargs.workstation_name])
 
-	data = query.run(as_dict=True)
+	# get_list, not get_all: it applies the caller's User Permissions to rows the doctype check does not scope
+	data = frappe.get_list(
+		"Workstation",
+		filters=filters,
+		fields=["name", "description", "status", "on_status_image", "off_status_image"],
+		order_by="creation, workstation_type, name",
+	)
 
 	color_map = get_color_map()
 

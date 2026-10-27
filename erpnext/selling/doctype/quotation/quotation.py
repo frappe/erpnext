@@ -324,8 +324,8 @@ class Quotation(SellingController):
 		):
 			return
 
-		copy_comments("Opportunity", self.opportunity, self)
-		link_communications("Opportunity", self.opportunity, self)
+		copy_comments("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
+		link_communications("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
 
 	def print_other_charges(self, docname):
 		print_lst = []
@@ -337,6 +337,7 @@ class Quotation(SellingController):
 		return print_lst
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.valid_till = None
 
 	def get_rows_with_alternatives(self):

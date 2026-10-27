@@ -84,10 +84,14 @@ def get_children(doctype, parent=None, company=None, is_root=False, include_disa
 	else:
 		filters["parent_department"] = parent
 
-	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
+	# `doctype` is caller-supplied and only reaches has_column; the query below is fixed to Department,
+	# so pin it rather than letting a caller probe another table's columns.
+	if frappe.db.has_column("Department", "disabled") and not include_disabled:
 		filters["disabled"] = False
 
-	return frappe.get_all("Department", fields=fields, filters=filters, order_by="name")
+	# get_list, not get_all: it applies the caller's User Permissions. Department carries no `if_owner`
+	# row, so this does not silently empty the tree.
+	return frappe.get_list("Department", fields=fields, filters=filters, order_by="name")
 
 
 @frappe.whitelist()
@@ -96,6 +100,10 @@ def add_node():
 
 	args = frappe.form_dict
 	args = make_tree_args(**args)
+
+	# `args` comes straight from form_dict, so without this the caller chooses the doctype created.
+	# insert() would still check permissions on whatever they named.
+	args.doctype = "Department"
 
 	if args.parent_department == args.company:
 		args.parent_department = None

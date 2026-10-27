@@ -214,7 +214,8 @@ $.extend(erpnext.utils, {
 	},
 
 	view_serial_batch_nos: function (frm) {
-		if (!frm.doc?.items) {
+		// the Serial and Batch Summary report only lists submitted bundles
+		if (!frm.doc?.items || frm.doc.docstatus !== 1) {
 			return;
 		}
 
@@ -343,7 +344,7 @@ $.extend(erpnext.utils, {
 							label: __(dimension["label"]),
 							fieldtype: "MultiSelectList",
 							get_data: function (txt) {
-								return frappe.db.get_link_options(dimension["document_type"], txt);
+								return erpnext.utils.get_link_options(dimension["document_type"], txt);
 							},
 						});
 					}
@@ -372,13 +373,13 @@ $.extend(erpnext.utils, {
 										? "eval:doc.show_dimension_wise_stock === 1"
 										: "",
 								get_data: function (txt) {
-									return frappe.db.get_link_options(dimension["doctype"], txt);
+									return erpnext.utils.get_link_options(dimension["doctype"], txt);
 								},
 							});
 						} else {
 							existing_filter[0]["fieldtype"] = "MultiSelectList";
 							existing_filter[0]["get_data"] = function (txt) {
-								return frappe.db.get_link_options(dimension["doctype"], txt);
+								return erpnext.utils.get_link_options(dimension["doctype"], txt);
 							};
 						}
 					});
@@ -426,6 +427,26 @@ $.extend(erpnext.utils, {
 		}
 		return rows;
 	},
+	/**
+	 * Row flags for the Account / Cost Center trees: the caller's badges plus
+	 * a shared "Disabled" marker for records shown through the tree's
+	 * "include disabled" toggle.
+	 * @param {Object} node tree node (from treeview_settings.onrender)
+	 * @param {Array<string|HTMLElement>} flags badge markup / elements
+	 */
+	render_tree_node_flags: function (node, flags = []) {
+		if (cint(node.data?.disabled)) {
+			flags.push(frappe.ui.badge({ label: __("Disabled"), variant: "outline" }));
+			node.$tree_link.find("a.tree-label").addClass("text-ink-gray-5");
+		}
+		if (!flags.length) return;
+		const $flags = $(
+			'<span class="tree-node-flags inline-flex items-center gap-1.5 ms-2 shrink-0"></span>'
+		);
+		flags.forEach((flag) => $flags.append(flag));
+		$flags.insertAfter(node.$tree_link.find("a.tree-label"));
+	},
+
 	get_tree_options: function (option) {
 		// get valid options for tree based on user permission & locals dict
 		let unscrub_option = frappe.model.unscrub(option);
@@ -512,6 +533,11 @@ $.extend(erpnext.utils, {
 				}
 			});
 		});
+	},
+
+	get_link_options: function (doctype, txt, filters) {
+		const page_length = cint(frappe.boot.sysdefaults?.link_field_results_limit) || 10;
+		return frappe.db.get_link_options(doctype, txt, filters, page_length);
 	},
 
 	get_fiscal_year: function (date, with_dates = false, raise_on_missing = true) {
@@ -666,8 +692,8 @@ erpnext.utils.select_alternate_items = function (opts) {
 				],
 			},
 		],
-		primary_action: function () {
-			const args = this.get_values()["alternative_items"];
+		primary_action: function (values) {
+			const args = values.alternative_items;
 			const alternative_items = args.filter((d) => {
 				if (d.alternate_item && d.item_code != d.alternate_item) {
 					return true;
@@ -1005,7 +1031,12 @@ erpnext.utils.update_child_items = function (opts) {
 			},
 		],
 		primary_action: function () {
-			if (frm.doctype == "Sales Order" && has_reserved_stock && frm.doc.is_subcontracted == 0) {
+			if (
+				frm.doctype == "Sales Order" &&
+				has_reserved_stock &&
+				frm.doc.is_subcontracted == 0 &&
+				!frm.doc.per_picked
+			) {
 				this.hide();
 				frappe.confirm(
 					__(
@@ -1208,7 +1239,8 @@ frappe.form.link_formatters["Project"] = function (value, doc, df) {
  * @returns {string} - The link value with the added title.
  */
 function add_link_title(value, doc, df, title_field) {
-	if (value && doc[title_field]) {
+	const title_belongs_to_value = df.options !== df.parent || value === doc.name;
+	if (value && title_belongs_to_value && doc[title_field]) {
 		if (doc[title_field] !== value && doc[df.fieldname] === value) {
 			return value + ": " + doc[title_field];
 		} else if (doc.doctype == df.parent) {

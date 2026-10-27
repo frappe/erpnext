@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"supplier_group\", \"label\": \"Supplier Group\"}, {\"fieldname\": \"country\", \"label\": \"Country\"}, {\"fieldname\": \"modified\", \"label\": \"Last Updated On\"}]",
+ "creation": "2026-09-30 21:12:56.800109",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Disabled",
+ "filters": "[[\"Supplier\", \"disabled\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.800109",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier-Disabled",
+ "owner": "Administrator",
+ "reference_doctype": "Supplier",
+ "route_signature": "disabled=1",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

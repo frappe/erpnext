@@ -1,6 +1,7 @@
 {
  "actions": [],
  "creation": "2022-10-19 21:59:33.553852",
+ "description": "Rebuilds the payment ledger so outstanding amounts are right again.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -95,6 +96,7 @@
    "label": "Repost Error Log"
   }
  ],
+ "icon": "list-restart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],

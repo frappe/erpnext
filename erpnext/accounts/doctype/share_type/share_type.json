@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:title",
  "creation": "2017-12-28 14:55:20.950877",
+ "description": "A class of shares, like equity or preference.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -24,6 +25,7 @@
    "label": "Description"
   }
  ],
+ "icon": "tag",
  "links": [],
  "modified": "2024-03-27 13:10:40.190914",
  "modified_by": "Administrator",

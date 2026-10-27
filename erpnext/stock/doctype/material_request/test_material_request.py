@@ -18,10 +18,11 @@ from erpnext.stock.doctype.material_request.material_request import (
 	make_stock_entry,
 	make_supplier_quotation,
 	raise_work_orders,
+	update_status,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
 class TestMaterialRequest(ERPNextTestSuite):
@@ -38,6 +39,46 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.items[0].qty = 1
 		mr.save()
 		self.assertEqual(mr.items[0].qty, 1)
+
+	def test_production_plan_qty_with_repeated_references(self):
+		from unittest.mock import patch
+
+		plan_items = {
+			name: frappe._dict(name=name, quantity=quantity, requested_qty=0, conversion_factor=2)
+			for name, quantity in (("plan-item-1", 10), ("plan-item-2", 10), ("plan-item-3", 0.3))
+		}
+		cases = [
+			("above availability", [("plan-item-1", 6), ("plan-item-1", 6)], True),
+			("equal to availability", [("plan-item-1", 6), ("plan-item-1", 4)], False),
+			("below availability", [("plan-item-1", 3), ("plan-item-1", 4)], False),
+			("separate plan items", [("plan-item-1", 6), ("plan-item-2", 6)], False),
+			("unlinked item", [("plan-item-1", 6), (None, 6)], False),
+			("single row above availability", [("plan-item-1", 11)], True),
+			("negative row before excess", [("plan-item-1", -2), ("plan-item-1", 11)], True),
+			("negative row after excess", [("plan-item-1", 11), ("plan-item-1", -2)], True),
+			("fractional quantities", [("plan-item-3", 0.1), ("plan-item-3", 0.2)], False),
+		]
+		for label, quantities, should_raise in cases:
+			with self.subTest(label=label):
+				mr = frappe.new_doc("Material Request")
+				for plan_item, qty in quantities:
+					mr.append(
+						"items",
+						{
+							"item_code": "_Test Item",
+							"material_request_plan_item": plan_item,
+							"qty": qty,
+							"conversion_factor": 2,
+							"stock_qty": qty * 2,
+						},
+					)
+
+				with patch.object(type(mr), "get_plan_items", return_value=plan_items):
+					if should_raise:
+						with self.assertRaises(frappe.ValidationError):
+							mr.validate_pp_qty()
+					else:
+						mr.validate_pp_qty()
 
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
@@ -79,10 +120,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		)
 
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		for row in mr.items:
+			frappe.db.set_value("Item", row.item_code, "is_sub_contracted_item", 1)
+
 		mr.material_request_type = "Subcontracting"
 		mr.submit()
-
-		frappe.db.set_value("Item", mr.items[0].item_code, "is_sub_contracted_item", 1)
 
 		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
 		for item in raw_materials:
@@ -120,6 +162,69 @@ class TestMaterialRequest(ERPNextTestSuite):
 		# Test 2 - MR items ordered qty should be updated based on PO items qty when submitted
 		self.assertEqual(mr.items[0].ordered_qty, 54)
 
+		po.cancel()
+		partial_po = make_purchase_order(mr.name)
+		partial_po.supplier = "_Test Supplier"
+		partial_po.items = [partial_po.items[0]]
+		partial_po.items[0].schedule_date = today()
+		partial_po.items[0].fg_item_qty = 18
+		partial_po.items[0].qty = 9
+		partial_po.submit()
+		mr.reload()
+		self.assertEqual(mr.items[0].ordered_qty, 18)
+
+		remaining_po = make_purchase_order(mr.name)
+		self.assertEqual(remaining_po.items[0].fg_item_qty, 36)
+		self.assertEqual(remaining_po.items[0].qty, 18)
+		self.assertEqual(remaining_po.items[0].stock_qty, 54)
+		self.assertEqual(remaining_po.items[0].uom, "Test UOM")
+		self.assertEqual(remaining_po.items[0].conversion_factor, 3)
+
+		# only the finished good without a Subcontracting BOM is reported
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertNotIn(mr.items[0].item_code, message)
+		self.assertIn(mr.items[1].item_code, message)
+
+	def test_subcontracting_material_request_item_validation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		service_item = make_item(properties={"is_stock_item": 0, "is_sub_contracted_item": 1})
+		stock_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 0})
+
+		for item in (service_item, stock_item):
+			mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0])
+			mr.material_request_type = "Subcontracting"
+			mr.items = mr.items[:1]
+			mr.items[0].item_code = item.name
+			self.assertRaises(frappe.ValidationError, mr.insert)
+
+		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
+		mr.insert()
+		self.assertEqual(mr.items[0].item_code, stock_item.name)
+
+	def test_subcontracted_purchase_order_without_subcontracting_bom(self):
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		mr.submit()
+
+		frappe.clear_messages()
+		make_purchase_order(mr.name)
+		self.assertFalse(frappe.get_message_log())
+
+		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
+		for row in mr.items:
+			frappe.db.set_value("Item", row.item_code, "is_sub_contracted_item", 1)
+
+		mr.material_request_type = "Subcontracting"
+		mr.submit()
+
+		po = make_purchase_order(mr.name)
+		self.assertFalse(po.items[0].item_code)
+		self.assertEqual(po.items[0].fg_item, mr.items[0].item_code)
+
+		message = frappe.get_message_log()[-1]["message"]
+		self.assertIn("No active Subcontracting BOM found", message)
+		self.assertIn(mr.items[0].item_code, message)
+
 	def test_make_supplier_quotation(self):
 		mr = frappe.copy_doc(self.globalTestRecords["Material Request"][0]).insert()
 
@@ -146,6 +251,53 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(se.purpose, "Material Transfer")
 		self.assertEqual(se.doctype, "Stock Entry")
 		self.assertEqual(len(se.get("items")), len(mr.get("items")))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"validate_material_transfer_warehouses": 1})
+	def test_material_request_transfer_warehouses(self):
+		from unittest.mock import patch
+
+		mr = make_material_request(material_request_type="Material Transfer")
+		se = make_stock_entry(mr.name)
+		se.items[0].s_warehouse = se.items[0].t_warehouse
+
+		with patch(
+			"erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			return_value=[],
+		):
+			with self.assertRaisesRegex(
+				frappe.ValidationError, "Source and Target Warehouse cannot be the same"
+			):
+				se.save()
+
+			with self.change_settings("Stock Settings", {"validate_material_transfer_warehouses": 0}):
+				se.save()
+
+			se.items[0].s_warehouse = "_Test Warehouse 1 - _TC"
+			se.save()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"validate_material_transfer_warehouses": 1})
+	def test_material_request_transfer_inventory_dimensions(self):
+		from unittest.mock import patch
+
+		mr = make_material_request(material_request_type="Material Transfer")
+		se = make_stock_entry(mr.name)
+		se.items[0].s_warehouse = se.items[0].t_warehouse
+		with patch(
+			"erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			return_value=[frappe._dict(source_fieldname="rack")],
+		):
+			for source, target in ((None, None), ("A", None), (None, "B"), ("A", "A")):
+				with self.subTest(source=source, target=target):
+					se.items[0].rack = source
+					se.items[0].to_rack = target
+					with self.assertRaisesRegex(
+						frappe.ValidationError, "Inventory Dimensions cannot be the exact same"
+					):
+						se.validate_same_source_target_warehouse_during_material_transfer()
+
+			se.items[0].rack = "A"
+			se.items[0].to_rack = "B"
+			se.validate_same_source_target_warehouse_during_material_transfer()
 
 	def test_partial_make_stock_entry(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as _make_stock_entry
@@ -363,7 +515,8 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.update_status("Stopped")
 		self.assertRaises(frappe.InvalidStatusError, po.submit)
 		po.db_set("docstatus", 1)
-		self.assertRaises(frappe.InvalidStatusError, po.cancel)
+		po.cancel()
+		self.assertEqual(po.docstatus, 2)
 
 		# resubmit and check for per complete
 		mr.load_from_db()
@@ -1046,6 +1199,50 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		self.assertRaises(OverAllowanceError, mr.submit)
 
+	def test_subcontracting_requested_qty_from_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"is_sub_contracted_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		)
+		for purpose in ("Purchase", "Subcontracting"):
+			for uom, conversion_factor in ((item.stock_uom, 1), ("Box", 12)):
+				with self.subTest(purpose=purpose, uom=uom):
+					so = make_sales_order(item_code=item.name, qty=10, uom=uom)
+					mr = make_material_request(so.name)
+					mr.material_request_type = purpose
+					mr.items[0].qty = 4
+					mr.insert()
+					mr.submit()
+
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 4 * conversion_factor)
+					remaining_mr = make_material_request(so.name)
+					self.assertEqual(remaining_mr.items[0].qty, 6)
+					self.assertEqual(remaining_mr.items[0].stock_qty, 6 * conversion_factor)
+					remaining_mr.material_request_type = purpose
+					remaining_mr.insert()
+					remaining_mr.submit()
+
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 10 * conversion_factor)
+					with self.assertRaisesRegex(
+						frappe.ValidationError, "Material Request already created for the ordered quantity"
+					):
+						make_material_request(so.name)
+
+					remaining_mr.cancel()
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 4 * conversion_factor)
+					self.assertEqual(make_material_request(so.name).items[0].qty, 6)
+
+					mr.cancel()
+					so.reload()
+					self.assertEqual(so.items[0].requested_qty, 0)
+					self.assertEqual(make_material_request(so.name).items[0].qty, 10)
+
 	def test_get_remaining_qty_from_sales_order(self):
 		from frappe.utils import add_to_date, today
 
@@ -1271,6 +1468,137 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(material_request.status, "Transferred")
 		self.assertEqual(material_request.transfer_status, "Completed")
 
+	def test_get_material_requests_based_on_supplier(self):
+		"""The supplier-based Material Request picker must run on every engine.
+
+		It deduplicated requests with SELECT DISTINCT while ordering by an item
+		column that is not in the select list; PostgreSQL rejects that, so the
+		picker has to group and order by an aggregate instead.
+		"""
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.stock.doctype.material_request.material_request import (
+			get_material_requests_based_on_supplier,
+		)
+
+		item = create_item("_Test MR Default Supplier Item")
+		item.set("item_defaults", [])
+		item.append(
+			"item_defaults",
+			{
+				"company": "_Test Company",
+				"default_warehouse": "_Test Warehouse - _TC",
+				"default_supplier": "_Test Supplier",
+			},
+		)
+		item.save()
+
+		mr1 = make_material_request(item_code=item.name, qty=5)
+		mr2 = make_material_request(item_code=item.name, qty=7)
+
+		result = get_material_requests_based_on_supplier(
+			doctype="Material Request",
+			txt="",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"supplier": "_Test Supplier", "company": "_Test Company"},
+		)
+		returned = {row[0] for row in result}
+		self.assertIn(mr1.name, returned)
+		self.assertIn(mr2.name, returned)
+
+		with test_user(first_name="mr-supplier-picker", roles=["Purchase Manager"]) as user:
+			with self.set_user(user.name):
+				self.assertFalse(frappe.has_permission("Item", "read"))
+				result = get_material_requests_based_on_supplier(
+					doctype="Material Request",
+					txt="",
+					searchfield="name",
+					start=0,
+					page_len=20,
+					filters={"supplier": "_Test Supplier", "company": "_Test Company"},
+				)
+				returned = {row[0] for row in result}
+				self.assertIn(mr1.name, returned)
+				self.assertIn(mr2.name, returned)
+
+	def test_default_supplier_item_permissions(self):
+		from frappe.core.doctype.user.test_user import test_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.material_request.material_request import (
+			get_items_based_on_default_supplier,
+		)
+
+		allowed_item = create_item_with_default_supplier("_Test MR Allowed Supplier Item", "_Test Supplier")
+		restricted_item = create_item_with_default_supplier(
+			"_Test MR Restricted Supplier Item", "_Test Supplier"
+		)
+		for role in ("Purchase User", "Purchase Manager"):
+			with (
+				self.subTest(role=role),
+				test_user(first_name=f"mr-{frappe.scrub(role)}", roles=[role]) as user,
+			):
+				with self.set_user(user.name):
+					self.assertTrue(frappe.has_permission("Item", "select"))
+					self.assertEqual(frappe.has_permission("Item", "read"), role == "Purchase User")
+					items = get_items_based_on_default_supplier("_Test Supplier")
+					self.assertIn(allowed_item, items)
+					self.assertIn(restricted_item, items)
+
+				add_user_permission("Item", allowed_item, user.name)
+				with self.set_user(user.name):
+					self.assertEqual(get_items_based_on_default_supplier("_Test Supplier"), [allowed_item])
+					self.assertEqual(get_items_based_on_default_supplier("_Test Supplier 1"), [])
+
+	def test_default_supplier_items_deny_missing_access(self):
+		from frappe.core.doctype.user.test_user import test_user
+
+		from erpnext.stock.doctype.material_request.material_request import (
+			get_items_based_on_default_supplier,
+		)
+
+		with test_user(first_name="mr-no-item-access", roles=[], user_type="Website User") as user:
+			for username in (user.name, "Guest"):
+				with self.subTest(user=username), self.set_user(username):
+					self.assertFalse(frappe.has_permission("Item", "select"))
+					self.assertRaises(
+						frappe.PermissionError, get_items_based_on_default_supplier, "_Test Supplier"
+					)
+
+	def test_default_supplier_items_preserve_order_and_duplicates(self):
+		from erpnext.stock.doctype.material_request.material_request import (
+			get_items_based_on_default_supplier,
+		)
+
+		self.load_test_records("Company")
+		item_code = create_item_with_default_supplier("_Test MR Supplier Z", "_Test Supplier")
+		item = frappe.get_doc("Item", item_code)
+		warehouse = create_warehouse(
+			"_Test MR Supplier Warehouse", properties={"parent_warehouse": None}, company="_Test Company 1"
+		)
+		item.append(
+			"item_defaults",
+			{
+				"company": "_Test Company 1",
+				"default_supplier": "_Test Supplier",
+				"default_warehouse": warehouse,
+			},
+		)
+		item.save()
+		other_item = create_item_with_default_supplier("_Test MR Supplier A", "_Test Supplier")
+		for index, row in enumerate(
+			[*item.item_defaults, frappe.get_doc("Item", other_item).item_defaults[0]]
+		):
+			frappe.db.set_value("Item Default", row.name, "creation", f"2020-01-0{index + 1} 00:00:00")
+
+		expected = frappe.get_all(
+			"Item Default", {"default_supplier": "_Test Supplier", "parenttype": "Item"}, pluck="parent"
+		)
+		self.assertEqual(expected.count(item_code), 2)
+		self.assertEqual(get_items_based_on_default_supplier("_Test Supplier"), expected)
+
 	def test_get_item_default_suppliers(self):
 		from erpnext.stock.doctype.material_request.material_request import get_item_default_suppliers
 
@@ -1370,6 +1698,363 @@ class TestMaterialRequest(ERPNextTestSuite):
 			[row, row | {"supplier": "_Test Supplier 1"}],
 		)
 
+	def test_manufacture_request_from_sales_order_updates_requested_qty(self):
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_material_request as make_request_from_so,
+		)
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=5)
+		mr = make_request_from_so(so.name)
+		mr.material_request_type = "Manufacture"
+		mr.items[0].schedule_date = today()
+		mr.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 5)
+		self.assertRaises(frappe.ValidationError, make_request_from_so, so.name)
+
+		mr.cancel()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 0)
+
+	def test_work_orders_are_raised_once_per_requested_qty(self):
+		mr = make_material_request(item_code="_Test FG Item", material_request_type="Manufacture", qty=10)
+
+		first = raise_work_orders(mr.name, mr.company)
+		self.assertEqual(raise_work_orders(mr.name, mr.company), [])
+
+		extra = frappe.copy_doc(frappe.get_doc("Work Order", first[0]))
+		extra.insert()
+		for name in (first[0], extra.name):
+			work_order = frappe.get_doc("Work Order", name)
+			work_order.wip_warehouse = "_Test Warehouse 1 - _TC"
+			work_order.save()
+
+		frappe.get_doc("Work Order", first[0]).submit()
+		self.assertRaises(frappe.ValidationError, frappe.get_doc("Work Order", extra.name).submit)
+
+		stopped_mr = make_material_request(
+			item_code="_Test FG Item", material_request_type="Manufacture", qty=3
+		)
+		draft = frappe.get_doc("Work Order", raise_work_orders(stopped_mr.name, stopped_mr.company)[0])
+		draft.wip_warehouse = "_Test Warehouse 1 - _TC"
+		draft.save()
+		update_status(stopped_mr.name, "Stopped")
+		self.assertRaises(frappe.InvalidStatusError, draft.submit)
+
+	def test_closed_work_order_keeps_its_produced_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		fg_item = make_item(properties={"is_stock_item": 1})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		make_se(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_bom(item=fg_item.name, raw_materials=[raw_material], rm_qty=1)
+		mr = make_material_request(
+			item_code=fg_item.name, material_request_type="Manufacture", qty=10, uom=fg_item.stock_uom
+		)
+
+		work_order = frappe.get_doc("Work Order", raise_work_orders(mr.name, mr.company)[0])
+		work_order.update(
+			{
+				"skip_transfer": 1,
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"source_warehouse": "_Test Warehouse - _TC",
+			}
+		)
+		for row in work_order.required_items:
+			row.source_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+		frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 4)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"), 4)
+		self.assertEqual(
+			frappe.db.get_value("Work Order", raise_work_orders(mr.name, mr.company)[0], "qty"), 6
+		)
+
+	@change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 10})
+	def test_closing_an_overproduced_work_order_is_allowed(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		fg_item = make_item(properties={"is_stock_item": 1})
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		make_se(item_code=raw_material, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		make_bom(item=fg_item.name, raw_materials=[raw_material], rm_qty=1)
+		mr = make_material_request(
+			item_code=fg_item.name, material_request_type="Manufacture", qty=10, uom=fg_item.stock_uom
+		)
+
+		work_order = frappe.get_doc("Work Order", raise_work_orders(mr.name, mr.company)[0])
+		work_order.update(
+			{
+				"skip_transfer": 1,
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
+				"source_warehouse": "_Test Warehouse - _TC",
+			}
+		)
+		for row in work_order.required_items:
+			row.source_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+		frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 11)).submit()
+		close_work_order(work_order.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"), 10)
+
+	@change_settings("Stock Settings", {"auto_indent": 1, "reorder_email_notify": 0})
+	def test_reorder_raises_one_request_for_a_shortfall(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.reorder_item import reorder_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"reorder_levels": [
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"warehouse_reorder_level": 10,
+						"warehouse_reorder_qty": 5,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+
+		def get_requested_qty(requests):
+			return [d.stock_qty for mr in requests for d in mr.items if d.item_code == item_code]
+
+		self.assertEqual(get_requested_qty(reorder_item()), [15])
+		self.assertEqual(get_requested_qty(reorder_item() or []), [])
+
+	def test_customer_provided_request_refuses_other_items(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			make_material_request,
+			item_code="_Test Item",
+			material_request_type="Customer Provided",
+		)
+
+	def test_production_plan_requested_qty_follows_the_stock_qty(self):
+		plan, _mr = make_plan_request_in_boxes()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "requested_qty"), 24
+		)
+
+	def test_production_plan_requested_qty_is_rebuilt_from_submitted_requests(self):
+		from erpnext.patches.v16_0.rebuild_production_plan_requested_qty import execute
+
+		plan, mr = make_plan_request_in_boxes()
+		plan_item = plan.mr_items[0].name
+
+		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 2)
+		execute()
+		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 24)
+
+		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 2)
+		mr.cancel()
+		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 0)
+
+	def test_pick_list_maps_only_the_qty_left_to_transfer(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		item_code = create_item("_Test MR Pick Transfer Item", is_stock_item=1).name
+		make_se(item_code=item_code, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		mr = make_material_request(
+			item_code=item_code,
+			material_request_type="Material Transfer",
+			from_warehouse="_Test Warehouse - _TC",
+			warehouse="_Test Warehouse 1 - _TC",
+			uom="Nos",
+		)
+
+		transfer = make_stock_entry(mr.name)
+		transfer.items[0].qty = 6
+		transfer.submit()
+
+		self.assertEqual(create_pick_list(mr.name).locations[0].qty, 4)
+
+		update_status(mr.name, "Stopped")
+		self.assertRaises(frappe.InvalidStatusError, create_pick_list, mr.name)
+
+	def test_mappers_skip_ordered_rows_and_stopped_requests(self):
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		self.assertFalse(make_supplier_quotation(mr.name).items)
+		self.assertRaises(frappe.ValidationError, create_pick_list, mr.name)
+
+		stopped_mr = make_material_request(item_code="_Test Item", qty=10)
+		update_status(stopped_mr.name, "Stopped")
+		for mapper in (
+			make_supplier_quotation,
+			make_request_for_quotation,
+			make_purchase_order,
+			make_stock_entry,
+		):
+			self.assertRaises(frappe.InvalidStatusError, mapper, stopped_mr.name)
+
+	def test_purchase_order_of_a_stopped_request_can_be_closed(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import update_status as update_po_status
+
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 4
+		po.submit()
+		update_status(mr.name, "Stopped")
+
+		update_po_status("Closed", po.name)
+
+		self.assertEqual(frappe.db.get_value("Purchase Order", po.name, "status"), "Closed")
+
+	def test_subcontracting_request_is_counted_in_indented_qty(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		existing_qty = self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC")
+
+		mr = make_material_request(
+			item_code="Subcontracted Item SA1", qty=10, material_request_type="Subcontracting"
+		)
+		self.assertEqual(
+			self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC"), existing_qty + 10
+		)
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 10,
+				}
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_save=True,
+		)
+		po.items[0].material_request = mr.name
+		po.items[0].material_request_item = mr.items[0].name
+		po.submit()
+
+		self.assertEqual(
+			self._get_requested_qty("Subcontracted Item SA1", "_Test Warehouse - _TC"), existing_qty
+		)
+
+	def test_reorder_mail_goes_to_the_company_and_shows_stock_qty(self):
+		from erpnext.stock.reorder_item import get_email_list
+
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-other-company@example.com",
+				"first_name": "Reorder",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertNotIn(user.email, get_email_list("_Test Company 1"))
+
+		scoped_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-request-scoped@example.com",
+				"first_name": "Reorder Scoped",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": scoped_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Material Request",
+			}
+		).insert(ignore_permissions=True)
+		self.assertNotIn(scoped_user.email, get_email_list("_Test Company 1"))
+		self.assertIn(scoped_user.email, get_email_list("_Test Company"))
+
+		from unittest.mock import patch
+
+		hidden_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-parent-only@example.com",
+				"first_name": "Reorder Parent Only",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": hidden_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Material Request",
+				"hide_descendants": 1,
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Company", "_Test Company 1", "parent_company", "_Test Company")
+
+		with patch("erpnext.stock.reorder_item.get_ancestors_of", return_value=["_Test Company"]):
+			recipients = get_email_list("_Test Company 1")
+			self.assertIn(user.email, recipients)
+			self.assertNotIn(hidden_user.email, recipients)
+
+		message = frappe.render_template(
+			"templates/emails/reorder_item.html",
+			{
+				"mr_list": [
+					frappe._dict(
+						name="MR-1",
+						items=[
+							frappe._dict(item_code="X", qty=2, uom="Box", stock_qty=24, projected_on_hand=6)
+						],
+					)
+				]
+			},
+		)
+		self.assertIn(">30.0<", message)
+
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
@@ -1462,3 +2147,50 @@ def make_material_request(**args):
 	if not args.do_not_submit:
 		mr.submit()
 	return mr
+
+
+def make_plan_request_in_boxes():
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	fg_item = make_item(properties={"is_stock_item": 1}).name
+	raw_material = make_item(
+		properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+	)
+	bom = make_bom(item=fg_item, raw_materials=[raw_material.name], rm_qty=24)
+	plan = frappe.get_doc(
+		{
+			"doctype": "Production Plan",
+			"company": "_Test Company",
+			"posting_date": today(),
+			"po_items": [
+				{
+					"item_code": fg_item,
+					"bom_no": bom.name,
+					"planned_qty": 1,
+					"warehouse": "_Test Warehouse - _TC",
+				}
+			],
+			"mr_items": [
+				{
+					"item_code": raw_material.name,
+					"quantity": 24,
+					"uom": raw_material.stock_uom,
+					"conversion_factor": 1,
+					"warehouse": "_Test Warehouse - _TC",
+					"material_request_type": "Purchase",
+				}
+			],
+		}
+	).submit()
+	plan.make_material_request()
+
+	mr = frappe.get_doc(
+		"Material Request",
+		frappe.db.get_value(
+			"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
+		),
+	)
+	mr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2})
+	mr.submit()
+	return plan, mr

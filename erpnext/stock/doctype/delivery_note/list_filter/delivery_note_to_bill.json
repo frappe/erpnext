@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"customer_name\", \"label\": \"Customer Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"posting_date\", \"label\": \"Date\"}, {\"fieldname\": \"per_billed\", \"label\": \"% Amount Billed\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.806300",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Bill",
+ "filters": "[[\"Delivery Note\", \"status\", \"in\", [\"To Bill\", \"Partially Billed\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.806300",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Note-To Bill",
+ "owner": "Administrator",
+ "reference_doctype": "Delivery Note",
+ "route_signature": "status=[\"in\",[\"To Bill\",\"Partially Billed\"]]",
+ "sort_field": "posting_date",
+ "sort_order": "asc"
+}

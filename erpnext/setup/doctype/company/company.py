@@ -21,7 +21,7 @@ from frappe.utils import (
 	get_timestamp,
 	today,
 )
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -85,6 +85,7 @@ class Company(NestedSet):
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
+		default_warehouse: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		depreciation_cost_center: DF.Link | None
@@ -122,6 +123,7 @@ class Company(NestedSet):
 		round_off_cost_center: DF.Link | None
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
+		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
@@ -184,6 +186,7 @@ class Company(NestedSet):
 		self.validate_parent_company()
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
+		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
 
@@ -228,6 +231,42 @@ class Company(NestedSet):
 				).format(bold(self.name)),
 				title=_("Cannot Change Inventory Account Setting"),
 			)
+
+	def validate_warehouses(self):
+		for fieldname in (
+			"default_warehouse",
+			"sample_retention_warehouse",
+			"default_in_transit_warehouse",
+			"default_warehouse_for_sales_return",
+			"default_wip_warehouse",
+			"default_fg_warehouse",
+			"default_scrap_warehouse",
+		):
+			warehouse = self.get(fieldname)
+			if not warehouse:
+				continue
+
+			details = frappe.db.get_value("Warehouse", warehouse, ["is_group", "company"], as_dict=True)
+			if not details:
+				continue
+
+			label = _(self.meta.get_label(fieldname))
+
+			if details.is_group:
+				frappe.throw(
+					_(
+						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
+					).format(bold(label)),
+					title=_("Incorrect Warehouse"),
+				)
+
+			if details.company != self.name:
+				frappe.throw(
+					_("{0} {1} does not belong to company {2}").format(
+						bold(label), bold(warehouse), bold(self.name)
+					),
+					title=_("Incorrect Warehouse"),
+				)
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -416,6 +455,11 @@ class Company(NestedSet):
 			if wh_detail["is_group"]:
 				parent_warehouse = warehouse.name
 
+		if not self.default_warehouse:
+			stores = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": self.name})
+			if stores:
+				self.db_set("default_warehouse", stores)
+
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
@@ -435,91 +479,92 @@ class Company(NestedSet):
 		)
 
 	def create_default_departments(self):
+		root = get_root_of("Department") or "All Departments"
 		records = [
 			# Department
 			{
 				"doctype": "Department",
-				"department_name": _("All Departments"),
+				"department_name": root,
 				"is_group": 1,
 				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+				"__condition": lambda: not frappe.db.exists("Department", root),
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 		]
@@ -928,13 +973,25 @@ def update_transactions_annual_history(company, commit=False):
 
 
 def cache_companies_monthly_sales_history():
+	refresh_total_monthly_sales = _should_refresh_total_monthly_sales()
 	companies = [d["name"] for d in frappe.get_list("Company")]
 	for company in companies:
 		update_company_monthly_sales(company)
 		update_transactions_annual_history(company)
+		if refresh_total_monthly_sales:
+			update_company_current_month_sales(company)
 
 	if not frappe.in_test:
 		frappe.db.commit()
+
+
+def _should_refresh_total_monthly_sales():
+	# "Each Transaction" updates on submit; refresh the cached figure for the
+	# scheduled frequencies only ("Monthly" just on the 1st).
+	frequency = frappe.get_single_value("Selling Settings", "sales_update_frequency")
+	if frequency == "Monthly":
+		return frappe.utils.now_datetime().day == 1
+	return frequency == "Daily"
 
 
 @frappe.whitelist()
@@ -942,17 +999,14 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	if parent is None or parent == "All Companies":
 		parent = ""
 
-	return frappe.db.sql(
-		f"""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tabCompany` comp
-		where
-			ifnull(parent_company, "")={frappe.db.escape(parent)}
-		""",
-		as_dict=1,
+	filters = {"parent_company": parent} if parent else {"parent_company": ["is", "not set"]}
+
+	# get_list, not get_all: it applies the caller's Company User Permissions, so a restricted user
+	# sees only their own companies.
+	return frappe.get_list(
+		"Company",
+		filters=filters,
+		fields=["name as value", "is_group as expandable"],
 	)
 
 
@@ -962,6 +1016,10 @@ def add_node():
 
 	args = frappe.form_dict
 	args = make_tree_args(**args)
+
+	# `args` comes straight from form_dict, so without this the caller chooses the doctype created.
+	# insert() would still check permissions, but nothing here is meant to build anything but a Company.
+	args.doctype = "Company"
 
 	if args.parent_company == "All Companies":
 		args.parent_company = None
@@ -1048,6 +1106,11 @@ def get_timeline_data(doctype, name):
 def get_default_company_address(name, sort_key="is_primary_address", existing_address=None):
 	if sort_key not in ["is_shipping_address", "is_primary_address"]:
 		return None
+
+	# Same boundary as accounts/custom/address.py::get_shipping_address: `select` denies the portal
+	# identities and costs none of the transaction-writing roles. doc= so the named company is
+	# evaluated and User Permissions apply.
+	frappe.has_permission("Company", ptype="select", doc=name, throw=True)
 
 	out = frappe.db.sql(
 		""" SELECT

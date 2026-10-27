@@ -5,6 +5,7 @@ import frappe
 from frappe import _, qb, query_builder
 from frappe.query_builder import Criterion, functions
 from frappe.utils.dateutils import getdate
+from pypika.terms import Bracket, LiteralValue
 
 
 def get_columns():
@@ -214,6 +215,11 @@ def get_so_with_invoices(filters):
 		.where(Criterion.all(filter_criterions))
 		.orderby(so.name, so.transaction_date, ps.due_date)
 	)
+
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions("Sales Order"):
+		query_so = query_so.where(Bracket(LiteralValue(match_conditions)))
 
 	sorders = query_so.run(as_dict=True)
 

@@ -122,11 +122,12 @@ class Opportunity(TransactionBase, CRMNote):
 		if self.opportunity_from == "Lead":
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
-			link_open_tasks(self.opportunity_from, self.party_name, self)
-			link_open_events(self.opportunity_from, self.party_name, self)
+			ignore_permissions = self.flags.ignore_permissions
+			link_open_tasks(self.opportunity_from, self.party_name, self, ignore_permissions)
+			link_open_events(self.opportunity_from, self.party_name, self, ignore_permissions)
 			if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
-				copy_comments(self.opportunity_from, self.party_name, self)
-				link_communications(self.opportunity_from, self.party_name, self)
+				copy_comments(self.opportunity_from, self.party_name, self, ignore_permissions)
+				link_communications(self.opportunity_from, self.party_name, self, ignore_permissions)
 
 	def validate(self):
 		self.set_opportunity_type()
@@ -135,6 +136,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.validate_party()
+		self.validate_party_specific_items()
 		self.map_fields()
 		self.validate_qty()
 		self.set_exchange_rate()
@@ -146,6 +148,36 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def on_update(self):
 		self.update_prospect()
+
+	def validate_party_specific_items(self):
+		if self.opportunity_from != "Customer" or not self.party_name:
+			return
+
+		from erpnext.selling.doctype.party_specific_item.party_specific_item import (
+			get_allowed_items_condition,
+		)
+
+		allowed_items_condition = get_allowed_items_condition("Customer", self.party_name)
+		if allowed_items_condition is None:
+			return
+
+		rows = [row for row in self.get("items") if row.item_code]
+		item = frappe.qb.DocType("Item")
+		allowed_items = (
+			frappe.qb.from_(item)
+			.select(item.name)
+			.where(item.name.isin(list({row.item_code for row in rows})))
+			.where(allowed_items_condition)
+			.run(pluck=True)
+		)
+		for row in rows:
+			if row.item_code not in allowed_items:
+				frappe.throw(
+					_("Row {0}: Item {1} is not allowed for {2} {3}.").format(
+						row.idx, frappe.bold(row.item_code), _("Customer"), frappe.bold(self.party_name)
+					),
+					title=_("Item Restricted for Party"),
+				)
 
 	def validate_qty(self):
 		for item in self.items:
@@ -167,7 +199,7 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def set_opportunity_type(self):
 		if self.is_new() and not self.opportunity_type:
-			self.opportunity_type = _("Sales")
+			self.opportunity_type = "Sales"
 
 	def set_exchange_rate(self):
 		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
@@ -408,7 +440,7 @@ def get_item_details(item_code):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+		from erpnext.controllers.accounts_controller import _get_default_taxes_and_charges
 
 		quotation = frappe.get_doc(target)
 
@@ -424,7 +456,7 @@ def make_quotation(source_name, target_doc=None):
 		quotation.conversion_rate = exchange_rate
 
 		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
+		taxes = _get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
 		if taxes.get("taxes"):
 			quotation.update(taxes)
 
@@ -555,8 +587,13 @@ def make_opportunity_from_communication(
 ):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 
+	# Communication grants read to `All` only for the owner and carries a has_permission hook, so doc=
+	# is what decides access.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
 	doc = frappe.get_doc("Communication", communication)
 
+	# make_lead_from_communication() checks, but is skipped when the email already references a Lead.
 	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
 	if not lead:
 		lead = make_lead_from_communication(communication, ignore_communication_links=True)

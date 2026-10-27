@@ -20,6 +20,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 from erpnext.controllers.accounts_controller import AccountsController
 
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method
 class AssetRepair(AccountsController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -163,7 +164,8 @@ class AssetRepair(AccountsController):
 			row.purchase_invoice, row.expense_account, exclude_asset_repair=self.name
 		)
 
-		if flt(row.repair_cost) > available_amount:
+		row.repair_cost = flt(row.repair_cost, row.precision("repair_cost"))
+		if row.repair_cost > available_amount:
 			frappe.throw(
 				_(
 					"Row #{0}: Repair cost {1} exceeds available amount {2} for Purchase Invoice {3} and Account {4}"
@@ -458,6 +460,15 @@ class AssetRepair(AccountsController):
 		add_asset_activity(self.asset, subject)
 
 
+def check_asset_repair_access(company=None):
+	"""Both pickers below sit on the Asset Repair form, so that form is the boundary, not Purchase Invoice.
+
+	`company` is accepted so the call sites read the same as on develop, where it also narrows the
+	caller to their permitted companies. There is no Company Restriction on this branch.
+	"""
+	frappe.has_permission("Asset Repair", throw=True)
+
+
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
@@ -471,6 +482,8 @@ def get_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
 	Get Purchase Invoices that have expense accounts for non-stock items.
 	Only returns invoices with at least one non-stock, non-fixed-asset item with an expense account.
 	"""
+	check_asset_repair_access(filters.get("company") if isinstance(filters, dict) else None)
+
 	pi = DocType("Purchase Invoice")
 	pi_item = DocType("Purchase Invoice Item")
 	item = DocType("Item")
@@ -506,6 +519,8 @@ def get_expense_accounts(doctype, txt, searchfield, start, page_len, filters):
 	Get expense accounts for non-stock (service) items from the purchase invoice.
 	Used as a query function for link fields.
 	"""
+	check_asset_repair_access()
+
 	purchase_invoice = filters.get("purchase_invoice")
 	if not purchase_invoice:
 		return []
@@ -571,7 +586,8 @@ def get_unallocated_repair_cost(
 	used_amount = get_allocated_repair_cost(purchase_invoice, expense_account, exclude_asset_repair)
 	total_amount = get_total_expense_amount(purchase_invoice, expense_account)
 
-	return flt(total_amount - used_amount)
+	precision = frappe.get_precision("Asset Repair Purchase Invoice", "repair_cost")
+	return flt(total_amount - used_amount, precision)
 
 
 def get_allocated_repair_cost(

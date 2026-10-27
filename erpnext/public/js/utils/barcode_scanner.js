@@ -244,10 +244,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 						return;
 					}
 
-					if (e.target.value) {
-						this.scan_api_call(e.target.value, (r) => {
+					const input = e.target.value;
+					if (input) {
+						this.scan_api_call(input, (r) => {
 							if (r.message) {
-								this.update_dialog_values(item_code, r);
+								this.update_dialog_values(item_code, r, input);
 							}
 						});
 					}
@@ -315,14 +316,19 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return fields;
 	}
 
-	update_dialog_values(scanned_item, r) {
+	update_dialog_values(scanned_item, r, input) {
 		const { item_code, barcode, batch_no, serial_no } = r.message;
 
 		this.dialog.set_value("barcode_scanner", "");
-		if (
-			item_code === scanned_item &&
-			(this.dialog.get_value("barcode") === barcode || batch_no || serial_no)
-		) {
+		if (item_code !== scanned_item) {
+			this.play_fail_sound();
+			frappe.msgprint(
+				__("Cannot find {0} for Item {1}", [frappe.utils.escape_html(input), scanned_item])
+			);
+			return;
+		}
+
+		if (this.dialog.get_value("barcode") === barcode || batch_no || serial_no) {
 			if (batch_no) {
 				this.dialog.set_value("batch_no", batch_no);
 			}
@@ -500,7 +506,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			const clear_btn = `
 				<a class="btn-clear-last-scanned-warehouse" title="${__("Clear Last Scanned Warehouse")}">
-					${frappe.utils.icon("close", "xs", "es-icon")}
+					${frappe.utils.icon("x", "xs")}
 				</a>
 			`;
 

@@ -1,9 +1,10 @@
 {
  "actions": [],
  "creation": "2013-06-25 10:25:16",
- "description": "Settings for Selling Module",
+ "description": "How quotations, sales orders and pricing work.",
  "doctype": "DocType",
  "document_type": "Other",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/selling-settings",
  "engine": "InnoDB",
  "field_order": [
   "customer_defaults_tab",
@@ -115,7 +116,7 @@
   },
   {
    "default": "Daily",
-   "description": "The frequency at which project progress and company transaction details will be updated. Set it to daily or monthly if you post a lot of transactions.",
+   "description": "The frequency at which project progress and company transaction details will be updated. Set it to daily or monthly if you post a lot of transactions. Daily refreshes nightly; Monthly refreshes on the 1st of each month.",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "How often should sales data be updated in Company/Project?",
@@ -407,7 +408,7 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,

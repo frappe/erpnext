@@ -6,13 +6,15 @@ import frappe
 from frappe import _, bold
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import _refuse
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	SalesInvoice,
+	get_discounting_status,
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
@@ -229,7 +231,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_company_with_pos_company()
 		self.validate_full_payment()
 		self.update_packing_list()
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
@@ -254,7 +256,7 @@ class POSInvoice(SalesInvoice):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 			self.submit_serial_batch_bundle(table_name)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
@@ -295,7 +297,7 @@ class POSInvoice(SalesInvoice):
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
@@ -469,12 +471,14 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Sales Invoice mode is activated in POS. Please create Sales Invoice instead."))
 
 	def validate_serialised_or_batched_item(self):
+		auto_picks_serial_nos = self.auto_picks_outward_serial_batch()
 		error_msg = []
 		for d in self.get("items"):
 			error_msg = ""
+			serial_no_missing = not d.serial_no and not (auto_picks_serial_nos and d.get("has_batch_no"))
 			if d.get("has_serial_no") and (
 				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
-				or (d.use_serial_batch_fields and not d.serial_no)
+				or (d.use_serial_batch_fields and serial_no_missing)
 			):
 				error_msg = f"Row #{d.idx}: Please select Serial No. for item {bold(d.item_code)}"
 
@@ -614,7 +618,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) < getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
@@ -622,7 +626,7 @@ class POSInvoice(SalesInvoice):
 				elif (
 					0 < flt(self.outstanding_amount) < total
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Partly Paid and Discounted"
 				elif 0 < flt(self.outstanding_amount) < total:
@@ -631,7 +635,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
@@ -899,6 +903,19 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
+	# select-or-read on POS Profile: a bare check defaults to `read`, which Sales Manager lacks.
+	# The profile is the only boundary that fits -- Item and Bin read both exclude Accounts Manager.
+	ptype = "select" if frappe.only_has_select_perm("POS Profile") else "read"
+	frappe.has_permission("POS Profile", ptype, throw=True)
+
+	# the caller picks the warehouse when allow_warehouse_change is set; costs nobody who has no
+	# Warehouse User Permission
+	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
+		if allowed_warehouses and warehouse not in allowed_warehouses:
+			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
@@ -1028,7 +1045,7 @@ def make_sales_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_merge_log(invoices):
+def make_merge_log(invoices: str | list):
 	import json
 
 	if isinstance(invoices, str):
@@ -1040,6 +1057,10 @@ def make_merge_log(invoices):
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())
 	for inv in invoices:
+		inv["name"] = cstr(inv.get("name"))
+		if not inv["name"] or not frappe.has_permission("POS Invoice", "read", doc=inv["name"]):
+			_refuse()
+
 		inv_data = frappe.db.get_values(
 			"POS Invoice", inv.get("name"), ["customer", "posting_date", "grand_total"], as_dict=1
 		)[0]

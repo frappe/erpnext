@@ -13,6 +13,7 @@
    "doc_type": "GL Entry"
   }
  ],
+ "documentation_url": "https://docs.frappe.io/erpnext/balance-sheet",
  "filters": [],
  "generate_csv": 0,
  "idx": 3,

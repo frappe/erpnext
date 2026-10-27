@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "Prompt",
  "creation": "2019-04-19 15:04:05.317138",
+ "description": "A grouping of tasks, like bug or feature.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -12,7 +13,8 @@
   {
    "fieldname": "weight",
    "fieldtype": "Float",
-   "label": "Weight"
+   "label": "Weight",
+   "non_negative": 1
   },
   {
    "fieldname": "description",
@@ -20,8 +22,9 @@
    "label": "Description"
   }
  ],
+ "icon": "tag",
  "links": [],
- "modified": "2026-04-17 15:32:28.598095",
+ "modified": "2026-10-05 10:05:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task Type",

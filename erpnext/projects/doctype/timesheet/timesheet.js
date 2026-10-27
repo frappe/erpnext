@@ -48,11 +48,7 @@ frappe.ui.form.on("Timesheet", {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
-			if (
-				frm.doc.per_billed < 100 &&
-				frm.doc.total_billable_hours &&
-				frm.doc.total_billable_hours > frm.doc.total_billed_hours
-			) {
+			if (frm.doc.total_billable_hours > frm.doc.total_billed_hours) {
 				frm.add_custom_button(__("Create Sales Invoice"), function () {
 					frm.trigger("make_invoice");
 				});
@@ -93,10 +89,6 @@ frappe.ui.form.on("Timesheet", {
 					erpnext.timesheet.timer(frm);
 				}
 			}).addClass("btn-primary");
-		}
-		if (frm.doc.per_billed > 0) {
-			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
-			frm.fields_dict["time_logs"].grid.toggle_enable("is_billable", false);
 		}
 
 		let filters = {
@@ -234,9 +226,7 @@ frappe.ui.form.on("Timesheet", {
 			fields: fields,
 		});
 
-		dialog.set_primary_action(__("Create Sales Invoice"), () => {
-			var args = dialog.get_values();
-			if (!args) return;
+		dialog.set_primary_action(__("Create Sales Invoice"), (args) => {
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
@@ -322,6 +312,8 @@ frappe.ui.form.on("Timesheet Detail", {
 		if (frm.doc.parent_project) {
 			frappe.model.set_value(cdt, cdn, "project", frm.doc.parent_project);
 		}
+
+		calculate_time_and_amount(frm);
 	},
 
 	hours: function (frm, cdt, cdn) {

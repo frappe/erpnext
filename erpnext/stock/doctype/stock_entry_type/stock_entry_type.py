@@ -44,8 +44,21 @@ class StockEntryType(Document):
 
 	def validate(self):
 		self.validate_standard_type()
+		self.validate_add_to_transit()
 		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0
+
+	def on_trash(self):
+		if self.is_standard:
+			frappe.throw(_("Standard Stock Entry Type {0} cannot be deleted").format(frappe.bold(self.name)))
+
+	def validate_add_to_transit(self):
+		if self.is_standard and self.add_to_transit:
+			frappe.throw(
+				_(
+					"Add to Transit cannot be enabled on the standard Stock Entry Type {0}. Create a separate Stock Entry Type for transit transfers."
+				).format(frappe.bold(self.name))
+			)
 
 	def validate_standard_type(self):
 		if self.is_standard and self.name not in [
@@ -156,16 +169,14 @@ class ManufactureEntry:
 			self.stock_entry.add_to_stock_entry_detail(item_dict)
 
 	def get_production_share(self):
-		"""Fraction of the job card's production this entry accounts for; raw materials are
-		generated proportionally so several partial entries never consume more than required."""
-		for_quantity, pending_qty = frappe.db.get_value(
-			"Job Card", self.job_card, ["for_quantity", "pending_qty"]
-		)
-		qty_to_produce = flt(for_quantity) - flt(pending_qty)
-		if not qty_to_produce:
+		"""Fraction of the job card's for_quantity this entry accounts for; raw materials are
+		generated proportionally so several partial entries never consume more than required.
+		The job card's required qty covers its pending qty too, so the pending qty stays in the base."""
+		for_quantity = flt(frappe.db.get_value("Job Card", self.job_card, "for_quantity"))
+		if not for_quantity:
 			return 1
 
-		return min(flt(self.for_quantity) / qty_to_produce, 1)
+		return min(flt(self.for_quantity) / for_quantity, 1)
 
 	def parse_available_serial_batches(self, item_dict, available_serial_batches):
 		key = (item_dict.item_code, item_dict.from_warehouse)

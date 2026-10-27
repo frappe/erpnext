@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 import frappe.utils
 from frappe import _, msgprint, throw
@@ -14,10 +16,12 @@ from frappe.utils.data import comma_and
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
 )
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
 	validate_coupon_code,
@@ -42,6 +46,7 @@ from erpnext.accounts.utils import (
 from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_asset_disposal_values,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
 	reset_depreciation_schedule,
@@ -52,7 +57,9 @@ from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -273,6 +280,8 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
+				"extra_cond": """ and exists(select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and (is_return=0 or update_billed_amount_in_sales_order=1))""",
 			}
 		]
 
@@ -331,8 +340,7 @@ class SalesInvoice(SellingController):
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
 
-		# Validating coupon code
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			validate_coupon_code(self.coupon_code)
 
 		if cint(self.is_pos):
@@ -367,6 +375,8 @@ class SalesInvoice(SellingController):
 		if not self.is_return:
 			self.validate_time_sheets_are_submitted()
 
+		self.validate_delivery_note_rows_billed_by_invoice()
+		self.validate_closed_delivery_notes()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 
 		if self.is_return and self.return_against:
@@ -501,10 +511,12 @@ class SalesInvoice(SellingController):
 			self.validate_standalone_serial_nos_customer()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
+			self.validate_produced_serial_nos_against_reservation()
 
 		self.split_asset_based_on_sale_qty()
 
 		self.process_asset_depreciation()
+		self.set_asset_disposal_values()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -512,12 +524,14 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			self.check_credit_limit()
-			self.check_overdue_billing_threshold()
+			if self.is_opening != "Yes":
+				self.check_credit_limit()
+				self.check_overdue_billing_threshold()
 
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -529,7 +543,7 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "used")
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -549,6 +563,9 @@ class SalesInvoice(SellingController):
 
 		self.process_common_party_accounting()
 		self.update_billed_qty_in_scio()
+
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 
 	def validate_pos_return(self):
 		if self.is_consolidated:
@@ -637,10 +654,11 @@ class SalesInvoice(SellingController):
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
 			self.update_pick_list_status()
+			self.update_project_consumed_material_cost()
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
@@ -668,6 +686,7 @@ class SalesInvoice(SellingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
 
@@ -684,6 +703,9 @@ class SalesInvoice(SellingController):
 
 		self.update_billed_qty_in_scio()
 
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
+
 	def update_status_updater_args(self):
 		if not cint(self.update_stock):
 			return
@@ -697,13 +719,14 @@ class SalesInvoice(SellingController):
 					"target_parent_field": "per_delivered",
 					"target_field": "delivered_qty",
 					"target_ref_field": "qty",
-					"source_field": "qty",
+					"source_field": "qty * conversion_factor",
+					"target_conversion_factor": "conversion_factor",
 					"join_field": "so_detail",
 					"percent_join_field": "sales_order",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
 					"second_source_dt": "Delivery Note Item",
-					"second_source_field": "qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "so_detail",
 					"overflow_type": "delivery",
 					"extra_cond": """ and exists(select name from `tabSales Invoice`
@@ -721,6 +744,11 @@ class SalesInvoice(SellingController):
 					"percent_join_field": "against_pick_list",
 					"status_field": "delivery_status",
 					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "stock_qty",
+					"second_join_field": "pick_list_item",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
 				},
 			]
 		)
@@ -735,11 +763,13 @@ class SalesInvoice(SellingController):
 				"join_field": "so_detail",
 				"target_field": "returned_qty",
 				"target_parent_dt": "Sales Order",
-				"source_field": "-1 * qty",
+				"source_field": "-1 * qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"second_source_dt": "Delivery Note Item",
-				"second_source_field": "-1 * qty",
+				"second_source_field": "-1 * qty * conversion_factor",
 				"second_join_field": "so_detail",
 				"extra_cond": """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)""",
+				"second_source_extra_cond": """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)""",
 			}
 		)
 
@@ -843,17 +873,9 @@ class SalesInvoice(SellingController):
 				timesheet.db_update_all()
 
 	def update_billed_qty_in_scio(self):
-		if self.is_return:
-			return
-
 		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-		data = frappe._dict(
-			{
-				item.scio_detail: item.stock_qty if self._action == "submit" else -item.stock_qty
-				for item in self.items
-				if item.scio_detail
-			}
-		)
+		sign = 1 if self._action == "submit" else -1
+		data = {name: sign * qty for name, qty in self.get_scio_self_rm_stock_qty().items()}
 
 		if data:
 			case_expr = Case()
@@ -862,6 +884,13 @@ class SalesInvoice(SellingController):
 			frappe.qb.update(table).set(table.billed_qty, case_expr).where(
 				(table.name.isin(list(data.keys()))) & (table.docstatus == 1)
 			).run()
+
+	def get_scio_self_rm_stock_qty(self):
+		stock_qty = defaultdict(float)
+		for item in self.items:
+			if item.scio_detail:
+				stock_qty[item.scio_detail] += flt(item.stock_qty)
+		return stock_qty
 
 	def update_time_sheet_detail(self, timesheet, args, sales_invoice):
 		for data in timesheet.time_logs:
@@ -929,9 +958,18 @@ class SalesInvoice(SellingController):
 	def validate_time_sheets_are_submitted(self):
 		# Note: This validation is skipped for return invoices
 		# to allow returns to reference already-billed timesheet details
+		listed = set()
 		for data in self.timesheets:
+			if data.timesheet_detail in listed:
+				frappe.throw(
+					_("Row {0}: The same time log of Timesheet {1} is added more than once").format(
+						data.idx, frappe.bold(data.time_sheet)
+					)
+				)
+
 			# Handle invoice duplication
 			if data.time_sheet and data.timesheet_detail:
+				listed.add(data.timesheet_detail)
 				if sales_invoice := frappe.db.get_value(
 					"Timesheet Detail", data.timesheet_detail, "sales_invoice"
 				):
@@ -943,7 +981,7 @@ class SalesInvoice(SellingController):
 
 			if data.time_sheet:
 				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
-				if status not in ["Submitted", "Payslip", "Partially Billed"]:
+				if status not in ["Submitted", "Payslip", "Partially Billed", "Billed"]:
 					frappe.throw(
 						_("Timesheet {0} cannot be invoiced in its current state").format(data.time_sheet)
 					)
@@ -1138,6 +1176,42 @@ class SalesInvoice(SellingController):
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
 			)
 
+	def validate_closed_delivery_notes(self):
+		delivery_notes = {d.delivery_note for d in self.items if d.delivery_note}
+		if self.is_return or not delivery_notes:
+			return
+
+		if closed := frappe.get_all(
+			"Delivery Note", filters={"name": ("in", list(delivery_notes)), "status": "Closed"}, pluck="name"
+		):
+			frappe.throw(
+				_("Delivery Note {0} is closed and cannot be invoiced").format(
+					", ".join(frappe.bold(name) for name in closed)
+				)
+			)
+
+	def validate_delivery_note_rows_billed_by_invoice(self):
+		dn_details = [d.dn_detail for d in self.items if d.dn_detail]
+		if self.is_return or not dn_details:
+			return
+
+		billing_invoices = frappe._dict(
+			frappe.get_all(
+				"Delivery Note Item",
+				filters={"name": ("in", dn_details), "against_sales_invoice": ("is", "set")},
+				fields=["name", "against_sales_invoice"],
+				as_list=True,
+			)
+		)
+		for d in self.items:
+			invoice = billing_invoices.get(d.dn_detail)
+			if invoice and invoice != self.name:
+				frappe.throw(
+					_(
+						"Row #{0}: Delivery Note {1} was created from Sales Invoice {2}, which already bills it"
+					).format(d.idx, frappe.bold(d.delivery_note), get_link_to_form("Sales Invoice", invoice))
+				)
+
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
 		against_acc = []
@@ -1196,6 +1270,11 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_pos(self):
+		# Consolidation posts payments already accepted on submitted POS invoices.
+		if not self.get("is_consolidated"):
+			for payment in self.get("payments") or []:
+				validate_enabled_mode_of_payment(payment.mode_of_payment)
+
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
 			if abs(flt(self.paid_amount)) + abs(flt(self.write_off_amount)) - abs(
@@ -1305,22 +1384,23 @@ class SalesInvoice(SellingController):
 	def validate_scio_self_rm_qty(self):
 		self_rms = [item for item in self.items if item.scio_detail]
 		if self_rms:
+			stock_qty = self.get_scio_self_rm_stock_qty()
 			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 			query = (
 				frappe.qb.from_(table)
 				.select(table.required_qty, table.consumed_qty, table.billed_qty, table.name)
-				.where((table.docstatus == 1) & (table.name.isin([item.scio_detail for item in self_rms])))
+				.where((table.docstatus == 1) & (table.name.isin(list(stock_qty))))
 			)
 			result = query.run(as_dict=True)
 			data = {item.name: item for item in result}
 			for item in self_rms:
 				row = data.get(item.scio_detail)
 				max_qty = max(row.required_qty, row.consumed_qty) - row.billed_qty
-				if item.stock_qty > max_qty:
+				if stock_qty[item.scio_detail] > max_qty:
 					frappe.throw(
 						_("Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}").format(
 							item.idx,
-							item.stock_qty,
+							stock_qty[item.scio_detail],
 							item.stock_uom,
 							get_link_to_form("Item", item.item_code),
 							frappe.bold(max_qty),
@@ -1351,11 +1431,17 @@ class SalesInvoice(SellingController):
 			)
 
 	def update_current_stock(self):
+		bin_qty_map = get_bin_qty_map(self.items + self.packed_items)
+
 		for item in self.items:
-			item.set_actual_qty()
+			if item.item_code and item.warehouse:
+				bin_data = bin_qty_map.get((item.item_code, item.warehouse))
+				item.actual_qty = bin_data.actual_qty if bin_data else 0
 
 		for packed_item in self.packed_items:
-			packed_item.set_actual_and_projected_qty()
+			bin_data = bin_qty_map.get((packed_item.item_code, packed_item.warehouse))
+			packed_item.actual_qty = bin_data.actual_qty if bin_data else 0
+			packed_item.projected_qty = bin_data.projected_qty if bin_data else 0
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
@@ -1366,20 +1452,67 @@ class SalesInvoice(SellingController):
 			self.set("packed_items", [])
 
 	def set_billing_hours_and_amount(self):
-		if not self.project:
-			for timesheet in self.timesheets:
-				ts_doc = frappe.get_doc("Timesheet", timesheet.time_sheet)
-				if not timesheet.billing_hours and ts_doc.total_billable_hours:
-					timesheet.billing_hours = ts_doc.total_billable_hours
+		"""Fill rows from their time logs; a row without one gets its timesheet's unbilled logs."""
+		if self.is_return:
+			return
 
-				if not timesheet.billing_amount and ts_doc.total_billable_amount:
-					timesheet.billing_amount = ts_doc.total_billable_amount
+		pending = [
+			row
+			for row in self.timesheets
+			if row.time_sheet and not (row.timesheet_detail and row.billing_hours and row.billing_amount)
+		]
+		unbilled_logs = {
+			name: get_projectwise_timesheet_data(self.project, name)
+			for name in {row.time_sheet for row in pending}
+		}
+		exchange_rates = {}
+		for row in pending:
+			if row.timesheet_detail:
+				self.fill_from_time_log(row, unbilled_logs[row.time_sheet], exchange_rates)
+			else:
+				self.replace_with_time_logs(row, unbilled_logs[row.time_sheet], exchange_rates)
+
+	def fill_from_time_log(self, row, time_logs: list, exchange_rates: dict):
+		if log := next((log for log in time_logs if log.name == row.timesheet_detail), None):
+			row.billing_hours = row.billing_hours or log.billing_hours
+			row.billing_amount = row.billing_amount or self.get_billing_amount(log, exchange_rates)
+
+	def replace_with_time_logs(self, row, time_logs: list, exchange_rates: dict):
+		listed = {d.timesheet_detail for d in self.timesheets}
+		time_logs = [log for log in time_logs if log.name not in listed]
+		if not time_logs:
+			frappe.throw(
+				_("Row {0}: Timesheet {1} has no unbilled billable time logs").format(
+					row.idx, frappe.bold(row.time_sheet)
+				)
+			)
+
+		if row.billing_amount:
+			self.link_time_log(row, time_logs)
+			return
+
+		self.remove(row)
+		for log in time_logs:
+			self.append("timesheets", self.get_timesheet_row(log, exchange_rates))
+
+	def link_time_log(self, row, time_logs: list):
+		"""Bill a row's own amount against the only unbilled log of its timesheet."""
+		if len(time_logs) > 1:
+			frappe.throw(
+				_("Row {0}: Select the time log of Timesheet {1} that this amount bills").format(
+					row.idx, frappe.bold(row.time_sheet)
+				)
+			)
+
+		row.timesheet_detail = time_logs[0].name
+		row.billing_hours = row.billing_hours or time_logs[0].billing_hours
 
 	def update_timesheet_billing_for_project(self):
 		if (
 			not self.is_return
 			and not self.timesheets
 			and self.project
+			and self.has_value_changed("project")
 			and self.is_auto_fetch_timesheet_enabled()
 		):
 			self.add_timesheet_data()
@@ -1394,20 +1527,41 @@ class SalesInvoice(SellingController):
 	def add_timesheet_data(self):
 		self.set("timesheets", [])
 		if self.project:
+			exchange_rates = {}
 			for data in get_projectwise_timesheet_data(self.project):
-				self.append(
-					"timesheets",
-					{
-						"time_sheet": data.time_sheet,
-						"billing_hours": data.billing_hours,
-						"billing_amount": data.billing_amount,
-						"timesheet_detail": data.name,
-						"activity_type": data.activity_type,
-						"description": data.description,
-					},
-				)
+				self.append("timesheets", self.get_timesheet_row(data, exchange_rates))
 
 			self.calculate_billing_amount_for_timesheet()
+
+	def get_timesheet_row(self, time_log, exchange_rates: dict) -> dict:
+		return {
+			"time_sheet": time_log.time_sheet,
+			"billing_hours": time_log.billing_hours,
+			"billing_amount": self.get_billing_amount(time_log, exchange_rates),
+			"timesheet_detail": time_log.name,
+			"activity_type": time_log.activity_type,
+			"description": time_log.description,
+			"from_time": time_log.from_time,
+			"to_time": time_log.to_time,
+			"project_name": time_log.project_name,
+		}
+
+	def get_billing_amount(self, time_log, exchange_rates: dict) -> float:
+		"""Time log billing amount in the invoice currency; `exchange_rates` keeps each rate for the pass."""
+		if not time_log.currency or time_log.currency == self.currency:
+			return time_log.billing_amount
+
+		if time_log.currency not in exchange_rates:
+			exchange_rate = get_exchange_rate(time_log.currency, self.currency, self.posting_date)
+			if not exchange_rate:
+				frappe.throw(
+					_(
+						"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
+					).format(time_log.currency, self.currency, self.posting_date)
+				)
+			exchange_rates[time_log.currency] = exchange_rate
+
+		return flt(time_log.billing_amount) * exchange_rates[time_log.currency]
 
 	def calculate_billing_amount_for_timesheet(self):
 		def timesheet_sum(field):
@@ -1511,6 +1665,22 @@ class SalesInvoice(SellingController):
 			self.restore_asset()
 
 		self.update_asset()
+
+	def set_asset_disposal_values(self) -> None:
+		"""Store the asset values the sale or return entries are built from, so a repost reproduces them."""
+		if self.is_internal_transfer():
+			return
+
+		for item in self.get("items"):
+			if item.is_fixed_asset and item.asset:
+				asset = frappe.get_doc("Asset", item.asset)
+				values = get_asset_disposal_values(asset, item.finance_book)
+				item.db_set(
+					{
+						"asset_value_after_depreciation": values["value_after_depreciation"],
+						"asset_gross_value": values["gross_asset_value"],
+					}
+				)
 
 	def depreciate_asset_on_sale(self):
 		"""
@@ -1802,6 +1972,7 @@ class SalesInvoice(SellingController):
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		asset = frappe.get_cached_doc("Asset", item.asset)
+		disposal_values = get_stored_asset_disposal_values(item)
 
 		if self.is_return:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
@@ -1811,6 +1982,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 		else:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -1820,6 +1992,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 
 		for gle in fixed_asset_gl_entries:
@@ -2111,8 +2284,13 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.set("write_off_amount", reference_doc.get("write_off_amount"))
+		self.po_no = reference_doc.po_no
+		# The payment schedule is rebuilt from the template, relative to the new posting date.
+		self.payment_terms_template = reference_doc.payment_terms_template
 		self.due_date = None
+		self.shift_service_dates(reference_doc, auto_repeat_doc)
 
 	def update_project(self):
 		unique_projects = list(set([d.project for d in self.get("items") if d.project]))
@@ -2268,6 +2446,35 @@ class SalesInvoice(SellingController):
 			if points_to_redeem < 1:  # since points_to_redeem is integer
 				break
 
+	def counts_coupon_use(self):
+		# Returns and POS consolidation do not redeem the coupon again.
+		if self.is_return or self.get("is_consolidated"):
+			return False
+
+		if not self.items or any(
+			not item.get("sales_order") or not item.get("so_detail") for item in self.items
+		):
+			return True
+
+		# Match each detail to the order that already consumed this coupon.
+		order = frappe.qb.DocType("Sales Order")
+		order_item = frappe.qb.DocType("Sales Order Item")
+		coupon_order_items = dict(
+			frappe.qb.from_(order_item)
+			.join(order)
+			.on(order.name == order_item.parent)
+			.select(order_item.name, order_item.parent)
+			.where(
+				(order_item.name.isin([item.so_detail for item in self.items]))
+				& (order.coupon_code == self.coupon_code)
+				& (order.customer == self.customer)
+				& (order.company == self.company)
+				& (order.docstatus == 1)
+			)
+			.run()
+		)
+		return any(coupon_order_items.get(item.so_detail) != item.sales_order for item in self.items)
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get("amended_from"):
@@ -2412,7 +2619,10 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 	if inter_company_reference:
 		doc = frappe.get_doc(ref_doc, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
-		if frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") != party:
+		if (
+			frappe.db.get_value(partytype, {"represents_company": doc.company, "disabled": 0}, "name")
+			!= party
+		):
 			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(_(partytype)))
 		if frappe.get_cached_value(ref_partytype, ref_party, "represents_company") != company:
 			frappe.throw(_("Invalid Company for Inter Company Transaction."))
@@ -2432,27 +2642,33 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 			)
 
 
-def update_linked_doc(doctype, name, inter_company_reference):
+def get_inter_company_counterpart(doctype: str) -> tuple[str, str]:
+	"""Return the counterpart doctype and the field both documents use to reference each other."""
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
-		ref_field = "inter_company_invoice_reference"
-	else:
-		ref_field = "inter_company_order_reference"
+		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
+		return ref_doc, "inter_company_invoice_reference"
 
+	ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
+	return ref_doc, "inter_company_order_reference"
+
+
+def update_linked_doc(doctype, name, inter_company_reference):
+	ref_doc, ref_field = get_inter_company_counterpart(doctype)
 	if inter_company_reference:
-		frappe.db.set_value(doctype, inter_company_reference, ref_field, name)
+		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, name)
 
 
 def unlink_inter_company_doc(doctype, name, inter_company_reference):
-	if doctype in ["Sales Invoice", "Purchase Invoice"]:
-		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
-		ref_field = "inter_company_invoice_reference"
-	else:
-		ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
-		ref_field = "inter_company_order_reference"
+	ref_doc, ref_field = get_inter_company_counterpart(doctype)
+	if not inter_company_reference:
+		return
 
-	if inter_company_reference:
-		frappe.db.set_value(doctype, name, ref_field, "")
-		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, "")
+	frappe.db.set_value(doctype, name, ref_field, "")
+	if frappe.db.get_value(ref_doc, inter_company_reference, ref_field) != name:
+		return
+
+	remaining_counterpart = frappe.db.get_value(doctype, {ref_field: inter_company_reference, "docstatus": 1})
+	frappe.db.set_value(ref_doc, inter_company_reference, ref_field, remaining_counterpart or "")
 
 
 def get_list_context(context=None):
@@ -2636,15 +2852,6 @@ def validate_inter_company_transaction(doc, doctype):
 		partytype = "Supplier" if doctype in ["Sales Invoice", "Sales Order"] else "Customer"
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
-	company = details.get("company")
-	default_currency = frappe.get_cached_value("Company", company, "default_currency")
-	if default_currency != doc.currency:
-		frappe.throw(
-			_("Company currencies of both the companies should match for Inter Company Transactions.")
-		)
-
-	return
-
 
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name, target_doc=None):
@@ -2669,12 +2876,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
-		received_items = {}
+		received_items = (
+			get_received_items(source_name, "Sales Order", "purchase_order_item")
+			if doctype == "Purchase Order"
+			else {}
+		)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
 	def set_missing_values(source, target):
+		target.conversion_rate = target.plc_conversion_rate = 0
 		target.run_method("set_missing_values")
 		set_purchase_references(target)
 
@@ -2691,9 +2903,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"parent",
 			)
 
-		target_doc.inter_company_invoice_reference = source_doc.name
+		_, reference_field = get_inter_company_counterpart(target_doc.doctype)
+		target_doc.set(reference_field, source_doc.name)
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
-			currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.is_internal_supplier = 1
@@ -2730,9 +2942,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 					target_doc, "billing_address", "billing_address_display", source_doc.customer_address
 				)
 
-			if currency:
-				target_doc.currency = currency
-
 			update_taxes(
 				target_doc,
 				party=target_doc.supplier,
@@ -2744,7 +2953,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 		else:
-			currency = frappe.db.get_value("Customer", details.get("party"), "default_currency")
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
@@ -2766,9 +2974,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			):
 				update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
 
-			if currency:
-				target_doc.currency = currency
-
 			update_taxes(
 				target_doc,
 				party=target_doc.customer,
@@ -2780,8 +2985,16 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				shipping_address_name=target_doc.shipping_address_name,
 			)
 
+	def get_pending_qty(row):
+		received_stock_qty = received_items.get(row.name, 0.0)
+		if not received_stock_qty:
+			return flt(row.qty)
+
+		pending_stock_qty = flt(flt(row.stock_qty) - received_stock_qty, row.precision("stock_qty"))
+		return flt(max(pending_stock_qty, 0) / (flt(row.conversion_factor) or 1), row.precision("qty"))
+
 	def update_item(source, target, source_parent):
-		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
+		target.qty = get_pending_qty(source)
 		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
 			target.purchase_order = source.parent
 			target.purchase_order_item = source.name
@@ -2806,7 +3019,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
+		"condition": lambda doc: get_pending_qty(doc) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -2837,6 +3050,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		{
 			doctype: {
 				"doctype": target_doctype,
+				"validation": {"docstatus": ["=", 1]},
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
 				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse", "cost_center"],
@@ -2848,21 +3062,46 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	if not doclist.get("items"):
-		frappe.throw(
-			_(
+		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
+			message = _(
 				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
 				"Please check the existing linked {2}s."
-			).format(target_doctype, doctype, target_doctype)
-		)
+			)
+		else:
+			message = _(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully ordered. "
+				"Please check the existing linked {2}s."
+			)
+		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
 
 
 @frappe.whitelist()
 def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
-	reference_field = "inter_company_invoice_reference"
-	if doctype == "Purchase Order":
-		reference_field = "inter_company_order_reference"
+	# The targets and reference fields the callers use. Stating them rejects a caller-supplied
+	# doctype that would otherwise be filtered on a column it does not have.
+	reference_fields = {
+		"Purchase Invoice": ("inter_company_invoice_reference", "Sales Invoice", "sales_invoice_item"),
+		"Purchase Order": ("inter_company_order_reference", "Sales Order", "sales_order_item"),
+		"Sales Order": ("inter_company_order_reference", "Purchase Order", "purchase_order_item"),
+	}
+	if doctype not in reference_fields:
+		frappe.throw(_("Invalid doctype {0}").format(doctype), frappe.PermissionError)
+
+	reference_field, source_doctype, expected_fieldname = reference_fields[doctype]
+
+	# The targets belong to the counterpart company and the caller may legitimately not read them, so
+	# the source document decides access. doc= brings User Permissions in.
+	frappe.has_permission(source_doctype, doc=reference_name, throw=True)
+
+	# `reference_fieldname` becomes a selected column and the result key, so it has to be this target's
+	# own reference field: any other item-table column would be returned from unauthorised rows.
+	if reference_fieldname != expected_fieldname:
+		frappe.throw(
+			_("{0} is not a valid reference field for {1}").format(reference_fieldname, doctype),
+			frappe.ValidationError,
+		)
 
 	filters = {
 		reference_field: reference_name,
@@ -2879,12 +3118,12 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
-			fields=[reference_fieldname, "qty"],
+			fields=[reference_fieldname, "stock_qty"],
 		)
 		for item in received_items_data:
 			key = item.get(reference_fieldname)
 			if key:
-				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
 
 	return received_items_map
 
@@ -3158,7 +3397,13 @@ def get_mode_of_payment_info(mode_of_payment, company):
 
 
 @frappe.whitelist()
-def create_dunning(source_name, target_doc=None, ignore_permissions=False):
+def create_dunning(source_name, target_doc=None, args=None, ignore_permissions=False):
+	if isinstance(args, bool):
+		ignore_permissions = args
+		args = None
+
+	args = frappe.parse_json(args) or {}
+
 	from frappe.model.mapper import get_mapped_doc
 
 	def postprocess_dunning(source, target):
@@ -3167,19 +3412,38 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
-			target.dunning_fee = dunning_type.dunning_fee
+			target.dunning_fee = flt(dunning_type.dunning_fee) / target.conversion_rate
 			target.income_account = dunning_type.income_account
 			target.cost_center = dunning_type.cost_center
 			target.language = source.language
-			target.get_dunning_letter_text()
 
 		# update outstanding from doc
 		if source.payment_schedule and len(source.payment_schedule) == 1:
 			for row in target.overdue_payments:
 				if row.payment_schedule == source.payment_schedule[0].name:
-					row.outstanding = source.get("outstanding_amount")
+					# outstanding_amount is in the party account currency, but the Overdue Payment
+					# row is in the invoice's transaction currency. When they differ, use the
+					# payment schedule's own outstanding — it is kept in transaction currency and
+					# updated as payments are allocated, so it stays correct even when the invoice
+					# and its payments post at different exchange rates (#56006).
+					if source.party_account_currency and source.party_account_currency != source.currency:
+						row.outstanding = source.payment_schedule[0].outstanding
+					else:
+						row.outstanding = source.get("outstanding_amount")
 
+		if len(source.payment_schedule) > 1 and source.party_account_currency == source.currency:
+			outstanding = get_payment_schedule_outstanding(source, source.payment_schedule)
+			for row in target.overdue_payments[:]:
+				if row.sales_invoice == source.name:
+					row.outstanding = outstanding[row.payment_schedule]
+					if flt(row.outstanding, row.precision("outstanding")) <= 0:
+						target.remove(row)
+
+		if not target.overdue_payments:
+			frappe.throw(_("There are no overdue payments to include in this Dunning."))
 		target.validate()
+		if dunning_type:
+			target.get_dunning_letter_text()
 
 	return get_mapped_doc(
 		from_doctype="Sales Invoice",
@@ -3193,7 +3457,11 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			"Payment Schedule": {
 				"doctype": "Overdue Payment",
 				"field_map": {"name": "payment_schedule", "parent": "sales_invoice"},
-				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
+				"condition": lambda doc: (
+					doc.outstanding > 0
+					and getdate(doc.due_date) < getdate()
+					and (not args.get("filtered_children") or doc.name in args["filtered_children"])
+				),
 			},
 		},
 		postprocess=postprocess_dunning,
@@ -3243,3 +3511,14 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
+
+
+def get_stored_asset_disposal_values(item) -> dict | None:
+	"""Asset values stored on the row at submit, so a repost does not pick up later changes to the asset."""
+	if not flt(item.asset_gross_value):
+		return None
+
+	return {
+		"value_after_depreciation": item.asset_value_after_depreciation,
+		"gross_asset_value": item.asset_gross_value,
+	}

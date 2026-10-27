@@ -3,7 +3,9 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2018-10-22 18:19:02.784533",
+ "description": "A line from your bank statement, ready to be matched with a payment.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/bank-transaction",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -277,6 +279,7 @@
   }
  ],
  "grid_page_length": 50,
+ "icon": "arrow-left-right",
  "is_submittable": 1,
  "links": [],
  "modified": "2026-04-11 20:41:15.124085",

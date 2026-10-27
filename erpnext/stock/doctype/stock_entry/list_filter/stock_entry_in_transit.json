@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"stock_entry_type\", \"label\": \"Stock Entry Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"from_warehouse\", \"label\": \"Default Source Warehouse\"}, {\"fieldname\": \"to_warehouse\", \"label\": \"Default Target Warehouse\"}, {\"fieldname\": \"per_transferred\", \"label\": \"Per Transferred\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.869856",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "In Transit",
+ "filters": "[[\"Stock Entry\", \"docstatus\", \"=\", 1], [\"Stock Entry\", \"add_to_transit\", \"=\", 1], [\"Stock Entry\", \"per_transferred\", \"<\", 100]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.869856",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry-In Transit",
+ "owner": "Administrator",
+ "reference_doctype": "Stock Entry",
+ "route_signature": "add_to_transit=1&docstatus=1&per_transferred=[\"<\",100]",
+ "sort_field": "posting_date",
+ "sort_order": "asc"
+}

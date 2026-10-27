@@ -32,11 +32,24 @@ def update_lead_phone_numbers(contact, method):
 					mobile_no = primary_mobile_nos[0]
 
 			lead = frappe.get_doc("Lead", contact_lead)
+			numbers_changed = (lead.phone, lead.mobile_no) != (phone, mobile_no)
 			lead.db_set("phone", phone)
 			lead.db_set("mobile_no", mobile_no)
+			if numbers_changed:
+				link_existing_conversations_of_lead(lead.name)
 
 
-def copy_comments(doctype, docname, doc):
+def link_existing_conversations_of_lead(lead: str):
+	# db_set does not run the Lead's on_update hook that links past calls
+	from erpnext.telephony.doctype.call_log.call_log import link_existing_conversations
+
+	link_existing_conversations(frappe.get_doc("Lead", lead), "on_update")
+
+
+def copy_comments(doctype, docname, doc, ignore_permissions=False):
+	if not can_read_source(doctype, docname, ignore_permissions):
+		return
+
 	comments = frappe.db.get_values(
 		"Comment",
 		filters={"reference_doctype": doctype, "reference_name": docname, "comment_type": "Comment"},
@@ -47,10 +60,13 @@ def copy_comments(doctype, docname, doc):
 		comment.name = None
 		comment.reference_doctype = doc.doctype
 		comment.reference_name = doc.name
-		comment.insert()
+		comment.insert(ignore_permissions=True)
 
 
-def link_communications(doctype, docname, doc):
+def link_communications(doctype, docname, doc, ignore_permissions=False):
+	if not can_read_source(doctype, docname, ignore_permissions):
+		return
+
 	communication_list = get_linked_communication_list(doctype, docname)
 
 	for communication in communication_list:
@@ -130,26 +146,36 @@ def link_events_with_prospect(event, method):
 			event.save()
 
 
-def link_open_tasks(ref_doctype, ref_docname, doc):
+def link_open_tasks(ref_doctype, ref_docname, doc, ignore_permissions=False):
+	if not can_read_source(ref_doctype, ref_docname, ignore_permissions):
+		return
+
 	todos = get_open_todos(ref_doctype, ref_docname)
 
 	for todo in todos:
 		todo_doc = frappe.get_doc("ToDo", todo.name)
 		todo_doc.reference_type = doc.doctype
 		todo_doc.reference_name = doc.name
-		todo_doc.save()
+		todo_doc.save(ignore_permissions=ignore_permissions)
 
 
-def link_open_events(ref_doctype, ref_docname, doc):
+def link_open_events(ref_doctype, ref_docname, doc, ignore_permissions=False):
+	if not can_read_source(ref_doctype, ref_docname, ignore_permissions):
+		return
+
 	events = get_open_events(ref_doctype, ref_docname)
 	for event in events:
 		event_doc = frappe.get_doc("Event", event.name)
 		event_doc.add_participant(doc.doctype, doc.name)
-		event_doc.save()
+		event_doc.save(ignore_permissions=ignore_permissions)
 
 
 @frappe.whitelist()
 def get_open_activities(ref_doctype, ref_docname):
+	# both arguments are caller supplied and the ToDo/Event rows are read with get_all, so the
+	# referenced document decides who may see its activities. doc= applies User Permissions.
+	frappe.has_permission(ref_doctype, doc=ref_docname, throw=True)
+
 	tasks = get_open_todos(ref_doctype, ref_docname)
 	events = get_open_events(ref_doctype, ref_docname)
 	tasks_history = get_closed_todos(ref_doctype, ref_docname)
@@ -177,6 +203,11 @@ def get_open_events(ref_doctype, ref_docname):
 
 def get_closed_events(ref_doctype, ref_docname):
 	return get_filtered_events(ref_doctype, ref_docname, open=False)
+
+
+def can_read_source(doctype, docname, ignore_permissions=False):
+	# whatever is carried forward belongs to the source document, so its read access decides
+	return bool(ignore_permissions) or frappe.has_permission(doctype, "read", docname)
 
 
 def get_filtered_todos(ref_doctype, ref_docname, status: str | tuple[str, str]):
@@ -256,13 +287,11 @@ class CRMNote(Document):
 
 	@frappe.whitelist()
 	def edit_note(self, note: str, row_id: str):
-		# db_update() skips the write check that save() does in add_note/delete_note
-		self.check_permission("write")
-
 		for d in self.notes:
 			if cstr(d.name) == row_id:
 				d.note = note
-				d.db_update()
+				break
+		self.save()
 
 	@frappe.whitelist()
 	def delete_note(self, row_id):

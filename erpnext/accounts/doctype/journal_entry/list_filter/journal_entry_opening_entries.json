@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"voucher_type\", \"label\": \"Entry Type\"}, {\"fieldname\": \"posting_date\", \"label\": \"Posting Date\"}, {\"fieldname\": \"total_debit\", \"label\": \"Total Debit\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.572326",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Opening Entries",
+ "filters": "[[\"Journal Entry\", \"docstatus\", \"=\", 1], [\"Journal Entry\", \"is_opening\", \"=\", \"Yes\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.572326",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Journal Entry-Opening Entries",
+ "owner": "Administrator",
+ "reference_doctype": "Journal Entry",
+ "route_signature": "docstatus=1&is_opening=Yes",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

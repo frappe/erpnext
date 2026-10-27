@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"batch_id\", \"label\": \"Batch ID\"}, {\"fieldname\": \"item\", \"label\": \"Item\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"batch_qty\", \"label\": \"Batch Quantity\"}, {\"fieldname\": \"stock_uom\", \"label\": \"Batch UOM\"}, {\"fieldname\": \"expiry_date\", \"label\": \"Expiry Date\"}]",
+ "creation": "2026-09-30 21:12:57.003511",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "In Stock",
+ "filters": "[[\"Batch\", \"disabled\", \"=\", 0], [\"Batch\", \"batch_qty\", \">\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:57.003511",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Batch-In Stock",
+ "owner": "Administrator",
+ "reference_doctype": "Batch",
+ "route_signature": "batch_qty=[\">\",0]&disabled=0",
+ "sort_field": "expiry_date",
+ "sort_order": "asc"
+}

@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
@@ -13,11 +15,19 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import create_gain_loss_journal, get_linked_exchange_gain_loss_journal
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 	prepare_data_for_internal_transfer,
 )
+from erpnext.controllers.accounts_controller import get_payment_term_details, get_payment_terms
 from erpnext.projects.doctype.project.test_project import make_project
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1342,9 +1352,12 @@ class TestAccountsController(ERPNextTestSuite):
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr), 2)
-		self.assertEqual(exc_je_for_cr, exc_je_for_si)
+		self.assertCountEqual(
+			exc_je_for_cr,
+			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
+		)
 
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 1)
@@ -1365,6 +1378,67 @@ class TestAccountsController(ERPNextTestSuite):
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 2)
 		self.assert_ledger_outstanding(si.doctype, si.name, 160.0, 2.0)
+
+	def test_31_unreconcile_return_exchange_journal(self):
+		invoice = self.create_sales_invoice(rate=100, conversion_rate=85)
+		cr_note = self.create_sales_invoice(qty=-1, rate=100, conversion_rate=80, do_not_save=True)
+		cr_note.is_return = 1
+		cr_note.save().submit()
+		pr = self.create_payment_reconciliation()
+
+		def create_legacy_exchange(*args):
+			# Use the pre-upgrade references with normal journal creation and submission.
+			return create_gain_loss_journal(*args[:12], invoice.doctype, invoice.name, *args[14:])
+
+		for legacy in (True, False):
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				frappe._dict(
+					invoices=[row.as_dict() for row in pr.invoices if row.invoice_number == invoice.name],
+					payments=[row.as_dict() for row in pr.payments if row.reference_name == cr_note.name],
+				)
+			)
+			if legacy:
+				with patch(
+					"erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.create_gain_loss_journal",
+					create_legacy_exchange,
+				):
+					pr.reconcile()
+			else:
+				pr.reconcile()
+
+			(exchange_name,) = get_linked_exchange_gain_loss_journal(cr_note.doctype, cr_note.name, 1)
+			exchange = frappe.get_doc("Journal Entry", exchange_name)
+			journal_name = next(
+				row.parent
+				for row in self.get_journals_for(cr_note.doctype, cr_note.name)
+				if row.parent != exchange.name
+			)
+			self.assertEqual(exchange.total_debit, 500)
+			self.assertCountEqual(
+				[(row.reference_type, row.reference_name) for row in exchange.accounts],
+				[
+					(cr_note.doctype, cr_note.name),
+					(invoice.doctype, invoice.name) if legacy else ("Journal Entry", journal_name),
+				],
+			)
+			for doc in (invoice, cr_note):
+				self.assertEqual(doc.reload().outstanding_amount, 0)
+				self.assert_ledger_outstanding(doc.doctype, doc.name, 0, 0)
+
+			unreconcile = frappe.new_doc(
+				"Unreconcile Payment",
+				company=self.company,
+				voucher_type="Journal Entry",
+				voucher_no=journal_name,
+			)
+			unreconcile.add_references()
+			self.assertEqual(len(unreconcile.allocations), 2)
+			unreconcile.insert().submit()
+			self.assertEqual(exchange.reload().docstatus, 2)
+			self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": exchange.name, "is_cancelled": 0}))
+			self.assertEqual(invoice.reload().outstanding_amount, 100)
+			self.assertEqual(cr_note.reload().outstanding_amount, -100)
 
 	def test_40_cost_center_from_payment_entry(self):
 		"""
@@ -1489,9 +1563,12 @@ class TestAccountsController(ERPNextTestSuite):
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr_note), 2)
-		self.assertEqual(exc_je_for_si, exc_je_for_cr_note)
+		self.assertCountEqual(
+			exc_je_for_cr_note,
+			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
+		)
 
 		for x in exc_je_for_si + exc_je_for_cr_note:
 			with self.subTest(x=x):
@@ -1604,9 +1681,12 @@ class TestAccountsController(ERPNextTestSuite):
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr_note), 2)
-		self.assertEqual(exc_je_for_si, exc_je_for_cr_note)
+		self.assertCountEqual(
+			exc_je_for_cr_note,
+			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
+		)
 
 		for x in exc_je_for_si + exc_je_for_cr_note:
 			with self.subTest(x=x):
@@ -2411,3 +2491,72 @@ class TestAccountsController(ERPNextTestSuite):
 		si.posting_date = "2026-01-01"
 		si.save()
 		self.assertEqual(si.name, "SI-01-2026-00002")
+
+	def test_get_payment_terms_respects_user_permission(self):
+		user = make_fenced_user("payment-terms-user@example.com", ["Sales User"])
+
+		with as_user(user):
+			schedule = get_payment_terms("_Test Payment Term Template 1", nowdate(), 100, 100)
+		self.assertEqual(schedule[0].get("payment_term"), "_Test EONM")
+
+		make_fenced_user(user, ["Sales User"], [("Payment Terms Template", "_Test Payment Term Template")])
+		with as_user(user):
+			schedule = get_payment_terms("_Test Payment Term Template", nowdate(), 100, 100)
+			self.assertEqual(len(schedule), 2)
+			self.assertEqual(schedule[0].get("payment_amount"), 50)
+
+			assert_refused_without(
+				self, ["_Test EONM"], get_payment_terms, "_Test Payment Term Template 1", nowdate(), 100, 100
+			)
+
+			def build_kwargs(terms_template):
+				return {
+					"terms_template": terms_template,
+					"posting_date": nowdate(),
+					"grand_total": 100,
+					"base_grand_total": 100,
+				}
+
+			assert_refused_for_names(
+				self,
+				get_payment_terms,
+				build_kwargs,
+				[["_Test Payment Term Template 1"]],
+				type_gated=True,
+				caller_supplied=True,
+			)
+
+	def test_get_payment_term_details_respects_user_permission(self):
+		user = make_fenced_user("payment-term-details-user@example.com", ["Sales User"])
+
+		with as_user(user):
+			details = get_payment_term_details("_Test COD", nowdate(), 100, 100)
+		self.assertEqual(details.credit_days, 0)
+
+		make_fenced_user(user, ["Sales User"], [("Payment Term", "_Test N30")])
+		with as_user(user):
+			details = get_payment_term_details("_Test N30", nowdate(), 100, 100)
+			self.assertEqual(details.credit_days, 30)
+			self.assertEqual(details.payment_amount, 50)
+
+			assert_refused_without(
+				self,
+				["Day(s) after invoice date"],
+				get_payment_term_details,
+				"_Test COD",
+				nowdate(),
+				100,
+				100,
+			)
+
+			def build_kwargs(term):
+				return {"term": term, "posting_date": nowdate(), "grand_total": 100, "base_grand_total": 100}
+
+			assert_refused_for_names(
+				self,
+				get_payment_term_details,
+				build_kwargs,
+				[["_Test COD"]],
+				type_gated=True,
+				caller_supplied=True,
+			)

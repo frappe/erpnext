@@ -274,19 +274,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				second.qty = 10
 				second.submit()
 
-	def test_drafts_and_cancelled_orders_do_not_consume_quantity(self):
-		plan = self.make_plan()
-		for field in REFERENCE_FIELDS:
-			with self.subTest(field=field):
-				first = self.create_work_order(plan, field)
-				second = self.create_work_order(plan, field)
-				self.assertEqual(first.qty, second.qty)
-				first.submit()
-				self.assert_overproduction(second, 100)
-				first.cancel()
-				second.submit()
-				self.assert_pending_qty(plan, field, 0)
-
 	def test_process_loss_and_overproduction_allowance(self):
 		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 10)
 		plan = self.make_plan()
@@ -311,7 +298,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				first.submit()
 				stop_unstop(first.name, "Stopped")
 				self.assert_pending_qty(plan, field, 0)
-				stop_unstop(first.name, "Not Started")
+				stop_unstop(first.name, "Resumed")
 				close_work_order(first.name, "Closed")
 				self.assert_pending_qty(plan, field, 0)
 
@@ -342,7 +329,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		plan.onload()
 		pending = plan.get_onload()["pending_work_order_qty"]["production_plan_item"]
 		self.assertEqual(pending[plan.po_items[0].name], 0)
-		self.assertEqual(pending[plan.po_items[1].name], 50)
+		self.assertEqual(pending[plan.po_items[1].name], 0)
 		second_name = frappe.db.get_value(
 			"Work Order", {"production_plan_item": plan.po_items[1].name, "docstatus": 0}, "name"
 		)

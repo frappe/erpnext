@@ -5,11 +5,14 @@
 from unittest.mock import MagicMock, call, patch
 
 import frappe
-from frappe.utils import add_days, add_to_date, flt, now, nowdate, today
+from frappe.utils import add_days, add_to_date, flt, get_datetime, now, nowdate, today
 
+from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
+from erpnext.accounts.doctype.accounting_period.test_accounting_period import create_accounting_period
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
+from erpnext.stock import stock_ledger
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
@@ -17,11 +20,14 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	enqueue_reposting_entry,
 	execute_reposting_entry,
 	in_configured_timeslot,
+	repost,
 	run_parallel_reposting,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
+from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
-from erpnext.stock.utils import PendingRepostingError
+from erpnext.stock.utils import PendingRepostingError, get_combine_datetime
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -85,6 +91,171 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 				in_configured_timeslot(repost_settings, case.get("current_time")),
 				msg=f"Exepcted false from : {case}",
 			)
+
+	def make_queued_item_repost(self, item_code, posting_date):
+		repost = frappe.new_doc("Repost Item Valuation")
+		repost.update(
+			{
+				"based_on": "Item and Warehouse",
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"posting_date": posting_date,
+				"posting_time": "00:00:00",
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
+		return repost
+
+	def test_repost_queued_after_start_is_not_skipped(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		queued_during_run = self.make_queued_item_repost(item_code, add_days(today(), -8))
+
+		running.deduplicate_similar_repost()
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
+	def test_resumed_repost_keeps_its_first_start_time(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		stock_ledger.update_args_in_repost_item_valuation(running, 0, [], set())
+		queued_during_run = self.make_queued_item_repost(item_code, add_days(today(), -8))
+
+		running.flags.repost_started_at = None
+		repost(running)
+		running.deduplicate_similar_repost()
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
+	def test_dependant_repost_keeps_requests_queued_after_start(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		queued_during_run = self.make_queued_item_repost(fg_item, add_days(today(), -8))
+
+		stock_ledger.skip_reposts_covered_by_dependant_repost(
+			running,
+			{(fg_item, "_Test Warehouse - _TC"): get_combine_datetime(add_days(today(), -10), "00:00:00")},
+		)
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
+	def test_reposting_data_file_is_read_as_bytes(self):
+		from erpnext.stock.stock_ledger import get_reposting_data
+
+		data, content = get_text_decodable_gzip_payload()
+		self.assertTrue(content)
+
+		repost = self.make_queued_item_repost(make_item(properties={"is_stock_item": 1}).name, today())
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"repost_item_valuation-{repost.name}.json.gz",
+				"attached_to_doctype": repost.doctype,
+				"attached_to_name": repost.name,
+				"attached_to_field": "reposting_data_file",
+				"is_private": 1,
+				"content": content,
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertEqual(get_reposting_data(file.file_url), data)
+
+	def test_restart_only_failed_reposts(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
+		repost.db_set("status", "Completed")
+		self.assertRaises(frappe.ValidationError, repost.restart_reposting)
+
+		repost.db_set("status", "Failed")
+		repost.restart_reposting()
+		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost.name, "status"), "Queued")
+
+	def test_restart_checks_the_saved_status(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
+		repost.db_set({"status": "Completed", "current_index": 1})
+		repost.status = "Failed"
+
+		self.assertRaises(frappe.ValidationError, repost.restart_reposting)
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", repost.name, ["status", "current_index"]),
+			("Completed", 1),
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_repost_uses_allow_zero_rate(self):
+		item_code = make_item(properties={"is_stock_item": 1, "allow_negative_stock": 1}).name
+		warehouse = "Stores - TCP1"
+		receipt = make_stock_entry(
+			item_code=item_code, to_warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -20)
+		)
+		make_stock_entry(
+			item_code=item_code, from_warehouse=warehouse, qty=5, posting_date=add_days(today(), -10)
+		)
+		receipt.cancel()
+
+		repost_doc = frappe.get_last_doc(
+			"Repost Item Valuation", filters={"voucher_no": receipt.name, "status": "Queued"}
+		)
+		repost_doc.db_set("allow_zero_rate", 1)
+		repost(repost_doc)
+
+		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost_doc.name, "status"), "Completed")
+
+	def test_repost_refused_inside_stock_freeze(self):
+		fields = ["stock_frozen_upto", "stock_auth_role"]
+		original = {field: frappe.db.get_single_value("Stock Settings", field) for field in fields}
+		self.addCleanup(frappe.db.set_single_value, "Stock Settings", original)
+		frappe.db.set_single_value(
+			"Stock Settings", {"stock_frozen_upto": add_days(today(), -12), "stock_auth_role": ""}
+		)
+
+		self.assertRaises(
+			StockFreezeError, self.make_queued_item_repost, "_Test Item", add_days(today(), -20)
+		)
+
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_backdated_entry_refused_when_later_voucher_in_closed_period(self):
+		warehouse = "Stores - TCP1"
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item_code, to_warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -20)
+		)
+		make_stock_entry(
+			item_code=item_code, from_warehouse=warehouse, qty=4, posting_date=add_days(today(), -5)
+		)
+		period = create_accounting_period(
+			company="_Test Company with perpetual inventory",
+			start_date=add_days(today(), -8),
+			end_date=add_days(today(), -2),
+			period_name=frappe.generate_hash(length=10),
+		)
+		period.closed_documents = []
+		period.append("closed_documents", {"document_type": "Stock Entry", "closed": 1})
+		period.insert()
+
+		self.assertRaises(
+			ClosedAccountingPeriod,
+			make_stock_entry,
+			item_code=item_code,
+			to_warehouse=warehouse,
+			qty=10,
+			rate=50,
+			posting_date=add_days(today(), -15),
+		)
 
 	def test_clear_old_logs(self):
 		# create 10 logs
@@ -421,7 +592,8 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			}
 		)
 
-		self.assertRaises(frappe.ValidationError, riv.save)
+		riv.save()
+		self.assertFalse(riv.get_closing_stock_balance())
 		doc.cancel()
 
 	def test_recalculate_valuation_rate_for_purchase_receipt(self):
@@ -480,6 +652,24 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(se, [{"incoming_rate": 150}])
 
+	def test_recalculate_valuation_rate_not_allowed_for_material_transfer(self):
+		item = self.make_item().name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		transfer = make_stock_entry(
+			item_code=item, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=transfer.doctype,
+			voucher_no=transfer.name,
+			recalculate_valuation_rate=1,
+			posting_date=transfer.posting_date,
+			posting_time=transfer.posting_time,
+		)
+		self.assertRaises(frappe.ValidationError, riv.save)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
@@ -530,6 +720,55 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(detail_additional_cost, 2), flt(transfer.total_additional_costs, 2))
 		self.assertEqual(flt(net_added_to_stock, 2), flt(transfer.total_additional_costs, 2))
 
+	def test_repost_recalculates_transfer_with_additional_cost_once(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		source, target = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=source, qty=10, rate=100, posting_date=add_days(today(), -2))
+
+		transfer = make_stock_entry(company="_Test Company", purpose="Material Transfer", do_not_save=True)
+		transfer.items = []
+		for _ in range(5):
+			transfer.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"s_warehouse": source,
+					"t_warehouse": target,
+					"uom": "Nos",
+					"conversion_factor": 1,
+				},
+			)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "freight",
+				"amount": 50,
+			},
+		)
+		transfer.insert()
+		transfer.submit()
+
+		with patch.object(
+			StockEntry,
+			"calculate_rate_and_amount",
+			autospec=True,
+			side_effect=StockEntry.calculate_rate_and_amount,
+		) as calculate:
+			make_stock_entry(
+				item_code=item, target=source, qty=10, rate=200, posting_date=add_days(today(), -1)
+			)
+
+		transfer_calls = [c for c in calculate.call_args_list if c.args[0].name == transfer.name]
+		self.assertEqual(len(transfer_calls), 1)
+
+		transfer.load_from_db()
+		self.assertEqual([row.valuation_rate for row in transfer.items], [160] * 5)
+		self.assertSLEs(transfer, [{"incoming_rate": 160}] * 5, sle_filters={"warehouse": target})
+
 	def test_repost_multi_line_moving_average_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
@@ -578,6 +817,228 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			riv.submit()
 
 			self.assertSLEs(return_pr, expected_sles)
+
+	def test_skip_later_repost_covered_by_manufacture_dependant(self):
+		"""A finished good reposted as a dependant of its raw material makes a later
+		repost queued for the same finished good and warehouse redundant."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -5),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		# a repost queued for the finished good, dated after the manufacture entry
+		later_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=fg,
+			warehouse=warehouse,
+			posting_date=today(),
+			posting_time="00:00:01",
+		)
+		later_riv.flags.dont_run_in_test = True
+		later_riv.submit()
+		self.assertEqual(later_riv.status, "Queued")
+
+		# reposting the raw material walks the finished good forward as a dependant
+		rm_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=rm,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="00:00:01",
+		)
+		rm_riv.submit()
+
+		later_riv.load_from_db()
+		self.assertEqual(later_riv.status, "Skipped")
+
+	def test_repost_covering_earlier_date_is_not_skipped(self):
+		"""A repost for the finished good that starts before the manufacture entry still
+		has work to do, so it must survive."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+		make_stock_entry(item_code=fg, target=warehouse, qty=5, rate=50, posting_date=add_days(today(), -9))
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -5),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		earlier_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=fg,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -9),
+			posting_time="00:00:01",
+		)
+		earlier_riv.flags.dont_run_in_test = True
+		earlier_riv.submit()
+
+		rm_riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=rm,
+			warehouse=warehouse,
+			posting_date=add_days(today(), -10),
+			posting_time="00:00:01",
+		)
+		rm_riv.submit()
+
+		earlier_riv.load_from_db()
+		self.assertEqual(earlier_riv.status, "Queued")
+		earlier_riv.set_status("Skipped")
+
+	def test_repost_covers_every_entry_once_across_batches(self):
+		"""Full rows are fetched REPOST_SLE_BATCH_SIZE at a time, and the prefetched
+		window is dropped whenever a dependant repost re-sorts the queue. Every active
+		entry must still be reposted exactly once, in posting order."""
+		rm = self.make_item(properties={"valuation_method": "FIFO"}).name
+		fg = self.make_item(properties={"valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=rm, target=warehouse, qty=100, rate=100, posting_date=add_days(today(), -10)
+		)
+		for day, rate in ((-9, 110), (-8, 120), (-7, 130)):
+			make_stock_entry(
+				item_code=rm, target=warehouse, qty=10, rate=rate, posting_date=add_days(today(), day)
+			)
+
+		manufacture = make_stock_entry(
+			item_code=rm,
+			source=warehouse,
+			qty=10,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -6),
+			do_not_save=True,
+		)
+		manufacture.append(
+			"items",
+			{
+				"item_code": fg,
+				"t_warehouse": warehouse,
+				"qty": 1,
+				"transfer_qty": 1,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+				"is_finished_item": 1,
+			},
+		)
+		manufacture.save()
+		manufacture.submit()
+
+		# the finished good is pulled in as a dependant while the raw material is being
+		# reposted, so the queue grows and is re-sorted part way through
+		for day in (-5, -4, -3):
+			make_stock_entry(
+				item_code=fg, target=warehouse, qty=2, rate=200, posting_date=add_days(today(), day)
+			)
+
+		reposted = []
+		fetched_batches = []
+		original_repost = update_entries_after.repost_stock_ledger_entry
+		original_fetch = stock_ledger.get_sle_entries_by_names
+
+		def record_repost(self, sle):
+			reposted.append(sle.name)
+			return original_repost(self, sle)
+
+		def record_fetch(names):
+			fetched_batches.append(len(names))
+			return original_fetch(names)
+
+		batch_size = 2
+		with (
+			patch.object(stock_ledger, "REPOST_SLE_BATCH_SIZE", batch_size),
+			patch.object(update_entries_after, "repost_stock_ledger_entry", record_repost),
+			patch.object(stock_ledger, "get_sle_entries_by_names", record_fetch),
+		):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Item and Warehouse",
+				item_code=rm,
+				warehouse=warehouse,
+				posting_date=add_days(today(), -10),
+				posting_time="00:00:00",
+			)
+			riv.submit()
+
+		active_sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": ("in", [rm, fg]), "warehouse": warehouse, "is_cancelled": 0},
+			fields=["name", "posting_datetime", "creation"],
+		)
+		self.assertGreater(len(active_sles), batch_size)
+
+		# every active entry was reposted, and none of them twice
+		self.assertEqual(sorted(reposted), sorted(row.name for row in active_sles))
+		self.assertEqual(len(reposted), len(set(reposted)))
+
+		# and they were reposted in posting order, across the batch boundaries and the
+		# flush that the dependant discovery triggers
+		posting_order = {
+			row.name: (get_datetime(row.posting_datetime), get_datetime(row.creation)) for row in active_sles
+		}
+		reposted_order = [posting_order[name] for name in reposted]
+		self.assertEqual(reposted_order, sorted(reposted_order))
+
+		# the rows really were fetched a batch at a time, never the whole queue at once
+		self.assertGreater(len(fetched_batches), 1)
+		self.assertLessEqual(max(fetched_batches), batch_size)
 
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
@@ -718,3 +1179,20 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(kwargs["job_id"], f"{REPOSTING_JOB_ID_PREFIX}RIV-X")
 		self.assertTrue(kwargs["deduplicate"])
 		self.assertTrue(kwargs["continue_reposting"])
+
+
+def get_text_decodable_gzip_payload():
+	import gzip
+	import json
+
+	for idx in range(10000):
+		data = {"repost_affected_transaction": [["Stock Entry", f"MAT-STE-{idx}"]]}
+		content = gzip.compress(json.dumps(data).encode(), mtime=0)
+		for encoding in ("windows-1250", "windows-1252"):
+			try:
+				content.decode(encoding)
+				return data, content
+			except UnicodeDecodeError:
+				continue
+
+	return None, None

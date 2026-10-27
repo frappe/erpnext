@@ -12,33 +12,40 @@
  "doctype": "Module Onboarding",
  "idx": 0,
  "is_complete": 0,
- "modified": "2026-02-25 16:59:39.508221",
+ "modified": "2026-10-04 01:50:19.483034",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Onboarding",
  "owner": "Administrator",
  "steps": [
   {
+   "is_optional": 0,
    "step": "Create Raw Materials"
   },
   {
+   "is_optional": 0,
    "step": "Create Finished Goods"
   },
   {
-   "step": "Create Operations"
-  },
-  {
+   "is_optional": 0,
    "step": "Create Bill of Materials"
   },
   {
+   "is_optional": 0,
    "step": "Create Work Order"
   },
   {
-   "step": "View Work Order Summary Report"
+   "is_optional": 0,
+   "step": "Finish Work Order"
   },
   {
-   "step": "Review Manufacturing Settings"
+   "is_optional": 1,
+   "step": "Create Production Plan"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Work Order Summary Report"
   }
  ],
- "title": "Manufacturing Setup"
+ "title": "Plan and run production"
 }

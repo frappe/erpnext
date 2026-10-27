@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:parcel_template_name",
  "creation": "2020-07-09 11:43:43.470339",
+ "description": "A parcel size you ship often.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -51,8 +52,9 @@
    "unique": 1
   }
  ],
+ "icon": "package",
  "links": [],
- "modified": "2026-03-29 00:00:00.000000",
+ "modified": "2026-10-07 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Parcel Template",
@@ -67,6 +69,19 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "select": 1,
    "share": 1,
    "write": 1
   }

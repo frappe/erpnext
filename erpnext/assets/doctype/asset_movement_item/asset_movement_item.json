@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2019-10-07 18:49:00.737806",
  "doctype": "DocType",
  "editable_grid": 1,

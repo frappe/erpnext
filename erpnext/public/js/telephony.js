@@ -27,7 +27,7 @@ frappe.ui.form.ControlData = class ControlData extends frappe.ui.form.ControlDat
 					`
 					<span class="phone-btn">
 						<a class="btn-open no-decoration" title="${__("Make a call")}">
-							${frappe.utils.icon("call")}
+							${frappe.utils.icon("phone")}
 					</span>
 				`
 				)

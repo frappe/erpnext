@@ -5,9 +5,10 @@
  "autoname": "field:item_group_name",
  "creation": "2013-03-28 10:35:29",
  "default_view": "Tree",
- "description": "An Item Group is a way to classify items based on types.",
+ "description": "Groups items, for pricing, defaults and reporting.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-group",
  "engine": "InnoDB",
  "field_order": [
   "gs",
@@ -45,6 +46,7 @@
    "fieldname": "parent_item_group",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Parent Item Group",
    "oldfieldname": "parent_item_group",
@@ -57,6 +59,7 @@
    "description": "Only leaf nodes are allowed in transaction",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Is Group",
    "oldfieldname": "is_group",
@@ -130,7 +133,7 @@
    "report_hide": 1
   }
  ],
- "icon": "fa fa-sitemap",
+ "icon": "boxes",
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,

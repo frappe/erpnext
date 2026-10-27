@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Stock Entry",
+ "creation": "2026-10-04 00:49:20.676633",
+ "description": "Raw materials come out of stock and the finished products go in. From the work order, **Finish** fills this in for you. See [Stock Entry](https://docs.frappe.io/erpnext/user/manual/en/stock-entry).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:49:02.877040",
+ "modified_by": "Administrator",
+ "name": "Finish Work Order",
+ "owner": "Administrator",
+ "reference_document": "Stock Entry",
+ "route_options": "{\n    \"purpose\": \"Manufacture\",\n    \"stock_entry_type\": \"Manufacture\"\n}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Finish making it",
+ "validate_action": 1
+}

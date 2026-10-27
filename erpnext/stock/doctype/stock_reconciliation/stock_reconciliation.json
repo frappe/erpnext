@@ -2,9 +2,10 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2013-03-28 10:35:31",
- "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.",
+ "description": "Sets stock quantities and values to what is actually in your warehouses.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-reconciliation",
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
@@ -55,7 +56,7 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "\nOpening Stock\nStock Reconciliation",
+   "options": "\nOpening Stock\nStock Reconciliation\nAdjustment Entry",
    "reqd": 1
   },
   {
@@ -188,11 +189,11 @@
    "label": "Last Scanned Warehouse"
   }
  ],
- "icon": "fa fa-upload-alt",
+ "icon": "scale",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 19:21:20.179658",
+ "modified": "2026-09-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

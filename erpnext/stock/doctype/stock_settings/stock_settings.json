@@ -1,8 +1,9 @@
 {
  "actions": [],
  "creation": "2013-06-24 16:37:54",
- "description": "Default settings for your stock-related transactions",
+ "description": "How items, warehouses and stock transactions work.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-settings",
  "engine": "InnoDB",
  "field_order": [
   "defaults_tab",
@@ -23,9 +24,6 @@
   "allow_to_edit_stock_uom_qty_for_purchase",
   "allow_to_edit_stock_uom_qty_for_stock_entry",
   "allow_uom_with_conversion_rate_defined_in_item",
-  "warehouse_defaults_section",
-  "default_warehouse",
-  "sample_retention_warehouse",
   "stock_validations_tab",
   "negative_stock_section",
   "allow_negative_stock",
@@ -56,6 +54,7 @@
   "auto_bundle_section",
   "auto_create_serial_and_batch_bundle_for_outward",
   "do_not_update_serial_batch_on_creation_of_auto_bundle",
+  "auto_map_raw_materials_to_finished_goods",
   "set_serial_and_batch_bundle_naming_based_on_naming_series",
   "naming_series_preview",
   "configure_series",
@@ -111,19 +110,6 @@
    "in_list_view": 1,
    "label": "Default Stock UOM",
    "options": "UOM"
-  },
-  {
-   "fieldname": "default_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
-   "fieldname": "sample_retention_warehouse",
-   "fieldtype": "Link",
-   "label": "Sample Retention Warehouse",
-   "options": "Warehouse"
   },
   {
    "fieldname": "column_break_4",
@@ -260,7 +246,6 @@
    "label": "Disable Serial No and Batch selector"
   },
   {
-   "depends_on": "eval: doc.over_delivery_receipt_allowance>0",
    "description": "Users with this role are allowed to over deliver/receive against orders above the allowance percentage",
    "fieldname": "role_allowed_to_over_deliver_receive",
    "fieldtype": "Link",
@@ -362,15 +347,16 @@
   },
   {
    "default": "FIFO",
-   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "fieldname": "pick_serial_and_batch_based_on",
    "fieldtype": "Select",
    "label": "Pick Serial / Batch Based On",
-   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "mandatory_depends_on": "eval: doc.enable_serial_and_batch_no_for_item && doc.auto_create_serial_and_batch_bundle_for_outward",
    "options": "FIFO\nLIFO\nExpiry"
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
    "fieldtype": "Check",
    "label": "Auto create Serial and Batch Bundle for outward"
@@ -431,6 +417,7 @@
   },
   {
    "default": "1",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
@@ -472,6 +459,7 @@
   },
   {
    "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
    "fieldname": "set_serial_and_batch_bundle_naming_based_on_naming_series",
    "fieldtype": "Check",
    "label": "Set Serial and Batch Bundle Naming Based on Naming Series"
@@ -528,11 +516,6 @@
    "fieldname": "enable_serial_and_batch_no_for_item",
    "fieldtype": "Check",
    "label": "Activate Serial / Batch No for Item"
-  },
-  {
-   "fieldname": "warehouse_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Warehouse Defaults"
   },
   {
    "fieldname": "internal_transfer_rules_section",
@@ -598,14 +581,23 @@
   {
    "fieldname": "section_break_kcvr",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable_serial_and_batch_no_for_item",
+   "description": "On submit of a Manufacture / Repack entry, map the raw material serial / batch nos that were not mapped in draft to the finished goods, in order",
+   "fieldname": "auto_map_raw_materials_to_finished_goods",
+   "fieldtype": "Check",
+   "label": "Auto Map Raw Materials to Finished Goods",
+   "show_description_on_click": 1
   }
  ],
- "icon": "icon-cog",
+ "icon": "settings",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-01 23:35:02.896836",
+ "modified": "2026-10-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

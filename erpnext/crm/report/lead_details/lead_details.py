@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Concat_ws, Date
+from frappe.query_builder.functions import Concat_ws, Date, NullIf
 
 
 def execute(filters=None):
@@ -22,6 +22,7 @@ def get_columns():
 			"width": 150,
 		},
 		{"label": _("Lead Name"), "fieldname": "lead_name", "fieldtype": "Data", "width": 120},
+		{"label": _("Designation"), "fieldname": "job_title", "fieldtype": "Data", "width": 120},
 		{"fieldname": "status", "label": _("Status"), "fieldtype": "Data", "width": 100},
 		{
 			"fieldname": "lead_owner",
@@ -84,6 +85,7 @@ def get_data(filters):
 		.select(
 			lead.name,
 			lead.lead_name,
+			lead.job_title,
 			lead.status,
 			lead.lead_owner,
 			lead.territory,
@@ -93,7 +95,9 @@ def get_data(filters):
 			lead.phone,
 			lead.owner,
 			lead.company,
-			(Concat_ws(", ", address.address_line1, address.address_line2)).as_("address"),
+			(Concat_ws(", ", NullIf(address.address_line1, ""), NullIf(address.address_line2, ""))).as_(
+				"address"
+			),
 			address.pincode,
 			address.city,
 			address.state,

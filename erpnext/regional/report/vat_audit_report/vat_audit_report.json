@@ -6,6 +6,7 @@
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
+ "documentation_url": "https://docs.frappe.io/erpnext/vat_audit_report",
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",

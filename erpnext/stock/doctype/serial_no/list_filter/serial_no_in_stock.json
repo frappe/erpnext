@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"warehouse\", \"label\": \"Warehouse\"}, {\"fieldname\": \"batch_no\", \"label\": \"Batch No\"}]",
+ "creation": "2026-09-30 21:12:56.993986",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "In Stock",
+ "filters": "[[\"Serial No\", \"status\", \"=\", \"Active\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.993986",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial No-In Stock",
+ "owner": "Administrator",
+ "reference_doctype": "Serial No",
+ "route_signature": "status=Active",
+ "sort_field": "item_code",
+ "sort_order": "asc"
+}

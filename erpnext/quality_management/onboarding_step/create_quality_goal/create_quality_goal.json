@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Quality Goal",
+ "creation": "2026-10-04 01:54:23.267989",
+ "description": "Something you want to measure and improve, like on-time delivery or returns, reviewed on a schedule you choose. See [Quality Management](https://docs.frappe.io/erpnext/user/manual/en/quality-management).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:54:23.267989",
+ "modified_by": "Administrator",
+ "name": "Create Quality Goal",
+ "owner": "Administrator",
+ "reference_document": "Quality Goal",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Set a quality goal",
+ "validate_action": 1
+}

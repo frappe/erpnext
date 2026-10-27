@@ -22,6 +22,8 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import apply_unscoped_filters
 from erpnext.stock.utils import get_stock_value_on
 
+STOCK_VALUE_TOLERANCE_PERCENT = 1
+
 
 class PeriodClosingVoucher(AccountsController):
 	# begin: auto-generated types
@@ -41,6 +43,7 @@ class PeriodClosingVoucher(AccountsController):
 		period_end_date: DF.Date
 		period_start_date: DF.Date
 		remarks: DF.SmallText
+		stock_value_difference: DF.Currency
 		transaction_date: DF.Date | None
 	# end: auto-generated types
 
@@ -165,13 +168,12 @@ class PeriodClosingVoucher(AccountsController):
 		)
 
 	def validate_stock_accounts_balance(self):
-		precision = frappe.get_precision("GL Entry", "debit")
-		account_balance = flt(self.get_stock_accounts_balance(), precision)
-		stock_value = flt(
-			get_stock_value_on(posting_date=self.period_end_date, company=self.company), precision
-		)
+		account_balance, stock_value, difference = self.get_stock_value_mismatch()
+		if not difference:
+			self.stock_value_difference = 0
+			return
 
-		if account_balance == stock_value:
+		if self.is_stock_value_difference_accepted(stock_value, difference):
 			return
 
 		currency = frappe.get_cached_value("Company", self.company, "default_currency")
@@ -185,6 +187,35 @@ class PeriodClosingVoucher(AccountsController):
 			),
 			title=_("Stock Value Mismatch"),
 		)
+
+	def is_stock_value_difference_accepted(self, stock_value, difference):
+		precision = frappe.get_precision("GL Entry", "debit")
+		return is_within_stock_value_tolerance(stock_value, difference) and (
+			flt(self.stock_value_difference, precision) == difference
+		)
+
+	def get_stock_value_mismatch(self):
+		precision = frappe.get_precision("GL Entry", "debit")
+		account_balance = flt(self.get_stock_accounts_balance(), precision)
+		stock_value = flt(
+			get_stock_value_on(posting_date=self.period_end_date, company=self.company), precision
+		)
+
+		return account_balance, stock_value, flt(account_balance - stock_value, precision)
+
+	@frappe.whitelist()
+	def get_stock_value_difference(self) -> dict:
+		if not self.has_stock_transactions():
+			return {}
+
+		account_balance, stock_value, difference = self.get_stock_value_mismatch()
+		return {
+			"account_balance": account_balance,
+			"stock_value": stock_value,
+			"difference": difference,
+			"tolerance": STOCK_VALUE_TOLERANCE_PERCENT,
+			"within_tolerance": bool(difference) and is_within_stock_value_tolerance(stock_value, difference),
+		}
 
 	def get_stock_accounts_balance(self):
 		gle = frappe.qb.DocType("GL Entry")
@@ -231,6 +262,9 @@ class PeriodClosingVoucher(AccountsController):
 				title=_("Stock Closing Entry Required"),
 			)
 
+		if closing_entry.status == "Outdated":
+			self.throw_outdated_stock_closing_entry(closing_entry)
+
 		if closing_entry.status != "Completed":
 			frappe.throw(
 				_(
@@ -250,12 +284,15 @@ class PeriodClosingVoucher(AccountsController):
 		).run()
 
 		if last_change and last_change[0][0] and last_change[0][0] > closing_entry.modified:
-			frappe.throw(
-				_(
-					"Stock transactions were created or modified after the Stock Closing Entry {0} was generated. Regenerate it before submitting the Period Closing Voucher."
-				).format(get_link_to_form("Stock Closing Entry", closing_entry.name)),
-				title=_("Stock Closing Entry Outdated"),
-			)
+			self.throw_outdated_stock_closing_entry(closing_entry)
+
+	def throw_outdated_stock_closing_entry(self, closing_entry):
+		frappe.throw(
+			_(
+				"Stock transactions were created or modified after the Stock Closing Entry {0} was generated. Regenerate it before submitting the Period Closing Voucher."
+			).format(get_link_to_form("Stock Closing Entry", closing_entry.name)),
+			title=_("Stock Closing Entry Outdated"),
+		)
 
 	def on_submit(self):
 		self.db_set("gle_processing_status", "In Progress")
@@ -667,3 +704,7 @@ def get_previous_closed_period_in_current_year(fiscal_year, company):
 		order_by="period_end_date desc",
 	)
 	return prev_closed_period_end_date
+
+
+def is_within_stock_value_tolerance(stock_value, difference):
+	return abs(difference) <= abs(stock_value) * STOCK_VALUE_TOLERANCE_PERCENT / 100
