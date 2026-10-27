@@ -140,6 +140,7 @@ class Employee(NestedSet):
 		):
 			if frappe.db.get_value("Department", self.department, "disabled"):
 				frappe.throw(_("Cannot assign a disabled Department"))
+		self.validate_department_company()
 		self.validate_sales_persons_can_be_disabled()
 		self.set_preferred_email()
 		self.validate_preferred_email()
@@ -445,6 +446,16 @@ class Employee(NestedSet):
 		):
 			if frappe.db.get_value("Employee", self.reports_to, "status") != "Active":
 				throw(_("An Active employee must report to an Active employee."))
+
+	def validate_department_company(self):
+		if self.department and (self.has_value_changed("department") or self.has_value_changed("company")):
+			department_company = frappe.db.get_value("Department", self.department, "company")
+			if department_company and department_company != self.company:
+				frappe.throw(
+					_("Department {0} does not belong to Company {1}").format(
+						frappe.bold(self.department), frappe.bold(self.company)
+					)
+				)
 
 	def on_trash(self):
 		self.update_nsm_model()
