@@ -10,6 +10,18 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmailDigest(ERPNextTestSuite):
+	def test_purchase_order_totals_use_company_currency(self):
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		digest.future_from_date = digest.future_to_date = today()
+		before = digest.get_purchase_order()["value"]
+		order = create_purchase_order(
+			transaction_date=today(), currency="USD", conversion_factor=83, qty=1, rate=100, do_not_save=True
+		)
+		order.insert()
+		order.submit()
+		self.assertNotEqual(order.base_grand_total, order.grand_total)
+		self.assertEqual(digest.get_purchase_order()["value"] - before, order.base_grand_total)
+
 	def test_document_totals_exclude_drafts(self):
 		digest = create_email_digest(company="_Test Company", do_not_save=True)
 		before = digest.get_total_on("Purchase Order", today(), today())[0].count
