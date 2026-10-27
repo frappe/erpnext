@@ -582,8 +582,6 @@ def apply_pricing_rule_on_transaction(doc):
 
 		for d in pricing_rules:
 			if d.price_or_product_discount == "Price":
-				if d.apply_discount_on:
-					doc.set("apply_discount_on", d.apply_discount_on)
 				# Variable to track whether the condition has been met
 				condition_met = False
 				fields_set = set()
@@ -598,6 +596,8 @@ def apply_pricing_rule_on_transaction(doc):
 						frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
 					else:
 						if not d.coupon_code_based:
+							if d.apply_discount_on:
+								doc.set("apply_discount_on", d.apply_discount_on)
 							doc.set(field, d.get(pr_field))
 							fields_set.add(field)
 							applied_rules.append(d.name)
@@ -608,6 +608,8 @@ def apply_pricing_rule_on_transaction(doc):
 							)
 							if coupon_code_pricing_rule == d.name:
 								# if selected coupon code is linked with pricing rule
+								if d.apply_discount_on:
+									doc.set("apply_discount_on", d.apply_discount_on)
 								doc.set(field, d.get(pr_field))
 								fields_set.add(field)
 								applied_rules.append(d.name)
@@ -615,13 +617,6 @@ def apply_pricing_rule_on_transaction(doc):
 								# Set the condition_met variable to True and break out of the loop
 								condition_met = True
 								break
-
-							else:
-								# reset discount if not linked
-								doc.set(field, 0)
-						else:
-							# if coupon code based but no coupon code selected
-							doc.set(field, 0)
 
 				if has_rule_discount and fields_set:
 					# clear the discount set by the previously applied rule which this rule does not set
