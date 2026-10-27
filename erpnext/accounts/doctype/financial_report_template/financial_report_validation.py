@@ -36,6 +36,8 @@ ALLOWED_FUNCTIONS = frozenset(FORMULA_FUNCTIONS) | frozenset(
 # These nodes are not supported by Frappe's safe_eval, so they are not allowed in formulas.
 UNSUPPORTED_NODES = (ast.NamedExpr, ast.Lambda)
 
+COLOR_PATTERN = re.compile(r"^(#[0-9A-Fa-f]{3,8}|[A-Za-z]+|(rgb|rgba|hsl|hsla)\([0-9.,%/\s]+\))$")
+
 
 def get_valid_api_method(api_path: str):
 	"""Resolve `api_path`, ensuring it is whitelisted and permits GET (i.e. read-only)."""
@@ -164,6 +166,7 @@ class TemplateStructureValidator(Validator):
 
 		result.merge(self._validate_reference_codes(template))
 		result.merge(self._validate_required_fields(template))
+		result.merge(self._validate_colors(template))
 
 		return result
 
@@ -235,6 +238,20 @@ class TemplateStructureValidator(Validator):
 							row_idx=row.idx,
 						)
 					)
+
+		return result
+
+	def _validate_colors(self, template) -> ValidationResult:
+		result = ValidationResult()
+
+		for row in template.rows:
+			if row.color and not COLOR_PATTERN.match(row.color.strip()):
+				result.add_error(
+					ValidationIssue(
+						message=_("Invalid color: '{0}'. Use a hex code such as #1F2937.").format(row.color),
+						row_idx=row.idx,
+					)
+				)
 
 		return result
 
