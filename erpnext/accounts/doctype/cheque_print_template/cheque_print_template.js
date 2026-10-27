@@ -27,7 +27,7 @@ frappe.ui.form.on("Cheque Print Template", {
 					<span style="top: {{ acc_pay_dist_from_top_edge }}cm;\
 						left: {{ acc_pay_dist_from_left_edge }}cm;\
 						border-bottom: solid 1px;border-top:solid 1px;\
-						position: absolute;"> {{ message_to_show || __("Account Pay Only") }} </span>\
+						position: absolute;"> {{ frappe.utils.escape_html(message_to_show || __("Account Pay Only")) }} </span>\
 					{% endif %}\
 					<span style="top: {{ date_dist_from_top_edge }}cm;\
 						left: {{ date_dist_from_left_edge }}cm;\

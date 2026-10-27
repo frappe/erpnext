@@ -1644,6 +1644,19 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 
 			self.assertFalse(gl_entries)
 
+	def test_lcv_rejects_material_transfer_stock_entry(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		transfer = make_stock_entry(
+			item_code="_Test Item", source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type="Stock Entry", receipt_document=transfer.name, do_not_save=True
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Manufacture or Repack", lcv.insert)
+
 	def test_landed_cost_voucher_does_not_change_qty_across_stock_reco(self):
 		"""LCV cost updates must not change quantity after a batch stock reconciliation."""
 		from erpnext.stock.doctype.item.test_item import make_item
