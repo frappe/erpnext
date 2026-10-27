@@ -792,8 +792,56 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
+<<<<<<< HEAD
 			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
 			self.update_work_order_data(for_quantity, process_loss_qty, time_in_mins, wo)
+=======
+			self.validate_produced_quantity(for_quantity, process_loss_qty, pending_qty, wo)
+			self.update_work_order_data(for_quantity, process_loss_qty, pending_qty, time_in_mins, wo)
+
+	def get_operation_totals(self):
+		for_quantity, time_in_mins, process_loss_qty, pending_qty = 0, 0, 0, 0
+
+		data = self.get_current_operation_data()
+		if data and len(data) > 0:
+			for_quantity = flt(data[0].completed_qty)
+			time_in_mins = flt(data[0].time_in_mins)
+			process_loss_qty = flt(data[0].process_loss_qty)
+			pending_qty = flt(data[0].pending_qty)
+
+		return for_quantity, time_in_mins, process_loss_qty, pending_qty
+
+	def update_semi_finished_good_details(self):
+		if not self.operation_id:
+			return
+
+		work_order = frappe.get_doc("Work Order", self.work_order)
+		if work_order.production_plan:
+			ProductionPlanWorkOrderQuantities(work_order.production_plan).lock_plan_row(work_order)
+
+		job_cards = frappe.get_all(
+			"Job Card",
+			filters={
+				"work_order": self.work_order,
+				"operation_id": self.operation_id,
+				"docstatus": 1,
+				"is_corrective_job_card": 0,
+			},
+			fields=["manufactured_qty", "total_completed_qty"],
+		)
+
+		completed_qty = sum(max(flt(row.manufactured_qty), flt(row.total_completed_qty)) for row in job_cards)
+
+		frappe.db.set_value("Work Order Operation", self.operation_id, "completed_qty", completed_qty)
+		if self.finished_good and work_order.production_item == self.finished_good:
+			work_order.db_set("produced_qty", sum(flt(row.manufactured_qty) for row in job_cards))
+			if work_order.production_plan:
+				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
+					work_order, process_loss_qty=work_order.process_loss_qty
+				)
+			work_order.update_work_order_qty_in_sales_orders()
+			work_order.db_set("status", work_order.get_status())
+>>>>>>> 48210c7 (fix(manufacturing): refresh the Sales Order's Work Order Qty when a Work Order produces or loses qty)
 
 	def update_corrective_in_work_order(self, wo):
 		wo.corrective_operation_cost = 0.0
@@ -825,8 +873,33 @@ class JobCard(Document):
 				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
 			)
 
+<<<<<<< HEAD
 	def update_work_order_data(self, for_quantity, process_loss_qty, time_in_mins, wo):
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
+=======
+	def update_work_order_data(self, for_quantity, process_loss_qty, pending_qty, time_in_mins, wo):
+		time_data = self.get_operation_time_data()
+
+		for data in wo.operations:
+			if data.get("name") == self.operation_id:
+				self.update_wo_operation_row(
+					data, for_quantity, process_loss_qty, pending_qty, time_in_mins, time_data
+				)
+
+		wo.flags.ignore_validate_update_after_submit = True
+		wo.update_operation_status(self.operation_id)
+		wo.calculate_operating_cost()
+		wo.set_actual_dates()
+
+		if wo.track_semi_finished_goods:
+			wo.set_process_loss_qty()
+			wo.update_work_order_qty_in_sales_orders()
+
+		wo.status = wo.get_status()
+		wo.save()
+
+	def get_operation_time_data(self):
+>>>>>>> 48210c7 (fix(manufacturing): refresh the Sales Order's Work Order Qty when a Work Order produces or loses qty)
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
