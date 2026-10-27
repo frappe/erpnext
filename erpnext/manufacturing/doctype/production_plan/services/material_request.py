@@ -28,7 +28,7 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	aggregate_bin_details,
 	get_bin_details,
 	get_item_data,
-	get_planned_process_loss_percentage,
+	get_plan_process_loss_percentage,
 	get_qty_before_process_loss,
 	get_sales_orders,
 	get_uom_conversion_factor,
@@ -354,7 +354,7 @@ def _item_details_for_row(doc, data, company, sub_assembly_items, existing_sub_a
 	planned_qty = data.get("required_qty") or data.get("planned_qty")
 	if data.get("bom_no") and not data.get("required_qty"):
 		# A finished good's Work Order is made before its process loss.
-		loss_percentage = get_planned_process_loss_percentage(data.get("bom_no"))
+		loss_percentage = get_plan_process_loss_percentage(doc, data.get("bom_no"))
 		planned_qty = get_qty_before_process_loss(planned_qty, loss_percentage, data.get("stock_uom"))
 	if data.get("bom") or data.get("bom_no"):
 		return _bom_item_details(

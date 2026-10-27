@@ -28,6 +28,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
+	consider_process_loss=False,
 ):
 	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
 	parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
@@ -49,6 +50,7 @@ def get_sub_assembly_items(
 			indent,
 			precision,
 			skip_available_sub_assembly_item,
+			consider_process_loss,
 		)
 		if d.value:
 			get_sub_assembly_items(
@@ -61,6 +63,7 @@ def get_sub_assembly_items(
 				warehouse,
 				indent=indent + 1,
 				skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+				consider_process_loss=consider_process_loss,
 			)
 
 
@@ -77,13 +80,16 @@ def _add_sub_assembly_child(
 	indent,
 	precision,
 	skip_available,
+	consider_process_loss,
 ):
 	required_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 	stock_qty = _resolve_available_sub_assembly(
 		d, required_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
 	)
 	if not d.is_phantom_item:
-		d.process_loss_percentage = get_planned_process_loss_percentage(d.value)
+		d.process_loss_percentage = (
+			get_planned_process_loss_percentage(d.value) if consider_process_loss else 0
+		)
 		stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage, d.stock_uom)
 		bom_data.append(
 			_sub_assembly_row(

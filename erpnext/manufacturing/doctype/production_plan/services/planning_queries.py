@@ -20,6 +20,13 @@ def get_planned_process_loss_percentage(bom_no):
 	return get_planned_loss_percentage(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
 
 
+def get_plan_process_loss_percentage(plan, bom_no):
+	"""BOM process loss % a Production Plan orders for, 0 unless it considers process loss."""
+	if not plan.get("consider_process_loss"):
+		return 0
+	return get_planned_process_loss_percentage(bom_no)
+
+
 def get_planned_loss_percentage(loss_percentage):
 	"""Process loss % to plan for, 0 when everything is lost."""
 	loss_percentage = flt(loss_percentage)

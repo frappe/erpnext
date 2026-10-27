@@ -8,7 +8,7 @@ from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
 from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
-	get_planned_process_loss_percentage,
+	get_plan_process_loss_percentage,
 	get_qty_before_process_loss,
 	get_uom_conversion_factor,
 )
@@ -254,7 +254,7 @@ def _process_subitem(
 			d.qty
 			if d.is_phantom_item
 			else get_qty_before_process_loss(
-				d.qty, get_planned_process_loss_percentage(child_bom), d.stock_uom
+				d.qty, get_plan_process_loss_percentage(doc, child_bom), d.stock_uom
 			)
 		)
 		get_subitems(
