@@ -8,7 +8,6 @@ import frappe
 import frappe.desk.notifications
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.core.doctype.user.user import STANDARD_USERS
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, IfNull, Sum
 from frappe.utils import (
@@ -83,25 +82,6 @@ class EmailDigest(Document):
 		self.set_dates()
 		self._accounts = {}
 		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
-
-	@frappe.whitelist()
-	def get_users(self):
-		"""get list of users"""
-		user_list = frappe.get_all(
-			"User",
-			filters={"name": ["not in", STANDARD_USERS], "user_type": ["!=", "Website User"]},
-			fields=["name", "enabled"],
-			order_by="enabled desc, name asc",
-		)
-
-		if self.recipient_list:
-			recipient_list = self.recipient_list.split("\n")
-		else:
-			recipient_list = []
-		for p in user_list:
-			p["checked"] = p["name"] in recipient_list and 1 or 0
-
-		frappe.response["user_list"] = user_list
 
 	@frappe.whitelist()
 	def send(self):
