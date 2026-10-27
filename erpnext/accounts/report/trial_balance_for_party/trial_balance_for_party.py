@@ -6,12 +6,8 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Sum
-<<<<<<< HEAD
 from frappe.utils import cint, flt
-=======
-from frappe.utils import cint, cstr, flt
 from pypika.terms import Bracket, LiteralValue
->>>>>>> f0c96eb (fix(accounts): apply user permissions in party balance reports)
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
 from erpnext.accounts.report.trial_balance.trial_balance import (
@@ -137,15 +133,9 @@ def get_opening_balances(filters, account_filter=None):
 	if account_filter:
 		query = query.where(GL_Entry.account.isin(account_filter))
 
-<<<<<<< HEAD
-=======
-	if finance_book_condition := get_finance_book_condition(GL_Entry, filters):
-		query = query.where(finance_book_condition)
-
 	if match_conditions := build_match_conditions("GL Entry"):
 		query = query.where(Bracket(LiteralValue(match_conditions)))
 
->>>>>>> f0c96eb (fix(accounts): apply user permissions in party balance reports)
 	gle = query.run(as_dict=True)
 
 	opening = frappe._dict()
@@ -181,15 +171,9 @@ def get_balances_within_period(filters, account_filter=None):
 	if account_filter:
 		query = query.where(GL_Entry.account.isin(account_filter))
 
-<<<<<<< HEAD
-=======
-	if finance_book_condition := get_finance_book_condition(GL_Entry, filters):
-		query = query.where(finance_book_condition)
-
 	if match_conditions := build_match_conditions("GL Entry"):
 		query = query.where(Bracket(LiteralValue(match_conditions)))
 
->>>>>>> f0c96eb (fix(accounts): apply user permissions in party balance reports)
 	gle = query.run(as_dict=True)
 
 	balances_within_period = frappe._dict()
