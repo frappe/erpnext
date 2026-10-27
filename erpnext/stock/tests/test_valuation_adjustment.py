@@ -600,6 +600,14 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		adjustment.items[0].valuation_rate = 90
 		self.assertRaises(frappe.ValidationError, adjustment.save)
 
+	def test_rows_are_checked_on_the_posting_date_set_on_save(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+
+		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
+		adjustment.set_posting_time = 0
+		self.assertRaises(frappe.ValidationError, adjustment.save)
+
 	def test_adjustment_entry_cannot_be_selected_manually(self):
 		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		make_stock_entry(item_code=item, target=WAREHOUSE, qty=10, rate=100)

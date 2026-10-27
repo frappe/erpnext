@@ -108,8 +108,7 @@ class StockReconciliation(StockController):
 	def validate_adjustment_entry(self):
 		"""An Adjustment Entry resets each item-warehouse to its rows (erpnext.stock.valuation_adjustment),
 		so none of the counting a reconciliation does applies to it."""
-		adjustment_entry = AdjustmentEntry(self)
-		adjustment_entry.validate_made_from_report()
+		AdjustmentEntry(self).validate_made_from_report()
 
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
@@ -120,7 +119,7 @@ class StockReconciliation(StockController):
 
 		self.validate_posting_time()
 		self.validate_expense_account()
-		adjustment_entry.validate()
+		AdjustmentEntry(self).validate()
 
 		if self._action == "submit":
 			self.validate_reserved_stock()
