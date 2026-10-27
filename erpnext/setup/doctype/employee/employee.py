@@ -332,8 +332,7 @@ class Employee(NestedSet):
 		if user.enabled == enable:
 			return
 
-		# Re-enabling restores access, so it needs write access on the User; disabling does not.
-		if enable and not user.has_permission("write"):
+		if enable and not self.can_reenable_user(user):
 			frappe.msgprint(
 				_("User {0} is disabled. Only a user who can edit Users can enable it.").format(
 					frappe.bold(self.user_id)
@@ -342,8 +341,27 @@ class Employee(NestedSet):
 			return
 
 		user.enabled = enable
-		# Keep linked User status in sync from the Employee lifecycle and record the audit log.
-		user.save(ignore_permissions=True)
+		# Keep linked User status in sync from the Employee lifecycle and record the audit log,
+		# which can_reenable_user reads.
+		user.save(ignore_permissions=True, ignore_version=False)
+
+	def can_reenable_user(self, user):
+		"""Allow if the session user can edit the User, or if an Employee status change disabled it last."""
+		if user.has_permission("write"):
+			return True
+
+		last_change = frappe.get_all(
+			"Version",
+			filters={"ref_doctype": "User", "docname": user.name, "data": ("like", '%"enabled"%')},
+			pluck="owner",
+			order_by="creation desc",
+			limit=1,
+		)
+		# Without User write access, the only way to disable a User is an Employee status change.
+		# Every user has their own User shared with them, so check role permissions only.
+		return bool(last_change) and not frappe.has_permission(
+			"User", "write", user=last_change[0], ignore_share_permissions=True
+		)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
