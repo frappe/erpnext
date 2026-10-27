@@ -1,6 +1,8 @@
 # Copyright (c) 2021, Wahni Green Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import ANY, patch
+
 import frappe
 
 from erpnext.accounts.doctype.ledger_merge.ledger_merge import start_merge
@@ -45,10 +47,14 @@ class TestLedgerMerge(ERPNextTestSuite):
 		parent = frappe.db.get_value("Account", "Administrative Test Expenses - _TC", "parent_account")
 		self.assertEqual(parent, "Indirect Test Expenses - _TC")
 
-		start_merge(doc.name)
+		with patch("frappe.publish_realtime") as publish_realtime:
+			start_merge(doc.name)
 
 		parent = frappe.db.get_value("Account", "Administrative Test Expenses - _TC", "parent_account")
 		self.assertEqual(parent, "Indirect Expenses - _TC")
+		# only users who can open the Ledger Merge are told about it
+		for event in ("ledger_merge_progress", "ledger_merge_refresh"):
+			publish_realtime.assert_any_call(event, ANY, doctype="Ledger Merge", docname=doc.name)
 
 		self.assertFalse(frappe.db.exists("Account", "Indirect Test Expenses - _TC"))
 

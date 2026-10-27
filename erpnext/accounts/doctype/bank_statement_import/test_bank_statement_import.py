@@ -2,6 +2,7 @@
 # See license.txt
 
 import json
+from unittest.mock import patch
 
 import frappe
 import mt940
@@ -385,8 +386,15 @@ class TestBankStatementImport(ERPNextTestSuite):
 				}
 			}
 		)
-		start_import(
-			data_import.name, bank_account.name, file.file_url, None, "_Test BSI Bank", template_options
+		with patch("frappe.publish_realtime") as publish_realtime:
+			start_import(
+				data_import.name, bank_account.name, file.file_url, None, "_Test BSI Bank", template_options
+			)
+		publish_realtime.assert_any_call(
+			"data_import_refresh",
+			{"data_import": data_import.name},
+			doctype="Bank Statement Import",
+			docname=data_import.name,
 		)
 
 		self.assertEqual(frappe.db.get_value("Bank Statement Import", data_import.name, "status"), "Success")
