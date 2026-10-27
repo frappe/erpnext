@@ -497,6 +497,7 @@ class EmailDigest(Document):
 			)
 			.where(
 				(so.transaction_date <= self.future_to_date)
+				& (so.docstatus == 1)
 				& (so.billing_status != "Fully Billed")
 				& (so.company == self.company)
 				& so.status.notin(["Closed", "Cancelled", "Completed"])
@@ -531,6 +532,7 @@ class EmailDigest(Document):
 			)
 			.where(
 				(so.transaction_date <= self.future_to_date)
+				& (so.docstatus == 1)
 				& (so.delivery_status != "Fully Delivered")
 				& (so.company == self.company)
 				& so.status.notin(["Closed", "Cancelled", "Completed"])
@@ -565,6 +567,7 @@ class EmailDigest(Document):
 			)
 			.where(
 				(po.transaction_date <= self.future_to_date)
+				& (po.docstatus == 1)
 				& (po.per_received < 100)
 				& (po.company == self.company)
 				& po.status.notin(["Closed", "Cancelled", "Completed"])
@@ -599,6 +602,7 @@ class EmailDigest(Document):
 			)
 			.where(
 				(po.transaction_date <= self.future_to_date)
+				& (po.docstatus == 1)
 				& (po.per_billed < 100)
 				& (po.company == self.company)
 				& po.status.notin(["Closed", "Cancelled", "Completed"])
@@ -757,6 +761,7 @@ class EmailDigest(Document):
 			)
 			.where(
 				(doc.transaction_date <= self.future_to_date)
+				& (doc.docstatus == 1)
 				& doc.status.notin(["Closed", "Cancelled", "Completed"])
 				& (doc.company == self.company)
 			)
@@ -778,8 +783,9 @@ class EmailDigest(Document):
 			.select(IfNull(Sum(quotation.grand_total), 0), Count("*"))
 			.where(
 				(quotation.transaction_date <= self.future_to_date)
+				& (quotation.docstatus == 1)
 				& (quotation.company == self.company)
-				& quotation.status.notin(["Ordered", "Cancelled", "Lost"])
+				& quotation.status.notin(["Ordered", "Cancelled", "Lost", "Expired"])
 			)
 			.run()
 		)[0]
@@ -789,8 +795,10 @@ class EmailDigest(Document):
 			.select(IfNull(Sum(quotation.grand_total), 0))
 			.where(
 				(quotation.transaction_date <= self.past_to_date)
+				& (quotation.docstatus == 1)
 				& (quotation.company == self.company)
 				& quotation.status.notin(["Ordered", "Cancelled", "Lost"])
+				& (quotation.valid_till.isnull() | (quotation.valid_till >= self.past_to_date))
 			)
 			.run()
 		)[0][0]
@@ -845,6 +853,7 @@ class EmailDigest(Document):
 			doc_type,
 			filters={
 				date_field: ["between", (from_date, to_date)],
+				"docstatus": 1,
 				"status": ["not in", ("Cancelled")],
 				"company": self.company,
 			},
