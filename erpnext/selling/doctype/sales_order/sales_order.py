@@ -2019,6 +2019,8 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
+		plan_item = qb.DocType("Production Plan Item")
+		precision = frappe.get_precision("Work Order", "qty")
 
 		items = []
 		item_codes = [i.item_code for i in so.items]
@@ -2037,7 +2039,13 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
+<<<<<<< HEAD
 						.select(Sum(wo.qty - wo.process_loss_qty))
+=======
+						.left_join(plan_item)
+						.on(plan_item.name == wo.production_plan_item)
+						.select(Sum(qty_against_sales_order(wo, plan_item)))
+>>>>>>> 0f205d9 (fix(manufacturing): count Work Orders against Sales Orders by output after planned process loss)
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
@@ -2047,7 +2055,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 						)
 						.run()[0][0]
 					)
-					pending_qty = stock_qty - total_work_order_qty
+					pending_qty = flt(stock_qty - total_work_order_qty, precision)
 				else:
 					pending_qty = stock_qty
 
