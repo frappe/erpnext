@@ -135,64 +135,6 @@ class AssetValueAdjustment(Document):
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
 		for dimension in accounting_dimensions:
-			if dimension.get("mandatory_for_bs"):
-				credit_entry.update(
-					{
-						dimension["fieldname"]: self.get(dimension["fieldname"])
-						or dimension.get("default_dimension")
-					}
-				)
-
-			if dimension.get("mandatory_for_pl"):
-				debit_entry.update(
-					{
-						dimension["fieldname"]: self.get(dimension["fieldname"])
-						or dimension.get("default_dimension")
-					}
-				)
-
-		je.append("accounts", credit_entry)
-		je.append("accounts", debit_entry)
-
-		je.flags.ignore_permissions = True
-		je.submit()
-
-		self.db_set("journal_entry", je.name)
-
-<<<<<<< HEAD
-=======
-	def get_entry_for_asset_value_decrease(self, fixed_asset_account, entry_template):
-		credit_entry = {
-			"account": fixed_asset_account,
-			"credit_in_account_currency": -self.difference_amount,
-			**entry_template,
-		}
-		debit_entry = {
-			"account": self.difference_account,
-			"debit_in_account_currency": -self.difference_amount,
-			**entry_template,
-		}
-
-		return credit_entry, debit_entry
-
-	def get_entry_for_asset_value_increase(self, fixed_asset_account, entry_template):
-		credit_entry = {
-			"account": self.difference_account,
-			"credit_in_account_currency": self.difference_amount,
-			**entry_template,
-		}
-		debit_entry = {
-			"account": fixed_asset_account,
-			"debit_in_account_currency": self.difference_amount,
-			**entry_template,
-		}
-
-		return credit_entry, debit_entry
-
-	def update_accounting_dimensions(self, credit_entry, debit_entry):
-		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
-
-		for dimension in accounting_dimensions:
 			value = self.get(dimension["fieldname"])
 			# Dimension defaults and mandatory flags are set per company; explicit values always apply
 			is_own_company = dimension.get("company") == self.company
@@ -203,7 +145,14 @@ class AssetValueAdjustment(Document):
 			if value or (is_own_company and dimension.get("mandatory_for_pl")):
 				debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 
->>>>>>> 9cee191 (fix(assets): scope accounting dimension defaults to the asset's company)
+		je.append("accounts", credit_entry)
+		je.append("accounts", debit_entry)
+
+		je.flags.ignore_permissions = True
+		je.submit()
+
+		self.db_set("journal_entry", je.name)
+
 	def cancel_asset_revaluation_entry(self):
 		if not self.journal_entry:
 			return

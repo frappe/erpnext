@@ -1468,7 +1468,7 @@ class TestDepreciationBasics(AssetSetup):
 	def test_depreciation_ignores_dimension_defaults_of_other_companies(self):
 		"""A dimension default that is mandatory for another company must not be stamped on this
 		company's depreciation entry, or every scheduled posting fails company validation."""
-		other_company_department = set_mandatory_dimension_default_for_other_company()
+		other_company_department = set_mandatory_dimension_default_for_other_company(self)
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -2026,11 +2026,10 @@ def create_asset(**args):
 	return asset
 
 
-<<<<<<< HEAD
-def create_asset_category():
-=======
-def set_mandatory_dimension_default_for_other_company():
-	"""Make Department mandatory for P&L in _Test Company 1 with a default that belongs to it."""
+def set_mandatory_dimension_default_for_other_company(test_case):
+	"""Make Department mandatory for P&L in _Test Company 1 with a default that belongs to it.
+
+	These test classes do not roll back after each test, so the change is reverted on cleanup."""
 	department = frappe.get_doc(
 		{
 			"doctype": "Department",
@@ -2040,7 +2039,9 @@ def set_mandatory_dimension_default_for_other_company():
 		}
 	).insert(ignore_if_duplicate=True)
 
-	dimension = frappe.get_doc("Accounting Dimension", "Department")
+	dimension = get_department_dimension()
+	test_case.addCleanup(restore_department_dimension, dimension.disabled)
+	dimension.disabled = 0
 	dimension.append(
 		"dimension_defaults",
 		{
@@ -2054,8 +2055,22 @@ def set_mandatory_dimension_default_for_other_company():
 	return department.name
 
 
-def create_asset_category(enable_cwip=1):
->>>>>>> 9cee191 (fix(assets): scope accounting dimension defaults to the asset's company)
+def get_department_dimension():
+	if frappe.db.exists("Accounting Dimension", "Department"):
+		return frappe.get_doc("Accounting Dimension", "Department")
+	return frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Department"})
+
+
+def restore_department_dimension(disabled):
+	dimension = frappe.get_doc("Accounting Dimension", "Department")
+	dimension.disabled = disabled
+	dimension.dimension_defaults = [
+		row for row in dimension.dimension_defaults if row.company != "_Test Company 1"
+	]
+	dimension.save()
+
+
+def create_asset_category():
 	asset_category = frappe.new_doc("Asset Category")
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
