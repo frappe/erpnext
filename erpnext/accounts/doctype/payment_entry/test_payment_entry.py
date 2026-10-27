@@ -127,7 +127,7 @@ class TestPaymentEntry(FrappeTestCase):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_payment_entry_for_blocked_supplier_payments_today_date(self):
+	def test_payment_entry_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.hold_type = "Payments"
@@ -136,13 +136,8 @@ class TestPaymentEntry(FrappeTestCase):
 
 		pi = make_purchase_invoice()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Invoice",
-			dn=pi.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()
@@ -167,6 +162,26 @@ class TestPaymentEntry(FrappeTestCase):
 				pass
 			else:
 				raise Exception
+
+	def test_outstanding_invoices_listed_after_supplier_release_date(self):
+		pi = make_purchase_invoice()
+		supplier = frappe.get_doc("Supplier", pi.supplier)
+		supplier.update({"on_hold": 1, "hold_type": "All", "release_date": add_days(nowdate(), -3)})
+		supplier.save()
+
+		references = get_outstanding_reference_documents(
+			{
+				"posting_date": nowdate(),
+				"company": pi.company,
+				"party_type": "Supplier",
+				"payment_type": "Pay",
+				"party": pi.supplier,
+				"party_account": pi.credit_to,
+				"get_outstanding_invoices": True,
+			}
+		)
+
+		self.assertIn(pi.name, [row.voucher_no for row in references])
 
 	def test_payment_entry_against_si_usd_to_usd(self):
 		si = create_sales_invoice(
@@ -2036,6 +2051,92 @@ class TestPaymentEntry(FrappeTestCase):
 
 		self.assertEqual(rows[0].project, si.project)
 		self.assertEqual(rows[1].project, si.project)
+
+	def test_outstanding_orders_split_by_payment_terms(self):
+		create_payment_terms_template()
+
+		so = make_sales_order(do_not_save=1, qty=1, rate=200)
+		so.payment_terms_template = "Test Receivable Template"
+		so.save().submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": so.company,
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": so.customer,
+			"party_account": "Debtors - _TC",
+			"get_orders_to_be_billed": True,
+		}
+
+		references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(len(references), 2)
+		self.assertEqual(references[0].voucher_no, so.name)
+		self.assertEqual(references[1].voucher_no, so.name)
+		self.assertEqual(references[0].payment_term, "Basic Amount Receivable")
+		self.assertEqual(references[1].payment_term, "Tax Receivable")
+
+	def test_outstanding_orders_no_split_when_allocate_disabled(self):
+		create_payment_terms_template()
+
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+
+		so = make_sales_order(do_not_save=1, qty=1, rate=200)
+		so.payment_terms_template = "Test Receivable Template"
+		so.save().submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": so.company,
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": so.customer,
+			"party_account": "Debtors - _TC",
+			"get_orders_to_be_billed": True,
+		}
+
+		references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(len(references), 1)
+		self.assertIsNone(references[0].payment_term)
+
+		template.allocate_payment_based_on_payment_terms = 1
+		template.save()
+
+	def test_outstanding_multicurrency_sales_order_split(self):
+		create_payment_terms_template()
+
+		so = make_sales_order(
+			customer="_Test Customer USD",
+			currency="USD",
+			qty=1,
+			rate=100,
+			do_not_submit=True,
+		)
+		so.payment_terms_template = "Test Receivable Template"
+		so.conversion_rate = 50
+		so.save().submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": so.company,
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": so.customer,
+			"party_account": "Debtors - _TC",
+			"get_orders_to_be_billed": True,
+		}
+
+		references = get_outstanding_reference_documents(args)
+
+		# Should split without throwing currency errors
+		self.assertEqual(len(references), 2)
+		for ref in references:
+			self.assertEqual(ref.voucher_no, so.name)
+			self.assertIsNotNone(ref.payment_term)
 
 
 def create_payment_entry(**args):

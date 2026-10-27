@@ -12,6 +12,36 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 
 class TestGeneralLedger(FrappeTestCase):
+	def test_snapshot_reports_use_live_data_for_restricted_users(self):
+		from importlib import import_module
+		from unittest.mock import patch
+
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		class SnapshotReached(Exception):
+			pass
+
+		restricted = make_fenced_user(
+			"gl-snapshot-fenced@example.com", ["Accounts User"], [("Company", "_Test Company")]
+		)
+		unrestricted = make_fenced_user("gl-snapshot-open@example.com", ["Accounts User"])
+		for report in ("general_ledger", "balance_sheet", "profit_and_loss_statement", "trial_balance"):
+			module = import_module(f"erpnext.accounts.report.{report}.{report}")
+			for user, expect_live in ((restricted, True), (unrestricted, False)):
+				with (
+					as_user(user),
+					patch.object(module, "execute", return_value="live") as live,
+					patch(
+						"frappe.database.duckdb.database.get_latest_sync", side_effect=SnapshotReached
+					) as sync,
+				):
+					try:
+						result = module.execute_snapshot_report(frappe._dict(company="_Test Company"))
+					except SnapshotReached:
+						result = "snapshot"
+				self.assertEqual(result, "live" if expect_live else "snapshot", f"{report} as {user}")
+				self.assertEqual((live.called, sync.called), (expect_live, not expect_live))
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.clear_old_entries()

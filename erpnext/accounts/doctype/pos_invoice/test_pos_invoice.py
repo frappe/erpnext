@@ -1162,6 +1162,46 @@ class TestPOSInvoice(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 
+	def test_serial_and_batch_item_with_only_batch_in_fields(self):
+		from frappe.tests.utils import change_settings
+
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+
+		frappe.set_user("Administrator")
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PSB-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "PSS-.#####",
+			}
+		).name
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		with change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}):
+			pos = create_pos_invoice(
+				item=item_code, qty=2, rate=100, use_serial_batch_fields=1, batch_no=batch_no, do_not_save=1
+			)
+			pos.items[0].update({"has_serial_no": 1, "has_batch_no": 1})
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+			pos.insert()
+			self.assertFalse(pos.items[0].serial_no)
+
+			pos.submit()
+			pos.reload()
+			entries = frappe.get_all(
+				"Serial and Batch Entry",
+				{"parent": pos.items[0].serial_and_batch_bundle},
+				["serial_no", "batch_no"],
+			)
+			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
+			self.assertEqual({d.batch_no for d in entries}, {batch_no})
+
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)

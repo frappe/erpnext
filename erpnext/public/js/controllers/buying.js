@@ -70,7 +70,7 @@ erpnext.buying = {
 				if(this.frm.fields_dict.buying_price_list) {
 					this.frm.set_query("buying_price_list", function() {
 						return{
-							filters: { 'buying': 1 }
+							filters: { 'buying': 1, 'enabled': 1 }
 						}
 					});
 				}
@@ -178,7 +178,11 @@ erpnext.buying = {
 
 						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+						const is_drop_ship = this.frm.doc.items.some((item) => item.delivered_by_supplier);
+						if (
+							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+							!is_drop_ship
+						) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
@@ -196,6 +200,7 @@ erpnext.buying = {
 
 			transaction_date() {
 				super.transaction_date();
+				if (!this.frm.fields_dict.schedule_date) return;
 				this.frm.set_value("schedule_date", "");
 				this.prevent_past_schedule_dates(this.frm);
 			}

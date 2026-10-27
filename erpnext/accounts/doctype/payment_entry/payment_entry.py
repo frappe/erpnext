@@ -27,6 +27,7 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -54,9 +55,9 @@ from erpnext.accounts.utils import (
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
-	get_supplier_block_status,
 	validate_taxes_and_charges,
 )
+from erpnext.controllers.queries import has_ignored_field
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -86,6 +87,7 @@ class PaymentEntry(AccountsController):
 			self.party_account_currency = self.paid_to_account_currency
 
 	def validate(self):
+		validate_enabled_mode_of_payment(self.mode_of_payment)
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
@@ -96,6 +98,7 @@ class PaymentEntry(AccountsController):
 		self.set_exchange_rate()
 		self.validate_mandatory()
 		self.validate_reference_documents()
+		self.validate_dunning_deductions()
 		self.set_amounts()
 		self.validate_amounts()
 		self.apply_taxes()
@@ -112,6 +115,54 @@ class PaymentEntry(AccountsController):
 		self.set_tax_withholding()
 		self.set_status()
 		self.set_total_in_words()
+
+	def validate_dunning_deductions(self):
+		dunning_names = {row.dunning for row in self.deductions if row.dunning}
+		if not dunning_names:
+			return
+
+		dunnings = {
+			row.name: row
+			for row in frappe.get_all(
+				"Dunning",
+				filters={"name": ("in", list(dunning_names))},
+				fields=["name", "docstatus", "customer", "company", "income_account"],
+			)
+		}
+		for row in self.deductions:
+			if not row.dunning:
+				continue
+
+			dunning = dunnings.get(row.dunning)
+			if not dunning or dunning.docstatus != 1:
+				frappe.throw(_("Row #{0}: Dunning {1} must be submitted.").format(row.idx, row.dunning))
+
+			if self.payment_type != "Receive" or self.party_type != "Customer":
+				frappe.throw(
+					_("Row #{0}: Dunning charges require a Receive payment from a Customer.").format(row.idx)
+				)
+
+			if self.party != dunning.customer:
+				frappe.throw(
+					_("Row #{0}: Dunning {1} belongs to a different customer.").format(row.idx, row.dunning)
+				)
+
+			if self.company != dunning.company:
+				frappe.throw(
+					_("Row #{0}: Dunning {1} belongs to a different company.").format(row.idx, row.dunning)
+				)
+
+			if row.account != dunning.income_account:
+				frappe.throw(
+					_(
+						"Row #{0}: Dunning charges must use the income account {1} configured on Dunning {2}."
+					).format(row.idx, dunning.income_account, row.dunning)
+				)
+
+			if flt(row.amount) >= 0:
+				frappe.throw(
+					_("Row #{0}: Dunning charges must have a negative deduction amount.").format(row.idx)
+				)
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
@@ -578,8 +629,11 @@ class PaymentEntry(AccountsController):
 
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
+			self.set(field, flt(self.get(field)))
 			if not self.get(field):
 				frappe.throw(_("{0} is mandatory").format(_(self.meta.get_label(field))))
+			if self.get(field) < 0:
+				frappe.throw(_("{0} must be greater than zero").format(_(self.meta.get_label(field))))
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -787,7 +841,7 @@ class PaymentEntry(AccountsController):
 						base_paid_amount = `base_paid_amount` - %s,
 						discounted_amount = `discounted_amount` - %s,
 						outstanding = `outstanding` + %s,
-						base_outstanding = `base_outstanding` - %s
+						base_outstanding = `base_outstanding` + %s
 					WHERE parent = %s and payment_term = %s""",
 					(
 						allocated_amount - discounted_amt,
@@ -2299,7 +2353,8 @@ def get_outstanding_reference_documents(args, validate=False):
 		return
 
 	if args.get("party_type") and args.get("party"):
-		frappe.has_permission(args["party_type"], "read", args["party"], throw=True)
+		party_to_check = None if has_ignored_field("Payment Entry", args["party_type"]) else args["party"]
+		frappe.has_permission(args["party_type"], "read", party_to_check, throw=True)
 
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
@@ -2309,18 +2364,10 @@ def get_outstanding_reference_documents(args, validate=False):
 	accounting_dimensions_filter = []
 	posting_and_due_date = []
 
-	# confirm that Supplier is not blocked
-	if args.get("party_type") == "Supplier":
-		supplier_status = get_supplier_block_status(args["party"])
-		if supplier_status["on_hold"]:
-			if supplier_status["hold_type"] == "All":
-				return []
-			elif supplier_status["hold_type"] == "Payments":
-				if (
-					not supplier_status["release_date"]
-					or getdate(nowdate()) <= supplier_status["release_date"]
-				):
-					return []
+	if args.get("party_type") == "Supplier" and frappe.get_lazy_doc("Supplier", args["party"]).is_blocked_for(
+		"Payments"
+	):
+		return []
 
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.get_cached_value("Company", args.get("company"), "default_currency")
@@ -2437,6 +2484,8 @@ def get_outstanding_reference_documents(args, validate=False):
 			filters=args,
 		)
 
+		orders_to_be_billed = split_invoices_based_on_payment_terms(orders_to_be_billed, args.get("company"))
+
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
 	if not data:
@@ -2465,7 +2514,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices, company) -> list
 
 	outstanding_invoices_after_split = []
 	for entry in outstanding_invoices:
-		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+		if entry.voucher_type in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
 			if payment_term_template := frappe.db.get_value(
 				entry.voucher_type, entry.voucher_no, "payment_terms_template"
 			):
@@ -2494,7 +2543,7 @@ def get_currency_data(outstanding_invoices: list, company: str | None = None) ->
 	exc_rates = frappe._dict()
 	company_currency = frappe.db.get_value("Company", company, "default_currency") if company else None
 
-	for doctype in ["Sales Invoice", "Purchase Invoice"]:
+	for doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
 		invoices = [x.voucher_no for x in outstanding_invoices if x.voucher_type == doctype]
 		for x in frappe.db.get_all(
 			doctype,
@@ -2711,7 +2760,8 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
 	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
-	frappe.has_permission(party_type, ptype, party, throw=True)
+	party_to_check = None if has_ignored_field("Payment Entry", party_type) else party
+	frappe.has_permission(party_type, ptype, party_to_check, throw=True)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
@@ -2771,6 +2821,7 @@ def get_account_details(account, date, cost_center=None):
 
 @frappe.whitelist()
 def get_company_defaults(company):
+	frappe.has_permission("Company", doc=company, throw=True)
 	fields = ["write_off_account", "exchange_gain_loss_account", "cost_center"]
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
@@ -3596,6 +3647,7 @@ def make_payment_order(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Entry"
+		target.company = target.company or source.company
 		target.append(
 			"references",
 			dict(
@@ -3616,6 +3668,8 @@ def make_payment_order(source_name, target_doc=None):
 			"Payment Entry": {
 				"doctype": "Payment Order",
 				"validation": {"docstatus": ["=", 1]},
+				# keep the company of an existing order; references are validated against it
+				"field_no_map": ["company"] if target_doc else [],
 			}
 		},
 		target_doc,

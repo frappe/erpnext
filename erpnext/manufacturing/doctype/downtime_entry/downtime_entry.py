@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import time_diff_in_hours
+from frappe.utils import get_datetime, time_diff_in_hours
 
 
 class DowntimeEntry(Document):
@@ -36,4 +38,7 @@ class DowntimeEntry(Document):
 
 	def validate(self):
 		if self.from_time and self.to_time:
+			if get_datetime(self.to_time) <= get_datetime(self.from_time):
+				frappe.throw(_("To Time must be after From Time"))
+
 			self.downtime = time_diff_in_hours(self.to_time, self.from_time) * 60

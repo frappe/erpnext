@@ -11,11 +11,12 @@
    "fieldname": "parameter",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Parameter"
+   "label": "Parameter",
+   "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2019-05-26 21:23:53.574743",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Template Parameter",

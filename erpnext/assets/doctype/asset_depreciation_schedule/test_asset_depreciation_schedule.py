@@ -11,6 +11,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
+	get_asset_depreciation_schedule,
 	get_depr_schedule,
 )
 
@@ -401,3 +402,13 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
+
+	def test_schedule_is_read_only_with_asset_permission(self):
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+
+		for method in (get_depr_schedule, get_asset_depr_schedule_doc):
+			self.assertRaises(frappe.PermissionError, frappe.is_whitelisted, method)
+
+		self.assertEqual(get_asset_depreciation_schedule(asset.name, "Active").asset, asset.name)
+		with self.set_user("Guest"):
+			self.assertRaises(frappe.PermissionError, get_asset_depreciation_schedule, asset.name, "Active")

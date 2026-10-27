@@ -238,7 +238,7 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2023-06-03 16:15:43.958072",
+ "modified": "2026-10-05 17:12:54.560318",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
@@ -258,6 +258,10 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Maintenance User"
   }
  ],
  "search_fields": "status,customer,customer_name",

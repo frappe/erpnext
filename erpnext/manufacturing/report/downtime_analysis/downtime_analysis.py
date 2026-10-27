@@ -35,7 +35,7 @@ def get_data(filters):
 	if filters.get("workstation"):
 		query_filters["workstation"] = filters.get("workstation")
 
-	data = frappe.get_all("Downtime Entry", fields=fields, filters=query_filters) or []
+	data = frappe.get_list("Downtime Entry", fields=fields, filters=query_filters, limit_page_length=0) or []
 	for d in data:
 		if d.downtime:
 			d.downtime = d.downtime / 60

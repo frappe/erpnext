@@ -126,15 +126,17 @@ class Workstation(Document):
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
 		for d in self.get("working_hours"):
-			existing = frappe.db.sql_list(
-				"""select idx from `tabWorkstation Working Hour`
-				where parent = %s and name != %s
-					and (
-						(start_time between %s and %s) or
-						(end_time between %s and %s) or
-						(%s between start_time and end_time))
-				""",
-				(self.name, d.name, d.start_time, d.end_time, d.start_time, d.end_time, d.start_time),
+			wh = frappe.qb.DocType("Workstation Working Hour")
+			existing = (
+				frappe.qb.from_(wh)
+				.select(wh.idx)
+				.where(
+					(wh.parent == self.name)
+					& (wh.name != d.name)
+					& (wh.start_time < d.end_time)
+					& (wh.end_time > d.start_time)
+				)
+				.run(pluck=True)
 			)
 
 			if existing:
@@ -200,7 +202,7 @@ class Workstation(Document):
 @frappe.whitelist()
 def get_job_cards(workstation):
 	if frappe.has_permission("Job Card", "read"):
-		jc_data = frappe.get_all(
+		jc_data = frappe.get_list(
 			"Job Card",
 			fields=[
 				"name",

@@ -246,6 +246,15 @@ class TestLIFOValuation(unittest.TestCase):
 		self.assertEqual(consumed, [[10, 20], [5, 10]])
 		self.assertTotalQty(5)
 
+	def test_lifo_rate_matching_only_for_purchase_returns(self):
+		self.stack = LIFOValuation([[10, 150], [5, 100], [5, 200]])
+		self.assertEqual(self.stack.remove_stock(10, outgoing_rate=150), [[5, 200], [5, 100]])
+
+		self.stack = LIFOValuation([[10, 150], [5, 100], [5, 200]])
+		consumed = self.stack.remove_stock(5, outgoing_rate=100, is_return_purchase_entry=True)
+		self.assertEqual(consumed, [[5, 100]])
+		self.assertEqual(self.stack, [[10, 150], [5, 200]])
+
 	def test_lifo_consumption_going_negative(self):
 		self.stack.add_stock(10, 10)
 		self.stack.add_stock(10, 20)

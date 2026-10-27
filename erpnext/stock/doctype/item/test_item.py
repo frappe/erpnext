@@ -23,6 +23,7 @@ from erpnext.stock.doctype.item.item import (
 	get_item_attribute,
 	get_timeline_data,
 	get_uom_conv_factor,
+	set_item_default,
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -150,6 +151,7 @@ class TestItem(FrappeTestCase):
 				"conversion_factor": 1,
 				"price_list_uom_dependant": 1,
 				"ignore_pricing_rule": 1,
+				"qty": 1,
 			}
 		)
 
@@ -240,10 +242,10 @@ class TestItem(FrappeTestCase):
 					"tax_category": data["tax_category"],
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Sales Order",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"order_type": "Sales",
 					"customer": "_Test Customer",
@@ -288,10 +290,10 @@ class TestItem(FrappeTestCase):
 				"item_code": "Test Item With Defaults",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"customer": "_Test Customer",
 			}
@@ -311,16 +313,28 @@ class TestItem(FrappeTestCase):
 				"item_code": "Test Item With Defaults",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Purchase Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"supplier": "_Test Supplier",
 			}
 		)
 		for key, value in purchase_item_check.items():
 			self.assertEqual(value, purchase_item_details.get(key))
+
+	def test_set_item_default_refreshes_cached_item(self):
+		item = make_item(
+			properties={
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+			}
+		)
+
+		set_item_default(item.name, "_Test Company", "income_account", "_Test Account Sales - _TC")
+
+		cached_item = frappe.get_cached_doc("Item", item.name)
+		self.assertEqual(cached_item.item_defaults[0].income_account, "_Test Account Sales - _TC")
 
 	def test_item_default_validations(self):
 		with self.assertRaises(frappe.ValidationError) as ve:
@@ -717,6 +731,17 @@ class TestItem(FrappeTestCase):
 
 		self.assertFalse(frappe.db.exists("Item", "Test Item Bundle Item 1"))
 
+	def test_invalid_uom_conversion_factor(self):
+		for conversion_factor in (0, -1):
+			with self.subTest(conversion_factor=conversion_factor), self.assertRaisesRegex(
+				frappe.ValidationError, "Conversion Factor must be greater than zero"
+			):
+				make_item(uoms=[{"uom": "Box", "conversion_factor": conversion_factor}])
+
+	def test_preserve_explicit_uom_conversion_factor(self):
+		item = make_item(properties={"stock_uom": "Gram"}, uoms=[{"uom": "Kg", "conversion_factor": 950}])
+		self.assertEqual(item.uoms[0].conversion_factor, 950)
+
 	def test_uom_conversion_factor(self):
 		if frappe.db.exists("Item", "Test Item UOM"):
 			frappe.delete_doc("Item", "Test Item UOM")
@@ -899,6 +924,16 @@ class TestItem(FrappeTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
 
+	def test_stock_uom_can_change_after_stock_is_cancelled(self):
+		item = create_item(frappe.generate_hash(length=20))
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=5, basic_rate=10).cancel()
+
+		item.reload()
+		item.stock_uom = "Gram"
+		item.save()
+
+		self.assertEqual(frappe.db.get_value("Bin", {"item_code": item.name}, "stock_uom"), "Gram")
+
 	def test_erasure_of_old_conversions(self):
 		item = create_item("_item change uom")
 		item.stock_uom = "Gram"
@@ -992,6 +1027,35 @@ class TestItem(FrappeTestCase):
 		item.description = ""
 		item.save()
 		self.assertEqual(item.description, item.item_name)
+
+	def test_item_dashboard_applies_item_user_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.dashboard.item_dashboard import get_data
+
+		allowed, restricted = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		for item_code in (allowed, restricted):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+
+		user = frappe.get_doc("User", "test@example.com")
+		user.add_roles("Stock User")
+		add_user_permission("Item", allowed, user.name)
+
+		with self.set_user(user.name):
+			self.assertTrue(get_data(item_code=allowed))
+			self.assertFalse(get_data(item_code=restricted))
+
+	def test_item_dashboard_group_warehouse_includes_children(self):
+		from erpnext.stock.dashboard.item_dashboard import get_data
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		group = create_warehouse("_Test Dashboard Group", {"is_group": 1})
+		child = create_warehouse("_Test Dashboard Child", {"parent_warehouse": group})
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target=child, qty=1, basic_rate=100)
+
+		rows = get_data(item_code=item_code, warehouse=group)
+		self.assertEqual([row.warehouse for row in rows], [child])
 
 	def test_item_type_field_change(self):
 		"""Check if critical fields like `is_stock_item`, `has_batch_no` are not changed if transactions exist."""
@@ -1098,6 +1162,53 @@ class TestItem(FrappeTestCase):
 		)
 
 		self.assertRaises(frappe.ValidationError, item_doc.save)
+
+	def test_opening_stock_requires_serial_and_batch_settings(self):
+		setups = (
+			({"has_serial_no": 1}, "Serial Number Series"),
+			({"has_batch_no": 1, "create_new_batch": 0}, "Automatically Create New Batch"),
+		)
+		for properties, message in setups:
+			with self.subTest(properties=properties), self.assertRaisesRegex(frappe.ValidationError, message):
+				make_item(
+					properties={"is_stock_item": 1, "opening_stock": 5, "valuation_rate": 100, **properties}
+				)
+
+	def test_opening_stock_with_serial_series(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SN-OPENING-.#####",
+				"opening_stock": 5,
+				"valuation_rate": 100,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			}
+		)
+		self.assertEqual(frappe.db.count("Serial No", {"item_code": item.name}), 5)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"item_code": item.name, "warehouse": "_Test Warehouse - _TC"}, "actual_qty"
+			),
+			5,
+		)
+
+	def test_opening_stock_for_batch_without_series(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"opening_stock": 5,
+				"valuation_rate": 100,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			}
+		)
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"item_code": item.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(actual_qty, 5)
 
 	def test_cannot_unset_serialized_while_bundle_exists(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (

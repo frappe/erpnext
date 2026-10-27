@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import cstr
 from frappe.utils.user import is_website_user
 
-__version__ = "15.112.0"
+__version__ = "15.123.1"
 
 
 def get_default_company(user=None):

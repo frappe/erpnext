@@ -241,21 +241,16 @@ def get_list_context(context=None):
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
 	from frappe.www.list import get_list
 
+	from erpnext.controllers.website_list_for_contact import get_parents_for_user
+
 	user = frappe.session.user
-	contact = frappe.db.get_value("Contact", {"user": user}, "name")
-	customer = None
-
-	if contact:
-		contact_doc = frappe.get_doc("Contact", contact)
-		customer = contact_doc.get_link_for("Customer")
-
 	ignore_permissions = False
 	if is_website_user() and user != "Guest":
 		if not filters:
 			filters = {}
 
-		if customer:
-			filters["customer"] = customer
+		if customers := get_parents_for_user("Customer"):
+			filters["customer"] = ["in", customers]
 		else:
 			filters["raised_by"] = user
 
@@ -311,9 +306,11 @@ def auto_close_tickets():
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 
-	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
+	if doc.raised_by == user:
+		return True
 
-	return permission_based_on_customer or doc.raised_by == user
+	# other issues of the customer can be viewed, but only the user's own issues can be changed
+	return ptype in ("read", "print") and has_website_permission(doc, ptype, user, verbose)
 
 
 def update_issue(contact, method):

@@ -32,20 +32,20 @@ def get_data(filters: Filters) -> Data:
 			wo.name,
 			wo.status,
 			wo.production_item,
-			wo.produced_qty,
-			wo.process_loss_qty,
+			(Sum(se.fg_completed_qty) - Sum(se.process_loss_qty)).as_("produced_qty"),
+			Sum(se.process_loss_qty).as_("process_loss_qty"),
 			wo.qty.as_("qty_to_manufacture"),
 			Sum(se.total_incoming_value).as_("total_fg_value"),
 			Sum(se.total_outgoing_value).as_("total_rm_value"),
 		)
 		.where(
-			(wo.process_loss_qty > 0)
-			& (wo.company == filters.company)
+			(wo.company == filters.company)
 			& (se.docstatus == 1)
 			& (se.purpose == "Manufacture")
 			& (se.posting_date.between(filters.from_date, filters.to_date))
 		)
 		.groupby(se.work_order)
+		.having(Sum(se.process_loss_qty) > 0)
 	)
 
 	if "item" in filters:
@@ -119,5 +119,5 @@ def get_columns() -> Columns:
 
 def update_data_with_total_pl_value(data: Data) -> None:
 	for row in data:
-		value_per_unit_fg = row["total_fg_value"] / row["qty_to_manufacture"]
-		row["total_pl_value"] = row["process_loss_qty"] * value_per_unit_fg
+		processed_qty = row["produced_qty"] + row["process_loss_qty"]
+		row["total_pl_value"] = row["process_loss_qty"] * row["total_fg_value"] / processed_qty

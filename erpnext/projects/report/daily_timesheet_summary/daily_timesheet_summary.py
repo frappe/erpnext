@@ -56,7 +56,7 @@ def get_conditions(filters):
 	if filters.get("from_date"):
 		conditions += " and `tabTimesheet Detail`.from_time >= timestamp(%(from_date)s, %(from_time)s)"
 	if filters.get("to_date"):
-		conditions += " and `tabTimesheet Detail`.to_time <= timestamp(%(to_date)s, %(to_time)s)"
+		conditions += " and `tabTimesheet Detail`.from_time < timestamp(%(to_date)s, %(to_time)s)"
 
 	match_conditions = build_match_conditions("Timesheet")
 	if match_conditions:
