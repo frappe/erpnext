@@ -337,8 +337,7 @@ class Employee(NestedSet):
 			frappe.msgprint(
 				_("User {0} is disabled. Only a user who can edit Users can enable it.").format(
 					frappe.bold(self.user_id)
-				),
-				alert=True,
+				)
 			)
 			return
 
