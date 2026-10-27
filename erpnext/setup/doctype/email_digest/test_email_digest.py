@@ -10,6 +10,37 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmailDigest(ERPNextTestSuite):
+	def test_project_list_links_to_projects(self):
+		if not frappe.db.exists("Project Type", "External"):
+			frappe.get_doc({"doctype": "Project Type", "project_type": "External"}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": "Email Digest Link Test",
+				"project_type": "External",
+				"company": "_Test Company",
+			}
+		).insert()
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		projects = digest.get_project_list()
+		self.assertTrue(projects)
+		for project in projects:
+			self.assertIn("/desk/project/", project.link)
+
+	def test_pending_card_links_use_correct_filters(self):
+		from urllib.parse import unquote
+
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		purchase_label = unquote(digest.get_purchase_orders_to_bill()["label"])
+		quotation_label = unquote(digest.get_pending_quotations()["label"])
+		self.assertIn("per_billed", purchase_label)
+		self.assertNotIn("per_received", purchase_label)
+		self.assertIn("docstatus=1", purchase_label)
+		self.assertNotIn("per_received", quotation_label)
+		self.assertIn("docstatus=1", quotation_label)
+		self.assertIn("Expired", quotation_label)
+		self.assertIn("docstatus=1", unquote(digest.get_purchase_order()["label"]))
+
 	def test_purchase_order_totals_use_company_currency(self):
 		digest = create_email_digest(company="_Test Company", do_not_save=True)
 		digest.future_from_date = digest.future_to_date = today()
