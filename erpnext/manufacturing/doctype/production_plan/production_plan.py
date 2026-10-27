@@ -32,7 +32,52 @@ from pypika.terms import ExistsCriterion
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+=======
+
+# Backward-compatible re-exports (moved to mapper.py / services/).
+from erpnext.manufacturing.doctype.production_plan.mapper import (
+	get_so_details,
+	sales_order_query,
+)
+from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+	MaterialRequestService,
+	download_raw_materials,
+	get_bin_details,
+	get_exploded_items,
+	get_item_data,
+	get_items_for_material_requests,
+	get_material_request_items,
+	get_materials_from_other_locations,
+	get_raw_materials_of_sub_assembly_items,
+	get_sales_orders,
+	get_subitems,
+	get_uom_conversion_factor,
+	get_warehouse_list,
+	set_default_warehouses,
+)
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_plan_process_loss_percentage,
+)
+from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+	cancel_stock_reservation_entries,
+	get_reserved_qty_for_production_plan,
+	get_reserved_qty_for_sub_assembly,
+	make_stock_reservation_entries,
+	reserve_stock_for_production_plan,
+)
+from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
+	SalesOrderSourcingService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
+	SubAssemblyService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
+	WorkOrderCreationService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+>>>>>>> 89b9029 (feat(manufacturing): let a Production Plan order the process loss of its BOMs)
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -78,6 +123,7 @@ class ProductionPlan(Document):
 		combine_sub_items: DF.Check
 		company: DF.Link
 		consider_minimum_order_qty: DF.Check
+		consider_process_loss: DF.Check
 		customer: DF.Link | None
 		for_warehouse: DF.Link | None
 		from_date: DF.Date | None
@@ -138,6 +184,7 @@ class ProductionPlan(Document):
 
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
+		self.set_process_loss_percentage()
 		self.calculate_total_planned_qty()
 		self.set_status()
 		self._rename_temporary_references()
@@ -223,6 +270,10 @@ class ProductionPlan(Document):
 		for item in self.po_items:
 			if not item.get("sales_order") or not item.get("material_request"):
 				item.pending_qty = item.planned_qty
+
+	def set_process_loss_percentage(self):
+		for item in self.po_items:
+			item.process_loss_percentage = get_plan_process_loss_percentage(self, item.bom_no)
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
