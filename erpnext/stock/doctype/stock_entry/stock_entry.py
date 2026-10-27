@@ -69,8 +69,8 @@ from erpnext.stock.stock_ledger import (
 )
 from erpnext.stock.utils import _get_incoming_rate, get_bin, get_combine_datetime
 
-WORK_ORDER_PURPOSES = (*WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES, "Disassemble")
-FROM_BOM_PURPOSES = (*WORK_ORDER_PURPOSES, "Material Issue", "Repack", "Send to Subcontractor")
+WORK_ORDER_PURPOSES = (*WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES, "Disassemble", "Repack")
+FROM_BOM_PURPOSES = (*WORK_ORDER_PURPOSES, "Material Issue", "Send to Subcontractor")
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -323,14 +323,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_allow_alternative_item()
 
 	def clear_links_hidden_for_purpose(self):
-		if self.purpose not in WORK_ORDER_PURPOSES and self.purpose != "Repack":
+		if self.purpose not in WORK_ORDER_PURPOSES:
 			self.work_order = None
 			self.job_card = None
 
 		if self.purpose not in FROM_BOM_PURPOSES:
 			self.from_bom = 0
 			self.bom_no = None
-			self.fg_completed_qty = 0.0
 
 	def set_allow_alternative_item(self):
 		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""
