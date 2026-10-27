@@ -1066,13 +1066,25 @@ def update_transactions_annual_history(company, commit=False):
 
 
 def cache_companies_monthly_sales_history():
+	refresh_total_monthly_sales = _should_refresh_total_monthly_sales()
 	companies = [d["name"] for d in frappe.get_list("Company")]
 	for company in companies:
 		update_company_monthly_sales(company)
 		update_transactions_annual_history(company)
+		if refresh_total_monthly_sales:
+			update_company_current_month_sales(company)
 
 	if not frappe.in_test:
 		frappe.db.commit()
+
+
+def _should_refresh_total_monthly_sales():
+	# "Each Transaction" updates on submit; refresh the cached figure for the
+	# scheduled frequencies only ("Monthly" just on the 1st).
+	frequency = frappe.get_single_value("Selling Settings", "sales_update_frequency")
+	if frequency == "Monthly":
+		return frappe.utils.now_datetime().day == 1
+	return frequency == "Daily"
 
 
 @frappe.whitelist()

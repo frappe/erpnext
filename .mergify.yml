@@ -3,7 +3,6 @@ shared:
     - base~=^(develop|version-15-hotfix|version-16-hotfix)$
     - label!=dont-merge
     - check-success=linters
-    - check-success=Check Commit Titles
   suite_checks: &suite_checks
     - check-success=Patch Test
     - check-success=Python Unit Tests (1)
@@ -32,6 +31,7 @@ pull_request_rules:
               - author!=ankush
               - author!=deepeshgarg007
               - author!=frappe-pr-bot
+              - author!=frappe-release-bot[bot]
               - author!=mergify[bot]
           - or:
               - base=version-13

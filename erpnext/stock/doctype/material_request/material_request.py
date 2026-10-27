@@ -170,12 +170,14 @@ class MaterialRequest(BuyingController):
 					)
 
 	def validate(self):
+		self.clear_source_warehouse()
 		super().validate()
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_material_request_type()
 
 		if not self.status:
@@ -290,6 +292,14 @@ class MaterialRequest(BuyingController):
 
 	def before_update_after_submit(self):
 		self.validate_schedule_date()
+
+	def clear_source_warehouse(self):
+		"""Source Warehouse is only used by Material Transfer, so it stays hidden and stale otherwise."""
+		if self.material_request_type == "Material Transfer":
+			return
+
+		for item in self.items:
+			item.from_warehouse = None
 
 	def validate_material_request_type(self):
 		"""Validate fields in accordance with selected type"""

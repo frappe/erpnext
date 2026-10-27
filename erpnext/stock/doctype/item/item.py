@@ -32,6 +32,7 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
+from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item_search import queue_item
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
@@ -1130,6 +1131,7 @@ class Item(Document):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
+		validate_uoms_are_enabled([self.stock_uom, *(d.uom for d in self.uoms)])
 		allow_different_uom = frappe.get_cached_value(
 			"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
 		)
@@ -1490,6 +1492,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		frappe.qb.from_(sle)
 		.select(UnixTimestamp(sle.posting_date), Count("*"))
 		.where(sle.item_code == name)
+		.where(sle.is_cancelled == 0)
 		.where(sle.posting_date > CurDate() - Interval(years=1))
 		.groupby(sle.posting_date)
 		.run()
@@ -1611,6 +1614,7 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		query = query.where(parent_doc.name != document_name)
 
 	if doctype in ("Purchase Receipt", "Purchase Invoice"):
+		query = query.where(parent_doc.is_return == 0)
 		query = query.select(parent_doc.posting_date, parent_doc.posting_time)
 		query = query.orderby(
 			parent_doc.posting_date, parent_doc.posting_time, parent_doc.name, order=Order.desc
@@ -1636,7 +1640,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
 		return
 
-	ref_uom = frappe.db.get_value("Stock Ledger Entry", {"item_code": item}, "stock_uom")
+	ref_uom = frappe.db.get_value("Stock Ledger Entry", {"item_code": item, "is_cancelled": 0}, "stock_uom")
 
 	if ref_uom:
 		if cstr(ref_uom) != cstr(stock_uom):

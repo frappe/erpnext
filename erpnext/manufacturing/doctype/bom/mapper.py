@@ -35,7 +35,7 @@ _VARIANT_BOM_MAPPING = {
 
 
 @frappe.whitelist()
-def get_children(parent: str | None = None, is_root: bool = False, **filters):
+def get_children(doctype: str | None = None, parent: str | None = None, is_root: bool = False, **filters):
 	frappe.has_permission("BOM", "read", throw=True)
 
 	if not parent or parent == "BOM":

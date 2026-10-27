@@ -68,6 +68,7 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Incorrect Balance Qty After Transaction", {}),
 	("Item Wise Consumption", {}),
 	("Item Prices", {"items": "Enabled Items only"}),
+	("Item Balance (Simple)", {}),
 	("Item Where Used", {"item": "_Test Item", "_optional": True}),
 	("Delayed Item Report", {"based_on": "Sales Invoice"}),
 	("Delayed Item Report", {"based_on": "Delivery Note"}),

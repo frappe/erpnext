@@ -30,6 +30,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -5930,6 +5931,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(pr.items[0].conversion_factor, 1.0)
 
+	def test_conversion_factor_via_shared_target_uom(self):
+		transaction_uom = "_Test 3 Kg Bag"
+		stock_uom = "_Test 25 Kg Bag"
+		make_uom_conversion_factor(transaction_uom, "Kg", 3)
+		make_uom_conversion_factor(stock_uom, "Kg", 25)
+		item = make_item("Test Item for Shared Target UOM", {"stock_uom": stock_uom})
+
+		conversion_factor = get_conversion_factor(item.name, transaction_uom).get("conversion_factor")
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=10,
+			uom=transaction_uom,
+			stock_uom=stock_uom,
+			conversion_factor=conversion_factor,
+		)
+
+		self.assertEqual(conversion_factor, 0.12)
+		self.assertEqual(pr.items[0].stock_qty, 1.2)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_type": pr.doctype, "voucher_no": pr.name, "voucher_detail_no": pr.items[0].name},
+				"actual_qty",
+			),
+			1.2,
+		)
+
 	def test_purchase_receipt_return_valuation_without_use_serial_batch_field(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
@@ -7944,50 +7972,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"stock_value_difference",
 			),
 			-1970,
-		)
-
-	def test_moving_average_purchase_return_keeps_its_rate_on_repost(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		item = make_item(properties={"valuation_method": "Moving Average"}).name
-		company = "_Test Company with perpetual inventory"
-		warehouse = "Stores - TCP1"
-
-		pr = make_purchase_receipt(
-			item_code=item,
-			qty=10,
-			rate=100,
-			company=company,
-			warehouse=warehouse,
-			posting_date=add_days(today(), -3),
-		)
-		pr_return = make_purchase_receipt(
-			item_code=item,
-			qty=-5,
-			rate=100,
-			company=company,
-			warehouse=warehouse,
-			is_return=1,
-			return_against=pr.name,
-			posting_date=add_days(today(), -1),
-		)
-
-		make_stock_entry(
-			item_code=item,
-			target=warehouse,
-			qty=10,
-			rate=300,
-			company=company,
-			posting_date=add_days(today(), -5),
-		)
-
-		self.assertEqual(
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": pr_return.name, "is_cancelled": 0},
-				"stock_value_difference",
-			),
-			-500,
 		)
 
 	@ERPNextTestSuite.change_settings(

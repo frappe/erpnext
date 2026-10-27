@@ -35,10 +35,19 @@ jobs:
           with:
             node-version: 24
 
+        - name: Get Frappe Release Bot token
+          id: app-token
+          uses: actions/create-github-app-token@v3
+          with:
+            client-id: ${{ vars.FRAPPE_BOT_CLIENT_ID }}
+            private-key: ${{ secrets.FRAPPE_BOT_PRIVATE_KEY }}
+            permission-contents: write
+            permission-pull-requests: write
+
         - name: Run script to update POT file
           run: |
             bash ${GITHUB_WORKSPACE}/.github/helper/update_pot_file.sh
           env:
-            GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+            GH_TOKEN: ${{ steps.app-token.outputs.token }}
             BASE_BRANCH: ${{ matrix.branch }}
             PR_REVIEWER: barredterra # change to your GitHub username if you copied this file

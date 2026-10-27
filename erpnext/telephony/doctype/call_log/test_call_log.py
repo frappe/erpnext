@@ -322,6 +322,45 @@ class TestCallLog(ERPNextTestSuite):
 		short_call = frappe.get_doc("Call Log", self._make_call_log(to=self.number[-4:], type="Incoming"))
 		self.assertIsNone(short_call.call_received_by)
 
+	def test_unassigned_call_is_visible_only_to_its_agent_and_privileged_roles(self):
+		agent, other = (f"test_call_log_{name}_{self.number}@example.com" for name in ("agent", "other"))
+		make_employee(agent, company="_Test Company", cell_number=f"+91{self.number}1")
+		make_employee(other, company="_Test Company", cell_number=f"+91{self.number}2")
+		manager = self._make_user(f"test_call_log_manager_{self.number}@example.com", "System Manager")
+
+		received = self._make_call_log(to=f"+91{self.number}1", type="Incoming")
+		placed = self._make_call_log(
+			**{"from": f"+91{self.number}1"}, type="Outgoing", employee_user_id=agent
+		)
+		unassigned = self._make_call_log(**{"from": f"+91{self.number}3"}, type="Outgoing")
+
+		call_logs = (received, placed, unassigned)
+		self.assertEqual(self._readable_call_logs(agent, *call_logs), [True, True, False])
+		self.assertEqual(self._readable_call_logs(other, *call_logs), [False, False, False])
+		self.assertEqual(self._readable_call_logs(manager, *call_logs), [True, True, True])
+
+	def _readable_call_logs(self, user, *call_logs):
+		frappe.set_user(user)
+		try:
+			visible = frappe.get_list("Call Log", filters={"name": ["in", call_logs]}, pluck="name")
+			readable = [frappe.has_permission("Call Log", "read", doc=name) for name in call_logs]
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual(readable, [name in visible for name in call_logs])
+		return readable
+
+	def _make_user(self, email, role):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": email,
+				"send_welcome_email": 0,
+				"roles": [{"role": role}],
+			}
+		).insert(ignore_permissions=True)
+		return email
+
 	def _make_contact(self, phone):
 		contact = frappe.get_doc(
 			{

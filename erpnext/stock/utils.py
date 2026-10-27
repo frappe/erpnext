@@ -229,6 +229,8 @@ def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
 	# Manufacturing User, who holds Item read. (Manufacturing Manager holds neither.)
 	frappe.has_permission("Item", "read", throw=True)
 	check_warehouse_company(warehouse)
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
 
 	bin_dt = frappe.qb.DocType("Bin")
 	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)

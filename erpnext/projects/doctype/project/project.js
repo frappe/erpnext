@@ -124,6 +124,7 @@ frappe.ui.form.on("Project", {
 		}
 
 		const project = frm.doc.name;
+		frm.tasks_sort ??= { sort_by: "creation", sort_order: "asc" };
 		// loading Task's meta also loads task_list.js, whose indicators the Status column reuses
 		const pending = Promise.all([
 			frappe.require("embedded_list.bundle.js"),
@@ -132,104 +133,209 @@ frappe.ui.form.on("Project", {
 			// a refresh while loading starts over with a list of its own
 			if (frm.tasks_list !== pending) return;
 
+			const can_edit = frappe.model.can_write("Task");
+			const editable = (field, html) => (can_edit ? frm.events.inline_edit_html(field, html) : html);
 			const list = new frappe.ui.EmbeddedList({
 				wrapper: $wrapper,
-				get_page: ({ start, page_length, txt }) => {
-					const args = {
-						fields: [
-							"name",
-							"subject",
-							"status",
-							"priority",
-							"_assign",
-							"exp_start_date",
-							"exp_end_date",
-							"progress",
-						],
-						filters: { project },
-						order_by: "creation asc",
+				get_page: ({ start, page_length, txt }) =>
+					frappe.xcall("erpnext.projects.doctype.project.project.get_project_tasks", {
+						project,
+						...frm.tasks_sort,
 						start,
-						limit: page_length,
-					};
-					if (txt) {
-						args.or_filters = [
-							["subject", "like", `%${txt}%`],
-							["name", "like", `%${txt}%`],
-						];
-					}
-					return frappe.db.get_list("Task", args);
-				},
+						page_length,
+						txt,
+					}),
 				empty_message: __("No Tasks in this Project yet."),
 				add_button: frappe.model.can_create("Task") && {
 					label: __("Add Task"),
-					action: () => {
-						frappe.model.with_doctype("Task", () => {
-							const task = frappe.model.get_new_doc("Task");
-							task.project = frm.doc.name;
-							// % Complete and status are recomputed on the server when a task changes
-							frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
-						});
-					},
+					action: () => frm.events.create_task(frm),
 				},
 				on_row_click: (row) => frappe.set_route("Form", "Task", row.name),
 				columns: [
 					{ label: __("Task Name"), fieldname: "subject" },
 					{
 						label: __("Status"),
+						fieldname: "status",
 						render: (row) => {
 							if (!row.status) return "";
 							// the Task list gives no colour for statuses missing from its map, e.g. ones
 							// added through Customize Form
 							const [label, color] = frappe.get_indicator(row, "Task") || [];
-							return frappe.ui.badge.html({
+							const badge = frappe.ui.badge.html({
 								label: label || __(row.status),
 								// badge knows "darkgrey" but not the list view's "dark grey"
 								theme: (color || "gray").replace(" ", ""),
 							});
+							return editable("status", badge);
 						},
 					},
-					{ label: __("Priority"), render: (row) => __(row.priority || "") },
+					{
+						label: __("Priority"),
+						fieldname: "priority",
+						render: (row) => editable("priority", erpnext.utils.task_priority_html(row.priority)),
+					},
 					{
 						label: __("Start Date"),
+						fieldname: "exp_start_date",
 						render: (row) => frappe.datetime.str_to_user(row.exp_start_date, false, true),
 					},
 					{
 						label: __("End Date"),
+						fieldname: "exp_end_date",
 						render: (row) => frappe.datetime.str_to_user(row.exp_end_date, false, true),
 					},
 					{
 						label: __("Progress"),
+						fieldname: "progress",
 						align: "right",
 						render: (row) => frappe.format(flt(row.progress), { fieldtype: "Percent" }),
 					},
 					{
 						label: __("Assigned To"),
 						render: (row) =>
-							frappe
-								.avatar_group(JSON.parse(row._assign || "[]"), 3, {
-									align: "left",
-									overlap: true,
-									action_icon: "plus",
-								})
-								.prop("outerHTML"),
+							frappe.ui.avatar_group.html({
+								avatars: JSON.parse(row._assign || "[]").map((user) => {
+									const { fullname, image } = frappe.user_info(user);
+									return { label: fullname, image };
+								}),
+								max: 3,
+								size: "sm",
+								add: { title: __("Assign") },
+							}),
 					},
 				],
 			});
 
-			// cells are rendered as HTML, so avatar_group's own handler for "+" is lost; bound here instead
-			$wrapper.off(".project_tasks").on("click.project_tasks", ".avatar-group", (e) => {
+			const $actions = $wrapper.find(".embedded-list-header-actions");
+			new frappe.ui.SortSelector({
+				parent: $actions,
+				doctype: "Task",
+				args: {
+					sort_by: frm.tasks_sort.sort_by,
+					sort_order: frm.tasks_sort.sort_order,
+					options: [
+						{ fieldname: "creation", label: __("Created On") },
+						{ fieldname: "modified", label: __("Last Updated On") },
+						...list.columns
+							.filter((column) => column.fieldname)
+							.map(({ fieldname, label }) => ({ fieldname, label })),
+					],
+				},
+				onchange: (sort_by, sort_order) => {
+					frm.tasks_sort = { sort_by, sort_order };
+					list.refresh();
+				},
+			}).wrapper.insertAfter($actions.find("[data-action='search']"));
+
+			$wrapper.off(".project_tasks").on("click.project_tasks", ".task-inline-edit", (e) => {
+				e.stopPropagation();
+				const button = e.currentTarget;
+				if ($(button).data("dropdown")) return;
+
+				const row = list.data[$(button).closest("tr").attr("data-row-idx")];
+				const field = button.dataset.field;
+				const dropdown = new frappe.ui.Dropdown({
+					trigger: button,
+					options: () =>
+						frm.events.task_field_options(frm, row, field, () =>
+							frm.events.reload_task_rows(list)
+						),
+				});
+				$(button).data("dropdown", dropdown);
+				dropdown.open();
+			});
+
+			// cells are HTML, so the group's add button has no handler of its own
+			$wrapper.on("click.project_tasks", ".es-avatar-group", (e) => {
 				// the avatars only show their user's name on hover, rather than opening the task
 				e.stopPropagation();
-				if (!$(e.target).closest(".avatar-action").length) return;
+				if (!$(e.target).closest(".es-avatar-group__add").length) return;
 
 				const row = list.data[$(e.currentTarget).closest("tr").attr("data-row-idx")];
-				frm.events.assign_task(frm, row, () => list.refresh());
+				frm.events.assign_task(frm, row, () => frm.events.reload_task_rows(list));
 			});
 
 			list.refresh();
 			return list;
 		});
 		return pending;
+	},
+
+	inline_edit_html: function (field, html) {
+		const caret = frappe.utils.icon("chevron-down", "xs", "", "", "ml-1 text-ink-gray-4", true);
+		return `<button type="button" class="btn-reset inline-flex items-center rounded task-inline-edit"
+			data-field="${field}" title="${__("Change")}">${html}${caret}</button>`;
+	},
+
+	// Overdue and Template are set by the system, so they aren't offered
+	task_field_options: function (frm, task, field, after) {
+		const options = frappe.meta.get_docfield("Task", field).options.split("\n");
+		const choices =
+			field === "status"
+				? options.filter((value) => !["Overdue", "Template"].includes(value))
+				: options.slice().reverse();
+		const icons = ["Urgent", "High", "Medium", "Low"];
+		return choices.map((value) => ({
+			label: __(value),
+			icon: field === "priority" && icons.includes(value) ? `priority-${value.toLowerCase()}` : null,
+			selected: task[field] === value,
+			onclick: () => task[field] !== value && frm.events.update_task(frm, task, field, value, after),
+		}));
+	},
+
+	update_task: function (frm, task, field, value, after) {
+		const save = () =>
+			frappe.db.set_value("Task", task.name, field, value).then(() => {
+				after();
+				frm.events.refresh_project_progress(frm);
+			});
+		if (field === "status" && value === "Cancelled") {
+			frappe.confirm(__("Cancel task {0}?", [frappe.utils.escape_html(task.subject)]), save);
+		} else {
+			save();
+		}
+	},
+
+	// EmbeddedList can't reload what it has loaded, so the page is widened for one request; reloads are
+	// queued because they share that page size. Load More waits, as it would read the next page in the
+	// new order while the rows shown are still in the old one; the redraw brings the button back
+	reload_task_rows: function (list) {
+		const disable_load_more = () =>
+			list.$wrapper.find("[data-action='load-more']").prop("disabled", true);
+		const reload = () => {
+			disable_load_more();
+			const page_size = list.page_size;
+			list.page_size = Math.max(page_size, list.data.length);
+			return list.load_page(0).finally(() => (list.page_size = page_size));
+		};
+		disable_load_more();
+		const previous = list.task_reload || Promise.resolve();
+		list.task_reload = previous.then(reload, reload);
+		return list.task_reload;
+	},
+
+	// a task save leaves the project's modified as it was, so it isn't read back and the conflict check holds
+	refresh_project_progress: function (frm) {
+		const fields = ["percent_complete", "status"];
+		const project = frm.doc.name;
+		return frappe.db.get_value("Project", project, fields).then(({ message }) => {
+			// the form is reused for the next Project opened, so a late reply may belong to another one
+			if (frm.doc.name !== project) return;
+			if (!frm.is_dirty()) {
+				Object.assign(frm.doc, message);
+				frm.refresh_fields(fields);
+				frm.refresh_header();
+			}
+			frm.project_overview?.refresh();
+		});
+	},
+
+	create_task: function (frm) {
+		frappe.model.with_doctype("Task", () => {
+			const task = frappe.model.get_new_doc("Task");
+			task.project = frm.doc.name;
+			frappe.ui.form.make_quick_entry("Task", () => frm.reload_doc(), null, task);
+		});
 	},
 
 	set_custom_buttons: function (frm) {

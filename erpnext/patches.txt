@@ -262,6 +262,7 @@ erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.convert_commission_rate_to_percent
 erpnext.patches.v16_0.convert_hide_currency_symbol_to_check
+erpnext.patches.v16_0.deduplicate_bank_account_balances
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -554,3 +555,10 @@ erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
 erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
 erpnext.patches.v16_0.set_lost_on_in_opportunity
+erpnext.patches.v16_0.apply_selling_settings_section_toggles
+erpnext.patches.v16_0.set_output_qty_in_work_order_operations
+execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
+execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
+erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
+erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers

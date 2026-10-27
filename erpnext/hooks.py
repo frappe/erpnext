@@ -63,13 +63,27 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
-	"Customer": ["public/js/party_overview.js", "public/js/customer_overview.js"],
-	"Supplier": ["public/js/party_overview.js", "public/js/supplier_overview.js"],
+	"Customer": [
+		"public/js/party_overview.js",
+		"public/js/customer_overview.js",
+		"public/js/party_items.js",
+	],
+	"Supplier": [
+		"public/js/party_overview.js",
+		"public/js/supplier_overview.js",
+		"public/js/party_items.js",
+	],
 	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
+	"Project": [
+		"public/js/project_overview.js",
+		"public/js/project_overview_progress.js",
+		"public/js/project_overview_attention.js",
+		"public/js/project_overview_breakdown.js",
+	],
 }
 doctype_list_js = {
 	"Code List": [
@@ -347,6 +361,7 @@ permission_query_conditions = {
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
 	"GL Entry": "erpnext.accounts.doctype.account_category.account_category.get_permission_query_conditions",
 	"Account Closing Balance": "erpnext.accounts.doctype.account_category.account_category.get_permission_query_conditions",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.get_inherited_permission_query_conditions",
 }
 
@@ -358,6 +373,7 @@ has_permission = {
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 	"GL Entry": "erpnext.accounts.doctype.account_category.account_category.has_permission",
 	"Account Closing Balance": "erpnext.accounts.doctype.account_category.account_category.has_permission",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
 	"*": "erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission",
 }
 

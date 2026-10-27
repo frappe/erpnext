@@ -10,6 +10,9 @@ from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate,
 
 from erpnext.controllers.item_close import closed_rows_settle, has_closable_items
 
+# percentages at or above this count as complete; anything short of it is rounding
+COMPLETE_PERCENTAGE = 99.999999
+
 
 class OverAllowanceError(frappe.ValidationError):
 	pass
@@ -400,7 +403,11 @@ class StatusUpdater(Document):
 						)
 					)
 
-			if items_to_validate and args.get("validate_overflow") is not False:
+			# a later return can lower the installation limit below an already-installed qty;
+			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
+			skip_on_cancel = self.docstatus == 2 and args.get("overflow_type") == "installation"
+
+			if items_to_validate and args.get("validate_overflow") is not False and not skip_on_cancel:
 				pp_sub_assembly_items = [
 					item.production_plan_sub_assembly_item
 					for item in items_to_validate
@@ -456,30 +463,48 @@ class StatusUpdater(Document):
 						elif item[args["target_ref_field"]]:
 							self.check_overflow_with_allowance(item, args)
 
+						elif (
+							args.get("overflow_type") == "installation"
+							and flt(item[args["target_field"]]) > 0
+						):
+							# nothing left to install (e.g. fully returned) but a positive qty was entered
+							item["reduce_by"] = flt(item[args["target_field"]])
+							self.limits_crossed_error(args, item, "qty")
+
 	def fetch_items_with_pending_qty(self, args, item_field, items):
 		doctype = frappe.qb.DocType(args["target_dt"])
 		item_field_col = doctype[item_field]
-		target_ref_field = doctype[args["target_ref_field"]]
 		target_field = doctype[args["target_field"]]
 
 		is_qty_check = "qty" in args["target_ref_field"]
+		is_installation = args.get("overflow_type") == "installation"
+
+		# installation consumes delivered-minus-returned qty, not the raw delivered qty
+		# (returned_qty is in stock UOM, so bring it back to the row's sales UOM)
+		if is_installation:
+			target_ref_value = (
+				doctype[args["target_ref_field"]] - doctype.returned_qty / doctype.conversion_factor
+			)
+		else:
+			target_ref_value = doctype[args["target_ref_field"]]
 
 		query = (
 			frappe.qb.from_(doctype)
 			.select(
 				doctype.name,
 				item_field_col.as_("item_code"),
-				target_ref_field,
+				target_ref_value.as_(args["target_ref_field"]),
 				target_field,
 				doctype.parenttype,
 				doctype.parent,
 			)
-			.where(target_ref_field < target_field)
+			.where(target_ref_value < target_field)
 			.where(doctype.name.isin(items))
 			.where(doctype.docstatus == 1)
 		)
 
-		if is_qty_check:
+		# installation is not a stock movement, so bundles and non-stock items are installable too
+		if is_qty_check and not is_installation:
 			item_table = frappe.qb.DocType("Item")
 			query = (
 				query.join(item_table)
@@ -740,10 +765,15 @@ class StatusUpdater(Document):
 		return percentage
 
 	@staticmethod
+	def _snap_full_percentage(percentage):
+		# status rules check for a full 100
+		return 100 if flt(percentage) >= COMPLETE_PERCENTAGE else percentage
+
+	@staticmethod
 	def _determine_status(percentage, keyword):
 		if percentage < 0.001:
 			return f"Not {keyword}"
-		elif percentage >= 99.999999:
+		elif percentage >= COMPLETE_PERCENTAGE:
 			return f"Fully {keyword}"
 		else:
 			return f"Partly {keyword}"
@@ -784,6 +814,9 @@ class StatusUpdater(Document):
 					args["target_parent_field"],
 					args.get("exclude_field"),
 				)
+			update_data[args.get("target_parent_field")] = self._snap_full_percentage(
+				update_data[args.get("target_parent_field")]
+			)
 			# update field
 			if args.get("status_field"):
 				update_data[args.get("status_field")] = self._determine_status(
@@ -841,7 +874,7 @@ class StatusUpdater(Document):
 				.run()[0][0]
 			)
 
-			per_billed = safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100
+			per_billed = self._snap_full_percentage(safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100)
 
 			ref_doc = frappe.get_lazy_doc(ref_dt, ref_dn)
 
@@ -851,7 +884,7 @@ class StatusUpdater(Document):
 			if hasattr(ref_doc, "billing_status"):
 				if ref_doc.per_billed < 0.001:
 					ref_doc.db_set("billing_status", "Not Billed")
-				elif ref_doc.per_billed > 99.999999:
+				elif ref_doc.per_billed >= COMPLETE_PERCENTAGE:
 					ref_doc.db_set("billing_status", "Fully Billed")
 				else:
 					ref_doc.db_set("billing_status", "Partly Billed")

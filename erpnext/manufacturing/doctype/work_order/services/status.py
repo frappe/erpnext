@@ -17,6 +17,7 @@ from frappe.utils import cint, flt, get_link_to_form
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 
 _QTY_PURPOSES = (
@@ -344,7 +345,7 @@ class StatusService:
 
 	def _process_loss_qty(self):
 		if self.doc.track_semi_finished_goods:
-			return flt(sum(flt(row.process_loss_qty) for row in self.doc.operations))
+			return flt(sum(self._process_loss_in_finished_good_units(row) for row in self.doc.operations))
 
 		table = frappe.qb.DocType("Stock Entry")
 		process_loss_qty = (
@@ -358,6 +359,14 @@ class StatusService:
 		).run()[0][0]
 
 		return flt(process_loss_qty)
+
+	def _process_loss_in_finished_good_units(self, row):
+		operation_qty = get_operation_qty(self.doc, row)
+		if not operation_qty:
+			return 0.0
+
+		process_loss_qty = flt(row.process_loss_qty) * flt(self.doc.qty) / operation_qty
+		return flt(process_loss_qty, self.doc.precision("process_loss_qty"))
 
 	def update_production_plan_status(self):
 		production_plan = frappe.get_doc("Production Plan", self.doc.production_plan)

@@ -2,7 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class TargetDetail(Document):
@@ -25,3 +28,16 @@ class TargetDetail(Document):
 	# end: auto-generated types
 
 	pass
+
+
+def validate_targets(targets):
+	seen = set()
+	for target in targets or []:
+		if flt(target.target_qty) < 0 or flt(target.target_amount) < 0:
+			frappe.throw(_("Row {0}: Target Qty and Target Amount cannot be negative").format(target.idx))
+		key = (target.fiscal_year, target.item_group or None)
+		if key in seen:
+			frappe.throw(
+				_("Row {0}: A target already exists for this fiscal year and item group.").format(target.idx)
+			)
+		seen.add(key)

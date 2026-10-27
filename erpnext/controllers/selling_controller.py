@@ -13,7 +13,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, i
 from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
-from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
+from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
 
@@ -32,7 +32,7 @@ class SellingController(StockController):
 				company = self.company
 
 				item.update(
-					get_bin_details(
+					_get_bin_details(
 						item.item_code, item.warehouse, company=company, include_child_warehouses=True
 					)
 				)
@@ -45,7 +45,7 @@ class SellingController(StockController):
 				),
 			)
 
-		if self.get("company") and not self.get("terms"):
+		if self.docstatus.is_draft() and self.get("company") and not self.get("terms"):
 			if not self.get("tc_name"):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
 			self.set_missing_terms()
@@ -73,6 +73,13 @@ class SellingController(StockController):
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
+
+	def before_update_after_submit(self):
+		if self.meta.get_field("sales_team") and self.is_child_table_same("sales_team"):
+			return
+
+		self.calculate_commission()
+		self.calculate_contribution()
 
 	def validate_against_stock_reservation_entries(self):
 		if self.get("is_return") or (self.doctype == "Sales Invoice" and not cint(self.get("update_stock"))):
@@ -281,11 +288,10 @@ class SellingController(StockController):
 				self.precision("allocated_amount", sales_person),
 			)
 
-			if sales_person.commission_rate:
-				sales_person.incentives = flt(
-					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
-					self.precision("incentives", sales_person),
-				)
+			sales_person.incentives = flt(
+				sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
+				self.precision("incentives", sales_person),
+			)
 
 			total += sales_person.allocated_percentage
 
@@ -299,12 +305,44 @@ class SellingController(StockController):
 			return
 
 		sales_person_status = frappe.db.get_all(
-			"Sales Person", filters={"name": ["in", sales_persons]}, fields=["name", "enabled"]
+			"Sales Person",
+			filters={"name": ["in", sales_persons]},
+			fields=["name", "enabled", "is_group", "commission_rate"],
 		)
 
 		for row in sales_person_status:
+			if row.is_group:
+				frappe.throw(_("Sales Person {0} is a group.").format(frappe.bold(row.name)))
 			if not row.enabled:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
+
+		seen = set()
+		for row in sales_team:
+			if row.sales_person in seen:
+				frappe.throw(
+					_("Sales Person {0} is repeated in the sales team.").format(frappe.bold(row.sales_person))
+				)
+			seen.add(row.sales_person)
+			if not 0 <= flt(row.allocated_percentage) <= 100:
+				frappe.throw(_("Row #{0}: Contribution (%) must be between 0 and 100").format(row.idx))
+
+		previous = self.get_doc_before_save()
+		previous_rows = {row.name: row for row in previous.get("sales_team")} if previous else {}
+		master_rates = {row.name: flt(row.commission_rate) for row in sales_person_status}
+		return_rates = {}
+		if self.get("is_return") and self.get("return_against"):
+			source = frappe.get_doc(self.doctype, self.return_against)
+			return_rates = {row.sales_person: row.commission_rate for row in source.sales_team}
+		for row in sales_team:
+			previous_row = previous_rows.get(row.name)
+			if previous_row and previous_row.sales_person == row.sales_person:
+				commission_rate = previous_row.commission_rate
+			else:
+				commission_rate = return_rates.get(row.sales_person, master_rates[row.sales_person])
+
+			if any(not 0 <= flt(rate) <= 100 for rate in (row.commission_rate, commission_rate)):
+				frappe.throw(_("Row #{0}: Commission Rate must be between 0 and 100").format(row.idx))
+			row.commission_rate = commission_rate
 
 	def validate_max_discount(self):
 		for d in self.get("items"):

@@ -21,6 +21,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.setup.utils import get_exchange_rate
 
 
 class Dunning(AccountsController):
@@ -71,30 +72,187 @@ class Dunning(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
-		self.validate_same_currency()
+		self.validate_currency()
+		self.set_dunning_fee()
+		self.validate_overdue_payment_references()
 		self.validate_overdue_payments()
 		self.validate_totals()
+		if self.docstatus == 0:
+			self.status = "Draft"
 		self.set_party_details()
 		self.set_dunning_level()
 
-	def validate_same_currency(self):
-		"""
-		Throw an error if invoice currency differs from dunning currency.
-		"""
+	def validate_currency(self):
+		self.currency = self.currency or self.company_currency
+		if self.currency == self.company_currency:
+			self.conversion_rate = 1
+		elif not self.conversion_rate or (
+			self.get_doc_before_save()
+			and not self.has_value_changed("conversion_rate")
+			and any(self.has_value_changed(field) for field in ("currency", "company", "posting_date"))
+		):
+			self.conversion_rate = get_exchange_rate(
+				self.currency, self.company_currency, self.posting_date, "for_selling"
+			)
+
+		if flt(self.conversion_rate) <= 0:
+			frappe.throw(
+				_("Conversion Rate from {0} to {1} must be greater than zero.").format(
+					self.currency, self.company_currency
+				)
+			)
+
+	def before_submit(self):
+		if self.dunning_amount and not self.income_account:
+			frappe.throw(_("Income Account is required to collect dunning fees or interest."))
+		self.status = "Unresolved"
+
+	def set_dunning_fee(self):
+		if not self.dunning_type:
+			self.dunning_fee = flt(self.dunning_fee)
+			return
+
+		default_fee = flt(frappe.get_cached_value("Dunning Type", self.dunning_type, "dunning_fee"))
+		previous = self.get_doc_before_save()
+		if self.dunning_fee is None or (
+			previous
+			and previous.dunning_type == self.dunning_type
+			and previous.dunning_fee == self.dunning_fee
+			and flt(previous.conversion_rate) > 0
+			and previous.conversion_rate != self.conversion_rate
+			and previous.dunning_fee
+			== flt(default_fee / previous.conversion_rate, self.precision("dunning_fee"))
+		):
+			if flt(self.conversion_rate) <= 0:
+				frappe.throw(_("Conversion Rate must be greater than zero."))
+			self.dunning_fee = flt(default_fee / self.conversion_rate, self.precision("dunning_fee"))
+
+	def validate_overdue_payment_references(self):
+		if not self.overdue_payments:
+			return
+
+		invoices = {
+			invoice.name: invoice
+			for invoice in frappe.get_list(
+				"Sales Invoice",
+				filters={"name": ("in", {row.sales_invoice for row in self.overdue_payments})},
+				fields=[
+					"name",
+					"customer",
+					"company",
+					"currency",
+					"party_account_currency",
+					"docstatus",
+					"is_return",
+					"outstanding_amount",
+				],
+				limit_page_length=0,
+				ignore_permissions=self.flags.ignore_permissions,
+			)
+		}
+		schedules = (
+			{
+				schedule.name: schedule
+				for schedule in frappe.get_all(
+					"Payment Schedule",
+					filters={
+						"parent": ("in", list(invoices)),
+						"parenttype": "Sales Invoice",
+						"parentfield": "payment_schedule",
+					},
+					fields=[
+						"name",
+						"idx",
+						"parent",
+						"due_date",
+						"outstanding",
+						"payment_term",
+						"payment_amount",
+						"invoice_portion",
+						"mode_of_payment",
+					],
+				)
+			}
+			if invoices
+			else {}
+		)
+		invoice_schedules = {name: [] for name in invoices}
+		for schedule in schedules.values():
+			invoice_schedules[schedule.parent].append(schedule)
+		schedule_outstanding = {}
+		for name, invoice in invoices.items():
+			schedule_outstanding.update(get_payment_schedule_outstanding(invoice, invoice_schedules[name]))
+
+		seen_schedules = set()
+		invoice_outstanding = {}
+
 		for row in self.overdue_payments:
-			invoice_currency = frappe.get_value("Sales Invoice", row.sales_invoice, "currency")
-			if invoice_currency != self.currency:
+			invoice = invoices.get(row.sales_invoice)
+			if not invoice or invoice.docstatus != 1 or invoice.is_return:
+				frappe.throw(_("Row #{0}: Select an accessible, submitted Sales Invoice.").format(row.idx))
+
+			for field in ("customer", "company", "currency"):
+				if invoice.get(field) != self.get(field):
+					frappe.throw(
+						_("Row #{0}: Sales Invoice {1} must have the same {2} as this Dunning.").format(
+							row.idx, row.sales_invoice, _(self.meta.get_label(field))
+						)
+					)
+
+			schedule = schedules.get(row.payment_schedule)
+			if not schedule or schedule.parent != row.sales_invoice:
+				frappe.throw(
+					_("Row #{0}: Payment Schedule must belong to the selected Sales Invoice.").format(row.idx)
+				)
+			if row.payment_schedule in seen_schedules:
+				frappe.throw(
+					_("Row #{0}: Payment Schedule is already included in this Dunning.").format(row.idx)
+				)
+			seen_schedules.add(row.payment_schedule)
+
+			for field in ("payment_term", "mode_of_payment", "payment_amount", "invoice_portion"):
+				if field in ("payment_amount", "invoice_portion"):
+					matches = flt(row.get(field), row.precision(field)) == flt(
+						schedule.get(field), row.precision(field)
+					)
+				else:
+					matches = (row.get(field) or "") == (schedule.get(field) or "")
+				if not matches:
+					frappe.throw(
+						_("Row #{0}: {1} must match the Payment Schedule.").format(
+							row.idx, _(row.meta.get_label(field))
+						)
+					)
+
+			if (
+				not row.due_date
+				or not schedule.due_date
+				or getdate(row.due_date) != getdate(schedule.due_date)
+			):
+				frappe.throw(_("Row #{0}: Due Date must match the Payment Schedule.").format(row.idx))
+			if getdate(schedule.due_date) >= getdate(self.posting_date):
+				frappe.throw(
+					_("Row #{0}: Payment must be overdue on the Dunning Posting Date.").format(row.idx)
+				)
+
+			invoice_outstanding[row.sales_invoice] = invoice_outstanding.get(row.sales_invoice, 0) + flt(
+				row.outstanding
+			)
+			if (
+				flt(row.outstanding, row.precision("outstanding")) <= 0
+				or flt(invoice.outstanding_amount) <= 0
+				or flt(row.outstanding, row.precision("outstanding"))
+				> flt(schedule_outstanding[schedule.name], row.precision("outstanding"))
+				or (
+					invoice.party_account_currency == invoice.currency
+					and flt(invoice_outstanding[row.sales_invoice], row.precision("outstanding"))
+					> flt(invoice.outstanding_amount, row.precision("outstanding"))
+				)
+			):
 				frappe.throw(
 					_(
-						"The currency of invoice {0} ({1}) is different from the currency of this dunning ({2})."
-					).format(
-						frappe.get_desk_link(
-							"Sales Invoice",
-							row.sales_invoice,
-						),
-						invoice_currency,
-						self.currency,
-					)
+						"Row #{0}: Outstanding must be positive and cannot exceed the unpaid invoice or installment amount."
+					).format(row.idx)
 				)
 
 	def validate_overdue_payments(self):
@@ -173,6 +331,10 @@ class Dunning(AccountsController):
 			if (outstanding := get_current_outstanding(row)) > 0
 		]
 
+	def before_cancel(self):
+		super().before_cancel()
+		self.status = "Cancelled"
+
 	def on_cancel(self):
 		super().on_cancel()
 		self.ignore_linked_doctypes = [
@@ -187,7 +349,6 @@ class Dunning(AccountsController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
-			"Payment Entry",
 		]
 
 	@frappe.whitelist()
@@ -229,6 +390,21 @@ class Dunning(AccountsController):
 			else None
 		)
 		self.language = letter_text.language if letter_text else self.language
+
+
+def get_payment_schedule_outstanding(invoice, payment_schedule):
+	"""Apply payments without term allocations to the oldest installments first."""
+	outstanding = {row.name: flt(row.outstanding) for row in payment_schedule}
+	if invoice.party_account_currency != invoice.currency:
+		return outstanding
+
+	unallocated_payment = max(sum(outstanding.values()) - flt(invoice.outstanding_amount), 0)
+	for row in sorted(payment_schedule, key=lambda row: (getdate(row.due_date), row.idx)):
+		paid_amount = min(outstanding[row.name], unallocated_payment)
+		unallocated_payment -= paid_amount
+		outstanding[row.name] -= paid_amount
+
+	return outstanding
 
 
 def update_linked_dunnings(doc, previous_outstanding_amount):
@@ -318,13 +494,25 @@ def get_paid_dunning_amount(dunning: str) -> float:
 	"""Interest and fee collected for this dunning, in company currency."""
 	deduction = frappe.qb.DocType("Payment Entry Deduction")
 	payment_entry = frappe.qb.DocType("Payment Entry")
+	dunning_doc = frappe.qb.DocType("Dunning")
 
 	paid = (
 		frappe.qb.from_(deduction)
 		.join(payment_entry)
 		.on(payment_entry.name == deduction.parent)
+		.join(dunning_doc)
+		.on(dunning_doc.name == deduction.dunning)
 		.select(Sum(deduction.amount))
-		.where((deduction.dunning == dunning) & (payment_entry.docstatus == 1))
+		.where(
+			(deduction.dunning == dunning)
+			& (payment_entry.docstatus == 1)
+			& (payment_entry.payment_type == "Receive")
+			& (payment_entry.party_type == "Customer")
+			& (payment_entry.party == dunning_doc.customer)
+			& (payment_entry.company == dunning_doc.company)
+			& (deduction.account == dunning_doc.income_account)
+			& (deduction.amount < 0)
+		)
 	).run()
 
 	# the dunning amount is booked as a negative deduction, against the income account
@@ -367,7 +555,7 @@ def get_linked_dunnings_as_per_state(sales_invoice, state):
 		.distinct()
 		.where(
 			(dunning.status == state)
-			& (dunning.docstatus != 2)
+			& (dunning.docstatus == 1)
 			& (overdue_payment.sales_invoice == sales_invoice)
 		)
 	).run(as_dict=True)

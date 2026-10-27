@@ -28,6 +28,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 )
 from erpnext.manufacturing.doctype.work_order.mapper import (
 	create_job_card,
+	get_operation_qty,
 	split_qty_based_on_batch_size,
 )
 
@@ -37,6 +38,7 @@ _BOM_OPERATION_FIELDS = [
 	"workstation",
 	"idx",
 	"finished_good",
+	"finished_good_qty",
 	"is_subcontracted",
 	"wip_warehouse",
 	"source_warehouse",
@@ -118,7 +120,7 @@ class OperationsService:
 		plan_days = get_capacity_planning_days()
 
 		for idx, row in enumerate(self.doc.operations):
-			qty = self.doc.qty
+			qty = get_operation_qty(self.doc, row)
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self.doc, row, qty)
 				if row.job_card_qty > 0:
@@ -157,7 +159,7 @@ class OperationsService:
 		if not (self.doc.production_plan and plan_row):
 			return []
 
-		if flt(row.job_card_qty) != flt(self.doc.qty):
+		if flt(row.job_card_qty) != get_operation_qty(self.doc, row):
 			return []
 
 		if sum(1 for d in self.doc.operations if d.operation == row.operation) > 1:
@@ -247,6 +249,15 @@ class OperationsService:
 			self.doc.get_items_and_operations_from_bom()
 		elif flt(previous.qty) != flt(self.doc.qty) and flt(previous.qty):
 			self._scale_saved_operation_time(previous)
+			self._scale_saved_output_qty(previous)
+
+	def _scale_saved_output_qty(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		for d in self.doc.get("operations"):
+			saved = saved_rows.get(d.name)
+			if saved and flt(saved.output_qty) and flt(saved.output_qty) == flt(d.output_qty):
+				output_qty = flt(saved.output_qty) * flt(self.doc.qty) / flt(previous.qty)
+				d.output_qty = flt(output_qty, d.precision("output_qty"))
 
 	def _scale_saved_operation_time(self, previous):
 		saved_rows = {row.name: row for row in previous.get("operations")}
@@ -343,8 +354,20 @@ class OperationsService:
 			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
 
 		d.status = "Pending"
+		d.output_qty = self._operation_output_qty(d, qty, exploded)
 		if self.doc.track_semi_finished_goods and not d.sequence_id:
 			d.sequence_id = d.idx
+
+	def _operation_output_qty(self, d, qty, exploded):
+		finished_good_qty = flt(d.pop("finished_good_qty", 0))
+		if not (finished_good_qty and flt(qty) and d.finished_good):
+			return 0
+
+		if d.finished_good == self.doc.production_item:
+			return 0
+
+		per_unit = finished_good_qty * flt(qty) if exploded else finished_good_qty / flt(qty)
+		return flt(per_unit * flt(self.doc.qty), self.doc.precision("output_qty", "operations"))
 
 	def calculate_time(self):
 		for d in self.doc.get("operations"):
@@ -386,7 +409,8 @@ class OperationsService:
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
-		max_allowed_qty_for_wo = flt(self.doc.qty) + (allowance_percentage / 100 * flt(self.doc.qty))
+		operation_qty = get_operation_qty(self.doc, d)
+		max_allowed_qty_for_wo = operation_qty + (allowance_percentage / 100 * operation_qty)
 
 		if self._operation_qty(d) > flt(max_allowed_qty_for_wo, d.precision("completed_qty")):
 			frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
@@ -395,7 +419,7 @@ class OperationsService:
 		qty = self._operation_qty(d)
 		if not qty:
 			return "Pending"
-		if qty < flt(self.doc.qty, d.precision("completed_qty")):
+		if qty < flt(get_operation_qty(self.doc, d), d.precision("completed_qty")):
 			return "Work in Progress"
 		return "Completed"
 

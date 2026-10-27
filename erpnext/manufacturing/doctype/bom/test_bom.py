@@ -1463,7 +1463,7 @@ class TestBOM(ERPNextTestSuite):
 		bom.items[1].percentage = 60
 		bom.with_operations = 1
 		bom.track_semi_finished_goods = 1
-		self.assertRaisesRegex(frappe.ValidationError, "Produce an Item at Each Operation", bom.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Produce Item per Operation", bom.insert)
 
 	@timeout
 	def test_final_operation_must_produce_the_bom_item(self):
@@ -1901,7 +1901,9 @@ class TestBOM(ERPNextTestSuite):
 		bom.append("items", {"item_code": rm_item, "qty": 1, "operation_row_id": 1})
 		bom.insert()
 
-		self.assertRaisesRegex(frappe.ValidationError, "Step 2.*Add Raw Materials", bom.submit)
+		self.assertRaisesRegex(
+			frappe.ValidationError, f"Step 2.*Add Raw Materials.*output item.*{fg_item}", bom.submit
+		)
 
 	def test_changing_step_bom_replaces_its_raw_materials(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

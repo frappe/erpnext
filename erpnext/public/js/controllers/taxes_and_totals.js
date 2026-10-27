@@ -351,7 +351,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		frappe.call({
 			method: "erpnext.controllers.taxes_and_totals.get_rounding_tax_settings",
 			callback: function (r) {
-				frappe.flags.round_off_settings = r.message;
+				frappe.flags.round_row_wise_tax = r.message;
 			},
 		});
 	}

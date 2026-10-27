@@ -15,6 +15,17 @@ frappe.ui.form.on("Payment Request", {
 				},
 			};
 		});
+
+		frm.set_query("bank_account", function () {
+			return {
+				query: "erpnext.accounts.doctype.payment_request.payment_request.get_bank_account_query",
+				filters: {
+					company: frm.doc.company,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party,
+				},
+			};
+		});
 	},
 });
 

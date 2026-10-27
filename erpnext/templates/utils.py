@@ -14,6 +14,9 @@ from frappe.utils import escape_html, strip_html, validate_email_address
 def send_message(sender: str, message: str, subject: str = "Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
+	if frappe.get_single_value("Contact Us Settings", "is_disabled"):
+		return
+
 	website_send_message(sender, message, subject)
 	sender = validate_email_address(sender, throw=True)
 
@@ -29,7 +32,10 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 		return
 
 	lead = None
-	customer = get_customer_from_contact_email(sender)
+	# a guest's address is unverified, so only a signed-in sender is matched to a customer
+	customer = (
+		get_customer_from_contact_email(sender) if frappe.session.user.lower() == sender.lower() else None
+	)
 
 	if not customer:
 		lead = frappe.db.get_value("Lead", dict(email_id=sender))

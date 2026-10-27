@@ -1325,7 +1325,8 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
-		elif self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
+
+		if self.is_inward_transfer_leg(sle) and not self.has_bundle_valuation(sle):
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if self.is_produced_row(sle) and not self.has_bundle_valuation(sle):
@@ -1881,12 +1882,7 @@ class update_entries_after:
 
 				if self.valuation_method == "Moving Average" and (
 					self.skip_serial_batch_valuation
-					or (
-						sle.voucher_type in ("Delivery Note", "Sales Invoice")
-						and not (
-							sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle")
-						)
-					)
+					or not (sle.get("serial_no") or sle.get("batch_no") or sle.get("serial_and_batch_bundle"))
 				):
 					rate = self.get_moving_average_rate_for_return(sle)
 
@@ -3163,9 +3159,12 @@ def get_stock_value_difference(
 
 @frappe.request_cache
 def is_transfer_stock_entry(voucher_no):
-	purpose = frappe.get_cached_value("Stock Entry", voucher_no, "purpose")
-
-	return purpose in ["Material Transfer", "Material Transfer for Manufacture", "Send to Subcontractor"]
+	return bool(
+		frappe.db.exists(
+			"Stock Entry Detail",
+			{"parent": voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
+		)
+	)
 
 
 @frappe.request_cache

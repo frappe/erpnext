@@ -4,8 +4,10 @@
 import json
 
 import frappe
+from frappe.permissions import add_permission
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 from erpnext.accounts.services.child_item_update import update_child_qty_rate
 from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
 	get_sales_order_items,
@@ -69,6 +71,47 @@ class TestProformaInvoice(ERPNextTestSuite):
 		# partial (4 of 10): net 400 + 10% tax = 440
 		self.assertEqual(flt(proforma.grand_total), 440)
 
+	def test_fixed_discount_and_actual_charges_scale_to_partial_qty(self):
+		sales_order = make_sales_order(qty=10, do_not_submit=True)  # rate 100
+		sales_order.apply_discount_on = "Net Total"
+		sales_order.discount_amount = 200
+		sales_order.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account CST - _TC",
+				"description": "Freight",
+				"tax_amount": 500,
+			},
+		)
+		sales_order.submit()
+
+		# full order: 1000 - 200 discount + 500 freight = 1300
+		self.assertEqual(flt(sales_order.grand_total), 1300)
+
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 5)])
+		# half the order: 500 - 100 discount + 250 freight = 650
+		self.assertEqual(flt(proforma.grand_total), 650)
+
+	def test_pricing_rule_discount_is_kept(self):
+		pricing_rule = make_pricing_rule(selling=1, discount_percentage=10)
+		sales_order = make_sales_order(qty=2, do_not_submit=True)
+		sales_order.items[0].update(
+			{
+				"price_list_rate": 100,
+				"discount_percentage": 10,
+				"rate": 90,
+				"pricing_rules": json.dumps([pricing_rule.name]),
+			}
+		)
+		sales_order.submit()
+		self.assertEqual(flt(sales_order.grand_total), 180)
+
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 2)])
+
+		self.assertEqual(flt(proforma.items[0].rate), 90)
+		self.assertEqual(flt(proforma.grand_total), 180)
+
 	def test_amount_based_proforma(self):
 		"""Amount basis: qty and amount are both entered; the rate is derived from them."""
 		sales_order = make_sales_order(qty=10)  # rate 100
@@ -87,6 +130,16 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(flt(item.rate), 50)  # 250 / 5
 		self.assertEqual(flt(item.amount), 250)
 		self.assertEqual(flt(proforma.grand_total), 250)
+
+	def test_amount_basis_total_matches_line_amount(self):
+		sales_order = make_sales_order(qty=10)
+		name = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": sales_order.items[0].name, "qty": 3, "amount": 100}]),
+			based_on="Amount",
+		)
+
+		self.assertEqual(flt(frappe.db.get_value("Proforma Invoice", name, "grand_total")), 100)
 
 	def test_cancelled_proforma_keeps_pdf(self):
 		"""Cancelling voids the proforma but keeps its PDF and status for the audit trail."""
@@ -153,6 +206,34 @@ class TestProformaInvoice(ERPNextTestSuite):
 		sales_order = make_sales_order(qty=10)
 		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])
 		proforma.cancel()
+
+		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
+
+	def test_pdf_and_grand_total_are_set_by_the_server(self):
+		sales_order = make_sales_order(qty=10)  # rate 100
+		other_file = frappe.get_doc(
+			{"doctype": "File", "file_name": "other.txt", "content": b"other", "is_private": 1}
+		).insert()
+		proforma = frappe.new_doc(
+			"Proforma Invoice",
+			sales_order=sales_order.name,
+			proforma_pdf=other_file.file_url,
+			grand_total=1,
+			items=[{"so_detail": sales_order.items[0].name, "qty": 4}],
+		)
+		proforma.insert()
+		proforma.submit()
+
+		self.assertNotEqual(proforma.proforma_pdf, other_file.file_url)
+		self.assertEqual(flt(proforma.grand_total), 400)
+
+	def test_email_sends_only_the_proforma_attachment(self):
+		sales_order = make_sales_order(qty=10)
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])
+		other_file = frappe.get_doc(
+			{"doctype": "File", "file_name": "other.txt", "content": b"other", "is_private": 1}
+		).insert()
+		proforma.db_set("proforma_pdf", other_file.file_url)
 
 		self.assertRaises(frappe.ValidationError, send_proforma_email, proforma.name, "customer@example.com")
 
@@ -238,6 +319,43 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(item.item_code, so_item.item_code)
 		self.assertEqual(flt(item.rate), flt(so_item.rate))
 		self.assertEqual(flt(item.amount), 4 * flt(so_item.rate))
+
+	def test_requires_read_permission_on_sales_order(self):
+		sales_order = make_sales_order(qty=10)
+		role = "_Test Proforma Creator"
+		frappe.get_doc({"doctype": "Role", "role_name": role}).insert(ignore_if_duplicate=True)
+		add_permission("Proforma Invoice", role, ptype="create")
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "proforma-creator@example.com", "first_name": "Proforma"}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles(role)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				self.make_draft_proforma,
+				sales_order,
+				so_detail=sales_order.items[0].name,
+				qty=1,
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_duplicate_sales_order_line_is_rejected(self):
+		sales_order = make_sales_order(qty=10)
+		so_detail = sales_order.items[0].name
+		proforma = frappe.new_doc(
+			"Proforma Invoice",
+			sales_order=sales_order.name,
+			based_on="Amount",
+			items=[
+				{"so_detail": so_detail, "qty": 1, "amount": 100},
+				{"so_detail": so_detail, "qty": 2, "amount": 200},
+			],
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "already in row #1", proforma.insert)
 
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})

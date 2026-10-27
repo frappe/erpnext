@@ -160,9 +160,13 @@ class BaseManufactureStockEntry(BaseStockEntry):
 
 		item_details["transfer_qty"] = item_details["qty"]
 
-		if self.wo_doc and cint(
-			frappe.db.get_single_value(
-				"Manufacturing Settings", "make_serial_no_batch_from_work_order", cache=True
+		if (
+			self.wo_doc
+			and (self.wo_doc.has_serial_no or self.wo_doc.has_batch_no)
+			and cint(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "make_serial_no_batch_from_work_order", cache=True
+				)
 			)
 		):
 			if self.wo_doc.has_serial_no:
@@ -175,6 +179,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 	def set_serial_nos_for_finished_good(self, item_details, existing_row=None):
 		serial_nos = self.get_available_serial_nos_for_fg(item_details.item_code)
 		if not serial_nos:
+			if not existing_row:
+				self.doc.append("items", item_details)
 			return
 
 		row = frappe._dict({"serial_nos": serial_nos[0 : cint(item_details.qty)]})
@@ -226,6 +232,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		self.update_batches_to_be_consume(batches, row, qty)
 		if row.batches_to_be_consume:
 			self._link_fg_bundle_and_append(item_details, row, existing_row=existing_row)
+		elif not existing_row:
+			self.doc.append("items", item_details)
 
 	def _link_fg_bundle_and_append(self, item_details, row, existing_row=None):
 		_id = create_serial_and_batch_bundle(
@@ -302,13 +310,15 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				continue
 
 			if self.check_invalid_serial_batch_nos_for_finished_good_item(row):
+				had_selection = row.serial_no or row.batch_no or row.serial_and_batch_bundle
 				self.reset_serial_batch_on_fg_row(row)
-				frappe.msgprint(
-					_(
-						"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
-						" because the previously selected serial/batch does not belong to this Work Order."
-					).format(row.idx, frappe.bold(self.doc.work_order))
-				)
+				if had_selection:
+					frappe.msgprint(
+						_(
+							"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
+							" because the previously selected serial/batch does not belong to this Work Order."
+						).format(row.idx, frappe.bold(self.doc.work_order))
+					)
 
 	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
 		if self.wo_doc.has_serial_no:

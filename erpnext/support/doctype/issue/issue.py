@@ -350,9 +350,11 @@ def auto_close_tickets():
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 
-	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
+	if doc.raised_by == user:
+		return True
 
-	return permission_based_on_customer or doc.raised_by == user
+	# other issues of the customer can be viewed, but only the user's own issues can be changed
+	return ptype in ("read", "print") and has_website_permission(doc, ptype, user, verbose)
 
 
 def update_issue(contact, method):

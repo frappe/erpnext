@@ -1619,6 +1619,9 @@ def validate_field_number(doctype_name, docname, number_value, company, field_na
 def get_autoname_with_number(number_value, doc_title, company):
 	"""append title with prefix as number and suffix as company's abbreviation separated by '-'"""
 	company_abbr = frappe.get_cached_value("Company", company, "abbr")
+	if not company_abbr:
+		frappe.throw(_("Company {0} does not exist or has no abbreviation").format(company))
+
 	parts = [doc_title.strip(), company_abbr]
 
 	if cstr(number_value).strip():

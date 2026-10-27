@@ -507,7 +507,12 @@ class SalesOrder(SellingController):
 		if opportunity_name:
 			frappe.db.set_value("Opportunity", opportunity_name, "status", flag)
 
-	def update_prevdoc_status(self, flag=None):
+	def update_prevdoc_status(self, flag=None, update_quotation_qty=False):
+		# Update Items edits ordered rows without going through on_submit/on_cancel,
+		# so recompute the quotation's ordered_qty and re-run the over-order check here.
+		if update_quotation_qty:
+			super().update_prevdoc_status()
+
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
@@ -522,6 +527,33 @@ class SalesOrder(SellingController):
 
 				doc.set_status(update=True)
 				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
+
+	def update_ordered_qty_in_quotation_for_removed_items(self, removed_items):
+		"""Recompute Quotation Item ordered_qty for rows removed via Update Items.
+
+		`update_qty` on the surviving rows never visits a removed row's quotation_item,
+		so without this it keeps counting as ordered even after the row (or the SO) is gone.
+		"""
+		soi = frappe.qb.DocType("Sales Order Item")
+		quotations = set()
+		for item in removed_items:
+			quotation_item = item.get("quotation_item")
+			if not quotation_item:
+				continue
+
+			ordered_qty = (
+				frappe.qb.from_(soi)
+				.select(Sum(soi.stock_qty))
+				.where((soi.quotation_item == quotation_item) & (soi.docstatus == 1))
+			).run()[0][0]
+			frappe.db.set_value("Quotation Item", quotation_item, "ordered_qty", flt(ordered_qty))
+
+			quotation = frappe.db.get_value("Quotation Item", quotation_item, "parent")
+			if quotation:
+				quotations.add(quotation)
+
+		for quotation in quotations:
+			frappe.get_doc("Quotation", quotation).set_status(update=True)
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):
@@ -583,6 +615,9 @@ class SalesOrder(SellingController):
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
+	def on_trash(self):
+		DeliveryScheduleService(self).delete_delivery_schedule_items()
+
 	def update_project(self):
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction":
 			return
@@ -642,11 +677,10 @@ class SalesOrder(SellingController):
 		SalesOrderStockReservation(self).update_reserved_qty(so_item_rows)
 
 	def on_update_after_submit(self):
-		self.calculate_commission()
-		self.calculate_contribution()
 		self.check_credit_limit()
 
 	def before_update_after_submit(self):
+		super().before_update_after_submit()
 		self.validate_po()
 		self.validate_drop_ship()
 		self.validate_supplier_after_submit()

@@ -17,6 +17,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestQuotation(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Quotation")
+		self.lost_reason = "_Test Quotation Lost Reason"
+		if not frappe.db.exists("Quotation Lost Reason", self.lost_reason):
+			frappe.get_doc(
+				{"doctype": "Quotation Lost Reason", "order_lost_reason": self.lost_reason}
+			).insert()
 
 	def test_update_child_quotation_add_item(self):
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -406,6 +411,124 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(sales_order.currency, "USD")
 		self.assertNotEqual(sales_order.currency, quotation.currency)
 
+	def test_sales_order_update_items_refreshes_quotation_ordered_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item1 = make_item().item_code
+		item2 = make_item().item_code
+		warehouse = "_Test Warehouse - _TC"
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": item1, "qty": 10, "rate": 100, "warehouse": warehouse},
+				{"item_code": item2, "qty": 4, "rate": 100, "warehouse": warehouse},
+			]
+		)
+
+		so = make_sales_order(quotation.name)
+		so.delivery_date = nowdate()
+		so.insert()
+		so.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+		self.assertEqual(quotation.items[0].ordered_qty, 10)
+		self.assertEqual(quotation.items[1].ordered_qty, 4)
+
+		# Update Items on the SO: shrink the first row, drop the second
+		trans_items = json.dumps(
+			[{"item_code": item1, "qty": 4, "rate": so.items[0].rate, "docname": so.items[0].name}]
+		)
+		update_child_qty_rate("Sales Order", trans_items, so.name)
+
+		quotation.reload()
+		self.assertEqual(quotation.items[0].ordered_qty, 4)
+		self.assertEqual(quotation.items[1].ordered_qty, 0)
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		# Cancelling the trimmed SO must release everything back to Open
+		so.reload()
+		so.cancel()
+		quotation.reload()
+		self.assertEqual(quotation.items[0].ordered_qty, 0)
+		self.assertEqual(quotation.items[1].ordered_qty, 0)
+		self.assertEqual(quotation.status, "Open")
+
+	def test_get_items_rejects_quotation_with_mismatched_header(self):
+		quotation_a = make_quotation(party_name="_Test Customer", qty=1)
+		sales_order = make_sales_order(quotation_a.name)
+
+		# A different customer cannot be merged into a target that already has rows
+		quotation_b = make_quotation(party_name="_Test Customer 1", qty=1)
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation_b.name, sales_order)
+
+		# The same customer still merges into the existing target
+		quotation_c = make_quotation(party_name="_Test Customer", qty=2)
+		merged = make_sales_order(quotation_c.name, sales_order)
+		self.assertEqual(len(merged.items), 2)
+
+	def test_quotation_update_items_recomputes_status(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item1 = make_item().item_code
+		item2 = make_item().item_code
+		warehouse = "_Test Warehouse - _TC"
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": item1, "qty": 2, "rate": 100, "warehouse": warehouse},
+				{"item_code": item2, "qty": 2, "rate": 100, "warehouse": warehouse},
+			]
+		)
+
+		so = make_sales_order(quotation.name, args={"filtered_children": [quotation.items[0].name]})
+		so.delivery_date = nowdate()
+		so.insert()
+		so.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
+		# Dropping the un-ordered row makes the quotation fully ordered; status must follow
+		row = quotation.items[0]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "qty": row.qty, "rate": row.rate, "docname": row.name}]
+		)
+		update_child_qty_rate("Quotation", trans_items, quotation.name)
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Ordered")
+
+		# An Ordered quotation refuses further Update Items, even from the API
+		row = quotation.items[0]
+		raised = json.dumps([{"item_code": row.item_code, "qty": 5, "rate": row.rate, "docname": row.name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", raised, quotation.name)
+
+	def test_unordered_alternative_set_keeps_quotation_partially_ordered(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		simple = make_item(properties={"is_stock_item": 1}).item_code
+		main = make_item(properties={"is_stock_item": 1}).item_code
+		alt = make_item(properties={"is_stock_item": 1}).item_code
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": simple, "qty": 1, "rate": 100, "warehouse": warehouse},
+				{"item_code": main, "qty": 1, "rate": 100, "warehouse": warehouse},
+				{"item_code": alt, "qty": 1, "rate": 100, "is_alternative": True, "warehouse": warehouse},
+			]
+		)
+
+		frappe.flags.args = frappe._dict(selected_items=[quotation.items[0]])
+		so = make_sales_order(quotation.name)
+		frappe.flags.args = frappe._dict()
+		so.delivery_date = add_days(so.transaction_date, 10)
+		so.insert()
+		so.submit()
+
+		self.assertEqual(len(so.items), 1)
+		self.assertEqual(so.items[0].item_code, simple)
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
@@ -591,13 +714,42 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
 		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
 
+	def test_declare_lost_requires_a_reason_without_changing_the_quotation(self):
+		quotation = make_quotation()
+		quotation.append("lost_reasons", {"lost_reason": self.lost_reason})
+		quotation.save()
+		previous_status = quotation.status
+		previous_reason_names = [row.name for row in quotation.lost_reasons]
+
+		with self.assertRaises(frappe.ValidationError):
+			quotation.declare_enquiry_lost([], [], "New detailed reason")
+
+		quotation.reload()
+		self.assertEqual(quotation.status, previous_status)
+		self.assertEqual(quotation.is_active, 1)
+		self.assertFalse(quotation.order_lost_reason)
+		self.assertEqual([row.name for row in quotation.lost_reasons], previous_reason_names)
+		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [self.lost_reason])
+		self.assertFalse(quotation.competitors)
+
+	def test_declare_lost_with_a_reason(self):
+		quotation = make_quotation()
+
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [], "Too expensive")
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Lost")
+		self.assertEqual(quotation.is_active, 1)
+		self.assertEqual(quotation.order_lost_reason, "Too expensive")
+		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [self.lost_reason])
+
 	def test_setting_a_revision_as_lost_sets_other_versions_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)
 		revision.insert()
 		revision.submit()
 
-		revision.declare_enquiry_lost([], [])
+		revision.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Lost")
 
@@ -612,7 +764,13 @@ class TestQuotation(ERPNextTestSuite):
 		sales_order.submit()
 		quotation.reload()
 
-		self.assertRaises(frappe.ValidationError, quotation.declare_enquiry_lost, [], [])
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot set as Lost as Sales Order is made",
+			quotation.declare_enquiry_lost,
+			[],
+			[],
+		)
 
 	def test_opportunity_is_lost_when_an_older_version_is_set_as_lost(self):
 		opportunity = make_opportunity(with_items=1)
@@ -626,14 +784,14 @@ class TestQuotation(ERPNextTestSuite):
 		revision.submit()
 		quotation.reload()
 
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Lost")
 
 	def test_draft_revision_cannot_be_submitted_after_the_quotation_is_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name).insert()
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertRaises(frappe.ValidationError, revision.submit)
 
@@ -679,7 +837,7 @@ class TestQuotation(ERPNextTestSuite):
 		quotation.reload()
 		self.assertTrue(quotation.has_versions_to_set_as_lost)
 
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertEqual(
 			frappe.db.get_value("Quotation", quotation.name, ["status", "is_active"]), ("Lost", 1)
@@ -721,7 +879,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_is_active_is_locked_on_a_lost_quotation(self):
 		quotation = make_quotation()
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 		quotation.reload()
 		quotation.is_active = 0
 
@@ -729,7 +887,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_lost_quotation_cannot_be_revised(self):
 		quotation = make_quotation()
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
@@ -746,13 +904,24 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, quotation.name)
 
+	def test_lost_or_expired_quotation_cannot_be_invoiced(self):
+		lost = make_quotation()
+		lost.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, lost.name)
+
+		expired = make_quotation(do_not_submit=1)
+		expired.transaction_date = add_days(nowdate(), -10)
+		expired.valid_till = add_days(nowdate(), -5)
+		expired.submit()
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, expired.name)
+
 	def test_sales_order_cannot_be_submitted_against_a_lost_quotation(self):
 		quotation = make_quotation()
 		sales_order = make_sales_order(quotation.name)
 		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
-		quotation.declare_enquiry_lost([], [])
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [])
 
 		self.assertRaisesRegex(frappe.ValidationError, "is Lost", sales_order.submit)
 
@@ -942,6 +1111,29 @@ class TestQuotation(ERPNextTestSuite):
 		]
 
 		self.assertEqual(quotation_packed_items, so_packed_items)
+
+	def test_quotation_update_items_rebuilds_bundle_packed_items(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+		make_product_bundle("_Test Product Bundle", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		quotation = make_quotation(item_code="_Test Product Bundle", qty=1, rate=100)
+		before = {pi.item_code: pi.qty for pi in quotation.packed_items}
+		self.assertTrue(before)
+
+		row = quotation.items[0]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "qty": 3, "rate": row.rate, "docname": row.name}]
+		)
+		update_child_qty_rate("Quotation", trans_items, quotation.name)
+
+		quotation.reload()
+		after = {pi.item_code: pi.qty for pi in quotation.packed_items}
+		self.assertEqual(after, {code: qty * 3 for code, qty in before.items()})
 
 	def test_product_bundle_price_calculation_when_calculate_bundle_price_is_unchecked(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -1420,7 +1612,7 @@ class TestQuotation(ERPNextTestSuite):
 
 		cache = frappe.cache()
 		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
-		value = cache.get(key)
+		value = cache.get_value(key)
 		expected_rate = flt(value) / 3.64
 
 		self.assertEqual(

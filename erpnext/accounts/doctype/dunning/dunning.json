@@ -116,9 +116,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fetch_from": "dunning_type.dunning_fee",
-   "fetch_if_empty": 1,
    "fieldname": "dunning_fee",
    "fieldtype": "Currency",
    "label": "Dunning Fee",
@@ -237,7 +234,7 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "Unresolved",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -403,7 +400,7 @@
  "icon": "bell-ring",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-30 23:18:04.712528",
+ "modified": "2026-10-26 11:25:50.077318",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
