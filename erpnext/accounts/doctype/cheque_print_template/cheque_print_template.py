@@ -108,7 +108,10 @@ def create_or_update_cheque_print_format(template_name: str):
 		<span style="top:{amt_in_words_from_top_edge}cm; left:{amt_in_words_from_left_edge}cm;
 			position: absolute; display: block; width: {amt_in_word_width}cm;
 			line-height:{amt_in_words_line_spacing}cm; word-wrap: break-word;">
-				{{{{doc.in_words}}}}
+				{{{{ frappe.utils.money_in_words(
+					doc.received_amount if doc.payment_type == "Receive" else doc.paid_amount,
+					doc.paid_to_account_currency if doc.payment_type == "Receive" else doc.paid_from_account_currency
+				) }}}}
 		</span>
 		<span style="top:{amt_in_figures_from_top_edge}cm;left: {amt_in_figures_from_left_edge}cm;
 			position: absolute; min-width: 4cm;">
