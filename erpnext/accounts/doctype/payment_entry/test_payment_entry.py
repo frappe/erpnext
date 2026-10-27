@@ -3321,3 +3321,11 @@ class TestPaymentEntryQueries(ERPNextTestSuite):
 			{"reference": "S"},
 		)
 		self.assertEqual(payment_term({"reference_doctype": "Sales Order", "reference_name": "S"}), {})
+
+	def test_account_query_keeps_field_filters(self):
+		filters = get_search_filters(
+			payment_entry.account_query,
+			"Account",
+			{"payment_type": "Pay", "bank_payment_type": "Pay", "company": "C", "root_type": ["=", "Asset"]},
+		)
+		self.assertEqual(filters["root_type"], ["=", "Asset"])
