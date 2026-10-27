@@ -136,6 +136,7 @@ class ValuationFixTestCase(ERPNextTestSuite):
 		self.assertEqual(result["not_adjusted"], [])
 		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
 		self.assertEqual(adjustment.purpose, ADJUSTMENT_ENTRY)
+		self.assertTrue(adjustment.is_made_from_valuation_comparison)
 		adjustment.submit()
 
 		# from its date on the ledger is right
@@ -626,6 +627,15 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		reconciliation.insert()
 		reconciliation.purpose = ADJUSTMENT_ENTRY
 		self.assertRaises(ManualAdjustmentEntryError, reconciliation.save)
+
+	def test_duplicate_of_adjustment_entry_is_not_allowed(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+
+		copy = frappe.copy_doc(
+			frappe.get_doc("Stock Reconciliation", result["adjustment_entry"]), ignore_no_copy=False
+		)
+		self.assertRaises(ManualAdjustmentEntryError, copy.insert)
 
 	def test_no_backdated_entry_before_an_adjustment_entry(self):
 		item = self.make_fifo_issue_at_wrong_value()
