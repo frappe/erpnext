@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import add_days, cint, formatdate, getdate
 
 
 class BankGuarantee(Document):
@@ -43,8 +44,60 @@ class BankGuarantee(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_reference()
 		if not (self.customer or self.supplier):
 			frappe.throw(_("Select the customer or supplier."))
+		self.set_end_date()
+
+	def validate_reference(self):
+		"""The reference is a submitted order of the guarantee's type; the party and project come from it."""
+		reference_doctype, party_field, other_party_field = (
+			("Sales Order", "customer", "supplier")
+			if self.bg_type == "Receiving"
+			else ("Purchase Order", "supplier", "customer")
+		)
+		if self.reference_docname and self.reference_doctype != reference_doctype:
+			frappe.throw(
+				_("The reference of a {0} Bank Guarantee must be a {1}.").format(
+					_(self.bg_type), _(reference_doctype)
+				),
+				title=_("Invalid Reference"),
+			)
+		self.reference_doctype = reference_doctype
+		self.set(other_party_field, None)
+
+		if not self.reference_docname:
+			return
+
+		order = frappe.db.get_value(
+			reference_doctype,
+			self.reference_docname,
+			["docstatus", party_field, "project"],
+			as_dict=True,
+		)
+		if not order or order.docstatus != 1:
+			frappe.throw(
+				_("{0} {1} must be submitted.").format(
+					_(reference_doctype), frappe.bold(self.reference_docname)
+				),
+				title=_("Invalid Reference"),
+			)
+
+		self.set(party_field, order.get(party_field))
+		if order.project:
+			self.project = order.project
+
+	def set_end_date(self):
+		if cint(self.validity) > 0:
+			self.end_date = add_days(self.start_date, cint(self.validity) - 1)
+
+		if self.end_date and getdate(self.end_date) < getdate(self.start_date):
+			frappe.throw(
+				_("End Date {0} cannot be before Start Date {1}. Set the Validity in Days.").format(
+					frappe.bold(formatdate(self.end_date)), frappe.bold(formatdate(self.start_date))
+				),
+				title=_("Invalid Dates"),
+			)
 
 	def on_submit(self):
 		if not self.bank_guarantee_number:
