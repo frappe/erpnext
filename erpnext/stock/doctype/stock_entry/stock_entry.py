@@ -69,6 +69,9 @@ from erpnext.stock.stock_ledger import (
 )
 from erpnext.stock.utils import _get_incoming_rate, get_bin, get_combine_datetime
 
+WORK_ORDER_PURPOSES = (*WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES, "Disassemble")
+FROM_BOM_PURPOSES = (*WORK_ORDER_PURPOSES, "Material Issue", "Repack", "Send to Subcontractor")
+
 
 class FinishedGoodError(frappe.ValidationError):
 	pass
@@ -296,6 +299,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
+<<<<<<< HEAD
+=======
+		self.clear_links_hidden_for_purpose()
+
+		if self.purpose_cls and hasattr(self.purpose_cls, "before_validate"):
+			self.purpose_cls(self).before_validate()
+
+		self.set_default_cost_center()
+		self.set_allow_alternative_item()
+
+>>>>>>> 049229e (fix(stock): clear manufacturing links hidden by stock entry purpose)
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
 		if self.get("items") and apply_rule:
@@ -307,6 +321,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 					item.project = self.project
 
 		self.set_allow_alternative_item()
+
+	def clear_links_hidden_for_purpose(self):
+		if self.purpose not in WORK_ORDER_PURPOSES and self.purpose != "Repack":
+			self.work_order = None
+			self.job_card = None
+
+		if self.purpose not in FROM_BOM_PURPOSES:
+			self.from_bom = 0
+			self.bom_no = None
+			self.fg_completed_qty = 0.0
 
 	def set_allow_alternative_item(self):
 		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""
