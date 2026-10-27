@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
@@ -910,51 +911,40 @@ class TestPOSInvoice(unittest.TestCase):
 				self.assertEqual(batch.qty, 5)
 
 	def test_pos_batch_reservation_with_return_qty(self):
-		"""
-		Test POS Invoice reserved qty for batch without bundle with return invoices.
-		"""
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_auto_batch_nos,
+		frappe.set_user("Administrator")
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1})
+		batch_nos = []
+		for qty in (10, 10):
+			se = make_stock_entry(
+				target="_Test Warehouse - _TC", item_code=item.name, qty=qty, basic_rate=100
+			)
+			batch_nos.append(get_batch_from_bundle(se.items[0].serial_and_batch_bundle))
+		self.assertNotEqual(batch_nos[0], batch_nos[1])
+
+		pos_inv = create_pos_invoice(
+			item=item.name, batch_no=batch_nos[0], use_serial_batch_fields=1, do_not_save=1
 		)
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
-			create_batch_item_with_batch,
+		pos_inv.append("items", copy.deepcopy(pos_inv.items[0])).batch_no = batch_nos[1]
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 200})
+		pos_inv.insert().submit()
+
+		batch_args = frappe._dict(item_code=item.name, warehouse="_Test Warehouse - _TC")
+		self.assertEqual(
+			{batch.batch_no: batch.qty for batch in get_auto_batch_nos(batch_args)},
+			dict.fromkeys(batch_nos, 9),
 		)
-
-		create_batch_item_with_batch("_Batch Item Reserve Return", "TestBatch-RR 01")
-		se = make_stock_entry(
-			target="_Test Warehouse - _TC",
-			item_code="_Batch Item Reserve Return",
-			qty=30,
-			basic_rate=100,
-		)
-
-		se.reload()
-
-		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
-
-		# POS Invoice for the batch without bundle
-		pos_inv = create_pos_invoice(item="_Batch Item Reserve Return", rate=300, qty=15, do_not_save=1)
-		pos_inv.append(
-			"payments",
-			{"mode_of_payment": "Cash", "amount": 4500},
-		)
-		pos_inv.items[0].batch_no = batch_no
-		pos_inv.save()
-		pos_inv.submit()
-
-		# POS Invoice return
 		pos_return = make_sales_return(pos_inv.name)
-
-		pos_return.insert()
-		pos_return.submit()
-
-		batches = get_auto_batch_nos(
-			frappe._dict({"item_code": "_Batch Item Reserve Return", "warehouse": "_Test Warehouse - _TC"})
+		pos_return.insert().submit()
+		self.assertEqual(
+			{batch.batch_no: batch.qty for batch in get_auto_batch_nos(batch_args)},
+			dict.fromkeys(batch_nos, 10),
 		)
 
-		for batch in batches:
-			if batch.batch_no == batch_no and batch.warehouse == "_Test Warehouse - _TC":
-				self.assertEqual(batch.qty, 30)
+		pos_return.cancel()
+		self.assertEqual(
+			{batch.batch_no: batch.qty for batch in get_auto_batch_nos(batch_args)},
+			dict.fromkeys(batch_nos, 9),
+		)
 
 	def test_pos_batch_item_qty_validation(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
