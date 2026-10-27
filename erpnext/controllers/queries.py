@@ -1384,14 +1384,14 @@ def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, 
 
 def standard_search(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters, **kwargs):
 	"""Frappe's own link search, for a query that only works out its filters. Of `kwargs`, it takes
-	those Frappe passes a query for the field's user permissions."""
+	those Frappe passes a query for the result format and the field's user permissions."""
 	from frappe.desk.search import search_widget
 
 	if isinstance(filters, dict):
 		# as Desk leaves out filters without a value
 		filters = {fieldname: value for fieldname, value in filters.items() if value not in (None, "")}
 
-	permission_args = ("reference_doctype", "ignore_user_permissions", "link_fieldname")
+	search_args = ("as_dict", "reference_doctype", "ignore_user_permissions", "link_fieldname")
 	return search_widget(
 		doctype,
 		txt,
@@ -1399,8 +1399,21 @@ def standard_search(doctype: str, txt: str, searchfield: str, start: int, page_l
 		start=start,
 		page_length=page_len,
 		filters=filters,
-		**{arg: kwargs[arg] for arg in permission_args if arg in kwargs},
+		**{arg: kwargs[arg] for arg in search_args if arg in kwargs},
 	)
+
+
+def get_field_filters(filters: dict, *form_fields: str) -> dict:
+	"""The link field's own filters (its Link Filters), which Desk adds to the form's values."""
+	return {fieldname: value for fieldname, value in filters.items() if fieldname not in form_fields}
+
+
+def get_filter_list(doctype: str, filters: dict) -> list:
+	"""`filters` as `[doctype, fieldname, operator, value]` rows."""
+	return [
+		[doctype, fieldname, *(value if isinstance(value, list | tuple) else ("=", value))]
+		for fieldname, value in filters.items()
+	]
 
 
 @frappe.whitelist()
@@ -1412,13 +1425,15 @@ def transaction_batch_query(
 	if not filters.get("item_code"):
 		frappe.throw(_("Please enter Item Code to get batch no"))
 
+	field_filters = get_field_filters(
+		filters, "voucher_type", "item_code", "warehouse", "posting_date", "is_return", "update_stock"
+	)
 	voucher_type = filters.get("voucher_type")
 	if voucher_type == "Purchase Receipt" or (
 		voucher_type == "Purchase Invoice" and filters.get("update_stock")
 	):
-		return standard_search(
-			doctype, txt, searchfield, start, page_len, {"item": filters["item_code"]}, **kwargs
-		)
+		search_filters = {"item": filters["item_code"], **field_filters}
+		return standard_search(doctype, txt, searchfield, start, page_len, search_filters, **kwargs)
 
 	batch_filters = {
 		"item_code": filters["item_code"],
@@ -1432,6 +1447,7 @@ def transaction_batch_query(
 	if filters.get("warehouse"):
 		batch_filters["warehouse"] = filters["warehouse"]
 
+	batch_filters.update(field_filters)
 	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
 
 
@@ -1441,8 +1457,19 @@ def item_tax_template_query(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
 ):
 	"""The tax templates of a transaction's item: its own and its item group's, else the company's."""
+	field_filters = get_field_filters(
+		filters,
+		"item_code",
+		"item_group",
+		"base_net_rate",
+		"transaction_date",
+		"bill_date",
+		"posting_date",
+		"tax_category",
+		"company",
+	)
 	if not filters.get("item_code"):
-		company_filters = {"company": filters.get("company")}
+		company_filters = {"company": filters.get("company"), **field_filters}
 		return standard_search(doctype, txt, searchfield, start, page_len, company_filters, **kwargs)
 
 	template_filters = {
@@ -1456,6 +1483,7 @@ def item_tax_template_query(
 		"tax_category": filters.get("tax_category"),
 		"company": filters.get("company"),
 		"disabled": 0,
+		**field_filters,
 	}
 	return frappe.call(
 		get_tax_template, doctype, txt, searchfield, start, page_len, template_filters, **kwargs
@@ -1471,6 +1499,7 @@ def item_warehouse_query(
 	warehouse_filters = [
 		["Warehouse", "company", "in", ["", filters.get("company") or ""]],
 		["Warehouse", "is_group", "=", 0],
+		*get_filter_list("Warehouse", get_field_filters(filters, "company", "item_code")),
 	]
 	if not filters.get("item_code"):
 		return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)
@@ -1493,6 +1522,7 @@ def purchase_item_query(
 	else:
 		item_filters.update({"is_purchase_item": 1, "has_variants": 0})
 
+	item_filters.update(get_field_filters(filters, "supplier", "company", "is_subcontracted"))
 	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
 
 
@@ -1511,6 +1541,7 @@ def sales_item_query(
 		"customer": customer,
 		"has_variants": 0,
 		"company": filters.get("company"),
+		**get_field_filters(filters, "customer", "quotation_to", "party_name", "company"),
 	}
 	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
 
@@ -1526,6 +1557,7 @@ def dimension_query(
 		"dimension": filters.get("dimension"),
 		"account": account,
 		"company": filters.get("company"),
+		**get_field_filters(filters, "dimension", "accounts", "company"),
 	}
 	return frappe.call(
 		get_filtered_dimensions, doctype, txt, searchfield, start, page_len, dimension_filters, **kwargs
@@ -1542,6 +1574,7 @@ def project_query(
 	if filters.get("party_type") == "Customer":
 		project_filters["customer"] = filters.get("party")
 
+	project_filters.update(get_field_filters(filters, "company", "party_type", "party"))
 	return frappe.call(
 		get_project_name, doctype, txt, searchfield, start, page_len, project_filters, **kwargs
 	)
@@ -1563,4 +1596,5 @@ def company_address_query(
 	else:
 		address_filters = {"link_doctype": "Company", "link_name": filters.get("company")}
 
+	address_filters.update(get_field_filters(filters, "customer", "delivered_by_supplier", "company"))
 	return frappe.call(address_query, doctype, txt, searchfield, start, page_len, address_filters, **kwargs)
