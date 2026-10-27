@@ -137,6 +137,15 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 			doc.evaluate_rule(self._make_transaction(deposit=1, description="NEFT inv-1001 Sharma"))
 		)
 
+	def test_regex_with_angle_brackets_is_saved_as_written(self):
+		pattern = r"INV-(?P<number>\d+)"
+		doc = self._rule("rx_saved", [{"check": "Regex", "value": pattern}]).insert()
+		doc.reload()
+		self.assertEqual(doc.description_rules[0].value, pattern)
+		self.assertTrue(
+			doc.evaluate_rule(self._make_transaction(deposit=1, description="NEFT INV-1001 Sharma"))
+		)
+
 	def test_evaluate_rule_composite_fails_on_description(self):
 		doc = self._rule(
 			"cmp",
