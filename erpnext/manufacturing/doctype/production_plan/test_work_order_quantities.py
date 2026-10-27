@@ -272,7 +272,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		field = "production_plan_sub_assembly_item"
 		plan = self.make_plan(qty=81, consider_process_loss=True)
 		row = self.plan_row(plan, field)
-		self.assertEqual((row.required_qty, row.process_loss_percentage, row.qty), (90, 10, 100))
+		self.assertEqual((row.required_qty, row.process_loss_percentage, row.qty), (90, 10, 90))
 
 		work_order = self.create_work_order(plan, field)
 		self.assertEqual(work_order.qty, 100)

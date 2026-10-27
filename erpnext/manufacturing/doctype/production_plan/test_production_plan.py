@@ -12,6 +12,9 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_pooled_bin_details,
 )
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
@@ -1164,8 +1167,9 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		plan.get_sub_assembly_items()
 
-		# 10 Nos after 10% loss needs 11.11 Nos, so a Work Order for 12 Nos.
-		self.assertEqual(plan.sub_assembly_items[0].qty, 12)
+		row = plan.sub_assembly_items[0]
+		order_qty = ProductionPlanWorkOrderQuantities.get_order_qty(row, "production_plan_sub_assembly_item")
+		self.assertEqual((row.qty, order_qty), (10, 12))
 
 	def test_whole_number_sub_assembly_rounds_up_without_process_loss(self):
 		rm_item = make_item("_Test PP Whole Ratio RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
