@@ -2723,6 +2723,33 @@ class TestStockEntry(ERPNextTestSuite):
 			within_allowance = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
 			within_allowance.insert()
 
+	def test_manufacturing_links_cleared_on_plain_material_transfer(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		wo = make_wo_order_test_record(qty=1)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=100
+		)
+
+		transfer = frappe.get_doc(make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		self.assertEqual(transfer.fg_completed_qty, 1)
+
+		transfer.stock_entry_type = "Material Transfer"
+		transfer.purpose = "Material Transfer"
+		for d in transfer.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer.insert()
+
+		self.assertFalse(transfer.work_order)
+		self.assertFalse(transfer.job_card)
+		self.assertFalse(transfer.from_bom)
+		self.assertFalse(transfer.bom_no)
+		self.assertEqual(transfer.fg_completed_qty, 0)
+
 	def test_manufacture_blocked_without_manufactured_qty(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_wo_stock_entry,
