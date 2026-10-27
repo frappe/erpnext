@@ -8,6 +8,7 @@ def execute():
 	last_name = ""
 	while names := get_bundle_names(last_name):
 		set_posting_datetime(names)
+		frappe.db.commit()
 		last_name = names[-1]
 
 	drop_indexes()
