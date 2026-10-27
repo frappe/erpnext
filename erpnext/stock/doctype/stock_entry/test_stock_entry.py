@@ -6567,3 +6567,13 @@ class TestStockEntryQueries(ERPNextTestSuite):
 		entry_type = partial(get_search_filters, stock_entry.stock_entry_type_query, "Stock Entry Type")
 		self.assertEqual(entry_type({"subcontracting_inward_order": "O"})["purpose"][0], "in")
 		self.assertEqual(entry_type({})["purpose"][0], "not in")
+
+	def test_target_warehouse_query_keeps_field_filters(self):
+		self.assertEqual(
+			get_search_filters(
+				stock_entry.target_warehouse_query,
+				"Warehouse",
+				{"company": "C", "purpose": "Material Issue", "warehouse_type": ["=", "Stores"]},
+			),
+			{"is_group": 0, "company": "C", "warehouse_type": ["=", "Stores"]},
+		)
