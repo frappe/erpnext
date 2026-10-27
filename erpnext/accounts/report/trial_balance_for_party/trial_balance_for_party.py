@@ -4,15 +4,21 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
-from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.report.trial_balance.trial_balance import (
+	validate_company_permission,
+	validate_filters,
+)
 from erpnext.accounts.utils import get_currency_precision
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 
 	show_party_name = is_party_name_visible(filters)
@@ -130,6 +136,9 @@ def get_opening_balances(filters, account_filter=None):
 	if finance_book_condition := get_finance_book_condition(GL_Entry, filters):
 		query = query.where(finance_book_condition)
 
+	if match_conditions := build_match_conditions("GL Entry"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
 	gle = query.run(as_dict=True)
 
 	opening = frappe._dict()
@@ -167,6 +176,9 @@ def get_balances_within_period(filters, account_filter=None):
 
 	if finance_book_condition := get_finance_book_condition(GL_Entry, filters):
 		query = query.where(finance_book_condition)
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
 
 	gle = query.run(as_dict=True)
 
