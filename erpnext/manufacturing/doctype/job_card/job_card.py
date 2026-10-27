@@ -1829,8 +1829,17 @@ class JobCard(Document):
 		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
 		min_completed_qty = min(flt(row.get(qty_field)) for row in previous_operations)
 
-		precision = self.precision("total_completed_qty")
-		return flt(min_completed_qty - self.get_current_operation_completed_qty(), precision)
+		used_qty = (
+			self.get_current_operation_completed_qty()
+			if self.track_semi_finished_goods
+			else self.get_operation_input_qty()
+		)
+		return flt(min_completed_qty - used_qty, self.precision("total_completed_qty"))
+
+	def get_operation_input_qty(self):
+		"""Qty of the previous operation used by submitted job cards of this operation and this card's completed qty."""
+		submitted = self.get_current_operation_data()[0]
+		return flt(submitted.completed_qty) + flt(submitted.process_loss_qty) + flt(self.total_completed_qty)
 
 	def validate_previous_operation(self, row, current_operation_qty):
 		if not row.completed_qty or (row.status != "Completed" and row.completed_qty < current_operation_qty):
@@ -1868,15 +1877,8 @@ class JobCard(Document):
 			return
 
 		previous = min(previous_operations, key=lambda row: flt(row.completed_qty))
-		submitted = self.get_current_operation_data()[0]
 		precision = self.precision("total_completed_qty")
-		input_qty = flt(
-			flt(submitted.completed_qty)
-			+ flt(submitted.process_loss_qty)
-			+ flt(self.total_completed_qty)
-			+ flt(self.process_loss_qty),
-			precision,
-		)
+		input_qty = flt(self.get_operation_input_qty() + flt(self.process_loss_qty), precision)
 		if input_qty <= flt(previous.completed_qty, precision):
 			return
 
