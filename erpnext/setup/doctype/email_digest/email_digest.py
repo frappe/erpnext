@@ -83,12 +83,32 @@ class EmailDigest(Document):
 		self._accounts = {}
 		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
 
+	def validate(self):
+		valid_users = self.get_eligible_recipients()
+		for row in self.recipients:
+			if row.recipient not in valid_users:
+				frappe.throw(
+					_("Row {0}: Recipient {1} must be an enabled System User.").format(row.idx, row.recipient)
+				)
+
+	def get_eligible_recipients(self):
+		recipients = [row.recipient for row in self.recipients if row.recipient]
+		if not recipients:
+			return set()
+		return set(
+			frappe.get_all(
+				"User",
+				filters={"name": ["in", recipients], "enabled": 1, "user_type": "System User"},
+				pluck="name",
+			)
+		)
+
 	@frappe.whitelist()
 	def send(self):
 		self._send()
 
 	def _send(self, continue_on_error=False):
-		valid_users = frappe.get_all("User", filters={"enabled": 1}, pluck="name")
+		valid_users = self.get_eligible_recipients()
 		for row in self.recipients:
 			if row.recipient not in valid_users:
 				continue
@@ -106,6 +126,8 @@ class EmailDigest(Document):
 		original_form = frappe.local.form_dict
 		try:
 			frappe.set_user(recipient)
+			if not self.can_receive_financial_cards():
+				return
 			message = self.get_msg_html()
 		finally:
 			frappe.set_user(original_session.user)
@@ -121,6 +143,52 @@ class EmailDigest(Document):
 				unsubscribe_message=_("Unsubscribe from this Email Digest"),
 			)
 
+	def can_receive_financial_cards(self):
+		"""Company-wide cards require access to all contributing company records."""
+		sections = {
+			"Account": (
+				"income",
+				"expenses_booked",
+				"income_year_to_date",
+				"expense_year_to_date",
+				"bank_balance",
+				"credit_balance",
+				"invoiced_amount",
+				"payables",
+			),
+			"GL Entry": (
+				"income",
+				"expenses_booked",
+				"income_year_to_date",
+				"expense_year_to_date",
+				"bank_balance",
+				"credit_balance",
+				"invoiced_amount",
+				"payables",
+			),
+			"Sales Order": ("sales_order", "sales_orders_to_bill", "sales_orders_to_deliver"),
+			"Purchase Order": ("purchase_order", "purchase_orders_to_bill", "purchase_orders_to_receive"),
+			"Sales Invoice": ("sales_invoice",),
+			"Purchase Invoice": ("purchase_invoice",),
+			"Quotation": ("new_quotations", "pending_quotations"),
+		}
+		doctypes = [
+			doctype for doctype, fields in sections.items() if any(self.get(field) for field in fields)
+		]
+		if not doctypes:
+			return True
+		if not frappe.has_permission("Company", "read", doc=self.company):
+			return False
+		for doctype in doctypes:
+			if not frappe.has_permission(doctype, "read"):
+				return False
+			filters = {"company": self.company}
+			visible = frappe.get_list(doctype, filters=filters, fields=[{"COUNT": "*", "as": "count"}])[
+				0
+			].count
+			if visible != frappe.db.count(doctype, filters):
+				return False
+		return True
 
 	def get_msg_html(self):
 		"""Build email digest content"""
@@ -300,8 +368,12 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		project_list = frappe.get_all(
+		if not frappe.has_permission("Project", "read", user=user_id):
+			return []
+
+		project_list = frappe.get_list(
 			"Project",
+			user=user_id,
 			filters={"status": "Open", "project_type": "External"},
 			fields=["*"],
 			order_by="creation asc",
@@ -315,7 +387,13 @@ class EmailDigest(Document):
 
 	def get_project_count(self):
 		"""Get count of Project"""
-		return frappe.db.count("Project", {"status": "Open", "project_type": "External"})
+		if not frappe.has_permission("Project", "read"):
+			return 0
+		return frappe.get_list(
+			"Project",
+			filters={"status": "Open", "project_type": "External"},
+			fields=[{"COUNT": "*", "as": "count"}],
+		)[0].count
 
 	def set_accounting_cards(self, context):
 		"""Create accounting cards if checked."""
@@ -941,11 +1019,14 @@ class EmailDigest(Document):
 			return fmt_money(value, currency=self.currency)
 
 	def get_purchase_orders_items_overdue_list(self):
+		if not frappe.has_permission("Purchase Order", "read"):
+			return frappe._dict()
+
 		po = frappe.qb.DocType("Purchase Order")
 		poi = frappe.qb.DocType("Purchase Order Item")
 
 		query = (
-			frappe.qb.from_(poi)
+			frappe.qb.get_query("Purchase Order", fields=["name"], ignore_permissions=False)
 			.select(
 				poi.parent,
 				poi.schedule_date,
@@ -956,7 +1037,7 @@ class EmailDigest(Document):
 				poi.amount,
 				po.currency,
 			)
-			.inner_join(po)
+			.inner_join(poi)
 			.on(po.name == poi.parent)
 			.where(po.status != "Closed")
 			.where(poi.docstatus == 1)
