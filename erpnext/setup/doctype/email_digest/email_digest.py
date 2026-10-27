@@ -83,10 +83,29 @@ class EmailDigest(Document):
 		self._accounts = {}
 		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
 
+	def validate(self):
+		valid_users = self.get_eligible_recipients()
+		for row in self.recipients:
+			if row.recipient not in valid_users:
+				frappe.throw(
+					_("Row {0}: Recipient {1} must be an enabled System User.").format(row.idx, row.recipient)
+				)
+
+	def get_eligible_recipients(self):
+		recipients = [row.recipient for row in self.recipients if row.recipient]
+		if not recipients:
+			return set()
+		return set(
+			frappe.get_all(
+				"User",
+				filters={"name": ["in", recipients], "enabled": 1, "user_type": "System User"},
+				pluck="name",
+			)
+		)
+
 	@frappe.whitelist()
 	def send(self):
-		# send email only to enabled users
-		valid_users = frappe.get_all("User", filters={"enabled": 1}, pluck="name")
+		valid_users = self.get_eligible_recipients()
 
 		if self.recipients:
 			for row in self.recipients:
@@ -290,8 +309,12 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		project_list = frappe.get_all(
+		if not frappe.has_permission("Project", "read", user=user_id):
+			return []
+
+		project_list = frappe.get_list(
 			"Project",
+			user=user_id,
 			filters={"status": "Open", "project_type": "External"},
 			fields=["*"],
 			order_by="creation asc",
@@ -305,7 +328,13 @@ class EmailDigest(Document):
 
 	def get_project_count(self):
 		"""Get count of Project"""
-		return frappe.db.count("Project", {"status": "Open", "project_type": "External"})
+		if not frappe.has_permission("Project", "read"):
+			return 0
+		return frappe.get_list(
+			"Project",
+			filters={"status": "Open", "project_type": "External"},
+			fields=[{"COUNT": "*", "as": "count"}],
+		)[0].count
 
 	def set_accounting_cards(self, context):
 		"""Create accounting cards if checked"""
@@ -924,11 +953,14 @@ class EmailDigest(Document):
 			return fmt_money(value, currency=self.currency)
 
 	def get_purchase_orders_items_overdue_list(self):
+		if not frappe.has_permission("Purchase Order", "read"):
+			return frappe._dict()
+
 		po = frappe.qb.DocType("Purchase Order")
 		poi = frappe.qb.DocType("Purchase Order Item")
 
 		query = (
-			frappe.qb.from_(poi)
+			frappe.qb.get_query("Purchase Order", fields=["name"], ignore_permissions=False)
 			.select(
 				poi.parent,
 				poi.schedule_date,
@@ -939,7 +971,7 @@ class EmailDigest(Document):
 				poi.amount,
 				po.currency,
 			)
-			.inner_join(po)
+			.inner_join(poi)
 			.on(po.name == poi.parent)
 			.where(po.status != "Closed")
 			.where(poi.docstatus == 1)

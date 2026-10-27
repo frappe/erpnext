@@ -299,7 +299,7 @@
    "label": "Add Quote"
   },
   {
-   "description": "Note: Email will not be sent to disabled users",
+   "description": "All selected recipients receive company-wide totals for enabled sections, regardless of their access to the underlying transactions.",
    "fieldname": "recipients",
    "fieldtype": "Table MultiSelect",
    "label": "Recipients",
