@@ -2274,7 +2274,7 @@ def get_warehouse_details(args: str | dict):
 @frappe.validate_and_sanitize_search_inputs
 def batch_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs):
 	"""The batches of a row's item: of its source warehouse, or its target one when it has none."""
-	from erpnext.controllers.queries import get_batch_no
+	from erpnext.controllers.queries import get_batch_no, get_field_filters
 
 	if not filters.get("item_code"):
 		frappe.throw(_("Please enter Item Code to get Batch Number"))
@@ -2295,6 +2295,11 @@ def batch_query(doctype: str, txt: str, searchfield: str, start: int, page_len: 
 	if purpose in ("Material Receipt", "Material Transfer", "Material Issue"):
 		batch_filters["include_expired_batches"] = 1
 
+	batch_filters.update(
+		get_field_filters(
+			filters, "item_code", "s_warehouse", "t_warehouse", "purpose", "posting_date", "posting_time"
+		)
+	)
 	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
 
 
@@ -2304,12 +2309,13 @@ def target_warehouse_query(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
 ):
 	"""The company's warehouses to move stock to: transit ones for a transfer to transit."""
-	from erpnext.controllers.queries import standard_search
+	from erpnext.controllers.queries import get_field_filters, standard_search
 
 	warehouse_filters = {"is_group": 0, "company": filters.get("company")}
 	if filters.get("purpose") == "Material Transfer" and filters.get("add_to_transit"):
 		warehouse_filters["warehouse_type"] = "Transit"
 
+	warehouse_filters.update(get_field_filters(filters, "company", "purpose", "add_to_transit"))
 	return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)
 
 
@@ -2320,7 +2326,7 @@ def stock_entry_type_query(
 ):
 	"""The stock entry types of a subcontracting inward order's purposes for an entry against one,
 	the others otherwise."""
-	from erpnext.controllers.queries import standard_search
+	from erpnext.controllers.queries import get_field_filters, standard_search
 
 	operator = "in" if filters.get("subcontracting_inward_order") else "not in"
 	purposes = [
@@ -2329,6 +2335,8 @@ def stock_entry_type_query(
 		"Subcontracting Delivery",
 		"Subcontracting Return",
 	]
-	return standard_search(
-		doctype, txt, searchfield, start, page_len, {"purpose": [operator, purposes]}, **kwargs
-	)
+	type_filters = {
+		"purpose": [operator, purposes],
+		**get_field_filters(filters, "subcontracting_inward_order"),
+	}
+	return standard_search(doctype, txt, searchfield, start, page_len, type_filters, **kwargs)
