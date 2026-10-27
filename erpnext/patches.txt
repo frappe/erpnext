@@ -539,4 +539,7 @@ erpnext.patches.v16_0.set_output_qty_in_work_order_operations
 erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
 erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
 execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
+execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
+execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
 erpnext.patches.v16_0.set_value_adjustment_amount_on_asset

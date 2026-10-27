@@ -6,6 +6,7 @@ from contextlib import contextmanager
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.coupon_code.test_coupon_code import test_create_test_data
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
@@ -140,6 +141,34 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		consolidated = frappe.get_doc("Sales Invoice", pos_inv3.consolidated_invoice)
 		self.assertEqual(consolidated.docstatus, 1)
 		self.assertTrue(any(payment.mode_of_payment == mode.name for payment in consolidated.payments))
+
+	def test_consolidation_and_return_do_not_consume_coupon_again(self):
+		test_create_test_data()
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		invoice = create_pos_invoice(rate=300, do_not_submit=1)
+		invoice.coupon_code = "SAVE30"
+		invoice.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+		invoice.save().submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		credit_note = make_sales_return(invoice.name)
+		credit_note.insert().submit()
+		self.assertEqual(credit_note.coupon_code, "SAVE30")
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		closing_entry = self.make_closing_entry()
+		invoice.reload()
+		self.assertEqual(
+			frappe.db.get_value("Sales Invoice", invoice.consolidated_invoice, "coupon_code"), "SAVE30"
+		)
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		closing_entry.cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		credit_note.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		invoice.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 0)
 
 	def test_consolidated_credit_note_creation(self):
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
