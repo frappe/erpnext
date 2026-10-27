@@ -24,6 +24,59 @@ class TestEmployee(ERPNextTestSuite):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_active_employee_requires_active_manager(self):
+		manager = frappe.get_doc(
+			"Employee", make_employee("manager-tree@example.com", company="_Test Company")
+		)
+		reportee = frappe.get_doc(
+			"Employee", make_employee("reportee-tree@example.com", company="_Test Company")
+		)
+		reportee.reports_to = manager.name
+		reportee.save()
+		manager.reload()
+		manager.status = "Inactive"
+		self.assertRaises(InactiveEmployeeStatusError, manager.save)
+		reportee.status = "Inactive"
+		reportee.save()
+		manager.reload()
+		manager.status = "Left"
+		manager.relieving_date = "2020-01-01"
+		manager.save()
+
+		reportee.status = "Active"
+		self.assertRaises(frappe.ValidationError, reportee.save)
+		new_reportee = new_employee("reportee-tree-new@example.com")
+		new_reportee.user_id = None
+		new_reportee.reports_to = manager.name
+		self.assertRaises(frappe.ValidationError, new_reportee.insert)
+
+	def test_existing_employee_with_inactive_manager_can_be_edited(self):
+		from unittest.mock import patch
+
+		manager = frappe.get_doc(
+			"Employee", make_employee("legacy-manager@example.com", company="_Test Company")
+		)
+		reportee = frappe.get_doc(
+			"Employee", make_employee("legacy-reportee@example.com", company="_Test Company")
+		)
+		reportee.reports_to = manager.name
+		reportee.save()
+		manager.reload()
+		manager.status = "Inactive"
+		# This transition was allowed before the new reporting validation.
+		with patch.object(type(manager), "validate_status"):
+			manager.save()
+
+		reportee.reload()
+		reportee.cell_number = "1234567890"
+		reportee.save()
+		self.assertEqual(reportee.reload().cell_number, "1234567890")
+		reportee.status = "Inactive"
+		reportee.save()
+		reportee.status = "Active"
+		with self.assertRaisesRegex(frappe.ValidationError, "must report to an Active employee"):
+			reportee.save()
+
 	def test_sales_person_disabled_only_after_employee_leaves(self):
 		from erpnext.setup.doctype.employee.employee import deactivate_sales_person
 

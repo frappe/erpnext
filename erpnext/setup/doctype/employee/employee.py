@@ -291,7 +291,7 @@ class Employee(NestedSet):
 		self.prefered_email = self.get(preferred_email_field) if preferred_email_field else None
 
 	def validate_status(self):
-		if self.status == "Left":
+		if self.status != "Active" and self.has_value_changed("status"):
 			reports_to = frappe.db.get_all(
 				"Employee",
 				filters={"reports_to": self.name, "status": "Active"},
@@ -308,9 +308,9 @@ class Employee(NestedSet):
 				message += "<br><br><ul><li>" + "</li><li>".join(link_to_employees)
 				message += "</li></ul><br>"
 				message += _("Please make sure the employees above report to another Active employee.")
-				throw(message, InactiveEmployeeStatusError, _("Cannot Relieve Employee"))
-			if not self.relieving_date:
-				throw(_("Please enter relieving date."))
+				throw(message, InactiveEmployeeStatusError, _("Cannot Deactivate Employee"))
+		if self.status == "Left" and not self.relieving_date:
+			throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self):
 		if not frappe.db.exists("User", self.user_id):
@@ -350,6 +350,13 @@ class Employee(NestedSet):
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
 			throw(_("Employee cannot report to himself."))
+		if (
+			self.status == "Active"
+			and self.reports_to
+			and (self.has_value_changed("status") or self.has_value_changed("reports_to"))
+		):
+			if frappe.db.get_value("Employee", self.reports_to, "status") != "Active":
+				throw(_("An Active employee must report to an Active employee."))
 
 	def on_trash(self):
 		self.update_nsm_model()
