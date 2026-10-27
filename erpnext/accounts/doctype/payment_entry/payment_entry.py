@@ -251,6 +251,13 @@ class PaymentEntry(AccountsController):
 				frappe.throw(
 					_("Row #{0}: Dunning charges must have a negative deduction amount.").format(row.idx)
 				)
+			if not self.get_doc_before_save() or self.get_doc_before_save().docstatus == 0:
+				if successor := frappe.get_doc("Dunning", row.dunning).get_settled_successor():
+					frappe.throw(
+						_("Dunning {0} has already been settled through Dunning {1}.").format(
+							row.dunning, successor
+						)
+					)
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
@@ -2727,6 +2734,8 @@ def get_payment_entry(
 
 	doc = frappe.get_doc(dt, dn)
 	doc.check_permission()
+	if dt == "Dunning" and (successor := doc.get_settled_successor()):
+		frappe.throw(_("Dunning {0} has already been settled through Dunning {1}.").format(dn, successor))
 
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (100.0 + over_billing_allowance):
