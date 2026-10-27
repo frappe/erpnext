@@ -344,10 +344,6 @@ erpnext.company.setup_queries = function (frm) {
 				"stock_delivered_but_not_billed",
 				{ root_type: "Asset", account_type: "Stock Delivered But Not Billed" },
 			],
-			[
-				"service_received_but_not_billed",
-				{ root_type: "Liability", account_type: "Service Received But Not Billed" },
-			],
 		],
 		function (i, v) {
 			erpnext.company.set_custom_query(frm, v);
