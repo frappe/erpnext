@@ -407,6 +407,15 @@ class StatusUpdater(Document):
 			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
 			skip_on_cancel = self.docstatus == 2 and args.get("overflow_type") == "installation"
 
+			# a return row lowers billing unless its rate is negative, so check only rows that add to it;
+			# use qty and rate since the stored amount is stale when one field is set through the api
+			if self.get("is_return") and self.docstatus != 2 and args.get("overflow_type") == "billing":
+				items_to_validate = [
+					d
+					for d in items_to_validate
+					if flt(d.child_doc.get("qty")) * flt(d.child_doc.get("rate")) > 0
+				]
+
 			if items_to_validate and args.get("validate_overflow") is not False and not skip_on_cancel:
 				pp_sub_assembly_items = [
 					item.production_plan_sub_assembly_item
