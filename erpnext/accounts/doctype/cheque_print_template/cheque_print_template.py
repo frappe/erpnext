@@ -50,6 +50,7 @@ class ChequePrintTemplate(Document):
 @frappe.whitelist(methods=["POST"])
 def create_or_update_cheque_print_format(template_name: str):
 	frappe.only_for("System Manager")
+	doc = frappe.get_doc("Cheque Print Template", template_name)
 
 	if not frappe.db.exists("Print Format", template_name):
 		cheque_print = frappe.new_doc("Print Format")
@@ -64,8 +65,13 @@ def create_or_update_cheque_print_format(template_name: str):
 		)
 	else:
 		cheque_print = frappe.get_doc("Print Format", template_name)
-
-	doc = frappe.get_doc("Cheque Print Template", template_name)
+		if not doc.has_print_format or cheque_print.doc_type != "Payment Entry":
+			frappe.throw(
+				_(
+					"Print Format {0} already exists. Rename the existing Print Format before continuing."
+				).format(frappe.bold(template_name)),
+				title=_("Print Format Conflict"),
+			)
 
 	account_payee = ""
 	if doc.is_account_payable:
