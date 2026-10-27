@@ -134,13 +134,8 @@ class BankTransactionRule(Document):
 						if account.credit:
 							validate_amount_formula(account.credit)
 
-		# Validate regex
-		for rule in self.description_rules:
-			if rule.check == "Regex":
-				try:
-					re.compile(rule.value)
-				except re.error:
-					frappe.throw(_("Invalid regex pattern."))
+		if not self.has_valid_regex():
+			frappe.throw(_("Invalid regex pattern."))
 
 		if self.bank_entry_type == "Single Account":
 			account_company = frappe.get_cached_value("Account", self.account, "company")
@@ -172,6 +167,16 @@ class BankTransactionRule(Document):
 		)
 		for i, rule in enumerate(rules):
 			frappe.db.set_value("Bank Transaction Rule", rule.name, "priority", i + 1)
+
+	def has_valid_regex(self) -> bool:
+		for rule in self.description_rules:
+			if rule.check == "Regex":
+				try:
+					re.compile(rule.value)
+				except re.error:
+					return False
+
+		return True
 
 	def evaluate_rule(self, transaction: BankTransaction) -> bool:
 		"""
@@ -276,6 +281,11 @@ def _run_rule_evaluation(force_evaluate=False):
 
 	for rule in rules:
 		rule_doc = frappe.get_doc("Bank Transaction Rule", rule.name)
+		# a rule saved before its pattern was validated must not stop the run for every transaction
+		if not rule_doc.has_valid_regex():
+			rule_doc.log_error(_("Bank Transaction Rule skipped: invalid regex pattern"))
+			continue
+
 		rule_docs.append(rule_doc)
 
 	# Run evaluation for each transaction
