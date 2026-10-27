@@ -10,6 +10,113 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmailDigest(ERPNextTestSuite):
+	def test_render_failure_restores_user_and_account_permission_flag(self):
+		from unittest.mock import patch
+
+		user = "digest-error@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Digest Error", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		digest = create_email_digest(company="_Test Company", recipients=[user], do_not_save=True)
+		previous = frappe.flags.get("ignore_account_permission")
+		original_session, original_form = frappe._dict(frappe.session), frappe.form_dict
+		try:
+			frappe.session.sid = "original-session-id"
+			frappe.session.data = frappe._dict(csrf_token="original-token")
+			frappe.local.form_dict = frappe._dict(example="request-value")
+			with patch.object(digest, "_get_msg_html", side_effect=ValueError("render failed")):
+				with self.assertRaises(ValueError):
+					digest.send()
+			self.assertEqual(frappe.session.user, "Administrator")
+			self.assertEqual(frappe.session.sid, "original-session-id")
+			self.assertEqual(frappe.session.data.csrf_token, "original-token")
+			self.assertEqual(frappe.form_dict.example, "request-value")
+			self.assertEqual(frappe.flags.get("ignore_account_permission"), previous)
+		finally:
+			frappe.local.session.update(original_session)
+			frappe.local.form_dict = original_form
+
+	def test_issue_list_and_count_respect_customer_permissions(self):
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		user = "digest-support@example.com"
+		if not frappe.db.exists("User", user):
+			user_doc = frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Support", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+			user_doc.add_roles("Support Team")
+		allowed = make_customer("Digest Allowed Customer")
+		other = make_customer("Digest Other Customer")
+		frappe.get_doc(
+			{"doctype": "User Permission", "user": user, "allow": "Customer", "for_value": allowed}
+		).insert(ignore_permissions=True)
+		visible = frappe.get_doc(
+			{"doctype": "Issue", "subject": "Allowed digest issue", "customer": allowed}
+		).insert()
+		hidden = frappe.get_doc(
+			{"doctype": "Issue", "subject": "Hidden digest issue", "customer": other}
+		).insert()
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		try:
+			frappe.set_user(user)
+			issues = digest.get_issue_list()
+			self.assertIn(visible.name, [issue.name for issue in issues])
+			self.assertNotIn(hidden.name, [issue.name for issue in issues])
+			self.assertEqual(digest.get_issue_count(), 1)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_issue_count_is_hidden_without_read_permission(self):
+		user = "digest-no-issues@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Digest", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc({"doctype": "Issue", "subject": "Private digest issue"}).insert(
+			ignore_permissions=True
+		)
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		try:
+			frappe.set_user(user)
+			self.assertFalse(frappe.has_permission("Issue", "read"))
+			self.assertEqual(digest.get_issue_count(), 0)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_send_renders_each_recipients_todos(self):
+		from unittest.mock import patch
+
+		users = ["digest-one@example.com", "digest-two@example.com"]
+		for index, user in enumerate(users):
+			if not frappe.db.exists("User", user):
+				frappe.get_doc(
+					{
+						"doctype": "User",
+						"email": user,
+						"first_name": f"Digest {index}",
+						"send_welcome_email": 0,
+					}
+				).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{"doctype": "ToDo", "description": f"Digest private task {index}", "assigned_by": user}
+			).insert(ignore_permissions=True)
+
+		digest = create_email_digest(company="_Test Company", todo_list=1, recipients=users, do_not_save=True)
+		messages = {}
+
+		def capture_mail(**kwargs):
+			messages[kwargs["recipients"]] = kwargs["message"]
+
+		with patch("frappe.sendmail", side_effect=capture_mail):
+			digest.send()
+
+		self.assertEqual(frappe.session.user, "Administrator")
+		self.assertIn("Digest private task 0", messages[users[0]])
+		self.assertNotIn("Digest private task 1", messages[users[0]])
+		self.assertIn("Digest private task 1", messages[users[1]])
+		self.assertNotIn("Digest private task 0", messages[users[1]])
+
 	def test_dates_before_first_fiscal_year_have_zero_income_and_count(self):
 		from erpnext.setup.doctype.email_digest.email_digest import (
 			get_count_for_period,
