@@ -409,6 +409,32 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 			outstanding, {(sales_invoice.name, self.debit_to): 50, (je.name, self.debit_to): 100}
 		)
 
+	def test_reconciliation_needs_access_to_the_company(self):
+		self.create_sales_invoice(qty=1, rate=300)
+		self.create_payment_entry(amount=300).save().submit()
+		outsider = make_user_restricted_to_company("pr-outsider@example.com", "_Test Company 1")
+		insider = make_user_restricted_to_company("pr-insider@example.com", self.company)
+
+		pr = self.create_payment_reconciliation()
+		frappe.set_user(outsider)
+		try:
+			self.assertRaises(frappe.PermissionError, pr.get_unreconciled_entries)
+			self.assertRaises(
+				frappe.PermissionError, pr.allocate_entries, frappe._dict(invoices=[], payments=[])
+			)
+			self.assertRaises(frappe.PermissionError, pr.reconcile)
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual(pr.get("invoices"), [])
+
+		frappe.set_user(insider)
+		try:
+			pr.get_unreconciled_entries()
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual(len(pr.get("invoices")), 1)
+		self.assertEqual(len(pr.get("payments")), 1)
+
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
 		self.create_sales_invoice(qty=1, rate=300)
@@ -3190,3 +3216,17 @@ def make_period_closing_voucher(company, cost_center, posting_date=None, submit=
 		pcv.submit()
 
 	return pcv
+
+
+def make_user_restricted_to_company(user, company):
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": user.split("@")[0],
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Company", company, user)
+	return user
