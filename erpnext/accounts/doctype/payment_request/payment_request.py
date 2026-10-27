@@ -996,6 +996,8 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			if pr.get("__unsaved"):
 				pr.insert(ignore_permissions=True)
+			# the insert above skips permission checks, but submitting needs the caller's own permission
+			pr.flags.ignore_permissions = False
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
