@@ -819,6 +819,35 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assert_schedule_matches_outstanding(si)
 		self.assertEqual(si.outstanding_amount, 50)
 
+	def assert_schedule_rows_valid(self, si):
+		si.reload()
+		for term in si.payment_schedule:
+			self.assertGreaterEqual(term.outstanding, 0)
+			self.assertLessEqual(term.outstanding, term.payment_amount)
+			self.assertGreaterEqual(term.paid_amount, 0)
+
+	def test_cancelling_journal_then_term_payment_keeps_schedule_rows_valid(self):
+		si = self.make_invoice_with_terms()
+		je = self.create_journal_entry(self.bank, self.debit_to, 90)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+		self.reconcile_invoice_with_journal(si)
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+		self.assert_schedule_rows_valid(si)
+
+		# the schedule does not know which terms the journal paid, so the split can be approximate here
+		je.reload().cancel()
+		self.assert_schedule_matches_outstanding(si)
+		self.assert_schedule_rows_valid(si)
+
+		pe.reload().cancel()
+		self.assert_schedule_rows_valid(si)
+		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
+		self.assertEqual([t.paid_amount for t in si.payment_schedule], [0, 0])
+
 	def test_journal_reconciliation_after_partial_payment_against_first_term(self):
 		si = self.make_invoice_with_terms()
 		pe = get_payment_entry(si.doctype, si.name, party_amount=50)

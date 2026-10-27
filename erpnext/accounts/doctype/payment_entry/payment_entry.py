@@ -584,9 +584,9 @@ class PaymentEntry(AccountsController):
 
 	def sync_payment_schedules(self):
 		"""Reconciled references carry no payment term, so cancel cannot reverse them term by term."""
-		for ref in self.references:
-			if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-				sync_payment_schedule_outstanding(ref.reference_doctype, ref.reference_name)
+		for reference in {(d.reference_doctype, d.reference_name) for d in self.references}:
+			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
+				sync_payment_schedule_outstanding(*reference)
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -943,6 +943,7 @@ class PaymentEntry(AccountsController):
 					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
 					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
+					invoice_paid_amount_map[invoice_key]["payment_amount"] = term.payment_amount
 					if not (term.discount_type and term.discount):
 						continue
 
@@ -963,6 +964,13 @@ class PaymentEntry(AccountsController):
 
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
+
+			if cancel:
+				# Reconciliation can move paid amounts between terms, so reverse only what this term
+				# still has paid. sync_payment_schedules puts back the rest.
+				payment_amount = flt(invoice_paid_amount_map.get(key, {}).get("payment_amount"))
+				allocated_amount = min(allocated_amount, max(payment_amount - outstanding, 0))
+				discounted_amt = min(discounted_amt, allocated_amount)
 
 			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
 			base_paid_amount_precision = get_field_precision(
