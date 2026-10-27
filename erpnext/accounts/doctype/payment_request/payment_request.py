@@ -816,7 +816,11 @@ def make_payment_request(**args):
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
 	# Any existing Payment Entry forces legacy (amount-based) flow.
-	selected_payment_schedules = frappe.parse_json(args.get("schedules")) if args.get("schedules") else []
+	selected_payment_schedules = (
+		get_selected_payment_schedules(ref_doc, frappe.parse_json(args.get("schedules")))
+		if args.get("schedules")
+		else []
+	)
 
 	# Backend guard:
 	# If any Payment Entry exists, schedule-based PRs are not allowed.
@@ -860,7 +864,7 @@ def make_payment_request(**args):
 					)
 				)
 
-		payment_reference = set_payment_references(args.get("schedules"))
+		payment_reference = set_payment_references(selected_payment_schedules)
 
 	# Determine grand_total
 	if selected_payment_schedules and not has_payment_entry:
@@ -1017,6 +1021,26 @@ def apply_payment_references(pr, payment_reference):
 	new_refs = [r for r in (payment_reference or []) if r.get("payment_schedule") not in existing_ids]
 	pr.set("payment_reference", existing_refs + new_refs)
 	pr.set("grand_total", sum(flt(r.get("amount")) for r in pr.get("payment_reference")))
+
+
+def get_selected_payment_schedules(ref_doc, selected: list) -> list[dict]:
+	"""Return the reference document's own schedule rows for the selected row names."""
+	if not isinstance(selected, list):
+		frappe.throw(_("Invalid parameter. 'schedules' should be a list"))
+
+	schedules = {row.name: row for row in ref_doc.get("payment_schedule") or []}
+	rows = {}
+	for selected_row in selected:
+		name = selected_row.get("name") if isinstance(selected_row, dict) else None
+		if name not in schedules:
+			frappe.throw(
+				_("Payment Schedule {0} does not belong to {1} {2}").format(
+					frappe.bold(name), _(ref_doc.doctype), frappe.bold(ref_doc.name)
+				)
+			)
+		rows[name] = {**schedules[name].as_dict(), "currency": ref_doc.get("currency")}
+
+	return list(rows.values())
 
 
 def set_payment_references(payment_schedules):

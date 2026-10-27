@@ -1050,6 +1050,49 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(pr.grand_total, 70)
 		self.assertEqual(len(pr.payment_reference), 2)
 
+	def make_po_with_schedule(self):
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
+		po.payment_schedule = []
+		po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 30})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 1), "payment_amount": 70})
+		po.save()
+		po.submit()
+		return po
+
+	def request_for_schedules(self, po, schedules):
+		return make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			return_doc=True,
+			schedules=json.dumps(schedules),
+		)
+
+	def test_schedule_amounts_are_taken_from_the_reference(self):
+		po = self.make_po_with_schedule()
+		row = po.payment_schedule[0]
+
+		pr = self.request_for_schedules(
+			po, [{"name": row.name, "payment_amount": 250000}, {"name": row.name, "payment_amount": 250000}]
+		)
+
+		self.assertEqual(pr.grand_total, 30)
+		self.assertEqual(
+			[(ref.payment_schedule, ref.amount) for ref in pr.payment_reference], [(row.name, 30)]
+		)
+
+	def test_schedule_of_another_reference_is_rejected(self):
+		po = self.make_po_with_schedule()
+		other_po = self.make_po_with_schedule()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"does not belong to",
+			self.request_for_schedules,
+			po,
+			[{"name": other_po.payment_schedule[0].name, "payment_amount": 30}],
+		)
+
 	def test_draft_pr_reuse_merges_payment_references(self):
 		from frappe.utils import add_days, nowdate
 
