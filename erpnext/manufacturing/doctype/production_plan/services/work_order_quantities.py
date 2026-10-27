@@ -7,9 +7,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_link_to_form
 
+QTY_FIELDS = {"production_plan_item": "planned_qty", "production_plan_sub_assembly_item": "qty"}
+
 
 class ProductionPlanWorkOrderQuantities:
-	"""Count submitted Work Orders after recorded process loss, independently for each plan row."""
+	"""Count submitted Work Orders after unplanned process loss, independently for each plan row."""
 
 	def __init__(self, production_plan):
 		self.production_plan = production_plan
@@ -29,8 +31,10 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		precision = work_order.precision("qty")
-		maximum_qty = flt(flt(row.planned_qty) * (1 + allowance / 100) - committed, precision)
-		committed_qty = flt(self._get_committed_qty(work_order, process_loss_qty), precision)
+		maximum_qty = flt(row.order_qty * (1 + allowance / 100) - committed, precision)
+		committed_qty = flt(
+			self._get_committed_qty(work_order, process_loss_qty, row.process_loss_percentage), precision
+		)
 		if committed_qty > maximum_qty:
 			frappe.throw(
 				_(
@@ -52,10 +56,10 @@ class ProductionPlanWorkOrderQuantities:
 
 		if work_order.production_plan_sub_assembly_item:
 			reference_field = "production_plan_sub_assembly_item"
-			row_doctype, qty_field = "Production Plan Sub Assembly Item", "qty"
+			row_doctype = "Production Plan Sub Assembly Item"
 		else:
 			reference_field = "production_plan_item"
-			row_doctype, qty_field = "Production Plan Item", "planned_qty"
+			row_doctype = "Production Plan Item"
 
 		reference_name = work_order.get(reference_field)
 		# Serialize submissions and loss reversals. The submit rollup updates this row.
@@ -63,7 +67,7 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_value(
 				row_doctype,
 				{"name": reference_name, "parent": self.production_plan},
-				["name", "idx", f"{qty_field} as planned_qty"],
+				["name", "idx", QTY_FIELDS[reference_field], "process_loss_percentage", "stock_uom"],
 				as_dict=True,
 				for_update=True,
 			)
@@ -79,19 +83,36 @@ class ProductionPlanWorkOrderQuantities:
 
 		row.reference_field = reference_field
 		row.doctype = row_doctype
+		row.order_qty = self.get_order_qty(row, reference_field)
 		return row
+
+	@staticmethod
+	def get_order_qty(row, reference_field):
+		"""Quantity a plan row orders, before its planned process loss."""
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			get_qty_before_process_loss,
+		)
+
+		return get_qty_before_process_loss(
+			row.get(QTY_FIELDS[reference_field]), row.process_loss_percentage, row.stock_uom
+		)
 
 	def get_pending_quantities(self, plan):
 		committed = self.get_committed_quantities(include_drafts=True)
 		precision = frappe.get_precision("Work Order", "qty")
 		pending = {}
-		for table, reference_field, qty_field in (
-			("po_items", "production_plan_item", "planned_qty"),
-			("sub_assembly_items", "production_plan_sub_assembly_item", "qty"),
+		for table, reference_field in (
+			("po_items", "production_plan_item"),
+			("sub_assembly_items", "production_plan_sub_assembly_item"),
 		):
 			pending[reference_field] = {
 				row.name: max(
-					0, flt(flt(row.get(qty_field)) - committed[reference_field].get(row.name, 0), precision)
+					0,
+					flt(
+						self.get_order_qty(row, reference_field)
+						- committed[reference_field].get(row.name, 0),
+						precision,
+					),
 				)
 				for row in plan.get(table)
 				if table == "po_items" or row.type_of_manufacturing == "In House"
@@ -126,6 +147,7 @@ class ProductionPlanWorkOrderQuantities:
 			for_update=for_update,
 			order_by="name",
 		).run(as_dict=True)
+		loss_percentages = self.get_planned_loss_percentages()
 		quantities = {
 			"production_plan_item": defaultdict(float),
 			"production_plan_sub_assembly_item": defaultdict(float),
@@ -138,10 +160,35 @@ class ProductionPlanWorkOrderQuantities:
 			)
 			if work_order.get(field):
 				quantities[field][work_order[field]] += self._get_committed_qty(
-					work_order, work_order.process_loss_qty
+					work_order,
+					work_order.process_loss_qty,
+					loss_percentages.get(work_order[field]),
 				)
 		return quantities
 
-	def _get_committed_qty(self, work_order, process_loss_qty):
+	def get_planned_loss_percentages(self):
+		"""Process loss % each plan row already orders for, by row name."""
+		loss_percentages = {}
+		for doctype in ("Production Plan Item", "Production Plan Sub Assembly Item"):
+			loss_percentages.update(
+				frappe.get_all(
+					doctype,
+					filters={"parent": self.production_plan, "process_loss_percentage": (">", 0)},
+					fields=["name", "process_loss_percentage"],
+					as_list=True,
+				)
+			)
+		return loss_percentages
+
+	def _get_committed_qty(self, work_order, process_loss_qty, planned_loss_percentage):
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			get_planned_loss_percentage,
+		)
+
+		loss_percentage = get_planned_loss_percentage(planned_loss_percentage)
+		good_qty = flt(work_order.qty) - max(
+			flt(process_loss_qty), flt(work_order.qty) * loss_percentage / 100
+		)
+		committed_qty = good_qty / (1 - loss_percentage / 100)
 		# Excess loss in existing records must not erase finished goods already produced.
-		return max(0, flt(work_order.produced_qty), flt(work_order.qty) - flt(process_loss_qty))
+		return max(0, flt(work_order.produced_qty), committed_qty)

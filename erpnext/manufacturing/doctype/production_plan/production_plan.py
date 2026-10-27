@@ -31,6 +31,9 @@ from erpnext.manufacturing.doctype.production_plan.services.material_request imp
 	get_warehouse_list,
 	set_default_warehouses,
 )
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_plan_process_loss_percentage,
+)
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 	cancel_stock_reservation_entries,
 	get_reserved_qty_for_production_plan,
@@ -88,6 +91,7 @@ class ProductionPlan(Document):
 		combine_sub_items: DF.Check
 		company: DF.Link
 		consider_minimum_order_qty: DF.Check
+		consider_process_loss: DF.Check
 		customer: DF.Link | None
 		for_warehouse: DF.Link | None
 		from_date: DF.Date | None
@@ -148,6 +152,7 @@ class ProductionPlan(Document):
 
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
+		self.set_process_loss_percentage()
 		self.calculate_total_planned_qty()
 		self.set_status()
 		self._rename_temporary_references()
@@ -251,6 +256,10 @@ class ProductionPlan(Document):
 		for item in self.po_items:
 			if not item.get("sales_order") or not item.get("material_request"):
 				item.pending_qty = item.planned_qty
+
+	def set_process_loss_percentage(self):
+		for item in self.po_items:
+			item.process_loss_percentage = get_plan_process_loss_percentage(self, item.bom_no)
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0

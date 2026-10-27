@@ -14,6 +14,7 @@
   "status",
   "posting_date",
   "reserve_stock",
+  "consider_process_loss",
   "other_details",
   "total_planned_qty",
   "total_produced_qty",
@@ -454,6 +455,13 @@
    "label": "Reserve Stock"
   },
   {
+   "default": "0",
+   "description": "Work Orders are made larger to cover their BOM's % Process Loss",
+   "fieldname": "consider_process_loss",
+   "fieldtype": "Check",
+   "label": "Consider Process Loss"
+  },
+  {
    "description": "Used by scheduling when an item has no BOM operations: scales the Item Lead Time daily capacity to this many shifts.",
    "fieldname": "no_of_shifts",
    "fieldtype": "Int",
@@ -485,7 +493,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-15 13:02:23.654005",
+ "modified": "2026-10-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
