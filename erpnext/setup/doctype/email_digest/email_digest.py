@@ -23,7 +23,7 @@ from frappe.utils import (
 	today,
 )
 
-from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
+from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year, get_fiscal_years
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -395,11 +395,12 @@ class EmailDigest(Document):
 		"""Get income to date"""
 		balance = 0.0
 		count = 0
-		fy_start_date = get_fiscal_year(self.future_to_date)[1]
+		fiscal_year = get_digest_fiscal_year(self.future_to_date)
 
-		for account in self.get_root_type_accounts(root_type):
-			balance += get_balance_on(account, date=self.future_to_date, start_date=fy_start_date)
-			count += get_count_on(account, fieldname, date=self.future_to_date)
+		if fiscal_year:
+			for account in self.get_root_type_accounts(root_type):
+				balance += get_balance_on(account, date=self.future_to_date, start_date=fiscal_year[1])
+				count += get_count_on(account, fieldname, date=self.future_to_date)
 
 		if fieldname == "income":
 			filters = {"currency": self.currency}
@@ -949,9 +950,14 @@ def send():
 	for ed in frappe.get_all(
 		"Email Digest", filters={"enabled": 1, "docstatus": ["<", 2]}, fields=["name"], as_list=True
 	):
-		ed_obj = frappe.get_doc("Email Digest", ed[0])
-		if now_date == ed_obj.get_next_sending():
-			ed_obj.send()
+		frappe.db.savepoint("email_digest")
+		try:
+			ed_obj = frappe.get_doc("Email Digest", ed[0])
+			if now_date == ed_obj.get_next_sending():
+				ed_obj.send()
+		except Exception:
+			frappe.db.rollback(save_point="email_digest")
+			frappe.log_error(title=f"Email Digest failed: {ed[0]}")
 
 
 @frappe.whitelist()
@@ -963,12 +969,15 @@ def get_digest_msg(name: str):
 
 def get_incomes_expenses_for_period(account, from_date, to_date):
 	"""Get amounts for current and past periods"""
+	fiscal_year = get_digest_fiscal_year(to_date)
+	if not fiscal_year:
+		return 0.0
 
 	val = 0.0
 	balance_on_to_date = get_balance_on(account, date=to_date)
 	balance_before_from_date = get_balance_on(account, date=from_date - timedelta(days=1))
 
-	fy_start_date = get_fiscal_year(to_date)[1]
+	fy_start_date = fiscal_year[1]
 
 	if from_date == fy_start_date:
 		val = balance_on_to_date
@@ -982,11 +991,14 @@ def get_incomes_expenses_for_period(account, from_date, to_date):
 
 
 def get_count_for_period(account, fieldname, from_date, to_date):
+	fiscal_year = get_digest_fiscal_year(to_date)
+	if not fiscal_year:
+		return 0.0
 	count = 0.0
 	count_on_to_date = get_count_on(account, fieldname, to_date)
 	count_before_from_date = get_count_on(account, fieldname, from_date - timedelta(days=1))
 
-	fy_start_date = get_fiscal_year(to_date)[1]
+	fy_start_date = fiscal_year[1]
 	if from_date == fy_start_date:
 		count = count_on_to_date
 	elif from_date > fy_start_date:
@@ -996,6 +1008,17 @@ def get_count_for_period(account, fieldname, from_date, to_date):
 		count = count_on_to_date + (last_year_closing_count - count_before_from_date)
 
 	return count
+
+
+def get_digest_fiscal_year(date):
+	fiscal_year = get_fiscal_year(date, raise_on_missing=False)
+	if fiscal_year:
+		return fiscal_year
+
+	years = get_fiscal_years()
+	if years and date < min(year.year_start_date for year in years):
+		return None
+	return get_fiscal_year(date)
 
 
 def get_future_date_for_calendaer_event(frequency):
