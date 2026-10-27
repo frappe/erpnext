@@ -196,6 +196,8 @@ class Employee(NestedSet):
 
 	def on_update(self):
 		self.update_nsm_model()
+		if self.status == "Left" and self.has_value_changed("status"):
+			_deactivate_sales_person(self.name)
 		if self.user_id:
 			active_rehire = self.status != "Active" and frappe.db.exists(
 				"Employee", {"user_id": self.user_id, "status": "Active", "name": ["!=", self.name]}
@@ -452,10 +454,15 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 @frappe.whitelist()
 def deactivate_sales_person(status: str, employee: str):
 	frappe.has_permission("Employee", doc=employee, ptype="write", throw=True)
-	if status == "Left":
-		sales_person = frappe.db.get_value("Sales Person", {"employee": employee})
-		if sales_person:
-			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+	if status == "Left" and frappe.db.get_value("Employee", employee, "status") == "Left":
+		_deactivate_sales_person(employee)
+
+
+def _deactivate_sales_person(employee):
+	for name in frappe.get_all("Sales Person", filters={"employee": employee, "enabled": 1}, pluck="name"):
+		sales_person = frappe.get_doc("Sales Person", name)
+		sales_person.enabled = 0
+		sales_person.save(ignore_permissions=True)
 
 
 @frappe.whitelist(methods=["POST"])

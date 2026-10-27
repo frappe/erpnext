@@ -24,6 +24,23 @@ class TestEmployee(ERPNextTestSuite):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_sales_person_disabled_only_after_employee_leaves(self):
+		from erpnext.setup.doctype.employee.employee import deactivate_sales_person
+
+		employee = frappe.get_doc(
+			"Employee", make_employee("employee-sales@example.com", company="_Test Company")
+		)
+		person = frappe.get_doc(
+			doctype="Sales Person", sales_person_name="Employee Sales Test", employee=employee.name
+		).insert()
+		deactivate_sales_person("Left", employee.name)
+		self.assertEqual(person.reload().enabled, 1)
+
+		employee.status = "Left"
+		employee.relieving_date = "2020-01-01"
+		employee.save()
+		self.assertEqual(person.reload().enabled, 0)
+
 	def test_edit_left_employee_after_rehire(self):
 		user = "employee-rehire@example.com"
 		old = frappe.get_doc("Employee", make_employee(user, company="_Test Company"))
