@@ -24,6 +24,26 @@ class TestEmployee(ERPNextTestSuite):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_edit_left_employee_after_rehire(self):
+		user = "employee-rehire@example.com"
+		old = frappe.get_doc("Employee", make_employee(user, company="_Test Company"))
+		old.status = "Left"
+		old.relieving_date = "2020-01-01"
+		old.save()
+		rehire = new_employee(user).insert()
+
+		old.reason_for_leaving = "Changed after rehire"
+		old.date_of_birth = "1989-05-08"
+		old.save()
+		self.assertEqual(str(frappe.db.get_value("User", user, "birth_date")), "1990-05-08")
+		old.status = "Inactive"
+		old.save()
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
+		self.assertEqual(old.reload().reason_for_leaving, "Changed after rehire")
+		self.assertEqual(rehire.status, "Active")
+		old.status = "Active"
+		self.assertRaises(frappe.DuplicateEntryError, old.save)
+
 	def test_user_has_employee(self):
 		employee = make_employee("test_emp_user_creation@company.com", company="_Test Company")
 		employee_doc = frappe.get_doc("Employee", employee)
