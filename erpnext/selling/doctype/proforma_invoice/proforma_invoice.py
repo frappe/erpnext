@@ -48,13 +48,28 @@ class ProformaInvoice(Document):
 		validate_feature_enabled()
 		self.validate_amended_doc()
 		self.validate_sales_order()
+		self.validate_duplicate_lines()
 		self.set_item_values()
 		self.set_total_qty()
 		self.clear_generated_values()
 
 	def validate_sales_order(self) -> None:
-		if frappe.db.get_value("Sales Order", self.sales_order, "docstatus") != 1:
+		# the proforma copies the order's lines, rates and totals into its PDF
+		sales_order = frappe.get_doc("Sales Order", self.sales_order, check_permission="read")
+		if sales_order.docstatus != 1:
 			frappe.throw(_("A Proforma Invoice can only be created against a submitted Sales Order."))
+
+	def validate_duplicate_lines(self) -> None:
+		"""Each Sales Order line may appear once; the PDF and totals are keyed by it."""
+		first_row = {}
+		for item in self.items:
+			if item.so_detail in first_row:
+				frappe.throw(
+					_("Row #{0}: The same Sales Order line is already in row #{1}").format(
+						item.idx, first_row[item.so_detail]
+					)
+				)
+			first_row[item.so_detail] = item.idx
 
 	def set_item_values(self) -> None:
 		"""Copy each line's item details from its Sales Order line, then set the rate and amount."""

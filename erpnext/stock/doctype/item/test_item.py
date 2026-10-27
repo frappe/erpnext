@@ -325,10 +325,10 @@ class TestItem(ERPNextTestSuite):
 					"tax_category": data["tax_category"],
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Sales Order",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"order_type": "Sales",
 					"customer": "_Test Customer",
@@ -374,10 +374,10 @@ class TestItem(ERPNextTestSuite):
 					"item_code": "Test Item With Defaults",
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Sales Invoice",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"customer": "_Test Customer",
 				}
@@ -399,10 +399,10 @@ class TestItem(ERPNextTestSuite):
 					"item_code": "Test Item With Defaults",
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Purchase Invoice",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"supplier": "_Test Supplier",
 				}
@@ -1008,6 +1008,18 @@ class TestItem(ERPNextTestSuite):
 		self.assertEqual(item_doc.uoms[0].conversion_factor, 0.2)
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
+
+	def test_disabled_uom_cannot_be_used_by_item(self):
+		disabled_uom = frappe.get_doc(
+			{"doctype": "UOM", "uom_name": frappe.generate_hash(length=12), "enabled": 0}
+		).insert()
+
+		self.assertRaises(frappe.ValidationError, make_item, properties={"stock_uom": disabled_uom.name})
+		self.assertRaises(
+			frappe.ValidationError,
+			make_item,
+			uoms=[{"uom": disabled_uom.name, "conversion_factor": 2}],
+		)
 
 	def test_item_uom_conversion_factor_overrides_global_factor(self):
 		custom_factor = 10.76

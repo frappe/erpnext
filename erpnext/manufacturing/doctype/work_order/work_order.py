@@ -870,16 +870,8 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = self.qty
 
-		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
-		if not batch_auto_creation:
-			frappe.msgprint(
-				_("Batch not created for item {0} since it does not have a batch series.").format(
-					frappe.bold(self.production_item)
-				),
-				alert=True,
-				indicator="orange",
-			)
-			return
+		if not frappe.get_cached_value("Item", self.production_item, "create_new_batch"):
+			self.throw_missing_item_setting("create_new_batch")
 
 		while total_qty > 0:
 			qty = self.batch_size
@@ -910,12 +902,12 @@ class WorkOrder(Document):
 
 		batch_capacity = self.get_batch_capacity() if self.has_batch_no else []
 
-		serial_nos = []
-		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(
-				item_details.serial_no_series, qty or self.qty, self.production_item
-			)
+		if not item_details.serial_no_series:
+			self.throw_missing_item_setting("serial_no_series")
 
+		serial_nos = get_available_serial_nos(
+			item_details.serial_no_series, qty or self.qty, self.production_item
+		)
 		if not serial_nos:
 			return
 
@@ -974,6 +966,22 @@ class WorkOrder(Document):
 				).format(frappe.bold(self.production_item)),
 			)
 			raise
+
+	def throw_missing_item_setting(self, fieldname):
+		frappe.throw(
+			_("Set {0} in Item {1} or disable {2} in {3}").format(
+				frappe.bold(_(frappe.get_meta("Item").get_label(fieldname))),
+				get_link_to_form("Item", self.production_item),
+				frappe.bold(
+					_(
+						frappe.get_meta("Manufacturing Settings").get_label(
+							"make_serial_no_batch_from_work_order"
+						)
+					)
+				),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			)
+		)
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -1157,7 +1165,8 @@ class WorkOrder(Document):
 			return row
 
 		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
-			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
+			completed_qty = flt(operation.completed_qty) * flt(self.qty) / get_operation_qty(self, operation)
+			time_per_unit = flt(operation.actual_operation_time) / completed_qty
 		else:
 			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
 

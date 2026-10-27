@@ -2870,32 +2870,28 @@ def get_non_expired_batches(batches):
 
 
 def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
-	serial_nos = set()
+	serial_nos = Counter()
 	data = get_stock_ledgers_for_serial_nos(kwargs)
 
 	bundle_wise_serial_nos = get_bundle_wise_serial_nos(data, kwargs)
 	for d in data:
 		if d.serial_and_batch_bundle:
-			if sns := bundle_wise_serial_nos.get(d.serial_and_batch_bundle):
-				if d.actual_qty > 0:
-					serial_nos.update(sns)
-				else:
-					serial_nos.difference_update(sns)
-
+			sns = bundle_wise_serial_nos.get(d.serial_and_batch_bundle, [])
 		elif d.serial_no:
 			sns = parse_serial_nos(d.serial_no)
-			if d.actual_qty > 0:
-				serial_nos.update(sns)
-			else:
-				serial_nos.difference_update(sns)
+		else:
+			continue
 
-	serial_nos = list(serial_nos)
+		if d.actual_qty > 0:
+			serial_nos.update(sns)
+		else:
+			# Keep outward balances when the inward entry has a later posting time.
+			serial_nos.subtract(sns)
 
-	for serial_no in ignore_serial_nos:
-		if serial_no in serial_nos:
-			serial_nos.remove(serial_no)
-
-	return serial_nos
+	ignore_serial_nos = set(ignore_serial_nos)
+	return [
+		serial_no for serial_no, qty in serial_nos.items() if qty > 0 and serial_no not in ignore_serial_nos
+	]
 
 
 def get_bundle_wise_serial_nos(data, kwargs):

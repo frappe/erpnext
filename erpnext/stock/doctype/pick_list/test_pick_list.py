@@ -30,6 +30,34 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPickList(ERPNextTestSuite):
+	def test_whole_number_qty_must_not_be_fractional(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item = make_item(properties={"stock_uom": "Nos"})
+		make_stock_entry(item_code=item.name, qty=5, target="_Test Warehouse - _TC", basic_rate=10)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item.name,
+						"qty": 2.5,
+						"uom": "Nos",
+						"stock_uom": "Nos",
+						"stock_qty": 2.5,
+						"picked_qty": 2.5,
+						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		)
+
+		self.assertRaises(UOMMustBeIntegerError, pick_list.insert)
+
 	def test_filter_locations_consumes_picked_qty_across_rows(self):
 		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
 
@@ -1046,6 +1074,55 @@ class TestPickList(ERPNextTestSuite):
 		)
 
 		self.assertEqual([row.item_code for row in delivery_note.items], [items[0]])
+
+	def test_bundle_picked_qty_uses_order_row_version(self):
+		from erpnext.selling.doctype.product_bundle.product_bundle import (
+			get_active_product_bundle,
+			make_new_version,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		bundle, _components = create_product_bundle([2], warehouse=warehouse)  # v1: 2 per bundle
+		v1 = get_active_product_bundle(bundle)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)  # 6 components
+		self.assertEqual(sales_order.items[0].product_bundle, v1)
+
+		# a new version with a larger component qty becomes the active one
+		v2 = make_new_version(v1)
+		v2.items[0].qty = 4
+		v2.insert()
+		v2.submit()
+		self.assertNotEqual(get_active_product_bundle(bundle), v1)
+
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		# 6 picked / 2 (the version the order was placed with) = 3 bundles, not 6/4
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 3)
+
+	def test_bundle_picked_qty_converts_component_uom(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=50, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})  # 1 Box = 12 Nos
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)  # 12 Nos
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		# 12 Nos picked / 12 (1 Box in stock units) = 1 bundle, not 12
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
 
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"

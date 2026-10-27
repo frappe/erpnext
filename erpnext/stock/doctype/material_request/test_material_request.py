@@ -42,6 +42,22 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 		self.assertEqual(mr.items[0].qty, 1)
 
+	def test_whole_number_stock_qty_must_not_be_fractional(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Kg", "conversion_factor": 0.5}])
+
+		self.assertRaises(
+			UOMMustBeIntegerError,
+			make_material_request,
+			item_code=item.name,
+			qty=3,
+			uom="Kg",
+			conversion_factor=0.5,
+			do_not_submit=1,
+		)
+
 	def test_production_plan_qty_with_repeated_references(self):
 		from unittest.mock import patch
 
@@ -2032,6 +2048,15 @@ class TestMaterialRequest(ERPNextTestSuite):
 			},
 		)
 		self.assertIn(">30.0<", message)
+
+	def test_purchase_request_clears_source_warehouse(self):
+		mr = make_material_request(
+			from_warehouse="_Test Warehouse - _TC",
+			warehouse="_Test Warehouse - _TC",
+			do_not_submit=True,
+		)
+
+		self.assertIsNone(mr.items[0].from_warehouse)
 
 
 def create_item_with_default_supplier(item_code, supplier):
