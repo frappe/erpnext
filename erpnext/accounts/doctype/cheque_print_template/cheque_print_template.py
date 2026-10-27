@@ -99,7 +99,7 @@ def create_or_update_cheque_print_format(template_name: str):
 		</span>
 		<span style="top:{acc_no_dist_from_top_edge}cm;left:{acc_no_dist_from_left_edge}cm;
 			position: absolute;  min-width: 6cm;">
-			{{{{ doc.account_no or '' }}}}
+			{{{{ (doc.bank_account_no or '') | e }}}}
 		</span>
 		<span style="top:{payer_name_from_top_edge}cm;left: {payer_name_from_left_edge}cm;
 			position: absolute;  min-width: 6cm;">
