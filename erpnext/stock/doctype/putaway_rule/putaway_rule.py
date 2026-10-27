@@ -151,6 +151,7 @@ def _apply_putaway_rule(
 
 	items_not_accomodated, updated_table = [], []
 	item_wise_rules = defaultdict(list)
+	rules_by_source = {}
 
 	for item in items:
 		if isinstance(item, dict):
@@ -164,7 +165,7 @@ def _apply_putaway_rule(
 		item.conversion_factor = flt(item.conversion_factor) or 1.0
 		pending_qty, item_code = flt(item.qty), item.item_code
 		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
-		uom_must_be_whole_number = frappe.db.get_value("UOM", item.uom, "must_be_whole_number")
+		uom_must_be_whole_number = frappe.get_cached_value("UOM", item.uom, "must_be_whole_number")
 
 		if not pending_qty or not item_code:
 			updated_table = add_row(
@@ -172,7 +173,12 @@ def _apply_putaway_rule(
 			)
 			continue
 
-		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
+		source_key = (item_code, source_warehouse)
+		if source_key not in rules_by_source:
+			rules_by_source[source_key] = get_ordered_putaway_rules(
+				item_code, company, source_warehouse=source_warehouse
+			)
+		at_capacity, rules = rules_by_source[source_key]
 
 		if not rules:
 			warehouse = (
