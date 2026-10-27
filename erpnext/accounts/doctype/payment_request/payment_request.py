@@ -17,7 +17,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import find_party_account, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
@@ -29,6 +29,8 @@ ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"POS Invoice",
 	"Fees",
 ]
+
+PORTAL_PAYABLE_DOCTYPES = ("Sales Order", "Sales Invoice")
 
 
 def _get_payment_gateway_controller(*args, **kwargs):
@@ -136,7 +138,8 @@ class PaymentRequest(Document):
 			self.status = "Draft"
 		self.validate_reference_document()
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		ref_doc.check_permission("read")
+		if not self.flags.portal_payment:
+			ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
 		self.validate_bank_account()
 		self.validate_print_format()
@@ -799,14 +802,19 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+	is_portal_payment = args.order_type == "Shopping Cart"
+	if is_portal_payment:
+		args = get_portal_payment_args(args.dt, args.dn, args.submit_doc)
+
 	if args.dt not in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST:
 		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
 	if args.dn and not isinstance(args.dn, str):
 		frappe.throw(_("Invalid parameter. 'dn' should be of type str"))
 
-	frappe.has_permission("Payment Request", "create", throw=True)
-	frappe.has_permission(args.dt, "read", args.dn, throw=True)
+	if not is_portal_payment:
+		frappe.has_permission("Payment Request", "create", throw=True)
+		frappe.has_permission(args.dt, "read", args.dn, throw=True)
 
 	ref_doc = args.ref_doc or frappe.get_doc(args.dt, args.dn)
 	if not args.get("company"):
@@ -927,10 +935,11 @@ def make_payment_request(**args):
 		party_account_currency = ref_doc.get("party_account_currency")
 
 		if not party_account_currency:
-			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
+			find_account = find_party_account if is_portal_payment else get_party_account
+			party_account = find_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
-		subscription_plans = get_subscription_details(ref_doc.doctype, ref_doc.name)
+		subscription_plans = get_subscription_plans(ref_doc.doctype, ref_doc.name)
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -991,6 +1000,8 @@ def make_payment_request(**args):
 		for dimension in get_accounting_dimensions():
 			pr.update({dimension: ref_doc.get(dimension)})
 
+		pr.flags.portal_payment = is_portal_payment
+
 		if frappe.db.get_single_value("Accounts Settings", "create_pr_in_draft_status", cache=True):
 			pr.insert(ignore_permissions=True)
 		if args.submit_doc:
@@ -1008,6 +1019,28 @@ def make_payment_request(**args):
 		return pr
 
 	return pr.as_dict()
+
+
+def get_portal_payment_args(doctype: str, docname: str, submit_doc: str | int | None) -> frappe._dict:
+	"""Allow a portal user to pay only a submitted order or invoice of their own customer.
+
+	Returns only the arguments the portal Pay button sends, so the rest comes from the document.
+	"""
+	from erpnext.controllers.website_list_for_contact import has_website_permission
+
+	if doctype not in PORTAL_PAYABLE_DOCTYPES or not isinstance(docname, str):
+		frappe.throw_permission_error()
+
+	if not frappe.db.exists(doctype, docname):
+		frappe.throw_permission_error()
+
+	ref_doc = frappe.get_doc(doctype, docname)
+	if ref_doc.docstatus != 1 or not has_website_permission(ref_doc, "read", frappe.session.user):
+		frappe.throw_permission_error()
+
+	return frappe._dict(
+		dt=doctype, dn=docname, order_type="Shopping Cart", submit_doc=submit_doc, ref_doc=ref_doc
+	)
 
 
 def apply_payment_references(pr, payment_reference):
@@ -1338,7 +1371,10 @@ def get_dummy_message(doc):
 @frappe.whitelist()
 def get_subscription_details(reference_doctype: str, reference_name: str) -> list[dict]:
 	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
+	return get_subscription_plans(reference_doctype, reference_name)
 
+
+def get_subscription_plans(reference_doctype: str, reference_name: str) -> list[dict]:
 	if not frappe.get_meta(reference_doctype).has_field("subscription"):
 		return []
 

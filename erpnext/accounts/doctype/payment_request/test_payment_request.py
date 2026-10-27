@@ -26,6 +26,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 PAYMENT_URL = "https://example.com/payment"
@@ -1264,15 +1265,27 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.send_email.assert_called_once()
 		self.assertEqual(pr.email_to, "customer@example.com")
 
-	def test_portal_pay_form_post_redirects_to_payment_url(self):
+	def test_portal_customer_pays_own_order_with_document_values(self):
 		from frappe.handler import execute_cmd
 		from frappe.utils import set_request
 
 		so = make_sales_order()
+		user = make_portal_user("_test_portal_payer@example.com", so.customer)
 		cmd = "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request"
-		portal_form = {"dn": so.name, "dt": "Sales Order", "submit_doc": "1", "order_type": "Shopping Cart"}
+		portal_form = {
+			"dn": so.name,
+			"dt": "Sales Order",
+			"submit_doc": "1",
+			"order_type": "Shopping Cart",
+			"grand_total": 1,
+			"recipient_id": "attacker@example.com",
+			"party": "_Test Customer 1",
+			"payment_gateway_account": "_Test Gateway - USD - _TC",
+		}
 
-		try:
+		self.addCleanup(setattr, frappe.local, "request", None)
+		self.addCleanup(setattr, frappe.local, "response", frappe._dict())
+		with as_user(user):
 			set_request(method="GET", path=f"/api/method/{cmd}")
 			frappe.local.form_dict = frappe._dict(portal_form)
 			self.assertRaises(frappe.PermissionError, execute_cmd, cmd)
@@ -1280,17 +1293,67 @@ class TestPaymentRequest(ERPNextTestSuite):
 			set_request(method="POST", path=f"/api/method/{cmd}")
 			frappe.local.form_dict = frappe._dict(portal_form)
 			execute_cmd(cmd)
-			response = frappe.local.response
-		finally:
-			frappe.local.request = None
-			frappe.local.response = frappe._dict()
 
-		self.assertEqual(response.get("type"), "redirect")
-		self.assertEqual(response.get("location"), PAYMENT_URL)
+		self.assertEqual(frappe.local.response.get("type"), "redirect")
+		self.assertEqual(frappe.local.response.get("location"), PAYMENT_URL)
+		pr = frappe.get_doc("Payment Request", {"reference_name": so.name})
+		self.assertEqual(pr.docstatus, 1)
+		self.assertEqual(pr.grand_total, so.grand_total)
+		self.assertEqual(pr.email_to, so.owner)
+		self.assertEqual(pr.party, so.customer)
 		self.assertEqual(
-			frappe.db.get_value("Payment Request", {"reference_name": so.name}, "docstatus"),
-			1,
+			pr.payment_gateway_account,
+			frappe.db.get_value("Payment Gateway Account", {"is_default": 1, "company": so.company}),
 		)
+
+	def test_portal_payment_refused_outside_own_submitted_orders(self):
+		own_order = make_sales_order()
+		user = make_portal_user("_test_portal_payer@example.com", own_order.customer)
+		cancelled_order = make_sales_order()
+		cancelled_order.cancel()
+		refused = {
+			"another customer's order": (user, "Sales Order", make_sales_order(customer="_Test Customer 1")),
+			"draft order": (user, "Sales Order", make_sales_order(do_not_submit=True)),
+			"cancelled order": (user, "Sales Order", cancelled_order),
+			"doctype the portal cannot pay": (user, "Purchase Order", create_purchase_order()),
+			"user without a customer": (
+				make_fenced_user("_test_no_rights@example.com", []),
+				"Sales Order",
+				own_order,
+			),
+			"guest": ("Guest", "Sales Order", own_order),
+		}
+
+		for case, (payer, doctype, doc) in refused.items():
+			with self.subTest(case), as_user(payer):
+				self.assertRaises(
+					frappe.PermissionError,
+					make_payment_request,
+					dt=doctype,
+					dn=doc.name,
+					submit_doc=1,
+					order_type="Shopping Cart",
+				)
+
+	def test_desk_payment_request_still_needs_desk_permissions(self):
+		so = make_sales_order()
+		accounts_user = make_fenced_user("_test_pr_accounts_user@example.com", ["Accounts User"])
+		sales_user = make_fenced_user("_test_pr_sales_user@example.com", ["Sales User"])
+
+		with as_user(accounts_user):
+			pr = make_payment_request(dt="Sales Order", dn=so.name, return_doc=1)
+		self.assertEqual(pr.reference_name, so.name)
+
+		with as_user(sales_user):
+			self.assertRaises(frappe.PermissionError, make_payment_request, dt="Sales Order", dn=so.name)
+
+
+def make_portal_user(email, customer):
+	user = make_fenced_user(email, ["Customer"])
+	customer_doc = frappe.get_doc("Customer", customer)
+	customer_doc.append("portal_users", {"user": user})
+	customer_doc.save()
+	return user
 
 
 class TestPaymentRequestV2Gateway(ERPNextTestSuite):
