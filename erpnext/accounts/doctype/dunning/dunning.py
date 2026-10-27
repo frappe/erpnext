@@ -536,6 +536,13 @@ def update_dunnings_linked_to_payment(payment_entry):
 		)
 
 
+def update_superseded_dunnings():
+	for name in frappe.get_all("Dunning", filters={"docstatus": 1, "status": "Unresolved"}, pluck="name"):
+		dunning = frappe.get_doc("Dunning", name)
+		if not dunning.get_unpaid_overdue_payments():
+			set_dunning_status(dunning, False)
+
+
 def set_dunning_status(dunning, has_outstanding_payments: bool, respect_manual_resolution: bool = False):
 	"""A dunning is only resolved once the invoiced sum *and* its interest and fee are paid."""
 	# resolving by hand waives the interest, only an invoice that is owed again reopens it
