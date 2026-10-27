@@ -432,13 +432,9 @@ class AdjustmentEntry:
 
 		frappe.throw(
 			_(
-				"Users cannot select Adjustment Entry as the purpose of a Stock Reconciliation. The Stock Valuation Comparison report uses this purpose to correct stock quantity and value."
-			)
-			+ "<br><br>"
-			+ _(
-				"To update the current stock quantity or valuation rate, select Stock Reconciliation as the purpose. To add opening stock, select Opening Stock."
+				"Adjustment Entry can only be made by the system from the Stock Valuation Comparison report. To add opening stock, select Opening Stock. To update stock quantity or valuation rate, select Stock Reconciliation."
 			),
-			title=_("Not Allowed"),
+			title=_("Not Allowed Purpose"),
 			exc=ManualAdjustmentEntryError,
 		)
 
