@@ -13,6 +13,7 @@
       "comparison": {
        "label": "vs a month ago",
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(posting_date <= date_sub(today(), 1, 'month'), debit) - sum_if(posting_date <= date_sub(today(), 1, 'month'), credit)",
@@ -30,6 +31,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(debit) - sum(credit)",
@@ -85,6 +87,7 @@
        "measure": {
         "aggregation": "max",
         "column_name": "cash_balance",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Cash and Bank Balance"
@@ -135,6 +138,7 @@
      "series": [
       {
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum(debit) - sum(credit)",
@@ -230,6 +234,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(credit) - sum(debit)",
@@ -277,6 +282,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(outstanding)",
@@ -287,6 +293,7 @@
       "measure_name": "Accounts Payable"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(overdue)",
@@ -297,6 +304,7 @@
       "measure_name": "Overdue"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if((outstanding >= 0.005) & (due_date >= today()) & (due_date < date_add(today(), 30, 'day')), outstanding)",
@@ -390,6 +398,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(outstanding)",
@@ -400,6 +409,7 @@
       "measure_name": "Accounts Receivable"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(overdue)",
@@ -446,6 +456,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(net_amount)",
@@ -511,6 +522,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "base_net_amount",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Revenue"
@@ -582,6 +594,7 @@
     ],
     "values": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(outstanding)",
@@ -591,6 +604,7 @@
       "measure_name": "Overdue"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(days_overdue.between(1, 30), outstanding)",
@@ -600,6 +614,7 @@
       "measure_name": "1-30 Days"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(days_overdue.between(31, 60), outstanding)",
@@ -609,6 +624,7 @@
       "measure_name": "31-60 Days"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(days_overdue.between(61, 90), outstanding)",
@@ -618,6 +634,7 @@
       "measure_name": "61-90 Days"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(days_overdue.between(91, 120), outstanding)",
@@ -627,6 +644,7 @@
       "measure_name": "91-120 Days"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(days_overdue > 120, outstanding)",
@@ -913,7 +931,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:12:12.832764",
+ "modified": "2026-10-24 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "accounts",
@@ -958,6 +976,11 @@
        "data_type": "Date",
        "dimension_name": "period",
        "granularity": "month"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
       }
      ],
      "measures": [
@@ -1052,7 +1075,8 @@
       "voucher_no",
       "posting_date",
       "debit",
-      "credit"
+      "credit",
+      "company"
      ],
      "type": "select"
     }
@@ -1140,30 +1164,11 @@
    "operations": [
     {
      "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPayment Ledger Entry",
-      "type": "table"
+      "query_name": "accounts-week-spine",
+      "type": "query",
+      "workbook": "accounts"
      },
      "type": "source"
-    },
-    {
-     "column_names": [
-      "name"
-     ],
-     "type": "select"
-    },
-    {
-     "limit": 8,
-     "type": "limit"
-    },
-    {
-     "data_type": "Integer",
-     "expression": {
-      "expression": "ibis.row_number()",
-      "type": "expression"
-     },
-     "new_name": "row_index",
-     "type": "mutate"
     },
     {
      "data_type": "Date",
@@ -1238,7 +1243,8 @@
       "voucher_no",
       "posting_date",
       "debit",
-      "credit"
+      "credit",
+      "company"
      ],
      "type": "select"
     }
@@ -1923,7 +1929,8 @@
       "voucher_no",
       "posting_date",
       "debit",
-      "credit"
+      "credit",
+      "company"
      ],
      "type": "select"
     }
@@ -2186,6 +2193,11 @@
        "column_name": "customer",
        "data_type": "String",
        "dimension_name": "customer"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
       }
      ],
      "measures": [
@@ -2241,7 +2253,8 @@
       "item_code",
       "stock_qty",
       "base_net_amount",
-      "buying_amount"
+      "buying_amount",
+      "company"
      ],
      "type": "select"
     }
@@ -2571,6 +2584,24 @@
    ],
    "sort_order": 5,
    "title": "Sales Invoice Lines",
+   "use_live_connection": 1,
+   "workbook": "accounts"
+  },
+  "accounts-week-spine": {
+   "folder": null,
+   "is_builder_query": 0,
+   "is_native_query": 1,
+   "is_script_query": 0,
+   "name": "accounts-week-spine",
+   "operations": [
+    {
+     "data_source": "Site DB",
+     "raw_sql": "SELECT 0 AS row_index\nUNION ALL SELECT 1\nUNION ALL SELECT 2\nUNION ALL SELECT 3\nUNION ALL SELECT 4\nUNION ALL SELECT 5\nUNION ALL SELECT 6\nUNION ALL SELECT 7",
+     "type": "sql"
+    }
+   ],
+   "sort_order": 19,
+   "title": "Week Spine",
    "use_live_connection": 1,
    "workbook": "accounts"
   }

@@ -5,6 +5,7 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Task", {
 	setup: function (frm) {
+		frm.add_fetch("type", "weight", "task_weight");
 		frm.make_methods = {
 			Timesheet: () =>
 				frappe.model.open_mapped_doc({

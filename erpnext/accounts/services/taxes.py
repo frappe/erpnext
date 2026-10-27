@@ -362,7 +362,7 @@ def validate_inclusive_tax(tax, doc) -> None:
 		):
 			_on_previous_row_error(tax.row_id)
 		elif tax.charge_type == "On Previous Row Total" and not all(
-			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id) - 1]]
+			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id)]]
 		):
 			_on_previous_row_error("1 - %d" % (tax.row_id,))
 		elif tax.get("category") == "Valuation":

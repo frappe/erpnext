@@ -47,6 +47,65 @@ class TestLead(ERPNextTestSuite):
 		make_customer(lead.name).insert()
 		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
 
+	def test_disabled_lead_cannot_be_converted(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer, make_quotation
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation as make_test_quotation
+
+		lead = make_lead()
+		quotation = make_test_quotation(do_not_save=1)
+		quotation.update({"quotation_to": "Lead", "party_name": lead.name})
+		quotation.insert().submit()
+		lead.db_set("disabled", 1)
+
+		for mapper in (make_customer, make_opportunity, make_quotation):
+			self.assertRaisesRegex(frappe.ValidationError, "is disabled", mapper, lead.name)
+
+		new_quotation = make_test_quotation(do_not_save=1)
+		new_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", new_quotation.insert)
+
+		quotation.cancel()
+		amended = frappe.copy_doc(quotation)
+		amended.update({"amended_from": quotation.name, "docstatus": 0})
+		amended.insert()
+
+	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		quotation = make_quotation(do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.insert()
+		quotation.submit()
+
+		customer = make_customer(lead.name).insert()
+
+		self.assertEqual(
+			frappe.db.get_value("Quotation", quotation.name, ["quotation_to", "party_name"]),
+			("Customer", customer.name),
+		)
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", opportunity.name, ["opportunity_from", "party_name"]),
+			("Customer", customer.name),
+		)
+
+	def test_customer_from_lead_keeps_records_the_user_cannot_write(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		customer = make_customer(lead.name)
+
+		with self.set_user(make_user("_test_lead_master_manager@example.com", "Sales Master Manager")):
+			customer.insert()
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "opportunity_from"), "Lead")
+
 	def test_customer_from_lead_without_contact_gets_one(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
 
@@ -120,6 +179,25 @@ class TestLead(ERPNextTestSuite):
 		event.reload()
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
+
+	def test_edited_note_is_cleaned_and_needs_write(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		lead = make_lead(first_name="Note", last_name="Editor", email_id=f"{random_string(8)}@example.com")
+		lead.add_note("first note")
+		row_id = str(lead.notes[0].name)
+
+		with as_user(make_fenced_user("lead-note-editor@example.com", ["Sales User"])):
+			frappe.get_doc("Lead", lead.name).edit_note('<b>edited</b><img src=x onerror="alert(1)">', row_id)
+		note = frappe.db.get_value("CRM Note", row_id, "note")
+		self.assertIn("<b>edited</b>", note)
+		self.assertNotIn("onerror", note)
+
+		with as_user(make_fenced_user("lead-note-reader@example.com", [])):
+			self.assertRaises(
+				frappe.PermissionError, frappe.get_doc("Lead", lead.name).edit_note, "changed", row_id
+			)
+		self.assertEqual(frappe.db.get_value("CRM Note", row_id, "note"), note)
 
 	def test_opportunity_from_lead(self):
 		lead = make_lead(
@@ -319,9 +397,10 @@ class TestLead(ERPNextTestSuite):
 		lead.save()
 		self.assertEqual(frappe.db.get_value("Prospect Lead", {"lead": lead.name}, "mobile_no"), "9999999999")
 
-		# deleting the only lead of a prospect removes the prospect
+		# deleting the only lead of a prospect keeps the prospect, without the lead
 		lead.delete()
-		self.assertFalse(frappe.db.exists("Prospect", prospect_name))
+		self.assertFalse(frappe.db.exists("Prospect Lead", {"parent": prospect_name}))
+		self.assertTrue(frappe.db.exists("Prospect", prospect_name))
 
 	def test_set_lead_name_fallbacks(self):
 		# organization name is used when there is no person name

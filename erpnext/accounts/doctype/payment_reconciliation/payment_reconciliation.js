@@ -361,8 +361,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						).bold(),
 					},
 				],
-				primary_action: () => {
-					const args = dialog.get_values()["allocation"];
+				primary_action: (values) => {
+					const args = values.allocation;
 
 					args.forEach((d) => {
 						frappe.model.set_value(

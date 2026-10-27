@@ -79,6 +79,8 @@ class RequestforQuotation(BuyingController):
 		validate_for_items(self)
 		self.set_missing_item_names()
 		super().set_qty_as_per_stock_uom()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.update_email_id()
 
 		if self.docstatus < 1:

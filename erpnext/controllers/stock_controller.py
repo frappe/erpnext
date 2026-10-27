@@ -29,6 +29,7 @@ from erpnext.exceptions import (
 	QualityInspectionRejectedError,
 	QualityInspectionRequiredError,
 )
+from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account, get_warehouse_account_map
@@ -413,9 +414,9 @@ class StockController(AccountsController):
 		return QualityInspectionService(self).validate_inspection()
 
 	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
+		blanket_orders = sorted({d.blanket_order for d in self.items if d.blanket_order})
 		for blanket_order in blanket_orders:
-			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
+			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
 		for d in self.get("items"):
@@ -440,6 +441,10 @@ class StockController(AccountsController):
 		from erpnext.stock.services.stock_ledger_service import StockLedgerService
 
 		return StockLedgerService(self).repost_future_sle_and_gle(force, via_landed_cost_voucher)
+
+	def update_project_consumed_material_cost(self):
+		projects = {self.get("project"), *(d.get("project") for d in self.get("items"))}
+		update_consumed_material_cost(projects - {None, ""})
 
 	def add_gl_entry(
 		self,
@@ -561,7 +566,12 @@ class StockController(AccountsController):
 						if sre_doc.has_serial_no:
 							serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos:
+								is_open = (
+									entry.qty > entry.delivered_qty
+									if self._action == "submit"
+									else entry.delivered_qty
+								)
+								if entry.serial_no in serial_nos and is_open:
 									entry.delivered_qty = 1 if self._action == "submit" else 0
 									entry.db_update()
 									working_qty += 1
@@ -936,6 +946,7 @@ def create_item_wise_repost_entries(
 	from erpnext.stock.utils import get_valuation_method
 
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
+	company = frappe.db.get_value(voucher_type, voucher_no, "company")
 
 	distinct_item_warehouses = set()
 	repost_entries = []
@@ -948,7 +959,7 @@ def create_item_wise_repost_entries(
 
 		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
 		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
-		if get_valuation_method(sle.item_code) == "Standard Cost":
+		if get_valuation_method(sle.item_code, company) == "Standard Cost":
 			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
@@ -966,6 +977,23 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+def create_accounting_repost_entry(voucher_type, voucher_no):
+	repost_entry = frappe.new_doc("Repost Item Valuation")
+	repost_entry.based_on = "Transaction"
+	repost_entry.voucher_type = voucher_type
+	repost_entry.voucher_no = voucher_no
+	repost_entry.update(
+		frappe.db.get_value(
+			voucher_type, voucher_no, ["company", "posting_date", "posting_time"], as_dict=True
+		)
+	)
+	repost_entry.repost_only_accounting_ledgers = 1
+	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
+	repost_entry.submit()
+	return repost_entry
 
 
 def make_bundle_for_material_transfer(**kwargs):
@@ -1028,6 +1056,8 @@ def make_bundle_for_material_transfer(**kwargs):
 		bundle_doc.save(ignore_permissions=True)
 	else:
 		bundle_doc.submit()
+		if kwargs.docstatus != 2:
+			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
 

@@ -316,7 +316,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 			log = frappe.new_doc("Process Payment Reconciliation Log")
 			log.process_pr = doc
 			log.status = "Running"
-			log = log.save()
+			log = log.save(ignore_permissions=True)
 
 			job_name = f"process_{doc}_fetch_and_allocate"
 			if not is_job_running(job_name):
@@ -425,7 +425,7 @@ def fetch_and_allocate(doc: str) -> None:
 				reconcile_log.allocated = True
 				reconcile_log.total_allocations = len(reconcile_log.get("allocations"))
 				reconcile_log.reconciled_entries = 0
-				reconcile_log.save()
+				reconcile_log.save(ignore_permissions=True)
 
 				# generate reconcile job name
 				allocation = get_next_allocation(log)

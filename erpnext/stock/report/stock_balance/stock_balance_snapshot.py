@@ -16,6 +16,7 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
 )
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 ITEM_COLUMNS = {
 	"name": pa.string(),
@@ -84,6 +85,16 @@ SERIAL_RECONCILIATIONS_SQL = """
 
 REPLAY_ROWS_SQL = "SELECT * FROM replay"
 
+LATEST_RATES_SQL = """
+	SELECT sle.item_code, sle.warehouse, sle.valuation_rate::DOUBLE AS valuation_rate
+	FROM "tabStock Ledger Entry" sle
+	JOIN rate_pairs USING (item_code, warehouse)
+	WHERE sle.is_cancelled = 0 AND sle.posting_date <= $to_date
+	QUALIFY row_number() OVER (
+		PARTITION BY sle.item_code, sle.warehouse ORDER BY sle.posting_datetime DESC, sle.creation DESC, sle.name DESC
+	) = 1
+"""
+
 SEGMENTS_SQL = """
 	SELECT segment.*, item.item_group, item.stock_uom, item.item_name
 	FROM (
@@ -97,7 +108,7 @@ SEGMENTS_SQL = """
 			sum(CASE WHEN NOT is_opening AND stock_value_difference < 0 THEN -stock_value_difference ELSE 0 END) AS out_val,
 			sum(stock_value_difference) AS bal_val
 		FROM (
-			SELECT *, count_if(replay) OVER (PARTITION BY item_code, warehouse, dimension_key ORDER BY row_no) AS segment
+			SELECT *, count_if(replay) OVER (PARTITION BY item_code, warehouse ORDER BY row_no) AS segment
 			FROM ledger
 		)
 		WHERE NOT replay
@@ -172,7 +183,8 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		self.prepare_stock_reco_voucher_wise_count()
 
 		changes = [*self.run_sql(REPLAY_ROWS_SQL), *self.run_sql(self.get_segments_sql())]
-		for change in sorted(changes, key=itemgetter("row_no")):
+		self.adjustment_netting = AdjustmentNetting()
+		for change in self.adjustment_netting.net(sorted(changes, key=itemgetter("row_no"))):
 			self.apply_change(change)
 
 		self.item_warehouse_map = filter_items_with_no_transactions(
@@ -299,11 +311,26 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 			return
 
 		balance = self.item_warehouse_map[key]
+		self.add_to_item_warehouse_balance(
+			self.get_item_warehouse_balance(change, balance), balance, change.bal_qty, change.bal_val
+		)
 		for field in MOVEMENT_FIELDS:
 			balance[field] += change[field]
 		balance.val_rate = change.valuation_rate
 		for field in self.inventory_dimensions:
 			balance[field] = change.get(field)
+
+	def get_latest_valuation_rates(self, rows) -> dict:
+		pairs = {(row.item_code, row.warehouse) for row in rows}
+		if not pairs:
+			return {}
+
+		self.conn.register(
+			"rate_pairs",
+			pa.Table.from_pylist([{"item_code": item, "warehouse": warehouse} for item, warehouse in pairs]),
+		)
+		rates = self.run_sql(LATEST_RATES_SQL, {"to_date": self.to_date})
+		return {(rate.item_code, rate.warehouse): rate.valuation_rate for rate in rates}
 
 	def run_sql(self, sql, params=None):
 		cursor = self.conn.execute(sql, params)

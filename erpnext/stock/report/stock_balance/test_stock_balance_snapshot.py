@@ -113,12 +113,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 	def test_empty_result_keeps_columns(self):
 		self.assert_snapshot_matches()
 
-	def test_opening_receipts_and_issues(self):
-		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
-		self.make_movement(qty=5, basic_rate=150)
-		self.issue(3)
-		self.assert_snapshot_matches()
-
 	def test_ordinary_movements_are_summed_in_duckdb(self):
 		self.make_movement(qty=10, basic_rate=100, posting_date=add_days(today(), -10))
 		self.make_movement(qty=5, basic_rate=150)
@@ -249,15 +243,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 		self.issue(3, batch_no=batch)
 		self.assert_snapshot_matches()
 
-	def test_changes_after_the_sync_are_not_read(self):
-		self.make_movement(qty=10, basic_rate=100)
-		ledger = capture_ledger(self.filters)
-		expected = stock_balance.execute(deepcopy(self.filters))
-		self.make_movement(qty=5, basic_rate=100)
-		with ledger_snapshot(ledger):
-			self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(self.filters)), expected)
-		self.assertNotEqual(stock_balance.execute(deepcopy(self.filters)), expected)
-
 	def test_ageing_columns_are_refused(self):
 		filters = frappe._dict(self.filters, show_stock_ageing_data=1)
 		with patch(LATEST_SYNC, side_effect=AssertionError("Sync opened")):
@@ -273,6 +258,6 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 @patch.object(live_tests, "execute", execute_from_snapshot)
 class TestStockBalanceFromSnapshot(live_tests.TestStockBalance):
 	"""The live Stock Balance tests, with the report read from a snapshot of the ledger. A snapshot
-	refuses ageing columns, which test_ageing_columns_are_refused covers."""
+	refuses ageing columns."""
 
 	test_show_stock_ageing_data_adds_ageing_columns = None

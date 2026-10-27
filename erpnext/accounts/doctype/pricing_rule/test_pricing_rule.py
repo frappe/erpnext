@@ -43,10 +43,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -103,6 +103,39 @@ class TestPricingRule(ERPNextTestSuite):
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 15)
 
+	def test_campaign_pricing_rule_applies_to_transaction_utm_campaign(self):
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Pricing Rule for UTM Campaign",
+				"apply_on": "Item Code",
+				"items": [{"item_code": "_Test Item"}],
+				"selling": 1,
+				"applicable_for": "Campaign",
+				"campaign": "_Test Campaign",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 10,
+				"company": "_Test Company",
+			}
+		).insert()
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": "Standard Selling",
+				"item_code": "_Test Item",
+				"price_list_rate": 100,
+			}
+		).insert()
+
+		quotation = make_quotation(do_not_save=1)
+		quotation.utm_campaign = "_Test Campaign"
+		quotation.insert()
+
+		self.assertEqual(quotation.items[0].discount_percentage, 10)
+
 	def test_pricing_rule_for_margin(self):
 		from erpnext.stock.get_item_details import get_item_details
 
@@ -141,10 +174,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test FG Item 2",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -189,10 +222,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_group": "Products",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -229,10 +262,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -296,10 +329,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "Test Variant PRT",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -437,6 +470,24 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(item.rate_with_margin, 1100)
 		self.assertEqual(item.discount_amount, 110)
 		self.assertEqual(item.rate, 990)
+
+	def test_typed_rate_stays_when_no_pricing_rule_is_applied(self):
+		# A coupon based rule without its coupon is considered but not applied: the row holds "[]".
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		pricing_rule = make_pricing_rule(selling=1, discount_percentage=10)
+		pricing_rule.db_set("coupon_code_based", 1)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 100
+		si.items[0].rate = 120
+		si.payment_schedule = []
+		si.insert(ignore_permissions=True)
+		self.assertEqual(si.items[0].rate, 120)
+
+		si.save()
+		si.submit()
+		self.assertEqual(si.items[0].rate, 120)
+		self.assertEqual(si.items[0].margin_rate_or_amount, 20)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_pricing_rule_for_product_discount_on_same_item(self):
@@ -583,10 +634,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -999,7 +1050,7 @@ class TestPricingRule(ERPNextTestSuite):
 				"currency": "USD",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -1019,7 +1070,7 @@ class TestPricingRule(ERPNextTestSuite):
 				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",

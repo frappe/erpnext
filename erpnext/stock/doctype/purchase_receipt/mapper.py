@@ -49,6 +49,7 @@ def get_returned_qty_map(purchase_receipt: str) -> dict:
 			& (pr.is_return == 1)
 			& (pr.return_against == purchase_receipt)
 			& (pr_item.purchase_receipt_item.isnotnull())
+			& (pr_item.return_qty_from_rejected_warehouse == 0)
 		)
 		.groupby(pr_item.purchase_receipt_item)
 	).run(as_list=1)
@@ -67,6 +68,9 @@ def make_purchase_invoice(
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
+	if doc.status == "Closed":
+		frappe.throw(_("Purchase Receipt {0} is closed and cannot be invoiced").format(frappe.bold(doc.name)))
+
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	for ref, qty in get_qty_already_mapped(target_doc, "pr_detail").items():
@@ -91,8 +95,7 @@ def make_purchase_invoice(
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			target_doc.rejected_qty = 0
+		target_doc.rejected_qty = 0
 		target_doc.stock_qty = flt(target_doc.qty) * flt(
 			target_doc.conversion_factor, target_doc.precision("conversion_factor")
 		)
@@ -110,9 +113,6 @@ def make_purchase_invoice(
 			return pending_qty, 0
 
 		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
-		if item_row.rejected_qty and returned_qty:
-			returned_qty -= item_row.rejected_qty
-
 		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0

@@ -6,10 +6,11 @@ import frappe
 from frappe import _
 from frappe.desk.notifications import get_open_count as get_linked_document_counts
 from frappe.model.document import Document
-from frappe.utils import cint, formatdate, get_datetime, getdate, nowdate
+from frappe.utils import add_days, cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
 
 from .mapper import (
 	get_ordered_items,
@@ -169,8 +170,10 @@ class Quotation(SellingController):
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
+		self.set_default_valid_till()
 		self.validate_valid_till()
 		self.validate_revision()
+		self.validate_lead()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -185,9 +188,18 @@ class Quotation(SellingController):
 	def before_submit(self):
 		self.set_has_alternative_item()
 
+	def set_default_valid_till(self):
+		validity_days = cint(frappe.get_single_value("CRM Settings", "default_valid_till"))
+		if self.is_new() and not self.valid_till and validity_days > 0:
+			self.valid_till = add_days(self.transaction_date, validity_days)
+
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_lead(self):
+		if self.quotation_to == "Lead" and self.party_name and self.is_new() and not self.amended_from:
+			validate_lead_is_enabled(self.party_name, self.doctype)
 
 	def validate_revision(self):
 		if not self.revision_of:
@@ -247,6 +259,7 @@ class Quotation(SellingController):
 		If permitted in settings and any item has 0 qty, the SO has unit price items.
 		"""
 		if not frappe.get_single_value("Selling Settings", "allow_zero_qty_in_quotation"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -272,26 +285,38 @@ class Quotation(SellingController):
 		return "Ordered"
 
 	def get_valid_items(self):
-		"""
-		Filters out items in an alternatives set that were not ordered.
-		"""
+		"""Collapse each alternatives set to its ordered row, or keep the main row if none was ordered."""
 
 		def is_in_sales_order(row):
-			in_sales_order = bool(
+			return bool(
 				frappe.db.exists(
 					"Sales Order Item",
 					{"quotation_item": row.name, "item_code": row.item_code, "docstatus": 1},
 				)
 			)
-			return in_sales_order
 
-		def can_map(row) -> bool:
-			if row.is_alternative or row.has_alternative_item:
-				return is_in_sales_order(row)
+		valid_items = []
+		alternatives_set = []
 
-			return True
+		def collapse_set():
+			if not alternatives_set:
+				return
+			ordered_rows = [row for row in alternatives_set if is_in_sales_order(row)]
+			valid_items.extend(ordered_rows or alternatives_set[:1])
 
-		return list(filter(can_map, self.get("items")))
+		for row in self.get("items"):
+			if row.has_alternative_item:
+				collapse_set()
+				alternatives_set = [row]
+			elif row.is_alternative:
+				alternatives_set.append(row)
+			else:
+				collapse_set()
+				alternatives_set = []
+				valid_items.append(row)
+
+		collapse_set()
+		return valid_items
 
 	def is_fully_ordered(self):
 		return self.get_ordered_status() == "Ordered"
@@ -337,7 +362,13 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
+		if self.docstatus != 1:
+			frappe.throw(_("Only a submitted Quotation can be set as Lost."))
+
 		if not (self.is_fully_ordered() or self.is_partially_ordered() or self.has_ordered_versions):
+			if not lost_reasons_list:
+				frappe.throw(_("Please select at least one Lost Reason"))
+
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			self.db_set({"status": "Lost", "is_active": 1})
@@ -468,14 +499,16 @@ class Quotation(SellingController):
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications
 
-		if not (
-			self.opportunity
-			and frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments")
-		):
+		if self.opportunity:
+			source = ("Opportunity", self.opportunity)
+		elif self.quotation_to == "Lead" and self.party_name:
+			source = ("Lead", self.party_name)
+		else:
 			return
 
-		copy_comments("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
-		link_communications("Opportunity", self.opportunity, self, self.flags.ignore_permissions)
+		if frappe.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			copy_comments(*source, self, self.flags.ignore_permissions)
+			link_communications(*source, self, self.flags.ignore_permissions)
 
 	def print_other_charges(self, docname):
 		print_lst = []
@@ -487,6 +520,7 @@ class Quotation(SellingController):
 		return print_lst
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
+		super().on_recurring(reference_doc, auto_repeat_doc)
 		self.valid_till = None
 
 	def get_rows_with_alternatives(self):

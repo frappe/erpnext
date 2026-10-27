@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cstr, flt
 from pypika.terms import Bracket, LiteralValue
 
@@ -32,6 +32,8 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 )
 from erpnext.accounts.report.utils import convert, get_currency
 from erpnext.accounts.utils import get_fiscal_year
+
+OTHER_BALANCE_SHEET_ACCOUNTS = "Other Balance Sheet Accounts"
 
 
 def execute(filters=None):
@@ -111,15 +113,7 @@ def execute(filters=None):
 			row_data = get_account_type_based_data(
 				filters.company, row["account_type"], period_list, filters.accumulated_values, filters
 			)
-			accounts = frappe.get_all(
-				"Account",
-				filters={
-					"account_type": row["account_type"],
-					"is_group": 0,
-					"company": filters.company,
-				},
-				pluck="name",
-			)
+			accounts = get_row_accounts(filters.company, row["account_type"])
 			row_data.update(
 				{
 					"section_name": row["label"],
@@ -190,6 +184,10 @@ def get_cash_flow_accounts():
 			{"account_type": "Receivable", "label": _("Net Change in Accounts Receivable")},
 			{"account_type": "Payable", "label": _("Net Change in Accounts Payable")},
 			{"account_type": "Stock", "label": _("Net Change in Inventory")},
+			{
+				"account_type": OTHER_BALANCE_SHEET_ACCOUNTS,
+				"label": _("Net Change in Other Balance Sheet Accounts"),
+			},
 		],
 	}
 
@@ -209,6 +207,44 @@ def get_cash_flow_accounts():
 
 	# combine all cash flow accounts for iteration
 	return [operation_accounts, investing_accounts, financing_accounts]
+
+
+def get_row_accounts(company: str, account_type: str) -> list[str]:
+	account = frappe.qb.DocType("Account")
+	return get_row_accounts_query(account, company, account_type).run(pluck=True)
+
+
+def get_row_accounts_query(account, company: str, account_type: str):
+	return (
+		frappe.qb.from_(account)
+		.select(account.name)
+		.where(account.is_group == 0)
+		.where(account.company == company)
+		.where(get_row_account_condition(account, account_type))
+	)
+
+
+def get_row_account_condition(account, account_type: str):
+	if account_type != OTHER_BALANCE_SHEET_ACCOUNTS:
+		return account.account_type == account_type
+
+	# Balance sheet accounts not reported on another row, so that Net Change in Cash equals the movement
+	# on Cash and Bank. Depreciation accounts offset the charge credited to accumulated depreciation,
+	# since the Depreciation row already adds it back.
+	excluded_types = [*get_mapped_account_types(), "Cash", "Bank"]
+	other_balance_sheet_accounts = account.root_type.isin(["Asset", "Liability", "Equity"]) & IfNull(
+		account.account_type, ""
+	).notin(excluded_types)
+	return other_balance_sheet_accounts | (account.account_type == "Depreciation")
+
+
+def get_mapped_account_types() -> list[str]:
+	return [
+		row["account_type"]
+		for section in get_cash_flow_accounts()
+		for row in section["account_types"]
+		if row["account_type"] != OTHER_BALANCE_SHEET_ACCOUNTS
+	]
 
 
 def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
@@ -262,15 +298,7 @@ def get_account_type_based_gl_data(company, filters=None):
 		.where(gl.posting_date >= filters.start_date)
 		.where(gl.posting_date <= filters.end_date)
 		.where(gl.voucher_type != "Period Closing Voucher")
-		.where(
-			gl.account.isin(
-				frappe.qb.from_(acc)
-				.select(acc.name)
-				.where(acc.is_group == 0)
-				.where(acc.company == company)
-				.where(acc.account_type == filters.account_type)
-			)
-		)
+		.where(gl.account.isin(get_row_accounts_query(acc, company, filters.account_type)))
 	)
 
 	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):

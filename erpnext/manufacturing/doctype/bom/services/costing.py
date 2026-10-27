@@ -33,7 +33,7 @@ class BOMCostingService:
 			self.doc.rm_cost_as_per = "Valuation Rate"
 
 		rate = self._raw_material_rate(arg, notify) if arg else 0
-		return flt(rate) * flt(self.doc.plc_conversion_rate or 1) / (self.doc.conversion_rate or 1)
+		return flt(rate) / (self.doc.conversion_rate or 1)
 
 	def _raw_material_rate(self, arg, notify):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate, get_valuation_rate
@@ -57,6 +57,10 @@ class BOMCostingService:
 		rate = get_bom_item_rate(arg, self.doc)
 		if not rate:
 			self._warn_rate_not_found(arg, notify)
+
+		if self.doc.rm_cost_as_per == "Price List":
+			rate = flt(rate) * flt(self.doc.plc_conversion_rate or 1)
+
 		return rate
 
 	def _warn_rate_not_found(self, arg, notify):
@@ -86,6 +90,7 @@ class BOMCostingService:
 		if self.doc.docstatus == 1:
 			self.doc.flags.ignore_validate_update_after_submit = True
 
+		self.doc.set_plc_conversion_rate()
 		self.calculate_cost(save_updates=save, update_hour_rate=update_hour_rate)
 
 		if save:
@@ -112,11 +117,11 @@ class BOMCostingService:
 		).run(pluck=True)
 
 		for bom in parent_boms:
-			frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
+			BOMCostingService(frappe.get_doc("BOM", bom)).update_cost(from_child_bom=True)
 
 	def update_parent_cost(self):
 		if self.doc.total_cost:
-			cost = self.doc.total_cost / self.doc.quantity
+			cost = self.doc.total_cost / get_good_qty(self.doc)
 
 			bom_item = frappe.qb.DocType("BOM Item")
 			(
@@ -134,17 +139,14 @@ class BOMCostingService:
 		bom_table = frappe.qb.DocType("BOM")
 		bom = (
 			frappe.qb.from_(bom_table)
-			.select(
-				bom_table.name,
-				(bom_table.base_total_cost / bom_table.quantity).as_("unit_cost"),
-			)
+			.select(bom_table.base_total_cost, bom_table.quantity, bom_table.process_loss_qty)
 			.where((bom_table.is_active == 1) & (bom_table.name == bom_no))
 		).run(as_dict=1)
-		return bom and bom[0]["unit_cost"] or 0
+		return flt(bom[0].base_total_cost) / get_good_qty(bom[0]) if bom else 0
 
 	def calculate_cost(self, save_updates=False, update_hour_rate=False):
 		"""Calculate bom totals"""
-		self.calculate_op_cost(update_hour_rate)
+		self.calculate_op_cost(update_hour_rate, save=save_updates)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_secondary_items_costs(save=save_updates)
 		self.doc.set_fg_cost_allocation()
@@ -166,19 +168,19 @@ class BOMCostingService:
 		if self.doc.total_cost != old_cost:
 			self.doc.flags.cost_updated = True
 
-	def calculate_op_cost(self, update_hour_rate=False):
+	def calculate_op_cost(self, update_hour_rate=False, save=True):
 		"""Update workstation rate and calculates totals"""
 		self.doc.operating_cost = 0
 		self.doc.base_operating_cost = 0
 		if self.doc.get("with_operations"):
 			for d in self.doc.get("operations"):
-				self._accumulate_operation_cost(d, update_hour_rate)
+				self._accumulate_operation_cost(d, update_hour_rate, save)
 		elif self.doc.get("fg_based_operating_cost"):
 			self._set_fg_based_operating_cost()
 
-	def _accumulate_operation_cost(self, d, update_hour_rate):
+	def _accumulate_operation_cost(self, d, update_hour_rate, save=True):
 		if d.workstation or d.workstation_type:
-			self.update_rate_and_time(d, update_hour_rate)
+			self.update_rate_and_time(d, update_hour_rate, save)
 
 		operating_cost = d.operating_cost
 		base_operating_cost = d.base_operating_cost
@@ -194,7 +196,7 @@ class BOMCostingService:
 		self.doc.operating_cost = total
 		self.doc.base_operating_cost = flt(total * self.doc.conversion_rate, 2)
 
-	def update_rate_and_time(self, row, update_hour_rate=False):
+	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
 			self._set_row_hour_rate(row)
 
@@ -203,7 +205,7 @@ class BOMCostingService:
 			if row.time_in_mins:
 				self._set_row_operating_costs(row)
 
-		if update_hour_rate:
+		if update_hour_rate and save:
 			row.db_update()
 
 	def _set_row_hour_rate(self, row):
@@ -351,3 +353,8 @@ class BOMCostingService:
 				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
 
 		return rm_rate_map
+
+
+def get_good_qty(bom):
+	good_qty = flt(bom.quantity) - flt(bom.process_loss_qty)
+	return good_qty if good_qty > 0 else flt(bom.quantity) or 1

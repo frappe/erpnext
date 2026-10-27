@@ -20,7 +20,7 @@ def execute(filters=None):
 	avg_daily_outgoing = 0
 	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
 	if diff <= 0:
-		frappe.throw(_("'From Date' must be after 'To Date'"))
+		frappe.throw(_("From Date cannot be after To Date"))
 
 	columns = get_columns()
 	items = get_item_info(filters)
@@ -108,19 +108,27 @@ def get_consumed_items(filters):
 	]
 
 	se = frappe.qb.DocType("Stock Entry")
+	scr = frappe.qb.DocType("Subcontracting Receipt")
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
 		.left_join(se)
 		.on(sle.voucher_no == se.name)
+		.left_join(scr)
+		.on((sle.voucher_type == "Subcontracting Receipt") & (sle.voucher_no == scr.name))
 		.select(sle.item_code, Abs(Sum(sle.actual_qty)).as_("consumed_qty"))
 		.where(
 			(sle.actual_qty < 0)
 			& (sle.is_cancelled == 0)
 			# the stock an Adjustment Entry counts out comes back in, it is not consumed
 			& (sle.is_adjustment_entry == 0)
-			& (sle.voucher_type.notin(["Delivery Note", "Sales Invoice"]))
+			& (
+				sle.voucher_type.notin(
+					["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"]
+				)
+			)
 			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))
+			& ((scr.is_return.isnull()) | (scr.is_return == 0))
 		)
 		.groupby(sle.item_code)
 	)
@@ -133,40 +141,16 @@ def get_consumed_items(filters):
 
 
 def get_delivered_items(filters):
-	parent = frappe.qb.DocType("Delivery Note")
-	child = frappe.qb.DocType("Delivery Note Item")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
-		frappe.qb.from_(parent)
-		.from_(child)
-		.select(child.item_code, Sum(child.stock_qty).as_("dn_qty"))
-		.where((parent.name == child.parent) & (parent.docstatus == 1))
-		.groupby(child.item_code)
+		frappe.qb.from_(sle)
+		.select(sle.item_code, Sum(sle.actual_qty).as_("delivered_qty"))
+		.where((sle.is_cancelled == 0) & (sle.voucher_type.isin(["Delivery Note", "Sales Invoice"])))
+		.groupby(sle.item_code)
 	)
-	query = get_filtered_query(filters, parent, query, "Delivery Note")
+	query = get_filtered_query(filters, sle, query, "Stock Ledger Entry")
 
-	dn_items = query.run(as_dict=True)
-
-	parent = frappe.qb.DocType("Sales Invoice")
-	child = frappe.qb.DocType("Sales Invoice Item")
-	query = (
-		frappe.qb.from_(parent)
-		.from_(child)
-		.select(child.item_code, Sum(child.stock_qty).as_("si_qty"))
-		.where((parent.name == child.parent) & (parent.docstatus == 1) & (parent.update_stock == 1))
-		.groupby(child.item_code)
-	)
-	query = get_filtered_query(filters, parent, query, "Sales Invoice")
-
-	si_items = query.run(as_dict=True)
-
-	dn_item_map = {}
-	for item in dn_items:
-		dn_item_map.setdefault(item.item_code, item.dn_qty)
-
-	for item in si_items:
-		dn_item_map.setdefault(item.item_code, item.si_qty)
-
-	return dn_item_map
+	return {item.item_code: -flt(item.delivered_qty) for item in query.run(as_dict=True)}
 
 
 def get_filtered_query(filters, table, query, doctype):

@@ -68,7 +68,7 @@ class SubAssemblyService:
 
 		frappe.msgprint(
 			_(
-				"Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+				"Row #{0}: Since 'Produce Item per Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
 			).format(row.idx, row.bom_no)
 		)
 		return True

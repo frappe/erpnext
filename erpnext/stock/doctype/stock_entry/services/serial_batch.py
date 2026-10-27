@@ -354,10 +354,18 @@ def get_batchwise_serial_nos(item_code, row):
 
 @frappe.whitelist()
 def get_expired_batch_items():
+	frappe.has_permission("Batch", "read", throw=True)
 	expired_batches = get_expired_batches()
 	if not expired_batches:
 		return []
-	return _enrich_expired_batches_with_stock(expired_batches)
+
+	rows = _enrich_expired_batches_with_stock(expired_batches)
+	permitted_warehouses = set(
+		frappe.get_list(
+			"Warehouse", filters={"name": ("in", list({row.warehouse for row in rows}))}, pluck="name"
+		)
+	)
+	return [row for row in rows if row.warehouse in permitted_warehouses]
 
 
 def _enrich_expired_batches_with_stock(expired_batches):
@@ -372,13 +380,12 @@ def _enrich_expired_batches_with_stock(expired_batches):
 
 
 def get_expired_batches():
-	batch = frappe.qb.DocType("Batch")
-
-	data = (
-		frappe.qb.from_(batch)
-		.select(batch.item, batch.name.as_("batch_no"), batch.stock_uom)
-		.where((batch.expiry_date <= nowdate()) & (batch.expiry_date.isnotnull()))
-	).run(as_dict=True)
+	data = frappe.get_list(
+		"Batch",
+		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"]],
+		fields=["item", "name as batch_no", "stock_uom"],
+		limit_page_length=0,
+	)
 
 	if not data:
 		return []

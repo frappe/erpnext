@@ -247,7 +247,6 @@
    "label": "Disable Serial No and Batch selector"
   },
   {
-   "depends_on": "eval: doc.over_delivery_receipt_allowance>0",
    "description": "Users with this role are allowed to over deliver/receive against orders above the allowance percentage",
    "fieldname": "role_allowed_to_over_deliver_receive",
    "fieldtype": "Link",
@@ -607,7 +606,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-01 12:00:00.000000",
+ "modified": "2026-10-08 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

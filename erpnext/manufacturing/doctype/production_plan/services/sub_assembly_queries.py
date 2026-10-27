@@ -303,3 +303,34 @@ def _merge_sub_assembly_rm(item, item_details):
 		details.qty += item.get("qty")
 	else:
 		item_details.setdefault(key, item)
+
+
+def get_subcontracted_received_qty(po_details):
+	"""Accepted finished good qty from Subcontracting Receipts, by Purchase Order Item."""
+	if not po_details:
+		return {}
+
+	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	# return rows don't carry purchase_order_item, so link via the subcontracting order item
+	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
+
+	return frappe._dict(
+		frappe.qb.from_(scr_item)
+		.inner_join(sco_item)
+		.on(scr_item.subcontracting_order_item == sco_item.name)
+		.left_join(return_against)
+		.on(scr_item.subcontracting_receipt_item == return_against.name)
+		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
+		.where(
+			(scr_item.docstatus == 1)
+			& sco_item.purchase_order_item.isin(po_details)
+			# skip returns of rejected qty, they come out of the rejected warehouse
+			& (
+				return_against.name.isnull()
+				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
+			)
+		)
+		.groupby(sco_item.purchase_order_item)
+		.run()
+	)

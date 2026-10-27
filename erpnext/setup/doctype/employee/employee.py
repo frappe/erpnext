@@ -138,6 +138,7 @@ class Employee(NestedSet):
 		else:
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
+				self.validate_user_access(existing_user_id)
 				user = frappe.get_doc("User", existing_user_id)
 				validate_employee_role(user, ignore_emp_check=True)
 				user.save(ignore_permissions=True)
@@ -163,6 +164,21 @@ class Employee(NestedSet):
 
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
+		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
+			self.validate_user_access()
+
+	def validate_user_access(self, user: str | None = None):
+		"""Only a System Manager may link, unlink or update a User holding an admin role."""
+		editor_roles = set(frappe.get_roles())
+		if "System Manager" in editor_roles:
+			return
+
+		user = user or self.user_id
+		if set(frappe.get_roles(user)) & (get_admin_roles() - editor_roles):
+			frappe.throw(
+				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
+				frappe.PermissionError,
+			)
 
 	def validate_auto_user_creation(self):
 		if self.create_user_automatically and not (
@@ -179,7 +195,6 @@ class Employee(NestedSet):
 
 	def on_update(self):
 		self.update_nsm_model()
-		frappe.clear_cache()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -245,18 +260,6 @@ class Employee(NestedSet):
 		if self.image:
 			if not user.user_image or self.has_value_changed("image"):
 				user.user_image = self.image
-				try:
-					frappe.get_doc(
-						{
-							"doctype": "File",
-							"file_url": self.image,
-							"attached_to_doctype": "User",
-							"attached_to_name": self.user_id,
-						}
-					).insert(ignore_if_duplicate=True)
-				except frappe.DuplicateEntryError:
-					# already exists
-					pass
 
 		user.save()
 
@@ -353,8 +356,17 @@ class Employee(NestedSet):
 		cell_number = cstr(self.get("cell_number"))
 		prev_number = cstr(prev_doc.get("cell_number"))
 		if cell_number != prev_number or self.get("user_id") != prev_doc.get("user_id"):
-			frappe.cache().hdel("employees_with_number", cell_number)
-			frappe.cache().hdel("employees_with_number", prev_number)
+			frappe.cache().delete_value("employees_with_number")
+
+
+def get_admin_roles() -> set[str]:
+	"""Roles that administer the site: System Manager, Administrator and roles that can edit users or roles."""
+	roles = {"Administrator", "System Manager"}
+	for doctype in ("User", "Role"):
+		roles.update(
+			perm.role for perm in frappe.get_meta(doctype).permissions if perm.write and not perm.permlevel
+		)
+	return roles
 
 
 def validate_employee_role(doc, method=None, ignore_emp_check=False):

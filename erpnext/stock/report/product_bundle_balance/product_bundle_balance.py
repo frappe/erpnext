@@ -62,7 +62,7 @@ def execute(filters=None):
 					"minimum_qty": flt(child_item_detail.qty),
 					"company": company,
 				}
-				child_row["bundle_qty"] = child_row["actual_qty"] // child_row["minimum_qty"]
+				child_row["bundle_qty"] = max(0, child_row["actual_qty"] // child_row["minimum_qty"])
 				child_rows.append(child_row)
 
 			min_bundle_qty = min(map(lambda d: d["bundle_qty"], child_rows))
@@ -227,6 +227,7 @@ def get_stock_ledger_entries(filters, items):
 		)
 		.select(sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company)
 		.where(sle.is_cancelled == 0)
+		.orderby(sle.creation)
 	)
 
 	if filters.get("warehouse"):
@@ -247,8 +248,8 @@ def get_stock_ledger_entries(filters, items):
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))
 
-	if filters.get("data"):
-		query = query.where(sle.posting_date <= filters.get("data"))
+	if filters.get("date"):
+		query = query.where(sle.posting_date <= filters.get("date"))
 
 	return query.run(as_dict=True)
 
@@ -283,7 +284,7 @@ def get_item_wise_max_posting_datetime(filters, items):
 	if filters.get("company"):
 		query = query.where(sle.company == filters.get("company"))
 
-	if filters.get("data"):
-		query = query.where(sle.posting_date <= filters.get("data"))
+	if filters.get("date"):
+		query = query.where(sle.posting_date <= filters.get("date"))
 
 	return query

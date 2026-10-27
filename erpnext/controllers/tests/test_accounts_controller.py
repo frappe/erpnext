@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
@@ -13,6 +15,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import create_gain_loss_journal, get_linked_system_journals
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 	prepare_data_for_internal_transfer,
@@ -50,58 +53,15 @@ class TestAccountsController(ERPNextTestSuite):
 		self.cash = "Cash - _TC"
 		self.creditors = "Creditors - _TC"
 		self.creditors_usd = "_Test Payable USD - _TC"
+		self.advance_received_usd = "Advance Received USD - _TC"
+		self.advance_paid_usd = "Advance Paid USD - _TC"
 		self.item = "_Test Item"
 		self.customer = "_Test Customer USD"
 		self.supplier = "_Test Supplier USD"
 		frappe.flags.is_reverse_depr_entry = False
 
-	def create_account(self):
-		# Advance accounts are not in persistent test data — create them on demand.
-		accounts = [
-			frappe._dict(
-				{
-					"attribute_name": "advance_received_usd",
-					"name": "Advance Received USD",
-					"account_type": "Receivable",
-					"account_currency": "USD",
-					"parent_account": "Current Liabilities - " + self.company_abbr,
-				}
-			),
-			frappe._dict(
-				{
-					"attribute_name": "advance_paid_usd",
-					"name": "Advance Paid USD",
-					"account_type": "Payable",
-					"account_currency": "USD",
-					"parent_account": "Current Assets - " + self.company_abbr,
-				}
-			),
-		]
-
-		for x in accounts:
-			if not frappe.db.get_value("Account", filters={"account_name": x.name, "company": self.company}):
-				acc = frappe.new_doc("Account")
-				acc.account_name = x.name
-				acc.parent_account = x.parent_account
-				acc.company = self.company
-				acc.account_currency = x.account_currency
-				acc.account_type = x.account_type
-				acc.insert()
-			else:
-				name = frappe.db.get_value(
-					"Account",
-					filters={"account_name": x.name, "company": self.company},
-					fieldname="name",
-					pluck=True,
-				)
-				acc = frappe.get_doc("Account", name)
-			setattr(self, x.attribute_name, acc.name)
-
 	def setup_advance_accounts_in_party_master(self):
-		self.create_account()
-		company = frappe.get_doc("Company", self.company)
-		company.book_advance_payments_in_separate_party_account = 1
-		company.save()
+		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", 1)
 
 		customer = frappe.get_doc("Customer", self.customer)
 		customer.accounts = []
@@ -125,17 +85,6 @@ class TestAccountsController(ERPNextTestSuite):
 				"advance_account": self.advance_paid_usd,
 			},
 		)
-		supplier.save()
-
-	def remove_advance_accounts_from_party_master(self):
-		company = frappe.get_doc("Company", self.company)
-		company.book_advance_payments_in_separate_party_account = 0
-		company.save()
-		customer = frappe.get_doc("Customer", self.customer)
-		customer.accounts = []
-		customer.save()
-		supplier = frappe.get_doc("Supplier", self.supplier)
-		supplier.accounts = []
 		supplier.save()
 
 	def create_sales_invoice(
@@ -724,7 +673,7 @@ class TestAccountsController(ERPNextTestSuite):
 
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
-		target_warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
+		target_warehouse = "_Test Transfer From - TCP1"
 		warehouse = create_warehouse("_Test Internal Warehouse New 2", company=company)
 		arms_length_price = 40
 
@@ -1343,10 +1292,13 @@ class TestAccountsController(ERPNextTestSuite):
 		# (1), while cr_note is referenced by the bridge AND the FX JE (2).
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
+		self.assertNotEqual(exc_je_for_si, [])
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr), 2)
-		# the bridge is the JE common to both
-		self.assertTrue({x.parent for x in exc_je_for_si}.issubset({x.parent for x in exc_je_for_cr}))
+		self.assertCountEqual(
+			exc_je_for_cr,
+			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
+		)
 
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 1)
@@ -1367,6 +1319,67 @@ class TestAccountsController(ERPNextTestSuite):
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 2)
 		self.assert_ledger_outstanding(si.doctype, si.name, 160.0, 2.0)
+
+	def test_31_unreconcile_return_exchange_journal(self):
+		invoice = self.create_sales_invoice(rate=100, conversion_rate=85)
+		cr_note = self.create_sales_invoice(qty=-1, rate=100, conversion_rate=80, do_not_save=True)
+		cr_note.is_return = 1
+		cr_note.save().submit()
+		pr = self.create_payment_reconciliation()
+
+		def create_legacy_exchange(*args):
+			# Use the pre-upgrade references with normal journal creation and submission.
+			return create_gain_loss_journal(*args[:12], invoice.doctype, invoice.name, *args[14:])
+
+		for legacy in (True, False):
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				to_receive=[row.as_dict() for row in pr.to_receive if row.voucher_no == invoice.name],
+				to_pay=[row.as_dict() for row in pr.to_pay if row.voucher_no == cr_note.name],
+			)
+			if legacy:
+				with patch(
+					"erpnext.accounts.services.exchange_gain_loss.create_gain_loss_journal",
+					create_legacy_exchange,
+				):
+					pr.reconcile()
+			else:
+				pr.reconcile()
+
+			(exchange_name,) = get_linked_system_journals(
+				cr_note.doctype, cr_note.name, "Exchange Gain Or Loss"
+			)
+			exchange = frappe.get_doc("Journal Entry", exchange_name)
+			journal_name = next(
+				row.parent
+				for row in self.get_journals_for(cr_note.doctype, cr_note.name)
+				if row.parent != exchange.name
+			)
+			self.assertEqual(exchange.total_debit, 500)
+			self.assertCountEqual(
+				[(row.reference_type, row.reference_name) for row in exchange.accounts],
+				[
+					(cr_note.doctype, cr_note.name),
+					(invoice.doctype, invoice.name) if legacy else ("Journal Entry", journal_name),
+				],
+			)
+			for doc in (invoice, cr_note):
+				self.assertEqual(doc.reload().outstanding_amount, 0)
+				self.assert_ledger_outstanding(doc.doctype, doc.name, 0, 0)
+
+			unreconcile = frappe.new_doc(
+				"Unreconcile Payment",
+				company=self.company,
+				voucher_type="Journal Entry",
+				voucher_no=journal_name,
+			)
+			unreconcile.add_references()
+			self.assertEqual(len(unreconcile.allocations), 2)
+			unreconcile.insert().submit()
+			self.assertEqual(exchange.reload().docstatus, 2)
+			self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": exchange.name, "is_cancelled": 0}))
+			self.assertEqual(invoice.reload().outstanding_amount, 100)
+			self.assertEqual(cr_note.reload().outstanding_amount, -100)
 
 	def test_40_cost_center_from_payment_entry(self):
 		"""
@@ -1490,9 +1503,13 @@ class TestAccountsController(ERPNextTestSuite):
 		# bridge links both; gain/loss JE links cr note and bridge
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
+		self.assertNotEqual(exc_je_for_si, [])
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr_note), 2)
-		self.assertIn(exc_je_for_si[0], exc_je_for_cr_note)
+		self.assertCountEqual(
+			exc_je_for_cr_note,
+			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
+		)
 		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 		self.assert_ledger_outstanding(cr_note.doctype, cr_note.name, 0.0, 0.0)
 
@@ -1606,9 +1623,13 @@ class TestAccountsController(ERPNextTestSuite):
 		# bridge links both; gain/loss JE links cr note and bridge
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
+		self.assertNotEqual(exc_je_for_si, [])
 		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr_note), 2)
-		self.assertIn(exc_je_for_si[0], exc_je_for_cr_note)
+		self.assertCountEqual(
+			exc_je_for_cr_note,
+			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
+		)
 		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 		self.assert_ledger_outstanding(cr_note.doctype, cr_note.name, 0.0, 0.0)
 
@@ -1954,8 +1975,6 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(len(exc_je_for_si), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
 
-		self.remove_advance_accounts_from_party_master()
-
 	def test_71_advance_payment_against_purchase_invoice_in_foreign_currency(self):
 		"""
 		Supplier advance booked under Asset
@@ -2024,8 +2043,6 @@ class TestAccountsController(ERPNextTestSuite):
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
 		self.assertEqual(len(exc_je_for_pi), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
-
-		self.remove_advance_accounts_from_party_master()
 
 	def test_difference_posting_date_in_pi_and_si(self):
 		self.setup_advance_accounts_in_party_master()

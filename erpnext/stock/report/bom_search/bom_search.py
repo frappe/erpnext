@@ -19,23 +19,24 @@ def execute(filters=None):
 		"BOM Item": "BOM",
 	}
 
-	for doctype in (
-		"Product Bundle Item",
-		"BOM Explosion Item" if filters.search_sub_assemblies else "BOM Item",
-	):
-		all_boms = {}
+	doctypes = ["Product Bundle Item", "BOM Item"]
+	if filters.search_sub_assemblies:
+		doctypes.append("BOM Explosion Item")
+
+	all_boms = {}
+	for doctype in doctypes:
 		for d in frappe.get_all(doctype, fields=["parent", "item_code"], filters=get_parent_filters(doctype)):
-			all_boms.setdefault(d.parent, []).append(d.item_code)
+			all_boms.setdefault((d.parent, parents[doctype]), set()).add(d.item_code)
 
-		for parent, items in all_boms.items():
-			valid = True
-			for key, item in filters.items():
-				if key != "search_sub_assemblies":
-					if item and item not in items:
-						valid = False
+	for parent, items in all_boms.items():
+		valid = True
+		for key, item in filters.items():
+			if key != "search_sub_assemblies":
+				if item and item not in items:
+					valid = False
 
-			if valid:
-				data.append((parent, parents[doctype]))
+		if valid:
+			data.append(parent)
 
 	return [
 		{
@@ -57,8 +58,7 @@ def get_parent_filters(doctype):
 		parent = frappe.qb.DocType("BOM")
 		condition = get_allowed_companies_condition(parent.company, "BOM")
 
-	if not condition:
-		return []
-
-	allowed_parents = frappe.qb.from_(parent).select(parent.name).where(condition)
+	allowed_parents = frappe.qb.from_(parent).select(parent.name).where(parent.docstatus == 1)
+	if condition:
+		allowed_parents = allowed_parents.where(condition)
 	return [frappe.qb.DocType(doctype).parent.isin(allowed_parents)]

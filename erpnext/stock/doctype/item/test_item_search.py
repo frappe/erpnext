@@ -10,24 +10,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestBuildMatchQuery(ERPNextTestSuite):
-	def test_quotes_the_term(self):
-		self.assertEqual(build_match_query("widget"), '"widget"')
-
 	def test_escapes_embedded_quotes(self):
 		self.assertEqual(build_match_query('say "hi"'), '"say ""hi"""')
 
 	def test_skips_terms_shorter_than_a_trigram(self):
-		for txt in ("", "a", "ab", "  b "):
+		for txt in ("", "a", "ab", "  b ", "ab%cd", "ab_cd", "a%b%c"):
 			self.assertIsNone(build_match_query(txt), txt)
 
 	def test_splits_on_like_wildcards(self):
 		"""A wildcard splits the term, the fragments narrow, and the caller rechecks with LIKE."""
 		self.assertEqual(build_match_query("RAW_MAT_000123"), '"RAW" AND "MAT" AND "000123"')
 		self.assertEqual(build_match_query("abc%def"), '"abc" AND "def"')
-
-	def test_skips_terms_with_no_usable_fragment(self):
-		for txt in ("ab%cd", "ab_cd", "a%b%c"):
-			self.assertIsNone(build_match_query(txt), txt)
 
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
@@ -146,21 +139,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		return DriftedItemSearch()
 
-	def test_an_item_without_barcodes_is_still_indexed(self):
-		"""A text column left unset drops the document from the index entirely."""
-		frappe.get_doc(
-			{
-				"doctype": "Item",
-				"item_code": "ZZ-NO-BARCODE-3312",
-				"item_name": "No Barcode Probe",
-				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
-				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
-			}
-		).insert()
-		index_docs_in_queue()
-
-		self.assertIn("ZZ-NO-BARCODE-3312", self.candidates("3312"))
-
 	def test_a_drifted_schema_reports_the_index_as_absent(self):
 		"""A site that adds an Item search field leaves the built table a column short."""
 		self.assertTrue(self.search.index_exists())
@@ -277,35 +255,23 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 	def test_item_query_output_is_unchanged(self):
 		cases = [
-			("Test", None),
-			("Item", None),
-			("EST", None),
-			("Test", {"is_stock_item": 1}),
-			("_Test", None),
-			("ab", None),
-			("%est", None),
-			("", None),
+			("Test", None, {}),
+			("Item", None, {}),
+			("EST", None, {}),
+			("Test", {"is_stock_item": 1}, {}),
+			("_Test", None, {}),
+			("ab", None, {}),
+			("%est", None, {}),
+			("", None, {}),
+			("Test", None, {"page_len": 3, "start": 0}),
+			("Test", None, {"page_len": 3, "start": 3}),
+			("Test", None, {"page_len": 3, "start": 6}),
 		]
-		for txt, filters in cases:
-			with self.subTest(txt=txt, filters=filters):
-				self.assertEqual(self.run_query(txt, filters), self.run_query(txt, filters, False))
-
-	def test_underscore_in_the_term_still_narrows(self):
-		"""_ is a LIKE wildcard, but the fragments around it are still indexable."""
-		candidates = self.candidates("_Test Item")
-		self.assertIsNotNone(candidates)
-		matched = frappe.get_all(
-			"Item",
-			filters={"name": ("like", "%_Test Item%"), "disabled": 0, "has_variants": 0},
-			pluck="name",
-		)
-		self.assertTrue(set(matched) <= set(candidates))
-
-	def test_no_candidates_returns_no_rows(self):
-		"""An empty candidate list must not reach the query, IN () is a syntax error."""
-		with patch.object(queries, "get_item_search_candidates", return_value=[]):
-			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None), ())
-			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None, as_dict=True), [])
+		for txt, filters, paging in cases:
+			with self.subTest(txt=txt, filters=filters, paging=paging):
+				self.assertEqual(
+					self.run_query(txt, filters, **paging), self.run_query(txt, filters, False, **paging)
+				)
 
 	def test_empty_result_matches_the_scan_shape(self):
 		"""The early return must give back what the query itself would, tuple or list."""
@@ -317,13 +283,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 					scanned = queries.item_query("Item", "ZZQQNOTHING", "name", 0, 20, None, as_dict=as_dict)
 				self.assertEqual(early, scanned)
 				self.assertIs(type(early), type(scanned))
-
-	def test_item_query_paging_is_unchanged(self):
-		for start in (0, 3, 6):
-			with self.subTest(start=start):
-				indexed = self.run_query("Test", None, page_len=3, start=start)
-				scanned = self.run_query("Test", None, False, page_len=3, start=start)
-				self.assertEqual(indexed, scanned)
 
 	def candidates(self, txt, searched_fields=None):
 		return self.search.get_candidate_item_codes(

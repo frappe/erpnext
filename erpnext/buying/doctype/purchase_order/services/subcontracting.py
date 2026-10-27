@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt
 
 from erpnext.stock.get_item_details import get_default_bom
+from erpnext.utilities.transaction_base import get_whole_number_uoms, validate_qty_is_integer
 
 
 class SubcontractingService:
@@ -39,10 +40,30 @@ class SubcontractingService:
 						)
 				if not item.fg_item_qty:
 					frappe.throw(_("Row #{0}: Finished Good Item Qty cannot be zero").format(item.idx))
+
+			self.validate_finished_good_qty()
 		else:
 			for item in doc.items:
 				item.set("fg_item", None)
 				item.set("fg_item_qty", 0)
+
+	def validate_finished_good_qty(self) -> None:
+		finished_good_uoms = {
+			item.name: item.stock_uom
+			for item in frappe.get_all(
+				"Item",
+				filters={"name": ["in", list({item.fg_item for item in self.doc.items})]},
+				fields=["name", "stock_uom"],
+			)
+		}
+		integer_uoms = get_whole_number_uoms(finished_good_uoms.values())
+
+		for item in self.doc.items:
+			if stock_uom := finished_good_uoms.get(item.fg_item):
+				if stock_uom in integer_uoms:
+					validate_qty_is_integer(
+						item.fg_item_qty, stock_uom, item.precision("fg_item_qty"), item.idx
+					)
 
 	def set_service_items_for_finished_goods(self) -> None:
 		from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
@@ -93,7 +114,7 @@ class SubcontractingService:
 
 		doc = self.doc
 		if doc.is_subcontracted:
-			sco = frappe.db.get_value("Subcontracting Order", {"purchase_order": doc.name, "docstatus": 1})
-
-			if sco:
+			for sco in frappe.get_all(
+				"Subcontracting Order", {"purchase_order": doc.name, "docstatus": 1}, pluck="name"
+			):
 				update_sco_status(sco, "Closed" if doc.status == "Closed" else None)

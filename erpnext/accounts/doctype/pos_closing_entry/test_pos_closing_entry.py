@@ -54,6 +54,34 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
 
+	def test_closing_with_disabled_sales_person(self):
+		opening = create_opening_entry(self.pos_profile, self.test_user.name)
+		frappe.set_user("Administrator")
+		person = frappe.get_doc(
+			doctype="Sales Person",
+			sales_person_name=f"_Test Closing {frappe.generate_hash(length=10)}",
+			commission_rate=10,
+			enabled=1,
+		).insert()
+		invoice = create_pos_invoice(rate=100, do_not_submit=1)
+		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		invoice.append("sales_team", {"sales_person": person.name, "allocated_percentage": 100})
+		invoice.save()
+		invoice.submit()
+		person.enabled = 0
+		person.save()
+
+		closing = make_closing_entry_from_opening(opening)
+		closing.flags.in_test = True
+		closing.submit()
+		invoice.reload()
+		self.assertTrue(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+		closing.cancel()
+		invoice.reload()
+		self.assertFalse(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+
 	def test_pos_closing_without_item_code(self):
 		"""
 		Test if POS Closing Entry is created without item code
@@ -179,12 +207,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		# will assert coz the new mandatory accounting dimension bank is not set in POS Profile
 		pcv_doc.flags.in_test = True
 		self.assertRaises(frappe.ValidationError, pcv_doc.submit)
-
-		accounting_dimension_department = frappe.get_doc(
-			"Accounting Dimension Detail", {"parent": "Department"}
-		)
-		accounting_dimension_department.mandatory_for_bs = 0
-		accounting_dimension_department.save()
 
 	def test_merging_into_sales_invoice_for_batched_item(self):
 		frappe.flags.print_message = False
@@ -486,11 +508,8 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 
 def init_user_and_profile(**args):
-	user = "test@example.com"
+	user = "test-pos@example.com"
 	test_user = frappe.get_doc("User", user)
-
-	roles = ("Accounts Manager", "Accounts User", "Sales Manager", "Stock User", "Item Manager")
-	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
 	if args.get("do_not_create_pos_profile"):

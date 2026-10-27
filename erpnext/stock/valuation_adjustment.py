@@ -22,7 +22,7 @@ rate on the date. On submit, every item-warehouse is reset:
 3. Counted in: the rows.
 
 Every entry of the reset carries is_adjustment_entry, which reports use to show the reset as the
-net change it is (see net_adjustment_entries). A later repost through the date values the count
+net change it is (see AdjustmentNetting). A later repost through the date values the count
 out at whatever the ledger then holds, so the reset keeps setting the stock to its rows.
 
 As the ledger after an Adjustment Entry no longer follows from the ledger before it, no stock
@@ -727,9 +727,12 @@ class AdjustmentNetting:
 	"""
 
 	def __init__(self, by_lot: bool = False):
+		# cancelled ones too: a snapshot synced before the cancel still holds their entries
 		self.vouchers = set(
 			frappe.get_all(
-				"Stock Reconciliation", filters={"purpose": ADJUSTMENT_ENTRY, "docstatus": 1}, pluck="name"
+				"Stock Reconciliation",
+				filters={"purpose": ADJUSTMENT_ENTRY, "docstatus": ("!=", 0)},
+				pluck="name",
 			)
 		)
 		self.lot_changes = get_adjustment_lot_changes(self.vouchers) if by_lot and self.vouchers else {}
@@ -744,7 +747,8 @@ class AdjustmentNetting:
 	def net(self, entries, key_fields: tuple[str, ...] = ("item_code", "warehouse")):
 		"""The entries, with those of one Adjustment Entry and the same `key_fields` merged into one:
 		the sum of their qty and value, and the balance after the last of them. The merged entry keeps
-		is_adjustment_entry, so it reads as a change, not as a reconciled balance.
+		is_adjustment_entry: Stock Balance reads its balance as the one the reset sets, while reports
+		that age or count stock read its qty and value as a change.
 
 		`entries` must be in posting order, in which the entries of a reset follow each other."""
 		merged = None

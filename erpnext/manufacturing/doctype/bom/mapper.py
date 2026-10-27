@@ -12,7 +12,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull
-from frappe.utils import today
+from frappe.utils import flt, today
 
 from erpnext.stock.doctype.item.item import _get_item_details
 
@@ -35,7 +35,7 @@ _VARIANT_BOM_MAPPING = {
 
 
 @frappe.whitelist()
-def get_children(parent: str | None = None, is_root: bool = False, **filters):
+def get_children(doctype: str | None = None, parent: str | None = None, is_root: bool = False, **filters):
 	frappe.has_permission("BOM", "read", throw=True)
 
 	if not parent or parent == "BOM":
@@ -102,25 +102,36 @@ def _diff_table_field(df, doc1, doc2, out):
 		return
 
 	identifier = _BOM_DIFF_IDENTIFIERS[df.fieldname]
-	old_value, new_value = doc1.get(df.fieldname), doc2.get(df.fieldname)
-	old_map = {d.get(identifier): d for d in old_value}
-	new_map = {d.get(identifier): d for d in new_value}
+	old_rows = {}
+	for row in doc1.get(df.fieldname):
+		old_rows.setdefault(row.get(identifier), []).append(row)
 
-	_collect_row_changes(df, identifier, old_map, new_value, out)
-	for d in old_value:
-		if d.get(identifier) not in new_map:
-			out.removed.append([df.fieldname, d.as_dict()])
+	unmatched_rows = []
+	for index, row in enumerate(doc2.get(df.fieldname)):
+		if not _pop_unchanged_row(old_rows.get(row.get(identifier), []), row):
+			unmatched_rows.append((index, row))
+
+	_collect_row_changes(df, identifier, old_rows, unmatched_rows, out)
+	for rows in old_rows.values():
+		out.removed.extend([df.fieldname, row.as_dict()] for row in rows)
 
 
-def _collect_row_changes(df, identifier, old_map, new_value, out):
-	for i, d in enumerate(new_value):
-		if d.get(identifier) not in old_map:
-			out.added.append([df.fieldname, d.as_dict()])
+def _pop_unchanged_row(candidates, row):
+	for index, candidate in enumerate(candidates):
+		if not get_diff(candidate, row, for_child=True):
+			return candidates.pop(index)
+
+
+def _collect_row_changes(df, identifier, old_rows, unmatched_rows, out):
+	for index, row in unmatched_rows:
+		candidates = old_rows.get(row.get(identifier))
+		if not candidates:
+			out.added.append([df.fieldname, row.as_dict()])
 			continue
 
-		diff = get_diff(old_map[d.get(identifier)], d, for_child=True)
+		diff = get_diff(candidates.pop(0), row, for_child=True)
 		if diff and diff.changed:
-			out.row_changed.append((df.fieldname, i, d.get(identifier), diff.changed))
+			out.row_changed.append((df.fieldname, index, row.get(identifier), diff.changed))
 
 
 @frappe.whitelist()
@@ -155,7 +166,10 @@ def _item_query_filters(filters):
 			query_filters.append(["has_variants", "=", 0])
 
 	for fieldname, value in (filters or {}).items():
-		query_filters.append([fieldname, "=", value])
+		# link_filters arrive as [operator, value]
+		query_filters.append(
+			[fieldname, *value] if isinstance(value, list | tuple) else [fieldname, "=", value]
+		)
 	return query_filters
 
 
@@ -197,7 +211,6 @@ def _postprocess_variant_bom(source, doc, item, variant_items, source_name):
 
 	item_data = _get_item_details(item)
 	doc.item = item
-	doc.quantity = 1
 	doc.update(
 		{
 			"item_name": item_data.item_name,
@@ -206,4 +219,7 @@ def _postprocess_variant_bom(source, doc, item, variant_items, source_name):
 			"allow_alternative_item": item_data.allow_alternative_item,
 		}
 	)
+	mapped_rows = len(doc.items)
 	add_variant_item(variant_items, doc, source_name)
+	for row in doc.items[mapped_rows:]:
+		row.qty = flt(row.qty) * (flt(source.quantity) or 1)

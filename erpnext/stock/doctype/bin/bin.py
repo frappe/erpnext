@@ -4,9 +4,19 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.query_builder import Case, Order
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import flt
+from frappe.utils import flt, now
+from pypika.terms import ValueWrapper
+
+PROJECTED_QTY_ADDITIONS = ("actual_qty", "ordered_qty", "indented_qty", "planned_qty")
+PROJECTED_QTY_DEDUCTIONS = (
+	"reserved_qty",
+	"reserved_qty_for_production",
+	"reserved_qty_for_sub_contract",
+	"reserved_qty_for_production_plan",
+)
+RECALCULATED_FIELDS = ("valuation_rate", "stock_value", *PROJECTED_QTY_ADDITIONS, *PROJECTED_QTY_DEDUCTIONS)
 
 from erpnext.deprecation_dumpster import deprecated
 
@@ -38,8 +48,34 @@ class Bin(Document):
 		warehouse: DF.Link
 	# end: auto-generated types
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def recalculate_values(self):
+		frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
+		self.reload()
+		self.set_stock_values_from_ledger()
+		self.set_pending_and_reserved_qty()
+		self.set_projected_qty()
+		update_bin_columns(
+			self.name, {fieldname: flt(self.get(fieldname)) for fieldname in RECALCULATED_FIELDS}
+		)
+
+	def set_stock_values_from_ledger(self):
+		from erpnext.stock.utils import get_valuation_method
+
+		last_sle = get_last_sle_values(self.item_code, self.warehouse)
+		self.actual_qty = last_sle.qty_after_transaction
+		self.valuation_rate = last_sle.valuation_rate
+		self.stock_value = last_sle.stock_value
+
+		if get_valuation_method(self.item_code, self.company) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+			self.stock_value = flt(self.actual_qty) * flt(
+				get_item_standard_rate(self.item_code, self.company)
+			)
+
+	def set_pending_and_reserved_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 		from erpnext.stock.stock_balance import (
 			get_indented_qty,
@@ -48,29 +84,13 @@ class Bin(Document):
 			get_reserved_qty,
 		)
 
-		last_sle = get_last_sle_values(self.item_code, self.warehouse)
-		self.actual_qty = last_sle.qty_after_transaction
-		self.valuation_rate = last_sle.valuation_rate
-		self.stock_value = last_sle.stock_value
-
-		from erpnext.stock.utils import get_valuation_method
-
-		if get_valuation_method(self.item_code) == "Standard Cost":
-			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
-
-			self.stock_value = flt(self.actual_qty) * flt(
-				get_item_standard_rate(self.item_code, self.company)
-			)
 		self.planned_qty = get_planned_qty(self.item_code, self.warehouse)
 		self.indented_qty = get_indented_qty(self.item_code, self.warehouse)
 		self.ordered_qty = get_ordered_qty(self.item_code, self.warehouse)
 		self.reserved_qty = get_reserved_qty(self.item_code, self.warehouse)
 		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
-
 		self.update_reserved_qty_for_sub_contracting(update_qty=False)
 		self.update_reserved_qty_for_production_plan(skip_project_qty_update=True, update_qty=False)
-		self.set_projected_qty()
-		self.save()
 
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
@@ -144,69 +164,28 @@ class Bin(Document):
 	def update_reserved_qty_for_sub_contracting(
 		self, subcontract_doctype="Subcontracting Order", update_qty=True
 	):
-		# reserved qty
-
 		subcontract_order = frappe.qb.DocType(subcontract_doctype)
 		supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
 
-		conditions = (
-			(supplied_item.rm_item_code == self.item_code)
-			& (subcontract_order.name == supplied_item.parent)
-			& (subcontract_order.per_received < 100)
-			& (supplied_item.reserve_warehouse == self.warehouse)
-			& (subcontract_order.status != "Closed")
-			& (subcontract_order.docstatus == 1)
-		)
-
-		reserved_qty_for_sub_contract = (
+		pending_qty_per_order = (
 			frappe.qb.from_(subcontract_order)
 			.from_(supplied_item)
-			.select(Sum(Coalesce(supplied_item.required_qty, 0)))
-			.where(conditions)
-		).run()[0][0] or 0.0
-
-		se = frappe.qb.DocType("Stock Entry")
-		se_item = frappe.qb.DocType("Stock Entry Detail")
-
-		if frappe.db.field_exists("Stock Entry", "is_return"):
-			qty_field = Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty)
-		else:
-			qty_field = se_item.transfer_qty
-
-		conditions = (
-			(se.docstatus == 1)
-			& (se.purpose == "Send to Subcontractor")
-			& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
-			& (se.name == se_item.parent)
-			& (subcontract_order.docstatus == 1)
-			& (subcontract_order.per_received < 100)
-			& (
-				(
-					(Coalesce(se.purchase_order, "") != "")
-					& (subcontract_order.name == se.purchase_order)
-					& (subcontract_order.status != "Closed")
-				)
-				if subcontract_doctype == "Purchase Order"
-				else (
-					(Coalesce(se.subcontracting_order, "") != "")
-					& (subcontract_order.name == se.subcontracting_order)
-					& (subcontract_order.status != "Closed")
-				)
+			.select(
+				Sum(Coalesce(supplied_item.required_qty, 0))
+				- Sum(Coalesce(supplied_item.total_supplied_qty, 0))
 			)
-		)
+			.where(
+				(supplied_item.rm_item_code == self.item_code)
+				& (subcontract_order.name == supplied_item.parent)
+				& (subcontract_order.per_received < 100)
+				& (supplied_item.reserve_warehouse == self.warehouse)
+				& (subcontract_order.status != "Closed")
+				& (subcontract_order.docstatus == 1)
+			)
+			.groupby(subcontract_order.name)
+		).run(pluck=True)
 
-		materials_transferred = (
-			frappe.qb.from_(se)
-			.from_(se_item)
-			.from_(subcontract_order)
-			.select(Sum(qty_field))
-			.where(conditions)
-		).run()[0][0] or 0.0
-
-		if reserved_qty_for_sub_contract > materials_transferred:
-			reserved_qty_for_sub_contract = reserved_qty_for_sub_contract - materials_transferred
-		else:
-			reserved_qty_for_sub_contract = 0
+		reserved_qty_for_sub_contract = sum(max(flt(qty), 0) for qty in pending_qty_per_order)
 
 		self.reserved_qty_for_sub_contract = reserved_qty_for_sub_contract
 		if update_qty:
@@ -246,6 +225,31 @@ def get_bin_details(bin_name):
 		],
 		as_dict=1,
 	)
+
+
+def update_bin_columns(bin_name, values):
+	table = frappe.qb.DocType("Bin")
+	query = frappe.qb.update(table).set(table.modified, now()).where(table.name == bin_name)
+
+	for fieldname, value in values.items():
+		query = query.set(table[fieldname], value)
+
+	query.set(table.projected_qty, get_projected_qty_term(table, values)).run()
+	frappe.clear_document_cache("Bin", bin_name)
+
+
+def get_projected_qty_term(table, values):
+	def qty(fieldname):
+		return flt(values[fieldname]) if fieldname in values else Coalesce(table[fieldname], 0)
+
+	projected_qty = ValueWrapper(0)
+	for fieldname in PROJECTED_QTY_ADDITIONS:
+		projected_qty = projected_qty + qty(fieldname)
+
+	for fieldname in PROJECTED_QTY_DEDUCTIONS:
+		projected_qty = projected_qty - qty(fieldname)
+
+	return projected_qty
 
 
 def update_qty_from_sle(bin_name, args):
@@ -296,7 +300,7 @@ def update_qty_from_sle(bin_name, args):
 	# refreshed by a repost. Keep it in step with the balance at the standard rate.
 	from erpnext.stock.utils import get_valuation_method
 
-	if get_valuation_method(args.get("item_code")) == "Standard Cost":
+	if get_valuation_method(args.get("item_code"), args.get("company")) == "Standard Cost":
 		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
 
 		bin_values["stock_value"] = flt(actual_qty) * flt(

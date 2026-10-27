@@ -342,11 +342,11 @@ class Subscription(Document):
 		"""
 		Returns `True` if the grace period for the `Subscription` has passed
 		"""
-		if not self.current_invoice_is_past_due():
+		if not self.current_invoice_is_past_due(posting_date):
 			return False
 
 		grace_period = cint(frappe.get_value("Subscription Settings", None, "grace_period"))
-		return getdate(posting_date) >= getdate(add_days(self.current_invoice.due_date, grace_period))
+		return getdate(posting_date) > getdate(add_days(self.current_invoice.due_date, grace_period))
 
 	def current_invoice_is_past_due(self, posting_date: DateTimeLikeObject | None = None) -> bool:
 		"""
@@ -358,7 +358,7 @@ class Subscription(Document):
 		if not self.current_invoice.due_date:
 			return False
 
-		return getdate(posting_date) >= getdate(self.current_invoice.due_date)
+		return getdate(posting_date) > getdate(self.current_invoice.due_date)
 
 	@property
 	def invoice_document_type(self) -> str:
@@ -672,7 +672,8 @@ class Subscription(Document):
 					return
 			self.update_subscription_period(add_days(self.next_billing_period_end, 1))
 		elif posting_date and getdate(posting_date) > getdate(self.next_billing_period_end):
-			self.update_subscription_period()
+			if not (self.end_date and getdate(self.next_billing_period_end) >= getdate(self.end_date)):
+				self.update_subscription_period()
 
 		if self.cancel_at_period_end and (
 			getdate(posting_date) >= getdate(self.next_billing_period_end)
@@ -716,10 +717,19 @@ class Subscription(Document):
 			_current_start_date = self.get_current_invoice_start(add_days(self.next_billing_period_end, 1))
 			_current_end_date = self.get_current_invoice_end(_current_start_date)
 
-		if self.current_invoice and getdate(_current_start_date) <= getdate(
-			self.current_invoice.posting_date
-		) <= getdate(_current_end_date):
+		if self.end_date and getdate(_current_start_date) > getdate(self.end_date):
 			return True
+
+		invoice = self.current_invoice
+		if invoice:
+			if invoice.get("from_date"):
+				return getdate(invoice.from_date) == getdate(_current_start_date)
+			elif invoice.get("posting_date"):
+				return (
+					getdate(_current_start_date)
+					<= getdate(invoice.posting_date)
+					<= getdate(_current_end_date)
+				)
 
 		return False
 
@@ -948,9 +958,19 @@ class Subscription(Document):
 
 	def _upcoming_periods(self) -> list[tuple]:
 		"""The open billing period and the one immediately after it."""
+		if not (self.next_billing_period_start and self.next_billing_period_end):
+			return []
+
+		if self.end_date and getdate(self.next_billing_period_start) > getdate(self.end_date):
+			return []
+
 		open_period = (self.next_billing_period_start, self.next_billing_period_end)
-		after_start = add_days(self.next_billing_period_end, 1) if self.next_billing_period_end else None
-		after_end = self.get_current_invoice_end(after_start) if after_start else None
+		after_start = add_days(self.next_billing_period_end, 1)
+
+		if self.end_date and getdate(after_start) > getdate(self.end_date):
+			return [open_period]
+
+		after_end = self.get_current_invoice_end(after_start)
 		return [open_period, (after_start, after_end)]
 
 	def _heatmap_cell(self, day: date, periods: list[dict]) -> dict:

@@ -56,8 +56,12 @@ def make_subcontracting_po(source_name: str, target_doc: str | dict | Document |
 
 @frappe.whitelist()
 def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
+	shortages = get_shortages_to_request(source_name)
+
 	def update_item(obj, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
+		if shortages is not None:
+			target.qty = shortages[obj.name]
 
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Transfer"
@@ -76,6 +80,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 				"doctype": "Material Request Item",
 				"field_map": {"required_qty": "qty", "uom": "stock_uom", "name": "job_card_item"},
 				"postprocess": update_item,
+				"condition": lambda row: shortages is None or row.name in shortages,
 			},
 		},
 		target_doc,
@@ -83,6 +88,14 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 	)
 
 	return doclist
+
+
+def get_shortages_to_request(job_card):
+	if not (frappe.flags.args or {}).get("only_shortage"):
+		return None
+
+	shortages = frappe.get_doc("Job Card", job_card).get_material_shortages()
+	return {row["name"]: row["shortage_qty"] for row in shortages}
 
 
 @frappe.whitelist()
@@ -98,8 +111,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 			target.conversion_factor = 1
 
 		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
-		if pending_rm_qty > 0:
-			target.qty = pending_rm_qty
+		target.qty = pending_rm_qty if pending_rm_qty > 0 else flt(source.required_qty)
 
 	def set_missing_values(source, target):
 		if not source.items:
@@ -135,6 +147,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 			)
 			set_previous_operation_serial_batch(target, item)
 
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 	doclist = get_mapped_doc(
 		"Job Card",
 		source_name,
@@ -151,7 +164,8 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 					"name": "job_card_item",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.required_qty > 0,
+				"condition": lambda doc: flt(doc.required_qty) > 0
+				and (allow_excess_transfer or flt(doc.required_qty) > flt(doc.transferred_qty)),
 			},
 		},
 		target_doc,
@@ -184,6 +198,8 @@ def make_corrective_job_card(
 		target.operation = operation
 		target.for_operation = for_operation
 		target.total_completed_qty = 0
+		target.process_loss_qty = 0
+		target.pending_qty = 0
 
 		target.set("time_logs", [])
 		target.set("employee", [])

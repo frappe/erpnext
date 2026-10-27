@@ -11,7 +11,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
 value_gen = st.floats(min_value=1, max_value=1e6)
-stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10)
+stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10, max_size=50)
 
 
 class TestFIFOValuation(ERPNextTestSuite):
@@ -234,6 +234,15 @@ class TestLIFOValuation(ERPNextTestSuite):
 		consumed = self.stack.remove_stock(15)
 		self.assertEqual(consumed, [[10, 20], [5, 10]])
 		self.assertTotalQty(5)
+
+	def test_lifo_rate_matching_only_for_purchase_returns(self):
+		self.stack = LIFOValuation([[10, 150], [5, 100], [5, 200]])
+		self.assertEqual(self.stack.remove_stock(10, outgoing_rate=150), [[5, 200], [5, 100]])
+
+		self.stack = LIFOValuation([[10, 150], [5, 100], [5, 200]])
+		consumed = self.stack.remove_stock(5, outgoing_rate=100, is_return_purchase_entry=True)
+		self.assertEqual(consumed, [[5, 100]])
+		self.assertEqual(self.stack, [[10, 150], [5, 200]])
 
 	def test_lifo_consumption_going_negative(self):
 		self.stack.add_stock(10, 10)

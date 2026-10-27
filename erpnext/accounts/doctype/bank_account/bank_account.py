@@ -74,6 +74,14 @@ class BankAccount(Document):
 			self.validate_account()
 
 	def validate_account(self):
+		account = frappe.get_cached_value(
+			"Account", self.account, ["company", "account_type", "is_group"], as_dict=True
+		)
+		if account.company != self.company:
+			frappe.throw(_("Account {0} does not belong to Company {1}").format(self.account, self.company))
+		if account.is_group or account.account_type != "Bank":
+			frappe.throw(_("Account {0} must be a non-group account of type Bank").format(self.account))
+
 		if accounts := frappe.db.get_all(
 			"Bank Account", filters={"account": self.account, "name": ["!=", self.name]}, as_list=1
 		):
@@ -85,7 +93,10 @@ class BankAccount(Document):
 			)
 
 	def update_default_bank_account(self):
-		if self.is_default and not self.disabled:
+		if self.disabled:
+			self.is_default = 0
+
+		if self.is_default:
 			frappe.db.set_value(
 				"Bank Account",
 				{
@@ -94,7 +105,6 @@ class BankAccount(Document):
 					"is_company_account": self.is_company_account,
 					"company": self.company,
 					"is_default": 1,
-					"disabled": 0,
 				},
 				"is_default",
 				0,
@@ -112,12 +122,15 @@ def get_party_bank_account(party_type, party):
 def get_default_company_bank_account(company, party_type, party, ignore_permissions=True):
 	default_company_bank_account = frappe.db.get_value(party_type, party, "default_bank_account")
 	if default_company_bank_account:
-		if company != frappe.get_cached_value("Bank Account", default_company_bank_account, "company"):
+		bank_account = frappe.get_cached_value(
+			"Bank Account", default_company_bank_account, ["company", "disabled"], as_dict=True
+		)
+		if not bank_account or bank_account.company != company or bank_account.disabled:
 			default_company_bank_account = None
 
 	if not default_company_bank_account:
 		default_company_bank_account = frappe.db.get_value(
-			"Bank Account", {"company": company, "is_company_account": 1, "is_default": 1}
+			"Bank Account", {"company": company, "is_company_account": 1, "is_default": 1, "disabled": 0}
 		)
 
 	if not ignore_permissions:

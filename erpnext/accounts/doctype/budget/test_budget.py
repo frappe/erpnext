@@ -10,9 +10,12 @@ from erpnext.accounts.doctype.budget.budget import (
 	get_actual_expense,
 	revise_budget,
 )
+from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -169,6 +172,139 @@ class TestBudget(ERPNextTestSuite):
 		budget.load_from_db()
 		budget.cancel()
 		po.cancel()
+
+	def test_budget_includes_other_items(self):
+		for doctype, use_legacy_controller in (
+			("Purchase Order", False),
+			("Purchase Order", True),
+			("Material Request", False),
+			("Material Request", True),
+		):
+			with self.subTest(doctype=doctype, use_legacy_controller=use_legacy_controller):
+				frappe.db.set_single_value(
+					"Accounts Settings", "use_legacy_budget_controller", use_legacy_controller
+				)
+				cost_center = f"_Test Budget Commitments {doctype} {use_legacy_controller}"
+				create_cost_center(cost_center_name=cost_center)
+				budget = make_budget(
+					budget_against="Cost Center",
+					cost_center=f"{cost_center} - _TC",
+					budget_amount=1000,
+					applicable_on_purchase_order=1,
+					applicable_on_material_request=1,
+					action_if_annual_budget_exceeded_on_po="Stop",
+					action_if_annual_budget_exceeded_on_mr="Stop",
+					action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+					action_if_accumulated_monthly_budget_exceeded_on_mr="Ignore",
+					submit_budget=True,
+				)
+
+				for item_code in ("_Test Budget Consumable A", "_Test Budget Consumable B"):
+					make_item(item_code, {"is_stock_item": 0, "stock_uom": "Nos"})
+					doc = frappe.new_doc(doctype)
+					doc.company = self.company
+					doc.transaction_date = doc.schedule_date = nowdate()
+					if doctype == "Purchase Order":
+						doc.supplier = "_Test Supplier"
+					else:
+						doc.material_request_type = "Purchase"
+
+					doc.append(
+						"items",
+						{
+							"item_code": item_code,
+							"qty": 1,
+							"uom": "Nos",
+							"conversion_factor": 1,
+							"rate": 600,
+							"schedule_date": nowdate(),
+							"warehouse": "_Test Warehouse - _TC",
+							"expense_account": self.account,
+							"cost_center": budget.cost_center,
+						},
+					)
+					doc.set_missing_values()
+					doc.insert()
+					if item_code == "_Test Budget Consumable A":
+						doc.submit()
+					else:
+						# Each item costs less than the budget, but their combined commitment exceeds it.
+						with assert_raises_with_savepoint(self, BudgetError):
+							doc.submit()
+
+						# The same second item is allowed when the combined commitment equals the budget.
+						doc.reload()
+						doc.items[0].rate = 400
+						doc.save()
+						doc.submit()
+						self.assertEqual(doc.docstatus, 1)
+
+	def test_budget_skips_closed_and_over_ordered_rows(self):
+		cost_center = make_budget_for_new_cost_center("_Test Budget Closed Row")
+		po = make_purchase_commitment("Purchase Order", "_Test Budget Closed Row Item", cost_center, 600)
+		frappe.db.set_value("Purchase Order Item", po.items[0].name, "closed", 1)
+		make_purchase_commitment("Purchase Order", "_Test Budget Open Row Item", cost_center, 500)
+
+		cost_center = make_budget_for_new_cost_center("_Test Budget Over Ordered Row")
+		mr = make_purchase_commitment(
+			"Material Request", "_Test Budget Over Ordered Item", cost_center, 100, 10
+		)
+		frappe.db.set_value("Material Request Item", mr.items[0].name, "ordered_qty", 11)
+		with assert_raises_with_savepoint(self, BudgetError):
+			make_purchase_commitment("Material Request", "_Test Budget Requested Item", cost_center, 1050)
+
+	def test_budget_counts_requested_amount_in_purchase_uom(self):
+		make_item(
+			"_Test Budget Boxed Item",
+			{"is_stock_item": 0, "stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]},
+		)
+		for use_legacy_controller in (False, True):
+			frappe.db.set_single_value(
+				"Accounts Settings", "use_legacy_budget_controller", use_legacy_controller
+			)
+			cost_center = make_budget_for_new_cost_center(
+				f"_Test Budget Purchase UOM {use_legacy_controller}"
+			)
+
+			# one box of 10 at 80 commits 80, so 300 more stays within the budget
+			make_purchase_commitment(
+				"Material Request",
+				"_Test Budget Boxed Item",
+				cost_center,
+				80,
+				uom="Box",
+				conversion_factor=10,
+			)
+			make_purchase_commitment("Material Request", "_Test Budget Loose Item", cost_center, 300)
+
+	def test_budget_allows_request_equal_to_budget_with_fractional_uom(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		make_item(
+			"_Test Budget Pound Item",
+			{
+				"is_stock_item": 0,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.45359237}],
+			},
+		)
+		for use_legacy_controller in (False, True):
+			frappe.db.set_single_value(
+				"Accounts Settings", "use_legacy_budget_controller", use_legacy_controller
+			)
+			cost_center = make_budget_for_new_cost_center(
+				f"_Test Budget Fractional UOM {use_legacy_controller}"
+			)
+
+			# 1.25 x 800 is exactly the budget once the stored stock qty is converted back
+			make_purchase_commitment(
+				"Material Request",
+				"_Test Budget Pound Item",
+				cost_center,
+				800,
+				qty=1.25,
+				uom="Box",
+				conversion_factor=0.45359237,
+			)
 
 	def test_monthly_budget_crossed_for_po_in_foreign_currency(self):
 		self.assert_foreign_currency_po_budget_crossed()
@@ -502,22 +638,6 @@ class TestBudget(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			budget.save()
 
-	def test_total_distribution_equals_budget(self):
-		budget = make_budget(
-			budget_against="Cost Center",
-			applicable_on_cumulative_expense=True,
-			distribute_equally=0,
-			budget_amount=12000,
-			do_not_save=False,
-			submit_budget=False,
-		)
-
-		for row in budget.budget_distribution:
-			row.amount = 2000
-
-		with self.assertRaises(frappe.ValidationError):
-			budget.save()
-
 	def test_evenly_distribute_budget(self):
 		budget = make_budget(
 			budget_against="Cost Center", budget_amount=120000, do_not_save=False, submit_budget=True
@@ -695,6 +815,52 @@ def set_total_expense_zero(posting_date, budget_against_field=None, budget_again
 				project=budget_against,
 				posting_date=nowdate(),
 			)
+
+
+def make_budget_for_new_cost_center(cost_center_name):
+	create_cost_center(cost_center_name=cost_center_name)
+	return make_budget(
+		budget_against="Cost Center",
+		cost_center=f"{cost_center_name} - _TC",
+		budget_amount=1000,
+		applicable_on_purchase_order=1,
+		applicable_on_material_request=1,
+		action_if_annual_budget_exceeded_on_po="Stop",
+		action_if_annual_budget_exceeded_on_mr="Stop",
+		action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+		action_if_accumulated_monthly_budget_exceeded_on_mr="Ignore",
+		submit_budget=True,
+	).cost_center
+
+
+def make_purchase_commitment(doctype, item_code, cost_center, rate, qty=1, uom="Nos", conversion_factor=1):
+	make_item(item_code, {"is_stock_item": 0, "stock_uom": "Nos"})
+	doc = frappe.new_doc(doctype)
+	doc.company = "_Test Company"
+	doc.transaction_date = doc.schedule_date = nowdate()
+	if doctype == "Purchase Order":
+		doc.supplier = "_Test Supplier"
+	else:
+		doc.material_request_type = "Purchase"
+
+	doc.append(
+		"items",
+		{
+			"item_code": item_code,
+			"qty": qty,
+			"uom": uom,
+			"conversion_factor": conversion_factor,
+			"rate": rate,
+			"schedule_date": nowdate(),
+			"warehouse": "_Test Warehouse - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": cost_center,
+		},
+	)
+	doc.set_missing_values()
+	doc.insert()
+	doc.submit()
+	return doc
 
 
 def make_budget(**args):

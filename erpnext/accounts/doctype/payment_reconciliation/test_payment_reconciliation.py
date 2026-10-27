@@ -19,7 +19,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_le
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, get_linked_system_journals
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -3204,9 +3204,109 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		pr.allocate_entries()
 
-		# Check the difference_amount is a gain of 5000
+		# sign follows Payment Entry Reference.exchange_gain_loss; the journal below is what counts
 		self.assertEqual(flt(pr.allocation[0].difference_amount), 5000.0)
 		pr.reconcile()
+
+		(gain_loss_journal,) = {
+			name
+			for je in (je1, je2)
+			for name in get_linked_system_journals(je.doctype, je.name, "Exchange Gain Or Loss")
+		}
+		party_row = frappe.db.get_value(
+			"Journal Entry Account",
+			{"parent": gain_loss_journal, "account": self.creditors_usd, "party": self.supplier},
+			["debit", "credit"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(party_row.debit), 5000)
+		self.assertEqual(flt(party_row.credit), 0)
+
+		party_gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": ["in", [je1.name, je2.name, gain_loss_journal]],
+				"account": self.creditors_usd,
+				"party": self.supplier,
+				"is_cancelled": 0,
+			},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(flt(sum(row.debit - row.credit for row in party_gl_entries)), 0)
+
+	def test_foreign_currency_journal_payable_against_journal_gain_loss_for_supplier(self):
+		transaction_date = nowdate()
+		self.supplier = "_Test Supplier USD"
+		amount = 1000
+		allocated = 400
+		invoice_rate = 83
+		settlement_rate = 85
+
+		je1 = self.create_journal_entry(self.cash, self.creditors_usd, amount, transaction_date)
+		je1.multi_currency = 1
+		je1.accounts[0].exchange_rate = 1
+		je1.accounts[0].debit = invoice_rate * amount
+		je1.accounts[0].debit_in_account_currency = invoice_rate * amount
+		je1.accounts[1].party_type = "Supplier"
+		je1.accounts[1].party = self.supplier
+		je1.accounts[1].exchange_rate = invoice_rate
+		je1.accounts[1].credit_in_account_currency = amount
+		je1.accounts[1].credit = invoice_rate * amount
+		je1.save()
+		je1.submit()
+
+		je2 = self.create_journal_entry(self.creditors_usd, self.cash, allocated, transaction_date)
+		je2.multi_currency = 1
+		je2.accounts[0].party_type = "Supplier"
+		je2.accounts[0].party = self.supplier
+		je2.accounts[0].exchange_rate = settlement_rate
+		je2.accounts[0].debit_in_account_currency = allocated
+		je2.accounts[0].debit = settlement_rate * allocated
+		je2.accounts[1].exchange_rate = 1
+		je2.accounts[1].credit = settlement_rate * allocated
+		je2.accounts[1].credit_in_account_currency = settlement_rate * allocated
+		je2.save()
+		je2.submit()
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+
+		pr.allocate_entries()
+		# sign follows Payment Entry Reference.exchange_gain_loss; the journal below is what counts
+		self.assertEqual(flt(pr.allocation[0].difference_amount), -800.0)
+		pr.reconcile()
+
+		(gain_loss_journal,) = {
+			name
+			for je in (je1, je2)
+			for name in get_linked_system_journals(je.doctype, je.name, "Exchange Gain Or Loss")
+		}
+		party_row = frappe.db.get_value(
+			"Journal Entry Account",
+			{"parent": gain_loss_journal, "account": self.creditors_usd, "party": self.supplier},
+			["debit", "credit"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(party_row.debit), 0)
+		self.assertEqual(flt(party_row.credit), 800)
+
+		party_gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": ["in", [je1.name, je2.name, gain_loss_journal]],
+				"account": self.creditors_usd,
+				"party": self.supplier,
+				"is_cancelled": 0,
+			},
+			fields=["debit", "credit"],
+		)
+		outstanding_in_base = (amount - allocated) * invoice_rate
+		self.assertEqual(flt(sum(row.credit - row.debit for row in party_gl_entries)), outstanding_in_base)
 
 	# ----------------------------------------------------------------
 	# Phase 1 — new capabilities

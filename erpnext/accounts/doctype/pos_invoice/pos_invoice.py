@@ -235,7 +235,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_company_with_pos_company()
 		self.validate_full_payment()
 		self.update_packing_list()
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
@@ -260,7 +260,7 @@ class POSInvoice(SalesInvoice):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 			self.submit_serial_batch_bundle(table_name)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
@@ -301,7 +301,7 @@ class POSInvoice(SalesInvoice):
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
@@ -475,12 +475,16 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Sales Invoice mode is activated in POS. Please create Sales Invoice instead."))
 
 	def validate_serialised_or_batched_item(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		auto_picks_serial_nos = SerialBatchBundleService(self).auto_picks_outward_serial_batch()
 		error_msg = []
 		for d in self.get("items"):
 			error_msg = ""
+			serial_no_missing = not d.serial_no and not (auto_picks_serial_nos and d.get("has_batch_no"))
 			if d.get("has_serial_no") and (
 				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
-				or (d.use_serial_batch_fields and not d.serial_no)
+				or (d.use_serial_batch_fields and serial_no_missing)
 			):
 				error_msg = f"Row #{d.idx}: Please select Serial No. for item {bold(d.item_code)}"
 

@@ -997,7 +997,7 @@ class PaymentReconciliation(Document):
 				"project": None,
 			}
 		)
-		super(Document, self).__init__(doc_dict)
+		self.init_from_dict(doc_dict)
 
 	def save(self):
 		return

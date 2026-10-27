@@ -26,7 +26,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 @frappe.whitelist()
 def get_item_details(item: str, project: str | None = None, skip_bom_info: bool = False, throw: bool = True):
-	frappe.has_permission("Item", "read", throw=True)
+	frappe.has_permission("Item", "read", doc=item, throw=True)
 
 	res = _item_master_details(item)
 	if not res:
@@ -239,7 +239,7 @@ def make_stock_entry(
 ):
 	frappe.has_permission("Stock Entry", "create", throw=True)
 
-	work_order = frappe.get_doc("Work Order", work_order_id)
+	work_order = frappe.get_doc("Work Order", work_order_id, check_permission="read")
 	stock_entry = _new_manufacture_stock_entry(work_order, purpose, qty)
 	_set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehouse, source_stock_entry)
 
@@ -393,12 +393,20 @@ def get_operation_details(name, work_order, parent_bom):
 				"finished_good": row.finished_good,
 				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
+				"output_qty": row.output_qty,
 			}
+
+
+def get_operation_qty(work_order, operation):
+	if work_order.get("track_semi_finished_goods") and flt(operation.get("output_qty")):
+		return flt(operation.get("output_qty"))
+
+	return flt(work_order.get("qty"))
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
-		row.batch_size = row.get("qty") or wo_doc.qty
+		row.batch_size = row.get("qty") or get_operation_qty(wo_doc, row)
 
 	row.job_card_qty = row.batch_size
 	if row.batch_size and qty >= row.batch_size:
@@ -519,7 +527,7 @@ def _job_card_warehouse_values(work_order, row, qty):
 
 	return {
 		"serial_no": row.get("serial_no"),
-		"time_required": (row.get("time_in_mins", 0) / work_order.qty) * qty,
+		"time_required": (row.get("time_in_mins", 0) / get_operation_qty(work_order, row)) * qty,
 		"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 		"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 		"wip_warehouse": wip_warehouse,
@@ -608,10 +616,8 @@ def _allocate_material_demand(work_order, fraction):
 	required_by_group = {}
 	for row in work_order.required_items:
 		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
-		covered_by_item.setdefault(
-			row.item_code,
-			flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty),
-		)
+		covered_by_item.setdefault(row.item_code, flt(row.requested_qty) + flt(row.picked_qty))
+		covered_by_item[row.item_code] += flt(row.transferred_qty)
 		key = _allocation_key(row)
 		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
 
@@ -744,7 +750,7 @@ def make_stock_return_entry(work_order: str):
 
 	frappe.has_permission("Stock Entry", "create", throw=True)
 
-	wo_doc = frappe.get_cached_doc("Work Order", work_order)
+	wo_doc = frappe.get_doc("Work Order", work_order, check_permission="read")
 
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.from_bom = 1

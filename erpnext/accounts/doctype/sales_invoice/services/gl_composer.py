@@ -408,6 +408,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		doc = self.doc
 		asset = frappe.get_cached_doc("Asset", item.asset)
+		disposal_values = get_stored_asset_disposal_values(item)
 
 		if doc.is_return:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
@@ -417,6 +418,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				doc.get("doctype"),
 				doc.get("name"),
 				doc.get("posting_date"),
+				disposal_values,
 			)
 		else:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -426,6 +428,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				doc.get("doctype"),
 				doc.get("name"),
 				doc.get("posting_date"),
+				disposal_values,
 			)
 
 		for gle in fixed_asset_gl_entries:
@@ -685,3 +688,14 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 		if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
 			return doc.return_against
 		return doc.name
+
+
+def get_stored_asset_disposal_values(item) -> dict | None:
+	"""Asset values stored on the row at submit, so a repost does not pick up later changes to the asset."""
+	if not flt(item.asset_gross_value):
+		return None
+
+	return {
+		"value_after_depreciation": item.asset_value_after_depreciation,
+		"gross_asset_value": item.asset_gross_value,
+	}

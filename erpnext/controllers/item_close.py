@@ -73,6 +73,12 @@ def update_closed_status(doctype: str, name: str, item_names: str | list[str], c
 		validate_rows = getattr(doc, "validate_item_close", None)
 		if validate_rows:
 			validate_rows(changed)
+	elif doc.doctype in ("Sales Order", "Purchase Order"):
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			validate_reopen_against_blanket_order,
+		)
+
+		validate_reopen_against_blanket_order(doc, changed)
 
 	for row in changed:
 		row.db_set("closed", closed)
@@ -80,6 +86,9 @@ def update_closed_status(doctype: str, name: str, item_names: str | list[str], c
 	recalculate = getattr(doc, "on_item_close_status_change", None)
 	if recalculate:
 		recalculate()
+
+	if doc.doctype in ("Sales Order", "Purchase Order"):
+		doc.update_blanket_order()
 
 	doc.reload()
 

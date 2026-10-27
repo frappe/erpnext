@@ -73,17 +73,117 @@ class Warehouse(NestedSet):
 	def validate(self):
 		self.validate_warehouse_account()
 		self.validate_inventory_account()
+		self.validate_group_conversion()
+		self.validate_company_change()
+		self.validate_parent_warehouse()
+		self.validate_disable_with_stock()
+		self.validate_default_in_transit_warehouse()
 		self.warn_about_multiple_warehouse_account()
 
-	def validate_warehouse_account(self):
-		if self.account and self.company:
-			account_company = frappe.get_cached_value("Account", self.account, "company")
-			if account_company and account_company != self.company:
-				frappe.throw(
-					_("Account {0} does not belong to Company {1}").format(
-						frappe.bold(self.account), frappe.bold(self.company)
-					)
+	def validate_default_in_transit_warehouse(self):
+		if not self.default_in_transit_warehouse:
+			return
+
+		transit = frappe.db.get_value(
+			"Warehouse",
+			self.default_in_transit_warehouse,
+			["warehouse_type", "is_group", "company"],
+			as_dict=True,
+		)
+		if transit.warehouse_type != "Transit" or transit.is_group or transit.company != self.company:
+			throw(
+				_(
+					"Default In-Transit Warehouse {0} must be a Transit ledger warehouse of Company {1}"
+				).format(frappe.bold(self.default_in_transit_warehouse), frappe.bold(self.company))
+			)
+
+	def validate_disable_with_stock(self):
+		if not self.disabled or self.is_new() or not self.has_value_changed("disabled"):
+			return
+
+		if item_code := frappe.db.get_value(
+			"Bin", {"warehouse": self.name, "actual_qty": ("!=", 0)}, "item_code"
+		):
+			throw(
+				_("Warehouse {0} cannot be disabled as stock exists for Item {1}").format(
+					frappe.bold(self.name), frappe.bold(item_code)
 				)
+			)
+
+	def validate_parent_warehouse(self):
+		if not self.parent_warehouse:
+			return
+
+		parent = frappe.db.get_value(
+			"Warehouse", self.parent_warehouse, ["is_group", "company"], as_dict=True
+		)
+		if not parent.is_group or (parent.company and parent.company != self.company):
+			throw(
+				_("Parent Warehouse {0} must be a group warehouse of Company {1}").format(
+					frappe.bold(self.parent_warehouse), frappe.bold(self.company)
+				)
+			)
+
+	def validate_company_change(self):
+		if self.is_new() or not self.has_value_changed("company"):
+			return
+
+		if self.check_if_sle_exists() or frappe.db.exists("Bin", {"warehouse": self.name}):
+			throw(
+				_("Company cannot be changed for Warehouse {0} as it has stock transactions").format(
+					frappe.bold(self.name)
+				)
+			)
+
+		if self.check_if_child_exists():
+			throw(
+				_("Company cannot be changed for Warehouse {0} as it has child warehouses").format(
+					frappe.bold(self.name)
+				)
+			)
+
+	def validate_group_conversion(self):
+		if self.is_new() or not self.has_value_changed("is_group"):
+			return
+
+		if self.is_group and self.check_if_sle_exists():
+			throw(_("Warehouses with existing transaction can not be converted to group."))
+
+		if self.is_group and (bin_with_qty := self.get_bin_with_quantity()):
+			throw(
+				_("Warehouse {0} can not be converted to group as quantity exists for Item {1}").format(
+					self.name, bin_with_qty.item_code
+				)
+			)
+
+		if self.is_group and frappe.db.exists("Item Default", {"default_warehouse": self.name}):
+			throw(
+				_("Warehouse {0} can not be converted to group as it is an Item's default warehouse").format(
+					self.name
+				)
+			)
+
+		if not self.is_group and self.check_if_child_exists():
+			throw(_("Warehouses with child nodes cannot be converted to ledger"))
+
+	def validate_warehouse_account(self):
+		if not self.account:
+			return
+
+		account = frappe.get_cached_value(
+			"Account", self.account, ["company", "account_type", "is_group"], as_dict=True
+		)
+		if self.company and account.company and account.company != self.company:
+			frappe.throw(
+				_("Account {0} does not belong to Company {1}").format(
+					frappe.bold(self.account), frappe.bold(self.company)
+				)
+			)
+
+		if account.is_group or account.account_type != "Stock":
+			frappe.throw(
+				_("Account {0} must be a non-group account of type Stock").format(frappe.bold(self.account))
+			)
 
 	def validate_inventory_account(self):
 		if (
@@ -105,28 +205,18 @@ class Warehouse(NestedSet):
 		get_warehouse_account(warehouse)
 
 	def on_update(self):
-		self.update_nsm_model()
+		super().on_update()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
 
 	def on_trash(self):
-		# delete bin
-		bins = frappe.get_all("Bin", fields="*", filters={"warehouse": self.name})
-		for d in bins:
-			if (
-				d["actual_qty"]
-				or d["reserved_qty"]
-				or d["ordered_qty"]
-				or d["indented_qty"]
-				or d["projected_qty"]
-				or d["planned_qty"]
-			):
-				throw(
-					_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(
-						self.name, d["item_code"]
-					)
+		if bin_with_qty := self.get_bin_with_quantity():
+			throw(
+				_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(
+					self.name, bin_with_qty.item_code
 				)
+			)
 
 		if self.check_if_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
@@ -137,6 +227,19 @@ class Warehouse(NestedSet):
 		frappe.db.delete("Bin", filters={"warehouse": self.name})
 		self.update_nsm_model()
 		self.unlink_from_items()
+
+	def get_bin_with_quantity(self):
+		qty_fields = (
+			"actual_qty",
+			"reserved_qty",
+			"ordered_qty",
+			"indented_qty",
+			"projected_qty",
+			"planned_qty",
+		)
+		for d in frappe.get_all("Bin", fields=["item_code", *qty_fields], filters={"warehouse": self.name}):
+			if any(d.get(field) for field in qty_fields):
+				return d
 
 	def warn_about_multiple_warehouse_account(self):
 		"If Warehouse value is split across multiple accounts, warn."
@@ -257,29 +360,12 @@ def get_child_warehouses(warehouse):
 
 
 def get_warehouses_based_on_account(account, company=None):
-	warehouses = []
-	warehouse_account_map = None
-	for d in frappe.get_all(
-		"Warehouse", fields=["name", "is_group"], filters={"account": account, "disabled": 0}
-	):
-		if d.is_group:
-			# Keep only children whose effective account matches; a child can override the group's account
-			if warehouse_account_map is None:
-				warehouse_account_map = get_warehouse_account_map(company)
-			warehouses.extend(
-				w
-				for w in get_child_warehouses(d.name)
-				if (warehouse_account_map.get(w) or {}).get("account") == account
-			)
-		else:
-			warehouses.append(d.name)
-
-	if (
-		not warehouses
-		and company
-		and frappe.get_cached_value("Company", company, "default_inventory_account") == account
-	):
-		warehouses = [d.name for d in frappe.get_all("Warehouse", filters={"is_group": 0})]
+	warehouse_account_map = get_warehouse_account_map(company)
+	warehouses = [
+		warehouse
+		for warehouse, details in warehouse_account_map.items()
+		if not details.is_group and details.account == account
+	]
 
 	if not warehouses:
 		frappe.throw(_("Warehouse not found against the account {0}").format(account))

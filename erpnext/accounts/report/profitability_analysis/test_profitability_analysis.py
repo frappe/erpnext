@@ -105,3 +105,92 @@ class TestProfitabilityAnalysis(ERPNextTestSuite):
 		# and it includes this test's bookings
 		self.assertGreaterEqual(total_row["income"], 10000)
 		self.assertGreaterEqual(total_row["expense"], 4000)
+
+	def test_restricted_user_sees_only_permitted_cost_center_figures(self):
+		permitted = self.make_cc("_Test PA Permitted")
+		restricted = self.make_cc("_Test PA Restricted")
+		self.book_income(permitted, 400)
+		self.book_income(restricted, 1000)
+		user = make_restricted_user("test_profitability_analysis@example.com", "Cost Center", permitted)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report(show_zero_values=1)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(data[-1]["income"], 400)
+		cost_centers = {row.get("account") for row in data}
+		self.assertIn(permitted, cost_centers)
+		self.assertNotIn(restricted, cost_centers)
+
+	def test_restricted_user_sees_only_permitted_projects(self):
+		permitted, restricted = (
+			frappe.get_doc({"doctype": "Project", "project_name": name, "company": "_Test Company"})
+			.insert()
+			.name
+			for name in ("_Test PA Permitted Project", "_Test PA Restricted Project")
+		)
+		user = make_restricted_user(
+			"test_profitability_analysis_project@example.com",
+			"Project",
+			permitted,
+			roles=["Accounts User", "Projects User"],
+		)
+
+		frappe.set_user(user)
+		try:
+			data = self.run_report(based_on="Project", show_zero_values=1)
+		finally:
+			frappe.set_user("Administrator")
+
+		projects = {row.get("account") for row in data}
+		self.assertIn(permitted, projects)
+		self.assertNotIn(restricted, projects)
+
+	def test_user_without_company_permission_cannot_run_report_on_accounting_dimension(self):
+		user = make_restricted_user(
+			"test_profitability_analysis_company@example.com", "Company", "_Test Company 1"
+		)
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				self.run_report,
+				based_on="Accounting Dimension",
+				accounting_dimension="Location",
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_entries_of_other_finance_books_are_left_out(self):
+		cc = self.make_cc("_Test PA Finance Book")
+		self.book_expense(cc, 300)
+		journal_entry = make_journal_entry(
+			EXPENSE, BANK, 500, cost_center=cc, posting_date="2026-06-01", save=False
+		)
+		journal_entry.finance_book = (
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test PA Finance Book"})
+			.insert(ignore_if_duplicate=True)
+			.name
+		)
+		journal_entry.submit()
+
+		self.assertEqual(self.row(self.run_report(), cc)["expense"], 300)
+		data = self.run_report(finance_book=journal_entry.finance_book)
+		self.assertEqual(self.row(data, cc)["expense"], 800)
+
+
+def make_restricted_user(user, doctype, value, roles=("Accounts User",)):
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Profitability Analysis",
+				"roles": [{"role": role} for role in roles],
+			}
+		).insert()
+	frappe.permissions.add_user_permission(doctype, value, user)
+	return user

@@ -25,6 +25,8 @@ class SalesInvoiceItem(Document):
 		amount: DF.Currency
 		apply_tds: DF.Check
 		asset: DF.Link | None
+		asset_gross_value: DF.Currency
+		asset_value_after_depreciation: DF.Currency
 		barcode: DF.Data | None
 		base_amount: DF.Currency
 		base_net_amount: DF.Currency
@@ -63,6 +65,7 @@ class SalesInvoiceItem(Document):
 		item_name: DF.Data
 		item_tax_rate: DF.SmallText | None
 		item_tax_template: DF.Link | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		net_amount: DF.Currency

@@ -129,6 +129,7 @@
    "options": "Batch"
   },
   {
+   "default": "1",
    "fieldname": "sample_size",
    "fieldtype": "Float",
    "label": "Sample Size",
@@ -280,7 +281,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-21 23:11:47.694751",
+ "modified": "2026-10-09 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

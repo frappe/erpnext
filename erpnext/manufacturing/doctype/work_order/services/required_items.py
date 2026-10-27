@@ -10,19 +10,20 @@ callers and the whitelisted entry point keep working unchanged.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.query_builder.functions import IfNull
+from frappe.utils import cint, flt
 from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	CONSUMPTION_PURPOSES,
 	WorkOrderStockReservation,
-	get_consumed_qty,
 	get_row_wise_serial_batch,
 )
 from erpnext.manufacturing.doctype.work_order.services.status import StatusService
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.utils import get_bin, get_latest_stock_qty
+from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items
 
 
 class RequiredItemsService:
@@ -58,18 +59,32 @@ class RequiredItemsService:
 				stock_bin.update_reserved_qty_for_production()
 
 	def get_items_and_operations_from_bom(self):
+		if not self.doc.fg_warehouse:
+			self.doc.fg_warehouse = self.doc.get_default_fg_warehouse()
+
 		self.set_required_items()
 		self.doc.set_work_order_operations()
 
 		return check_if_scrap_warehouse_mandatory(self.doc.bom_no)
 
 	def set_available_qty(self):
+		items_by_warehouse = {}
+		for d in self.doc.get("required_items"):
+			for warehouse in (d.source_warehouse, self.doc.wip_warehouse):
+				if warehouse:
+					items_by_warehouse.setdefault(warehouse, set()).add(d.item_code)
+
+		available_qty = get_latest_stock_qty_for_items(items_by_warehouse)
 		for d in self.doc.get("required_items"):
 			if d.source_warehouse:
-				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				d.available_qty_at_source_warehouse = available_qty.get(
+					(d.item_code, d.source_warehouse), 0.0
+				)
 
 			if self.doc.wip_warehouse:
-				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.doc.wip_warehouse)
+				d.available_qty_at_wip_warehouse = available_qty.get(
+					(d.item_code, self.doc.wip_warehouse), 0.0
+				)
 
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
 		"""set required_items for production to keep track of reserved qty"""
@@ -93,8 +108,8 @@ class RequiredItemsService:
 
 	def _reset_required_qty(self, item_dict, operation):
 		for d in self.doc.get("required_items"):
-			if item_dict.get(d.item_code):
-				d.required_qty = item_dict.get(d.item_code).get("qty")
+			if bom_item := _find_bom_item(item_dict, d):
+				d.required_qty = bom_item.get("qty")
 
 			if not d.operation:
 				d.operation = operation
@@ -156,8 +171,11 @@ class RequiredItemsService:
 		if self.doc.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name)
 
+		transferred_by_row = distribute_transfers_over_rows(
+			self.doc.required_items, self._material_transfer_qty_by_item_warehouse_and_operation()
+		)
 		for row in self.doc.required_items:
-			transferred_qty = transferred_items.get(row.item_code) or 0.0
+			transferred_qty = transferred_by_row[row.name]
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
 			if self.doc.reserve_stock:
 				WorkOrderStockReservation(self.doc).update_qty_in_stock_reservation(
@@ -211,9 +229,11 @@ class RequiredItemsService:
 		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_returned_qty(self):
-		returned_dict = self._material_transfer_qty_by_item(is_return=1)
+		returned_by_row = distribute_over_rows(
+			self.doc.required_items, self._material_transfer_qty_by_item(is_return=1)
+		)
 		for row in self.doc.required_items:
-			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
+			row.db_set("returned_qty", returned_by_row[row.name], update_modified=False)
 
 	def validate_incoming_material_demand(self, incoming_qty_by_item):
 		"""Reject demand exceeding the pending requirement; callers must hold the
@@ -341,6 +361,41 @@ class RequiredItemsService:
 
 		return qty_by_item
 
+	def _material_transfer_qty_by_item_warehouse_and_operation(self):
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
+		query = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.left_join(job_card)
+			.on(ste.job_card == job_card.name)
+			.select(
+				ste_child.item_code,
+				ste_child.original_item,
+				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
+				fn.Sum(ste_child.transfer_qty).as_("qty"),
+			)
+			.where(self._material_transfer_filter(ste, 0))
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
+			.groupby(
+				ste_child.item_code,
+				ste_child.original_item,
+				ste_child.s_warehouse,
+				job_card.operation_row_id,
+				job_card.operation,
+			)
+		)
+		qty_by_key = {}
+		for d in query.run(as_dict=1) or []:
+			key = (d.original_item or d.item_code, d.s_warehouse, d.operation_row_id, d.operation)
+			qty_by_key[key] = qty_by_key.get(key, 0.0) + flt(d.qty)
+
+		return qty_by_key
+
 	def _cap_returned_qty_to_transferred(self, returned_qty_by_item):
 		# Work Order returns combine regular and corrective stock without a Job Card link.
 		# Cap each return at the regular transfer total so corrective quantities stay neutral.
@@ -369,8 +424,15 @@ class RequiredItemsService:
 		if self.doc.skip_transfer and not self.doc.from_wip_warehouse:
 			wip_warehouse = None
 
+		consumed_by_item = self._consumed_qty_by_item()
+		consumed_by_row = distribute_over_rows(self.doc.required_items, consumed_by_item)
+		reserved_consumption = (
+			self._split_consumption_over_reservations(consumed_by_item, wip_warehouse)
+			if self.doc.reserve_stock
+			else {}
+		)
 		for item in self.doc.required_items:
-			consumed_qty = get_consumed_qty(self.doc.name, item.item_code) + item.returned_qty
+			consumed_qty = consumed_by_row[item.name] + flt(item.returned_qty)
 			item.db_set("consumed_qty", flt(consumed_qty), update_modified=False)
 
 			if not self.doc.reserve_stock:
@@ -378,8 +440,59 @@ class RequiredItemsService:
 
 			warehouse = wip_warehouse or item.source_warehouse
 			WorkOrderStockReservation(self.doc).update_consumed_qty_in_stock_reservation(
-				item, consumed_qty, warehouse
+				item, flt(reserved_consumption.get(item.name)) + flt(item.returned_qty), warehouse
 			)
+
+	def _split_consumption_over_reservations(self, consumed_by_item, wip_warehouse):
+		"""Cap each row's consumption by the reservations that hold it, including those a closed Work Order keeps."""
+		filters = {"voucher_type": "Work Order", "voucher_no": self.doc.name}
+		if not self.doc.skip_transfer:
+			filters["from_voucher_no"] = ("is", "set")
+		filters, or_filters = WorkOrderStockReservation(self.doc).get_holding_filters(filters, "consumed_qty")
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		reserved = {
+			(row.voucher_detail_no, row.warehouse): flt(row.qty)
+			for row in frappe.qb.get_query(
+				"Stock Reservation Entry",
+				fields=[sre.voucher_detail_no, sre.warehouse, fn.Sum(sre.reserved_qty).as_("qty")],
+				filters=filters,
+				or_filters=or_filters,
+				group_by="voucher_detail_no, warehouse",
+			).run(as_dict=True)
+		}
+		reserved_by_row = {
+			row.name: reserved.get((row.name, wip_warehouse or row.source_warehouse), 0.0)
+			for row in self.doc.required_items
+		}
+
+		remaining = {item_code: flt(qty) for item_code, qty in consumed_by_item.items()}
+		consumption_by_row = {}
+		for row in self.doc.required_items:
+			qty = min(flt(reserved_by_row.get(row.name)), remaining.get(row.item_code, 0.0))
+			consumption_by_row[row.name] = qty
+			remaining[row.item_code] = remaining.get(row.item_code, 0.0) - qty
+
+		return consumption_by_row
+
+	def _consumed_qty_by_item(self):
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		item_code = fn.Coalesce(ste_child.original_item, ste_child.item_code)
+		query = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(item_code.as_("item_code"), fn.Sum(ste_child.transfer_qty).as_("qty"))
+			.where(
+				(ste.work_order == self.doc.name)
+				& (ste.purpose.isin(CONSUMPTION_PURPOSES))
+				& (ste.docstatus == 1)
+				& (IfNull(ste_child.s_warehouse, "") != "")
+			)
+			.groupby(item_code)
+		)
+		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
 
 	def remove_additional_items(self, stock_entry):
 		for row in stock_entry.items:
@@ -431,3 +544,66 @@ class RequiredItemsService:
 			"is_additional_item": 1,
 			"voucher_detail_reference": row.name,
 		}
+
+
+def _find_bom_item(item_dict, row):
+	for key in ((row.item_code, row.operation), (row.item_code, row.operation_row_id), row.item_code):
+		if key in item_dict:
+			return item_dict[key]
+
+
+def distribute_transfers_over_rows(rows, qty_by_item_warehouse_and_operation):
+	"""Split each transfer over the rows of its item, keeping a Job Card's transfer on its operation."""
+	rows_by_item = {}
+	for row in rows:
+		rows_by_item.setdefault(row.item_code, []).append(row)
+
+	qty_by_row = {row.name: 0.0 for row in rows}
+	for key, qty in qty_by_item_warehouse_and_operation.items():
+		item_code, warehouse, operation_row_id, operation = key
+		item_rows = rows_by_item.get(item_code)
+		if not item_rows:
+			continue
+
+		if operation:
+			job_card_operation = frappe._dict(operation_row_id=operation_row_id, operation=operation)
+			item_rows = [
+				row for row in item_rows if is_row_of_operation(row, job_card_operation)
+			] or item_rows
+
+		share_by_row = {}
+		matching_rows = [row for row in item_rows if row.source_warehouse == warehouse] or item_rows
+		_split_item_qty(matching_rows, flt(qty), share_by_row)
+		for name, share in share_by_row.items():
+			qty_by_row[name] += share
+
+	return qty_by_row
+
+
+def is_row_of_operation(row, operation):
+	"""Whether a required item row belongs to a Job Card's operation."""
+	if cint(row.operation_row_id) and cint(operation.operation_row_id):
+		return cint(row.operation_row_id) == cint(operation.operation_row_id)
+
+	return not row.operation or row.operation == operation.operation
+
+
+def distribute_over_rows(rows, qty_by_item):
+	rows_by_item = {}
+	for row in rows:
+		rows_by_item.setdefault(row.item_code, []).append(row)
+
+	qty_by_row = {}
+	for item_code, item_rows in rows_by_item.items():
+		_split_item_qty(item_rows, flt(qty_by_item.get(item_code)), qty_by_row)
+	return qty_by_row
+
+
+def _split_item_qty(rows, qty, qty_by_row):
+	required_qty = sum(flt(row.required_qty) for row in rows)
+	remaining_qty = qty
+	for row in rows[:-1]:
+		share = qty * flt(row.required_qty) / required_qty if required_qty else 0.0
+		qty_by_row[row.name] = share
+		remaining_qty -= share
+	qty_by_row[rows[-1].name] = remaining_qty

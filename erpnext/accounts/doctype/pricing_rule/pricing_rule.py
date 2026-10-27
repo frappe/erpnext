@@ -25,10 +25,9 @@ PRICING_TRANSACTION_DOCTYPES = frozenset(
 		"Purchase Receipt",
 		"Purchase Invoice",
 		"Material Request",
-		# these three also extend a controller that calls the pricing engine: BOM and BOM Creator
-		# through TransactionController, Request for Quotation through BuyingController
+		# these two also extend a controller that calls the pricing engine: BOM through
+		# TransactionController, Request for Quotation through BuyingController
 		"BOM",
-		"BOM Creator",
 		"Request for Quotation",
 		# no client sends this one, but set_transaction_type below still branches on it
 		"Opportunity",
@@ -480,6 +479,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	if pricing_rules:
 		rules = []
+		price_rules = []
 
 		for pricing_rule in pricing_rules:
 			if not pricing_rule:
@@ -529,9 +529,26 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 			if not pricing_rule.validate_applied_rule:
 				if pricing_rule.price_or_product_discount == "Price":
-					apply_price_discount_rule(pricing_rule, item_details, args)
+					price_rules.append(pricing_rule)
 				else:
 					get_product_discount_rule(pricing_rule, item_details, args, doc)
+
+		for pricing_rule in price_rules:
+			if pricing_rule.rate_or_discount == "Rate":
+				apply_price_discount_rule(pricing_rule, item_details, args)
+
+		for pricing_rule in price_rules:
+			apply_pricing_rule_margin(pricing_rule, item_details, args)
+
+		for pricing_rule in price_rules:
+			if pricing_rule.rate_or_discount != "Rate":
+				apply_price_discount_rule(pricing_rule, item_details, args)
+
+		# Preserve flat discounts instead of recalculating them from a rounded percentage.
+		if any(rule.rate_or_discount == "Discount Amount" and rule.discount_amount for rule in price_rules):
+			item_details.discount_percentage = 0.0
+			if item_details.pricing_rule_for == "Discount Percentage":
+				item_details.pricing_rule_for = "Discount Amount"
 
 		if not item_details.get("has_margin"):
 			item_details.margin_type = None
@@ -544,7 +561,8 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		if not doc:
 			return item_details
 
-	elif args.get("pricing_rules"):
+	# "[]" means no rule was applied, so there is none to remove and the rate typed in stays
+	elif get_applied_pricing_rules(args.get("pricing_rules")):
 		item_details = remove_pricing_rule_for_item(
 			args.get("pricing_rules"),
 			item_details,
@@ -598,17 +616,6 @@ def get_pricing_rule_details(args, pricing_rule):
 def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-	if (pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency) or (
-		pricing_rule.margin_type == "Percentage"
-	):
-		item_details.margin_type = pricing_rule.margin_type
-		item_details.has_margin = True
-
-		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
-			item_details.margin_rate_or_amount += pricing_rule.margin_rate_or_amount
-		else:
-			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-
 	if pricing_rule.rate_or_discount == "Rate":
 		pricing_rule_rate = 0.0
 		if pricing_rule.currency == args.currency:
@@ -625,31 +632,39 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 					* (args.get("conversion_factor", 1) if is_blank_uom else 1),
 				}
 			)
+			item_details.has_pricing_rule_for_rate = True
 		item_details.update({"discount_percentage": 0.0})
+
+	discount_rate = flt(item_details.get("price_list_rate", args.price_list_rate))
+	if item_details.get("margin_type") == "Percentage":
+		discount_rate *= 1 + flt(item_details.margin_rate_or_amount) / 100
+	elif item_details.get("margin_type") == "Amount":
+		discount_rate += flt(item_details.margin_rate_or_amount)
 
 	for apply_on in ["Discount Amount", "Discount Percentage"]:
 		if pricing_rule.rate_or_discount != apply_on:
 			continue
 
 		field = frappe.scrub(apply_on)
-		if pricing_rule.apply_discount_on_rate and item_details.get("discount_percentage"):
-			# Apply discount on discounted rate
-			item_details[field] += (100 - item_details[field]) * (pricing_rule.get(field, 0) / 100)
-		elif args.price_list_rate:
+		if discount_rate:
 			value = pricing_rule.get(field, 0)
 			calculate_discount_percentage = False
 			if field == "discount_percentage":
 				field = "discount_amount"
-				value = args.price_list_rate * (value / 100)
+				discount_base = discount_rate
+				if pricing_rule.apply_discount_on_rate:
+					discount_base -= flt(item_details.get("discount_amount"))
+				value = discount_base * (value / 100)
 				calculate_discount_percentage = True
 
 			if field not in item_details:
 				item_details.setdefault(field, 0)
 
 			item_details[field] += value if pricing_rule else args.get(field, 0)
-			if calculate_discount_percentage and args.price_list_rate and item_details.discount_amount:
+			# Keep an existing percentage in sync when a later rule adds a flat discount.
+			if calculate_discount_percentage or item_details.get("discount_percentage"):
 				item_details.discount_percentage = flt(
-					(flt(item_details.discount_amount) / flt(args.price_list_rate)) * 100
+					(flt(item_details.discount_amount) / discount_rate) * 100
 				)
 		else:
 			if field not in item_details:
@@ -658,10 +673,32 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			item_details[field] += pricing_rule.get(field, 0) if pricing_rule else args.get(field, 0)
 
 
+def apply_pricing_rule_margin(pricing_rule, item_details, args):
+	if (pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency) or (
+		pricing_rule.margin_type == "Percentage"
+	):
+		margin_type = pricing_rule.margin_type
+		margin = flt(pricing_rule.margin_rate_or_amount)
+		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
+			existing_margin = item_details.margin_rate_or_amount
+			if item_details.margin_type and item_details.margin_type != margin_type:
+				price_list_rate = flt(item_details.get("price_list_rate", args.get("price_list_rate")))
+				if item_details.margin_type == "Percentage":
+					existing_margin *= price_list_rate / 100
+				else:
+					margin *= price_list_rate / 100
+				margin_type = "Amount"
+			margin += existing_margin
+
+		item_details.margin_type = margin_type
+		item_details.margin_rate_or_amount = margin
+		item_details.has_margin = True
+
+
 @frappe.whitelist()
 def remove_pricing_rule_for_item(
 	pricing_rules: str | None,
-	item_details: str | frappe._dict,
+	item_details: str | dict,
 	item_code: str | None = None,
 	rate: float | None = None,
 ):
@@ -765,7 +802,7 @@ def validate_pricing_parties(ctx: frappe._dict) -> None:
 
 
 def validate_pricing_price_lists(ctx: frappe._dict, doctype: str) -> None:
-	if doctype in ("BOM", "BOM Creator"):
+	if doctype == "BOM":
 		return
 
 	meta = frappe.get_meta(doctype)
