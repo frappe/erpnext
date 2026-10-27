@@ -537,6 +537,37 @@ class TestAsset(AssetSetup):
 		gle = get_gl_entries("Sales Invoice", si.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
+	def test_sale_and_return_gl_unchanged_on_repost(self):
+		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+			update_repost_settings,
+		)
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		asset = create_monthly_depreciating_asset()
+		post_depreciation_entries(date="2025-08-31")
+		sale_args = {"item_code": "Macbook Pro", "asset": asset.name, "rate": 50000}
+		sale = create_sales_invoice(qty=1, posting_date="2025-09-15", **sale_args)
+		sale_return = create_sales_invoice(
+			qty=-1, posting_date="2025-09-20", is_return=1, return_against=sale.name, **sale_args
+		)
+		# the restored asset depreciates further, so its current values differ from the sale's
+		post_depreciation_entries(date="2025-10-31")
+		posted_entries = {
+			name: get_gl_entries("Sales Invoice", name) for name in (sale.name, sale_return.name)
+		}
+
+		update_repost_settings()
+		repost = frappe.new_doc("Repost Accounting Ledger")
+		repost.company = sale.company
+		repost.delete_cancelled_entries = 1
+		for name in posted_entries:
+			repost.append("vouchers", {"voucher_type": "Sales Invoice", "voucher_no": name})
+		repost.submit()
+
+		self.assertEqual(frappe.db.get_value(repost.doctype, repost.name, "status"), "Completed")
+		for name, entries in posted_entries.items():
+			self.assertCountEqual(get_gl_entries("Sales Invoice", name), entries)
+
 	def test_asset_with_maintenance_required_status_after_sale(self):
 		asset = create_asset(
 			calculate_depreciation=1,

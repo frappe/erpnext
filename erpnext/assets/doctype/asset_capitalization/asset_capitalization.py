@@ -727,9 +727,9 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 	# Get Asset Details
 	asset_details = frappe._dict()
 	if asset:
-		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code"], as_dict=1)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(asset))
+		erpnext.require_permission("Asset", asset, "select")
+		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code", "company"], as_dict=1)
+		check_capitalization_access(asset_details.company)
 
 		# Re-set item code from Asset
 		out.target_item_code = asset_details.item_code
@@ -849,11 +849,11 @@ def get_consumed_asset_details(ctx):
 
 	asset_details = frappe._dict()
 	if ctx.asset:
+		erpnext.require_permission("Asset", ctx.asset, "select")
 		asset_details = frappe.db.get_value(
-			"Asset", ctx.asset, ["asset_name", "item_code", "item_name"], as_dict=1
+			"Asset", ctx.asset, ["asset_name", "item_code", "item_name", "company"], as_dict=1
 		)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(ctx.asset))
+		check_capitalization_access(asset_details.company)
 
 	out.item_code = asset_details.item_code
 	out.asset_name = asset_details.asset_name

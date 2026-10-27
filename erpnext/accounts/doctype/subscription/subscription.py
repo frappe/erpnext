@@ -630,7 +630,8 @@ class Subscription(Document):
 					return
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 		elif posting_date and getdate(posting_date) > getdate(self.current_invoice_end):
-			self.update_subscription_period()
+			if not (self.end_date and getdate(self.current_invoice_end) >= getdate(self.end_date)):
+				self.update_subscription_period()
 
 		if self.cancel_at_period_end and (
 			getdate(posting_date) >= getdate(current_period_end)
@@ -675,10 +676,19 @@ class Subscription(Document):
 				date=add_days(self.current_invoice_end, 1)
 			)
 
-		if self.current_invoice and getdate(_current_start_date) <= getdate(
-			self.current_invoice.posting_date
-		) <= getdate(_current_end_date):
+		if self.end_date and getdate(_current_start_date) > getdate(self.end_date):
 			return True
+
+		invoice = self.current_invoice
+		if invoice:
+			if invoice.get("from_date"):
+				return getdate(invoice.from_date) == getdate(_current_start_date)
+			elif invoice.get("posting_date"):
+				return (
+					getdate(_current_start_date)
+					<= getdate(invoice.posting_date)
+					<= getdate(_current_end_date)
+				)
 
 		return False
 

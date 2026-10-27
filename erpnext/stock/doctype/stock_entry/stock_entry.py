@@ -1664,7 +1664,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 					and ifnull(s_warehouse,'')='' """.format(", ".join(["%s" * len(other_ste)]), "%s"),
 				args,
 			)[0][0]
-			if fg_qty_already_entered and fg_qty_already_entered >= qty:
+			allowance_percentage = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "overproduction_percentage_for_work_order"
+				)
+			)
+			allowed_qty = flt(qty) + (allowance_percentage / 100 * flt(qty))
+			if fg_qty_already_entered and fg_qty_already_entered >= allowed_qty:
 				frappe.throw(
 					_("Stock Entries already created for Work Order {0}: {1}").format(
 						self.work_order, ", ".join(other_ste)
@@ -3363,6 +3369,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.items = []
 
 		if self.outgoing_stock_entry and self.purpose == "Material Transfer":
+			erpnext.require_permission("Stock Entry", self.outgoing_stock_entry)
 			doc = frappe.get_doc("Stock Entry", self.outgoing_stock_entry)
 
 			if doc.per_transferred == 100:
@@ -4027,6 +4034,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_batches_to_be_consume(batches, row, qty)
 
 		if not row.batches_to_be_consume:
+			if not existing_row:
+				self.add_finished_goods(args, item)
 			return
 
 		_id = create_serial_and_batch_bundle(
