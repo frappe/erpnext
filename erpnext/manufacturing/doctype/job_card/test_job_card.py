@@ -1652,6 +1652,42 @@ class TestJobCard(ERPNextTestSuite):
 		)
 		self.assertRaises(OperationSequenceError, extra.submit)
 
+	def test_max_completable_qty_excludes_process_loss_of_operation(self):
+		work_order = self.make_two_operation_work_order(qty=100)
+		first, second = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+			)
+		)
+		for index, (job_card, for_quantity, completed_qty) in enumerate(((first, 100, 95), (second, 50, 45))):
+			job_card.for_quantity = for_quantity
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date("2024-04-10 08:00:00", hours=index),
+					"to_time": add_to_date("2024-04-10 08:00:00", hours=index, minutes=30),
+					"completed_qty": completed_qty,
+				},
+			)
+			job_card.save()
+			job_card.submit()
+
+		make_job_card(
+			work_order.name,
+			[
+				{
+					"name": second.operation_id,
+					"operation": second.operation,
+					"sequence_id": second.sequence_id,
+					"qty": 50,
+					"pending_qty": 50,
+				}
+			],
+		)
+		extra = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		self.assertEqual(extra.get_max_completable_qty(), 45)
+
 	def complete_second_operation_and_finish(self, wo_doc, job_card):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
