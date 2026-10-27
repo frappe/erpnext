@@ -4,6 +4,7 @@
 """Delivery schedule management for Sales Order Items."""
 
 import frappe
+from frappe import _
 from frappe.utils import flt, parse_json
 
 
@@ -26,6 +27,15 @@ class DeliveryScheduleService:
 		if isinstance(schedules, str):
 			schedules = parse_json(schedules)
 
+		if not frappe.db.exists(
+			"Sales Order Item",
+			{"name": child_row.name, "parent": self.doc.name, "parenttype": self.doc.doctype},
+		):
+			frappe.throw(
+				_("Row {0} is not an item of Sales Order {1}").format(child_row.name, self.doc.name),
+				title=_("Invalid Sales Order Item"),
+			)
+
 		names = []
 		first_delivery_date = None
 		for row in schedules:
@@ -47,7 +57,10 @@ class DeliveryScheduleService:
 				"stock_qty": row.qty * (child_row.conversion_factor or 1.0),
 			}
 
-			if frappe.db.exists("Delivery Schedule Item", row.name):
+			if row.name and frappe.db.exists(
+				"Delivery Schedule Item",
+				{"name": row.name, "sales_order": self.doc.name, "sales_order_item": child_row.name},
+			):
 				doc = frappe.get_doc("Delivery Schedule Item", row.name)
 			else:
 				doc = frappe.new_doc("Delivery Schedule Item")
