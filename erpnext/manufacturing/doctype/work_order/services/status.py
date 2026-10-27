@@ -33,7 +33,6 @@ class StatusService:
 
 	def validate_work_order_against_so(self):
 		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
-			get_planned_process_loss_percentage,
 			get_qty_before_process_loss,
 		)
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
@@ -42,10 +41,9 @@ class StatusService:
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
-		# This Work Order is made before its planned loss, so it may exceed the good qty left.
 		max_qty = get_qty_before_process_loss(
 			so_qty + (allowance_percentage / 100 * so_qty) - flt(self._ordered_qty_against_so()),
-			get_planned_process_loss_percentage(self.doc.bom_no),
+			self._planned_process_loss_percentage(),
 			self.doc.stock_uom,
 		)
 		precision = self.doc.precision("qty")
@@ -61,14 +59,21 @@ class StatusService:
 			OverProductionError,
 		)
 
+	def _planned_process_loss_percentage(self):
+		if not self.doc.production_plan_item:
+			return 0
+		return frappe.db.get_value(
+			"Production Plan Item", self.doc.production_plan_item, "process_loss_percentage"
+		)
+
 	def _ordered_qty_against_so(self):
 		wo = frappe.qb.DocType("Work Order")
-		bom = frappe.qb.DocType("BOM")
+		plan_item = frappe.qb.DocType("Production Plan Item")
 		return (
 			frappe.qb.from_(wo)
-			.left_join(bom)
-			.on(bom.name == wo.bom_no)
-			.select(Sum(qty_against_sales_order(wo, bom)))
+			.left_join(plan_item)
+			.on(plan_item.name == wo.production_plan_item)
+			.select(Sum(qty_against_sales_order(wo, plan_item)))
 			.where(
 				(wo.production_item == self.doc.production_item)
 				& (wo.sales_order == self.doc.sales_order)
@@ -502,12 +507,12 @@ class StatusService:
 
 	def _sales_order_work_order_qty(self):
 		wo = frappe.qb.DocType("Work Order")
-		bom = frappe.qb.DocType("BOM")
+		plan_item = frappe.qb.DocType("Production Plan Item")
 		query = (
 			frappe.qb.from_(wo)
-			.left_join(bom)
-			.on(bom.name == wo.bom_no)
-			.select(Sum(qty_against_sales_order(wo, bom)))
+			.left_join(plan_item)
+			.on(plan_item.name == wo.production_plan_item)
+			.select(Sum(qty_against_sales_order(wo, plan_item)))
 			.where((wo.sales_order == self.doc.sales_order) & (wo.docstatus == 1))
 		)
 		if self.doc.product_bundle_item:
@@ -529,13 +534,13 @@ class StatusService:
 		)
 
 		work_order = frappe.qb.DocType("Work Order")
-		bom = frappe.qb.DocType("BOM")
+		plan_item = frappe.qb.DocType("Production Plan Item")
 		ordered_qty = flt(
 			(
 				frappe.qb.from_(work_order)
-				.left_join(bom)
-				.on(bom.name == work_order.bom_no)
-				.select(Sum(qty_against_sales_order(work_order, bom)))
+				.left_join(plan_item)
+				.on(plan_item.name == work_order.production_plan_item)
+				.select(Sum(qty_against_sales_order(work_order, plan_item)))
 				.where(
 					(work_order.production_plan_item == self.doc.production_plan_item)
 					& (work_order.docstatus == 1)
@@ -575,10 +580,9 @@ class StatusService:
 			)
 
 
-def qty_against_sales_order(wo, bom):
+def qty_against_sales_order(wo, plan_item):
 	"""Good output a Work Order counts against its Sales Order, after recorded or planned process loss."""
-	# As in planning, a BOM that loses everything plans no loss.
-	loss_percentage = Case().when(bom.process_loss_percentage < 100, bom.process_loss_percentage).else_(0)
+	loss_percentage = IfNull(plan_item.process_loss_percentage, 0)
 	planned_loss_qty = wo.qty * loss_percentage / 100
 	loss_qty = (
 		Case().when(wo.process_loss_qty > planned_loss_qty, wo.process_loss_qty).else_(planned_loss_qty)
