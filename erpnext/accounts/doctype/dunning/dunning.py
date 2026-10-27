@@ -455,13 +455,25 @@ def update_linked_dunnings(doc, previous_outstanding_amount):
 	):
 		return
 
-	to_resolve = doc.outstanding_amount < previous_outstanding_amount
-	state = "Unresolved" if to_resolve else "Resolved"
-	dunnings = get_linked_dunnings_as_per_state(doc.name, state)
+	dunnings = frappe.get_all(
+		"Overdue Payment", filters={"sales_invoice": doc.name, "docstatus": 1}, pluck="parent"
+	)
 	if not dunnings:
 		return
 
-	dunnings = [frappe.get_doc("Dunning", dunning.name) for dunning in dunnings]
+	dunnings = frappe.get_all(
+		"Dunning",
+		filters={
+			"name": ("in", get_related_dunnings(dunnings)),
+			"docstatus": 1,
+			"status": "Unresolved" if doc.outstanding_amount < previous_outstanding_amount else "Resolved",
+		},
+		pluck="name",
+	)
+	if not dunnings:
+		return
+
+	dunnings = [frappe.get_doc("Dunning", name) for name in dunnings]
 	invoices = set()
 	payment_schedule_ids = set()
 
@@ -511,20 +523,7 @@ def update_dunnings_linked_to_payment(payment_entry):
 	if not referenced_dunnings:
 		return
 
-	payment_schedules = frappe.get_all(
-		"Overdue Payment",
-		filters={"parent": ("in", referenced_dunnings), "docstatus": 1},
-		pluck="payment_schedule",
-	)
-	dunnings = referenced_dunnings | set(
-		frappe.get_all(
-			"Overdue Payment",
-			filters={"payment_schedule": ("in", payment_schedules), "docstatus": 1},
-			pluck="parent",
-		)
-	)
-
-	for name in dunnings:
+	for name in get_related_dunnings(referenced_dunnings):
 		dunning = frappe.get_doc("Dunning", name)
 		if dunning.docstatus != 1:
 			continue
@@ -622,19 +621,16 @@ def get_current_outstanding(overdue_payment) -> float:
 	return outstanding
 
 
-def get_linked_dunnings_as_per_state(sales_invoice, state):
-	dunning = frappe.qb.DocType("Dunning")
-	overdue_payment = frappe.qb.DocType("Overdue Payment")
-
-	return (
-		frappe.qb.from_(dunning)
-		.join(overdue_payment)
-		.on(overdue_payment.parent == dunning.name)
-		.select(dunning.name)
-		.distinct()
-		.where(
-			(dunning.status == state)
-			& (dunning.docstatus == 1)
-			& (overdue_payment.sales_invoice == sales_invoice)
+def get_related_dunnings(dunnings):
+	payment_schedules = frappe.get_all(
+		"Overdue Payment",
+		filters={"parent": ("in", dunnings), "docstatus": 1},
+		pluck="payment_schedule",
+	)
+	return set(dunnings) | set(
+		frappe.get_all(
+			"Overdue Payment",
+			filters={"payment_schedule": ("in", payment_schedules), "docstatus": 1},
+			pluck="parent",
 		)
-	).run(as_dict=True)
+	)
