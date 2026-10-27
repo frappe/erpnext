@@ -86,6 +86,32 @@ class TestEmployee(ERPNextTestSuite):
 			linked.save()
 		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
 
+	def test_hr_user_reenables_only_users_disabled_through_employee_status(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-returning-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+
+		def set_status_as_hr(status):
+			with as_user(hr_user):
+				linked = frappe.get_doc("Employee", employee)
+				linked.status = status
+				linked.save()
+
+		set_status_as_hr("Inactive")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+		set_status_as_hr("Active")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 1)
+
+		user = frappe.get_doc("User", staff)
+		user.enabled = 0
+		user.save(ignore_version=False)
+		set_status_as_hr("Inactive")
+		set_status_as_hr("Active")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
 	def test_hr_roles_link_any_user_except_admins(self):
 		from frappe.permissions import add_permission, reset_perms
 
