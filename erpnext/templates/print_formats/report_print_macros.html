@@ -86,14 +86,14 @@
 {%- set links = frappe.get_all("Address", filters=[["Dynamic Link", "link_doctype", "=", "Company"], ["Dynamic Link", "link_name", "=", company], ["Address", "disabled", "=", 0]], fields=["name"], order_by="is_primary_address desc") -%}
 {%- set address = frappe.get_doc("Address", links[0].name) if links else {} -%}
 <div class="rpf-company">
-	<div class="rpf-company-name">{{ info.company_name or company }}</div>
+	<div class="rpf-company-name">{{ (info.company_name or company) | e }}</div>
 	<div class="rpf-company-meta">
 		{%- if address -%}
-		<div>{{ [address.address_line1, address.address_line2, address.city, address.state, address.pincode] | select | join(", ") }}</div>
+		<div>{{ [address.address_line1, address.address_line2, address.city, address.state, address.pincode] | select | join(", ") | e }}</div>
 		{%- endif -%}
 		{%- set tax_id = address.gstin or info.tax_id -%}
 		{%- set contact = [(_("GSTIN") ~ " " ~ tax_id) if tax_id else "", address.phone or info.phone_no, address.email_id or info.email] | select | join(" · ") -%}
-		{%- if contact %}<div>{{ contact }}</div>{% endif %}
+		{%- if contact %}<div>{{ contact | e }}</div>{% endif %}
 	</div>
 </div>
 {%- endif -%}
@@ -118,11 +118,11 @@
 {%- set doc = frappe.get_doc(party_type, party) if party_type and party else {} -%}
 {%- set address = ((doc.primary_address or "") | replace("<br>", ", ") | striptags | trim(", ")) -%}
 {%- set tax_id = doc.gstin or doc.tax_id -%}
-{{ [address, (_("GSTIN") ~ " " ~ tax_id) if tax_id else ""] | select | join(" · ") }}
+{{ [address, (_("GSTIN") ~ " " ~ tax_id) if tax_id else ""] | select | join(" · ") | e }}
 {%- endmacro %}
 
 {% macro party_name(party_type, party) -%}
-{{ frappe.db.get_value(party_type, party, "supplier_name" if party_type == "Supplier" else ("customer_name" if party_type == "Customer" else "name")) or party }}
+{{ (frappe.db.get_value(party_type, party, "supplier_name" if party_type == "Supplier" else ("customer_name" if party_type == "Customer" else "name")) or party) | e }}
 {%- endmacro %}
 
 {% macro date(value) -%}
@@ -156,7 +156,7 @@
 {%- elif row.voucher_type == "Journal Entry" -%}
 {{ _("Contra") if subtype == "Contra Entry" else _("Journal") }}
 {%- else -%}
-{{ _(row.voucher_type) }}
+{{ _(row.voucher_type) | e }}
 {%- endif -%}
 {%- endmacro %}
 
@@ -166,5 +166,5 @@
 
 {% macro short(name, company) -%}
 {%- set abbr = frappe.get_cached_doc("Company", company).abbr if company else None -%}
-{{ (name or "") | replace(" - " ~ abbr, "") if abbr else (name or "") }}
+{{ ((name or "") | replace(" - " ~ abbr, "") if abbr else (name or "")) | e }}
 {%- endmacro %}
