@@ -9,7 +9,7 @@ from datetime import datetime
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import cstr, flt, getdate
 from frappe.utils.csvutils import read_csv_content
 from frappe.utils.xlsxutils import (
 	read_xls_file_from_attached_file,
@@ -68,6 +68,9 @@ class BankStatementImportLog(Document):
 		self.currency = frappe.get_cached_value("Account", account, "account_currency")
 
 	def validate(self):
+		if not self.is_new() and self.has_value_changed("file"):
+			self.validate_file_access()
+
 		if not frappe.has_permission("Bank Transaction", "write"):
 			frappe.throw(
 				_("You do not have permission to import bank transactions"), title=_("Permission Denied")
@@ -98,6 +101,8 @@ class BankStatementImportLog(Document):
 			)
 
 	def before_insert(self):
+		# before_insert reads the file before validate runs
+		self.validate_file_access()
 		if self.is_pdf():
 			tables = self.prepare_pdf_tables()
 			self.set_pdf_summary(tables)
@@ -170,6 +175,9 @@ class BankStatementImportLog(Document):
 
 	def get_file_doc(self):
 		return frappe.get_doc("File", {"file_url": self.file})
+
+	def validate_file_access(self):
+		self.get_file_doc().check_permission("read")
 
 	def get_file_extension(self):
 		return self.get_file_doc().get_extension()[1].lower()
@@ -290,33 +298,9 @@ class BankStatementImportLog(Document):
 		Given the transactions and date format, try to get the statement start date, end date and closing balance
 		"""
 
-		statement_start_date = None
-		statement_end_date = None
-		closing_balance = None
-
-		date_format = self.detected_date_format
-
-		for transaction in transactions:
-			date = transaction.get("date")
-			if not date:
-				continue
-
-			if isinstance(date, datetime):
-				tx_date = date
-			else:
-				tx_date = datetime.strptime(date, date_format)
-
-			if statement_start_date is None or tx_date < statement_start_date:
-				statement_start_date = tx_date
-
-			if statement_end_date is None or tx_date >= statement_end_date:
-				statement_end_date = tx_date
-
-				closing_balance = transaction.get("balance")
-
-		self.start_date = getdate(statement_start_date)
-		self.end_date = getdate(statement_end_date)
-		self.closing_balance = get_float_amount(closing_balance)
+		self.start_date, self.end_date, self.closing_balance = get_statement_period(
+			transactions, self.detected_date_format
+		)
 
 	def get_final_transactions(self, transaction_rows: list):
 		"""
@@ -443,8 +427,6 @@ class BankStatementImportLog(Document):
 
 		total_debits = total_credits = 0
 		debit_transactions = credit_transactions = 0
-		start_date = end_date = None
-		closing_balance = None
 
 		for transaction in final_transactions:
 			withdrawal = transaction.get("withdrawal", 0) or 0
@@ -456,23 +438,13 @@ class BankStatementImportLog(Document):
 				total_credits += deposit
 				credit_transactions += 1
 
-			date = transaction.get("date")
-			if not date:
-				continue
-			tx_date = getdate(date)
-			if start_date is None or tx_date < start_date:
-				start_date = tx_date
-			if end_date is None or tx_date >= end_date:
-				end_date = tx_date
-				closing_balance = transaction.get("balance")
-
 		self.total_debits = total_debits
 		self.total_credits = total_credits
 		self.total_debit_transactions = debit_transactions
 		self.total_credit_transactions = credit_transactions
-		self.start_date = getdate(start_date) if start_date else None
-		self.end_date = getdate(end_date) if end_date else None
-		self.closing_balance = get_float_amount(closing_balance)
+		self.start_date, self.end_date, self.closing_balance = get_statement_period(
+			final_transactions, "%Y-%m-%d"
+		)
 
 		return final_transactions
 
@@ -515,6 +487,16 @@ class BankStatementImportLog(Document):
 			transaction_rows, _starting_index, _ending_index = self.get_transaction_rows(raw_data)
 			final_transactions = self.get_final_transactions(transaction_rows=transaction_rows)
 
+		final_rows = final_transactions
+		# rows of an overlapping statement that are already imported, known by their reference
+		already_imported = get_imported_transactions(self.bank_account, final_transactions)
+		new_transactions = [
+			transaction
+			for transaction in final_transactions
+			if get_transaction_key(transaction) not in already_imported
+		]
+		skipped = len(final_transactions) - len(new_transactions)
+		final_transactions = new_transactions
 		total_transactions = len(final_transactions)
 
 		for transaction in final_transactions:
@@ -529,6 +511,11 @@ class BankStatementImportLog(Document):
 					"description": transaction.get("description"),
 					"reference_number": transaction.get("reference"),
 					"transaction_type": transaction.get("transaction_type"),
+					"included_fee": abs(get_float_amount(transaction.get("included_fee")) or 0),
+					"excluded_fee": abs(get_float_amount(transaction.get("excluded_fee")) or 0),
+					"bank_party_name": transaction.get("party_name"),
+					"bank_party_account_number": transaction.get("party_account_number"),
+					"bank_party_iban": transaction.get("party_iban"),
 					"currency": currency,
 					"company": company,
 				}
@@ -559,9 +546,17 @@ class BankStatementImportLog(Document):
 			docname=self.name,
 		)
 
-		if self.closing_balance is not None and self.end_date:
-			_set_closing_balance_as_per_statement(
-				self.bank_account, frappe.utils.getdate(self.end_date), self.closing_balance
+		# the saved closing balance reads 0 when the statement has no balance, so take it from the rows
+		_start_date, end_date, closing_balance = get_statement_period(final_rows, "%Y-%m-%d")
+		if closing_balance is not None:
+			_set_closing_balance_as_per_statement(self.bank_account, end_date, closing_balance)
+
+		if skipped:
+			frappe.msgprint(
+				_(
+					"{0} rows were not imported again: a submitted Bank Transaction with the same date, amount and reference already exists."
+				).format(skipped),
+				title=_("Rows Already Imported"),
 			)
 
 		from erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule import run_rule_evaluation
@@ -570,6 +565,76 @@ class BankStatementImportLog(Document):
 
 		self.status = "Completed"
 		self.save()
+
+
+def get_statement_period(transactions: list, date_format: str):
+	"""Start date, end date and closing balance of the statement rows.
+
+	The closing balance is the balance of the chronologically last row: the first row of the
+	last date when the statement lists the newest first. It is None when no row has a balance.
+	"""
+	dated = []
+	for transaction in transactions:
+		date = transaction.get("date")
+		if not date:
+			continue
+		dated.append(
+			(date if isinstance(date, datetime) else parse_statement_date(date, date_format), transaction)
+		)
+
+	if not dated:
+		return None, None, None
+
+	start_date = min(date for date, _transaction in dated)
+	end_date = max(date for date, _transaction in dated)
+	last_day = [transaction for date, transaction in dated if date == end_date]
+	newest_first = dated[0][0] > dated[-1][0]
+	closing_row = last_day[0] if newest_first else last_day[-1]
+
+	return getdate(start_date), getdate(end_date), get_float_amount(closing_row.get("balance"))
+
+
+def parse_statement_date(date: str, date_format: str) -> datetime:
+	try:
+		return datetime.strptime(date, date_format)
+	except ValueError:
+		frappe.throw(
+			_("The date {0} in the statement does not match the date format {1} of the other rows.").format(
+				frappe.bold(date), frappe.bold(date_format)
+			),
+			title=_("Invalid Statement Date"),
+		)
+
+
+def get_transaction_key(transaction: dict) -> tuple | None:
+	"""Rows are matched to imported transactions only by date, amount and reference."""
+	reference = cstr(transaction.get("reference")).strip()
+	if not reference:
+		return None
+	return (
+		getdate(transaction.get("date")),
+		reference,
+		flt(transaction.get("deposit"), 2),
+		flt(transaction.get("withdrawal"), 2),
+	)
+
+
+def get_imported_transactions(bank_account: str, transactions: list) -> set:
+	keys = {get_transaction_key(transaction) for transaction in transactions} - {None}
+	if not keys:
+		return set()
+
+	bank_transactions = frappe.get_all(
+		"Bank Transaction",
+		filters={
+			"bank_account": bank_account,
+			"docstatus": 1,
+			"date": ["between", [min(key[0] for key in keys), max(key[0] for key in keys)]],
+			"reference_number": ["in", list({key[1] for key in keys})],
+		},
+		fields=["date", "reference_number as reference", "deposit", "withdrawal"],
+	)
+	return {get_transaction_key(transaction) for transaction in bank_transactions} & keys
 
 
 HEADER_KEYWORDS = [
@@ -597,8 +662,8 @@ STANDARD_VARIABLES = {
 		"debit / credit",
 		"credit / debit",
 	],
-	"Withdrawal": ["withdrawal", "debit"],
-	"Deposit": ["deposit", "credit"],
+	"Withdrawal": ["withdrawal", "debit", "paid out", "money out"],
+	"Deposit": ["deposit", "credit", "paid in", "money in"],
 	"Amount": ["amount"],
 	"Description": ["description", "particulars", "remarks", "narration", "detail", "reference"],
 	"Reference": ["reference", "ref", "tran id", "transaction id", "cheque", "check", "id", "chq"],
@@ -665,8 +730,9 @@ def detect_column_mapping(header_row: list) -> list[dict]:
 			"maps_to": "Do not import",
 		}
 
+		header = normalize_header(cell)
 		for standard_variable, names in STANDARD_VARIABLES.items():
-			if any(name in cell.lower().replace(".", "") for name in names):
+			if any(header_has_name(header, name) for name in names):
 				if column_mapping.get(standard_variable, None) is None:
 					column["maps_to"] = standard_variable
 					column_mapping[standard_variable] = idx
@@ -675,6 +741,19 @@ def detect_column_mapping(header_row: list) -> list[dict]:
 		columns.append(column)
 
 	return columns
+
+
+def normalize_header(cell: str) -> str:
+	"""Lower case, dots as spaces and no spaces around a slash, so "Dr / Cr" reads as "dr/cr"."""
+	header = re.sub(r"\s+", " ", cell.lower().replace(".", " "))
+	return re.sub(r"\s*/\s*", "/", header).strip()
+
+
+def header_has_name(header: str, name: str) -> bool:
+	# a short name must be a whole word: "id" is in "Paid In", "ref" is in "Transfer"
+	if len(name) <= 3:
+		return re.search(rf"(?<![a-z]){re.escape(name)}(?![a-z])", header) is not None
+	return name in header
 
 
 def is_meaningful_mapping(columns: list[dict]) -> bool:
@@ -834,8 +913,9 @@ def compute_final_transactions(transaction_rows: list, date_format: str, amount_
 
 	def parse_amount(transaction_row: dict):
 		if amount_format == "Separate columns for withdrawal and deposit":
-			return get_float_amount(transaction_row.get("withdrawal")), get_float_amount(
-				transaction_row.get("deposit")
+			# the column gives the side; "(500)" or "-500" in the withdrawal column is a withdrawal of 500
+			return abs(get_float_amount(transaction_row.get("withdrawal")) or 0), abs(
+				get_float_amount(transaction_row.get("deposit")) or 0
 			)
 
 		if amount_format == 'Amount column has "CR"/"DR" values':
@@ -886,7 +966,7 @@ def compute_final_transactions(transaction_rows: list, date_format: str, amount_
 		if isinstance(date, datetime):
 			date = date.strftime("%Y-%m-%d")
 		else:
-			date = datetime.strptime(date, date_format).strftime("%Y-%m-%d")
+			date = parse_statement_date(date, date_format).strftime("%Y-%m-%d")
 
 		withdrawal, deposit = parse_amount(transaction)
 		final_transactions.append(
@@ -1062,18 +1142,17 @@ def render_pdf_pages(
 	return images
 
 
+# The number in an amount cell: a dot right after a letter belongs to "Rs." or "Cr.", not to the number.
+AMOUNT_NUMBER_PATTERN = re.compile(r"(?<![a-zA-Z])\.?\d[\d,.'\s]*")
+MINUS_SIGNS = ("-", "\u2212")
+
+
 def get_float_amount(amount):
 	if not amount:
 		return None
 
 	if isinstance(amount, str):
-		amount = amount.lower().replace(",", "").replace(" ", "").replace("cr", "").replace("dr", "")
-		# Remove any other alphabets and currency symbols - do not remove the minus or decimal sign
-		amount = re.sub(r"[^\d.-]", "", amount)
-		try:
-			amount = float(amount)
-		except ValueError:
-			return None
+		return parse_amount_text(amount)
 	elif isinstance(amount, int):
 		amount = float(amount)
 	else:
@@ -1083,6 +1162,43 @@ def get_float_amount(amount):
 			return None
 
 	return amount
+
+
+def parse_amount_text(text: str) -> float | None:
+	"""Read "Rs. 1,000.00 Cr", "(500.00)", "300.00-", "1.234,56" or "-1,000.34 INR" as a number.
+
+	Parentheses and a leading or trailing minus make it negative. When a comma and a dot both
+	appear, the last one is the decimal separator; a single comma followed by other than three
+	digits is a decimal comma.
+	"""
+	match = AMOUNT_NUMBER_PATTERN.search(text)
+	if not match:
+		return None
+
+	before, after = text[: match.start()], text[match.end() :].strip()
+	negative = (
+		any(sign in before for sign in MINUS_SIGNS)
+		or after.startswith(MINUS_SIGNS)
+		or ("(" in before and after.startswith(")"))
+	)
+
+	number = re.sub(r"[\s']", "", match.group()).rstrip(".,")
+	if "," in number and "." in number:
+		decimal, thousands = (",", ".") if number.rfind(",") > number.rfind(".") else (".", ",")
+		number = number.replace(thousands, "").replace(decimal, ".")
+	elif "," in number:
+		whole, _sep, fraction = number.rpartition(",")
+		is_decimal_comma = number.count(",") == 1 and len(fraction) != 3
+		number = f"{whole}.{fraction}" if is_decimal_comma else number.replace(",", "")
+	elif number.count(".") > 1:
+		number = number.replace(".", "")
+
+	try:
+		amount = float(number)
+	except ValueError:
+		return None
+
+	return -amount if negative else amount
 
 
 # A "CR"/"DR" marker on the amount itself, at either end: "2,378.00Cr", "Cr 100",
@@ -1180,7 +1296,7 @@ def get_file_properties(transactions: list):
 			# Nothing said which direction this is, so assume the amount carries the sign.
 			amount_format_frequency["Amount column has positive/negative values"] += 1
 
-	most_common_date_format = max(date_format_frequency, key=date_format_frequency.get)
+	most_common_date_format = pick_date_format(transactions, date_format_frequency)
 	most_common_amount_format = max(amount_format_frequency, key=amount_format_frequency.get)
 
 	# With no votes at all (no rows, or every amount blank) max() would return whichever key
@@ -1196,6 +1312,58 @@ def get_file_properties(transactions: list):
 		most_common_amount_format = 'Amount column has "CR"/"DR" values'
 
 	return most_common_date_format, most_common_amount_format
+
+
+def pick_date_format(transactions: list, date_format_frequency: dict) -> str:
+	"""The most common date format that reads every row.
+
+	Each row votes for the first format that reads it, and that is day-first for a date like
+	03/05/2026. A statement with a day after the 12th shows its order; when every row can be read
+	both ways, the system date format decides.
+	"""
+	candidates = sorted(date_format_frequency, key=date_format_frequency.get, reverse=True)
+	candidates += [swap_day_month(date_format) for date_format in candidates]
+	candidates = list(dict.fromkeys(candidates))
+
+	dates = [
+		transaction.get("date") for transaction in transactions if isinstance(transaction.get("date"), str)
+	]
+	readable = [
+		date_format for date_format in candidates if all(reads_date(date, date_format) for date in dates)
+	]
+	if not readable:
+		return candidates[0]
+
+	date_format = readable[0]
+	swapped = swap_day_month(date_format)
+	if swapped in readable and is_month_first(date_format) != system_is_month_first():
+		return swapped
+	return date_format
+
+
+def swap_day_month(date_format: str) -> str:
+	"""%d/%m/%Y <-> %m/%d/%Y. A format that starts with the year is never read the other way."""
+	day, month = date_format.find("%d"), date_format.find("%m")
+	year = max(date_format.find("%Y"), date_format.find("%y"))
+	if day < 0 or month < 0 or year < max(day, month):
+		return date_format
+	return date_format.replace("%d", "%_").replace("%m", "%d").replace("%_", "%m")
+
+
+def is_month_first(date_format: str) -> bool:
+	return date_format.find("%m") < date_format.find("%d")
+
+
+def system_is_month_first() -> bool:
+	return cstr(frappe.get_system_settings("date_format")).startswith("mm")
+
+
+def reads_date(date: str, date_format: str) -> bool:
+	try:
+		datetime.strptime(date, date_format)
+	except ValueError:
+		return False
+	return True
 
 
 @frappe.whitelist(methods=["GET"])
@@ -1398,6 +1566,8 @@ def check_for_conflicts(bank_account: str, start_date: str, end_date: str):
 	"""
 	Given a bank account, start date and end date, check if there are any conflicts with existing bank transactions
 	"""
+	if not start_date or not end_date:
+		return []
 
 	conflicts = frappe.get_all(
 		"Bank Transaction",
