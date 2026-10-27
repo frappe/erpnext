@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -800,6 +801,23 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 100)
 		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
+
+	def test_credit_note_reconciliation_updates_payment_schedule(self):
+		si = self.make_invoice_with_terms()
+		cn = make_return_doc("Sales Invoice", si.name)
+		cn.update_outstanding_for_self = 1
+		cn.items[0].rate = 50
+		cn.insert().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices") if x.invoice_number == si.name]
+		payments = [x.as_dict() for x in pr.get("payments") if x.reference_name == cn.name]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		self.assert_schedule_matches_outstanding(si)
+		self.assertEqual(si.outstanding_amount, 50)
 
 	def test_journal_reconciliation_after_partial_payment_against_first_term(self):
 		si = self.make_invoice_with_terms()

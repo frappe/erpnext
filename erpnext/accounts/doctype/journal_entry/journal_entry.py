@@ -250,6 +250,7 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		JournalTaxWithholding(self).on_submit()
+		self.sync_payment_schedules()
 
 	@frappe.whitelist()
 	def get_balance_for_periodic_accounting(self) -> None:
@@ -367,6 +368,10 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		AssetService(self).unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.sync_payment_schedules()
+
+	def sync_payment_schedules(self):
+		"""A reference moves the invoice outstanding through the ledger only, so follow it in the schedule."""
 		for reference in {(d.reference_type, d.reference_name) for d in self.accounts}:
 			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
 				sync_payment_schedule_outstanding(*reference)
