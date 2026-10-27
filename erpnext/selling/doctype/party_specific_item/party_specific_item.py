@@ -30,7 +30,8 @@ class PartySpecificItem(Document):
 				"party_type": self.party_type,
 				"party": self.party,
 				"restrict_based_on": self.restrict_based_on,
-				"based_on": self.based_on_value,
+				"based_on_value": self.based_on_value,
+				"name": ("!=", self.name),
 			}
 		)
 		if exists:
@@ -45,4 +46,8 @@ def get_party_specific_items(party):
 	):
 		field = "name" if rule.restrict_based_on == "Item" else frappe.scrub(rule.restrict_based_on)
 		allowed_items[field].append(rule.based_on_value)
+	if allowed_items.get("name"):
+		allowed_items["name"].extend(
+			frappe.get_all("Item", filters={"variant_of": ["in", allowed_items["name"]]}, pluck="name")
+		)
 	return allowed_items

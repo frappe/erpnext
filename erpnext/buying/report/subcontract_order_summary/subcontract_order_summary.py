@@ -35,11 +35,12 @@ def get_subcontracted_orders(report_filters):
 		f"`tab{report_filters.order_type} Item`.`name`",
 		f"`tab{report_filters.order_type} Item`.`received_qty`",
 		f"`tab{report_filters.order_type}`.`status`",
+		f"`tab{report_filters.order_type}`.`supplier`",
 	]
 
 	filters = get_filters(report_filters)
 
-	return frappe.get_all(report_filters.order_type, fields=fields, filters=filters) or []
+	return frappe.get_list(report_filters.order_type, fields=fields, filters=filters) or []
 
 
 def get_filters(report_filters):
@@ -116,7 +117,7 @@ def get_subcontracted_data(order_details, data):
 		res = details.order_item
 		for index, row in enumerate(details.supplied_items):
 			if index != 0:
-				res = {}
+				res = {"order_id": details.order_item.order_id}
 
 			res.update(row)
 			data.append(res)
@@ -130,6 +131,13 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"options": filters.order_type,
 			"width": 100,
+		},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"fieldtype": "Link",
+			"options": "Supplier",
+			"width": 120,
 		},
 		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 80},
 		{

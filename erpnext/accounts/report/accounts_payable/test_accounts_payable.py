@@ -190,6 +190,7 @@ class TestAccountsPayable(AccountsTestMixin, FrappeTestCase):
 		pi = self.create_purchase_invoice(do_not_submit=True)
 		pi.project = project.name
 		pi.save().submit()
+		filters.update({"party_type": "Supplier", "party": [pi.supplier]})
 
 		report = execute(filters)
 

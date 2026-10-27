@@ -213,6 +213,57 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 		self.assertEqual(issue.sla_resolution_date, frappe.flags.current_time)
 
+	def test_portal_list_ignores_contact_links(self):
+		from erpnext.support.doctype.issue.issue import get_issue_list
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user("test_issue_portal_list@example.com", ["Customer"])
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Portal",
+				"user": user,
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer"}],
+			}
+		).insert(ignore_permissions=True)
+		issue = make_issue(customer="_Test Customer")
+
+		with as_user(user):
+			self.assertNotIn(issue.name, [d.name for d in get_issue_list("Issue", None, None, 0, 500)])
+
+	def test_sla_reset_needs_write_access(self):
+		from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+			reset_service_level_agreement,
+		)
+
+		frappe.db.set_single_value("Support Settings", "allow_resetting_service_level_agreement", 1)
+		issue = make_issue(get_datetime("2019-03-04 12:00"), "_Test Customer", 1)
+
+		website_user = create_user("test_sla_website_user@example.com")
+		website_user.db_set("user_type", "Website User")
+		frappe.set_user(website_user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				reset_service_level_agreement,
+				"Issue",
+				issue.name,
+				"not mine",
+				website_user.name,
+			)
+		finally:
+			frappe.set_user("Administrator")
+		self.assertFalse(
+			frappe.db.exists("Comment", {"reference_name": issue.name, "content": ["like", "%not mine%"]})
+		)
+
+		reset_service_level_agreement("Issue", issue.name, "customer asked", "Administrator")
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment", {"reference_name": issue.name, "content": ["like", "%customer asked%"]}
+			)
+		)
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
@@ -254,6 +305,25 @@ class TestIssue(TestSetUp):
 		issue.reload()
 		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
 		self.assertEqual(issue.agreement_status, "Resolution Due")
+
+	def test_portal_user_changes_only_own_issues(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user("_test_issue_portal_customer@example.com", ["Customer"])
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		if user not in [row.user for row in customer.portal_users]:
+			customer.append("portal_users", {"user": user})
+			customer.save()
+		staff_issue = make_issue(customer="_Test Customer", index=1).name
+		own_issue = make_issue(customer="_Test Customer", index=2).name
+		frappe.db.set_value("Issue", own_issue, "raised_by", user)
+		staff_issue, own_issue = frappe.get_doc("Issue", staff_issue), frappe.get_doc("Issue", own_issue)
+
+		with as_user(user):
+			self.assertTrue(frappe.has_website_permission(staff_issue, "read"))
+			self.assertFalse(frappe.has_website_permission(staff_issue, "write"))
+			self.assertFalse(frappe.has_website_permission(staff_issue, "delete"))
+			self.assertTrue(frappe.has_website_permission(own_issue, "write"))
 
 
 class TestFirstResponseTime(TestSetUp):

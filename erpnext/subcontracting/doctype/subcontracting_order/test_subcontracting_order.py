@@ -29,8 +29,10 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
+	update_subcontracting_order_status,
 )
 
 
@@ -113,6 +115,126 @@ class TestSubcontractingOrder(FrappeTestCase):
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
 
+	def test_status_can_only_be_closed_or_reopened_when_submitted(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_subcontracting_order_status, sco.name, "Closed")
+
+		sco.submit()
+		self.assertRaises(frappe.ValidationError, update_subcontracting_order_status, sco.name, "Completed")
+
+		update_subcontracting_order_status(sco.name, "Closed")
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
+
+	def test_closing_purchase_order_closes_all_its_subcontracting_orders(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].qty = 4
+		sco.insert()
+		sco.submit()
+		create_subcontracting_order(po_name=sco.purchase_order)
+
+		frappe.get_doc("Purchase Order", sco.purchase_order).update_status("Closed")
+
+		self.assertEqual(
+			frappe.get_all("Subcontracting Order", {"purchase_order": sco.purchase_order}, pluck="status"),
+			["Closed", "Closed"],
+		)
+
+	def test_holding_purchase_order_keeps_a_closed_subcontracting_order_closed(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].qty = 4
+		sco.insert()
+		sco.submit()
+		create_subcontracting_order(po_name=sco.purchase_order)
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		frappe.get_doc("Purchase Order", sco.purchase_order).update_status("On Hold")
+
+		self.assertEqual(frappe.db.get_value("Purchase Order", sco.purchase_order, "status"), "On Hold")
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
+
+	def test_quantity_is_checked_against_the_purchase_order(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].update({"subcontracting_conversion_factor": 0.1, "qty": 100})
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
+		sco = create_subcontracting_order(po_name=sco.purchase_order, do_not_save=1)
+		sco.append("items", sco.items[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, sco.insert)
+
+	def test_order_must_match_its_purchase_order(self):
+		sa1_bom = frappe.db.get_value("BOM", {"item": "Subcontracted Item SA1", "is_default": 1})
+		changes = (
+			lambda sco: sco.update({"supplier": "_Test Supplier 1"}),
+			lambda sco: sco.items[0].update({"item_code": "Subcontracted Item SA1", "bom": sa1_bom}),
+			lambda sco: sco.service_items[0].update({"rate": 1000}),
+		)
+		for change in changes:
+			sco = get_subcontracting_order(do_not_save=1)
+			change(sco)
+			self.assertRaises(frappe.ValidationError, sco.insert)
+
+	def test_purchase_order_is_fully_subcontracted_with_a_non_integer_ratio(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 3,
+			},
+		]
+		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
+		for _ in range(3):
+			sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+			sco.items[0].qty = 1
+			sco.insert()
+			sco.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Purchase Order Item", {"parent": po_name}, "subcontracted_quantity"), 10
+		)
+
+	def test_partial_subcontracting_order_leaves_the_exact_remaining_qty(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 3,
+			},
+		]
+		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
+		sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		sco.items[0].qty = 1
+		sco.insert()
+		sco.submit()
+
+		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		self.assertEqual(next_sco.items[0].qty, 2)
+
+	def test_purchase_order_stays_open_while_finished_goods_remain(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 3000,
+			},
+		]
+		po_name = get_subcontracting_order(service_items=service_items, do_not_save=1).purchase_order
+		sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		sco.items[0].qty = 2999
+		sco.insert()
+		sco.submit()
+
+		next_sco = create_subcontracting_order(po_name=po_name, do_not_save=1)
+		self.assertEqual(next_sco.items[0].qty, 1)
+
 	def test_project_is_carried_over_from_purchase_order(self):
 		project = make_project({"project_name": "_Test SCO Project"}).name
 		po = make_subcontracted_purchase_order(project)
@@ -130,6 +252,15 @@ class TestSubcontractingOrder(FrappeTestCase):
 		sco = get_mapped_subcontracting_order(source_name=po.name)
 		sco.items[0].project = other_project
 		self.assertRaises(frappe.ValidationError, sco.save)
+
+	def test_draft_bom_is_refused(self):
+		sco = get_subcontracting_order(do_not_save=1)
+		draft_bom = make_bom(
+			item=sco.items[0].item_code, raw_materials=["Subcontracted SRM Item 1"], do_not_submit=True
+		)
+		sco.items[0].bom = draft_bom.name
+
+		self.assertRaises(frappe.ValidationError, sco.insert)
 
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
@@ -715,6 +846,23 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertEqual(sco.supplied_items[0].returned_qty, 5)
 
+	def test_status_counts_materials_returned_by_supplier(self):
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		ste.items[0].qty = 4
+		ste.save()
+		ste.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
+		)
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
@@ -777,7 +925,6 @@ class TestSubcontractingOrder(FrappeTestCase):
 		self.assertEqual(ordered_qty + 10, new_ordered_qty)
 
 	def test_requested_qty_for_subcontracting_order(self):
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
 		requested_qty = frappe.db.get_value(
@@ -804,17 +951,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		self.assertEqual(requested_qty + 10, new_requested_qty)
 
-		po = make_purchase_order(mr.name)
-		po.is_subcontracted = 1
-		po.supplier = "_Test Supplier"
-		po.items[0].fg_item = "Subcontracted Item SA8"
-		po.items[0].fg_item_qty = 10
-		po.items[0].item_code = "Subcontracted Service Item 8"
-		po.items[0].item_name = "Subcontracted Service Item 8"
-		po.items[0].qty = 10
-		po.supplier_warehouse = "_Test Warehouse 1 - _TC"
-		po.save()
-		po.submit()
+		po = make_subcontracted_purchase_order_from_material_request(mr.name)
 
 		self.assertTrue(po.items[0].material_request)
 		self.assertTrue(po.items[0].material_request_item)
@@ -831,6 +968,135 @@ class TestSubcontractingOrder(FrappeTestCase):
 		new_requested_qty = flt(new_requested_qty)
 
 		self.assertEqual(requested_qty, new_requested_qty)
+
+	def test_stopped_material_request_blocks_only_new_subcontracting_orders(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		mr = make_material_request(
+			item_code="Subcontracted Item SA8", material_request_type="Purchase", qty=10
+		)
+		po = make_subcontracted_purchase_order_from_material_request(mr.name)
+		sco = create_subcontracting_order(po_name=po.name, do_not_save=1)
+		sco.items[0].qty = 4
+		sco.insert()
+		sco.submit()
+		frappe.get_doc("Material Request", mr.name).update_status("Stopped")
+
+		update_subcontracting_order_status(sco.name, "Closed")
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
+		self.assertRaises(frappe.InvalidStatusError, create_subcontracting_order, po_name=po.name)
+
+	def test_reserved_qty_for_subcontracting_ignores_other_orders_transfers(self):
+		get_subcontracting_order()
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse 2 - _TC"
+		sco.insert()
+		sco.submit()
+
+		stock_bin = get_bin("Subcontracted SRM Item 1", "_Test Warehouse - _TC")
+		stock_bin.update_reserved_qty_for_sub_contracting()
+		reserved_qty_before_transfer = stock_bin.reserved_qty_for_sub_contract
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		stock_bin.update_reserved_qty_for_sub_contracting()
+
+		self.assertEqual(stock_bin.reserved_qty_for_sub_contract, reserved_qty_before_transfer)
+
+	def test_alternative_item_transfer_without_supplied_row_releases_reserved_qty(self):
+		sco = get_subcontracting_order()
+		row = sco.supplied_items[0]
+		alternative = make_item("_Test SCO Alternative RM", {"is_stock_item": 1, "valuation_rate": 10}).name
+		set_alternative_item(row.rm_item_code, alternative)
+		make_stock_entry(
+			item_code=alternative, target=row.reserve_warehouse, qty=row.required_qty, basic_rate=10
+		)
+
+		transfer = make_supplied_item_transfer(sco, row, link=False)
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": row.rm_item_code, "allow_alternative_item": 1}
+		)
+		transfer.insert()
+		transfer.submit()
+
+		self.assertEqual(frappe.db.get_value(row.doctype, row.name, "total_supplied_qty"), row.required_qty)
+		self.assertEqual(get_bin(row.rm_item_code, row.reserve_warehouse).reserved_qty_for_sub_contract, 0)
+
+	def test_alternative_item_transfer_counts_against_its_original_requirement(self):
+		service_item = {
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA1",
+			"fg_item_qty": 10,
+		}
+		sco = get_subcontracting_order(service_items=[service_item])
+		original, alternative = sco.supplied_items[0], sco.supplied_items[1]
+		set_alternative_item(original.rm_item_code, alternative.rm_item_code)
+		make_stock_entry(
+			item_code=alternative.rm_item_code,
+			target=alternative.reserve_warehouse,
+			qty=original.required_qty + alternative.required_qty,
+			basic_rate=10,
+		)
+
+		replacement = make_supplied_item_transfer(sco, original)
+		replacement.items[0].update(
+			{
+				"item_code": alternative.rm_item_code,
+				"original_item": original.rm_item_code,
+				"allow_alternative_item": 1,
+			}
+		)
+		replacement.insert()
+		replacement.submit()
+
+		own_transfer = make_supplied_item_transfer(sco, alternative)
+		own_transfer.insert()
+		own_transfer.submit()
+
+		self.assertEqual(own_transfer.docstatus, 1)
+
+	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
+		make_subcontracted_item(
+			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Shared RM",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(
+			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+		)
+
+		def transfer_20_for(fg_item):
+			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+			ste.items = [row for row in ste.items if row.subcontracted_item == fg_item]
+			ste.items[0].qty = 20
+			ste.save()
+			ste.submit()
+
+		transfer_20_for("Subcontracted Item SA7")
+		self.assertRaises(frappe.ValidationError, transfer_20_for, "Subcontracted Item Shared RM")
 
 	def test_subcontracting_order_rm_required_items_for_precision(self):
 		item_code = "Subcontracted Item SA9"
@@ -853,6 +1119,26 @@ class TestSubcontractingOrder(FrappeTestCase):
 		sco.reload()
 
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
+
+
+def set_alternative_item(item_code, alternative_item_code):
+	frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+	frappe.get_doc(
+		doctype="Item Alternative", item_code=item_code, alternative_item_code=alternative_item_code
+	).insert()
+
+
+def make_supplied_item_transfer(sco, row, link=True):
+	rm_item = {
+		"item_code": row.main_item_code,
+		"rm_item_code": row.rm_item_code,
+		"qty": row.required_qty,
+		"warehouse": row.reserve_warehouse,
+		"stock_uom": row.stock_uom,
+	}
+	if link:
+		rm_item["name"] = row.name
+	return frappe.get_doc(make_rm_stock_entry(sco.name, [rm_item]))
 
 
 def create_subcontracting_order(**args):
@@ -892,6 +1178,24 @@ def create_subcontracting_order(**args):
 			sco.submit()
 
 	return sco
+
+
+def make_subcontracted_purchase_order_from_material_request(material_request):
+	from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+
+	po = make_purchase_order(material_request)
+	po.is_subcontracted = 1
+	po.supplier = "_Test Supplier"
+	po.items[0].fg_item = "Subcontracted Item SA8"
+	po.items[0].fg_item_qty = 10
+	po.items[0].item_code = "Subcontracted Service Item 8"
+	po.items[0].item_name = "Subcontracted Service Item 8"
+	po.items[0].qty = 10
+	po.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	po.save()
+	po.submit()
+
+	return po
 
 
 def make_subcontracted_purchase_order(project):

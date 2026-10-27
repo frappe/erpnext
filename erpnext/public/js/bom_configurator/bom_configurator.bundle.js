@@ -79,8 +79,8 @@ class BOMConfigurator {
 			},
 			onrender(node) {
 				const qty = node.data.qty || frm_obj.frm.doc.qty;
-				const uom = node.data.uom || frm_obj.frm.doc.uom;
-				const docname = node.data.name || frm_obj.frm.doc.name;
+				const uom = frappe.utils.escape_html(node.data.uom || frm_obj.frm.doc.uom);
+				const docname = frappe.utils.escape_html(node.data.name || frm_obj.frm.doc.name);
 				let amount = node.data.amount;
 				if (node.data.value === frm_obj.frm.doc.item_code) {
 					amount = frm_obj.frm.doc.raw_material_cost;
@@ -248,9 +248,7 @@ class BOMConfigurator {
 		dialog.show();
 		view.events.set_default_qty(dialog);
 
-		dialog.set_primary_action(__("Add"), () => {
-			let bom_item = dialog.get_values();
-
+		dialog.set_primary_action(__("Add"), (bom_item) => {
 			frappe.call({
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
@@ -345,9 +343,7 @@ class BOMConfigurator {
 		dialog.show();
 		view.events.set_default_qty(dialog);
 
-		dialog.set_primary_action(__("Add"), () => {
-			let bom_item = dialog.get_values();
-
+		dialog.set_primary_action(__("Add"), (bom_item) => {
 			frappe.call({
 				method: "add_sub_assembly",
 				doc: this.frm.doc,
@@ -412,8 +408,8 @@ class BOMConfigurator {
 						node.data.qty = data.qty;
 						let uom = node.data.uom || this.frm.doc.uom;
 						$(node.parent.get(0))
-							.find(`[data-bom-qty-docname='${docname}']`)
-							.html(data.qty + " " + uom);
+							.find(`[data-bom-qty-docname="${CSS.escape(docname)}"]`)
+							.text(data.qty + " " + uom);
 						view.events.load_tree(r, node);
 					},
 				});

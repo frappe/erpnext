@@ -1158,6 +1158,13 @@ class TestJobCard(FrappeTestCase):
 
 		assert_operating_costs(s4, 3, [s, s3])
 
+	def test_completed_qty_sums_without_float_noise(self):
+		jc = frappe.new_doc("Job Card")
+		jc.update({"docstatus": 1, "for_quantity": 0.8, "total_completed_qty": 0.7, "process_loss_qty": 0.1})
+		jc.append("items", {"item_code": "_Test Item"})
+		jc.set_status()
+		self.assertEqual(jc.status, "Completed")
+
 	def test_set_process_loss(self):
 		nothing_done = frappe.new_doc("Job Card")
 		nothing_done.for_quantity = 10

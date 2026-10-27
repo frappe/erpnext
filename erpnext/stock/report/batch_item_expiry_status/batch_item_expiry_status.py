@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
+from frappe.utils import date_diff, today
 
 
 def execute(filters=None):
@@ -51,9 +52,7 @@ def get_data(filters):
 				batch.stock_uom,
 				batch.batch_qty,
 				batch.expiry_date,
-				max((batch.expiry_date - frappe.utils.datetime.date.today()).days, 0)
-				if batch.expiry_date
-				else None,
+				date_diff(batch.expiry_date, today()) if batch.expiry_date else None,
 			]
 		)
 

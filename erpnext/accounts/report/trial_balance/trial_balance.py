@@ -4,8 +4,10 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
+from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -18,7 +20,11 @@ from erpnext.accounts.report.financial_statements import (
 	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+)
 from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = (
@@ -36,6 +42,11 @@ def execute(filters=None):
 	data = get_data(filters)
 	columns = get_columns()
 	return columns, data
+
+
+def validate_company_permission(company: str | None) -> None:
+	if company and not frappe.has_permission("Company", "select", company):
+		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
 def validate_filters(filters):
@@ -149,6 +160,7 @@ def get_rootwise_opening_balances(filters, report_type, ignore_is_opening):
 	ignore_closing_balances = frappe.db.get_single_value(
 		"Accounts Settings", "ignore_account_closing_balance"
 	)
+	ignore_closing_balances = ignore_closing_balances or has_gl_entry_restrictions()
 
 	if not ignore_closing_balances:
 		last_period_closing_voucher = frappe.db.get_all(
@@ -307,6 +319,9 @@ def get_opening_balance(
 					opening_balance = opening_balance.where(
 						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
 					)
+
+	if match_conditions := build_match_conditions(doctype):
+		opening_balance = opening_balance.where(Bracket(LiteralValue(match_conditions)))
 
 	gle = opening_balance.run(as_dict=1)
 
@@ -513,6 +528,9 @@ def hide_group_accounts(data):
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):

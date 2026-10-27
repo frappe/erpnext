@@ -48,7 +48,6 @@
  "fields": [
   {
    "allow_on_submit": 1,
-   "default": "{employee_name}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -310,7 +309,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-06 22:30:28.513139",
+ "modified": "2026-07-30 11:04:12.882140",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
@@ -389,5 +388,5 @@
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],
- "title_field": "title"
+ "title_field": "employee_name"
 }

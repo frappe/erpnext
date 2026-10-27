@@ -565,10 +565,11 @@ class TestBatch(FrappeTestCase):
 				"currency": currency,
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"customer": "_Test Customer",
 				"name": None,
+				"qty": 1,
 			}
 		)
 

@@ -55,6 +55,7 @@ class PurchaseOrderItem(Document):
 		last_purchase_rate: DF.Currency
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		material_request: DF.Link | None

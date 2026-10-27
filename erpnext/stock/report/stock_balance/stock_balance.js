@@ -86,7 +86,7 @@ frappe.query_reports["Stock Balance"] = {
 					...(company && { company }),
 				};
 
-				return frappe.db.get_link_options("Warehouse", txt, filters);
+				return erpnext.utils.get_link_options("Warehouse", txt, filters);
 			},
 		},
 		{

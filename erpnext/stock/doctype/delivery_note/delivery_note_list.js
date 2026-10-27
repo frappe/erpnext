@@ -19,11 +19,11 @@ frappe.listview_settings["Delivery Note"] = {
 		} else if (doc.status === "Return Issued") {
 			return [__("Return Issued"), "grey", "status,=,Return Issued"];
 		} else if (flt(doc.per_billed) == 0) {
-			return [__("To Bill"), "orange", "per_billed,=,0|docstatus,=,1"];
+			return [__("To Bill"), "orange", "status,=,To Bill"];
 		} else if (flt(doc.per_billed, 2) > 0 && flt(doc.per_billed, 2) < 100) {
-			return [__("Partially Billed"), "yellow", "per_billed,<,100|docstatus,=,1"];
+			return [__("Partially Billed"), "yellow", "status,=,Partially Billed"];
 		} else if (flt(doc.per_billed, 2) === 100) {
-			return [__("Completed"), "green", "per_billed,=,100|docstatus,=,1"];
+			return [__("Completed"), "green", "status,=,Completed"];
 		}
 	},
 	onload: function (doclist) {
