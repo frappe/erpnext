@@ -319,6 +319,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.disable_rounded_total = cint(
 			frappe.db.get_value("POS Profile", invoice.pos_profile, "disable_rounded_total")
 		)
+		company = frappe.get_cached_value("POS Profile", invoice.pos_profile, "company")
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 		accounting_dimensions_fields = [d.fieldname for d in accounting_dimensions]
 		dimension_values = frappe.db.get_value(
@@ -334,7 +335,11 @@ class POSInvoiceMergeLog(Document):
 				else dimension_values.get(dimension.fieldname)
 			)
 
-			if not dimension_value and (dimension.mandatory_for_pl or dimension.mandatory_for_bs):
+			# mandatory flags are per company
+			is_mandatory = dimension.company == company and (
+				dimension.mandatory_for_pl or dimension.mandatory_for_bs
+			)
+			if not dimension_value and is_mandatory:
 				frappe.throw(
 					_("Please set Accounting Dimension {0} in {1}").format(
 						frappe.bold(dimension.label),

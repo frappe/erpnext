@@ -567,6 +567,24 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 
 		self.assertEqual(pos_inv2.consolidated_invoice, pos_inv3.consolidated_invoice)
 
+	def test_consolidation_ignores_mandatory_dimension_of_other_company(self):
+		from erpnext.assets.doctype.asset.test_asset import set_mandatory_dimension_default_for_other_company
+
+		user = frappe.session.user
+		frappe.set_user("Administrator")
+		set_mandatory_dimension_default_for_other_company()
+		frappe.set_user(user)
+
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+		pos_inv.save()
+		pos_inv.submit()
+
+		self.make_closing_entry()
+
+		pos_inv.load_from_db()
+		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
+
 	def test_company_in_pos_invoice_merge_log(self):
 		"""
 		Test if the company is fetched from POS Closing Entry
