@@ -67,6 +67,7 @@ class Dunning(AccountsController):
 		rate_of_interest: DF.Float
 		spacer: DF.Data | None
 		status: DF.Literal["Draft", "Resolved", "Unresolved", "Cancelled"]
+		superseded_by: DF.Link | None
 		total_interest: DF.Currency
 		total_outstanding: DF.Currency
 	# end: auto-generated types
@@ -79,6 +80,7 @@ class Dunning(AccountsController):
 		self.validate_totals()
 		if self.docstatus == 0:
 			self.status = "Draft"
+			self.superseded_by = None
 		self.set_party_details()
 		self.set_dunning_level()
 
@@ -106,6 +108,7 @@ class Dunning(AccountsController):
 		if self.dunning_amount and not self.income_account:
 			frappe.throw(_("Income Account is required to collect dunning fees or interest."))
 		self.status = "Unresolved"
+		self.superseded_by = None
 
 	def set_dunning_fee(self):
 		if not self.dunning_type:
@@ -306,15 +309,52 @@ class Dunning(AccountsController):
 			)
 			row.dunning_level = len(past_dunnings) + 1
 
-	def get_unpaid_base_dunning_amount(self):
+	def get_unpaid_base_dunning_amount(self, ignore_successors=False):
 		"""Interest and dunning fee that is still to be collected, in company currency."""
 		if not self.base_dunning_amount:
 			return 0.0
 
-		return flt(
+		unpaid_amount = flt(
 			flt(self.base_dunning_amount) - get_paid_dunning_amount(self.name),
 			self.precision("base_dunning_amount"),
 		)
+		if unpaid_amount > 0 and not ignore_successors and self.get_settled_successor():
+			return 0.0
+		return unpaid_amount
+
+	def get_settled_successor(self):
+		"""Find a paid later notice covering every installment and the earlier charges."""
+		payment_schedules = {row.payment_schedule for row in self.overdue_payments}
+		if self.docstatus != 1 or not payment_schedules or not all(payment_schedules):
+			return
+
+		for row in frappe.get_all(
+			"Dunning",
+			filters=[
+				["Dunning", "docstatus", "=", 1],
+				["Dunning", "customer", "=", self.customer],
+				["Dunning", "company", "=", self.company],
+				["Dunning", "currency", "=", self.currency],
+				["Dunning", "posting_date", ">=", self.posting_date],
+				["Dunning", "dunning_amount", ">=", self.dunning_amount],
+				["Overdue Payment", "payment_schedule", "in", list(payment_schedules)],
+			],
+			or_filters=[
+				["Dunning", "posting_date", ">", self.posting_date],
+				["Dunning", "creation", ">", self.creation],
+			],
+			fields=["name"],
+			distinct=True,
+		):
+			successor = frappe.get_doc("Dunning", row.name)
+			if not payment_schedules.issubset(
+				{payment.payment_schedule for payment in successor.overdue_payments}
+			):
+				continue
+			if successor.get_unpaid_overdue_payments():
+				continue
+			if successor.get_unpaid_base_dunning_amount(ignore_successors=True) <= 0:
+				return successor.name
 
 	def get_unpaid_dunning_amount(self):
 		"""Interest and dunning fee that is still to be collected, in the dunning currency."""
@@ -467,27 +507,59 @@ def update_linked_dunnings(doc, previous_outstanding_amount):
 
 def update_dunnings_linked_to_payment(payment_entry):
 	"""Refresh dunnings whose interest and fee are settled by this payment."""
-	dunnings = {row.dunning for row in payment_entry.get("deductions") if row.dunning}
+	referenced_dunnings = {row.dunning for row in payment_entry.get("deductions") if row.dunning}
+	if not referenced_dunnings:
+		return
+
+	payment_schedules = frappe.get_all(
+		"Overdue Payment",
+		filters={"parent": ("in", referenced_dunnings), "docstatus": 1},
+		pluck="payment_schedule",
+	)
+	dunnings = referenced_dunnings | set(
+		frappe.get_all(
+			"Overdue Payment",
+			filters={"payment_schedule": ("in", payment_schedules), "docstatus": 1},
+			pluck="parent",
+		)
+	)
 
 	for name in dunnings:
 		dunning = frappe.get_doc("Dunning", name)
 		if dunning.docstatus != 1:
 			continue
 
-		set_dunning_status(dunning, bool(dunning.get_unpaid_overdue_payments()))
+		set_dunning_status(
+			dunning,
+			bool(dunning.get_unpaid_overdue_payments()),
+			respect_manual_resolution=name not in referenced_dunnings,
+		)
 
 
 def set_dunning_status(dunning, has_outstanding_payments: bool, respect_manual_resolution: bool = False):
 	"""A dunning is only resolved once the invoiced sum *and* its interest and fee are paid."""
-	has_unpaid_dunning_amount = dunning.get_unpaid_dunning_amount() > 0
-	new_status = "Unresolved" if has_outstanding_payments or has_unpaid_dunning_amount else "Resolved"
-
 	# resolving by hand waives the interest, only an invoice that is owed again reopens it
-	if respect_manual_resolution and dunning.status == "Resolved" and not has_outstanding_payments:
+	if (
+		respect_manual_resolution
+		and dunning.status == "Resolved"
+		and not dunning.superseded_by
+		and not has_outstanding_payments
+	):
 		return
 
-	if dunning.status != new_status:
-		dunning.db_set("status", new_status, notify=True)
+	has_unpaid_dunning_amount = dunning.get_unpaid_base_dunning_amount(ignore_successors=True) > 0
+	superseded_by = (
+		dunning.get_settled_successor()
+		if has_unpaid_dunning_amount and not has_outstanding_payments
+		else None
+	)
+	new_status = (
+		"Unresolved"
+		if has_outstanding_payments or (has_unpaid_dunning_amount and not superseded_by)
+		else "Resolved"
+	)
+	if dunning.status != new_status or dunning.superseded_by != superseded_by:
+		dunning.db_set({"status": new_status, "superseded_by": superseded_by}, notify=True)
 
 
 def get_paid_dunning_amount(dunning: str) -> float:
