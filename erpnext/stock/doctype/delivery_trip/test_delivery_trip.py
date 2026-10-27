@@ -6,12 +6,8 @@ import frappe
 from frappe.utils import add_days, flt, getdate, now_datetime, nowdate
 
 import erpnext
-<<<<<<< HEAD
-from erpnext.stock.doctype.delivery_note.delivery_note import make_delivery_trip
-=======
 from erpnext.setup.doctype.employee.test_employee import make_employee
-from erpnext.stock.doctype.delivery_note.mapper import make_delivery_trip
->>>>>>> ff1dab7 (fix(stock): avoid leaking employee private email for drivers)
+from erpnext.stock.doctype.delivery_note.delivery_note import make_delivery_trip
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
 	get_contact_display,
