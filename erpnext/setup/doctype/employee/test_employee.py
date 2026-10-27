@@ -24,6 +24,22 @@ class TestEmployee(ERPNextTestSuite):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_department_must_belong_to_employee_company(self):
+		department = frappe.get_doc(
+			doctype="Department", department_name="Employee Other Company", company="_Test Company 1"
+		).insert()
+		employee = new_employee("company-department@example.com")
+		employee.user_id = None
+		employee.department = department.name
+		with self.assertRaises(frappe.ValidationError):
+			employee.insert()
+
+		employee.department = None
+		employee.insert()
+		employee.department = department.name
+		with self.assertRaises(frappe.ValidationError):
+			employee.save()
+
 	def test_unknown_employee_holiday_list_and_existing_user_email(self):
 		from unittest.mock import patch
 
@@ -380,7 +396,9 @@ def make_employee(user, company=None, **kwargs):
 				"user_id": user,
 				"date_of_birth": "1990-05-08",
 				"date_of_joining": "2013-01-01",
-				"department": frappe.get_all("Department", fields="name")[0].name,
+				"department": frappe.db.get_value(
+					"Department", {"company": company or erpnext.get_default_company()}
+				),
 				"gender": "Female",
 				"company_email": user,
 				"prefered_contact_email": "Company Email",
