@@ -331,6 +331,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		sbb = SerialBatchBundleService(self)
 
+		if self.docstatus == 1:
+			self.acquire_sle_processing_gates()
+
 		if self.purpose_cls:
 			self.purpose_cls(self).validate()
 
@@ -389,6 +392,17 @@ class StockEntry(StockController, SubcontractingInwardController):
 		validate_putaway_capacity(self)
 		self.validate_closed_subcontracting_order()
 		super().validate_subcontracting_inward()
+
+	def acquire_sle_processing_gates(self):
+		"""Take the gates before submit inserts bundles or runs locking reads on their rows."""
+		stock_ledger.acquire_sle_processing_gates(
+			[
+				{"item_code": row.item_code, "warehouse": warehouse}
+				for row in self.items
+				for warehouse in (row.s_warehouse, row.t_warehouse)
+				if warehouse
+			]
+		)
 
 	def remove_fg_completed_qty(self):
 		if not self.from_bom and not self.work_order and self.fg_completed_qty:

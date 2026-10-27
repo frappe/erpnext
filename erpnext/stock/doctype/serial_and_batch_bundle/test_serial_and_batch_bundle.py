@@ -10,6 +10,7 @@ from frappe.utils import add_days, add_to_date, flt, nowtime, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import resolve_csv_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	SerialandBatchBundle,
 	SerialNoDuplicateError,
 	add_serial_batch_ledgers,
 	combine_datetime,
@@ -3068,6 +3069,45 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 		serialized.append("entries", {"qty": 5})
 		serialized.calculate_total_qty(save=False)
 		self.assertEqual(serialized.total_qty, 1)
+
+	def test_new_bundle_is_not_written_before_insert(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "NWBT-.#####",
+			}
+		).name
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, rate=100)
+		batch_no = get_batch_from_bundle(
+			frappe.db.get_value("Serial and Batch Bundle", {"voucher_no": receipt.name})
+		)
+		writes_before_insert = []
+		db_set = SerialandBatchBundle.db_set
+
+		def record_write(doc, *args, **kwargs):
+			if doc.is_new():
+				writes_before_insert.append(args[0])
+			return db_set(doc, *args, **kwargs)
+
+		with patch.object(SerialandBatchBundle, "db_set", autospec=True, side_effect=record_write):
+			make_stock_entry(
+				item_code=item_code,
+				source="_Test Warehouse - _TC",
+				qty=2,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+
+		self.assertEqual(writes_before_insert, [])
+
+	def test_bundle_is_indexed_on_voucher_and_item_on_mariadb(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest("Postgres has its own partial indexes")
+
+		for index in ("voucher_no_voucher_type_index", "item_code_posting_datetime_index"):
+			self.assertTrue(frappe.db.has_index("tabSerial and Batch Bundle", index))
 
 	def test_get_bundle_wise_serial_nos(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
