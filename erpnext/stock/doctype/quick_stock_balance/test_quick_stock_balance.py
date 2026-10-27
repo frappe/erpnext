@@ -2,10 +2,12 @@
 # See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.quick_stock_balance.quick_stock_balance import get_stock_item_details
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.permission_test_utils import (
 	OTHER_COMPANY,
 	as_user,
@@ -64,6 +66,49 @@ def add_barcode(item, barcode):
 
 
 class TestQuickStockBalance(ERPNextTestSuite):
+	def make_warehouse(self, name, parent, is_group=0):
+		full_name = f"{name} - _TC"
+		if not frappe.db.exists("Warehouse", full_name):
+			frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": name,
+					"company": "_Test Company",
+					"parent_warehouse": parent,
+					"is_group": is_group,
+				}
+			).insert()
+		return full_name
+
+	def test_past_date_balance_covers_whole_day(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		posting_date = add_days(today(), -1)
+		for qty, posting_time in ((10, "00:00:01"), (5, "23:59:58"), (2, "23:59:59.500000")):
+			make_stock_entry(
+				item_code=item,
+				target="_Test Warehouse - _TC",
+				qty=qty,
+				rate=100,
+				posting_date=posting_date,
+				posting_time=posting_time,
+				set_posting_time=1,
+			)
+
+		details = get_stock_item_details("_Test Warehouse - _TC", posting_date, item)
+
+		self.assertEqual((details["qty"], details["value"]), (17, 1700))
+
+	def test_group_warehouse_balance_sums_children(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		group = self.make_warehouse("_Test QSB Group", "All Warehouses - _TC", is_group=1)
+		for name, qty in (("_Test QSB Child 1", 10), ("_Test QSB Child 2", 5)):
+			warehouse = self.make_warehouse(name, group)
+			make_stock_entry(item_code=item, target=warehouse, qty=qty, rate=100)
+
+		details = get_stock_item_details(group, today(), item)
+
+		self.assertEqual((details["qty"], details["value"]), (15, 1500))
+
 	def assert_details(self, warehouse, item="_Test Item"):
 		out = get_stock_item_details(warehouse, today(), item=item)
 		self.assertEqual(out["item"], item)

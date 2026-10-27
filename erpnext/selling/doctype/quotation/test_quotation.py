@@ -1091,7 +1091,7 @@ class TestQuotation(ERPNextTestSuite):
 
 		cache = frappe.cache()
 		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
-		value = cache.get(key)
+		value = cache.get_value(key)
 		expected_rate = flt(value) / 3.64
 
 		self.assertEqual(

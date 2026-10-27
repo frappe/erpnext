@@ -15,7 +15,7 @@ class QualityFeedbackTemplateParameter(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		parameter: DF.Data | None
+		parameter: DF.Data
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

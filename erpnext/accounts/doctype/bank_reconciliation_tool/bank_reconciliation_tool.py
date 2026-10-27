@@ -19,6 +19,7 @@ from erpnext import (
 	require_party_permission,
 )
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+from erpnext.accounts.doctype.bank_clearance.bank_clearance import validate_clearance_date
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
 	get_doctypes_for_bank_reconciliation,
 	get_total_allocated_amount,
@@ -116,7 +117,9 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	)
 	data = get_entries(filters)
 
-	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
+	balance_as_per_system = get_balance_on(
+		filters["account"], filters["report_date"], company=filters["company"]
+	)
 
 	total_debit, total_credit = 0.0, 0.0
 	for d in data:
@@ -475,10 +478,14 @@ def update_clearance_date(
 	if not payment_entry or not frappe.has_permission(payment_document, "write", doc=payment_entry):
 		_refuse()
 
+	frappe.get_doc("Account", account).check_permission("read")
+	voucher = frappe.get_doc(payment_document, payment_entry)
+	validate_clearance_date(voucher, clearance_date, account)
+
 	if payment_document == "Sales Invoice":
 		frappe.db.set_value(
 			"Sales Invoice Payment",
-			{"parent": payment_entry, "account": account, "amount": [">", 0]},
+			{"parent": payment_entry, "account": account, "amount": ["!=", 0]},
 			"clearance_date",
 			clearance_date,
 		)
@@ -492,10 +499,23 @@ def clear_clearing_date(voucher_type: str, voucher_name: str | int):
 	"""
 	Clear the clearing date of a voucher
 	"""
-	# using db_set to trigger notification
-	payment_entry = frappe.get_doc(voucher_type, voucher_name)
+	frappe.has_permission("Bank Clearance", ptype="write", throw=True)
+	if voucher_type not in get_doctypes_for_bank_reconciliation():
+		frappe.throw(
+			_("{0} is not a voucher this tool can clear").format(voucher_type), title=_("Invalid Voucher")
+		)
 
-	if payment_entry.has_permission("write"):
+	payment_entry = frappe.get_doc(voucher_type, voucher_name)
+	validate_clearance_date(payment_entry, None, None)
+
+	if voucher_type == "Sales Invoice":
+		frappe.db.set_value(
+			"Sales Invoice Payment",
+			{"parent": voucher_name, "amount": ["!=", 0]},
+			"clearance_date",
+			None,
+		)
+	else:
 		payment_entry.db_set("clearance_date", None)
 
 
@@ -1268,7 +1288,7 @@ def get_linked_payments(
 		"Bank Transaction", "read", doc=bank_transaction_name
 	):
 		_refuse()
-	return _get_linked_payments(
+	vouchers = _get_linked_payments(
 		bank_transaction_name,
 		document_types,
 		from_date,
@@ -1277,6 +1297,12 @@ def get_linked_payments(
 		from_reference_date,
 		to_reference_date,
 	)
+	# matching queries skip permissions, so drop the vouchers the user may not read
+	return [
+		voucher
+		for voucher in vouchers
+		if voucher.get("doctype") and _is_permitted(voucher["doctype"], voucher.get("name"), "read")
+	]
 
 
 def _get_linked_payments(
@@ -1379,6 +1405,7 @@ def check_matching(
 	from_reference_date=None,
 	to_reference_date=None,
 ):
+	document_types = document_types or []
 	exact_match = True if "exact_match" in document_types else False
 
 	common_filters = frappe._dict(

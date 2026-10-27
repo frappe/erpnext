@@ -7,6 +7,9 @@ from frappe.query_builder.functions import Sum
 
 
 def execute(filters=None):
+	if not (filters or {}).get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data
@@ -14,7 +17,13 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 300},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": 300,
+		},
 		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",
@@ -54,8 +63,7 @@ def get_data(filters):
 
 
 def apply_filters(query, filters, gle):
-	if filters.get("company"):
-		query = query.where(gle.company == filters.company)
+	query = query.where(gle.company == filters.company)
 	if filters.get("voucher_type"):
 		query = query.where(gle.voucher_type == filters.voucher_type)
 	if filters.get("from_date"):

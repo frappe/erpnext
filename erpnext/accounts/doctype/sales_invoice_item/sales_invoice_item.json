@@ -39,6 +39,7 @@
   "discount_percentage",
   "discount_amount",
   "distributed_discount_amount",
+  "mapped_additional_discount_amount",
   "base_rate_with_margin",
   "section_break1",
   "rate",
@@ -67,6 +68,8 @@
   "is_fixed_asset",
   "asset",
   "finance_book",
+  "asset_gross_value",
+  "asset_value_after_depreciation",
   "col_break4",
   "expense_account",
   "discount_account",
@@ -618,6 +621,7 @@
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",
+   "no_copy": 1,
    "options": "Quality Inspection"
   },
   {
@@ -827,6 +831,26 @@
    "options": "Finance Book"
   },
   {
+   "fieldname": "asset_gross_value",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Asset Gross Value",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "asset_value_after_depreciation",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Asset Value After Depreciation",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
@@ -956,6 +980,17 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "description": "Tax-exclusive additional discount carried from a source document, per stock unit.",
+   "fieldname": "mapped_additional_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount per Stock Unit",
+   "options": "currency",
+   "precision": "9",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "available_quantity_section",
    "fieldtype": "Section Break",
    "label": "Available Quantity"
@@ -1039,7 +1074,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-24 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

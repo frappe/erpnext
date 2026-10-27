@@ -6,7 +6,11 @@ from frappe.desk.query_report import export_query
 from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.financial_statements import get_period_list
+from erpnext.accounts.report.financial_statements import (
+	build_period_list,
+	get_period_list,
+	is_dimension_grouped,
+)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
@@ -59,6 +63,75 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 			periodicity="Monthly",
 			accumulated_values=False,
 		)
+
+	def _create_cost_center(self, name):
+		parent = frappe.db.get_value("Cost Center", self.cost_center, "parent_cost_center")
+		cc = frappe.new_doc("Cost Center")
+		cc.cost_center_name = name
+		cc.parent_cost_center = parent
+		cc.company = self.company
+		cc.insert()
+		return cc.name
+
+	def test_group_by_dimension(self):
+		second_cc = self._create_cost_center("P&L Test CC 2")
+
+		# 100 to default cost center, 200 to second cost center
+		self.create_sales_invoice(rate=100)
+		si2 = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=second_cc,
+			cost_center=second_cc,
+			rate=200,
+			price_list_rate=200,
+			qty=1,
+		)
+		si2.submit()
+
+		filters = self.get_report_filters()
+		filters.group_by_dimension = "Cost Center"
+
+		period_list = build_period_list(filters)
+		self.assertTrue(is_dimension_grouped(period_list))
+
+		posting_date = getdate()
+
+		def key_for(cost_center):
+			return next(
+				p.key
+				for p in period_list
+				if p.dimension_value == cost_center and p.from_date <= posting_date <= p.to_date
+			)
+
+		columns, data, *_ = execute(filters)
+		self.assertLessEqual({self.cost_center, second_cc}, {c.get("dimension_value") for c in columns})
+
+		income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+		income_row = next((r for r in data if r.get("account") == income_account), None)
+		self.assertIsNotNone(income_row)
+
+		cc1_key, cc2_key = key_for(self.cost_center), key_for(second_cc)
+		self.assertEqual(income_row[cc1_key], 100)
+		self.assertEqual(income_row[cc2_key], 200)
+
+		# no leakage into other dimension or period columns
+		for period in period_list:
+			if period.key not in (cc1_key, cc2_key):
+				self.assertEqual(income_row[period.key], 0)
+
+		# non-accumulated: total = sum of all dimension-period values
+		self.assertEqual(income_row["total"], 300.0)
+
+		# accumulated: total must take each dimension's last running balance once,
+		# not sum every accumulated column
+		filters.accumulated_values = True
+		data = execute(filters)[1]
+		income_row = next(r for r in data if r.get("account") == income_account)
+		self.assertEqual(income_row["total"], 300.0)
 
 	def test_profit_and_loss_output_and_summary(self):
 		self.create_sales_invoice(qty=1, rate=150)

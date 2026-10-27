@@ -76,6 +76,7 @@
    "label": "Capacity Planning For (Days)"
   },
   {
+   "default": "10",
    "depends_on": "eval:!doc.disable_capacity_planning",
    "description": "Default: 10 mins",
    "fieldname": "mins_between_operations",
@@ -245,7 +246,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-20 13:28:20.714576",
+ "modified": "2026-10-20 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

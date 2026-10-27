@@ -23,10 +23,33 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.tests.permission_test_utils import make_bank_account
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
+	def test_payment_creation_excludes_disabled_bank_default(self):
+		bank_account = frappe.get_doc(
+			"Bank Account", make_bank_account("_Test Payment Bank Default", "_Test Company", "HDFC - _TC")
+		)
+		bank_account.disabled = 0
+		bank_account.is_default = 1
+		bank_account.save()
+
+		for make_document in (create_sales_invoice, make_sales_order):
+			doc = make_document()
+			with self.subTest(doctype=doc.doctype):
+				bank_account.db_set("disabled", 0)
+				self.assertEqual(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account,
+					bank_account.name,
+				)
+				# Preserve is_default to reproduce disabled accounts saved before the fix.
+				bank_account.db_set("disabled", 1)
+				self.assertIsNone(
+					get_payment_entry(doc.doctype, doc.name, bank_account="_Test Bank - _TC").bank_account
+				)
+
 	def get_journals_for(self, voucher_type: str, voucher_no: str) -> list:
 		journals = []
 		if voucher_type and voucher_no:
@@ -122,7 +145,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		supplier.on_hold = 0
 		supplier.save()
 
-	def test_payment_entry_for_blocked_supplier_payments_today_date(self):
+	def test_payment_entry_for_supplier_released_today(self):
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		supplier.on_hold = 1
 		supplier.hold_type = "Payments"
@@ -131,13 +154,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		pi = make_purchase_invoice()
 
-		self.assertRaises(
-			frappe.ValidationError,
-			get_payment_entry,
-			dt="Purchase Invoice",
-			dn=pi.name,
-			bank_account="_Test Bank - _TC",
-		)
+		pe = get_payment_entry(dt="Purchase Invoice", dn=pi.name, bank_account="_Test Bank - _TC")
+		self.assertEqual(pe.party, supplier.name)
 
 		supplier.on_hold = 0
 		supplier.save()
@@ -162,6 +180,26 @@ class TestPaymentEntry(ERPNextTestSuite):
 				pass
 			else:
 				raise Exception
+
+	def test_outstanding_invoices_listed_after_supplier_release_date(self):
+		pi = make_purchase_invoice()
+		supplier = frappe.get_doc("Supplier", pi.supplier)
+		supplier.update({"on_hold": 1, "hold_type": "All", "release_date": add_days(nowdate(), -3)})
+		supplier.save()
+
+		references = get_outstanding_reference_documents(
+			{
+				"posting_date": nowdate(),
+				"company": pi.company,
+				"party_type": "Supplier",
+				"payment_type": "Pay",
+				"party": pi.supplier,
+				"party_account": pi.credit_to,
+				"get_outstanding_invoices": True,
+			}
+		)
+
+		self.assertIn(pi.name, [row.voucher_no for row in references])
 
 	def test_payment_entry_against_si_usd_to_usd(self):
 		si = create_sales_invoice(

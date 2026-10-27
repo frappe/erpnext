@@ -3,6 +3,7 @@
 
 
 import json
+from bisect import bisect_left
 
 import frappe
 from frappe import _, scrub
@@ -47,8 +48,8 @@ class IssueAnalytics:
 				{
 					"label": _("User"),
 					"fieldname": "user",
-					"fieldtype": "Link",
-					"options": "User",
+					"fieldtype": "Dynamic Link",
+					"options": "user_doctype",
 					"width": 200,
 				}
 			)
@@ -88,11 +89,12 @@ class IssueAnalytics:
 		self.get_rows()
 
 	def get_period(self, date):
+		if self.filters.range == "Weekly":
+			return self.get_week(date)
+
 		months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-		if self.filters.range == "Weekly":
-			period = "Week " + str(date.isocalendar()[1])
-		elif self.filters.range == "Monthly":
+		if self.filters.range == "Monthly":
 			period = str(months[date.month - 1])
 		elif self.filters.range == "Quarterly":
 			period = "Quarter " + str(((date.month - 1) // 3) + 1)
@@ -108,6 +110,13 @@ class IssueAnalytics:
 
 		return period
 
+	def get_week(self, date) -> str:
+		"""ISO week label, with the ISO week-year when the periods span more than one."""
+		iso_year, week = date.isocalendar()[:2]
+		if self.weeks_span_years:
+			return f"Week {week} {iso_year}"
+		return f"Week {week}"
+
 	def get_period_date_ranges(self):
 		from dateutil.relativedelta import MO, relativedelta
 
@@ -115,15 +124,17 @@ class IssueAnalytics:
 
 		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(self.filters.range, 1)
 
-		if self.filters.range in ["Monthly", "Quarterly"]:
+		if self.filters.range == "Monthly":
 			from_date = from_date.replace(day=1)
+		elif self.filters.range == "Quarterly":
+			from_date = from_date.replace(month=(from_date.month - 1) // 3 * 3 + 1, day=1)
 		elif self.filters.range == "Yearly":
 			from_date = get_fiscal_year(from_date)[1]
 		else:
 			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
 
 		self.periodic_daterange = []
-		for _dummy in range(1, 53):
+		while True:
 			if self.filters.range == "Weekly":
 				period_end_date = add_days(from_date, 6)
 			else:
@@ -138,6 +149,8 @@ class IssueAnalytics:
 			if period_end_date == to_date:
 				break
 
+		self.weeks_span_years = len({date.isocalendar()[0] for date in self.periodic_daterange}) > 1
+
 	def get_issues(self):
 		filters = self.get_common_filters()
 		self.field_map = {
@@ -147,7 +160,7 @@ class IssueAnalytics:
 			"Assigned To": "_assign",
 		}
 
-		self.entries = frappe.db.get_all(
+		self.entries = frappe.get_list(
 			"Issue",
 			fields=[self.field_map.get(self.filters.based_on), "name", "opening_date"],
 			filters=filters,
@@ -158,7 +171,7 @@ class IssueAnalytics:
 		filters["opening_date"] = ("between", [self.filters.from_date, self.filters.to_date])
 
 		if self.filters.get("assigned_to"):
-			filters["_assign"] = ("like", "%" + self.filters.get("assigned_to") + "%")
+			filters["_assign"] = ("like", '%"' + self.filters.get("assigned_to") + '"%')
 
 		for entry in ["company", "status", "priority", "customer", "project"]:
 			if self.filters.get(entry):
@@ -174,7 +187,8 @@ class IssueAnalytics:
 			if self.filters.based_on == "Customer":
 				row = {"customer": entity}
 			elif self.filters.based_on == "Assigned To":
-				row = {"user": entity}
+				# unassigned row has no doctype, so it shows as plain text instead of a User link
+				row = {"user": entity, "user_doctype": None if entity == _("Not Assigned") else "User"}
 			elif self.filters.based_on == "Issue Type":
 				row = {"issue_type": entity}
 			elif self.filters.based_on == "Issue Priority":
@@ -195,13 +209,12 @@ class IssueAnalytics:
 		self.issue_periodic_data = frappe._dict()
 
 		for d in self.entries:
-			period = self.get_period(d.get("opening_date"))
+			period = self.get_period_of(d.get("opening_date"))
 
 			if self.filters.based_on == "Assigned To":
-				if d._assign:
-					for entry in json.loads(d._assign):
-						self.issue_periodic_data.setdefault(entry, frappe._dict()).setdefault(period, 0.0)
-						self.issue_periodic_data[entry][period] += 1
+				for entry in json.loads(d._assign or "[]") or [_("Not Assigned")]:
+					self.issue_periodic_data.setdefault(entry, frappe._dict()).setdefault(period, 0.0)
+					self.issue_periodic_data[entry][period] += 1
 
 			else:
 				field = self.field_map.get(self.filters.based_on)
@@ -211,6 +224,11 @@ class IssueAnalytics:
 
 				self.issue_periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0.0)
 				self.issue_periodic_data[value][period] += 1
+
+	def get_period_of(self, date) -> str:
+		"""Label of the period whose date range holds the date."""
+		index = bisect_left(self.periodic_daterange, getdate(date))
+		return self.get_period(self.periodic_daterange[index])
 
 	def get_chart_data(self):
 		length = len(self.columns)
