@@ -32,13 +32,8 @@ def get_scheduled_employees_for_popup(communication_medium):
 	)
 
 	available_employee_groups = tuple([emp.employee_group for emp in available_employee_groups])
-<<<<<<< HEAD
-=======
-	if not available_employee_groups and medium and medium.catch_all:
-		available_employee_groups = (medium.catch_all,)
 	if not available_employee_groups:
 		return set()
->>>>>>> e302a8a (fix(employee-group): resolve current active call recipients)
 
 	member = frappe.qb.DocType("Employee Group Table")
 	employee = frappe.qb.DocType("Employee")
