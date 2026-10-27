@@ -204,6 +204,18 @@ class TestAsset(AssetSetup):
 					rows.append(row)
 				self.assertCountEqual(rows, [item.name for item in purchase_doc.items])
 
+	def test_purchase_amount_matches_linked_purchase_row(self):
+		for doctype in ("Purchase Receipt", "Purchase Invoice"):
+			with self.subTest(doctype=doctype):
+				purchase_doc = self.make_asset_purchase(doctype, [("Macbook Pro", 1, 100000)])
+				fieldname = frappe.scrub(doctype)
+				asset = frappe.get_doc("Asset", {fieldname: purchase_doc.name})
+
+				asset.net_purchase_amount = 600000
+				with self.assertRaisesRegex(frappe.ValidationError, "Net Purchase Amount should be"):
+					asset.save()
+				self.assertEqual(asset.purchase_amount, 100000)
+
 	def test_manual_assets_use_remaining_purchase_row_quantities(self):
 		item = create_fixed_asset_item("_Test Manual Asset Purchase", auto_create_assets=0)
 		for doctype in ("Purchase Receipt", "Purchase Invoice"):
