@@ -386,7 +386,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 
 			const paid_side =
-				frappe.boot.party_account_types[this.frm.doc.party_type] === "Receivable" ? "to_pay" : "to_receive";
+				frappe.boot.party_account_types[this.frm.doc.party_type] === "Receivable"
+					? "to_pay"
+					: "to_receive";
 			this.frm.doc.allocation.forEach((d) => {
 				if (d.difference_amount) {
 					dialog.fields_dict.allocation.df.data.push({

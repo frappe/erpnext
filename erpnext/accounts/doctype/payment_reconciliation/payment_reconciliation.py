@@ -717,7 +717,8 @@ class Allocator:
 	def _fx_difference(self, recv, pay, allocated_amount):
 		"""FX gain/loss when the two sides booked at different exchange rates.
 
-		Sign convention matches `Payment Entry Reference.exchange_gain_loss`.
+		Positive is a gain, except on a Payable account with an invoice in the pair,
+		where negative is a gain, as a Payment Entry against a Purchase Invoice stores it.
 		"""
 		recv_rate = flt(recv.exchange_rate) or 1.0
 		pay_rate = flt(pay.exchange_rate) or 1.0

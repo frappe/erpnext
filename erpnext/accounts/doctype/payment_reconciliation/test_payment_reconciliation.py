@@ -3204,7 +3204,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		pr.allocate_entries()
 
-		# sign follows Payment Entry Reference.exchange_gain_loss; the journal below is what counts
+		# no invoice in the pair, so a supplier gain is positive; the journal below is what counts
 		self.assertEqual(flt(pr.allocation[0].difference_amount), 5000.0)
 		pr.reconcile()
 
@@ -3277,7 +3277,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(len(pr.to_pay), 1)
 
 		pr.allocate_entries()
-		# sign follows Payment Entry Reference.exchange_gain_loss; the journal below is what counts
+		# no invoice in the pair, so a supplier gain is positive; the journal below is what counts
 		self.assertEqual(flt(pr.allocation[0].difference_amount), -800.0)
 		pr.reconcile()
 
