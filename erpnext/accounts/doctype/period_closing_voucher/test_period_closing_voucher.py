@@ -69,6 +69,44 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertEqual(pcv.gle_processing_status, "Completed")
 		self.assertEqual(tuple(pcv_gle), expected_gle)
 
+	def test_trial_balance_pl_opening_starts_at_fiscal_year_after_closing(self):
+		from erpnext.accounts.report.trial_balance.trial_balance import execute
+
+		for posting_date, amount in (("2021-03-15", 400), ("2022-02-10", 150)):
+			jv = make_journal_entry(
+				posting_date=posting_date,
+				amount=amount,
+				account1="Cash - TPC",
+				account2="Sales - TPC",
+				cost_center=create_cost_center("Test Cost Center 1"),
+				company="Test PCV Company",
+				save=False,
+			)
+			jv.company = "Test PCV Company"
+			jv.submit()
+		self.make_period_closing_voucher(posting_date="2021-12-31")
+
+		def sales_row(from_date):
+			filters = frappe._dict(
+				company="Test PCV Company",
+				fiscal_year=get_fiscal_year("2022-06-30", company="Test PCV Company")[0],
+				from_date=from_date,
+				to_date="2022-12-31",
+			)
+			return next(row for row in execute(filters)[1] if row.get("account") == "Sales - TPC")
+
+		row = sales_row("2022-01-01")
+		self.assertEqual((row["opening_credit"], row["closing_credit"]), (0, 150))
+		row = sales_row("2022-03-01")
+		self.assertEqual((row["opening_credit"], row["closing_credit"]), (150, 150))
+
+	def test_closing_needs_the_previous_closing_to_be_completed(self):
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		pcv.db_set("gle_processing_status", "Failed")
+
+		with self.assertRaises(frappe.ValidationError):
+			self.make_period_closing_voucher(posting_date="2022-12-31")
+
 	def test_cost_center_wise_posting(self):
 		surplus_account = create_account()
 
