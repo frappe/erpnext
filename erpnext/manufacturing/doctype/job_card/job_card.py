@@ -196,15 +196,13 @@ class JobCard(Document):
 		if self.sub_operations:
 			self.set_total_completed_qty_from_sub_operations()
 
-		if self.docstatus == 1:
-			self.validate_input_from_previous_operations()
-
 		self.validate_on_hold()
 		self.validate_pending_qty()
 		self.validate_work_order()
 		self.set_employees()
 
 		if self.docstatus == 1:
+			self.validate_input_from_previous_operations()
 			self.validate_semi_finished_goods()
 
 	def validate_pending_qty(self):
@@ -1862,19 +1860,20 @@ class JobCard(Document):
 
 	def validate_input_from_previous_operations(self):
 		"""Completed qty and process loss together can't exceed what the previous operation completed."""
-		if self.is_corrective_job_card or self.track_semi_finished_goods:
+		if self.is_corrective_job_card or self.track_semi_finished_goods or not self.sequence_id:
 			return
 
-		previous_operations = self.get_previous_operations() if self.work_order and self.sequence_id else []
+		previous_operations = self.get_previous_operations()
 		if not previous_operations:
 			return
 
 		previous = min(previous_operations, key=lambda row: flt(row.completed_qty))
-		data = self.get_current_operation_data()
+		submitted = self.get_current_operation_data()[0]
 		precision = self.precision("total_completed_qty")
 		input_qty = flt(
-			self.get_current_operation_completed_qty()
-			+ flt(data[0].process_loss_qty if data else 0)
+			flt(submitted.completed_qty)
+			+ flt(submitted.process_loss_qty)
+			+ flt(self.total_completed_qty)
 			+ flt(self.process_loss_qty),
 			precision,
 		)
