@@ -34,6 +34,7 @@ frappe.ui.form.on("Financial Report Row", {
 		const row = locals[cdt][cdn];
 
 		update_formula_label(frm, row.data_source);
+		update_formula_editor_mode(frm, cdt, cdn);
 		update_formula_description(frm, row.data_source);
 
 		set_up_filters_editor(frm, cdt, cdn);
@@ -43,6 +44,7 @@ frappe.ui.form.on("Financial Report Row", {
 		const row = locals[cdt][cdn];
 
 		update_formula_label(frm, row.data_source);
+		update_formula_editor_mode(frm, cdt, cdn);
 		update_advanced_formula_property(frm, cdt, cdn);
 		set_up_filters_editor(frm, cdt, cdn);
 		update_formula_description(frm, row.data_source);
@@ -299,6 +301,21 @@ function update_formula_label(frm, data_source) {
 		"label",
 		labels[data_source] || __("Calculation Formula")
 	);
+}
+
+function update_formula_editor_mode(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+
+	const field = frm.fields_dict.rows.grid.get_row(cdn)?.get_field("calculation_formula");
+	if (!field) return;
+
+	const modes = {
+		"Calculated Amount": "PythonExpression",
+		"Account Data": "JSON",
+	};
+
+	field.df.options = modes[row.data_source] || "";
+	if (field.editor) field.set_language();
 }
 
 // FORMULA DESCRIPTION
