@@ -3491,7 +3491,7 @@ def account_query(
 ):
 	"""The accounts Paid From or Paid To can take: `bank_payment_type` is the payment type that
 	pays from (or to) a bank, and `other_account` the account on the other side."""
-	from erpnext.controllers.queries import standard_search
+	from erpnext.controllers.queries import get_field_filters, standard_search
 
 	party_type = filters.get("party_type")
 	payment_type = filters.get("payment_type")
@@ -3511,6 +3511,11 @@ def account_query(
 	if payment_type == "Internal Transfer" and filters.get("other_account"):
 		account_filters["name"] = ["!=", filters["other_account"]]
 
+	account_filters.update(
+		get_field_filters(
+			filters, "payment_type", "bank_payment_type", "party_type", "company", "other_account"
+		)
+	)
 	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
 
 
@@ -3542,13 +3547,14 @@ def reference_doctype_query(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
 ):
 	"""The doctypes a payment of the party type can reference."""
-	from erpnext.controllers.queries import standard_search
+	from erpnext.controllers.queries import get_field_filters, standard_search
 
 	doctypes = {
 		"Customer": ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"],
 		"Supplier": ["Purchase Order", "Purchase Invoice", "Journal Entry"],
 	}.get(filters.get("party_type"), ["Journal Entry"])
-	return standard_search(doctype, txt, searchfield, start, page_len, {"name": ["in", doctypes]}, **kwargs)
+	doctype_filters = {"name": ["in", doctypes], **get_field_filters(filters, "party_type")}
+	return standard_search(doctype, txt, searchfield, start, page_len, doctype_filters, **kwargs)
 
 
 @frappe.whitelist()
@@ -3574,12 +3580,17 @@ def payment_term_query(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
 ):
 	"""The payment terms of the referenced invoice, or all of them for another reference."""
-	from erpnext.controllers.queries import get_payment_terms_for_references, standard_search
+	from erpnext.controllers.queries import (
+		get_field_filters,
+		get_payment_terms_for_references,
+		standard_search,
+	)
 
+	field_filters = get_field_filters(filters, "reference_doctype", "reference_name")
 	if filters.get("reference_doctype") in ("Purchase Invoice", "Sales Invoice") and filters.get(
 		"reference_name"
 	):
-		reference_filters = {"reference": filters["reference_name"]}
+		reference_filters = {"reference": filters["reference_name"], **field_filters}
 		return frappe.call(
 			get_payment_terms_for_references,
 			doctype,
@@ -3591,4 +3602,4 @@ def payment_term_query(
 			**kwargs,
 		)
 
-	return standard_search(doctype, txt, searchfield, start, page_len, {}, **kwargs)
+	return standard_search(doctype, txt, searchfield, start, page_len, field_filters, **kwargs)

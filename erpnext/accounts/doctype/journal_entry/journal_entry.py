@@ -1366,7 +1366,7 @@ def account_query(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
 ):
 	"""The company's ledger accounts, in its currency unless the entry is multi-currency."""
-	from erpnext.controllers.queries import standard_search
+	from erpnext.controllers.queries import get_field_filters, standard_search
 
 	company = filters.get("company")
 	account_filters = {"company": company, "is_group": 0}
@@ -1374,6 +1374,7 @@ def account_query(
 		currency = erpnext.get_company_currency(company) or frappe.db.get_default("currency")
 		account_filters["account_currency"] = ["in", [currency, None]]
 
+	account_filters.update(get_field_filters(filters, "company", "multi_currency"))
 	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
 
 
