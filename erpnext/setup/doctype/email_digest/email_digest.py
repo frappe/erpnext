@@ -121,9 +121,16 @@ class EmailDigest(Document):
 				unsubscribe_message=_("Unsubscribe from this Email Digest"),
 			)
 
+
 	def get_msg_html(self):
 		"""Build email digest content"""
-		frappe.flags.ignore_account_permission = True
+		previous = frappe.flags.get("ignore_account_permission")
+		try:
+			return self._get_msg_html()
+		finally:
+			frappe.flags.ignore_account_permission = previous
+
+	def _get_msg_html(self):
 		from erpnext.setup.doctype.email_digest.quotes import get_random_quote
 
 		context = frappe._dict()
@@ -155,8 +162,6 @@ class EmailDigest(Document):
 
 		if not context:
 			return None
-
-		frappe.flags.ignore_account_permission = False
 
 		# style
 		return frappe.render_template(
@@ -265,13 +270,12 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		meta = frappe.get_meta("Issue")
-		role_permissions = frappe.permissions.get_role_permissions(meta, user_id)
-		if not role_permissions.get("read"):
+		if not frappe.has_permission("Issue", "read", user=user_id):
 			return None
 
-		issue_list = frappe.get_all(
+		issue_list = frappe.get_list(
 			"Issue",
+			user=user_id,
 			filters={"status": ["in", ["Replied", "Open"]]},
 			fields=["*"],
 			order_by="creation asc",
@@ -285,7 +289,11 @@ class EmailDigest(Document):
 
 	def get_issue_count(self):
 		"""Get count of Issue"""
-		return frappe.db.count("Issue", {"status": ["in", ["Open", "Replied"]]})
+		if not frappe.has_permission("Issue", "read"):
+			return 0
+		return frappe.get_list(
+			"Issue", filters={"status": ["in", ["Open", "Replied"]]}, fields=[{"COUNT": "*", "as": "count"}]
+		)[0].count
 
 	def get_project_list(self, user_id=None):
 		"""Get project list"""
@@ -310,8 +318,15 @@ class EmailDigest(Document):
 		return frappe.db.count("Project", {"status": "Open", "project_type": "External"})
 
 	def set_accounting_cards(self, context):
-		"""Create accounting cards if checked"""
+		"""Create accounting cards if checked."""
+		previous = frappe.flags.get("ignore_account_permission")
+		frappe.flags.ignore_account_permission = True
+		try:
+			self._set_accounting_cards(context)
+		finally:
+			frappe.flags.ignore_account_permission = previous
 
+	def _set_accounting_cards(self, context):
 		cache = frappe.cache()
 		context.cards = []
 		for key in (
