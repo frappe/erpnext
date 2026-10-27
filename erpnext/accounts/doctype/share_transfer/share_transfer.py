@@ -218,9 +218,7 @@ class ShareTransfer(Document):
 				continue  # since query lies outside bounds
 			elif entry.from_no <= self.from_no and entry.to_no >= self.to_no:  # both inside
 				return "Complete"  # absolute truth!
-			elif entry.from_no <= self.from_no <= self.to_no:
-				return "Partial"
-			elif entry.from_no <= self.to_no <= entry.to_no:
+			else:
 				return "Partial"
 
 		return "Outside"
