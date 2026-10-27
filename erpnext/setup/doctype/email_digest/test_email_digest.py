@@ -5,10 +5,68 @@ import frappe
 from frappe.utils import add_days, getdate, now_datetime, today
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestEmailDigest(ERPNextTestSuite):
+	def test_document_totals_exclude_drafts(self):
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		before = digest.get_total_on("Purchase Order", today(), today())[0].count
+		order = create_purchase_order(transaction_date=today(), do_not_save=True)
+		order.insert()
+		self.assertEqual(digest.get_total_on("Purchase Order", today(), today())[0].count, before)
+		order.submit()
+		self.assertEqual(digest.get_total_on("Purchase Order", today(), today())[0].count, before + 1)
+
+	def test_pending_purchase_orders_exclude_drafts(self):
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		digest.future_to_date = today()
+		before = [
+			digest.get_purchase_orders_to_bill()["count"],
+			digest.get_purchase_orders_to_receive()["count"],
+		]
+		order = create_purchase_order(transaction_date=today(), do_not_save=True)
+		order.insert()
+		self.assertEqual(digest.get_purchase_orders_to_bill()["count"], before[0])
+		self.assertEqual(digest.get_purchase_orders_to_receive()["count"], before[1])
+		order.submit()
+		self.assertEqual(digest.get_purchase_orders_to_bill()["count"], before[0] + 1)
+		self.assertEqual(digest.get_purchase_orders_to_receive()["count"], before[1] + 1)
+
+	def test_pending_quotations_exclude_drafts_and_expired(self):
+		from erpnext.selling.doctype.quotation.quotation import set_expired_status
+
+		set_expired_status()
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		digest.future_to_date = today()
+		before = digest.get_pending_quotations()["count"]
+		quotation = make_quotation(transaction_date=add_days(today(), -2), do_not_save=True)
+		quotation.valid_till = add_days(today(), -1)
+		quotation.insert()
+		self.assertEqual(digest.get_pending_quotations()["count"], before)
+		quotation.submit()
+		self.assertEqual(digest.get_pending_quotations()["count"], before + 1)
+		set_expired_status()
+		self.assertEqual(digest.get_pending_quotations()["count"], before)
+
+	def test_expired_quotation_is_in_previous_period_if_still_valid_then(self):
+		from erpnext.selling.doctype.quotation.quotation import set_expired_status
+
+		set_expired_status()
+		digest = create_email_digest(company="_Test Company", do_not_save=True)
+		digest.future_to_date = today()
+		digest.past_to_date = getdate(add_days(today(), -1))
+		before = digest.get_pending_quotations()
+		quotation = make_quotation(transaction_date=add_days(today(), -2), do_not_save=True)
+		quotation.valid_till = add_days(today(), -1)
+		quotation.insert()
+		quotation.submit()
+		set_expired_status()
+		after = digest.get_pending_quotations()
+		self.assertEqual(after["value"], before["value"])
+		self.assertEqual(after["last_value"] - before["last_value"], quotation.base_grand_total)
+
 	def test_purchase_orders_items_overdue_list_is_filtered_by_company(self):
 		digest = create_email_digest(
 			company="_Test Company",
