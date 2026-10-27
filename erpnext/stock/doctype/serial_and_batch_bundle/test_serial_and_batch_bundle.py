@@ -14,11 +14,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_available_batches_qty,
 	get_qty_based_available_batches,
-<<<<<<< HEAD
 	get_serial_batch_ledgers,
-=======
 	get_serial_nos_based_on_posting_date,
->>>>>>> 4b55428 (fix(stock): net serial movements when reconstructing availability)
 	get_type_of_transaction,
 	make_batch_nos,
 	make_serial_nos,
@@ -56,7 +53,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			posting_time="08:00:00",
 			use_serial_batch_fields=1,
 		)
-		serial_nos = get_serial_numbers_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		serial_nos = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)
 		issue = make_stock_entry(
 			item_code=item_code,
 			source=warehouse,
@@ -75,16 +72,15 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual(balance["qty"], 2)
 		self.assertCountEqual(balance["serial_nos"].split("\n"), serial_nos[1:])
 
-		serial_ids = SerialBatchIdentity("Serial No").resolve(item_code, serial_nos)
 		available = get_serial_nos_based_on_posting_date(
 			frappe._dict(
 				item_code=item_code,
 				warehouse=warehouse,
 				posting_datetime=combine_datetime(posting_date, "11:00:00"),
 			),
-			[serial_ids[1]],
+			[serial_nos[1]],
 		)
-		self.assertCountEqual(available, [serial_ids[2]])
+		self.assertCountEqual(available, [serial_nos[2]])
 
 		issue.cancel()
 		balance = get_stock_balance_for(item_code, warehouse, posting_date, "11:00:00")
@@ -107,7 +103,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			posting_time="08:00:00",
 			use_serial_batch_fields=1,
 		)
-		serial_no = get_serial_numbers_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
+		serial_no = get_serial_nos_from_bundle(receipt.items[0].serial_and_batch_bundle)[0]
 		make_stock_entry(
 			item_code=item_code,
 			source=warehouse,
