@@ -5,7 +5,17 @@
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import DateTimeLikeObject, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import (
+	DateTimeLikeObject,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	sanitize_html,
+)
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -933,7 +943,9 @@ class PurchaseInvoice(BuyingController):
 		self.release_date = release_date
 		self.validate_block_invoice()
 
-		self.db_set({"on_hold": 1, "hold_comment": cstr(hold_comment), "release_date": release_date})
+		self.db_set(
+			{"on_hold": 1, "hold_comment": sanitize_html(cstr(hold_comment)), "release_date": release_date}
+		)
 
 	@frappe.whitelist(methods=["POST"])
 	def unblock_invoice(self):

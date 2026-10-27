@@ -367,6 +367,26 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
+	def test_update_child_keeps_description_markup_safe(self):
+		po = create_purchase_order()
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": po.items[0].item_code,
+					"rate": po.items[0].rate,
+					"qty": po.items[0].qty,
+					"docname": po.items[0].name,
+					"description": '<p>Bolts</p><img src="x" onerror="alert(1)"><script>alert(2)</script>',
+				}
+			]
+		)
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+
+		description = frappe.db.get_value("Purchase Order Item", po.items[0].name, "description")
+		self.assertIn("<p>Bolts</p>", description)
+		self.assertNotIn("onerror", description)
+		self.assertNotIn("<script", description)
+
 	def test_update_child_qty_with_conversion_factor_after_receipt(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
 		purchase_order = create_purchase_order(item_code=item.item_code, qty=6, do_not_save=True)
