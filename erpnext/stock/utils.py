@@ -10,6 +10,7 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
+from erpnext import require_user_permission
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_available_serial_nos
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -94,6 +95,30 @@ def get_stock_value_on(
 
 @frappe.whitelist()
 def get_stock_balance(
+	item_code,
+	warehouse,
+	posting_date=None,
+	posting_time=None,
+	with_valuation_rate=False,
+	with_serial_no=False,
+	inventory_dimensions_dict=None,
+):
+	frappe.has_permission("Item", "read", throw=True)
+	require_user_permission("Item", item_code)
+	require_user_permission("Warehouse", warehouse)
+
+	return _get_stock_balance(
+		item_code,
+		warehouse,
+		posting_date,
+		posting_time,
+		with_valuation_rate,
+		with_serial_no,
+		inventory_dimensions_dict,
+	)
+
+
+def _get_stock_balance(
 	item_code,
 	warehouse,
 	posting_date=None,
@@ -202,6 +227,38 @@ def get_latest_stock_qty(item_code, warehouse=None):
 	return actual_qty
 
 
+def get_latest_stock_qty_for_items(items_by_warehouse: dict[str, set[str]]) -> dict[tuple[str, str], float]:
+	if not items_by_warehouse:
+		return {}
+
+	frappe.has_permission("Item", "read", throw=True)
+	bin_dt = frappe.qb.DocType("Bin")
+	quantities = {}
+	for warehouse, item_codes in items_by_warehouse.items():
+		query = (
+			frappe.qb.from_(bin_dt)
+			.select(bin_dt.item_code, Sum(bin_dt.actual_qty))
+			.where(bin_dt.item_code.isin(item_codes))
+			.where(get_bin_warehouse_condition(warehouse))
+			.groupby(bin_dt.item_code)
+		)
+
+		for item_code, qty in query.run():
+			quantities[item_code, warehouse] = qty
+
+	return quantities
+
+
+def get_bin_warehouse_condition(warehouse):
+	bin_dt = frappe.qb.DocType("Bin")
+	lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
+	if not is_group:
+		return bin_dt.warehouse == warehouse
+
+	wh = frappe.qb.DocType("Warehouse")
+	return bin_dt.warehouse.isin(frappe.qb.from_(wh).select(wh.name).where((wh.lft >= lft) & (wh.rgt <= rgt)))
+
+
 def get_latest_stock_balance():
 	bin_map = {}
 	for d in frappe.db.sql(
@@ -212,6 +269,26 @@ def get_latest_stock_balance():
 		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 
 	return bin_map
+
+
+def get_bin_qty_map(rows) -> dict[tuple[str, str], frappe._dict]:
+	item_codes = set()
+	warehouses = set()
+	for row in rows:
+		if row.item_code and row.warehouse:
+			item_codes.add(row.item_code)
+			warehouses.add(row.warehouse)
+
+	if not item_codes:
+		return {}
+
+	bins = frappe.get_all(
+		"Bin",
+		filters={"item_code": ["in", item_codes], "warehouse": ["in", warehouses]},
+		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+	)
+
+	return {(bin.item_code, bin.warehouse): bin for bin in bins}
 
 
 def get_bin(item_code, warehouse):
@@ -292,6 +369,8 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 	if not args.get("posting_datetime") and args.get("posting_date"):
 		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
+	posting_datetime = args.get("posting_datetime")
+
 	in_rate = None
 
 	item_details = frappe.get_cached_value(
@@ -301,13 +380,16 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		as_dict=1,
 	)
 
-	use_moving_avg_for_batch = frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
 	skip_serial_batch_valuation = bool(
 		item_details and item_details.has_serial_no and not item_details.use_serial_no_wise_valuation
 	)
 
 	if isinstance(args, dict):
 		args = frappe._dict(args)
+
+	use_moving_avg_for_batch = frappe.get_single_value(
+		"Stock Settings", "do_not_use_batchwise_valuation"
+	) and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
 
 	if (
 		item_details
@@ -369,7 +451,7 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		return batch_obj.get_incoming_rate()
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
-		previous_sle = get_previous_sle(args)
+		previous_sle = get_previous_sle({**args, "serial_no": None})
 		if valuation_method in ("FIFO", "LIFO"):
 			if previous_sle:
 				previous_stock_queue = json.loads(previous_sle.get("stock_queue", "[]") or "[]")
@@ -393,9 +475,25 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 			company=args.get("company"),
 			fallbacks=fallbacks,
 			raise_error_if_no_rate=raise_error_if_no_rate,
+			posting_datetime=posting_datetime,
+			creation=args.get("creation"),
 		)
 
 	return flt(in_rate)
+
+
+def has_batchwise_valued_batch(batch_no: str | None, serial_and_batch_bundle: str | None) -> bool:
+	"""Pooling applies to Moving Average batches only; FIFO batches keep batch-wise valuation."""
+	batches = [batch_no] if batch_no else []
+	if serial_and_batch_bundle:
+		batches = frappe.get_all(
+			"Serial and Batch Entry", {"parent": serial_and_batch_bundle}, pluck="batch_no"
+		)
+
+	return (
+		bool(batches)
+		and frappe.db.exists("Batch", {"name": ("in", batches), "use_batchwise_valuation": 1}) is not None
+	)
 
 
 def get_avg_purchase_rate(serial_nos):
@@ -538,14 +636,13 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		for key, value in data:
 			if key not in convertible_columns:
 				continue
-			# If no conversion factor for the UOM, defaults to 1
-			if not conversion_factors[row_idx]:
-				conversion_factors[row_idx] = 1
-
-			if convertible_columns.get(key) == "rate":
-				new_value = flt(value) * conversion_factors[row_idx]
+			conversion_factor = conversion_factors[row_idx]
+			if not conversion_factor:
+				new_value = None
+			elif convertible_columns.get(key) == "rate":
+				new_value = flt(value) * conversion_factor
 			else:
-				new_value = flt(value) / conversion_factors[row_idx]
+				new_value = flt(value) / conversion_factor
 
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)

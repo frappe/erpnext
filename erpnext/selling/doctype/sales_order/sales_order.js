@@ -1011,7 +1011,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					if (doc.is_subcontracted) {
-						if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+						if (doc.items.some((item) => flt(item.subcontracted_qty) < flt(item.stock_qty))) {
 							this.frm.add_custom_button(
 								__("Subcontracting Inward Order"),
 								() => {
@@ -1484,8 +1484,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var d = new frappe.ui.Dialog({
 			title: __("Items for Raw Material Request"),
 			fields: fields,
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				me.frm.call({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request",
 					args: {
@@ -1814,8 +1813,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				frappe.call({
 					method: "frappe.desk.form.utils.add_comment",
 					args: {

@@ -3,7 +3,9 @@
 
 
 import frappe
-from frappe.utils import flt
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+from frappe.query_builder.functions import Sum
+from frappe.utils import floor, flt
 
 
 def execute(filters=None):
@@ -12,7 +14,7 @@ def execute(filters=None):
 
 	columns = get_columns()
 	iwq_map = get_item_warehouse_quantity_map()
-	item_map = get_item_details()
+	item_map = get_item_details(list(iwq_map.keys()))
 	data = []
 	for sbom, warehouse in iwq_map.items():
 		total = 0
@@ -53,46 +55,79 @@ def get_columns():
 	return columns
 
 
-def get_item_details():
+def get_item_details(item_codes):
+	if not item_codes:
+		return {}
 	item_map = {}
-	for item in frappe.db.sql(
-		"""SELECT name, item_name, description, stock_uom
-								from `tabItem`""",
-		as_dict=1,
+	for item in frappe.get_all(
+		"Item",
+		filters={"name": ["in", item_codes]},
+		fields=["name", "item_name", "description", "stock_uom"],
 	):
 		item_map.setdefault(item.name, item)
 	return item_map
 
 
 def get_item_warehouse_quantity_map():
-	query = """SELECT parent, warehouse, MIN(qty) AS qty
-			   FROM (SELECT b.parent, bi.item_code, bi.warehouse,
-							sum(bi.projected_qty) / b.qty AS qty
-					 FROM tabBin AS bi, (SELECT pb.new_item_code as parent, b.item_code, b.qty, w.name
-										 FROM `tabProduct Bundle Item` b, `tabWarehouse` w,
-											  `tabProduct Bundle` pb
-										 where b.parent = pb.name) AS b
-					 WHERE bi.item_code = b.item_code
-						   AND bi.warehouse = b.name
-					 GROUP BY b.parent, b.item_code, bi.warehouse
-					 UNION ALL
-					 SELECT b.parent, b.item_code, b.name, 0 AS qty
-					 FROM (SELECT pb.new_item_code as parent, b.item_code, b.qty, w.name
-						   FROM `tabProduct Bundle Item` b, `tabWarehouse` w,
-								`tabProduct Bundle` pb
-						   where b.parent = pb.name) AS b
-					 WHERE NOT EXISTS(SELECT *
-									  FROM `tabBin` AS bi
-									  WHERE bi.item_code = b.item_code
-											AND bi.warehouse = b.name)) AS r
-			   GROUP BY parent, warehouse
-			   HAVING MIN(qty) != 0"""
-	result = frappe.db.sql(query, as_dict=1)
-	last_sbom = ""
+	pb = frappe.qb.DocType("Product Bundle")
+	pbi = frappe.qb.DocType("Product Bundle Item")
+	bundle_components = (
+		frappe.qb.from_(pbi)
+		.inner_join(pb)
+		.on(pbi.parent == pb.name)
+		.select(pb.new_item_code.as_("parent"), pbi.item_code, Sum(pbi.qty).as_("qty"))
+		.where(pb.disabled == 0)
+		.groupby(pb.new_item_code, pbi.item_code)
+		.run(as_dict=True)
+	)
+
+	if not bundle_components:
+		return {}
+
+	component_items = list({c.item_code for c in bundle_components})
+
+	bin_projected = {
+		(b.item_code, b.warehouse): flt(b.projected_qty) for b in get_component_bins(component_items)
+	}
+
+	bin_warehouses = {wh for (_, wh) in bin_projected}
+
+	# packable bundles per (bundle, warehouse) = MIN over components of projected_qty / qty per bundle
+	packable_qty = {}
+	for component in bundle_components:
+		if not component.qty:
+			continue
+		for warehouse in bin_warehouses:
+			qty = bin_projected.get((component.item_code, warehouse), 0) / flt(component.qty)
+			key = (component.parent, warehouse)
+			packable_qty[key] = min(packable_qty[key], qty) if key in packable_qty else qty
+
 	sbom_map = {}
-	for line in result:
-		if line.get("parent") != last_sbom:
-			last_sbom = line.get("parent")
-			actual_dict = sbom_map.setdefault(last_sbom, {})
-		actual_dict.setdefault(line.get("warehouse"), line.get("qty"))
+	for (parent, warehouse), qty in packable_qty.items():
+		# round off float-division noise, then floor to whole, non-negative bundles
+		bundles = max(0, floor(flt(qty, 9)))
+		if bundles:
+			sbom_map.setdefault(parent, {})[warehouse] = bundles
+
 	return sbom_map
+
+
+def get_component_bins(component_items):
+	bin_table = frappe.qb.DocType("Bin")
+	query = (
+		frappe.qb.from_(bin_table)
+		.select(bin_table.item_code, bin_table.warehouse, bin_table.projected_qty)
+		.where(bin_table.item_code.isin(component_items))
+	)
+
+	if warehouses := get_user_permitted_warehouses():
+		query = query.where(bin_table.warehouse.isin(warehouses))
+
+	return query.run(as_dict=True)
+
+
+def get_user_permitted_warehouses():
+	# Warehouse user permissions that apply to Bin; an empty set means no restriction, matching how
+	# Frappe itself scopes link fields by User Permission (applicable_for)
+	warehouse_permissions = get_user_permissions(frappe.session.user).get("Warehouse") or []
+	return get_allowed_docs_for_doctype(warehouse_permissions, "Bin")

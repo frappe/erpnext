@@ -537,7 +537,6 @@ def update_stock_settings():
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
-	stock_settings.default_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores")})
 	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
@@ -547,11 +546,9 @@ def update_stock_settings():
 	stock_settings.save()
 
 
-def create_bank_account(args, demo=False):
+def create_bank_account(args):
 	if not args.get("bank_account"):
-		if not demo:
-			return
-		args["bank_account"] = _("Demo Bank Account")
+		return
 
 	company_name = args.get("company_name")
 	bank_account_group = frappe.db.get_value(

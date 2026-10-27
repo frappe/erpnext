@@ -5,6 +5,7 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.utils import getdate
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -20,7 +21,7 @@ def get_data(filters):
 	data = get_stock_ledger_entries(filters)
 	bundles = get_bundles(data)
 	serial_nos_data = prepare_serial_nos(data, bundles)
-	data = get_incorrect_serial_nos(serial_nos_data)
+	data = get_incorrect_serial_nos(serial_nos_data, filters.from_date and getdate(filters.from_date))
 
 	return data
 
@@ -65,7 +66,7 @@ def prepare_serial_nos(data, bundles):
 	return serial_no_wise_data
 
 
-def get_incorrect_serial_nos(serial_nos_data):
+def get_incorrect_serial_nos(serial_nos_data, from_date):
 	result = []
 
 	total_value = frappe._dict({"qty": 0, "valuation_rate": 0, "serial_no": frappe.bold(_("Balance"))})
@@ -73,8 +74,8 @@ def get_incorrect_serial_nos(serial_nos_data):
 	for _serial_no, data in serial_nos_data.items():
 		total_dict = frappe._dict({"qty": 0, "valuation_rate": 0, "serial_no": frappe.bold(_("Total"))})
 
-		if check_incorrect_serial_data(data, total_dict):
-			result.extend(data)
+		if check_incorrect_serial_data(data, total_dict, from_date):
+			result.extend(row for row in data if not from_date or row.posting_date >= from_date)
 
 			total_value.qty += total_dict.qty
 			total_value.valuation_rate += total_dict.valuation_rate
@@ -90,11 +91,14 @@ def get_incorrect_serial_nos(serial_nos_data):
 	return result
 
 
-def check_incorrect_serial_data(data, total_dict):
+def check_incorrect_serial_data(data, total_dict, from_date):
 	incorrect_data = False
 	for row in data:
 		total_dict.qty += row.qty
 		total_dict.valuation_rate += row.valuation_rate
+
+		if from_date and row.posting_date < from_date:
+			continue
 
 		if (total_dict.qty == 0 and abs(total_dict.valuation_rate) > 0) or total_dict.qty < 0:
 			incorrect_data = True
@@ -123,12 +127,11 @@ def get_stock_ledger_entries(report_filters):
 
 	if report_filters.get("item_code"):
 		filters["item_code"] = report_filters.get("item_code")
+	elif report_filters.get("from_date") and report_filters.get("to_date"):
+		filters["item_code"] = ("in", get_items_moved_in_period(report_filters, filters, or_filters))
 
-	if report_filters.get("from_date") and report_filters.get("to_date"):
-		filters["posting_date"] = (
-			"between",
-			[report_filters.get("from_date"), report_filters.get("to_date")],
-		)
+	if report_filters.get("to_date"):
+		filters["posting_date"] = ("<=", report_filters.get("to_date"))
 
 	return frappe.get_all(
 		"Stock Ledger Entry",
@@ -136,6 +139,17 @@ def get_stock_ledger_entries(report_filters):
 		filters=filters,
 		or_filters=or_filters,
 		order_by="posting_date asc, posting_time asc, creation asc",
+	)
+
+
+def get_items_moved_in_period(report_filters, filters, or_filters):
+	period = [report_filters.get("from_date"), report_filters.get("to_date")]
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters={**filters, "posting_date": ("between", period)},
+		or_filters=or_filters,
+		pluck="item_code",
+		distinct=True,
 	)
 
 

@@ -182,7 +182,7 @@
   },
   {
    "default": "0",
-   "description": "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.",
+   "description": "While making a Purchase Receipt or Purchase Invoice from a Purchase Order, use the exchange rate on its posting date rather than inheriting it from the Purchase Order.",
    "fieldname": "use_transaction_date_exchange_rate",
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate"
@@ -351,7 +351,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-27 23:04:00.842393",
+ "modified": "2026-10-07 20:54:19.279740",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

@@ -11,7 +11,12 @@ import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import (
+	ItemDetailsCtx,
+	get_conversion_factor,
+	get_item_details,
+	get_price_list_rate,
+)
 
 
 class PackedItem(Document):
@@ -45,6 +50,7 @@ class PackedItem(Document):
 		projected_qty: DF.Float
 		qty: DF.Float
 		rate: DF.Currency
+		received_qty: DF.Float
 		requested_qty: DF.Float
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
@@ -116,9 +122,11 @@ def is_product_bundle(item_code: str) -> bool:
 def get_indexed_packed_items_table(doc):
 	"""
 	Create dict from stale packed items table like:
-	{(Parent Item 1, Bundle Item 1, ae4b5678): {...}, (key): {value}}
+	{(Parent Item 1, Bundle Item 1, ae4b5678): [{...}], (key): [{value}]}
 
-	Use: to quickly retrieve/check if row existed in table instead of looping n times
+	Use: to quickly retrieve/check if row existed in table instead of looping n times.
+	A component repeated on a bundle shares one key, so rows are kept as a list and
+	consumed per occurrence rather than collapsed onto a single row.
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
@@ -128,7 +136,7 @@ def get_indexed_packed_items_table(doc):
 			packed_item.idx if doc.is_new() else packed_item.parent_detail_docname,
 		)
 
-		indexed_table[key] = packed_item
+		indexed_table.setdefault(key, []).append(packed_item)
 
 	return indexed_table
 
@@ -193,13 +201,17 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 		packing_item.item_code,
 		main_item_row.idx if doc.is_new() else main_item_row.name,
 	)
-	if packed_items_table.get(key):
-		pi_row, exists = packed_items_table.get(key), True
+	# a component repeated on the bundle shares one key; consume stale rows in order so
+	# each occurrence keeps its own packed row instead of overwriting a single one
+	if stale_rows := packed_items_table.get(key):
+		pi_row, exists = stale_rows.pop(0), True
 
 	if not exists:
 		pi_row = doc.append("packed_items", {})
 	elif reset:  # add row if row exists but table is reset
-		pi_row.idx, pi_row.name = None, None
+		pi_row.idx = None
+		if doc.is_new():
+			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
 
 	return pi_row
@@ -231,12 +243,21 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	pi_row.qty = flt(packing_item.qty) * flt(main_item_row.stock_qty)
+	# component qty is in the bundle row's UOM; convert to stock qty before scaling by bundle qty
+	component_factor = get_component_conversion_factor(packing_item, item_data.stock_uom)
+	pi_row.qty = flt(packing_item.qty) * component_factor * flt(main_item_row.stock_qty)
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
+
+
+def get_component_conversion_factor(packing_item, stock_uom):
+	uom = packing_item.get("uom")
+	if not uom or uom == stock_uom:
+		return 1.0
+	return flt(get_conversion_factor(packing_item.item_code, uom).get("conversion_factor")) or 1.0
 
 
 def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
@@ -383,7 +404,8 @@ def get_items_from_product_bundle(row):
 		row.update(
 			{
 				"item_code": item.item_code,
-				"qty": flt(row["quantity"]) * flt(item.qty),
+				# convert the component's bundle-row UOM to stock qty, as packing does
+				"qty": flt(row["quantity"]) * flt(item.qty) * get_component_conversion_factor(item, None),
 				"conversion_rate": 1,
 				"currency": frappe.defaults.get_defaults().currency,
 			}

@@ -339,28 +339,23 @@ def update_pegged_currencies():
 
 
 def set_default_print_formats():
-	# For each doctype, prefer the newer builder-made "Modern with Images" format,
-	# falling back to the older "with Item Image" format if it isn't present.
-	default_map = {
-		"Sales Order": ["Sales Order Modern with Images", "Sales Order with Item Image"],
-		"Sales Invoice": ["Sales Invoice Modern with Images", "Sales Invoice with Item Image"],
-		"Delivery Note": ["Delivery Note Modern with Images", "Delivery Note with Item Image"],
-		"Purchase Order": ["Purchase Order Modern with Images", "Purchase Order with Item Image"],
-		"Purchase Invoice": ["Purchase Invoice Modern with Images", "Purchase Invoice with Item Image"],
-		"POS Invoice": ["POS Invoice Modern with Images", "POS Invoice with Item Image"],
-		"Quotation": ["Quotation Modern with Images", "Quotation with Item Image"],
-		"Request for Quotation": [
-			"Request for Quotation Modern with Images",
-			"Request for Quotation with Item Image",
-		],
-	}
+	doctypes = (
+		"Sales Order",
+		"Sales Invoice",
+		"Delivery Note",
+		"Purchase Order",
+		"Purchase Invoice",
+		"POS Invoice",
+		"Quotation",
+		"Request for Quotation",
+	)
 
-	for doctype, print_formats in default_map.items():
+	for doctype in doctypes:
 		if frappe.get_meta(doctype).default_print_format:
 			continue
 
-		print_format = next((pf for pf in print_formats if frappe.db.exists("Print Format", pf)), None)
-		if not print_format:
+		print_format = f"{doctype} Classic"
+		if not frappe.db.exists("Print Format", print_format):
 			continue
 
 		frappe.make_property_setter(
@@ -405,12 +400,20 @@ def toggle_hidden_fields():
 		toggle_sales_discount_section,
 		toggle_subscription_sections,
 	)
+	from erpnext.selling.doctype.selling_settings.selling_settings import (
+		toggle_tracking_sales_commissions_section,
+		toggle_utm_analytics_section,
+	)
 
 	acc_settings = frappe.get_doc("Accounts Settings")
 	toggle_accounting_dimension_sections(not acc_settings.enable_accounting_dimensions)
 	toggle_sales_discount_section(not acc_settings.enable_discounts_and_margin)
 	toggle_subscription_sections(not acc_settings.enable_subscription)
 	toggle_loyalty_point_program_section(not acc_settings.enable_loyalty_point_program)
+
+	selling_settings = frappe.get_doc("Selling Settings")
+	toggle_tracking_sales_commissions_section(not selling_settings.enable_tracking_sales_commissions)
+	toggle_utm_analytics_section(not selling_settings.enable_utm)
 
 
 DEFAULT_ROLE_PROFILES = {

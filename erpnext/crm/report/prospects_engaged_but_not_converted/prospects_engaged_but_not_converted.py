@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, now
+from frappe.query_builder import Criterion, Order
+from frappe.utils import add_days, cint, now
 
 
 def execute(filters=None):
@@ -32,7 +33,7 @@ def get_columns():
 			"label": _("Reference Document Type"),
 			"fieldname": "reference_document_type",
 			"fieldtype": "Link",
-			"options": "Doctype",
+			"options": "DocType",
 			"width": 100,
 		},
 		{
@@ -58,40 +59,66 @@ def get_columns():
 	return columns
 
 
+REFERENCE_DOCTYPES = (
+	("Opportunity", "party_name", {"opportunity_from": "Lead"}),
+	("Quotation", "party_name", {"quotation_to": "Lead"}),
+	("Issue", "lead", {"status": ["!=", "Closed"]}),
+)
+
+
 def get_data(filters):
 	lead_details = []
-	lead_filters = get_lead_filters(filters)
+	leads = frappe.get_list(
+		"Lead", fields=["name", "lead_name", "company_name"], filters=get_lead_filters(filters)
+	)
+	if not leads:
+		return lead_details
 
-	for lead in frappe.get_all("Lead", fields=["name", "lead_name", "company_name"], filters=lead_filters):
-		data = frappe.db.sql(
-			"""
-			select
-				`tabCommunication`.reference_doctype, `tabCommunication`.reference_name,
-				`tabCommunication`.content, `tabCommunication`.communication_date
-			from
-				(
-					(select name, party_name as lead from `tabOpportunity` where opportunity_from='Lead' and party_name = %(lead)s)
-				union
-					(select name, party_name as lead from `tabQuotation` where quotation_to = 'Lead' and party_name = %(lead)s)
-				union
-					(select name, lead from `tabIssue` where lead = %(lead)s and status!='Closed')
-				union
-					(select %(lead)s, %(lead)s)
-				)
-				as ref_document, `tabCommunication`
-			where
-				`tabCommunication`.reference_name = ref_document.name and
-				`tabCommunication`.sent_or_received = 'Received'
-			order by
-				ref_document.lead, `tabCommunication`.creation desc limit %(limit)s""",
-			{"lead": lead.name, "limit": filters.get("no_of_interaction")},
-		)
-
-		for lead_info in data:
-			lead_data = [lead.name, lead.lead_name, lead.company_name, *list(lead_info)]
-			lead_details.append(lead_data)
+	references = get_references([lead.name for lead in leads])
+	limit = cint(filters.get("no_of_interaction"))
+	for lead in leads:
+		for communication in get_received_communications(references[lead.name], limit):
+			lead_details.append([lead.name, lead.lead_name, lead.company_name, *communication])
 
 	return lead_details
+
+
+def get_references(lead_names: list) -> dict:
+	"""Map each lead to the names, per DocType, of itself and the documents linked to it that the user can read."""
+	references = {name: {"Lead": {name}} for name in lead_names}
+	for doctype, lead_field, filters in REFERENCE_DOCTYPES:
+		filters = {**filters, lead_field: ["in", lead_names]}
+		for row in get_readable(doctype, filters, ["name", lead_field]):
+			references[row[lead_field]].setdefault(doctype, set()).add(row.name)
+	return references
+
+
+def get_received_communications(references: dict, limit: int) -> list:
+	communication = frappe.qb.DocType("Communication")
+	# names are unique only within a DocType, so each DocType is matched with its own names
+	matches = [
+		(communication.reference_doctype == doctype) & communication.reference_name.isin(list(names))
+		for doctype, names in references.items()
+	]
+	return (
+		frappe.qb.from_(communication)
+		.select(
+			communication.reference_doctype,
+			communication.reference_name,
+			communication.content,
+			communication.communication_date,
+		)
+		.where(Criterion.any(matches) & (communication.sent_or_received == "Received"))
+		.orderby(communication.creation, order=Order.desc)
+		.limit(limit)
+		.run()
+	)
+
+
+def get_readable(doctype: str, filters: dict, fields: list) -> list:
+	if not frappe.has_permission(doctype, "read"):
+		return []
+	return frappe.get_list(doctype, filters=filters, fields=fields)
 
 
 def get_lead_filters(filters):

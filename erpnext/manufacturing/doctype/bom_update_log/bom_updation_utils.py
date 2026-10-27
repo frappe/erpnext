@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 import frappe
 from frappe import _
+from pypika.terms import ExistsCriterion
 
 
 def replace_bom(boms: dict, log_name: str) -> None:
@@ -19,11 +20,10 @@ def replace_bom(boms: dict, log_name: str) -> None:
 	current_bom = boms.get("current_bom")
 	new_bom = boms.get("new_bom")
 
-	unit_cost = get_bom_unit_cost(new_bom)
-	update_new_bom_in_bom_items(unit_cost, current_bom, new_bom)
+	update_new_bom_in_bom_items(current_bom, new_bom)
 
 	frappe.cache().delete_key("bom_children")
-	parent_boms = get_ancestor_boms(new_bom)
+	parent_boms = sort_children_first(get_ancestor_boms(new_bom))
 
 	for bom in parent_boms:
 		bom_obj = frappe.get_doc("BOM", bom)
@@ -32,8 +32,7 @@ def replace_bom(boms: dict, log_name: str) -> None:
 		# which proves to be expensive while doing bulk replace
 		bom_obj._doc_before_save = copy.deepcopy(bom_obj)
 		bom_obj.update_exploded_items()
-		bom_obj.calculate_cost()
-		bom_obj.update_parent_cost()
+		bom_obj.calculate_cost(save_updates=True)
 		bom_obj.db_update()
 		bom_obj.flags.updater_reference = {
 			"doctype": "BOM Update Log",
@@ -67,49 +66,80 @@ def update_cost_in_level(doc: "BOMUpdateLog", bom_list: list[str], batch_name: i
 			frappe.db.commit()  # nosemgrep
 
 
-def get_ancestor_boms(new_bom: str, bom_list: list | None = None) -> list:
-	"Recursively get all ancestors of BOM."
+def get_ancestor_boms(new_bom: str) -> list:
+	"Get all ancestors of BOM."
 
-	bom_list = bom_list or []
+	ancestors = []
+	seen = set()
+	children = [new_bom]
+	while children:
+		links = get_bom_links_query().as_("bom_links")
+		parents = (
+			frappe.qb.from_(links).select(links.parent).where(links.bom_no.isin(children)).distinct()
+		).run(pluck=True)
+		children = [parent for parent in parents if parent not in seen]
+		seen.update(children)
+		ancestors.extend(children)
+
+	if new_bom in seen:
+		frappe.throw(_("BOM recursion: {0} cannot be an ancestor of itself").format(new_bom))
+
+	return ancestors
+
+
+def get_bom_links_query():
 	bom_item = frappe.qb.DocType("BOM Item")
+	bom_operation = frappe.qb.DocType("BOM Operation")
 
-	parents = (
+	return (
 		frappe.qb.from_(bom_item)
-		.select(bom_item.parent)
-		.where((bom_item.bom_no == new_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
-		.run(as_dict=True)
+		.select(bom_item.parent, bom_item.bom_no)
+		.where((bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
+	) + (
+		frappe.qb.from_(bom_operation)
+		.select(bom_operation.parent, bom_operation.bom_no)
+		.where((bom_operation.docstatus < 2) & (bom_operation.parenttype == "BOM"))
 	)
 
-	for d in parents:
-		if new_bom == d.parent:
-			frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(new_bom, d.parent))
 
-		if d.parent not in tuple(bom_list):
-			bom_list.append(d.parent)
-
-		get_ancestor_boms(d.parent, bom_list)
-
-	return bom_list
-
-
-def update_new_bom_in_bom_items(unit_cost: float, current_bom: str, new_bom: str) -> None:
-	bom_item = frappe.qb.DocType("BOM Item")
-	(
-		frappe.qb.update(bom_item)
-		.set(bom_item.bom_no, new_bom)
-		.set(bom_item.rate, unit_cost)
-		.set(bom_item.amount, (bom_item.stock_qty * unit_cost))
-		.where((bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
-	).run()
+def update_new_bom_in_bom_items(current_bom: str, new_bom: str) -> None:
+	for doctype in ("BOM Item", "BOM Operation"):
+		table = frappe.qb.DocType(doctype)
+		(
+			frappe.qb.update(table)
+			.set(table.bom_no, new_bom)
+			.where((table.bom_no == current_bom) & (table.docstatus < 2) & (table.parenttype == "BOM"))
+		).run()
 
 
-def get_bom_unit_cost(bom_name: str) -> float:
-	bom = frappe.qb.DocType("BOM")
-	new_bom_unitcost = (
-		frappe.qb.from_(bom).select(bom.total_cost / bom.quantity).where(bom.name == bom_name).run()
-	)
+def sort_children_first(boms: list[str]) -> list[str]:
+	if len(boms) < 2:
+		return boms
 
-	return frappe.utils.flt(new_bom_unitcost[0][0])
+	bom_links = get_bom_links_query().as_("bom_links")
+	links = (
+		frappe.qb.from_(bom_links)
+		.select(bom_links.parent, bom_links.bom_no)
+		.where(bom_links.parent.isin(boms) & bom_links.bom_no.isin(boms))
+	).run(as_dict=True)
+
+	pending_children = defaultdict(set)
+	parents_of = defaultdict(set)
+	for link in links:
+		pending_children[link.parent].add(link.bom_no)
+		parents_of[link.bom_no].add(link.parent)
+
+	ordered = []
+	ready = [bom for bom in boms if not pending_children[bom]]
+	while ready:
+		bom = ready.pop()
+		ordered.append(bom)
+		for parent in parents_of[bom]:
+			pending_children[parent].discard(bom)
+			if not pending_children[parent]:
+				ready.append(parent)
+
+	return ordered
 
 
 def update_cost_in_boms(bom_list: list[str]) -> None:
@@ -155,17 +185,26 @@ def get_leaf_boms() -> list[str]:
 
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
+	child_bom = frappe.qb.DocType("BOM").as_("child_bom")
 
-	boms = (
+	active_children = (
+		frappe.qb.from_(bom_item)
+		.join(child_bom)
+		.on(child_bom.name == bom_item.bom_no)
+		.select(bom_item.name)
+		.where(
+			(bom_item.parent == bom.name)
+			& (bom_item.parenttype == "BOM")
+			& (child_bom.docstatus == 1)
+			& (child_bom.is_active == 1)
+		)
+	)
+
+	return (
 		frappe.qb.from_(bom)
-		.left_join(bom_item)
-		.on((bom.name == bom_item.parent) & (bom_item.bom_no != ""))
 		.select(bom.name)
-		.where((bom.docstatus == 1) & (bom.is_active == 1) & (bom_item.bom_no.isnull()))
-		.distinct()
+		.where((bom.docstatus == 1) & (bom.is_active == 1) & ExistsCriterion(active_children).negate())
 	).run(pluck=True)
-
-	return boms
 
 
 def _generate_dependence_map() -> defaultdict:
@@ -179,17 +218,20 @@ def _generate_dependence_map() -> defaultdict:
 
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
+	child_bom = frappe.qb.DocType("BOM").as_("child_bom")
 
 	bom_items = (
 		frappe.qb.from_(bom_item)
 		.join(bom)
 		.on(bom_item.parent == bom.name)
+		.join(child_bom)
+		.on(child_bom.name == bom_item.bom_no)
 		.select(bom_item.bom_no, bom_item.parent)
 		.where(
-			(bom_item.bom_no.isnotnull())
-			& (bom_item.bom_no != "")
-			& (bom.docstatus == 1)
+			(bom.docstatus == 1)
 			& (bom.is_active == 1)
+			& (child_bom.docstatus == 1)
+			& (child_bom.is_active == 1)
 			& (bom_item.parenttype == "BOM")
 		)
 	).run(as_dict=True)

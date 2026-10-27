@@ -28,6 +28,10 @@
    "settings_doctype": "Buying Settings"
   },
   {
+   "setting_field": "use_transaction_date_exchange_rate",
+   "settings_doctype": "Buying Settings"
+  },
+  {
    "setting_field": "bill_for_rejected_quantity_in_purchase_invoice",
    "settings_doctype": "Buying Settings"
   },
@@ -56,7 +60,7 @@
    "settings_doctype": "Accounts Settings"
   }
  ],
- "modified": "2026-07-20 16:02:40.647761",
+ "modified": "2026-10-07 20:54:19.279740",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt - Stock",
