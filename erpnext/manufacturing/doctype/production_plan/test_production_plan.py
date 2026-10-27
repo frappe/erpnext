@@ -1109,7 +1109,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
 
 		plan = create_production_plan(
-			item_code=fg_item, planned_qty=80, skip_getting_mr_items=True, do_not_submit=1
+			item_code=fg_item,
+			planned_qty=80,
+			consider_process_loss=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
 		)
 		plan.po_items[0].include_exploded_items = 1
 		items = get_items_for_material_requests(plan.as_dict())
@@ -1117,6 +1121,29 @@ class TestProductionPlan(ERPNextTestSuite):
 		# 80 of the sub-assembly needs a Work Order for 100, which consumes 100 of the raw material.
 		self.assertEqual(
 			[(row.get("item_code"), row.get("required_bom_qty")) for row in items], [(rm_item, 100)]
+		)
+
+	def test_plan_ignores_process_loss_unless_considered(self):
+		rm_item = make_item("_Test PP Ignored Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test PP Ignored Loss Sub", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("_Test PP Ignored Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], process_loss_percentage=20, currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], process_loss_percentage=20, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=80, stock_uom="Kg", skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		plan.save()
+
+		self.assertEqual(plan.po_items[0].process_loss_percentage, 0)
+		self.assertEqual(
+			(plan.sub_assembly_items[0].qty, plan.sub_assembly_items[0].process_loss_percentage), (80, 0)
+		)
+		plan.po_items[0].include_exploded_items = 1
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			[(row.get("item_code"), row.get("required_bom_qty")) for row in items], [(rm_item, 80)]
 		)
 
 	def test_whole_number_sub_assembly_rounds_up_for_process_loss(self):
@@ -1129,7 +1156,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
 
 		plan = create_production_plan(
-			item_code=fg_item, planned_qty=10, skip_getting_mr_items=True, do_not_submit=1
+			item_code=fg_item,
+			planned_qty=10,
+			consider_process_loss=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
 		)
 		plan.get_sub_assembly_items()
 
@@ -5295,6 +5326,7 @@ def create_production_plan(**args):
 			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 			"reserve_stock": args.reserve_stock or 0,
+			"consider_process_loss": args.consider_process_loss or 0,
 			"for_warehouse": args.for_warehouse or None,
 			"raw_material_group_warehouse": args.raw_material_group_warehouse or None,
 		}
