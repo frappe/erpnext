@@ -24,6 +24,41 @@ class TestEmployee(ERPNextTestSuite):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_unknown_employee_holiday_list_and_existing_user_email(self):
+		from unittest.mock import patch
+
+		from erpnext.setup.doctype.employee.employee import create_user, get_holiday_list_for_employee
+
+		get_hooks = frappe.get_hooks
+		with patch(
+			"frappe.get_hooks",
+			side_effect=lambda key, *args: [] if key == "employee_holiday_list" else get_hooks(key, *args),
+		):
+			with self.assertRaisesRegex(frappe.DoesNotExistError, "Employee .* not found"):
+				get_holiday_list_for_employee("NONEXISTENT-EMPLOYEE")
+
+		existing_email = "employee-existing-email@example.com"
+		make_employee(existing_email, company="_Test Company")
+		employee = new_employee("employee-new@example.com")
+		employee.user_id = None
+		employee.insert()
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			create_user(employee.name, existing_email)
+		self.assertFalse(employee.reload().user_id)
+
+	def test_missing_employee_without_holiday_exception(self):
+		from unittest.mock import patch
+
+		from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee, is_holiday
+
+		get_hooks = frappe.get_hooks
+		with patch(
+			"frappe.get_hooks",
+			side_effect=lambda key, *args: [] if key == "employee_holiday_list" else get_hooks(key, *args),
+		):
+			self.assertFalse(get_holiday_list_for_employee("NONEXISTENT-EMPLOYEE", raise_exception=False))
+			self.assertFalse(is_holiday("NONEXISTENT-EMPLOYEE", raise_exception=False))
+
 	def test_active_employee_requires_active_manager(self):
 		manager = frappe.get_doc(
 			"Employee", make_employee("manager-tree@example.com", company="_Test Company")

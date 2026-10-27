@@ -414,7 +414,14 @@ def get_holiday_list_for_employee(employee, raise_exception=True, as_on=None):
 	if hrms_override:
 		return frappe.get_attr(hrms_override[-1])(employee, raise_exception, as_on)
 	if employee:
-		holiday_list, company = frappe.get_cached_value("Employee", employee, ["holiday_list", "company"])
+		employee_details = frappe.get_cached_value("Employee", employee, ["holiday_list", "company"])
+		if not employee_details:
+			if raise_exception:
+				frappe.throw(
+					_("Employee {0} not found").format(frappe.bold(employee)), frappe.DoesNotExistError
+				)
+			return None
+		holiday_list, company = employee_details
 	else:
 		holiday_list = ""
 		company = frappe.db.get_single_value("Global Defaults", "default_company")
@@ -483,6 +490,12 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 		frappe.throw(_("Email is required to create a user"))
 
 	email = validate_email_address(email, True)
+	if frappe.db.exists("User", email):
+		frappe.throw(
+			_("User {0} already exists. Link the existing user to the Employee instead.").format(
+				frappe.bold(email)
+			)
+		)
 	employee_name = emp.employee_name.split(" ")
 	first_name = employee_name[0]
 	middle_name = last_name = ""
