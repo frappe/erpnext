@@ -94,15 +94,14 @@ class ProductionPlanWorkOrderQuantities:
 
 	@staticmethod
 	def get_order_qty(row, reference_field):
-		"""Work Order quantity a plan row allows. Sub-assembly rows already include their process loss."""
+		"""Quantity a plan row orders, before its planned process loss."""
 		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 			get_qty_before_process_loss,
 		)
 
-		qty = flt(row.get(QTY_FIELDS[reference_field]))
-		if reference_field == "production_plan_sub_assembly_item":
-			return qty
-		return get_qty_before_process_loss(qty, row.process_loss_percentage, row.stock_uom)
+		return get_qty_before_process_loss(
+			row.get(QTY_FIELDS[reference_field]), row.process_loss_percentage, row.stock_uom
+		)
 
 	def get_pending_quantities(self, plan):
 		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (

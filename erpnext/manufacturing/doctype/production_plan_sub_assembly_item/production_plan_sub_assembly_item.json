@@ -228,7 +228,7 @@
    "label": "Required Qty"
   },
   {
-   "description": "Qty to Order includes this loss",
+   "description": "Work Orders include this loss",
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
    "label": "% Process Loss",
@@ -286,7 +286,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-26 12:00:00.000000",
+ "modified": "2026-10-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",

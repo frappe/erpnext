@@ -315,7 +315,9 @@ def _build_sub_assembly_map(doc):
 		if d.get("type_of_manufacturing") == "Material Request":
 			continue
 		key = (d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
-		sub_assembly_items[key] += d.get("qty")
+		sub_assembly_items[key] += get_qty_before_process_loss(
+			d.get("qty"), d.get("process_loss_percentage"), d.get("stock_uom")
+		)
 	return {k[:2]: v for k, v in sub_assembly_items.items()}
 
 
