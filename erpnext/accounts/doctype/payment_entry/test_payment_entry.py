@@ -1804,6 +1804,62 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
 
+	def test_outstanding_invoice_terms_after_credit_note(self):
+		create_payment_terms_template()
+		template = frappe.get_doc("Payment Terms Template", "Test Receivable Template")
+		template.terms[0].invoice_portion = 30
+		template.terms[1].invoice_portion = 70
+		template.save()
+		si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		si.payment_terms_template = template.name
+		si.save().submit()
+		credit_note = create_sales_invoice(
+			qty=-1, rate=200, is_return=1, return_against=si.name, do_not_save=True
+		)
+		credit_note.update_outstanding_for_self = 0
+		credit_note.save().submit()
+		self.assertEqual(si.reload().outstanding_amount, 800)
+		references = get_outstanding_reference_documents(
+			{
+				"company": si.company,
+				"party_type": "Customer",
+				"party": si.customer,
+				"party_account": si.debit_to,
+				"get_outstanding_invoices": True,
+			}
+		)
+		rows = [row for row in references if row.voucher_no == si.name]
+		self.assertEqual(
+			[row.payment_term for row in rows], [term.payment_term for term in si.payment_schedule]
+		)
+		self.assertEqual([row.outstanding_amount for row in rows], [100, 700])
+		self.assertEqual([row.payment_term_outstanding for row in rows], [100, 700])
+		self.assertEqual(sum(row.outstanding_amount for row in rows), si.reload().outstanding_amount)
+
+	def test_outstanding_invoice_terms_include_small_balances(self):
+		create_payment_terms_template()
+		for precision, amount in ((2, 0.01), (2, 0.05), (2, 0.10), (3, 0.005)):
+			with (
+				self.subTest(precision=precision, amount=amount),
+				self.change_settings("System Settings", currency_precision=precision),
+			):
+				si = create_sales_invoice(qty=1, rate=amount, do_not_save=True)
+				si.payment_terms_template = "Test Receivable Template"
+				si.save().submit()
+				references = get_outstanding_reference_documents(
+					{
+						"company": si.company,
+						"party_type": "Customer",
+						"party": si.customer,
+						"party_account": si.debit_to,
+						"get_outstanding_invoices": True,
+					}
+				)
+				rows = [row for row in references if row.voucher_no == si.name]
+				self.assertTrue(rows)
+				self.assertTrue(all(row.outstanding_amount > 0 for row in rows))
+				self.assertEqual(flt(sum(row.outstanding_amount for row in rows), precision), amount)
+
 	def test_negative_outstanding_invoice_currency_multicurrency(self):
 		"""
 		A foreign-currency invoice whose party account is in company currency should report its
