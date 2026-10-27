@@ -189,7 +189,14 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 		for sub_cost_center, percentage in cost_center_allocation:
 			gle = copy.deepcopy(d)
 			gle.cost_center = sub_cost_center
-			for field in ("debit", "credit", "debit_in_account_currency", "credit_in_account_currency"):
+			for field in (
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+				"debit_in_transaction_currency",
+				"credit_in_transaction_currency",
+			):
 				gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
 			new_gl_map.append(gle)
 
