@@ -163,7 +163,8 @@ class Employee(NestedSet):
 			return
 
 		self.validate_for_enabled_user_id()
-		self.validate_duplicate_user_id()
+		if self.status == "Active":
+			self.validate_duplicate_user_id()
 		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
 			self.validate_user_access()
 
@@ -196,9 +197,14 @@ class Employee(NestedSet):
 	def on_update(self):
 		self.update_nsm_model()
 		if self.user_id:
-			self.update_user()
+			active_rehire = self.status != "Active" and frappe.db.exists(
+				"Employee", {"user_id": self.user_id, "status": "Active", "name": ["!=", self.name]}
+			)
+			if not active_rehire:
+				self.update_user()
 			self.update_user_permissions()
-			self.update_user_status()
+			if not active_rehire:
+				self.update_user_status()
 		self.reset_employee_emails_cache()
 
 	def before_insert(self):
