@@ -862,3 +862,146 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 			today(),
 		)
 		self.assertRaises(frappe.ValidationError, clear_clearing_date, "Sales Order", "SO-MISSING-0001")
+
+	def test_journal_entry_books_only_the_unallocated_amount(self):
+		txn = self.make_bank_transaction(today(), deposit=1000)
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=600,
+			save=True,
+		)
+		payment.reference_no = "TEST-JE-REST"
+		payment.reference_date = today()
+		payment.submit()
+		reconcile_vouchers(
+			txn.name,
+			[{"payment_doctype": "Payment Entry", "payment_name": payment.name, "amount": 600}],
+		)
+
+		txn = create_journal_entry_bts(
+			txn.name,
+			reference_number="TEST-JE-REST",
+			reference_date=today(),
+			posting_date=today(),
+			entry_type="Bank Entry",
+			second_account="Cash - _TC",
+		)
+
+		journal_entry = next(row for row in txn.payment_entries if row.payment_document == "Journal Entry")
+		self.assertEqual(journal_entry.allocated_amount, 400)
+		bank_debit = frappe.db.get_value(
+			"Journal Entry Account",
+			{"parent": journal_entry.payment_entry, "account": self.bank},
+			"debit_in_account_currency",
+		)
+		self.assertEqual(bank_debit, 400)
+		self.assertEqual(txn.unallocated_amount, 0)
+		self.assertEqual(txn.status, "Reconciled")
+
+	def test_reconcile_vouchers_refuses_a_draft_bank_transaction(self):
+		txn = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"date": today(),
+				"deposit": 100,
+				"bank_account": self.bank_account,
+				"currency": "INR",
+			}
+		).insert()
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+			save=True,
+		)
+		payment.reference_no = "TEST-DRAFT-TXN"
+		payment.reference_date = today()
+		payment.submit()
+
+		self.assertRaises(
+			frappe.ValidationError,
+			reconcile_vouchers,
+			txn.name,
+			[{"payment_doctype": "Payment Entry", "payment_name": payment.name, "amount": 100}],
+		)
+		self.assertIsNone(frappe.db.get_value("Payment Entry", payment.name, "clearance_date"))
+
+	def test_auto_reconcile_keeps_to_the_statement_period(self):
+		payment = create_payment_entry(
+			company=self.company,
+			posting_date=add_days(today(), -10),
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+			save=True,
+		)
+		payment.reference_no = "TEST-PERIOD"
+		payment.reference_date = add_days(today(), -10)
+		payment.submit()
+		txn = (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Transaction",
+					"date": add_days(today(), -10),
+					"deposit": 100,
+					"bank_account": self.bank_account,
+					"reference_number": "TEST-PERIOD",
+					"currency": "INR",
+				}
+			)
+			.save()
+			.submit()
+		)
+
+		auto_reconcile_vouchers(
+			bank_account=self.bank_account,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			filter_by_reference_date=False,
+		)
+
+		txn.reload()
+		self.assertEqual(txn.status, "Unreconciled")
+		self.assertIsNone(frappe.db.get_value("Payment Entry", payment.name, "clearance_date"))
+
+	def test_paid_purchase_invoice_in_another_currency_matches_by_base_amount(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		self.enable_multi_currency_setup()
+		invoice = make_purchase_invoice(
+			supplier=self.supplier,
+			currency="USD",
+			conversion_rate=80,
+			qty=1,
+			rate=50,
+			is_paid=1,
+			cash_bank_account=self.bank,
+			do_not_save=True,
+		)
+		invoice.credit_to = self.creditors_usd
+		invoice.paid_amount = 50
+		invoice.insert().submit()
+		self.assertEqual(invoice.base_paid_amount, 4000)
+		txn = self.make_bank_transaction(today(), deposit=0, withdrawal=4000)
+
+		vouchers = get_linked_payments(
+			txn.name,
+			["purchase_invoice", "exact_match"],
+			from_date=add_days(today(), -1),
+			to_date=today(),
+		)
+
+		match = next(v for v in vouchers if v.get("name") == invoice.name)
+		self.assertEqual(match.paid_amount, 4000)
