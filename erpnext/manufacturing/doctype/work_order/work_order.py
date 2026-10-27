@@ -1125,12 +1125,7 @@ class WorkOrder(Document):
 
 	def on_submit(self):
 		self.validate_warehouse()
-		if self.production_plan and frappe.db.exists(
-			"Production Plan Item Reference", {"parent": self.production_plan}
-		):
-			self.update_work_order_qty_in_combined_so()
-		else:
-			self.update_work_order_qty_in_so()
+		self.update_work_order_qty_in_sales_orders()
 
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
@@ -1149,12 +1144,7 @@ class WorkOrder(Document):
 		self.on_close_or_cancel()
 
 	def on_close_or_cancel(self):
-		if self.production_plan and frappe.db.exists(
-			"Production Plan Item Reference", {"parent": self.production_plan}
-		):
-			self.update_work_order_qty_in_combined_so()
-		else:
-			self.update_work_order_qty_in_so()
+		self.update_work_order_qty_in_sales_orders()
 
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -3029,6 +3019,7 @@ def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=Fal
 	reserve_stock_for_work_order(doc, items, is_transfer, notify)
 
 
+<<<<<<< HEAD
 def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False):
 	"""Reserve stock for a Work Order. Internal: no permission check, because the Work Order and
 	Stock Entry lifecycles reach it for a user who need not hold Work Order write. The cancelled and
@@ -3038,6 +3029,13 @@ def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False
 	is_transfer = cint(is_transfer)
 	if items and isinstance(items, str):
 		items = parse_json(items)
+=======
+	def update_work_order_qty_in_sales_orders(self):
+		return StatusService(self).update_work_order_qty_in_sales_orders()
+
+	def update_work_order_qty_in_so(self):
+		return StatusService(self).update_work_order_qty_in_so()
+>>>>>>> 48210c7 (fix(manufacturing): refresh the Sales Order's Work Order Qty when a Work Order produces or loses qty)
 
 	sre = StockReservation(doc, items=items)
 	if doc.docstatus == 2 or doc.status == "Closed":
