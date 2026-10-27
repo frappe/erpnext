@@ -839,6 +839,48 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assert_schedule_matches_outstanding(si)
 		self.assertEqual(si.outstanding_amount, 80)
 
+	def test_foreign_currency_reconciliation_keeps_base_amounts_of_payment_schedule(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		si = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		si.customer, si.currency, si.conversion_rate = self.customer_usd, "USD", 80
+		si.debit_to = self.debtors_usd
+		si.payment_terms_template = "Test Receivable Template"
+		si.set("payment_schedule", [])
+		si.save().submit()
+
+		schedule_before = [frappe._dict(t.as_dict()) for t in si.payment_schedule]
+		je = self.create_journal_entry(self.bank, self.debtors_usd, 100, nowdate())
+		je.multi_currency = 1
+		je.accounts[0].update({"exchange_rate": 1, "debit_in_account_currency": 7200, "debit": 7200})
+		je.accounts[0].update({"credit_in_account_currency": 0, "credit": 0})
+		je.accounts[1].update({"party_type": "Customer", "party": self.customer_usd, "exchange_rate": 80})
+		je.accounts[1].update({"credit_in_account_currency": 90, "credit": 7200, "debit": 0})
+		je.accounts[1].debit_in_account_currency = 0
+		je.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.party, pr.receivable_payable_account = self.customer_usd, self.debtors_usd
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			frappe._dict(
+				{
+					"invoices": [x.as_dict() for x in pr.get("invoices")],
+					"payments": [x.as_dict() for x in pr.get("payments")],
+				}
+			)
+		)
+		pr.reconcile()
+
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 10)
+		for before, term in zip(schedule_before, si.payment_schedule, strict=True):
+			# the company-currency amounts move by the transaction-currency change times the rate
+			change = before.outstanding - term.outstanding
+			self.assertEqual(flt(before.base_outstanding - term.base_outstanding, 2), flt(change * 80, 2))
+			self.assertEqual(flt(term.base_paid_amount, 2), flt(term.paid_amount * 80, 2))
+
 	def test_foreign_currency_journal_reconciliation_updates_payment_schedule(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 

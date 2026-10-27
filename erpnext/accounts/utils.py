@@ -2272,11 +2272,10 @@ def sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc=None):
 	if ref_doc.docstatus != 1 or ref_doc.get("is_return") or not ref_doc.get("payment_schedule"):
 		return
 
-	rate = 1
+	rate = flt(ref_doc.conversion_rate) or 1
 	outstanding = flt(ref_doc.outstanding_amount)
 	if ref_doc.party_account_currency != ref_doc.currency:
 		# outstanding is in company currency, the schedule is in transaction currency
-		rate = flt(ref_doc.conversion_rate) or 1
 		outstanding /= rate
 
 	precision = ref_doc.precision("outstanding_amount")
