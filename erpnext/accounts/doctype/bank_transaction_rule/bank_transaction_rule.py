@@ -200,6 +200,11 @@ class BankTransactionRule(Document):
 
 		# Checking description rules
 		for rule_desc_rule in self.description_rules:
+			if rule_desc_rule.check == "Regex":
+				if re.search(rule_desc_rule.value or "", transaction.description or "", re.IGNORECASE):
+					return True
+				continue
+
 			desc = (transaction.description or "").lower()
 			value = (rule_desc_rule.value or "").lower()
 
@@ -213,10 +218,6 @@ class BankTransactionRule(Document):
 
 			if rule_desc_rule.check == "Ends With":
 				if desc.endswith(value):
-					return True
-
-			if rule_desc_rule.check == "Regex":
-				if re.search(value, desc):
 					return True
 
 		return False

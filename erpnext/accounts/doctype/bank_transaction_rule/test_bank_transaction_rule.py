@@ -127,6 +127,16 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 		self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="INV-12345 payment")))
 		self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="invoice abc")))
 
+	def test_evaluate_rule_description_regex_keeps_pattern_case(self):
+		doc = self._rule("rx_case", [{"check": "Regex", "value": r"UPI/\S+/"}])
+		self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="UPI/AB12CD/Rent")))
+		self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="UPI/ /Rent")))
+
+		doc = self._rule("rx_group", [{"check": "Regex", "value": r"INV-(?P<number>\d+)"}])
+		self.assertTrue(
+			doc.evaluate_rule(self._make_transaction(deposit=1, description="NEFT inv-1001 Sharma"))
+		)
+
 	def test_evaluate_rule_composite_fails_on_description(self):
 		doc = self._rule(
 			"cmp",
