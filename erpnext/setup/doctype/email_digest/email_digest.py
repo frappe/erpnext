@@ -492,7 +492,7 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(so)
 			.select(
-				IfNull(Sum(so.grand_total) - Sum(so.grand_total * so.per_billed / 100), 0),
+				IfNull(Sum(so.base_grand_total) - Sum(so.base_grand_total * so.per_billed / 100), 0),
 				Count("*"),
 			)
 			.where(
@@ -527,7 +527,7 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(so)
 			.select(
-				IfNull(Sum(so.grand_total) - Sum(so.grand_total * so.per_delivered / 100), 0),
+				IfNull(Sum(so.base_grand_total) - Sum(so.base_grand_total * so.per_delivered / 100), 0),
 				Count("*"),
 			)
 			.where(
@@ -562,7 +562,7 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(po)
 			.select(
-				IfNull(Sum(po.grand_total) - Sum(po.grand_total * po.per_received / 100), 0),
+				IfNull(Sum(po.base_grand_total) - Sum(po.base_grand_total * po.per_received / 100), 0),
 				Count("*"),
 			)
 			.where(
@@ -597,7 +597,7 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(po)
 			.select(
-				IfNull(Sum(po.grand_total) - Sum(po.grand_total * po.per_billed / 100), 0),
+				IfNull(Sum(po.base_grand_total) - Sum(po.base_grand_total * po.per_billed / 100), 0),
 				Count("*"),
 			)
 			.where(
@@ -754,10 +754,10 @@ class EmailDigest(Document):
 		value, count, billed_value, delivered_value = (
 			frappe.qb.from_(doc)
 			.select(
-				IfNull(Sum(doc.grand_total), 0),
+				IfNull(Sum(doc.base_grand_total), 0),
 				Count("*"),
-				IfNull(Sum(doc.grand_total * doc.per_billed / 100), 0),
-				IfNull(Sum(doc.grand_total * doc[getfield] / 100), 0),
+				IfNull(Sum(doc.base_grand_total * doc.per_billed / 100), 0),
+				IfNull(Sum(doc.base_grand_total * doc[getfield] / 100), 0),
 			)
 			.where(
 				(doc.transaction_date <= self.future_to_date)
@@ -780,7 +780,7 @@ class EmailDigest(Document):
 		quotation = frappe.qb.DocType("Quotation")
 		value, count = (
 			frappe.qb.from_(quotation)
-			.select(IfNull(Sum(quotation.grand_total), 0), Count("*"))
+			.select(IfNull(Sum(quotation.base_grand_total), 0), Count("*"))
 			.where(
 				(quotation.transaction_date <= self.future_to_date)
 				& (quotation.docstatus == 1)
@@ -792,7 +792,7 @@ class EmailDigest(Document):
 
 		last_value = (
 			frappe.qb.from_(quotation)
-			.select(IfNull(Sum(quotation.grand_total), 0))
+			.select(IfNull(Sum(quotation.base_grand_total), 0))
 			.where(
 				(quotation.transaction_date <= self.past_to_date)
 				& (quotation.docstatus == 1)
@@ -857,7 +857,7 @@ class EmailDigest(Document):
 				"status": ["not in", ("Cancelled")],
 				"company": self.company,
 			},
-			fields=[{"COUNT": "*", "as": "count"}, {"SUM": "grand_total", "as": "grand_total"}],
+			fields=[{"COUNT": "*", "as": "count"}, {"SUM": "base_grand_total", "as": "grand_total"}],
 		)
 
 	def get_from_to_date(self):
