@@ -114,7 +114,7 @@ def get_sales_details(filters):
 	date_col = parent.transaction_date if filters["based_on"] == "Sales Order" else parent.posting_date
 	days_since_last_order = date_diff(current_date(), date_col)
 
-	sales_data = (
+	query = (
 		frappe.qb.from_(parent)
 		.inner_join(child)
 		.on(parent.name == child.parent)
@@ -129,19 +129,12 @@ def get_sales_details(filters):
 		)
 		.where(parent.docstatus == 1)
 		.orderby(days_since_last_order)
-<<<<<<< HEAD
-	).run(as_dict=True)
-=======
 	)
 
 	if filters["based_on"] == "Sales Invoice":
 		query = query.where(parent.is_return == 0)
 
-	if condition := get_allowed_companies_condition(parent.company, filters["based_on"]):
-		query = query.where(condition)
-
 	sales_data = query.run(as_dict=True)
->>>>>>> 45b2078 (fix(inactive-sales-items): ignore credit notes when finding the last order)
 
 	# rows are ordered by recency, so the first one per (item, territory) is the latest sale
 	for d in sales_data:
