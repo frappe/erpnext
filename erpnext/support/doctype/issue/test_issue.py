@@ -485,13 +485,36 @@ class TestIssue(TestSetUp):
 			issue = frappe.get_doc("Issue", issue.name)
 			issue.customer = "__Test Customer"
 			issue.status = "Closed"
-			issue.save(ignore_permissions=True)
+			in_web_form = frappe.flags.get("in_web_form", False)
+			frappe.flags.in_web_form = True
+			try:
+				issue.save(ignore_permissions=True)
+			finally:
+				frappe.flags.in_web_form = in_web_form
 		finally:
 			frappe.set_user("Administrator")
 
 		self.assertEqual(
 			frappe.db.get_value("Issue", issue.name, ["customer", "status"]), ("_Test Customer", "Open")
 		)
+
+	def test_web_form_rejects_customer_without_select_permission(self):
+		user = self._get_no_perm_user()
+		in_web_form = frappe.flags.get("in_web_form", False)
+		frappe.set_user(user)
+		frappe.flags.in_web_form = True
+		try:
+			issue = frappe.get_doc(
+				{
+					"doctype": "Issue",
+					"subject": "Forged customer",
+					"customer": "_Test Customer",
+				}
+			)
+			self.assertRaises(frappe.PermissionError, issue.insert, ignore_permissions=True)
+		finally:
+			frappe.flags.in_web_form = in_web_form
+			frappe.set_user("Administrator")
 
 	def test_portal_list_ignores_contact_links(self):
 		from erpnext.support.doctype.issue.issue import get_issue_list

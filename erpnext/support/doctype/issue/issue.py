@@ -81,11 +81,23 @@ class Issue(Document):
 		if is_website_user():
 			self.restore_staff_only_fields()
 
+		self.validate_web_form_customer_permission()
+
 		if not self.raised_by:
 			self.raised_by = frappe.session.user
 
 		self.set_lead_contact(self.raised_by)
 		self.set_opening_time()
+
+	def validate_web_form_customer_permission(self) -> None:
+		if (
+			not frappe.flags.in_web_form
+			or not self.customer
+			or (not self.is_new() and self.customer == self.get_db_value("customer"))
+		):
+			return
+
+		frappe.has_permission("Customer", ptype="select", doc=self.customer, throw=True)
 
 	def before_save(self) -> None:
 		# runs after the SLA validate hook, so service_level_agreement is final here
