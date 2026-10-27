@@ -1,6 +1,8 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
@@ -53,6 +55,24 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
+
+	def test_closing_notifies_only_the_cashier(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
+		pos_inv.save()
+		pos_inv.submit()
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.payment_reconciliation[0].closing_amount = 3500
+		with patch("frappe.publish_realtime") as publish_realtime:
+			closing_entry.submit()
+
+		publish_realtime.assert_any_call(
+			f"poe_{opening_entry.name}",
+			message={"operation": "Closed", "creation": closing_entry.creation},
+			user=self.test_user.name,
+		)
 
 	def test_closing_with_disabled_sales_person(self):
 		opening = create_opening_entry(self.pos_profile, self.test_user.name)
