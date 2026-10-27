@@ -6,7 +6,6 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
 	add_user_permission,
 	get_doc_permissions,
-	remove_user_permission,
 )
 from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
@@ -140,9 +139,9 @@ class Employee(NestedSet):
 			if existing_user_id:
 				self.validate_user_access(existing_user_id)
 				user = frappe.get_doc("User", existing_user_id)
-				validate_employee_role(user, ignore_emp_check=True)
-				user.save(ignore_permissions=True)
-				remove_user_permission("Employee", self.name, existing_user_id, ignore_permissions=True)
+				validate_employee_role(user, excluded_employee=self.name)
+				user.save()
+				self.remove_user_permissions(existing_user_id, self.company)
 
 	def after_rename(self, old, new, merge):
 		self.db_set("employee", new)
@@ -162,19 +161,23 @@ class Employee(NestedSet):
 		if not self.user_id:
 			return
 
+		previous_doc = self.get_doc_before_save()
+		if previous_doc and previous_doc.user_id and previous_doc.user_id != self.user_id:
+			self.validate_user_access(previous_doc.user_id)
+
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
-		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
+		if self.has_user_details_changed() or any(
+			self.has_value_changed(field) for field in ("status", "create_user_permission")
+		):
 			self.validate_user_access()
 
 	def validate_user_access(self, user: str | None = None):
-		"""Only a System Manager may link, unlink or update a User holding an admin role."""
-		editor_roles = set(frappe.get_roles())
-		if "System Manager" in editor_roles:
+		user = user or self.user_id
+		if self.flags.get("created_user") == user:
 			return
 
-		user = user or self.user_id
-		if set(frappe.get_roles(user)) & (get_admin_roles() - editor_roles):
+		if not frappe.has_permission("User", "write", user):
 			frappe.throw(
 				_("You are not permitted to link or update User {0}").format(frappe.bold(user)),
 				frappe.PermissionError,
@@ -196,10 +199,25 @@ class Employee(NestedSet):
 	def on_update(self):
 		self.update_nsm_model()
 		if self.user_id:
-			self.update_user()
+			if self.has_user_details_changed():
+				self.update_user()
 			self.update_user_permissions()
 			self.update_user_status()
 		self.reset_employee_emails_cache()
+
+	def has_user_details_changed(self):
+		return any(
+			self.has_value_changed(field)
+			for field in (
+				"user_id",
+				"first_name",
+				"middle_name",
+				"last_name",
+				"date_of_birth",
+				"gender",
+				"image",
+			)
+		)
 
 	def before_insert(self):
 		self.validate_auto_user_creation()
@@ -211,31 +229,83 @@ class Employee(NestedSet):
 		if self.user_id:
 			return
 
+		email = self.prefered_email or self.company_email or self.personal_email
+		self.flags.created_user = email
 		create_user(
 			employee=self.name,
-			email=self.prefered_email or self.company_email or self.personal_email,
+			email=email,
 			create_user_permission=self.create_user_permission,
 		)
 
 	def update_user_permissions(self):
-		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
+		if not any(
+			self.has_value_changed(field) for field in ("user_id", "company", "create_user_permission")
+		):
 			return
 
-		employee_user_permission_exists = frappe.db.exists(
-			"User Permission", {"allow": "Employee", "for_value": self.name, "user": self.user_id}
-		)
+		previous_doc = self.get_doc_before_save()
+		if previous_doc and previous_doc.user_id and previous_doc.user_id != self.user_id:
+			self.remove_user_permissions(previous_doc.user_id, previous_doc.company)
+			self.remove_employee_role(previous_doc.user_id)
+		elif previous_doc and previous_doc.company != self.company:
+			self.remove_user_permissions(previous_doc.user_id, previous_doc.company, include_employee=False)
 
-		if employee_user_permission_exists and not self.create_user_permission:
-			remove_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
-			remove_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
-		elif not employee_user_permission_exists and self.create_user_permission:
-			add_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
-			add_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
+		if self.create_user_permission:
+			self.add_user_permissions(self.user_id, self.company)
+		else:
+			self.remove_user_permissions(self.user_id, self.company)
+
+	def add_user_permissions(self, user, company):
+		add_user_permission("Employee", self.name, user, applicable_for="Employee", ignore_permissions=True)
+
+		company_permission_exists = frappe.db.exists(
+			"User Permission",
+			{
+				"allow": "Company",
+				"for_value": company,
+				"user": user,
+				"apply_to_all_doctypes": 1,
+			},
+		)
+		if not company_permission_exists:
+			add_user_permission("Company", company, user, ignore_permissions=True)
+			add_user_permission("Company", company, user, applicable_for="Employee", ignore_permissions=True)
+
+	def remove_user_permissions(self, user, company, include_employee=True):
+		if include_employee:
+			self.delete_user_permissions(
+				{"allow": "Employee", "for_value": self.name, "user": user, "applicable_for": "Employee"}
+			)
+
+		company_permission_marker = {
+			"allow": "Company",
+			"for_value": company,
+			"user": user,
+			"applicable_for": "Employee",
+		}
+		if frappe.db.exists("User Permission", company_permission_marker):
+			self.delete_user_permissions(
+				{
+					"allow": "Company",
+					"for_value": company,
+					"user": user,
+					"apply_to_all_doctypes": 1,
+				}
+			)
+			self.delete_user_permissions(company_permission_marker)
+
+	def delete_user_permissions(self, filters):
+		for user_permission in frappe.get_all("User Permission", filters=filters, pluck="name"):
+			frappe.delete_doc("User Permission", user_permission, force=True, ignore_permissions=True)
+
+	def remove_employee_role(self, user):
+		user_doc = frappe.get_doc("User", user)
+		validate_employee_role(user_doc)
+		user_doc.save(ignore_permissions=True)
 
 	def update_user(self):
 		# add employee role if missing
 		user = frappe.get_doc("User", self.user_id)
-		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("roles"):
 			user.append_roles("Employee")
@@ -261,7 +331,7 @@ class Employee(NestedSet):
 			if not user.user_image or self.has_value_changed("image"):
 				user.user_image = self.image
 
-		user.save()
+		user.save(ignore_permissions=self.flags.get("created_user") == user.name)
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -320,7 +390,7 @@ class Employee(NestedSet):
 		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
 			user.enabled = not enabled
 			# Keep linked User status in sync from the Employee lifecycle and record the audit log.
-			user.save(ignore_permissions=True)
+			user.save(ignore_permissions=self.flags.get("created_user") == user.name)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
@@ -359,20 +429,13 @@ class Employee(NestedSet):
 			frappe.cache().delete_value("employees_with_number")
 
 
-def get_admin_roles() -> set[str]:
-	"""Roles that administer the site: System Manager, Administrator and roles that can edit users or roles."""
-	roles = {"Administrator", "System Manager"}
-	for doctype in ("User", "Role"):
-		roles.update(
-			perm.role for perm in frappe.get_meta(doctype).permissions if perm.write and not perm.permlevel
-		)
-	return roles
-
-
-def validate_employee_role(doc, method=None, ignore_emp_check=False):
+def validate_employee_role(doc, method=None, ignore_emp_check=False, excluded_employee=None):
 	# called via User hook
 	if not ignore_emp_check:
-		if frappe.db.get_value("Employee", {"user_id": doc.name}):
+		filters = {"user_id": doc.name}
+		if excluded_employee:
+			filters["name"] = ["!=", excluded_employee]
+		if frappe.db.get_value("Employee", filters):
 			return
 
 	user_roles = [d.role for d in doc.get("roles")]
@@ -385,6 +448,37 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 			_("User {0}: Removed Employee Self Service role as there is no mapped employee.").format(doc.name)
 		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
+
+
+def has_permission(doc, ptype=None, user=None, **kwargs):
+	user = user or frappe.session.user
+	if ptype not in ("read", "select") or doc.user_id == user:
+		return True
+
+	if "Employee" not in frappe.get_roles(user):
+		return True
+
+	return has_unrestricted_employee_read_access(user)
+
+
+def get_permission_query_conditions(user=None, doctype=None):
+	user = user or frappe.session.user
+	if "Employee" not in frappe.get_roles(user) or has_unrestricted_employee_read_access(user):
+		return None
+
+	Employee = frappe.qb.DocType(doctype or "Employee")
+	return Employee.user_id == user
+
+
+def has_unrestricted_employee_read_access(user):
+	roles = set(frappe.get_roles(user))
+	return any(
+		permission.role != "Employee"
+		and permission.role in roles
+		and not permission.permlevel
+		and permission.read
+		for permission in frappe.get_meta("Employee").permissions
+	)
 
 
 def get_employee_email(employee_doc):
@@ -487,17 +581,15 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 			"bio": emp.bio,
 		}
 	)
-	emp.db_set("user_id", email)
-	user.append_roles("Employee")
-	user.insert()
+	user.insert(ignore_permissions=True)
 
-	emp.user_id = user.name
-	emp.create_user_permission = cint(create_user_permission)
-	emp.save()
-
-	if cint(create_user_permission):
-		add_user_permission("Employee", emp.name, user.name)
-		add_user_permission("Company", emp.company, user.name)
+	emp.flags.created_user = user.name
+	try:
+		emp.user_id = user.name
+		emp.create_user_permission = cint(create_user_permission)
+		emp.save()
+	finally:
+		emp.flags.created_user = None
 
 	return user.name
 
