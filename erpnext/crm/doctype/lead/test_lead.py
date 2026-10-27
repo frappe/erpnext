@@ -42,6 +42,60 @@ class TestLead(unittest.TestCase):
 			contact_doc = frappe.get_doc("Contact", contact)
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
+	def test_customer_from_lead_keeps_records_the_user_cannot_write(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		user = "_test_lead_master_manager@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sales Master Manager",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Sales Master Manager"}],
+				}
+			).insert(ignore_permissions=True)
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+
+		frappe.set_user(user)
+		try:
+			customer.insert()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "opportunity_from"), "Lead")
+
+	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
+		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		lead = make_lead()
+		opportunity = make_opportunity(opportunity_from="Lead", lead=lead.name)
+		quotation = make_quotation(do_not_save=1)
+		quotation.quotation_to = "Lead"
+		quotation.party_name = lead.name
+		quotation.insert()
+		quotation.submit()
+
+		customer = make_customer(lead.name)
+		customer.customer_group = "_Test Customer Group"
+		customer.insert()
+
+		self.assertEqual(
+			frappe.db.get_value("Quotation", quotation.name, ["quotation_to", "party_name"]),
+			("Customer", customer.name),
+		)
+		self.assertEqual(
+			frappe.db.get_value("Opportunity", opportunity.name, ["opportunity_from", "party_name"]),
+			("Customer", customer.name),
+		)
+
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
@@ -107,6 +161,25 @@ class TestLead(unittest.TestCase):
 		event.reload()
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
+
+	def test_edited_note_is_cleaned_and_needs_write(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		lead = make_lead(first_name="Note", last_name="Editor", email_id=f"{random_string(8)}@example.com")
+		lead.add_note("first note")
+		row_id = str(lead.notes[0].name)
+
+		with as_user(make_fenced_user("lead-note-editor@example.com", ["Sales User"])):
+			frappe.get_doc("Lead", lead.name).edit_note('<b>edited</b><img src=x onerror="alert(1)">', row_id)
+		note = frappe.db.get_value("CRM Note", row_id, "note")
+		self.assertIn("<b>edited</b>", note)
+		self.assertNotIn("onerror", note)
+
+		with as_user(make_fenced_user("lead-note-reader@example.com", [])):
+			self.assertRaises(
+				frappe.PermissionError, frappe.get_doc("Lead", lead.name).edit_note, "changed", row_id
+			)
+		self.assertEqual(frappe.db.get_value("CRM Note", row_id, "note"), note)
 
 	def test_opportunity_from_lead(self):
 		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")

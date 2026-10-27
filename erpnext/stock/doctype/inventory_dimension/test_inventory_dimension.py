@@ -80,7 +80,7 @@ class TestInventoryDimension(FrappeTestCase):
 		self.assertFalse(custom_field)
 
 	def test_inventory_dimension(self):
-		frappe.local.document_wise_inventory_dimensions = {}
+		frappe.clear_cache(doctype="Inventory Dimension")
 
 		warehouse = "Shelf Warehouse - _TC"
 		item_code = "_Test Item"
@@ -152,7 +152,7 @@ class TestInventoryDimension(FrappeTestCase):
 		self.assertRaises(DoNotChangeError, inv_dim1.save)
 
 	def test_inventory_dimension_for_purchase_receipt_and_delivery_note(self):
-		frappe.local.document_wise_inventory_dimensions = {}
+		frappe.clear_cache(doctype="Inventory Dimension")
 
 		inv_dimension = create_inventory_dimension(
 			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
@@ -717,7 +717,7 @@ class TestInventoryDimension(FrappeTestCase):
 		)
 		inv_dimension_2.db_set("validate_negative_stock", 1)
 		frappe.local.inventory_dimensions = {}
-		frappe.local.document_wise_inventory_dimensions = {}
+		frappe.clear_cache(doctype="Inventory Dimension")
 
 		pr_doc = make_purchase_receipt(item_code=item_code, qty=30, do_not_submit=True)
 		pr_doc.items[0].inv_site = "Site 1"
@@ -908,7 +908,7 @@ def create_inventory_dimension(**args):
 			doc.insert(ignore_permissions=True)
 
 	frappe.local.inventory_dimensions = {}
-	frappe.local.document_wise_inventory_dimensions = {}
+	frappe.clear_cache(doctype="Inventory Dimension")
 
 	return doc
 

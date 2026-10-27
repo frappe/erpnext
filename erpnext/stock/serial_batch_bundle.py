@@ -4,8 +4,19 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import NamingSeries, make_autoname, parse_naming_series
 from frappe.query_builder import Case
-from frappe.query_builder.functions import CombineDatetime, Max, Sum, Timestamp
-from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowtime, today
+from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
+from frappe.utils import (
+	add_days,
+	cint,
+	create_batch,
+	cstr,
+	flt,
+	get_link_to_form,
+	getdate,
+	now,
+	nowtime,
+	today,
+)
 from pypika import Order
 from pypika.terms import ExistsCriterion
 
@@ -22,6 +33,8 @@ CONSUMED_SERIAL_NO_STOCK_ENTRY_PURPOSES = (
 	"Material Consumption for Manufacture",
 )
 INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES = ("Disassemble", "Material Receipt")
+
+SERIAL_NO_QUERY_BATCH_SIZE = 500
 
 
 def get_serial_no_status(sle):
@@ -679,94 +692,64 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
 	def get_serial_no_wise_incoming_rate(self, serial_nos):
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		latest_inward = {}
+		for serial_nos_batch in create_batch(serial_nos, SERIAL_NO_QUERY_BATCH_SIZE):
+			entries = self.get_inward_serial_no_entries(serial_nos_batch)
+			bundles = self.get_inward_bundles({entry.parent for entry in entries})
+			for entry in entries:
+				bundle = bundles.get(entry.parent)
+				if not bundle:
+					continue
+
+				key = (bundle.posting_datetime, bundle.creation)
+				if entry.serial_no not in latest_inward or key > latest_inward[entry.serial_no][0]:
+					latest_inward[entry.serial_no] = (key, entry.incoming_rate)
+
+		return frappe._dict({serial_no: rate for serial_no, (_key, rate) in latest_inward.items()})
+
+	def get_inward_serial_no_entries(self, serial_nos):
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
-
-		def get_latest_based_on_posting_datetime():
-			# Get latest inward record based on posting datetime for each serial no
-
-			latest_posting = (
-				frappe.qb.from_(bundle)
-				.inner_join(bundle_child)
-				.on(bundle.name == bundle_child.parent)
-				.select(
-					bundle_child.serial_no,
-					Max(bundle.posting_datetime).as_("max_posting_dt"),
-				)
-				.where(
-					(bundle.is_cancelled == 0)
-					& (bundle.docstatus == 1)
-					& (bundle.type_of_transaction == "Inward")
-					& (bundle_child.qty > 0)
-					& (bundle.item_code == self.sle.item_code)
-					& (bundle_child.warehouse == self.sle.warehouse)
-					& (bundle_child.serial_no.isin(serial_nos))
-				)
-				.groupby(bundle_child.serial_no)
+		return (
+			frappe.qb.from_(bundle_child)
+			.select(bundle_child.serial_no, bundle_child.incoming_rate, bundle_child.parent)
+			.where(
+				(bundle_child.serial_no.isin(serial_nos))
+				& (bundle_child.warehouse == self.sle.warehouse)
+				& (bundle_child.qty > 0)
+				& (bundle_child.docstatus == 1)
 			)
+		).run(as_dict=True)
 
-			# Important to exclude the current voucher to calculate correct the stock value difference
-			if self.sle.voucher_no:
-				latest_posting = latest_posting.where(bundle.voucher_no != self.sle.voucher_no)
+	def get_inward_bundles(self, bundle_names):
+		bundles = {}
+		for bundle_names_batch in create_batch(list(bundle_names), SERIAL_NO_QUERY_BATCH_SIZE):
+			for bundle in self.get_inward_bundle_query(bundle_names_batch).run(as_dict=True):
+				bundles[bundle.name] = bundle
 
-			if self.sle.posting_datetime:
-				timestamp_condition = bundle.posting_datetime <= self.sle.posting_datetime
+		return bundles
 
-				latest_posting = latest_posting.where(timestamp_condition)
-
-			latest_posting = latest_posting.as_("latest_posting")
-
-			return latest_posting
-
-		def get_latest_based_on_creation(latest_posting):
-			# Get latest inward record based on creation for each serial no
-			latest_creation = (
-				frappe.qb.from_(bundle)
-				.join(bundle_child)
-				.on(bundle.name == bundle_child.parent)
-				.join(latest_posting)
-				.on(
-					(latest_posting.serial_no == bundle_child.serial_no)
-					& (latest_posting.max_posting_dt == bundle.posting_datetime)
-				)
-				.select(
-					bundle_child.serial_no,
-					Max(bundle.creation).as_("max_creation"),
-				)
-				.where(
-					(bundle.is_cancelled == 0)
-					& (bundle.docstatus == 1)
-					& (bundle.type_of_transaction == "Inward")
-					& (bundle_child.qty > 0)
-					& (bundle.item_code == self.sle.item_code)
-					& (bundle_child.warehouse == self.sle.warehouse)
-				)
-				.groupby(bundle_child.serial_no)
-			).as_("latest_creation")
-
-			return latest_creation
-
-		latest_posting = get_latest_based_on_posting_datetime()
-		latest_creation = get_latest_based_on_creation(latest_posting)
-
+	def get_inward_bundle_query(self, bundle_names):
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		query = (
 			frappe.qb.from_(bundle)
-			.join(bundle_child)
-			.on(bundle.name == bundle_child.parent)
-			.join(latest_creation)
-			.on(
-				(latest_creation.serial_no == bundle_child.serial_no)
-				& (latest_creation.max_creation == bundle.creation)
-			)
-			.select(
-				bundle_child.serial_no,
-				bundle_child.incoming_rate,
+			.select(bundle.name, bundle.posting_datetime, bundle.creation)
+			.where(
+				(bundle.name.isin(bundle_names))
+				& (bundle.item_code == self.sle.item_code)
+				& (bundle.is_cancelled == 0)
+				& (bundle.docstatus == 1)
+				& (bundle.type_of_transaction == "Inward")
+				& (bundle.posting_datetime.isnotnull())
 			)
 		)
 
-		result = query.run(as_list=1)
+		if self.sle.voucher_no:
+			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
-		return frappe._dict(result) if result else frappe._dict({})
+		if self.sle.posting_datetime:
+			query = query.where(bundle.posting_datetime <= self.sle.posting_datetime)
+
+		return query
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):
@@ -1279,6 +1262,9 @@ class SerialBatchCreation:
 
 		if self.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = self.ignore_serial_nos
+
+		if self.get("already_picked_batches"):
+			kwargs["already_picked_batches"] = self.already_picked_batches
 
 		if (
 			self.has_serial_no

@@ -853,7 +853,7 @@ class JobCard(Document):
 					data.hour_rate = flt(workstation_hour_rate)
 
 		wo.flags.ignore_validate_update_after_submit = True
-		wo.update_operation_status()
+		wo.update_operation_status(self.operation_id)
 		wo.calculate_operating_cost()
 		wo.set_actual_dates()
 		wo.save()
@@ -1007,9 +1007,11 @@ class JobCard(Document):
 			if self.time_logs:
 				self.status = "Work In Progress"
 
-			if self.docstatus == 1 and (
-				self.for_quantity <= (self.total_completed_qty + self.process_loss_qty) or not self.items
-			):
+			completed_qty = flt(
+				flt(self.total_completed_qty) + flt(self.process_loss_qty),
+				self.precision("total_completed_qty"),
+			)
+			if self.docstatus == 1 and (self.for_quantity <= completed_qty or not self.items):
 				self.status = "Completed"
 
 		if update_status:
@@ -1056,7 +1058,9 @@ class JobCard(Document):
 		if data and len(data) > 0:
 			current_operation_qty = flt(data[0].completed_qty)
 
-		current_operation_qty += flt(self.total_completed_qty)
+		current_operation_qty = flt(
+			current_operation_qty + flt(self.total_completed_qty), self.precision("total_completed_qty")
+		)
 
 		data = frappe.get_all(
 			"Work Order Operation",

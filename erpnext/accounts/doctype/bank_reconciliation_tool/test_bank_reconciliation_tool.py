@@ -7,7 +7,7 @@ from unittest.mock import patch
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
@@ -17,6 +17,7 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	get_linked_payments,
 	reconcile_vouchers,
 )
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.permission_test_utils import (
@@ -65,6 +66,119 @@ class TestBankReconciliationTool(AccountsTestMixin, FrappeTestCase):
 			.insert()
 			.name
 		)
+
+	def test_update_clearance_date_validates_dates_and_reconciliation(self):
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+		)
+		payment.reference_date = add_days(payment.posting_date, 1)
+		payment.save().submit()
+
+		for clearance_date, message in (
+			(add_days(payment.posting_date, -1), "posting date"),
+			(payment.posting_date, "cheque date"),
+		):
+			with self.subTest(clearance_date=clearance_date):
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					self.update_voucher_clearance_date(
+						payment.doctype, payment.name, self.bank, str(clearance_date)
+					)
+				self.assertFalse(payment.reload().clearance_date)
+
+		clearance_date = str(payment.reference_date)
+		self.update_voucher_clearance_date(payment.doctype, payment.name, self.bank, clearance_date)
+		self.assertEqual(payment.reload().clearance_date, getdate(clearance_date))
+		self.update_voucher_clearance_date(payment.doctype, payment.name, self.bank, None)
+		self.assertFalse(payment.reload().clearance_date)
+
+		transaction = self.make_bank_transaction(clearance_date)
+		reconcile_vouchers(
+			transaction.name,
+			frappe.as_json([{"payment_doctype": payment.doctype, "payment_name": payment.name}]),
+		)
+		self.update_voucher_clearance_date(payment.doctype, payment.name, self.bank, clearance_date)
+		for changed_date in (None, str(add_days(clearance_date, 1))):
+			with self.subTest(clearance_date=changed_date):
+				with self.assertRaisesRegex(frappe.ValidationError, "Unreconcile"):
+					self.update_voucher_clearance_date(payment.doctype, payment.name, self.bank, changed_date)
+				self.assertEqual(payment.reload().clearance_date, getdate(clearance_date))
+		self.assertEqual(transaction.reload().allocated_amount, 100)
+
+	def test_unchanged_restricted_vouchers_do_not_block_clearance(self):
+		payments = [
+			create_payment_entry(
+				company=self.company,
+				payment_type="Receive",
+				party_type="Customer",
+				party=self.customer,
+				paid_from=self.debit_to,
+				paid_to=self.bank,
+				paid_amount=amount,
+			)
+			.save()
+			.submit()
+			for amount in (100, 50, 75)
+		]
+		self.update_voucher_clearance_date(payments[2].doctype, payments[2].name, self.bank, today())
+		for payment in payments:
+			payment.reload()
+
+		user = make_fenced_user(
+			"clearance-fenced@example.com", ["Accounts User"], [("Payment Entry", payments[0].name)]
+		)
+		clearance = frappe.get_doc(
+			{
+				"doctype": "Bank Clearance",
+				"account": self.bank,
+				"from_date": today(),
+				"to_date": today(),
+				"include_reconciled_entries": 1,
+			}
+		)
+		with as_user(user):
+			clearance.get_payment_entries()
+			self.assertEqual(
+				{row.payment_entry for row in clearance.payment_entries}, {p.name for p in payments}
+			)
+			for row in clearance.payment_entries:
+				if row.payment_entry == payments[0].name:
+					row.clearance_date = today()
+			clearance.update_clearance_date()
+
+		self.assertEqual(payments[0].reload().clearance_date, getdate(today()))
+		for payment in payments[1:]:
+			modified, clearance_date = payment.modified, payment.clearance_date
+			payment.reload()
+			self.assertEqual((payment.modified, payment.clearance_date), (modified, clearance_date))
+
+		with as_user(user):
+			for row in clearance.payment_entries:
+				if row.payment_entry == payments[1].name:
+					row.clearance_date = today()
+			with self.assertRaises(frappe.PermissionError):
+				clearance.update_clearance_date()
+		self.assertFalse(payments[1].reload().clearance_date)
+
+	def update_voucher_clearance_date(self, doctype, name, account, date):
+		clearance = frappe.get_doc(
+			{
+				"doctype": "Bank Clearance",
+				"account": account,
+				"from_date": add_days(today(), -30),
+				"to_date": add_days(today(), 30),
+				"include_reconciled_entries": 1,
+				"payment_entries": [
+					{"payment_document": doctype, "payment_entry": name, "clearance_date": date}
+				],
+			}
+		)
+		clearance.update_clearance_date()
 
 	def test_auto_reconcile(self):
 		# make payment
@@ -115,6 +229,75 @@ class TestBankReconciliationTool(AccountsTestMixin, FrappeTestCase):
 		# assert API output post reconciliation
 		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
 		self.assertEqual(len(transactions), 0)
+
+	def make_bank_transaction(self, date, deposit=100, withdrawal=0):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Transaction",
+					"date": date,
+					"deposit": deposit,
+					"withdrawal": withdrawal,
+					"bank_account": self.bank_account,
+					"currency": "INR",
+				}
+			)
+			.save()
+			.submit()
+		)
+
+	def test_get_linked_payments_hides_vouchers_outside_the_fence(self):
+		def make_payment(cost_center):
+			payment = create_payment_entry(
+				company=self.company,
+				payment_type="Receive",
+				party_type="Customer",
+				party=self.customer,
+				paid_from=self.debit_to,
+				paid_to=self.bank,
+				paid_amount=100,
+			)
+			payment.cost_center = cost_center
+			return payment.save().submit()
+
+		def make_journal(cost_center):
+			return make_journal_entry(self.bank, "Sales - _TC", 100, cost_center=cost_center, submit=True)
+
+		def get_matches(transaction):
+			vouchers = get_linked_payments(
+				transaction.name,
+				["payment_entry", "journal_entry"],
+				from_date=add_days(today(), -1),
+				to_date=today(),
+			)
+			return {(v["doctype"], v["name"]) for v in vouchers}
+
+		inside = make_payment("_Test Cost Center - _TC"), make_journal("_Test Cost Center - _TC")
+		outside = make_payment("_Test Cost Center 2 - _TC"), make_journal("_Test Cost Center 2 - _TC")
+		inside = {(doc.doctype, doc.name) for doc in inside}
+		outside = {(doc.doctype, doc.name) for doc in outside}
+		transaction = self.make_bank_transaction(date=today())
+
+		self.assertLessEqual(inside | outside, get_matches(transaction))
+
+		user = make_fenced_user(
+			"brt-fenced@example.com", ["Accounts User"], [("Cost Center", "_Test Cost Center - _TC")]
+		)
+		with as_user(user):
+			for doctype, name in outside:
+				self.assertFalse(frappe.has_permission(doctype, "read", doc=name))
+			matches = get_matches(transaction)
+		self.assertLessEqual(inside, matches)
+		self.assertFalse(outside & matches)
+
+	def test_get_linked_payments_drops_rows_without_a_doctype(self):
+		transaction = self.make_bank_transaction(date=today())
+		rows = [frappe._dict(name="ROW-WITHOUT-DOCTYPE", paid_amount=100)]
+		with patch(
+			"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool._get_linked_payments",
+			return_value=rows,
+		):
+			self.assertEqual(get_linked_payments(transaction.name, ["payment_entry"]), [])
 
 	def test_rejects_reversed_date_ranges(self):
 		from_date, to_date = today(), add_days(today(), -1)

@@ -24,6 +24,57 @@ class TestPartySpecificItem(FrappeTestCase):
 		self.supplier = frappe.get_last_doc("Supplier")
 		self.item = frappe.get_last_doc("Item")
 
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def test_template_item_rule_covers_variant(self):
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			"_Test Party Specific Template",
+			{"has_variants": 1, "attributes": [{"attribute": "Test Size"}]},
+		)
+		variant = create_variant(template.name, {"Test Size": "Small"}).insert()
+		sibling = create_variant(template.name, {"Test Size": "Large"}).insert()
+		other_item = make_item("_Test Party Specific Other Item")
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value=template.name,
+		)
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer 2",
+			restrict_based_on="Item",
+			based_on_value=variant.name,
+		)
+
+		for customer, item, allowed in (
+			("_Test Customer", variant, True),
+			("_Test Customer", sibling, True),
+			("_Test Customer", other_item, False),
+			("_Test Customer 2", variant, True),
+			("_Test Customer 2", sibling, False),
+		):
+			with self.subTest(customer=customer, item=item.name):
+				items = item_query(
+					doctype="Item",
+					txt=item.name,
+					searchfield="name",
+					start=0,
+					page_len=20,
+					filters={"customer": customer},
+				)
+				self.assertEqual(item.name in [row[0] for row in items], allowed)
+				if allowed:
+					make_sales_order(customer=customer, item_code=item.name, do_not_submit=True)
+				else:
+					with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+						make_sales_order(customer=customer, item_code=item.name, do_not_submit=True)
+
 	def test_item_query_for_customer(self):
 		create_party_specific_item(
 			party_type="Customer",
@@ -94,3 +145,22 @@ class TestPartySpecificItem(FrappeTestCase):
 		standalone_note = frappe.copy_doc(credit_note)
 		standalone_note.return_against = None
 		self.assertRaisesRegex(frappe.ValidationError, "is not allowed for", standalone_note.insert)
+
+	def test_opportunity_enforces_party_rules(self):
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer 1",
+			restrict_based_on="Item",
+			based_on_value="_Test Item Home Desktop 100",
+		)
+		make_opportunity(with_items=1, customer="_Test Customer 1", item_code="_Test Item Home Desktop 100")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not allowed for Customer",
+			make_opportunity,
+			with_items=1,
+			customer="_Test Customer 1",
+			item_code="_Test Item",
+		)

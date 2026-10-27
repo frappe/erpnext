@@ -21,6 +21,13 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
 )
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 
 class TestAssetCapitalization(unittest.TestCase):
@@ -368,6 +375,112 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		rates = [d.valuation_rate for d in asset_capitalization.stock_items]
 		self.assertEqual(rates, [100, 200])
+
+	def test_consumed_asset_value_for_manual_depreciation_method(self):
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		asset_values = {}
+		for method in ("Straight Line", "Manual"):
+			asset = create_depreciation_asset(
+				asset_name=f"Capitalization {method} Asset",
+				asset_value=100000,
+				expected_value_after_useful_life=10000,
+				depreciation_method=method,
+				submit=1,
+			)
+			asset_values[method] = get_value_after_depreciation_on_disposal_date(asset.name, "2021-06-30")
+
+		# value on the disposal date, not the value at the end of useful life
+		self.assertNotEqual(asset_values["Manual"], 10000)
+		self.assertEqual(asset_values["Manual"], asset_values["Straight Line"])
+
+	def test_consumed_asset_value_for_manual_depreciation_schedule_with_custom_amounts(self):
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		asset = create_depreciation_asset(
+			asset_name="Capitalization Custom Manual Asset",
+			asset_value=100000,
+			expected_value_after_useful_life=10000,
+			depreciation_method="Manual",
+		)
+		asset.insert()
+
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Draft")
+		for schedule, depreciation_amount in zip(
+			asset_depr_schedule_doc.depreciation_schedule, [50000, 30000, 10000], strict=True
+		):
+			schedule.depreciation_amount = depreciation_amount
+		asset_depr_schedule_doc.save()
+
+		asset = frappe.get_doc("Asset", asset.name)
+		asset.submit()
+
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2020-06-30"), 75136.61)
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2021-06-30"), 35123.29)
+
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
+		self.assertEqual(
+			[d.depreciation_amount for d in asset_depr_schedule_doc.depreciation_schedule],
+			[50000, 30000, 10000],
+		)
+
+	def test_consumed_asset_value_for_existing_asset_with_fiscal_year_schedule(self):
+		from erpnext.assets.doctype.asset.depreciation import get_value_after_depreciation_on_disposal_date
+
+		# 5 opening depreciations up to 31-03-2025, schedule runs to 31st March (not the purchase anniversary)
+		asset = create_asset(
+			asset_name="Capitalization Existing Asset",
+			calculate_depreciation=1,
+			purchase_date="2020-12-23",
+			available_for_use_date="2020-12-23",
+			gross_purchase_amount=23895945,
+			purchase_amount=23895945,
+			opening_accumulated_depreciation=14496517,
+			opening_number_of_booked_depreciations=5,
+			total_number_of_depreciations=10,
+			expected_value_after_useful_life=1098496.59,
+			depreciation_start_date="2026-03-31",
+			depreciation_method="Manual",
+			submit=1,
+		)
+
+		# depreciation from 01-04-2025 to 21-03-2026: 2279744.841 * 355 / 365 = 2217286.08
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2026-03-21"), 7182141.92)
+
+		self.assertEqual(get_value_after_depreciation_on_disposal_date(asset.name, "2025-03-31"), 9399428)
+
+	def test_items_tagged_to_wip_composite_asset(self):
+		from erpnext.assets.doctype.asset_capitalization.asset_capitalization import (
+			get_items_tagged_to_wip_composite_asset,
+		)
+
+		target_asset = create_asset(is_composite_asset=1, warehouse="Stores - _TC")
+		pr = make_purchase_receipt(do_not_save=1)
+		pr.items[0].wip_composite_asset = target_asset.name
+		pr.insert()
+		pr.submit()
+
+		def build_kwargs(name):
+			return {"params": {"target_asset": name}}
+
+		roles = ["Manufacturing Manager", "Stock User"]
+		with as_user(
+			make_company_fenced_user("capitalization-other-company@example.com", roles, "_Test Company 1")
+		):
+			assert_refused_for_names(
+				self, get_items_tagged_to_wip_composite_asset, build_kwargs, [target_asset.name]
+			)
+
+		with as_user(make_fenced_user("capitalization-quality_manager@example.com", ["Quality Manager"])):
+			assert_refused_without(
+				self, [pr.name], get_items_tagged_to_wip_composite_asset, **build_kwargs(target_asset.name)
+			)
+
+		with as_user(make_fenced_user("capitalization-manufacturing_manager@example.com", roles)):
+			stock_items, _asset_items = get_items_tagged_to_wip_composite_asset(
+				**build_kwargs(target_asset.name)
+			)
+		self.assertEqual(stock_items[0].purchase_receipt, pr.name)
 
 
 def create_asset_capitalization_data():

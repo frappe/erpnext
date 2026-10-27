@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, formatdate, get_link_to_form, getdate, now
+from frappe.utils.caching import request_cache
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -229,6 +230,7 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 	return new_gl_map
 
 
+@request_cache
 def get_cost_center_allocation_data(company, posting_date, cost_center):
 	cost_center_allocation = frappe.db.get_value(
 		"Cost Center Allocation",
@@ -238,7 +240,7 @@ def get_cost_center_allocation_data(company, posting_date, cost_center):
 			"valid_from": ("<=", posting_date),
 			"main_cost_center": cost_center,
 		},
-		pluck="name",
+		pluck=True,
 		order_by="valid_from desc",
 	)
 
@@ -558,6 +560,8 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 				else:
 					debit_credit_diff += flt(d.credit)
 				round_off_account_exists = True
+
+		debit_credit_diff = flt(debit_credit_diff, precision)
 
 		if round_off_account_exists and abs(debit_credit_diff) < (1.0 / (10**precision)):
 			gl_map.remove(round_off_gle)

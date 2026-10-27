@@ -1,8 +1,66 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
+import frappe
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, nowdate
+
+from erpnext.buying.doctype.supplier_scorecard.test_supplier_scorecard import make_scorecard_for
+from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+	make_supplier_scorecard,
+)
 
 
-class TestSupplierScorecardPeriod(unittest.TestCase):
-	pass
+class TestSupplierScorecardPeriod(FrappeTestCase):
+	def test_manual_period_is_validated_against_its_scorecard(self):
+		scorecard = make_scorecard_for("_Test Supplier SC Manual Period")
+		scorecard.insert()
+		existing = frappe.get_all(
+			"Supplier Scorecard Period",
+			filters={"scorecard": scorecard.name, "docstatus": 1},
+			fields=["start_date", "end_date"],
+			limit=1,
+		)[0]
+
+		for start_date, end_date in (
+			(add_days(nowdate(), 10), add_days(nowdate(), 5)),
+			(existing.start_date, existing.end_date),
+		):
+			with self.subTest(start_date=start_date, end_date=end_date):
+				period = make_manual_period(scorecard.name, start_date, end_date)
+				self.assertRaises(frappe.ValidationError, period.insert)
+
+		period = make_manual_period(scorecard.name, add_days(nowdate(), 5), add_days(nowdate(), 10))
+		period.insert()
+		self.assertEqual(period.supplier, scorecard.supplier)
+
+		period.supplier = "_Test Supplier"
+		period.submit()
+		self.assertEqual(frappe.db.get_value(period.doctype, period.name, "supplier"), scorecard.supplier)
+
+	def test_period_score_is_normalised_by_max_score(self):
+		period = make_period(
+			criteria=[
+				{"criteria_name": "C1", "formula": "10", "max_score": 10, "weight": 50},
+				{"criteria_name": "C2", "formula": "50", "max_score": 200, "weight": 50},
+			]
+		)
+		period.calculate_criteria()
+		period.calculate_score()
+
+		self.assertEqual(period.total_score, 62.5)
+
+
+def make_manual_period(scorecard, start_date, end_date):
+	period = make_supplier_scorecard(scorecard)
+	period.update({"supplier": "_Test Supplier", "start_date": start_date, "end_date": end_date})
+	return period
+
+
+def make_period(variables=None, criteria=None):
+	period = frappe.new_doc("Supplier Scorecard Period")
+	for variable in variables or []:
+		period.append("variables", variable)
+	for criterion in criteria or []:
+		period.append("criteria", criterion)
+	return period

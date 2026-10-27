@@ -25,6 +25,9 @@ from erpnext.stock.serial_batch_bundle import (
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
 )
+from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+	validate_single_purchase_receipt,
+)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -154,6 +157,7 @@ class PurchaseReceipt(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transporter_name: DF.Data | None
+		use_transaction_date_exchange_rate: DF.Check
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -167,9 +171,10 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_field": "per_received",
 				"target_ref_field": "qty",
 				"source_dt": "Purchase Receipt Item",
-				"source_field": "received_qty",
+				"source_field": "received_qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
 				"second_source_dt": "Purchase Invoice Item",
-				"second_source_field": "received_qty",
+				"second_source_field": "received_qty * conversion_factor",
 				"second_join_field": "po_detail",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "receipt",
@@ -185,6 +190,11 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_field": "per_received",
 				"target_ref_field": "stock_qty",
 				"source_field": "stock_qty",
+				"second_source_dt": "Purchase Invoice Item",
+				"second_source_field": "stock_qty",
+				"second_join_field": "material_request_item",
+				"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 				"percent_join_field": "material_request",
 				"validate_qty": False,
 			},
@@ -212,42 +222,47 @@ class PurchaseReceipt(BuyingController):
 			},
 		]
 
+	def update_prevdoc_status(self):
 		if cint(self.is_return):
-			self.status_updater.extend(
-				[
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Order Item",
-						"join_field": "purchase_order_item",
-						"target_field": "returned_qty",
-						"source_field": "-1 * qty",
-						"second_source_dt": "Purchase Invoice Item",
-						"second_source_field": "-1 * qty",
-						"second_join_field": "po_detail",
-						"extra_cond": """ and exists (select name from `tabPurchase Receipt`
-						where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
-						"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
-						where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
-					},
-					{
-						"source_dt": "Purchase Receipt Item",
-						"target_dt": "Purchase Receipt Item",
-						"join_field": "purchase_receipt_item",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Purchase Receipt",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "received_stock_qty",
-						"source_field": "-1 * received_stock_qty",
-						"percent_join_field_parent": "return_against",
-					},
-				]
-			)
+			self.status_updater.extend(self.get_return_status_updaters())
+
+		super().update_prevdoc_status()
+
+	def get_return_status_updaters(self):
+		return [
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Purchase Order Item",
+				"join_field": "purchase_order_item",
+				"target_field": "returned_qty",
+				"source_field": "-1 * qty * conversion_factor",
+				"target_conversion_factor": "conversion_factor",
+				"second_source_dt": "Purchase Invoice Item",
+				"second_source_field": "-1 * qty * conversion_factor",
+				"second_join_field": "po_detail",
+				"extra_cond": """ and exists (select name from `tabPurchase Receipt`
+				where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
+				"second_source_extra_cond": """ and exists (select name from `tabPurchase Invoice`
+				where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)""",
+			},
+			{
+				"source_dt": "Purchase Receipt Item",
+				"target_dt": "Purchase Receipt Item",
+				"join_field": "purchase_receipt_item",
+				"target_field": "returned_qty",
+				"target_parent_dt": "Purchase Receipt",
+				"target_parent_field": "per_returned",
+				"target_ref_field": "received_stock_qty",
+				"source_field": "-1 * received_stock_qty",
+				"percent_join_field_parent": "return_against",
+			},
+		]
 
 	def before_validate(self):
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
-			apply_putaway_rule(self.doctype, self.get("items"), self.company)
+			_apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
 	def validate(self):
 		self.validate_posting_time()
@@ -264,6 +279,9 @@ class PurchaseReceipt(BuyingController):
 		self.validate_provisional_expense_account()
 
 		self.check_on_hold_or_closed_status()
+
+		if self.subcontracting_receipt and not self.is_return:
+			validate_single_purchase_receipt(self.subcontracting_receipt, self.name)
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
@@ -331,6 +349,7 @@ class PurchaseReceipt(BuyingController):
 	def po_required(self):
 		if (
 			frappe.db.get_single_value("Buying Settings", "po_required") == "Yes"
+			and not self.is_return
 			and not self.is_internal_transfer()
 		):
 			for d in self.get("items"):

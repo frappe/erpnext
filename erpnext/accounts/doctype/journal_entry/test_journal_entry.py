@@ -3,6 +3,7 @@
 
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import change_settings
@@ -477,6 +478,18 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertEqual(
 			jv.pay_to_recd_from, frappe.db.get_value("Journal Entry", jv.name, "pay_to_recd_from")
 		)
+
+	def test_cancel_large_entry_queued_in_background(self):
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		for row in jv.accounts * 50:
+			jv.append("accounts", row.as_dict(no_default_fields=True))
+		jv.insert()
+
+		with patch.object(jv.meta, "queue_in_background", 1):
+			jv.submit()
+			jv.cancel()
+
+		self.assertEqual(frappe.db.get_value("Journal Entry", jv.name, "docstatus"), 2)
 
 	def test_jv_account_and_party_balance_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center

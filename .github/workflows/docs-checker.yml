@@ -3,19 +3,23 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened, edited ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    if: ${{ !(github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - name: 'Setup Environment'
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 
       - name: 'Clone repo'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Validate Docs
         env:

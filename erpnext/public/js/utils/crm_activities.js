@@ -153,8 +153,7 @@ erpnext.utils.CRMNotes = class CRMNotes {
 						enable_mentions: true,
 					},
 				],
-				primary_action: function () {
-					var data = d.get_values();
+				primary_action: function (data) {
 					frappe.call({
 						method: "add_note",
 						doc: me.frm.doc,
@@ -194,8 +193,7 @@ erpnext.utils.CRMNotes = class CRMNotes {
 						default: row_content,
 					},
 				],
-				primary_action: function () {
-					var data = d.get_values();
+				primary_action: function (data) {
 					frappe.call({
 						method: "edit_note",
 						doc: me.frm.doc,
