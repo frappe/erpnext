@@ -705,7 +705,13 @@ class StockController(AccountsController):
 			):
 				reference_ids.append(row.get(field))
 
-			if table_name == "packed_items" and row.get("parent_detail_docname"):
+			# Packed items with serial / batch fields (e.g. delivered before v15) can have no bundle
+			# to return against, make_bundle_using_old_serial_batch_fields handles them
+			if (
+				table_name == "packed_items"
+				and row.get("parent_detail_docname")
+				and not (row.serial_no or row.batch_no)
+			):
 				parent_rows = self.get("items", {"name": row.parent_detail_docname}) or []
 				for d in parent_rows:
 					if d.get(field) and not d.get(bundle_field):
