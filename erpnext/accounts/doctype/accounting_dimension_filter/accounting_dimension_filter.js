@@ -41,7 +41,10 @@ frappe.ui.form.on("Accounting Dimension Filter", {
 
 		if (frm.doc.accounting_dimension) {
 			frappe.model.with_doctype(frm.doc.accounting_dimension, function () {
-				if (frappe.model.is_tree(frm.doc.accounting_dimension)) {
+				if (
+					frappe.model.is_tree(frm.doc.accounting_dimension) &&
+					frappe.meta.has_field(frm.doc.accounting_dimension, "is_group")
+				) {
 					filters["is_group"] = 0;
 				}
 

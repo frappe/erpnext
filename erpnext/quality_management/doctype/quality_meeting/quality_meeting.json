@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:QA-MEET-{YY}-{MM}-{DD}",
+ "autoname": "QA-MEET-.YY.-.MM.-.DD.-.###",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -48,7 +48,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-05 14:52:58.721512",
+ "modified": "2026-10-05 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",

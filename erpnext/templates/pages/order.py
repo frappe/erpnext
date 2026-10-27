@@ -33,7 +33,7 @@ def get_context(context):
 	else:
 		context.print_format = "Standard"
 
-	if not frappe.has_website_permission(context.doc):
+	if not (context.doc.has_permission("read") or frappe.has_website_permission(context.doc)):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 	context.available_loyalty_points = 0.0
@@ -68,8 +68,11 @@ def get_payment_details(doc):
 	show_pay_button, amount = (
 		(
 			"payments" in frappe.get_installed_apps()
-			and frappe.db.get_single_value("Buying Settings", "show_pay_button")
 			and doc.doctype in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST
+			and (
+				doc.doctype not in ("Purchase Order", "Purchase Invoice")
+				or frappe.db.get_single_value("Buying Settings", "show_pay_button")
+			)
 		),
 		0,
 	)

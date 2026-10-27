@@ -12,6 +12,7 @@ from frappe.utils import cint, flt
 import erpnext
 from erpnext import is_perpetual_inventory_enabled
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -188,7 +189,6 @@ class LandedCostVoucher(Document):
 		if self.get("taxes") and self.distribute_charges_based_on != "Distribute Manually":
 			items = self.get("items")
 			total_charges = 0.0
-			item_count = 0
 			based_on_field = frappe.scrub(self.distribute_charges_based_on)
 
 			total_item_cost = sum(flt(item.get(based_on_field)) for item in items)
@@ -203,18 +203,17 @@ class LandedCostVoucher(Document):
 					)
 				)
 
-			for item in self.get("items"):
+			precision = items[0].precision("applicable_charges")
+			for item in items:
 				item.applicable_charges = flt(
 					flt(item.get(based_on_field))
 					* (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
-					item.precision("applicable_charges"),
+					precision,
 				)
 				total_charges += item.applicable_charges
-				item_count += 1
 
-			if total_charges != self.total_taxes_and_charges:
-				diff = self.total_taxes_and_charges - total_charges
-				self.get("items")[item_count - 1].applicable_charges += diff
+			diff = flt(self.total_taxes_and_charges - total_charges, precision)
+			absorb_rounding_difference(items, diff, precision, self.total_taxes_and_charges)
 
 	def validate_applicable_charges_for_item(self):
 		if self.distribute_charges_based_on == "Distribute Manually" and len(self.taxes) > 1:
@@ -261,9 +260,29 @@ class LandedCostVoucher(Document):
 	def on_submit(self):
 		self.validate_applicable_charges_for_item()
 		self.update_landed_cost()
+		self.update_project_purchase_cost()
 
 	def on_cancel(self):
 		self.update_landed_cost()
+		self.update_project_purchase_cost()
+
+	def update_project_purchase_cost(self):
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") != "Each Transaction":
+			return
+
+		projects = set()
+		for receipt_type in {item.receipt_document_type for item in self.get("items")}:
+			receipt_items = [
+				item.purchase_receipt_item
+				for item in self.get("items")
+				if item.receipt_document_type == receipt_type
+			]
+			projects.update(
+				frappe.get_all(
+					f"{receipt_type} Item", filters={"name": ("in", receipt_items)}, pluck="project"
+				)
+			)
+		update_purchase_cost(projects - {None, ""})
 
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
@@ -381,3 +400,15 @@ def get_pr_items(purchase_receipt):
 		.orderby(pr_item.idx)
 		.run(as_dict=True)
 	)
+
+
+def absorb_rounding_difference(items, diff, precision, total):
+	sign = -1 if flt(total) < 0 else 1
+	for item in reversed(items):
+		if not diff:
+			break
+
+		share = flt(item.applicable_charges) * sign
+		adjustment = diff if diff * sign > 0 else sign * max(diff * sign, -share)
+		item.applicable_charges = flt(flt(item.applicable_charges) + adjustment, precision)
+		diff = flt(diff - adjustment, precision)

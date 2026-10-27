@@ -108,7 +108,7 @@ class ImportSupplierInvoice(Document):
 					pi_name,
 					folder=None,
 					decode=False,
-					is_private=0,
+					is_private=1,
 					df=None,
 				)
 

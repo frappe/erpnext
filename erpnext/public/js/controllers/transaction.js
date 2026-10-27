@@ -88,6 +88,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		frappe.ui.form.on(this.frm.doctype, "apply_discount_on", function(frm) {
+			if (frm.doc.apply_discount_on !== "Net Total") {
+				frm.cscript.clear_mapped_discounts();
+			}
+
 			if(frm.doc.additional_discount_percentage) {
 				frm.trigger("additional_discount_percentage");
 			} else {
@@ -102,6 +106,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 
 			frm.via_discount_percentage = true;
+
+			if (frm.doc.additional_discount_percentage) {
+				frm.cscript.clear_mapped_discounts();
+			}
 
 			if(frm.doc.additional_discount_percentage && frm.doc.discount_amount) {
 				// Reset discount amount and net / grand total
@@ -119,6 +127,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		frappe.ui.form.on(this.frm.doctype, "discount_amount", function(frm) {
 			frm.cscript.set_dynamic_labels();
+			frm.cscript.clear_mapped_discounts();
 
 			if (!frm.via_discount_percentage) {
 				frm.doc.additional_discount_percentage = 0;
@@ -579,6 +588,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 
 		item.barcode = null;
+		this.drop_mapped_discount(item);
 
 
 		if(item.item_code || item.serial_no) {
@@ -613,6 +623,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_return: cint(me.frm.doc.is_return),
+							return_against: me.frm.doc.return_against,
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 							doctype: me.frm.doc.doctype,
@@ -1207,7 +1218,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let company_currency = this.get_company_currency();
 		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
-				&& (!this.frm.doc.__onload?.load_after_mapping || inter_company_reference)) {
+				&& (!this.frm.doc.__onload?.load_after_mapping || inter_company_reference
+					|| this.frm.doc.use_transaction_date_exchange_rate)) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
@@ -1260,6 +1272,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_gross_profit(item);
 	}
 
+	disable_rounded_total() {
+		this.calculate_taxes_and_totals();
+	}
+
 	shipping_rule() {
 		var me = this;
 		if(this.frm.doc.shipping_rule) {
@@ -1297,10 +1313,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	get_exchange_rate(transaction_date, from_currency, to_currency, callback) {
 		var args;
-		if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"].includes(this.frm.doctype)) {
+		if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"].includes(this.frm.doctype)) {
 			args = "for_selling";
 		}
-		else if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
+		else if (["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype)) {
 			args = "for_buying";
 		}
 
@@ -1504,6 +1520,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				}
 			})
 		}
+	}
+
+	before_items_remove(doc, cdt, cdn) {
+		this.drop_mapped_discount(frappe.get_doc(cdt, cdn));
 	}
 
 	process_item_removal() {
@@ -1850,6 +1870,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"doctype": me.frm.doc.doctype,
 			"name": me.frm.doc.name,
 			"is_return": cint(me.frm.doc.is_return),
+			"return_against": me.frm.doc.return_against,
 			"update_stock": ['Sales Invoice', 'Purchase Invoice'].includes(me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 			"conversion_factor": me.frm.doc.conversion_factor,
 			"pos_profile": me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
@@ -1912,6 +1933,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			const existing_pricing_rule = frappe.model.get_value(child.doctype, child.name, "pricing_rules");
 
 			for (const [key, value] of Object.entries(child)) {
+				if (key === "discount_amount" && child.discount_percentage) continue;
+
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
 						frappe.model.set_value(child.doctype, child.name, "rate", value);
@@ -2495,8 +2518,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
 			fields: fields,
-			primary_action: function () {
-				const data = dialog.get_values();
+			primary_action: function (data) {
 				const selected_data = data.items.filter(item => item?.__checked == 1 );
 				frappe.call({
 					method: "erpnext.controllers.stock_controller.make_quality_inspections",
@@ -2742,6 +2764,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				method: "erpnext.stock.get_item_details.get_blanket_order_details",
 				args: {
 					args:{
+						doctype: doc.doctype,
 						item_code: item.item_code,
 						customer: doc.customer,
 						supplier: doc.supplier,

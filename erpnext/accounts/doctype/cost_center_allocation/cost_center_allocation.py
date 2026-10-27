@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from decimal import Decimal
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -60,7 +62,9 @@ class CostCenterAllocation(Document):
 		self.validate_child_cost_centers()
 
 	def validate_total_allocation_percentage(self):
-		total_percentage = sum([flt(d.percentage) for d in self.get("allocation_percentages", [])])
+		total_percentage = sum(
+			Decimal(str(flt(d.percentage))) for d in self.get("allocation_percentages", [])
+		)
 
 		if total_percentage != 100:
 			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
@@ -154,3 +158,7 @@ class CostCenterAllocation(Document):
 					).format(d.cost_center),
 					InvalidChildCostCenter,
 				)
+
+	def clear_cache(self):
+		frappe.clear_cache(doctype="Cost Center")
+		return super().clear_cache()

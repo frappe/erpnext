@@ -35,7 +35,7 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 		{
 			fieldname: "show_incorrect_entries",
 			fieldtype: "Check",
-			label: "Show Incorrect Entries",
+			label: __("Show Incorrect Entries"),
 			default: 0,
 		},
 	],

@@ -615,6 +615,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_invoice_reference",
    "reqd": 1
   },
   {
@@ -2199,7 +2200,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-10-13 12:12:32.911258",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

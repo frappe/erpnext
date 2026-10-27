@@ -16,7 +16,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+)
 from erpnext.accounts.utils import get_account_currency
 
 
@@ -731,7 +735,13 @@ def get_columns(filters):
 		]
 
 	columns += [
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": 120,
+		},
 		{
 			"label": _("Voucher Subtype"),
 			"fieldname": "voucher_subtype",
@@ -795,6 +805,9 @@ def get_columns(filters):
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):

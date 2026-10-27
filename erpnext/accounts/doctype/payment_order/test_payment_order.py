@@ -26,6 +26,10 @@ class TestPaymentOrder(FrappeTestCase):
 			gl_account=self.gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
 
+		frappe.db.set_value(
+			"Bank Account", self.bank_account, {"is_company_account": 1, "company": "_Test Company"}
+		)
+
 	def tearDown(self):
 		frappe.db.rollback()
 

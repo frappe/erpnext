@@ -87,7 +87,7 @@
   },
   {
    "default": "Each Transaction",
-   "description": "How often should Project and Company be updated based on Sales Transactions?",
+   "description": "How often should Project and Company be updated based on Sales Transactions? Daily refreshes nightly; Monthly refreshes on the 1st of each month.",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "Sales Update Frequency in Company and Project",

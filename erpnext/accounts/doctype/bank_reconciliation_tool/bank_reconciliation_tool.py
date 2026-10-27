@@ -570,7 +570,7 @@ def get_linked_payments(
 		"Bank Transaction", "read", doc=bank_transaction_name
 	):
 		_refuse()
-	return _get_linked_payments(
+	vouchers = _get_linked_payments(
 		bank_transaction_name,
 		document_types,
 		from_date,
@@ -579,6 +579,12 @@ def get_linked_payments(
 		from_reference_date,
 		to_reference_date,
 	)
+	# matching queries skip permissions, so drop the vouchers the user may not read
+	return [
+		voucher
+		for voucher in vouchers
+		if voucher.get("doctype") and _is_permitted(voucher["doctype"], voucher.get("name"), "read")
+	]
 
 
 def _get_linked_payments(

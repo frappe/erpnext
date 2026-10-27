@@ -143,6 +143,33 @@ class TestPaymentReconciliation(FrappeTestCase):
 				acc = frappe.get_doc("Account", name)
 			setattr(self, x.attribute, acc.name)
 
+	def test_allocation_cannot_exceed_invoice_balance(self):
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.append(
+			"invoices",
+			{"invoice_type": "Sales Invoice", "invoice_number": "INV-1", "outstanding_amount": 600},
+		)
+		for amounts in ([600], [1000], [400, 400], [300, 300]):
+			with self.subTest(amounts=amounts):
+				pr.set("allocation", [])
+				for amount in amounts:
+					pr.append(
+						"allocation",
+						{
+							"invoice_type": "Sales Invoice",
+							"invoice_number": "INV-1",
+							"amount": 1000,
+							"allocated_amount": amount,
+						},
+					)
+				if sum(amounts) > 600:
+					self.assertRaises(frappe.ValidationError, pr.validate_allocation)
+				else:
+					pr.validate_allocation()
+
+		pr.set("invoices", [])
+		self.assertRaises(frappe.ValidationError, pr.validate_allocation)
+
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
