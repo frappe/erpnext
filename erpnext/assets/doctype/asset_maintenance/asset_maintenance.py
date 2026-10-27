@@ -60,9 +60,9 @@ class AssetMaintenance(Document):
 	def sync_maintenance_tasks(self):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
-			tasks_names.append(task.name)
 			if task.maintenance_status == "Cancelled":
 				continue
+			tasks_names.append(task.name)
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
 			)
