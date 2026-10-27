@@ -15,6 +15,7 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	get_planned_process_loss_percentage,
 	get_qty_before_process_loss,
 	get_uom_conversion_factor,
+	round_up_to_whole_unit,
 )
 
 
@@ -90,6 +91,7 @@ def _add_sub_assembly_child(
 		d.process_loss_percentage = (
 			get_planned_process_loss_percentage(d.value) if consider_process_loss else 0
 		)
+		stock_qty = round_up_to_whole_unit(stock_qty, d.stock_uom)
 		bom_data.append(
 			_sub_assembly_row(
 				d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision

@@ -33,6 +33,7 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	get_sales_orders,
 	get_uom_conversion_factor,
 	get_warehouse_list,
+	round_up_to_whole_unit,
 	set_default_warehouses,
 )
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
@@ -794,12 +795,6 @@ def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 	return quantity
 
 
-def _round_up_whole_uom(quantity, uom):
-	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
-		return ceil(quantity)
-	return quantity
-
-
 def _mr_purchase_conversion_factor(row):
 	if purchase_uom := _mr_purchase_uom(row):
 		return get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
@@ -836,7 +831,7 @@ def _material_request_item_row(
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": _round_up_whole_uom(
+		"quantity": round_up_to_whole_unit(
 			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
 		),
 		"conversion_factor": conversion_factor,
@@ -915,7 +910,7 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 
 	min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
 	quantity = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
-	item["quantity"] = _round_up_whole_uom(quantity, item.get("uom"))
+	item["quantity"] = round_up_to_whole_unit(quantity, item.get("uom"))
 	new_mr_items.append(item)
 
 
