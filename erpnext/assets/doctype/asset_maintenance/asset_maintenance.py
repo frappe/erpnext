@@ -53,16 +53,21 @@ class AssetMaintenance(Document):
 	def sync_maintenance_tasks(self):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
-			tasks_names.append(task.name)
 			if task.maintenance_status == "Cancelled":
 				continue
+			tasks_names.append(task.name)
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
 			)
 		asset_maintenance_logs = frappe.get_all(
 			"Asset Maintenance Log",
 			fields=["name"],
-			filters={"asset_maintenance": self.name, "task": ("not in", tasks_names)},
+			filters={
+				"asset_maintenance": self.name,
+				"task": ("not in", tasks_names),
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+			},
 		)
 		if asset_maintenance_logs:
 			for asset_maintenance_log in asset_maintenance_logs:
