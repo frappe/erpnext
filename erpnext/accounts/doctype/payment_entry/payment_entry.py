@@ -183,6 +183,7 @@ class PaymentEntry(AccountsController):
 		self.set_exchange_rate()
 		self.validate_mandatory()
 		self.validate_reference_documents()
+		self.validate_dunning_deductions()
 		self.set_amounts()
 		self.validate_amounts()
 		self.apply_taxes()
@@ -199,6 +200,54 @@ class PaymentEntry(AccountsController):
 		PaymentTaxWithholding(self).on_validate()
 		self.set_status()
 		self.set_total_in_words()
+
+	def validate_dunning_deductions(self):
+		dunning_names = {row.dunning for row in self.deductions if row.dunning}
+		if not dunning_names:
+			return
+
+		dunnings = {
+			row.name: row
+			for row in frappe.get_all(
+				"Dunning",
+				filters={"name": ("in", list(dunning_names))},
+				fields=["name", "docstatus", "customer", "company", "income_account"],
+			)
+		}
+		for row in self.deductions:
+			if not row.dunning:
+				continue
+
+			dunning = dunnings.get(row.dunning)
+			if not dunning or dunning.docstatus != 1:
+				frappe.throw(_("Row #{0}: Dunning {1} must be submitted.").format(row.idx, row.dunning))
+
+			if self.payment_type != "Receive" or self.party_type != "Customer":
+				frappe.throw(
+					_("Row #{0}: Dunning charges require a Receive payment from a Customer.").format(row.idx)
+				)
+
+			if self.party != dunning.customer:
+				frappe.throw(
+					_("Row #{0}: Dunning {1} belongs to a different customer.").format(row.idx, row.dunning)
+				)
+
+			if self.company != dunning.company:
+				frappe.throw(
+					_("Row #{0}: Dunning {1} belongs to a different company.").format(row.idx, row.dunning)
+				)
+
+			if row.account != dunning.income_account:
+				frappe.throw(
+					_(
+						"Row #{0}: Dunning charges must use the income account {1} configured on Dunning {2}."
+					).format(row.idx, dunning.income_account, row.dunning)
+				)
+
+			if flt(row.amount) >= 0:
+				frappe.throw(
+					_("Row #{0}: Dunning charges must have a negative deduction amount.").format(row.idx)
+				)
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
