@@ -301,7 +301,7 @@ class EmailDigest(Document):
 		)
 
 		for t in project_list:
-			t.link = get_url_to_form("Issue", t.name)
+			t.link = get_url_to_form("Project", t.name)
 
 		return project_list
 
@@ -511,7 +511,8 @@ class EmailDigest(Document):
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters={
-				"status": [["!=", "Closed"], ["!=", "Cancelled"]],
+				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
+				"docstatus": 1,
 				"per_billed": [["<", 100]],
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
@@ -548,6 +549,7 @@ class EmailDigest(Document):
 			filters={
 				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
 				"delivery_status": [["!=", "Fully Delivered"]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -583,6 +585,7 @@ class EmailDigest(Document):
 			filters={
 				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
 				"per_received": [["<", 100]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -617,7 +620,8 @@ class EmailDigest(Document):
 			doctype="Purchase Order",
 			filters={
 				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
-				"per_received": [["<", 100]],
+				"per_billed": [["<", 100]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -809,8 +813,8 @@ class EmailDigest(Document):
 			report_type="Report Builder",
 			doctype="Quotation",
 			filters={
-				"status": [["!=", "Ordered"], ["!=", "Cancelled"], ["!=", "Lost"]],
-				"per_received": [["<", 100]],
+				"status": [["!=", "Ordered"], ["!=", "Cancelled"], ["!=", "Lost"], ["!=", "Expired"]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -830,6 +834,7 @@ class EmailDigest(Document):
 
 		filters = {
 			date_field: [[">=", self.future_from_date], ["<=", self.future_to_date]],
+			"docstatus": 1,
 			"status": [["!=", "Cancelled"]],
 			"company": self.company,
 		}
