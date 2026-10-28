@@ -10,6 +10,7 @@
  "field_order": [
   "settings",
   "has_print_format",
+  "print_format_creation",
   "primary_settings",
   "bank_name",
   "cheque_size",
@@ -60,6 +61,15 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Has Print Format",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "print_format_creation",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Print Format Creation",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -298,7 +308,7 @@
  "icon": "printer",
  "links": [],
  "max_attachments": 1,
- "modified": "2026-06-08 12:10:35.829531",
+ "modified": "2026-10-28 15:14:49.304250",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Print Template",
