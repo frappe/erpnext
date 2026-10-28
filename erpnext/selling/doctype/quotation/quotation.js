@@ -158,7 +158,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				});
 			}
 
-			if (frappe.model.can_create("Quotation")) {
+			if (doc.status !== "Partially Ordered" && frappe.model.can_create("Quotation")) {
 				this.frm.add_custom_button(
 					__("New Version"),
 					() => {
