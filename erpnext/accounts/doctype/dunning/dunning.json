@@ -17,6 +17,7 @@
   "posting_date",
   "posting_time",
   "status",
+  "superseded_by",
   "section_break_9",
   "currency",
   "column_break_11",
@@ -243,6 +244,16 @@
    "read_only": 1
   },
   {
+   "fieldname": "superseded_by",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Superseded By",
+   "no_copy": 1,
+   "options": "Dunning",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "description": "For dunning fee and interest",
    "fetch_from": "dunning_type.income_account",
    "fieldname": "income_account",
@@ -400,7 +411,7 @@
  "icon": "bell-ring",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-26 11:25:50.077318",
+ "modified": "2026-10-27 12:26:10.799506",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
