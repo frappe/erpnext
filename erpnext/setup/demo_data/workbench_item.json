@@ -1,0 +1,157 @@
+[
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-1200",
+        "item_name": "Steel Workbench 1200 with Drawer",
+        "stock_uom": "Nos"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-FRM-ASM",
+        "item_name": "Frame Assembly",
+        "stock_uom": "Nos"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-LEG-01",
+        "item_name": "Square Tube Leg 50 x 50",
+        "stock_uom": "Nos",
+        "valuation_rate": 450.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-FOOT-M10",
+        "item_name": "Leveling Foot M10",
+        "stock_uom": "Nos",
+        "valuation_rate": 60.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-BOLT-M8",
+        "item_name": "Hex Bolt M8 x 60",
+        "stock_uom": "Nos",
+        "valuation_rate": 8.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-RAIL-L",
+        "item_name": "Long Rail 40 x 40 x 1050",
+        "stock_uom": "Nos",
+        "valuation_rate": 380.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-RAIL-S",
+        "item_name": "Short Rail 40 x 40 x 450",
+        "stock_uom": "Nos",
+        "valuation_rate": 190.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-TOP-ASM",
+        "item_name": "Top Assembly",
+        "stock_uom": "Nos"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-SHEET-01",
+        "item_name": "Galvanised Top Cover Sheet",
+        "stock_uom": "Nos",
+        "valuation_rate": 1200.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-TOP-01",
+        "item_name": "Beech Worktop 1200 x 600 x 30",
+        "stock_uom": "Nos",
+        "valuation_rate": 3500.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-SHELF-01",
+        "item_name": "Plywood Lower Shelf 18 mm",
+        "stock_uom": "Nos",
+        "valuation_rate": 900.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-DRW-ASM",
+        "item_name": "Drawer Assembly",
+        "stock_uom": "Nos"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-DRW-FRONT",
+        "item_name": "Drawer Front Panel",
+        "stock_uom": "Nos",
+        "valuation_rate": 350.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-DRW-SIDE",
+        "item_name": "Drawer Side Panel",
+        "stock_uom": "Nos",
+        "valuation_rate": 220.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-DRW-BACK",
+        "item_name": "Drawer Back Panel",
+        "stock_uom": "Nos",
+        "valuation_rate": 180.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-DRW-BOTTOM",
+        "item_name": "Drawer Bottom Panel",
+        "stock_uom": "Nos",
+        "valuation_rate": 260.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-SLIDE-450",
+        "item_name": "Ball Bearing Drawer Slide 450 mm",
+        "stock_uom": "Nos",
+        "valuation_rate": 420.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-HANDLE-ASM",
+        "item_name": "Drawer Handle Assembly",
+        "stock_uom": "Nos"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-HANDLE-BAR",
+        "item_name": "Handle Bar 200 mm",
+        "stock_uom": "Nos",
+        "valuation_rate": 150.0
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "WB-HANDLE-POST",
+        "item_name": "Handle Post",
+        "stock_uom": "Nos",
+        "valuation_rate": 40.0
+    }
+]
