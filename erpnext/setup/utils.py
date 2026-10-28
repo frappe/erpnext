@@ -27,39 +27,50 @@ def get_pegged_currencies():
 			"ratio": flt(currency.pegged_exchange_rate),
 		}
 		for currency in pegged_currencies
+		# a row without a positive ratio cannot convert anything
+		if currency.source_currency and currency.pegged_against and flt(currency.pegged_exchange_rate) > 0
 	}
 	return pegged_map
 
 
-def get_pegged_rate(pegged_map, from_currency, to_currency, transaction_date=None):
+def get_pegged_rate(pegged_map, from_currency, to_currency, transaction_date=None, args=None):
+	"""Return the rate for a pair in which at least one currency is pegged, or None if neither is.
+
+	The ratio of a pegged currency is the number of its units for one unit of the currency it
+	is pegged against, e.g. AED pegged against USD at 3.6725.
+	"""
 	from_entry = pegged_map.get(from_currency)
 	to_entry = pegged_map.get(to_currency)
 
-	if from_currency in pegged_map and to_currency in pegged_map:
-		# Case 1: Both are present and pegged to same bases
-		if from_entry["pegged_against"] == to_entry["pegged_against"]:
-			return (1 / from_entry["ratio"]) * to_entry["ratio"]
+	if not (from_entry or to_entry):
+		return None
 
-		# Case 2: Both are present but pegged to different bases
-		base_from = from_entry["pegged_against"]
-		base_to = to_entry["pegged_against"]
-		base_rate = get_exchange_rate(base_from, base_to, transaction_date)
+	# Case 1: both are pegged against the same currency
+	if from_entry and to_entry and from_entry["pegged_against"] == to_entry["pegged_against"]:
+		return to_entry["ratio"] / from_entry["ratio"]
 
-		if not base_rate:
-			return None
-
-		return (1 / from_entry["ratio"]) * base_rate * to_entry["ratio"]
-
-	# Case 3: from_currency is pegged to to_currency
+	# Case 2: from_currency is pegged against to_currency
 	if from_entry and from_entry["pegged_against"] == to_currency:
-		return flt(from_entry["ratio"])
+		return 1 / from_entry["ratio"]
 
-	# Case 4: to_currency is pegged to from_currency
+	# Case 3: to_currency is pegged against from_currency
 	if to_entry and to_entry["pegged_against"] == from_currency:
-		return 1 / flt(to_entry["ratio"])
+		return to_entry["ratio"]
 
-	""" If only one entry exists but doesn’t match pegged currency logic, return None """
-	return None
+	# Otherwise convert between the currencies they are pegged against, from a Currency Exchange
+	# record or the provider, the same way as any other pair
+	base_from = from_entry["pegged_against"] if from_entry else from_currency
+	base_to = to_entry["pegged_against"] if to_entry else to_currency
+	base_rate = _get_exchange_rate(base_from, base_to, transaction_date, args, resolve_pegged=False)
+	if not base_rate:
+		return 0.0
+
+	rate = flt(base_rate)
+	if from_entry:
+		rate /= from_entry["ratio"]
+	if to_entry:
+		rate *= to_entry["ratio"]
+	return rate
 
 
 @frappe.whitelist()
@@ -69,6 +80,10 @@ def get_exchange_rate(
 	transaction_date: DateTimeLikeObject | None = None,
 	args: str | None = None,
 ):
+	return _get_exchange_rate(from_currency, to_currency, transaction_date, args)
+
+
+def _get_exchange_rate(from_currency, to_currency, transaction_date=None, args=None, resolve_pegged=True):
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
@@ -114,15 +129,14 @@ def get_exchange_rate(
 	if entries:
 		return flt(entries[0].exchange_rate)
 
+	# fixed pegs need no provider, so they are resolved before the provider check
+	if resolve_pegged and currency_settings.allow_pegged_currencies_exchange_rates:
+		rate = get_pegged_rate(get_pegged_currencies(), from_currency, to_currency, transaction_date, args)
+		if rate is not None:
+			return flt(rate)
+
 	if frappe.get_single_value("Currency Exchange Settings", "disabled"):
 		return 0.00
-
-	pegged_currencies = {}
-
-	if currency_settings.allow_pegged_currencies_exchange_rates:
-		pegged_currencies = get_pegged_currencies()
-		if rate := get_pegged_rate(pegged_currencies, from_currency, to_currency, transaction_date):
-			return rate
 
 	try:
 		cache = frappe.cache()
@@ -141,12 +155,8 @@ def get_exchange_rate(
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
 			req_params = {
 				"transaction_date": transaction_date,
-				"from_currency": from_currency
-				if from_currency not in pegged_currencies
-				else pegged_currencies[from_currency]["pegged_against"],
-				"to_currency": to_currency
-				if to_currency not in pegged_currencies
-				else pegged_currencies[to_currency]["pegged_against"],
+				"from_currency": from_currency,
+				"to_currency": to_currency,
 			}
 			params = {}
 			for row in settings.req_params:
@@ -170,15 +180,9 @@ def get_exchange_rate(
 				raise ValueError("Exchange rate must be a positive finite number")
 			cache.set_value(key, value, expires_in_sec=21600)
 
-		# Support multiple pegged currencies
 		value = float(value)
 		if not isfinite(value) or value <= 0:
 			raise ValueError("Exchange rate must be a positive finite number")
-
-		if currency_settings.allow_pegged_currencies_exchange_rates and to_currency in pegged_currencies:
-			value *= flt(pegged_currencies[to_currency]["ratio"])
-		if currency_settings.allow_pegged_currencies_exchange_rates and from_currency in pegged_currencies:
-			value /= flt(pegged_currencies[from_currency]["ratio"])
 
 		return flt(value)
 	except frappe.PermissionError:
