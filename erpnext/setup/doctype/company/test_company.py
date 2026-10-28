@@ -366,6 +366,28 @@ class TestCompany(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Customer", {"customer_name": "Grant Plastics Ltd."}))
 		self.assertFalse(frappe.db.exists("Item", "SKU001"))
 
+	def test_demo_data_adds_workbench_design_with_boms(self):
+		from erpnext.setup.demo import clear_demo_data, setup_demo_data
+
+		setup_demo_data("_Test Company")
+
+		company = frappe.db.get_single_value("Global Defaults", "demo_company")
+		design = frappe.get_doc("BOM Creator", {"company": company})
+		self.assertEqual(design.design_name, "Steel Workbench 1200 with Drawer")
+		self.assertEqual(design.status, "Completed")
+		self.assertEqual(len(design.items), 19)
+		self.assertTrue(all(part.item_code == part.part_number for part in design.items))
+		self.assertEqual(frappe.db.count("BOM", {"bom_creator": design.name, "docstatus": 1}), 5)
+		self.assertTrue(
+			frappe.db.exists("File", {"file_url": design.design_file, "attached_to_name": design.name})
+		)
+
+		clear_demo_data()
+
+		self.assertFalse(frappe.db.exists("Company", company))
+		self.assertFalse(frappe.db.exists("BOM Creator", design.name))
+		self.assertFalse(frappe.db.exists("Item", "WB-1200"))
+
 
 def create_company_communication(doctype, docname):
 	comm = frappe.get_doc(

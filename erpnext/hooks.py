@@ -140,6 +140,7 @@ treeviews = [
 demo_master_doctypes = [
 	"item_group",
 	"item",
+	"workbench_item",
 	"customer_group",
 	"supplier_group",
 	"customer",
