@@ -419,6 +419,14 @@ def get_payment_term_details(
 	if posting_date and getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
 
+	# a discount cannot be valid after the due date
+	if (
+		term_details.discount_date
+		and term_details.due_date
+		and getdate(term_details.discount_date) > getdate(term_details.due_date)
+	):
+		term_details.discount_date = term_details.due_date
+
 	return term_details
 
 
