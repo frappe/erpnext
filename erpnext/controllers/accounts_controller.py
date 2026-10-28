@@ -4527,6 +4527,19 @@ def update_child_qty_rate(
 				)
 			)
 
+		# The Quotation form hides Update Items for these states; enforce it server-side too.
+		if doc.doctype == "Quotation":
+			if doc.status in ("Lost", "Ordered"):
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it is {1}.").format(
+						doc.name, _(doc.status)
+					)
+				)
+			if doc.valid_till and getdate(doc.valid_till) < getdate():
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it has expired.").format(doc.name)
+				)
+
 	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
@@ -4894,6 +4907,8 @@ def update_child_qty_rate(
 	if parent_doctype == "Sales Order" and not parent.is_subcontracted:
 		make_packing_list(parent)
 		parent.set_gross_profit()
+	elif parent_doctype == "Quotation":
+		make_packing_list(parent)
 	frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 		parent.doctype, parent.company, parent.base_grand_total
 	)
@@ -4955,6 +4970,9 @@ def update_child_qty_rate(
 
 	elif parent_doctype == "Supplier Quotation":
 		parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), rfqs_before_update)
+
+	elif parent_doctype == "Quotation":
+		parent.set_status(update=True)
 
 	parent.reload()
 	validate_workflow_conditions(parent)
