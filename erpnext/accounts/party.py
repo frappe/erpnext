@@ -765,17 +765,19 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 	:param template_name: Name of the `Payment Terms Template`
 	:return: String representing the calculated due date
 	"""
-	due_date = getdate(bill_date or posting_date)
+	invoice_date = getdate(bill_date or posting_date)
+	due_date = invoice_date
 
 	template = frappe.get_doc("Payment Terms Template", template_name)
 
+	# each term is due from the invoice date, not from the previous term's due date
 	for term in template.terms:
 		if term.due_date_based_on == "Day(s) after invoice date":
-			due_date = max(due_date, add_days(due_date, term.credit_days))
+			due_date = max(due_date, add_days(invoice_date, term.credit_days))
 		elif term.due_date_based_on == "Day(s) after the end of the invoice month":
-			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
+			due_date = max(due_date, add_days(get_last_day(invoice_date), term.credit_days))
 		else:
-			due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
+			due_date = max(due_date, get_last_day(add_months(invoice_date, term.credit_months)))
 	return due_date
 
 

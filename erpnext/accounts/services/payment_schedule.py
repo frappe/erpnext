@@ -107,11 +107,38 @@ class PaymentScheduleService:
 						d.payment_amount * doc.get("conversion_rate"), d.precision("base_payment_amount")
 					)
 					d.base_outstanding = d.base_payment_amount
+			self.adjust_rounding_difference(grand_total, base_grand_total)
 		else:
 			self.fetch_payment_terms_from_order(
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			doc.ignore_default_payment_terms_template = 1
+
+	def adjust_rounding_difference(self, grand_total, base_grand_total) -> None:
+		"""Put the rounding difference of a schedule split by portions on its last row,
+		so that the rows add up to the total."""
+		schedule = self.doc.get("payment_schedule")
+		if not schedule or not all(flt(d.invoice_portion) for d in schedule):
+			return
+
+		if flt(sum(flt(d.invoice_portion) for d in schedule), 2) != 100:
+			return
+
+		last = schedule[-1]
+		for amount_field, outstanding_field, total in (
+			("payment_amount", "outstanding", grand_total),
+			("base_payment_amount", "base_outstanding", base_grand_total),
+		):
+			precision = last.precision(amount_field)
+			difference = flt(
+				flt(total, precision) - sum(flt(d.get(amount_field), precision) for d in schedule), precision
+			)
+			if not difference:
+				continue
+
+			if flt(last.get(outstanding_field), precision) == flt(last.get(amount_field), precision):
+				last.set(outstanding_field, flt(last.get(outstanding_field) + difference, precision))
+			last.set(amount_field, flt(last.get(amount_field) + difference, precision))
 
 	def get_order_details(self) -> tuple:
 		doc = self.doc
@@ -201,14 +228,26 @@ class PaymentScheduleService:
 			if schedule.discount_type == "Percentage":
 				payment_schedule["discount_type"] = schedule.discount_type
 				payment_schedule["discount"] = schedule.discount
+			elif schedule.discount_type == "Amount" and flt(schedule.discount):
+				# an amount discount applies to the order's row, so it shrinks with a partial invoice
+				ratio = 1
+				if schedule.invoice_portion and flt(schedule.payment_amount):
+					ratio = min(1, flt(payment_schedule["payment_amount"]) / flt(schedule.payment_amount))
+				payment_schedule["discount_type"] = schedule.discount_type
+				payment_schedule["discount"] = flt(
+					flt(schedule.discount) * ratio, schedule.precision("discount")
+				)
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
 
 			doc.append("payment_schedule", payment_schedule)
 
+		if automatically_fetch_payment_terms:
+			self.adjust_rounding_difference(grand_total, base_grand_total)
+
 	def set_due_date(self) -> None:
-		due_dates = [d.due_date for d in self.doc.get("payment_schedule") if d.due_date]
+		due_dates = [getdate(d.due_date) for d in self.doc.get("payment_schedule") if d.due_date]
 		if due_dates:
 			self.doc.due_date = max(due_dates)
 
@@ -232,9 +271,10 @@ class PaymentScheduleService:
 						d.idx
 					)
 				)
-			elif d.due_date in dates:
+			# different payment terms may fall on the same date, e.g. on a month-end invoice
+			elif (getdate(d.due_date) if d.due_date else None, d.payment_term) in dates:
 				li.append(_("{0} in row {1}").format(d.due_date, d.idx))
-			dates.append(d.due_date)
+			dates.append((getdate(d.due_date) if d.due_date else None, d.payment_term))
 
 		if li:
 			frappe.throw(
