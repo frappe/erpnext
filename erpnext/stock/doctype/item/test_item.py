@@ -286,10 +286,10 @@ class TestItem(ERPNextTestSuite):
 						"tax_category": data["tax_category"],
 						"company": "_Test Company",
 						"price_list": "_Test Price List",
-						"currency": "_Test Currency",
+						"currency": "INR",
 						"doctype": "Sales Order",
 						"conversion_rate": 1,
-						"price_list_currency": "_Test Currency",
+						"price_list_currency": "INR",
 						"plc_conversion_rate": 1,
 						"order_type": "Sales",
 						"customer": "_Test Customer",
@@ -337,10 +337,10 @@ class TestItem(ERPNextTestSuite):
 					"item_code": "Test Item With Defaults",
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Sales Invoice",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"customer": "_Test Customer",
 				}
@@ -362,10 +362,10 @@ class TestItem(ERPNextTestSuite):
 					"item_code": "Test Item With Defaults",
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Purchase Invoice",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"supplier": "_Test Supplier",
 				}
@@ -1228,6 +1228,16 @@ class TestItem(ERPNextTestSuite):
 			item.save()
 		except frappe.ValidationError as e:
 			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
+
+	def test_stock_uom_can_change_after_stock_is_cancelled(self):
+		item = create_item(frappe.generate_hash(length=20))
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=5, basic_rate=10).cancel()
+
+		item.reload()
+		item.stock_uom = "Gram"
+		item.save()
+
+		self.assertEqual(frappe.db.get_value("Bin", {"item_code": item.name}, "stock_uom"), "Gram")
 
 	def test_erasure_of_old_conversions(self):
 		item = create_item("_item change uom")

@@ -3,6 +3,7 @@
 
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, today
@@ -45,10 +46,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -141,10 +142,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test FG Item 2",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -189,10 +190,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_group": "Products",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -229,10 +230,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -296,10 +297,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "Test Variant PRT",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -437,6 +438,24 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(item.rate_with_margin, 1100)
 		self.assertEqual(item.discount_amount, 110)
 		self.assertEqual(item.rate, 990)
+
+	def test_typed_rate_stays_when_no_pricing_rule_is_applied(self):
+		# A coupon based rule without its coupon is considered but not applied: the row holds "[]".
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		pricing_rule = make_pricing_rule(selling=1, discount_percentage=10)
+		pricing_rule.db_set("coupon_code_based", 1)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 100
+		si.items[0].rate = 120
+		si.payment_schedule = []
+		si.insert(ignore_permissions=True)
+		self.assertEqual(si.items[0].rate, 120)
+
+		si.save()
+		si.submit()
+		self.assertEqual(si.items[0].rate, 120)
+		self.assertEqual(si.items[0].margin_rate_or_amount, 20)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_pricing_rule_for_product_discount_on_same_item(self):
@@ -583,10 +602,10 @@ class TestPricingRule(ERPNextTestSuite):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -999,7 +1018,7 @@ class TestPricingRule(ERPNextTestSuite):
 				"currency": "USD",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -1019,7 +1038,7 @@ class TestPricingRule(ERPNextTestSuite):
 				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -1169,6 +1188,85 @@ class TestPricingRule(ERPNextTestSuite):
 
 		si.submit()
 		self.assertEqual(si.additional_discount_percentage, 4)
+
+	def test_coupon_transaction_discount_without_tracking(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		pricing_rule = make_pricing_rule(
+			selling=1,
+			apply_on="Transaction",
+			price_or_product_discount="Price",
+			discount_percentage=50,
+		)
+		pricing_rule.coupon_code_based = 1
+		pricing_rule.apply_discount_on = "Grand Total"
+		pricing_rule.save()
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Legacy Transaction Coupon",
+				"coupon_code": "LEGACYTRANSACTION",
+				"pricing_rule": pricing_rule.name,
+			}
+		).insert()
+
+		for discount_percentage, discount_amount in [(50, 0), (0, 100)]:
+			pricing_rule.rate_or_discount = (
+				"Discount Percentage" if discount_percentage else "Discount Amount"
+			)
+			pricing_rule.discount_percentage = discount_percentage
+			pricing_rule.discount_amount = discount_amount
+			pricing_rule.save()
+
+			# An unused coupon must not change a manual discount or its basis.
+			si = create_sales_invoice(qty=3, rate=1000, do_not_save=True)
+			si.apply_discount_on = "Net Total"
+			si.additional_discount_percentage = 20
+			si.insert()
+			si.reload()
+			self.assertEqual(si.additional_discount_percentage, 20)
+			self.assertEqual(si.discount_amount, 600)
+			self.assertEqual(si.apply_discount_on, "Net Total")
+
+			for manual_discount in [None, 200]:
+				with self.subTest(discount_percentage=discount_percentage, manual_discount=manual_discount):
+					si = create_sales_invoice(qty=3, rate=1000, do_not_save=True)
+					si.coupon_code = coupon.name
+					# Reproduce invoices saved before transaction rules were tracked.
+					with patch("erpnext.accounts.doctype.pricing_rule.utils.set_transaction_pricing_rules"):
+						si.insert()
+					si.reload()
+					self.assertFalse(si.pricing_rules)
+					self.assertEqual(si.discount_amount, 1500 if discount_percentage else 100)
+
+					si.coupon_code = None
+					if manual_discount is not None:
+						si.additional_discount_percentage = 0
+						si.discount_amount = manual_discount
+					si.save()
+					si.reload()
+					self.assertEqual(si.additional_discount_percentage, 0)
+					self.assertEqual(si.discount_amount, manual_discount or 0)
+					self.assertEqual(si.grand_total, 3000 - (manual_discount or 0))
+					self.assertEqual(sum(d.payment_amount for d in si.payment_schedule), si.grand_total)
+
+		# Selecting an inapplicable coupon does not make a manual discount belong to that rule.
+		for apply_on in ["Transaction", "Item Code"]:
+			pricing_rule.apply_on = apply_on
+			pricing_rule.min_qty = 10 if apply_on == "Transaction" else 0
+			if apply_on == "Item Code":
+				pricing_rule.append("items", {"item_code": "_Test Item 2"})
+			pricing_rule.save()
+			si = create_sales_invoice(qty=3, rate=1000, do_not_save=True)
+			si.coupon_code = coupon.name
+			si.apply_discount_on = "Grand Total"
+			si.discount_amount = 100
+			si.insert()
+			si.reload()
+			si.coupon_code = None
+			si.save()
+			si.reload()
+			self.assertEqual(si.discount_amount, 100)
+			self.assertEqual(si.grand_total, 2900)
 
 	def test_transaction_discount_replaced_by_another_pricing_rule(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -1668,6 +1766,22 @@ class TestPricingRule(ERPNextTestSuite):
 
 		debit_note.delete()
 		pi.cancel()
+
+	def test_pricing_rule_query_rejects_unknown_transaction_type(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rules
+
+		pricing_rule = make_pricing_rule(title="_Test Transaction Type Column Rule", selling=1)
+		self.addCleanup(frappe.delete_doc_if_exists, "Pricing Rule", pricing_rule.name)
+
+		args = frappe._dict(
+			item_code="_Test Item",
+			company="_Test Company",
+			price_list="_Test Price List",
+			qty=1,
+			transaction_date=frappe.utils.today(),
+			transaction_type="not_a_column",
+		)
+		self.assertRaises(frappe.ValidationError, get_pricing_rules, args)
 
 
 def make_pricing_rule(**args):

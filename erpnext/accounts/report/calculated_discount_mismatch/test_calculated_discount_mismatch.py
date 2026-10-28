@@ -1,0 +1,141 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+
+import json
+from unittest.mock import patch
+
+import frappe
+from frappe.desk.query_report import run
+from frappe.utils.formatters import format_value
+from frappe.utils.number_format import NumberFormat
+
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.calculated_discount_mismatch.calculated_discount_mismatch import (
+	execute,
+	parse_formatted_amount,
+)
+from erpnext.tests.utils import ERPNextTestSuite
+
+
+class TestCalculatedDiscountMismatch(ERPNextTestSuite):
+	"""Integrity detector: flag transactions whose stored ``discount_amount`` was tampered
+	after the fact (a Version records the change) while ``additional_discount_percentage``
+	stayed the same, so the stored amount no longer matches the percentage-derived value.
+	"""
+
+	def run_report(self, docname: str) -> dict | None:
+		"""Run the (filter-less) report and return the row for ``docname``, if any."""
+		_columns, data = execute(frappe._dict({}))
+		return next((row for row in data if row["docname"] == docname), None)
+
+	def create_discounted_invoice(self) -> "frappe.Document":
+		"""Draft Sales Invoice (rate 1000) with a 10% additional discount.
+
+		The controller derives ``discount_amount`` = 10% of the grand total = 100.00,
+		so the stored amount is consistent with the percentage.
+		"""
+		invoice = create_sales_invoice(rate=1000, qty=1, do_not_submit=1)
+		invoice.additional_discount_percentage = 10
+		invoice.save()
+		invoice.reload()
+		return invoice
+
+	def test_consistent_discount_is_not_flagged(self):
+		"""A submitted invoice whose discount_amount matches its percentage is not reported."""
+		invoice = self.create_discounted_invoice()
+		invoice.submit()
+		invoice.reload()
+
+		self.assertEqual(invoice.discount_amount, 100.0)
+		self.assertIsNone(self.run_report(invoice.name))
+
+	def test_tampered_discount_is_flagged(self):
+		"""Directly overwriting discount_amount (leaving the percentage intact) is reported.
+
+		This reproduces the real-world integrity breach: a Version records the
+		``discount_amount`` change, its ``new`` value equals the current stored amount, and
+		``additional_discount_percentage`` was not touched -- exactly the shape the report
+		queries for.
+		"""
+		invoice = self.create_discounted_invoice()
+		consistent_amount = invoice.discount_amount  # 100.00, matches the 10% percentage
+		tampered_amount = 250.0
+
+		discount_field = frappe.get_meta("Sales Invoice").get_field("discount_amount")
+		# Format exactly as the report does so version.new == format_value(current amount).
+		suspected = format_value(consistent_amount, df=discount_field, currency=invoice.currency)
+		actual = format_value(tampered_amount, df=discount_field, currency=invoice.currency)
+
+		# Tamper the stored amount directly, bypassing the controller that would recompute it.
+		frappe.db.set_value("Sales Invoice", invoice.name, "discount_amount", tampered_amount)
+		self.record_discount_change(invoice.name, suspected, actual)
+
+		row = self.run_report(invoice.name)
+
+		self.assertIsNotNone(row)
+		self.assertEqual(row["doctype"], "Sales Invoice")
+		self.assertEqual(row["actual_discount_percentage"], 10.0)
+		self.assertEqual(row["actual_discount_amount"], tampered_amount)
+		self.assertEqual(row["suspected_discount_amount"], consistent_amount)
+
+	def test_accounts_user_can_run_report(self):
+		frappe.reload_doc("accounts", "report", "calculated_discount_mismatch", force=True)
+		user = self.make_user("test_discount_mismatch_accounts@example.com", ["Accounts User"])
+
+		frappe.set_user(user)
+		try:
+			result = run("Calculated Discount Mismatch", frappe._dict())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIsInstance(result["result"], list)
+
+	def test_unreadable_transactions_are_hidden(self):
+		invoice = self.create_discounted_invoice()
+		frappe.db.set_value("Sales Invoice", invoice.name, "discount_amount", 250.0)
+		self.record_discount_change(
+			invoice.name, self.format_discount(invoice, 100.0), self.format_discount(invoice, 250.0)
+		)
+		user = self.make_user("test_discount_mismatch_restricted@example.com", ["Accounts User"])
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			row = self.run_report(invoice.name)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertIsNone(row)
+
+	def test_amounts_parse_in_formats_without_decimal_separator(self):
+		symbol = frappe.db.get_value("Currency", "INR", "symbol") or "INR"
+		for number_format, formatted in (("#,###", "1,250"), ("#.###", "1.250")):
+			with (
+				self.subTest(number_format=number_format),
+				patch(
+					"erpnext.accounts.report.calculated_discount_mismatch.calculated_discount_mismatch.get_number_format",
+					return_value=NumberFormat.from_string(number_format),
+				),
+			):
+				self.assertEqual(parse_formatted_amount(f"{symbol} {formatted}", "INR"), 1250.0)
+				self.assertEqual(parse_formatted_amount("100", "INR"), 100.0)
+
+	def format_discount(self, invoice: "frappe.Document", amount: float) -> str:
+		discount_field = frappe.get_meta("Sales Invoice").get_field("discount_amount")
+		return format_value(amount, df=discount_field, currency=invoice.currency)
+
+	def make_user(self, email: str, roles: list[str]) -> str:
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				doctype="User", email=email, first_name="Discount", roles=[{"role": role} for role in roles]
+			).insert()
+		return email
+
+	def record_discount_change(self, docname: str, old: str, new: str) -> None:
+		"""Insert the Version audit row a direct discount_amount edit would have produced."""
+		version = frappe.new_doc("Version")
+		version.ref_doctype = "Sales Invoice"
+		version.docname = docname
+		version.data = json.dumps({"changed": [["discount_amount", old, new]]}, separators=(",", ":"))
+		version.flags.ignore_version = True
+		version.insert(ignore_permissions=True)

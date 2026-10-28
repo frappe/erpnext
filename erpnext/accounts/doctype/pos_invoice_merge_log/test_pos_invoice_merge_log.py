@@ -6,6 +6,8 @@ from contextlib import contextmanager
 import frappe
 from frappe.utils import flt
 
+import erpnext
+from erpnext.accounts.doctype.coupon_code.test_coupon_code import test_create_test_data
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
@@ -34,6 +36,16 @@ def rounding_method(method):
 	finally:
 		frappe.db.set_single_value("System Settings", "rounding_method", previous)
 		frappe.local.system_settings = None
+
+
+@contextmanager
+def perpetual_inventory(company):
+	previous = erpnext.is_perpetual_inventory_enabled(company)
+	frappe.local.enable_perpetual_inventory[company] = 1
+	try:
+		yield
+	finally:
+		frappe.local.enable_perpetual_inventory[company] = previous
 
 
 def sell_over_the_counter(lines, discount_percentage=0):
@@ -140,6 +152,34 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		consolidated = frappe.get_doc("Sales Invoice", pos_inv3.consolidated_invoice)
 		self.assertEqual(consolidated.docstatus, 1)
 		self.assertTrue(any(payment.mode_of_payment == mode.name for payment in consolidated.payments))
+
+	def test_consolidation_and_return_do_not_consume_coupon_again(self):
+		test_create_test_data()
+		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
+		invoice = create_pos_invoice(rate=300, do_not_submit=1)
+		invoice.coupon_code = "SAVE30"
+		invoice.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+		invoice.save().submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		credit_note = make_sales_return(invoice.name)
+		credit_note.insert().submit()
+		self.assertEqual(credit_note.coupon_code, "SAVE30")
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		closing_entry = self.make_closing_entry()
+		invoice.reload()
+		self.assertEqual(
+			frappe.db.get_value("Sales Invoice", invoice.consolidated_invoice, "coupon_code"), "SAVE30"
+		)
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+
+		closing_entry.cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		credit_note.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
+		invoice.reload().cancel()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 0)
 
 	def test_consolidated_credit_note_creation(self):
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
@@ -636,3 +676,23 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 				flt(frappe.db.get_value("Sales Invoice", consolidated_name, "grand_total"), 2),
 				flt(handed_back, 2),
 			)
+
+	def test_consolidating_standalone_return_without_stock_history(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", "Stock In Hand - _TC")
+		item_code = make_item("_Test Standalone POS Return Item", {"is_stock_item": 1}).name
+		pos_return = create_pos_invoice(item_code=item_code, qty=-1, rate=100, is_return=1, do_not_save=1)
+		pos_return.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": -100})
+		pos_return.paid_amount = pos_return.base_paid_amount = -100
+
+		with perpetual_inventory("_Test Company"):
+			self.assertRaises(frappe.ValidationError, pos_return.insert)
+
+			pos_return.items[0].incoming_rate = 80
+			pos_return.insert().submit()
+			self.make_closing_entry()
+
+		pos_return.load_from_db()
+		credit_note = frappe.get_doc("Sales Invoice", pos_return.consolidated_invoice)
+		self.assertEqual(credit_note.items[0].incoming_rate, 80)

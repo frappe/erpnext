@@ -238,11 +238,38 @@ class TestJobCard(ERPNextTestSuite):
 				"from_time": "2024-01-01 08:00:00",
 				"to_time": "2024-01-01 09:00:00",
 				"time_in_mins": 60,
-				"completed_qty": job_card.for_quantity,
+				"completed_qty": job_card.for_quantity - 1,
 			},
 		)
+		doc.pending_qty = 1
 		doc.is_paused = 1
-		self.assertRaises(frappe.ValidationError, doc.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "On Hold", doc.submit)
+
+	def test_paused_job_card_is_released_once_all_qty_is_done(self):
+		job_card = self.get_first_job_card(self.work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
+		job_card.save()
+
+		job_card.pause_job(end_time="2024-03-01 09:00:00")
+		job_card.reload()
+		self.assertEqual((job_card.is_paused, job_card.status), (1, "On Hold"))
+
+		job_card.time_logs[0].completed_qty = job_card.for_quantity
+		job_card.save()
+		self.assertEqual((job_card.is_paused, job_card.status), (0, "Work In Progress"))
+
+		job_card.submit()
+		self.assertEqual(job_card.status, "Completed")
+
+	def test_removing_all_time_logs_clears_actual_dates(self):
+		job_card = self.get_first_job_card(self.work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00"})
+		job_card.save()
+		self.assertTrue(job_card.actual_start_date and job_card.actual_end_date)
+
+		job_card.set("time_logs", [])
+		job_card.save()
+		self.assertEqual((job_card.actual_start_date, job_card.actual_end_date), (None, None))
 
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
@@ -3275,6 +3302,7 @@ class TestJobCard(ERPNextTestSuite):
 		jc.process_loss_qty = 5
 		jc.validate_semi_finished_goods()
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_lowered_overproduction_allowance_checks_only_job_card_operation(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 
