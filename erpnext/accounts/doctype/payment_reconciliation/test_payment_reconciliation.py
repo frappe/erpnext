@@ -38,10 +38,11 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.creditors_usd = "_Test Payable USD - _TC"
 
 	def test_allocation_cannot_exceed_invoice_balance(self):
-		pr = frappe.get_doc("Payment Reconciliation")
+		si = self.create_sales_invoice(qty=1, rate=600)
+		pr = self.create_payment_reconciliation()
 		pr.append(
 			"invoices",
-			{"invoice_type": "Sales Invoice", "invoice_number": "INV-1", "outstanding_amount": 600},
+			{"invoice_type": "Sales Invoice", "invoice_number": si.name, "outstanding_amount": 600},
 		)
 		for amounts in ([600], [1000], [400, 400], [300, 300]):
 			with self.subTest(amounts=amounts):
@@ -51,7 +52,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 						"allocation",
 						{
 							"invoice_type": "Sales Invoice",
-							"invoice_number": "INV-1",
+							"invoice_number": si.name,
 							"amount": 1000,
 							"allocated_amount": amount,
 						},
@@ -61,8 +62,108 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 				else:
 					pr.validate_allocation()
 
-		pr.set("invoices", [])
+		# the outstanding comes from the ledger, not from the posted invoices table
+		pr.invoices[0].outstanding_amount = 1000
+		pr.set("allocation", [])
+		pr.append(
+			"allocation",
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": si.name,
+				"amount": 1000,
+				"allocated_amount": 1000,
+			},
+		)
 		self.assertRaises(frappe.ValidationError, pr.validate_allocation)
+
+	def test_allocation_against_another_partys_invoice(self):
+		other = create_sales_invoice(
+			customer="_Test Customer 1",
+			company=self.company,
+			debit_to=self.debit_to,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			rate=700,
+		)
+		pr = self.create_payment_reconciliation()
+		pr.append(
+			"invoices",
+			{"invoice_type": "Sales Invoice", "invoice_number": other.name, "outstanding_amount": 700},
+		)
+		pr.append(
+			"allocation",
+			{
+				"invoice_type": "Sales Invoice",
+				"invoice_number": other.name,
+				"amount": 700,
+				"allocated_amount": 700,
+			},
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "invoice outstanding amount 0", pr.validate_allocation)
+
+	def test_party_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		user = create_user("test_payment_reconciliation_party@example.com", "Accounts User")
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user.name)
+		pr = self.create_payment_reconciliation()
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, pr.get_unreconciled_entries)
+			self.assertRaises(frappe.PermissionError, pr.reconcile)
+
+	def test_journal_entry_amount_filter_on_party_row(self):
+		je = self.create_journal_entry(self.cash, self.debit_to, 5000)
+		je.accounts[1].update(
+			{"party_type": "Customer", "party": self.customer, "credit_in_account_currency": 500}
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": "_Test Customer 1",
+				"cost_center": self.cost_center,
+				"credit_in_account_currency": 4500,
+			},
+		)
+		je.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.maximum_payment_amount = 1000
+		pr.get_unreconciled_entries()
+		self.assertIn(je.name, [x.reference_name for x in pr.payments])
+
+		pr.maximum_payment_amount = 0
+		pr.minimum_payment_amount = 1000
+		pr.get_unreconciled_entries()
+		self.assertNotIn(je.name, [x.reference_name for x in pr.payments])
+
+	def test_payment_limit_keeps_oldest_payments(self):
+		older = self.create_journal_entry(
+			self.cash, self.debit_to, 300, posting_date=add_days(nowdate(), -30)
+		)
+		older.accounts[1].update({"party_type": "Customer", "party": self.customer})
+		older.save().submit()
+		self.create_payment_entry(amount=400).save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.from_payment_date = pr.to_payment_date = None
+		pr.payment_limit = 1
+		pr.get_unreconciled_entries()
+		self.assertEqual([x.reference_name for x in pr.payments], [older.name])
+
+	def test_invoice_limit_with_date_filter(self):
+		for days in (-10, -9, -8):
+			si = self.create_sales_invoice(rate=100, posting_date=add_days(nowdate(), days))
+			get_payment_entry(si.doctype, si.name).save().submit()
+		open_invoice = self.create_sales_invoice(rate=500, posting_date=add_days(nowdate(), -5))
+
+		pr = self.create_payment_reconciliation()
+		pr.from_invoice_date = add_days(nowdate(), -12)
+		pr.to_invoice_date = add_days(nowdate(), -3)
+		pr.invoice_limit = 3
+		pr.get_unreconciled_entries()
+		self.assertEqual([x.invoice_number for x in pr.invoices], [open_invoice.name])
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False

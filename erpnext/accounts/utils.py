@@ -2375,6 +2375,14 @@ class QueryPaymentLedger:
 				)
 
 		if self.limit and self.get_invoices:
+			# the date filter is on the invoice's own row: payments of any date count in its outstanding
+			invoice_date_filter = Criterion.all(self.voucher_posting_date)
+			if self.voucher_posting_date:
+				invoice_date_filter = (
+					(ple.voucher_no != ple.against_voucher_no)
+					| (ple.voucher_type != ple.against_voucher_type)
+					| invoice_date_filter
+				)
 			outstanding_vouchers = (
 				qb.from_(ple)
 				.select(
@@ -2394,7 +2402,7 @@ class QueryPaymentLedger:
 				.where(Criterion.all(filter_on_against_voucher_no))
 				.where(Criterion.all(self.common_filter))
 				.where(Criterion.all(self.dimensions_filter))
-				.where(Criterion.all(self.voucher_posting_date))
+				.where(invoice_date_filter)
 				.groupby(
 					ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party
 				)

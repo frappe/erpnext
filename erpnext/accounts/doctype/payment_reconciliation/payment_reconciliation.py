@@ -151,12 +151,12 @@ class PaymentReconciliation(Document):
 
 		non_reconciled_payments = payment_entries + journal_entries + dr_or_cr_notes
 
-		if self.payment_limit:
-			non_reconciled_payments = non_reconciled_payments[: self.payment_limit]
-
 		non_reconciled_payments = sorted(
 			non_reconciled_payments, key=lambda k: k["posting_date"] or getdate(nowdate())
 		)
+
+		if self.payment_limit:
+			non_reconciled_payments = non_reconciled_payments[: self.payment_limit]
 
 		self.add_payment_entries(non_reconciled_payments)
 
@@ -250,6 +250,12 @@ class PaymentReconciliation(Document):
 			dr_or_cr = jea.debit_in_account_currency - jea.credit_in_account_currency
 
 		conditions.append(dr_or_cr.gt(0))
+
+		if self.minimum_payment_amount:
+			conditions.append(dr_or_cr.gte(self.minimum_payment_amount))
+
+		if self.maximum_payment_amount:
+			conditions.append(dr_or_cr.lte(self.maximum_payment_amount))
 
 		if self.bank_cash_account:
 			conditions.append(jea.against_account.like(f"%%{self.bank_cash_account}%%"))
@@ -618,6 +624,7 @@ class PaymentReconciliation(Document):
 				)
 				return
 
+		self.check_mandatory_to_fetch()
 		self.validate_allocation()
 		self.reconcile_allocations()
 		msgprint(_("Successfully Reconciled"))
@@ -659,6 +666,12 @@ class PaymentReconciliation(Document):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
 			if not self.get(fieldname):
 				frappe.throw(_("Please select {0} first").format(self.meta.get_translated_label(fieldname)))
+
+		self.check_party_permission()
+
+	def check_party_permission(self):
+		# party is a Dynamic Link, so user permissions on it are not applied by the framework
+		frappe.has_permission(self.party_type, "read", doc=self.party, throw=True)
 
 	def validate_entries(self):
 		if not self.get("invoices"):
@@ -757,12 +770,9 @@ class PaymentReconciliation(Document):
 		return invoice_exchange_map
 
 	def validate_allocation(self):
-		unreconciled_invoices = frappe._dict()
-
-		for inv in self.get("invoices"):
-			unreconciled_invoices.setdefault(inv.invoice_type, {}).setdefault(
-				inv.invoice_number, inv.outstanding_amount
-			)
+		unreconciled_invoices = self.get_ledger_outstanding(
+			{(row.invoice_type, row.invoice_number) for row in self.get("allocation") if row.invoice_number}
+		)
 
 		invoices_to_reconcile = []
 		for row in self.get("allocation"):
@@ -792,6 +802,27 @@ class PaymentReconciliation(Document):
 
 		if not invoices_to_reconcile:
 			frappe.throw(_("No records found in Allocation table"))
+
+	def get_ledger_outstanding(self, invoices):
+		"""Outstanding of each invoice in the Payment Ledger of the selected company, party and accounts."""
+		outstanding = frappe._dict()
+		if not invoices:
+			return outstanding
+
+		ple = qb.DocType("Payment Ledger Entry")
+		accounts = [self.receivable_payable_account]
+		if self.default_advance_account:
+			accounts.append(self.default_advance_account)
+
+		for entry in get_outstanding_invoices(
+			self.party_type,
+			self.party,
+			accounts,
+			common_filter=[ple.company == self.company],
+			vouchers=[frappe._dict(voucher_type=t, voucher_no=n) for t, n in invoices],
+		):
+			outstanding.setdefault(entry.voucher_type, {})[entry.voucher_no] = flt(entry.outstanding_amount)
+		return outstanding
 
 	def build_dimensions_filter_conditions(self):
 		ple = qb.DocType("Payment Ledger Entry")
@@ -843,12 +874,6 @@ class PaymentReconciliation(Document):
 
 		if self.to_payment_date:
 			conditions.append(je.posting_date.lte(self.to_payment_date))
-
-		if self.minimum_payment_amount:
-			conditions.append(je.total_debit.gte(self.minimum_payment_amount))
-
-		if self.maximum_payment_amount:
-			conditions.append(je.total_debit.lte(self.maximum_payment_amount))
 
 		return conditions
 
