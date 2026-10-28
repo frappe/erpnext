@@ -178,6 +178,9 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.validate_inter_company_accounts()
 		AssetService(self).validate_depr_account_and_depr_entry_voucher_type()
+		if not frappe.flags.is_reverse_depr_entry:
+			AssetService(self).validate_depreciated_assets()
+		self.validate_reversal_of()
 		self.validate_company_in_accounting_dimension()
 		self.validate_advance_accounts()
 
@@ -185,6 +188,22 @@ class JournalEntry(AccountsController):
 
 		if not self.title or (self.is_new() and self.amended_from):
 			self.title = self.get_title()
+
+	def validate_reversal_of(self):
+		"""A Journal Entry can be reversed by one submitted Journal Entry only."""
+		if not self.reversal_of:
+			return
+
+		existing_reverse = frappe.db.exists(
+			"Journal Entry",
+			{"reversal_of": self.reversal_of, "docstatus": 1, "name": ("!=", self.name)},
+		)
+		if existing_reverse:
+			frappe.throw(
+				_("A Reverse Journal Entry {0} already exists for Journal Entry {1}.").format(
+					get_link_to_form("Journal Entry", existing_reverse), self.reversal_of
+				)
+			)
 
 	def validate_account_company(self):
 		"""Catch an account/Company mismatch on save, before GL Entry has to reject it on submit."""
@@ -648,6 +667,9 @@ class JournalEntry(AccountsController):
 		accounts_debited, accounts_credited = [], []
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			for d in self.get("accounts"):
+				if not (d.reference_type and d.reference_name):
+					continue
+
 				if d.reference_type == "Sales Invoice":
 					field = "customer"
 				else:
@@ -674,7 +696,7 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Row {0}: Both Debit and Credit values cannot be zero").format(d.idx))
 
 	def validate_total_debit_and_credit(self):
-		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
+		if not self.system_generated_gain_loss():
 			if self.difference:
 				frappe.throw(
 					_("Total Debit must be equal to Total Credit. The difference is {0}").format(
@@ -809,7 +831,7 @@ class JournalEntry(AccountsController):
 			return self._get_bill_remark(row)
 		if row.reference_type == "Purchase Order" and row.debit:
 			return _("{0} against Purchase Order {1}").format(
-				fmt_money(flt(row.credit), currency=self.company_currency), row.reference_name
+				fmt_money(flt(row.debit), currency=self.company_currency), row.reference_name
 			)
 		return None
 
@@ -987,25 +1009,15 @@ class JournalEntry(AccountsController):
 		else:
 			return
 
-		invoice = frappe.qb.DocType(doctype)
-		query = (
-			frappe.qb.from_(invoice)
-			.select(
-				invoice.name,
-				invoice[account_field].as_("account"),
-				invoice[party_field].as_("party"),
-				invoice.outstanding_amount,
-			)
-			.where(
-				(invoice.docstatus == 1)
-				& (invoice.company == self.company)
-				& (invoice.outstanding_amount > 0)
-			)
-		)
+		filters = [["docstatus", "=", 1], ["company", "=", self.company], ["outstanding_amount", ">", 0]]
 		if flt(self.write_off_amount) > 0:
-			query = query.where(invoice.outstanding_amount <= flt(self.write_off_amount))
+			filters.append(["outstanding_amount", "<=", flt(self.write_off_amount)])
 
-		return query.run(as_dict=True)
+		return frappe.get_list(
+			doctype,
+			filters=filters,
+			fields=["name", f"{account_field} as account", f"{party_field} as party", "outstanding_amount"],
+		)
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:
@@ -1168,6 +1180,9 @@ def get_outstanding(
 		account = legacy_payload.get("account")
 		party = legacy_payload.get("party")
 		account_currency = legacy_payload.get("account_currency")
+
+	if doctype in ("Journal Entry", "Sales Invoice", "Purchase Invoice") and docname:
+		frappe.has_permission(doctype, "read", docname, throw=True)
 
 	if doctype == "Journal Entry":
 		return _get_journal_entry_outstanding(docname, account, party)

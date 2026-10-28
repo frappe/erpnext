@@ -100,7 +100,7 @@ class JournalEntryReferenceValidator:
 
 	def _validate_invoice_party_and_account(self, row, against_voucher, party_fields) -> None:
 		party_account, against_party = self._resolve_invoice_party_account(row, against_voucher)
-		if self.doc.voucher_type == "Exchange Gain Or Loss":
+		if self.doc.system_generated_gain_loss():
 			return
 		if against_party != cstr(row.party) or party_account != row.account:
 			frappe.throw(
@@ -158,13 +158,14 @@ class JournalEntryReferenceValidator:
 		"""The advance paid against an order cannot exceed its grand total."""
 		account_currency = get_account_currency(account)
 		if account_currency == self.doc.company_currency:
-			voucher_total = order.base_grand_total
+			voucher_total = order.base_rounded_total or order.base_grand_total
 			field = "base_grand_total"
 		else:
-			voucher_total = order.grand_total
+			voucher_total = order.rounded_total or order.grand_total
 			field = "grand_total"
 
-		if flt(voucher_total) < (flt(order.advance_paid) + total):
+		precision = order.precision(field)
+		if flt(voucher_total, precision) < flt(flt(order.advance_paid) + total, precision):
 			formatted_voucher_total = fmt_money(
 				voucher_total, order.precision(field), currency=account_currency
 			)
@@ -176,7 +177,7 @@ class JournalEntryReferenceValidator:
 
 	def _validate_invoices(self) -> None:
 		"""Validate totals and docstatus for referenced invoices."""
-		if self.doc.voucher_type in ("Debit Note", "Credit Note"):
+		if self.doc.voucher_type in ("Debit Note", "Credit Note") and self.doc.is_system_generated:
 			return
 		for reference_name, total in self.doc.reference_totals.items():
 			reference_type = self.doc.reference_types[reference_name]

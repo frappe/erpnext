@@ -1049,6 +1049,123 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.assertEqual(result.get("company"), "_Test Company 1")
 		self.assertEqual(result.get("inter_company_journal_entry_reference"), source.name)
 
+	def test_manual_exchange_gain_or_loss_entry_must_balance(self):
+		jv = make_journal_entry("_Test Cash - _TC", "Sales - _TC", 1000, save=False)
+		jv.voucher_type = "Exchange Gain Or Loss"
+		# company-currency amounts are taken as entered for this voucher type
+		jv.accounts[0].debit = 1000
+		jv.accounts[1].credit_in_account_currency = 10
+		jv.accounts[1].credit = 10
+		jv.save()
+		self.assertRaisesRegex(frappe.ValidationError, "Total Debit must be equal to Total Credit", jv.submit)
+
+	def test_manual_credit_note_is_checked_against_invoice(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		def credit_note(invoice, amount):
+			jv = make_journal_entry("Sales - _TC", "Debtors - _TC", amount, save=False)
+			jv.voucher_type = "Credit Note"
+			jv.accounts[1].update(
+				{
+					"party_type": "Customer",
+					"party": "_Test Customer",
+					"reference_type": "Sales Invoice",
+					"reference_name": invoice,
+				}
+			)
+			return jv
+
+		si = create_sales_invoice(rate=1000)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be greater than Outstanding", credit_note(si.name, 5000).insert
+		)
+		credit_note(si.name, 300).insert().submit()
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 700)
+
+		draft = create_sales_invoice(rate=1000, do_not_submit=True)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is not submitted", credit_note(draft.name, 300).insert
+		)
+
+	def test_journal_entry_is_reversed_once(self):
+		from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+
+		jv = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC", "_Test Bank - _TC", 700, submit=True
+		)
+		reversal = make_reverse_journal_entry(jv.name)
+		reversal.posting_date = nowdate()
+		reversal.submit()
+
+		duplicate = frappe.copy_doc(reversal, ignore_no_copy=False)
+		self.assertFalse(duplicate.reversal_of)
+
+		second = make_journal_entry(
+			"_Test Bank - _TC", "_Test Account Cost for Goods Sold - _TC", 700, save=False
+		)
+		second.reversal_of = jv.name
+		self.assertRaisesRegex(frappe.ValidationError, "already exists", second.insert)
+
+	def test_purchase_order_advance_remark(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(rate=400, qty=1)
+		jv = make_journal_entry("Creditors - _TC", "_Test Bank - _TC", 400, save=False)
+		jv.accounts[0].update(
+			{
+				"party_type": "Supplier",
+				"party": po.supplier,
+				"reference_type": "Purchase Order",
+				"reference_name": po.name,
+				"is_advance": "Yes",
+			}
+		)
+		jv.insert()
+		self.assertIn(f"{frappe.utils.fmt_money(400, currency='INR')} against Purchase Order", jv.remark)
+
+	def test_deferred_entry_with_row_without_reference(self):
+		jv = make_journal_entry("Sales - _TC", "_Test Cash - _TC", 50, save=False)
+		jv.voucher_type = "Deferred Revenue"
+		jv.insert()
+		self.assertFalse(any(d.against_account for d in jv.accounts))
+
+	def test_order_advance_is_limited_to_rounded_total(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(rate=1000.6, qty=1)
+		self.assertEqual(so.rounded_total, 1001)
+
+		def advance(amount):
+			jv = make_journal_entry("_Test Bank - _TC", "Debtors - _TC", amount, save=False)
+			jv.accounts[1].update(
+				{
+					"party_type": "Customer",
+					"party": so.customer,
+					"reference_type": "Sales Order",
+					"reference_name": so.name,
+					"is_advance": "Yes",
+				}
+			)
+			return jv
+
+		advance(1001).insert()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be greater than Grand Total", advance(1001.5).insert
+		)
+
+	def test_payment_against_invoice_in_bank_of_another_currency(self):
+		from erpnext.accounts.doctype.journal_entry.mapper import get_payment_entry_against_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		si = create_sales_invoice(rate=8000)
+		jv = get_payment_entry_against_invoice(
+			"Sales Invoice", si.name, journal_entry=True, bank_account="_Test Bank USD - _TC"
+		)
+		bank_row = next(d for d in jv.accounts if d.account == "_Test Bank USD - _TC")
+		self.assertEqual(
+			flt(bank_row.debit_in_account_currency, 2), flt(8000 / flt(bank_row.exchange_rate), 2)
+		)
+
 
 def make_journal_entry(
 	account1,

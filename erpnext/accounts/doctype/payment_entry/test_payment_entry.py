@@ -1048,13 +1048,15 @@ class TestPaymentEntry(ERPNextTestSuite):
 		cr_note = create_sales_invoice(is_return=1, return_against=si1.name, qty=-1)
 		si1_outstanding = frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount")
 
-		# create JE(credit note) manually against si1 and cr_note
+		# create JE(credit note) against si1 and cr_note; it takes si1 past zero, which only a
+		# system-generated credit note may do
 		je = frappe.get_doc(
 			{
 				"doctype": "Journal Entry",
 				"company": si1.company,
 				"voucher_type": "Credit Note",
 				"posting_date": nowdate(),
+				"is_system_generated": 1,
 			}
 		)
 		je.append(
