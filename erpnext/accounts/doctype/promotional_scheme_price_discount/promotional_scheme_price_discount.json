@@ -22,6 +22,8 @@
   "discount_amount",
   "discount_percentage",
   "for_price_list",
+  "rate_rounding",
+  "rounding_increment",
   "section_break_11",
   "warehouse",
   "threshold_percentage",
@@ -129,6 +131,22 @@
    "options": "Price List"
   },
   {
+   "depends_on": "eval:doc.rate_or_discount != 'Rate' && !doc.validate_applied_rule && parent.apply_on != 'Transaction'",
+   "description": "Round the discounted rate to a multiple of the Rounding Increment",
+   "fieldname": "rate_rounding",
+   "fieldtype": "Select",
+   "label": "Round Rate",
+   "options": "\nNearest\nUp\nDown"
+  },
+  {
+   "depends_on": "eval:doc.rate_rounding && doc.rate_or_discount != 'Rate' && !doc.validate_applied_rule && parent.apply_on != 'Transaction'",
+   "fieldname": "rounding_increment",
+   "fieldtype": "Float",
+   "label": "Rounding Increment",
+   "mandatory_depends_on": "eval:doc.rate_rounding && doc.rate_or_discount != 'Rate' && !doc.validate_applied_rule && parent.apply_on != 'Transaction'",
+   "non_negative": 1
+  },
+  {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break"
   },
@@ -177,7 +195,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-23 12:33:46.574950",
+ "modified": "2026-10-22 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Price Discount",

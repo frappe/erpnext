@@ -6,6 +6,7 @@
 
 import copy
 import json
+import math
 
 import frappe
 from frappe import _, bold
@@ -758,6 +759,29 @@ def get_applied_pricing_rules(pricing_rules):
 			return pricing_rules.split(",")
 
 	return []
+
+
+def get_rate_rounding_rule(pricing_rules):
+	for pricing_rule in get_applied_pricing_rules(pricing_rules):
+		pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
+		if (
+			pricing_rule.price_or_product_discount == "Price"
+			and pricing_rule.rate_rounding
+			and not pricing_rule.validate_applied_rule
+		):
+			return pricing_rule
+
+
+def round_rate(rate, rounding_method, rounding_increment):
+	steps = flt(flt(rate) / flt(rounding_increment), 9)
+	if rounding_method == "Up":
+		steps = math.ceil(steps)
+	elif rounding_method == "Down":
+		steps = math.floor(steps)
+	else:
+		steps = math.floor(steps + 0.5)
+
+	return steps * flt(rounding_increment)
 
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):

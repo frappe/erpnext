@@ -132,8 +132,10 @@ class PricingRule(Document):
 		promotional_scheme_id: DF.Data | None
 		rate: DF.Currency
 		rate_or_discount: DF.Literal["", "Rate", "Discount Percentage", "Discount Amount"]
+		rate_rounding: DF.Literal["", "Nearest", "Up", "Down"]
 		recurse_for: DF.Float
 		round_free_qty: DF.Check
+		rounding_increment: DF.Float
 		rule_description: DF.SmallText | None
 		sales_partner: DF.Link | None
 		same_item: DF.Check
@@ -158,6 +160,7 @@ class PricingRule(Document):
 		self.validate_recursion()
 		self.cleanup_fields_value()
 		self.validate_rate_or_discount()
+		self.validate_rate_rounding()
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
 		self.validate_dates()
@@ -326,6 +329,20 @@ class PricingRule(Document):
 				frappe.throw(_("Free item code is not selected"))
 			else:
 				self.same_item = 1
+
+	def validate_rate_rounding(self):
+		if (
+			self.price_or_product_discount != "Price"
+			or self.rate_or_discount == "Rate"
+			or self.apply_on == "Transaction"
+			or self.validate_applied_rule
+		):
+			self.rate_rounding = None
+
+		if not self.rate_rounding:
+			self.rounding_increment = 0.0
+		elif flt(self.rounding_increment) <= 0:
+			throw(_("Rounding Increment must be greater than 0"))
 
 	def validate_max_discount(self):
 		if self.rate_or_discount == "Discount Percentage" and self.get("items"):
@@ -550,6 +567,9 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			if item_details.pricing_rule_for == "Discount Percentage":
 				item_details.pricing_rule_for = "Discount Amount"
 
+		if rounding_rule := next((rule for rule in price_rules if rule.rate_rounding), None):
+			apply_rate_rounding(rounding_rule, item_details, args)
+
 		if not item_details.get("has_margin"):
 			item_details.margin_type = None
 			item_details.margin_rate_or_amount = 0.0
@@ -635,11 +655,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			item_details.has_pricing_rule_for_rate = True
 		item_details.update({"discount_percentage": 0.0})
 
-	discount_rate = flt(item_details.get("price_list_rate", args.price_list_rate))
-	if item_details.get("margin_type") == "Percentage":
-		discount_rate *= 1 + flt(item_details.margin_rate_or_amount) / 100
-	elif item_details.get("margin_type") == "Amount":
-		discount_rate += flt(item_details.margin_rate_or_amount)
+	discount_rate = get_discount_base_rate(item_details, args)
 
 	for apply_on in ["Discount Amount", "Discount Percentage"]:
 		if pricing_rule.rate_or_discount != apply_on:
@@ -671,6 +687,42 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 				item_details.setdefault(field, 0)
 
 			item_details[field] += pricing_rule.get(field, 0) if pricing_rule else args.get(field, 0)
+
+
+def get_discount_base_rate(item_details, args):
+	discount_rate = flt(item_details.get("price_list_rate", args.price_list_rate))
+	if item_details.get("margin_type") == "Percentage":
+		discount_rate *= 1 + flt(item_details.margin_rate_or_amount) / 100
+	elif item_details.get("margin_type") == "Amount":
+		discount_rate += flt(item_details.margin_rate_or_amount)
+
+	return discount_rate
+
+
+def apply_rate_rounding(pricing_rule, item_details, args):
+	from erpnext.accounts.doctype.pricing_rule.utils import round_rate
+
+	item_details.rate_rounding = pricing_rule.rate_rounding
+	item_details.rounding_increment = pricing_rule.rounding_increment
+
+	rate_with_margin = get_discount_base_rate(item_details, args)
+	if not rate_with_margin:
+		return
+
+	discount_amount = flt(item_details.get("discount_amount"))
+	if args.get("child_doctype"):
+		discount_amount = flt(
+			discount_amount, frappe.get_precision(args.child_doctype, "discount_amount", args.currency)
+		)
+		rate = flt(
+			rate_with_margin - discount_amount,
+			frappe.get_precision(args.child_doctype, "rate", args.currency),
+		)
+	else:
+		rate = rate_with_margin - discount_amount
+
+	rate = round_rate(rate, pricing_rule.rate_rounding, pricing_rule.rounding_increment)
+	item_details.discount_amount = rate_with_margin - min(rate, rate_with_margin)
 
 
 def apply_pricing_rule_margin(pricing_rule, item_details, args):
