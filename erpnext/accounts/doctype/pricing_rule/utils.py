@@ -588,8 +588,6 @@ def apply_pricing_rule_on_transaction(doc):
 
 		for d in pricing_rules:
 			if d.price_or_product_discount == "Price":
-				if d.apply_discount_on:
-					doc.set("apply_discount_on", d.apply_discount_on)
 				# Variable to track whether the condition has been met
 				condition_met = False
 				fields_set = set()
@@ -608,6 +606,8 @@ def apply_pricing_rule_on_transaction(doc):
 						frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
 					else:
 						if not d.coupon_code_based:
+							if d.apply_discount_on:
+								doc.set("apply_discount_on", d.apply_discount_on)
 							doc.set(field, d.get(pr_field))
 							fields_set.add(field)
 							applied_rules.append(d.name)
@@ -618,6 +618,8 @@ def apply_pricing_rule_on_transaction(doc):
 							)
 							if coupon_code_pricing_rule == d.name:
 								# if selected coupon code is linked with pricing rule
+								if d.apply_discount_on:
+									doc.set("apply_discount_on", d.apply_discount_on)
 								doc.set(field, d.get(pr_field))
 								fields_set.add(field)
 								applied_rules.append(d.name)
@@ -625,13 +627,6 @@ def apply_pricing_rule_on_transaction(doc):
 								# Set the condition_met variable to True and break out of the loop
 								condition_met = True
 								break
-
-							else:
-								# reset discount if not linked
-								doc.set(field, 0)
-						else:
-							# if coupon code based but no coupon code selected
-							doc.set(field, 0)
 
 				if has_rule_discount and fields_set:
 					# clear the discount set by the previously applied rule which this rule does not set
@@ -668,7 +663,41 @@ def get_transaction_pricing_rules(doc):
 	if doc_before_save := doc.get_doc_before_save():
 		rows += doc_before_save.get("pricing_rules") or []
 
-	return {d.pricing_rule for d in rows if d.pricing_rule and not d.item_code and not d.child_docname}
+	pricing_rules = {
+		d.pricing_rule for d in rows if d.pricing_rule and not d.item_code and not d.child_docname
+	}
+	if (
+		pricing_rules
+		or not doc_before_save
+		or not doc_before_save.get("coupon_code")
+		or doc_before_save.coupon_code == doc.get("coupon_code")
+		or doc_before_save.ignore_pricing_rule
+	):
+		return pricing_rules
+
+	# Older documents did not track transaction rules. Check the saved coupon before removing its discount.
+	values = {"pricing_rule": frappe.db.get_value("Coupon Code", doc_before_save.coupon_code, "pricing_rule")}
+	conditions = get_other_conditions(
+		"name = %(pricing_rule)s and apply_on = 'Transaction' and price_or_product_discount = 'Price'"
+		" and coupon_code_based = 1 and disable = 0",
+		values,
+		doc_before_save,
+	)
+	coupon_rules = frappe.db.sql(f"select * from `tabPricing Rule` where {conditions}", values, as_dict=True)
+	coupon_rules = filter_pricing_rules_for_qty_amount(
+		doc_before_save.total_qty, doc_before_save.total, coupon_rules
+	)
+	for rule in filter_pricing_rule_based_on_condition(coupon_rules, doc_before_save):
+		field = "additional_discount_percentage" if rule.discount_percentage else "discount_amount"
+		discount = rule.discount_percentage or rule.discount_amount
+		if (
+			discount
+			and doc_before_save.apply_discount_on == rule.apply_discount_on
+			and doc_before_save.get(field) == flt(discount, doc_before_save.precision(field))
+		):
+			pricing_rules.add(rule.name)
+
+	return pricing_rules
 
 
 def set_transaction_pricing_rules(doc, applied_rules):
