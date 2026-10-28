@@ -2,6 +2,7 @@
 # See license.txt
 import frappe
 from frappe import _
+from frappe.utils import get_datetime
 
 from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -320,6 +321,24 @@ class TestWorkstation(ERPNextTestSuite):
 		)
 		self.assertEqual(
 			frappe.db.get_value("Workstation", "_Test WS Disabled Shift", "total_working_hours"), 4
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_operation_planned_times_span_all_scheduled_slots(self):
+		job_card = make_scheduled_job_card(
+			"_Test WS Multi Day", [("08:00:00", "12:00:00")], 360, "2031-03-03 08:00:00"
+		)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Operation",
+				job_card.operation_id,
+				["planned_start_time", "planned_end_time"],
+				as_dict=True,
+			),
+			{
+				"planned_start_time": get_datetime("2031-03-03 08:00:00"),
+				"planned_end_time": get_datetime("2031-03-04 10:00:00"),
+			},
 		)
 
 	@change_settings(
