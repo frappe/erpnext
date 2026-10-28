@@ -425,6 +425,67 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 				# Task should have company field set
 				self.assertIsNotNone(row.company_field, "Task should have company_field set after import")
 
+	def test_import_rejects_unknown_company_field(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.insert()
+		result = tdr.import_to_delete_template_method(
+			"doctype_name,company_field\nItem Price,missing_company\n"
+		)
+		self.assertEqual(result["imported"], 0)
+		self.assertEqual(result["skipped"], 1)
+		self.assertFalse(tdr.doctypes_to_delete)
+
+	def test_custom_company_field_is_used_for_import(self):
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		custom_field = create_custom_field(
+			"Item Price",
+			{"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company"},
+		)
+		self.assertIsNotNone(custom_field)
+		try:
+			tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+			tdr.insert()
+			tdr.generate_to_delete_list()
+			rows = [row for row in tdr.doctypes_to_delete if row.doctype_name == "Item Price"]
+			self.assertEqual([row.company_field for row in rows], ["company"])
+			result = tdr.import_to_delete_template_method("doctype_name,company_field\nItem Price,company\n")
+			self.assertEqual(result["imported"], 1)
+			self.assertEqual(tdr.doctypes_to_delete[0].company_field, "company")
+			price_list = frappe.db.get_value("Price List", {"selling": 1, "enabled": 1}, "name")
+			prices = [
+				frappe.get_doc(
+					{
+						"doctype": "Item Price",
+						"item_code": make_item().name,
+						"price_list": price_list,
+						"price_list_rate": 100,
+						"company": company,
+					}
+				).insert()
+				for company in ("_Test Company 7", "_Test Company")
+			]
+			invalid = tdr.import_to_delete_template_method(
+				"doctype_name,company_field\nItem Price,missing_company\n"
+			)
+			self.assertEqual(invalid, {"imported": 0, "skipped": 1})
+			self.assertEqual(tdr.doctypes_to_delete[0].company_field, "company")
+			omitted = tdr.import_to_delete_template_method("doctype_name\nItem Price\n")
+			self.assertEqual(omitted["imported"], 1)
+			self.assertEqual(tdr.doctypes_to_delete[0].company_field, "company")
+			tdr.process_in_single_transaction = True
+			tdr.submit()
+			self.assertEqual(tdr.db_get("status"), "Completed")
+			self.assertFalse(frappe.db.exists("Item Price", prices[0].name))
+			self.assertTrue(frappe.db.exists("Item Price", prices[1].name))
+		finally:
+			frappe.db.rollback()
+			frappe.delete_doc("Custom Field", custom_field.name, force=True)
+			frappe.db.commit()
+			frappe.clear_cache(doctype="Item Price")
+
 	def test_csv_import_tolerates_short_rows(self):
 		"""Test that CSV rows omitting trailing columns are imported with an auto-detected company_field"""
 		company = "_Test Company 7"
@@ -509,26 +570,11 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			tdr.insert()
 
-	def test_same_doctype_different_company_field_allowed(self):
-		"""Test that same DocType can be added with different company_field values"""
-		company = "_Test Company 7"
-
-		tdr = frappe.new_doc("Transaction Deletion Record")
-		tdr.company = company
-		# Same DocType but one with company field, one without (None)
-		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
-		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": None})
-
-		# Should NOT throw error - different company_field values are allowed
-		try:
+	def test_rejects_unscoped_company_owned_doctype(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task"})
+		with self.assertRaises(frappe.ValidationError):
 			tdr.insert()
-			self.assertEqual(
-				len(tdr.doctypes_to_delete),
-				2,
-				"Should allow 2 Task entries with different company_field values",
-			)
-		except frappe.ValidationError as e:
-			self.fail(f"Should allow same DocType with different company_field values, but got error: {e}")
 
 	def test_company_field_validation(self):
 		"""Test that invalid company_field values are rejected"""

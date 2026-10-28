@@ -88,12 +88,10 @@ def get_company_link_fields(doctype_name: str):
 	if not doctype_name or not frappe.db.exists("DocType", doctype_name):
 		return []
 
-	return frappe.get_all(
-		"DocField",
-		filters={"parent": doctype_name, "fieldtype": "Link", "options": "Company"},
-		pluck="fieldname",
-		order_by="idx",
-	)
+	return [
+		field.fieldname
+		for field in frappe.get_meta(doctype_name).get("fields", {"fieldtype": "Link", "options": "Company"})
+	]
 
 
 def _get_protected_doctypes_internal():
@@ -216,9 +214,13 @@ class TransactionDeletionRecord(Document):
 					title=_("Virtual DocType"),
 				)
 
-			# Validate company_field if specified
+			valid_company_fields = self._get_company_link_fields(item.doctype_name)
+			if valid_company_fields and not item.company_field:
+				frappe.throw(
+					_("Select a Company field for DocType {0}").format(item.doctype_name),
+					title=_("Company Field Required"),
+				)
 			if item.company_field:
-				valid_company_fields = self._get_company_link_fields(item.doctype_name)
 				if "company" not in valid_company_fields and len(valid_company_fields) > 1:
 					frappe.throw(
 						_("Cannot determine the owning company field for {0}").format(item.doctype_name),
@@ -389,13 +391,12 @@ class TransactionDeletionRecord(Document):
 		Returns:
 		        list: List of field names that link to Company DocType, ordered by field index
 		"""
-		company_fields = frappe.get_all(
-			"DocField",
-			filters={"parent": doctype_name, "fieldtype": "Link", "options": "Company"},
-			pluck="fieldname",
-			order_by="idx",
-		)
-		return company_fields or []
+		return [
+			field.fieldname
+			for field in frappe.get_meta(doctype_name).get(
+				"fields", {"fieldtype": "Link", "options": "Company"}
+			)
+		]
 
 	@frappe.whitelist()
 	def generate_to_delete_list(self):
@@ -413,6 +414,13 @@ class TransactionDeletionRecord(Document):
 			pluck="parent",
 			distinct=True,
 		)
+
+		doctypes_with_company_field.extend(
+			frappe.get_all(
+				"Custom Field", filters={"fieldtype": "Link", "options": "Company"}, pluck="dt", distinct=True
+			)
+		)
+		doctypes_with_company_field = list(dict.fromkeys(doctypes_with_company_field))
 
 		# Filter to get only valid DocTypes (not child tables, not virtual, not excluded)
 		doctypes_with_company = []
@@ -558,6 +566,9 @@ class TransactionDeletionRecord(Document):
 				continue
 
 			db_company_fields = self._get_company_link_fields(doctype_name)
+			if company_field and company_field not in db_company_fields:
+				skipped.append(_("{0}: Invalid company field").format(doctype_name))
+				continue
 			import_company_field = ""
 			if not db_company_fields:  # Case no company field exists
 				details = self._get_to_delete_row_infos(doctype_name)
