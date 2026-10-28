@@ -4,10 +4,14 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import today
 
 from erpnext.stock.get_item_details import (
+	get_batch_qty,
+	get_bin_details,
 	get_item_details,
 	get_price_list_currency_and_exchange_rate,
+	get_projected_qty,
 	get_valuation_rate,
 )
+from erpnext.stock.utils import get_latest_stock_qty
 from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
 
 test_ignore = ["BOM"]
@@ -121,17 +125,20 @@ class TestGetItemDetail(FrappeTestCase):
 		details = get_item_details(args)
 		self.assertEqual(details.get("expense_account"), "_Test Fixed Asset - _TC")
 
-	def test_get_valuation_rate_applies_warehouse_user_permission(self):
+	def make_stock_item_in_two_warehouses(self):
+		"""Stock item defaulting to `_Test Warehouse - _TC` (rate 100), also stocked in `_Test Warehouse 1 - _TC` (rate 50)."""
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
 		item_code = make_item(properties={"is_stock_item": 1, "item_defaults": item_defaults}).name
-		service_item = make_item(properties={"is_stock_item": 0, "item_defaults": item_defaults}).name
 		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
 		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=1, rate=50)
+		return item_code
 
-		user = make_fenced_user("_test_valuation_rate_user@example.com", ["Stock User"])
+	def make_warehouse_fenced_user(self, roles):
+		"""User allowed only `_Test Warehouse 1 - _TC`, applied to Warehouse alone so Item and transaction checks pass."""
+		user = make_fenced_user("_test_warehouse_fenced_user@example.com", roles)
 		frappe.get_doc(
 			{
 				"doctype": "User Permission",
@@ -142,7 +149,16 @@ class TestGetItemDetail(FrappeTestCase):
 				"applicable_for": "Warehouse",
 			}
 		).insert(ignore_permissions=True)
-		with as_user(user):
+		return user
+
+	def test_get_valuation_rate_applies_warehouse_user_permission(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = self.make_stock_item_in_two_warehouses()
+		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+		service_item = make_item(properties={"is_stock_item": 0, "item_defaults": item_defaults}).name
+
+		with as_user(self.make_warehouse_fenced_user(["Stock User"])):
 			assert_refused(self, get_valuation_rate, item_code, "_Test Company", "_Test Warehouse - _TC")
 			assert_refused(self, get_valuation_rate, item_code, "_Test Company")
 			self.assertEqual(
@@ -150,6 +166,48 @@ class TestGetItemDetail(FrappeTestCase):
 				{"valuation_rate": 50},
 			)
 			self.assertEqual(get_valuation_rate(service_item, "_Test Company"), {"valuation_rate": 0.0})
+
+	def test_get_item_details_applies_warehouse_user_permission(self):
+		ctx = frappe._dict(
+			{
+				"item_code": self.make_stock_item_in_two_warehouses(),
+				"company": "_Test Company",
+				"doctype": "Sales Order",
+				"customer": "_Test Customer",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		with as_user(self.make_warehouse_fenced_user(["Sales User"])):
+			details = get_item_details(ctx.copy())
+			self.assertIsNone(details.warehouse)
+			self.assertEqual(details.valuation_rate, 0)
+
+			assert_refused(
+				self,
+				get_item_details,
+				ctx.copy().update({"warehouse": "_Test Warehouse - _TC"}),
+				overwrite_warehouse=False,
+			)
+			details = get_item_details(
+				ctx.copy().update({"warehouse": "_Test Warehouse 1 - _TC"}), overwrite_warehouse=False
+			)
+			self.assertEqual(details.valuation_rate, 50)
+			self.assertEqual(details.actual_qty, 1)
+
+	def test_stock_qty_methods_apply_warehouse_user_permission(self):
+		item_code = self.make_stock_item_in_two_warehouses()
+
+		with as_user(self.make_warehouse_fenced_user(["Stock User"])):
+			for method in (get_bin_details, get_projected_qty, get_latest_stock_qty):
+				with self.subTest(method=method.__name__):
+					assert_refused(self, method, item_code, "_Test Warehouse - _TC")
+					method(item_code, "_Test Warehouse 1 - _TC")
+
+			assert_refused(self, get_batch_qty, "_Test Batch", "_Test Warehouse - _TC", item_code)
 
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):

@@ -44,6 +44,11 @@ def execute(filters=None):
 	return columns, data
 
 
+def validate_company_permission(company: str | None) -> None:
+	if company and not frappe.has_permission("Company", "select", company):
+		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
+
+
 def validate_filters(filters):
 	if not filters.fiscal_year:
 		frappe.throw(_("Fiscal Year {0} is required").format(filters.fiscal_year))

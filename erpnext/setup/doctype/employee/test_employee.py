@@ -112,6 +112,22 @@ class TestEmployee(unittest.TestCase):
 			)
 			self.assertEqual(bool(has_permission), expected)
 
+	def test_hr_user_sets_image_of_employee_linked_to_user(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+		image = frappe.get_doc(doctype="File", file_name="employee-image.png", content=b"image").insert()
+
+		with as_user(hr_user):
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.image = image.file_url
+			employee_doc.save()
+
+		self.assertEqual(frappe.db.get_value("User", staff, "user_image"), image.file_url)
+
 	def test_employee_user_permission(self):
 		employee1 = make_employee("employee_1_test@company.com", create_user_permission=1)
 		employee2 = make_employee("employee_2_test@company.com", create_user_permission=1)

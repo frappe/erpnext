@@ -753,9 +753,8 @@ def get_target_asset_details(asset=None, company=None):
 	# Get Asset Details
 	asset_details = frappe._dict()
 	if asset:
+		erpnext.require_permission("Asset", asset, "select")
 		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code"], as_dict=1)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(asset))
 
 		# Re-set item code from Asset
 		out.target_item_code = asset_details.item_code
@@ -856,20 +855,14 @@ def get_consumed_asset_details(args):
 
 	args = frappe._dict(args)
 
-	# and the Asset the caller named: its depreciation values are returned through the unguarded
-	# _get_asset_value_after_depreciation. select-or-read, as in the asset.py wrapper.
-	if args.get("asset"):
-		ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
-		frappe.has_permission("Asset", ptype, doc=args.get("asset"), throw=True)
 	out = frappe._dict()
 
 	asset_details = frappe._dict()
 	if args.asset:
+		erpnext.require_permission("Asset", args.asset, "select")
 		asset_details = frappe.db.get_value(
 			"Asset", args.asset, ["asset_name", "item_code", "item_name"], as_dict=1
 		)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(args.asset))
 
 	out.item_code = asset_details.item_code
 	out.asset_name = asset_details.asset_name

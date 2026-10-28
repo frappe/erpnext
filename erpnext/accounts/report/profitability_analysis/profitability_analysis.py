@@ -12,7 +12,10 @@ from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
 )
-from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.report.trial_balance.trial_balance import (
+	validate_company_permission,
+	validate_filters,
+)
 from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = ("income", "expense", "gross_profit_loss")
@@ -34,23 +37,28 @@ def execute(filters=None):
 
 def get_accounts_data(based_on, company):
 	if based_on == "Cost Center":
-		cc = qb.DocType("Cost Center")
-		return (
-			qb.from_(cc)
-			.select(
-				cc.name,
-				cc.parent_cost_center.as_("parent_account"),
-				cc.cost_center_name.as_("account_name"),
-				cc.lft,
-				cc.rgt,
-			)
-			.where(cc.company.eq(company))
-			.orderby(cc.name)
-			.run(as_dict=True)
+		cost_centers = frappe.get_list(
+			"Cost Center",
+			fields=[
+				"name",
+				"parent_cost_center as parent_account",
+				"cost_center_name as account_name",
+				"lft",
+				"rgt",
+			],
+			filters={"company": company},
+			order_by="name",
 		)
+		# show a cost center as a root when the user cannot read its parent
+		names = {cc.name for cc in cost_centers}
+		for cc in cost_centers:
+			if cc.parent_account not in names:
+				cc.parent_account = None
+		return cost_centers
 	elif based_on == "Project":
-		return frappe.get_all("Project", fields=["name"], filters={"company": company}, order_by="name")
+		return frappe.get_list("Project", fields=["name"], filters={"company": company}, order_by="name")
 	else:
+		validate_company_permission(company)
 		filters = {}
 		doctype = frappe.unscrub(based_on)
 		has_company = frappe.db.has_column(doctype, "company")
@@ -58,7 +66,7 @@ def get_accounts_data(based_on, company):
 		if has_company:
 			filters.update({"company": company})
 
-		return frappe.get_all(doctype, fields=["name"], filters=filters, order_by="name")
+		return frappe.get_list(doctype, fields=["name"], filters=filters, order_by="name")
 
 
 def get_data(accounts, filters, based_on):
