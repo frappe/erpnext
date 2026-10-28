@@ -389,19 +389,22 @@ def get_list_context(context=None):
 	return list_context
 
 
+def validate_quotation_expiry(source_name):
+	if frappe.db.get_singles_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation"):
+		return
+
+	quotation = frappe.db.get_value("Quotation", source_name, ["transaction_date", "valid_till"], as_dict=1)
+	if (
+		quotation
+		and quotation.valid_till
+		and (quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate()))
+	):
+		frappe.throw(_("Validity period of this quotation has ended."))
+
+
 @frappe.whitelist()
 def make_sales_order(source_name: str, target_doc=None, args=None):
-	if not frappe.db.get_singles_value(
-		"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
-	):
-		quotation = frappe.db.get_value(
-			"Quotation", source_name, ["transaction_date", "valid_till"], as_dict=1
-		)
-		if quotation.valid_till and (
-			quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate())
-		):
-			frappe.throw(_("Validity period of this quotation has ended."))
-
+	validate_quotation_expiry(source_name)
 	return _make_sales_order(source_name, target_doc, args=args)
 
 
@@ -546,6 +549,10 @@ def set_expired_status():
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None, args=None):
+	if frappe.db.get_value("Quotation", source_name, "status") == "Lost":
+		frappe.throw(_("Cannot create a Sales Invoice against Lost Quotation {0}.").format(source_name))
+
+	validate_quotation_expiry(source_name)
 	return _make_sales_invoice(source_name, target_doc, args=args)
 
 

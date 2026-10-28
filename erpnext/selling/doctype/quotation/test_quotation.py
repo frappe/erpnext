@@ -1212,6 +1212,24 @@ class TestQuotation(ERPNextTestSuite):
 		quotation.reload()
 		self.assertEqual(quotation.status, "Partially Ordered")
 
+	def test_lost_or_expired_quotation_cannot_be_invoiced(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_invoice
+
+		if not frappe.db.exists("Quotation Lost Reason", "_Test Quotation Lost Reason"):
+			frappe.get_doc(
+				{"doctype": "Quotation Lost Reason", "order_lost_reason": "_Test Quotation Lost Reason"}
+			).insert()
+
+		lost = make_quotation()
+		lost.declare_enquiry_lost([{"lost_reason": "_Test Quotation Lost Reason"}], [])
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, lost.name)
+
+		expired = make_quotation(do_not_submit=1)
+		expired.transaction_date = add_days(nowdate(), -10)
+		expired.valid_till = add_days(nowdate(), -5)
+		expired.submit()
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, expired.name)
+
 
 def enable_calculate_bundle_price(enable=1):
 	selling_settings = frappe.get_doc("Selling Settings")
