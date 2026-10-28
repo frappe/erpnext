@@ -201,7 +201,7 @@ def get_serial_nos_data(serial_nos):
 
 
 @frappe.whitelist()
-def get_latest_stock_qty(item_code, warehouse=None):
+def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
 	if warehouse:
 		erpnext.require_user_permission("Warehouse", warehouse)
 
