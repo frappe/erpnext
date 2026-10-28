@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
 from frappe.query_builder.functions import Max, NullIf, Sum
-from frappe.utils import flt, get_link_to_form, nowdate
+from frappe.utils import flt, formatdate, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
@@ -76,7 +76,106 @@ class ExchangeRateRevaluation(Document):
 			frappe.throw(_("Please select Company and Posting Date to get entries"))
 
 	def before_submit(self):
+		self.set_balances_from_ledger()
+		self.validate_new_exchange_rates()
+		self.set_total_gain_loss()
 		self.remove_accounts_without_gain_loss()
+		self.warn_about_later_revaluations()
+
+	def get_ledger_balances(self):
+		"""Balances on the posting date, keyed by account, party type and party."""
+		return {
+			get_row_key(d): d
+			for d in self.get_account_balance_from_gle(
+				company=self.company,
+				posting_date=self.posting_date,
+				account=None,
+				party_type=None,
+				party=None,
+				rounding_loss_allowance=self.rounding_loss_allowance,
+			)
+		}
+
+	def set_balances_from_ledger(self):
+		"""Revalue the balance in the ledger on the posting date, not the balance the row was filled with."""
+		ledger_balances = self.get_ledger_balances()
+		precision = get_new_balance_precision(self.company)
+		rows = {}
+
+		for row in self.accounts:
+			key = get_row_key(row)
+			if key in rows:
+				frappe.throw(
+					_("Row {0}: Account {1} and Party {2} are already in row {3}").format(
+						row.idx, frappe.bold(row.account), frappe.bold(row.party or "-"), rows[key]
+					)
+				)
+			rows[key] = row.idx
+
+			balance = ledger_balances.get(key)
+			if not balance:
+				row.update(
+					{
+						"balance_in_base_currency": 0,
+						"balance_in_account_currency": 0,
+						"zero_balance": 0,
+						"current_exchange_rate": 0,
+						"new_balance_in_base_currency": 0,
+						"new_balance_in_account_currency": 0,
+						"gain_loss": 0,
+					}
+				)
+				continue
+
+			new_exchange_rate = 0 if balance.zero_balance else flt(row.new_exchange_rate)
+			row.update(
+				revalue_balance(balance, new_exchange_rate, precision, self.company, self.posting_date)
+			)
+
+	def validate_new_exchange_rates(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		for row in self.accounts:
+			if not row.zero_balance and row.balance_in_account_currency and flt(row.new_exchange_rate) <= 0:
+				frappe.throw(
+					_("Row {0}: New Exchange Rate from {1} to {2} must be greater than 0").format(
+						row.idx, frappe.bold(row.account_currency), frappe.bold(company_currency)
+					)
+				)
+
+	def warn_about_later_revaluations(self):
+		"""A revaluation dated before a submitted one changes the balance that the later one already revalued."""
+		err = qb.DocType("Exchange Rate Revaluation")
+		err_account = qb.DocType("Exchange Rate Revaluation Account")
+		later_rows = (
+			qb.from_(err)
+			.join(err_account)
+			.on(err.name == err_account.parent)
+			.select(
+				err.name, err.posting_date, err_account.account, err_account.party_type, err_account.party
+			)
+			.where(
+				(err.docstatus == 1)
+				& (err.company == self.company)
+				& (err.posting_date > self.posting_date)
+				& (err_account.account.isin({row.account for row in self.accounts}))
+			)
+			.orderby(err.posting_date)
+			.run(as_dict=True)
+		)
+
+		keys = {get_row_key(row) for row in self.accounts}
+		later = {d.name: d.posting_date for d in later_rows if get_row_key(d) in keys}
+		if later:
+			frappe.msgprint(
+				_(
+					"Exchange Rate Revaluation {0} is dated after {1} and revalues the same balances. The gain or loss of this revaluation also changes the balances on that date."
+				).format(
+					", ".join(get_link_to_form("Exchange Rate Revaluation", name) for name in later),
+					frappe.bold(formatdate(self.posting_date)),
+				),
+				title=_("Later Revaluation"),
+				indicator="orange",
+			)
 
 	def remove_accounts_without_gain_loss(self):
 		self.accounts = [account for account in self.accounts if account.gain_loss]
@@ -93,47 +192,34 @@ class ExchangeRateRevaluation(Document):
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 
-	@frappe.whitelist()
-	def check_journal_and_reversal(self):
-		exchange_gain_loss_account = self.get_for_unrealized_gain_loss_account()
-
-		journals_posted = False
-		reversals_posted = False
-
+	def get_journals(self):
+		"""Journal Entries made for this revaluation that are neither cancelled nor reversals."""
 		je = qb.DocType("Journal Entry")
 		jea = qb.DocType("Journal Entry Account")
-		journals = (
+		return (
 			qb.from_(je)
 			.join(jea)
 			.on(je.name == jea.parent)
-			.select(je.name)
+			.select(je.name, je.docstatus)
 			.distinct()
 			.where(
 				(jea.reference_type == "Exchange Rate Revaluation")
 				& (jea.reference_name == self.name)
-				& (jea.docstatus == 1)
-				& (je.reversal_of.isnull())  # omit journals that have reversals
+				& (je.docstatus < 2)
+				& (je.reversal_of.isnull())
 			)
-			.run(pluck="name")
+			.run(as_dict=True)
 		)
-		if journals:
-			gle = qb.DocType("GL Entry")
-			total_amt = (
-				qb.from_(gle)
-				.select((Sum(gle.credit) - Sum(gle.debit)).as_("total_amount"))
-				.where(
-					(gle.voucher_type == "Journal Entry")
-					& (gle.voucher_no.isin(journals))
-					& (gle.account == exchange_gain_loss_account)
-					& (gle.is_cancelled == 0)
-				)
-				.run()
-			)
 
-			if total_amt and total_amt[0][0] == self.total_gain_loss:
-				journals_posted = True
-			else:
-				journals_posted = False
+	@frappe.whitelist()
+	def check_journal_and_reversal(self):
+		reversals_posted = False
+
+		journals = self.get_journals()
+		journals_posted = bool(journals) and all(d.docstatus == 1 for d in journals)
+
+		je = qb.DocType("Journal Entry")
+		jea = qb.DocType("Journal Entry Account")
 
 		# reverse journals
 		reverse_journals = (
@@ -280,74 +366,31 @@ class ExchangeRateRevaluation(Document):
 	def calculate_new_account_balance(company, posting_date, account_details):
 		accounts = []
 		company_currency = erpnext.get_company_currency(company)
-		precision = get_field_precision(
-			frappe.get_meta("Exchange Rate Revaluation Account").get_field("new_balance_in_base_currency"),
-			currency=company_currency,
-		)
+		precision = get_new_balance_precision(company)
 
 		if account_details:
 			# Handle Accounts with balance in both Account/Base Currency
 			for d in [x for x in account_details if not x.zero_balance]:
-				current_exchange_rate = (
-					d.balance / d.balance_in_account_currency if d.balance_in_account_currency else 0
-				)
 				new_exchange_rate = get_exchange_rate(d.account_currency, company_currency, posting_date)
-				new_balance_in_base_currency = flt(d.balance_in_account_currency * new_exchange_rate)
-				gain_loss = flt(new_balance_in_base_currency, precision) - flt(d.balance, precision)
-
 				accounts.append(
 					{
 						"account": d.account,
 						"party_type": d.party_type,
 						"party": d.party,
 						"account_currency": d.account_currency,
-						"balance_in_base_currency": d.balance,
-						"balance_in_account_currency": d.balance_in_account_currency,
-						"zero_balance": d.zero_balance,
-						"current_exchange_rate": current_exchange_rate,
-						"new_exchange_rate": new_exchange_rate,
-						"new_balance_in_base_currency": new_balance_in_base_currency,
-						"new_balance_in_account_currency": d.balance_in_account_currency,
-						"gain_loss": gain_loss,
+						**revalue_balance(d, new_exchange_rate, precision, company, posting_date),
 					}
 				)
 
 			# Handle Accounts with '0' balance in Account/Base Currency
 			for d in [x for x in account_details if x.zero_balance]:
-				if d.balance != 0:
-					current_exchange_rate = new_exchange_rate = 0
-
-					new_balance_in_account_currency = 0  # this will be '0'
-					new_balance_in_base_currency = 0  # this will be '0'
-					gain_loss = flt(new_balance_in_base_currency, precision) - flt(d.balance, precision)
-				else:
-					new_exchange_rate = 0
-					new_balance_in_base_currency = 0
-					new_balance_in_account_currency = 0
-
-					current_exchange_rate = (
-						calculate_exchange_rate_using_last_gle(company, d.account, d.party_type, d.party)
-						or 0.0
-					)
-
-					gain_loss = new_balance_in_account_currency - (
-						current_exchange_rate * d.balance_in_account_currency
-					)
-
 				accounts.append(
 					{
 						"account": d.account,
 						"party_type": d.party_type,
 						"party": d.party,
 						"account_currency": d.account_currency,
-						"balance_in_base_currency": d.balance,
-						"balance_in_account_currency": d.balance_in_account_currency,
-						"zero_balance": d.zero_balance,
-						"current_exchange_rate": current_exchange_rate,
-						"new_exchange_rate": new_exchange_rate,
-						"new_balance_in_base_currency": new_balance_in_base_currency,
-						"new_balance_in_account_currency": new_balance_in_account_currency,
-						"gain_loss": gain_loss,
+						**revalue_balance(d, 0, precision, company, posting_date),
 					}
 				)
 
@@ -370,9 +413,42 @@ class ExchangeRateRevaluation(Document):
 			)
 		return unrealized_exchange_gain_loss_account
 
+	def validate_journals_can_be_made(self):
+		if self.docstatus != 1:
+			frappe.throw(_("Submit the Exchange Rate Revaluation before creating its Journal Entries"))
+
+		if journals := self.get_journals():
+			frappe.throw(
+				_("Journal Entries are already created for this Exchange Rate Revaluation: {0}").format(
+					", ".join(get_link_to_form("Journal Entry", d.name) for d in journals)
+				)
+			)
+
+		ledger_balances = self.get_ledger_balances()
+		for row in self.accounts:
+			balance = ledger_balances.get(get_row_key(row)) or frappe._dict(
+				balance=0, balance_in_account_currency=0
+			)
+			if flt(balance.balance, row.precision("balance_in_base_currency")) != flt(
+				row.balance_in_base_currency, row.precision("balance_in_base_currency")
+			) or flt(
+				balance.balance_in_account_currency, row.precision("balance_in_account_currency")
+			) != flt(row.balance_in_account_currency, row.precision("balance_in_account_currency")):
+				frappe.throw(
+					_(
+						"Row {0}: The balance of Account {1} and Party {2} on {3} changed after this Exchange Rate Revaluation was submitted. Cancel and amend it to revalue the current balance."
+					).format(
+						row.idx,
+						frappe.bold(row.account),
+						frappe.bold(row.party or "-"),
+						frappe.bold(formatdate(self.posting_date)),
+					)
+				)
+
 	@frappe.whitelist()
 	def make_jv_entries(self):
 		frappe.has_permission("Journal Entry", "write", throw=True)
+		self.validate_journals_can_be_made()
 		zero_balance_jv = self.make_jv_for_zero_balance()
 		if zero_balance_jv:
 			frappe.msgprint(
@@ -451,14 +527,15 @@ class ExchangeRateRevaluation(Document):
 
 				journal_entry_accounts.append(journal_account)
 
+				# the base balance is already 0: the row only keeps a second GL entry on the voucher
 				journal_entry_accounts.append(
 					{
 						"account": unrealized_exchange_gain_loss_account,
 						"balance": get_balance_on(unrealized_exchange_gain_loss_account),
 						"debit": 0,
 						"credit": 0,
-						"debit_in_account_currency": abs(d.gain_loss) if d.gain_loss < 0 else 0,
-						"credit_in_account_currency": abs(d.gain_loss) if d.gain_loss > 0 else 0,
+						"debit_in_account_currency": 0,
+						"credit_in_account_currency": 0,
 						"cost_center": erpnext.get_default_cost_center(self.company),
 						"exchange_rate": 1,
 						"reference_type": "Exchange Rate Revaluation",
@@ -500,6 +577,12 @@ class ExchangeRateRevaluation(Document):
 
 		journal_entry.set("accounts", journal_entry_accounts)
 		journal_entry.set_total_debit_credit()
+		if journal_entry.difference:
+			frappe.throw(
+				_("Zero Balance Journal is not balanced. The difference is {0}").format(
+					journal_entry.difference
+				)
+			)
 		journal_entry.save()
 		return journal_entry
 
@@ -646,7 +729,59 @@ class ExchangeRateRevaluation(Document):
 					)
 
 
-def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
+def get_row_key(row):
+	return (row.account, row.party_type or None, row.party or None)
+
+
+def get_new_balance_precision(company):
+	return get_field_precision(
+		frappe.get_meta("Exchange Rate Revaluation Account").get_field("new_balance_in_base_currency"),
+		currency=erpnext.get_company_currency(company),
+	)
+
+
+def revalue_balance(d, new_exchange_rate, precision, company, posting_date):
+	"""Return the revaluation fields of a row for the balance `d` from `get_account_balance_from_gle`."""
+	if not d.zero_balance:
+		current_exchange_rate = (
+			d.balance / d.balance_in_account_currency if d.balance_in_account_currency else 0
+		)
+		new_balance_in_base_currency = flt(d.balance_in_account_currency * new_exchange_rate)
+		new_balance_in_account_currency = d.balance_in_account_currency
+		gain_loss = flt(new_balance_in_base_currency, precision) - flt(d.balance, precision)
+
+	# Handle Accounts with '0' balance in Account/Base Currency
+	elif d.balance != 0:
+		current_exchange_rate = new_exchange_rate = 0
+
+		new_balance_in_account_currency = 0  # this will be '0'
+		new_balance_in_base_currency = 0  # this will be '0'
+		gain_loss = flt(new_balance_in_base_currency, precision) - flt(d.balance, precision)
+	else:
+		new_exchange_rate = 0
+		new_balance_in_base_currency = 0
+		new_balance_in_account_currency = 0
+
+		current_exchange_rate = (
+			calculate_exchange_rate_using_last_gle(company, d.account, d.party_type, d.party, posting_date)
+			or 0.0
+		)
+
+		gain_loss = new_balance_in_account_currency - (current_exchange_rate * d.balance_in_account_currency)
+
+	return {
+		"balance_in_base_currency": d.balance,
+		"balance_in_account_currency": d.balance_in_account_currency,
+		"zero_balance": d.zero_balance,
+		"current_exchange_rate": current_exchange_rate,
+		"new_exchange_rate": new_exchange_rate,
+		"new_balance_in_base_currency": new_balance_in_base_currency,
+		"new_balance_in_account_currency": new_balance_in_account_currency,
+		"gain_loss": gain_loss,
+	}
+
+
+def calculate_exchange_rate_using_last_gle(company, account, party_type, party, posting_date=None):
 	"""
 	Use last GL entry to calculate exchange rate
 	"""
@@ -665,16 +800,22 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 			conditions.append(gl.party_type == party_type)
 		if party:
 			conditions.append(gl.party == party)
+		if posting_date:
+			conditions.append(gl.posting_date.lte(posting_date))
 
-		voucher_type, voucher_no = (
+		last_entry = (
 			qb.from_(gl)
 			.select(gl.voucher_type, gl.voucher_no)
 			.where(Criterion.all(conditions))
 			.orderby(gl.posting_date, order=Order.desc)
 			.orderby(gl.name, order=Order.desc)
 			.limit(1)
-			.run()[0]
+			.run()
 		)
+		if not last_entry:
+			return last_exchange_rate
+
+		voucher_type, voucher_no = last_entry[0]
 
 		last_exchange_rate = (
 			qb.from_(gl)
@@ -703,10 +844,16 @@ def get_account_details(
 	party: str | None = None,
 	rounding_loss_allowance: float = 0.0,
 ):
+	frappe.has_permission("Exchange Rate Revaluation", "write", throw=True)
 	frappe.has_permission("Account", doc=account, throw=True)
 
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
+
+	if frappe.get_cached_value("Account", account, "company") != company:
+		frappe.throw(
+			_("Account {0} does not belong to Company {1}").format(frappe.bold(account), frappe.bold(company))
+		)
 
 	account_currency, account_type = frappe.get_cached_value(
 		"Account", account, ["account_currency", "account_type"]
