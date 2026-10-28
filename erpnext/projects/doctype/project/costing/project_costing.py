@@ -133,6 +133,8 @@ def get_costing_access(project: str) -> dict[str, bool]:
 	access["labour"] = can_read_labour_cost()
 	# Materials open as Stock Entries; the list behind them reads stock ledger rows.
 	access["materials"] = can_read("Stock Entry") and can_read("Stock Ledger Entry")
+	# The Accounts view reads the project's ledger entries.
+	access["ledger"] = can_read("GL Entry")
 	access["edit_estimate"] = can_edit_estimate(project)
 	return access
 

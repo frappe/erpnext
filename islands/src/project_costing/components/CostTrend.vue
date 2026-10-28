@@ -113,12 +113,6 @@ const chart = computed(() => {
 		yAxis: { format: format.short, min: 0 },
 	};
 });
-
-const subtitle = computed(() => {
-	if (mode.value === "monthly")
-		return props.view.internal ? __("Cost each month") : __("Cost each month, billing as points");
-	return props.view.closed ? __("Cumulative, to the end") : __("Cumulative, with forecast");
-});
 </script>
 
 <template>
@@ -127,7 +121,6 @@ const subtitle = computed(() => {
 			:is="chart.is"
 			:key="mode"
 			:title="__('Cost over time')"
-			:subtitle="subtitle"
 			:data="chart.data"
 			x="label"
 			:y="chart.y"

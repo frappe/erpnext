@@ -1,21 +1,21 @@
 <script setup>
 import { computed, ref } from "vue";
-import { Alert, Button, Dropdown, ErrorMessage, Skeleton, Tooltip } from "frappe-ui";
-import { NumberCard } from "frappe-ui/charts";
+import { Alert, Button, Dropdown, ErrorMessage, Skeleton, TabButtons } from "frappe-ui";
 import { useHost } from "@framework/ui/island";
 
+import AccountsView from "./components/AccountsView.vue";
 import BillingCard from "./components/BillingCard.vue";
 import BudgetCard from "./components/BudgetCard.vue";
 import CostBreakdown from "./components/CostBreakdown.vue";
 import CostDrivers from "./components/CostDrivers.vue";
 import CostTrend from "./components/CostTrend.vue";
+import KpiCards from "./components/KpiCards.vue";
 import MarginCard from "./components/MarginCard.vue";
-import RateGapsDialog from "./components/RateGapsDialog.vue";
-import { alertFor, hiddenFor } from "./alerts.js";
+import { hiddenFor } from "./alerts.js";
 import { toView } from "./costing.js";
 import { createFormat, provideFormat } from "./format.js";
 import { kpisFor } from "./kpis.js";
-import { useProjectCosting } from "./useProjectCosting.js";
+import { useProjectAccounts, useProjectCosting } from "./useProjectCosting.js";
 
 // What a Vue Component field passes: the form's document, as it stands.
 const props = defineProps({
@@ -29,29 +29,35 @@ const props = defineProps({
 const __ = window.__;
 const host = useHost();
 const element = ref(null);
-const show_rate_gaps = ref(false);
+const mode = ref("project");
+const modes = [
+	{ value: "project", label: __("Project") },
+	{ value: "accounts", label: __("Accounts") },
+];
 
 const costing = useProjectCosting(
 	element,
 	() => props.name,
 	() => props.doc.modified
 );
+const accounts = useProjectAccounts(
+	element,
+	() => props.name,
+	() => props.doc.modified,
+	() => mode.value === "accounts"
+);
 const view = computed(() => (costing.data?.summary ? toView(costing.data, props.doc) : null));
 const format = createFormat(host, () => costing.data?.currency);
 provideFormat(format);
 
 const kpis = computed(() => kpisFor(view.value, format));
-const alert = computed(() =>
-	alertFor(view.value, format, { fix_rates: () => (show_rate_gaps.value = true) })
-);
-const hidden = computed(() => hiddenFor(view.value));
-const failed = computed(() => Object.keys(costing.data?.errors || {}).length > 0);
-
-const context = computed(() =>
-	view.value?.hrms
-		? __("Measured from timesheets, purchase invoices, stock consumption and expense claims.")
-		: __("Measured from timesheets, purchase invoices and stock consumption.")
-);
+const hidden = computed(() => {
+	if (mode.value === "project") return hiddenFor(view.value);
+	return accounts.data && !accounts.data.access.budgets ? [__("Budget records")] : [];
+});
+const failed = computed(() => mode.value === "project" && Object.keys(costing.data?.errors || {}).length > 0);
+// Only a viewer who may read the ledger gets the Accounts view.
+const has_accounts = computed(() => Boolean(view.value?.access.ledger));
 
 const reports = computed(() =>
 	["Project Profitability", "Project Billing Summary", "Timesheet Billing Summary"].map((report) => ({
@@ -68,8 +74,8 @@ function new_timesheet() {
 <template>
 	<div ref="element" class="space-y-5 pb-8 pt-2">
 		<template v-if="!is_new">
-			<div class="flex flex-wrap items-center gap-2">
-				<p class="text-p-sm text-ink-gray-5">{{ context }}</p>
+			<div class="flex flex-wrap items-center gap-3">
+				<TabButtons v-if="has_accounts" v-model="mode" :options="modes" size="sm" />
 				<div class="ml-auto">
 					<Dropdown :options="reports">
 						<Button size="sm" :label="__('Reports')" icon-right="lucide-chevron-down" />
@@ -83,6 +89,27 @@ function new_timesheet() {
 				:title="__('Could not load the costing')"
 				:description="costing.error.message"
 			/>
+
+			<template v-else-if="mode === 'accounts'">
+				<Alert
+					v-if="accounts.error"
+					theme="red"
+					:title="__('Could not load the accounts')"
+					:description="accounts.error.message"
+				/>
+				<AccountsView
+					v-else-if="accounts.data"
+					:payload="accounts.data"
+					:internal="view.internal"
+					:closed="view.closed"
+				/>
+				<div v-else class="space-y-5">
+					<div class="grid grid-cols-2 gap-5 lg:grid-cols-4">
+						<Skeleton v-for="index in 4" :key="index" class="h-24 w-full rounded-4" />
+					</div>
+					<Skeleton class="h-80 w-full rounded-4" />
+				</div>
+			</template>
 
 			<div v-else-if="!view" class="space-y-5">
 				<div class="grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -99,13 +126,6 @@ function new_timesheet() {
 					<span class="lucide-receipt size-6" aria-hidden="true" />
 				</div>
 				<p class="text-base text-ink-gray-7">{{ __("No costs booked yet") }}</p>
-				<p class="max-w-md text-p-sm text-ink-gray-5">
-					{{
-						__(
-							"Costs show up here as timesheets, purchase invoices and stock consumption are booked against this project."
-						)
-					}}
-				</p>
 				<Button
 					v-if="!view.closed"
 					variant="solid"
@@ -118,26 +138,7 @@ function new_timesheet() {
 			</div>
 
 			<template v-else>
-				<Alert v-if="alert" v-bind="alert" />
-				<div
-					class="grid grid-cols-2 gap-5"
-					:class="kpis.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'"
-				>
-					<NumberCard v-for="kpi in kpis" :key="kpi.label" :title="kpi.label" :value="kpi.value">
-						<template v-if="kpi.hint" #title-suffix>
-							<Tooltip :text="kpi.hint">
-								<span
-									class="lucide-info size-[1em] text-ink-gray-4"
-									role="img"
-									:aria-label="kpi.hint"
-								/>
-							</Tooltip>
-						</template>
-						<template v-if="kpi.sub" #caption>
-							<span class="text-ink-gray-5">{{ kpi.sub }}</span>
-						</template>
-					</NumberCard>
-				</div>
+				<KpiCards :items="kpis" />
 				<div class="grid gap-5 lg:grid-cols-5">
 					<BudgetCard class="lg:col-span-2" :view="view" />
 					<CostTrend class="lg:col-span-3" :view="view" />
@@ -150,7 +151,6 @@ function new_timesheet() {
 					<BillingCard v-if="view.billing" :view="view" />
 					<MarginCard :view="view" />
 				</div>
-				<RateGapsDialog v-if="view.rate_gaps" v-model:open="show_rate_gaps" :view="view" />
 			</template>
 
 			<ErrorMessage
