@@ -219,6 +219,16 @@ class TransactionDeletionRecord(Document):
 			# Validate company_field if specified
 			if item.company_field:
 				valid_company_fields = self._get_company_link_fields(item.doctype_name)
+				if "company" not in valid_company_fields and len(valid_company_fields) > 1:
+					frappe.throw(
+						_("Cannot determine the owning company field for {0}").format(item.doctype_name),
+						title=_("Ambiguous Company Field"),
+					)
+				if "company" in valid_company_fields and item.company_field != "company":
+					frappe.throw(
+						_("Only the owning company field may be used for {0}").format(item.doctype_name),
+						title=_("Invalid Company Field"),
+					)
 				if item.company_field not in valid_company_fields:
 					frappe.throw(
 						_("Field '{0}' is not a valid Company link field for DocType {1}").format(
@@ -415,8 +425,11 @@ class TransactionDeletionRecord(Document):
 					doctypes_with_company.append(doctype_name)
 
 		for doctype_name in doctypes_with_company:
-			# Get ALL company fields for this DocType
+			# Only the owning company field is safe for automatic deletion.
 			company_fields = self._get_company_link_fields(doctype_name)
+			if "company" not in company_fields:
+				continue
+			company_fields = ["company"]
 
 			# Get child tables once (same for all company fields of this DocType)
 			child_tables = self._get_child_tables(doctype_name)

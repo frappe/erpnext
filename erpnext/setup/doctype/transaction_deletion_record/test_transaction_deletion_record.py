@@ -1,3 +1,4 @@
+from unittest.mock import patch
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
@@ -99,6 +100,80 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		self.assertGreater(len(tdr.doctypes_to_delete), 0)
 		task_in_list = any(d.doctype_name == "Task" for d in tdr.doctypes_to_delete)
 		self.assertTrue(task_in_list, "Task should be in To Delete list")
+
+	def test_generated_list_uses_owning_company_for_sales_invoice(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.insert()
+		tdr.generate_to_delete_list()
+
+		fields = [row.company_field for row in tdr.doctypes_to_delete if row.doctype_name == "Sales Invoice"]
+		self.assertEqual(fields, ["company"])
+
+	def test_intercompany_invoice_children_and_ledgers_survive(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		customer_group, territory = frappe.get_cached_value(
+			"Customer", "_Test Customer", ["customer_group", "territory"]
+		)
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Transaction deletion internal customer",
+				"customer_group": customer_group,
+				"territory": territory,
+				"is_internal_customer": 1,
+				"represents_company": "_Test Company 7",
+				"companies": [{"company": "_Test Company"}],
+			}
+		).insert()
+		item = make_item(properties={"is_stock_item": 0}).name
+		invoice = create_sales_invoice(
+			customer=customer.name, item_code=item, qty=1, rate=1000, is_internal_customer=1
+		)
+		self.assertEqual(invoice.represents_company, "_Test Company 7")
+		filters = {"voucher_type": "Sales Invoice", "voucher_no": invoice.name}
+		gl_entries = frappe.get_all(
+			"GL Entry", filters=filters, fields=["name", "account", "debit", "credit"], order_by="name"
+		)
+		payment_entries = frappe.get_all(
+			"Payment Ledger Entry", filters=filters, fields=["name", "amount", "delinked"], order_by="name"
+		)
+		self.assertEqual(len(gl_entries), 2)
+		self.assertEqual(len(payment_entries), 1)
+		delete = create_and_submit_transaction_deletion_doc("_Test Company 7")
+		self.assertEqual(delete.db_get("status"), "Completed")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", invoice.name, "docstatus"), 1)
+		self.assertTrue(frappe.db.exists("Sales Invoice Item", invoice.items[0].name))
+		self.assertEqual(
+			frappe.get_all(
+				"GL Entry", filters=filters, fields=["name", "account", "debit", "credit"], order_by="name"
+			),
+			gl_entries,
+		)
+		self.assertEqual(
+			frappe.get_all(
+				"Payment Ledger Entry",
+				filters=filters,
+				fields=["name", "amount", "delinked"],
+				order_by="name",
+			),
+			payment_entries,
+		)
+
+	def test_rejects_secondary_company_field_for_owned_documents(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append(
+			"doctypes_to_delete", {"doctype_name": "Sales Invoice", "company_field": "represents_company"}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			tdr.insert()
+
+	def test_rejects_ambiguous_company_field_for_shipment(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Shipment", "company_field": "pickup_company"})
+		with self.assertRaises(frappe.ValidationError):
+			tdr.insert()
 
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
