@@ -1,0 +1,329 @@
+# Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+"""Sub-assembly resolution helpers for Production Plan."""
+
+import frappe
+from frappe.query_builder.functions import Count, IfNull, Max, Sum
+from frappe.utils import flt
+from frappe.utils.caching import request_cache
+
+from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	aggregate_bin_details,
+	get_bin_details,
+	get_uom_conversion_factor,
+)
+
+
+def get_sub_assembly_items(
+	bin_details,
+	bom_no,
+	bom_data,
+	to_produce_qty,
+	company,
+	warehouse=None,
+	indent=0,
+	skip_available_sub_assembly_item=False,
+):
+	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
+	parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
+
+	for d in get_bom_children(parent=bom_no):
+		if not d.expandable:
+			continue
+
+		stock_qty = _add_sub_assembly_child(
+			d,
+			parent_item_code,
+			bom_no,
+			bom_data,
+			bin_details,
+			to_produce_qty,
+			company,
+			warehouse,
+			indent,
+			precision,
+			skip_available_sub_assembly_item,
+		)
+		if d.value:
+			get_sub_assembly_items(
+				bin_details,
+				d.value,
+				bom_data,
+				stock_qty,
+				company,
+				warehouse,
+				indent=indent + 1,
+				skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+			)
+
+
+def _add_sub_assembly_child(
+	d,
+	parent_item_code,
+	bom_no,
+	bom_data,
+	bin_details,
+	to_produce_qty,
+	company,
+	warehouse,
+	indent,
+	precision,
+	skip_available,
+):
+	required_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
+	stock_qty = _resolve_available_sub_assembly(
+		d, required_qty, bin_details, company, warehouse, skip_available
+	)
+	if not d.is_phantom_item:
+		bom_data.append(
+			_sub_assembly_row(
+				d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision
+			)
+		)
+	return stock_qty
+
+
+def _resolve_available_sub_assembly(d, stock_qty, bin_details, company, warehouse, skip_available):
+	if warehouse and d.item_code not in bin_details:
+		bins = get_bin_details(d, company, for_warehouse=warehouse)
+		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
+
+	if skip_available:
+		return _consume_projected_qty(d, stock_qty, bin_details)
+	return stock_qty
+
+
+def _consume_projected_qty(d, stock_qty, bin_details):
+	bin_dict = bin_details[d.item_code]
+	available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
+	if available_qty <= 0:
+		return stock_qty
+
+	if available_qty >= stock_qty:
+		bin_dict.available_qty = available_qty - stock_qty
+		return 0
+
+	bin_dict.available_qty = 0
+	return stock_qty - available_qty
+
+
+def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision):
+	bin_dict = bin_details.get(d.item_code) or {}
+	return frappe._dict(
+		{
+			"actual_qty": bin_dict.get("actual_qty", 0),
+			"parent_item_code": parent_item_code,
+			"description": d.description,
+			"production_item": d.item_code,
+			"item_name": d.item_name,
+			"stock_uom": d.stock_uom,
+			"uom": d.stock_uom,
+			"bom_no": d.value,
+			"is_sub_contracted_item": d.is_sub_contracted_item,
+			"bom_level": indent,
+			"indent": indent,
+			"stock_qty": flt(stock_qty, precision),
+			"required_qty": flt(required_qty, precision),
+			"projected_qty": bin_dict.get("projected_qty", 0),
+			"main_bom": bom_no,
+		}
+	)
+
+
+def get_raw_materials_of_sub_assembly_items(
+	existing_sub_assembly_items,
+	item_details,
+	company,
+	bom_no,
+	include_non_stock_items,
+	sub_assembly_items,
+	planned_qty=1,
+):
+	for item in _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty):
+		_process_sub_assembly_rm(
+			item,
+			existing_sub_assembly_items,
+			item_details,
+			company,
+			include_non_stock_items,
+			sub_assembly_items,
+		)
+	return item_details
+
+
+def _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty):
+	bei = frappe.qb.DocType("BOM Item")
+	bom = frappe.qb.DocType("BOM")
+	item = frappe.qb.DocType("Item")
+	item_default = frappe.qb.DocType("Item Default")
+	item_uom = frappe.qb.DocType("UOM Conversion Detail")
+	rows = (
+		frappe.qb.from_(bei)
+		.join(bom)
+		.on(bom.name == bei.parent)
+		.join(item)
+		.on(item.name == bei.item_code)
+		.left_join(item_default)
+		.on((item_default.parent == item.name) & (item_default.company == company))
+		.left_join(item_uom)
+		.on((item.name == item_uom.parent) & (item_uom.uom == item.purchase_uom))
+		.select(*_sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty))
+		.where(_sub_assembly_rm_filter(bei, bom, item, bom_no, include_non_stock_items))
+		.groupby(bei.item_code, bei.stock_uom, bei.bom_no, bei.is_phantom_item)
+	).run(as_dict=True)
+
+	_apply_representative_lines(rows, bom_no)
+	return rows
+
+
+def _apply_representative_lines(rows, bom_no):
+	"""Fill description/source_warehouse from a single real BOM Item line per group.
+
+	Both describe a line, not an item. Aggregating each independently can pair one line's
+	description with another's warehouse, and Max() over text is a sort -- MariaDB folds case,
+	PostgreSQL orders by byte value, so the engines pick differently. Take the first line by idx.
+	"""
+	repeated = [row for row in rows if (row.pop("line_count", 1) or 1) > 1]
+	if not repeated:
+		return
+
+	keys = ("item_code", "stock_uom", "bom_no", "is_phantom_item")
+	representative = _representative_lines(bom_no, keys)
+
+	for row in repeated:
+		line = representative.get(tuple(row.get(key) for key in keys))
+		if line:
+			row.description = line.description
+			row.source_warehouse = line.source_warehouse
+
+
+@request_cache
+def _representative_lines(bom_no, keys):
+	"""Cached per request: sub-assembly resolution recurses and revisits the same BOM."""
+	representative = {}
+	for line in frappe.get_all(
+		"BOM Item",
+		filters={
+			"parent": bom_no,
+			"parenttype": "BOM",
+			"is_sub_assembly_item": 0,
+			"docstatus": 1,
+		},
+		fields=["item_code", "stock_uom", "bom_no", "is_phantom_item", "description", "source_warehouse"],
+		order_by="idx",
+	):
+		representative.setdefault(tuple(line.get(key) for key in keys), line)
+
+	return representative
+
+
+def _sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty):
+	# Grouped by item_code/stock_uom plus bom_no/is_phantom_item: those two MUST come from the same
+	# BOM Item row -- the consumer keys on (item_code, bom_no) and recurses on is_phantom_item, so an
+	# independent Max() per column could pair a bom_no from one line with is_phantom_item from another
+	# and recurse into the wrong sub-BOM. Grouping them keeps the pair coherent and the GROUP BY valid
+	# on postgres. The remaining columns are functionally dependent on the grouped item; Max() returns
+	# their single value on both engines.
+	return [
+		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
+		Max(item.item_name).as_("item_name"),
+		Max(item.name).as_("item_code"),
+		Max(bei.description).as_("description"),
+		Max(bei.source_warehouse).as_("source_warehouse"),
+		Count(bei.name).distinct().as_("line_count"),
+		bei.stock_uom,
+		bei.is_phantom_item,
+		bei.bom_no,
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item.default_material_request_type).as_("default_material_request_type"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item_default.default_warehouse).as_("default_warehouse"),
+		Max(item.purchase_uom).as_("purchase_uom"),
+		Max(item_uom.conversion_factor).as_("conversion_factor"),
+		Max(item.safety_stock).as_("safety_stock"),
+		Max(bom.item).as_("main_bom_item"),
+		Max(bom.name).as_("main_bom"),
+	]
+
+
+def _sub_assembly_rm_filter(bei, bom, item, bom_no, include_non_stock_items):
+	stock_filter = item.is_stock_item.isin([0, 1]) if include_non_stock_items else item.is_stock_item == 1
+	return (
+		(bei.docstatus == 1)
+		& (bei.is_sub_assembly_item == 0)
+		& (bom.name == bom_no)
+		& (stock_filter | (bei.is_phantom_item == 1))
+	)
+
+
+def _process_sub_assembly_rm(
+	item, existing_sub_assembly_items, item_details, company, include_non_stock_items, sub_assembly_items
+):
+	key = (item.item_code, item.bom_no)
+	existing_key = (item.item_code, item.bom_no or item.main_bom)
+
+	if item.bom_no and not item.is_phantom_item and key not in sub_assembly_items:
+		return
+	if not item.is_phantom_item and existing_key in existing_sub_assembly_items:
+		return
+
+	if not item.bom_no:
+		_merge_sub_assembly_rm(item, item_details)
+		return
+
+	recursion_qty = flt(item.get("qty")) if item.is_phantom_item else flt(sub_assembly_items[key])
+	get_raw_materials_of_sub_assembly_items(
+		existing_sub_assembly_items,
+		item_details,
+		company,
+		item.bom_no,
+		include_non_stock_items,
+		sub_assembly_items,
+		planned_qty=recursion_qty,
+	)
+	if not item.is_phantom_item:
+		existing_sub_assembly_items.add(existing_key)
+
+
+def _merge_sub_assembly_rm(item, item_details):
+	if not item.conversion_factor and item.purchase_uom:
+		item.conversion_factor = get_uom_conversion_factor(item.item_code, item.purchase_uom)
+
+	key = (item.get("item_code"), item.get("main_bom"))
+	if details := item_details.get(key):
+		details.qty += item.get("qty")
+	else:
+		item_details.setdefault(key, item)
+
+
+def get_subcontracted_received_qty(po_details):
+	"""Accepted finished good qty from Subcontracting Receipts, by Purchase Order Item."""
+	if not po_details:
+		return {}
+
+	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	# return rows don't carry purchase_order_item, so link via the subcontracting order item
+	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
+
+	return frappe._dict(
+		frappe.qb.from_(scr_item)
+		.inner_join(sco_item)
+		.on(scr_item.subcontracting_order_item == sco_item.name)
+		.left_join(return_against)
+		.on(scr_item.subcontracting_receipt_item == return_against.name)
+		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
+		.where(
+			(scr_item.docstatus == 1)
+			& sco_item.purchase_order_item.isin(po_details)
+			# skip returns of rejected qty, they come out of the rejected warehouse
+			& (
+				return_against.name.isnull()
+				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
+			)
+		)
+		.groupby(sco_item.purchase_order_item)
+		.run()
+	)
