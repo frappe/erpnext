@@ -114,6 +114,9 @@ class TestProjectCosting(ERPNextTestSuite):
 		frappe.set_user("Administrator")
 
 		self.assertEqual(costing["errors"], {})
+		self.assertEqual(
+			costing["customer_name"], frappe.db.get_value("Customer", "_Test Customer", "customer_name")
+		)
 		self.assertFalse(costing["access"]["labour"])
 		self.assertEqual(costing["summary"]["cost"], cost)
 		self.assertIsNone(costing["billing"]["invoices"])
