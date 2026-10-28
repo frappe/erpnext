@@ -601,6 +601,134 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tdr.generate_to_delete_list()
 		self.assertFalse(expected & {row.doctype_name for row in tdr.doctypes_to_delete})
 
+	def test_partial_deletion_preserves_stock_and_sales_order_reservation(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company 7"
+		warehouse = frappe.db.get_value("Warehouse", {"company": company, "warehouse_name": "Stores"})
+		item = make_item().name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=10, rate=100)
+		order = make_sales_order(item_code=item, company=company, warehouse=warehouse, qty=4)
+		tdr = delete_selected_doctypes(company, ["Delivery Note"])
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertTrue(frappe.db.exists("Sales Order", order.name))
+		self.assertTrue(frappe.db.exists("Bin", {"item_code": item, "warehouse": warehouse}))
+		bin = frappe.get_doc("Bin", {"item_code": item, "warehouse": warehouse})
+		self.assertEqual((bin.actual_qty, bin.reserved_qty, bin.projected_qty), (10, 4, 6))
+		self.assertEqual((bin.valuation_rate, bin.stock_value), (100, 1000))
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=1, rate=100)
+		bin.reload()
+		self.assertEqual((bin.actual_qty, bin.reserved_qty, bin.projected_qty), (11, 4, 7))
+
+	def test_previously_queued_bin_task_does_not_complete_before_transactions(self):
+		create_task("_Test Company 7")
+		tdr = frappe.get_doc(
+			{
+				"doctype": "Transaction Deletion Record",
+				"company": "_Test Company 7",
+				"doctypes_to_delete": [{"doctype_name": "Task", "company_field": "company"}],
+			}
+		).insert()
+		try:
+			with patch.object(tdr, "enqueue_task"):
+				tdr.submit()
+				tdr.execute_task("Delete Bins")
+			self.assertEqual(tdr.db_get("status"), "Running")
+			self.assertEqual(tdr.db_get("delete_transactions_status"), "Pending")
+			self.assertEqual(frappe.cache.get_value("deletion_running_doctype:Task"), tdr.name)
+		finally:
+			tdr._clear_deletion_cache()
+
+	def test_old_completed_bin_task_is_rebuilt_after_transactions(self):
+		tdr = frappe.get_doc(
+			{
+				"doctype": "Transaction Deletion Record",
+				"company": "_Test Company 7",
+				"doctypes_to_delete": [{"doctype_name": "Delivery Note", "company_field": "company"}],
+			}
+		).insert()
+		try:
+			with patch.object(tdr, "enqueue_task"):
+				tdr.submit()
+				tdr.db_set("delete_bin_data_status", "Completed")
+				tdr.initialize_doctypes_to_be_deleted_table()
+				tdr.execute_task("Delete Transactions")
+				tdr.reload()
+				self.assertEqual(tdr.delete_transactions_status, "Completed")
+				self.assertEqual(tdr.delete_bin_data_status, "Pending")
+		finally:
+			tdr._clear_deletion_cache()
+
+	def test_deleting_orders_recalculates_bin_commitments(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company 7"
+		warehouse = frappe.db.get_value("Warehouse", {"company": company, "warehouse_name": "Stores"})
+		item = make_item().name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=10, rate=100)
+		make_sales_order(item_code=item, company=company, warehouse=warehouse, qty=4)
+		create_purchase_order(item_code=item, company=company, warehouse=warehouse, qty=3)
+		make_material_request(
+			item_code=item,
+			company=company,
+			warehouse=warehouse,
+			qty=2,
+			uom="Nos",
+			cost_center=frappe.get_cached_value("Company", company, "cost_center"),
+		)
+		bin = frappe.get_doc("Bin", {"item_code": item, "warehouse": warehouse})
+		self.assertEqual((bin.reserved_qty, bin.ordered_qty, bin.indented_qty), (4, 3, 2))
+		delete_selected_doctypes(company, ["Sales Order", "Purchase Order", "Material Request"])
+		self.assertTrue(frappe.db.exists("Bin", bin.name))
+		bin.reload()
+		self.assertEqual((bin.actual_qty, bin.reserved_qty, bin.ordered_qty, bin.indented_qty), (10, 0, 0, 0))
+		self.assertEqual((bin.valuation_rate, bin.stock_value, bin.projected_qty), (100, 1000, 10))
+
+	def test_full_deletion_clears_bin_values_after_removing_stock(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company 7"
+		warehouse = frappe.db.get_value("Warehouse", {"company": company, "warehouse_name": "Stores"})
+		item = make_item().name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=10, rate=100)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=7, rate=100)
+		bin = frappe.get_doc("Bin", {"item_code": item, "warehouse": warehouse})
+		tdr = create_and_submit_transaction_deletion_doc(company)
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertFalse(frappe.db.exists("Bin", bin.name))
+		other_bin = frappe.get_doc("Bin", {"item_code": item, "warehouse": "_Test Warehouse - _TC"})
+		self.assertEqual((other_bin.actual_qty, other_bin.stock_value), (7, 700))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_stock": 0}
+	)
+	def test_rebuild_bins_preserves_and_releases_stock_reservations(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company 7"
+		warehouse = frappe.db.get_value("Warehouse", {"company": company, "warehouse_name": "Stores"})
+		item = make_item().name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=10, rate=100)
+		order = make_sales_order(item_code=item, company=company, warehouse=warehouse, qty=4)
+		order.create_stock_reservation_entries(notify=False)
+		bin = frappe.get_doc("Bin", {"item_code": item, "warehouse": warehouse})
+		self.assertEqual(bin.reserved_stock, 4)
+		delete_selected_doctypes(company, ["Delivery Note"])
+		bin.reload()
+		self.assertEqual((bin.reserved_stock, bin.reserved_qty, bin.projected_qty), (4, 4, 6))
+		delete_selected_doctypes(company, ["Stock Reservation Entry"])
+		bin.reload()
+		self.assertEqual((bin.reserved_stock, bin.reserved_qty, bin.projected_qty), (0, 4, 6))
+
 	def test_deletion_preserves_series_after_amended_document(self):
 		def make_process(company):
 			return frappe.get_doc(

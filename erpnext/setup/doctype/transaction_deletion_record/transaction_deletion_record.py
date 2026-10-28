@@ -7,7 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
-from frappe.utils import comma_and, create_batch, get_link_to_form
+from frappe.utils import comma_and, create_batch, flt, get_link_to_form
 from frappe.utils.background_jobs import get_job, is_job_enqueued
 from frappe.utils.caching import request_cache
 
@@ -148,12 +148,12 @@ class TransactionDeletionRecord(Document):
 		# Tasks are listed by their execution order
 		self.task_to_internal_method_map = OrderedDict(
 			{
-				"Delete Bins": "delete_bins",
 				"Delete Leads and Addresses": "delete_lead_addresses",
 				"Reset Company Values": "reset_company_values",
 				"Clear Notifications": "delete_notifications",
 				"Initialize Summary Table": "initialize_doctypes_to_be_deleted_table",
 				"Delete Transactions": "delete_company_transactions",
+				"Delete Bins": "delete_bins",
 			}
 		)
 
@@ -712,10 +712,14 @@ class TransactionDeletionRecord(Document):
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
 		self._set_deletion_cache()
-		self.enqueue_task(task="Delete Bins")
+		self.enqueue_task(task="Delete Leads and Addresses")
 
 	def delete_bins(self):
+		"""Rebuild derived stock balances after deleting their source transactions."""
 		self.validate_doc_status()
+		if self.delete_transactions_status != "Completed":
+			self.enqueue_task(task="Delete Leads and Addresses")
+			return
 		if self.delete_bin_data_status == "Pending":
 			stock_related_doctypes = [
 				"Item",
@@ -727,18 +731,48 @@ class TransactionDeletionRecord(Document):
 				"Material Request",
 				"Purchase Invoice",
 				"Sales Invoice",
+				"Stock Ledger Entry",
+				"Serial and Batch Bundle",
+				"Sales Order",
+				"Purchase Order",
+				"Work Order",
+				"Production Plan",
+				"Subcontracting Order",
+				"Stock Reservation Entry",
 			]
 
 			if not self._is_any_doctype_in_deletion_list(stock_related_doctypes):
 				self.db_set("delete_bin_data_status", "Skipped")
-				self.enqueue_task(task="Delete Leads and Addresses")
-				return
+			else:
+				from erpnext.stock.doctype.bin.bin import RECALCULATED_FIELDS
+				from erpnext.stock.utils import get_bin
 
-			warehouses = frappe.get_all("Warehouse", filters={"company": self.company}, pluck="name")
-			if warehouses:
-				frappe.db.delete("Bin", {"warehouse": ["in", warehouses]})
-			self.db_set("delete_bin_data_status", "Completed")
-		self.enqueue_task(task="Delete Leads and Addresses")
+				bin_value_fields = (*RECALCULATED_FIELDS, "reserved_stock")
+				warehouses = frappe.get_all("Warehouse", filters={"company": self.company}, pluck="name")
+				item_warehouses = set()
+				for doctype in ("Bin", "Stock Ledger Entry"):
+					item_warehouses.update(
+						tuple(row)
+						for row in frappe.get_all(
+							doctype,
+							filters={"warehouse": ["in", warehouses]},
+							fields=["item_code", "warehouse"],
+							distinct=True,
+							as_list=True,
+						)
+					)
+				for item_code, warehouse in sorted(item_warehouses):
+					bin = get_bin(item_code, warehouse)
+					bin.recalculate_values()
+					bin.update_reserved_stock()
+					# An empty Bin equals a missing one; removing it keeps the Company deletable.
+					# Filter on stored values so a concurrent stock update keeps its Bin.
+					if not any(flt(bin.get(field)) for field in bin_value_fields):
+						frappe.db.delete("Bin", {"name": bin.name, **dict.fromkeys(bin_value_fields, 0)})
+				self.db_set("delete_bin_data_status", "Completed")
+		self.db_set("status", "Completed")
+		self.db_set("error_log", None)
+		self._clear_deletion_cache()
 
 	def delete_lead_addresses(self):
 		"""Delete addresses to which leads are linked"""
@@ -928,10 +962,9 @@ class TransactionDeletionRecord(Document):
 			if pending_doctypes:
 				self.enqueue_task(task="Delete Transactions")
 			else:
-				self.db_set("status", "Completed")
 				self.db_set("delete_transactions_status", "Completed")
-				self.db_set("error_log", None)
-				self._clear_deletion_cache()
+				self.db_set("delete_bin_data_status", "Pending")
+				self.enqueue_task(task="Delete Bins")
 
 	def get_doctypes_to_be_ignored_list(self):
 		doctypes_to_be_ignored_list = frappe.get_all(
@@ -1046,6 +1079,7 @@ def get_doctypes_to_be_ignored():
 		"Cost Center",
 		"Cost Center Allocation",
 		"Warehouse",
+		"Bin",
 		"Budget",
 		"Party Account",
 		"Employee",
