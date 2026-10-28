@@ -32,11 +32,10 @@ class TestBin(ERPNextTestSuite):
 		self.assertEqual(bin.item_code, item_code)
 
 	def test_create_bin_finds_bin_committed_after_snapshot(self):
-		"""The loser of a concurrent insert must get the bin the winner committed after its snapshot"""
+		"""The loser of a concurrent insert must get the bin the winner committed after its snapshot,
+		or a deadlock error to retry on where innodb_snapshot_isolation rejects that locking read"""
 		if frappe.db.db_type != "mariadb":
 			self.skipTest("Postgres repeatable read does not show rows committed after the snapshot")
-
-		from frappe.database import get_db
 
 		item_code = "_Test Item"
 		warehouses_with_bin = frappe.get_all("Bin", filters={"item_code": item_code}, pluck="warehouse")
@@ -46,6 +45,16 @@ class TestBin(ERPNextTestSuite):
 			pluck="name",
 			limit=1,
 		)[0]
+		bin_name = self.commit_bin_on_other_connection(item_code, warehouse)
+
+		snapshot_isolation = frappe.db.sql("SHOW VARIABLES LIKE 'innodb_snapshot_isolation'")
+		if snapshot_isolation and snapshot_isolation[0][1] == "ON":
+			self.assertRaises(frappe.QueryDeadlockError, _create_bin, item_code, warehouse)
+		else:
+			self.assertEqual(_create_bin(item_code, warehouse).name, bin_name)
+
+	def commit_bin_on_other_connection(self, item_code, warehouse):
+		from frappe.database import get_db
 
 		other_connection = get_db(
 			socket=frappe.db.socket,
@@ -63,8 +72,7 @@ class TestBin(ERPNextTestSuite):
 		other_connection.commit()
 		self.addCleanup(other_connection.commit)
 		self.addCleanup(other_connection.delete, "Bin", {"name": bin_name})
-
-		self.assertEqual(_create_bin(item_code, warehouse).name, bin_name)
+		return bin_name
 
 	def test_gates_make_missing_bins_before_taking_any_gate(self):
 		"""Making a bin locks the Item row, so it must happen before any bin row is locked"""

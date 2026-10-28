@@ -342,7 +342,7 @@ def _create_bin(item_code, warehouse):
 		bin_obj.insert()
 	except frappe.UniqueValidationError:
 		frappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres
-		# A locking read sees the bin another transaction committed after this one's snapshot.
+		# Sees a bin committed after the snapshot, or raises a deadlock under innodb_snapshot_isolation.
 		bin_obj = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse}, for_update=True)
 
 	return bin_obj
