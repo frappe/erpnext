@@ -1086,7 +1086,9 @@ class AccountsController(TransactionBase):
 
 	def validate_line_items(self, ref_dt, ref_dn_field, ref_link_field):
 		action, role_allowed_to_override = frappe.get_cached_value(
-			"Accounts Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+			"Accounts Settings",
+			"Accounts Settings",
+			["maintain_same_rate_action", "role_to_override_stop_action"],
 		)
 
 		reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
@@ -2595,6 +2597,7 @@ class AccountsController(TransactionBase):
 
 			advance_paid = flt(advance.amount, self.precision("advance_paid"))
 			if advance.account_currency:
+				self.party_account_currency = advance.account_currency
 				frappe.db.set_value(
 					self.doctype, self.name, "party_account_currency", advance.account_currency
 				)
@@ -2606,7 +2609,7 @@ class AccountsController(TransactionBase):
 		new_status = None
 
 		PaymentRequest = frappe.qb.DocType("Payment Request")
-		paid_amount = frappe.get_value(
+		requested_paid_amount = frappe.get_value(
 			doctype="Payment Request",
 			filters={
 				"reference_doctype": self.doctype,
@@ -2616,14 +2619,35 @@ class AccountsController(TransactionBase):
 			fieldname=Sum(PaymentRequest.grand_total - PaymentRequest.outstanding_amount),
 		)
 
+		advance_paid = flt(self.get("advance_paid"))
+		if advance_paid and self.get("party_account_currency") != self.get("currency"):
+			exchange_rate = get_exchange_rate(
+				self.party_account_currency, self.company_currency, self.transaction_date
+			)
+			if not exchange_rate:
+				frappe.throw(
+					_("Unable to find exchange rate from {0} to {1} on {2}").format(
+						self.party_account_currency, self.company_currency, self.transaction_date
+					)
+				)
+			advance_paid = advance_paid * exchange_rate / self.conversion_rate
+
+		# Payment Requests can cover the same advances, so do not add the amounts.
+		# Keep their paid amount as a fallback after advances are moved to invoices.
+		paid_amount = max(advance_paid, flt(requested_paid_amount))
+
 		if not paid_amount:
 			if self.doctype in self.get_advance_payment_doctypes(payment_type="receivable"):
-				new_status = "Not Requested" if paid_amount is None else "Requested"
+				new_status = "Not Requested" if requested_paid_amount is None else "Requested"
 			elif self.doctype in self.get_advance_payment_doctypes(payment_type="payable"):
-				new_status = "Not Initiated" if paid_amount is None else "Initiated"
+				new_status = "Not Initiated" if requested_paid_amount is None else "Initiated"
 		else:
 			total_amount = self.get("rounded_total") or self.get("grand_total")
-			new_status = "Fully Paid" if paid_amount == total_amount else "Partially Paid"
+			new_status = (
+				"Fully Paid"
+				if flt(paid_amount, self.precision("grand_total")) >= total_amount
+				else "Partially Paid"
+			)
 
 		if new_status == self.advance_payment_status:
 			return
@@ -4458,6 +4482,10 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 		d.cancel()
 		d.delete()
 
+	if parent.doctype == "Sales Order" and deleted_children:
+		for d in deleted_children:
+			parent.delete_delivery_schedule_items(d.name)
+
 	if parent.doctype == "Purchase Order":
 		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
 
@@ -4849,6 +4877,10 @@ def update_child_qty_rate(
 			child_item.insert()
 		else:
 			child_item.save(ignore_permissions=True)
+			if parent_doctype == "Sales Order" and not (
+				qty_unchanged and uom_unchanged and conversion_factor_unchanged
+			):
+				parent.sync_schedule_with_item(child_item)
 
 	parent.reload()
 	if had_mapped_discount:

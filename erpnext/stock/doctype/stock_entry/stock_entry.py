@@ -430,13 +430,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue
 
 			if self.check_invalid_serial_batch_nos_for_finished_good_item(row):
+				had_selection = row.serial_no or row.batch_no or row.serial_and_batch_bundle
 				self.reset_serial_batch_on_fg_row(row)
-				frappe.msgprint(
-					_(
-						"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
-						" because the previously selected serial/batch does not belong to this Work Order."
-					).format(row.idx, frappe.bold(self.work_order))
-				)
+				if had_selection:
+					frappe.msgprint(
+						_(
+							"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
+							" because the previously selected serial/batch does not belong to this Work Order."
+						).format(row.idx, frappe.bold(self.work_order))
+					)
 
 	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1443,11 +1445,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		expected_by_name, expected_by_item = {}, defaultdict(float)
 		for source_row, qty in expected_rows:
 			if source_row.get("name"):
-				expected_by_name[source_row.name] = qty
+				expected_by_name[source_row.name] = (qty, flt(source_row.conversion_factor))
 			expected_by_item[source_row.item_code] += qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		tolerance = _qty_tolerance(precision)
+		qty_precision = frappe.get_precision("Stock Entry Detail", "qty")
 		self.validate_no_missing_components(expected_rows, precision, tolerance)
 
 		for row in self.items:
@@ -1455,9 +1458,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 				continue  # covered by validate_finished_good_consumption
 
 			if row.ste_detail and row.ste_detail in expected_by_name:
-				expected = expected_by_name[row.ste_detail]
+				expected, conversion_factor = expected_by_name[row.ste_detail]
 			elif row.item_code in expected_by_item:
-				expected = expected_by_item[row.item_code]
+				expected, conversion_factor = expected_by_item[row.item_code], 1
 			else:
 				frappe.throw(
 					_(
@@ -1467,6 +1470,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					title=_("Invalid Disassembly Item"),
 				)
 
+			# rows are populated with qty rounded in the source UOM, so expect the same rounding
+			expected = flt(expected / conversion_factor, qty_precision) * conversion_factor
 			if abs(flt(row.transfer_qty, precision) - flt(expected, precision)) > tolerance:
 				frappe.throw(
 					_(
@@ -1650,7 +1655,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 					and ifnull(s_warehouse,'')='' """.format(", ".join(["%s" * len(other_ste)]), "%s"),
 				args,
 			)[0][0]
-			if fg_qty_already_entered and fg_qty_already_entered >= qty:
+			allowance_percentage = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "overproduction_percentage_for_work_order"
+				)
+			)
+			allowed_qty = flt(qty) + (allowance_percentage / 100 * flt(qty))
+			if fg_qty_already_entered and fg_qty_already_entered >= allowed_qty:
 				frappe.throw(
 					_("Stock Entries already created for Work Order {0}: {1}").format(
 						self.work_order, ", ".join(other_ste)
@@ -3349,6 +3360,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.items = []
 
 		if self.outgoing_stock_entry and self.purpose == "Material Transfer":
+			erpnext.require_permission("Stock Entry", self.outgoing_stock_entry)
 			doc = frappe.get_doc("Stock Entry", self.outgoing_stock_entry)
 
 			if doc.per_transferred == 100:
@@ -4013,6 +4025,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_batches_to_be_consume(batches, row, qty)
 
 		if not row.batches_to_be_consume:
+			if not existing_row:
+				self.add_finished_goods(args, item)
 			return
 
 		_id = create_serial_and_batch_bundle(
