@@ -922,43 +922,37 @@ def get_linked_exchange_gain_loss_journal(referenced_dt: str, referenced_dn: str
 
 
 def cancel_common_party_journal(self):
+	"""Cancel the Journal Entry that common party accounting made for the invoice, also when the
+	setting or the Party Link has changed since."""
 	if self.doctype not in ["Sales Invoice", "Purchase Invoice"]:
 		return
 
-	if not frappe.get_single_value("Accounts Settings", "enable_common_party_accounting"):
-		return
-
-	party_link = self.get_common_party_link()
-	if not party_link:
-		return
-
-	journal_entry = frappe.db.get_value(
+	journals = frappe.get_all(
 		"Journal Entry Account",
 		filters={
 			"reference_type": self.doctype,
 			"reference_name": self.name,
 			"docstatus": 1,
 		},
-		fieldname="parent",
+		pluck="parent",
+		distinct=True,
 	)
-
-	if not journal_entry:
+	if not journals:
 		return
 
-	common_party_journal = frappe.db.get_value(
+	common_party_journals = frappe.get_all(
 		"Journal Entry",
 		filters={
-			"name": journal_entry,
-			"is_system_generated": True,
+			"name": ("in", journals),
+			"voucher_type": "Journal Entry",
+			"is_system_generated": 1,
 			"docstatus": 1,
 		},
+		pluck="name",
 	)
 
-	if not common_party_journal:
-		return
-
-	common_party_je = frappe.get_doc("Journal Entry", common_party_journal)
-	common_party_je.cancel()
+	for journal in common_party_journals:
+		frappe.get_doc("Journal Entry", journal).cancel()
 
 
 def update_accounting_ledgers_after_reference_removal(
