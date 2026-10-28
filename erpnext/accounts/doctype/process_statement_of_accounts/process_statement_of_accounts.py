@@ -104,13 +104,26 @@ class ProcessStatementOfAccounts(Document):
 		if not self.customers:
 			frappe.throw(_("Customers not selected."))
 
-		if self.enable_auto_email:
-			if self.start_date and getdate(self.start_date) >= getdate(today()):
-				if self.report == "General Ledger":
-					self.to_date = self.start_date
-					self.from_date = add_months(self.to_date, -1 * self.filter_duration)
-				else:
-					self.posting_date = self.start_date
+		if (
+			self.enable_auto_email
+			and self.start_date
+			and (
+				self.has_value_changed("start_date")
+				or self.has_value_changed("enable_auto_email")
+				or self.has_value_changed("report")
+			)
+		):
+			scheduled_date = self.start_date
+			if not self.has_value_changed("start_date") and not self.has_value_changed("enable_auto_email"):
+				scheduled_date = self.get_value_before_save(
+					"posting_date" if self.report == "General Ledger" else "to_date"
+				)
+
+			if self.report == "General Ledger":
+				self.to_date = scheduled_date
+				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+			else:
+				self.posting_date = scheduled_date
 
 	def validate_account(self):
 		if not self.account:
@@ -542,12 +555,14 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 			)
 
 		if doc.enable_auto_email and from_scheduler:
-			new_to_date = getdate(posting_date or today())
-			if doc.frequency in ("Daily", "Weekly", "Biweekly"):
-				frequency = {"Daily": 1, "Weekly": 7, "Biweekly": 14}
-				new_to_date = add_days(new_to_date, frequency[doc.frequency])
-			else:
-				new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
+			posting_date = getdate(posting_date or today())
+			new_to_date = getdate(doc.to_date if doc.report == "General Ledger" else doc.posting_date)
+			while new_to_date <= posting_date:
+				if doc.frequency in ("Daily", "Weekly", "Biweekly"):
+					frequency = {"Daily": 1, "Weekly": 7, "Biweekly": 14}
+					new_to_date = add_days(new_to_date, frequency[doc.frequency])
+				else:
+					new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
 			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
 			doc.add_comment("Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now()))
 			if doc.report == "General Ledger":
@@ -566,7 +581,7 @@ def send_auto_email():
 	for report, date_field in (("General Ledger", "to_date"), ("Accounts Receivable", "posting_date")):
 		selected = frappe.get_list(
 			"Process Statement Of Accounts",
-			filters={"enable_auto_email": 1, "report": report, date_field: today()},
+			filters={"enable_auto_email": 1, "report": report, date_field: ["<=", today()]},
 			or_filters=[["start_date", "is", "not set"], ["start_date", "<=", today()]],
 		)
 		for entry in selected:
