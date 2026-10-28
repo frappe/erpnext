@@ -379,6 +379,115 @@ class TestTaxRule(ERPNextTestSuite):
 		# Check if accounts heads and rate fetched are also fetched from tax template or not
 		self.assertGreater(len(quotation.taxes), 0)
 
+	def test_item_rule_does_not_match_party_lookup(self):
+		make_tax_rule(
+			customer="_Test Customer",
+			item_group="_Test Item Group",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			save=1,
+		)
+
+		self.assertIsNone(get_tax_template("2015-01-01", {"customer": "_Test Customer"}))
+
+	def test_address_rule_does_not_match_party_without_address(self):
+		make_tax_rule(
+			customer="_Test Customer",
+			shipping_state="Karnataka",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			save=1,
+		)
+
+		self.assertIsNone(get_tax_template("2015-01-01", {"customer": "_Test Customer"}))
+		self.assertEqual(
+			get_tax_template("2015-01-01", {"customer": "_Test Customer", "shipping_state": "Karnataka"}),
+			"_Test Sales Taxes and Charges Template - _TC",
+		)
+
+	def test_conflict_with_partly_overlapping_dates(self):
+		for existing_dates, new_dates in [
+			(("2015-04-01", "2016-03-31"), ("2015-04-01", "2015-06-30")),
+			(("2015-04-01", None), ("2015-07-01", "2015-12-31")),
+			((None, "2015-09-30"), ("2015-09-30", None)),
+		]:
+			with self.subTest(existing_dates=existing_dates, new_dates=new_dates):
+				frappe.db.delete("Tax Rule")
+				make_tax_rule(
+					customer="_Test Customer",
+					sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+					priority=1,
+					from_date=existing_dates[0],
+					to_date=existing_dates[1],
+					save=1,
+				)
+				tax_rule = make_tax_rule(
+					customer="_Test Customer",
+					sales_tax_template="_Test Sales Taxes and Charges Template 1 - _TC",
+					priority=1,
+					from_date=new_dates[0],
+					to_date=new_dates[1],
+				)
+
+				self.assertRaises(ConflictingTaxRule, tax_rule.save)
+
+	def test_disabled_template_falls_back_to_next_rule(self):
+		make_tax_rule(sales_tax_template="_Test Sales Taxes and Charges Template - _TC", save=1)
+		make_tax_rule(
+			customer="_Test Customer",
+			sales_tax_template="_Test Sales Taxes and Charges Template 1 - _TC",
+			save=1,
+		)
+		frappe.db.set_value(
+			"Sales Taxes and Charges Template",
+			"_Test Sales Taxes and Charges Template 1 - _TC",
+			"disabled",
+			1,
+		)
+
+		self.assertEqual(
+			get_tax_template("2015-01-01", {"customer": "_Test Customer"}),
+			"_Test Sales Taxes and Charges Template - _TC",
+		)
+
+	def test_template_of_another_company(self):
+		tax_rule = make_tax_rule(
+			company="_Test Company 1",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", tax_rule.insert)
+
+		# a rule with no company
+		tax_rule = make_tax_rule(
+			customer="_Test Customer",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			save=1,
+		)
+		tax_rule.db_set("company", None)
+
+		args = {"customer": "_Test Customer", "company": "_Test Company 1"}
+		self.assertIsNone(get_tax_template("2015-01-01", args))
+		args["company"] = "_Test Company"
+		self.assertEqual(get_tax_template("2015-01-01", args), "_Test Sales Taxes and Charges Template - _TC")
+
+	def test_nearer_customer_group_wins_tie(self):
+		# the parent group rule is made first, so it is the first row returned
+		make_tax_rule(
+			customer_group="All Customer Groups",
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			priority=1,
+			save=1,
+		)
+		make_tax_rule(
+			customer_group="Commercial",
+			sales_tax_template="_Test Sales Taxes and Charges Template 1 - _TC",
+			priority=1,
+			save=1,
+		)
+
+		self.assertEqual(
+			get_tax_template("2015-01-01", {"customer_group": "Commercial"}),
+			"_Test Sales Taxes and Charges Template 1 - _TC",
+		)
+
 	def make_customer_address(self):
 		return (
 			frappe.get_doc(
