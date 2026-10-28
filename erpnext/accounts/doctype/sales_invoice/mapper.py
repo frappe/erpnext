@@ -48,7 +48,11 @@ def make_delivery_note(source_name: str, target_doc: str | dict | Document | Non
 		"Sales Invoice",
 		source_name,
 		{
-			"Sales Invoice": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+			"Sales Invoice": {
+				"doctype": "Delivery Note",
+				# an invoice that updates stock already delivered its goods
+				"validation": {"docstatus": ["=", 1], "update_stock": ["=", 0]},
+			},
 			"Sales Invoice Item": {
 				"doctype": "Delivery Note Item",
 				"field_map": {
@@ -572,7 +576,8 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name: str, target_doc: str | dict | Document | None = None):
-	invoice = frappe.get_doc("Sales Invoice", source_name)
+	frappe.has_permission("Invoice Discounting", "create", throw=True)
+	invoice = frappe.get_doc("Sales Invoice", source_name, check_permission="read")
 	invoice_discounting = frappe.new_doc("Invoice Discounting")
 	invoice_discounting.company = invoice.company
 	invoice_discounting.append(
