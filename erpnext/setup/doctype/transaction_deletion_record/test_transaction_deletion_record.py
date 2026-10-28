@@ -405,6 +405,61 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 			frappe.db.exists("Dynamic Link", {"parent": address.name, "link_name": leads[0].name})
 		)
 
+	def test_deletes_documents_created_after_list_generation(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.insert()
+		tdr.generate_to_delete_list()
+		task_row = next(row for row in tdr.doctypes_to_delete if row.doctype_name == "Task")
+		self.assertEqual(task_row.document_count, 0)
+		create_task("_Test Company 7")
+		task_name = frappe.db.get_value("Task", {"company": "_Test Company 7", "subject": "Delete"}, "name")
+		tdr.process_in_single_transaction = True
+		tdr.submit()
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertFalse(frappe.db.exists("Task", task_name))
+
+	def test_late_submitted_journal_and_ledger_are_deleted_together(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = (
+			frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": "Deletion late journal",
+					"abbr": "TDLJ",
+					"country": "India",
+					"default_currency": "INR",
+					"enable_perpetual_inventory": 1,
+				}
+			)
+			.insert()
+			.name
+		)
+		warehouse = frappe.db.get_value("Warehouse", {"company": company, "warehouse_name": "Stores"})
+		make_stock_entry(item_code=make_item().name, company=company, target=warehouse, qty=1, rate=100)
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company}).insert()
+		tdr.generate_to_delete_list()
+		self.assertEqual(
+			next(row.document_count for row in tdr.doctypes_to_delete if row.doctype_name == "Journal Entry"),
+			0,
+		)
+		self.assertGreater(
+			next(row.document_count for row in tdr.doctypes_to_delete if row.doctype_name == "GL Entry"), 0
+		)
+		journal = create_deletion_journal(company)
+		self.assertEqual(
+			frappe.db.count("GL Entry", {"voucher_type": "Journal Entry", "voucher_no": journal.name}), 2
+		)
+		tdr.process_in_single_transaction = True
+		tdr.submit()
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertFalse(frappe.db.exists("Journal Entry", journal.name))
+		self.assertEqual(frappe.db.count("Journal Entry Account", {"parent": journal.name}), 0)
+		self.assertEqual(
+			frappe.db.count("GL Entry", {"voucher_type": "Journal Entry", "voucher_no": journal.name}), 0
+		)
+
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
 		company = "_Test Company 7"

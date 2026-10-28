@@ -823,7 +823,10 @@ class TransactionDeletionRecord(Document):
 			tables = self.get_all_child_doctypes()
 
 			for to_delete_item in self.doctypes_to_delete:
-				if to_delete_item.document_count > 0:
+				filters = (
+					{to_delete_item.company_field: self.company} if to_delete_item.company_field else None
+				)
+				if frappe.db.count(to_delete_item.doctype_name, filters=filters) > 0:
 					# Add parent DocType only - child tables are handled automatically
 					# by delete_child_tables() when the parent is deleted
 					# Use company_field directly from To Delete item
