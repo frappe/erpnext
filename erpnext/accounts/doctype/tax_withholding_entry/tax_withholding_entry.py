@@ -1168,19 +1168,27 @@ class TaxWithholdingController:
 
 	def _is_tax_withholding_applicable(self):
 		# Clear existing tax withholding amounts before recalculation
-		self._clear_existing_tax_amounts()
+		cleared = self._clear_existing_tax_amounts()
 
 		if not self.doc.apply_tds or self.doc.get("is_opening") == "Yes" or not self._get_category_names():
 			self.doc.tax_withholding_entries = []
+			# the totals were calculated with the amounts cleared above
+			if cleared:
+				self._remove_zero_tax_rows()
+				self.calculate_taxes_and_totals()
 			return False
 
 		return True
 
 	def _clear_existing_tax_amounts(self):
+		cleared = False
 		for row in self.doc.taxes:
 			if row.is_tax_withholding_account and row.tax_amount:
 				row.tax_amount = 0
 				row.base_tax_amount_after_discount_amount = 0
+				cleared = True
+
+		return cleared
 
 	def calculate_taxes_and_totals(self):
 		self.doc.calculate_taxes_and_totals()

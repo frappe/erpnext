@@ -327,7 +327,13 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		grand_total = self.grand_total
 		PurchaseTaxWithholding(self).on_validate()
+		if flt(self.grand_total) != flt(grand_total):
+			from erpnext.accounts.services.payment_schedule import PaymentScheduleService
+
+			# the payment schedule was set from the totals before TDS
+			PaymentScheduleService(self).set_payment_schedule()
 		self.set_percentage_received()
 
 		if self.on_hold:
