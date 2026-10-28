@@ -823,8 +823,12 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		si.reload()
 		for term in si.payment_schedule:
 			self.assertGreaterEqual(term.outstanding, 0)
-			self.assertLessEqual(term.outstanding, term.payment_amount)
 			self.assertGreaterEqual(term.paid_amount, 0)
+			self.assertGreaterEqual(term.discounted_amount, 0)
+			self.assertEqual(
+				flt(term.paid_amount + term.discounted_amount + term.outstanding, 2),
+				flt(term.payment_amount, 2),
+			)
 
 	def test_cancelling_journal_then_term_payment_keeps_schedule_rows_valid(self):
 		si = self.make_invoice_with_terms()
@@ -847,6 +851,64 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assert_schedule_rows_valid(si)
 		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
 		self.assertEqual([t.paid_amount for t in si.payment_schedule], [0, 0])
+
+	def test_cancelling_journal_then_discounted_term_payment_keeps_schedule_rows_valid(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
+
+		for term in ("_Test Term Without Discount", "_Test Term With Discount"):
+			create_payment_term(term)
+		if not frappe.db.exists("Payment Terms Template", "_Test Template With Discount On Second Term"):
+			frappe.get_doc(
+				{
+					"doctype": "Payment Terms Template",
+					"template_name": "_Test Template With Discount On Second Term",
+					"allocate_payment_based_on_payment_terms": 1,
+					"terms": [
+						{
+							"payment_term": "_Test Term Without Discount",
+							"invoice_portion": 50,
+							"due_date_based_on": "Day(s) after invoice date",
+							"credit_days": 15,
+						},
+						{
+							"payment_term": "_Test Term With Discount",
+							"invoice_portion": 50,
+							"due_date_based_on": "Day(s) after invoice date",
+							"credit_days": 45,
+							"discount_type": "Percentage",
+							"discount": 10,
+							"discount_validity_based_on": "Day(s) after invoice date",
+							"discount_validity": 30,
+						},
+					],
+				}
+			).insert()
+		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+
+		si = self.create_sales_invoice(rate=200, do_not_submit=True)
+		si.payment_terms_template = "_Test Template With Discount On Second Term"
+		si.set("payment_schedule", [])
+		si.save().submit()
+
+		je = self.create_journal_entry(self.bank, self.debit_to, 100)
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je.save().submit()
+		self.reconcile_invoice_with_journal(si)
+
+		# pays the second term with a discount
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+		self.assert_schedule_rows_valid(si)
+
+		je.reload().cancel()
+		self.assert_schedule_matches_outstanding(si)
+		self.assert_schedule_rows_valid(si)
+
+		pe.reload().cancel()
+		self.assert_schedule_rows_valid(si)
+		self.assertEqual([t.outstanding for t in si.payment_schedule], [100, 100])
+		self.assertEqual([t.discounted_amount for t in si.payment_schedule], [0, 0])
 
 	def test_journal_reconciliation_after_partial_payment_against_first_term(self):
 		si = self.make_invoice_with_terms()

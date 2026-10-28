@@ -937,13 +937,15 @@ class PaymentEntry(AccountsController):
 						"discount",
 						"outstanding",
 						"discount_type",
+						"discounted_amount",
 					],
 				)
 				for term in payment_schedule:
 					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
 					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
-					invoice_paid_amount_map[invoice_key]["payment_amount"] = term.payment_amount
+					invoice_paid_amount_map[invoice_key]["paid_amount"] = term.paid_amount
+					invoice_paid_amount_map[invoice_key]["discounted_amount"] = term.discounted_amount
 					if not (term.discount_type and term.discount):
 						continue
 
@@ -967,10 +969,11 @@ class PaymentEntry(AccountsController):
 
 			if cancel:
 				# Reconciliation can move paid amounts between terms, so reverse only what this term
-				# still has paid. sync_payment_schedules puts back the rest.
-				payment_amount = flt(invoice_paid_amount_map.get(key, {}).get("payment_amount"))
-				allocated_amount = min(allocated_amount, max(payment_amount - outstanding, 0))
-				discounted_amt = min(discounted_amt, allocated_amount)
+				# still has paid and discounted. sync_payment_schedules puts back the rest.
+				term = invoice_paid_amount_map.get(key, {})
+				discounted_amt = min(discounted_amt, flt(term.get("discounted_amount")))
+				paid = min(allocated_amount - discounted_amt, flt(term.get("paid_amount")))
+				allocated_amount = max(paid, 0) + discounted_amt
 
 			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
 			base_paid_amount_precision = get_field_precision(

@@ -2288,7 +2288,8 @@ def sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc=None):
 		if amount > 0:
 			change = min(amount, flt(term.outstanding))
 		else:
-			change = max(amount, flt(term.outstanding) - flt(term.payment_amount))
+			# restore only what was paid; a cash discount stays with the payment that gave it
+			change = max(amount, -flt(term.paid_amount))
 
 		if not change:
 			continue
