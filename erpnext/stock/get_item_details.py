@@ -8,6 +8,7 @@ from functools import WRAPPER_ASSIGNMENTS, wraps
 
 import frappe
 from frappe import _, throw
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model import child_table_fields, default_fields
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
@@ -90,7 +91,12 @@ def get_item_details(
 	overwrite_warehouse: bool = True,
 ) -> ItemDetails:
 	validate_pricing_context(ctx)
-	return _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
+	out = _get_item_details(ctx, doc, for_validate, overwrite_warehouse)
+	for warehouse in (out.warehouse, ctx.warehouse, ctx.from_warehouse):
+		if warehouse:
+			erpnext.require_user_permission("Warehouse", warehouse)
+
+	return out
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
@@ -424,10 +430,10 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 
 def update_bin_details(ctx: ItemDetailsCtx, out: ItemDetails, doc):
 	if ctx.doctype == "Material Request" and ctx.material_request_type == "Material Transfer":
-		out.update(get_bin_details(ctx.item_code, ctx.from_warehouse))
+		out.update(_get_bin_details(ctx.item_code, ctx.from_warehouse))
 
 	elif out.get("warehouse"):
-		bin_details = get_bin_details(
+		bin_details = _get_bin_details(
 			ctx.item_code, out.warehouse, ctx.company, include_child_warehouses=True
 		)
 
@@ -731,9 +737,11 @@ def get_item_warehouse_(ctx: ItemDetailsCtx, item, overwrite_warehouse, defaults
 	if overwrite_warehouse or not ctx.warehouse:
 		warehouse = (
 			ctx.set_warehouse
-			or defaults.item_defaults.get("default_warehouse")
-			or defaults.item_group_defaults.get("default_warehouse")
-			or defaults.brand_defaults.get("default_warehouse")
+			or get_accessible_warehouse(
+				defaults.item_defaults.get("default_warehouse"),
+				defaults.item_group_defaults.get("default_warehouse"),
+				defaults.brand_defaults.get("default_warehouse"),
+			)
 			or ctx.warehouse
 		)
 
@@ -741,9 +749,25 @@ def get_item_warehouse_(ctx: ItemDetailsCtx, item, overwrite_warehouse, defaults
 		warehouse = ctx.warehouse
 
 	if not warehouse and ctx.company:
-		return frappe.get_cached_value("Company", ctx.company, "default_warehouse")
+		return get_accessible_warehouse(frappe.get_cached_value("Company", ctx.company, "default_warehouse"))
 
 	return warehouse
+
+
+def get_accessible_warehouse(*warehouses: str | None) -> str | None:
+	"""First of `warehouses` the user's Warehouse User Permissions allow."""
+	warehouses = [warehouse for warehouse in warehouses if warehouse]
+	if not get_user_permissions().get("Warehouse"):
+		return next(iter(warehouses), None)
+
+	return next(
+		(
+			warehouse
+			for warehouse in warehouses
+			if erpnext._is_within_user_permissions("Warehouse", warehouse)
+		),
+		None,
+	)
 
 
 def update_barcode_value(out):
@@ -1617,9 +1641,9 @@ def get_pos_profile_item_details_(ctx: ItemDetailsCtx, company, pos_profile=None
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(ctx.item_code, res.warehouse, include_child_warehouses=True).get(
-				"actual_qty"
-			)
+			res.actual_qty = _get_bin_details(
+				ctx.item_code, res.warehouse, include_child_warehouses=True
+			).get("actual_qty")
 
 	return res
 
@@ -1700,10 +1724,11 @@ def get_conversion_factor(item_code, uom):
 
 
 @frappe.whitelist()
-def get_projected_qty(item_code, warehouse):
+def get_projected_qty(item_code: str, warehouse: str):
 	# record-level read on the item, as get_item_details() in this file already does. Nothing in the
 	# tree calls this, so no caller's roles constrain the choice.
 	frappe.has_permission("Item", doc=item_code, throw=True)
+	erpnext.require_user_permission("Warehouse", warehouse)
 
 	return {
 		"projected_qty": frappe.db.get_value(
@@ -1713,10 +1738,21 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
-	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
+def get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
+	# `select`, not `read`: the selling/buying rows reach this with no Item read row
 	frappe.has_permission("Item", ptype="select", throw=True)
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
 
+	return _get_bin_details(item_code, warehouse, company, include_child_warehouses)
+
+
+def _get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
+	# no guard here: internal callers read the warehouse already on the document
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1757,9 +1793,10 @@ def get_company_total_stock(item_code, company):
 
 
 @frappe.whitelist()
-def get_batch_qty(batch_no, warehouse, item_code):
+def get_batch_qty(batch_no: str, warehouse: str, item_code: str):
 	from erpnext.stock.doctype.batch import batch
 
+	erpnext.require_user_permission("Warehouse", warehouse)
 	if batch_no:
 		return {"actual_batch_qty": batch.get_batch_qty(batch_no, warehouse)}
 
@@ -1932,7 +1969,7 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 
 	item = get_item_defaults(item_code, company)
 	if item.get("is_stock_item"):
-		warehouse = warehouse or get_default_warehouse(item_code, company)
+		warehouse = warehouse or get_accessible_warehouse(get_default_warehouse(item_code, company))
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
 		) or {"valuation_rate": item.get("valuation_rate") or 0}
