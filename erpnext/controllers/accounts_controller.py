@@ -1150,7 +1150,8 @@ class AccountsController(TransactionBase):
 
 	@frappe.whitelist()
 	def apply_shipping_rule(self):
-		if self.shipping_rule:
+		# A return keeps the negated shipping row of the original document
+		if self.shipping_rule and not self.get("is_return"):
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
 			shipping_rule.apply(self)
 			self.calculate_taxes_and_totals()

@@ -470,15 +470,47 @@ class calculate_taxes_and_totals:
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 	def calculate_shipping_charges(self):
-		# Do not apply shipping rule for POS
-		if self.doc.get("is_pos"):
+		# Do not apply shipping rule for POS.
+		# A return keeps the negated shipping row of the original document.
+		if self.doc.get("is_pos") or self.doc.get("is_return"):
 			return
 
-		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
+		if not hasattr(self.doc, "shipping_rule"):
+			return
+
+		removed = self.remove_previous_shipping_charge()
+
+		if self.doc.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
+			self.validate_shipping_rule_enabled(shipping_rule)
 			shipping_rule.apply(self.doc)
 
+		if removed or self.doc.shipping_rule:
 			self._calculate()
+
+	def remove_previous_shipping_charge(self):
+		"""Remove the row of the saved rule when the rule was changed or cleared"""
+		previous_rule = self.get_previous_shipping_rule()
+		if not previous_rule or previous_rule == self.doc.shipping_rule:
+			return False
+
+		return frappe.get_cached_doc("Shipping Rule", previous_rule).remove_from_tax_table(self.doc)
+
+	def validate_shipping_rule_enabled(self, shipping_rule):
+		if not shipping_rule.disabled:
+			return
+
+		# Check only a rule set on insert or changed on save, so that mapping a document and
+		# saving documents made before the rule was disabled still work
+		is_new_rule = (self.doc.flags.in_insert and not self.doc.get("amended_from")) or (
+			self.doc.get_doc_before_save() and self.get_previous_shipping_rule() != shipping_rule.name
+		)
+		if is_new_rule:
+			frappe.throw(_("Shipping Rule {0} is disabled").format(frappe.bold(shipping_rule.name)))
+
+	def get_previous_shipping_rule(self):
+		previous_doc = self.doc.get_doc_before_save()
+		return previous_doc.get("shipping_rule") if previous_doc else None
 
 	def calculate_taxes(self):
 		# reset value from earlier calculations

@@ -3,12 +3,16 @@
 
 import frappe
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
 	FromGreaterThanToError,
 	ManyBlankToValuesError,
 	OverlappingConditionError,
 )
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.tests.utils import ERPNextTestSuite
+
+SHIPPING_ACCOUNT = "_Test Account Shipping Charges - _TC"
 
 
 class TestShippingRule(ERPNextTestSuite):
@@ -73,6 +77,99 @@ class TestShippingRule(ERPNextTestSuite):
 			shipping_rule.get("conditions")[1].from_value = range_b[0]
 			shipping_rule.get("conditions")[1].to_value = range_b[1]
 			self.assertRaises(OverlappingConditionError, shipping_rule.insert)
+
+	def test_return_reverses_shipping_charge(self):
+		shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule For Return")
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=1)
+		si.shipping_rule = shipping_rule.name
+		si.insert()
+		si.submit()
+		self.assertEqual(get_shipping_amounts(si), [200])
+
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.save()
+
+		self.assertEqual(get_shipping_amounts(credit_note), [-200])
+		self.assertEqual(credit_note.grand_total, -si.grand_total)
+
+	def test_open_ended_condition_applies_from_its_from_value(self):
+		shipping_rule = frappe.get_doc(
+			{
+				"doctype": "Shipping Rule",
+				"label": "_Test Shipping Rule Open Ended",
+				"shipping_rule_type": "Selling",
+				"company": "_Test Company",
+				"account": SHIPPING_ACCOUNT,
+				"cost_center": "_Test Cost Center - _TC",
+				"calculate_based_on": "Net Total",
+				"conditions": [
+					{"from_value": 1000, "to_value": 0, "shipping_amount": 20},
+					{"from_value": 0, "to_value": 999.99, "shipping_amount": 100},
+				],
+			}
+		).insert()
+
+		self.assertEqual([d.from_value for d in shipping_rule.conditions], [0, 1000])
+		self.assertEqual(shipping_rule.get_shipping_amount_from_rules(500), 100)
+		self.assertEqual(shipping_rule.get_shipping_amount_from_rules(1500), 20)
+
+	def test_changed_or_cleared_rule_removes_old_shipping_row(self):
+		rule_a = create_shipping_rule("Selling", "_Test Shipping Rule Change A")
+		rule_b = create_fixed_shipping_rule("_Test Shipping Rule Change B", "_Test Cost Center 2 - _TC")
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=1)
+		si.shipping_rule = rule_a.name
+		si.insert()
+		self.assertEqual(get_shipping_amounts(si), [200])
+
+		si.shipping_rule = rule_b.name
+		si.save()
+		shipping_rows = si.get("taxes", {"account_head": SHIPPING_ACCOUNT})
+		self.assertEqual(
+			[(row.cost_center, row.tax_amount) for row in shipping_rows], [("_Test Cost Center 2 - _TC", 40)]
+		)
+
+		si.shipping_rule = ""
+		si.save()
+		self.assertEqual(get_shipping_amounts(si), [])
+
+	def test_disabled_rule_is_not_applied_to_new_document(self):
+		shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule Disabled")
+		saved_si = create_sales_invoice(qty=5, rate=100, do_not_save=1)
+		saved_si.shipping_rule = shipping_rule.name
+		saved_si.insert()
+
+		shipping_rule.disabled = 1
+		shipping_rule.save()
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=1)
+		si.shipping_rule = shipping_rule.name
+		# totals of an unsaved document, as when it is mapped from an order, are still calculated
+		si.calculate_taxes_and_totals()
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", si.insert)
+
+		# A document saved before the rule was disabled can still be saved
+		saved_si.reload()
+		saved_si.save()
+		self.assertEqual(get_shipping_amounts(saved_si), [200])
+
+
+def get_shipping_amounts(doc):
+	return [row.tax_amount for row in doc.get("taxes", {"account_head": SHIPPING_ACCOUNT})]
+
+
+def create_fixed_shipping_rule(label, cost_center):
+	return frappe.get_doc(
+		{
+			"doctype": "Shipping Rule",
+			"label": label,
+			"shipping_rule_type": "Selling",
+			"company": "_Test Company",
+			"account": SHIPPING_ACCOUNT,
+			"cost_center": cost_center,
+			"calculate_based_on": "Fixed",
+			"shipping_amount": 40,
+		}
+	).insert()
 
 
 def create_shipping_rule(shipping_rule_type, shipping_rule_name):
