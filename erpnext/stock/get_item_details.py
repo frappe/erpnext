@@ -1724,7 +1724,7 @@ def get_conversion_factor(item_code, uom):
 
 
 @frappe.whitelist()
-def get_projected_qty(item_code, warehouse):
+def get_projected_qty(item_code: str, warehouse: str):
 	# record-level read on the item, as get_item_details() in this file already does. Nothing in the
 	# tree calls this, so no caller's roles constrain the choice.
 	frappe.has_permission("Item", doc=item_code, throw=True)
@@ -1738,7 +1738,9 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
+def get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
 	# `select`, not `read`: the selling/buying rows reach this with no Item read row
 	frappe.has_permission("Item", ptype="select", throw=True)
 	if warehouse:
@@ -1791,7 +1793,7 @@ def get_company_total_stock(item_code, company):
 
 
 @frappe.whitelist()
-def get_batch_qty(batch_no, warehouse, item_code):
+def get_batch_qty(batch_no: str, warehouse: str, item_code: str):
 	from erpnext.stock.doctype.batch import batch
 
 	erpnext.require_user_permission("Warehouse", warehouse)
