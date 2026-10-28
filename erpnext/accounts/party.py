@@ -25,6 +25,7 @@ from frappe.utils import (
 
 import erpnext
 from erpnext import get_company_currency
+from erpnext.accounts.doctype.tax_category.tax_category import get_enabled_tax_category
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 from erpnext.stock.doctype.price_list.price_list import is_price_list_enabled
@@ -195,7 +196,9 @@ def _get_party_details(
 		]
 
 	if not party_details.get("tax_category") and pos_profile:
-		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
+		party_details["tax_category"] = get_enabled_tax_category(
+			frappe.get_value("POS Profile", pos_profile, "tax_category")
+		)
 
 	return party_details
 
@@ -822,12 +825,13 @@ def get_address_tax_category(
 	addr_tax_category_from = frappe.get_single_value(
 		"Accounts Settings", "determine_address_tax_category_from"
 	)
-	if addr_tax_category_from == "Shipping Address":
-		if shipping_address:
-			tax_category = frappe.db.get_value("Address", shipping_address, "tax_category") or tax_category
-	else:
-		if billing_address:
-			tax_category = frappe.db.get_value("Address", billing_address, "tax_category") or tax_category
+	address = shipping_address if addr_tax_category_from == "Shipping Address" else billing_address
+
+	tax_category = get_enabled_tax_category(tax_category)
+	if address:
+		tax_category = (
+			get_enabled_tax_category(frappe.db.get_value("Address", address, "tax_category")) or tax_category
+		)
 
 	return cstr(tax_category)
 
