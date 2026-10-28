@@ -7,6 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import comma_and, create_batch, flt, get_link_to_form
 from frappe.utils.background_jobs import get_job, is_job_enqueued
 from frappe.utils.caching import request_cache
@@ -775,7 +776,7 @@ class TransactionDeletionRecord(Document):
 		self._clear_deletion_cache()
 
 	def delete_lead_addresses(self):
-		"""Delete addresses to which leads are linked"""
+		"""Remove lead-only addresses and contacts while preserving shared records."""
 		self.validate_doc_status()
 		if self.delete_leads_and_addresses_status == "Pending":
 			if not self._is_any_doctype_in_deletion_list(["Lead"]):
@@ -784,41 +785,58 @@ class TransactionDeletionRecord(Document):
 				return
 
 			leads = frappe.db.get_all("Lead", filters={"company": self.company}, pluck="name")
-			addresses = []
 			if leads:
-				addresses = frappe.db.get_all(
-					"Dynamic Link",
-					filters={"link_doctype": "Lead", "link_name": ("in", leads), "parenttype": "Address"},
-					pluck="parent",
-				)
-				if addresses:
-					address = qb.DocType("Address")
-					dynamic_link = qb.DocType("Dynamic Link")
-					other_links = (
-						qb.from_(dynamic_link)
-						.select(dynamic_link.parent)
-						.where(
-							(dynamic_link.parenttype == "Address")
-							& dynamic_link.parent.isin(addresses)
-							& ((dynamic_link.link_doctype != "Lead") | dynamic_link.link_name.notin(leads))
-						)
-					)
-					qb.from_(address).delete().where(
-						address.name.isin(addresses) & address.name.notin(other_links)
-					).run()
-
-					dynamic_link = qb.DocType("Dynamic Link")
-					qb.from_(dynamic_link).delete().where(
-						(dynamic_link.link_doctype == "Lead")
-						& (dynamic_link.parenttype == "Address")
-						& (dynamic_link.link_name.isin(leads))
-					).run()
+				for doctype in ("Address", "Contact"):
+					self.delete_lead_linked_records(doctype, leads)
 
 				customer = qb.DocType("Customer")
 				qb.update(customer).set(customer.lead_name, None).where(customer.lead_name.isin(leads)).run()
 
 			self.db_set("delete_leads_and_addresses_status", "Completed")
 		self.enqueue_task(task="Reset Company Values")
+
+	def delete_lead_linked_records(self, doctype, leads):
+		linked_records = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": doctype, "link_doctype": "Lead", "link_name": ["in", leads]},
+			pluck="parent",
+		)
+		if not linked_records:
+			return
+
+		dynamic_link = qb.DocType("Dynamic Link")
+		other_links = (
+			qb.from_(dynamic_link)
+			.select(dynamic_link.parent)
+			.where(
+				(dynamic_link.parenttype == doctype)
+				& dynamic_link.parent.isin(linked_records)
+				& ((dynamic_link.link_doctype != "Lead") | dynamic_link.link_name.notin(leads))
+			)
+		)
+		parent = qb.DocType(doctype)
+		exclusive_records = (
+			qb.from_(parent)
+			.select(parent.name)
+			.where(parent.name.isin(linked_records) & parent.name.notin(other_links))
+			.run(pluck=True)
+		)
+		if exclusive_records:
+			self.delete_version_log(doctype, exclusive_records)
+			self.delete_communications(doctype, exclusive_records)
+			self.delete_comments(doctype, exclusive_records)
+			self.delete_document_references(doctype, exclusive_records)
+			self.unlink_attachments(doctype, exclusive_records)
+			self.delete_child_tables(doctype, exclusive_records)
+			frappe.db.delete(doctype, {"name": ["in", exclusive_records]})
+		frappe.db.delete(
+			"Dynamic Link",
+			{
+				"parenttype": doctype,
+				"link_doctype": "Lead",
+				"link_name": ["in", leads],
+			},
+		)
 
 	def reset_company_values(self):
 		self.validate_doc_status()
@@ -838,8 +856,13 @@ class TransactionDeletionRecord(Document):
 			frappe.db.set_value(
 				"Company",
 				self.company,
-				{"total_monthly_sales": 0, "sales_monthly_history": None},
+				{
+					"total_monthly_sales": 0,
+					"sales_monthly_history": None,
+					"transactions_annual_history": None,
+				},
 			)
+			frappe.clear_document_cache("Company", self.company)
 			self.db_set("reset_company_default_values_status", "Completed")
 		self.enqueue_task(task="Clear Notifications")
 
@@ -926,15 +949,18 @@ class TransactionDeletionRecord(Document):
 							)
 
 						reference_doc_names = [r.name for r in reference_docs]
+						batch_nos = self.get_affected_batches(docfield.doctype_name, reference_doc_names)
 
 						self.delete_version_log(docfield.doctype_name, reference_doc_names)
 						self.delete_communications(docfield.doctype_name, reference_doc_names)
 						self.delete_comments(docfield.doctype_name, reference_doc_names)
+						self.delete_document_references(docfield.doctype_name, reference_doc_names)
 						self.unlink_attachments(docfield.doctype_name, reference_doc_names)
 						self.delete_child_tables(docfield.doctype_name, reference_doc_names)
 						self.delete_docs_linked_with_specified_company(
 							docfield.doctype_name, reference_doc_names
 						)
+						self.recalculate_batch_quantities(batch_nos)
 						processed = int(docfield.no_of_docs) + len(reference_doc_names)
 						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
 					else:
@@ -1023,10 +1049,80 @@ class TransactionDeletionRecord(Document):
 		child_tables = self._get_child_tables(doctype)
 
 		for table in child_tables:
-			frappe.db.delete(table, {"parent": ["in", reference_doc_names]})
+			frappe.db.delete(table, {"parenttype": doctype, "parent": ["in", reference_doc_names]})
 
 	def delete_docs_linked_with_specified_company(self, doctype, reference_doc_names):
 		frappe.db.delete(doctype, {"name": ("in", reference_doc_names)})
+
+	def get_affected_batches(self, doctype, docnames):
+		batches = set()
+		if doctype == "Stock Ledger Entry":
+			entries = frappe.get_all(
+				doctype, filters={"name": ["in", docnames]}, fields=["batch_no", "serial_and_batch_bundle"]
+			)
+			batches.update(row.batch_no for row in entries if row.batch_no)
+			bundles = [row.serial_and_batch_bundle for row in entries if row.serial_and_batch_bundle]
+		elif doctype == "Serial and Batch Bundle":
+			bundles = docnames
+		else:
+			return batches
+		if bundles:
+			batches.update(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={
+						"parenttype": "Serial and Batch Bundle",
+						"parent": ["in", bundles],
+						"batch_no": ["is", "set"],
+					},
+					pluck="batch_no",
+				)
+			)
+		return batches
+
+	def recalculate_batch_quantities(self, batch_nos):
+		if not batch_nos:
+			return
+		sle = qb.DocType("Stock Ledger Entry")
+		entry = qb.DocType("Serial and Batch Entry")
+		legacy_quantities = (
+			qb.from_(sle)
+			.select(sle.batch_no, Sum(sle.actual_qty).as_("qty"))
+			.where(
+				(sle.is_cancelled == 0)
+				& sle.batch_no.isin(batch_nos)
+				& (sle.serial_and_batch_bundle.isnull() | (sle.serial_and_batch_bundle == ""))
+			)
+			.groupby(sle.batch_no)
+		)
+		bundle_quantities = (
+			qb.from_(entry)
+			.join(sle)
+			.on(entry.parent == sle.serial_and_batch_bundle)
+			.select(entry.batch_no, Sum(entry.qty).as_("qty"))
+			.where(
+				(sle.is_cancelled == 0)
+				& (entry.parenttype == "Serial and Batch Bundle")
+				& entry.batch_no.isin(batch_nos)
+			)
+			.groupby(entry.batch_no)
+		)
+		quantities = dict.fromkeys(batch_nos, 0)
+		for query in (legacy_quantities, bundle_quantities):
+			for row in query.run(as_dict=True):
+				quantities[row.batch_no] += row.qty
+		for batch_no, qty in quantities.items():
+			frappe.db.set_value("Batch", batch_no, "batch_qty", qty, update_modified=False)
+
+	def delete_document_references(self, doctype, docnames):
+		for reference_doctype, doctype_field, name_field in (
+			("ToDo", "reference_type", "reference_name"),
+			("DocShare", "share_doctype", "share_name"),
+			("Tag Link", "document_type", "document_name"),
+			("Document Follow", "ref_doctype", "ref_docname"),
+			("Notification Log", "document_type", "document_name"),
+		):
+			frappe.db.delete(reference_doctype, {doctype_field: doctype, name_field: ["in", docnames]})
 
 	def delete_version_log(self, doctype, docnames):
 		versions = qb.DocType("Version")
@@ -1064,12 +1160,21 @@ class TransactionDeletionRecord(Document):
 		if not file_names:
 			return
 
+		folder = frappe.get_doc(
+			{"doctype": "File", "file_name": "Transaction Deletion Review", "is_folder": 1, "folder": "Home"}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 		file = qb.DocType("File")
 
 		for batch in create_batch(file_names, self.batch_size):
-			qb.update(file).set(file.attached_to_doctype, None).set(file.attached_to_name, None).where(
-				file.name.isin(batch)
-			).run()
+			qb.update(file).set(file.attached_to_doctype, None).set(file.attached_to_name, None).set(
+				file.attached_to_field, None
+			).set(file.folder, folder.name).where(file.name.isin(batch)).run()
+		self.add_comment(
+			"Info",
+			_("Detached attachments are retained in {0} for review.").format(
+				get_link_to_form("File", folder.name)
+			),
+		)
 
 
 @frappe.whitelist()

@@ -1,4 +1,3 @@
-from unittest.mock import patch
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
@@ -162,6 +161,219 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 			),
 			payment_entries,
 		)
+
+	def test_deletion_removes_ancillary_references_only_for_deleted_documents(self):
+		from frappe.desk.doctype.tag.tag import add_tag
+
+		tasks = [
+			frappe.get_doc({"doctype": "Task", "company": company, "subject": "Deletion references"}).insert()
+			for company in ("_Test Company 7", "_Test Company")
+		]
+		references = []
+		for task in tasks:
+			rows = [
+				frappe.get_doc(
+					{
+						"doctype": "ToDo",
+						"description": "Follow up",
+						"allocated_to": "Administrator",
+						"reference_type": "Task",
+						"reference_name": task.name,
+					}
+				).insert(),
+				frappe.get_doc(
+					{
+						"doctype": "Document Follow",
+						"ref_doctype": "Task",
+						"ref_docname": task.name,
+						"user": "Administrator",
+					}
+				).insert(),
+				frappe.get_doc(
+					{
+						"doctype": "Notification Log",
+						"subject": "Task notification",
+						"for_user": "Administrator",
+						"type": "Alert",
+						"document_type": "Task",
+						"document_name": task.name,
+					}
+				).insert(),
+			]
+			frappe.share.add("Task", task.name, "Guest", read=1, notify=0)
+			add_tag("Deletion references", "Task", task.name)
+			references.append(rows)
+
+		delete_selected_doctypes("_Test Company 7", ["Task"])
+		for index, task in enumerate(tasks):
+			for row in references[index]:
+				self.assertEqual(bool(frappe.db.exists(row.doctype, row.name)), bool(index))
+			for doctype, filters in (
+				("DocShare", {"share_doctype": "Task", "share_name": task.name}),
+				("Tag Link", {"document_type": "Task", "document_name": task.name}),
+			):
+				self.assertEqual(bool(frappe.db.exists(doctype, filters)), bool(index))
+
+	def test_detached_attachments_have_a_review_folder_and_shared_files_survive(self):
+		task = frappe.get_doc(
+			{"doctype": "Task", "company": "_Test Company 7", "subject": "File cleanup"}
+		).insert()
+		other = frappe.get_doc(
+			{"doctype": "Task", "company": "_Test Company", "subject": "Shared file"}
+		).insert()
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "deletion-review.txt",
+				"content": b"deletion review",
+				"is_private": 1,
+				"attached_to_doctype": "Task",
+				"attached_to_name": task.name,
+			}
+		).insert()
+		shared_file = file.create_attachment_copy("Task", other.name)
+		tdr = delete_selected_doctypes("_Test Company 7", ["Task"])
+		file.reload()
+		self.assertFalse(file.attached_to_name)
+		self.assertEqual(file.folder, "Home/Transaction Deletion Review")
+		self.assertIn(file.get_content(), ("deletion review", b"deletion review"))
+		shared_file.reload()
+		self.assertEqual(shared_file.attached_to_name, other.name)
+		self.assertIn(shared_file.get_content(), ("deletion review", b"deletion review"))
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment",
+				{"reference_doctype": tdr.doctype, "reference_name": tdr.name, "comment_type": "Info"},
+			)
+		)
+
+	def test_lead_contacts_preserve_other_company_links(self):
+		leads = [
+			frappe.get_doc({"doctype": "Lead", "first_name": "Deletion contact", "company": company}).insert()
+			for company in ("_Test Company 7", "_Test Company")
+		]
+		shared = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Shared deletion contact",
+				"links": [{"link_doctype": "Lead", "link_name": lead.name} for lead in leads],
+			}
+		).insert()
+		exclusive = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Exclusive deletion contact",
+				"email_ids": [{"email_id": "deletion@example.com"}],
+				"links": [{"link_doctype": "Lead", "link_name": leads[0].name}],
+			}
+		).insert()
+		delete_selected_doctypes("_Test Company 7", ["Lead"])
+		self.assertFalse(frappe.db.exists("Contact", exclusive.name))
+		self.assertFalse(frappe.db.exists("Contact Email", {"parent": exclusive.name}))
+		shared.reload()
+		self.assertEqual(
+			[(row.link_doctype, row.link_name) for row in shared.links], [("Lead", leads[1].name)]
+		)
+
+	def test_deletion_resets_company_transaction_history(self):
+		frappe.db.set_value(
+			"Company",
+			"_Test Company 7",
+			{
+				"transactions_annual_history": '{"123": 1}',
+				"total_monthly_sales": 100,
+				"sales_monthly_history": '{"123": 100}',
+			},
+		)
+		frappe.clear_document_cache("Company", "_Test Company 7")
+		self.assertTrue(frappe.get_cached_value("Company", "_Test Company 7", "transactions_annual_history"))
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append(
+			"doctypes_to_delete",
+			{"doctype_name": "Sales Invoice", "company_field": "company", "document_count": 0},
+		)
+		tdr.insert()
+		tdr.process_in_single_transaction = True
+		tdr.submit()
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertEqual(tdr.db_get("reset_company_default_values_status"), "Completed")
+		self.assertFalse(frappe.get_cached_value("Company", "_Test Company 7", "transactions_annual_history"))
+		self.assertFalse(frappe.db.get_value("Company", "_Test Company 7", "sales_monthly_history"))
+
+	def test_address_cleanup_does_not_remove_same_named_contact_links(self):
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "first_name": "Delete address", "company": "_Test Company 7"}
+		).insert()
+		other_lead = frappe.get_doc(
+			{"doctype": "Lead", "first_name": "Keep contact", "company": "_Test Company"}
+		).insert()
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Colliding contact",
+				"links": [{"link_doctype": "Lead", "link_name": other_lead.name}],
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Colliding address",
+				"address_line1": "Street",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Lead", "link_name": lead.name}],
+			}
+		).insert(set_name=contact.name)
+		delete_selected_doctypes("_Test Company 7", ["Lead"])
+		contact.reload()
+		self.assertEqual(
+			[(row.link_doctype, row.link_name) for row in contact.links], [("Lead", other_lead.name)]
+		)
+
+	def test_deletion_recalculates_shared_batch_quantity(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 0}).name
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": item}
+		).insert()
+		warehouse = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company 7", "warehouse_name": "Stores"}
+		)
+		make_stock_entry(
+			item_code=item, company="_Test Company 7", target=warehouse, qty=5, rate=100, batch_no=batch.name
+		)
+		other_receipt = make_stock_entry(
+			item_code=item, target="_Test Warehouse - _TC", qty=7, rate=100, batch_no=batch.name
+		)
+		self.assertEqual(batch.db_get("batch_qty"), 12)
+		tdr = create_and_submit_transaction_deletion_doc("_Test Company 7")
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertEqual(batch.db_get("batch_qty"), 7)
+		self.assertTrue(frappe.db.exists("Stock Entry", other_receipt.name))
+
+	def test_partial_ledger_deletion_recalculates_disabled_shared_batch(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 0}).name
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "batch_id": frappe.generate_hash(length=10), "item": item}
+		).insert()
+		warehouse = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company 7", "warehouse_name": "Stores"}
+		)
+		make_stock_entry(
+			item_code=item, company="_Test Company 7", target=warehouse, qty=5, rate=100, batch_no=batch.name
+		)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=7, rate=100, batch_no=batch.name)
+		batch.reload()
+		batch.disabled = 1
+		batch.save()
+		tdr = delete_selected_doctypes("_Test Company 7", ["Stock Ledger Entry"])
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertEqual(batch.db_get("batch_qty"), 7)
 
 	def test_rejects_secondary_company_field_for_owned_documents(self):
 		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
@@ -1169,6 +1381,17 @@ def create_task(company):
 	task = frappe.get_doc({"doctype": "Task", "company": company, "subject": "Delete"})
 	task.insert()
 
+
+def delete_selected_doctypes(company, doctypes):
+	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
+	for doctype in doctypes:
+		tdr.append("doctypes_to_delete", {"doctype_name": doctype, "company_field": "company"})
+	tdr.insert()
+	tdr.process_in_single_transaction = True
+	tdr.submit()
+	return tdr
+
+
 def create_deletion_journal(company):
 	abbr, cost_center = frappe.get_cached_value("Company", company, ["abbr", "cost_center"])
 	return (
@@ -1194,14 +1417,3 @@ def create_deletion_journal(company):
 		.insert()
 		.submit()
 	)
-
-
-
-def delete_selected_doctypes(company, doctypes):
-	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
-	for doctype in doctypes:
-		tdr.append("doctypes_to_delete", {"doctype_name": doctype, "company_field": "company"})
-	tdr.insert()
-	tdr.process_in_single_transaction = True
-	tdr.submit()
-	return tdr
