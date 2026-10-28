@@ -1863,6 +1863,9 @@ def _apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document |
 		for item in item_list:
 			ctx_copy = frappe._dict(ctx.copy())
 			ctx_copy.update(item)
+			# a row must not replace the transaction type the context was normalised to,
+			# the Pricing Rule query uses it as a column name
+			ctx_copy.transaction_type = ctx.transaction_type
 			item_details = apply_price_list_on_item(ctx_copy, doc=doc)
 			children.append(item_details)
 

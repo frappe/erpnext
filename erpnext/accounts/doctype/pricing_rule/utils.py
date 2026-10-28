@@ -107,6 +107,10 @@ def _get_pricing_rules(apply_on, args, values):
 	if not args.get(apply_on_field):
 		return []
 
+	# interpolated into the query below as a column name
+	if args.transaction_type not in ("buying", "selling"):
+		frappe.throw(_("Invalid Transaction Type"))
+
 	child_doc = f"`tabPricing Rule {apply_on}`"
 
 	conditions = item_variant_condition = item_conditions = ""
