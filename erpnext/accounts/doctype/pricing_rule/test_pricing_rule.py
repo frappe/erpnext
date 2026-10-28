@@ -651,6 +651,59 @@ class TestPricingRule(ERPNextTestSuite):
 
 		self.assertTrue(details)
 
+	def test_condition_filters_item_rule_before_group_rule_selection(self):
+		group = frappe.get_doc(doctype="Item Group", item_group_name="_Test Conditional Pricing Group")
+		group.insert()
+		item = make_item("_Test Conditional Pricing Item", {"item_group": group.name, "is_stock_item": 0})
+		group_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Conditional Group Rule",
+				"company": "_Test Company",
+				"selling": 1,
+				"apply_on": "Item Group",
+				"item_groups": [{"item_group": group.name}],
+				"currency": "INR",
+				"price_or_product_discount": "Price",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 10,
+				"apply_multiple_pricing_rules": 1,
+				"has_priority": 1,
+				"priority": 3,
+			}
+		).insert()
+		item_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Conditional Item Rule",
+				"company": "_Test Company",
+				"selling": 1,
+				"apply_on": "Item Code",
+				"items": [{"item_code": item.name}],
+				"currency": "INR",
+				"price_or_product_discount": "Price",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 2,
+				"condition": "customer == '_Test Customer 1'",
+			}
+		).insert()
+
+		order = make_sales_order(
+			item_code=item.name, customer="_Test Customer", price_list_rate=100, do_not_submit=True
+		)
+		self.assertEqual(order.items[0].rate, 90)
+		self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [group_rule.name])
+		order.items[0].qty = 2
+		order.save()
+		self.assertEqual(order.items[0].rate, 90)
+		self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [group_rule.name])
+
+		order = make_sales_order(
+			item_code=item.name, customer="_Test Customer 1", price_list_rate=100, do_not_submit=True
+		)
+		self.assertEqual(order.items[0].rate, 98)
+		self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [item_rule.name])
+
 	def test_pricing_rule_for_condition(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
 
