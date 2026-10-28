@@ -5,7 +5,7 @@ import copy
 from datetime import timedelta
 
 import frappe
-from frappe import qb
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import add_days, flt, get_datetime
@@ -39,8 +39,28 @@ class ProcessPeriodClosingVoucher(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_parent_pcv()
+		if frappe.db.exists(
+			self.doctype,
+			{"parent_pcv": self.parent_pcv, "docstatus": ["!=", 2], "name": ["!=", self.name]},
+		):
+			frappe.throw(_("A Process Period Closing Voucher already exists for {0}").format(self.parent_pcv))
+
 		self.status = "Queued"
 		self.populate_processing_tables()
+
+	def validate_parent_pcv(self):
+		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
+		if (
+			pcv.gle_processing_status == "Completed"
+			or frappe.db.exists(
+				"GL Entry", {"voucher_type": pcv.doctype, "voucher_no": pcv.name, "is_cancelled": 0}
+			)
+			or frappe.db.exists("Account Closing Balance", {"period_closing_voucher": pcv.name})
+		):
+			frappe.throw(_("Period Closing Voucher {0} has already been processed").format(pcv.name))
+
+		return pcv
 
 	def populate_processing_tables(self):
 		self.generate_pcv_dates()
@@ -136,6 +156,7 @@ def start_pcv_processing(docname: str):
 	# learns the document's status from whether this returns or throws
 	frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 
+	frappe.get_doc("Process Period Closing Voucher", docname).validate_parent_pcv()
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
 		initialize_parallel_threads(docname)
 
@@ -438,6 +459,8 @@ def get_closing_account_closing_entry(closing_account_gle, pcv):
 
 
 def summarize_and_post_ledger_entries(docname):
+	pcv = frappe.get_doc("Process Period Closing Voucher", docname).validate_parent_pcv()
+
 	# P&L accounts
 	pl_accounts_reverse_gle, closing_account_gle = get_gl_entries(docname)
 	gl_entries = pl_accounts_reverse_gle + closing_account_gle
@@ -445,9 +468,6 @@ def summarize_and_post_ledger_entries(docname):
 
 	if gl_entries:
 		make_gl_entries(gl_entries, merge_entries=False)
-
-	pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
-	pcv = frappe.get_doc("Period Closing Voucher", pcv_name)
 
 	# Balance sheet accounts
 	bs_dimension_wise_acc_balance = calculate_balance_sheet_balance(docname)
@@ -581,6 +601,7 @@ def process_individual_date(docname: str, row_name, date, report_type, parentfie
 	).where(
 		(gle.company.eq(company))
 		& (gle.is_cancelled.eq(0))
+		& (gle.voucher_type != "Period Closing Voucher")
 		& (gle.posting_date.eq(date))
 		& (gle.account.isin(accounts))
 	)
