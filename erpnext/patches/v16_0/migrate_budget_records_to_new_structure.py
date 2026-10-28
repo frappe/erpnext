@@ -50,14 +50,14 @@ def migrate_single_budget(budget_name):
 
 	frappe.db.delete("Budget Account", filters={"parent": budget_doc.name})
 
-	percentage_allocations = get_percentage_allocations(budget_doc)
-
 	fiscal_year = frappe.get_cached_value(
 		"Fiscal Year",
 		budget_doc.fiscal_year,
 		["name", "year_start_date", "year_end_date"],
 		as_dict=True,
 	)
+
+	percentage_allocations = get_percentage_allocations(budget_doc, fiscal_year)
 
 	for row in account_rows:
 		create_new_budget_from_row(budget_doc, fiscal_year, row, percentage_allocations)
@@ -68,10 +68,12 @@ def migrate_single_budget(budget_name):
 		frappe.delete_doc("Budget", budget_name)
 
 
-def get_percentage_allocations(budget_doc):
+def get_percentage_allocations(budget_doc, fiscal_year):
+	"""Percentages of the months from the fiscal year start, by the month of each distribution row."""
 	if budget_doc.monthly_distribution:
 		distribution_doc = frappe.get_cached_doc("Monthly Distribution", budget_doc.monthly_distribution)
-		return [flt(row.percentage_allocation) for row in distribution_doc.percentages]
+		by_month = {row.month: flt(row.percentage_allocation) for row in distribution_doc.percentages}
+		return [by_month.get(add_months(fiscal_year.year_start_date, i).strftime("%B"), 0) for i in range(12)]
 
 	return [100 / 12] * 12
 

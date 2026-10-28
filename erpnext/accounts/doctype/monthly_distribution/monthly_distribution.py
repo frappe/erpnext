@@ -7,6 +7,21 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_months, flt
 
+MONTHS = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December",
+]
+
 
 class MonthlyDistribution(Document):
 	# begin: auto-generated types
@@ -28,22 +43,8 @@ class MonthlyDistribution(Document):
 
 	@frappe.whitelist()
 	def get_months(self):
-		month_list = [
-			"January",
-			"February",
-			"March",
-			"April",
-			"May",
-			"June",
-			"July",
-			"August",
-			"September",
-			"October",
-			"November",
-			"December",
-		]
 		idx = 1
-		for m in month_list:
+		for m in MONTHS:
 			mnth = self.append("percentages")
 			mnth.month = m
 			mnth.percentage_allocation = 100.0 / 12
@@ -51,10 +52,28 @@ class MonthlyDistribution(Document):
 			idx += 1
 
 	def validate(self):
+		self.validate_months()
 		total = sum(flt(d.percentage_allocation) for d in self.get("percentages"))
 
 		if flt(total, 2) != 100.0:
 			frappe.throw(_("Percentage Allocation should be equal to 100%") + f" ({flt(total, 2)!s}%)")
+
+	def validate_months(self):
+		months = [d.month for d in self.get("percentages")]
+		if sorted(months) != sorted(MONTHS):
+			frappe.throw(
+				_("The distribution must have one row for each month, January to December."),
+				title=_("Invalid Months"),
+			)
+
+		for d in self.get("percentages"):
+			if not 0 <= flt(d.percentage_allocation) <= 100:
+				frappe.throw(
+					_("Row {0}: Percentage Allocation for {1} must be between 0 and 100.").format(
+						d.idx, _(d.month)
+					),
+					title=_("Invalid Percentage"),
+				)
 
 
 def get_periodwise_distribution_data(distribution_id, period_list, periodicity):
