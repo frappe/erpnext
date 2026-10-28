@@ -1999,6 +1999,7 @@ class TestStockEntry(FrappeTestCase):
 			within_allowance.insert()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	@change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
 =======
 	def test_manufacturing_links_cleared_on_plain_material_transfer(self):
@@ -2028,6 +2029,8 @@ class TestStockEntry(FrappeTestCase):
 		self.assertFalse(transfer.bom_no)
 		self.assertEqual(transfer.fg_completed_qty, 0)
 
+=======
+>>>>>>> c340ac5 (test: drop manufacturing links clearing test)
 	def test_manufacture_blocked_without_manufactured_qty(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_wo_stock_entry,
