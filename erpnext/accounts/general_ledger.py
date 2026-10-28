@@ -502,6 +502,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 				else:
 					debit_credit_diff += flt(d.credit)
 				round_off_account_exists = True
+				break
 
 		debit_credit_diff = flt(debit_credit_diff, precision)
 
@@ -635,21 +636,22 @@ def make_reverse_gl_entries(
 		).run(as_dict=1)
 
 	if gl_entries:
+		if immutable_ledger_enabled:
+			validation_date = get_immutable_reversal_date(gl_entries, posting_date)
+		else:
+			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
+
 		create_payment_ledger_entry(
 			gl_entries,
 			cancel=1,
 			adv_adj=adv_adj,
 			update_outstanding=update_outstanding,
 			partial_cancel=partial_cancel,
+			posting_date=validation_date,
 		)
-		validate_accounting_period(gl_entries)
+		validate_accounting_period([frappe._dict(gl_entries[0], posting_date=validation_date)])
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
-
-		if immutable_ledger_enabled:
-			validation_date = posting_date or frappe.form_dict.get("posting_date") or getdate()
-		else:
-			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
 
 		check_freezing_date(validation_date, gl_entries[0]["company"], adv_adj)
 		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
@@ -720,12 +722,21 @@ def make_reverse_gl_entries(
 
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
-				new_gle["posting_date"] = posting_date or frappe.form_dict.get("posting_date") or getdate()
+				new_gle["posting_date"] = validation_date
 			elif posting_date:
 				new_gle["posting_date"] = posting_date
 
+			if getdate(new_gle["posting_date"]) != getdate(entry["posting_date"]):
+				new_gle["fiscal_year"] = None
+
 			if new_gle["debit"] or new_gle["credit"]:
-				make_entry(new_gle, adv_adj, "Yes", from_reversal=True)
+				make_entry(new_gle, adv_adj, update_outstanding, from_reversal=True)
+
+
+def get_immutable_reversal_date(gl_entries, posting_date=None):
+	"""Reversal date under immutable ledger: the cancel date, never before the voucher's own date."""
+	reversal_date = getdate(posting_date or frappe.form_dict.get("posting_date") or getdate())
+	return max(reversal_date, *(getdate(d["posting_date"]) for d in gl_entries))
 
 
 def set_as_cancel(voucher_type, voucher_no):

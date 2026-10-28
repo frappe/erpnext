@@ -258,7 +258,9 @@ class GLEntry(Document):
 		if not self.cost_center or self.is_cancelled:
 			return
 
-		is_group, company = frappe.get_cached_value("Cost Center", self.cost_center, ["is_group", "company"])
+		is_group, company, disabled = frappe.get_cached_value(
+			"Cost Center", self.cost_center, ["is_group", "company", "disabled"]
+		)
 
 		if company != self.company:
 			frappe.throw(
@@ -272,6 +274,13 @@ class GLEntry(Document):
 				_(
 					"""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions"""
 				).format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center))
+			)
+
+		if disabled and not self.flags.from_reversal:
+			frappe.throw(
+				_("{0} {1}: Cost Center {2} is disabled").format(
+					self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)
+				)
 			)
 
 	def validate_party(self):
@@ -503,6 +512,7 @@ def rename_temporarily_named_docs(doctype):
 	"""Rename temporarily named docs using autoname options"""
 	docs_to_rename = frappe.get_all(doctype, {"to_rename": "1"}, order_by="creation", limit=50000)
 	autoname = frappe.get_meta(doctype).autoname
+	hook_type = "on_gle_rename" if doctype == "GL Entry" else "on_sle_rename"
 
 	for batch in create_batch(docs_to_rename, 100):
 		for doc in batch:
@@ -518,9 +528,8 @@ def rename_temporarily_named_docs(doctype):
 				.where(dt.name == oldname)
 			).run()
 
-			for hook_type in ("on_gle_rename", "on_sle_rename"):
-				for hook in frappe.get_hooks(hook_type):
-					frappe.call(hook, newname=newname, oldname=oldname)
+			for hook in frappe.get_hooks(hook_type):
+				frappe.call(hook, newname=newname, oldname=oldname)
 
 		if not frappe.in_test:
 			frappe.db.commit()
