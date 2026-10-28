@@ -3596,8 +3596,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 						serial_batch_map[row.item_code].batch_no_valuation[entry.batch_no],
 					)
 
-<<<<<<< HEAD
-=======
 	def test_sales_return_for_product_bundle_with_legacy_serial_nos(self):
 		bundle_item = make_item("_Packed Legacy Bundle Item", {"is_stock_item": 0}).name
 		stock_item = make_item("_Packed Legacy Stock Item", {"is_stock_item": 1}).name
@@ -3654,7 +3652,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			)
 			self.assertEqual(stock_value_difference, 200)
 
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_partial_sales_return_for_product_bundle_with_serial_fields_and_bundle(self):
 		bundle_item = make_item("_Packed Serial Fields Bundle Item", {"is_stock_item": 0}).name
 		serial_item = make_item(
@@ -3684,76 +3682,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(len(returned_serial_nos), 1)
 		self.assertIn(returned_serial_nos[0], delivered_serial_nos)
 
-	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
-	def test_partial_delivery_note_against_reserved_stock(self):
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-			get_stock_reservation_entries_for_voucher,
-		)
-
-		# create batch item
-		batch_item = make_item(
-			"_Test Batch Item For DN Reserve Check",
-			{
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TBDNR.#####",
-			},
-		)
-		serial_item = make_item(
-			"_Test Serial Item For DN Reserve Check",
-			{
-				"is_stock_item": 1,
-				"has_serial_no": 1,
-				"serial_no_series": "TSNDNR.#####",
-			},
-		)
-
-		company = "_Test Company"
-
-		warehouse = create_warehouse("Test Partial DN Reserved Stock", company=company)
-		customer = "_Test Customer"
-
-		items = [batch_item.name, serial_item.name]
-
-		for idx, item in enumerate(items):
-			# make inward entry for batch item
-			se = make_stock_entry(item_code=item, purpose="Material Receipt", qty=10, to_warehouse=warehouse)
-			sabb = se.items[0].serial_and_batch_bundle
-
-			batch_no = get_batch_from_bundle(sabb) if not idx else None
-			serial_nos = get_serial_nos_from_bundle(sabb) if idx else None
-
-			# make sales order and reserve the quantites against the so
-			so = make_sales_order(item_code=item, qty=10, rate=100, customer=customer, warehouse=warehouse)
-			so.submit()
-			so.create_stock_reservation_entries()
-			so.reload()
-
-			# create a delivery note with partial quantity from resreved quantity
-			dn = create_dn_against_so(so=so.name, delivered_qty=5, do_not_submit=True)
-			dn.items[0].use_serial_batch_fields = 1
-			if batch_no:
-				dn.items[0].batch_no = batch_no
-			else:
-				dn.items[0].serial_no = "\n".join(serial_nos[:5])
-
-			dn.save()
-			dn.submit()
-
-			against_sales_order = dn.items[0].against_sales_order
-			so_detail = dn.items[0].so_detail
-
-			sre_details = get_stock_reservation_entries_for_voucher(
-				so.doctype, against_sales_order, so_detail, ["reserved_qty", "delivered_qty", "status"]
-			)
-
-			# check partially delivered reserved stock
-			self.assertEqual(sre_details[0].status, "Partially Delivered")
-			self.assertEqual(sre_details[0].reserved_qty, so.items[0].qty)
-			self.assertEqual(sre_details[0].delivered_qty, dn.items[0].qty)
-
->>>>>>> c574ac7 (fix(stock): return packed items with serial / batch fields)
 	def test_negative_stock_with_higher_precision(self):
 		original_flt_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_single_value("System Settings", "float_precision", 7)
