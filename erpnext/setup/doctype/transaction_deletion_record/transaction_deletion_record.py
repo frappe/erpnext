@@ -299,7 +299,7 @@ class TransactionDeletionRecord(Document):
 
 	def on_submit(self):
 		self.db_set("status", "Queued")
-		self.start_deletion_tasks()
+		self._start_deletion_tasks()
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
@@ -317,7 +317,9 @@ class TransactionDeletionRecord(Document):
 	def _clear_deletion_cache(self):
 		"""Clear Redis cache flags"""
 		for item in self.doctypes_to_delete:
-			frappe.cache.delete_value(f"deletion_running_doctype:{item.doctype_name}")
+			key = f"deletion_running_doctype:{item.doctype_name}"
+			if frappe.cache.get_value(key) == self.name:
+				frappe.cache.delete_value(key)
 
 	def _get_child_tables(self, doctype_name):
 		"""Get list of child table DocType names for a given DocType
@@ -629,6 +631,9 @@ class TransactionDeletionRecord(Document):
 				try:
 					task()
 				except Exception:
+					if self.process_in_single_transaction:
+						self._clear_deletion_cache()
+						raise
 					frappe.db.rollback()
 					traceback = frappe.get_traceback(with_context=True)
 					if traceback:
@@ -673,8 +678,27 @@ class TransactionDeletionRecord(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def start_deletion_tasks(self):
+		self.reload()
 		self.check_permission("write")
+		if self.docstatus != 1 or self.status != "Failed":
+			frappe.throw(
+				_(
+					"Only a submitted deletion with status Failed can be retried. {0} is {1} with status {2}."
+				).format(
+					self.name,
+					_({0: "Draft", 1: "Submitted", 2: "Cancelled"}[self.docstatus]),
+					_(self.status or "Not Set"),
+				),
+				title=_("Cannot Retry Deletion"),
+			)
+		self.validate_to_delete_list()
+		self.before_submit()
+		self.reset_task_flags()
+		self.flags.ignore_validate_update_after_submit = True
+		self.save()
+		self._start_deletion_tasks()
 
+	def _start_deletion_tasks(self):
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
 		self._set_deletion_cache()
@@ -792,9 +816,21 @@ class TransactionDeletionRecord(Document):
 					# Add parent DocType only - child tables are handled automatically
 					# by delete_child_tables() when the parent is deleted
 					# Use company_field directly from To Delete item
-					self.populate_doctypes_table(
-						tables, to_delete_item.doctype_name, to_delete_item.company_field, 0
+					existing = next(
+						(
+							row
+							for row in self.doctypes
+							if row.doctype_name == to_delete_item.doctype_name
+							and row.docfield_name == to_delete_item.company_field
+						),
+						None,
 					)
+					if existing:
+						existing.db_set("done", 0)
+					else:
+						self.populate_doctypes_table(
+							tables, to_delete_item.doctype_name, to_delete_item.company_field, 0
+						)
 			self.db_set("initialize_doctypes_table_status", "Completed")
 		self.enqueue_task(task="Delete Transactions")
 

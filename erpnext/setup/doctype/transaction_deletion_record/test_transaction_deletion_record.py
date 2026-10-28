@@ -3,6 +3,8 @@ from unittest.mock import patch
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
@@ -174,6 +176,191 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tdr.append("doctypes_to_delete", {"doctype_name": "Shipment", "company_field": "pickup_company"})
 		with self.assertRaises(frappe.ValidationError):
 			tdr.insert()
+
+	def test_start_deletion_rejects_draft_and_completed_records(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
+		tdr.insert()
+
+		try:
+			with patch.object(tdr, "enqueue_task"):
+				with self.assertRaises(frappe.ValidationError):
+					tdr.start_deletion_tasks()
+				tdr.db_set({"docstatus": 1, "status": "Completed"})
+				with self.assertRaises(frappe.ValidationError):
+					tdr.start_deletion_tasks()
+		finally:
+			tdr._clear_deletion_cache()
+
+	def test_retry_checks_saved_status(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.insert()
+		tdr.docstatus = 1
+		tdr.status = "Failed"
+		with patch.object(tdr, "enqueue_task"), self.assertRaises(frappe.ValidationError):
+			tdr.start_deletion_tasks()
+
+	def test_failed_deletion_can_be_retried(self):
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
+		tdr.insert()
+		tdr.db_set({"docstatus": 1, "status": "Failed"})
+		try:
+			with patch.object(tdr, "enqueue_task"):
+				tdr.start_deletion_tasks()
+			self.assertEqual(tdr.db_get("status"), "Running")
+		finally:
+			tdr._clear_deletion_cache()
+
+	def test_retry_revalidates_changed_company_fields(self):
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+		custom_field = create_custom_field(
+			"Item Price",
+			{"fieldname": "company", "label": "Company", "fieldtype": "Link", "options": "Company"},
+		)
+		tdr = frappe.get_doc(
+			{
+				"doctype": "Transaction Deletion Record",
+				"company": "_Test Company 7",
+				"doctypes_to_delete": [{"doctype_name": "Item Price", "company_field": "company"}],
+			}
+		)
+		try:
+			tdr.insert()
+			with patch.object(tdr, "enqueue_task") as enqueue:
+				tdr.submit()
+				tdr.db_set("status", "Failed")
+				tdr._clear_deletion_cache()
+				frappe.delete_doc("Custom Field", custom_field.name, force=True)
+				enqueue.reset_mock()
+				with self.assertRaises(frappe.ValidationError):
+					tdr.start_deletion_tasks()
+				enqueue.assert_not_called()
+			self.assertEqual(tdr.db_get("status"), "Failed")
+		finally:
+			tdr._clear_deletion_cache()
+			frappe.db.rollback()
+			frappe.delete_doc("Custom Field", custom_field.name, force=True)
+			frappe.db.commit()
+			frappe.clear_cache(doctype="Item Price")
+
+	def test_retry_rechecks_completed_and_previously_empty_doctypes(self):
+		company = "_Test Company 7"
+		create_deletion_journal(company)
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
+		for doctype in ("Journal Entry", "GL Entry", "Task"):
+			tdr.append("doctypes_to_delete", {"doctype_name": doctype, "company_field": "company"})
+		tdr.insert()
+		tdr.batch_size = 1
+		try:
+			with patch.object(tdr, "enqueue_task"):
+				tdr.submit()
+				tdr.initialize_doctypes_to_be_deleted_table()
+				for _ in range(2):
+					tdr.execute_task("Delete Transactions")
+					tdr.reload()
+				self.assertEqual(
+					next(row.done for row in tdr.doctypes if row.doctype_name == "Journal Entry"), 1
+				)
+				frappe.db.savepoint("before_failed_deletion_task")
+				rollback = frappe.db.rollback
+				with patch.object(
+					tdr,
+					"get_number_of_docs_linked_with_specified_company",
+					side_effect=RuntimeError("Worker failed"),
+				):
+					with patch.object(
+						frappe.db,
+						"rollback",
+						side_effect=lambda: rollback(save_point="before_failed_deletion_task"),
+					):
+						tdr.execute_task("Delete Transactions")
+				tdr.reload()
+				self.assertEqual(tdr.status, "Failed")
+				self.assertIn("Worker failed", tdr.error_log)
+				self.assertIsNone(frappe.cache.get_value("deletion_running_doctype:Journal Entry"))
+				journal = create_deletion_journal(company)
+				task = frappe.get_doc(
+					{"doctype": "Task", "company": company, "subject": "Created while failed"}
+				).insert()
+				self.assertEqual(
+					frappe.db.count(
+						"GL Entry", {"voucher_type": "Journal Entry", "voucher_no": journal.name}
+					),
+					2,
+				)
+				tdr.start_deletion_tasks()
+				for task_name in tdr.task_to_internal_method_map:
+					for _ in range(10):
+						tdr.reload()
+						tdr.execute_task(task_name)
+						if (
+							task_name != "Delete Transactions"
+							or tdr.db_get("delete_transactions_status") == "Completed"
+						):
+							break
+			self.assertEqual(tdr.db_get("status"), "Completed")
+			self.assertFalse(frappe.db.exists("Journal Entry", journal.name))
+			self.assertFalse(frappe.db.exists("Task", task.name))
+			self.assertEqual(
+				frappe.db.count("GL Entry", {"voucher_type": "Journal Entry", "voucher_no": journal.name}), 0
+			)
+		finally:
+			tdr._clear_deletion_cache()
+
+	def test_retry_refuses_another_running_deletion(self):
+		records = []
+		try:
+			for company in ("_Test Company 7", "_Test Company 6"):
+				tdr = frappe.get_doc(
+					{
+						"doctype": "Transaction Deletion Record",
+						"company": company,
+						"doctypes_to_delete": [{"doctype_name": "Task", "company_field": "company"}],
+					}
+				).insert()
+				records.append(tdr)
+				with patch.object(tdr, "enqueue_task"):
+					tdr.submit()
+				if len(records) == 1:
+					tdr.db_set("status", "Failed")
+					tdr._clear_deletion_cache()
+			with patch.object(records[0], "enqueue_task"), self.assertRaises(frappe.ValidationError):
+				records[0].start_deletion_tasks()
+			self.assertEqual(frappe.cache.get_value("deletion_running_doctype:Task"), records[1].name)
+		finally:
+			for tdr in records:
+				tdr._clear_deletion_cache()
+
+	def test_cache_cleanup_preserves_another_deletions_lock(self):
+		tdr = frappe.get_doc(
+			{
+				"doctype": "Transaction Deletion Record",
+				"company": "_Test Company 7",
+				"doctypes_to_delete": [{"doctype_name": "Task", "company_field": "company"}],
+			}
+		).insert()
+		frappe.cache.set_value("deletion_running_doctype:Task", "Another deletion", expires_in_sec=60)
+		try:
+			tdr._clear_deletion_cache()
+			self.assertEqual(frappe.cache.get_value("deletion_running_doctype:Task"), "Another deletion")
+		finally:
+			frappe.cache.delete_value("deletion_running_doctype:Task")
+
+	def test_single_transaction_deletion_propagates_failure(self):
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			TransactionDeletionRecord,
+		)
+
+		create_task("_Test Company 7")
+		with patch.object(
+			TransactionDeletionRecord,
+			"delete_docs_linked_with_specified_company",
+			side_effect=RuntimeError("Deletion failed"),
+		):
+			with self.assertRaisesRegex(RuntimeError, "Deletion failed"):
+				delete_selected_doctypes("_Test Company 7", ["Task"])
 
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
@@ -518,3 +705,40 @@ def create_and_submit_transaction_deletion_doc(company):
 def create_task(company):
 	task = frappe.get_doc({"doctype": "Task", "company": company, "subject": "Delete"})
 	task.insert()
+
+def create_deletion_journal(company):
+	abbr, cost_center = frappe.get_cached_value("Company", company, ["abbr", "cost_center"])
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": company,
+				"posting_date": frappe.utils.today(),
+				"accounts": [
+					{
+						"account": f"Cash - {abbr}",
+						"cost_center": cost_center,
+						"debit_in_account_currency": 100,
+					},
+					{
+						"account": f"Sales - {abbr}",
+						"cost_center": cost_center,
+						"credit_in_account_currency": 100,
+					},
+				],
+			}
+		)
+		.insert()
+		.submit()
+	)
+
+
+
+def delete_selected_doctypes(company, doctypes):
+	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
+	for doctype in doctypes:
+		tdr.append("doctypes_to_delete", {"doctype_name": doctype, "company_field": "company"})
+	tdr.insert()
+	tdr.process_in_single_transaction = True
+	tdr.submit()
+	return tdr
