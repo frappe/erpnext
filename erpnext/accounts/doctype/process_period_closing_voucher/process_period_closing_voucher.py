@@ -52,6 +52,13 @@ class ProcessPeriodClosingVoucher(Document):
 		self.status = "Queued"
 		self.populate_processing_tables()
 
+	def validate_processing(self, statuses):
+		if self.status not in statuses:
+			return False
+
+		self.validate_parent_pcv()
+		return True
+
 	def validate_parent_pcv(self):
 		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
 		if (
@@ -158,14 +165,17 @@ def start_pcv_processing(docname: str):
 	# checked before the status is read: otherwise an unentitled caller learns it from whether this throws.
 	frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 
-	frappe.get_doc("Process Period Closing Voucher", docname).validate_parent_pcv()
-	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
+	if frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(
+		["Queued", "Running"]
+	):
 		initialize_parallel_threads(docname)
 
 
 @frappe.whitelist(methods=["POST"])
 def pause_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+		return
 
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
@@ -199,6 +209,10 @@ def cancel_pcv_processing(docname: str):
 @frappe.whitelist(methods=["POST"])
 def resume_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(
+		["Paused", "Running"]
+	):
+		return
 
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Running").where(ppcv.name.eq(docname)).run()
@@ -285,6 +299,8 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 def schedule_next_date(docname: str):
 	# marks a row Running and enqueues a long job, so it needs the same write check as the sibling controls
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+		return
 
 	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
@@ -461,7 +477,11 @@ def get_closing_account_closing_entry(closing_account_gle, pcv):
 
 
 def summarize_and_post_ledger_entries(docname):
-	pcv = frappe.get_doc("Process Period Closing Voucher", docname).validate_parent_pcv()
+	# Serialize summary jobs so a queued retry sees the completed status before posting.
+	ppcv = frappe.get_doc("Process Period Closing Voucher", docname, for_update=True)
+	if not ppcv.validate_processing(["Running"]):
+		return
+	pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
 
 	# P&L accounts
 	pl_accounts_reverse_gle, closing_account_gle = get_gl_entries(docname)
@@ -480,11 +500,6 @@ def summarize_and_post_ledger_entries(docname):
 	closing_entries = pl_closing_entries + bs_closing_entries + closing_entries_for_closing_account
 
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
-
-	# keep transaction on PPCV and PPCVD short
-	# prevents concurrency errors - REPEATABLE READ
-	if not frappe.in_test:
-		frappe.db.commit()  # nosemgrep
 
 	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
 	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
