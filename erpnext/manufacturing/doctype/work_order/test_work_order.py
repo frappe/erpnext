@@ -7418,6 +7418,28 @@ class TestWorkOrder(ERPNextTestSuite):
 			"Stock Reservation Entry", filters=filters, fields=["reserved_qty", "consumed_qty"]
 		)
 
+	def test_available_qty_skips_warehouse_user_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		wo = make_wo_order_test_record(qty=1, source_warehouse="_Test Warehouse - _TC")
+		expected = [flt(d.available_qty_at_source_warehouse) for d in wo.required_items]
+		user = make_fenced_user("_test_wo_warehouse_fenced_user@example.com", ["Manufacturing User"])
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Warehouse",
+				"for_value": "_Test Warehouse 1 - _TC",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Warehouse",
+			}
+		).insert(ignore_permissions=True)
+
+		with as_user(user):
+			wo.set_available_qty()
+
+		self.assertEqual([flt(d.available_qty_at_source_warehouse) for d in wo.required_items], expected)
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

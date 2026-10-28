@@ -76,10 +76,10 @@ from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	ItemDetailsCtx,
+	_get_bin_details,
 	_get_item_details,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
-	get_bin_details,
 	get_conversion_factor,
 	get_item_tax_map,
 	get_item_warehouse_,
@@ -4305,7 +4305,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item.warehouse = get_new_child_item_warehouse(p_doc, item, trans_item, child_doctype)
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get("conversion_factor")) or conversion_factor
-	child_item.update(get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
+	child_item.update(_get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
 
 	if child_doctype in ["Purchase Order Item", "Supplier Quotation Item"]:
 		# Initialized value will update in parent validation
