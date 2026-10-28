@@ -693,6 +693,9 @@ class TestQuotation(ERPNextTestSuite):
 		second_revision.cancel()
 
 		self.assertEqual(self.get_latest_revision_flags(quotation), [0, 1, 0])
+		# cancelling the active version reactivates the latest remaining one
+		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 1)
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
 
 	def get_latest_revision_flags(self, quotation):
 		return [

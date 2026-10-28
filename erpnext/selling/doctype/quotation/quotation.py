@@ -497,6 +497,28 @@ class Quotation(SellingController):
 		self.update_opportunity("Open")
 		self.update_lead()
 		self.update_latest_revision()
+		self.reactivate_latest_version()
+
+	def reactivate_latest_version(self):
+		"""On cancel, if no version is left active, reactivate the latest remaining one."""
+		original = self.revision_of or self.name
+		versions = frappe.get_all(
+			"Quotation",
+			filters={"docstatus": 1, "name": ["!=", self.name], "status": ["!=", "Lost"]},
+			or_filters={"name": original, "revision_of": original},
+			fields=["name", "is_active", "transaction_date", "creation"],
+		)
+		if not versions or any(version.is_active for version in versions):
+			return
+
+		latest = max(versions, key=get_version_order)
+		frappe.db.set_value("Quotation", latest.name, "is_active", 1)
+
+		# refresh the reactivated version's own CRM links (not this cancelled one's),
+		# so the opportunity and lead reflect the version that is active again
+		latest_doc = frappe.get_doc("Quotation", latest.name)
+		latest_doc.update_opportunity("Quotation")
+		latest_doc.update_lead()
 
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications
