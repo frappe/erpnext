@@ -472,7 +472,9 @@ class Quotation(SellingController):
 		return [version for version in self.get_other_versions({}) if get_version_order(version) > own_order]
 
 	def validate_can_be_revised(self):
-		if self.status in ("Lost", "Ordered"):
+		# Ordered qty cannot cross into a new version (orders link to the original's rows),
+		# so a quotation with any ordered qty must not be revised.
+		if self.status in ("Lost", "Ordered", "Partially Ordered"):
 			frappe.throw(_("Cannot revise a Quotation with status {0}.").format(_(self.status)))
 
 	def get_other_versions(self, filters: dict, ignore_permissions: bool = True) -> list[frappe._dict]:

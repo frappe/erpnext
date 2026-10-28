@@ -896,6 +896,28 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
+	def test_partially_ordered_quotation_cannot_be_revised(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		item1 = make_item().item_code
+		item2 = make_item().item_code
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": item1, "qty": 2, "rate": 100, "warehouse": warehouse},
+				{"item_code": item2, "qty": 2, "rate": 100, "warehouse": warehouse},
+			]
+		)
+
+		so = make_sales_order(quotation.name, args={"filtered_children": [quotation.items[0].name]})
+		so.delivery_date = nowdate()
+		so.insert()
+		so.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
+		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+
 	def test_inactive_quotation_cannot_be_ordered_or_invoiced(self):
 		quotation = make_quotation()
 		quotation.is_active = 0
