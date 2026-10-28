@@ -3,6 +3,7 @@
 
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -1189,6 +1190,85 @@ class TestPricingRule(FrappeTestCase):
 
 		si.submit()
 		self.assertEqual(si.additional_discount_percentage, 4)
+
+	def test_coupon_transaction_discount_without_tracking(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		pricing_rule = make_pricing_rule(
+			selling=1,
+			apply_on="Transaction",
+			price_or_product_discount="Price",
+			discount_percentage=50,
+		)
+		pricing_rule.coupon_code_based = 1
+		pricing_rule.apply_discount_on = "Grand Total"
+		pricing_rule.save()
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Legacy Transaction Coupon",
+				"coupon_code": "LEGACYTRANSACTION",
+				"pricing_rule": pricing_rule.name,
+			}
+		).insert()
+
+		for discount_percentage, discount_amount in [(50, 0), (0, 100)]:
+			pricing_rule.rate_or_discount = (
+				"Discount Percentage" if discount_percentage else "Discount Amount"
+			)
+			pricing_rule.discount_percentage = discount_percentage
+			pricing_rule.discount_amount = discount_amount
+			pricing_rule.save()
+
+			# An unused coupon must not change a manual discount or its basis.
+			doc = create_sales_invoice(qty=3, rate=1000, do_not_save=True)
+			doc.apply_discount_on = "Net Total"
+			doc.additional_discount_percentage = 20
+			doc.insert()
+			doc.reload()
+			self.assertEqual(doc.additional_discount_percentage, 20)
+			self.assertEqual(doc.discount_amount, 600)
+			self.assertEqual(doc.apply_discount_on, "Net Total")
+
+			for manual_discount in [None, 200]:
+				with self.subTest(discount_percentage=discount_percentage, manual_discount=manual_discount):
+					doc = make_sales_order(qty=3, rate=1000, do_not_save=True)
+					doc.coupon_code = coupon.name
+					# Reproduce orders saved before transaction rules were tracked.
+					with patch("erpnext.accounts.doctype.pricing_rule.utils.set_transaction_pricing_rules"):
+						doc.insert()
+					doc.reload()
+					self.assertFalse(doc.pricing_rules)
+					self.assertEqual(doc.discount_amount, 1500 if discount_percentage else 100)
+
+					doc.coupon_code = None
+					if manual_discount is not None:
+						doc.additional_discount_percentage = 0
+						doc.discount_amount = manual_discount
+					doc.save()
+					doc.reload()
+					self.assertEqual(doc.additional_discount_percentage, 0)
+					self.assertEqual(doc.discount_amount, manual_discount or 0)
+					self.assertEqual(doc.grand_total, 3000 - (manual_discount or 0))
+					self.assertEqual(sum(d.payment_amount for d in doc.payment_schedule), doc.grand_total)
+
+		# Selecting an inapplicable coupon does not make a manual discount belong to that rule.
+		for apply_on in ["Transaction", "Item Code"]:
+			pricing_rule.apply_on = apply_on
+			pricing_rule.min_qty = 10 if apply_on == "Transaction" else 0
+			if apply_on == "Item Code":
+				pricing_rule.append("items", {"item_code": "_Test Item 2"})
+			pricing_rule.save()
+			doc = make_sales_order(qty=3, rate=1000, do_not_save=True)
+			doc.coupon_code = coupon.name
+			doc.apply_discount_on = "Grand Total"
+			doc.discount_amount = 100
+			doc.insert()
+			doc.reload()
+			doc.coupon_code = None
+			doc.save()
+			doc.reload()
+			self.assertEqual(doc.discount_amount, 100)
+			self.assertEqual(doc.grand_total, 2900)
 
 	def test_transaction_discount_replaced_by_another_pricing_rule(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
