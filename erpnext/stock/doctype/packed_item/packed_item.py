@@ -5,6 +5,7 @@
 
 
 import json
+from collections import Counter
 
 import frappe
 import frappe.defaults
@@ -109,7 +110,8 @@ def get_indexed_packed_items_table(doc):
 	consumed per occurrence rather than collapsed onto a single row.
 
 	A new doc (e.g. mapped) has no link to its item rows yet, so its packed rows are
-	consumed in order per parent item and component.
+	consumed in order per parent item and component. This is only safe if the item rows
+	need exactly these rows, e.g. no item row was removed after mapping.
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
@@ -120,6 +122,14 @@ def get_indexed_packed_items_table(doc):
 		)
 
 		indexed_table.setdefault(key, []).append(packed_item)
+
+	if doc.is_new():
+		needed_counts = Counter(
+			(item_row.item_code, bundle_item.item_code, None)
+			for item_row in doc.get("items")
+			for bundle_item in get_product_bundle_items(item_row.item_code)
+		)
+		indexed_table = {key: rows for key, rows in indexed_table.items() if len(rows) == needed_counts[key]}
 
 	return indexed_table
 
