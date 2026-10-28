@@ -3339,7 +3339,8 @@ class TestDeliveryNote(FrappeTestCase):
 			if packed_item.item_code not in serial_items:
 				continue
 
-			serial_nos = get_serial_nos_from_bundle(packed_item.serial_and_batch_bundle)
+			bundle = packed_item.serial_and_batch_bundle
+			serial_nos = get_serial_nos_from_bundle(bundle)
 			delivered_serial_nos[packed_item.item_code] = sorted(serial_nos)
 			legacy_values = {"serial_no": "\n".join(serial_nos), "serial_and_batch_bundle": None}
 			packed_item.db_set(legacy_values)
@@ -3348,6 +3349,8 @@ class TestDeliveryNote(FrappeTestCase):
 				{"voucher_no": dn.name, "item_code": packed_item.item_code},
 				legacy_values,
 			)
+			frappe.db.delete("Serial and Batch Entry", {"parent": bundle})
+			frappe.db.delete("Serial and Batch Bundle", bundle)
 
 		return_dn = make_sales_return(dn.name)
 		return_dn.submit()
@@ -3359,6 +3362,15 @@ class TestDeliveryNote(FrappeTestCase):
 			if row.item_code in serial_items
 		}
 		self.assertEqual(returned_serial_nos, delivered_serial_nos)
+
+		# The return gets the stock value of the delivery: 2 units at 100
+		for item_code in serial_items:
+			stock_value_difference = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": return_dn.name, "item_code": item_code, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			self.assertEqual(stock_value_difference, 200)
 
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_partial_sales_return_for_product_bundle_with_serial_fields_and_bundle(self):
