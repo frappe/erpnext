@@ -5875,7 +5875,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		credit_note.submit()
 
 		second_invoice = make_sales_invoice(dn.name)
-		second_invoice.items[0].qty = 5
+		self.assertEqual(second_invoice.items[0].qty, 5)
 		second_invoice.insert()
 		second_invoice.submit()
 
