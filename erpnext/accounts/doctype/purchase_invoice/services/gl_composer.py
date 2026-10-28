@@ -102,9 +102,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		skip_merge=False,
 	):
 		doc = self.doc
-		against_voucher = doc.name
-		if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
-			against_voucher = doc.return_against
+		against_voucher = self._resolve_against_voucher()
 
 		gl = {
 			"account": doc.credit_to,
@@ -349,6 +347,22 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 					if provisional_accounting_for_non_stock_items:
 						self.make_provisional_gl_entry(gl_entries, item)
+
+					if (
+						item.is_fixed_asset
+						and not item.pr_detail
+						and doc.is_opening == "No"
+						and flt(item.item_tax_amount)
+						and not doc.is_internal_transfer()
+					):
+						# the asset is valued with its valuation charges, so capitalize them here;
+						# they are credited to the charge accounts with negative_expense_to_be_booked
+						item_tax_amount = flt(item.item_tax_amount, item.precision("item_tax_amount"))
+						base_amount += item_tax_amount
+						amount += flt(
+							item_tax_amount / doc.conversion_rate, item.precision("item_tax_amount")
+						)
+						doc.negative_expense_to_be_booked += item_tax_amount
 
 					if not doc.is_internal_transfer():
 						# When Update Stock is disabled, this invoice has no stock impact: the linked
@@ -859,9 +873,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 	def make_payment_gl_entries(self, gl_entries):
 		doc = self.doc
 		if cint(doc.is_paid) and doc.cash_bank_account and doc.paid_amount:
-			against_voucher = doc.name
-			if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
-				against_voucher = doc.return_against
+			against_voucher = self._resolve_against_voucher()
 			bank_account_currency = get_account_currency(doc.cash_bank_account)
 
 			gl_entries.append(
@@ -920,9 +932,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						if doc.party_account_currency == doc.company_currency
 						else doc.write_off_amount,
 						"debit_in_transaction_currency": doc.write_off_amount,
-						"against_voucher": doc.return_against
-						if cint(doc.is_return) and doc.return_against
-						else doc.name,
+						"against_voucher": self._resolve_against_voucher(),
 						"against_voucher_type": doc.doctype,
 						"cost_center": doc.cost_center,
 						"project": doc.project,
@@ -987,3 +997,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					item=doc,
 				)
 			)
+
+	def _resolve_against_voucher(self) -> str:
+		"""Settle against the original invoice for returns not kept on their own outstanding."""
+		doc = self.doc
+		if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
+			return doc.return_against
+		return doc.name

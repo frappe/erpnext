@@ -3338,6 +3338,169 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
 
+	def test_debit_note_write_off_stays_on_its_own_outstanding(self):
+		pi = make_purchase_invoice(qty=2, rate=100)
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.update_outstanding_for_self = 1
+		debit_note.write_off_amount = -10
+		debit_note.write_off_account = "_Test Write Off - _TC"
+		debit_note.write_off_cost_center = "_Test Cost Center - _TC"
+		debit_note.insert()
+		debit_note.submit()
+
+		against_vouchers = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": debit_note.name, "account": pi.credit_to, "is_cancelled": 0},
+			pluck="against_voucher",
+		)
+		self.assertEqual(set(against_vouchers), {debit_note.name})
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 200)
+		self.assertEqual(debit_note.outstanding_amount, -190)
+
+	def test_asset_valuation_charge_is_capitalized_without_receipt(self):
+		item = create_item(
+			item_code="_Test Asset Item Valuation Charge",
+			is_stock_item=0,
+			is_fixed_asset=1,
+			asset_category="Computers",
+		)
+		pi = make_purchase_invoice(item_code=item.item_code, qty=1, rate=1000, do_not_save=1)
+		pi.append(
+			"taxes",
+			{
+				"category": "Valuation",
+				"add_deduct_tax": "Add",
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Freight",
+				"tax_amount": 100,
+			},
+		)
+		pi.insert()
+		pi.submit()
+
+		asset_account = pi.items[0].expense_account
+		gl = frappe._dict()
+		for row in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			gl[row.account] = flt(gl.get(row.account)) + row.debit - row.credit
+		self.assertEqual(gl[asset_account], 1100)
+		self.assertEqual(gl["_Test Account Shipping Charges - _TC"], -100)
+		self.assertEqual(gl[pi.credit_to], -1000)
+
+	def test_asset_row_from_order_links_unbilled_receipt(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		item = create_item(
+			item_code="_Test Asset Item Two Receipts",
+			is_stock_item=0,
+			is_fixed_asset=1,
+			asset_category="Computers",
+		)
+		po = create_purchase_order(item_code=item.item_code, qty=10, rate=100)
+		first_receipt = create_pr_against_po(po.name, 5)
+		second_receipt = create_pr_against_po(po.name, 5)
+
+		pi = make_pi_from_pr(second_receipt.name)
+		pi.insert()
+		pi.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+		self.assertEqual(pi.items[0].purchase_receipt, first_receipt.name)
+
+	def test_debit_note_without_receipt_update_keeps_receipt_billed_amount(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		pr = make_purchase_receipt(qty=10, rate=50)
+		first_invoice = make_pi_from_pr(pr.name)
+		first_invoice.items[0].qty = 5
+		first_invoice.insert()
+		first_invoice.submit()
+
+		debit_note = make_return_doc(first_invoice.doctype, first_invoice.name)
+		debit_note.items[0].qty = -2
+		debit_note.update_billed_amount_in_purchase_receipt = 0
+		debit_note.insert()
+		debit_note.submit()
+
+		second_invoice = make_pi_from_pr(pr.name)
+		second_invoice.items[0].qty = 5
+		second_invoice.insert()
+		second_invoice.submit()
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt Item", pr.items[0].name, "billed_amt"), 500)
+
+	def test_debit_note_cannot_return_stock_that_was_not_received(self):
+		pi = make_purchase_invoice(qty=5, rate=50)
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.update_stock = 1
+		debit_note.items[0].warehouse = "_Test Warehouse - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "not received", debit_note.insert)
+
+	def test_debit_note_rate_cannot_exceed_invoiced_rate(self):
+		pi = make_purchase_invoice(qty=5, rate=50)
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.items[0].rate = 60
+		self.assertRaisesRegex(frappe.ValidationError, "Rate cannot be greater", debit_note.insert)
+
+		pr = make_purchase_receipt(qty=5, rate=50)
+		purchase_return = make_return_doc(pr.doctype, pr.name)
+		purchase_return.items[0].rate = 60
+		self.assertRaisesRegex(frappe.ValidationError, "Rate cannot be greater", purchase_return.insert)
+
+	def test_asset_receipt_exchange_rate_must_match(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		item = create_item(
+			item_code="_Test Asset Item USD Receipt",
+			is_stock_item=0,
+			is_fixed_asset=1,
+			asset_category="Computers",
+		)
+		pr = make_purchase_receipt(
+			item_code=item.item_code,
+			qty=1,
+			rate=100,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=70,
+		)
+
+		# the landed cost repost adjusts stock valuation only, so it does not excuse asset receipts
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+		pi = make_pi_from_pr(pr.name)
+		pi.credit_to = "_Test Payable USD - _TC"
+		pi.conversion_rate = 80
+		self.assertRaisesRegex(frappe.ValidationError, "asset items", pi.insert)
+
+	def test_cancelled_invoice_cannot_be_held(self):
+		pi = make_purchase_invoice()
+		pi.cancel()
+		self.assertRaisesRegex(frappe.ValidationError, "Cancelled", pi.block_invoice)
+
+	def test_purchase_receipt_cannot_be_made_from_debit_note(self):
+		from erpnext.accounts.doctype.purchase_invoice.mapper import (
+			make_purchase_receipt as make_purchase_receipt_from_pi,
+		)
+
+		pi = make_purchase_invoice(qty=5, rate=50)
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.insert()
+		debit_note.submit()
+		self.assertRaises(frappe.ValidationError, make_purchase_receipt_from_pi, debit_note.name)
+
 	def test_make_pr_and_pi_from_po(self):
 		item = create_item(
 			item_code="_Test_Item", is_stock_item=0, is_fixed_asset=1, asset_category="Computers"

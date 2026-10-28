@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _, throw
-from frappe.utils import get_link_to_form
+from frappe.utils import flt, get_link_to_form
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
@@ -102,17 +102,8 @@ class ExpenseAccountService:
 						item.expense_account = stock_not_billed_account
 			elif item.is_fixed_asset:
 				account = None
-				if not item.pr_detail and item.po_detail:
-					receipt_item = frappe.get_cached_value(
-						"Purchase Receipt Item",
-						{
-							"purchase_order": item.purchase_order,
-							"purchase_order_item": item.po_detail,
-							"docstatus": 1,
-						},
-						["name", "parent"],
-						as_dict=1,
-					)
+				if not item.pr_detail and item.po_detail and not doc.update_stock:
+					receipt_item = get_unbilled_receipt_item(item.purchase_order, item.po_detail)
 					if receipt_item:
 						item.pr_detail = receipt_item.name
 						item.purchase_receipt = receipt_item.parent
@@ -174,3 +165,16 @@ class ExpenseAccountService:
 		doc = self.doc
 		self.set_against_expense_account()
 		frappe.db.set_value(doc.doctype, doc.name, "against_expense_account", doc.against_expense_account)
+
+
+def get_unbilled_receipt_item(purchase_order, po_detail):
+	"""The oldest submitted receipt row of the order row that is not fully billed yet."""
+	receipt_items = frappe.get_all(
+		"Purchase Receipt Item",
+		filters={"purchase_order": purchase_order, "purchase_order_item": po_detail, "docstatus": 1},
+		fields=["name", "parent", "amount", "billed_amt"],
+		order_by="creation asc",
+	)
+	for receipt_item in receipt_items:
+		if flt(receipt_item.amount) > flt(receipt_item.billed_amt):
+			return receipt_item
