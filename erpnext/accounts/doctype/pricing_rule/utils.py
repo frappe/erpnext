@@ -31,7 +31,8 @@ def get_pricing_rules(args, doc=None):
 		return
 
 	for apply_on in ["Item Code", "Item Group", "Brand"]:
-		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
+		candidates = _get_pricing_rules(apply_on, args, values)
+		pricing_rules.extend(filter_pricing_rule_based_on_condition(candidates, doc))
 		if pricing_rules and pricing_rules[0].has_priority:
 			continue
 
@@ -39,8 +40,6 @@ def get_pricing_rules(args, doc=None):
 			break
 
 	rules = []
-
-	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 	if not pricing_rules:
 		return []
