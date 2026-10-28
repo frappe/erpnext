@@ -109,8 +109,11 @@ class ProcessStatementOfAccounts(Document):
 
 		if self.enable_auto_email:
 			if self.start_date and getdate(self.start_date) >= getdate(today()):
-				self.to_date = self.start_date
-				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+				if self.report == "General Ledger":
+					self.to_date = self.start_date
+					self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+				else:
+					self.posting_date = self.start_date
 
 		if self.print_format:
 			pf = frappe.db.get_value(
@@ -587,11 +590,12 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 @frappe.whitelist()
 def send_auto_email():
 	frappe.has_permission("Process Statement Of Accounts", throw=True)
-	selected = frappe.get_list(
-		"Process Statement Of Accounts",
-		filters={"enable_auto_email": 1},
-		or_filters={"to_date": today(), "posting_date": today()},
-	)
-	for entry in selected:
-		send_emails(entry.name, from_scheduler=True)
+	for report, date_field in (("General Ledger", "to_date"), ("Accounts Receivable", "posting_date")):
+		selected = frappe.get_list(
+			"Process Statement Of Accounts",
+			filters={"enable_auto_email": 1, "report": report, date_field: today()},
+			or_filters=[["start_date", "is", "not set"], ["start_date", "<=", today()]],
+		)
+		for entry in selected:
+			send_emails(entry.name, from_scheduler=True)
 	return True
