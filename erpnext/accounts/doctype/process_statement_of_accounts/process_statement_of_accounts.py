@@ -224,7 +224,8 @@ def set_ageing(doc, entry):
 	ageing_filters = frappe._dict(
 		{
 			"company": doc.company,
-			"report_date": doc.posting_date,
+			"report_date": doc.to_date if doc.report == "General Ledger" else doc.posting_date,
+			"age_as_on": "Report Date" if doc.report == "General Ledger" else "Today",
 			"ageing_based_on": doc.ageing_based_on,
 			"range1": 30,
 			"range2": 60,
