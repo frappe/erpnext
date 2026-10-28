@@ -31,6 +31,11 @@ class LedgerMerge(Document):
 		status: DF.Literal["Pending", "Success", "Partial Success", "Error"]
 	# end: auto-generated types
 
+	def validate(self):
+		for row in self.merge_accounts:
+			if not row.merged:
+				row.account_name = row.account
+
 	def start_merge(self):
 		from frappe.utils.background_jobs import enqueue
 		from frappe.utils.scheduler import is_scheduler_inactive
@@ -63,7 +68,7 @@ def form_start_merge(docname: str):
 
 def start_merge(docname):
 	ledger_merge = frappe.get_doc("Ledger Merge", docname)
-	successful_merges = 0
+	successful_merges = sum(1 for row in ledger_merge.merge_accounts if row.merged)
 	total = len(ledger_merge.merge_accounts)
 	for row in ledger_merge.merge_accounts:
 		if not row.merged:
@@ -84,12 +89,12 @@ def start_merge(docname):
 			except Exception:
 				frappe.db.rollback(save_point="ledger_merge_row")
 				ledger_merge.log_error("Ledger merge failed")
-			finally:
-				if successful_merges == total:
-					ledger_merge.db_set("status", "Success")
-				elif successful_merges > 0:
-					ledger_merge.db_set("status", "Partial Success")
-				else:
-					ledger_merge.db_set("status", "Error")
+
+	if successful_merges == total:
+		ledger_merge.db_set("status", "Success")
+	elif successful_merges > 0:
+		ledger_merge.db_set("status", "Partial Success")
+	else:
+		ledger_merge.db_set("status", "Error")
 
 	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})
