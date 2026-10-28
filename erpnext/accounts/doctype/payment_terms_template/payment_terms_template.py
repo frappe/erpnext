@@ -33,16 +33,33 @@ class PaymentTermsTemplate(Document):
 	def validate_invoice_portion(self):
 		total_portion = 0
 		for term in self.terms:
-			total_portion += flt(term.get("invoice_portion", 0))
+			if flt(term.invoice_portion) <= 0:
+				frappe.throw(
+					_("Row {0}: Invoice Portion must be more than 0.").format(term.idx),
+					title=_("Invalid Invoice Portion"),
+				)
+			total_portion += flt(term.invoice_portion)
 
 		if flt(total_portion, 2) != 100.00:
 			frappe.msgprint(_("Combined invoice portion must equal 100%"), raise_exception=1, indicator="red")
 
 	def validate_terms(self):
 		terms = []
+		payment_terms = set()
 		for term in self.terms:
-			if self.allocate_payment_based_on_payment_terms and not term.payment_term:
-				frappe.throw(_("Row {0}: Payment Term is mandatory").format(term.idx))
+			if self.allocate_payment_based_on_payment_terms:
+				if not term.payment_term:
+					frappe.throw(_("Row {0}: Payment Term is mandatory").format(term.idx))
+
+				# payments are allocated by payment term, so each term must be used once
+				if term.payment_term in payment_terms:
+					frappe.throw(
+						_(
+							"Row {0}: Payment Term {1} is used more than once. Each Payment Term must be used only once when payments are allocated based on payment terms."
+						).format(term.idx, frappe.bold(term.payment_term)),
+						title=_("Duplicate Payment Term"),
+					)
+				payment_terms.add(term.payment_term)
 
 			term_info = (term.payment_term, term.credit_days, term.credit_months, term.due_date_based_on)
 			if term_info in terms:
