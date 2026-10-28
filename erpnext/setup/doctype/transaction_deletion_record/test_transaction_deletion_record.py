@@ -640,6 +640,58 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		self.assertNotEqual(new_process.name, original.name)
 		self.assertTrue(frappe.db.exists("Process Deferred Accounting", amended.name))
 
+	def test_deletion_preserves_year_format_and_selected_naming_series(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		def make_document(doctype, company):
+			abbr, cost_center = frappe.get_cached_value("Company", company, ["abbr", "cost_center"])
+			if doctype == "Sales Invoice":
+				return create_sales_invoice(
+					company=company,
+					debit_to=f"Debtors - {abbr}",
+					income_account=f"Sales - {abbr}",
+					expense_account=f"Cost of Goods Sold - {abbr}",
+					currency=frappe.get_cached_value("Company", company, "default_currency"),
+					cost_center=cost_center,
+					warehouse=frappe.db.get_value(
+						"Warehouse", {"company": company, "warehouse_name": "Stores"}
+					),
+					do_not_submit=True,
+				)
+			doc = frappe.get_doc({"doctype": doctype, "company": company})
+			if doctype == "Task":
+				doc.subject = "Naming counters"
+			else:
+				doc.update(
+					{
+						"party_type": "Customer",
+						"party": "_Test Customer",
+						"receivable_payable_account": f"Debtors - {abbr}",
+					}
+				)
+			return doc.insert()
+
+		for doctype in ("Task", "Process Payment Reconciliation", "Sales Invoice"):
+			with self.subTest(doctype=doctype):
+				survivor = make_document(doctype, "_Test Company")
+				target = make_document(doctype, "_Test Company 7")
+				prefix = (
+					""
+					if frappe.get_meta(doctype).autoname.startswith("format:")
+					else survivor.name.rsplit("-", 1)[0] + "-"
+				)
+				counter = frappe.db.get_value("Series", {"name": prefix}, "current", order_by="name")
+				self.assertIsNotNone(counter)
+				tdr = delete_selected_doctypes("_Test Company 7", [doctype])
+				self.assertEqual(tdr.db_get("status"), "Completed")
+				self.assertFalse(frappe.db.exists(doctype, target.name))
+				self.assertEqual(
+					frappe.db.get_value("Series", {"name": prefix}, "current", order_by="name"), counter
+				)
+				new_doc = make_document(doctype, "_Test Company")
+				self.assertGreater(int(new_doc.name.rsplit("-", 1)[1]), counter)
+				self.assertTrue(frappe.db.exists(doctype, survivor.name))
+
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
 		company = "_Test Company 7"
@@ -866,47 +918,6 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		# Should throw validation error for invalid company field
 		with self.assertRaises(frappe.ValidationError):
 			tdr.insert()
-
-	def test_get_naming_series_prefix_with_dot(self):
-		"""Test prefix extraction for standard dot-separated naming series"""
-		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
-			TransactionDeletionRecord,
-		)
-
-		# Standard patterns with dot separator
-		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("TDL.####", "Task"), "TDL")
-		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("PREFIX.#####", "Task"), "PREFIX")
-		self.assertEqual(
-			TransactionDeletionRecord.get_naming_series_prefix("TASK-.YYYY.-.#####", "Task"), "TASK-.YYYY.-"
-		)
-
-	def test_get_naming_series_prefix_with_brace(self):
-		"""Test prefix extraction for format patterns with brace separators"""
-		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
-			TransactionDeletionRecord,
-		)
-
-		# Format patterns with brace separator
-		self.assertEqual(
-			TransactionDeletionRecord.get_naming_series_prefix("QA-ACT-{#####}", "Quality Action"), "QA-ACT-"
-		)
-		self.assertEqual(
-			TransactionDeletionRecord.get_naming_series_prefix("PREFIX-{####}", "Task"), "PREFIX-"
-		)
-		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("{####}", "Task"), "")
-
-	def test_get_naming_series_prefix_fallback(self):
-		"""Test prefix extraction fallback for patterns without standard separators"""
-		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
-			TransactionDeletionRecord,
-		)
-
-		# Edge case: pattern with # but no dot or brace (shouldn't happen in practice)
-		self.assertEqual(TransactionDeletionRecord.get_naming_series_prefix("PREFIX####", "Task"), "PREFIX")
-		# Edge case: pattern with no # at all
-		self.assertEqual(
-			TransactionDeletionRecord.get_naming_series_prefix("JUSTPREFIX", "Task"), "JUSTPREFIX"
-		)
 
 	def test_cache_flag_management(self):
 		"""Test that cache flags can be set and cleared correctly"""

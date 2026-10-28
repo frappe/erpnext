@@ -7,8 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
-from frappe.query_builder.functions import Max
-from frappe.utils import cint, comma_and, create_batch, get_link_to_form
+from frappe.utils import comma_and, create_batch, get_link_to_form
 from frappe.utils.background_jobs import get_job, is_job_enqueued
 from frappe.utils.caching import request_cache
 
@@ -995,53 +994,6 @@ class TransactionDeletionRecord(Document):
 
 	def delete_docs_linked_with_specified_company(self, doctype, reference_doc_names):
 		frappe.db.delete(doctype, {"name": ("in", reference_doc_names)})
-
-	@staticmethod
-	def get_naming_series_prefix(naming_series: str, doctype_name: str) -> str:
-		"""Extract the static prefix from an autoname pattern.
-
-		Args:
-		        naming_series: The autoname pattern (e.g., "PREFIX.####", "format:PRE-{####}")
-		        doctype_name: DocType name for error logging
-
-		Returns:
-		        The static prefix before the counter placeholders
-		"""
-		if "." in naming_series:
-			prefix = naming_series.rsplit(".", 1)[0]
-		elif "{" in naming_series:
-			prefix = naming_series.rsplit("{", 1)[0]
-		else:
-			# Fallback for unexpected patterns (shouldn't happen with valid Frappe naming series)
-			frappe.log_error(
-				title=_("Unexpected Naming Series Pattern"),
-				message=_(
-					"Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-				).format(naming_series, doctype_name),
-			)
-			prefix = naming_series.split("#", 1)[0] if "#" in naming_series else naming_series
-
-		return prefix
-
-	def update_naming_series(self, naming_series, doctype_name):
-		# Derive a static prefix from the autoname pattern
-		prefix = self.get_naming_series_prefix(naming_series, doctype_name)
-
-		# Find the highest number used in the naming series to reset the counter
-		doctype_table = qb.DocType(doctype_name)
-		result = (
-			qb.from_(doctype_table)
-			.select(Max(doctype_table.name))
-			.where(doctype_table.name.like(prefix + "%"))
-			.run()
-		)
-
-		if result and result[0][0]:
-			last = cint(result[0][0].replace(prefix, ""))
-		else:
-			last = 0
-
-		frappe.db.set_value("Series", prefix, "current", last, update_modified=False)
 
 	def delete_version_log(self, doctype, docnames):
 		versions = qb.DocType("Version")
