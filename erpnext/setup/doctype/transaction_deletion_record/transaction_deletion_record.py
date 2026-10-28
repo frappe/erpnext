@@ -754,24 +754,24 @@ class TransactionDeletionRecord(Document):
 			addresses = []
 			if leads:
 				addresses = frappe.db.get_all(
-					"Dynamic Link", filters={"link_name": ("in", leads)}, pluck="parent"
+					"Dynamic Link",
+					filters={"link_doctype": "Lead", "link_name": ("in", leads), "parenttype": "Address"},
+					pluck="parent",
 				)
 				if addresses:
 					address = qb.DocType("Address")
-					dl1 = qb.DocType("Dynamic Link")
-					dl2 = qb.DocType("Dynamic Link")
-
-					qb.from_(address).delete().where(
-						(address.name.isin(addresses))
-						& (
-							address.name.notin(
-								qb.from_(dl1)
-								.join(dl2)
-								.on((dl1.parent == dl2.parent) & (dl1.link_doctype != dl2.link_doctype))
-								.select(dl1.parent)
-								.distinct()
-							)
+					dynamic_link = qb.DocType("Dynamic Link")
+					other_links = (
+						qb.from_(dynamic_link)
+						.select(dynamic_link.parent)
+						.where(
+							(dynamic_link.parenttype == "Address")
+							& dynamic_link.parent.isin(addresses)
+							& ((dynamic_link.link_doctype != "Lead") | dynamic_link.link_name.notin(leads))
 						)
+					)
+					qb.from_(address).delete().where(
+						address.name.isin(addresses) & address.name.notin(other_links)
 					).run()
 
 					dynamic_link = qb.DocType("Dynamic Link")

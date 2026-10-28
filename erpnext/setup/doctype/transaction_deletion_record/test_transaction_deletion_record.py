@@ -362,6 +362,49 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 			with self.assertRaisesRegex(RuntimeError, "Deletion failed"):
 				delete_selected_doctypes("_Test Company 7", ["Task"])
 
+	def test_keeps_address_shared_with_other_company_lead(self):
+		leads = [
+			frappe.get_doc({"doctype": "Lead", "first_name": first_name, "company": company}).insert()
+			for first_name, company in (("Deletion Lead", "_Test Company 7"), ("Other Lead", "_Test Company"))
+		]
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Shared deletion test",
+				"address_type": "Billing",
+				"address_line1": "Test street",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Lead", "link_name": lead.name} for lead in leads],
+			}
+		).insert()
+		exclusive_address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Exclusive deletion test",
+				"address_type": "Billing",
+				"address_line1": "Test street",
+				"city": "Mumbai",
+				"country": "India",
+				"links": [{"link_doctype": "Lead", "link_name": leads[0].name}],
+			}
+		).insert()
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append("doctypes_to_delete", {"doctype_name": "Lead", "company_field": "company"})
+		tdr.insert()
+		tdr.db_set("status", "Running")
+		with patch.object(tdr, "enqueue_task"):
+			tdr.delete_lead_addresses()
+
+		self.assertTrue(frappe.db.exists("Address", address.name))
+		self.assertFalse(frappe.db.exists("Address", exclusive_address.name))
+		self.assertTrue(
+			frappe.db.exists("Dynamic Link", {"parent": address.name, "link_name": leads[1].name})
+		)
+		self.assertFalse(
+			frappe.db.exists("Dynamic Link", {"parent": address.name, "link_name": leads[0].name})
+		)
+
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
 		company = "_Test Company 7"
