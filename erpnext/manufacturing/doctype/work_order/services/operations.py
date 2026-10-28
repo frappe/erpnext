@@ -1,0 +1,485 @@
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
+# License: GNU General Public License v3. See license.txt
+
+"""Operation scheduling, costing and job-card preparation for Work Order.
+
+Extracted from work_order.py. ``OperationsService`` wraps a Work Order document
+(composition); work_order.py keeps thin delegating stubs for the methods that
+are called from other modules.
+"""
+
+import frappe
+from dateutil.relativedelta import relativedelta
+from frappe import _
+from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Min, Sum
+from frappe.utils import (
+	cint,
+	date_diff,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	time_diff_in_hours,
+)
+
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+	get_capacity_planning_days,
+	get_mins_between_operations,
+)
+from erpnext.manufacturing.doctype.work_order.mapper import (
+	create_job_card,
+	get_operation_qty,
+	split_qty_based_on_batch_size,
+)
+
+_BOM_OPERATION_FIELDS = [
+	"operation",
+	"description",
+	"workstation",
+	"idx",
+	"finished_good",
+	"finished_good_qty",
+	"is_subcontracted",
+	"wip_warehouse",
+	"source_warehouse",
+	"fg_warehouse",
+	"workstation_type",
+	"base_hour_rate as hour_rate",
+	"time_in_mins",
+	"parent as bom",
+	"name as bom_operation",
+	"bom_no",
+	"batch_size",
+	"sequence_id",
+	"fixed_time",
+	"skip_material_transfer",
+	"backflush_from_wip_warehouse",
+	"set_cost_based_on_bom_qty",
+	"quality_inspection_required",
+	"batch_split",
+	"weight_per_piece",
+]
+
+
+class OperationsService:
+	def __init__(self, doc):
+		self.doc = doc
+
+	def calculate_operating_cost(self):
+		self.doc.planned_operating_cost, self.doc.actual_operating_cost = 0.0, 0.0
+		job_card_costs = self._job_card_operating_costs()
+		for d in self.doc.get("operations"):
+			self._set_operation_cost(d, job_card_costs)
+			self.doc.planned_operating_cost += flt(d.planned_operating_cost)
+			self.doc.actual_operating_cost += flt(d.actual_operating_cost)
+
+		variable_cost = self.doc.actual_operating_cost or self.doc.planned_operating_cost
+		self.doc.total_operating_cost = (
+			flt(self.doc.additional_operating_cost)
+			+ flt(variable_cost)
+			+ flt(self.doc.corrective_operation_cost)
+		)
+
+	@staticmethod
+	def _set_operation_cost(d, job_card_costs):
+		if not d.hour_rate and d.workstation:
+			d.hour_rate = get_hour_rate(d.workstation)
+
+		d.planned_operating_cost = flt(
+			flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
+		)
+		actual_cost = job_card_costs.get(d.name)
+		if actual_cost is None:
+			actual_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
+		d.actual_operating_cost = flt(actual_cost, d.precision("actual_operating_cost"))
+
+	def _job_card_operating_costs(self):
+		if self.doc.docstatus != 1 or not self.doc.get("operations"):
+			return {}
+
+		job_card = frappe.qb.DocType("Job Card")
+		rows = (
+			frappe.qb.from_(job_card)
+			.select(
+				job_card.operation_id,
+				Sum(job_card.total_time_in_mins * job_card.hour_rate / 60.0).as_("cost"),
+			)
+			.where(
+				(job_card.work_order == self.doc.name)
+				& (job_card.docstatus == 1)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+			)
+			.groupby(job_card.operation_id)
+		).run(as_dict=True)
+		return {row.operation_id: flt(row.cost) for row in rows}
+
+	def create_job_card(self):
+		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
+
+		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
+		plan_days = get_capacity_planning_days()
+
+		for idx, row in enumerate(self.doc.operations):
+			qty = get_operation_qty(self.doc, row)
+			while qty > 0:
+				qty = split_qty_based_on_batch_size(self.doc, row, qty)
+				if row.job_card_qty > 0:
+					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
+
+		planned_end_date = self.doc.operations and self.doc.operations[-1].planned_end_time
+		if planned_end_date:
+			self.doc.db_set("planned_end_date", planned_end_date)
+
+	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
+		self.set_operation_start_end_time(row, idx)
+		schedule_blocks = self.get_plan_schedule_blocks(row)
+
+		if schedule_blocks:
+			row.planned_start_time = schedule_blocks[0].from_time
+			row.planned_end_time = schedule_blocks[-1].to_time
+
+		job_card_doc = create_job_card(
+			self.doc,
+			row,
+			auto_create=True,
+			enable_capacity_planning=enable_capacity_planning and not schedule_blocks,
+			schedule_blocks=schedule_blocks,
+		)
+
+		if schedule_blocks:
+			row.db_update()
+		elif enable_capacity_planning and job_card_doc:
+			row.planned_start_time = job_card_doc.scheduled_time_logs[0].from_time
+			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
+			self._validate_capacity_window(row, plan_days)
+			row.db_update()
+
+	def get_plan_schedule_blocks(self, row):
+		plan_row = self.doc.production_plan_item or self.doc.production_plan_sub_assembly_item
+		if not (self.doc.production_plan and plan_row):
+			return []
+
+		if flt(row.job_card_qty) != get_operation_qty(self.doc, row):
+			return []
+
+		if sum(1 for d in self.doc.operations if d.operation == row.operation) > 1:
+			return []
+
+		if flt(self.get_scheduled_plan_row_qty(plan_row)) != flt(self.doc.qty):
+			return []
+
+		return frappe.get_all(
+			"Production Plan Schedule",
+			filters={
+				"production_plan": self.doc.production_plan,
+				"plan_row": plan_row,
+				"operation": row.operation,
+			},
+			fields=["from_time", "to_time", "duration_mins", "workstation"],
+			order_by="from_time",
+		)
+
+	def get_scheduled_plan_row_qty(self, plan_row):
+		if self.doc.production_plan_item:
+			return frappe.db.get_value("Production Plan Item", plan_row, "planned_qty", cache=True)
+
+		return frappe.db.get_value("Production Plan Sub Assembly Item", plan_row, "qty", cache=True)
+
+	def _validate_capacity_window(self, row, plan_days):
+		from erpnext.manufacturing.doctype.work_order.work_order import CapacityError
+
+		if date_diff(row.planned_end_time, self.doc.planned_start_date) <= plan_days:
+			return
+
+		frappe.message_log.pop()
+		msg = _(
+			"Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
+		).format(
+			plan_days, row.operation, get_link_to_form("Manufacturing Settings", "Manufacturing Settings")
+		)
+		frappe.throw(msg, CapacityError)
+
+	def set_operation_start_end_time(self, row, idx):
+		"""Set start and end time for given operation. If first operation, set start as
+		`planned_start_date`, else add time diff to end time of earlier operation."""
+		if idx == 0:
+			# first operation at planned_start date
+			row.planned_start_time = self.doc.planned_start_date
+		elif self.doc.operations[idx - 1].sequence_id:
+			row.planned_start_time = self._sequence_based_start_time(row, idx)
+		else:
+			previous_end = get_datetime(self.doc.operations[idx - 1].planned_end_time)
+			row.planned_start_time = previous_end + get_mins_between_operations()
+
+		row.planned_end_time = get_datetime(row.planned_start_time) + relativedelta(minutes=row.time_in_mins)
+
+		if row.planned_start_time == row.planned_end_time:
+			frappe.throw(_("Capacity Planning Error, planned start time can not be same as end time"))
+
+	def _sequence_based_start_time(self, row, idx):
+		previous = self.doc.operations[idx - 1]
+		if previous.sequence_id == row.sequence_id:
+			return previous.planned_start_time
+
+		same_sequence = sorted(
+			[op for op in self.doc.operations if op.sequence_id == previous.sequence_id],
+			key=lambda op: get_datetime(op.planned_end_time),
+		)
+		return get_datetime(same_sequence[-1].planned_end_time) + get_mins_between_operations()
+
+	def set_work_order_operations(self):
+		"""Fetch operations from BOM and set in 'Work Order'"""
+		self.doc.set("operations", [])
+		if not self.doc.bom_no or not frappe.get_cached_value("BOM", self.doc.bom_no, "with_operations"):
+			return
+
+		operations = self._collect_bom_operations()
+		for correct_index, operation in enumerate(operations, start=1):
+			operation.idx = correct_index
+
+		self.doc.set("operations", operations)
+		self.calculate_time()
+		self.set_operation_warehouses()
+
+	def sync_operations_with_bom(self, previous):
+		if previous is None:
+			return
+
+		if previous.bom_no != self.doc.bom_no or previous.use_multi_level_bom != self.doc.use_multi_level_bom:
+			self.doc.get_items_and_operations_from_bom()
+		elif flt(previous.qty) != flt(self.doc.qty) and flt(previous.qty):
+			self._scale_saved_operation_time(previous)
+			self._scale_saved_output_qty(previous)
+
+	def _scale_saved_output_qty(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		for d in self.doc.get("operations"):
+			saved = saved_rows.get(d.name)
+			if saved and flt(saved.output_qty) and flt(saved.output_qty) == flt(d.output_qty):
+				output_qty = flt(saved.output_qty) * flt(self.doc.qty) / flt(previous.qty)
+				d.output_qty = flt(output_qty, d.precision("output_qty"))
+
+	def _scale_saved_operation_time(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		fixed_flags = self._get_fixed_time_flags()
+		occurrence = {}
+		for d in self.doc.get("operations"):
+			key = (d.bom or self.doc.bom_no, d.operation)
+			idx = occurrence[key] = occurrence.get(key, -1) + 1
+			flags = fixed_flags.get(key, [])
+			is_fixed = flags[idx % len(flags)] if flags else False
+			saved = saved_rows.get(d.name)
+			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
+				continue
+			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
+		self.calculate_operating_cost()
+
+	def _get_fixed_time_flags(self):
+		boms = {d.bom or self.doc.bom_no for d in self.doc.get("operations")}
+		flags = {}
+		for row in frappe.get_all(
+			"BOM Operation",
+			filters={"parent": ["in", list(boms)], "parenttype": "BOM"},
+			fields=["parent", "operation", "fixed_time"],
+			order_by="idx",
+		):
+			flags.setdefault((row.parent, row.operation), []).append(cint(row.fixed_time))
+		return flags
+
+	def set_operation_warehouses(self):
+		"""For semi-finished goods tracking, default each operation's warehouses from the Work
+		Order and chain them: the first operation pulls from the WO source warehouse and every
+		later operation pulls from the previous operation's output; intermediate outputs go to the
+		WIP warehouse while the final operation outputs to the WO finished goods warehouse.
+
+		Only empty fields are filled, so values configured on the BOM/operation are preserved."""
+		if not self.doc.track_semi_finished_goods or not self.doc.operations:
+			return
+
+		operations = self.doc.operations
+		last_idx = len(operations) - 1
+		for idx, op in enumerate(operations):
+			if not op.source_warehouse:
+				op.source_warehouse = self.doc.source_warehouse
+
+			if not op.fg_warehouse:
+				op.fg_warehouse = self.doc.fg_warehouse if idx == last_idx else self.doc.source_warehouse
+
+			if not op.wip_warehouse:
+				op.wip_warehouse = self.doc.wip_warehouse
+
+	def _collect_bom_operations(self):
+		groups = []
+		if self.doc.use_multi_level_bom:
+			bom_tree = frappe.get_doc("BOM", self.doc.bom_no).get_tree_representation()
+			for node in reversed(bom_tree.level_order_traversal()):
+				if node.is_bom:
+					qty = node.exploded_qty / node.bom_qty
+					groups.append((self._bom_operations(node.name), qty, node.exploded_qty, True))
+
+		bom_qty = frappe.get_cached_value("BOM", self.doc.bom_no, "quantity")
+		groups.append((self._bom_operations(self.doc.bom_no), bom_qty, 1, False))
+
+		all_rows = [d for rows, _qty, _units, _exploded in groups for d in rows]
+		batch_size_flags = self._get_batch_size_flags(d.operation for d in all_rows)
+
+		operations = []
+		for rows, qty, units, exploded in groups:
+			for d in rows:
+				self._adjust_operation_row(d, qty, units, exploded, batch_size_flags)
+				operations.append(d)
+		return operations
+
+	def _bom_operations(self, bom_no):
+		return frappe.get_all(
+			"BOM Operation", filters={"parent": bom_no}, fields=_BOM_OPERATION_FIELDS, order_by="idx"
+		)
+
+	def _get_batch_size_flags(self, operation_names):
+		names = {name for name in operation_names if name}
+		if not names:
+			return {}
+		return dict(
+			frappe.get_all(
+				"Operation",
+				filters={"name": ["in", list(names)]},
+				fields=["name", "create_job_card_based_on_batch_size"],
+				as_list=True,
+				limit_page_length=0,
+			)
+		)
+
+	def _adjust_operation_row(self, d, qty, units, exploded, batch_size_flags):
+		if not d.fixed_time:
+			d.time_in_mins = _operation_time_per_unit(d, qty, units, exploded, batch_size_flags)
+
+		d.status = "Pending"
+		d.output_qty = self._operation_output_qty(d, qty, exploded)
+		if self.doc.track_semi_finished_goods and not d.sequence_id:
+			d.sequence_id = d.idx
+
+	def _operation_output_qty(self, d, qty, exploded):
+		finished_good_qty = flt(d.pop("finished_good_qty", 0))
+		if not (finished_good_qty and flt(qty) and d.finished_good):
+			return 0
+
+		if d.finished_good == self.doc.production_item:
+			return 0
+
+		per_unit = finished_good_qty * flt(qty) if exploded else finished_good_qty / flt(qty)
+		return flt(per_unit * flt(self.doc.qty), self.doc.precision("output_qty", "operations"))
+
+	def calculate_time(self):
+		for d in self.doc.get("operations"):
+			if not d.fixed_time:
+				d.time_in_mins = flt(d.time_in_mins) * flt(self.doc.qty)
+
+		self.calculate_operating_cost()
+
+	def get_holidays(self, workstation):
+		holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")
+
+		holidays = {}
+
+		if holiday_list not in holidays:
+			holiday_list_days = [
+				getdate(d[0])
+				for d in frappe.get_all(
+					"Holiday",
+					fields=["holiday_date"],
+					filters={"parent": holiday_list},
+					order_by="holiday_date",
+					limit_page_length=0,
+					as_list=1,
+				)
+			]
+
+			holidays[holiday_list] = holiday_list_days
+
+		return holidays[holiday_list]
+
+	def update_operation_status(self, operation_id=None):
+		for d in self.doc.get("operations"):
+			if d.name == operation_id:
+				self.validate_operation_overproduction(d)
+
+			d.status = self._operation_status(d)
+
+	def validate_operation_overproduction(self, d):
+		allowance_percentage = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
+		)
+		operation_qty = get_operation_qty(self.doc, d)
+		max_allowed_qty_for_wo = operation_qty + (allowance_percentage / 100 * operation_qty)
+
+		if self._operation_qty(d) > flt(max_allowed_qty_for_wo, d.precision("completed_qty")):
+			frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
+
+	def _operation_status(self, d):
+		qty = self._operation_qty(d)
+		if not qty:
+			return "Pending"
+		if qty < flt(get_operation_qty(self.doc, d), d.precision("completed_qty")):
+			return "Work in Progress"
+		return "Completed"
+
+	def _operation_qty(self, d):
+		precision = d.precision("completed_qty")
+		return flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
+
+	def set_actual_dates(self):
+		if self.doc.get("operations"):
+			self._set_dates_from_operations()
+		else:
+			self._set_dates_from_stock_entries()
+
+		self.set_lead_time()
+
+	def _set_dates_from_operations(self):
+		operations = self.doc.get("operations")
+		start_dates = [d.actual_start_time for d in operations if d.actual_start_time]
+		if start_dates:
+			self.doc.actual_start_date = min(start_dates)
+
+		end_dates = [d.actual_end_time for d in operations if d.actual_end_time]
+		if end_dates:
+			self.doc.actual_end_date = max(end_dates)
+
+	def _set_dates_from_stock_entries(self):
+		# {"TIMESTAMP": [...]} renders MySQL's TIMESTAMP(date, time), invalid on postgres; use the
+		# portable CombineDatetime via query builder instead.
+		se = frappe.qb.DocType("Stock Entry")
+		posting_datetime = CombineDatetime(se.posting_date, se.posting_time)
+		data = (
+			frappe.qb.from_(se)
+			.select(Min(posting_datetime).as_("start_date"), Max(posting_datetime).as_("end_date"))
+			.where(
+				(se.work_order == self.doc.name)
+				& (se.docstatus == 1)
+				& (se.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
+			)
+			.run(as_dict=True)
+		)
+		start_date = data[0].start_date
+		end_date = data[0].end_date if self.doc.status == "Completed" else None
+		lead_time = flt(time_diff_in_hours(end_date, start_date) * 60) if start_date and end_date else 0
+		self.doc.db_set(
+			{"actual_start_date": start_date, "actual_end_date": end_date, "lead_time": lead_time}
+		)
+
+	def set_lead_time(self):
+		if self.doc.actual_start_date and self.doc.actual_end_date:
+			self.doc.lead_time = flt(
+				time_diff_in_hours(self.doc.actual_end_date, self.doc.actual_start_date) * 60
+			)
+
+
+def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
+	if batch_size_flags.get(d.operation) and flt(d.batch_size):
+		return d.time_in_mins * flt(units) / flt(d.batch_size)
+	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
+
+
+@frappe.request_cache
+def get_hour_rate(workstation):
+	return frappe.get_cached_value("Workstation", workstation, "hour_rate") or 0.0
