@@ -8,7 +8,9 @@ from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts import (
 	get_statement_dict,
+	send_auto_email,
 	send_emails,
+	set_ageing,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -115,6 +117,61 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 		process_soa.load_from_db()
 		self.assertEqual(process_soa.posting_date, getdate(add_days(today(), 7)))
 
+	def test_future_start_date_sets_receivable_posting_date(self):
+		start_date = add_days(today(), 5)
+		process_soa = create_process_soa(
+			name="_Test Process SOA Start AR",
+			enable_auto_email=1,
+			report="Accounts Receivable",
+			start_date=start_date,
+		)
+		self.assertEqual(getdate(process_soa.posting_date), getdate(start_date))
+
+	def test_edit_keeps_the_next_send_date(self):
+		start_date = add_days(today(), 5)
+		process_soa = create_process_soa(
+			name="_Test Process SOA Edit", enable_auto_email=1, start_date=start_date
+		)
+		# the scheduler moves the date after a send
+		next_send = add_days(start_date, 7)
+		process_soa.db_set("to_date", next_send)
+		process_soa.reload()
+
+		process_soa.subject = "Statement"
+		process_soa.save()
+		self.assertEqual(getdate(process_soa.to_date), getdate(next_send))
+
+	@patch("erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_emails")
+	def test_auto_email_selects_due_and_missed_runs(self, send_emails):
+		missed_gl = create_process_soa(name="_Test Process SOA Missed GL", enable_auto_email=1)
+		missed_gl.db_set({"to_date": add_days(today(), -3), "posting_date": add_days(today(), 4)})
+		missed_ar = create_process_soa(
+			name="_Test Process SOA Missed AR", enable_auto_email=1, report="Accounts Receivable"
+		)
+		missed_ar.db_set({"posting_date": add_days(today(), -3), "to_date": add_days(today(), 4)})
+		future_ar = create_process_soa(
+			name="_Test Process SOA Future AR",
+			enable_auto_email=1,
+			report="Accounts Receivable",
+			start_date=add_days(today(), 5),
+		)
+
+		send_auto_email()
+		selected = {call.args[0] for call in send_emails.call_args_list}
+		self.assertIn(missed_gl.name, selected)
+		self.assertIn(missed_ar.name, selected)
+		self.assertNotIn(future_ar.name, selected)
+
+	def test_gl_ageing_is_as_of_to_date(self):
+		to_date = add_days(today(), 45)
+		process_soa = create_process_soa(name="_Test Process SOA GL Ageing", to_date=to_date)
+		with patch(
+			"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_ageing",
+			return_value=([], []),
+		) as get_ageing:
+			set_ageing(process_soa, frappe._dict(customer="_Test Customer"))
+		self.assertEqual(getdate(get_ageing.call_args.args[0].report_date), getdate(to_date))
+
 	def check_ageing_summary(self, ageing, expected_ageing):
 		for age_range in expected_ageing:
 			self.assertEqual(expected_ageing[age_range], ageing.get(age_range))
@@ -137,6 +194,8 @@ def create_process_soa(**args):
 		posting_date=args.posting_date or getdate(today()),
 		include_ageing=1,
 	)
+	if args.start_date:
+		soa_dict.start_date = args.start_date
 	process_soa.update(soa_dict)
 	process_soa.save()
 	return process_soa
