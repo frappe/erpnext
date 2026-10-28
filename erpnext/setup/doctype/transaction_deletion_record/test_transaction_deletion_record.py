@@ -460,6 +460,147 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 			frappe.db.count("GL Entry", {"voucher_type": "Journal Entry", "voucher_no": journal.name}), 0
 		)
 
+	def test_company_project_survives_transaction_deletion(self):
+		project = frappe.get_doc(
+			{"doctype": "Project", "project_name": "Transaction deletion test", "company": "_Test Company 7"}
+		).insert()
+		tdr = create_and_submit_transaction_deletion_doc("_Test Company 7")
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertTrue(frappe.db.exists("Project", project.name))
+
+	def test_configuration_and_submitted_cost_center_allocation_survive(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Deletion configuration",
+				"abbr": "TDCF",
+				"country": "India",
+				"default_currency": "INR",
+			}
+		).insert()
+		warehouse = frappe.db.get_value("Warehouse", {"company": company.name, "warehouse_name": "Stores"})
+		item = make_item().name
+		records = [
+			frappe.get_doc(
+				{
+					"doctype": "Pricing Rule",
+					"title": "Deletion discount",
+					"apply_on": "Item Code",
+					"items": [{"item_code": item}],
+					"selling": 1,
+					"company": company.name,
+					"price_or_product_discount": "Price",
+					"rate_or_discount": "Discount Percentage",
+					"discount_percentage": 5,
+				}
+			).insert(),
+			frappe.get_doc(
+				{
+					"doctype": "Putaway Rule",
+					"company": company.name,
+					"item_code": item,
+					"warehouse": warehouse,
+					"capacity": 100,
+				}
+			).insert(),
+			frappe.get_doc(
+				{
+					"doctype": "Authorization Rule",
+					"transaction": "Sales Order",
+					"based_on": "Grand Total",
+					"value": 100000,
+					"approving_role": "Sales Manager",
+					"company": company.name,
+				}
+			).insert(),
+		]
+		root = frappe.db.get_value(
+			"Cost Center", {"company": company.name, "is_group": 1, "parent_cost_center": ["is", "not set"]}
+		)
+		centers = [
+			frappe.get_doc(
+				{
+					"doctype": "Cost Center",
+					"cost_center_name": name,
+					"company": company.name,
+					"parent_cost_center": root,
+				}
+			)
+			.insert()
+			.name
+			for name in ("Deletion allocation A", "Deletion allocation B")
+		]
+		allocation = (
+			frappe.get_doc(
+				{
+					"doctype": "Cost Center Allocation",
+					"company": company.name,
+					"main_cost_center": company.cost_center,
+					"valid_from": frappe.utils.today(),
+					"allocation_percentages": [{"cost_center": name, "percentage": 50} for name in centers],
+				}
+			)
+			.insert()
+			.submit()
+		)
+		records.append(allocation)
+		tdr = create_and_submit_transaction_deletion_doc(company.name)
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		for record in records:
+			self.assertTrue(frappe.db.exists(record.doctype, record.name), record.doctype)
+		journal = create_deletion_journal(company.name)
+		entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Journal Entry",
+				"voucher_no": journal.name,
+				"account": f"Sales - {company.abbr}",
+			},
+			fields=["cost_center", "credit"],
+			order_by="cost_center",
+		)
+		self.assertEqual(
+			[(row.cost_center, row.credit) for row in entries], [(name, 50) for name in sorted(centers)]
+		)
+
+	def test_named_configuration_doctypes_are_excluded(self):
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			get_doctypes_to_be_ignored,
+		)
+
+		expected = {
+			"Pricing Rule",
+			"Tax Rule",
+			"Shipping Rule",
+			"Putaway Rule",
+			"Authorization Rule",
+			"Project",
+			"Promotional Scheme",
+			"Loyalty Program",
+			"Accounting Dimension Filter",
+			"Accounting Period",
+			"Cost Center Allocation",
+			"Journal Entry Template",
+			"Dunning Type",
+			"Bank Transaction Rule",
+			"Payment Gateway Account",
+			"Email Digest",
+			"UAE VAT Settings",
+			"South Africa VAT Settings",
+			"Shareholder",
+			"Vehicle",
+			"Plant Floor",
+			"Asset Maintenance Team",
+		}
+		self.assertFalse(expected - set(get_doctypes_to_be_ignored()))
+		tdr = frappe.get_doc(
+			{"doctype": "Transaction Deletion Record", "company": "_Test Company 7"}
+		).insert()
+		tdr.generate_to_delete_list()
+		self.assertFalse(expected & {row.doctype_name for row in tdr.doctypes_to_delete})
+
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
 		company = "_Test Company 7"
