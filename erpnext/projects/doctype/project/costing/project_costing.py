@@ -53,6 +53,8 @@ class ProjectCosting:
 	def build(self) -> dict:
 		payload = {
 			"project": self.project.name,
+			# the Project stores the customer's ID, which a naming series makes unreadable
+			"customer_name": self.customer_name(),
 			"as_of": str(getdate()),
 			"currency": self.currency,
 			"access": self.access,
@@ -66,6 +68,11 @@ class ProjectCosting:
 				payload["errors"][section] = 1
 				frappe.log_error(title="Project Costing: " + section)
 		return payload
+
+	def customer_name(self) -> str | None:
+		if not self.project.customer:
+			return None
+		return frappe.get_cached_value("Customer", self.project.customer, "customer_name")
 
 	def summary(self) -> dict:
 		summary = CostingSummary(self.project, self.totals, self.contract).build()

@@ -31,6 +31,11 @@
   "actual_start_date",
   "actual_end_date",
   "actual_time",
+  "accounting_section",
+  "company",
+  "estimated_costing",
+  "column_break_accounting",
+  "cost_center",
   "tasks_tab",
   "tasks_html",
   "more_info_tab",
@@ -41,12 +46,8 @@
   "section_break0",
   "notes",
   "costing_tab",
-  "accounting_section",
-  "company",
-  "column_break_accounting",
-  "cost_center",
+  "costing_dashboard",
   "project_details",
-  "estimated_costing",
   "total_costing_amount",
   "total_purchase_cost",
   "column_break_28",
@@ -496,6 +497,13 @@
    "label": "Costing"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "costing_dashboard",
+   "fieldtype": "Vue Component",
+   "label": "Costing Dashboard",
+   "options": "erpnext.project_costing"
+  },
+  {
    "fieldname": "monitor_progress_tab",
    "fieldtype": "Tab Break",
    "label": "Progress updates"
@@ -544,7 +552,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-10-15 12:00:00.000000",
+ "modified": "2026-10-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
