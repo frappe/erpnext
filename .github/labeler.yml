@@ -28,9 +28,6 @@ support:
 POS:
 - pos*
 
-ecommerce:
-- erpnext/e_commerce/*
-
 maintenance:
 - erpnext/maintenance/*
 
@@ -39,12 +36,6 @@ manufacturing:
 
 crm:
 - erpnext/crm/*
-
-HR:
-- erpnext/hr/*
-
-payroll:
-- erpnext/payroll*
 
 projects:
 - erpnext/projects/*
