@@ -403,6 +403,8 @@ class Quotation(SellingController):
 
 	def on_update_after_submit(self):
 		if self.has_value_changed("is_active"):
+			if self.is_active:
+				self.deactivate_other_versions()
 			self.update_opportunity("Quotation" if self.is_active else "Open")
 			self.update_lead()
 
@@ -419,7 +421,8 @@ class Quotation(SellingController):
 		self.update_latest_revision()
 
 	def deactivate_other_versions(self):
-		if not (self.revision_of and self.is_active):
+		# Only one version may be active at a time, whether this is the original or a revision.
+		if not self.is_active:
 			return
 
 		self.update_other_versions({"is_active": 1}, {"is_active": 0})

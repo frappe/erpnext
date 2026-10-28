@@ -717,6 +717,21 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
 		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
 
+	def test_manually_activating_a_version_deactivates_the_others(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
+
+		original = frappe.get_doc("Quotation", quotation.name)
+		original.is_active = 1
+		original.save()
+
+		# exactly one version stays active, even when the original is the one reactivated
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 1)
+		self.assertEqual(frappe.db.get_value("Quotation", revision.name, "is_active"), 0)
+
 	def test_declare_lost_requires_a_reason_without_changing_the_quotation(self):
 		quotation = make_quotation()
 		quotation.append("lost_reasons", {"lost_reason": self.lost_reason})
