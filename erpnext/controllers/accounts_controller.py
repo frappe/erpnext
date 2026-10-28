@@ -4730,6 +4730,8 @@ def update_child_qty_rate(
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()
+	elif parent_doctype == "Quotation":
+		make_packing_list(parent)
 	frappe.get_doc("Authorization Control").validate_approving_authority(
 		parent.doctype, parent.company, parent.base_grand_total
 	)
