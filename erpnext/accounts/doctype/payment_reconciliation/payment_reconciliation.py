@@ -338,7 +338,7 @@ class PaymentReconciliation(Document):
 			row.update(payment)
 			row.is_advance = payment.book_advance_payments_in_separate_party_account
 
-	def get_invoice_entries(self):
+	def get_invoice_entries(self, vouchers=None):
 		# Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
 
 		self.build_qb_filter_conditions(get_invoices=True)
@@ -357,7 +357,8 @@ class PaymentReconciliation(Document):
 			min_outstanding=self.minimum_invoice_amount if self.minimum_invoice_amount else None,
 			max_outstanding=self.maximum_invoice_amount if self.maximum_invoice_amount else None,
 			accounting_dimensions=self.accounting_dimension_filter_conditions,
-			limit=self.invoice_limit,
+			vouchers=vouchers,
+			limit=self.invoice_limit if not vouchers else None,
 			voucher_no=self.invoice_name,
 		)
 
@@ -370,7 +371,7 @@ class PaymentReconciliation(Document):
 		# Happens when non-standalone cr/dr notes are linked with another invoice through journal entry
 		non_reconciled_invoices = [x for x in non_reconciled_invoices if x.voucher_no not in cr_dr_notes]
 
-		if self.invoice_limit:
+		if self.invoice_limit and not vouchers:
 			non_reconciled_invoices = non_reconciled_invoices[: self.invoice_limit]
 
 		non_reconciled_invoices = sorted(
@@ -744,13 +745,19 @@ class PaymentReconciliation(Document):
 						).format(row.idx, row.allocated_amount, row.amount)
 					)
 
-				invoice_outstanding = unreconciled_invoices.get(row.invoice_type, {}).get(row.invoice_number)
+				invoice_outstanding = unreconciled_invoices.get(row.invoice_type, {}).get(
+					row.invoice_number, 0
+				)
 				if flt(row.allocated_amount) - invoice_outstanding > 0.009:
 					frappe.throw(
 						_(
 							"Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}"
 						).format(row.idx, row.allocated_amount, invoice_outstanding)
 					)
+
+				unreconciled_invoices.setdefault(row.invoice_type, {})[row.invoice_number] = (
+					invoice_outstanding - flt(row.allocated_amount)
+				)
 
 		if not invoices_to_reconcile:
 			frappe.throw(_("No records found in Allocation table"))
@@ -911,8 +918,8 @@ def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 				inv.voucher_type,
 				inv.voucher_no,
 				None,
-				inv.against_voucher_type,
-				inv.against_voucher,
+				jv.doctype,
+				jv.name,
 				None,
 				inv.cost_center,
 				dimensions_dict,

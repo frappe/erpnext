@@ -4,6 +4,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 concurrency:
   group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
@@ -14,100 +18,110 @@ jobs:
       (github.event_name != 'pull_request'
       || (github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/'))
       || (startsWith(github.base_ref, 'version-') && !endsWith(github.base_ref, '-hotfix')))
-    runs-on: ubuntu-latest
+    runs-on: erpnext-arc-patch
     timeout-minutes: 60
 
     name: Patch Test
 
-    services:
-      mysql:
-        image: mariadb:10.6
-        env:
-          MARIADB_ROOT_PASSWORD: 'root'
-        ports:
-          - 3306:3306
-        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+    container:
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.11-node18-mariadb11.8
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_TOKEN || github.token }}
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      ERPNEXT_CI_USER: ci
+      CI_DB_DATADIR: /home/ci/db-ram/data
+      PIP_CACHE_DIR: /home/ci/.cache/pip
+      npm_config_cache: /home/ci/.cache/npm
+      YARN_CACHE_FOLDER: /home/ci/.cache/yarn
+      UV_CACHE_DIR: /home/ci/.cache/uv
+      UV_LINK_MODE: copy
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Check for valid Python & Merge Conflicts
         run: |
-          python -m compileall -f "${GITHUB_WORKSPACE}"
+          python -m compileall -fq "${GITHUB_WORKSPACE}"
           if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
               then echo "Found merge conflicts"
               exit 1
           fi
 
-      - name: Setup Python
-        uses: "actions/setup-python@v4"
-        with:
-          python-version: '3.10'
-
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18
-          check-latest: true
-
       - name: Add to Hosts
-        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+        run: echo "127.0.0.1 test_site" | tee -a /etc/hosts
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
-
-      - name: Cache node modules
-        uses: actions/cache@v4
+      - name: Start DB
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
         env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          SKIP_SYSTEM_SETUP: "1"
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v4
-        id: yarn-cache
+      # The v13 baseline backup is a fixed published file — cache it instead of re-downloading
+      # it from the GitHub release every run.
+      - name: Cache erpnext v13 backup
+        id: cache-v13
+        uses: actions/cache@v4
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          path: /tmp/v13-erpnext.sql.gz
+          key: erpnext-v13-sql-gz
+
+      - name: Download erpnext v13 backup
+        if: steps.cache-v13.outputs.cache-hit != 'true'
+        run: |
+          curl -fSL --retry 5 --retry-all-errors --retry-delay 5 \
+            -o /tmp/v13-erpnext.sql.gz \
+            https://github.com/frappe/erpnext/releases/download/v13-baseline/v13-erpnext.sql.gz
 
       - name: Install
-        run: |
-          pip install frappe-bench
-          bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
           DB: mariadb
-          TYPE: server
+          TYPE: patch
+          DB_HOST: 127.0.0.1
+          DB_USER_HOST: '%'
+          SKIP_SYSTEM_SETUP: "1"
+          SKIP_WKHTMLTOX_SETUP: 1
+          CI_SKIP_ERPNEXT_ASSETS: 1
+          # Anonymous git to github.com gets throttled to a 401; authenticate the clones.
+          CI_GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run Patch Tests
         run: |
+          su -m "$ERPNEXT_CI_USER" -s /bin/bash <<'EOF'
+          set -eo pipefail
           cd ~/frappe-bench/
-          bench remove-app payments --force
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
-          wget https://erpnext.com/files/v13-erpnext.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/v13-erpnext.sql.gz
+          bench --site test_site --force restore /tmp/v13-erpnext.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
 
+          # Start every bench process except the background workers. If workers run during a
+          # migrate, they pick up the orphan-link cleanup jobs it enqueues and race its schema
+          # changes, which fails with MySQL 1412 "Table definition has changed". Redis and the
+          # other services stay up; the queued jobs simply wait and are harmless here.
+          function start_bench_without_workers() {
+            local procs
+            procs=$(awk -F: '/^[a-z_]+:/ && $1 !~ /worker/ {print $1}' ~/frappe-bench/Procfile)
+            honcho start -f ~/frappe-bench/Procfile $procs &>> ~/frappe-bench/bench_start.log &
+          }
+
+          function retry() {
+            for attempt in 1 2 3; do
+              "$@" && return
+              echo "Attempt $attempt failed: $*"
+              sleep 15
+            done
+            return 1
+          }
 
           function update_to_version() {
             version=$1
@@ -116,35 +130,60 @@ jobs:
             echo "Updating to v$version"
 
             # Fetch and checkout branches
-            git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
-            git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+            retry git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
+            retry git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
             git -C "apps/frappe" checkout -q -f $branch_name
             git -C "apps/erpnext" checkout -q -f $branch_name
 
             # Resetup env and install apps
             pgrep honcho | xargs kill
+            sleep 10
             rm -rf ~/frappe-bench/env
-            bench -v setup env
+            bench -v setup env --python "$2"
             bench pip install -e ./apps/erpnext
-            bench start &>> ~/frappe-bench/bench_start.log &
+            start_bench_without_workers
 
             bench --site test_site migrate
           }
 
-          update_to_version 14
+          update_to_version 14 python3.11
 
           echo "Updating to latest version"
-          git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+          fallback_to_hotfix=0
+          if [ -n "${GITHUB_BASE_REF:-}" ]; then
+            frappe_ref="refs/heads/$GITHUB_BASE_REF"
+            fallback_to_hotfix=1
+          elif [ "${GITHUB_REF_TYPE:-}" = "branch" ]; then
+            frappe_ref="$GITHUB_REF"
+            fallback_to_hotfix=1
+          elif [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            frappe_ref="$GITHUB_REF"
+          else
+            echo "Unsupported GitHub ref type: '${GITHUB_REF_TYPE:-unset}'"
+            exit 1
+          fi
+
+          ls_remote_status=0
+          git -C "apps/frappe" ls-remote --exit-code upstream "$frappe_ref" >/dev/null \
+            || ls_remote_status=$?
+          if [ "$ls_remote_status" -eq 2 ] && [ "$fallback_to_hotfix" -eq 1 ]; then
+            echo "frappe has no '$frappe_ref'; falling back to version-15-hotfix"
+            frappe_ref=refs/heads/version-15-hotfix
+          elif [ "$ls_remote_status" -ne 0 ]; then
+            exit "$ls_remote_status"
+          fi
+          retry git -C "apps/frappe" fetch --depth 1 upstream "$frappe_ref"
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
           pgrep honcho | xargs kill
           rm -rf ~/frappe-bench/env
-          bench -v setup env
+          bench -v setup env --python python3.11
           bench pip install -e ./apps/erpnext
-          bench start &>> ~/frappe-bench/bench_start.log &
+          start_bench_without_workers
 
           bench --site test_site migrate
+          EOF
 
       - name: Show bench output
         if: ${{ always() }}

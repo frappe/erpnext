@@ -1157,14 +1157,16 @@ class calculate_taxes_and_totals:
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
-			if item.pricing_rules and not self.doc.ignore_pricing_rule:
+			# An item no rule applied to may still hold "[]", which must not override the rate typed in
+			applied_rules = get_applied_pricing_rules(item.pricing_rules)
+			if applied_rules and not self.doc.ignore_pricing_rule:
 				item.margin_type = None
 				item.margin_rate_or_amount = 0.0
-				for d in get_applied_pricing_rules(item.pricing_rules):
+				for d in applied_rules:
 					pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 					apply_pricing_rule_margin(pricing_rule, item, self.doc)
 
-			if not item.pricing_rules and flt(item.rate) > flt(item.price_list_rate):
+			if not applied_rules and flt(item.rate) > flt(item.price_list_rate):
 				item.margin_type = "Amount"
 				item.margin_rate_or_amount = flt(
 					item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")

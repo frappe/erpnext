@@ -197,7 +197,10 @@ def validate_returned_items(doc):
 
 def validate_returned_bundle_components(doc, valid_items, already_returned_items):
 	"""Hold the components of returned bundles to what is left of each delivered component."""
-	from erpnext.stock.doctype.packed_item.packed_item import get_product_bundle_items
+	from erpnext.stock.doctype.packed_item.packed_item import (
+		get_component_conversion_factor,
+		get_product_bundle_items,
+	)
 
 	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
 	bundle_items = set(
@@ -227,7 +230,9 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 				component.item_code, frappe._dict(qty=0, stock_qty=0)
 			)
 			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
-			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * flt(component.qty)
+			# component.qty is in the bundle-row UOM; convert to stock qty, as packing does
+			component_stock_qty = flt(component.qty) * get_component_conversion_factor(component, None)
+			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * component_stock_qty
 			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
 				ref.stock_qty, row.precision("stock_qty")
 			):
@@ -515,11 +520,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
-				doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Credit Note"))
+				doc.select_print_heading = frappe.get_cached_value("Print Heading", "Credit Note")
 
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
-			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
+			doc.select_print_heading = frappe.get_cached_value("Print Heading", "Debit Note")
 			if source.tax_withholding_category:
 				doc.set_onload("supplier_tds", source.tax_withholding_category)
 		elif doctype == "Delivery Note":

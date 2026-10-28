@@ -147,11 +147,15 @@ class TransactionBase(StatusUpdater):
 
 		if self.doctype in buying_doctypes:
 			action, role_allowed_to_override = frappe.get_cached_value(
-				"Buying Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+				"Buying Settings",
+				"Buying Settings",
+				["maintain_same_rate_action", "role_to_override_stop_action"],
 			)
 		else:
 			action, role_allowed_to_override = frappe.get_cached_value(
-				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+				"Selling Settings",
+				"Selling Settings",
+				["maintain_same_rate_action", "role_to_override_stop_action"],
 			)
 
 		stop_actions = []
@@ -338,13 +342,13 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					precision = d.precision(f)
-					if abs(cint(qty) - flt(qty, precision)) > 0.0000001:
+					qty = flt(qty, d.precision(f))
+					if qty != cint(qty):
 						frappe.throw(
 							_(
 								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 							).format(
-								flt(qty, precision),
+								qty,
 								d.idx,
 								frappe.bold(_("Must be Whole Number")),
 								frappe.bold(d.get(uom_field)),

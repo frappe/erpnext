@@ -36,7 +36,7 @@ from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from erpnext.stock.utils import _get_latest_stock_qty, get_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -643,16 +643,8 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = total_qty
 
-		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
-		if not batch_auto_creation:
-			frappe.msgprint(
-				_("Batch not created for item {} since it does not have a batch series.").format(
-					frappe.bold(self.production_item)
-				),
-				alert=True,
-				indicator="orange",
-			)
-			return
+		if not frappe.get_cached_value("Item", self.production_item, "create_new_batch"):
+			self.throw_missing_item_setting("create_new_batch")
 
 		while total_qty > 0:
 			qty = self.batch_size
@@ -687,10 +679,10 @@ class WorkOrder(Document):
 				"Batch", filters={"reference_name": self.name}, order_by="creation", pluck="name"
 			)
 
-		serial_nos = []
-		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
+		if not item_details.serial_no_series:
+			self.throw_missing_item_setting("serial_no_series")
 
+		serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
 		if not serial_nos:
 			return
 
@@ -766,7 +758,7 @@ class WorkOrder(Document):
 		)
 
 		if enable_capacity_planning and job_card_doc:
-			row.planned_start_time = job_card_doc.scheduled_time_logs[-1].from_time
+			row.planned_start_time = job_card_doc.scheduled_time_logs[0].from_time
 			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
 
 			if date_diff(row.planned_end_time, self.planned_start_date) > plan_days:
@@ -811,6 +803,22 @@ class WorkOrder(Document):
 
 		if row.planned_start_time == row.planned_end_time:
 			frappe.throw(_("Capacity Planning Error, planned start time can not be same as end time"))
+
+	def throw_missing_item_setting(self, fieldname):
+		frappe.throw(
+			_("Set {0} in Item {1} or disable {2} in {3}").format(
+				frappe.bold(_(frappe.get_meta("Item").get_label(fieldname))),
+				get_link_to_form("Item", self.production_item),
+				frappe.bold(
+					_(
+						frappe.get_meta("Manufacturing Settings").get_label(
+							"make_serial_no_batch_from_work_order"
+						)
+					)
+				),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			)
+		)
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -1230,10 +1238,10 @@ class WorkOrder(Document):
 	def set_available_qty(self):
 		for d in self.get("required_items"):
 			if d.source_warehouse:
-				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				d.available_qty_at_source_warehouse = _get_latest_stock_qty(d.item_code, d.source_warehouse)
 
 			if self.wip_warehouse:
-				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
+				d.available_qty_at_wip_warehouse = _get_latest_stock_qty(d.item_code, self.wip_warehouse)
 
 	def set_required_items(self, reset_only_qty=False):
 		"""set required_items for production to keep track of reserved qty"""
@@ -1454,6 +1462,8 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_item_details(item, project=None, skip_bom_info=False, throw=True):
+	frappe.has_permission("Item", "read", doc=item, throw=True)
+
 	res = frappe.db.sql(
 		"""
 		select stock_uom, description, item_name, allow_alternative_item,

@@ -14,6 +14,7 @@ from frappe.utils.data import get_url_to_list
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 from erpnext import get_default_currency
+from erpnext.setup.doctype.target_detail.target_detail import validate_targets
 
 
 class SalesPerson(NestedSet):
@@ -43,6 +44,7 @@ class SalesPerson(NestedSet):
 	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):
+		validate_targets(self.get("targets"))
 		if not self.enabled:
 			self.validate_sales_person()
 
@@ -139,6 +141,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 			.on(transaction.name == sales_team.parent)
 			.select(UnixTimestamp(transaction[date_field]), Count("*"))
 			.where(sales_team.sales_person == name)
+			.where(transaction.docstatus == 1)
 			.where(transaction[date_field] > CurDate() - Interval(years=1))
 			.groupby(transaction[date_field])
 			.run()

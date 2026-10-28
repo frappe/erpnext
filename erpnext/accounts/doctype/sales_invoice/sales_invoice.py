@@ -11,6 +11,7 @@ from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -536,6 +537,9 @@ class SalesInvoice(SellingController):
 
 		self.process_common_party_accounting()
 
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
+
 	def validate_pos_return(self):
 		if self.is_consolidated:
 			# pos return is already validated in pos invoice
@@ -638,6 +642,9 @@ class SalesInvoice(SellingController):
 		)
 
 		self.delete_auto_created_batches()
+
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -3017,19 +3024,38 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
-			target.dunning_fee = dunning_type.dunning_fee
+			target.dunning_fee = flt(dunning_type.dunning_fee) / target.conversion_rate
 			target.income_account = dunning_type.income_account
 			target.cost_center = dunning_type.cost_center
 			target.language = source.language
-			target.get_dunning_letter_text()
 
 		# update outstanding from doc
 		if source.payment_schedule and len(source.payment_schedule) == 1:
 			for row in target.overdue_payments:
 				if row.payment_schedule == source.payment_schedule[0].name:
-					row.outstanding = source.get("outstanding_amount")
+					# outstanding_amount is in the party account currency, but the Overdue Payment
+					# row is in the invoice's transaction currency. When they differ, use the
+					# payment schedule's own outstanding — it is kept in transaction currency and
+					# updated as payments are allocated, so it stays correct even when the invoice
+					# and its payments post at different exchange rates (#56006).
+					if source.party_account_currency and source.party_account_currency != source.currency:
+						row.outstanding = source.payment_schedule[0].outstanding
+					else:
+						row.outstanding = source.get("outstanding_amount")
 
+		if len(source.payment_schedule) > 1 and source.party_account_currency == source.currency:
+			outstanding = get_payment_schedule_outstanding(source, source.payment_schedule)
+			for row in target.overdue_payments[:]:
+				if row.sales_invoice == source.name:
+					row.outstanding = outstanding[row.payment_schedule]
+					if flt(row.outstanding, row.precision("outstanding")) <= 0:
+						target.remove(row)
+
+		if not target.overdue_payments:
+			frappe.throw(_("There are no overdue payments to include in this Dunning."))
 		target.validate()
+		if dunning_type:
+			target.get_dunning_letter_text()
 
 	return get_mapped_doc(
 		from_doctype="Sales Invoice",

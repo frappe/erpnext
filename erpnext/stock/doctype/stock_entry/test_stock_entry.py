@@ -30,7 +30,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, make_stock_in_entry
+from erpnext.stock.doctype.stock_entry.stock_entry import (
+	DuplicateEntryForWorkOrderError,
+	FinishedGoodError,
+	make_stock_in_entry,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -637,6 +641,43 @@ class TestStockEntry(FrappeTestCase):
 		)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 
+	def test_half_cent_transfer_moves_no_value_after_target_warehouse_repost(self):
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=10.005,
+			posting_date=add_days(today(), -10),
+		)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			basic_rate=7,
+			posting_date=add_days(today(), -8),
+		)
+
+		outward, inward = self.get_transfer_leg_values(transfer.name)
+		self.assertEqual(flt(inward, 2), -flt(outward, 2))
+
+	def get_transfer_leg_values(self, voucher_no):
+		return tuple(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		)
+
 	def assert_half_cent_transfer_moves_no_value(self, item_code):
 		receipt = make_stock_entry(
 			item_code=item_code, target="_Test Warehouse - _TC", qty=4000, basic_rate=7189.1616125
@@ -651,14 +692,7 @@ class TestStockEntry(FrappeTestCase):
 			batch_no=bundle and get_batch_from_bundle(bundle),
 		)
 
-		outward, inward = (
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_no": transfer.name, "warehouse": warehouse, "is_cancelled": 0},
-				"stock_value_difference",
-			)
-			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
-		)
+		outward, inward = self.get_transfer_leg_values(transfer.name)
 		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 		return receipt, transfer
 
@@ -1935,6 +1969,34 @@ class TestStockEntry(FrappeTestCase):
 				se_ok.reload()
 				se_ok.submit()
 				self.assertEqual(se_ok.docstatus, 1)
+
+	def test_duplicate_entry_for_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		wo = make_wo_order_test_record(qty=1)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=100
+		)
+
+		transfer = frappe.get_doc(make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		for d in transfer.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer.insert()
+		transfer.submit()
+
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		mfg.insert()
+
+		duplicate = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		self.assertRaises(DuplicateEntryForWorkOrderError, duplicate.insert)
+
+		with change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}):
+			within_allowance = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+			within_allowance.insert()
 
 	@change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
 	def test_quality_inspection_required_for_manufacture(self):

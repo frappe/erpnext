@@ -1028,7 +1028,8 @@ class update_entries_after:
 		# Get dynamic incoming/outgoing rate
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
-		elif self.is_inward_transfer_leg(sle) and not sle.serial_and_batch_bundle:
+
+		if self.is_inward_transfer_leg(sle) and not sle.serial_and_batch_bundle:
 			sle.incoming_rate = self.get_incoming_rate_from_outward_leg(sle)
 
 		if self.is_produced_row(sle) and not sle.serial_and_batch_bundle:
@@ -2455,7 +2456,14 @@ def get_valuation_rate(
 			+ "</li>"
 		)
 		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
-		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		if fallbacks:
+			sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		else:
+			sub_solutions += (
+				"<li>"
+				+ _("Enter the Incoming Rate (Costing) in the {0} Item table.").format(voucher_type)
+				+ "</li></ul>"
+			)
 		msg = message + solutions + sub_solutions + "</li>"
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
@@ -2905,9 +2913,12 @@ def get_stock_value_difference(
 
 @frappe.request_cache
 def is_transfer_stock_entry(voucher_no):
-	purpose = frappe.get_cached_value("Stock Entry", voucher_no, "purpose")
-
-	return purpose in ["Material Transfer", "Material Transfer for Manufacture", "Send to Subcontractor"]
+	return bool(
+		frappe.db.exists(
+			"Stock Entry Detail",
+			{"parent": voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
+		)
+	)
 
 
 @frappe.request_cache

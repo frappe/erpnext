@@ -40,7 +40,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
-from erpnext.stock.get_item_details import get_bin_details, get_default_bom, get_price_list_rate
+from erpnext.stock.get_item_details import _get_bin_details, get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -905,7 +905,7 @@ def get_requested_item_qty(sales_order):
 
 
 @frappe.whitelist()
-def make_material_request(source_name, target_doc=None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -929,7 +929,7 @@ def make_material_request(source_name, target_doc=None):
 		target.project = source_parent.project
 		target.qty = get_remaining_qty(source)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
-		target.actual_qty = get_bin_details(
+		target.actual_qty = _get_bin_details(
 			target.item_code, target.warehouse, source_parent.company, True
 		).get("actual_qty", 0)
 
@@ -1532,8 +1532,7 @@ def make_purchase_order_for_default_supplier(
 	suppliers = [item.get("supplier") for item in selected_items if item.get("supplier")]
 	suppliers = list(dict.fromkeys(suppliers))  # remove duplicates while preserving order
 
-	items_to_map = [item.get("item_code") for item in selected_items if item.get("item_code")]
-	items_to_map = list(set(items_to_map))
+	items_to_map = get_purchase_order_item_map(source_name, selected_items)
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
@@ -1573,7 +1572,7 @@ def make_purchase_order_for_default_supplier(
 					"postprocess": update_item,
 					"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 					and doc.supplier == supplier
-					and doc.item_code in items_to_map
+					and doc.name in items_to_map
 					and not is_product_bundle(doc.item_code),
 				},
 				"Packed Item": {
@@ -1595,7 +1594,8 @@ def make_purchase_order_for_default_supplier(
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc: doc.parent_item in items_to_map
+					"condition": lambda doc, s=supplier: doc.parent_detail_docname in items_to_map
+					and items_to_map[doc.parent_detail_docname] == s
 					and flt(doc.ordered_qty) < flt(doc.qty),
 				},
 			},
@@ -1621,8 +1621,7 @@ def make_purchase_order(
 	if isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
 
-	items_to_map = [item.get("item_code") for item in selected_items if item.get("item_code")]
-	items_to_map = list(set(items_to_map))
+	items_to_map = get_purchase_order_item_map(source_name, selected_items)
 
 	def is_drop_ship_order(target):
 		drop_ship = True
@@ -1705,7 +1704,7 @@ def make_purchase_order(
 				],
 				"postprocess": update_item,
 				"condition": lambda doc: doc.ordered_qty < doc.stock_qty
-				and doc.item_code in items_to_map
+				and doc.name in items_to_map
 				and not is_product_bundle(doc.item_code),
 			},
 			"Packed Item": {
@@ -1727,7 +1726,7 @@ def make_purchase_order(
 					"pricing_rules",
 				],
 				"postprocess": update_item_for_packed_item,
-				"condition": lambda doc: doc.parent_item in items_to_map
+				"condition": lambda doc: doc.parent_detail_docname in items_to_map
 				and flt(doc.ordered_qty) < flt(doc.qty),
 			},
 		},
@@ -1739,6 +1738,25 @@ def make_purchase_order(
 	doc.set_onload("load_after_mapping", False)
 
 	return doc
+
+
+def get_purchase_order_item_map(source_name, selected_items):
+	sales_order = frappe.get_doc("Sales Order", source_name)
+	sales_order.check_permission("read")
+	items_to_map = {}
+	for item in selected_items:
+		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}
+		rows = sales_order.get("items", filters)
+		if len(rows) != 1:
+			frappe.throw(
+				_("Select a valid Sales Order row for Item {0}.").format(
+					frappe.bold(item.get("item_code") or item.get("name"))
+				),
+				title=_("Invalid Item Selection"),
+			)
+		items_to_map[rows[0].name] = item.get("supplier")
+
+	return items_to_map
 
 
 def set_delivery_date(items, sales_order):
@@ -1871,7 +1889,7 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 	def validate_sales_order():
@@ -1892,7 +1910,7 @@ def create_pick_list(source_name, target_doc=None):
 		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
 
 		# update available qty
-		bin_details = get_bin_details(source.item_code, source.warehouse, source_parent.company)
+		bin_details = _get_bin_details(source.item_code, source.warehouse, source_parent.company)
 		target.actual_qty = bin_details.get("actual_qty")
 		target.company_total_stock = bin_details.get("company_total_stock")
 
@@ -2161,7 +2179,7 @@ def get_potentially_billable_sales_orders(
 	item = qb.DocType("Item")
 
 	query = frappe.qb.get_query(
-		"Sales Order", fields=["name", "customer", "transaction_date"], filters=filters
+		"Sales Order", fields=["name", "customer", "transaction_date", "creation"], filters=filters
 	)
 	if txt:
 		query = query.where(get_text_search_criterion(so, txt))
@@ -2174,7 +2192,8 @@ def get_potentially_billable_sales_orders(
 		.where(get_potentially_billable_item_criterion(so, so_item, item))
 		.where(Criterion.all(build_qb_match_conditions("Sales Order")))
 		.distinct()
-		.orderby(so.transaction_date, order=Order.desc)
+		.orderby(so.transaction_date, order=Order.asc)
+		.orderby(so.creation, order=Order.asc)
 		.limit(cint(page_len))
 		.offset(cint(start))
 		.run(as_dict=True)

@@ -500,6 +500,18 @@ class BOM(WebsiteGenerator):
 
 	@frappe.whitelist()
 	def update_cost(self, update_parent=True, from_child_bom=False, update_hour_rate=True, save=True):
+		if cint(save) and not self.is_new():
+			self.load_from_db()
+			self.check_permission("write")
+
+		self._update_cost(
+			update_parent=cint(update_parent) and cint(save),
+			from_child_bom=from_child_bom,
+			update_hour_rate=update_hour_rate,
+			save=cint(save),
+		)
+
+	def _update_cost(self, update_parent=True, from_child_bom=False, update_hour_rate=True, save=True):
 		if self.docstatus == 2:
 			return
 
@@ -523,7 +535,7 @@ class BOM(WebsiteGenerator):
 			)
 
 			for bom in parent_boms:
-				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
+				frappe.get_doc("BOM", bom)._update_cost(from_child_bom=True)
 
 		if not from_child_bom:
 			msg = "Cost Updated"
@@ -1296,7 +1308,7 @@ def validate_bom_no(item, bom_no):
 
 
 @frappe.whitelist()
-def get_children(parent=None, is_root=False, **filters):
+def get_children(doctype=None, parent=None, is_root=False, **filters):
 	if not parent or parent == "BOM":
 		frappe.msgprint(_("Please select a BOM"))
 		return

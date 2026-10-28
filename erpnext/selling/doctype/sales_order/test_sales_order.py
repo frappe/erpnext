@@ -228,6 +228,26 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
 
+	def test_billing_within_rounding_of_full_completes_order(self):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, rate=100)
+		so = make_sales_order(qty=1, rate=1000000)
+
+		# 999999.99 / 1000000 rounds to 99.999999%, which already counts as fully billed
+		si = make_sales_invoice(so.name)
+		si.items[0].rate = 999999.99
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.per_billed, 100)
+		self.assertEqual(so.billing_status, "Fully Billed")
+		self.assertEqual(so.status, "To Deliver")
+
+		make_delivery_note(so.name).submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
 	def test_make_sales_invoice_for_pending_qty_with_item_billing_allowance(self):
 		item = make_item(
 			"_Test Over Billed Pending Qty Item",
@@ -1815,6 +1835,130 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(purchase_orders[0].supplier, "_Test Supplier")
 		self.assertEqual(purchase_orders[1].supplier, "_Test Supplier 1")
 
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_purchase_order_supplier_selection_uses_sales_order_rows(self):
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": "_Test Item",
+					"qty": 2,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"supplier": "_Test Supplier",
+				},
+				{
+					"item_code": "_Test Item",
+					"qty": 3,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"supplier": "_Test Supplier 1",
+				},
+			]
+		)
+		selected_items = [
+			{"name": row.name, "item_code": row.item_code, "supplier": supplier}
+			for row, supplier in zip(so.items, ["_Test Supplier", "_Test Supplier 1"], strict=True)
+		]
+
+		purchase_order = make_purchase_order(so.name, selected_items=selected_items[:1])
+		self.assertEqual(len(purchase_order.items), 1)
+		self.assertEqual(purchase_order.items[0].sales_order_item, so.items[0].name)
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=selected_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		for purchase_order in purchase_orders:
+			row = so.items[0] if purchase_order.supplier == "_Test Supplier" else so.items[1]
+			self.assertEqual(len(purchase_order.items), 1)
+			self.assertEqual(purchase_order.items[0].sales_order_item, row.name)
+			self.assertEqual(purchase_order.items[0].qty, row.qty)
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=selected_items[:1])
+		self.assertEqual(len(purchase_orders), 1)
+		self.assertEqual(len(purchase_orders[0].items), 1)
+		self.assertEqual(purchase_orders[0].items[0].sales_order_item, so.items[0].name)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_purchase_order_rejects_ambiguous_or_foreign_rows(self):
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": "_Test Item",
+					"qty": 2,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"supplier": "_Test Supplier",
+				},
+				{
+					"item_code": "_Test Item",
+					"qty": 3,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"supplier": "_Test Supplier 1",
+				},
+			]
+		)
+		other_so = make_sales_order()
+		for row_name in (None, other_so.items[0].name):
+			with self.subTest(row_name=row_name):
+				with self.assertRaisesRegex(frappe.ValidationError, "Select a valid Sales Order row"):
+					make_purchase_order_for_default_supplier(
+						so.name,
+						selected_items=[
+							{"name": row_name, "item_code": "_Test Item", "supplier": "_Test Supplier"}
+						],
+					)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_purchase_order_supplier_selection_uses_bundle_parent_rows(self):
+		bundle = make_item("_Test Repeated Supplier Bundle", {"is_stock_item": 0})
+		component = make_item("_Test Repeated Supplier Bundle Component", {"is_stock_item": 1})
+		make_product_bundle(bundle.name, [component.name], qty=2)
+		so = make_sales_order(
+			item_list=[
+				{
+					"item_code": bundle.name,
+					"qty": 2,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"supplier": "_Test Supplier",
+				},
+				{
+					"item_code": bundle.name,
+					"qty": 3,
+					"rate": 100,
+					"warehouse": "_Test Warehouse - _TC",
+					"supplier": "_Test Supplier 1",
+				},
+			]
+		)
+		selected_items = [
+			{"name": row.name, "item_code": row.item_code, "supplier": supplier}
+			for row, supplier in zip(so.items, ["_Test Supplier", "_Test Supplier 1"], strict=True)
+		]
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=selected_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		for purchase_order in purchase_orders:
+			row = so.items[0] if purchase_order.supplier == "_Test Supplier" else so.items[1]
+			packed_item = so.get("packed_items", {"parent_detail_docname": row.name})[0]
+			self.assertEqual(len(purchase_order.items), 1)
+			self.assertEqual(purchase_order.items[0].sales_order_packed_item, packed_item.name)
+			self.assertEqual(purchase_order.items[0].qty, row.qty * 2)
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=selected_items[1:])
+		self.assertEqual(len(purchase_orders), 1)
+		self.assertEqual(purchase_orders[0].supplier, "_Test Supplier 1")
+		self.assertEqual(len(purchase_orders[0].items), 1)
+		self.assertEqual(purchase_orders[0].items[0].qty, 6)
+		self.assertEqual(
+			purchase_orders[0].items[0].sales_order_packed_item,
+			so.get("packed_items", {"parent_detail_docname": so.items[1].name})[0].name,
+		)
+
 	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
 		"""
 		Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
@@ -1876,6 +2020,34 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.reload()
 		self.assertEqual(so.packed_items[0].ordered_qty, 2)
 		self.assertEqual(so.packed_items[1].ordered_qty, 2)
+
+	def test_ordered_qty_is_reset_when_cancelled_sales_order_is_unlinked(self):
+		"""Cancelling a Sales Order unlinks its Purchase Orders, so `ordered_qty` must be recomputed."""
+		selected_items = [{"item_code": "_Test Item", "supplier": "_Test Supplier"}]
+		so = make_sales_order(item_code="_Test Item", qty=10)
+
+		purchase_order = make_purchase_order(so.name, selected_items=selected_items)
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.schedule_date = add_days(nowdate(), 1)
+		purchase_order.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].ordered_qty, 10)
+
+		so.cancel()
+		so.reload()
+		self.assertEqual(so.items[0].ordered_qty, 0)
+
+		amended_so = frappe.copy_doc(so)
+		amended_so.amended_from = so.name
+		amended_so.docstatus = 0
+		amended_so.insert()
+		amended_so.submit()
+
+		self.assertEqual(amended_so.items[0].ordered_qty, 0)
+
+		new_purchase_order = make_purchase_order(amended_so.name, selected_items=selected_items)
+		self.assertEqual(new_purchase_order.items[0].qty, 10)
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all(

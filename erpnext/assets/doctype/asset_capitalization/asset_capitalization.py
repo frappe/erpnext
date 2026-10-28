@@ -7,7 +7,7 @@ import frappe
 
 # import erpnext
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
@@ -753,9 +753,8 @@ def get_target_asset_details(asset=None, company=None):
 	# Get Asset Details
 	asset_details = frappe._dict()
 	if asset:
+		erpnext.require_permission("Asset", asset, "select")
 		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code"], as_dict=1)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(asset))
 
 		# Re-set item code from Asset
 		out.target_item_code = asset_details.item_code
@@ -856,20 +855,14 @@ def get_consumed_asset_details(args):
 
 	args = frappe._dict(args)
 
-	# and the Asset the caller named: its depreciation values are returned through the unguarded
-	# _get_asset_value_after_depreciation. select-or-read, as in the asset.py wrapper.
-	if args.get("asset"):
-		ptype = "select" if frappe.only_has_select_perm("Asset") else "read"
-		frappe.has_permission("Asset", ptype, doc=args.get("asset"), throw=True)
 	out = frappe._dict()
 
 	asset_details = frappe._dict()
 	if args.asset:
+		erpnext.require_permission("Asset", args.asset, "select")
 		asset_details = frappe.db.get_value(
 			"Asset", args.asset, ["asset_name", "item_code", "item_name"], as_dict=1
 		)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(args.asset))
 
 	out.item_code = asset_details.item_code
 	out.asset_name = asset_details.asset_name
@@ -941,6 +934,9 @@ def get_items_tagged_to_wip_composite_asset(params):
 	if isinstance(params, str):
 		params = json.loads(params)
 
+	target_asset = cstr(params.get("target_asset"))
+	erpnext.require_permission("Asset", target_asset, "select")
+
 	fields = [
 		"item_code",
 		"item_name",
@@ -960,9 +956,12 @@ def get_items_tagged_to_wip_composite_asset(params):
 
 	pr_items = frappe.get_all(
 		"Purchase Receipt Item",
-		filters={"wip_composite_asset": params.get("target_asset"), "docstatus": 1},
+		filters={"wip_composite_asset": target_asset, "docstatus": 1},
 		fields=fields,
 	)
+
+	for purchase_receipt in {d.purchase_receipt for d in pr_items}:
+		erpnext.require_permission("Purchase Receipt", purchase_receipt)
 
 	stock_items = []
 	asset_items = []

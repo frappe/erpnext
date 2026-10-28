@@ -110,10 +110,43 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
+		self.validate_bank_account()
 		self.validate_print_format()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_bank_account(self):
+		if not self.bank_account:
+			return
+
+		bank_account = frappe.get_cached_value(
+			"Bank Account",
+			self.bank_account,
+			["disabled", "is_company_account", "company", "party_type", "party"],
+			as_dict=True,
+		)
+		if not bank_account or bank_account.disabled:
+			frappe.throw(_("Bank Account {0} is missing or disabled").format(self.bank_account))
+
+		if bank_account.is_company_account:
+			if not self.company or bank_account.company != self.company:
+				frappe.throw(
+					_("Bank Account {0} does not belong to Company {1}").format(
+						self.bank_account, self.company
+					)
+				)
+		elif (
+			not self.party_type
+			or not self.party
+			or bank_account.party_type != self.party_type
+			or bank_account.party != self.party
+		):
+			frappe.throw(
+				_("Bank Account {0} does not belong to {1} {2}").format(
+					self.bank_account, self.party_type, self.party
+				)
+			)
 
 	def validate_reference_document(self):
 		if not self.reference_doctype or not self.reference_name:
@@ -210,26 +243,7 @@ class PaymentRequest(Document):
 				)
 
 	def before_submit(self):
-		if (
-			self.currency != self.party_account_currency
-			and self.party_account_currency == get_company_currency(self.company)
-		):
-			# set outstanding amount in party account currency
-			invoice = frappe.get_value(
-				self.reference_doctype,
-				self.reference_name,
-				["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
-				as_dict=1,
-			)
-			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
-			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
-			self.outstanding_amount = flt(
-				self.grand_total / grand_total * base_grand_total,
-				self.precision("outstanding_amount"),
-			)
-
-		else:
-			self.outstanding_amount = self.grand_total
+		self.outstanding_amount = get_requested_amount_in_party_account_currency(self)
 
 	def on_submit(self):
 		if self.payment_request_type == "Outward":
@@ -897,6 +911,40 @@ def make_payment_entry(docname):
 	return doc.create_payment_entry(submit=False).as_dict()
 
 
+def get_requested_amount_in_party_account_currency(doc) -> float:
+	"""Return the total requested amount converted to party account currency when applicable."""
+	company = doc.get("company")
+	if (
+		doc.get("currency") != doc.get("party_account_currency")
+		and doc.get("party_account_currency") == get_company_currency(company)
+		and doc.get("reference_doctype")
+		and doc.get("reference_name")
+	):
+		invoice = frappe.get_value(
+			doc.get("reference_doctype"),
+			doc.get("reference_name"),
+			["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
+			as_dict=1,
+		)
+		if invoice:
+			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
+			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
+			if grand_total:
+				precision = (
+					doc.precision("outstanding_amount")
+					if callable(getattr(doc, "precision", None))
+					else frappe.get_precision(
+						"Payment Request", "outstanding_amount", currency=doc.get("party_account_currency")
+					)
+				)
+				return flt(
+					flt(doc.get("grand_total")) / grand_total * base_grand_total,
+					precision,
+				)
+
+	return flt(doc.get("grand_total"))
+
+
 def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	"""
 	Update Payment Request's `Status` and `Outstanding Amount` based on Payment Entry Reference's `Allocated Amount`.
@@ -913,8 +961,16 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			"grand_total",
 			"outstanding_amount",
 			"payment_request_type",
+			"currency",
+			"party_account_currency",
+			"company",
+			"reference_doctype",
+			"reference_name",
 		],
 	)
+
+	for pr in referenced_payment_requests:
+		pr.total_requested = get_requested_amount_in_party_account_currency(pr)
 
 	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
 	doc_updates = {}
@@ -944,9 +1000,10 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			)
 
 		# determine status
-		if new_outstanding_amount == payment_request["grand_total"]:
+		total_requested = payment_request.total_requested
+		if total_requested > 0 and flt(new_outstanding_amount, precision) >= flt(total_requested, precision):
 			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
-		elif new_outstanding_amount == 0:
+		elif new_outstanding_amount <= 0:
 			status = "Paid"
 		elif new_outstanding_amount > 0:
 			status = "Partially Paid"
@@ -1007,12 +1064,14 @@ def make_payment_order(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Request"
+		target.company = target.company or source.company
 		target.append(
 			"references",
 			{
 				"reference_doctype": source.reference_doctype,
 				"reference_name": source.reference_name,
-				"amount": source.grand_total,
+				# Journal Entry debits the supplier in party account currency.
+				"amount": source.outstanding_amount,
 				"supplier": source.party,
 				"payment_request": source_name,
 				"mode_of_payment": source.mode_of_payment,
@@ -1027,6 +1086,8 @@ def make_payment_order(source_name, target_doc=None):
 		{
 			"Payment Request": {
 				"doctype": "Payment Order",
+				# keep the company of an existing order; references are validated against it
+				"field_no_map": ["company"] if target_doc else [],
 			}
 		},
 		target_doc,
@@ -1047,6 +1108,40 @@ def validate_payment(doc, method=None):
 			doc.reference_docname
 		)
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_bank_account_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
+):
+	filters = frappe._dict(filters or {})
+	if not filters.company and not (filters.party_type and filters.party):
+		return []
+
+	owners = []
+	if filters.company:
+		owners.append({"is_company_account": 1, "company": filters.company})
+	if filters.party_type and filters.party:
+		owners.append({"is_company_account": 0, "party_type": filters.party_type, "party": filters.party})
+
+	accounts = []
+	for owner in owners:
+		accounts.extend(
+			frappe.get_list(
+				"Bank Account",
+				fields=["name", "bank", "account"],
+				filters=[
+					*[[key, "=", value] for key, value in owner.items()],
+					["disabled", "=", 0],
+					[searchfield, "like", f"%{txt}%"],
+				],
+				order_by="name",
+				limit_page_length=start + page_len,
+				as_list=True,
+			)
+		)
+	return sorted(accounts, key=lambda account: account[0])[start : start + page_len]
 
 
 @frappe.whitelist()
