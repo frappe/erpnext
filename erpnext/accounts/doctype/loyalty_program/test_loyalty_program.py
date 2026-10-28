@@ -286,6 +286,55 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 			getdate("9999-12-31"),
 		)
 
+	def test_redemption_does_not_count_as_spending(self):
+		customer = make_loyalty_customer(
+			"Test Redemption Spend Loyalty",
+			[
+				{"tier_name": "Silver", "collection_factor": 1, "min_spent": 0},
+				{"tier_name": "Gold", "collection_factor": 0.5, "min_spent": 2500},
+			],
+		)
+		for rate in (600, 400):
+			make_loyalty_invoice(customer, rate)
+		make_loyalty_invoice(customer, 1000, redeem=700)
+
+		details = get_loyalty_program_details_with_points(
+			customer,
+			loyalty_program="Test Redemption Spend Loyalty",
+			company="_Test Company",
+			include_expired_entry=True,
+		)
+		self.assertEqual(details.total_spent, 1300)
+		self.assertEqual(details.tier_name, "Silver")
+		self.assertEqual(frappe.db.get_value("Customer", customer, "loyalty_program_tier"), "Silver")
+
+	def test_return_after_points_are_redeemed(self):
+		customer = make_loyalty_customer(
+			"Test Return Redeemed Loyalty", [{"tier_name": "Basic", "collection_factor": 1, "min_spent": 0}]
+		)
+		invoice = make_loyalty_invoice(customer, 500, qty=2)
+		earning = frappe.db.get_value("Loyalty Point Entry", {"invoice": invoice.name}, "name")
+		make_loyalty_invoice(customer, 100, redeem=10)
+		self.assertTrue(frappe.db.exists("Loyalty Point Entry", {"redeem_against": earning}))
+
+		first_return = make_loyalty_invoice(customer, 500, qty=-1, return_against=invoice.name)
+		self.assertEqual(frappe.db.get_value("Loyalty Point Entry", earning, "loyalty_points"), 500)
+
+		frappe.db.savepoint("second_return")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already redeemed",
+			make_loyalty_invoice,
+			customer,
+			500,
+			qty=-1,
+			return_against=invoice.name,
+		)
+		frappe.db.rollback(save_point="second_return")
+
+		first_return.cancel()
+		self.assertEqual(frappe.db.get_value("Loyalty Point Entry", earning, "loyalty_points"), 1000)
+
 
 def get_points_earned(self):
 	def get_returned_amount():
@@ -342,3 +391,51 @@ def create_sales_invoice_record(qty=1):
 			],
 		}
 	)
+
+
+def make_loyalty_customer(program_name, collection_rules):
+	if not frappe.db.exists("Loyalty Program", program_name):
+		frappe.get_doc(
+			{
+				"doctype": "Loyalty Program",
+				"loyalty_program_name": program_name,
+				"from_date": today(),
+				"loyalty_program_type": "Multiple Tier Program"
+				if len(collection_rules) > 1
+				else "Single Tier Program",
+				"conversion_factor": 1,
+				"expiry_duration": 10,
+				"company": "_Test Company",
+				"cost_center": "Main - _TC",
+				"expense_account": "Loyalty - _TC",
+				"collection_rules": collection_rules,
+			}
+		).insert()
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": f"{program_name} Customer",
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"loyalty_program": program_name,
+			}
+		)
+		.insert()
+		.name
+	)
+
+
+def make_loyalty_invoice(customer, rate, qty=1, redeem=0, return_against=None):
+	si = create_sales_invoice_record(qty)
+	si.customer = customer
+	si.items[0].rate = rate
+	if redeem:
+		si.redeem_loyalty_points = 1
+		si.loyalty_points = redeem
+	if return_against:
+		si.is_return = 1
+		si.return_against = return_against
+	si.insert()
+	si.submit()
+	return si
