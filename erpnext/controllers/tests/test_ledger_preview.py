@@ -6,14 +6,9 @@ from unittest.mock import patch
 import frappe
 from frappe.tests import UnitTestCase
 
-<<<<<<< HEAD
-from erpnext.controllers.stock_controller import get_sl_entries_for_preview
-=======
-from erpnext.controllers.ledger_preview import get_sl_entries_for_preview
-from erpnext.controllers.stock_controller import show_accounting_ledger_preview
+from erpnext.controllers.stock_controller import get_sl_entries_for_preview, show_accounting_ledger_preview
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 0a76958 (test(stock): ledger preview needs GL Entry read access)
 
 
 class TestLedgerPreview(UnitTestCase):
@@ -29,6 +24,8 @@ class TestLedgerPreview(UnitTestCase):
 		self.assertIsNone(entries[0].get("in_out_rate"))
 		self.assertEqual(entries[1].in_out_rate, 3)
 
+
+class TestLedgerPreviewPermissions(ERPNextTestSuite):
 	def test_accounting_ledger_preview_needs_gl_entry_read(self):
 		stock_entry = make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
