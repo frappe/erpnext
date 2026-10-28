@@ -1264,6 +1264,29 @@ class TestQuotation(ERPNextTestSuite):
 		raised = json.dumps([{"item_code": row.item_code, "qty": 5, "rate": row.rate, "docname": row.name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Quotation", raised, quotation.name)
 
+	def test_quotation_update_items_rebuilds_bundle_packed_items(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+		make_product_bundle("_Test Product Bundle", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		quotation = make_quotation(item_code="_Test Product Bundle", qty=1, rate=100)
+		before = {pi.item_code: pi.qty for pi in quotation.packed_items}
+		self.assertTrue(before)
+
+		row = quotation.items[0]
+		trans_items = json.dumps(
+			[{"item_code": row.item_code, "qty": 3, "rate": row.rate, "docname": row.name}]
+		)
+		update_child_qty_rate("Quotation", trans_items, quotation.name)
+
+		quotation.reload()
+		after = {pi.item_code: pi.qty for pi in quotation.packed_items}
+		self.assertEqual(after, {code: qty * 3 for code, qty in before.items()})
+
 
 def enable_calculate_bundle_price(enable=1):
 	selling_settings = frappe.get_doc("Selling Settings")
