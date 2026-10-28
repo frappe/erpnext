@@ -107,6 +107,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 	def tearDown(self):
 		disable_dimension_filter()
 		disable_dimension()
+		delete_removed_dimension_filters()
 		frappe.flags.accounting_dimensions_details = None
 		frappe.flags.dimension_filter_map = None
 
@@ -156,6 +157,14 @@ def create_accounting_dimension_filter():
 		doc = frappe.get_doc("Accounting Dimension Filter", {"accounting_dimension": "Department"})
 		doc.disabled = 0
 		doc.save()
+
+
+def delete_removed_dimension_filters():
+	# the class has no transaction rollback, so the filter of a deleted dimension must be removed by hand
+	for name in frappe.get_all(
+		"Accounting Dimension Filter", {"accounting_dimension": "Test Removed Dimension"}, pluck="name"
+	):
+		frappe.delete_doc("Accounting Dimension Filter", name)
 
 
 def disable_dimension_filter():
