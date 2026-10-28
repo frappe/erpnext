@@ -347,7 +347,7 @@ class Employee(NestedSet):
 
 	def can_reenable_user(self, user):
 		"""Allow if the session user can edit the User, or if an Employee status change disabled it last."""
-		if user.has_permission("write"):
+		if frappe.has_permission("User", "write", user):
 			return True
 
 		last_change = frappe.get_all(
