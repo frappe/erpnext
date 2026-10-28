@@ -107,10 +107,17 @@ class ProcessStatementOfAccounts(Document):
 		if not self.customers:
 			frappe.throw(_("Customers not selected."))
 
-		if self.enable_auto_email:
-			if self.start_date and getdate(self.start_date) >= getdate(today()):
+		if self.enable_auto_email and self.start_date and getdate(self.start_date) >= getdate(today()):
+			# applied only when the schedule is set, so a later edit does not move the next send
+			if (
+				self.is_new()
+				or self.has_value_changed("start_date")
+				or self.has_value_changed("enable_auto_email")
+			):
 				self.to_date = self.start_date
 				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+				if self.report != "General Ledger":
+					self.posting_date = self.start_date
 
 		if self.print_format:
 			pf = frappe.db.get_value(
@@ -230,7 +237,8 @@ def set_ageing(doc, entry):
 	ageing_filters = frappe._dict(
 		{
 			"company": doc.company,
-			"report_date": doc.posting_date,
+			# the General Ledger statement is as of its To Date; posting_date is hidden for it
+			"report_date": doc.to_date if doc.report == "General Ledger" else doc.posting_date,
 			"ageing_based_on": doc.ageing_based_on,
 			"range1": 30,
 			"range2": 60,
@@ -585,11 +593,17 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 @frappe.whitelist()
 def send_auto_email():
 	frappe.has_permission("Process Statement Of Accounts", throw=True)
+	# each report keeps its schedule in its own date; a date in the past is a missed run, sent now
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
-		filters={"enable_auto_email": 1},
-		or_filters={"to_date": today(), "posting_date": today()},
+		filters={"enable_auto_email": 1, "report": "General Ledger", "to_date": ["<=", today()]},
+		pluck="name",
 	)
-	for entry in selected:
-		send_emails(entry.name, from_scheduler=True)
+	selected += frappe.get_list(
+		"Process Statement Of Accounts",
+		filters={"enable_auto_email": 1, "report": ["!=", "General Ledger"], "posting_date": ["<=", today()]},
+		pluck="name",
+	)
+	for name in selected:
+		send_emails(name, from_scheduler=True)
 	return True
