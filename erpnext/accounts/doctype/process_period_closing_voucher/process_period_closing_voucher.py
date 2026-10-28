@@ -53,6 +53,9 @@ class ProcessPeriodClosingVoucher(Document):
 		self.populate_processing_tables()
 
 	def validate_processing(self, statuses):
+		if self.docstatus != 1:
+			frappe.throw(_("Process Period Closing Voucher must be submitted before processing"))
+
 		if self.status not in statuses:
 			return False
 
@@ -61,6 +64,9 @@ class ProcessPeriodClosingVoucher(Document):
 
 	def validate_parent_pcv(self):
 		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
+		if pcv.docstatus != 1:
+			frappe.throw(_("Period Closing Voucher {0} must be submitted before processing").format(pcv.name))
+
 		if (
 			pcv.gle_processing_status == "Completed"
 			or frappe.db.exists(
@@ -69,8 +75,6 @@ class ProcessPeriodClosingVoucher(Document):
 			or frappe.db.exists("Account Closing Balance", {"period_closing_voucher": pcv.name})
 		):
 			frappe.throw(_("Period Closing Voucher {0} has already been processed").format(pcv.name))
-
-		return pcv
 
 	def populate_processing_tables(self):
 		self.generate_pcv_dates()
@@ -194,13 +198,15 @@ def pause_pcv_processing(docname: str):
 @frappe.whitelist(methods=["POST"])
 def cancel_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="cancel", doc=docname, throw=True)
+	if frappe.db.get_value("Process Period Closing Voucher", docname, "docstatus") != 2:
+		frappe.throw(_("Cancel the Process Period Closing Voucher document to stop processing"))
 
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Cancelled").where(ppcv.name.eq(docname)).run()
 
 	if queued_dates := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
+		filters={"parent": docname, "status": ["in", ["Queued", "Running", "Paused"]]},
 		pluck="name",
 	):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
@@ -588,6 +594,9 @@ def build_dimension_wise_balance_dict(gl_entries):
 
 
 def process_individual_date(docname: str, row_name, date, report_type, parentfield):
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+		return
+
 	current_date_status = frappe.db.get_value(
 		"Process Period Closing Voucher Detail",
 		row_name,
