@@ -352,7 +352,7 @@ class Employee(NestedSet):
 
 		last_change = frappe.get_all(
 			"Version",
-			filters={"ref_doctype": "User", "docname": user.name, "data": ("like", '%"enabled"%')},
+			filters={"ref_doctype": "User", "docname": user.name, "data": ("like", '%["enabled",%')},
 			pluck="owner",
 			order_by="creation desc",
 			limit=1,
