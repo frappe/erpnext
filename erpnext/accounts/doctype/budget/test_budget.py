@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import flt, now_datetime, nowdate
+from frappe.utils import add_days, add_months, flt, now_datetime, nowdate
 
 from erpnext.accounts.doctype.budget.budget import (
 	BudgetError,
@@ -347,6 +347,155 @@ class TestBudget(ERPNextTestSuite):
 
 		budget.load_from_db()
 		budget.cancel()
+
+	def test_group_cost_center_budget_sums_children(self):
+		group = make_cost_center_tree("_Test Budget Group Sum")
+		make_budget(
+			budget_against="Cost Center",
+			cost_center=group.name,
+			budget_amount=1000,
+			applicable_on_purchase_order=1,
+			action_if_annual_budget_exceeded_on_po="Stop",
+			action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+			submit_budget=True,
+		)
+
+		make_purchase_commitment("Purchase Order", "_Test Budget Group Item", group.children[0], 600)
+		with assert_raises_with_savepoint(self, BudgetError):
+			make_purchase_commitment("Purchase Order", "_Test Budget Group Item", group.children[1], 600)
+
+		make_journal_entry(self.account, "_Test Bank - _TC", 600, group.children[0], submit=True)
+		jv = make_journal_entry(self.account, "_Test Bank - _TC", 600, group.children[1])
+		with assert_raises_with_savepoint(self, BudgetError):
+			jv.submit()
+
+	def test_group_and_child_budget_are_both_checked(self):
+		group = make_cost_center_tree("_Test Budget Overlap")
+		for cost_center, amount in ((group.name, 1000), (group.children[0], 100)):
+			budget = make_budget(budget_against="Cost Center", cost_center=cost_center, budget_amount=amount)
+			budget.submit()
+
+		jv = make_journal_entry(self.account, "_Test Bank - _TC", 500, group.children[0])
+		with assert_raises_with_savepoint(self, BudgetError):
+			jv.submit()
+
+	def test_budget_spanning_fiscal_years_counts_every_year(self):
+		cost_center = create_cost_center(cost_center_name="_Test Budget Two Years")
+		cost_center = "_Test Budget Two Years - _TC"
+		this_year = get_fiscal_year(nowdate())
+		next_year = get_fiscal_year(add_days(this_year[2], 1))
+		make_budget(
+			budget_against="Cost Center",
+			cost_center=cost_center,
+			budget_amount=200,
+			from_fiscal_year=this_year[0],
+			to_fiscal_year=next_year[0],
+			applicable_on_purchase_order=1,
+			action_if_annual_budget_exceeded_on_po="Stop",
+			action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+			submit_budget=True,
+		)
+
+		make_purchase_commitment(
+			"Purchase Order", "_Test Budget Two Years Item", cost_center, 150, transaction_date=this_year[2]
+		)
+		with assert_raises_with_savepoint(self, BudgetError):
+			make_purchase_commitment(
+				"Purchase Order",
+				"_Test Budget Two Years Item",
+				cost_center,
+				150,
+				transaction_date=next_year[1],
+			)
+
+	def test_monthly_budget_ignores_later_months(self):
+		cost_center = create_cost_center(cost_center_name="_Test Budget Back Dated")
+		cost_center = "_Test Budget Back Dated - _TC"
+		year_start = get_fiscal_year(nowdate())[1]
+		budget = make_budget(budget_against="Cost Center", cost_center=cost_center, budget_amount=1200)
+		budget.action_if_accumulated_monthly_budget_exceeded = "Stop"
+		budget.submit()
+
+		# 600 in the seventh month, within the 700 budgeted up to then
+		make_journal_entry(
+			self.account,
+			"_Test Bank - _TC",
+			600,
+			cost_center,
+			posting_date=add_months(year_start, 6),
+			submit=True,
+		)
+		# 50 in the first month, within the 100 budgeted for it: the later 600 is not counted
+		jv = make_journal_entry(
+			self.account,
+			"_Test Bank - _TC",
+			50,
+			cost_center,
+			posting_date=add_days(year_start, 14),
+			submit=True,
+		)
+		self.assertEqual(jv.docstatus, 1)
+
+	def test_ledger_posting_does_not_recheck_purchase_orders(self):
+		cost_center = create_cost_center(cost_center_name="_Test Budget PO Overrun")
+		cost_center = "_Test Budget PO Overrun - _TC"
+		budget = make_budget(
+			budget_against="Cost Center",
+			cost_center=cost_center,
+			budget_amount=100,
+			applicable_on_purchase_order=1,
+			action_if_annual_budget_exceeded_on_po="Warn",
+			action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+			submit_budget=True,
+		)
+		make_purchase_commitment("Purchase Order", "_Test Budget PO Overrun Item", cost_center, 150)
+		frappe.db.set_value("Budget", budget.name, "action_if_annual_budget_exceeded_on_po", "Stop")
+
+		jv = make_journal_entry(self.account, "_Test Bank - _TC", 10, cost_center, submit=True)
+		self.assertEqual(jv.docstatus, 1)
+
+	def test_voucher_is_checked_by_its_net_expense(self):
+		cost_center = create_cost_center(cost_center_name="_Test Budget Net Expense")
+		cost_center = "_Test Budget Net Expense - _TC"
+		make_budget(
+			budget_against="Cost Center", cost_center=cost_center, budget_amount=100, submit_budget=True
+		)
+
+		jv = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": self.company,
+				"posting_date": nowdate(),
+				"accounts": [
+					{"account": self.account, "debit_in_account_currency": 150, "cost_center": cost_center},
+					{"account": self.account, "credit_in_account_currency": 100, "cost_center": cost_center},
+					{
+						"account": "_Test Bank - _TC",
+						"credit_in_account_currency": 50,
+						"cost_center": cost_center,
+					},
+				],
+			}
+		).submit()
+		self.assertEqual(jv.docstatus, 1)
+
+	def test_budget_warning_is_shown_once(self):
+		cost_center = create_cost_center(cost_center_name="_Test Budget Warn Once")
+		cost_center = "_Test Budget Warn Once - _TC"
+		make_budget(
+			budget_against="Cost Center",
+			cost_center=cost_center,
+			budget_amount=100,
+			applicable_on_purchase_order=1,
+			action_if_annual_budget_exceeded_on_po="Warn",
+			action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+			submit_budget=True,
+		)
+
+		frappe.local.message_log = []
+		make_purchase_commitment("Purchase Order", "_Test Budget Warn Once Item", cost_center, 150)
+		warnings = [m for m in frappe.local.message_log if "Annual Budget" in str(m)]
+		self.assertEqual(len(warnings), 1)
 
 	def test_monthly_budget_crossed_stop2(self):
 		set_total_expense_zero(nowdate(), "project")
@@ -833,11 +982,13 @@ def make_budget_for_new_cost_center(cost_center_name):
 	).cost_center
 
 
-def make_purchase_commitment(doctype, item_code, cost_center, rate, qty=1, uom="Nos", conversion_factor=1):
+def make_purchase_commitment(
+	doctype, item_code, cost_center, rate, qty=1, uom="Nos", conversion_factor=1, transaction_date=None
+):
 	make_item(item_code, {"is_stock_item": 0, "stock_uom": "Nos"})
 	doc = frappe.new_doc(doctype)
 	doc.company = "_Test Company"
-	doc.transaction_date = doc.schedule_date = nowdate()
+	doc.transaction_date = doc.schedule_date = transaction_date or nowdate()
 	if doctype == "Purchase Order":
 		doc.supplier = "_Test Supplier"
 	else:
@@ -851,7 +1002,7 @@ def make_purchase_commitment(doctype, item_code, cost_center, rate, qty=1, uom="
 			"uom": uom,
 			"conversion_factor": conversion_factor,
 			"rate": rate,
-			"schedule_date": nowdate(),
+			"schedule_date": doc.schedule_date,
 			"warehouse": "_Test Warehouse - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": cost_center,
@@ -861,6 +1012,17 @@ def make_purchase_commitment(doctype, item_code, cost_center, rate, qty=1, uom="
 	doc.insert()
 	doc.submit()
 	return doc
+
+
+def make_cost_center_tree(name):
+	"""A group cost center with two children."""
+	create_cost_center(cost_center_name=name, is_group=1)
+	group = f"{name} - _TC"
+	children = []
+	for suffix in ("A", "B"):
+		create_cost_center(cost_center_name=f"{name} {suffix}", parent_cost_center=group)
+		children.append(f"{name} {suffix} - _TC")
+	return frappe._dict(name=group, children=children)
 
 
 def make_budget(**args):
