@@ -92,21 +92,20 @@ def pick_voucher_side(recv, pay, party_type=None) -> str | None:
 
 
 class DimensionFilter:
-	"""Dimension, party and account conditions from form values and the user's permissions. Each
-	row obeys the permissions of the document it shows, as Frappe checks a document's child rows
-	against the parent's doctype."""
+	"""Dimension, party and account conditions from form values and the user's permissions."""
 
 	def __init__(self, pr):
 		self.user_permissions = get_user_permissions(frappe.session.user)
 		self.strict = frappe.get_system_settings("apply_strict_user_permissions")
 		# (column, linked doctype, form value)
 		self.fields = [(dim.fieldname, dim.document_type, pr.get(dim.fieldname)) for dim in pr.dimensions]
-		# party is a Dynamic Link, Frappe's own form check skips it; it does check the picked accounts
-		self.fields += [("party", pr.party_type, pr.party), ("account", "Account", None)]
+		# party is a Dynamic Link; one party, so one check, as Accounts Receivable does per party type
+		allowed = get_allowed_docs_for_doctype(self.user_permissions.get(pr.party_type, []), pr.party_type)
+		self._check_allowed(pr.party_type, pr.party, allowed)
+		self.fields += [("account", "Account", None)]
 
-	def conditions(self, table, doctype=None):
-		"""Conditions on `table`. Its rows are documents of `doctype`, or without one, of
-		their own `voucher_type`."""
+	def conditions(self, table, doctype):
+		"""Conditions on `table`, whose rows obey permissions set for `doctype`."""
 		columns_of = table._table_name.removeprefix("tab")
 		conditions = []
 		for fieldname, document_type, value in self.fields:
@@ -117,24 +116,8 @@ class DimensionFilter:
 			if value:
 				self._check_allowed(document_type, value, {p.get("doc") for p in permissions})
 				conditions.append(field == value)
-			if doctype:
-				if allowed := get_allowed_docs_for_doctype(permissions, doctype):
-					conditions.append(self._allowed_condition(field, allowed))
-			else:
-				conditions += self._by_voucher_type(table, field, permissions)
-		return conditions
-
-	def _by_voucher_type(self, table, field, permissions):
-		# a doctype with permissions of its own binds its rows; the rest obey those for all doctypes
-		own = {p.get("applicable_for") for p in permissions if p.get("applicable_for")}
-		conditions = [
-			(table.voucher_type != doctype)
-			| self._allowed_condition(field, get_allowed_docs_for_doctype(permissions, doctype))
-			for doctype in own
-		]
-		if everywhere := get_allowed_docs_for_doctype(permissions, None):
-			rest = self._allowed_condition(field, everywhere)
-			conditions.append(table.voucher_type.isin(own) | rest if own else rest)
+			if allowed := get_allowed_docs_for_doctype(permissions, doctype):
+				conditions.append(self._allowed_condition(field, allowed))
 		return conditions
 
 	def _check_allowed(self, document_type, value, allowed):
@@ -235,7 +218,8 @@ class OpenBalanceFetcher:
 		if self.pr.to_date:
 			posting_date_filter.append(ple.posting_date.lte(self.pr.to_date))
 
-		dimension_filter = self.dimension_filter.conditions(ple)
+		# ledger rows count as ledger entries, as in Accounts Receivable; edits are checked on the documents
+		dimension_filter = self.dimension_filter.conditions(ple, "Payment Ledger Entry")
 
 		return common_filter, posting_date_filter, dimension_filter
 
@@ -762,6 +746,7 @@ class ReconcileRouter:
 		self.party_type = pr.party_type
 
 	def execute(self, skip_ref_details_update_for_pe=False):
+		self.pr.check_voucher_permissions()
 		adjust_allocations_for_taxes(self.pr)
 
 		standard_args = []
@@ -1135,6 +1120,19 @@ class PaymentReconciliation(Document):
 		msgprint(_("Successfully Reconciled"))
 
 		self.get_unreconciled_entries()
+
+	def check_voucher_permissions(self):
+		# reconcile edits one voucher and links the other, both without permission checks
+		for row in self.allocation:
+			recv = frappe._dict(
+				voucher_type=row.to_receive_voucher_type, voucher_no=row.to_receive_voucher_no
+			)
+			pay = frappe._dict(voucher_type=row.to_pay_voucher_type, voucher_no=row.to_pay_voucher_no)
+			# a bridged pair has no edited side, so both only need read
+			side = pick_voucher_side(recv, pay, self.party_type)
+			for name, voucher in (("receive", recv), ("pay", pay)):
+				ptype = "write" if side == name else "read"
+				frappe.has_permission(voucher.voucher_type, ptype, voucher.voucher_no, throw=True)
 
 	def validate_allocation(self):
 		"""Per-row checks against open balances fetched fresh from the ledger, not the

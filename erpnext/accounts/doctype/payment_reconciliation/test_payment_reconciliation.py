@@ -1550,9 +1550,9 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		for cc in permitted_ccs:
 			frappe.permissions.remove_user_permission("Cost Center", cc, test_user)
 
-	def test_rows_follow_their_own_document_permissions(self):
-		"""A cost center restricted for one doctype hides only that doctype's rows, as Frappe
-		checks a document and its child rows against the document's own doctype."""
+	def test_rows_follow_their_source_permissions(self):
+		"""Ledger rows obey permissions for Payment Ledger Entry, as in Accounts Receivable; JE lines
+		those for Journal Entry."""
 		test_user = "test@example.com"
 		self.supplier = "_Test Supplier"
 		allowed, restricted = "_Test Cost Center - _TC", "_Test Write Off Cost Center - _TC"
@@ -1588,16 +1588,18 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 				supplier.get_unreconciled_entries()
 			return {r.voucher_no for pr in (customer, supplier) for r in pr.to_receive + pr.to_pay}
 
-		for doctype in vouchers:
+		for doctype in (*vouchers, "Payment Ledger Entry"):
 			frappe.permissions.add_user_permission("Cost Center", allowed, test_user, applicable_for=doctype)
 			shown = visible()
 			for voucher_doctype, name in vouchers.items():
+				# JE lines come from the journal, the rest from the ledger
+				source = "Journal Entry" if voucher_doctype == "Journal Entry" else "Payment Ledger Entry"
 				with self.subTest(restricted_for=doctype, voucher=voucher_doctype):
-					self.assertEqual(name in shown, voucher_doctype != doctype)
+					self.assertEqual(name in shown, doctype != source)
 			frappe.permissions.remove_user_permission("Cost Center", allowed, test_user)
 
 	def test_party_follows_user_permissions(self):
-		"""The picked party must be allowed; each voucher's rows then obey that voucher's permissions."""
+		"""The picked party must be allowed for its own doctype, as in Accounts Receivable."""
 		test_user = "test@example.com"
 		si = self.create_sales_invoice(qty=1, rate=100)
 		pe = self.create_payment_entry(amount=100).save().submit()
@@ -1612,20 +1614,44 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 				frappe.PermissionError, self.create_payment_reconciliation().get_unreconciled_entries
 			)
 
-		# allowed for invoices only
+		frappe.permissions.remove_user_permission("Customer", "_Test Customer 1", test_user)
+
+		def shown(applicable_for):
+			frappe.permissions.add_user_permission(
+				"Customer", self.customer, test_user, applicable_for=applicable_for
+			)
+			with self.set_user(test_user):
+				pr = self.create_payment_reconciliation()
+				pr.get_unreconciled_entries()
+			frappe.permissions.remove_user_permission("Customer", self.customer, test_user)
+			return {r.voucher_no for r in pr.to_receive + pr.to_pay}
+
+		# allowed for the customer itself, or restricted only on other doctypes: all its rows show
+		for applicable_for in ("Customer", "Sales Invoice"):
+			with self.subTest(applicable_for=applicable_for):
+				self.assertTrue({si.name, pe.name, je.name} <= shown(applicable_for))
+
+	def test_reconcile_needs_write_on_the_edited_payment(self):
+		"""A payment the user may not edit is refused at reconcile, though the list showed it."""
+		test_user = "test@example.com"
+		si = self.create_sales_invoice(qty=1, rate=100)
+		pe = self.create_payment_entry(amount=100)
+		pe.cost_center = "_Test Write Off Cost Center - _TC"
+		pe = pe.save().submit()
+
+		# set for Payment Entry only, so the ledger row is listed but the payment can't be edited
 		frappe.permissions.add_user_permission(
-			"Customer", self.customer, test_user, applicable_for="Sales Invoice"
+			"Cost Center", "_Test Cost Center - _TC", test_user, applicable_for="Payment Entry"
 		)
 		with self.set_user(test_user):
 			pr = self.create_payment_reconciliation()
 			pr.get_unreconciled_entries()
-		for customer in ("_Test Customer 1", self.customer):
-			frappe.permissions.remove_user_permission("Customer", customer, test_user)
-
-		shown = {r.voucher_no for r in pr.to_receive + pr.to_pay}
-		self.assertIn(si.name, shown)
-		self.assertNotIn(pe.name, shown)
-		self.assertNotIn(je.name, shown)
+			pr.allocate_entries(
+				to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no == si.name],
+				to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no == pe.name],
+			)
+			self.assertRaises(frappe.PermissionError, pr.reconcile)
+		frappe.permissions.remove_user_permission("Cost Center", "_Test Cost Center - _TC", test_user)
 
 	def test_account_follows_user_permissions(self):
 		"""Rows in accounts the user may not see stay hidden, whether the account is left blank or picked."""
@@ -1659,6 +1685,51 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		self.assertIn(allowed_si.name, blank)
 		self.assertFalse({other_si.name, other_je.name} & (blank | picked))
+
+	def test_journal_cannot_reconcile_invoice_user_cannot_open(self):
+		"""Like a payment, a journal only takes a reference to a document the user may open."""
+		test_user = "test@example.com"
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		si.territory = "_Test Territory India"
+		si = si.save().submit()
+		je = self.create_journal_entry(self.bank, self.debit_to, 100, nowdate())
+		je.accounts[1].party_type = "Customer"
+		je.accounts[1].party = self.customer
+		je = je.save().submit()
+
+		# the list filter knows nothing of territory, so the invoice is listed
+		frappe.permissions.add_user_permission("Territory", "_Test Territory", test_user)
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no == si.name],
+				to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no == je.name],
+			)
+			self.assertRaises(frappe.PermissionError, pr.reconcile)
+		frappe.permissions.remove_user_permission("Territory", "_Test Territory", test_user)
+
+	def test_bridged_pair_needs_read_on_both_vouchers(self):
+		"""An invoice against a credit note edits neither, yet still needs the user to open both."""
+		test_user = "test@example.com"
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		si.territory = "_Test Territory India"
+		si = si.save().submit()
+		cr_note = self.create_sales_invoice(qty=-1, rate=100, do_not_save=True, do_not_submit=True)
+		cr_note.is_return = 1
+		cr_note = cr_note.save().submit()
+
+		frappe.permissions.add_user_permission("Territory", "_Test Territory", test_user)
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no == si.name],
+				to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no == cr_note.name],
+			)
+			self.assertRaises(frappe.PermissionError, pr.reconcile)
+		frappe.permissions.remove_user_permission("Territory", "_Test Territory", test_user)
+		self.assertFalse(get_linked_system_journals("Sales Invoice", si.name, "Reconciliation Journal"))
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",

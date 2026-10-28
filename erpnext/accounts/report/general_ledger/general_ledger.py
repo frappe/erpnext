@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, _dict
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Count, Max
+from frappe.query_builder.functions import Count
 from frappe.utils import cstr, getdate
 
 from erpnext import get_company_currency, get_default_company
@@ -233,8 +233,9 @@ def get_gl_entries(filters, accounting_dimensions):
 
 def get_system_note_journals(company: str) -> list:
 	"""System journals the "ignore system generated credit / debit notes" filter hides:
-	old credit/debit note journals, and bridges whose lines all sit on one account (they
-	net to zero there). Cross-account bridges are real transfers, so they stay visible."""
+	bridges whose lines all sit on one account (they net to zero there), which includes
+	old credit/debit note journals relabelled by a v16 patch. Cross-account bridges are
+	real transfers, so they stay visible."""
 	je = frappe.qb.DocType("Journal Entry")
 	jea = frappe.qb.DocType("Journal Entry Account")
 	return (
@@ -246,12 +247,10 @@ def get_system_note_journals(company: str) -> list:
 			(je.company == company)
 			& (je.docstatus == 1)
 			& (je.is_system_generated == 1)
-			& je.voucher_type.isin(["Credit Note", "Debit Note", CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE])
+			& (je.voucher_type == CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
 		)
 		.groupby(je.name)
-		.having(
-			(Max(je.voucher_type) != CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE) | (Count(jea.account).distinct() == 1)
-		)
+		.having(Count(jea.account).distinct() == 1)
 	).run(pluck=True)
 
 

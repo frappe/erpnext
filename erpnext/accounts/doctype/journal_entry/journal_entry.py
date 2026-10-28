@@ -31,7 +31,6 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.services.gl_validator import validate_opening_entry_against_pcv
 from erpnext.accounts.services.taxes import validate_account_head
 from erpnext.accounts.utils import (
-	cancel_exchange_gain_loss_journal,
 	get_account_currency,
 	get_balance_on,
 	get_stock_accounts,
@@ -879,7 +878,7 @@ class JournalEntry(AccountsController):
 
 		return JournalEntryGLComposer(self).compose()
 
-	def make_gl_entries(self, cancel: int = 0, adv_adj: int = 0, from_repost: bool = False) -> None:
+	def make_gl_entries(self, cancel: int = 0, adv_adj: int = 0) -> None:
 		from erpnext.accounts.general_ledger import make_gl_entries
 
 		merge_entries = frappe.get_single_value("Accounts Settings", "merge_similar_account_heads")
@@ -899,8 +898,6 @@ class JournalEntry(AccountsController):
 				update_outstanding=update_outstanding,
 			)
 			frappe.flags.party_not_required = False
-			if cancel and not from_repost:
-				cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
 
 	@frappe.whitelist()
 	def get_balance(self, difference_account: str | None = None) -> None:
