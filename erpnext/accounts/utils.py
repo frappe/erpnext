@@ -2286,8 +2286,8 @@ def delink_original_entry(pl_entry, partial_cancel=False):
 				(ple.company == pl_entry.company)
 				& (ple.account_type == pl_entry.account_type)
 				& (ple.account == pl_entry.account)
-				& (ple.party_type == pl_entry.party_type)
-				& (ple.party == pl_entry.party)
+				& _same_or_empty(ple.party_type, pl_entry.party_type)
+				& _same_or_empty(ple.party, pl_entry.party)
 				& (ple.voucher_type == pl_entry.voucher_type)
 				& (ple.voucher_no == pl_entry.voucher_no)
 				& (ple.against_voucher_type == pl_entry.against_voucher_type)
@@ -2299,6 +2299,13 @@ def delink_original_entry(pl_entry, partial_cancel=False):
 			query = query.where(ple.voucher_detail_no == pl_entry.voucher_detail_no)
 
 		query.run()
+
+
+def _same_or_empty(column, value):
+	"""Match `value`, or a NULL or empty column when `value` is empty (rows without party)."""
+	if value:
+		return column == value
+	return column.isnull() | (column == "")
 
 
 class QueryPaymentLedger:
