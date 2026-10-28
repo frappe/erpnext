@@ -905,10 +905,6 @@ class TransactionDeletionRecord(Document):
 						processed = int(docfield.no_of_docs) + len(reference_doc_names)
 						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
 					else:
-						naming_series = frappe.db.get_value("DocType", docfield.doctype_name, "autoname")
-						if naming_series:
-							if "#" in naming_series:
-								self.update_naming_series(naming_series, docfield.doctype_name)
 						frappe.db.set_value(docfield.doctype, docfield.name, "done", 1)
 
 						to_delete_row = frappe.db.get_value(

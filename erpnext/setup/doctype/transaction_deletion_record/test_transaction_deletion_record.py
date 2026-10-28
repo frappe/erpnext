@@ -601,6 +601,45 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tdr.generate_to_delete_list()
 		self.assertFalse(expected & {row.doctype_name for row in tdr.doctypes_to_delete})
 
+	def test_deletion_preserves_series_after_amended_document(self):
+		def make_process(company):
+			return frappe.get_doc(
+				{
+					"doctype": "Process Deferred Accounting",
+					"company": company,
+					"type": "Income",
+					"posting_date": frappe.utils.today(),
+					"start_date": frappe.utils.today(),
+					"end_date": frappe.utils.today(),
+				}
+			).insert()
+
+		original = make_process("_Test Company")
+		original.submit()
+		original.cancel()
+		amended = frappe.copy_doc(original)
+		amended.docstatus = 0
+		amended.amended_from = original.name
+		amended.insert()
+		amended.submit()
+		make_process("_Test Company 7")
+		prefix = original.name.rsplit("-", 1)[0] + "-"
+		counter = frappe.db.get_value("Series", prefix, "current", order_by="name")
+
+		tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": "_Test Company 7"})
+		tdr.append(
+			"doctypes_to_delete",
+			{"doctype_name": "Process Deferred Accounting", "company_field": "company", "document_count": 1},
+		)
+		tdr.insert()
+		tdr.process_in_single_transaction = True
+		tdr.submit()
+		self.assertEqual(tdr.db_get("status"), "Completed")
+		self.assertEqual(frappe.db.get_value("Series", prefix, "current", order_by="name"), counter)
+		new_process = make_process("_Test Company")
+		self.assertNotEqual(new_process.name, original.name)
+		self.assertTrue(frappe.db.exists("Process Deferred Accounting", amended.name))
+
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
 		company = "_Test Company 7"
