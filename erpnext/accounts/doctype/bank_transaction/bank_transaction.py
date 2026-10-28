@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
 from frappe.query_builder import Tuple
-from frappe.query_builder.functions import Abs, Max, Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt, getdate
 
 
@@ -59,6 +59,8 @@ class BankTransaction(Document):
 
 	def validate(self):
 		self.set_status()
+		self.validate_amounts()
+		self.validate_transaction_id()
 		self.validate_included_fee()
 		self.validate_duplicate_references()
 		self.validate_currency()
@@ -81,6 +83,37 @@ class BankTransaction(Document):
 							frappe.bold(account_currency),
 						)
 					)
+
+	def validate_amounts(self):
+		if flt(self.deposit) < 0 or flt(self.withdrawal) < 0:
+			frappe.throw(_("Deposit and Withdrawal cannot be negative."), title=_("Invalid Amount"))
+
+		if flt(self.deposit) > 0 and flt(self.withdrawal) > 0:
+			frappe.throw(
+				_("A Bank Transaction is either a deposit or a withdrawal. Set only one of them."),
+				title=_("Invalid Amount"),
+			)
+
+	def validate_transaction_id(self):
+		if not self.transaction_id:
+			return
+
+		duplicate = frappe.db.exists(
+			"Bank Transaction",
+			{
+				"transaction_id": self.transaction_id,
+				"bank_account": self.bank_account,
+				"docstatus": ["<", DocStatus.cancelled()],
+				"name": ["!=", self.name],
+			},
+		)
+		if duplicate:
+			frappe.throw(
+				_("Bank Transaction {0} already has the Transaction ID {1} for this bank account.").format(
+					frappe.bold(duplicate), frappe.bold(self.transaction_id)
+				),
+				title=_("Duplicate Transaction ID"),
+			)
 
 	def set_status(self):
 		if self.docstatus.is_draft():
@@ -131,6 +164,10 @@ class BankTransaction(Document):
 			self.delink_payment_entry(old_pe)
 
 	def before_submit(self):
+		if not flt(self.deposit) and not flt(self.withdrawal):
+			frappe.throw(_("Set the Deposit or the Withdrawal amount."), title=_("Invalid Amount"))
+
+		self.reset_unallocated_rows()
 		self.allocate_payment_entries()
 		self.set_status()
 
@@ -139,10 +176,30 @@ class BankTransaction(Document):
 
 	def before_update_after_submit(self):
 		self.validate_duplicate_references()
+		self.reset_unallocated_rows()
 		self.update_allocated_amount()
 		self.delink_old_payment_entries()
 		self.allocate_payment_entries()
 		self.set_status()
+
+	def reset_unallocated_rows(self):
+		"""Only allocate_payment_entries sets an allocated amount. A row it has not allocated yet, such
+		as a row typed in the form or copied by Amend, starts from zero and is allocated again."""
+		if self.flags.updating_linked_bank_transaction:
+			return
+
+		saved = {}
+		doc_before_save = self.get_doc_before_save()
+		if doc_before_save and doc_before_save.docstatus == DocStatus.submitted():
+			saved = {row.name: row.allocated_amount for row in doc_before_save.payment_entries}
+
+		allocated_now = self.flags.get("allocated_rows") or set()
+		for row in self.payment_entries:
+			if id(row) in allocated_now:
+				continue
+			row.allocated_amount = saved.get(row.name, 0.0)
+
+		self.update_allocated_amount()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ["GL Entry"]
@@ -209,7 +266,11 @@ class BankTransaction(Document):
 			)
 
 			if allocable_amount < 0:
-				frappe.throw(_("Voucher {0} is over-allocated by {1}").format(allocable_amount))
+				frappe.throw(
+					_("Voucher {0} is over-allocated by {1}").format(
+						payment_entry.payment_entry, abs(allocable_amount)
+					)
+				)
 
 			if remaining_amount <= 0:
 				self.remove(payment_entry)
@@ -223,6 +284,7 @@ class BankTransaction(Document):
 
 			should_clear = should_clear and allocable_amount <= remaining_amount
 			payment_entry.allocated_amount = min(allocable_amount, remaining_amount)
+			self.flags.setdefault("allocated_rows", set()).add(id(payment_entry))
 			remaining_amount = flt(
 				remaining_amount - payment_entry.allocated_amount,
 				self.precision("unallocated_amount"),
@@ -264,9 +326,14 @@ class BankTransaction(Document):
 			return
 
 		if doctype == "Sales Invoice":
+			# only the payment rows paid into this transaction's bank account
 			frappe.db.set_value(
 				"Sales Invoice Payment",
-				dict(parenttype=doctype, parent=docname),
+				dict(
+					parenttype=doctype,
+					parent=docname,
+					account=frappe.db.get_value("Bank Account", self.bank_account, "account"),
+				),
 				"clearance_date",
 				clearance_date,
 			)
@@ -278,6 +345,7 @@ class BankTransaction(Document):
 		"""For when a second bank transaction has fixed another, e.g. refund"""
 
 		bt = frappe.get_doc(self.doctype, bank_transaction_name)
+		bt.flags.updating_linked_bank_transaction = True
 		if allocated_amount:
 			bt.append(
 				"payment_entries",
@@ -300,7 +368,6 @@ class BankTransaction(Document):
 			if not pe:
 				return
 
-			bt.flags.updating_linked_bank_transaction = True
 			bt.remove(pe)
 
 		bt.save()
@@ -431,11 +498,13 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 	transaction_date = getdate(transaction.date)
 
+	is_deposit = flt(transaction.deposit) > 0
+
 	if payment_entry.payment_document == "Bank Transaction":
 		bt = frappe.db.get_value(
 			"Bank Transaction",
 			payment_entry.payment_entry,
-			("unallocated_amount", "bank_account"),
+			("unallocated_amount", "bank_account", "deposit"),
 			as_dict=True,
 		)
 		bt_bank_account = frappe.db.get_value("Bank Account", bt.bank_account, "account")
@@ -447,6 +516,14 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 				)
 			)
 
+		if (flt(bt.deposit) > 0) == is_deposit:
+			frappe.throw(
+				_(
+					"Bank Transaction {0} is on the same side as this one; only a deposit and a withdrawal reconcile each other."
+				).format(payment_entry.payment_entry),
+				title=_("Wrong Direction"),
+			)
+
 		return abs(bt.unallocated_amount), True, transaction_date
 
 	if gl_bank_account not in gl_entries:
@@ -456,13 +533,28 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 			)
 		)
 
-	allocable_amount = gl_entries.pop(gl_bank_account) or 0
-	if allocable_amount <= 0.0:
+	# the bank is debited by money coming in and credited by money going out
+	bank_amount = flt(gl_entries.pop(gl_bank_account))
+	if not bank_amount:
 		frappe.throw(
 			_("Invalid amount in accounting entries of {0} {1} for Account {2}: {3}").format(
-				payment_entry.payment_document, payment_entry.payment_entry, gl_bank_account, allocable_amount
+				payment_entry.payment_document, payment_entry.payment_entry, gl_bank_account, bank_amount
 			)
 		)
+
+	if (bank_amount > 0) != is_deposit:
+		frappe.throw(
+			_("{0} {1} is a {2} in bank account {3}, but this Bank Transaction is a {4}.").format(
+				payment_entry.payment_document,
+				frappe.bold(payment_entry.payment_entry),
+				_("deposit") if bank_amount > 0 else _("withdrawal"),
+				gl_bank_account,
+				_("deposit") if is_deposit else _("withdrawal"),
+			),
+			title=_("Wrong Direction"),
+		)
+
+	allocable_amount = abs(bank_amount)
 
 	matching_bt_allocaion = bt_allocations.pop(gl_bank_account, {})
 
@@ -471,7 +563,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 	)
 
 	should_clear = all(
-		gl_entries[gle_account] == bt_allocations.get(gle_account, {}).get("total", 0)
+		abs(flt(gl_entries[gle_account])) == bt_allocations.get(gle_account, {}).get("total", 0)
 		for gle_account in gl_entries
 	)
 
@@ -495,7 +587,7 @@ def get_related_bank_gl_entries(docs):
 			gle.voucher_type.as_("doctype"),
 			gle.voucher_no.as_("docname"),
 			gle.account.as_("gl_account"),
-			Sum(Abs(gle.credit_in_account_currency - gle.debit_in_account_currency)).as_("amount"),
+			Sum(gle.debit_in_account_currency - gle.credit_in_account_currency).as_("amount"),
 		)
 		.where(
 			(ac.account_type == "Bank")
