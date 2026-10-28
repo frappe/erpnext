@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import random_string
+from frappe.utils import add_days, random_string, today
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.selling.page.point_of_sale.point_of_sale import get_items
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.selling.page.point_of_sale.point_of_sale import get_items, get_past_order_list
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -56,6 +58,30 @@ class TestPointOfSaleGetItems(ERPNextTestSuite):
 		# and a bare (empty) list when nothing matches.
 		items = result["items"] if isinstance(result, dict) else result
 		return [row.get("item_code") for row in items]
+
+	def _get_item_row(self, search_term):
+		result = get_items(
+			start=0,
+			page_length=100,
+			price_list="Standard Selling",
+			item_group=self.item_group,
+			pos_profile=self.pos_profile,
+			search_term=search_term,
+		)
+		(row,) = result["items"]
+		return row
+
+	def _make_price(self, item_code, rate, valid_from, **kwargs):
+		return frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": "Standard Selling",
+				"item_code": item_code,
+				"price_list_rate": rate,
+				"valid_from": valid_from,
+				**kwargs,
+			}
+		).insert()
 
 	def _make_stock_item(self):
 		# Fresh stock item in the filtered item group so it passes the
@@ -161,6 +187,63 @@ class TestPointOfSaleGetItems(ERPNextTestSuite):
 
 		out_of_stock_codes = self._get_item_codes(out_of_stock_item)
 		self.assertNotIn(out_of_stock_item, out_of_stock_codes)
+
+	def test_tile_price_ignores_batch_price(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 0,
+				"item_group": self.item_group,
+			}
+		).name
+		batch_no = (
+			frappe.get_doc({"doctype": "Batch", "batch_id": random_string(10), "item": item_code})
+			.insert()
+			.name
+		)
+		self._make_price(item_code, 100, add_days(today(), -10))
+		self._make_price(item_code, 80, add_days(today(), -1), batch_no=batch_no)
+
+		row = self._get_item_row(item_code)
+		self.assertEqual(row["price_list_rate"], 100)
+		self.assertFalse(row.get("batch_no"))
+
+	def test_tile_price_ignores_customer_price(self):
+		self._make_price(self.item_code, 100, add_days(today(), -10))
+		self._make_price(self.item_code, 70, add_days(today(), -1), customer="_Test Customer")
+
+		row = self._get_item_row(self.item_code)
+		self.assertEqual(row["price_list_rate"], 100)
+
+	def test_barcode_scan_price_respects_validity(self):
+		barcode = random_string(12)
+		self.item.append("barcodes", {"barcode": barcode})
+		self.item.save()
+
+		# Item Price lists in creation order, so the expired and the future price come first
+		self._make_price(self.item_code, 50, add_days(today(), -30), valid_upto=add_days(today(), -20))
+		self._make_price(self.item_code, 150, add_days(today(), 5))
+		self._make_price(self.item_code, 100, add_days(today(), -5))
+
+		row = self._get_item_row(barcode)
+		self.assertEqual(row["item_code"], self.item_code)
+		self.assertEqual(row["price_list_rate"], 100)
+
+	def test_paid_past_orders_exclude_unpaid_invoice(self):
+		# an unpaid invoice, flagged as made from the POS page
+		si = create_sales_invoice()
+		si.db_set("is_created_using_pos", 1)
+		self.assertGreater(si.outstanding_amount, 0)
+
+		paid = [row.name for row in get_past_order_list(si.name, "Paid")]
+		self.assertNotIn(si.name, paid)
+		partly_paid = [row.name for row in get_past_order_list(si.name, "Partly Paid")]
+		self.assertIn(si.name, partly_paid)
+
+	def test_past_orders_without_status(self):
+		self.assertEqual(get_past_order_list("", ""), [])
+		self.assertEqual(get_past_order_list(self.item_code, ""), [])
 
 	def test_get_parent_item_group_returns_common_ancestor(self):
 		from erpnext.selling.page.point_of_sale.point_of_sale import get_parent_item_group
