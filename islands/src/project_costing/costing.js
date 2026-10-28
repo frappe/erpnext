@@ -8,7 +8,6 @@ export const SOURCES = [
 		key: "labour",
 		label: __("Labour"),
 		via: __("timesheets"),
-		definition: __("Costing amount of submitted timesheets"),
 		route: (project) => list_route("Timesheet", { "Timesheet Detail.project": project, docstatus: 1 }),
 	},
 	{
@@ -16,7 +15,6 @@ export const SOURCES = [
 		label: __("Purchases"),
 		via: __("purchase invoices"),
 		access: "purchases",
-		definition: __("Non-stock items on submitted purchase invoices"),
 		route: (project) =>
 			list_route("Purchase Invoice", { "Purchase Invoice Item.project": project, docstatus: 1 }),
 	},
@@ -25,7 +23,6 @@ export const SOURCES = [
 		label: __("Materials"),
 		via: __("stock consumption"),
 		access: "materials",
-		definition: __("Value of stock consumed against the project"),
 		route: (project) =>
 			list_route("Stock Entry", { "Stock Entry Detail.project": project, docstatus: 1 }),
 	},
@@ -33,7 +30,6 @@ export const SOURCES = [
 		key: "expenses",
 		label: __("Expenses"),
 		via: __("expense claims"),
-		definition: __("Sanctioned amount of submitted expense claims"),
 		route: (project) => list_route("Expense Claim", { project, docstatus: 1 }),
 	},
 ];
@@ -73,7 +69,6 @@ export function toView(payload, doc) {
 		drivers: payload.drivers,
 		rate_gaps: payload.rate_gaps,
 		labour_understated: Boolean(payload.rate_gaps?.understated),
-		...margin_percents(summary),
 	};
 }
 
@@ -90,16 +85,5 @@ function billing_of(billing, summary) {
 		...billing,
 		over_billed: billing.over_billed ? summary.billed - summary.contract : 0,
 		overdue: (billing.invoices || []).some((invoice) => invoice.status === "Overdue"),
-	};
-}
-
-function margin_percents(summary) {
-	const percent_of = (amount, whole) => (amount != null && whole ? (amount * 100) / whole : null);
-	return {
-		projected_margin_percent: percent_of(
-			summary.projected_margin,
-			Math.max(summary.contract || 0, summary.billed)
-		),
-		planned_margin_percent: percent_of(summary.planned_margin, summary.contract),
 	};
 }

@@ -27,22 +27,10 @@ const series = computed(() =>
 	Object.fromEntries(active.value.map((source) => [source.key, { label: source.label }]))
 );
 
-// What the totals leave out, behind the info mark by the title.
-const notes = computed(() => {
-	const out = active.value.map((source) => `${source.label}: ${source.definition}.`);
-	const missing = props.view.sources.filter((source) => !source.amount);
-	if (missing.length)
-		out.push(
-			__("No {0} against this project yet.", [missing.map((source) => source.via).join(__(" or "))])
-		);
-	if (props.view.rate_gaps?.hours)
-		out.push(
-			__("Labour leaves out {0} h saved without a costing rate.", [
-				format.number(props.view.rate_gaps.hours),
-			])
-		);
-	return out.join(" ");
-});
+// Where each slice comes from, behind the info mark by the title.
+const notes = computed(() =>
+	active.value.map((source) => __("{0}: {1}", [source.label, source.via])).join(" · ")
+);
 
 // Totals show to everyone; the entries behind a slice open only for those who can read them.
 function open_source(event) {
@@ -61,7 +49,6 @@ function open_source(event) {
 		<DonutChart
 			v-if="mode === 'total'"
 			:title="__('Cost by source')"
-			:subtitle="__('Select a slice to see its entries')"
 			:data="slices"
 			category="label"
 			value="amount"
@@ -81,7 +68,6 @@ function open_source(event) {
 		<BarChart
 			v-else
 			:title="__('Cost by source')"
-			:subtitle="__('Cost each month, stacked by source')"
 			:data="months"
 			x="label"
 			:y="active.map((source) => source.key)"

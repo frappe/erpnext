@@ -21,9 +21,9 @@ class HeadlineNumbers {
 
 	running() {
 		const view = this.view;
-		const cost = this.cost(__("Cost to date"), __("{0} booked so far.", [this.sources()]));
+		const cost = this.cost(__("Cost to date"), this.sources());
 		if (view.labour_understated) {
-			cost.sub = __("+ ~{0} unpriced labour", [this.format.short(view.rate_gaps.estimate)]);
+			cost.sub = __("+ ~{0} unpriced", [this.format.short(view.rate_gaps.estimate)]);
 		}
 		const items = [cost, this.forecast()];
 		if (view.internal) return [...items, this.hours()];
@@ -32,12 +32,7 @@ class HeadlineNumbers {
 
 	completed() {
 		const view = this.view;
-		const items = [
-			this.cost(
-				__("Final cost"),
-				__("{0} booked against the project, including entries after it closed.", [this.sources()])
-			),
-		];
+		const items = [this.cost(__("Final cost"), this.sources())];
 		if (view.has_estimate) items.push(this.final_variance());
 		if (view.internal) return [...items, this.hours()];
 		items.push(this.billed(), this.margin(__("Final gross margin")));
@@ -47,9 +42,7 @@ class HeadlineNumbers {
 
 	cancelled() {
 		const view = this.view;
-		const items = [
-			this.cost(__("Cost incurred"), __("{0} booked against the project.", [this.sources()])),
-		];
+		const items = [this.cost(__("Cost incurred"), this.sources())];
 		if (view.internal) return [...items, this.hours()];
 		return [
 			...items,
@@ -57,8 +50,7 @@ class HeadlineNumbers {
 			{
 				label: __("Net result"),
 				value: this.format.short(view.margin),
-				sub: __("Billed − cost incurred"),
-				hint: __("Billed − cost incurred. The same figure as the gross margin on the Project."),
+				hint: __("Billed − cost incurred"),
 			},
 		];
 	}
@@ -70,11 +62,9 @@ class HeadlineNumbers {
 			label,
 			value: format.short(view.cost),
 			sub: view.has_estimate
-				? __("{0} of {1} estimate", [format.percent(view.used_percent), format.short(view.estimate)])
+				? __("{0} of estimate", [format.percent(view.used_percent)])
 				: __("No estimate set"),
-			hint: view.has_estimate
-				? `${hint} ${__("Measured against the estimated cost on the Project.")}`
-				: hint,
+			hint,
 		};
 	}
 
@@ -85,7 +75,7 @@ class HeadlineNumbers {
 			label: __("Forecast at completion"),
 			value: started ? this.format.short(view.forecast) : "—",
 			sub: this.forecast_caption(),
-			hint: __("Cost to date ÷ % complete. Assumes the rest of the work costs the same per percent."),
+			hint: __("Cost to date ÷ % complete"),
 		};
 	}
 
@@ -110,7 +100,7 @@ class HeadlineNumbers {
 				view.variance > 0
 					? __("{0} over the estimate", [share])
 					: __("{0} under the estimate", [share]),
-			hint: __("Final cost − estimated cost."),
+			hint: __("Final cost − estimated cost"),
 		};
 	}
 
@@ -121,12 +111,9 @@ class HeadlineNumbers {
 			label: __("Billed"),
 			value: format.short(view.billed),
 			sub: view.has_contract
-				? __("{0} of {1} contract", [
-						format.percent(view.billed_percent),
-						format.short(view.contract),
-				  ])
+				? __("{0} of contract", [format.percent(view.billed_percent)])
 				: __("No sales order"),
-			hint: __("Sales invoices for this project, net of returns, before tax."),
+			hint: __("Sales invoices, net of returns"),
 		};
 	}
 
@@ -138,7 +125,7 @@ class HeadlineNumbers {
 			sub: view.billed
 				? __("{0} of billed", [this.format.percent(view.margin_percent, 1)])
 				: __("Nothing billed yet"),
-			hint: __("Billed − cost. The same figure as the gross margin on the Project."),
+			hint: __("Billed − cost"),
 		};
 	}
 
@@ -147,14 +134,14 @@ class HeadlineNumbers {
 		return {
 			label: __("Hours logged"),
 			value: this.format.number(view.hours),
-			sub: view.access.labour ? __("At {0}/h average cost", [this.format.short(view.rate)]) : null,
-			hint: __("Hours on submitted timesheets."),
+			sub: view.access.labour ? __("{0}/h average", [this.format.short(view.rate)]) : null,
+			hint: __("Hours on submitted timesheets"),
 		};
 	}
 
 	sources() {
 		return this.view.hrms
-			? __("Timesheet labour, non-stock purchases, materials consumed and expense claims")
-			: __("Timesheet labour, non-stock purchases and materials consumed");
+			? __("Timesheets + purchases + materials + expense claims")
+			: __("Timesheets + purchases + materials");
 	}
 }

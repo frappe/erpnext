@@ -29,9 +29,6 @@ const ORDER_THEMES = { "To Bill": "blue", "To Deliver and Bill": "blue", Complet
 const billing = computed(() => props.view.billing);
 const orders = computed(() => billing.value.sales_orders || []);
 
-// The rows say how many sales orders there are, so the subtitle names only the customer.
-const subtitle = computed(() => props.view.customer_name || "");
-
 // A customer project with nothing ordered or billed yet.
 const not_started = computed(() => !props.view.has_contract && !props.view.billed);
 const show_orders = computed(() => orders.value.length > 1 || billing.value.closed_remainder > 0);
@@ -42,22 +39,18 @@ const rows = computed(() => {
 	if (view.has_contract)
 		out.push({
 			label: __("Contract value"),
-			caption:
-				orders.value.length > 1 ? __("{0} sales orders", [orders.value.length]) : __("Sales order"),
 			value: format.short(view.contract),
 		});
 	out.push({
 		label: __("Billed to date"),
-		caption: view.has_contract
-			? __("Sales invoices, net of returns")
-			: __("No sales order, so no projected or planned margin"),
+		caption: __("Invoices, net of returns"),
 		value: format.short(view.billed),
 	});
 	if (view.has_contract && !billing.value.over_billed) out.push(left_to_bill_row());
 	if (billing.value.closed_remainder)
 		out.push({
 			label: __("Not billable"),
-			caption: __("Unbilled part of a closed order, left out of Left to bill"),
+			caption: __("Unbilled part of a closed order"),
 			value: format.short(billing.value.closed_remainder),
 			tone: "text-ink-gray-4",
 		});
@@ -65,14 +58,14 @@ const rows = computed(() => {
 	if (billing.value.outstanding != null)
 		out.push({
 			label: __("Outstanding"),
-			caption: __("Invoiced, not yet paid"),
+			caption: __("Invoiced, unpaid"),
 			value: format.short(billing.value.outstanding),
 			tone: billing.value.overdue ? "text-ink-red-5" : "",
 		});
 	if (billing.value.unbilled)
 		out.push({
 			label: view.has_contract ? __("Unbilled timesheets") : __("Ready to bill"),
-			caption: __("Billable hours not yet invoiced"),
+			caption: __("Billable hours, not invoiced"),
 			value: format.short(billing.value.unbilled.amount, billing.value.unbilled.currency),
 		});
 	return out;
@@ -83,8 +76,8 @@ const figures = computed(() => rows.value.map(({ caption, ...figure }) => figure
 const definitions = computed(() =>
 	rows.value
 		.filter((row) => row.caption)
-		.map((row) => `${row.label}: ${row.caption}.`)
-		.join(" ")
+		.map((row) => `${row.label}: ${row.caption}`)
+		.join(" · ")
 );
 
 function left_to_bill_row() {
@@ -92,14 +85,12 @@ function left_to_bill_row() {
 	if (props.view.phase === "cancelled")
 		return {
 			label: __("Not billable"),
-			caption: __("Project cancelled"),
 			value: format.short(left),
 			tone: "text-ink-gray-4",
 		};
 	if (props.view.phase === "completed")
 		return {
 			label: __("Never billed"),
-			caption: __("Project is complete"),
 			value: format.short(left),
 			tone: left > 0 ? "text-ink-amber-5" : "",
 		};
@@ -115,7 +106,7 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 
 <template>
 	<ChartCard>
-		<ChartContainer :title="__('Billing')" :subtitle="subtitle">
+		<ChartContainer :title="__('Billing')">
 			<template v-if="definitions && !not_started" #title-suffix>
 				<Tooltip :text="definitions">
 					<span
@@ -143,13 +134,6 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 						<span class="lucide-file-text size-6" aria-hidden="true" />
 					</div>
 					<p class="text-base text-ink-gray-7">{{ __("Not billed yet") }}</p>
-					<p class="max-w-xs text-p-sm text-ink-gray-5">
-						{{
-							__(
-								"No sales order or invoice for this project yet. A sales order sets the contract value."
-							)
-						}}
-					</p>
 					<div v-if="!view.closed" class="mt-2 flex flex-wrap justify-center gap-2">
 						<Button
 							v-if="view.access.sales_orders"

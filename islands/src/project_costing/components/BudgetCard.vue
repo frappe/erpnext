@@ -21,44 +21,12 @@ const HEALTH = {
 	empty: { label: __("No costs yet"), theme: "gray" },
 };
 
-const SUBTITLES = {
-	completed: __("Final cost against the estimate"),
-	cancelled: __("Spent against the estimate"),
-};
-
 const badge = computed(() => {
 	const view = props.view;
 	if (view.phase === "completed") return { label: __("Completed"), theme: "gray" };
 	if (view.phase === "cancelled") return { label: __("Cancelled"), theme: "gray" };
 	return HEALTH[view.health];
 });
-
-const verdict = computed(() => {
-	const view = props.view;
-	if (view.phase === "completed")
-		return view.variance > 0
-			? __("Finished {0} over the estimate.", [format.short(view.variance)])
-			: __("Finished {0} under the estimate.", [format.short(-view.variance)]);
-	if (view.phase === "cancelled")
-		return view.cost > view.estimate
-			? __("Spent {0} more than the estimate before cancelling.", [
-					format.short(view.cost - view.estimate),
-			  ])
-			: __("{0} of the estimate was never spent.", [format.short(view.estimate - view.cost)]);
-	const pace = spending_pace(view);
-	// on hold the project still runs, so the forecast stands, on one assumption
-	return view.phase === "hold"
-		? `${pace} ${__("On hold: the forecast assumes work resumes at the same pace.")}`
-		: pace;
-});
-
-function spending_pace(view) {
-	const gap = Math.round(view.used_percent - view.percent_complete);
-	if (Math.abs(gap) <= 3) return __("Spending is in line with progress.");
-	return gap > 0
-		? __("Spending is {0} points ahead of progress.", [gap])
-		: __("Spending is {0} points behind progress.", [-gap]);
-}
 
 const rows = computed(() => {
 	const view = props.view;
@@ -85,23 +53,14 @@ const rows = computed(() => {
 
 <template>
 	<ChartCard>
-		<ChartContainer
-			:title="__('Budget')"
-			:subtitle="SUBTITLES[view.phase] || __('Against the estimated cost')"
-		>
+		<ChartContainer :title="__('Budget')">
 			<template #actions>
 				<Badge :label="badge.label" :theme="badge.theme" variant="subtle" />
 			</template>
 
 			<div class="space-y-4 pt-2">
-				<p v-if="!view.has_estimate" class="text-p-sm text-ink-gray-6">
-					{{
-						view.closed
-							? __("No estimated cost was set while the project ran.")
-							: __(
-									"No estimated cost. Set Estimated Cost on the Details tab to see how much of the budget is used."
-							  )
-					}}
+				<p v-if="!view.has_estimate && !view.closed" class="text-p-sm text-ink-gray-5">
+					{{ __("Set Estimated Cost on the Details tab.") }}
 				</p>
 				<template v-else>
 					<Progress
@@ -115,7 +74,6 @@ const rows = computed(() => {
 						:label="__('Work complete · {0}', [format.percent(view.percent_complete)])"
 						size="md"
 					/>
-					<p class="text-p-sm text-ink-gray-6">{{ verdict }}</p>
 				</template>
 				<FigureRows :rows="rows" />
 			</div>

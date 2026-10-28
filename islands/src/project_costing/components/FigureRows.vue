@@ -3,7 +3,7 @@ import { List, ListCell, ListRow } from "frappe-ui/list";
 
 // Label and figure pairs, such as "Estimated cost  ₹12 L", as a frappe-ui List.
 defineProps({
-	// [{ label, caption?, value, detail?, tone? }]; `tone` is an ink class for the value
+	// [{ label, caption?, value, tone? }]; `tone` is an ink class for the value
 	rows: { type: Array, required: true },
 });
 </script>
@@ -18,10 +18,7 @@ defineProps({
 				</div>
 			</ListCell>
 			<ListCell class="justify-end">
-				<div class="text-right">
-					<p class="text-sm tabular-nums" :class="row.tone || 'text-ink-gray-8'">{{ row.value }}</p>
-					<p v-if="row.detail" class="text-xs tabular-nums text-ink-gray-5">{{ row.detail }}</p>
-				</div>
+				<p class="text-sm tabular-nums" :class="row.tone || 'text-ink-gray-8'">{{ row.value }}</p>
 			</ListCell>
 		</ListRow>
 	</List>
