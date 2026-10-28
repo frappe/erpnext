@@ -221,6 +221,12 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			new_gl_map.append(d)
 			continue
 
+		transaction_precision = get_transaction_currency_precision(d, precision)
+		allocated_percentage = 0
+		allocated_transaction_amounts = {
+			"debit_in_transaction_currency": 0,
+			"credit_in_transaction_currency": 0,
+		}
 		for sub_cost_center, percentage in cost_center_allocation:
 			gle = copy.deepcopy(d)
 			gle.cost_center = sub_cost_center
@@ -229,13 +235,27 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 				"credit",
 				"debit_in_account_currency",
 				"credit_in_account_currency",
-				"debit_in_transaction_currency",
-				"credit_in_transaction_currency",
 			):
 				gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
+
+			# Round cumulative amounts so each allocation carries forward the rounding remainder.
+			allocated_percentage += percentage
+			for field, allocated_amount in allocated_transaction_amounts.items():
+				cumulative_amount = flt(flt(d.get(field)) * allocated_percentage / 100, transaction_precision)
+				gle[field] = flt(cumulative_amount - allocated_amount, transaction_precision)
+				allocated_transaction_amounts[field] = cumulative_amount
 			new_gl_map.append(gle)
 
 	return new_gl_map
+
+
+def get_transaction_currency_precision(entry, default_precision):
+	if not entry.get("transaction_currency"):
+		return default_precision
+	return get_field_precision(
+		frappe.get_meta("GL Entry").get_field("debit_in_transaction_currency"),
+		currency=entry.transaction_currency,
+	)
 
 
 @request_cache
@@ -497,20 +517,23 @@ def process_debit_credit_difference(gl_map):
 def get_debit_credit_difference(gl_map, precision):
 	debit_credit_diff = 0.0
 	trx_cur_debit_credit_diff = 0
+	transaction_precision = 0
 
 	for entry in gl_map:
 		entry.debit = flt(entry.debit, precision)
 		entry.credit = flt(entry.credit, precision)
 		debit_credit_diff += entry.debit - entry.credit
 
-		entry.debit_in_transaction_currency = flt(entry.debit_in_transaction_currency, precision)
-		entry.credit_in_transaction_currency = flt(entry.credit_in_transaction_currency, precision)
+		entry_precision = get_transaction_currency_precision(entry, precision)
+		transaction_precision = max(transaction_precision, entry_precision)
+		entry.debit_in_transaction_currency = flt(entry.debit_in_transaction_currency, entry_precision)
+		entry.credit_in_transaction_currency = flt(entry.credit_in_transaction_currency, entry_precision)
 		trx_cur_debit_credit_diff += (
 			entry.debit_in_transaction_currency - entry.credit_in_transaction_currency
 		)
 
 	debit_credit_diff = flt(debit_credit_diff, precision)
-	trx_cur_debit_credit_diff = flt(trx_cur_debit_credit_diff, precision)
+	trx_cur_debit_credit_diff = flt(trx_cur_debit_credit_diff, transaction_precision)
 
 	return debit_credit_diff, trx_cur_debit_credit_diff
 
