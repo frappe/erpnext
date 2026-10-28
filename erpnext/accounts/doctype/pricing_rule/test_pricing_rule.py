@@ -1687,6 +1687,22 @@ class TestPricingRule(ERPNextTestSuite):
 		debit_note.delete()
 		pi.cancel()
 
+	def test_pricing_rule_query_rejects_unknown_transaction_type(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rules
+
+		pricing_rule = make_pricing_rule(title="_Test Transaction Type Column Rule", selling=1)
+		self.addCleanup(frappe.delete_doc_if_exists, "Pricing Rule", pricing_rule.name)
+
+		args = frappe._dict(
+			item_code="_Test Item",
+			company="_Test Company",
+			price_list="_Test Price List",
+			qty=1,
+			transaction_date=frappe.utils.today(),
+			transaction_type="not_a_column",
+		)
+		self.assertRaises(frappe.ValidationError, get_pricing_rules, args)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
