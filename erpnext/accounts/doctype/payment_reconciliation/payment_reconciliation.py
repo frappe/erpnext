@@ -135,6 +135,7 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
+		self.validate_access()
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
 
@@ -478,6 +479,7 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def allocate_entries(self, args: dict):
+		self.validate_access()
 		self.validate_entries()
 
 		exc_gain_loss_posting_date = frappe.db.get_single_value(
@@ -600,6 +602,7 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def reconcile(self):
+		self.validate_access()
 		if frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 			running_doc = is_any_doc_running(
 				dict(
@@ -654,6 +657,13 @@ class PaymentReconciliation(Document):
 				payment_details[x.fieldname] = row.get(x.fieldname)
 
 		return payment_details
+
+	def validate_access(self):
+		if self.company:
+			erpnext.require_permission("Company", self.company, "select")
+		if self.receivable_payable_account:
+			erpnext.require_permission("Account", self.receivable_payable_account)
+		erpnext.require_party_permission(self.party_type, self.party)
 
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
