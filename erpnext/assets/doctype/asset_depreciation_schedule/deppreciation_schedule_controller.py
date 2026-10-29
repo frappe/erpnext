@@ -41,7 +41,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		self.schedules_before_clearing = rows
 		gap_idx = next((idx for idx, row in enumerate(rows) if not row.journal_entry), None)
 
-		self.first_non_depreciated_row_idx = gap_idx or 0
+		self.first_non_depreciated_row_idx = len(rows) if gap_idx is None else gap_idx
 		self.depreciation_schedule = list(rows) if gap_idx is None else rows[:gap_idx]
 		self.booked_rows_after_gap = (
 			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
