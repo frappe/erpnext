@@ -2,8 +2,9 @@
 # See license.txt
 
 import frappe
+from frappe.utils import getdate
 
-from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
+from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists, make_jv_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -116,6 +117,80 @@ class TestShareTransfer(ERPNextTestSuite):
 				self.assertEqual(doc.amount, amount)
 				doc.cancel()
 				self.assertEqual(doc.docstatus, 2)
+
+	def make_share_transfer(self, **args):
+		doc = {
+			"doctype": "Share Transfer",
+			"date": "2018-01-06",
+			"share_type": "Equity",
+			"rate": 10,
+			"company": "_Test Company",
+			"asset_account": "Cash - _TC",
+			"equity_or_liability_account": "Creditors - _TC",
+		}
+		doc.update(args)
+		doc["no_of_shares"] = doc["to_no"] - doc["from_no"] + 1
+		return frappe.get_doc(doc)
+
+	def get_share_rows(self, shareholder):
+		return [(row.from_no, row.to_no) for row in frappe.get_doc("Shareholder", shareholder).share_balance]
+
+	def test_cancel_is_refused_after_the_shares_moved_on(self):
+		# SH-00003 passed 201-400 on to SH-00002 and sold 401-500 back to the company
+		transfer = frappe.get_doc(
+			"Share Transfer",
+			{
+				"docstatus": 1,
+				"transfer_type": "Transfer",
+				"from_shareholder": "SH-00001",
+				"to_shareholder": "SH-00003",
+			},
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "have moved on", transfer.cancel)
+
+		purchase = frappe.get_doc(
+			"Share Transfer", {"docstatus": 1, "transfer_type": "Purchase", "from_shareholder": "SH-00003"}
+		)
+		self.make_share_transfer(
+			transfer_type="Issue", to_shareholder="SH-00001", from_no=401, to_no=500
+		).submit()
+		self.assertRaisesRegex(frappe.ValidationError, "have moved on", purchase.cancel)
+
+		self.assertEqual(self.get_share_rows("SH-00001"), [(1, 100), (401, 500)])
+		self.assertEqual(self.get_share_rows("SH-00003"), [])
+
+	def test_transfer_across_adjacent_holdings(self):
+		# setUp leaves SH-00002 with 101-200 and 201-400 as two rows
+		transfer = self.make_share_transfer(
+			transfer_type="Transfer",
+			from_shareholder="SH-00002",
+			to_shareholder="SH-00001",
+			from_no=101,
+			to_no=400,
+		).submit()
+		self.assertEqual(self.get_share_rows("SH-00002"), [])
+		self.assertEqual(self.get_share_rows("SH-00001"), [(1, 100), (101, 400)])
+
+		transfer.cancel()
+		self.assertEqual(self.get_share_rows("SH-00002"), [(101, 400)])
+		self.assertEqual(self.get_share_rows("SH-00001"), [(1, 100)])
+
+	def test_journal_entry_uses_the_transfer_date(self):
+		transfer = frappe.get_doc("Share Transfer", {"docstatus": 1, "transfer_type": "Issue"})
+		journal_entry = make_jv_entry(
+			company=transfer.company,
+			account=transfer.asset_account,
+			amount=transfer.amount,
+			payment_account=transfer.equity_or_liability_account,
+			credit_applicant_type="Shareholder",
+			credit_applicant=transfer.to_shareholder,
+			debit_applicant_type="",
+			debit_applicant="",
+			posting_date="2018-01-01",
+			share_transfer=transfer.name,
+		)
+		self.assertEqual(getdate(journal_entry.posting_date), getdate("2018-01-01"))
+		self.assertIn(transfer.name, journal_entry.user_remark)
 
 	def test_shareholders_stay_protected_after_buyback(self):
 		from frappe.client import set_value
@@ -276,3 +351,12 @@ class TestShareTransferValidation(ERPNextTestSuite):
 	def test_purchase_requires_a_from_shareholder(self):
 		doc = self.make_transfer(transfer_type="Purchase", from_shareholder="", asset_account="Cash - _TC")
 		self.assertRaises(frappe.ValidationError, doc.basic_validations)
+
+	def test_share_range_must_be_positive(self):
+		# both ranges match their share count, so only the range check can refuse them
+		for from_no, to_no in ((0, -1), (500, 496)):
+			with self.subTest(from_no=from_no, to_no=to_no):
+				doc = self.make_transfer(
+					from_no=from_no, to_no=to_no, no_of_shares=to_no - from_no + 1, amount=0
+				)
+				self.assertRaisesRegex(frappe.ValidationError, "must start from 1", doc.basic_validations)

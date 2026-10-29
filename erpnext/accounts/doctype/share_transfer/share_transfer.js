@@ -109,6 +109,8 @@ erpnext.share_transfer.make_jv = function (frm) {
 			credit_applicant: credit_applicant,
 			debit_applicant_type: debit_applicant_type,
 			debit_applicant: debit_applicant,
+			posting_date: frm.doc.date,
+			share_transfer: frm.doc.name,
 		},
 		method: "erpnext.accounts.doctype.share_transfer.share_transfer.make_jv_entry",
 		callback: function (r) {

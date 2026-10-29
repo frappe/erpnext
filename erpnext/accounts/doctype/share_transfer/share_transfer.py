@@ -7,7 +7,7 @@ from frappe import _
 from frappe.exceptions import ValidationError
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, get_link_to_form, nowdate
 
 
 class ShareDontExists(ValidationError):
@@ -97,6 +97,9 @@ class ShareTransfer(Document):
 			doc.flags.from_share_transfer = True
 			doc.save()
 
+	def before_cancel(self):
+		self.validate_shares_not_moved_on()
+
 	def on_cancel(self):
 		if self.transfer_type == "Issue":
 			compnay_shareholder = self.get_company_shareholder()
@@ -172,6 +175,46 @@ class ShareTransfer(Document):
 					_("The shares don't exist with the {0}").format(self.from_shareholder), ShareDontExists
 				)
 
+	def validate_shares_not_moved_on(self):
+		if self.shares_still_in_place():
+			return
+
+		message = _(
+			"Cannot cancel because shares {0} to {1} have moved on since this Share Transfer."
+		).format(self.from_no, self.to_no)
+		if later_transfers := self.get_later_overlapping_transfers():
+			message += "<br>" + _("Cancel these Share Transfers first: {0}").format(
+				", ".join(get_link_to_form("Share Transfer", name) for name in later_transfers)
+			)
+		frappe.throw(message, title=_("Cannot Cancel"))
+
+	def shares_still_in_place(self):
+		company_shareholder = self.get_company_shareholder().name
+		if self.transfer_type == "Purchase":
+			# cancel gives the shares back, so they must not have been issued again
+			return self.share_exists(company_shareholder) == "Outside"
+
+		if self.share_exists(self.to_shareholder) != "Complete":
+			return False
+
+		return self.transfer_type != "Issue" or self.share_exists(company_shareholder) == "Complete"
+
+	def get_later_overlapping_transfers(self):
+		return frappe.get_all(
+			"Share Transfer",
+			filters={
+				"docstatus": 1,
+				"company": self.company,
+				"share_type": self.share_type,
+				"from_no": ("<=", self.to_no),
+				"to_no": (">=", self.from_no),
+				"name": ("!=", self.name),
+				"creation": (">", self.creation),
+			},
+			order_by="creation desc",
+			pluck="name",
+		)
+
 	def basic_validations(self):
 		if self.transfer_type == "Purchase":
 			self.to_shareholder = ""
@@ -198,6 +241,8 @@ class ShareTransfer(Document):
 			frappe.throw(_("The field Equity/Liability Account cannot be blank"))
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw(_("The seller and the buyer cannot be the same"))
+		if self.from_no < 1 or self.to_no < self.from_no:
+			frappe.throw(_("Share numbers must start from 1, and To No cannot be less than From No"))
 		if self.no_of_shares != self.to_no - self.from_no + 1:
 			frappe.throw(_("The number of shares and the share numbers are inconsistent"))
 		amount = flt(self.rate * self.no_of_shares, self.precision("amount"))
@@ -209,21 +254,26 @@ class ShareTransfer(Document):
 
 	def share_exists(self, shareholder):
 		doc = self.get_shareholder_doc(shareholder)
-		for entry in doc.share_balance:
-			if (
-				entry.share_type != self.share_type
-				or entry.from_no > self.to_no
-				or entry.to_no < self.from_no
-			):
-				continue  # since query lies outside bounds
-			elif entry.from_no <= self.from_no and entry.to_no >= self.to_no:  # both inside
-				return "Complete"  # absolute truth!
-			elif entry.from_no <= self.from_no <= self.to_no:
-				return "Partial"
-			elif entry.from_no <= self.to_no <= entry.to_no:
-				return "Partial"
+		overlapping = sorted(
+			(
+				entry
+				for entry in doc.share_balance
+				if entry.share_type == self.share_type
+				and entry.from_no <= self.to_no
+				and entry.to_no >= self.from_no
+			),
+			key=lambda entry: entry.from_no,
+		)
+		if not overlapping:
+			return "Outside"
 
-		return "Outside"
+		next_uncovered = self.from_no
+		for entry in overlapping:
+			if entry.from_no > next_uncovered:
+				break
+			next_uncovered = max(next_uncovered, entry.to_no + 1)
+
+		return "Complete" if next_uncovered > self.to_no else "Partial"
 
 	def folio_no_validation(self):
 		shareholder_fields = ["from_shareholder", "to_shareholder"]
@@ -357,11 +407,15 @@ def make_jv_entry(
 	credit_applicant: str,
 	debit_applicant_type: str,
 	debit_applicant: str,
+	posting_date: str | None = None,
+	share_transfer: str | None = None,
 ):
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Journal Entry"
 	journal_entry.company = company
-	journal_entry.posting_date = nowdate()
+	journal_entry.posting_date = posting_date or nowdate()
+	if share_transfer:
+		journal_entry.user_remark = _("Against Share Transfer {0}").format(share_transfer)
 	account_amt_list = []
 
 	account_amt_list.append(
