@@ -784,6 +784,7 @@ class SalesOrder(SellingController):
 
 	@frappe.whitelist()
 	def create_delivery_schedule(self, child_row: dict | frappe._dict, schedules: str | list[dict]):
+		self.check_permission("write")
 		DeliveryScheduleService(self).create_delivery_schedule(child_row, schedules)
 
 
