@@ -161,7 +161,7 @@ def initialize_parallel_threads(docname: str):
 			if not frappe.in_test:
 				frappe.db.commit()  # nosemgrep
 	else:
-		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+		schedule_next_date(docname)
 
 
 @frappe.whitelist(methods=["POST"])
