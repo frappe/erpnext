@@ -364,6 +364,7 @@ permission_query_conditions = {
 }
 
 has_permission = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
 	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
