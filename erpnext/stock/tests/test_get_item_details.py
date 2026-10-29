@@ -902,7 +902,12 @@ class TestGetItemDetail(ERPNextTestSuite):
 			transaction_date=today(),
 			items=[
 				frappe._dict(
-					doctype="Sales Order Item", item_code="_Test Item", qty=1, transaction_type="not_a_column"
+					doctype="Sales Order Item",
+					item_code="_Test Item",
+					qty=1,
+					uom="_Test UOM",
+					conversion_factor=1.0,
+					transaction_type="not_a_column",
 				)
 			],
 		)
