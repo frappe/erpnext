@@ -388,6 +388,22 @@ class TestStockReservationEntry(ERPNextTestSuite):
 					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_closing_sales_order_with_reserved_stock_is_blocked(self) -> None:
+		so = make_sales_order(
+			item_code=self.sr_item.name, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = 1
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+		so.create_stock_reservation_entries()
+
+		# closing must not strand reserved stock; the user has to unreserve first
+		self.assertRaises(frappe.ValidationError, so.update_status, "Closed")
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
