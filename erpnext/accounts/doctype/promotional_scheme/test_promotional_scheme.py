@@ -183,6 +183,19 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Pricing Rule", pricing_rule))
 		self.assertEqual(len(frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})), 1)
 
+	def test_pricing_rule_of_removed_disabled_slab_is_deleted(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		ps.price_discount_slabs[1].disable = 1
+		ps.save()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertFalse(frappe.db.exists("Pricing Rule", pricing_rule))
+
 	def test_pricing_rule_of_removed_slab_used_in_transaction_is_disabled(self):
 		ps = make_promotional_scheme_with_two_slabs()
 		pricing_rule = frappe.db.get_value(

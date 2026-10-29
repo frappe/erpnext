@@ -254,25 +254,25 @@ class PromotionalScheme(Document):
 			filters={
 				"promotional_scheme": self.name,
 				"promotional_scheme_id": ["not in", slabs],
-				"disable": 0,
 			},
-			pluck="name",
+			fields=["name", "disable"],
 		)
 		if not pricing_rules:
 			return
 
+		names = [d.name for d in pricing_rules]
 		used_pricing_rules = {
 			pricing_rule
 			for doctype in ("Pricing Rule Detail", "Coupon Code")
 			for pricing_rule in frappe.get_all(
-				doctype, filters={"pricing_rule": ["in", pricing_rules]}, pluck="pricing_rule", distinct=True
+				doctype, filters={"pricing_rule": ["in", names]}, pluck="pricing_rule", distinct=True
 			)
 		}
 		for pricing_rule in pricing_rules:
-			if pricing_rule in used_pricing_rules:
-				frappe.db.set_value("Pricing Rule", pricing_rule, "disable", 1)
-			else:
-				frappe.delete_doc("Pricing Rule", pricing_rule)
+			if pricing_rule.name not in used_pricing_rules:
+				frappe.delete_doc("Pricing Rule", pricing_rule.name)
+			elif not pricing_rule.disable:
+				frappe.db.set_value("Pricing Rule", pricing_rule.name, "disable", 1)
 
 	def validate_mixed_with_recursion(self):
 		if self.mixed_conditions:
