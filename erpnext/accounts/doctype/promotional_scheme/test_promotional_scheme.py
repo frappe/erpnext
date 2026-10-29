@@ -230,6 +230,18 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		so = make_sales_order(qty=4, price_list_rate=100, do_not_submit=True)
 		self.assertEqual(so.items[0].discount_percentage, 20)
 
+	def test_overlapping_slabs_are_allowed_for_transaction(self):
+		ps = frappe.new_doc("Promotional Scheme")
+		ps.name = "_Test Scheme"
+		ps.update({"apply_on": "Transaction", "selling": 1, "company": "_Test Company"})
+		for min_amount, free_item in ((100, "_Test Item"), (300, "_Test Item 2")):
+			ps.append(
+				"product_discount_slabs",
+				{"min_amount": min_amount, "free_item": free_item, "free_qty": 1, "rule_description": "Free"},
+			)
+		ps.save()
+		self.assertEqual(len(frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})), 2)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)

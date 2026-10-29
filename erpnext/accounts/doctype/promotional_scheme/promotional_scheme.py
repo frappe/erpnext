@@ -164,7 +164,7 @@ class PromotionalScheme(Document):
 				frappe.throw(_(msg))
 
 	def validate_overlapping_slabs(self):
-		if self.disable:
+		if self.disable or self.apply_on == "Transaction":
 			return
 
 		slabs = [d for d in self.price_discount_slabs + self.product_discount_slabs if not d.disable]
