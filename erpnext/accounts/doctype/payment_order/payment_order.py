@@ -45,8 +45,7 @@ class PaymentOrder(Document):
 	def validate(self):
 		self.validate_reference_type()
 		self.validate_company_bank_account()
-		self.validate_reference_company()
-		self.validate_reference_status()
+		self.validate_references()
 		self.validate_references_not_in_other_orders()
 
 	@property
@@ -80,59 +79,44 @@ class PaymentOrder(Document):
 				)
 			)
 
-	def validate_reference_company(self):
-		if not self.payment_order_type:
-			return
-
-		references = self.get_reference_names()
-		if not references:
-			return
-
-		reference_company = frappe._dict(
-			frappe.get_all(
-				self.payment_order_type,
-				filters={"name": ["in", references]},
-				fields=["name", "company"],
-				as_list=True,
-			)
-		)
-		for d in self.references:
-			company = reference_company.get(d.get(self.reference_field))
-			if company and company != self.company:
-				frappe.throw(
-					_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
-						d.idx, _(self.payment_order_type), d.get(self.reference_field), company, self.company
-					)
-				)
-
-	def validate_reference_status(self):
+	def validate_references(self):
 		references = self.get_reference_names()
 		if not self.payment_order_type or not references:
 			return
 
-		reference_status = {
+		reference_details = {
 			reference.name: reference
 			for reference in frappe.get_all(
 				self.payment_order_type,
 				filters={"name": ["in", references]},
-				fields=["name", "docstatus", "status"],
+				fields=["name", "company", "docstatus", "status"],
 			)
 		}
 		for d in self.references:
-			reference = reference_status.get(d.get(self.reference_field))
-			if not reference or reference.docstatus != 1:
-				frappe.throw(
-					_("Row #{0}: {1} {2} must be submitted").format(
-						d.idx, _(self.payment_order_type), d.get(self.reference_field)
-					)
-				)
+			self.validate_reference(d, reference_details.get(d.get(self.reference_field)))
 
-			if reference.status == "Paid":
-				frappe.throw(
-					_("Row #{0}: {1} {2} is already paid").format(
-						d.idx, _(self.payment_order_type), d.get(self.reference_field)
-					)
+	def validate_reference(self, row, reference):
+		reference_name = row.get(self.reference_field)
+		if not reference or reference.docstatus != 1:
+			frappe.throw(
+				_("Row #{0}: {1} {2} must be submitted").format(
+					row.idx, _(self.payment_order_type), reference_name
 				)
+			)
+
+		if reference.company != self.company:
+			frappe.throw(
+				_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
+					row.idx, _(self.payment_order_type), reference_name, reference.company, self.company
+				)
+			)
+
+		if reference.status == "Paid":
+			frappe.throw(
+				_("Row #{0}: {1} {2} is already paid").format(
+					row.idx, _(self.payment_order_type), reference_name
+				)
+			)
 
 	def validate_references_not_in_other_orders(self):
 		references = self.get_reference_names()
