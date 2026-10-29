@@ -630,8 +630,7 @@ def apply_pricing_rule_on_transaction(doc):
 				if d.coupon_code_based and not is_coupon_of_pricing_rule(doc, d.name):
 					continue
 
-				# Variable to track whether the condition has been met
-				condition_met = False
+				coupon_rule_applied = False
 				fields_set = set()
 
 				for field in ["additional_discount_percentage", "discount_amount"]:
@@ -654,7 +653,7 @@ def apply_pricing_rule_on_transaction(doc):
 						applied_rules.append(d.name)
 
 						if d.coupon_code_based:
-							condition_met = True
+							coupon_rule_applied = True
 							break
 
 				if has_rule_discount and fields_set:
@@ -664,8 +663,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 				doc.calculate_taxes_and_totals()
 
-				# Break out of the main loop if the condition is met
-				if condition_met:
+				if coupon_rule_applied:
 					break
 			elif d.price_or_product_discount == "Product":
 				item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
