@@ -7,6 +7,8 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, NullIf, Sum
 from frappe.utils import flt
 
+KEY_LENGTH = 8
+
 
 class General_Payment_Ledger_Comparison:
 	"""
@@ -192,26 +194,33 @@ class General_Payment_Ledger_Comparison:
 		self.diff = frappe._dict({})
 
 		for x in self.variation_in_payment_ledger:
-			self.diff[x[:-2]] = frappe._dict({"gl_balance": x[-2], "gl_balance_in_account_currency": x[-1]})
+			gl_balance, gl_balance_in_account_currency = x[KEY_LENGTH:]
+			self.diff[x[:KEY_LENGTH]] = frappe._dict(
+				gl_balance=gl_balance, gl_balance_in_account_currency=gl_balance_in_account_currency
+			)
 
 		for x in self.variation_in_general_ledger:
+			pl_balance, pl_balance_in_account_currency = x[KEY_LENGTH:]
 			self.diff.setdefault(
-				x[:-2], frappe._dict({"gl_balance": 0.0, "gl_balance_in_account_currency": 0.0})
-			).update(frappe._dict({"pl_balance": x[-2], "pl_balance_in_account_currency": x[-1]}))
+				x[:KEY_LENGTH], frappe._dict({"gl_balance": 0.0, "gl_balance_in_account_currency": 0.0})
+			).update(pl_balance=pl_balance, pl_balance_in_account_currency=pl_balance_in_account_currency)
 
 	def fold_reconciled_allocations(self) -> set[tuple]:
 		"""Reconciliation re-points Payment Ledger rows to invoices but leaves the GL entry unallocated,
 		so count such rows under the voucher's unallocated GL row."""
-		gl_keys = {row[:-2] for row in self.gle_balances}
+		gl_keys = {row[:KEY_LENGTH] for row in self.gle_balances}
 		balances = {}
 		for row in self.ple_balances:
-			key, unallocated = row[:-2], (*row[:6], row[2], row[3])
+			key, unallocated = row[:KEY_LENGTH], (*row[:6], row[2], row[3])
 			if key not in gl_keys and unallocated in gl_keys:
 				key = unallocated
 			balances[key] = (
-				tuple(flt(total + amount, 9) for total, amount in zip(balances[key], row[-2:], strict=True))
+				tuple(
+					flt(total + amount, 9)
+					for total, amount in zip(balances[key], row[KEY_LENGTH:], strict=True)
+				)
 				if key in balances
-				else row[-2:]
+				else row[KEY_LENGTH:]
 			)
 		return {(*key, *amounts) for key, amounts in balances.items()}
 
