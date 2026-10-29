@@ -1277,6 +1277,7 @@ class update_entries_after:
 			outward_value = self.get_outward_leg_value(sle)
 			if outward_value is not None:
 				amount = outward_value
+				sle.incoming_rate = outward_value / flt(sle.actual_qty)
 
 		if self.is_produced_row(sle):
 			sle.incoming_rate = self.get_produced_row_rate(sle)
@@ -1616,7 +1617,7 @@ class update_entries_after:
 				)
 
 				if item_code == sle.item_code:
-					rate = incoming_rate
+					rate = 0.0 if self.is_unvalued_rejected_material(sle) else incoming_rate
 				else:
 					if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 						ref_doctype = "Packed Item"
@@ -1632,6 +1633,18 @@ class update_entries_after:
 					)
 
 		return rate
+
+	def is_unvalued_rejected_material(self, sle):
+		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""
+		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice"):
+			return False
+
+		rejected_warehouse = frappe.db.get_value(
+			f"{sle.voucher_type} Item", sle.voucher_detail_no, "rejected_warehouse"
+		)
+		return sle.warehouse == rejected_warehouse and not frappe.db.get_single_value(
+			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		)
 
 	def get_moving_average_rate_for_return(self, sle):
 		"""Rate just before this entry, taken from the in-memory running state so a
@@ -1683,20 +1696,8 @@ class update_entries_after:
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no or self.is_manufacture_entry_with_sabb(sle):
+		if not self.args.get("sle_id") and not sle.dependant_sle_voucher_detail_no:
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
-
-	def is_manufacture_entry_with_sabb(self, sle):
-		if (
-			self.args.get("sle_id")
-			and sle.serial_and_batch_bundle
-			and sle.auto_created_serial_and_batch_bundle
-		):
-			purpose = frappe.get_cached_value("Stock Entry", sle.voucher_no, "purpose")
-			if purpose in ["Manufacture", "Repack"]:
-				return True
-
-		return False
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no, voucher_detail_no):
 		stock_entry = frappe.get_doc("Stock Entry", voucher_no, for_update=True)
@@ -2593,9 +2594,6 @@ def get_next_stock_reco(kwargs):
 		.orderby(sle.creation)
 		.limit(1)
 	)
-
-	if kwargs.get("batch_no"):
-		query = query.where(sle.batch_no == kwargs.get("batch_no"))
 
 	return query.run(as_dict=True)
 
