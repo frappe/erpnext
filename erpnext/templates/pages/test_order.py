@@ -14,8 +14,8 @@ MAKE_PAYMENT_REQUEST = "erpnext.accounts.doctype.payment_request.payment_request
 
 
 class TestOrder(ERPNextTestSuite):
-	@ERPNextTestSuite.change_settings("Buying Settings", {"show_pay_button": 0})
-	def test_buying_pay_button_setting_skips_selling_documents(self):
+	@ERPNextTestSuite.change_settings("Buying Settings", {"show_pay_button": 1})
+	def test_pay_button_only_for_documents_the_portal_can_pay(self):
 		so = make_sales_order()
 		po = create_purchase_order()
 
