@@ -1285,6 +1285,17 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 		schedule = get_depr_schedule(asset.name, "Active")
 		self.assertEqual([d.depreciation_amount for d in schedule if not d.journal_entry], [90] * 7)
 
+	def test_reschedule_of_fully_booked_schedule_adds_no_rows(self):
+		asset = create_monthly_asset(expected_value_after_useful_life=200)
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-12-31")
+
+		adjust_asset_value(asset.name, "2024-01-01", 200, 260)
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		self.assertEqual(len(schedule), 12)
+		self.assertEqual(len({d.schedule_date for d in schedule}), 12)
+		self.assertTrue(all(d.journal_entry for d in schedule))
+
 	def test_reschedule_counts_partial_rows_booked_after_a_cancelled_entry(self):
 		asset = create_monthly_asset(available_for_use_date="2023-01-16")
 		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2024-01-31")
