@@ -80,6 +80,8 @@ def start_merge(docname):
 				frappe.publish_realtime(
 					"ledger_merge_progress",
 					{"ledger_merge": ledger_merge.name, "current": successful_merges, "total": total},
+					doctype=ledger_merge.doctype,
+					docname=ledger_merge.name,
 				)
 			except Exception:
 				frappe.db.rollback(save_point="ledger_merge_row")
@@ -92,4 +94,9 @@ def start_merge(docname):
 				else:
 					ledger_merge.db_set("status", "Error")
 
-	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})
+	frappe.publish_realtime(
+		"ledger_merge_refresh",
+		{"ledger_merge": ledger_merge.name},
+		doctype=ledger_merge.doctype,
+		docname=ledger_merge.name,
+	)
