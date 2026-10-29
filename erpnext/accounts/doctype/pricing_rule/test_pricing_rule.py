@@ -2193,26 +2193,35 @@ class TestPricingRule(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_cumulative_totals_are_read_once_per_document(self):
-		item = make_item("PR Cumulative Item", {"is_stock_item": 0}).name
+		from erpnext.accounts.doctype.pricing_rule import utils
+
+		items = [make_item(f"PR Cumulative Item {i}", {"is_stock_item": 0}).name for i in range(3)]
 		make_item_pricing_rule(
-			item,
+			items=[{"item_code": item} for item in items],
 			is_cumulative=1,
+			min_qty=10,
 			discount_percentage=15,
 			applicable_for="Customer Group",
 			customer_group="All Customer Groups",
 			valid_from=add_days(today(), -30),
 			valid_upto=add_days(today(), 30),
 		)
-		si = create_sales_invoice(item_code=item, qty=1, do_not_save=True)
-		for _row in range(4):
-			si.append("items", {**si.items[0].as_dict(), "name": None, "idx": None})
+		create_sales_invoice(item_code=items[0], qty=9)
+		si = create_sales_invoice(item_code=items[0], qty=1, do_not_save=True)
+		for item in items[1:]:
+			si.append("items", {**si.items[0].as_dict(), "name": None, "idx": None, "item_code": item})
 
-		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as sql:
+		frappe.local.request_cache.clear()
+		with (
+			patch.object(frappe.db, "sql", wraps=frappe.db.sql) as sql,
+			patch.object(utils, "get_descendants_of", wraps=utils.get_descendants_of) as descendants,
+		):
 			si.insert()
 
 		cumulative_queries = [d for d in sql.call_args_list if "SUM(" in str(d.args[0]).upper()]
 		self.assertEqual(len(cumulative_queries), 1)
-		self.assertEqual(si.items[4].discount_percentage, 15)
+		self.assertEqual(descendants.call_count, 1)
+		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
 
 
 def make_pricing_rule(**args):

@@ -322,12 +322,9 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 				pricing_rule_args.apply_rule_on_other_items = items
 
 		elif pricing_rules[0].is_cumulative:
-			items = [args.get(frappe.scrub(pr_doc.get("apply_on")))]
-			data = get_qty_amount_data_for_cumulative(pr_doc, args, items)
-
-			if data:
-				stock_qty += data[0]
-				amount += data[1]
+			cumulative_qty, cumulative_amount = get_cumulative_qty_and_amount_for_row(pr_doc, args, doc)
+			stock_qty += cumulative_qty
+			amount += cumulative_amount
 
 		if pricing_rules[0].apply_rule_on_other and not pricing_rules[0].mixed_conditions and doc:
 			pricing_rules = get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, args) or []
@@ -542,11 +539,27 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
 
 
 def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
+	totals = get_cumulative_totals(pr_doc, doc, items).values()
+	return [sum(d[0] for d in totals), sum(d[1] for d in totals)]
+
+
+def get_cumulative_qty_and_amount_for_row(pr_doc, args, doc=None):
+	apply_on = frappe.scrub(pr_doc.get("apply_on"))
+	value = args.get(apply_on)
+	if not value:
+		return (0, 0)
+
+	rows = doc.get("items") if doc else None
+	values = {value, *(row.get(apply_on) for row in rows or [] if row.get(apply_on))}
+	return get_cumulative_totals(pr_doc, args, values).get(value, (0, 0))
+
+
+def get_cumulative_totals(pr_doc, doc, items=None):
 	return get_cumulative_qty_and_amount(
 		pr_doc.name,
 		doc.get("parenttype") or doc.doctype,
 		doc.get("company"),
-		tuple(sorted(items or [])),
+		tuple(sorted(set(items or []))),
 		doc.get("name"),
 		str(doc.get("modified")),
 	)
@@ -557,6 +570,7 @@ def get_cumulative_qty_and_amount(pricing_rule, doctype, company, items, transac
 	pr_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 	parent = frappe.qb.DocType(doctype)
 	child = frappe.qb.DocType(f"{doctype} Item")
+	apply_on = child[frappe.scrub(pr_doc.get("apply_on"))]
 	date_field = (
 		"transaction_date" if frappe.get_meta(doctype).has_field("transaction_date") else "posting_date"
 	)
@@ -565,9 +579,10 @@ def get_cumulative_qty_and_amount(pricing_rule, doctype, company, items, transac
 		frappe.qb.from_(child)
 		.inner_join(parent)
 		.on(child.parent == parent.name)
-		.select(Sum(child.stock_qty), Sum(child.amount))
+		.select(apply_on, Sum(child.stock_qty), Sum(child.amount))
 		.where(parent.docstatus == 1)
 		.where(parent[date_field][pr_doc.valid_from : pr_doc.valid_upto])
+		.groupby(apply_on)
 	)
 
 	if company:
@@ -577,12 +592,10 @@ def get_cumulative_qty_and_amount(pricing_rule, doctype, company, items, transac
 		query = query.where(child.warehouse.isin(get_child_warehouses(pr_doc.warehouse)))
 
 	if items:
-		query = query.where(child[frappe.scrub(pr_doc.get("apply_on"))].isin(items))
+		query = query.where(apply_on.isin(items))
 
 	query = filter_cumulative_query_by_applicable_for(query, parent, pr_doc, doctype)
-	sum_qty, sum_amt = query.run()[0]
-
-	return (flt(sum_qty), flt(sum_amt))
+	return {value: (flt(qty), flt(amount)) for value, qty, amount in query.run()}
 
 
 def filter_cumulative_query_by_applicable_for(query, parent, pr_doc, doctype):
@@ -596,12 +609,16 @@ def filter_cumulative_query_by_applicable_for(query, parent, pr_doc, doctype):
 	if not frappe.get_meta(doctype).has_field(fieldname):
 		return query
 
-	value = pr_doc.get(frappe.scrub(pr_doc.applicable_for))
-	values = [value]
-	if pr_doc.applicable_for in ("Customer Group", "Territory", "Supplier Group"):
-		values += get_descendants_of(pr_doc.applicable_for, value, ignore_permissions=True)
-
+	values = get_applicable_for_values(pr_doc.applicable_for, pr_doc.get(frappe.scrub(pr_doc.applicable_for)))
 	return query.where(parent[fieldname].isin(values))
+
+
+@request_cache
+def get_applicable_for_values(applicable_for, value):
+	if applicable_for in ("Customer Group", "Territory", "Supplier Group"):
+		return [value, *get_descendants_of(applicable_for, value, ignore_permissions=True)]
+
+	return [value]
 
 
 def apply_pricing_rule_on_transaction(doc):
