@@ -2135,8 +2135,6 @@ class TestPricingRule(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_cumulative_totals_are_read_once_per_document(self):
-		from unittest.mock import patch
-
 		item = make_item("PR Cumulative Item", {"is_stock_item": 0}).name
 		make_item_pricing_rule(
 			item,
