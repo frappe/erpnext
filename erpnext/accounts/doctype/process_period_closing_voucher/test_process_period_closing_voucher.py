@@ -1,12 +1,17 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import today
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher import (
 	process_individual_date,
+	resume_pcv_processing,
+	start_pcv_processing,
+	summarize_and_post_ledger_entries,
 )
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
@@ -177,3 +182,53 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 		for k in expected_opening_debtors.keys():
 			with self.subTest(k):
 				self.assertEqual(expected_opening_debtors[k], opening_debtors[k])
+
+	def make_closed_pcv(self):
+		"""A Period Closing Voucher that has posted its own closing entries."""
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
+		jv = make_journal_entry(
+			posting_date=today(),
+			amount=120,
+			account1="Debtors - _TC",
+			account2="Sales - _TC",
+			company=self.company,
+			save=False,
+		)
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = "_Test Customer"
+		jv.submit()
+		pcv = self.make_period_closing_voucher(posting_date=today())
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 0)
+		return pcv
+
+	def test_closed_pcv_is_not_closed_again(self):
+		pcv = self.make_closed_pcv()
+		gl_entries = frappe.db.count("GL Entry", {"voucher_no": pcv.name, "is_cancelled": 0})
+		closing_balances = frappe.db.count("Account Closing Balance", {"period_closing_voucher": pcv.name})
+		self.assertTrue(gl_entries)
+
+		ppcv = frappe.get_doc({"doctype": "Process Period Closing Voucher", "parent_pcv": pcv.name}).save()
+		for rpt_type in ("Profit and Loss", "Balance Sheet"):
+			row_name = self.get_row_name(ppcv.name, rpt_type, "normal_balances")
+			self.set_processing_date_status(row_name, "Running")
+			with patch("frappe.enqueue"):
+				process_individual_date(ppcv.name, row_name, today(), rpt_type, "normal_balances")
+
+		summarize_and_post_ledger_entries(ppcv.name)
+
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": pcv.name, "is_cancelled": 0}), gl_entries)
+		self.assertEqual(
+			frappe.db.count("Account Closing Balance", {"period_closing_voucher": pcv.name}), closing_balances
+		)
+
+	def test_only_a_submitted_unfinished_document_can_run(self):
+		ppcv = self.make_process_pcv()
+		with patch("frappe.enqueue") as enqueue:
+			# a draft, of a draft Period Closing Voucher
+			self.assertRaises(frappe.ValidationError, start_pcv_processing, ppcv.name)
+
+			ppcv.db_set({"docstatus": 1, "status": "Completed"})
+			self.assertRaises(frappe.ValidationError, resume_pcv_processing, ppcv.name)
+
+		enqueue.assert_not_called()
+		self.assertEqual(frappe.db.get_value(ppcv.doctype, ppcv.name, "status"), "Completed")
