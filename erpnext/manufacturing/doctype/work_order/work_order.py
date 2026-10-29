@@ -2139,6 +2139,7 @@ class WorkOrder(Document):
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
 			)
+			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(
 				ste_child.item_code,
 				ste_child.original_item,
