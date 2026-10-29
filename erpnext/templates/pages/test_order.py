@@ -6,9 +6,18 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from erpnext.accounts.doctype.payment_request.payment_request import get_portal_payment_args
 from erpnext.accounts.doctype.payment_request.test_payment_request import make_portal_user
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+<<<<<<< HEAD
 from erpnext.templates.pages.order import get_payment_details
+=======
+from erpnext.templates.pages.order import get_context, get_payment_details
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.tests.utils import ERPNextTestSuite
+
+MAKE_PAYMENT_REQUEST = "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request"
+>>>>>>> 22dada9 (test(accounts): cover unsupported purchase portal checkout)
 
 
 class TestOrder(FrappeTestCase):
@@ -57,6 +66,30 @@ class TestOrder(FrappeTestCase):
 					self.assertRaises(
 						frappe.PermissionError, get_portal_payment_args, doc.doctype, doc.name, "1"
 					)
+
+	def test_pay_button_is_hidden_for_purchase_documents(self):
+		purchase_order = create_purchase_order(qty=1, rate=100)
+		purchase_invoice = make_purchase_invoice(purchase_order.name)
+		purchase_invoice.insert()
+		purchase_invoice.submit()
+		user = make_fenced_user("purchase-portal-payments@example.com", ["Accounts User", "Purchase User"])
+
+		for doc in (purchase_order, purchase_invoice):
+			with (
+				self.subTest(doctype=doc.doctype),
+				as_user(user),
+				patch.object(frappe, "get_installed_apps", return_value=["frappe", "erpnext", "payments"]),
+				patch.dict(frappe.form_dict, {"doctype": doc.doctype, "name": doc.name}),
+			):
+				self.assertTrue(frappe.has_permission("Payment Request", "create"))
+				self.assertTrue(doc.has_permission("read"))
+				context = frappe._dict()
+				get_context(context)
+				self.assertFalse(context.show_pay_button)
+				self.assertEqual(context.pay_amount, 0)
+				template = frappe.get_template("erpnext/templates/pages/order.html")
+				header = "".join(template.blocks["header_actions"](template.new_context(context)))
+				self.assertIsNone(BeautifulSoup(header, "html.parser").find(id="pay-for-order"))
 
 	def test_pay_button_is_a_post_form_to_make_payment_request(self):
 		so = make_sales_order(customer="_Test Customer")
