@@ -881,10 +881,10 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 				"pos_invoices": [{"pos_invoice": sale.name}],
 			}
 		)
-		self.assertRaises(frappe.ValidationError, merge_log.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Customer Group is mandatory", merge_log.insert)
 
 		merge_log.customer_group = "_Test Customer Group 1"
-		self.assertRaises(frappe.ValidationError, merge_log.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "is not in Customer Group", merge_log.insert)
 
 		merge_log.customer_group = "All Customer Groups"
 		merge_log.insert()
