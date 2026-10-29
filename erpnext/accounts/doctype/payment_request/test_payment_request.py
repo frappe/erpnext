@@ -1301,10 +1301,29 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(pr.grand_total, so.grand_total)
 		self.assertEqual(pr.email_to, so.owner)
 		self.assertEqual(pr.party, so.customer)
+		self.assertTrue(pr.make_sales_invoice)
 		self.assertEqual(
 			pr.payment_gateway_account,
 			frappe.db.get_value("Payment Gateway Account", {"is_default": 1, "company": so.company}),
 		)
+
+	def test_portal_payment_does_not_invoice_an_invoice_or_billed_order(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		billed_order = make_sales_order()
+		make_sales_invoice(billed_order.name).insert().submit()
+		invoice = create_sales_invoice()
+		user = make_portal_user("_test_portal_payer@example.com", invoice.customer)
+
+		with as_user(user):
+			for doctype, docname in (("Sales Order", billed_order.name), ("Sales Invoice", invoice.name)):
+				make_payment_request(dt=doctype, dn=docname, submit_doc=1, order_type="Shopping Cart")
+
+		for docname in (billed_order.name, invoice.name):
+			pr = frappe.get_doc("Payment Request", {"reference_name": docname})
+			self.assertFalse(pr.make_sales_invoice)
+			pr.set_as_paid()
+			self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
 
 	def test_portal_payment_refused_outside_own_submitted_orders(self):
 		own_order = make_sales_order()

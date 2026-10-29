@@ -963,7 +963,7 @@ def make_payment_request(**args):
 				"party_name": args.get("party_name") or ref_doc.get("customer_name"),
 				"make_sales_invoice": (
 					args.make_sales_invoice  # new standard
-					or args.order_type == "Shopping Cart"  # compat for webshop app
+					or is_unbilled_shopping_cart_order(args, ref_doc)  # compat for webshop app
 				),
 				"mute_email": (
 					args.mute_email  # new standard
@@ -1040,6 +1040,15 @@ def get_portal_payment_args(doctype: str, docname: str, submit_doc: str | int | 
 
 	return frappe._dict(
 		dt=doctype, dn=docname, order_type="Shopping Cart", submit_doc=submit_doc, ref_doc=ref_doc
+	)
+
+
+def is_unbilled_shopping_cart_order(args: frappe._dict, ref_doc: Document) -> bool:
+	"""Only a Sales Order with something left to bill can get an invoice once it is paid."""
+	return (
+		args.order_type == "Shopping Cart"
+		and ref_doc.doctype == "Sales Order"
+		and flt(ref_doc.get("per_billed")) < 100
 	)
 
 
