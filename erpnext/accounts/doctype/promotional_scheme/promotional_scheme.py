@@ -313,15 +313,37 @@ def are_slabs_conflicting(slab, other_slab):
 	if slab.apply_multiple_pricing_rules and other_slab.apply_multiple_pricing_rules:
 		return False
 
-	for fieldname in ("warehouse", "for_price_list"):
-		if (slab.get(fieldname) or "") != (other_slab.get(fieldname) or ""):
-			return False
+	if are_warehouses_distinct(slab.get("warehouse"), other_slab.get("warehouse")):
+		return False
+
+	if are_price_lists_distinct(slab, other_slab):
+		return False
 
 	return are_ranges_overlapping(
 		slab.min_qty, slab.max_qty, other_slab.min_qty, other_slab.max_qty
 	) and are_ranges_overlapping(
 		slab.min_amount, slab.max_amount, other_slab.min_amount, other_slab.max_amount
 	)
+
+
+def are_warehouses_distinct(warehouse, other_warehouse):
+	if not (warehouse and other_warehouse) or warehouse == other_warehouse:
+		return False
+
+	lft, rgt = frappe.get_cached_value("Warehouse", warehouse, ["lft", "rgt"])
+	other_lft, other_rgt = frappe.get_cached_value("Warehouse", other_warehouse, ["lft", "rgt"])
+	return rgt < other_lft or other_rgt < lft
+
+
+def are_price_lists_distinct(slab, other_slab):
+	price_lists = {slab.get("for_price_list") or "", other_slab.get("for_price_list") or ""}
+	if len(price_lists) == 1:
+		return False
+
+	if "" not in price_lists:
+		return True
+
+	return all(d.get("rate_or_discount") == "Discount Percentage" for d in (slab, other_slab))
 
 
 def are_ranges_overlapping(min_value, max_value, other_min_value, other_max_value):

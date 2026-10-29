@@ -272,6 +272,33 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		ps.save()
 		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
 
+	def test_blank_or_group_warehouse_overlaps_its_warehouses(self):
+		ps = make_promotional_scheme()
+		for warehouse, other_warehouse in (
+			("", "_Test Warehouse - _TC"),
+			("_Test Warehouse Group - _TC", "_Test Warehouse Group-C1 - _TC"),
+		):
+			ps.reload()
+			ps.price_discount_slabs[0].warehouse = warehouse
+			add_price_slab(ps, max_qty=0, other_slab={"min_qty": 4, "warehouse": other_warehouse})
+			self.assertRaisesRegex(frappe.ValidationError, "apply to the same quantity", ps.save)
+
+		ps.reload()
+		ps.price_discount_slabs[0].warehouse = "_Test Warehouse 1 - _TC"
+		add_price_slab(
+			ps, max_qty=0, other_slab={"min_qty": 4, "warehouse": "_Test Warehouse Group-C1 - _TC"}
+		)
+		ps.save()
+
+	def test_blank_price_list_overlaps_a_rate_slab(self):
+		ps = make_promotional_scheme()
+		add_price_slab(ps, max_qty=0, other_slab={"min_qty": 4, "for_price_list": "_Test Price List"})
+		ps.save()
+
+		ps.price_discount_slabs[1].rate_or_discount = "Rate"
+		ps.price_discount_slabs[1].rate = 50
+		self.assertRaisesRegex(frappe.ValidationError, "apply to the same quantity", ps.save)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)
