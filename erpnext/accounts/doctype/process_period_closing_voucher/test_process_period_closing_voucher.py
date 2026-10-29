@@ -4,6 +4,7 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import get_datetime, today
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -19,11 +20,16 @@ from erpnext.accounts.doctype.process_period_closing_voucher.process_period_clos
 	summarize_and_post_ledger_entries,
 )
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.tests.utils import FrappeTestCase
+
+test_dependencies = ["Journal Entry"]
 
 
 class TestProcessPeriodClosingVoucher(FrappeTestCase):
 	def setUp(self):
+		self.addCleanup(frappe.db.rollback)
+		self.legacy_controller = frappe.db.get_single_value(
+			"Accounts Settings", "use_legacy_controller_for_pcv"
+		)
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 0)
 		self.company = "_Test Company"
 
@@ -48,21 +54,17 @@ class TestProcessPeriodClosingVoucher(FrappeTestCase):
 		return pcv
 
 	def make_process_pcv(self, submit=True):
-		with patch("frappe.utils.background_jobs.mapreduce"):
-			self.pcv = self.make_period_closing_voucher(posting_date=today())
-		ppcv = frappe.get_doc(
-			{
-				"doctype": "Process Period Closing Voucher",
-				"parent_pcv": self.pcv.name,
-			}
-		)
 		with (
 			patch.object(ProcessPeriodClosingVoucher, "get_dates", return_value=[get_datetime(today())]),
 			patch.object(process_period_closing_voucher, "is_scheduler_inactive", return_value=True),
 		):
-			ppcv.insert()
-			if submit:
-				ppcv.submit()
+			self.pcv = self.make_period_closing_voucher(posting_date=today())
+			ppcv = frappe.get_doc(
+				"Process Period Closing Voucher", {"parent_pcv": self.pcv.name, "docstatus": 1}
+			)
+			if not submit:
+				ppcv.cancel()
+				ppcv = frappe.get_doc(doctype=ppcv.doctype, parent_pcv=self.pcv.name).insert()
 		return ppcv
 
 	def set_processing_date_status(self, row_name, status):
@@ -71,22 +73,6 @@ class TestProcessPeriodClosingVoucher(FrappeTestCase):
 			row_name,
 			"status",
 			status,
-		)
-
-	def get_row_name(self, ppcv_name, rpt_type, parentfield):
-		return frappe.db.get_all(
-			"Process Period Closing Voucher Detail",
-			filters={"parent": ppcv_name, "report_type": rpt_type, "parentfield": parentfield},
-			order_by="report_type, idx",
-			pluck="name",
-			limit=1,
-		)[0]
-
-	def get_processing_date_closing_balance(self, row_name):
-		return frappe.db.get_value(
-			"Process Period Closing Voucher Detail",
-			row_name,
-			"closing_balance",
 		)
 
 	def test_reject_processing_closed_period(self):
@@ -166,6 +152,105 @@ class TestProcessPeriodClosingVoucher(FrappeTestCase):
 			summarize_and_post_ledger_entries(ppcv.name)
 		self.assertEqual(frappe.db.count("GL Entry", gl_filters), gl_count)
 		self.assertEqual(frappe.db.count("Account Closing Balance", balance_filters), balance_count)
+
+	def test_reject_duplicate_from_stale_transaction(self):
+		if frappe.db.db_type != "mariadb":
+			self.skipTest(
+				"MariaDB locking reads must see duplicates committed after the transaction snapshot"
+			)
+
+		ppcv = self.make_process_pcv()
+		ppcv.cancel()
+		pcv = self.pcv
+		duplicate = frappe.get_doc(doctype="Process Period Closing Voucher", parent_pcv=pcv.name)
+		# Allocate the name before the snapshot so naming-series locks cannot mask the duplicate check.
+		duplicate.set_new_name()
+		frappe.db.commit()
+		primary_connection = frappe.local.db
+		frappe.connect()
+		secondary_connection = frappe.local.db
+		try:
+			# Establish the second request's snapshot before the first request creates its voucher.
+			frappe.get_doc(pcv.doctype, pcv.name)
+			frappe.local.db = primary_connection
+			with patch.object(ProcessPeriodClosingVoucher, "get_dates", return_value=[get_datetime(today())]):
+				frappe.get_doc(doctype="Process Period Closing Voucher", parent_pcv=pcv.name).insert()
+			frappe.db.commit()
+
+			frappe.local.db = secondary_connection
+			# Snapshot isolation can reject the locking read instead of returning the committed duplicate.
+			with self.assertRaisesRegex(
+				(frappe.ValidationError, frappe.QueryDeadlockError),
+				"already exists|tabProcess Period Closing Voucher",
+			):
+				duplicate.insert()
+			frappe.db.rollback()
+			with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+				duplicate.insert()
+		finally:
+			secondary_connection.rollback()
+			secondary_connection.close()
+			frappe.local.db = primary_connection
+			for name in frappe.get_all(
+				"Process Period Closing Voucher", filters={"parent_pcv": pcv.name}, pluck="name"
+			):
+				frappe.delete_doc("Process Period Closing Voucher", name)
+			pcv.reload().cancel()
+			pcv.delete()
+			frappe.db.set_single_value(
+				"Accounts Settings", "use_legacy_controller_for_pcv", self.legacy_controller
+			)
+			frappe.db.commit()
+
+	def test_start_waits_for_running_dates_and_summary(self):
+		make_journal_entry(
+			posting_date=today(), amount=1000, account1="Cash - _TC", account2="Sales - _TC"
+		).submit()
+		ppcv = self.make_process_pcv()
+		with (
+			patch.object(process_period_closing_voucher, "is_scheduler_inactive", return_value=False),
+			patch.object(frappe, "enqueue") as enqueue,
+		):
+			start_pcv_processing(ppcv.name)
+			self.assertTrue(
+				all(
+					row.status == "Running" for row in ppcv.reload().normal_balances + ppcv.z_opening_balances
+				)
+			)
+			enqueue.reset_mock()
+			start_pcv_processing(ppcv.name)
+			self.assertEqual(ppcv.reload().status, "Running")
+			enqueue.assert_not_called()
+
+		with patch.object(process_period_closing_voucher, "schedule_next_date"):
+			for row in ppcv.normal_balances + ppcv.z_opening_balances:
+				process_individual_date(
+					ppcv.name, row.name, row.processing_date, row.report_type, row.parentfield
+				)
+		self.assertTrue(
+			all(row.status == "Completed" for row in ppcv.reload().normal_balances + ppcv.z_opening_balances)
+		)
+		with patch.object(frappe, "enqueue") as enqueue:
+			start_pcv_processing(ppcv.name)
+			self.assertEqual(ppcv.reload().status, "Running")
+			enqueue.assert_called_once()
+			self.assertEqual(
+				enqueue.call_args.kwargs["method"],
+				"erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
+			)
+
+		summarize_and_post_ledger_entries(ppcv.name)
+		self.assertEqual(ppcv.reload().status, "Completed")
+		self.assertEqual(self.pcv.reload().gle_processing_status, "Completed")
+		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": self.pcv.name, "is_cancelled": 0}), 2)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Account Closing Balance",
+				{"period_closing_voucher": self.pcv.name, "account": "Cash - _TC"},
+				"debit",
+			),
+			1000,
+		)
 
 	def test_processing_requires_submitted_vouchers(self):
 		pcv = self.make_period_closing_voucher(today(), submit=False)
