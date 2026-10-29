@@ -404,6 +404,40 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, so.update_status, "Closed")
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_rate_only_update_items_keeps_reservation(self) -> None:
+		# A rate-only Update Items must not cancel and rebuild reservations, otherwise the
+		# partly delivered reservation is dropped when the Delivery Note is later cancelled.
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		so = make_sales_order(
+			item_code=self.sr_item.name, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = 1
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 4
+		dn.submit()
+
+		trans_items = [{"docname": so.items[0].name, "item_code": self.sr_item.name, "qty": 10, "rate": 150}]
+		update_child_qty_rate("Sales Order", frappe.as_json(trans_items), so.name)
+
+		dn.cancel()
+
+		sre = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": so.name, "docstatus": 1},
+			fields=["reserved_qty", "delivered_qty"],
+		)[0]
+		self.assertEqual(sre.reserved_qty, 10)
+		self.assertEqual(sre.delivered_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
 			"allow_negative_stock": 0,
