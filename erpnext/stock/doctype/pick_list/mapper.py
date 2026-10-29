@@ -360,8 +360,12 @@ def add_product_bundles_to_target(
 				)
 			)
 
+		pending_qty = pick_list._compute_picked_qty_for_bundle(so_row, bundle_items, pending_only=True)
+		if not pending_qty:
+			continue
+
 		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
-		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(so_row, bundle_items)
+		target_bundle_item.qty = pending_qty
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
 
