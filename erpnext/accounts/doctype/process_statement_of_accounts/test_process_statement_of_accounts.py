@@ -248,6 +248,35 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 							send_auto_email()
 							enqueue.assert_not_called()
 
+	def test_auto_email_updates_filter_duration_without_resetting_schedule(self):
+		with (
+			freeze_time("2026-10-02") as frozen_time,
+			patch(
+				"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_report_pdf",
+				return_value={"_Test Customer": b"%PDF"},
+			),
+			patch("frappe.enqueue"),
+		):
+			process_soa = create_process_soa(
+				name="_Test Statement Filter Duration",
+				enable_auto_email=1,
+				frequency="Monthly",
+				start_date="2026-10-22",
+				customers=[{"customer": "_Test Customer", "billing_email": "billing@example.com"}],
+			)
+			process_soa.filter_duration = 3
+			process_soa.save()
+			self.assertEqual(process_soa.reload().to_date, getdate("2026-10-22"))
+			self.assertEqual(process_soa.from_date, getdate("2026-07-22"))
+
+			frozen_time.move_to("2026-10-22")
+			send_auto_email()
+			process_soa.reload()
+			process_soa.filter_duration = 2
+			process_soa.save()
+			self.assertEqual(process_soa.reload().to_date, getdate("2026-11-22"))
+			self.assertEqual(process_soa.from_date, getdate("2026-09-22"))
+
 	def check_ageing_summary(self, ageing, expected_ageing):
 		for age_range in expected_ageing:
 			self.assertEqual(expected_ageing[age_range], ageing.get(age_range))
