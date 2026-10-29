@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.accounts.doctype.promotional_scheme.promotional_scheme import TransactionExists
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -284,6 +285,22 @@ class TestPromotionalScheme(ERPNextTestSuite):
 				"pricing_rule": pricing_rule,
 			}
 		).insert()
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+	def test_pricing_rule_of_removed_slab_used_in_a_custom_link_is_disabled(self):
+		make_property_setter("Contact", "user", "options", "Pricing Rule", "Text")
+		self.addCleanup(frappe.clear_cache, doctype="Contact")
+		self.addCleanup(frappe.flags.pop, "link_fields", None)
+		frappe.flags.pop("link_fields", None)
+
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		frappe.get_doc({"doctype": "Contact", "first_name": "_Test Scheme", "user": pricing_rule}).insert()
 
 		ps.remove(ps.price_discount_slabs[1])
 		ps.save()

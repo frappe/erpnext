@@ -6,6 +6,7 @@ import math
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.rename_doc import get_link_fields
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt
@@ -260,14 +261,7 @@ class PromotionalScheme(Document):
 		if not pricing_rules:
 			return
 
-		names = [d.name for d in pricing_rules]
-		used_pricing_rules = {
-			pricing_rule
-			for doctype in ("Pricing Rule Detail", "Coupon Code")
-			for pricing_rule in frappe.get_all(
-				doctype, filters={"pricing_rule": ["in", names]}, pluck="pricing_rule", distinct=True
-			)
-		}
+		used_pricing_rules = get_linked_pricing_rules([d.name for d in pricing_rules])
 		for pricing_rule in pricing_rules:
 			if pricing_rule.name not in used_pricing_rules:
 				frappe.delete_doc("Pricing Rule", pricing_rule.name)
@@ -361,6 +355,21 @@ def raise_for_transaction_exists(name):
 	msg += "Kindly disable this Promotional Scheme and create new for new Applicable For."
 
 	frappe.throw(_(msg), TransactionExists)
+
+
+def get_linked_pricing_rules(pricing_rules):
+	linked_pricing_rules = set()
+	for link_field in get_link_fields("Pricing Rule"):
+		linked_pricing_rules.update(
+			frappe.get_all(
+				link_field.parent,
+				filters={link_field.fieldname: ["in", pricing_rules]},
+				pluck=link_field.fieldname,
+				distinct=True,
+			)
+		)
+
+	return linked_pricing_rules
 
 
 def get_pricing_rules(doc, rules=None):
