@@ -970,21 +970,21 @@ def _get_item_tax_template(
 	if out is None:
 		out = frappe._dict()
 	taxes = get_latest_item_taxes(get_applicable_item_taxes(ctx, taxes))
+	category_templates = [
+		tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(ctx.get("tax_category"))
+	]
 
 	if for_validate:
-		return [
-			tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(ctx.get("tax_category"))
-		]
+		return category_templates
 
 	# do not change if already a valid template
-	if ctx.get("item_tax_template") in {t.item_tax_template for t in taxes}:
+	if ctx.get("item_tax_template") in (category_templates or {t.item_tax_template for t in taxes}):
 		out.item_tax_template = ctx.get("item_tax_template")
 		return ctx.get("item_tax_template")
 
-	for tax in taxes:
-		if cstr(tax.tax_category) == cstr(ctx.get("tax_category")):
-			out.item_tax_template = tax.item_tax_template
-			return tax.item_tax_template
+	if category_templates:
+		out.item_tax_template = category_templates[0]
+		return category_templates[0]
 	return None
 
 

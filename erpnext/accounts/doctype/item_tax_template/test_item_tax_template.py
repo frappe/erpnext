@@ -130,6 +130,31 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		self.assertEqual(self.get_template_for(item_code, tax_category=in_state), template_in_state)
 		self.assertEqual(self.get_template_for(item_code, tax_category=out_state), template_out_state)
 
+	def test_template_of_old_tax_category_is_replaced(self):
+		in_state = self.make_tax_category("_Test In-State")
+		out_state = self.make_tax_category("_Test Out-State")
+		template_in_state = self.make_tax_template(5)
+		template_out_state = self.make_tax_template(18)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_in_state, "tax_category": in_state},
+				{
+					"item_tax_template": template_out_state,
+					"tax_category": out_state,
+					"valid_from": add_days(today(), -10),
+				},
+			]
+		)
+
+		self.assertEqual(
+			self.get_template_for(item_code, tax_category=out_state, item_tax_template=template_in_state),
+			template_out_state,
+		)
+		self.assertEqual(
+			self.get_template_for(item_code, tax_category=None, item_tax_template=template_in_state),
+			template_in_state,
+		)
+
 	def test_superseded_template_is_replaced_on_transaction(self):
 		template_12 = self.make_tax_template(12)
 		template_18 = self.make_tax_template(18)
