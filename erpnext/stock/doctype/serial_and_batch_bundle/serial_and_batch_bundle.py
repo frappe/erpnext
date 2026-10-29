@@ -3148,7 +3148,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			POS_Invoice_Item.serial_and_batch_bundle,
 		)
 		.where(
-			(POS_Invoice.consolidated_invoice.isnull())
+			(Coalesce(POS_Invoice.consolidated_invoice, "") == "")
 			& (POS_Invoice.docstatus == 1)
 			& (POS_Invoice_Item.item_code == kwargs.item_code)
 		)
