@@ -210,10 +210,11 @@ class POSClosingEntry(StatusUpdater):
 
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)
+		# only the cashier's POS page listens for this event
 		frappe.publish_realtime(
 			f"poe_{self.pos_opening_entry}",
-			message={"operation": "Closed", "doc": self},
-			docname=f"POS Opening Entry/{self.pos_opening_entry}",
+			message={"operation": "Closed", "creation": self.creation},
+			user=frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "user"),
 		)
 
 		self.update_sales_invoices_closing_entry()

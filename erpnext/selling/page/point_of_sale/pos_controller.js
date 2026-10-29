@@ -175,7 +175,7 @@ erpnext.PointOfSale.Controller = class {
 				const msg =
 					data.operation === "Closed"
 						? __("POS has been closed at {0}. Please refresh the page.", [
-								frappe.datetime.str_to_user(data.doc?.creation).bold(),
+								frappe.datetime.str_to_user(data.creation).bold(),
 						  ])
 						: __("POS Opening Entry has been cancelled. Please refresh the page.");
 				frappe.msgprint({
