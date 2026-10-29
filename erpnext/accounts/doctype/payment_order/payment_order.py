@@ -11,7 +11,7 @@ from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	get_payment_request_status,
-	get_requested_amount_in_party_account_currency,
+	get_payment_requests_with_total_requested,
 	update_payment_requests_as_per_pe_references,
 )
 from erpnext.accounts.party import get_party_account
@@ -188,28 +188,14 @@ class PaymentOrder(Document):
 
 	def reset_payment_request_status(self):
 		precision = frappe.get_precision("Payment Request", "outstanding_amount")
-		payment_requests = frappe.get_all(
-			"Payment Request",
-			filters={"name": ["in", self.get_reference_names()]},
-			fields=[
-				"name",
-				"grand_total",
-				"outstanding_amount",
-				"payment_request_type",
-				"currency",
-				"party_account_currency",
-				"company",
-				"reference_doctype",
-				"reference_name",
-			],
-		)
+		payment_requests = get_payment_requests_with_total_requested(self.get_reference_names())
 
 		status_updates = {
 			payment_request.name: {
 				"status": get_payment_request_status(
 					payment_request,
 					payment_request.outstanding_amount,
-					get_requested_amount_in_party_account_currency(payment_request),
+					payment_request.total_requested,
 					precision,
 				)
 			}
