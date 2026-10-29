@@ -115,15 +115,17 @@ class ProcessStatementOfAccounts(Document):
 		):
 			scheduled_date = self.start_date
 			if not self.has_value_changed("start_date") and not self.has_value_changed("enable_auto_email"):
-				scheduled_date = self.get_value_before_save(
+				scheduled_date = self.get_doc_before_save().get(
 					"posting_date" if self.report == "General Ledger" else "to_date"
 				)
 
 			if self.report == "General Ledger":
 				self.to_date = scheduled_date
-				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 			else:
 				self.posting_date = scheduled_date
+
+		if self.enable_auto_email and self.report == "General Ledger" and self.to_date:
+			self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 
 	def validate_account(self):
 		if not self.account:
