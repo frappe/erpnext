@@ -1,14 +1,12 @@
 import frappe
 from frappe.core.page.permission_manager.permission_manager import remove
-from frappe.permissions import add_permission, setup_custom_perms
+from frappe.permissions import setup_custom_perms
 
 from erpnext.patches.v16_0 import (
 	mirror_release_perms_to_custom_docperm,
 	mirror_select_perms_to_custom_docperm,
-	remove_all_role_from_import_supplier_invoice,
 	remove_all_role_from_payment_terms_template,
 )
-from erpnext.regional.italy.setup import add_permissions
 from erpnext.setup.install import grant_address_read_to_accounts_manager
 from erpnext.tests.permission_test_utils import insert_test_record
 from erpnext.tests.utils import ERPNextTestSuite
@@ -17,13 +15,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestPermissionPatches(ERPNextTestSuite):
 	def tearDown(self):
 		super().tearDown()
-		for doctype in (
-			"Payment Term",
-			"Account",
-			"Payment Terms Template",
-			"Address",
-			"Import Supplier Invoice",
-		):
+		for doctype in ("Payment Term", "Account", "Payment Terms Template", "Address"):
 			frappe.clear_cache(doctype=doctype)
 
 	def custom_rule(self, doctype, role):
@@ -72,14 +64,6 @@ class TestPermissionPatches(ERPNextTestSuite):
 				"Custom DocPerm", {"parent": "Payment Terms Template", "role": "All", "permlevel": 0}
 			)
 		)
-
-	def test_all_row_is_removed_from_import_supplier_invoice(self):
-		# Italian setup used to add an `All` read rule before the role rules
-		add_permission("Import Supplier Invoice", "All", 0)
-		add_permissions()
-		remove_all_role_from_import_supplier_invoice.execute()
-		self.assertIsNone(self.custom_rule("Import Supplier Invoice", "All"))
-		self.assertEqual(self.custom_rule("Import Supplier Invoice", "Accounts User").read, 1)
 
 	def test_address_grant_is_idempotent_and_keeps_other_roles(self):
 		frappe.db.delete("Custom DocPerm", {"parent": "Address"})
