@@ -198,6 +198,10 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		so = make_sales_order(qty=10, price_list_rate=100, do_not_submit=True)
 		self.assertEqual(so.items[0].discount_percentage, 0)
 
+		modified = frappe.db.get_value("Pricing Rule", pricing_rule, "modified")
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "modified"), modified)
+
 	def test_overlapping_slabs_are_not_allowed(self):
 		ps = make_promotional_scheme()
 		add_price_slab(ps, max_qty=10, other_slab={"min_qty": 10, "max_qty": 20})

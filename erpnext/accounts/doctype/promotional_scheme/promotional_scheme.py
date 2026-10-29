@@ -251,7 +251,11 @@ class PromotionalScheme(Document):
 		slabs = [d.name for d in self.price_discount_slabs + self.product_discount_slabs]
 		pricing_rules = frappe.get_all(
 			"Pricing Rule",
-			filters={"promotional_scheme": self.name, "promotional_scheme_id": ["not in", slabs]},
+			filters={
+				"promotional_scheme": self.name,
+				"promotional_scheme_id": ["not in", slabs],
+				"disable": 0,
+			},
 			pluck="name",
 		)
 		if not pricing_rules:
