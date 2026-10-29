@@ -158,6 +158,41 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		self.assertEqual(si.items[0].item_tax_template, template_18)
 		self.assertEqual(si.taxes[0].tax_amount, 180)
 
+	def make_item_group_with_taxes(self, taxes):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": f"_Test ITT Group {frappe.generate_hash(length=6)}",
+				"parent_item_group": "All Item Groups",
+				"taxes": taxes,
+			}
+		)
+		return item_group.insert().name
+
+	def test_superseded_template_is_replaced_with_item_row_before_item_group_row(self):
+		template_5 = self.make_tax_template(5)
+		template_12 = self.make_tax_template(12)
+		template_18 = self.make_tax_template(18)
+		item_group = self.make_item_group_with_taxes(
+			[
+				{"item_tax_template": template_12, "valid_from": add_days(today(), -60)},
+				{"item_tax_template": template_18, "valid_from": add_days(today(), -10)},
+			]
+		)
+		item_code = make_item(
+			properties={
+				"item_group": item_group,
+				"taxes": [{"item_tax_template": template_5, "valid_from": add_days(today(), -20)}],
+			}
+		).name
+
+		si = create_sales_invoice(item_code=item_code, rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template_12
+		si.insert()
+
+		self.assertEqual(self.get_template_for(item_code), template_5)
+		self.assertEqual(si.items[0].item_tax_template, template_5)
+
 	def test_actual_charge_breakup_with_not_applicable_item(self):
 		freight_account = "_Test Account Shipping Charges - _TC"
 		not_applicable_template = self.make_template([(freight_account, 0, 1)]).insert().name
