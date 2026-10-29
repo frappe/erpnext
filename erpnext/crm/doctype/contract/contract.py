@@ -135,6 +135,9 @@ class ContractPartyAccess:
 			return None
 
 		contract = frappe.qb.DocType("Contract")
+		if not self.party_types:
+			return contract.name.isnull()
+
 		return Criterion.any(
 			[self.get_party_criterion(contract, party_type) for party_type in self.party_types]
 		)
