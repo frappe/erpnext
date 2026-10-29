@@ -2534,10 +2534,7 @@ def _get_material_request_plan_query(item_code):
 		.select(
 			table.name.as_("production_plan"),
 			child.warehouse,
-			Sum(
-				Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity)
-				* child.conversion_factor
-			).as_("reserved_qty"),
+			Sum(child.required_bom_qty).as_("reserved_qty"),
 		)
 		.where(_is_open_plan(table) & (child.item_code == item_code))
 		.groupby(table.name, child.warehouse)
