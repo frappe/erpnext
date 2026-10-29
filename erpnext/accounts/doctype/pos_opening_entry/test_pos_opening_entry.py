@@ -96,7 +96,7 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, opening_entry.cancel)
 
 	def test_user_not_in_pos_profile_cannot_open_session(self):
-		test_user, pos_profile = self.init_user_and_profile()
+		_, pos_profile = self.init_user_and_profile()
 		other_user = create_user("test_other_cashier@example.com", "Sales User")
 
 		with self.assertRaises(frappe.ValidationError) as context:
@@ -116,12 +116,15 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 
 	def test_negative_or_duplicate_opening_balance_is_refused(self):
 		test_user, pos_profile = self.init_user_and_profile()
-		for balance_details in (
-			[{"mode_of_payment": "Cash", "opening_amount": -500}],
-			[
-				{"mode_of_payment": "Cash", "opening_amount": 200},
-				{"mode_of_payment": "Cash", "opening_amount": 100},
-			],
+		for balance_details, message in (
+			([{"mode_of_payment": "Cash", "opening_amount": -500}], "cannot be negative"),
+			(
+				[
+					{"mode_of_payment": "Cash", "opening_amount": 200},
+					{"mode_of_payment": "Cash", "opening_amount": 100},
+				],
+				"added more than once",
+			),
 		):
 			opening_entry = frappe.get_doc(
 				{
@@ -133,7 +136,7 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 					"balance_details": balance_details,
 				}
 			)
-			self.assertRaises(frappe.ValidationError, opening_entry.insert)
+			self.assertRaisesRegex(frappe.ValidationError, message, opening_entry.insert)
 
 
 def create_opening_entry(pos_profile, user, get_obj=False):
