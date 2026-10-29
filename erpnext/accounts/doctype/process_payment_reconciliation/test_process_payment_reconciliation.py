@@ -5,16 +5,18 @@ from functools import partial
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import PaymentReconciliation
+from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import ReconcileRouter
+from erpnext.accounts.doctype.process_payment_reconciliation import process_payment_reconciliation as ppr
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	fetch_and_allocate,
 	get_pr_instance,
 	reconcile,
 )
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.tests.permission_test_utils import as_user, make_fenced_user
@@ -70,19 +72,133 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(pr.company, COMPANY)
 		self.assertEqual(pr.party, "_Test Customer")
 		self.assertEqual(pr.receivable_payable_account, "Debtors - _TC")
-		self.assertEqual(str(pr.from_invoice_date), "2026-01-01")
+		# old invoice date fields still feed the new single date range
+		self.assertEqual(str(pr.from_date), "2026-01-01")
+		self.assertEqual(str(pr.to_date), "2026-06-30")
 		# the tool run is capped so a single process can't fetch unbounded rows
-		self.assertEqual(pr.invoice_limit, 1000)
-		self.assertEqual(pr.payment_limit, 1000)
+		self.assertEqual(pr.fetch_limit, 1000)
 
-	def test_get_pr_instance_copies_bank_cash_and_cost_center(self):
-		doc = self.make_ppr(bank_cash_account="Cash - _TC")
+	def test_get_pr_instance_copies_cost_center(self):
+		doc = self.make_ppr()
 		doc.cost_center = "_Test Cost Center - _TC"
 		doc.insert()
 
 		pr = get_pr_instance(doc.name)
-		self.assertEqual(pr.bank_cash_account, "Cash - _TC")
 		self.assertEqual(pr.cost_center, "_Test Cost Center - _TC")
+
+	def make_customer(self):
+		return frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test PPR Background Customer",
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+			}
+		).insert()
+
+	def run_in_place(self, doc):
+		doc.insert()
+		doc.submit()
+		# run the queued steps in place
+		ppr.reconcile_based_on_filters(doc.name)
+		ppr.fetch_and_allocate(doc.name)
+		ppr.reconcile(doc.name)
+
+	def test_background_run_reconciles_invoice_against_credit_note(self):
+		"""The log keeps no accounts: the bridge for an invoice / credit note pair gets
+		them from the ledger."""
+		customer = self.make_customer()
+		invoice = create_sales_invoice(customer=customer.name, rate=100)
+		credit_note = create_sales_invoice(customer=customer.name, qty=-1, rate=100, do_not_save=True)
+		credit_note.is_return = 1
+		credit_note.save().submit()
+
+		doc = self.make_ppr()
+		doc.party = customer.name
+		self.run_in_place(doc)
+
+		self.assertEqual(frappe.db.get_value("Sales Invoice", invoice.name, "outstanding_amount"), 0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", credit_note.name, "outstanding_amount"), 0)
+
+	def test_background_run_keeps_the_journal_line(self):
+		"""An invoice-side journal line is matched by its row, so the log keeps it."""
+		customer = self.make_customer()
+		journal = frappe.new_doc("Journal Entry")
+		journal.company = COMPANY
+		journal.posting_date = nowdate()
+		journal.append(
+			"accounts",
+			{
+				"account": "Debtors - _TC",
+				"party_type": "Customer",
+				"party": customer.name,
+				"debit_in_account_currency": 100,
+			},
+		)
+		journal.append(
+			"accounts",
+			{
+				"account": "Sales - _TC",
+				"credit_in_account_currency": 100,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		journal.save().submit()
+		create_payment_entry(
+			company=COMPANY,
+			payment_type="Receive",
+			party_type="Customer",
+			party=customer.name,
+			paid_from="Debtors - _TC",
+			paid_to="_Test Bank - _TC",
+			paid_amount=100,
+		).save().submit()
+
+		doc = self.make_ppr()
+		doc.party = customer.name
+		self.run_in_place(doc)
+
+		open_amount = frappe.get_all(
+			"Payment Ledger Entry",
+			filters={"against_voucher_no": journal.name, "delinked": 0},
+			fields=[{"SUM": "amount", "as": "total"}],
+		)[0].total
+		self.assertEqual(open_amount, 0)
+
+	def test_background_run_logs_the_payment_as_reference(self):
+		"""A supplier's payment sits in to_receive; the log's reference is still the payment."""
+		supplier = frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": "_Test PPR Background Supplier",
+				"supplier_group": "_Test Supplier Group",
+			}
+		).insert()
+		invoice = make_purchase_invoice(supplier=supplier.name, qty=1, rate=100)
+		payment = create_payment_entry(
+			company=COMPANY,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=supplier.name,
+			paid_from="_Test Bank - _TC",
+			paid_to="Creditors - _TC",
+			paid_amount=100,
+		)
+		payment.save().submit()
+
+		doc = self.make_ppr(receivable_payable_account="Creditors - _TC")
+		doc.party_type = "Supplier"
+		doc.party = supplier.name
+		self.run_in_place(doc)
+
+		log = frappe.db.get_value("Process Payment Reconciliation Log", {"process_pr": doc.name})
+		references = frappe.get_all(
+			"Process Payment Reconciliation Log Allocations",
+			filters={"parent": log, "invoice_number": invoice.name},
+			fields=["reference_type", "reference_name"],
+		)
+		self.assertEqual(references, [{"reference_type": "Payment Entry", "reference_name": payment.name}])
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", invoice.name, "outstanding_amount"), 0)
 
 	def test_log_permissions_allow_cleanup(self):
 		for role in ("Accounts User", "Accounts Manager"):
@@ -141,14 +257,14 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		with (
 			patch.object(frappe.db, "rollback", side_effect=rollback),
 			patch("frappe.enqueue"),
-			patch.object(PaymentReconciliation, "reconcile_allocations") as reconcile_allocations,
+			patch.object(ReconcileRouter, "execute") as execute,
 		):
 			reconcile(doc.name)
-			reconcile_allocations.assert_not_called()
+			execute.assert_not_called()
 
 		log.reload()
 		self.assertEqual(log.status, "Failed")
-		self.assertIn("invoice outstanding amount 400", log.error_log)
+		self.assertIn("exceeds receivable outstanding 400", log.error_log)
 		self.assertEqual(log.reconciled_entries, 0)
 		self.assertFalse(log.allocations[0].reconciled)
 		self.assertEqual(invoice.reload().outstanding_amount, 400)
@@ -182,9 +298,9 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		)
 		pr = get_pr_instance(doc.name)
 		# Reproduce the selection cap with two invoices instead of creating 1,001.
-		pr.invoice_limit = 1
+		pr.fetch_limit = 1
 		pr.get_unreconciled_entries()
-		self.assertEqual([row.invoice_number for row in pr.invoices], [backdated_invoice.name])
+		self.assertEqual([row.voucher_no for row in pr.to_receive], [backdated_invoice.name])
 
 		frappe.db.savepoint("before_reconciliation_batch")
 		rollback = partial(frappe.db.rollback, save_point="before_reconciliation_batch")
@@ -202,7 +318,7 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		self.assertFalse(log.error_log)
 		self.assertEqual(log.reconciled_entries, 1)
 		self.assertTrue(log.allocations[0].reconciled)
-		self.assertEqual([row.invoice_number for row in pr.invoices], [invoice.name])
+		self.assertEqual([row.voucher_no for row in pr.to_receive], [invoice.name])
 		self.assertEqual(invoice.reload().outstanding_amount, 0)
 		self.assertEqual(advance.reload().unallocated_amount, 0)
 		self.assertEqual(backdated_invoice.reload().outstanding_amount, 600)

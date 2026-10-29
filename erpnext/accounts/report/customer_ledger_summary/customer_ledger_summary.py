@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.trial_balance.trial_balance import validate_company_permission
+from erpnext.accounts.utils import CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE
 
 TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
@@ -350,30 +351,10 @@ class PartyLedgerSummaryReport:
 				& (IfNull(gle.party, "") != "")
 				& (gle.posting_date <= self.filters.to_date)
 				& (gle.party.isin(self.parties))
+				# bridges move balance between the party's own entries: never invoiced or paid
+				& (IfNull(gle.voucher_subtype, "") != CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
 			)
 		)
-
-		if self.filters.get("ignore_cr_dr_notes"):
-			system_generated_cr_dr_journals = frappe.db.get_all(
-				"Journal Entry",
-				filters={
-					"company": self.filters.get("company"),
-					"docstatus": 1,
-					"voucher_type": ("in", ["Credit Note", "Debit Note"]),
-					"is_system_generated": 1,
-					"posting_date": ["between", [self.filters.get("from_date"), self.filters.get("to_date")]],
-				},
-				as_list=True,
-			)
-			if system_generated_cr_dr_journals:
-				vouchers_to_ignore = (self.filters.get("voucher_no_not_in") or []) + [
-					x[0] for x in system_generated_cr_dr_journals
-				]
-				self.filters.update({"voucher_no_not_in": vouchers_to_ignore})
-
-		voucher_no_not_in = self.filters.get("voucher_no_not_in", [])
-		if voucher_no_not_in:
-			query = query.where(gle.voucher_no.notin(voucher_no_not_in))
 
 		query = self.prepare_conditions(query)
 

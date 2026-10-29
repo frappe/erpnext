@@ -44,7 +44,6 @@ from erpnext.accounts.party import (
 	validate_party_company,
 )
 from erpnext.accounts.utils import (
-	cancel_exchange_gain_loss_journal,
 	get_account_currency,
 	get_advance_payment_doctypes,
 	get_outstanding_invoices,
@@ -1414,9 +1413,8 @@ class PaymentEntry(AccountsController):
 
 		gl_entries = process_gl_map(gl_entries, merge_entries=merge_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj, merge_entries=merge_entries)
-		if cancel:
-			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
-		else:
+		# gain/loss journals go with the reconciliation, in on_cancel; a repost leaves them
+		if not cancel:
 			self.make_exchange_gain_loss_journal()
 
 		self.make_advance_gl_entries(cancel=cancel)

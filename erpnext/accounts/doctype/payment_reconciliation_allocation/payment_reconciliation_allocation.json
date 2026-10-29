@@ -5,18 +5,20 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "reference_type",
-  "reference_name",
-  "reference_row",
+  "to_receive_voucher_type",
+  "to_receive_voucher_no",
+  "to_receive_voucher_row",
   "column_break_3",
-  "invoice_type",
-  "invoice_number",
+  "to_pay_voucher_type",
+  "to_pay_voucher_no",
+  "to_pay_voucher_row",
   "section_break_6",
   "allocated_amount",
   "unreconciled_amount",
   "column_break_8",
   "amount",
   "is_advance",
+  "is_cross_account",
   "section_break_5",
   "difference_amount",
   "gain_loss_posting_date",
@@ -24,20 +26,79 @@
   "column_break_7",
   "difference_account",
   "exchange_rate",
+  "to_receive_exchange_rate",
+  "to_pay_exchange_rate",
   "currency",
+  "accounts_section",
+  "to_receive_account",
+  "column_break_kyjc",
+  "to_pay_account",
+  "parties_section",
+  "to_receive_party_type",
+  "to_receive_party",
+  "parties_col_break",
+  "to_pay_party_type",
+  "to_pay_party",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
  ],
  "fields": [
   {
-   "fieldname": "invoice_number",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "label": "Invoice Number",
-   "options": "invoice_type",
+   "fieldname": "to_receive_voucher_type",
+   "fieldtype": "Link",
+   "label": "To Receive Voucher Type",
+   "options": "DocType",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "to_receive_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "To Receive Voucher No",
+   "options": "to_receive_voucher_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_receive_voucher_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "To Receive Voucher Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_pay_voucher_type",
+   "fieldtype": "Link",
+   "label": "To Pay Voucher Type",
+   "options": "DocType",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_pay_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "To Pay Voucher No",
+   "options": "to_pay_voucher_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_pay_voucher_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "To Pay Voucher Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "allocated_amount",
@@ -48,79 +109,16 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "difference_account",
-   "fieldtype": "Link",
-   "label": "Difference Account",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "difference_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Difference Amount",
-   "options": "Currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "reference_name",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "label": "Reference Name",
-   "options": "reference_type",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "is_advance",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Is Advance",
-   "read_only": 1
-  },
-  {
-   "fieldname": "reference_type",
-   "fieldtype": "Link",
-   "label": "Reference Type",
-   "options": "DocType",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "invoice_type",
-   "fieldtype": "Link",
-   "label": "Invoice Type",
-   "options": "DocType",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_8",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "unreconciled_amount",
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Unreconciled Amount",
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amount",
@@ -131,10 +129,73 @@
    "read_only": 1
   },
   {
-   "fieldname": "reference_row",
-   "fieldtype": "Data",
+   "default": "0",
+   "fieldname": "is_advance",
+   "fieldtype": "Check",
    "hidden": 1,
-   "label": "Reference Row",
+   "label": "Is Advance",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cross_account",
+   "fieldtype": "Check",
+   "label": "Is Cross Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Difference Amount",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gain_loss_posting_date",
+   "fieldtype": "Date",
+   "label": "Difference Posting Date"
+  },
+  {
+   "fieldname": "debit_or_credit_note_posting_date",
+   "fieldtype": "Date",
+   "label": "Debit / Credit Note Posting Date"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "difference_account",
+   "fieldtype": "Link",
+   "label": "Difference Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_receive_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "To Receive Exchange Rate",
+   "precision": "9",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_pay_exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "To Pay Exchange Rate",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -145,10 +206,67 @@
    "options": "Currency"
   },
   {
-   "fieldname": "exchange_rate",
-   "fieldtype": "Float",
-   "label": "Exchange Rate",
+   "collapsible": 1,
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "to_receive_account",
+   "fieldtype": "Link",
+   "label": "To Receive Account",
+   "options": "Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "to_pay_account",
+   "fieldtype": "Link",
+   "label": "To Pay Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "parties_section",
+   "fieldtype": "Section Break",
+   "label": "Parties"
+  },
+  {
+   "fieldname": "to_receive_party_type",
+   "fieldtype": "Link",
+   "label": "To Receive Party Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_receive_party",
+   "fieldtype": "Dynamic Link",
+   "label": "To Receive Party",
+   "options": "to_receive_party_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parties_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_pay_party_type",
+   "fieldtype": "Link",
+   "label": "To Pay Party Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_pay_party",
+   "fieldtype": "Dynamic Link",
+   "label": "To Pay Party",
+   "options": "to_pay_party_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
   },
   {
    "fieldname": "cost_center",
@@ -157,29 +275,18 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "gain_loss_posting_date",
-   "fieldtype": "Date",
-   "label": "Difference Posting Date"
-  },
-  {
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "debit_or_credit_note_posting_date",
-   "fieldtype": "Date",
-   "label": "Debit / Credit Note Posting Date"
+   "fieldname": "column_break_kyjc",
+   "fieldtype": "Column Break"
   }
  ],
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-20 19:12:50.406769",
+ "modified": "2026-09-30 12:57:58.752286",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",

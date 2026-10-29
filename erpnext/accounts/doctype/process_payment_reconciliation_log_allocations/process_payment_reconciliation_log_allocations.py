@@ -22,6 +22,7 @@ class ProcessPaymentReconciliationLogAllocations(Document):
 		exchange_rate: DF.Float
 		gain_loss_posting_date: DF.Date | None
 		invoice_number: DF.DynamicLink
+		invoice_row: DF.Data | None
 		invoice_type: DF.Link
 		is_advance: DF.Data | None
 		parent: DF.Data

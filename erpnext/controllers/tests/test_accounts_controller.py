@@ -15,7 +15,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.utils import create_gain_loss_journal, get_linked_exchange_gain_loss_journal
+from erpnext.accounts.utils import create_gain_loss_journal, get_linked_system_journals
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_purchase_order,
 	prepare_data_for_internal_transfer,
@@ -197,7 +197,7 @@ class TestAccountsController(ERPNextTestSuite):
 		pr.party_type = "Customer"
 		pr.party = self.customer
 		pr.receivable_payable_account = get_party_account(pr.party_type, pr.party, pr.company)
-		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
+		pr.from_date = pr.to_date = nowdate()
 		return pr
 
 	def create_journal_entry(
@@ -564,14 +564,14 @@ class TestAccountsController(ERPNextTestSuite):
 		pr.party = self.customer
 		pr.receivable_payable_account = self.debit_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# Exc gain/loss journal should have been creaetd for the reconciled amount
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
@@ -623,11 +623,11 @@ class TestAccountsController(ERPNextTestSuite):
 		pr.party = self.customer
 		pr.receivable_payable_account = self.debit_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.allocation[0].gain_loss_posting_date = add_days(nowdate(), 1)
 		pr.reconcile()
 
@@ -644,8 +644,8 @@ class TestAccountsController(ERPNextTestSuite):
 			getdate(add_days(nowdate(), 1)),
 		)
 
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# There should be no outstanding
 		si.reload()
@@ -744,20 +744,19 @@ class TestAccountsController(ERPNextTestSuite):
 		pe = self.create_payment_entry(posting_date=adv_date, amount=1, source_exc_rate=75.1).save().submit()
 
 		pr = self.create_payment_reconciliation()
-		pr.from_invoice_date = add_days(nowdate(), -1)
-		pr.to_invoice_date = nowdate()
-		pr.from_payment_date = add_days(nowdate(), -2)
-		pr.to_payment_date = nowdate()
+		# Phase 1: uniform date range. Use the wider window (-2 days) to cover both sides.
+		pr.from_date = add_days(nowdate(), -2)
+		pr.to_date = nowdate()
 
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# Outstanding in both currencies should be '0'
 		si.reload()
@@ -894,14 +893,14 @@ class TestAccountsController(ERPNextTestSuite):
 		pr = self.create_payment_reconciliation()
 		# pr.receivable_payable_account = self.debit_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# There should be no outstanding in both currencies
 		si.reload()
@@ -1072,14 +1071,14 @@ class TestAccountsController(ERPNextTestSuite):
 		pr = self.create_payment_reconciliation()
 		# pr.receivable_payable_account = self.debit_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# Outstanding should be '0' in both currencies
 		si.reload()
@@ -1138,19 +1137,19 @@ class TestAccountsController(ERPNextTestSuite):
 		# Reconcile the first half
 		pr = self.create_payment_reconciliation()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		difference_amount = pr.calculate_difference_on_allocation_change(
-			[x.as_dict() for x in pr.payments], [x.as_dict() for x in pr.invoices], 1
+			pr.to_receive[0].as_dict(), pr.to_pay[0].as_dict(), 1
 		)
 		pr.allocation[0].allocated_amount = 1
 		pr.allocation[0].difference_amount = difference_amount
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
 
 		# There should be outstanding in both currencies
 		si.reload()
@@ -1167,16 +1166,16 @@ class TestAccountsController(ERPNextTestSuite):
 
 		# reconcile remaining half
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.allocation[0].allocated_amount = 1
 		pr.allocation[0].difference_amount = difference_amount
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# Exchange Gain/Loss Journal should've been created.
 		exc_je_for_si = [x for x in self.get_journals_for(si.doctype, si.name) if x.parent != je.name]
@@ -1223,14 +1222,14 @@ class TestAccountsController(ERPNextTestSuite):
 
 		pr = self.create_payment_reconciliation()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 2)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 2)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		si1.reload()
 		si2.reload()
@@ -1273,21 +1272,24 @@ class TestAccountsController(ERPNextTestSuite):
 		# Reconcile the first half
 		pr = self.create_payment_reconciliation()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		difference_amount = pr.calculate_difference_on_allocation_change(
-			[x.as_dict() for x in pr.payments], [x.as_dict() for x in pr.invoices], 1
+			pr.to_receive[0].as_dict(), pr.to_pay[0].as_dict(), 1
 		)
 		pr.allocation[0].allocated_amount = 1
 		pr.allocation[0].difference_amount = difference_amount
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
 
-		# Exchange Gain/Loss Journal should've been created.
+		# Reconcile mints a "Reconciliation Journal" bridge referencing BOTH vouchers,
+		# plus a rate-difference Exchange Gain/Loss JE booked on the cr_note (to_pay) side
+		# whose balancing leg points at the bridge. So si is referenced by the bridge only
+		# (1), while cr_note is referenced by the bridge AND the FX JE (2).
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertNotEqual(exc_je_for_si, [])
@@ -1305,8 +1307,8 @@ class TestAccountsController(ERPNextTestSuite):
 		cr_note.reload()
 		cr_note.cancel()
 
-		# with the introduction of 'cancel_system_generated_credit_debit_notes' in accounts controller
-		# JE(Credit Note) will be cancelled once the parent is cancelled
+		# Cancelling the parent unwinds the reconciliation bridge (and its linked
+		# Exchange Gain/Loss journals) via `unwind_reconciliation`.
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertEqual(exc_je_for_si, [])
@@ -1332,21 +1334,21 @@ class TestAccountsController(ERPNextTestSuite):
 		for legacy in (True, False):
 			pr.get_unreconciled_entries()
 			pr.allocate_entries(
-				frappe._dict(
-					invoices=[row.as_dict() for row in pr.invoices if row.invoice_number == invoice.name],
-					payments=[row.as_dict() for row in pr.payments if row.reference_name == cr_note.name],
-				)
+				to_receive=[row.as_dict() for row in pr.to_receive if row.voucher_no == invoice.name],
+				to_pay=[row.as_dict() for row in pr.to_pay if row.voucher_no == cr_note.name],
 			)
 			if legacy:
 				with patch(
-					"erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.create_gain_loss_journal",
+					"erpnext.accounts.services.exchange_gain_loss.create_gain_loss_journal",
 					create_legacy_exchange,
 				):
 					pr.reconcile()
 			else:
 				pr.reconcile()
 
-			(exchange_name,) = get_linked_exchange_gain_loss_journal(cr_note.doctype, cr_note.name, 1)
+			(exchange_name,) = get_linked_system_journals(
+				cr_note.doctype, cr_note.name, "Exchange Gain Or Loss"
+			)
 			exchange = frappe.get_doc("Journal Entry", exchange_name)
 			journal_name = next(
 				row.parent
@@ -1443,14 +1445,14 @@ class TestAccountsController(ERPNextTestSuite):
 		# Reconcile
 		pr = self.create_payment_reconciliation()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# Exchange Gain/Loss Journal should've been created.
 		exc_je_for_si = [x for x in self.get_journals_for(si.doctype, si.name) if x.parent != je.name]
@@ -1489,16 +1491,16 @@ class TestAccountsController(ERPNextTestSuite):
 		# Reconcile
 		pr = self.create_payment_reconciliation()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
-		# Exchange Gain/Loss Journal should've been created.
+		# bridge links both; gain/loss JE links cr note and bridge
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertNotEqual(exc_je_for_si, [])
@@ -1508,8 +1510,10 @@ class TestAccountsController(ERPNextTestSuite):
 			exc_je_for_cr_note,
 			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
 		)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(cr_note.doctype, cr_note.name, 0.0, 0.0)
 
-		for x in exc_je_for_si + exc_je_for_cr_note:
+		for x in exc_je_for_cr_note:
 			with self.subTest(x=x):
 				self.assertEqual(
 					[self.cost_center, self.cost_center],
@@ -1572,23 +1576,23 @@ class TestAccountsController(ERPNextTestSuite):
 		# assert dimension filter's result
 		pr = self.create_payment_reconciliation()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 2)
-		self.assertEqual(len(pr.payments), 5)
+		self.assertEqual(len(pr.to_receive), 2)
+		self.assertEqual(len(pr.to_pay), 5)
 
 		pr.department = "Legal - _TC"
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 1)
 
 		pr.department = "Management - _TC"
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 3)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 3)
 
 		pr.department = "Research & Development - _TC"
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 1)
 
 	def test_91_cr_note_should_inherit_dimension(self):
 		rate_in_account_currency = 1
@@ -1607,16 +1611,16 @@ class TestAccountsController(ERPNextTestSuite):
 		pr = self.create_payment_reconciliation()
 		pr.department = "Management - _TC"
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
-		# There should be 2 journals, JE(Cr Note) and JE(Exchange Gain/Loss)
+		# bridge links both; gain/loss JE links cr note and bridge
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertNotEqual(exc_je_for_si, [])
@@ -1626,8 +1630,10 @@ class TestAccountsController(ERPNextTestSuite):
 			exc_je_for_cr_note,
 			exc_je_for_si + self.get_journals_for("Journal Entry", exc_je_for_si[0].parent),
 		)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(cr_note.doctype, cr_note.name, 0.0, 0.0)
 
-		for x in exc_je_for_si + exc_je_for_cr_note:
+		for x in exc_je_for_cr_note:
 			with self.subTest(x=x):
 				self.assertEqual(
 					[cr_note.department, cr_note.department],
@@ -1652,14 +1658,14 @@ class TestAccountsController(ERPNextTestSuite):
 		pr = self.create_payment_reconciliation()
 		pr.department = dpt
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# Exc Gain/Loss journals should inherit dimension from parent
 		journals = self.get_journals_for(si.doctype, si.name)
@@ -1748,14 +1754,14 @@ class TestAccountsController(ERPNextTestSuite):
 		pr = self.create_payment_reconciliation()
 		# pr.receivable_payable_account = self.debit_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# There should be no outstanding in both currencies
 		journal_as_invoice.reload()
@@ -1819,14 +1825,14 @@ class TestAccountsController(ERPNextTestSuite):
 		pr = self.create_payment_reconciliation()
 		pr.receivable_payable_account = self.debit_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 2)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 2)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# There should be no outstanding in both currencies
 		self.assert_ledger_outstanding(je1.doctype, je1.name, 0.0, 0.0)
@@ -1892,16 +1898,16 @@ class TestAccountsController(ERPNextTestSuite):
 				"receivable_payable_account": get_party_account("Supplier", self.supplier, self.company),
 			}
 		)
-		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
+		pr.from_date = pr.to_date = nowdate()
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 
 		# There should be no outstanding in both currencies
 		self.assert_ledger_outstanding(je1.doctype, je1.name, 0.0, 0.0)
@@ -1940,16 +1946,16 @@ class TestAccountsController(ERPNextTestSuite):
 		pr.receivable_payable_account = self.debtors_usd
 		pr.default_advance_account = self.advance_received_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(pr.invoices[0].invoice_number, si.name)
-		self.assertEqual(pr.payments[0].reference_name, adv.name)
+		self.assertEqual(pr.to_receive[0].voucher_no, si.name)
+		self.assertEqual(pr.to_pay[0].voucher_no, adv.name)
 
 		# Allocate and Reconcile
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
 		# Exc Gain/Loss journal should've been creatad
@@ -2007,16 +2013,18 @@ class TestAccountsController(ERPNextTestSuite):
 		pr.receivable_payable_account = self.creditors_usd
 		pr.default_advance_account = self.advance_paid_usd
 		pr.get_unreconciled_entries()
-		self.assertEqual(pr.invoices[0].invoice_number, pi.name)
-		self.assertEqual(pr.payments[0].reference_name, adv.name)
+
+		# Classifier routes by (account_type, sign(amount))
+		self.assertEqual(pr.to_receive[0].voucher_no, adv.name)
+		self.assertEqual(pr.to_pay[0].voucher_no, pi.name)
 
 		# Allocate and Reconcile
-		invoices = [x.as_dict() for x in pr.invoices]
-		payments = [x.as_dict() for x in pr.payments]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		invoices = [x.as_dict() for x in pr.to_receive]
+		payments = [x.as_dict() for x in pr.to_pay]
+		pr.allocate_entries(to_receive=invoices, to_pay=payments)
 		pr.reconcile()
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
+		self.assertEqual(len(pr.to_receive), 0)
+		self.assertEqual(len(pr.to_pay), 0)
 		self.assert_ledger_outstanding(pi.doctype, pi.name, 0.0, 0.0)
 
 		# Exc Gain/Loss journal should've been creatad

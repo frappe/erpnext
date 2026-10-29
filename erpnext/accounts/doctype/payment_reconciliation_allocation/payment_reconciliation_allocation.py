@@ -23,18 +23,48 @@ class PaymentReconciliationAllocation(Document):
 		difference_amount: DF.Currency
 		exchange_rate: DF.Float
 		gain_loss_posting_date: DF.Date | None
-		invoice_number: DF.DynamicLink
-		invoice_type: DF.Link
-		is_advance: DF.Data | None
+		is_advance: DF.Check
+		is_cross_account: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		reference_name: DF.DynamicLink
-		reference_row: DF.Data | None
-		reference_type: DF.Link
+		to_pay_account: DF.Link | None
+		to_pay_exchange_rate: DF.Float
+		to_pay_party: DF.DynamicLink | None
+		to_pay_party_type: DF.Link | None
+		to_pay_voucher_no: DF.DynamicLink
+		to_pay_voucher_row: DF.Data | None
+		to_pay_voucher_type: DF.Link
+		to_receive_account: DF.Link | None
+		to_receive_exchange_rate: DF.Float
+		to_receive_party: DF.DynamicLink | None
+		to_receive_party_type: DF.Link | None
+		to_receive_voucher_no: DF.DynamicLink
+		to_receive_voucher_row: DF.Data | None
+		to_receive_voucher_type: DF.Link
 		unreconciled_amount: DF.Currency
 	# end: auto-generated types
 
+	def load_from_db(self):
+		pass
+
+	def db_insert(self, *args, **kwargs):
+		pass
+
+	def db_update(self, *args, **kwargs):
+		pass
+
+	def delete(self):
+		pass
+
 	@staticmethod
 	def get_list(args):
+		pass
+
+	@staticmethod  # nosemgrep
+	def get_count(args):
+		pass
+
+	@staticmethod  # nosemgrep
+	def get_stats(args):
 		pass

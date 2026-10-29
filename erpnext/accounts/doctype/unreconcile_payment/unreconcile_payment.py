@@ -1,8 +1,6 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
@@ -13,9 +11,9 @@ from frappe.utils.data import comma_and
 
 from erpnext import _refuse
 from erpnext.accounts.utils import (
-	cancel_exchange_gain_loss_journal,
-	get_linked_exchange_gain_loss_journal,
-	unlink_ref_doc_from_payment_entries,
+	CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
+	get_linked_system_journals,
+	unwind_reconciliation,
 	update_voucher_outstanding,
 )
 
@@ -66,8 +64,12 @@ class UnreconcilePayment(Document):
 		# todo: more granular unreconciliation
 		for alloc in self.allocations:
 			doc = frappe.get_doc(alloc.reference_doctype, alloc.reference_name)
-			unlink_ref_doc_from_payment_entries(doc, self.voucher_no)
-			cancel_exchange_gain_loss_journal(doc, self.voucher_type, self.voucher_no)
+			unwind_reconciliation(
+				doc,
+				payment_name=self.voucher_no,
+				referenced_dt=self.voucher_type,
+				referenced_dn=self.voucher_no,
+			)
 
 			# update outstanding amounts
 			update_voucher_outstanding(
@@ -88,7 +90,8 @@ class UnreconcilePayment(Document):
 		if not (
 			journal.docstatus == 1
 			and journal.is_system_generated
-			and journal.voucher_type in ("Credit Note", "Debit Note")
+			# the legacy journals are relabelled as reconciliation journals by a v16 patch
+			and journal.voucher_type in ("Credit Note", "Debit Note", CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
 			and len(journal.accounts) == 2
 		):
 			return
@@ -141,8 +144,8 @@ class UnreconcilePayment(Document):
 
 	def get_legacy_return_exchange_journals(self, journal, invoice_row, return_row):
 		legacy_journals = []
-		for name in get_linked_exchange_gain_loss_journal(
-			return_row.reference_type, return_row.reference_name, 1
+		for name in get_linked_system_journals(
+			return_row.reference_type, return_row.reference_name, "Exchange Gain Or Loss", docstatus=1
 		):
 			gain_loss = frappe.get_doc("Journal Entry", name)
 			if any(
@@ -246,8 +249,57 @@ def doc_has_references(doctype: str | None = None, docname: str | None = None):
 				"event": ["=", "Submit"],
 			},
 		)
+		count += len(_linked_bridge_allocations(None, doctype, docname))
 
 	return count
+
+
+def _linked_bridge_allocations(company: str | None, doctype: str, docname: str) -> list:
+	"""Cross-account bridge JEs that REFERENCE (doctype, docname) — returned as
+	allocation rows.
+
+	A cross-account reconcile mints a transfer JE (the bridge) and mutates the
+	writable side; the other side (a reverse PE, or a non-writable JE) is left
+	untouched, so it owns no ledger row pointing at the bridge and the normal forward
+	query (`voucher_no == this voucher`) misses it. But the bridge's own PLE carries
+	`against_voucher_no = this voucher`, so we walk that link in reverse — the same
+	Payment Ledger the rest of this query uses, no JEA join. The `on_submit` unwind
+	(`unlink_ref_doc_from_payment_entries` → `remove_ref_doc_link_from_jv`) reverses
+	the whole bridge, reopening the counterpart too.
+
+	Mutually exclusive with the normal query: if THIS voucher references the bridge
+	(writable side), the bridge does not reference it back, so nothing is returned
+	here and no duplicate row is produced.
+	"""
+	ple = qb.DocType("Payment Ledger Entry")
+	je = qb.DocType("Journal Entry")
+	query = (
+		qb.from_(ple)
+		.inner_join(je)
+		.on(je.name == ple.voucher_no)
+		.select(
+			# grouped by voucher and account; the rest is the same on every row, Max() for strict GROUP BY
+			Max(ple.company).as_("company"),
+			ple.account,
+			Max(ple.party_type).as_("party_type"),
+			Max(ple.party).as_("party"),
+			Max(ple.voucher_type).as_("reference_doctype"),
+			ple.voucher_no.as_("reference_name"),
+			Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
+			Max(ple.account_currency).as_("account_currency"),
+		)
+		.where(
+			(ple.against_voucher_no == docname)
+			& (ple.voucher_no != docname)
+			& (ple.delinked == 0)
+			& (je.voucher_type == CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
+			& (je.is_system_generated == 1)
+		)
+		.groupby(ple.voucher_no, ple.account)
+	)
+	if company:
+		query = query.where(ple.company == company)
+	return query.run(as_dict=True)
 
 
 @frappe.whitelist()
@@ -317,6 +369,8 @@ def get_linked_payments_for_doc(
 			res = query.run(as_dict=True)
 
 			res += get_linked_advances(company, _dn)
+
+			res += _linked_bridge_allocations(company, _dt, _dn)
 
 			return res
 

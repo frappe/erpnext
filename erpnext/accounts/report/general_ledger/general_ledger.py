@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, _dict
 from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Count
 from frappe.utils import cstr, getdate
 
 from erpnext import get_company_currency, get_default_company
@@ -18,7 +19,7 @@ from erpnext.accounts.report.utils import (
 	get_currency,
 	has_gl_entry_restrictions,
 )
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.accounts.utils import CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE, get_account_currency, get_fiscal_year
 
 DEBIT_CREDIT_DICT = {
 	"debit": 0.0,
@@ -230,6 +231,29 @@ def get_gl_entries(filters, accounting_dimensions):
 		return gl_entries
 
 
+def get_system_note_journals(company: str) -> list:
+	"""System journals the "ignore system generated credit / debit notes" filter hides:
+	bridges whose lines all sit on one account (they net to zero there), which includes
+	old credit/debit note journals relabelled by a v16 patch. Cross-account bridges are
+	real transfers, so they stay visible."""
+	je = frappe.qb.DocType("Journal Entry")
+	jea = frappe.qb.DocType("Journal Entry Account")
+	return (
+		frappe.qb.from_(je)
+		.inner_join(jea)
+		.on(jea.parent == je.name)
+		.select(je.name)
+		.where(
+			(je.company == company)
+			& (je.docstatus == 1)
+			& (je.is_system_generated == 1)
+			& (je.voucher_type == CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE)
+		)
+		.groupby(je.name)
+		.having(Count(jea.account).distinct() == 1)
+	).run(pluck=True)
+
+
 def get_conditions(filters):
 	conditions = []
 
@@ -264,20 +288,8 @@ def get_conditions(filters):
 			filters.update({"voucher_no_not_in": [x[0] for x in err_journals]})
 
 	if filters.get("ignore_cr_dr_notes"):
-		system_generated_cr_dr_journals = frappe.db.get_all(
-			"Journal Entry",
-			filters={
-				"company": filters.get("company"),
-				"docstatus": 1,
-				"voucher_type": ("in", ["Credit Note", "Debit Note"]),
-				"is_system_generated": 1,
-			},
-			as_list=True,
-		)
-		if system_generated_cr_dr_journals:
-			vouchers_to_ignore = (filters.get("voucher_no_not_in") or []) + [
-				x[0] for x in system_generated_cr_dr_journals
-			]
+		if system_generated := get_system_note_journals(filters.get("company")):
+			vouchers_to_ignore = (filters.get("voucher_no_not_in") or []) + system_generated
 			filters.update({"voucher_no_not_in": vouchers_to_ignore})
 
 	if filters.get("voucher_no_not_in"):
@@ -1042,16 +1054,7 @@ def _build_gl_conditions_duckdb(filters):
 			filters.update({"voucher_no_not_in": err_journals})
 
 	if filters.get("ignore_cr_dr_notes"):
-		system_generated = frappe.db.get_all(
-			"Journal Entry",
-			filters={
-				"company": filters.get("company"),
-				"docstatus": 1,
-				"voucher_type": ("in", ["Credit Note", "Debit Note"]),
-				"is_system_generated": 1,
-			},
-			pluck="name",
-		)
+		system_generated = get_system_note_journals(filters.get("company"))
 		if system_generated:
 			vouchers_to_ignore = (filters.get("voucher_no_not_in") or []) + system_generated
 			filters.update({"voucher_no_not_in": vouchers_to_ignore})

@@ -151,92 +151,64 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 			with self.subTest(field=field):
 				self.assertEqual(report[0].get(field), expected_after_cr_and_payment.get(field))
 
-	def test_customer_ledger_ignore_cr_dr_filter(self):
-		si = create_sales_invoice()
+	def test_reconciliation_bridges_are_neither_invoiced_nor_paid(self):
+		"""Reconciling an invoice against a credit note, or against a payment in another
+		receivable account, posts a bridge journal. It only moves the customer's own
+		balance, so it is neither invoiced nor paid."""
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
+		si = create_sales_invoice()
 		cr_note = make_return_doc(si.doctype, si.name)
 		cr_note.submit()
 
-		pr = frappe.get_doc("Payment Reconciliation")
-		pr.company = si.company
-		pr.party_type = "Customer"
-		pr.party = si.customer
-		pr.receivable_payable_account = si.debit_to
-
-		pr.get_unreconciled_entries()
-
-		invoices = [invoice.as_dict() for invoice in pr.invoices if invoice.invoice_number == si.name]
-		payments = [payment.as_dict() for payment in pr.payments if payment.reference_name == cr_note.name]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
-		pr.reconcile()
-
-		system_generated_journal = frappe.db.get_all(
-			"Journal Entry",
-			filters={
-				"docstatus": 1,
-				"reference_type": si.doctype,
-				"reference_name": si.name,
-				"voucher_type": "Credit Note",
-				"is_system_generated": True,
-			},
-			fields=["name"],
+		other_debtors = create_account(
+			account_name="Debtors 2",
+			parent_account="Accounts Receivable - _TC",
+			company=self.company,
+			account_type="Receivable",
+			account_currency="INR",
 		)
-		self.assertEqual(len(system_generated_journal), 1)
+		si2 = create_sales_invoice()
+		pe = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=other_debtors,
+			paid_to=self.cash,
+			paid_amount=100,
+			save=True,
+			submit=True,
+		)
+
+		def reconcile(account, vouchers):
+			pr = frappe.get_doc("Payment Reconciliation")
+			pr.company = self.company
+			pr.party_type = "Customer"
+			pr.party = self.customer
+			pr.receivable_payable_account = account
+			pr.get_unreconciled_entries()
+			pr.allocate_entries(
+				to_receive=[r.as_dict() for r in pr.to_receive if r.voucher_no in vouchers],
+				to_pay=[r.as_dict() for r in pr.to_pay if r.voucher_no in vouchers],
+			)
+			pr.reconcile()
+
+		reconcile(self.debit_to, {si.name, cr_note.name})
+		reconcile(None, {si2.name, pe.name})
+		bridges = {"company": self.company, "voucher_type": "Reconciliation Journal", "docstatus": 1}
+		self.assertEqual(frappe.db.count("Journal Entry", bridges), 2)
+
+		data = execute(frappe._dict({"company": self.company, "from_date": today(), "to_date": today()}))[1]
+		self.assertEqual(len(data), 1)
 		expected = {
-			"party": "_Test Customer",
-			"customer_name": "_Test Customer",
-			"customer_group": "_Test Customer Group",
-			"territory": "_Test Territory",
-			"party_name": "_Test Customer",
-			"opening_balance": 0,
-			"invoiced_amount": 100.0,
-			"paid_amount": 0.0,
+			"invoiced_amount": 200.0,
+			"paid_amount": 100.0,
 			"return_amount": 100.0,
 			"closing_balance": 0.0,
-			"currency": "INR",
-			"dr_or_cr": "",
 		}
-		# Without ignore_cr_dr_notes
-		columns, data = execute(
-			frappe._dict(
-				{
-					"company": si.company,
-					"from_date": si.posting_date,
-					"to_date": si.posting_date,
-					"ignore_cr_dr_notes": False,
-				}
-			)
-		)
-		self.assertEqual(len(data), 1)
-		self.assertDictEqual(expected, data[0])
-
-		# With ignore_cr_dr_notes
-		expected = {
-			"party": "_Test Customer",
-			"customer_name": "_Test Customer",
-			"customer_group": "_Test Customer Group",
-			"territory": "_Test Territory",
-			"party_name": "_Test Customer",
-			"opening_balance": 0,
-			"invoiced_amount": 100.0,
-			"paid_amount": 0.0,
-			"return_amount": 100.0,
-			"closing_balance": 0.0,
-			"currency": "INR",
-			"dr_or_cr": "",
-		}
-		columns, data = execute(
-			frappe._dict(
-				{
-					"company": si.company,
-					"from_date": si.posting_date,
-					"to_date": si.posting_date,
-					"ignore_cr_dr_notes": True,
-				}
-			)
-		)
-		self.assertEqual(len(data), 1)
-		self.assertEqual(expected, data[0])
+		self.assertEqual({field: data[0][field] for field in expected}, expected)
 
 	def test_journal_voucher_against_return_invoice(self):
 		filters = {"company": self.company, "from_date": today(), "to_date": today()}
