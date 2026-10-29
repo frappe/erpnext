@@ -908,6 +908,7 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.controllers.item_close import is_bundle_of_closed_row
 	from erpnext.manufacturing.doctype.work_order.services.status import qty_against_sales_order
 
 	if sales_order:
@@ -933,6 +934,10 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
+				row_closed = is_bundle_of_closed_row(i) if i.doctype == "Packed Item" else i.closed
+				if row_closed:
+					continue
+
 				bom = get_default_bom(i.item_code)
 				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
 

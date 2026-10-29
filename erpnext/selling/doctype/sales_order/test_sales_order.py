@@ -2551,6 +2551,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			}
 		)
 
+		# a closed row is not offered for work orders
+		from erpnext.controllers.item_close import update_closed_status
+
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		self.assertNotIn(so.items[1].name, [i["sales_order_item"] for i in get_work_order_items(so.name)])
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 0)
+
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
