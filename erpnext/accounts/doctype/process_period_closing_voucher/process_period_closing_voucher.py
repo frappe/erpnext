@@ -43,9 +43,10 @@ class ProcessPeriodClosingVoucher(Document):
 
 	def validate(self):
 		self.validate_parent_pcv()
-		if frappe.db.exists(
+		if frappe.db.get_value(
 			self.doctype,
 			{"parent_pcv": self.parent_pcv, "docstatus": ["!=", 2], "name": ["!=", self.name]},
+			for_update=True,
 		):
 			frappe.throw(_("A Process Period Closing Voucher already exists for {0}").format(self.parent_pcv))
 
