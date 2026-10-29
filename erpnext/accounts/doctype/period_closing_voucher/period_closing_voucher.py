@@ -61,7 +61,7 @@ class PeriodClosingVoucher(AccountsController):
 
 	def validate(self):
 		self.validate_start_and_end_date()
-		self.check_if_previous_year_closed()
+		self.check_if_previous_period_closed()
 		self.block_if_future_closing_voucher_exists()
 		self.check_closing_account()
 		self.check_closing_account_currency()
@@ -91,7 +91,7 @@ class PeriodClosingVoucher(AccountsController):
 		if getdate(self.period_end_date) > getdate(self.fy_end_date):
 			frappe.throw(_("Period End Date cannot be greater than Fiscal Year End Date"))
 
-	def check_if_previous_year_closed(self):
+	def check_if_previous_period_closed(self):
 		last_closing = self.get_last_closing()
 		if last_closing and last_closing.gle_processing_status != "Completed":
 			frappe.throw(
