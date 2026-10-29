@@ -102,8 +102,8 @@ class ItemAttribute(Document):
 			elif flt(self.from_range) >= flt(self.to_range):
 				frappe.throw(_("From Range has to be less than To Range"))
 
-			if not self.increment:
-				frappe.throw(_("Increment cannot be 0"), ItemAttributeIncrementError)
+			if flt(self.increment) <= 0:
+				frappe.throw(_("Increment must be greater than 0"), ItemAttributeIncrementError)
 		else:
 			self.from_range = self.to_range = self.increment = 0
 
