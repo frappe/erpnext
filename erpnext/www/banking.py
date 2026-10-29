@@ -10,8 +10,8 @@ from frappe.utils.user import is_website_user
 
 no_cache = 1
 
-SCRIPT_TAG_PATTERN = re.compile(r"\<script[^<]*\</script\>", re.IGNORECASE)
-CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>", re.IGNORECASE)
+SCRIPT_TAG_PATTERN = re.compile(r"\<script[^<]*\</script\>")
+CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>")
 
 
 def get_context(context):
