@@ -518,6 +518,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.add_secondary_items_from_job_card()
 
 	def add_raw_materials(self):
+		if not self.wo_doc:
+			# nothing was transferred or consumed for a standalone entry, so follow the BOM
+			self.add_raw_materials_based_on_work_order()
+			return
+
 		material_consumption = frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
 
 		if material_consumption and self.raw_materials_already_consumed():
@@ -1333,7 +1338,7 @@ class MaterialConsumptionForManufactureStockEntry(ManufactureStockEntry):
 		self.validate_alternative_items()
 
 	def add_items(self):
-		if self.backflush_based_on == "BOM" or self.wo_doc.skip_transfer:
+		if self.backflush_based_on == "BOM" or not self.wo_doc or self.wo_doc.skip_transfer:
 			self.add_raw_materials_based_on_work_order()
 		else:
 			self.add_raw_materials_based_on_transfer()
