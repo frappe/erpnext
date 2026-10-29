@@ -1263,6 +1263,15 @@ class TestPaymentEntry(ERPNextTestSuite):
 		invoice = create_sales_invoice(qty=1, rate=118, do_not_save=True)
 		invoice.payment_terms_template = "Test Receivable Template"
 		invoice.submit()
+		payment = get_payment_entry(invoice.doctype, invoice.name)
+		payment.references[0].allocated_amount = 80
+		payment.references[1].allocated_amount = -10
+		payment.paid_amount = payment.received_amount = 70
+		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+			payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 118)
+		self.assertEqual([row.paid_amount for row in invoice.payment_schedule], [0, 0])
+
 		journal = make_journal_entry("_Test Cash - _TC", invoice.debit_to, 80, save=False)
 		journal.accounts[1].update(
 			{
