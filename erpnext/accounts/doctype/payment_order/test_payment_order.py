@@ -13,7 +13,10 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 	make_payment_order,
 )
-from erpnext.accounts.doctype.payment_order.payment_order import make_payment_records
+from erpnext.accounts.doctype.payment_order.payment_order import (
+	make_journal_entry,
+	make_payment_records,
+)
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	make_payment_order as make_payment_order_from_payment_request,
 )
@@ -201,6 +204,24 @@ class TestPaymentOrder(ERPNextTestSuite):
 		self.assertRaisesRegex(
 			frappe.ValidationError, "is already in another Payment Order", payment_order.submit
 		)
+
+	def test_journal_entry_skips_rows_claimed_after_payment_order_was_loaded(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		payment_order.submit()
+
+		loaded_order = frappe.get_doc("Payment Order", payment_order.name)
+		make_payment_records(payment_order.name, "_Test Supplier")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Journal Entries are already created",
+			make_journal_entry,
+			loaded_order,
+			"_Test Supplier",
+		)
+		self.assertEqual(frappe.db.count("Journal Entry", {"payment_order": payment_order.name}), 1)
 
 	def test_partial_journal_entry_from_payment_order_updates_payment_request(self):
 		payment_request = self.make_payment_request()

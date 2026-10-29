@@ -283,16 +283,7 @@ def make_payment_records(name: str, supplier: str, mode_of_payment: str | None =
 
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
-	rows = [
-		d
-		for d in doc.references
-		if d.supplier == supplier
-		and not d.payment_reference
-		and (not mode_of_payment or mode_of_payment == d.mode_of_payment)
-	]
-	if not rows:
-		frappe.throw(_("Journal Entries are already created for Supplier {0}").format(supplier))
-
+	rows = get_unpaid_rows(doc, supplier, mode_of_payment)
 	je = frappe.new_doc("Journal Entry")
 	je.company = doc.company
 	je.payment_order = doc.name
@@ -323,6 +314,31 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	je.save()
 	set_payment_reference([d.name for d in rows], je.name)
 	frappe.msgprint(_("{0} {1} created").format(je.doctype, je.name))
+
+
+def get_unpaid_rows(doc, supplier, mode_of_payment=None):
+	rows = [
+		d
+		for d in doc.references
+		if d.supplier == supplier
+		and not d.payment_reference
+		and (not mode_of_payment or mode_of_payment == d.mode_of_payment)
+	]
+	if rows:
+		payment_references = dict(
+			frappe.qb.get_query(
+				"Payment Order Reference",
+				fields=["name", "payment_reference"],
+				filters={"name": ["in", [d.name for d in rows]]},
+				for_update=True,
+			).run()
+		)
+		rows = [d for d in rows if not payment_references.get(d.name)]
+
+	if not rows:
+		frappe.throw(_("Journal Entries are already created for Supplier {0}").format(supplier))
+
+	return rows
 
 
 def set_payment_reference(rows: list[str], journal_entry: str):
