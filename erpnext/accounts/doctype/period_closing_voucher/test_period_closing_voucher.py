@@ -989,6 +989,23 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			frappe.PermissionError, get_period_start_end_date, "_Test Fiscal Year 2021", "Test PCV Company"
 		)
 
+	def test_period_dates_need_permission_on_requested_company(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.crm.doctype.lead.test_lead import make_user
+
+		user = make_user("pcv_restricted_accounts_manager@example.com", "Accounts Manager")
+		add_user_permission("Company", "_Test Company", user)
+
+		with self.set_user(user):
+			get_period_start_end_date("_Test Fiscal Year 2021", "_Test Company")
+			self.assertRaises(
+				frappe.PermissionError,
+				get_period_start_end_date,
+				"_Test Fiscal Year 2021",
+				"Test PCV Company",
+			)
+
 	def test_incomplete_previous_closing_blocks_next_closing(self):
 		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
 		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
