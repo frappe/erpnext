@@ -328,6 +328,68 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi1.name, "outstanding_amount"), 0)
 		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi2.name, "outstanding_amount"), 0)
 
+	def test_foreign_unallocated_amount_precision(self):
+		for create_invoice, party in (
+			(
+				create_sales_invoice,
+				{"customer": "_Test Customer USD", "debit_to": "_Test Receivable USD - _TC"},
+			),
+			(
+				make_purchase_invoice,
+				{"supplier": "_Test Supplier USD", "credit_to": "_Test Payable USD - _TC"},
+			),
+		):
+			invoice = create_invoice(currency="USD", conversion_rate=83.33, qty=1, rate=100, **party)
+			for deduction in (0, 1):
+				with self.subTest(doctype=invoice.doctype, deduction=deduction):
+					payment = get_payment_entry(
+						invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+					)
+					payment.references[0].allocated_amount = 33.33
+					if payment.payment_type == "Receive":
+						payment.source_exchange_rate, payment.target_exchange_rate = 83.33, 1
+						payment.paid_amount, payment.received_amount = 100, 8333
+						expected_unallocated = 66.68 if deduction else 66.67
+					else:
+						payment.source_exchange_rate, payment.target_exchange_rate = 1, 83.33
+						payment.paid_amount, payment.received_amount = 8333, 100
+						expected_unallocated = 66.66 if deduction else 66.67
+					if deduction:
+						payment.append(
+							"deductions",
+							{"account": "Write Off - _TC", "cost_center": "Main - _TC", "amount": deduction},
+						)
+					payment.submit()
+					self.assertEqual(payment.unallocated_amount, expected_unallocated)
+					self.assertEqual(payment.reload().unallocated_amount, expected_unallocated)
+					self.assertEqual(invoice.reload().outstanding_amount, 66.67)
+					gl_entries = frappe.get_all(
+						"GL Entry",
+						filters={
+							"voucher_type": payment.doctype,
+							"voucher_no": payment.name,
+							"is_cancelled": 0,
+						},
+						fields=[
+							"account",
+							"debit",
+							"credit",
+							"debit_in_account_currency",
+							"credit_in_account_currency",
+						],
+					)
+					self.assertEqual(flt(sum(row.debit - row.credit for row in gl_entries), 2), 0)
+					self.assertCountEqual(
+						[
+							row.debit_in_account_currency or row.credit_in_account_currency
+							for row in gl_entries
+							if row.account == payment.party_account
+						],
+						[33.33, expected_unallocated],
+					)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, 100)
+
 	def test_unallocated_amount_on_overpaid_purchase_payment(self):
 		pi = make_purchase_invoice()  # outstanding 250
 
