@@ -2551,6 +2551,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			}
 		)
 
+		# a closed row is not offered for work orders
+		from erpnext.controllers.item_close import update_closed_status
+
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		self.assertNotIn(so.items[1].name, [i["sales_order_item"] for i in get_work_order_items(so.name)])
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 0)
+
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
@@ -2577,6 +2584,16 @@ class TestSalesOrder(ERPNextTestSuite):
 				.where((wo.sales_order == so.name) & (wo.sales_order_item == item))
 			).run()
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+
+	def test_update_status_endpoint_rejects_invalid_status(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		so = make_sales_order()
+		# only Draft / On Hold / Closed are allowed, and only on a submitted order
+		self.assertRaises(frappe.ValidationError, update_status, "Cancelled", so.name)
+
+		draft = make_sales_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_status, "Closed", draft.name)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_work_order_for_duplicate_product_bundle_rows(self):

@@ -784,6 +784,7 @@ class SalesOrder(SellingController):
 
 	@frappe.whitelist()
 	def create_delivery_schedule(self, child_row: dict | frappe._dict, schedules: str | list[dict]):
+		self.check_permission("write")
 		DeliveryScheduleService(self).create_delivery_schedule(child_row, schedules)
 
 
@@ -883,7 +884,13 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 
 @frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
@@ -908,6 +915,7 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.controllers.item_close import is_bundle_of_closed_row
 	from erpnext.manufacturing.doctype.work_order.services.status import qty_against_sales_order
 
 	if sales_order:
@@ -933,6 +941,10 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
+				row_closed = is_bundle_of_closed_row(i) if i.doctype == "Packed Item" else i.closed
+				if row_closed:
+					continue
+
 				bom = get_default_bom(i.item_code)
 				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
 

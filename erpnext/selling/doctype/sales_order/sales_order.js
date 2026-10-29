@@ -1892,7 +1892,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				qty_field: "delivered_qty",
 				qty_label: __("Delivered Qty"),
 				help: __(
-					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note or Sales Invoice."
+					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note, Sales Invoice or Work Order."
 				),
 			})
 		);
