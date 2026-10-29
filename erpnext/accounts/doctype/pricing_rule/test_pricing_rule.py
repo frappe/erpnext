@@ -2086,6 +2086,21 @@ class TestPricingRule(ERPNextTestSuite):
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "is not supported", rule.insert)
 
+	def test_saved_recursive_product_rule_on_transaction_does_not_break_invoice(self):
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+		rule.db_set({"is_recursive": 1, "recurse_for": 1})
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_submit=True)
+		self.assertEqual([(d.item_code, d.qty) for d in si.items if d.is_free_item], [(free_item, 1)])
+
 	def test_remove_pricing_rule_checks_transaction_permission(self):
 		from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 			remove_pricing_rule_for_item,
