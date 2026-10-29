@@ -21,7 +21,6 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 )
-from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import get_credit_note_return_criterion
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -75,28 +74,20 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 		)
 
 	def get_remaining_packed_item_qty(so_item):
-		delivered_qty = frappe.db.get_value(
-			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
+		parent = frappe.db.get_value(
+			"Sales Order Item",
+			so_item.parent_detail_docname,
+			["delivered_qty", "qty"],
+			as_dict=True,
 		)
-
-		bundle_name = get_active_product_bundle(so_item.parent_item)
-		bundle_item_qty = (
-			frappe.db.get_value(
-				"Product Bundle Item",
-				{"parent": bundle_name, "item_code": so_item.item_code},
-				["qty"],
-			)
-			if bundle_name
-			else None
-		)
+		# components per parent qty frozen on the row (delivered_qty is in the row's sales UOM),
+		# so a later bundle edit can't shift the pending qty
+		components_per_unit = flt(so_item.qty) / (flt(parent.qty) or 1)
 
 		return flt(
 			flt(so_item.qty)
 			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-			- max(
-				flt(delivered_qty) * flt(bundle_item_qty),
-				0,
-			)
+			- max(flt(parent.delivered_qty) * components_per_unit, 0)
 		)
 
 	def update_item(source, target, source_parent):
