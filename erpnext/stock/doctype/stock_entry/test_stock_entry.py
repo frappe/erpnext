@@ -6080,6 +6080,38 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		self.assertEqual(se.process_loss_percentage, 5)
 		self.assertEqual(self.get_finished_good_row(se).qty, 190)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
+	)
+	def test_get_items_without_work_order_follows_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item = make_item("Standalone Manufacture FG", properties={"is_stock_item": 1}).name
+		rm_item = make_item("Standalone Manufacture RM", properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[rm_item], rm_qty=2)
+
+		for material_consumption in (0, 1):
+			with self.change_settings(
+				"Manufacturing Settings", {"material_consumption": material_consumption}
+			):
+				for purpose in ("Manufacture", "Material Consumption for Manufacture"):
+					se = make_stock_entry(
+						item_code=fg_item, qty=5, purpose=purpose, company="_Test Company", do_not_save=True
+					)
+					se.items = []
+					se.from_bom = 1
+					se.bom_no = bom.name
+					se.fg_completed_qty = 5
+					se.from_warehouse = "_Test Warehouse - _TC"
+					se.to_warehouse = "_Test Warehouse 1 - _TC"
+					se.get_items()
+
+					rm_rows = [row for row in se.items if row.item_code == rm_item]
+					self.assertEqual(len(rm_rows), 1, purpose)
+					self.assertEqual(rm_rows[0].qty, 10)
+					self.assertEqual(rm_rows[0].s_warehouse, "_Test Warehouse - _TC")
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_fifo_rate_for_serial_item_without_serial_wise_valuation(self):
 		item = make_item(
