@@ -124,9 +124,11 @@ class ProcessStatementOfAccounts(Document):
 
 			if self.report == "General Ledger":
 				self.to_date = scheduled_date
-				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 			else:
 				self.posting_date = scheduled_date
+
+		if self.enable_auto_email and self.report == "General Ledger" and self.to_date:
+			self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 
 		if self.print_format:
 			pf = frappe.db.get_value(
