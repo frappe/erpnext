@@ -4722,6 +4722,53 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(fg_row.basic_rate, 0)
 		self.assertEqual(fg_row.basic_amount, 0)
 
+	def test_disassembly_returns_each_consumed_batch_once(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		warehouse = "_Test Warehouse - _TC"
+		for typed_batch_no in (1, 0):
+			rm_item = make_item(
+				properties={
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": "DISB-.#####",
+				}
+			).name
+			fg_item = make_item(properties={"is_stock_item": 1}).name
+			make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100)
+			batches = [
+				get_batch_from_bundle(
+					make_stock_entry(item_code=rm_item, target=warehouse, qty=5, basic_rate=100)
+					.items[0]
+					.serial_and_batch_bundle
+				)
+				for _ in range(2)
+			]
+			wo = make_wo_order_test_record(item=fg_item, qty=10, skip_transfer=1, source_warehouse=warehouse)
+
+			for batch_no in batches:
+				manufacture = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 5))
+				if typed_batch_no:
+					rm_row = next(row for row in manufacture.items if row.item_code == rm_item)
+					rm_row.use_serial_batch_fields = 1
+					rm_row.batch_no = batch_no
+				manufacture.insert().submit()
+
+			returned = []
+			for _ in range(2):
+				disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 5))
+				disassembly.insert().submit()
+				rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+				returned.append(get_batch_from_bundle(rm_row.serial_and_batch_bundle))
+
+			self.assertEqual(sorted(returned), sorted(batches))
+			for batch_no in batches:
+				self.assertEqual(get_batch_qty(batch_no, warehouse, rm_item), 5)
+
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
