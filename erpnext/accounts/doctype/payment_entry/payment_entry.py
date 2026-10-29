@@ -686,6 +686,7 @@ class PaymentEntry(AccountsController):
 				self.party_account_currency,
 				self.party_type,
 				self.party,
+				party_account=self.party_account,
 			)
 
 			# Only update exchange rate when the reference is Journal Entry
@@ -697,7 +698,7 @@ class PaymentEntry(AccountsController):
 				ref_details.update({"exchange_rate": reference_exchange_details.exchange_rate})
 
 			for field, value in ref_details.items():
-				if d.exchange_gain_loss:
+				if d.exchange_gain_loss and self.docstatus != 0 and self.get("_action") != "submit":
 					# for cases where gain/loss is booked into invoice
 					# exchange_gain_loss is calculated from invoice & populated
 					# and row.exchange_rate is already set to payment entry's exchange rate
@@ -2241,8 +2242,12 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 				if d.voucher_type in frappe.get_hooks("invoice_doctypes"):
 					d["exchange_rate"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "conversion_rate")
 				elif d.voucher_type == "Journal Entry":
-					d["exchange_rate"] = get_exchange_rate(
-						party_account_currency, company_currency, d.posting_date
+					d["exchange_rate"] = get_journal_entry_exchange_rate(
+						d.voucher_no,
+						args.get("party_type"),
+						args.get("party"),
+						party_account_currency,
+						party_account,
 					)
 			if d.voucher_type in ("Purchase Invoice"):
 				d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
@@ -2592,6 +2597,30 @@ def get_company_defaults(company: str):
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
 
+def get_journal_entry_exchange_rate(voucher_no, party_type, party, account_currency, party_account=None):
+	filters = {
+		"parent": voucher_no,
+		"party_type": party_type,
+		"party": party,
+		"account_currency": account_currency,
+	}
+	if party_account:
+		filters["account"] = party_account
+
+	rows = frappe.get_all(
+		"Journal Entry Account",
+		filters=filters,
+		or_filters=[
+			["reference_type", "is", "not set"],
+			["reference_type", "in", get_advance_payment_doctypes()],
+		],
+		fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+	)
+	amount = sum(row.debit_in_account_currency - row.credit_in_account_currency for row in rows)
+	# Multiple party rows can have different booked rates.
+	return sum(row.debit - row.credit for row in rows) / amount if amount else 1
+
+
 def get_outstanding_on_journal_entry(voucher_no, party_type, party):
 	ple = frappe.qb.DocType("Payment Ledger Entry")
 
@@ -2631,6 +2660,7 @@ def get_reference_details(
 	party_account_currency: str,
 	party_type: str | None = None,
 	party: str | None = None,
+	party_account: str | None = None,
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
@@ -2648,7 +2678,9 @@ def get_reference_details(
 
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		if ref_doc.multi_currency:
-			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+			exchange_rate = get_journal_entry_exchange_rate(
+				reference_name, party_type, party, party_account_currency, party_account
+			)
 		else:
 			exchange_rate = 1
 		outstanding_amount, total_amount = get_outstanding_on_journal_entry(reference_name, party_type, party)
