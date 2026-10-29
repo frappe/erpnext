@@ -973,12 +973,7 @@ def _get_item_tax_template(
 
 	if for_validate:
 		return [
-			tax.item_tax_template
-			for tax in taxes
-			if (
-				cstr(tax.tax_category) == cstr(ctx.get("tax_category"))
-				and (tax.item_tax_template not in taxes)
-			)
+			tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(ctx.get("tax_category"))
 		]
 
 	# do not change if already a valid template
