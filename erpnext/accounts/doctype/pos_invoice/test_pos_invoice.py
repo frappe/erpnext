@@ -4,7 +4,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, add_to_date, nowdate
+from frappe.utils import add_days, add_to_date, nowdate, nowtime
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -1212,11 +1212,61 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos.loyalty_points = -5
 		self.assertRaises(frappe.ValidationError, pos.save)
 
+	def test_consolidation_does_not_count_coupon_again(self):
+		rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test POS Coupon Rule",
+				"apply_on": "Item Code",
+				"items": [{"item_code": "_Test Item"}],
+				"selling": 1,
+				"company": "_Test Company",
+				"coupon_code_based": 1,
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 10,
+				"currency": "INR",
+			}
+		).insert()
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "POSONCE",
+				"coupon_code": "POSONCE",
+				"coupon_type": "Promotional",
+				"pricing_rule": rule.name,
+				"maximum_use": 1,
+			}
+		).insert()
+
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.coupon_code = coupon.name
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000})
+		pos.insert().submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
+
+		make_merge_log_for(pos)
+		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name
 	make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
 	return item_code
+
+
+def make_merge_log_for(pos_invoice):
+	merge_log = frappe.get_doc(
+		{
+			"doctype": "POS Invoice Merge Log",
+			"company": pos_invoice.company,
+			"customer": pos_invoice.customer,
+			"posting_date": nowdate(),
+			"posting_time": nowtime(),
+			"pos_invoices": [{"pos_invoice": pos_invoice.name, "customer": pos_invoice.customer}],
+		}
+	).insert()
+	merge_log.submit()
+	return merge_log
 
 
 def create_pos_invoice(**args):
