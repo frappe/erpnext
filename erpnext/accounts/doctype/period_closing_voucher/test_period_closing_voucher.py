@@ -658,7 +658,9 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		sce.create_stock_closing_balance_entries()
 		sce.db_set("status", "Completed")
 
-	def make_period_closing_voucher(self, posting_date, submit=True, period_start_date=None):
+	def make_period_closing_voucher(
+		self, posting_date, submit=True, period_start_date=None, period_end_date=None
+	):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 		fy = get_fiscal_year(posting_date, company="Test PCV Company")
@@ -667,7 +669,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 				"doctype": "Period Closing Voucher",
 				"transaction_date": posting_date or today(),
 				"period_start_date": period_start_date or fy[1],
-				"period_end_date": posting_date if period_start_date else fy[2],
+				"period_end_date": period_end_date or fy[2],
 				"company": "Test PCV Company",
 				"fiscal_year": fy[0],
 				"cost_center": cost_center,
@@ -722,29 +724,29 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertEqual(totals_after_cancel.total_debit, totals_after_cancel.total_credit)
 
 	def make_income_entry(self, posting_date, amount, income_account="Sales - TPC"):
-		jv = make_journal_entry(
+		return make_journal_entry(
 			posting_date=posting_date,
 			amount=amount,
 			account1="Cash - TPC",
 			account2=income_account,
 			cost_center=create_cost_center("Test Cost Center 1"),
 			company="Test PCV Company",
-			save=False,
+			submit=True,
 		)
-		jv.company = "Test PCV Company"
-		jv.save()
-		jv.submit()
-		return jv
 
 	def test_partly_closed_previous_year_blocks_closing_next_year(self):
 		self.make_income_entry("2021-02-10", 1000)
 		self.make_income_entry("2021-06-15", 700)
-		self.make_period_closing_voucher(posting_date="2021-02-28", period_start_date="2021-01-01")
+		self.make_period_closing_voucher(
+			posting_date="2021-02-28", period_start_date="2021-01-01", period_end_date="2021-02-28"
+		)
 
 		with self.assertRaisesRegex(frappe.ValidationError, f"from <strong>{formatdate('2021-03-01')}"):
 			self.make_period_closing_voucher(posting_date="2022-12-31")
 
-		self.make_period_closing_voucher(posting_date="2021-12-31", period_start_date="2021-03-01")
+		self.make_period_closing_voucher(
+			posting_date="2021-12-31", period_start_date="2021-03-01", period_end_date="2021-12-31"
+		)
 		self.make_period_closing_voucher(posting_date="2022-12-31")
 
 	def test_unclosed_earlier_year_blocks_closing(self):
@@ -790,18 +792,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 	def make_sale_and_refund(self, posting_date, amount):
 		self.make_income_entry(posting_date, amount)
-		refund = make_journal_entry(
-			posting_date=posting_date,
-			amount=amount,
-			account1="Sales - TPC",
-			account2="Cash - TPC",
-			cost_center=create_cost_center("Test Cost Center 1"),
-			company="Test PCV Company",
-			save=False,
-		)
-		refund.company = "Test PCV Company"
-		refund.save()
-		refund.submit()
+		self.make_income_entry(posting_date, -amount)
 
 	def assert_period_closed_without_entries(self, pcv):
 		self.assertEqual(pcv.gle_processing_status, "Completed")
@@ -814,10 +805,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account2="Sales - TPC",
 			cost_center=create_cost_center("Test Cost Center 1"),
 			company="Test PCV Company",
-			save=False,
 		)
-		late_entry.company = "Test PCV Company"
-		late_entry.save()
 		self.assertRaisesRegex(frappe.ValidationError, "Books have been closed", late_entry.submit)
 
 	def test_close_period_with_zero_profit_and_loss_in_legacy_controller(self):
