@@ -7,6 +7,7 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -1190,6 +1191,27 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		with self.set_user(accounts_user):
 			self.assertRaises(frappe.PermissionError, pr.insert)
+
+	def test_submit_doc_needs_submit_permission(self):
+		def args():
+			return {
+				"dt": "Sales Order",
+				"dn": make_sales_order(currency="USD").name,
+				"payment_gateway_account": "_Test Gateway Other - USD - _TC",
+				"submit_doc": 1,
+				"return_doc": 1,
+			}
+
+		accounts_user = create_user("test_pr_accounts_user@example.com", "Accounts User", "Sales User")
+		with self.set_user(accounts_user.name):
+			self.assertRaises(frappe.PermissionError, make_payment_request, **args())
+
+		accounts_manager = create_user(
+			"test_pr_accounts_manager@example.com", "Accounts Manager", "Sales User"
+		)
+		with self.set_user(accounts_manager.name):
+			pr = make_payment_request(**args())
+		self.assertEqual(pr.docstatus, 1)
 
 	def test_payment_request_reference_doctype_must_be_allowed(self):
 		todo = frappe.get_doc({"doctype": "ToDo", "description": "_Test Payment Request Reference"}).insert()
