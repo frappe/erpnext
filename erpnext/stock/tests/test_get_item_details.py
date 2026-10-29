@@ -1016,3 +1016,46 @@ class TestGetItemDetail(ERPNextTestSuite):
 				"qty": 1,
 			}
 		)
+
+	def test_apply_price_list_keeps_normalised_transaction_type_for_rows(self):
+		"""A row in `items` must not replace the context's transaction type, which the
+		Pricing Rule query uses as a column name."""
+		from unittest.mock import patch
+
+		from erpnext.accounts.doctype.pricing_rule import utils as pricing_rule_utils
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+		from erpnext.stock.get_item_details import apply_price_list
+
+		pricing_rule = make_pricing_rule(
+			title="_Test Row Transaction Type Rule", selling=1, discount_percentage=10
+		)
+		self.addCleanup(frappe.delete_doc_if_exists, "Pricing Rule", pricing_rule.name)
+
+		ctx = frappe._dict(
+			doctype="Sales Order",
+			company="_Test Company",
+			customer="_Test Customer",
+			currency="INR",
+			conversion_rate=1.0,
+			price_list="_Test Price List",
+			plc_conversion_rate=1.0,
+			transaction_date=today(),
+			items=[
+				frappe._dict(
+					doctype="Sales Order Item",
+					item_code="_Test Item",
+					qty=1,
+					uom="_Test UOM",
+					conversion_factor=1.0,
+					transaction_type="not_a_column",
+				)
+			],
+		)
+		with patch.object(
+			pricing_rule_utils, "_get_pricing_rules", wraps=pricing_rule_utils._get_pricing_rules
+		) as get_pricing_rules:
+			apply_price_list(ctx)
+
+		self.assertEqual(
+			{call.args[1].transaction_type for call in get_pricing_rules.call_args_list}, {"selling"}
+		)
