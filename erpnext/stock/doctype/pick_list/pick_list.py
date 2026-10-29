@@ -1622,6 +1622,22 @@ def create_delivery_note(source_name, target_doc=None):
 
 
 @frappe.whitelist()
+def get_existing_drafts(source_name: str, target_doctype: str) -> list[str]:
+	if target_doctype not in {"Delivery Note", "Sales Invoice"}:
+		frappe.throw(_("Unsupported target document type"))
+
+	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list.check_permission("read")
+
+	return frappe.get_list(
+		target_doctype,
+		filters={"docstatus": 0, "against_pick_list": source_name},
+		pluck="name",
+		order_by="name",
+	)
+
+
+@frappe.whitelist()
 def create_delivery(
 	source_name: str, target_doc: str | dict | Document | None = None, target: str | None = None
 ):
