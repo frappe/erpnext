@@ -4,7 +4,9 @@ from unittest import mock
 
 import frappe
 from frappe.utils import cint, flt
+from frappe.utils.password import remove_encrypted_password
 
+from erpnext.patches.v16_0 import encrypt_currency_exchange_access_key
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -147,6 +149,50 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		settings = frappe.get_single("Currency Exchange Settings")
 		settings.service_provider = "frankfurter.dev"
 		settings.save()
+
+	def use_exchangerate_host(self, access_key):
+		settings = frappe.get_single("Currency Exchange Settings")
+		settings.service_provider = "exchangerate.host"
+		settings.access_key = access_key
+		settings.save()
+		self.addCleanup(self.use_frankfurter)
+
+	def use_frankfurter(self):
+		settings = frappe.get_single("Currency Exchange Settings")
+		settings.service_provider = "frankfurter.dev"
+		settings.save()
+
+	def test_exchangerate_host_access_key_is_sent_but_not_stored(self, mock_get):
+		self.use_exchangerate_host("12345667890")
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+
+		settings = frappe.get_single("Currency Exchange Settings")
+		self.assertEqual(settings.access_key, "*" * 11)
+		self.assertNotIn("access_key", [row.key for row in settings.req_params])
+
+		self.clear_cache()
+		self.assertEqual(flt(get_exchange_rate("USD", "INR", "2015-12-15", "for_selling"), 3), 66.999)
+		self.assertEqual(mock_get.call_args.kwargs["params"]["access_key"], "12345667890")
+
+	def test_patch_moves_a_plain_text_access_key_to_the_password_store(self, mock_get):
+		doctype = "Currency Exchange Settings"
+		self.use_exchangerate_host("12345667890")
+		# store the settings as they were before the access key became a password
+		remove_encrypted_password(doctype, doctype, "access_key")
+		frappe.db.set_single_value(doctype, "access_key", "12345667890")
+		frappe.db.set_single_value(
+			doctype, "url", "https://api.exchangerate.host/convert?access_key=12345667890&amount=1"
+		)
+		settings = frappe.get_single(doctype)
+		settings.append("req_params", {"key": "access_key", "value": "12345667890"}).db_insert()
+
+		encrypt_currency_exchange_access_key.execute()
+
+		settings = frappe.get_single(doctype)
+		self.assertEqual(settings.access_key, "*" * 11)
+		self.assertEqual(settings.get_password("access_key"), "12345667890")
+		self.assertNotIn("access_key", [row.key for row in settings.req_params])
+		self.assertEqual(settings.url, "https://api.exchangerate.host/convert?amount=1")
 
 	def test_exchange_rate_strict(self, mock_get):
 		# strict currency settings
