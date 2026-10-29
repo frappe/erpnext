@@ -2723,7 +2723,7 @@ def get_vouchers_reported_by(report_name, companies, filters):
 
 
 def update_ledger_health(check, vouchers, run_date, scan):
-	still_reported, stale = get_ledger_health_records(check, vouchers, scan)
+	still_reported, stale = get_kept_and_stale_ledger_health(check, vouchers, scan)
 
 	if stale:
 		frappe.db.delete("Ledger Health", {"name": ("in", stale)})
@@ -2740,8 +2740,8 @@ def update_ledger_health(check, vouchers, run_date, scan):
 		doc.save()
 
 
-def get_ledger_health_records(check, vouchers, scan):
-	still_reported, not_reported = {}, {}
+def get_kept_and_stale_ledger_health(check, vouchers, scan):
+	still_reported, extra_records = {}, {}
 	for row in frappe.get_all(
 		"Ledger Health", filters={check: 1}, fields=["name", "voucher_type", "voucher_no"], order_by="name"
 	):
@@ -2749,10 +2749,10 @@ def get_ledger_health_records(check, vouchers, scan):
 		if voucher in vouchers and voucher not in still_reported:
 			still_reported[voucher] = row.name
 		else:
-			not_reported.setdefault(voucher, []).append(row.name)
+			extra_records.setdefault(voucher, []).append(row.name)
 
-	rechecked = vouchers | get_vouchers_in_scan(not_reported.keys() - vouchers, scan)
-	stale = [name for voucher in not_reported.keys() & rechecked for name in not_reported[voucher]]
+	rechecked = vouchers | get_vouchers_in_scan(extra_records.keys() - vouchers, scan)
+	stale = [name for voucher in extra_records.keys() & rechecked for name in extra_records[voucher]]
 	return still_reported, stale
 
 
