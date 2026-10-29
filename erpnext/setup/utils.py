@@ -138,6 +138,10 @@ def get_exchange_rate(
 
 			import requests
 
+			from erpnext.accounts.doctype.currency_exchange_settings.currency_exchange_settings import (
+				get_auth_params,
+			)
+
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
 			req_params = {
 				"transaction_date": transaction_date,
@@ -151,6 +155,7 @@ def get_exchange_rate(
 			params = {}
 			for row in settings.req_params:
 				params[row.key] = format_ces_api(row.value, req_params)
+			params.update(get_auth_params(settings))
 			response = requests.get(
 				format_ces_api(
 					settings.api_endpoint, {key: quote(value, safe="") for key, value in req_params.items()}

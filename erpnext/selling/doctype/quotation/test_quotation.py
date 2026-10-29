@@ -693,6 +693,9 @@ class TestQuotation(ERPNextTestSuite):
 		second_revision.cancel()
 
 		self.assertEqual(self.get_latest_revision_flags(quotation), [0, 1, 0])
+		# cancelling the active version reactivates the latest remaining one
+		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 1)
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
 
 	def get_latest_revision_flags(self, quotation):
 		return [
@@ -713,6 +716,21 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Quotation", first_revision.name, "is_active"), 0)
 		self.assertEqual(frappe.db.get_value("Quotation", second_revision.name, "is_active"), 1)
+
+	def test_manually_activating_a_version_deactivates_the_others(self):
+		quotation = make_quotation()
+		revision = make_revision(quotation.name)
+		revision.insert()
+		revision.submit()
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 0)
+
+		original = frappe.get_doc("Quotation", quotation.name)
+		original.is_active = 1
+		original.save()
+
+		# exactly one version stays active, even when the original is the one reactivated
+		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "is_active"), 1)
+		self.assertEqual(frappe.db.get_value("Quotation", revision.name, "is_active"), 0)
 
 	def test_declare_lost_requires_a_reason_without_changing_the_quotation(self):
 		quotation = make_quotation()
@@ -894,6 +912,28 @@ class TestQuotation(ERPNextTestSuite):
 	def test_draft_quotation_cannot_be_revised(self):
 		quotation = make_quotation(do_not_submit=1)
 
+		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
+
+	def test_partially_ordered_quotation_cannot_be_revised(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		item1 = make_item().item_code
+		item2 = make_item().item_code
+		quotation = make_quotation(
+			item_list=[
+				{"item_code": item1, "qty": 2, "rate": 100, "warehouse": warehouse},
+				{"item_code": item2, "qty": 2, "rate": 100, "warehouse": warehouse},
+			]
+		)
+
+		so = make_sales_order(quotation.name, args={"filtered_children": [quotation.items[0].name]})
+		so.delivery_date = nowdate()
+		so.insert()
+		so.submit()
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Partially Ordered")
 		self.assertRaises(frappe.ValidationError, make_revision, quotation.name)
 
 	def test_inactive_quotation_cannot_be_ordered_or_invoiced(self):

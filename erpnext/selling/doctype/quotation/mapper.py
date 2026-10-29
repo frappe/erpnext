@@ -43,8 +43,10 @@ def validate_quotation_expiry(source_name):
 		return
 
 	quotation = frappe.db.get_value("Quotation", source_name, ["transaction_date", "valid_till"], as_dict=1)
-	if quotation.valid_till and (
-		quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate())
+	if (
+		quotation
+		and quotation.valid_till
+		and (quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate()))
 	):
 		frappe.throw(_("Validity period of this quotation has ended."))
 

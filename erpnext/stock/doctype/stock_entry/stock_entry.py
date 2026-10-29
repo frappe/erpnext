@@ -66,6 +66,9 @@ WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES = (
 	"Material Consumption for Manufacture",
 )
 
+WORK_ORDER_PURPOSES = (*WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES, "Disassemble", "Repack")
+FROM_BOM_PURPOSES = (*WORK_ORDER_PURPOSES, "Material Issue", "Send to Subcontractor")
+
 
 class FinishedGoodError(frappe.ValidationError):
 	pass
@@ -276,6 +279,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
+		self.clear_links_hidden_for_purpose()
+
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_validate"):
 			self.purpose_cls(self).before_validate()
 
@@ -305,6 +310,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 					get_brand_defaults(row.item_code, self.company),
 					self.company,
 				)
+
+	def clear_links_hidden_for_purpose(self):
+		if self.purpose not in WORK_ORDER_PURPOSES:
+			self.work_order = None
+			self.job_card = None
+
+		if self.purpose not in FROM_BOM_PURPOSES:
+			self.from_bom = 0
+			self.bom_no = None
 
 	def set_allow_alternative_item(self):
 		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""

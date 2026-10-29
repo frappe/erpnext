@@ -149,7 +149,7 @@ class OperationsService:
 		if schedule_blocks:
 			row.db_update()
 		elif enable_capacity_planning and job_card_doc:
-			row.planned_start_time = job_card_doc.scheduled_time_logs[-1].from_time
+			row.planned_start_time = job_card_doc.scheduled_time_logs[0].from_time
 			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
 			self._validate_capacity_window(row, plan_days)
 			row.db_update()
