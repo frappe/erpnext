@@ -1455,6 +1455,19 @@ def get_available_item_locations_for_other_item(
 
 
 @frappe.whitelist()
+def get_existing_drafts(source_name: str) -> list[str]:
+	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list.check_permission("read")
+
+	return frappe.get_list(
+		"Delivery Note",
+		filters={"docstatus": 0, "against_pick_list": source_name},
+		pluck="name",
+		order_by="name",
+	)
+
+
+@frappe.whitelist()
 def create_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	pick_list = frappe.get_doc("Pick List", source_name)
 	pick_list.check_permission("read")
