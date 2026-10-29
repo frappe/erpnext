@@ -405,6 +405,20 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertFalse(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_over_delivery_of_bundle_is_blocked(self):
+		# a bundle parent is non-stock, but its components move real stock, so it must obey the limit
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=50, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=2, warehouse="_Test Warehouse - _TC")
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 5
+		self.assertRaises(frappe.ValidationError, dn.submit)
+
 	def test_over_delivery_keeps_whole_number_uom_qty(self):
 		item = make_item(
 			"_Test Over Delivery Whole Item",
