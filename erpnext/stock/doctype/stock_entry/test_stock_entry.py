@@ -4588,6 +4588,56 @@ class TestStockEntry(ERPNextTestSuite):
 				self.assertEqual(get_batch_qty(batch_no, warehouse, rm_item), 5)
 >>>>>>> 150812f (test(stock): cover batch selection across two disassemblies of one work order)
 
+	def test_disassembly_skips_batch_left_with_rounding_residue(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "DISR-.#####",
+				"stock_uom": "Kg",
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(
+			item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100, do_not_submit=True
+		)
+		bom.items[0].qty = 0.1
+		bom.submit()
+		first_batch, second_batch = (
+			get_batch_from_bundle(
+				make_stock_entry(item_code=rm_item, target=warehouse, qty=1, basic_rate=100)
+				.items[0]
+				.serial_and_batch_bundle
+			)
+			for _ in range(2)
+		)
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=6, skip_transfer=1, source_warehouse=warehouse, bom_no=bom.name
+		)
+
+		# 0.1 + 0.2 of the first batch leaves a float residue once 0.3 is disassembled
+		for fg_qty, batch_no in ((1, first_batch), (2, first_batch), (3, second_batch)):
+			manufacture = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", fg_qty))
+			rm_row = next(row for row in manufacture.items if row.item_code == rm_item)
+			rm_row.use_serial_batch_fields = 1
+			rm_row.batch_no = batch_no
+			manufacture.insert().submit()
+
+		returned = []
+		for _ in range(2):
+			disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 3))
+			disassembly.insert().submit()
+			rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+			returned.append(get_batch_from_bundle(rm_row.serial_and_batch_bundle))
+
+		self.assertEqual(returned, [first_batch, second_batch])
+
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
