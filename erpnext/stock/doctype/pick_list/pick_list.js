@@ -237,7 +237,11 @@ frappe.ui.form.on("Pick List", {
 		frm.clear_table("locations");
 		frm.trigger("add_get_items_button");
 	},
-	create_delivery(frm, doctype) {
+	async create_delivery(frm, doctype) {
+		if (!(await erpnext.utils.confirm_if_drafts_exist(frm.doc, doctype))) {
+			return;
+		}
+
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery",
 			args: {
