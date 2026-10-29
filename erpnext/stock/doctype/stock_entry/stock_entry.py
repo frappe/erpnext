@@ -1183,7 +1183,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 			return
 
-		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
 		stock_ledger.make_sl_entries(
 			source_entries, allow_negative_stock, via_landed_cost_voucher, defer_dimension_checks=True
 		)
