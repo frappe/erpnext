@@ -21,7 +21,6 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 )
-from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import get_credit_note_return_criterion
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -75,28 +74,20 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 		)
 
 	def get_remaining_packed_item_qty(so_item):
-		delivered_qty = frappe.db.get_value(
-			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
+		parent = frappe.db.get_value(
+			"Sales Order Item",
+			so_item.parent_detail_docname,
+			["delivered_qty", "qty"],
+			as_dict=True,
 		)
-
-		bundle_name = get_active_product_bundle(so_item.parent_item)
-		bundle_item_qty = (
-			frappe.db.get_value(
-				"Product Bundle Item",
-				{"parent": bundle_name, "item_code": so_item.item_code},
-				["qty"],
-			)
-			if bundle_name
-			else None
-		)
+		# components per parent qty frozen on the row (delivered_qty is in the row's sales UOM),
+		# so a later bundle edit can't shift the pending qty
+		components_per_unit = flt(so_item.qty) / (flt(parent.qty) or 1)
 
 		return flt(
 			flt(so_item.qty)
 			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-			- max(
-				flt(delivered_qty) * flt(bundle_item_qty),
-				0,
-			)
+			- max(flt(parent.delivered_qty) * components_per_unit, 0)
 		)
 
 	def update_item(source, target, source_parent):
@@ -1088,15 +1079,28 @@ def make_inter_company_purchase_order(source_name: str, target_doc: str | dict |
 
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
+	source_doc = frappe.get_doc("Sales Order", source_name)
+	so_items = {row.name: row for row in source_doc.items}
+
 	def validate_sales_order():
-		so = frappe.get_doc("Sales Order", source_name)
-		for item in so.items:
+		for item in source_doc.items:
 			if item.stock_reserved_qty > 0:
 				frappe.throw(
 					_(
 						"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 					).format(frappe.bold(source_name))
 				)
+
+	def should_pick_packed_item(packed_item) -> bool:
+		# a bundle component is pickable only while its parent row is open, warehouse-delivered and has qty left
+		parent = so_items.get(packed_item.parent_detail_docname)
+		return bool(
+			parent
+			and not parent.closed
+			and parent.delivered_by_supplier != 1
+			and abs(parent.delivered_qty) < abs(parent.qty)
+			and flt(packed_item.qty) > 0
+		)
 
 	def update_item_quantity(source, target, source_parent) -> None:
 		picked_qty = flt(source.picked_qty) / (flt(source.conversion_factor) or 1)
@@ -1154,6 +1158,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 				},
 				"field_no_map": ["picked_qty"],
 				"postprocess": update_packed_item_qty,
+				"condition": should_pick_packed_item,
 			},
 		},
 		target_doc,
