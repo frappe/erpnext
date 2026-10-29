@@ -843,15 +843,6 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "total_amount"
 			)
 		else:
-			# Serialize concurrent valuations of this (item, warehouse) on postgres. MariaDB's
-			# grouped FOR UPDATE + gap locks do this via the history reads below; postgres has no
-			# gap locks, and row-locking the whole history writes a lock marker on every tuple --
-			# a txn-scoped advisory lock (released at commit/rollback) serializes without either.
-			if frappe.db.db_type == "postgres":
-				frappe.db.transaction_advisory_lock(
-					("batch-valuation", self.sle.item_code, self.sle.warehouse)
-				)
-
 			self.stock_value_change = 0.0
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
@@ -982,9 +973,6 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		if self.stock_closing_from_datetime:
 			conditions &= child.posting_datetime >= self.stock_closing_from_datetime
 
-		# MariaDB carries a row lock on the grouped query below; on postgres the caller
-		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse)
-		# instead of row-locking the whole history (FOR UPDATE is invalid with GROUP BY there).
 		query = (
 			frappe.qb.from_(child)
 			.select(
