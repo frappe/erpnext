@@ -1923,10 +1923,11 @@ class AccountsController(TransactionBase):
 							party_account = arg.get("account")
 							gain_loss_account = arg.get("difference_account")
 							difference_amount = arg.get("difference_amount") or arg.get("exchange_gain_loss")
-							if difference_amount > 0:
-								dr_or_cr = "debit" if arg.get("party_type") == "Customer" else "credit"
-							else:
-								dr_or_cr = "credit" if arg.get("party_type") == "Customer" else "debit"
+							dr_or_cr = "debit" if difference_amount > 0 else "credit"
+							if self.is_payable_account(self.doctype, party_account) and arg.get(
+								"against_voucher_type"
+							) not in ("Journal Entry", "Payment Entry"):
+								dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
