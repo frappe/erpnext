@@ -337,11 +337,7 @@ def make_promotional_scheme(**args):
 
 def make_promotional_scheme_with_two_slabs():
 	ps = make_promotional_scheme()
-	ps.price_discount_slabs[0].max_qty = 9
-	ps.append(
-		"price_discount_slabs",
-		{"min_qty": 10, "discount_percentage": 30, "rule_description": "Ten or more"},
-	)
+	add_price_slab(ps, max_qty=9, other_slab={"min_qty": 10, "rule_description": "Ten or more"})
 	ps.save()
 	return ps
 
