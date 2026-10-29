@@ -4457,6 +4457,27 @@ def validate_blanket_order_changes(parent, data) -> None:
 			)
 
 
+def validate_no_issued_proforma(rows) -> None:
+	"""Raise if a Sales Order row being deleted has an issued Proforma Invoice."""
+	if not rows:
+		return
+
+	proformed = set(
+		frappe.get_all(
+			"Proforma Invoice Item",
+			filters={"so_detail": ["in", [row.name for row in rows]], "docstatus": 1},
+			pluck="so_detail",
+		)
+	)
+	for row in rows:
+		if row.name in proformed:
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which has an issued Proforma Invoice.").format(
+					row.idx, row.item_code
+				)
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept_reservation=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
@@ -4475,6 +4496,9 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 					),
 					title=_("Stock Reserved"),
 				)
+
+	if parent.doctype == "Sales Order":
+		validate_no_issued_proforma(deleted_children)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
