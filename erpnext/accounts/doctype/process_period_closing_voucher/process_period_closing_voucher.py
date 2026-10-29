@@ -40,9 +40,10 @@ class ProcessPeriodClosingVoucher(Document):
 
 	def validate(self):
 		self.validate_parent_pcv()
-		if frappe.db.exists(
+		if frappe.db.get_value(
 			self.doctype,
 			{"parent_pcv": self.parent_pcv, "docstatus": ["!=", 2], "name": ["!=", self.name]},
+			for_update=True,
 		):
 			frappe.throw(_("A Process Period Closing Voucher already exists for {0}").format(self.parent_pcv))
 
@@ -167,16 +168,14 @@ def start_pcv_processing(docname: str):
 	# learns the document's status from whether this returns or throws
 	frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 
-	if frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(
-		["Queued", "Running"]
-	):
+	if frappe.get_doc("Process Period Closing Voucher", docname).validate_processing(["Queued", "Running"]):
 		initialize_parallel_threads(docname)
 
 
 @frappe.whitelist(methods=["POST"])
 def pause_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
-	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+	if not frappe.get_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
 		return
 
 	ppcv = qb.DocType("Process Period Closing Voucher")
@@ -213,7 +212,7 @@ def cancel_pcv_processing(docname: str):
 @frappe.whitelist(methods=["POST"])
 def resume_pcv_processing(docname: str):
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
-	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(
+	if not frappe.get_doc("Process Period Closing Voucher", docname).validate_processing(
 		["Paused", "Running"]
 	):
 		return
@@ -303,7 +302,7 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 def schedule_next_date(docname: str):
 	# marks a row Running and enqueues a long job, so it needs the same write check as the sibling controls
 	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
-	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+	if not frappe.get_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
 		return
 
 	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
@@ -591,7 +590,7 @@ def build_dimension_wise_balance_dict(gl_entries):
 
 
 def process_individual_date(docname: str, row_name, date, report_type, parentfield):
-	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+	if not frappe.get_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
 		return
 
 	current_date_status = frappe.db.get_value(
