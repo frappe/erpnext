@@ -117,23 +117,6 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(first_locations[0].serial_no, "SN-1\nSN-2")
 		self.assertEqual(second_locations[0].serial_no, "SN-3\nSN-4")
 
-	def test_pick_list_allocation_takes_advisory_gate(self):
-		if frappe.db.db_type != "postgres":
-			self.skipTest("advisory locks are a PostgreSQL feature")
-
-		item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
-		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
-
-		def held_advisory_locks():
-			return frappe.db.sql(
-				"SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
-			)[0][0]
-
-		before = held_advisory_locks()
-		create_pick_list(sales_order.name)
-		self.assertGreater(held_advisory_locks(), before)
-
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:

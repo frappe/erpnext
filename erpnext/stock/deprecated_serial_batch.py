@@ -190,8 +190,6 @@ class DeprecatedBatchNoValuation:
 		if getattr(self, "stock_closing_from_datetime", None):
 			conditions &= sle.posting_datetime >= self.stock_closing_from_datetime
 
-		# MariaDB carries a row lock on the grouped query below; on postgres the caller
-		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse).
 		query = (
 			frappe.qb.from_(sle)
 			.select(
@@ -356,8 +354,6 @@ class DeprecatedBatchNoValuation:
 		if self.sle.name:
 			conditions &= sle.name != self.sle.name
 
-		# MariaDB carries a row lock on the grouped query below; on postgres the caller
-		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse).
 		query = (
 			frappe.qb.from_(sle)
 			.inner_join(batch)
@@ -506,8 +502,6 @@ class DeprecatedBatchNoValuation:
 			conditions &= bundle.name != self.sle.serial_and_batch_bundle
 		conditions &= bundle.voucher_type != "Pick List"
 
-		# MariaDB carries a row lock on the grouped query below; on postgres the caller
-		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse).
 		query = (
 			frappe.qb.from_(bundle)
 			.inner_join(bundle_child)
