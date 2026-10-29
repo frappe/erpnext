@@ -167,6 +167,8 @@ def get_depr_cost_center_and_series():
 def make_depreciation_entry(
 	depr_schedule_name,
 	date=None,
+	sch_start_idx=None,
+	sch_end_idx=None,
 	accounting_dimensions=None,
 ):
 	depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", depr_schedule_name)
@@ -174,7 +176,9 @@ def make_depreciation_entry(
 	frappe.has_permission("Asset", "write", depr_schedule_doc.asset, throw=True)
 	frappe.has_permission("Journal Entry", throw=True)
 
-	return _make_depreciation_entry(depr_schedule_name, date, accounting_dimensions=accounting_dimensions)
+	return _make_depreciation_entry(
+		depr_schedule_name, date, sch_start_idx, sch_end_idx, accounting_dimensions
+	)
 
 
 def _make_depreciation_entry(
