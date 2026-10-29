@@ -2047,6 +2047,28 @@ class TestPricingRule(ERPNextTestSuite):
 			si = create_sales_invoice(item_code=item, qty=qty, do_not_submit=True)
 			self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), free_qty)
 
+	def test_free_qty_with_apply_recursion_over_below_min_qty(self):
+		item = make_item("PR Recursion Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			item,
+			min_qty=4,
+			price_or_product_discount="Product",
+			same_item=1,
+			free_qty=1,
+			is_recursive=1,
+			recurse_for=2,
+			apply_recursion_over=2,
+			round_free_qty=1,
+		)
+
+		for qty, free_qty in ((4, 1), (6, 2), (8, 3)):
+			si = create_sales_invoice(item_code=item, qty=qty, do_not_submit=True)
+			self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), free_qty)
+
+		rule.db_set({"min_qty": 5, "apply_recursion_over": 1})
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), 2)
+
 	def test_mixed_conditions_with_same_item_in_two_rows(self):
 		item = make_item(
 			"PR Mixed Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
