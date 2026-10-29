@@ -660,14 +660,7 @@ erpnext.PointOfSale.ItemCart = class {
 		function get_description_html() {
 			if (item_data.description) {
 				if (item_data.description.indexOf("<div>") != -1) {
-					try {
-						item_data.description = $(item_data.description).text();
-					} catch (error) {
-						item_data.description = item_data.description
-							.replace(/<div>/g, " ")
-							.replace(/<\/div>/g, " ")
-							.replace(/ +/g, " ");
-					}
+					item_data.description = frappe.utils.html2text(item_data.description);
 				}
 				item_data.description = frappe.ellipsis(item_data.description, 45);
 				return `<div class="item-desc">${frappe.utils.escape_html(item_data.description)}</div>`;
