@@ -176,14 +176,17 @@ class PaymentOrder(Document):
 
 	def update_payment_status(self, cancel=False):
 		if self.payment_order_type == "Payment Request":
-			self.update_payment_request_status(cancel)
+			if cancel:
+				self.reset_payment_request_status()
+			else:
+				set_payment_requests_as_ordered(self.get_reference_names())
 			return
 
 		status = "Initiated" if cancel else "Payment Ordered"
 		for d in self.references:
 			frappe.db.set_value(self.payment_order_type, d.reference_name, "payment_order_status", status)
 
-	def update_payment_request_status(self, cancel=False):
+	def reset_payment_request_status(self):
 		precision = frappe.get_precision("Payment Request", "outstanding_amount")
 		payment_requests = frappe.get_all(
 			"Payment Request",
@@ -201,17 +204,25 @@ class PaymentOrder(Document):
 			],
 		)
 
-		for payment_request in payment_requests:
-			status = "Payment Ordered"
-			if cancel:
-				status = get_payment_request_status(
+		status_updates = {
+			payment_request.name: {
+				"status": get_payment_request_status(
 					payment_request,
 					payment_request.outstanding_amount,
 					get_requested_amount_in_party_account_currency(payment_request),
 					precision,
 				)
+			}
+			for payment_request in payment_requests
+		}
+		frappe.db.bulk_update("Payment Request", status_updates)
 
-			frappe.db.set_value("Payment Request", payment_request.name, "status", status)
+
+def set_payment_requests_as_ordered(payment_requests: list[str]):
+	if payment_requests:
+		frappe.db.set_value(
+			"Payment Request", {"name": ["in", payment_requests]}, "status", "Payment Ordered"
+		)
 
 
 def _readable_payment_order(filters: dict) -> str | None:
@@ -342,8 +353,7 @@ def update_payment_requests_from_journal_entry(journal_entry, cancel=False):
 	update_payment_requests_as_per_pe_references(references, cancel=cancel)
 
 	if cancel:
-		for row in references:
-			frappe.db.set_value("Payment Request", row.payment_request, "status", "Payment Ordered")
+		set_payment_requests_as_ordered([row.payment_request for row in references])
 		clear_payment_reference(journal_entry)
 
 
