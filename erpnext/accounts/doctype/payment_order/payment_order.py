@@ -148,6 +148,7 @@ class PaymentOrder(Document):
 			.on(order.name == order_reference.parent)
 			.select(reference_column, order.name)
 			.where(order.docstatus == 1)
+			.where(order.payment_order_type == self.payment_order_type)
 			.where(order.name != (self.name or ""))
 			.where(reference_column.isin(references))
 			.limit(1)
