@@ -2,6 +2,8 @@
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_months, getdate, today
@@ -96,7 +98,7 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
 		self.check_ageing_summary(ageing_summary, expected_summary)
 
 	def test_ageing_uses_the_statement_report_date(self):
-		with freeze_time("2026-12-02"):
+		with freeze_time("2026-12-02 12:00:00"):
 			self.create_customer(customer_name="_Test Statement Ageing Customer")
 			for posting_date, amount in (("2026-05-10", 1000), ("2026-09-25", 5000)):
 				invoice = create_sales_invoice(
@@ -138,7 +140,7 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
 
 	def test_auto_email_respects_start_date(self):
 		with (
-			freeze_time("2026-10-02"),
+			freeze_time("2026-10-02 12:00:00"),
 			patch(
 				"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_report_pdf",
 				return_value={"_Test Customer": b"%PDF"},
@@ -174,12 +176,13 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
 						get_report_pdf.assert_not_called()
 						enqueue.assert_not_called()
 
-						with freeze_time("2026-10-22"):
+						with freeze_time("2026-10-22 12:00:00"):
 							send_auto_email()
 						get_report_pdf.assert_called_once()
 						enqueue.assert_called_once()
 						self.assertEqual(enqueue.call_args.kwargs["recipients"], ["billing@example.com"])
 						self.assertEqual(process_soa.reload().get(date_field), getdate(next_date))
+						process_soa.delete()
 
 	def test_auto_email_recovers_missed_runs_and_preserves_schedule(self):
 		with (
@@ -202,7 +205,7 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
 					("Quarterly", "2026-03-02", "2026-12-02"),
 				):
 					with self.subTest(report=report, frequency=frequency, start_date=start_date):
-						with freeze_time(start_date):
+						with freeze_time(start_date + " 12:00:00"):
 							process_soa = create_process_soa(
 								name=f"_Test Scheduled {report} {frequency} {start_date}",
 								report=report,
@@ -212,7 +215,7 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
 									{"customer": "_Test Customer", "billing_email": "billing@example.com"}
 								],
 							)
-						with freeze_time("2026-10-02"):
+						with freeze_time("2026-10-02 12:00:00"):
 							enqueue.reset_mock()
 							send_auto_email()
 							enqueue.assert_called_once()
@@ -237,6 +240,37 @@ class TestProcessStatementOfAccounts(AccountsTestMixin, FrappeTestCase):
 								self.assertEqual(process_soa.posting_date, getdate(next_date))
 							send_auto_email()
 							enqueue.assert_not_called()
+
+							process_soa.delete()
+
+	def test_auto_email_updates_filter_duration_without_resetting_schedule(self):
+		with (
+			freeze_time("2026-10-02 12:00:00") as frozen_time,
+			patch(
+				"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.get_report_pdf",
+				return_value={"_Test Customer": b"%PDF"},
+			),
+			patch("frappe.enqueue"),
+		):
+			process_soa = create_process_soa(
+				name="_Test Statement Filter Duration",
+				enable_auto_email=1,
+				frequency="Monthly",
+				start_date="2026-10-22",
+				customers=[{"customer": "_Test Customer", "billing_email": "billing@example.com"}],
+			)
+			process_soa.filter_duration = 3
+			process_soa.save()
+			self.assertEqual(process_soa.reload().to_date, getdate("2026-10-22"))
+			self.assertEqual(process_soa.from_date, getdate("2026-07-22"))
+
+			frozen_time.move_to("2026-10-22 12:00:00")
+			send_auto_email()
+			process_soa.reload()
+			process_soa.filter_duration = 2
+			process_soa.save()
+			self.assertEqual(process_soa.reload().to_date, getdate("2026-11-22"))
+			self.assertEqual(process_soa.from_date, getdate("2026-09-22"))
 
 	def check_ageing_summary(self, ageing, expected_ageing):
 		for age_range in expected_ageing:
