@@ -257,12 +257,13 @@ class PromotionalScheme(Document):
 		if not pricing_rules:
 			return
 
-		used_pricing_rules = frappe.get_all(
-			"Pricing Rule Detail",
-			filters={"pricing_rule": ["in", pricing_rules], "docstatus": ["<", 2]},
-			pluck="pricing_rule",
-			distinct=True,
-		)
+		used_pricing_rules = {
+			pricing_rule
+			for doctype in ("Pricing Rule Detail", "Coupon Code")
+			for pricing_rule in frappe.get_all(
+				doctype, filters={"pricing_rule": ["in", pricing_rules]}, pluck="pricing_rule", distinct=True
+			)
+		}
 		for pricing_rule in pricing_rules:
 			if pricing_rule in used_pricing_rules:
 				frappe.db.set_value("Pricing Rule", pricing_rule, "disable", 1)
