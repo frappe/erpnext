@@ -180,6 +180,28 @@ class TestPaymentOrder(ERPNextTestSuite):
 			)
 		)
 
+	def test_payment_order_submit_rereads_payment_request_status(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+
+		frappe.db.set_value("Payment Request", payment_request.name, "status", "Payment Ordered")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is already in another Payment Order", payment_order.submit
+		)
+
+	def test_payment_order_submit_rereads_payment_entry_order_status(self):
+		payment_entry = self.make_payment_entry()
+		payment_order = make_payment_order(payment_entry.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+
+		frappe.db.set_value("Payment Entry", payment_entry.name, "payment_order_status", "Payment Ordered")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is already in another Payment Order", payment_order.submit
+		)
+
 	def test_partial_journal_entry_from_payment_order_updates_payment_request(self):
 		payment_request = self.make_payment_request()
 		payment_order = make_payment_order_from_payment_request(payment_request.name)

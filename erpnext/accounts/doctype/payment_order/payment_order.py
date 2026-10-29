@@ -84,13 +84,17 @@ class PaymentOrder(Document):
 		if not self.payment_order_type or not references:
 			return
 
+		order_status_field = (
+			"status" if self.payment_order_type == "Payment Request" else "payment_order_status"
+		)
 		reference_details = {
 			reference.name: reference
-			for reference in frappe.get_all(
+			for reference in frappe.qb.get_query(
 				self.payment_order_type,
+				fields=["name", "company", "docstatus", "status", f"{order_status_field} as order_status"],
 				filters={"name": ["in", references]},
-				fields=["name", "company", "docstatus", "status"],
-			)
+				for_update=self.docstatus == 1,
+			).run(as_dict=True)
 		}
 		for d in self.references:
 			self.validate_reference(d, reference_details.get(d.get(self.reference_field)))
@@ -114,6 +118,13 @@ class PaymentOrder(Document):
 		if reference.status == "Paid":
 			frappe.throw(
 				_("Row #{0}: {1} {2} is already paid").format(
+					row.idx, _(self.payment_order_type), reference_name
+				)
+			)
+
+		if self.docstatus == 1 and reference.order_status == "Payment Ordered":
+			frappe.throw(
+				_("Row #{0}: {1} {2} is already in another Payment Order").format(
 					row.idx, _(self.payment_order_type), reference_name
 				)
 			)
