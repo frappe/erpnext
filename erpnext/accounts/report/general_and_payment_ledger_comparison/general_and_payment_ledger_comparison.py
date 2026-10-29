@@ -243,8 +243,21 @@ class General_Payment_Ledger_Comparison:
 			permitted.update((party_type, name) for name in names)
 		return permitted
 
+	def get_account_currencies(self) -> dict[str, str]:
+		accounts = list({key[1] for key in self.diff})
+		if not accounts:
+			return {}
+		account = qb.DocType("Account")
+		return dict(
+			qb.from_(account)
+			.select(account.name, account.account_currency)
+			.where(account.name.isin(accounts))
+			.run()
+		)
+
 	def generate_data(self):
 		self.data = []
+		account_currencies = self.get_account_currencies()
 		for key, val in self.diff.items():
 			self.data.append(
 				frappe._dict(
@@ -259,7 +272,7 @@ class General_Payment_Ledger_Comparison:
 						"against_voucher_no": key[7],
 						"gl_balance": val.gl_balance,
 						"pl_balance": val.pl_balance,
-						"account_currency": frappe.get_cached_value("Account", key[1], "account_currency"),
+						"account_currency": account_currencies[key[1]],
 						"gl_balance_in_account_currency": val.gl_balance_in_account_currency,
 						"pl_balance_in_account_currency": val.pl_balance_in_account_currency,
 					}
