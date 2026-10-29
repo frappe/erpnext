@@ -1,7 +1,16 @@
 import frappe
 from frappe.utils import today
 
-from erpnext.stock.get_item_details import get_item_details, get_price_list_currency_and_exchange_rate
+from erpnext.stock.get_item_details import (
+	get_batch_qty,
+	get_bin_details,
+	get_item_details,
+	get_price_list_currency_and_exchange_rate,
+	get_projected_qty,
+	get_valuation_rate,
+)
+from erpnext.stock.utils import get_latest_stock_qty
+from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -61,6 +70,90 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 				self.assertEqual(details.get("actual_qty"), 100)
 				self.assertEqual(details.get("company_total_stock"), 150)
+
+	def make_stock_item_in_two_warehouses(self):
+		"""Stock item defaulting to `_Test Warehouse - _TC` (rate 100), also stocked in `_Test Warehouse 1 - _TC` (rate 50)."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+		item_code = make_item(properties={"is_stock_item": 1, "item_defaults": item_defaults}).name
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse 1 - _TC", qty=1, rate=50)
+		return item_code
+
+	def make_warehouse_fenced_user(self, roles):
+		"""User allowed only `_Test Warehouse 1 - _TC`, applied to Warehouse alone so Item and transaction checks pass."""
+		user = make_fenced_user("_test_warehouse_fenced_user@example.com", roles)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Warehouse",
+				"for_value": "_Test Warehouse 1 - _TC",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Warehouse",
+			}
+		).insert(ignore_permissions=True)
+		return user
+
+	def test_get_valuation_rate_applies_warehouse_user_permission(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = self.make_stock_item_in_two_warehouses()
+		item_defaults = [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}]
+		service_item = make_item(properties={"is_stock_item": 0, "item_defaults": item_defaults}).name
+
+		with as_user(self.make_warehouse_fenced_user(["Stock User"])):
+			assert_refused(self, get_valuation_rate, item_code, "_Test Company", "_Test Warehouse - _TC")
+			assert_refused(self, get_valuation_rate, item_code, "_Test Company")
+			self.assertEqual(
+				get_valuation_rate(item_code, "_Test Company", "_Test Warehouse 1 - _TC"),
+				{"valuation_rate": 50},
+			)
+			self.assertEqual(get_valuation_rate(service_item, "_Test Company"), {"valuation_rate": 0.0})
+
+	def test_get_item_details_applies_warehouse_user_permission(self):
+		ctx = frappe._dict(
+			{
+				"item_code": self.make_stock_item_in_two_warehouses(),
+				"company": "_Test Company",
+				"doctype": "Sales Order",
+				"customer": "_Test Customer",
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		with as_user(self.make_warehouse_fenced_user(["Sales User"])):
+			details = get_item_details(ctx.copy())
+			self.assertIsNone(details.warehouse)
+			self.assertEqual(details.valuation_rate, 0)
+
+			assert_refused(
+				self,
+				get_item_details,
+				ctx.copy().update({"warehouse": "_Test Warehouse - _TC"}),
+				overwrite_warehouse=False,
+			)
+			details = get_item_details(
+				ctx.copy().update({"warehouse": "_Test Warehouse 1 - _TC"}), overwrite_warehouse=False
+			)
+			self.assertEqual(details.valuation_rate, 50)
+			self.assertEqual(details.actual_qty, 1)
+
+	def test_stock_qty_methods_apply_warehouse_user_permission(self):
+		item_code = self.make_stock_item_in_two_warehouses()
+
+		with as_user(self.make_warehouse_fenced_user(["Stock User"])):
+			for method in (get_bin_details, get_projected_qty, get_latest_stock_qty):
+				with self.subTest(method=method.__name__):
+					assert_refused(self, method, item_code, "_Test Warehouse - _TC")
+					method(item_code, "_Test Warehouse 1 - _TC")
+
+			assert_refused(self, get_batch_qty, "_Test Batch", "_Test Warehouse - _TC", item_code)
 
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
@@ -830,3 +923,46 @@ class TestGetItemDetail(ERPNextTestSuite):
 			picked = [d.serial_no for d in self.get_bundle_entries(bundles)]
 			self.assertEqual(len(picked), 2)
 			self.assertEqual(len(set(picked)), 2)
+
+	def test_apply_price_list_keeps_normalised_transaction_type_for_rows(self):
+		"""A row in `items` must not replace the context's transaction type, which the
+		Pricing Rule query uses as a column name."""
+		from unittest.mock import patch
+
+		from erpnext.accounts.doctype.pricing_rule import utils as pricing_rule_utils
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+		from erpnext.stock.get_item_details import apply_price_list
+
+		pricing_rule = make_pricing_rule(
+			title="_Test Row Transaction Type Rule", selling=1, discount_percentage=10
+		)
+		self.addCleanup(frappe.delete_doc_if_exists, "Pricing Rule", pricing_rule.name)
+
+		ctx = frappe._dict(
+			doctype="Sales Order",
+			company="_Test Company",
+			customer="_Test Customer",
+			currency="INR",
+			conversion_rate=1.0,
+			price_list="_Test Price List",
+			plc_conversion_rate=1.0,
+			transaction_date=today(),
+			items=[
+				frappe._dict(
+					doctype="Sales Order Item",
+					item_code="_Test Item",
+					qty=1,
+					uom="_Test UOM",
+					conversion_factor=1.0,
+					transaction_type="not_a_column",
+				)
+			],
+		)
+		with patch.object(
+			pricing_rule_utils, "_get_pricing_rules", wraps=pricing_rule_utils._get_pricing_rules
+		) as get_pricing_rules:
+			apply_price_list(ctx)
+
+		self.assertEqual(
+			{call.args[1].transaction_type for call in get_pricing_rules.call_args_list}, {"selling"}
+		)

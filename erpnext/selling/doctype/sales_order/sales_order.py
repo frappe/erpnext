@@ -43,7 +43,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
-	get_bin_details,
+	_get_bin_details,
 	get_default_bom,
 	get_price_list_rate,
 )
@@ -579,6 +579,9 @@ class SalesOrder(SellingController):
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
+	def on_trash(self):
+		self.delete_delivery_schedule_items()
+
 	def update_project(self):
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction":
 			return
@@ -998,6 +1001,44 @@ class SalesOrder(SellingController):
 
 		self.save()
 
+	def sync_schedule_with_item(self, child_row):
+		"""Rescale and refresh an item's schedules after its qty, UOM or conversion factor changed."""
+		schedules = frappe.get_all(
+			"Delivery Schedule Item",
+			filters={"sales_order_item": child_row.name, "sales_order": self.name},
+			fields=["name", "qty"],
+			order_by="delivery_date asc, creation asc",
+		)
+		if not schedules:
+			return
+
+		conversion_factor = child_row.conversion_factor or 1.0
+		remaining = flt(child_row.qty)
+		stale = []
+		for schedule in schedules:
+			kept_qty = min(flt(schedule.qty), remaining) if remaining > 0 else 0
+			if not kept_qty:
+				stale.append(schedule.name)
+				continue
+
+			remaining -= kept_qty
+			frappe.db.set_value(
+				"Delivery Schedule Item",
+				schedule.name,
+				{
+					"qty": kept_qty,
+					"uom": child_row.uom,
+					"stock_uom": child_row.stock_uom,
+					"conversion_factor": conversion_factor,
+					"warehouse": child_row.warehouse,
+					"stock_qty": kept_qty * conversion_factor,
+				},
+			)
+
+		if stale:
+			doctype = frappe.qb.DocType("Delivery Schedule Item")
+			frappe.qb.from_(doctype).delete().where(doctype.name.isin(stale)).run()
+
 	def delete_delivery_schedule_items(self, sales_order_item=None, ignore_names=None):
 		"""Delete delivery schedule items."""
 		doctype = frappe.qb.DocType("Delivery Schedule Item")
@@ -1133,7 +1174,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 			else get_remaining_qty(source)
 		)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
-		target.actual_qty = get_bin_details(
+		target.actual_qty = _get_bin_details(
 			target.item_code, target.warehouse, source_parent.company, True
 		).get("actual_qty", 0)
 
@@ -1812,16 +1853,28 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		if (
 			item.ordered_qty < item.stock_qty
 			and not is_product_bundle(item.item_code)
-			and items_to_map.get(item.item_code) == supplier
+			and item.name in items_to_map
+			and items_to_map[item.name] == supplier
 		):
 			return True
 
 		return False
 
-	items_to_map = {
-		item.get("item_code"): item.get("supplier") for item in selected_items if item.get("item_code")
-	}
-	item_codes = list(set(items_to_map.keys()))
+	sales_order = frappe.get_doc("Sales Order", source_name)
+	sales_order.check_permission("read")
+	items_to_map = {}
+	for item in selected_items:
+		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}
+		rows = sales_order.get("items", filters)
+		if len(rows) != 1:
+			frappe.throw(
+				_("Select a valid Sales Order row for Item {0}.").format(
+					frappe.bold(item.get("item_code") or item.get("name"))
+				),
+				title=_("Invalid Item Selection"),
+			)
+		items_to_map[rows[0].name] = item.get("supplier")
+
 	suppliers = list(set(items_to_map.values()))
 
 	if not suppliers:
@@ -1881,7 +1934,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 						"pricing_rules",
 					],
 					"postprocess": update_item_for_packed_item,
-					"condition": lambda doc: doc.parent_item in item_codes
+					"condition": lambda doc, s=supplier: doc.parent_detail_docname in items_to_map
+					and items_to_map[doc.parent_detail_docname] == s
 					and flt(doc.ordered_qty) < flt(doc.qty),
 				},
 			},
@@ -2075,7 +2129,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
 
 		# update available qty
-		bin_details = get_bin_details(source.item_code, source.warehouse, source_parent.company)
+		bin_details = _get_bin_details(source.item_code, source.warehouse, source_parent.company)
 		target.actual_qty = bin_details.get("actual_qty")
 		target.company_total_stock = bin_details.get("company_total_stock")
 

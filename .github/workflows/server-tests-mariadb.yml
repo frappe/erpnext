@@ -4,9 +4,6 @@ on:
   repository_dispatch:
     types: [frappe-framework-change]
   pull_request:
-  schedule:
-    # Run everday at midnight UTC / 5:30 IST
-    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       user:
@@ -63,7 +60,7 @@ jobs:
     env:
       CI_DB_DATADIR: /home/ci/db-ram/data
     container:
-      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24-mariadb11.8
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_TOKEN || github.token }}
@@ -154,7 +151,7 @@ jobs:
     runs-on: erpnext-arc
     timeout-minutes: 60
     container:
-      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24
+      image: ghcr.io/frappe/erpnext-ci-mariadb:py3.14-node24-mariadb11.8
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_TOKEN || github.token }}

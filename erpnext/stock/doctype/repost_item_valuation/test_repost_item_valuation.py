@@ -670,6 +670,24 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(se, [{"incoming_rate": 150}])
 
+	def test_recalculate_valuation_rate_not_allowed_for_material_transfer(self):
+		item = self.make_item().name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		transfer = make_stock_entry(
+			item_code=item, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=transfer.doctype,
+			voucher_no=transfer.name,
+			recalculate_valuation_rate=1,
+			posting_date=transfer.posting_date,
+			posting_time=transfer.posting_time,
+		)
+		self.assertRaises(frappe.ValidationError, riv.save)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
@@ -719,6 +737,55 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(flt(detail_additional_cost, 2), flt(transfer.total_additional_costs, 2))
 		self.assertEqual(flt(net_added_to_stock, 2), flt(transfer.total_additional_costs, 2))
+
+	def test_repost_recalculates_transfer_with_additional_cost_once(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		source, target = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		make_stock_entry(item_code=item, target=source, qty=10, rate=100, posting_date=add_days(today(), -2))
+
+		transfer = make_stock_entry(company="_Test Company", purpose="Material Transfer", do_not_save=True)
+		transfer.items = []
+		for _ in range(5):
+			transfer.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"s_warehouse": source,
+					"t_warehouse": target,
+					"uom": "Nos",
+					"conversion_factor": 1,
+				},
+			)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "freight",
+				"amount": 50,
+			},
+		)
+		transfer.insert()
+		transfer.submit()
+
+		with patch.object(
+			StockEntry,
+			"calculate_rate_and_amount",
+			autospec=True,
+			side_effect=StockEntry.calculate_rate_and_amount,
+		) as calculate:
+			make_stock_entry(
+				item_code=item, target=source, qty=10, rate=200, posting_date=add_days(today(), -1)
+			)
+
+		transfer_calls = [c for c in calculate.call_args_list if c.args[0].name == transfer.name]
+		self.assertEqual(len(transfer_calls), 1)
+
+		transfer.load_from_db()
+		self.assertEqual([row.valuation_rate for row in transfer.items], [160] * 5)
+		self.assertSLEs(transfer, [{"incoming_rate": 160}] * 5, sle_filters={"warehouse": target})
 
 	def test_repost_multi_line_moving_average_return(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc

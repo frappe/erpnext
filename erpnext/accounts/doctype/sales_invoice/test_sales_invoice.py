@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
@@ -27,6 +28,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -152,6 +154,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertTrue(si.payment_schedule)
 		self.assertEqual(getdate(si.payment_schedule[0].due_date), getdate(si.due_date))
+
+	def test_update_after_submit_with_company_default_terms(self):
+		si = create_sales_invoice()
+		terms = frappe.get_doc(
+			{"doctype": "Terms and Conditions", "title": "_Test Default Selling Terms", "terms": "Terms"}
+		).insert()
+		frappe.db.set_value("Company", si.company, "default_selling_terms", terms.name)
+
+		si.reload()
+		si.run_method("onload")
+		self.assertFalse(si.tc_name)
+		si.save()
 
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
@@ -2436,6 +2450,22 @@ class TestSalesInvoice(ERPNextTestSuite):
 		current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"sales_update_frequency": "Daily"})
+	def test_daily_frequency_updates_company_monthly_sales(self):
+		from erpnext.setup.doctype.company.company import cache_companies_monthly_sales_history
+
+		company = "_Test Company"
+		frappe.db.set_value("Company", company, "total_monthly_sales", 0)
+
+		si = create_sales_invoice()
+		# "Daily" does not refresh the figure on submit
+		self.assertEqual(frappe.db.get_value("Company", company, "total_monthly_sales"), 0)
+
+		cache_companies_monthly_sales_history()
+		self.assertGreaterEqual(
+			frappe.db.get_value("Company", company, "total_monthly_sales"), si.base_grand_total
+		)
+
 	def test_rounding_adjustment(self):
 		si = create_sales_invoice(rate=24900, do_not_save=True)
 		for tax in ["Tax 1", "Tax2"]:
@@ -2651,6 +2681,32 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.append("payment_schedule", dict(due_date="2017-01-01", invoice_portion=50.00, payment_amount=50))
 
 		self.assertRaises(frappe.ValidationError, si.insert)
+
+	def test_standalone_return_updates_paid_invoice_status(self):
+		invoice = create_sales_invoice(qty=2, rate=100)
+		payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment.reference_no = "Return status test"
+		payment.reference_date = nowdate()
+		payment.insert()
+		payment.submit()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
+
+		return_invoice = make_return_doc(invoice.doctype, invoice.name)
+		return_invoice.update_outstanding_for_self = 1
+		return_invoice.insert()
+		return_invoice.submit()
+
+		invoice.reload()
+		self.assertEqual(invoice.status, "Credit Note Issued")
+		self.assertEqual(invoice.outstanding_amount, 0)
+		self.assertEqual(return_invoice.outstanding_amount, -invoice.grand_total)
+
+		return_invoice.cancel()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

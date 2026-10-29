@@ -287,6 +287,26 @@ class TestSalesOrder(ERPNextTestSuite):
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
 
+	def test_billing_within_rounding_of_full_completes_order(self):
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, rate=100)
+		so = make_sales_order(qty=1, rate=1000000)
+
+		# 999999.99 / 1000000 rounds to 99.999999%, which already counts as fully billed
+		si = make_sales_invoice(so.name)
+		si.items[0].rate = 999999.99
+		si.insert()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.per_billed, 100)
+		self.assertEqual(so.billing_status, "Fully Billed")
+		self.assertEqual(so.status, "To Deliver")
+
+		make_delivery_note(so.name).submit()
+
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+
 	def test_make_sales_invoice_for_pending_qty_with_item_billing_allowance(self):
 		item = make_item(
 			"_Test Over Billed Pending Qty Item",
@@ -1905,6 +1925,90 @@ class TestSalesOrder(ERPNextTestSuite):
 		supplier_list = sorted([purchase_orders[0].supplier, purchase_orders[1].supplier])
 		self.assertEqual(supplier_list, ["_Test Supplier", "_Test Supplier 1"])
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_purchase_order_supplier_selection_uses_sales_order_rows(self):
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": "_Test Item", "qty": 3, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+			]
+		)
+		selected_items = [
+			{"name": row.name, "item_code": row.item_code, "supplier": supplier}
+			for row, supplier in zip(so.items, ["_Test Supplier", "_Test Supplier 1"], strict=True)
+		]
+
+		purchase_orders = make_purchase_order(so.name, selected_items=selected_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		for purchase_order in purchase_orders:
+			row = so.items[0] if purchase_order.supplier == "_Test Supplier" else so.items[1]
+			self.assertEqual(len(purchase_order.items), 1)
+			self.assertEqual(purchase_order.items[0].sales_order_item, row.name)
+			self.assertEqual(purchase_order.items[0].qty, row.qty)
+
+		purchase_orders = make_purchase_order(so.name, selected_items=selected_items[:1])
+		self.assertEqual(len(purchase_orders), 1)
+		self.assertEqual(len(purchase_orders[0].items), 1)
+		self.assertEqual(purchase_orders[0].items[0].sales_order_item, so.items[0].name)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_purchase_order_rejects_ambiguous_or_foreign_rows(self):
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": "_Test Item", "qty": 3, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+			]
+		)
+		other_so = make_sales_order()
+		for row_name in (None, other_so.items[0].name):
+			with self.subTest(row_name=row_name):
+				with self.assertRaisesRegex(frappe.ValidationError, "Select a valid Sales Order row"):
+					make_purchase_order(
+						so.name,
+						selected_items=[
+							{"name": row_name, "item_code": "_Test Item", "supplier": "_Test Supplier"}
+						],
+					)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+	def test_purchase_order_supplier_selection_uses_bundle_parent_rows(self):
+		bundle = make_item("_Test Repeated Supplier Bundle", {"is_stock_item": 0})
+		component = make_item("_Test Repeated Supplier Bundle Component", {"is_stock_item": 1})
+		make_product_bundle(bundle.name, [component.name], qty=2)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": bundle.name, "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+				{"item_code": bundle.name, "qty": 3, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+			]
+		)
+		selected_items = [
+			{"name": row.name, "item_code": row.item_code, "supplier": supplier}
+			for row, supplier in zip(so.items, ["_Test Supplier", "_Test Supplier 1"], strict=True)
+		]
+
+		purchase_orders = make_purchase_order(so.name, selected_items=selected_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		for purchase_order in purchase_orders:
+			row = so.items[0] if purchase_order.supplier == "_Test Supplier" else so.items[1]
+			packed_item = so.get("packed_items", {"parent_detail_docname": row.name})[0]
+			self.assertEqual(len(purchase_order.items), 1)
+			self.assertEqual(purchase_order.items[0].sales_order_packed_item, packed_item.name)
+			self.assertEqual(purchase_order.items[0].qty, row.qty * 2)
+
+		purchase_orders = make_purchase_order(so.name, selected_items=selected_items[1:])
+		self.assertEqual(len(purchase_orders), 1)
+		self.assertEqual(purchase_orders[0].supplier, "_Test Supplier 1")
+		self.assertEqual(len(purchase_orders[0].items), 1)
+		self.assertEqual(purchase_orders[0].items[0].qty, 6)
+		self.assertEqual(
+			purchase_orders[0].items[0].sales_order_packed_item,
+			so.get("packed_items", {"parent_detail_docname": so.items[1].name})[0].name,
+		)
+
 	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
 		"""
 		Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
@@ -1933,6 +2037,33 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(purchase_order.items[0].item_code, "_Test Bundle Item 1")
 		self.assertEqual(purchase_order.items[1].item_code, "_Test Bundle Item 2")
+
+	def test_purchase_order_bundle_items_are_filtered_by_supplier(self):
+		so_items = []
+		for index, supplier in enumerate(["_Test Supplier", "_Test Supplier 1"], start=1):
+			bundle = make_item(f"_Test Supplier Bundle {index}", {"is_stock_item": 0})
+			component = make_item(f"_Test Supplier Bundle Component {index}", {"is_stock_item": 1})
+			make_product_bundle(bundle.name, [component.name], qty=2)
+			so_items.append(
+				{
+					"item_code": bundle.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": index + 1,
+					"rate": 400,
+					"supplier": supplier,
+				}
+			)
+		so = make_sales_order(item_list=so_items)
+
+		purchase_orders = make_purchase_order(so.name, selected_items=so_items)
+
+		self.assertEqual(
+			{po.supplier: [(item.item_code, item.qty) for item in po.items] for po in purchase_orders},
+			{
+				"_Test Supplier": [("_Test Supplier Bundle Component 1", 4)],
+				"_Test Supplier 1": [("_Test Supplier Bundle Component 2", 6)],
+			},
+		)
 
 	def test_purchase_order_updates_packed_item_ordered_qty(self):
 		"""
