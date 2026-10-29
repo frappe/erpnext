@@ -104,7 +104,7 @@ class PaymentOrder(Document):
 				)
 			)
 
-		if reference.company != self.company:
+		if reference.company and reference.company != self.company:
 			frappe.throw(
 				_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
 					row.idx, _(self.payment_order_type), reference_name, reference.company, self.company

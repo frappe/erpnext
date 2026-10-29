@@ -77,6 +77,16 @@ class TestPaymentOrder(ERPNextTestSuite):
 		payment_order.company_bank_account = self.bank_account
 		self.assertRaisesRegex(frappe.ValidationError, "must be submitted", payment_order.insert)
 
+	def test_payment_order_accepts_payment_request_without_company(self):
+		payment_request = self.make_payment_request()
+		payment_request.db_set("company", None)
+
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company = "_Test Company"
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		self.assertEqual(payment_order.references[0].payment_request, payment_request.name)
+
 	def test_payment_entry_order_ignores_payment_request_order_with_same_reference_name(self):
 		payment_request = self.make_payment_request()
 		request_order = make_payment_order_from_payment_request(payment_request.name)
