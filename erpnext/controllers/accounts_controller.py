@@ -2259,32 +2259,44 @@ class AccountsController(TransactionBase):
 				self.unlink_ref_doc_from_po()
 
 	def unlink_ref_doc_from_po(self):
-		so_items = []
-		for item in self.items:
-			so_items.append(item.name)
+		so_items = [item.name for item in self.items]
+		filters = {
+			"sales_order": self.name,
+			"sales_order_item": ["in", so_items],
+			"docstatus": ["<", 2],
+		}
 
-		linked_po = list(
-			set(
-				frappe.get_all(
-					"Purchase Order Item",
-					filters={
-						"sales_order": self.name,
-						"sales_order_item": ["in", so_items],
-						"docstatus": ["<", 2],
-					},
-					pluck="parent",
-				)
+		linked_po_items = frappe.get_all(
+			"Purchase Order Item", filters=filters, fields=["parent", "sales_order_item"]
+		)
+		if not linked_po_items:
+			return
+
+		frappe.db.set_value("Purchase Order Item", filters, {"sales_order": None, "sales_order_item": None})
+		self.update_ordered_qty_in_items({item.sales_order_item for item in linked_po_items})
+
+		linked_po = sorted({item.parent for item in linked_po_items})
+		frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+
+	def update_ordered_qty_in_items(self, so_items: set[str]):
+		purchase_order_item = frappe.qb.DocType("Purchase Order Item")
+		ordered_qty = dict(
+			frappe.qb.from_(purchase_order_item)
+			.select(purchase_order_item.sales_order_item, Sum(purchase_order_item.stock_qty))
+			.where(
+				purchase_order_item.sales_order_item.isin(list(so_items))
+				& (purchase_order_item.docstatus == 1)
 			)
+			.groupby(purchase_order_item.sales_order_item)
+			.run()
 		)
 
-		if linked_po:
-			frappe.db.set_value(
-				"Purchase Order Item",
-				{"sales_order": self.name, "sales_order_item": ["in", so_items], "docstatus": ["<", 2]},
-				{"sales_order": None, "sales_order_item": None},
-			)
+		items_by_ordered_qty = defaultdict(list)
+		for so_item in so_items:
+			items_by_ordered_qty[flt(ordered_qty.get(so_item))].append(so_item)
 
-			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+		for qty, items in items_by_ordered_qty.items():
+			frappe.db.set_value("Sales Order Item", {"name": ["in", items]}, "ordered_qty", qty)
 
 	def get_tax_map(self):
 		tax_map = {}
@@ -4295,7 +4307,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item = frappe.new_doc(child_doctype, parent_doc=p_doc, parentfield=child_docname)
 	item = frappe.get_doc("Item", trans_item.get("item_code"))
 
-	for field in ("item_code", "item_name", "description", "item_group"):
+	for field in ("item_code", "item_name", "description", "item_group", "weight_per_unit", "weight_uom"):
 		child_item.update({field: item.get(field)})
 
 	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
@@ -4872,7 +4884,7 @@ def update_child_qty_rate(
 				flt(d.get("conversion_factor"), conv_fac_precision) or conversion_factor
 			)
 
-		if child_item.get("total_weight") and child_item.get("weight_per_unit"):
+		if child_item.get("weight_per_unit"):
 			child_item.total_weight = flt(
 				child_item.weight_per_unit * child_item.qty * child_item.conversion_factor,
 				child_item.precision("total_weight"),
