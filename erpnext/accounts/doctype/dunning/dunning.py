@@ -392,11 +392,13 @@ class Dunning(AccountsController):
 		self.language = letter_text.language if letter_text else self.language
 
 
-def get_payment_schedule_outstanding(invoice, payment_schedule):
+def get_payment_schedule_outstanding(invoice, payment_schedule, in_account_currency=False):
 	"""Apply payments without term allocations to the oldest installments first."""
 	outstanding = {row.name: flt(row.outstanding) for row in payment_schedule}
 	if invoice.party_account_currency != invoice.currency:
-		return outstanding
+		if not in_account_currency:
+			return outstanding
+		outstanding = {name: amount * flt(invoice.conversion_rate) for name, amount in outstanding.items()}
 
 	unallocated_payment = max(sum(outstanding.values()) - flt(invoice.outstanding_amount), 0)
 	for row in sorted(payment_schedule, key=lambda row: (getdate(row.due_date), row.idx)):
@@ -527,26 +529,25 @@ def get_current_outstanding(overdue_payment, in_account_currency=False) -> float
 		["outstanding_amount", "currency", "party_account_currency", "conversion_rate"],
 		as_dict=True,
 	)
+	outstanding = flt(overdue_payment.outstanding)
+	if in_account_currency and invoice.currency != invoice.party_account_currency:
+		outstanding = flt(
+			outstanding * flt(invoice.conversion_rate), overdue_payment.precision("outstanding")
+		)
 	if overdue_payment.payment_schedule:
 		payment_schedule = frappe.get_all(
 			"Payment Schedule",
 			filters={"parent": overdue_payment.sales_invoice, "parenttype": "Sales Invoice"},
 			fields=["name", "idx", "due_date", "outstanding"],
 		)
-		schedule_outstanding = get_payment_schedule_outstanding(invoice, payment_schedule).get(
-			overdue_payment.payment_schedule, 0
+		schedule_outstanding = get_payment_schedule_outstanding(
+			invoice, payment_schedule, in_account_currency=in_account_currency
 		)
-	else:
-		schedule_outstanding = flt(overdue_payment.outstanding)
+		outstanding = min(outstanding, schedule_outstanding.get(overdue_payment.payment_schedule, 0))
 
-	if flt(invoice.outstanding_amount) <= 0 or schedule_outstanding <= 0:
+	if flt(invoice.outstanding_amount) <= 0 or outstanding <= 0:
 		return 0.0
 
-	outstanding = min(schedule_outstanding, flt(overdue_payment.outstanding))
-	if in_account_currency and invoice.currency != invoice.party_account_currency:
-		outstanding = flt(
-			outstanding * flt(invoice.conversion_rate), overdue_payment.precision("outstanding")
-		)
 	if in_account_currency or invoice.currency == invoice.party_account_currency:
 		outstanding = min(outstanding, flt(invoice.outstanding_amount))
 
