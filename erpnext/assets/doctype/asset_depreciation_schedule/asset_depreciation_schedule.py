@@ -360,7 +360,7 @@ class AssetDepreciationSchedule(Document):
 			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
 		)
 
-		return gap_idx or 0
+		return len(rows) if gap_idx is None else gap_idx
 
 	def add_booked_row(self, schedule_date, schedule_idx: int) -> bool:
 		"""Keep a row booked after an unbooked one in place of regenerating it.

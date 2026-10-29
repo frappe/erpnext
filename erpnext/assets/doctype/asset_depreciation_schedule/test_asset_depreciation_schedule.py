@@ -491,6 +491,19 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
 		self.assertNotEqual(get_rate_of_depreciation(finance_book), derived_rate)
 
+	def test_reschedule_of_fully_booked_schedule_adds_no_rows(self):
+		asset = create_monthly_asset(expected_value_after_useful_life=200)
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-12-31")
+
+		make_asset_value_adjustment(
+			asset=asset.name, date="2024-01-01", current_asset_value=200, new_asset_value=260
+		).submit()
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		self.assertEqual(len(schedule), 12)
+		self.assertEqual(len({d.schedule_date for d in schedule}), 12)
+		self.assertTrue(all(d.journal_entry for d in schedule))
+
 	def test_manual_schedule_rows_are_validated(self):
 		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
 
