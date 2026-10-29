@@ -104,6 +104,16 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 
 		self.assertIn("Applicable for Users", str(context.exception))
 
+	def test_blank_user_row_keeps_pos_profile_open_to_every_user(self):
+		test_user = self.init_user_and_profile(do_not_create_pos_profile=1)
+		pos_profile = make_pos_profile()
+		pos_profile.append("applicable_for_users", {"default": 1})
+		pos_profile.save()
+
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+
+		self.assertEqual(opening_entry.status, "Open")
+
 	def test_negative_or_duplicate_opening_balance_is_refused(self):
 		test_user, pos_profile = self.init_user_and_profile()
 		for balance_details in (
