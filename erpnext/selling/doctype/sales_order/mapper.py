@@ -1079,15 +1079,28 @@ def make_inter_company_purchase_order(source_name: str, target_doc: str | dict |
 
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
+	source_doc = frappe.get_doc("Sales Order", source_name)
+	so_items = {row.name: row for row in source_doc.items}
+
 	def validate_sales_order():
-		so = frappe.get_doc("Sales Order", source_name)
-		for item in so.items:
+		for item in source_doc.items:
 			if item.stock_reserved_qty > 0:
 				frappe.throw(
 					_(
 						"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 					).format(frappe.bold(source_name))
 				)
+
+	def should_pick_packed_item(packed_item) -> bool:
+		# a bundle component is pickable only while its parent row is open, warehouse-delivered and has qty left
+		parent = so_items.get(packed_item.parent_detail_docname)
+		return bool(
+			parent
+			and not parent.closed
+			and parent.delivered_by_supplier != 1
+			and abs(parent.delivered_qty) < abs(parent.qty)
+			and flt(packed_item.qty) > 0
+		)
 
 	def update_item_quantity(source, target, source_parent) -> None:
 		picked_qty = flt(source.picked_qty) / (flt(source.conversion_factor) or 1)
@@ -1145,6 +1158,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 				},
 				"field_no_map": ["picked_qty"],
 				"postprocess": update_packed_item_qty,
+				"condition": should_pick_packed_item,
 			},
 		},
 		target_doc,

@@ -1124,6 +1124,19 @@ class TestPickList(ERPNextTestSuite):
 		# 12 Nos picked / 12 (1 Box in stock units) = 1 bundle, not 12
 		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
 
+	def test_pick_list_skips_closed_bundle_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		warehouse = "_Test Warehouse - _TC"
+		bundle, _components = create_product_bundle([2], warehouse=warehouse)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		# closing the bundle row drops its components from the pick list too
+		update_closed_status("Sales Order", sales_order.name, [sales_order.items[0].name], 1)
+
+		pick_list = create_pick_list(sales_order.name)
+		self.assertEqual(pick_list.locations, [])
+
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
