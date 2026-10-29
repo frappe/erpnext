@@ -234,11 +234,6 @@ class POSInvoiceMergeLog(Document):
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes, item_tax_details = [], [], [], []
 
-		loyalty_amount_sum, loyalty_points_sum = 0, 0
-
-		rounding_adjustment, base_rounding_adjustment = 0, 0
-		rounded_total, base_rounded_total = 0, 0
-
 		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
 		reversed_rows = get_reversed_rows([doc.return_against for doc in data if doc.is_return])
@@ -315,11 +310,6 @@ class POSInvoiceMergeLog(Document):
 				if not found:
 					payments.append(payment)
 
-			rounding_adjustment += doc.rounding_adjustment
-			rounded_total += doc.rounded_total
-			base_rounding_adjustment += doc.base_rounding_adjustment
-			base_rounded_total += doc.base_rounded_total
-
 			for d in doc.get("item_wise_tax_details") or []:
 				row = frappe._dict(
 					item=old_new_item_map[d.item_row],
@@ -338,14 +328,19 @@ class POSInvoiceMergeLog(Document):
 		invoice.set("items", items)
 		invoice.set("payments", payments)
 		invoice.set("taxes", taxes)
-		invoice.set("rounding_adjustment", rounding_adjustment)
-		invoice.set("base_rounding_adjustment", base_rounding_adjustment)
-		invoice.set("rounded_total", rounded_total)
-		invoice.set("base_rounded_total", base_rounded_total)
 		set_summed_amounts(
 			invoice,
 			data,
-			["change_amount", "base_change_amount", "write_off_amount", "base_write_off_amount"],
+			[
+				"rounding_adjustment",
+				"base_rounding_adjustment",
+				"rounded_total",
+				"base_rounded_total",
+				"change_amount",
+				"base_change_amount",
+				"write_off_amount",
+				"base_write_off_amount",
+			],
 		)
 		invoice.flags.keep_change_amount = True
 		invoice.additional_discount_percentage = 0
