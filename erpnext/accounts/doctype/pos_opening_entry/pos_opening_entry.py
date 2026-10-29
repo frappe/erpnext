@@ -67,10 +67,10 @@ class POSOpeningEntry(StatusUpdater):
 	def validate_cashier_of_pos_profile(self):
 		cashiers = frappe.get_all(
 			"POS Profile User",
-			filters={"parent": self.pos_profile, "parenttype": "POS Profile", "user": ["is", "set"]},
+			filters={"parent": self.pos_profile, "parenttype": "POS Profile"},
 			pluck="user",
 		)
-		if cashiers and self.user not in cashiers:
+		if cashiers and all(cashiers) and self.user not in cashiers:
 			frappe.throw(
 				_("User {0} is not in Applicable for Users of POS Profile {1}").format(
 					frappe.bold(self.user), frappe.bold(self.pos_profile)

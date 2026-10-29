@@ -114,6 +114,16 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 
 		self.assertEqual(opening_entry.status, "Open")
 
+	def test_blank_user_row_lets_unlisted_user_open_session(self):
+		_, pos_profile = self.init_user_and_profile()
+		pos_profile.append("applicable_for_users", {})
+		pos_profile.save()
+		other_user = create_user("test_other_cashier@example.com", "Sales User")
+
+		opening_entry = create_opening_entry(pos_profile, other_user.name)
+
+		self.assertEqual(opening_entry.status, "Open")
+
 	def test_negative_or_duplicate_opening_balance_is_refused(self):
 		test_user, pos_profile = self.init_user_and_profile()
 		for balance_details, message in (
