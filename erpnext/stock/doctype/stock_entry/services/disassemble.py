@@ -650,7 +650,8 @@ class DisassembleStockEntry(BaseStockEntry):
 		for batch_no, batch_qty in batch_details.items():
 			if qty <= 0:
 				break
-			batch_qty = abs(batch_qty)
+			if batch_qty <= 0:
+				continue
 			if batch_qty <= qty:
 				batches[batch_no], qty = batch_qty, qty - batch_qty
 			else:
@@ -736,7 +737,7 @@ def _add_inward_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] += row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] += abs(qty)
 	_extend_serial_nos_from_row(item_data, row)
 
 
@@ -751,7 +752,7 @@ def _deduct_consumed_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] -= row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] -= abs(qty)
 	_remove_serial_nos_from_available(item_data, row)
 
 
