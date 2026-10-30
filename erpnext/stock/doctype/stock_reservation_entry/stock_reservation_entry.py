@@ -930,6 +930,7 @@ def get_available_serial_nos_to_reserve(
 				& (sre.item_code == item_code)
 				& (sre.warehouse == warehouse)
 				& (sre.delivered_qty < sre.reserved_qty)
+				& (sb_entry.delivered_qty < sb_entry.qty)
 				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)
