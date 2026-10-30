@@ -153,7 +153,7 @@ class CallLog(Document):
 			self.employee_user_id = employees[0].get("user_id")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str | None = None):
 	validate_call_type(call_type)
 	doc = frappe.get_doc("Call Log", call_log)
