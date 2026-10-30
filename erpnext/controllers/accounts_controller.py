@@ -5078,7 +5078,14 @@ def update_child_qty_rate(
 			has_reserved_stock,
 		)
 
-		if parent.per_picked == 0 and has_reserved_stock(parent.doctype, parent.name):
+		# Only rebuild reservations when a stock-relevant change happened. A rate/discount edit
+		# must not cancel and re-create them, which would drop delivered and partial reservations
+		# and re-reserve rows the user had deliberately unreserved.
+		if (
+			parent.per_picked == 0
+			and (any_qty_changed or any_conversion_factor_changed or items_added_or_removed)
+			and has_reserved_stock(parent.doctype, parent.name)
+		):
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
 			parent._create_stock_reservation_entries()
 
