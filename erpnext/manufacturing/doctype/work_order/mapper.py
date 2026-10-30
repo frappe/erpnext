@@ -611,7 +611,7 @@ def _pick_list_mapping(postprocess, allocation):
 def _allocate_material_demand(work_order, fraction):
 	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
 	at the group's proportional share of the item's pending pool. Whole number UOMs
-	round up, within the item's own rounded up total."""
+	round up, within the item's rounded up total and its unrounded pending qty."""
 	from erpnext.stock.doctype.stock_entry.services.manufacturing import ceil_qty_if_uom_has_whole_number
 
 	required_by_item = {}
@@ -635,7 +635,7 @@ def _allocate_material_demand(work_order, fraction):
 	remaining_by_item = {
 		item_code: min(
 			ceil_qty_if_uom_has_whole_number(flt(required_qty * fraction, precision), uom_by_item[item_code]),
-			flt(pending_pool[item_code], precision),
+			pending_pool[item_code],
 		)
 		for item_code, required_qty in required_by_item.items()
 	}
@@ -651,7 +651,7 @@ def _allocate_material_demand(work_order, fraction):
 		qty = min(ceil_qty_if_uom_has_whole_number(qty, uom_by_item[item_code]), remaining_by_item[item_code])
 		if qty > 0:
 			allocation[key] = qty
-			remaining_by_item[item_code] = flt(remaining_by_item[item_code] - qty, precision)
+			remaining_by_item[item_code] -= qty
 	return allocation
 
 
