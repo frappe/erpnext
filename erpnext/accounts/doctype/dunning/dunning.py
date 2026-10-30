@@ -527,11 +527,17 @@ def get_current_outstanding(overdue_payment) -> float:
 		["outstanding_amount", "currency", "party_account_currency"],
 		as_dict=True,
 	)
-	schedule_outstanding = (
-		flt(frappe.db.get_value("Payment Schedule", overdue_payment.payment_schedule, "outstanding"))
-		if overdue_payment.payment_schedule
-		else flt(overdue_payment.outstanding)
-	)
+	if overdue_payment.payment_schedule:
+		payment_schedule = frappe.get_all(
+			"Payment Schedule",
+			filters={"parent": overdue_payment.sales_invoice, "parenttype": "Sales Invoice"},
+			fields=["name", "idx", "due_date", "outstanding"],
+		)
+		schedule_outstanding = get_payment_schedule_outstanding(invoice, payment_schedule).get(
+			overdue_payment.payment_schedule, 0
+		)
+	else:
+		schedule_outstanding = flt(overdue_payment.outstanding)
 
 	if flt(invoice.outstanding_amount) <= 0 or schedule_outstanding <= 0:
 		return 0.0
