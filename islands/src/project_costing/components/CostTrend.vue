@@ -26,7 +26,7 @@ const show_table = ref(false);
 const monthly = computed(() =>
 	props.view.months.map((row) => {
 		const total = props.view.sources.reduce((sum, source) => sum + (row[source.key] || 0), 0);
-		return { ...row, label: format.month(row.month), total, billed_point: row.billed || null };
+		return { ...row, label: format.month(row.month), total };
 	})
 );
 
@@ -66,6 +66,14 @@ function next_month(key) {
 	return month === 12 ? `${year + 1}-01` : `${year}-${String(month + 1).padStart(2, "0")}`;
 }
 
+const has_forecast = computed(() => cumulative.value.some((row) => row.forecast != null));
+// Shown only while the forecast line is on the chart.
+const forecast_definition = computed(() =>
+	mode.value === "cumulative" && has_forecast.value
+		? __("Forecast: cost to date ÷ % complete, drawn to the expected end date")
+		: ""
+);
+
 const reference_lines = computed(() =>
 	props.view.has_estimate
 		? [
@@ -88,13 +96,12 @@ const y_max = computed(() => {
 	return top ? top * 1.1 : undefined;
 });
 
-// Billing comes in milestones, so it shows as points on the months an invoice went out.
 const chart = computed(() => {
 	if (mode.value === "cumulative")
 		return {
 			is: LineChart,
 			data: cumulative.value,
-			y: cumulative.value.some((row) => row.forecast != null) ? ["cost", "forecast"] : ["cost"],
+			y: has_forecast.value ? ["cost", "forecast"] : ["cost"],
 			seriesConfig: {
 				cost: { label: __("Cost to date") },
 				forecast: { label: __("Forecast"), dashed: true },
@@ -105,10 +112,9 @@ const chart = computed(() => {
 	return {
 		is: BarChart,
 		data: monthly.value,
-		y: props.view.internal ? ["total"] : ["total", "billed_point"],
+		y: ["total"],
 		seriesConfig: {
 			total: { label: __("Cost") },
-			billed_point: { label: __("Billed"), type: "line", showDataPoints: true, connectNulls: false },
 		},
 		yAxis: { format: format.short, min: 0 },
 	};
@@ -128,6 +134,15 @@ const chart = computed(() => {
 			:reference-lines="chart.referenceLines"
 			:y-axis="chart.yAxis"
 		>
+			<template v-if="forecast_definition" #title-suffix>
+				<Tooltip :text="forecast_definition">
+					<span
+						class="lucide-info size-[1em] text-ink-gray-4"
+						role="img"
+						:aria-label="forecast_definition"
+					/>
+				</Tooltip>
+			</template>
 			<template #actions>
 				<div class="flex items-center gap-2">
 					<TabButtons v-model="mode" :options="modes" size="sm" />

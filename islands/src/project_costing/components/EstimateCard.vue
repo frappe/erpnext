@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { Badge, Progress } from "frappe-ui";
+import { Badge, Progress, Tooltip } from "frappe-ui";
 import { ChartCard, ChartContainer } from "frappe-ui/charts";
 
 import FigureRows from "./FigureRows.vue";
@@ -12,11 +12,12 @@ const props = defineProps({
 
 const __ = window.__;
 const format = useFormat();
+const source = __("Estimated Cost field on the Details tab");
 
 const HEALTH = {
-	ok: { label: __("Within budget"), theme: "green" },
+	ok: { label: __("Within estimate"), theme: "green" },
 	risk: { label: __("Trending over"), theme: "amber" },
-	over: { label: __("Over budget"), theme: "red" },
+	over: { label: __("Over estimate"), theme: "red" },
 	none: { label: __("No estimate"), theme: "gray" },
 	empty: { label: __("No costs yet"), theme: "gray" },
 };
@@ -28,32 +29,31 @@ const badge = computed(() => {
 	return HEALTH[view.health];
 });
 
+// Cost to date is on the card above, so the rows show only the estimate and what is left of it.
 const rows = computed(() => {
 	const view = props.view;
-	const forecast = {
-		label: __("Forecast at completion"),
-		value: view.percent_complete > 0 ? format.short(view.forecast) : __("Needs % complete"),
-		tone: view.health === "over" || view.health === "risk" ? "text-ink-red-5" : "",
-	};
-	if (!view.has_estimate) return [{ label: __("Cost to date"), value: format.short(view.cost) }, forecast];
+	if (!view.has_estimate) return [];
 	const over = view.cost > view.estimate;
-	const out = [
-		{ label: __("Estimated cost"), value: format.short(view.estimate) },
-		{ label: view.closed ? __("Final cost") : __("Cost to date"), value: format.short(view.cost) },
+	return [
+		{ label: __("Estimated cost"), value: format.money(view.estimate) },
 		over
-			? { label: __("Over by"), value: format.short(view.cost - view.estimate), tone: "text-ink-red-5" }
+			? { label: __("Over by"), value: format.money(view.cost - view.estimate), tone: "text-ink-red-5" }
 			: {
 					label: view.closed ? __("Unspent") : __("Remaining"),
-					value: format.short(view.estimate - view.cost),
+					value: format.money(view.estimate - view.cost),
 			  },
 	];
-	return view.closed ? out : [...out, forecast];
 });
 </script>
 
 <template>
 	<ChartCard>
-		<ChartContainer :title="__('Budget')">
+		<ChartContainer :title="__('Spend tracking')">
+			<template #title-suffix>
+				<Tooltip :text="source">
+					<span class="lucide-info size-[1em] text-ink-gray-4" role="img" :aria-label="source" />
+				</Tooltip>
+			</template>
 			<template #actions>
 				<Badge :label="badge.label" :theme="badge.theme" variant="subtle" />
 			</template>
@@ -65,7 +65,7 @@ const rows = computed(() => {
 				<template v-else>
 					<Progress
 						:value="Math.min(view.used_percent, 100)"
-						:label="__('Budget used · {0}', [format.percent(view.used_percent)])"
+						:label="__('Estimated cost used · {0}', [format.percent(view.used_percent)])"
 						size="md"
 					/>
 					<Progress
@@ -75,7 +75,7 @@ const rows = computed(() => {
 						size="md"
 					/>
 				</template>
-				<FigureRows :rows="rows" />
+				<FigureRows v-if="rows.length" :rows="rows" />
 			</div>
 		</ChartContainer>
 	</ChartCard>

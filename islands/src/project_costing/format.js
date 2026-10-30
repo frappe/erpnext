@@ -24,18 +24,27 @@ export function createFormat(host, get_currency) {
 			maximumFractionDigits: compact ? 1 : 0,
 		}).format(value);
 
+	// A negative amount as "−₹ 200", not "₹ -200": the sign reads first.
+	const signed = (value, render) => {
+		if (value == null) return "—";
+		const rounded = Math.round(value);
+		return rounded < 0 ? `−${render(-rounded)}` : render(rounded);
+	};
+
 	return {
-		money(value, currency = get_currency()) {
-			if (value == null) return "—";
-			if (!host.format) return browser_currency(value, currency, false);
-			return host.format(Math.round(value), currency_field, { currency });
-		},
+		money: (value, currency = get_currency()) =>
+			signed(value, (amount) =>
+				host.format
+					? host.format(amount, currency_field, { currency })
+					: browser_currency(amount, currency, false)
+			),
 		// An amount shortened, such as "₹ 1.2 L".
-		short(value, currency = get_currency()) {
-			if (value == null) return "—";
-			if (!host.format_axis_number) return browser_currency(value, currency, true);
-			return host.format_axis_number(Math.round(value), currency_field, { currency });
-		},
+		short: (value, currency = get_currency()) =>
+			signed(value, (amount) =>
+				host.format_axis_number
+					? host.format_axis_number(amount, currency_field, { currency })
+					: browser_currency(amount, currency, true)
+			),
 		number: (value) => plain.format(value || 0),
 		percent: (value, digits = 0) => (value == null ? "—" : `${Number(value).toFixed(digits)}%`),
 		// "2026-03" as "Mar 26"

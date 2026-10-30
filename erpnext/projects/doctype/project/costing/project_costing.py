@@ -42,7 +42,7 @@ class ProjectCosting:
 	`errors`, so the tab can still render the others.
 	"""
 
-	SECTIONS = ("summary", "monthly", "billing", "drivers", "rate_gaps")
+	SECTIONS = ("summary", "monthly", "billing", "drivers", "rate_gaps", "reports")
 
 	def __init__(self, project: str):
 		self.project = frappe.db.get_value("Project", project, PROJECT_FIELDS, as_dict=True)
@@ -83,14 +83,24 @@ class ProjectCosting:
 		return monthly_rows({**self.monthly_amounts, "hours": self.monthly_hours})
 
 	def billing(self) -> dict:
-		billed = self.totals["billed"]
-		return ProjectBilling(self.project.name, self.access, self.currency, self.contract, billed).build()
+		return ProjectBilling(self.project.name, self.access).build()
 
 	def drivers(self) -> dict:
 		return self.cost_drivers.build()
 
 	def rate_gaps(self) -> dict | None:
 		return self.cost_drivers.rate_gaps()
+
+	def reports(self) -> list[dict]:
+		"""The reports on the Project's dashboard that the user may open, each filtered to this
+		project the way the form's own report links are. Apps add theirs to that dashboard."""
+		dashboard = frappe.get_meta("Project").get_dashboard_data()
+		names = tuple(report for group in dashboard.get("reports") or [] for report in group["items"])
+		fieldnames = dashboard.get("non_standard_fieldnames") or {}
+		return [
+			{"name": name, "filters": {fieldnames.get(name, dashboard.fieldname): self.project.name}}
+			for name in permitted_reports(names)
+		]
 
 	@cached_property
 	def cost_drivers(self) -> CostDrivers:
@@ -142,6 +152,16 @@ def get_costing_access(project: str) -> dict[str, bool]:
 def has_hrms() -> bool:
 	"""HRMS adds Expense Claims to a project's cost, so the Costing tab counts them only with HRMS."""
 	return "hrms" in frappe.get_installed_apps()
+
+
+def permitted_reports(names: tuple[str, ...]) -> list[str]:
+	"""Of `names`, the reports the site has enabled and the user's roles may open, in their order."""
+	if not names:
+		return []
+	enabled = frappe.get_all("Report", filters={"name": ["in", names], "disabled": 0}, pluck="name")
+	return [
+		name for name in names if name in enabled and frappe.get_cached_doc("Report", name).is_permitted()
+	]
 
 
 def can_read(doctype: str) -> bool:
@@ -219,15 +239,12 @@ class CostingSummary:
 		return "ok"
 
 	def margins(self) -> dict:
-		"""Gross margin is billed less cost to date. The projected margin expects the contract to be
-		billed in full, or what was billed when that is more; the planned one compares the contract
-		with the estimate. Both need a contract."""
+		"""Gross margin is billed less cost to date. The planned margin compares the contract with
+		the estimate, so it needs both."""
 		margin = self.billed - self.cost
-		billable = max(self.contract, self.billed)
 		return {
 			"margin": margin,
 			"margin_percent": self.percent_of(margin, self.billed),
-			"projected_margin": billable - self.forecast if self.contract else None,
 			"planned_margin": self.contract - self.estimate if self.contract and self.estimate else None,
 		}
 

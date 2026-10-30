@@ -23,8 +23,14 @@ export const SOURCES = [
 		label: __("Materials"),
 		via: __("stock consumption"),
 		access: "materials",
+		// the stock ledger rows the total is read from: stock entries, delivery notes and sales
+		// invoices that take stock out for the project
 		route: (project) =>
-			list_route("Stock Entry", { "Stock Entry Detail.project": project, docstatus: 1 }),
+			list_route("Stock Ledger Entry", {
+				project,
+				is_cancelled: 0,
+				voucher_type: ["in", ["Stock Entry", "Delivery Note", "Sales Invoice"]],
+			}),
 	},
 	{
 		key: "expenses",
@@ -36,10 +42,18 @@ export const SOURCES = [
 
 /** A desk route to `doctype`'s list, filtered. A `Child DocType.field` key filters on a child table. */
 export function list_route(doctype, filters) {
-	return `List/${doctype}?${new URLSearchParams(filters)}`;
+	// an operator filter, such as ["in", [...]], travels as JSON, as the list view reads it
+	const values = Object.entries(filters).map(([key, value]) => [
+		key,
+		typeof value === "string" ? value : JSON.stringify(value),
+	]);
+	return `List/${doctype}?${new URLSearchParams(values)}`;
 }
 
 export const form_route = (doctype, name) => `Form/${doctype}/${name}`;
+
+/** A query report's route, opened with `filters` set. */
+export const report_route = (report, filters) => `query-report/${report}?${new URLSearchParams(filters)}`;
 
 /**
  * The Costing tab's payload, with what the cards derive from it worked out once.
@@ -65,7 +79,7 @@ export function toView(payload, doc) {
 		rate: summary.hours ? labour_cost / summary.hours : 0,
 		sources: sources_of(summary),
 		months: payload.monthly || [],
-		billing: billing_of(payload.billing, summary),
+		billing: payload.billing,
 		drivers: payload.drivers,
 		rate_gaps: payload.rate_gaps,
 		labour_understated: Boolean(payload.rate_gaps?.understated),
@@ -77,13 +91,4 @@ function sources_of(summary) {
 		...source,
 		amount: summary.sources[source.key],
 	}));
-}
-
-function billing_of(billing, summary) {
-	if (!billing) return null;
-	return {
-		...billing,
-		over_billed: billing.over_billed ? summary.billed - summary.contract : 0,
-		overdue: (billing.invoices || []).some((invoice) => invoice.status === "Overdue"),
-	};
 }

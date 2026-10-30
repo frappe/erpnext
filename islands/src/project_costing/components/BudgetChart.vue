@@ -43,6 +43,11 @@ const series_config = {
 	committed: { label: __("Committed") },
 	left: { label: __("Budget left") },
 };
+// With no budget there is nothing to compare against, so the card is about spend, and says so.
+const title = computed(() =>
+	props.accounts.budget_count ? __("Budget vs actual by account") : __("Spend by account")
+);
+
 const can_add = computed(() => props.accounts.access.manage_budgets && !props.closed);
 
 function select_from_table(account) {
@@ -54,7 +59,7 @@ function select_from_table(account) {
 <template>
 	<ChartCard class="h-80">
 		<BarChart
-			:title="__('Budget vs actual by account')"
+			:title="title"
 			:subtitle="accounts.fiscal_year"
 			:data="rows"
 			x="label"
@@ -87,11 +92,7 @@ function select_from_table(account) {
 			</template>
 		</BarChart>
 
-		<Dialog
-			v-model:open="show_table"
-			:title="__('Budget vs actual · {0}', [accounts.fiscal_year])"
-			size="4xl"
-		>
+		<Dialog v-model:open="show_table" :title="__('{0} · {1}', [title, accounts.fiscal_year])" size="4xl">
 			<AccountTable :accounts="accounts" @select="select_from_table" />
 		</Dialog>
 	</ChartCard>

@@ -17,30 +17,22 @@ const sources = computed(() => props.view.sources.filter((source) => source.amou
 
 const columns = computed(() => [
 	"4.5rem",
-	...sources.value.map(() => "minmax(5rem,1fr)"),
-	"minmax(5.5rem,1fr)",
-	...(props.view.internal ? [] : ["minmax(5.5rem,1fr)", "minmax(5.5rem,1fr)"]),
+	...sources.value.map(() => "minmax(6rem,1fr)"),
+	"minmax(6.5rem,1fr)",
 ]);
 
 const rows = computed(() => {
-	const view = props.view;
-	const total = {
-		month: "total",
-		label: __("Total"),
-		total: view.cost,
-		billed: view.billed,
-		is_total: true,
-	};
+	const total = { month: "total", label: __("Total"), total: props.view.cost, is_total: true };
 	sources.value.forEach((source) => (total[source.key] = source.amount));
-	return [...props.months, total].map((row) => ({ ...row, net: (row.billed || 0) - row.total }));
+	return [...props.months, total];
 });
 
-const amount = (value) => (value ? format.short(value) : "—");
+const amount = (value) => (value ? format.money(value) : "—");
 </script>
 
 <template>
 	<div class="-mx-1 overflow-x-auto px-1">
-		<div class="min-w-[720px]">
+		<div class="min-w-[560px]">
 			<List :columns="columns" :row-height="40">
 				<ListHeader>
 					<ListHeaderCell>{{ __("Month") }}</ListHeaderCell>
@@ -48,10 +40,6 @@ const amount = (value) => (value ? format.short(value) : "—");
 						{{ source.label }}
 					</ListHeaderCell>
 					<ListHeaderCell class="justify-end">{{ __("Total cost") }}</ListHeaderCell>
-					<template v-if="!view.internal">
-						<ListHeaderCell class="justify-end">{{ __("Billed") }}</ListHeaderCell>
-						<ListHeaderCell class="justify-end">{{ __("Net") }}</ListHeaderCell>
-					</template>
 				</ListHeader>
 				<ListRow v-for="row in rows" :key="row.month">
 					<ListCell>
@@ -70,31 +58,11 @@ const amount = (value) => (value ? format.short(value) : "—");
 					</ListCell>
 					<ListCell class="justify-end">
 						<span class="text-sm-semibold tabular-nums text-ink-gray-8">{{
-							format.short(row.total)
+							format.money(row.total)
 						}}</span>
 					</ListCell>
-					<template v-if="!view.internal">
-						<ListCell class="justify-end">
-							<span class="text-sm tabular-nums text-ink-gray-7">{{ amount(row.billed) }}</span>
-						</ListCell>
-						<ListCell class="justify-end">
-							<span
-								class="text-sm tabular-nums"
-								:class="row.net < 0 ? 'text-ink-red-5' : 'text-ink-green-5'"
-							>
-								{{ format.short(row.net) }}
-							</span>
-						</ListCell>
-					</template>
 				</ListRow>
 			</List>
 		</div>
 	</div>
-	<p v-if="!view.internal" class="mt-3 text-p-xs text-ink-gray-5">
-		{{
-			__(
-				"Net swings month to month because billing follows milestones while cost is booked as work happens."
-			)
-		}}
-	</p>
 </template>

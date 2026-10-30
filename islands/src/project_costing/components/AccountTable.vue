@@ -12,15 +12,7 @@ const emit = defineEmits(["select"]);
 
 const __ = window.__;
 const format = useFormat();
-const columns = [
-	"minmax(9rem,1.6fr)",
-	"5.5rem",
-	"5.5rem",
-	"5.5rem",
-	"5.5rem",
-	"minmax(7.5rem,1fr)",
-	"7.5rem",
-];
+const columns = ["minmax(9rem,1.6fr)", "6rem", "6rem", "6rem", "6rem", "minmax(7.5rem,1fr)", "7.5rem"];
 
 const available = (row) => (row.budget ? row.budget.amount - row.actual - row.committed : null);
 const used_percent = (row) => ((row.actual + row.committed) * 100) / row.budget.amount;
@@ -31,7 +23,7 @@ const amount_class = (value) =>
 
 <template>
 	<div class="-mx-1 overflow-x-auto px-1">
-		<div class="min-w-[820px]">
+		<div class="min-w-[840px]">
 			<List :columns="columns" :row-height="52">
 				<ListHeader>
 					<ListHeaderCell>{{ __("Account") }}</ListHeaderCell>
@@ -61,22 +53,22 @@ const amount_class = (value) =>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm tabular-nums" :class="amount_class(row.budget?.amount)">
-								{{ format.short(row.budget?.amount) }}
+								{{ format.money(row.budget?.amount) }}
 							</span>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm tabular-nums text-ink-gray-8">{{
-								format.short(row.actual)
+								format.money(row.actual)
 							}}</span>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm tabular-nums text-ink-gray-7">
-								{{ row.committed ? format.short(row.committed) : "—" }}
+								{{ row.committed ? format.money(row.committed) : "—" }}
 							</span>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm tabular-nums" :class="amount_class(available(row))">
-								{{ format.short(available(row)) }}
+								{{ format.money(available(row)) }}
 							</span>
 						</ListCell>
 						<ListCell>
@@ -106,17 +98,17 @@ const amount_class = (value) =>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm-semibold tabular-nums text-ink-gray-9">
-								{{ format.short(accounts.budget) }}
+								{{ format.money(accounts.budget) }}
 							</span>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm-semibold tabular-nums text-ink-gray-9">
-								{{ format.short(accounts.actual) }}
+								{{ format.money(accounts.actual) }}
 							</span>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm-semibold tabular-nums text-ink-gray-9">
-								{{ format.short(accounts.committed) }}
+								{{ format.money(accounts.committed) }}
 							</span>
 						</ListCell>
 						<ListCell class="justify-end">
@@ -124,7 +116,7 @@ const amount_class = (value) =>
 								class="text-sm-semibold tabular-nums"
 								:class="amount_class(accounts.available)"
 							>
-								{{ format.short(accounts.available) }}
+								{{ format.money(accounts.available) }}
 							</span>
 						</ListCell>
 						<ListCell />
@@ -150,12 +142,12 @@ const amount_class = (value) =>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm tabular-nums" :class="amount_class(row.budget?.amount)">
-								{{ format.short(row.budget?.amount) }}
+								{{ format.money(row.budget?.amount) }}
 							</span>
 						</ListCell>
 						<ListCell class="justify-end">
 							<span class="text-sm tabular-nums text-ink-gray-8">{{
-								format.short(row.actual)
+								format.money(row.actual)
 							}}</span>
 						</ListCell>
 						<ListCell class="justify-end"
@@ -165,7 +157,7 @@ const amount_class = (value) =>
 							<span class="text-sm tabular-nums text-ink-gray-7">
 								{{
 									row.budget
-										? __("{0} to go", [format.short(row.budget.amount - row.actual)])
+										? __("{0} to go", [format.money(row.budget.amount - row.actual)])
 										: "—"
 								}}
 							</span>

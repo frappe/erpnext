@@ -59,7 +59,6 @@ class CostDrivers:
 			unpriced = detail.costing_rate == 0
 			measures["amount"] = Sum(detail.base_costing_amount)
 			measures["unpriced_hours"] = Sum(Case().when(unpriced, detail.hours).else_(0))
-			measures["unpriced_rows"] = Sum(Case().when(unpriced, 1).else_(0))
 		order_by = "amount" if self.access["labour"] else "hours"
 		return grouped_rows(query, group, measures, order_by, limit)
 
@@ -98,8 +97,7 @@ def grouped_rows(
 def summarise_rate_gaps(activities: list[dict]) -> dict:
 	"""Hours logged at a costing rate of zero, which add no labour cost. The estimate prices them at
 	the average rate of the hours that do have one."""
-	unpriced = [row for row in activities if flt(row.unpriced_hours)]
-	unpriced_hours = sum(flt(row.unpriced_hours) for row in unpriced)
+	unpriced_hours = sum(flt(row.unpriced_hours) for row in activities)
 	all_hours = sum(flt(row.hours) for row in activities)
 	priced_hours = all_hours - unpriced_hours
 	average_rate = sum(flt(row.amount) for row in activities) / priced_hours if priced_hours else 0
@@ -109,8 +107,4 @@ def summarise_rate_gaps(activities: list[dict]) -> dict:
 		"share": share,
 		"estimate": unpriced_hours * average_rate if average_rate else None,
 		"understated": share >= UNPRICED_HOURS_ALERT,
-		"activities": [
-			{"name": row.name, "hours": flt(row.unpriced_hours), "rows": int(row.unpriced_rows)}
-			for row in sorted(unpriced, key=lambda row: -flt(row.unpriced_hours))
-		],
 	}

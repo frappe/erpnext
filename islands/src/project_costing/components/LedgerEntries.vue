@@ -21,9 +21,9 @@ const __ = window.__;
 const format = useFormat();
 const host = useHost();
 
-const kind = ref("all");
+// Profit and Loss accounts only: the balance sheet side of each voucher would show every amount twice.
+const kind = ref("Expense");
 const kinds = [
-	{ value: "all", label: __("All") },
 	{ value: "Expense", label: __("Expense") },
 	{ value: "Income", label: __("Income") },
 ];
@@ -36,7 +36,7 @@ const entries = useCall({
 	params: () => {
 		const params = { project: props.accounts.project, page_length: page_length.value + 1 };
 		if (account.value) params.account = account.value;
-		else if (kind.value !== "all") params.root_type = kind.value;
+		else params.root_type = kind.value;
 		return params;
 	},
 });
@@ -61,6 +61,7 @@ const open_report = () => host.navigate?.(ledgerReportRoute(props.accounts, acco
 		<ChartContainer :title="__('Ledger entries')">
 			<template #actions>
 				<Button
+					v-if="accounts.reports.includes('General Ledger')"
 					size="sm"
 					variant="ghost"
 					icon-right="lucide-arrow-up-right"
