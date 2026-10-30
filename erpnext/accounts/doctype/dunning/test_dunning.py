@@ -6,7 +6,7 @@ from unittest.mock import patch
 import frappe
 from frappe.client import insert
 from frappe.model import mapper
-from frappe.utils import add_days, nowdate, today
+from frappe.utils import add_days, flt, nowdate, today
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -529,6 +529,112 @@ class TestDunning(ERPNextTestSuite):
 		credit_note.cancel()
 		dunning.reload()
 		self.assertEqual(dunning.status, "Unresolved")
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_payment_uses_receivable_currency(self):
+		create_payment_terms_template_for_dunning()
+		template = frappe.get_doc("Payment Terms Template", "_Test 50-50 for Dunning")
+		for bank_account, bank_rate, allocate_terms in (
+			("_Test Cash - _TC", 1, 1),
+			("_Test Bank USD - _TC", 80, 1),
+			("_Test Cash - _TC", 1, 0),
+			("_Test Bank USD - _TC", 80, 0),
+		):
+			template.allocate_payment_based_on_payment_terms = allocate_terms
+			template.save()
+			with (
+				self.subTest(bank_account=bank_account, allocate_terms=allocate_terms),
+				self.set_user("test@example.com"),
+			):
+				invoice = create_sales_invoice(
+					posting_date=add_days(today(), -15),
+					currency="USD",
+					conversion_rate=80,
+					qty=1,
+					rate=100,
+					debit_to="Debtors - _TC",
+					cost_center="_Test Cost Center - _TC",
+					do_not_save=True,
+				)
+				invoice.payment_terms_template = "_Test 50-50 for Dunning"
+				invoice.submit()
+				dunning = create_dunning_from_sales_invoice(invoice.name)
+				dunning.conversion_rate = 90
+				dunning.dunning_fee = 10
+				dunning.rate_of_interest = 0
+				dunning.income_account = get_income_account(invoice.company)
+				dunning.cost_center = invoice.cost_center
+				dunning.submit()
+				self.assertEqual([amount for row, amount in dunning.get_unpaid_overdue_payments()], [50, 50])
+				self.assertEqual(
+					[amount for row, amount in dunning.get_unpaid_overdue_payments(in_account_currency=True)],
+					[4000, 4000],
+				)
+
+				for outstanding, allocations, schedule_outstanding in (
+					(8000, [4000, 4000], [0, 0]),
+					(4000, [4000], [0, 0]) if allocate_terms else (3200, [3200], [50, 10]),
+				):
+					payment = get_payment_entry(
+						"Dunning",
+						dunning.name,
+						bank_account=bank_account,
+						bank_amount=(outstanding + 900) / bank_rate,
+					)
+					payment.target_exchange_rate = bank_rate
+					payment.reference_no = "Dunning settlement"
+					self.assertEqual(payment.paid_amount, outstanding + 900)
+					self.assertEqual(payment.received_amount, (outstanding + 900) / bank_rate)
+					self.assertEqual([row.allocated_amount for row in payment.references], allocations)
+					self.assertEqual(payment.deductions[0].amount, -900)
+					payment.submit()
+					self.assertEqual(invoice.reload().outstanding_amount, 0)
+					self.assertEqual(
+						[row.outstanding for row in invoice.payment_schedule], schedule_outstanding
+					)
+					self.assertEqual(dunning.reload().status, "Resolved")
+					self.assertEqual(dunning.get_unpaid_dunning_amount(), 0)
+					gl_entries = frappe.get_all(
+						"GL Entry",
+						filters={
+							"voucher_type": payment.doctype,
+							"voucher_no": payment.name,
+							"is_cancelled": 0,
+						},
+						fields=["debit", "credit"],
+					)
+					self.assertEqual(flt(sum(row.debit for row in gl_entries), 2), outstanding + 900)
+					self.assertEqual(flt(sum(row.credit for row in gl_entries), 2), outstanding + 900)
+					payment_ledger_entries = frappe.get_all(
+						"Payment Ledger Entry",
+						filters={
+							"against_voucher_type": invoice.doctype,
+							"against_voucher_no": invoice.name,
+							"delinked": 0,
+						},
+						pluck="amount_in_account_currency",
+					)
+					self.assertEqual(flt(sum(payment_ledger_entries), 2), 0)
+					payment.reload().cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, outstanding)
+					self.assertEqual(dunning.reload().status, "Unresolved")
+					self.assertEqual(dunning.get_unpaid_dunning_amount(), 10)
+					if outstanding == 8000:
+						partial_payment = get_payment_entry(
+							invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+						)
+						partial_payment.paid_amount = partial_payment.received_amount = (
+							4000 if allocate_terms else 4800
+						)
+						partial_payment.references[0].allocated_amount = partial_payment.paid_amount
+						if allocate_terms:
+							partial_payment.references[1].allocated_amount = 0
+						partial_payment.submit()
+				partial_payment.cancel()
+				self.assertEqual(invoice.reload().outstanding_amount, 8000)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [50, 50])
 
 	def test_dunning_not_affected_by_standalone_credit_note(self):
 		"""
