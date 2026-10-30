@@ -366,8 +366,15 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True)
 		self.validate_pending_qty_in_work_order()
 
+	@property
+	def is_work_order_transfer(self):
+		"""Job card requests are tracked on the job card, not the work order."""
+		return bool(
+			self.work_order and not self.job_card and self.material_request_type == "Material Transfer"
+		)
+
 	def validate_pending_qty_in_work_order(self):
-		if not self.work_order or self.material_request_type != "Material Transfer":
+		if not self.is_work_order_transfer:
 			return
 
 		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
@@ -544,7 +551,7 @@ class MaterialRequest(BuyingController):
 
 	def update_requested_qty_in_work_order(self):
 		"""Refresh both counters: stop and cancel also flip pick list coverage."""
-		if not self.work_order or self.material_request_type != "Material Transfer":
+		if not self.is_work_order_transfer:
 			return
 
 		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
