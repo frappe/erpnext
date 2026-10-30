@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation impo
 	WrongPercentageAllocation,
 )
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -193,8 +194,6 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("System Settings", {"rounding_method": "Commercial Rounding"})
 	def test_debit_credit_on_cost_center_allocation_for_commercial_rounding(self):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-
 		cca = create_cost_center_allocation(
 			"_Test Company",
 			"Main Cost Center 1 - _TC",
@@ -215,6 +214,93 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 
 		si.cancel()
 		cca.cancel()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	@ERPNextTestSuite.change_settings(
+		"System Settings", {"currency_precision": "", "use_number_format_from_currency": 1}
+	)
+	def test_transaction_currency_allocation_preserves_precision_and_totals(self):
+		for main_cost_center, percentage in (
+			("Main Cost Center 1 - _TC", 60),
+			("Main Cost Center 2 - _TC", 50),
+		):
+			create_cost_center_allocation(
+				"_Test Company",
+				main_cost_center,
+				{"Sub Cost Center 1 - _TC": percentage, "Sub Cost Center 2 - _TC": 100 - percentage},
+			)
+
+		for currency, number_format in (
+			("INR", "#,###.##"),
+			("USD", "#,###.##"),
+			("JPY", "#,###"),
+			("KWD", "#,###.###"),
+		):
+			currency_doc = frappe.get_doc("Currency", currency)
+			currency_doc.number_format = number_format
+			currency_doc.save()
+
+		for rounding_method in ("Commercial Rounding", "Banker's Rounding"):
+			with self.change_settings("System Settings", {"rounding_method": rounding_method}):
+				for currency, amount, cost_center, expected in (
+					("USD", 100, "Main Cost Center 1 - _TC", [60.0, 40.0]),
+					("USD", 100.01, "Main Cost Center 2 - _TC", [50.0, 50.01]),
+					("JPY", 1, "Main Cost Center 1 - _TC", [1.0, 0.0]),
+					("KWD", 1.001, "Main Cost Center 1 - _TC", [0.601, 0.4]),
+				):
+					with self.subTest(rounding_method=rounding_method, currency=currency, amount=amount):
+						invoice = create_sales_invoice(
+							currency=currency,
+							conversion_rate=50,
+							rate=amount,
+							cost_center=cost_center,
+							do_not_save=True,
+						)
+						invoice.disable_rounded_total = 1
+						invoice.insert().submit()
+						credit_note = create_sales_invoice(
+							currency=currency,
+							conversion_rate=50,
+							rate=amount,
+							qty=-1,
+							cost_center=cost_center,
+							is_return=1,
+							return_against=invoice.name,
+							do_not_save=True,
+						)
+						credit_note.disable_rounded_total = 1
+						credit_note.insert().submit()
+
+						for voucher, field in (
+							(invoice, "credit_in_transaction_currency"),
+							(credit_note, "debit_in_transaction_currency"),
+						):
+							entries = frappe.get_all(
+								"GL Entry",
+								filters={"voucher_type": voucher.doctype, "voucher_no": voucher.name},
+								fields=[
+									"account",
+									"debit",
+									"credit",
+									"debit_in_transaction_currency",
+									"credit_in_transaction_currency",
+								],
+							)
+							self.assertCountEqual(
+								[row[field] for row in entries if row.account == "Sales - _TC"], expected
+							)
+							self.assertAlmostEqual(sum(row.debit - row.credit for row in entries), 0)
+							self.assertAlmostEqual(
+								sum(row.debit_in_transaction_currency for row in entries), amount
+							)
+							self.assertAlmostEqual(
+								sum(row.credit_in_transaction_currency for row in entries), amount
+							)
+
+						credit_note.cancel()
+						invoice.reload().cancel()
 
 
 def create_cost_center_allocation(
