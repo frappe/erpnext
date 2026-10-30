@@ -2015,6 +2015,17 @@ class TestWorkOrder(ERPNextTestSuite):
 			mr = make_material_request(work_order.name, for_qty=1.5)
 		self.assertEqual([row.qty for row in mr.items], [2, 1])
 
+	def test_full_request_fits_unrounded_pending_qty(self):
+		rm = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
+		).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 2}], quantity=3)
+		work_order = make_review_work_order(fg, bom.name, 1)
+
+		mr = self.submit_material_request(work_order.name)
+		self.assertEqual(mr.docstatus, 1)
+
 	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
 >>>>>>> 63f7e2b (test(manufacturing): partial qty request in whole number uom)
