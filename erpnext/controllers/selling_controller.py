@@ -261,8 +261,16 @@ class SellingController(StockController):
 		for d in self.get("items"):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
+				reference_rate = flt(d.rate_with_margin or d.price_list_rate)
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						reference_rate > 0
+						and flt(d.discount_amount)
+						> flt(reference_rate * discount / 100, d.precision("discount_amount"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
