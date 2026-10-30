@@ -26,6 +26,7 @@ from erpnext.stock.get_item_details import (
 	get_conversion_factor,
 	get_item_defaults,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_incoming_rate, is_serial_no_wise_valuation_disabled
 from erpnext.utilities.transaction_base import get_whole_number_uoms
 
@@ -308,7 +309,9 @@ class BuyingController(SubcontractingController):
 				pluck="serial_no",
 			)
 
-		return get_serial_nos(row.get("rejected_serial_no"))
+		return SerialBatchIdentity("Serial No").resolve(
+			row.item_code, get_serial_nos(row.get("rejected_serial_no")), ignore_permissions=True
+		)
 
 	def get_component_incoming_rates(self) -> dict:
 		packed_items = [
