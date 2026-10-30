@@ -541,7 +541,7 @@
    "collapsible": 1,
    "hidden": 0,
    "indent": 0,
-   "is_default_module": 0,
+   "is_default_module": 1,
    "keep_closed": 0,
    "label": "Lead Source",
    "link_to": "UTM Source",
@@ -596,7 +596,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-10-30 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
