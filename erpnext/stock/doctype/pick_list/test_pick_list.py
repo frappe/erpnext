@@ -67,14 +67,18 @@ class TestPickList(ERPNextTestSuite):
 	def test_get_items_with_location_trims_allocated_serial_nos(self):
 		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
 
-		item = _dict(item_code="Test Serial Item", qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
+		item_code = make_item("Test Serial Item", properties={"has_serial_no": 1}).name
+		serial_ids = SerialBatchIdentity("Serial No").resolve(
+			item_code, ["SN-1", "SN-2", "SN-3", "SN-4"], create=True, defaults={"company": "_Test Company"}
+		)
+		item = _dict(item_code=item_code, qty=2, stock_qty=2, conversion_factor=1, uom="Nos")
 		item_location_map = {
 			item.item_code: [
 				_dict(
 					warehouse="Test Warehouse",
 					batch_no=None,
 					qty=4,
-					serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"],
+					serial_nos=serial_ids,
 				)
 			]
 		}

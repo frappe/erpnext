@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import get_url_to_form
 
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
+from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
 from erpnext.controllers.subcontracting_controller import add_items_in_ste
 from erpnext.manufacturing.doctype.work_order.work_order import get_serial_nos_for_job_card
 from erpnext.selling.page.point_of_sale.point_of_sale import (
@@ -427,7 +428,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(row.current_serial_no, "Keep-001\nRemove-002")
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "New-003"}))
 
-	def test_pick_list_allocation_shows_numbers(self):
+	def test_pick_list_allocation_shows_numbers_and_preserves_remaining_ids(self):
 		first = self.make_number("Serial No", "Pick-001")
 		second = self.make_number("Serial No", "Pick-002")
 		self.make_number("Serial No", "Pick-001", self.other_item.name)
@@ -439,6 +440,10 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		}
 		selected = get_items_with_location_and_quantity(item, locations, docstatus=0)
 		self.assertEqual(selected[0].serial_no, "Pick-002")
+		self.assertEqual(locations[self.item.name][0].serial_nos, [first.name])
+		selected = get_items_with_location_and_quantity(item, locations, docstatus=0)
+		self.assertEqual(selected[0].serial_no, "Pick-001")
+		self.assertEqual(locations[self.item.name], [])
 
 	def test_pick_list_validates_physical_serials_for_item_and_warehouse(self):
 		serial = self.make_number("Serial No", "Pick-<001>")
@@ -586,6 +591,44 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(other.reload().purchase_rate, 40)
 		self.assertEqual(receipt.items[0].serial_no, "receipt-001\nRECEIPT-002")
 		self.assertEqual(receipt.items[1].serial_no, "RECEIPT-001")
+
+	def test_delivered_reservations_resolve_physical_serial_text_by_item(self):
+		first = self.make_number("Serial No", "Delivered-001")
+		second = self.make_number("Serial No", "Delivered-002")
+		self.make_number("Serial No", "Delivered-001", self.other_item.name)
+		batch = self.make_number("Batch", "Delivered-Batch")
+		row = frappe._dict(
+			item_code=self.item.name,
+			serial_no="delivered-002\nDELIVERED-001",
+			batch_no=batch.name,
+			stock_qty=-2,
+		)
+		self.assertEqual(
+			get_delivered_serial_batch_for_reservation(row),
+			([second.name, first.name], {batch.name: 2}),
+		)
+		self.assertEqual(row.serial_no, "delivered-002\nDELIVERED-001")
+		self.assertEqual(row.batch_no, batch.name)
+
+	def test_delivered_reservations_prefer_bundle_ids(self):
+		serial = self.make_number("Serial No", "Delivered-001")
+		batch = self.make_number("Batch", "Delivered-Batch")
+		bundle = frappe.get_doc(
+			doctype="Serial and Batch Bundle",
+			item_code=self.item.name,
+			entries=[{"serial_no": serial.name, "batch_no": batch.name, "qty": -1}],
+		)
+		row = frappe._dict(
+			item_code=self.item.name,
+			serial_and_batch_bundle="Delivered-Bundle",
+			serial_no="Different-Selection",
+		)
+		with patch("frappe.get_doc", return_value=bundle) as lookup:
+			self.assertEqual(
+				get_delivered_serial_batch_for_reservation(row), ([serial.name], {batch.name: 1})
+			)
+		lookup.assert_called_once_with("Serial and Batch Bundle", "Delivered-Bundle")
+		self.assertEqual(bundle.entries[0].serial_no, serial.name)
 
 	def test_serial_filter_uses_each_rows_item_and_physical_number(self):
 		selected = self.make_number("Serial No", "Selected-001")
@@ -1050,6 +1093,57 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(
 			materials[(self.item.name, warehouse, None)].serial_nos, [first_by_number.name, first_by_id.name]
 		)
+
+	def test_disassembly_resolves_source_serial_text_by_item(self):
+		first = self.make_number("Serial No", "Disassembly-001")
+		second = self.make_number("Serial No", "Disassembly-002")
+		self.make_number("Serial No", "Disassembly-001", self.other_item.name)
+		source = frappe._dict(item_code=self.item.name, serial_no="disassembly-002\nDISASSEMBLY-001")
+
+		self.assertEqual(self.get_disassembly_serial_nos(source, {}, transfer_qty=1), [second.name])
+		self.assertEqual(
+			self.get_disassembly_serial_nos(source, {}, transfer_qty=2), [second.name, first.name]
+		)
+		self.assertEqual(source.serial_no, "disassembly-002\nDISASSEMBLY-001")
+
+		source.serial_no = "Missing-Disassembly"
+		with self.assertRaisesRegex(frappe.ValidationError, "Missing-Disassembly.*does not exist"):
+			self.get_disassembly_serial_nos(source, {}, transfer_qty=2)
+		self.assertFalse(
+			frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "Missing-Disassembly"})
+		)
+
+	def test_disassembly_prefers_source_bundle_ids(self):
+		serial = self.make_number("Serial No", "Disassembly-001")
+		self.make_number("Serial No", serial.name)
+		source = frappe._dict(item_code=self.item.name, serial_no="Unused-Source-Text")
+		bundle = {"serial_nos": [serial.name]}
+
+		self.assertEqual(self.get_disassembly_serial_nos(source, bundle, transfer_qty=1), [serial.name])
+		self.assertEqual(bundle["serial_nos"], [serial.name])
+
+	def get_disassembly_serial_nos(self, source_row, source_bundle, transfer_qty):
+		"""Serial nos a Disassemble row takes from its source Manufacture row."""
+		warehouse = "_Test Warehouse - _TC"
+		source_row.update(name="Source-Row", s_warehouse=None, t_warehouse=warehouse, batch_no=None)
+		doc = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Disassemble",
+			source_stock_entry="Source-Entry",
+			items=[{"item_code": self.item.name, "ste_detail": "Source-Row", "transfer_qty": transfer_qty}],
+		)
+		used = frappe._dict(serial_nos=set(), batch_qty=defaultdict(lambda: defaultdict(float)))
+		with (
+			patch(
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_voucher_wise_serial_batch_from_bundle",
+				return_value={(self.item.name, warehouse, "Source-Entry"): source_bundle},
+			),
+			patch.object(type(doc), "get_items_from_manufacture_stock_entry", return_value=[source_row]),
+			patch.object(type(doc), "get_serial_batches_used_by_earlier_disassemblies", return_value=used),
+			patch.object(type(doc), "_set_serial_batch_bundle_for_disassembly_row") as set_bundle,
+		):
+			doc._set_serial_batch_for_disassembly_from_stock_entry()
+		return set_bundle.call_args.args[1]
 
 	def make_work_order_entry(self, work_order, purpose, s_warehouse, t_warehouse, serial_no, qty=None):
 		"""Insert a submitted Stock Entry row of a Work Order; a list of numbers makes one row each."""
