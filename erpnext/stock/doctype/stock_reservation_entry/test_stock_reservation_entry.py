@@ -682,6 +682,50 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			so.name,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_delivery_consumes_bundle_component_reservation_from_other_warehouse(self) -> None:
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		component_warehouse = "_Test Warehouse 1 - _TC"
+		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
+		make_stock_entry(item_code=components[0], target=component_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=1)
+		so.reserve_stock = 1
+		so.packed_items[0].update({"warehouse": component_warehouse, "reserve_stock": 1})
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		self.assertEqual(dn.packed_items[0].warehouse, component_warehouse)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Reservation Entry", {"voucher_detail_no": so.packed_items[0].name}, "delivered_qty"
+			),
+			4,
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_return_keeps_warehouse_picked_for_reserved_bundle_component(self) -> None:
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		component_warehouse = "_Test Warehouse 1 - _TC"
+		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
+		make_stock_entry(item_code=components[0], target=component_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=1)
+		so.reserve_stock = 1
+		so.packed_items[0].update({"warehouse": component_warehouse, "reserve_stock": 1})
+		so.submit()
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.packed_items[0].warehouse = self.warehouse
+		return_dn.save()
+
+		self.assertEqual(return_dn.packed_items[0].warehouse, self.warehouse)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
