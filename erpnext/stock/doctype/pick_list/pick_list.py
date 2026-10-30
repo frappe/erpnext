@@ -37,20 +37,6 @@ class MissingWarehouseValidationError(frappe.ValidationError):
 	pass
 
 
-def validate_no_reserved_stock(sales_order: str) -> None:
-	"""Raise if the Sales Order has reserved stock, on its rows or on bundle components."""
-	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_sre_reserved_qty_details_for_voucher,
-	)
-
-	if get_sre_reserved_qty_details_for_voucher("Sales Order", sales_order):
-		frappe.throw(
-			_(
-				"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
-			).format(frappe.bold(sales_order))
-		)
-
-
 class IncorrectWarehouseValidationError(frappe.ValidationError):
 	pass
 
@@ -1221,6 +1207,20 @@ class PickList(TransactionBase):
 					return True
 
 		return False
+
+
+def validate_no_reserved_stock(sales_order: str) -> None:
+	"""Raise if the Sales Order has reserved stock, on its rows or on bundle components."""
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details_for_voucher,
+	)
+
+	if get_sre_reserved_qty_details_for_voucher("Sales Order", sales_order):
+		frappe.throw(
+			_(
+				"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
+			).format(frappe.bold(sales_order))
+		)
 
 
 def update_pick_list_status(pick_list):
