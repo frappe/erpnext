@@ -66,7 +66,13 @@ class Issue(Document):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
 
-		if not self.raised_by:
+		# a web form saves with ignore_permissions, so its submitter is never trusted with these fields
+		if is_website_user() or frappe.flags.in_web_form:
+			self.restore_staff_only_fields()
+
+		if frappe.flags.in_web_form and self.is_new():
+			self.raised_by = frappe.session.user
+		elif not self.raised_by:
 			self.raised_by = frappe.session.user
 
 		self.set_lead_contact(self.raised_by)
@@ -76,6 +82,12 @@ class Issue(Document):
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
+
+	def restore_staff_only_fields(self):
+		"""Customer and status are set by the support team, not by portal or web form users."""
+		doc_before_save = self.get_doc_before_save()
+		self.customer = doc_before_save.customer if doc_before_save else None
+		self.status = doc_before_save.status if doc_before_save else "Open"
 
 	def set_lead_contact(self, email_id):
 		import email.utils
