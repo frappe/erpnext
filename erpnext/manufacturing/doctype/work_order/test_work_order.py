@@ -1025,6 +1025,42 @@ class TestWorkOrder(ERPNextTestSuite):
 		for item in raw_materials:
 			self.assertEqual(get_bin(item, work_order.wip_warehouse).actual_qty, 0)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+			"material_consumption": 1,
+		},
+	)
+	def test_material_consumption_mixed_with_manufacture(self):
+		consumption = "Material Consumption for Manufacture"
+		work_order, raw_materials = make_transfer_based_work_order(2)
+		first_consumption = frappe.get_doc(make_stock_entry(work_order.name, consumption, 5))
+		first_consumption.remove(
+			next(row for row in first_consumption.items if row.item_code == raw_materials[1])
+		)
+		first_consumption.submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
+		manufacture.append(
+			"items",
+			{
+				"item_code": raw_materials[1],
+				"qty": 5,
+				"s_warehouse": work_order.wip_warehouse,
+				"uom": "Kg",
+				"conversion_factor": 1,
+			},
+		)
+		manufacture.submit()
+
+		# the manufacture entry only consumed the second material
+		last_consumption = frappe.get_doc(make_stock_entry(work_order.name, consumption, 5))
+		self.assertEqual(
+			{row.item_code: row.qty for row in last_consumption.items if row.s_warehouse},
+			{raw_materials[0]: 5, raw_materials[1]: 5},
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_partial_material_consumption(self):
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
