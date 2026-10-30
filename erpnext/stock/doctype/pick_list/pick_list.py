@@ -1619,14 +1619,15 @@ def get_available_item_locations(
 		)
 		locations = remove_stock_reserved_for_others(item_code, locations, own_vouchers)
 
-	if has_serial_no:
-		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
-
 	if exclude_warehouses:
 		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
 
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+	# after picked serials are removed, so a reserved pick is not deducted twice
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
 
 	if locations and keep_all_locations:
 		locations = prioritize_locations(locations, priority_warehouses)
