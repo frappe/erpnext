@@ -783,15 +783,32 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
-		pending_qty_to_mfg = flt(self.doc.fg_completed_qty)
-		if self.doc.work_order:
-			pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - flt(
-				self.wo_doc.produced_qty
+		for material in self.available_materials.values():
+			pending_qty_to_mfg = self.get_pending_qty_to_mfg(material)
+			if pending_qty_to_mfg > 0 or self.doc.get("is_return"):
+				# more than the pending qty only consumes what is left
+				pending_qty_to_mfg = max(pending_qty_to_mfg, flt(self.doc.fg_completed_qty))
+				self._append_transfer_based_rm(material, pending_qty_to_mfg)
+
+	def get_pending_qty_to_mfg(self, material):
+		"""Material consumption entries only cover the materials they consumed."""
+		if not self.doc.work_order:
+			return flt(self.doc.fg_completed_qty)
+
+		# Count each entry once; For Quantity includes its process loss.
+		covered_qty = {
+			row.parent: flt(row.fg_completed_qty)
+			for row in self._consumption_entries
+			if (row.purpose == "Manufacture" and self._get_available_buckets(row))
+			or (
+				row.purpose == "Material Consumption for Manufacture"
+				and any(bucket is material for bucket in self._get_available_buckets(row))
 			)
-		if pending_qty_to_mfg <= 0 and not self.doc.get("is_return"):
-			return
-		for key in self.available_materials:
-			self._append_transfer_based_rm(self.available_materials[key], pending_qty_to_mfg)
+		}
+		return flt(
+			flt(self.wo_doc.material_transferred_for_manufacturing) - sum(covered_qty.values()),
+			self.doc.precision("fg_completed_qty"),
+		)
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -902,6 +919,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def prepare_available_materials_based_on_transfer(self):
 		self.available_materials = frappe._dict()
+		self._consumption_entries = []
 		self._transfer_entries = self.get_transfer_entries()
 		if not self._transfer_entries:
 			return
@@ -968,7 +986,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.select(stock_entry_detail.star)
+			.select(stock_entry_detail.star, stock_entry.fg_completed_qty, stock_entry.purpose)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (IfNull(stock_entry_detail.s_warehouse, "") != "")
