@@ -1249,6 +1249,44 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "status"), "Delivered")
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 0,
+		},
+	)
+	def test_stock_updating_invoice_bundle_picks_the_reserved_serial(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=100,
+			serial_no="\n".join(f"{item_code}-{i}" for i in range(2)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1)
+		sales_order.create_stock_reservation_entries(notify=False)
+		sre = frappe.get_doc("Stock Reservation Entry", {"voucher_no": sales_order.name, "docstatus": 1})
+
+		sales_invoice = make_sales_invoice(sales_order.name)
+		sales_invoice.update_stock = 1
+		sales_invoice.insert()
+		sales_invoice.submit()
+
+		bundle = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_no": sales_invoice.name, "docstatus": 1}, "name"
+		)
+		self.assertEqual(
+			frappe.get_all("Serial and Batch Entry", filters={"parent": bundle}, pluck="serial_no"),
+			[sre.sb_entries[0].serial_no],
+		)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
 	def test_direct_entry_is_checked_against_its_voucher(self):
