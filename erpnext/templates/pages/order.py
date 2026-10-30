@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.doctype.payment_request.payment_request import (
-	ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST,
+	PORTAL_PAYABLE_DOCTYPES,
 	get_amount,
 )
 
@@ -65,19 +65,8 @@ def get_attachments(dt, dn):
 
 
 def get_payment_details(doc):
-	show_pay_button, amount = (
-		(
-			"payments" in frappe.get_installed_apps()
-			and doc.doctype in ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST
-			and (
-				doc.doctype not in ("Purchase Order", "Purchase Invoice")
-				or frappe.db.get_single_value("Buying Settings", "show_pay_button")
-			)
-		),
-		0,
-	)
-	if not show_pay_button:
-		return show_pay_button, amount
+	if "payments" not in frappe.get_installed_apps() or doc.doctype not in PORTAL_PAYABLE_DOCTYPES:
+		return False, 0
 
 	amount = get_amount(doc)
 	return bool(amount), amount
