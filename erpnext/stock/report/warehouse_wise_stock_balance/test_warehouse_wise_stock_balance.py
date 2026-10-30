@@ -17,6 +17,34 @@ class TestWarehouseWiseStockBalance(ERPNextTestSuite):
 	def row(self, data, warehouse):
 		return next(w for w in data if w["name"] == warehouse)
 
+<<<<<<< HEAD
+=======
+	def test_balance_and_parent_accumulation(self):
+		parent = create_warehouse("_Test WWSB Parent", properties={"is_group": 1})
+		child = create_warehouse("_Test WWSB Child", properties={"parent_warehouse": parent})
+
+		make_stock_entry(item_code="_Test Item", to_warehouse=child, qty=10, rate=100)
+
+		data = self.run_report()
+		# stock balance = sum of stock value difference (10 * 100)
+		self.assertEqual(self.row(data, child)["stock_balance"], 1000)
+		# the group warehouse rolls up its children
+		self.assertEqual(self.row(data, parent)["stock_balance"], 1000)
+
+	def test_nested_warehouses_roll_up_and_indent(self):
+		top = create_warehouse("_Test WWSB Top", properties={"is_group": 1})
+		middle = create_warehouse("_Test WWSB Middle", properties={"is_group": 1, "parent_warehouse": top})
+		leaf = create_warehouse("_Test WWSB Leaf", properties={"parent_warehouse": middle})
+		make_stock_entry(item_code="_Test Item", to_warehouse=leaf, qty=10, rate=100)
+
+		data = self.run_report()
+
+		for warehouse in (top, middle, leaf):
+			self.assertEqual(self.row(data, warehouse)["stock_balance"], 1000)
+		self.assertEqual(self.row(data, middle)["indent"], self.row(data, top)["indent"] + 1)
+		self.assertEqual(self.row(data, leaf)["indent"], self.row(data, middle)["indent"] + 1)
+
+>>>>>>> 3784475 (test(stock): roll up and indent nested warehouses in Warehouse Wise Stock Balance)
 	def test_disabled_warehouses_with_stock_stay_in_the_totals(self):
 		group = create_warehouse("_Test WWSB Disabled Group", properties={"is_group": 1})
 		child = create_warehouse("_Test WWSB Disabled Child", properties={"parent_warehouse": group})
