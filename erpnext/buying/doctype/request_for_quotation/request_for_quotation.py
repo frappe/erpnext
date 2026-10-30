@@ -491,7 +491,7 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 
 
 # This method is used to make supplier quotation from supplier's portal.
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_supplier_quotation(doc: str | Document | dict):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
