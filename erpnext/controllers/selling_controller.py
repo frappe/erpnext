@@ -1019,34 +1019,22 @@ class SellingController(StockController):
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+
 		# Don't update Delivered Qty on Return.
 		if self.is_return:
 			return
 
 		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
 
-		items = []
-		for item in self.items:
-			packed_items = [
-				packed_item
-				for packed_item in self.packed_items
-				if packed_item.parent_detail_docname == item.name
-			]
-			if not packed_items:
-				items.append(item)
-			else:
-				for d in packed_items:
-					d.set(so_field, item.get(so_field))
-					d.so_detail = frappe.get_value(
-						"Packed Item",
-						{
-							"parent_detail_docname": item.so_detail,
-							"parent_item": item.item_code,
-							"item_code": d.item_code,
-							"warehouse": d.warehouse,
-						},
-					)
-					items.append(d)
+		bundle_rows = {packed_item.parent_detail_docname for packed_item in self.packed_items}
+		items = [item for item in self.items if item.name not in bundle_rows]
+		items_by_name = {item.name: item for item in self.items}
+		# a component reserves against the order's packed row, whatever warehouse it is delivered from
+		for packed_item, so_packed_item in get_order_packed_item_pairs(self):
+			packed_item.set(so_field, items_by_name[packed_item.parent_detail_docname].get(so_field))
+			packed_item.so_detail = so_packed_item.name
+			items.append(packed_item)
 
 		if self._action == "submit":
 			for item in items:

@@ -326,6 +326,49 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 
+def get_order_packed_items(doc) -> dict:
+	"""Sales Order packed rows of the order rows this document is made from, by order row in idx order."""
+	so_details = {item.so_detail for item in doc.get("items") if item.get("so_detail")}
+	if not so_details:
+		return {}
+
+	order_packed_items = {}
+	for row in frappe.get_all(
+		"Packed Item",
+		filters={"parenttype": "Sales Order", "parent_detail_docname": ["in", list(so_details)]},
+		fields=["name", "parent_detail_docname", "parent_item", "item_code", "warehouse", "reserve_stock"],
+		order_by="idx",
+	):
+		order_packed_items.setdefault(row.parent_detail_docname, []).append(row)
+
+	return order_packed_items
+
+
+def pop_order_packed_item(so_packed_items, parent_item, item_code):
+	"""Take the order's packed row of a component; a component repeated in the bundle takes the next one."""
+	for idx, row in enumerate(so_packed_items):
+		if row.parent_item == parent_item and row.item_code == item_code:
+			return so_packed_items.pop(idx)
+
+
+def get_order_packed_item_pairs(doc) -> list[tuple]:
+	"""Pair each packed row of a document made from a Sales Order with the order's packed row it delivers."""
+	order_packed_items = get_order_packed_items(doc)
+	pairs = []
+	for item in doc.get("items"):
+		so_packed_items = list(order_packed_items.get(item.get("so_detail"), []))
+		for packed_item in doc.get("packed_items"):
+			if packed_item.parent_detail_docname != (item.name or item.idx):
+				continue
+
+			if so_packed_item := pop_order_packed_item(
+				so_packed_items, packed_item.parent_item, packed_item.item_code
+			):
+				pairs.append((packed_item, so_packed_item))
+
+	return pairs
+
+
 def update_packed_item_with_pick_list_info(main_item_row, pi_row):
 	pl_row = frappe.db.get_value(
 		"Pick List Item",
