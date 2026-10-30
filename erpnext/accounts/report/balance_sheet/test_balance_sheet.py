@@ -213,6 +213,18 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(len(expected), 2)
 		self.assertEqual(snapshot, expected)
 
+	def test_snapshot_with_report_template(self):
+		filters = frappe._dict(
+			company=COMPANY,
+			filter_based_on="Date Range",
+			period_start_date="2026-01-01",
+			period_end_date="2026-12-31",
+			periodicity="Yearly",
+			report_template="Standard Balance Sheet (IFRS)",
+		)
+		snapshot = execute_snapshot_report(frappe._dict(filters))[1]
+		self.assertEqual(snapshot, execute(frappe._dict(filters))[1])
+
 	def test_group_by_dimension(self):
 		create_account("BS Dim Test Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
 
