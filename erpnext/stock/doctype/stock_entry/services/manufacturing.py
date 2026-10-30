@@ -796,11 +796,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		# Count each entry once; For Quantity includes its process loss.
 		manufactured_qty, consumed_qty = {}, defaultdict(dict)
 		for row in self._consumption_entries:
-			keys = self._get_available_keys(row)
-			if row.purpose == "Manufacture" and keys:
+			if row.purpose == "Manufacture":
 				manufactured_qty[row.parent] = flt(row.fg_completed_qty)
 			elif row.purpose == "Material Consumption for Manufacture":
-				for key in keys:
+				for key in self._get_available_keys(row):
 					consumed_qty[key][row.parent] = flt(row.fg_completed_qty)
 
 		pending_qty = flt(self.wo_doc.material_transferred_for_manufacturing) - sum(manufactured_qty.values())
