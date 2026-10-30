@@ -2033,6 +2033,133 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.delete()
 
+	def test_item_valuation_with_quantity_based_charge(self):
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		stock_account = get_warehouse_account_map(company)[warehouse]["account"]
+		items = [make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name for i in range(2)]
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		for doctype in ("Purchase Receipt", "Purchase Invoice"):
+			for add_deduct_tax, quantities, conversion_rate, include_service in (
+				("Add", (10, 10), 1, False),
+				("Deduct", (5, 15), 1, False),
+				("Add", (10, 10), 80, False),
+				("Add", (10, 10), 1, True),
+			):
+				with self.subTest(
+					doctype=doctype,
+					add_deduct_tax=add_deduct_tax,
+					conversion_rate=conversion_rate,
+					include_service=include_service,
+				):
+					doc = frappe.get_doc(
+						{
+							"doctype": doctype,
+							"company": company,
+							"supplier": "_Test Supplier",
+							"currency": "INR" if conversion_rate == 1 else "USD",
+							"conversion_rate": conversion_rate,
+							"items": [
+								{
+									"item_code": item_code,
+									"qty": qty,
+									"rate": rate,
+									"warehouse": warehouse,
+									"cost_center": "Main - TCP1",
+									"expense_account": "Cost of Goods Sold - TCP1",
+								}
+								for item_code, qty, rate in zip(items, quantities, (100, 900), strict=True)
+							],
+							"taxes": [
+								{
+									"charge_type": "On Item Quantity",
+									"add_deduct_tax": add_deduct_tax,
+									"account_head": "_Test Account Shipping Charges - TCP1",
+									"category": "Valuation and Total",
+									"cost_center": "Main - TCP1",
+									"description": "Handling per kilogram",
+									"rate": 5,
+								}
+							],
+						}
+					)
+					if include_service:
+						doc.append(
+							"items",
+							{
+								"item_code": service_item,
+								"qty": 10,
+								"rate": 500,
+								"cost_center": "Main - TCP1",
+								"expense_account": "Cost of Goods Sold - TCP1",
+							},
+						)
+						doc.append(
+							"taxes",
+							{
+								"charge_type": "Actual",
+								"account_head": "_Test Account Customs Duty - TCP1",
+								"category": "Valuation and Total",
+								"cost_center": "Main - TCP1",
+								"description": "Freight",
+								"tax_amount": 60,
+								"allocate_full_amount_to_stock_items": 0,
+							},
+						)
+					if doctype == "Purchase Invoice":
+						doc.update_stock = 1
+						if conversion_rate != 1:
+							doc.credit_to = "_Test Payable USD - TCP1"
+					doc.insert()
+					doc.submit()
+					doc = frappe.get_doc(doc.doctype, doc.name)
+
+					for row in doc.items[:2]:
+						item_tax_amount = (
+							row.qty * 5 * conversion_rate * (-1 if add_deduct_tax == "Deduct" else 1)
+						)
+						if include_service:
+							item_tax_amount += 4 if row.idx == 1 else 36
+						self.assertEqual(row.item_tax_amount, item_tax_amount)
+						self.assertEqual(
+							row.valuation_rate, (row.base_net_amount + item_tax_amount) / row.qty
+						)
+						self.assertEqual(
+							frappe.db.get_value(
+								"Stock Ledger Entry",
+								{"voucher_detail_no": row.name, "is_cancelled": 0},
+								"stock_value_difference",
+							),
+							row.base_net_amount + item_tax_amount,
+						)
+					gl_entries = get_gl_entries(doc.doctype, doc.name, skip_cancelled=True)
+					self.assertEqual(
+						sum(d.debit - d.credit for d in gl_entries if d.account == stock_account),
+						10140 if include_service else doc.base_grand_total,
+					)
+					self.assertEqual(sum(d.debit - d.credit for d in gl_entries), 0)
+					if include_service:
+						self.assertEqual(doc.items[2].valuation_rate, 0)
+						self.assertEqual(doc.items[2].item_tax_amount, 0)
+						self.assertEqual(
+							doc.get_capitalized_valuation_tax(),
+							{doc.taxes[0].name: 100, doc.taxes[1].name: 40},
+						)
+
+					# Revaluation of a saved receipt must retain the same per-item allocation.
+					item_tax_amounts = [row.item_tax_amount for row in doc.items]
+					doc.update_valuation_rate()
+					self.assertEqual([row.item_tax_amount for row in doc.items], item_tax_amounts)
+					doc.cancel()
+					for item_code in items:
+						self.assertEqual(
+							frappe.db.get_value(
+								"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
+							),
+							0,
+						)
+
 	def test_valuation_tax_distribution_with_non_stock_item(self):
 		"""When "Allocate Full Amount to Stock Items" is unchecked, a "Valuation and Total"
 		actual charge is distributed across all items by net amount, but only stock/asset items
