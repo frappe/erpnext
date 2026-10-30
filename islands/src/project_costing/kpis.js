@@ -3,7 +3,7 @@ const __ = window.__;
 /**
  * The four headline numbers of the Costing tab, each captioned with what it is measured against.
  *
- * A running project shows cost and forecast against the estimate, then billing and margin. A
+ * A running project shows cost against the estimate, then billing and margin. A
  * completed one shows final figures, and a cancelled one what was spent and recovered.
  */
 export function kpisFor(view, format) {
@@ -22,12 +22,9 @@ class HeadlineNumbers {
 	running() {
 		const view = this.view;
 		const cost = this.cost(__("Cost to date"), this.sources());
-		if (view.labour_understated) {
-			cost.sub = __("+ ~{0} unpriced", [this.format.short(view.rate_gaps.estimate)]);
-		}
-		const items = [cost, this.forecast()];
-		if (view.internal) return [...items, this.hours()];
-		return [...items, this.billed(), this.margin(__("Gross margin"))];
+		if (view.labour_understated) Object.assign(cost, this.unpriced_labour(cost.hint));
+		if (view.internal) return [cost, this.hours()];
+		return [cost, this.billed(), this.margin(__("Gross margin"))];
 	}
 
 	completed() {
@@ -68,26 +65,18 @@ class HeadlineNumbers {
 		};
 	}
 
-	forecast() {
-		const view = this.view;
-		const started = view.percent_complete > 0;
+	/**
+	 * Hours saved without a costing rate add nothing to cost, so cost to date reads low. The
+	 * caption says how many hours; the tooltip roughly how much labour that leaves out.
+	 */
+	unpriced_labour(hint) {
+		const gaps = this.view.rate_gaps;
 		return {
-			label: __("Forecast at completion"),
-			value: started ? this.format.short(view.forecast) : "—",
-			sub: this.forecast_caption(),
-			hint: __("Cost to date ÷ % complete"),
+			sub: __("{0} h have no costing rate", [this.format.number(gaps.hours)]),
+			hint: gaps.estimate
+				? __("{0} · about {1} of labour not counted", [hint, this.format.short(gaps.estimate)])
+				: hint,
 		};
-	}
-
-	forecast_caption() {
-		const view = this.view;
-		const format = this.format;
-		if (view.labour_understated) return __("Likely higher");
-		if (!view.percent_complete) return __("Needs % complete");
-		if (!view.has_estimate) return __("Based on {0}% complete", [view.percent_complete]);
-		return view.variance > 0
-			? __("{0} over estimate", [format.short(view.variance)])
-			: __("{0} under estimate", [format.short(-view.variance)]);
 	}
 
 	final_variance() {
@@ -110,9 +99,8 @@ class HeadlineNumbers {
 		return {
 			label: __("Billed"),
 			value: format.short(view.billed),
-			sub: view.has_contract
-				? __("{0} of contract", [format.percent(view.billed_percent)])
-				: __("No sales order"),
+			// without a sales order there is nothing to measure billing against, so no caption
+			sub: view.has_contract ? __("{0} of sales orders", [format.percent(view.billed_percent)]) : null,
 			hint: __("Sales invoices, net of returns"),
 		};
 	}
@@ -122,11 +110,21 @@ class HeadlineNumbers {
 		return {
 			label,
 			value: this.format.short(view.margin),
-			sub: view.billed
-				? __("{0} of billed", [this.format.percent(view.margin_percent, 1)])
-				: __("Nothing billed yet"),
-			hint: __("Billed − cost"),
+			sub: this.margin_caption(),
+			hint:
+				view.planned_margin == null
+					? __("Billed − cost")
+					: __("Billed − cost · Planned: sales orders − estimated cost"),
 		};
+	}
+
+	// The planned margin is the benchmark when there is one; otherwise the share of billing.
+	margin_caption() {
+		const view = this.view;
+		if (view.planned_margin != null) return __("Planned {0}", [this.format.short(view.planned_margin)]);
+		return view.billed
+			? __("{0} of billed", [this.format.percent(view.margin_percent, 1)])
+			: __("Nothing billed yet");
 	}
 
 	hours() {
