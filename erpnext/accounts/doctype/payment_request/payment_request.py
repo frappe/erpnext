@@ -906,7 +906,8 @@ def make_payment_request(**args):
 				cancel_old_payment_requests(ref_doc.doctype, ref_doc.name)
 		elif not selected_payment_schedules:
 			grand_total = validate_and_calculate_grand_total(grand_total, existing_payment_request_amount)
-	draft_payment_request = frappe.db.get_value(
+	# a portal payer must not pay through a draft prepared by staff
+	draft_payment_request = not is_portal_payment and frappe.db.get_value(
 		"Payment Request",
 		{"reference_doctype": ref_doc.doctype, "reference_name": ref_doc.name, "docstatus": 0},
 	)
@@ -1010,8 +1011,6 @@ def make_payment_request(**args):
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
-		if not frappe.in_test:
-			frappe.db.commit()
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = pr.get_payment_url()
 

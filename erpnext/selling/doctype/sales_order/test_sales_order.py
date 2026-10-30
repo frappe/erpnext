@@ -3353,7 +3353,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		pr = make_payment_request(
 			dt=so.doctype,
 			dn=so.name,
-			order_type="Shopping Cart",
+			make_sales_invoice=True,
 			submit_doc=True,
 			return_doc=True,
 			mute_email=True,

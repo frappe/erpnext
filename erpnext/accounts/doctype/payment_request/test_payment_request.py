@@ -1307,6 +1307,25 @@ class TestPaymentRequest(ERPNextTestSuite):
 			frappe.db.get_value("Payment Gateway Account", {"is_default": 1, "company": so.company}),
 		)
 
+	def test_portal_payment_leaves_staff_draft_untouched(self):
+		so = make_sales_order()
+		staff_draft = make_payment_request(dt="Sales Order", dn=so.name, return_doc=1)
+		staff_draft.grand_total = 1
+		staff_draft.insert()
+		user = make_portal_user("_test_portal_payer@example.com", so.customer)
+
+		with as_user(user):
+			paid = make_payment_request(
+				dt="Sales Order", dn=so.name, submit_doc=1, order_type="Shopping Cart"
+			)
+
+		self.assertNotEqual(paid.name, staff_draft.name)
+		self.assertEqual(paid.docstatus, 1)
+		self.assertEqual(paid.grand_total, so.grand_total)
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", staff_draft.name, ["docstatus", "grand_total"]), (0, 1)
+		)
+
 	def test_portal_payment_does_not_invoice_an_invoice_or_billed_order(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
