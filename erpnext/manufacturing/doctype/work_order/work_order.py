@@ -2934,7 +2934,7 @@ def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False
 	if items and isinstance(items, str):
 		items = parse_json(items)
 
-	sre = StockReservation(doc, items=items, notify=notify)
+	sre = StockReservation(doc, items=items)
 	if doc.docstatus == 2 or doc.status == "Closed":
 		sre.cancel_stock_reservation_entries()
 	elif doc.docstatus == 1:

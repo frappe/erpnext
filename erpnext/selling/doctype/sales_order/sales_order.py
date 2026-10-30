@@ -37,8 +37,11 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_details_for_voucher,
 	get_sre_reserved_qty_details_for_voucher,
+	get_ssb_bundle_for_voucher,
 	has_reserved_stock,
 )
 from erpnext.stock.get_item_details import (
@@ -234,7 +237,7 @@ class SalesOrder(SellingController):
 			return
 
 		if frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
-			if self.has_unreserved_stock():
+			if self.has_unreserved_stock() or self.has_unreserved_stock("packed_items"):
 				self.set_onload("has_unreserved_stock", True)
 
 		if has_reserved_stock(self.doctype, self.name):
@@ -281,7 +284,8 @@ class SalesOrder(SellingController):
 
 			validate_coupon_code(self.coupon_code)
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		if not self.get("is_subcontracted"):
+			self.enable_auto_reserve_stock()
 
 		make_packing_list(self)
 
@@ -297,8 +301,6 @@ class SalesOrder(SellingController):
 			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-		if not self.get("is_subcontracted"):
-			self.enable_auto_reserve_stock()
 
 	def validate_fg_item_for_subcontracting(self):
 		if self.is_subcontracted:
@@ -869,20 +871,22 @@ class SalesOrder(SellingController):
 						indicator="yellow",
 					)
 
-	def has_unreserved_stock(self) -> bool:
+	@frappe.whitelist()
+	def has_unreserved_stock(self, table_name: str = "items") -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
 
 		reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", self.name)
 
-		for item in self.get("items"):
+		data = {}
+		for item in self.get(table_name):
 			if not item.get("reserve_stock"):
 				continue
 
 			unreserved_qty = get_unreserved_qty(item, reserved_qty_details)
 			if unreserved_qty > 0:
-				return True
+				data[item.name] = unreserved_qty
 
-		return False
+		return data
 
 	@frappe.whitelist()
 	def create_stock_reservation_entries(
@@ -910,12 +914,46 @@ class SalesOrder(SellingController):
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		create_stock_reservation_entries(
-			sales_order=self,
-			items_details=items_details,
-			from_voucher_type=from_voucher_type,
-			notify=notify,
-		)
+		packed_items = []
+		if items_details:
+			for item in items_details:
+				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
+					packed_items.append(item)
+
+			for item in packed_items:
+				items_details.remove(item)
+				item["qty"] = item.pop("qty_to_reserve")
+				item["from_voucher_type"] = from_voucher_type
+
+				picked_bundle = item.pop("serial_and_batch_bundle", None)
+				if picked_bundle:
+					item["serial_and_batch_bundles"] = [picked_bundle]
+
+		sre_count = 0
+		if items_details != []:
+			sre_count = create_stock_reservation_entries(
+				sales_order=self,
+				items_details=items_details,
+				from_voucher_type=from_voucher_type,
+				notify=notify,
+			)
+
+		items = []
+		if packed_items:
+			items = packed_items
+		elif not items_details:
+			items = [item for item in self.packed_items if item.reserve_stock]
+
+		if items:
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+
+			stock_reservation = StockReservation(doc=self, items=items)
+			stock_reservation.table_name = "packed_items"
+			stock_reservation.qty_field = "qty"
+			is_sre_created = stock_reservation.make_stock_reservation_entries()
+
+			if notify and is_sre_created and not sre_count:
+				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
@@ -1058,7 +1096,23 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
-	return item.stock_qty - flt(item.delivered_qty) * item.get("conversion_factor", 1) - existing_reserved_qty
+	if item.get("delivered_qty") is not None:
+		return (
+			item.stock_qty
+			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
+			- existing_reserved_qty
+		)
+	else:
+		stock_qty, delivered_qty, conversion_factor = frappe.get_value(
+			"Sales Order Item",
+			item.parent_detail_docname,
+			["stock_qty", "delivered_qty", "conversion_factor"],
+		)
+		bundle_conversion_factor = (
+			item.qty / stock_qty
+		)  # ratio of packed item qty to main item qty in product bundle
+		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
+		return item.qty - delivered_qty - existing_reserved_qty
 
 
 def get_list_context(context=None):
@@ -1262,11 +1316,10 @@ def set_reserved_serial_batch(dn_item, sre, use_serial_batch_fields):
 	"""Carry the reserved serial/batch to the row fields, or a bundle when they cannot hold it."""
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_serial_batch_entries_for_voucher,
-		get_ssb_bundle_for_voucher,
 	)
 
 	if use_serial_batch_fields:
-		entries = get_serial_batch_entries_for_voucher(sre.name)
+		entries = get_serial_batch_entries_for_voucher([sre.name])
 		batch_nos = list({d.batch_no for d in entries if d.batch_no})
 		if len(batch_nos) < 2:
 			dn_item.use_serial_batch_fields = 1
@@ -1275,14 +1328,58 @@ def set_reserved_serial_batch(dn_item, sre, use_serial_batch_fields):
 			return
 
 	dn_item.use_serial_batch_fields = 0
-	dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+	dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
+
+
+def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fields, packed_sre):
+	for item in source.packed_items:
+		target_item = next(
+			(
+				d
+				for d in target.packed_items
+				if (d.parent_item, d.item_code, d.warehouse)
+				== (item.parent_item, item.item_code, item.warehouse)
+			),
+			None,
+		)
+		if target_item and (sre := [sre for sre in packed_sre if sre.voucher_detail_no == item.name]):
+			if sre[0].reservation_based_on == "Serial and Batch":
+				qty = 0
+				serial_nos = []
+				batch_nos = []
+				if use_serial_batch_fields:
+					target_item.use_serial_batch_fields = 1
+					for item in sre:
+						qty += item.reserved_qty
+						if item.has_serial_no:
+							serial_nos.extend(
+								frappe.get_all(
+									"Serial and Batch Entry",
+									filters={"parent": item.name},
+									pluck="serial_no",
+								)
+							)
+						if item.has_batch_no:
+							batch_nos.extend(
+								frappe.get_all(
+									"Serial and Batch Entry",
+									filters={"parent": item.name},
+									pluck="batch_no",
+								)
+							)
+
+					if len(batch_nos) == 1:
+						target_item.batch_no = batch_nos[0] if batch_nos else None
+					if serial_nos and len(batch_nos) < 2:
+						target_item.serial_no = "\n".join(serial_nos)
+
+				if not use_serial_batch_fields or len(batch_nos) > 1:
+					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name
 
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, kwargs=None):
-	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_sre_details_for_voucher,
 		get_sre_reserved_qty_details_for_voucher,
 	)
 
@@ -1308,6 +1405,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+	use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
@@ -1394,6 +1492,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	so = frappe.get_doc("Sales Order", source_name)
 	target_doc = get_mapped_doc("Sales Order", so.name, mapper, target_doc)
 
+	packed_sre = []
 	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
 		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
 
@@ -1403,9 +1502,12 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				update_item(source, target, so)
 
 			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
-			use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 			for sre in sre_list:
+				if not so_items.get(sre.voucher_detail_no):
+					packed_sre.append(sre)
+					continue
+
 				if not condition(so_items[sre.voucher_detail_no]):
 					continue
 
@@ -1444,7 +1546,9 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		return
 
 	# Should be called after mapping items.
+	target_doc.packed_items = []
 	set_missing_values(so, target_doc)
+	set_serial_batch_for_bundle_reservation(so, target_doc, use_serial_batch_fields, packed_sre)
 
 	return target_doc
 
@@ -1544,6 +1648,14 @@ def make_sales_invoice(
 		# Get the advance paid Journal Entries in Sales Invoice Advance
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
+
+		make_packing_list(target)
+		set_serial_batch_for_bundle_reservation(
+			source,
+			target,
+			frappe.get_single_value("Stock Settings", "use_serial_batch_fields"),
+			get_sre_details_for_voucher("Sales Order", source_name),
+		)
 
 	def set_missing_values(source, target):
 		target.flags.ignore_permissions = True
