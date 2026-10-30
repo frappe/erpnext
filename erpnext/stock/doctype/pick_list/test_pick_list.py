@@ -980,6 +980,29 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual([row.item_code for row in delivery_note.items], [items[0]])
 
+	def test_pick_list_skips_drop_ship_bundle_rows(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5, basic_rate=100)
+		bundle, _components = create_product_bundle([2], warehouse=warehouse)
+		sales_order = make_sales_order(
+			item_list=[
+				{"item_code": item, "warehouse": warehouse, "qty": 2, "rate": 100},
+				{
+					"item_code": bundle,
+					"warehouse": warehouse,
+					"qty": 3,
+					"rate": 100,
+					"delivered_by_supplier": 1,
+					"supplier": "_Test Supplier",
+				},
+			]
+		)
+
+		# a drop-ship bundle row leaves its components off the pick list
+		pick_list = create_pick_list(sales_order.name)
+		self.assertEqual([row.item_code for row in pick_list.locations], [item])
+
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
