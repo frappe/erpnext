@@ -17,6 +17,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1210,6 +1211,42 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		sales_invoice.update_stock = 1
 		sales_invoice.items[0].warehouse = "_Test Warehouse 1 - _TC"
 		self.assertRaises(frappe.ValidationError, sales_invoice.insert)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_stock_updating_invoice_delivers_the_reserved_serial(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=100,
+			serial_no="\n".join(f"{item_code}-{i}" for i in range(2)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1)
+		sales_order.create_stock_reservation_entries(notify=False)
+		sre = frappe.get_doc("Stock Reservation Entry", {"voucher_no": sales_order.name, "docstatus": 1})
+
+		sales_invoice = make_sales_invoice(sales_order.name)
+		sales_invoice.update_stock = 1
+		sales_invoice.insert()
+		sales_invoice.submit()
+
+		self.assertEqual(
+			sales_invoice.items[0].serial_no,
+			SerialBatchIdentity("Serial No").get_numbers(item_code, [sre.sb_entries[0].serial_no])[0],
+		)
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "status"), "Delivered")
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
