@@ -1073,6 +1073,38 @@ class TestWorkOrder(ERPNextTestSuite):
 						{item: 10 for item in raw_materials},
 					)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+			"material_consumption": 0,
+		},
+	)
+	def test_no_raw_materials_pulled_once_transferred_materials_are_consumed(self):
+		raw_material = make_item(properties={"stock_uom": "Kg"}).name
+		finished_good = make_item(properties={"stock_uom": "Kg"}).name
+		test_stock_entry.make_stock_entry(
+			item_code=raw_material, target="_Test Warehouse - _TC", qty=1, basic_rate=10
+		)
+		make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+		work_order = make_wo_order_test_record(
+			production_item=finished_good,
+			qty=1,
+			stock_uom="Kg",
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Stores - _TC",
+		)
+		for purpose, qty in (
+			("Material Transfer for Manufacture", 0.8),
+			("Manufacture", 0.1),
+			("Manufacture", 0.7),
+		):
+			frappe.get_doc(make_stock_entry(work_order.name, purpose, qty)).submit()
+
+		# 0.8 - (0.1 + 0.7) leaves float noise; nothing transferred is left to consume
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 0.2))
+		self.assertFalse([row for row in entry.items if row.s_warehouse])
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_partial_material_consumption(self):
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
