@@ -1964,6 +1964,27 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in mr.items:
 			self.assertEqual(row.qty, required_qty[row.item_code])
 
+	def test_partial_qty_rounds_up_whole_number_uom(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		test_stock_entry.make_stock_entry(item_code=rm, target="Stores - _TC", qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, source_warehouse="Stores - _TC"
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in pick_list.locations], [3])
+
+		mr = self.submit_material_request(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in mr.items], [3])
+
+		# rounding up stays within the 2 left to request
+		mr = make_material_request(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in mr.items], [2])
+
 	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
 
