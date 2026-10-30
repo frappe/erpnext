@@ -3,12 +3,16 @@
 
 
 import frappe
-from frappe.utils import add_days, flt, now_datetime, nowdate
+from frappe.utils import add_days, flt, getdate, now_datetime, nowdate
 
 import erpnext
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.delivery_note.delivery_note import make_delivery_trip
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
+	get_contact_display,
+	get_default_contact,
+	get_driver_email,
 	notify_customers,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -37,11 +41,12 @@ class TestDeliveryTrip(ERPNextTestSuite):
 				"password": "test",
 				"smtp_server": "localhost",
 				"stmp_port": 25,
-				"email_id": "test@example.in",
+				"email_id": f"delivery-trip-{frappe.generate_hash(length=10)}@example.in",
 			}
 		)
 		outgoing.save()
 
+		self.delivery_trip.submit()
 		notify_customers(delivery_trip=self.delivery_trip.name)
 		self.delivery_trip.load_from_db()
 		self.assertEqual(self.delivery_trip.email_notification_sent, 1)
@@ -81,6 +86,53 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		self.assertEqual(len(route_list), 2)
 		self.assertEqual(len(route_list[0]), 2)  # [home_address, locked_stop]
 		self.assertEqual(len(route_list[1]), 3)  # [locked_stop, second_stop, home_address]
+
+	def test_unfit_driver_cannot_submit(self):
+		for status, expiry_date in (("Left", None), ("Suspended", None), ("Active", add_days(nowdate(), -1))):
+			with self.subTest(status=status, expiry_date=expiry_date):
+				frappe.db.set_value(
+					"Driver", self.delivery_trip.driver, {"status": status, "expiry_date": expiry_date}
+				)
+				with self.assertRaises(frappe.ValidationError):
+					self.delivery_trip.submit()
+				self.delivery_trip.reload()
+
+	def test_license_valid_on_departure_date_can_submit(self):
+		frappe.db.set_value(
+			"Driver", self.delivery_trip.driver, "expiry_date", getdate(self.delivery_trip.departure_time)
+		)
+		self.delivery_trip.submit()
+		self.assertEqual(self.delivery_trip.docstatus, 1)
+
+	def test_driver_email_respects_employee_access(self):
+		user = f"driver-{frappe.generate_hash(length=10)}@example.com"
+		employee = make_employee(user, company="_Test Company")
+		frappe.db.set_value(
+			"Employee",
+			employee,
+			{"personal_email": "private@example.com", "prefered_email": "private@example.com"},
+		)
+		driver = self.delivery_trip.driver
+		frappe.db.set_value("Driver", driver, {"employee": employee, "user": user})
+
+		reader = f"delivery-{frappe.generate_hash(length=10)}@example.com"
+		frappe.get_doc(
+			{"doctype": "User", "email": reader, "first_name": "Delivery", "send_welcome_email": 0}
+		).insert().add_roles("Delivery User")
+		with self.set_user(reader):
+			self.assertFalse(frappe.has_permission("Employee", "read", doc=employee))
+			self.assertEqual(get_driver_email(driver), {"email": user})
+
+		frappe.db.set_value("Driver", driver, "user", None)
+		with self.set_user(reader):
+			self.assertEqual(get_driver_email(driver), {"email": None})
+
+		frappe.db.set_value("Employee", employee, "prefered_email", None)
+		self.assertEqual(get_driver_email(driver), {"email": user})  # company e-mail
+		frappe.db.set_value(
+			"Employee", employee, {"company_email": None, "prefered_email": "private@example.com"}
+		)
+		self.assertEqual(get_driver_email(driver), {"email": "private@example.com"})
 
 	def test_delivery_trip_status_draft(self):
 		self.assertEqual(self.delivery_trip.status, "Draft")
@@ -135,6 +187,195 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 		self.assertRaises(frappe.MandatoryError, self.delivery_trip.save)
 
+	def make_delivery_note_with_address(self, **kwargs):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		delivery_note = create_delivery_note(do_not_submit=True)
+		delivery_note.shipping_address_name = get_contact_and_address(
+			"_Test Customer"
+		).shipping_address.parent
+		delivery_note.update(kwargs)
+		return delivery_note.submit()
+
+	def make_trip_for(self, *delivery_notes, submit=False):
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.delivery_stops = []
+		for name in delivery_notes:
+			trip = make_delivery_trip(name, trip)
+		trip.insert()
+		if submit:
+			trip.submit()
+		return trip
+
+	def test_delivery_note_stays_on_one_trip(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = self.make_trip_for(delivery_note.name, submit=True)
+
+		self.assertRaises(frappe.ValidationError, self.make_trip_for, delivery_note.name)
+
+		frappe.db.set_value("Delivery Note", delivery_note.name, "delivery_trip", self.delivery_trip.name)
+		trip.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), self.delivery_trip.name
+		)
+
+	def test_delivery_note_of_another_company_is_refused(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.company = "_Test Company 1"
+		trip.delivery_stops = []
+		trip = make_delivery_trip(delivery_note.name, trip)
+
+		self.assertRaises(frappe.ValidationError, trip.insert)
+		self.assertIsNone(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"))
+
+	def test_removed_stop_releases_its_delivery_note(self):
+		first, second = self.make_delivery_note_with_address(), self.make_delivery_note_with_address()
+		trip = self.make_trip_for(first.name, second.name)
+
+		trip.delivery_stops = [stop for stop in trip.delivery_stops if stop.delivery_note == first.name]
+		trip.save()
+		self.assertIsNone(frappe.db.get_value("Delivery Note", second.name, "delivery_trip"))
+
+		trip.submit()
+		trip.cancel()
+		self.assertEqual(trip.docstatus, 2)
+
+	def test_trip_keeps_the_delivery_note_transport_details(self):
+		delivery_note = self.make_delivery_note_with_address(lr_no="LR-777", vehicle_no="MH12AB1234")
+		trip = self.make_trip_for(delivery_note.name)
+
+		values = frappe.db.get_value(
+			"Delivery Note", delivery_note.name, ["lr_no", "vehicle_no", "driver"], as_dict=True
+		)
+		self.assertEqual(
+			(values.lr_no, values.vehicle_no, values.driver), ("LR-777", "MH12AB1234", trip.driver)
+		)
+
+		trip.delete()
+		values = frappe.db.get_value(
+			"Delivery Note",
+			delivery_note.name,
+			["lr_no", "vehicle_no", "driver", "delivery_trip"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			(values.lr_no, values.vehicle_no, values.driver, values.delivery_trip),
+			("LR-777", "MH12AB1234", None, None),
+		)
+
+	def test_cancelled_delivery_note_does_not_block_its_draft_trip(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = self.make_trip_for(delivery_note.name)
+		delivery_note.reload()
+		delivery_note.cancel()
+
+		trip.delete()
+		self.assertIsNone(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"))
+		self.assertRaises(frappe.ValidationError, make_delivery_trip, delivery_note.name)
+
+	def make_delivery_user(self, role):
+		email = f"delivery-trip-{frappe.scrub(role)}@example.com"
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": role,
+					"send_welcome_email": 0,
+					"roles": [{"role": role}],
+				}
+			).insert(ignore_permissions=True)
+		return email
+
+	def test_delivery_roles_can_use_the_trip_form(self):
+		contact = get_contact_and_address("_Test Customer")
+		delivery_note = self.make_delivery_note_with_address()
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for role in ("Stock User", "Fulfillment User"):
+			frappe.set_user(self.make_delivery_user(role))
+			self.assertTrue(get_contact_display(contact.contact_person.parent))
+			self.assertIn("email", get_driver_email(self.delivery_trip.driver))
+
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.delivery_stops = []
+		trip.append(
+			"delivery_stops",
+			{
+				"customer": "_Test Customer",
+				"address": contact.shipping_address.parent,
+				"delivery_note": delivery_note.name,
+			},
+		)
+		trip.insert()
+		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), trip.name)
+
+	def process_route_with_locks(self, locks):
+		from unittest.mock import patch
+
+		def get_directions(route, optimize):
+			legs = [
+				{
+					"end_location": {"lat": 1.0, "lng": 2.0},
+					"distance": {"value": 1000},
+					"duration": {"value": 600},
+				}
+				for _ in route[1:]
+			]
+			return {"legs": legs, "waypoint_order": list(range(len(route) - 2))}
+
+		for stop, locked in zip(self.delivery_trip.delivery_stops, locks, strict=True):
+			stop.locked = locked
+		self.delivery_trip.uom_conversion_factor = 1
+		with patch.object(type(self.delivery_trip), "get_directions", side_effect=get_directions):
+			self.delivery_trip.process_route(optimize=True)
+		return self.delivery_trip
+
+	def test_route_with_locks_estimates_every_stop(self):
+		trip = self.process_route_with_locks([0, 1])
+		self.assertTrue(trip.delivery_stops[1].estimated_arrival)
+		self.assertEqual(trip.delivery_stops[1].distance, 1000)
+
+	def test_route_with_locks_adds_up_the_total_distance(self):
+		self.assertEqual(self.process_route_with_locks([1, 0]).total_distance, 3000)
+
+	def test_dispatch_mail_renders_the_html_template(self):
+		from unittest.mock import patch
+
+		if not frappe.db.exists("Email Template", "_Test Dispatch HTML"):
+			frappe.get_doc(
+				{
+					"doctype": "Email Template",
+					"name": "_Test Dispatch HTML",
+					"subject": "Trip {{ parent }}",
+					"use_html": 1,
+					"response_html": "<p>Stop for {{ customer }}</p>",
+				}
+			).insert()
+		frappe.db.set_single_value("Delivery Settings", "dispatch_template", "_Test Dispatch HTML")
+		self.delivery_trip.submit()
+
+		with patch("frappe.sendmail") as sendmail:
+			notify_customers(self.delivery_trip.name)
+
+		self.assertEqual(sendmail.call_args.kwargs["subject"], f"Trip {self.delivery_trip.name}")
+		self.assertIn("Stop for _Test Customer", sendmail.call_args.kwargs["message"])
+
+	def test_dispatch_mail_only_for_submitted_trips_and_own_contacts(self):
+		self.assertRaises(frappe.ValidationError, notify_customers, self.delivery_trip.name)
+
+		other_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Other Customer Contact",
+				"email_ids": [{"email_id": "other-customer-contact@example.com", "is_primary": 1}],
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 1"}],
+			}
+		).insert()
+		self.delivery_trip.delivery_stops[0].contact = other_contact.name
+		self.assertRaises(frappe.ValidationError, self.delivery_trip.save)
+
 
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
@@ -164,6 +405,7 @@ def create_driver():
 			{
 				"doctype": "Driver",
 				"full_name": "Newton Scmander",
+				"status": "Active",
 				"cell_number": "98343424242",
 				"license_number": "B809",
 			}

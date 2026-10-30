@@ -68,13 +68,15 @@ frappe.treeview_settings["Task"] = {
 							],
 						},
 					],
-					primary_action: function () {
+					primary_action: function (values) {
 						dialog.hide();
 						return frappe.call({
 							method: "erpnext.projects.doctype.task.task.add_multiple_tasks",
 							args: {
-								data: dialog.get_values()["multiple_tasks"],
+								data: values.multiple_tasks,
 								parent: node.data.value,
+								project:
+									frappe.treeview_settings["Task"].page.fields_dict.project.get_value(),
 							},
 						});
 					},

@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.utils.telemetry import capture
 
-from erpnext.setup.demo import setup_demo_data
 from erpnext.setup.setup_wizard.operations import install_fixtures as fixtures
 
 
@@ -46,15 +45,6 @@ def get_setup_stages(args=None):  # nosemgrep
 		},
 	]
 
-	if args.get("setup_demo"):
-		stages.append(
-			{
-				"status": _("Adding demo data"),
-				"fail_msg": _("We couldn't add the demo data"),
-				"tasks": [{"fn": setup_demo, "args": args, "fail_msg": _("We couldn't add the demo data")}],
-			}
-		)
-
 	return stages
 
 
@@ -91,10 +81,6 @@ def setup_company(args):  # nosemgrep
 
 def setup_defaults(args):  # nosemgrep
 	fixtures.install_defaults(frappe._dict(args))
-
-
-def setup_demo(args):  # nosemgrep
-	setup_demo_data(args.get("company_name"))
 
 
 # Only for programmatical use

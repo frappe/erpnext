@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import time_diff_in_hours
+from frappe.utils import get_datetime, get_link_to_form, time_diff_in_hours
 
 
 class DowntimeEntry(Document):
@@ -36,4 +38,32 @@ class DowntimeEntry(Document):
 
 	def validate(self):
 		if self.from_time and self.to_time:
+			if get_datetime(self.to_time) <= get_datetime(self.from_time):
+				frappe.throw(_("To Time must be after From Time"))
+
 			self.downtime = time_diff_in_hours(self.to_time, self.from_time) * 60
+			self.validate_overlap()
+
+	def validate_overlap(self):
+		frappe.db.get_value("Workstation", self.workstation, "name", for_update=True)
+
+		entry = frappe.qb.DocType("Downtime Entry")
+		overlap = (
+			frappe.qb.from_(entry)
+			.select(entry.name)
+			.where(
+				(entry.workstation == self.workstation)
+				& (entry.name != self.name)
+				& (entry.from_time < self.to_time)
+				& (entry.to_time > self.from_time)
+			)
+			.limit(1)
+			.run(pluck=True)
+		)
+
+		if overlap:
+			frappe.throw(
+				_("Downtime overlaps with {0} for workstation {1}").format(
+					get_link_to_form("Downtime Entry", overlap[0]), frappe.bold(self.workstation)
+				)
+			)

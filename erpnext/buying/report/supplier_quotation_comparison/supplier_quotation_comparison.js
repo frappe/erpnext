@@ -52,7 +52,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			fieldtype: "MultiSelectList",
 			options: "Supplier",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Supplier", txt);
+				return erpnext.utils.get_link_options("Supplier", txt);
 			},
 		},
 		{
@@ -62,7 +62,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			options: "Supplier Quotation",
 			default: "",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Supplier Quotation", txt, { docstatus: ["<", 2] });
+				return erpnext.utils.get_link_options("Supplier Quotation", txt, { docstatus: ["<", 2] });
 			},
 		},
 		{
@@ -95,6 +95,17 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 				{ label: __("Submitted"), value: "Submitted" },
 			],
 			default: "Submitted",
+		},
+		{
+			fieldname: "order_status",
+			label: __("Order Status"),
+			fieldtype: "Select",
+			options: [
+				{ label: "", value: "" },
+				{ label: __("Not Ordered"), value: "Not Ordered" },
+				{ label: __("Partially Ordered"), value: "Partially Ordered" },
+				{ label: __("Ordered"), value: "Ordered" },
+			],
 		},
 		{
 			fieldtype: "Check",
@@ -188,9 +199,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			],
 		});
 
-		dialog.set_primary_action(__("Set Default Supplier"), () => {
-			let values = dialog.get_values();
-
+		dialog.set_primary_action(__("Set Default Supplier"), (values) => {
 			if (values) {
 				// Set the default_supplier field of the appropriate Item to the selected supplier
 				frappe.call({

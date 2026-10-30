@@ -21,11 +21,10 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.set_query("work_order", function () {
 			return {
-				filters: [
-					["Work Order", "docstatus", "=", 1],
-					["Work Order", "qty", ">", "`tabWork Order`.produced_qty"],
-					["Work Order", "company", "=", frm.doc.company],
-				],
+				query: "erpnext.stock.doctype.stock_entry.stock_entry.get_pending_work_orders",
+				filters: {
+					company: frm.doc.company,
+				},
 			};
 		});
 
@@ -66,56 +65,17 @@ frappe.ui.form.on("Stock Entry", {
 			};
 		});
 
-		frappe.db.get_value(
-			"Stock Settings",
-			{ name: "Stock Settings" },
-			"sample_retention_warehouse",
-			(r) => {
-				if (r.sample_retention_warehouse) {
-					let filters = [
-						["Warehouse", "company", "=", frm.doc.company],
-						["Warehouse", "is_group", "=", 0],
-						["Warehouse", "name", "!=", r.sample_retention_warehouse],
-					];
-					frm.set_query("from_warehouse", function () {
-						return {
-							filters: filters,
-						};
-					});
-					frm.set_query("s_warehouse", "items", function () {
-						return {
-							filters: filters,
-						};
-					});
-				}
-			}
-		);
-
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
-			let filters = {};
 
 			if (!item.item_code) {
 				frappe.throw(__("Please enter Item Code to get Batch Number"));
 			} else {
-				if (
-					[
-						"Material Transfer for Manufacture",
-						"Manufacture",
-						"Repack",
-						"Send to Subcontractor",
-						"Receive from Customer",
-					].includes(doc.purpose)
-				) {
-					filters = {
-						item_code: item.item_code,
-						posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
-					};
-				} else {
-					filters = {
-						item_code: item.item_code,
-					};
-				}
+				const filters = {
+					item_code: item.item_code,
+					posting_date: frm.doc.posting_date || frappe.datetime.nowdate(),
+					posting_time: frm.doc.posting_time || frappe.datetime.now_time(),
+				};
 
 				// User could want to select a manually created empty batch (no warehouse)
 				// or a pre-existing batch
@@ -891,6 +851,11 @@ frappe.ui.form.on("Stock Entry", {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
+		if (item.set_basic_rate_manually) {
+			frm.events.calculate_basic_amount(frm, item);
+			return;
+		}
+
 		let args = {
 			item_code: item.item_code,
 			posting_date: frm.doc.posting_date,
@@ -1112,11 +1077,16 @@ frappe.ui.form.on("Stock Entry", {
 			!frm.doc.to_warehouse &&
 			frm.doc.from_warehouse
 		) {
-			let dt = frm.doc.from_warehouse ? "Warehouse" : "Company";
-			let dn = frm.doc.from_warehouse ? frm.doc.from_warehouse : frm.doc.company;
-			frappe.db.get_value(dt, dn, "default_in_transit_warehouse", (r) => {
+			// prefer the source warehouse's in-transit default, then the company's
+			frappe.db.get_value("Warehouse", frm.doc.from_warehouse, "default_in_transit_warehouse", (r) => {
 				if (r.default_in_transit_warehouse) {
 					frm.set_value("to_warehouse", r.default_in_transit_warehouse);
+				} else if (frm.doc.company) {
+					frappe.db.get_value("Company", frm.doc.company, "default_in_transit_warehouse", (res) => {
+						if (res.default_in_transit_warehouse) {
+							frm.set_value("to_warehouse", res.default_in_transit_warehouse);
+						}
+					});
 				}
 			});
 		}
@@ -1227,6 +1197,18 @@ frappe.ui.form.on("Stock Entry Detail", {
 		if (!row.secondary_item_type || row.bom_secondary_item) return;
 
 		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
+	},
+
+	qty(frm, cdt, cdn) {
+		const item = locals[cdt][cdn];
+		if (item.s_warehouse) {
+			frm.events.set_basic_rate(frm, cdt, cdn);
+			return;
+		}
+
+		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
+		frm.events.calculate_basic_amount(frm, item);
+		refresh_field("items");
 	},
 
 	conversion_factor(frm, cdt, cdn) {
@@ -1388,6 +1370,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 				item_code: d.item_code,
 				sample_quantity: d.sample_quantity,
 				qty: d.transfer_qty,
+				company: frm.doc.company,
 			},
 			callback: (r) => {
 				frappe.model.set_value(cdt, cdn, "sample_quantity", r.message);
@@ -1427,6 +1410,27 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		this.frm.set_query("to_warehouse", transit_warehouse_query);
 		this.frm.set_query("t_warehouse", "items", transit_warehouse_query);
+		this.set_source_warehouse_query();
+	}
+
+	set_source_warehouse_query() {
+		const company = this.frm.doc.company;
+		if (!company) return;
+
+		frappe.db.get_value("Company", company, "sample_retention_warehouse", (r) => {
+			if (this.frm.doc.company !== company) return;
+
+			const source_warehouse_query = () => {
+				const query = erpnext.queries.warehouse(this.frm.doc);
+				if (r?.sample_retention_warehouse) {
+					query.filters.push(["Warehouse", "name", "!=", r.sample_retention_warehouse]);
+				}
+				return query;
+			};
+
+			this.frm.set_query("from_warehouse", source_warehouse_query);
+			this.frm.set_query("s_warehouse", "items", source_warehouse_query);
+		});
 	}
 
 	setup() {
@@ -1451,7 +1455,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		};
 
 		this.frm.fields_dict.items.grid.get_field("item_code").get_query = function () {
-			return erpnext.queries.item({ is_stock_item: 1 });
+			return erpnext.queries.item({ is_stock_item: 1, company: me.frm.doc.company });
 		};
 
 		this.frm.set_query("purchase_order", function () {
@@ -1626,6 +1630,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				this.frm.set_value("letter_head", company_doc.default_letter_head);
 			}
 			this.frm.trigger("toggle_display_account_head");
+			this.set_source_warehouse_query();
 
 			erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 
@@ -1877,10 +1882,6 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			});
 		}
 	});
-};
-
-erpnext.stock.is_subcontracting_or_return_transfer = (doc) => {
-	return doc.purpose == "Send to Subcontractor" || (doc.purpose == "Material Transfer" && doc.is_return);
 };
 
 function attach_bom_items(bom_no) {

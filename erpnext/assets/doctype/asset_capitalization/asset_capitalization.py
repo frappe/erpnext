@@ -7,7 +7,7 @@ import frappe
 
 # import erpnext
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
@@ -688,9 +688,9 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 	# Get Asset Details
 	asset_details = frappe._dict()
 	if asset:
-		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code"], as_dict=1)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(asset))
+		erpnext.require_permission("Asset", asset, "select")
+		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code", "company"], as_dict=1)
+		check_capitalization_access(asset_details.company)
 
 		# Re-set item code from Asset
 		out.target_item_code = asset_details.item_code
@@ -794,11 +794,11 @@ def get_consumed_asset_details(ctx):
 
 	asset_details = frappe._dict()
 	if ctx.asset:
+		erpnext.require_permission("Asset", ctx.asset, "select")
 		asset_details = frappe.db.get_value(
-			"Asset", ctx.asset, ["asset_name", "item_code", "item_name"], as_dict=1
+			"Asset", ctx.asset, ["asset_name", "item_code", "item_name", "company"], as_dict=1
 		)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(ctx.asset))
+		check_capitalization_access(asset_details.company)
 
 	out.item_code = asset_details.item_code
 	out.asset_name = asset_details.asset_name
@@ -863,7 +863,9 @@ def get_items_tagged_to_wip_composite_asset(params):
 	if isinstance(params, str):
 		params = json.loads(params)
 
-	check_capitalization_access(params.get("company") if isinstance(params, dict | frappe._dict) else None)
+	target_asset = cstr(params.get("target_asset"))
+	erpnext.require_permission("Asset", target_asset, "select")
+	check_capitalization_access(frappe.db.get_value("Asset", target_asset, "company"))
 
 	fields = [
 		"item_code",
@@ -884,9 +886,12 @@ def get_items_tagged_to_wip_composite_asset(params):
 
 	pr_items = frappe.get_all(
 		"Purchase Receipt Item",
-		filters={"wip_composite_asset": params.get("target_asset"), "docstatus": 1},
+		filters={"wip_composite_asset": target_asset, "docstatus": 1},
 		fields=fields,
 	)
+
+	for purchase_receipt in {d.purchase_receipt for d in pr_items}:
+		erpnext.require_permission("Purchase Receipt", purchase_receipt)
 
 	stock_items = []
 	asset_items = []

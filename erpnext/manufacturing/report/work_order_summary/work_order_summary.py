@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, flt, getdate, today
+from frappe.utils import add_days, date_diff, flt, getdate, today
 
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
@@ -33,6 +33,7 @@ def get_data(filters):
 		"qty",
 		"creation",
 		"produced_qty",
+		"process_loss_qty",
 		"planned_start_date",
 		"planned_end_date",
 		"actual_start_date",
@@ -50,14 +51,14 @@ def get_data(filters):
 
 	if filters.get("based_on") == "Planned Date":
 		query_filters["planned_start_date"] = (">=", filters.get("from_date"))
-		query_filters["planned_end_date"] = ("<=", filters.get("to_date"))
+		query_filters["planned_end_date"] = ("<", add_days(filters.get("to_date"), 1))
 	elif filters.get("based_on") == "Actual Date":
 		query_filters["actual_start_date"] = (">=", filters.get("from_date"))
-		query_filters["actual_end_date"] = ("<=", filters.get("to_date"))
+		query_filters["actual_end_date"] = ("<", add_days(filters.get("to_date"), 1))
 	else:
 		query_filters["creation"] = ("between", [filters.get("from_date"), filters.get("to_date")])
 
-	data = frappe.get_all(
+	data = frappe.get_list(
 		"Work Order", fields=fields, filters=query_filters, order_by="planned_start_date asc"
 	)
 
@@ -67,7 +68,7 @@ def get_data(filters):
 		d.age = 0
 
 		if d.status != "Completed":
-			d.age = date_diff(today(), start_date)
+			d.age = max(date_diff(today(), start_date), 0)
 
 		if filters.get("age") <= d.age:
 			res.append(d)
@@ -112,7 +113,10 @@ def get_chart_based_on_age(data):
 	age_wise_data = {"0-30 Days": 0, "30-60 Days": 0, "60-90 Days": 0, "90 Above": 0}
 
 	for d in data:
-		if d.age > 0 and d.age <= 30:
+		if d.status == "Completed":
+			continue
+
+		if d.age <= 30:
 			age_wise_data["0-30 Days"] += 1
 		elif d.age > 30 and d.age <= 60:
 			age_wise_data["30-60 Days"] += 1
@@ -180,10 +184,17 @@ def prepare_chart_data(data, filters):
 
 		for d in data:
 			if getdate(d.planned_start_date) >= from_date and getdate(d.planned_start_date) <= end_date:
-				periodic_data["Pending"][period] += flt(d.qty) - flt(d.produced_qty)
+				periodic_data["Pending"][period] += get_pending_qty(d)
 				periodic_data["Completed"][period] += flt(d.produced_qty)
 
 	return labels, periodic_data
+
+
+def get_pending_qty(work_order):
+	if work_order.status in ("Completed", "Closed", "Stopped"):
+		return 0.0
+
+	return flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
 
 
 def get_columns(filters):

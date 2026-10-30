@@ -6,9 +6,7 @@ from typing import Any
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import Now
-from frappe.utils import cint, cstr, date_diff, today
+from frappe.utils import add_days, cint, cstr, date_diff, now, today
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
 	get_leaf_boms,
@@ -17,6 +15,7 @@ from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
 	replace_bom,
 	set_values_in_log,
 )
+from erpnext.utilities import clear_logs_with_references
 
 
 class BOMMissingError(frappe.ValidationError):
@@ -48,10 +47,12 @@ class BOMUpdateLog(Document):
 	@staticmethod
 	def clear_old_logs(days=None):
 		days = days or 90
-		table = DocType("BOM Update Log")
-		frappe.db.delete(
-			table,
-			filters=((table.creation < (Now() - Interval(days=days))) & (table.update_type == "Update Cost")),
+		clear_logs_with_references(
+			"BOM Update Log",
+			{
+				"creation": ("<", add_days(now(), -days)),
+				"update_type": "Update Cost",
+			},
 		)
 
 	def validate(self):
@@ -59,6 +60,7 @@ class BOMUpdateLog(Document):
 			self.validate_boms_are_specified()
 			self.validate_same_bom()
 			self.validate_bom_items()
+			self.validate_not_a_semi_finished_goods_operation_bom()
 		else:
 			self.validate_bom_cost_update_in_progress()
 
@@ -80,11 +82,49 @@ class BOMUpdateLog(Document):
 			frappe.throw(_("Current BOM and New BOM can not be same"))
 
 	def validate_bom_items(self):
-		current_bom_item = frappe.db.get_value("BOM", self.current_bom, "item")
-		new_bom_item = frappe.db.get_value("BOM", self.new_bom, "item")
+		boms = {
+			bom.name: bom
+			for bom in frappe.get_all(
+				"BOM",
+				filters={"name": ["in", [self.current_bom, self.new_bom]]},
+				fields=["name", "item", "company", "currency", "docstatus", "is_active"],
+			)
+		}
+		current_bom = boms.get(self.current_bom) or frappe._dict()
+		new_bom = boms.get(self.new_bom) or frappe._dict()
 
-		if current_bom_item != new_bom_item:
+		if current_bom.item != new_bom.item:
 			frappe.throw(_("The selected BOMs are not for the same item"))
+
+		if new_bom.docstatus != 1 or not new_bom.is_active:
+			frappe.throw(_("New BOM {0} must be submitted and active").format(frappe.bold(self.new_bom)))
+
+		if (current_bom.company, current_bom.currency) != (new_bom.company, new_bom.currency):
+			frappe.throw(_("Current BOM and New BOM must have the same company and currency"))
+
+	def validate_not_a_semi_finished_goods_operation_bom(self):
+		bom = frappe.qb.DocType("BOM")
+		bom_operation = frappe.qb.DocType("BOM Operation")
+		parents = (
+			frappe.qb.from_(bom_operation)
+			.inner_join(bom)
+			.on(bom.name == bom_operation.parent)
+			.select(bom.name)
+			.distinct()
+			.where(
+				(bom_operation.bom_no == self.current_bom)
+				& (bom_operation.parenttype == "BOM")
+				& (bom.docstatus < 2)
+				& (bom.track_semi_finished_goods == 1)
+			)
+		).run(pluck=True)
+
+		if parents:
+			frappe.throw(
+				_(
+					"BOM {0} is the BOM of an operation in {1}, which track semi-finished goods. Amend those BOMs to use the new BOM so their operation materials are fetched again."
+				).format(frappe.bold(self.current_bom), ", ".join(frappe.bold(name) for name in parents))
+			)
 
 	def validate_bom_cost_update_in_progress(self):
 		"If another Cost Updation Log is still in progress, dont make new ones."
@@ -161,6 +201,10 @@ def process_boms_cost_level_wise(
 			# First level yet to process. On Submit.
 			current_level = 0
 			current_boms = get_leaf_boms()
+			if not current_boms:
+				set_values_in_log(update_doc.name, {"status": "Completed"}, commit=True)
+				return
+
 			values = {
 				"processed_boms": json.dumps({}),
 				"status": "In Progress",

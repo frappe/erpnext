@@ -1,16 +1,22 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
+from bisect import bisect_right
 
 import frappe
 from frappe import _, scrub
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
 from frappe.utils import get_first_day as get_first_day_of_month
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
+
+OPENING_KEY = "_opening"
 
 
 def execute(filters=None):
@@ -73,7 +79,7 @@ def get_period_date_ranges(filters):
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(filters.range, 1)
 
 	periodic_daterange = []
-	for _dummy in range(1, 53, increment):
+	while True:
 		if filters.range == "Weekly":
 			period_end_date = from_date + relativedelta(days=6)
 		else:
@@ -118,7 +124,8 @@ def get_period(posting_date, filters):
 	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 	if filters.range == "Weekly":
-		period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
+		iso_date = (get_first_day_of_week(posting_date) + datetime.timedelta(days=6)).isocalendar()
+		period = _("Week {0} {1}").format(str(iso_date.week), str(iso_date.year))
 	elif filters.range == "Monthly":
 		period = _(str(months[posting_date.month - 1])) + " " + str(posting_date.year)
 	elif filters.range == "Quarterly":
@@ -128,6 +135,15 @@ def get_period(posting_date, filters):
 		period = str(year[2])
 
 	return period
+
+
+def get_period_of_date(posting_date, ranges, periods, filters):
+	posting_date = getdate(posting_date)
+	index = bisect_right(ranges, posting_date, key=lambda date_range: getdate(date_range[0])) - 1
+	if index >= 0 and posting_date <= getdate(ranges[index][1]):
+		return periods[index]
+
+	return get_period(posting_date, filters)
 
 
 def get_periodic_data(entry, filters):
@@ -159,9 +175,11 @@ def get_periodic_data(entry, filters):
 	for _start_date, end_date in expected_ranges:
 		expected_periods.append(get_period(end_date, filters))
 
+	range_start = getdate(expected_ranges[0][0]) if expected_ranges else None
+
 	periodic_data = {}
 	for d in entry:
-		period = get_period(d.posting_date, filters)
+		period = get_period_of_date(d.posting_date, expected_ranges, expected_periods, filters)
 		bal_qty = 0
 
 		fill_intermediate_periods(periodic_data, d.item_code, period, expected_periods)
@@ -193,6 +211,8 @@ def get_periodic_data(entry, filters):
 
 		periodic_data[d.item_code]["balance"][d.warehouse] += value
 		periodic_data[d.item_code][period][d.warehouse] = periodic_data[d.item_code]["balance"][d.warehouse]
+		if range_start and getdate(d.posting_date) < range_start:
+			periodic_data[d.item_code][OPENING_KEY] = periodic_data[d.item_code]["balance"].copy()
 
 	return periodic_data
 
@@ -245,7 +265,7 @@ def get_data(filters):
 			"uom": item_data.stock_uom,
 			"brand": item_data.brand,
 		}
-		previous_period_value = 0.0
+		previous_period_value = sum(periodic_data.get(item_data.name, {}).get(OPENING_KEY, {}).values())
 		for start_date, end_date in ranges:
 			period = get_period(end_date, filters)
 			period_data = periodic_data.get(item_data.name, {}).get(period)
@@ -330,6 +350,9 @@ def apply_conditions(query, filters):
 	if company := filters.get("company"):
 		query = query.where(sle.company == company)
 
+	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Stock Entry"):
+		query = query.where(sle.warehouse.isin(warehouses))
+
 	if filters.get("warehouse"):
 		query = apply_warehouse_filter(query, sle, filters)
 	elif warehouse_type := filters.get("warehouse_type"):
@@ -364,6 +387,9 @@ def get_item_details(items, sle):
 		)
 		.where(item_table.name.isin(items))
 	)
+
+	if condition := get_allowed_masters_condition(item_table.name, "Item"):
+		query = query.where(condition)
 
 	result = query.run(as_dict=1)
 

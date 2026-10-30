@@ -7,7 +7,7 @@ from datetime import date
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Min
-from frappe.utils import create_batch, get_datetime, get_link_to_form, getdate, parse_json
+from frappe.utils import create_batch, get_datetime, get_link_to_form, getdate, parse_json, today
 
 import erpnext
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
@@ -21,6 +21,7 @@ def execute(filters=None):
 			_("Perpetual inventory required for the company {0} to view this report.").format(filters.company)
 		)
 
+	filters.as_on_date = filters.get("as_on_date") or today()
 	data = get_data(filters)
 	columns = get_columns(filters)
 
@@ -158,11 +159,18 @@ def get_columns(filters):
 		{
 			"label": _("Ledger Type"),
 			"fieldname": "ledger_type",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date"},
 		{"label": _("Posting Time"), "fieldname": "posting_time", "fieldtype": "Time"},
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": "110"},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": "110",
+		},
 		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",
