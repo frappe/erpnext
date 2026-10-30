@@ -1180,9 +1180,6 @@ def get_available_item_locations(
 =======
 		locations = remove_stock_reserved_for_others(item_code, locations, own_vouchers)
 
-	if has_serial_no:
-		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
-
 	if exclude_warehouses:
 		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
 >>>>>>> e53e5b8 (fix(stock): skip serial nos reserved for other vouchers in pick list)
@@ -1190,7 +1187,17 @@ def get_available_item_locations(
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
 
+<<<<<<< HEAD
 	if locations:
+=======
+	# after picked serials are removed, so a reserved pick is not deducted twice
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
+
+	if locations and keep_all_locations:
+		locations = prioritize_locations(locations, priority_warehouses)
+	elif locations:
+>>>>>>> ca31173 (fix(stock): drop reserved serial nos after picked ones in pick list)
 		locations = get_locations_based_on_required_qty(locations, required_qty, priority_warehouses)
 
 	if not ignore_validation:
