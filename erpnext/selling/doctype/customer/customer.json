@@ -66,6 +66,10 @@
   "tax_withholding_group",
   "tax_withholding_category",
   "settings_tab",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
+  "section_break_ario",
   "so_required",
   "dn_required",
   "column_break_53",
@@ -558,6 +562,29 @@
    "label": "Settings"
   },
   {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:doc.restrict_to_companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
+  },
+  {
    "collapsible": 1,
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_tab",
@@ -720,6 +747,10 @@
   {
    "fieldname": "credit_limit_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ario",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "user-round",
@@ -749,11 +780,6 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales User"
   },
   {
    "email": 1,
