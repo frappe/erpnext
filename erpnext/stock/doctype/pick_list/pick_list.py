@@ -17,6 +17,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_reserved_serial_nos_for_sre,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
@@ -1618,6 +1619,9 @@ def get_available_item_locations(
 		)
 		locations = remove_stock_reserved_for_others(item_code, locations, own_vouchers)
 
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
+
 	if exclude_warehouses:
 		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
 
@@ -1910,6 +1914,22 @@ def remove_stock_reserved_for_others(item_code, locations, own_vouchers=None):
 	precision = frappe.get_precision("Pick List Item", "stock_qty")
 	for location in locations:
 		location.qty = flt(flt(location.qty) - reserved_qty[location.warehouse], precision)
+
+	return [location for location in locations if location.qty > 0]
+
+
+def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=None):
+	reserved_serial_nos = {
+		row.serial_no
+		for row in get_reserved_serial_nos_for_sre(frappe._dict(item_code=item_code))
+		if row.voucher_no not in (own_vouchers or ())
+	}
+	if not reserved_serial_nos:
+		return locations
+
+	for location in locations:
+		location.serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty = len(location.serial_nos)
 
 	return [location for location in locations if location.qty > 0]
 
