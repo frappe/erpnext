@@ -1099,6 +1099,49 @@ def update_regional_item_valuation_rate(doc):
 	pass
 
 
+<<<<<<< HEAD
+=======
+def get_linked_asset_qty(detail_field, details):
+	asset = frappe.qb.DocType("Asset")
+	return dict(
+		(
+			frappe.qb.from_(asset)
+			.select(asset[detail_field], Sum(asset.asset_quantity))
+			.where((asset[detail_field].isin(details)) & (asset.docstatus < 2))
+			.groupby(asset[detail_field])
+		).run()
+	)
+
+
+@frappe.request_cache
+def get_purchase_expense_account(item_code, company):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
+	defaults = get_item_defaults(item_code, company)
+
+	details = frappe._dict(
+		{
+			"purchase_expense_account": defaults.get("purchase_expense_account"),
+			"purchase_expense_contra_account": defaults.get("purchase_expense_contra_account"),
+		}
+	)
+
+	if not details.purchase_expense_account:
+		details = get_item_group_defaults(item_code, company)
+
+	if not details.purchase_expense_account:
+		details = get_brand_defaults(item_code, company)
+
+	return frappe._dict(
+		{
+			field: details.get(field)
+			for field in ("purchase_expense_account", "purchase_expense_contra_account")
+		}
+	)
+
+
+>>>>>>> 64938cd (fix(stock): scope purchase defaults to item group and brand)
 def get_stock_qty(row, qty) -> float:
 	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
