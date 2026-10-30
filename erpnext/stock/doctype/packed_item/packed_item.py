@@ -73,6 +73,7 @@ def make_packing_list(doc):
 	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
+	order_packed_items = get_order_packed_items(doc)
 
 	reset = reset_packing_list(doc)
 
@@ -86,6 +87,7 @@ def make_packing_list(doc):
 			item_row.is_product_bundle = 1 if bundle_name else 0
 
 		if bundle_name:
+			so_packed_items = list(order_packed_items.get(item_row.get("so_detail"), []))
 			for bundle_item in get_product_bundle_items_by_name(bundle_name):
 				pi_row = add_packed_item_row(
 					doc=doc,
@@ -97,7 +99,10 @@ def make_packing_list(doc):
 				pi_row.product_bundle = bundle_name
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
-				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
+				so_packed_item = pop_order_packed_item(
+					so_packed_items, item_row.item_code, bundle_item.item_code
+				)
+				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc, so_packed_item)
 				update_packed_item_price_data(pi_row, item_data, doc)
 
 				if item_row.get("against_pick_list"):
@@ -293,21 +298,10 @@ def get_component_conversion_factor(packing_item, stock_uom):
 	return flt(get_conversion_factor(packing_item.item_code, uom).get("conversion_factor")) or 1.0
 
 
-def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
+def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc, so_packed_item=None):
 	# TODO batch_no, actual_batch_qty, incoming_rate
-	if main_item_row.get("so_detail") and not doc.get("is_return"):
-		warehouse, reserve_stock = frappe.get_value(
-			"Packed Item",
-			{
-				"parent_detail_docname": main_item_row.so_detail,
-				"parent_item": main_item_row.item_code,
-				"item_code": packing_item.item_code,
-			},
-			["warehouse", "reserve_stock"],
-		) or (None, None)
-
-		if reserve_stock:
-			pi_row.warehouse = warehouse
+	if so_packed_item and so_packed_item.reserve_stock and not doc.get("is_return"):
+		pi_row.warehouse = so_packed_item.warehouse
 
 	if not pi_row.warehouse and not doc.amended_from:
 		fetch_warehouse = doc.get("is_pos") or item_data.is_stock_item or not item_data.default_warehouse

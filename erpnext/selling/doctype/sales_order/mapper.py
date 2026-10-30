@@ -24,7 +24,11 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.sales_order.sales_order import get_credit_note_return_criterion
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, make_packing_list
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_order_packed_item_pairs,
+	is_product_bundle,
+	make_packing_list,
+)
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_serial_batch_entries_for_voucher,
 	get_sre_details_for_voucher,
@@ -183,20 +187,15 @@ def make_project(source_name: str, target_doc: str | dict | Document | None = No
 	return doc
 
 
-def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fields, packed_sre):
-	for item in source.packed_items:
-		target_item = next(
-			(
-				d
-				for d in target.packed_items
-				if (d.parent_item, d.item_code, d.warehouse)
-				== (item.parent_item, item.item_code, item.warehouse)
-			),
-			None,
-		)
-		if target_item and (sre := [sre for sre in packed_sre if sre.voucher_detail_no == item.name]):
-			if sre[0].reservation_based_on == "Serial and Batch":
-				set_reserved_serial_and_batch(target_item, sre, use_serial_batch_fields)
+def set_serial_batch_for_bundle_reservation(target, use_serial_batch_fields, packed_sre):
+	for packed_item, so_packed_item in get_order_packed_item_pairs(target):
+		sre_list = [
+			sre
+			for sre in packed_sre
+			if sre.voucher_detail_no == so_packed_item.name and sre.warehouse == packed_item.warehouse
+		]
+		if sre_list and sre_list[0].reservation_based_on == "Serial and Batch":
+			set_reserved_serial_and_batch(packed_item, sre_list, use_serial_batch_fields)
 
 
 def set_reserved_serial_and_batch(row, sre_list, use_serial_batch_fields):
@@ -406,7 +405,7 @@ def make_delivery_note(
 	# Should be called after mapping items.
 	target_doc.packed_items = []
 	set_missing_values(so, target_doc)
-	set_serial_batch_for_bundle_reservation(so, target_doc, use_serial_batch_fields, packed_sre)
+	set_serial_batch_for_bundle_reservation(target_doc, use_serial_batch_fields, packed_sre)
 
 	return target_doc
 
@@ -508,7 +507,6 @@ def make_sales_invoice(
 
 		make_packing_list(target)
 		set_serial_batch_for_bundle_reservation(
-			source,
 			target,
 			frappe.get_single_value("Stock Settings", "use_serial_batch_fields"),
 			get_sre_details_for_voucher("Sales Order", source_name),
