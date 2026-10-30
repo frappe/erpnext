@@ -5,6 +5,7 @@
 
 import frappe
 from frappe import _, qb
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, get_link_to_form
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
@@ -210,3 +211,153 @@ def set_transaction_currency_and_rate_in_gl_map(doc, gl_entries: list) -> None:
 	for entry in gl_entries:
 		entry["transaction_currency"] = doc.currency
 		entry["transaction_exchange_rate"] = doc.get("conversion_rate") or 1
+
+
+def get_revalued_exchange_rate(
+	invoice_doctype: str,
+	invoice_name: str,
+	on_date,
+	account: str | None = None,
+	party_type: str | None = None,
+	party: str | None = None,
+) -> float | None:
+	"""Rate of the latest Exchange Rate Revaluation of the invoice's party account, posted between
+	the invoice date and `on_date`, covering the invoice and not reversed by `on_date`.
+	For a Journal Entry, `account`, `party_type` and `party` narrow down its party row.
+	None if there is no such revaluation."""
+	if not invoice_name or not on_date:
+		return None
+
+	if invoice_doctype in ("Sales Invoice", "Purchase Invoice"):
+		is_sales = invoice_doctype == "Sales Invoice"
+		inv = frappe.db.get_value(
+			invoice_doctype,
+			invoice_name,
+			[
+				"company",
+				"docstatus",
+				"posting_date",
+				"debit_to" if is_sales else "credit_to",
+				"customer" if is_sales else "supplier",
+			],
+			as_dict=True,
+		)
+		if not inv or inv.docstatus != 1:
+			return None
+		account = inv.debit_to if is_sales else inv.credit_to
+		party_type, party = ("Customer", inv.customer) if is_sales else ("Supplier", inv.supplier)
+	elif invoice_doctype == "Journal Entry":
+		inv = frappe.db.get_value(
+			"Journal Entry",
+			invoice_name,
+			["company", "docstatus", "posting_date", "voucher_type"],
+			as_dict=True,
+		)
+		if not inv or inv.docstatus != 1 or inv.voucher_type == "Exchange Rate Revaluation":
+			return None
+		filters = {"parent": invoice_name, "party_type": ("is", "set"), "party": ("is", "set")}
+		for field, value in (("account", account), ("party_type", party_type), ("party", party)):
+			if value:
+				filters[field] = value
+		party_rows = frappe.db.get_all(
+			"Journal Entry Account",
+			filters=filters,
+			fields=["account", "party_type", "party"],
+			distinct=True,
+		)
+		# more than one party row matches: can't tell which one is being settled
+		if len(party_rows) != 1:
+			return None
+		account, party_type, party = party_rows[0].account, party_rows[0].party_type, party_rows[0].party
+	else:
+		return None
+	invoice_booked_at = _booked_at(invoice_doctype, invoice_name)
+
+	je = qb.DocType("Journal Entry")
+	jea = qb.DocType("Journal Entry Account")
+	err_acc = qb.DocType("Exchange Rate Revaluation Account")
+	revaluations = (
+		qb.from_(je)
+		.join(jea)
+		.on(jea.parent == je.name)
+		.join(err_acc)
+		.on(
+			(err_acc.parent == jea.reference_name)
+			& (err_acc.account == jea.account)
+			& (err_acc.party_type == jea.party_type)
+			& (err_acc.party == jea.party)
+		)
+		.select(
+			je.name,
+			err_acc.new_exchange_rate,
+			err_acc.balance_in_account_currency,
+			je.posting_date,
+			je.creation,
+		)
+		.distinct()
+		.where(
+			(je.voucher_type == "Exchange Rate Revaluation")
+			& (je.docstatus == 1)
+			& (je.company == inv.company)
+			& (je.reversal_of.isnull())
+			& (je.posting_date >= inv.posting_date)
+			& (je.posting_date <= on_date)
+			& (jea.reference_type == "Exchange Rate Revaluation")
+			& (jea.account == account)
+			& (jea.party_type == party_type)
+			& (jea.party == party)
+			& (err_acc.new_exchange_rate > 0)
+		)
+		.orderby(je.posting_date, order=frappe.qb.desc)
+		.orderby(je.creation, order=frappe.qb.desc)
+		.run(as_dict=True)
+	)
+
+	for row in revaluations:
+		# The revaluation covers the invoice if it hit the ledger after the invoice, or, when reposting
+		# has renewed the invoice's ledger entries, if the balance it revalued is still unchanged.
+		# Limitation: misses an invoice that was reposted and has a back-dated entry on the same party;
+		# it then falls back to the invoice rate.
+		revaluation_booked_at = _booked_at("Journal Entry", row.name)
+		booked_after_invoice = (
+			invoice_booked_at and revaluation_booked_at and revaluation_booked_at > invoice_booked_at
+		)
+		if not booked_after_invoice and _balance_in_account_currency(
+			inv.company, account, party_type, party, row.posting_date
+		) != flt(row.balance_in_account_currency, get_currency_precision()):
+			continue
+		reversed_by_date = frappe.db.exists(
+			"Journal Entry",
+			{"reversal_of": row.name, "docstatus": 1, "posting_date": ("<=", on_date)},
+		)
+		if not reversed_by_date:
+			return flt(row.new_exchange_rate)
+	return None
+
+
+def _balance_in_account_currency(company, account, party_type, party, posting_date) -> float:
+	gle = qb.DocType("GL Entry")
+	balance = (
+		qb.from_(gle)
+		.select(Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency))
+		.where(
+			(gle.company == company)
+			& (gle.account == account)
+			& (gle.party_type == party_type)
+			& (gle.party == party)
+			& (gle.posting_date <= posting_date)
+			& (gle.is_cancelled == 0)
+		)
+		.run()
+	)
+	return flt(balance[0][0] if balance else 0, get_currency_precision())
+
+
+def _booked_at(voucher_type: str, voucher_no: str):
+	"""When the voucher's live ledger entries were written."""
+	return frappe.db.get_value(
+		"GL Entry",
+		{"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+		"creation",
+		order_by="creation asc",
+	)
