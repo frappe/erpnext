@@ -117,6 +117,8 @@ class FIFOValuation(BinWiseValuation):
 			rate_generator = lambda: 0.0  # noqa
 
 		consumed_bins = []
+		# Compare at database precision without changing the queue rate.
+		matching_rate = flt(outgoing_rate, 9, rounding_method="Commercial Rounding")
 		while qty:
 			if not len(self.queue):
 				# rely on rate generator.
@@ -124,11 +126,8 @@ class FIFOValuation(BinWiseValuation):
 
 			index = None
 			if outgoing_rate > 0 or is_return_purchase_entry:
-				# Compare at database precision without changing the queue rate.
 				for idx, fifo_bin in enumerate(self.queue):
-					if flt(fifo_bin[RATE], 9, rounding_method="Commercial Rounding") == flt(
-						outgoing_rate, 9, rounding_method="Commercial Rounding"
-					):
+					if flt(fifo_bin[RATE], 9, rounding_method="Commercial Rounding") == matching_rate:
 						index = idx
 						break
 
