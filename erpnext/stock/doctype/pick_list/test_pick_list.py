@@ -983,6 +983,30 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(stock_entry.items[0].serial_no, pick_list.locations[0].serial_no)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1}
+	)
+	def test_pick_skips_serial_nos_reserved_for_other_orders(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRSN-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=3, basic_rate=100)
+
+		reserving_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
+		reserving_order.create_stock_reservation_entries(notify=False)
+		sre_name = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": reserving_order.name})
+		reserved_serial_nos = frappe.get_all(
+			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
+		)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		self.assertNotIn(
+			pick_list.locations[0].serial_no,
+			SerialBatchIdentity("Serial No").get_numbers(item, reserved_serial_nos),
+		)
+
 	def test_delivery_note_maps_only_the_selected_pick_list_rows(self):
 		items = [make_item(properties={"is_stock_item": 1}).name for _item in range(2)]
 		for item in items:
