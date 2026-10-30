@@ -151,6 +151,277 @@ class TestBlanketOrder(ERPNextTestSuite):
 		bo.reload()
 		self.assertEqual(bo.items[0].ordered_qty, 1)
 
+<<<<<<< HEAD
+=======
+	def test_status_follows_close_reopen_and_cancel(self):
+		bo = make_blanket_order(blanket_order_type="Selling")
+		self.assertEqual(bo.status, "Submitted")
+
+		bo.update_status("Closed")
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Closed")
+
+		bo.update_status("Submitted")
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Submitted")
+
+		bo.cancel()
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Cancelled")
+
+	def test_closed_blanket_order_cannot_be_ordered_against(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+
+		bo.update_status("Closed")
+		self.assertRaises(frappe.InvalidStatusError, make_order, bo.name)
+		self.assertRaises(frappe.InvalidStatusError, po.save)
+
+		filters = {"company": bo.company, "blanket_order_type": "Purchasing", "item": bo.items[0].item_code}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+		self.assertNotIn(bo.name, [order[0] for order in orders])
+
+		details = get_blanket_order_details(
+			{
+				"blanket_order": bo.name,
+				"company": bo.company,
+				"currency": bo.currency,
+				"supplier": bo.supplier,
+				"doctype": "Purchase Order",
+				"item_code": bo.items[0].item_code,
+				"transaction_date": today(),
+			}
+		)
+		self.assertFalse(details)
+
+		bo.update_status("Submitted")
+		po.save()
+
+	def test_linked_row_is_checked_without_against_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.items[0].against_blanket_order = 0
+
+		bo.update_status("Closed")
+		self.assertRaises(frappe.InvalidStatusError, po.save)
+
+	def test_update_items_cannot_raise_qty_against_closed_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.submit()
+		bo.update_status("Closed")
+		row = po.items[0]
+
+		self.assertRaises(frappe.InvalidStatusError, update_purchase_order_row_qty, po, row, 20)
+
+		update_purchase_order_row_qty(po, row, 5)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_counts_the_qty_of_deleted_rows(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=80)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 20})
+		po.submit()
+
+		update_purchase_order_row_qty(po, po.items[0], 100)
+
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 100)
+		self.assertFalse(frappe.db.exists("Purchase Order Item", po.items[1].name))
+
+	def test_update_items_refreshes_blanket_order_of_removed_row(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		second_item = make_item("_Test Blanket Order Second Item", {"is_stock_item": 1}).name
+		po.append(
+			"items",
+			{
+				"item_code": second_item,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": today(),
+			},
+		)
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 10)
+
+		# Keep only the row without a blanket order
+		update_purchase_order_row_qty(po, po.items[1], 5)
+
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_does_not_count_a_closed_row_as_deleted(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=80)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 20})
+		po.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[1].name], 1)
+
+		self.assertRaises(frappe.ValidationError, update_purchase_order_row_qty, po, po.items[0], 120)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 80)
+
+	def test_update_items_cannot_raise_qty_past_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=50)
+		po.submit()
+		row = po.items[0]
+
+		self.assertRaises(frappe.ValidationError, update_purchase_order_row_qty, po, row, 250)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 50)
+
+		update_purchase_order_row_qty(po, row, 100)
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 100)
+
+	def test_cancelled_receipt_frees_the_qty_of_a_closed_row(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		bo = make_two_row_purchasing_blanket_order()
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.schedule_date = today()
+		for row in po.items:
+			row.warehouse = "_Test Warehouse - _TC"
+		po.submit()
+		receipt = make_purchase_receipt(po.name)
+		receipt.items = [row for row in receipt.items if row.item_code == "_Test Item"]
+		receipt.items[0].qty = 80
+		receipt.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 80)
+
+		receipt.cancel()
+
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 0)
+
+	def test_closing_an_unbilled_receipt_row_works(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		receipt = make_purchase_receipt(item_code="_Test Item", qty=5, rate=100)
+
+		update_closed_status("Purchase Receipt", receipt.name, [receipt.items[0].name], 1)
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt Item", receipt.items[0].name, "closed"), 1)
+
+	def test_closing_every_row_closes_the_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Selling")
+		row = bo.items[0].name
+
+		update_closed_status("Blanket Order", bo.name, [row], 1)
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Closed")
+
+		bo.reload()
+		self.assertRaises(frappe.ValidationError, bo.update_status, "Submitted")
+
+		update_closed_status("Blanket Order", bo.name, [row], 0)
+		self.assertEqual(frappe.db.get_value("Blanket Order", bo.name, "status"), "Submitted")
+
+	def test_fully_ordered_row_cannot_be_closed(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=10)
+		make_purchase_order_against(bo, qty=10).submit()
+
+		self.assertRaises(
+			frappe.ValidationError, update_closed_status, "Blanket Order", bo.name, [bo.items[0].name], 1
+		)
+
+	def test_closed_row_is_skipped_when_ordering(self):
+		bo = make_two_row_purchasing_blanket_order()
+		po = make_purchase_order_against(bo, qty=10)
+		update_closed_status("Blanket Order", bo.name, [bo.items[0].name], 1)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		self.assertEqual([row.item_code for row in make_order(bo.name).items], [bo.items[1].item_code])
+		self.assertRaises(frappe.InvalidStatusError, po.save)
+
+		for row, is_listed in ((bo.items[0], False), (bo.items[1], True)):
+			filters = {"company": bo.company, "blanket_order_type": "Purchasing", "item": row.item_code}
+			orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+			self.assertEqual(bo.name in [order[0] for order in orders], is_listed)
+
+			details = get_blanket_order_details(
+				{
+					"blanket_order": bo.name,
+					"company": bo.company,
+					"currency": bo.currency,
+					"supplier": bo.supplier,
+					"doctype": "Purchase Order",
+					"item_code": row.item_code,
+					"transaction_date": today(),
+				}
+			)
+			self.assertEqual(bool(details), is_listed)
+
+	def test_update_items_cannot_raise_qty_on_closed_row(self):
+		bo = make_two_row_purchasing_blanket_order()
+		po = make_purchase_order_against(bo, qty=10)
+		po.submit()
+		update_closed_status("Blanket Order", bo.name, [bo.items[0].name], 1)
+		row = po.items[0]
+
+		self.assertRaises(frappe.InvalidStatusError, update_purchase_order_row_qty, po, row, 20)
+
+		update_purchase_order_row_qty(po, row, 5)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
+
+	def test_update_items_cannot_raise_qty_after_blanket_order_expires(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.submit()
+		bo.db_set("to_date", add_days(po.transaction_date, -1))
+		row = po.items[0]
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "expired on", update_purchase_order_row_qty, po, row, 20
+		)
+
+		update_purchase_order_row_qty(po, row, 5)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
+
+	def test_blanket_order_cannot_be_used_before_it_starts(self):
+		bo = new_blanket_order(blanket_order_type="Purchasing")
+		bo.from_date = add_days(today(), 30)
+		bo.to_date = add_days(today(), 60)
+		bo.append("items", {"item_code": "_Test Item", "qty": 100, "rate": 100})
+		bo.insert()
+		bo.submit()
+
+		frappe.flags.args.doctype = "Purchase Order"
+		self.assertRaisesRegex(frappe.ValidationError, "is valid from", make_order, bo.name)
+
+		bo.reload()
+		bo.to_date = add_days(today(), 1)
+		self.assertRaises(frappe.ValidationError, bo.save)
+
+	def test_expired_blanket_order_cannot_be_ordered_against(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		bo.db_set("to_date", today())
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.transaction_date = add_days(today(), 1)
+		po.schedule_date = po.transaction_date
+		self.assertRaisesRegex(frappe.ValidationError, "expired on", po.save)
+
+		po.transaction_date = today()
+		po.save()
+
+		bo.db_set("to_date", add_days(today(), -1))
+		self.assertRaisesRegex(frappe.ValidationError, "expired on", make_order, bo.name)
+
+		filters = {
+			"company": bo.company,
+			"blanket_order_type": "Purchasing",
+			"item": bo.items[0].item_code,
+			"transaction_date": today(),
+		}
+		orders = get_blanket_orders("Blanket Order", "", "name", 0, 20, filters)
+		self.assertNotIn(bo.name, [order[0] for order in orders])
+
+>>>>>>> 1ac7471 (test(manufacturing): Update Items refreshes blanket order of a removed row)
 	def test_party_item_code(self):
 		item_doc = make_item("_Test Item 1 for Blanket Order")
 		item_code = item_doc.name
