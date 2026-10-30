@@ -894,7 +894,7 @@ class SellingController(StockController):
 				item.gross_profit = flt(
 					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
 					* item.stock_qty,
-					self.precision("amount", item),
+					item.precision("gross_profit"),
 				)
 
 	def set_customer_address(self):
