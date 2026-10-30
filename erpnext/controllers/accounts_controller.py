@@ -4539,7 +4539,9 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 def update_child_qty_rate(
 	parent_doctype: str, trans_items: str, parent_doctype_name: str, child_docname: str = "items"
 ):
-	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
+	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import (
+		get_ordered_items as get_ordered_supplier_quotation_items,
+	)
 	from erpnext.selling.doctype.quotation.quotation import get_ordered_items
 
 	def check_doc_permissions(doc, perm_type="create"):
@@ -4670,7 +4672,10 @@ def update_child_qty_rate(
 						).format(frappe.bold(new_data.get("item_code")))
 					)
 
-				if flt(new_data.get("qty")) < qty_to_check:
+				new_stock_qty = flt(new_data.get("qty")) * (
+					flt(new_data.get("conversion_factor")) or flt(child_item.conversion_factor)
+				)
+				if new_stock_qty < qty_to_check:
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
 
 	def validate_uom_unchanged_after_fulfilment(child_item, new_data):
@@ -4760,7 +4765,7 @@ def update_child_qty_rate(
 		_removed_items = validate_and_delete_children(parent, data, ordered_items)
 	elif parent_doctype == "Supplier Quotation":
 		rfqs_before_update = parent.get_request_for_quotations()
-		purchased_items = get_purchased_items(parent.name)
+		purchased_items = get_ordered_supplier_quotation_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, purchased_items)
 	else:
 		_removed_items = validate_and_delete_children(
@@ -5006,6 +5011,7 @@ def update_child_qty_rate(
 
 	elif parent_doctype == "Supplier Quotation":
 		parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), rfqs_before_update)
+		parent.set_status(update=True)
 
 	elif parent_doctype == "Quotation":
 		parent.set_status(update=True)
