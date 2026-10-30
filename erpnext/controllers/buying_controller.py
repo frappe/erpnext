@@ -596,7 +596,7 @@ class BuyingController(SubcontractingController):
 						"Buying Settings", "set_valuation_rate_for_rejected_materials"
 					)
 				):
-					net_rate = item.rejected_qty * item.net_rate
+					net_rate = item.rejected_qty * item.base_net_rate
 
 				qty_in_stock_uom = (
 					get_stock_qty(item, item.qty)
