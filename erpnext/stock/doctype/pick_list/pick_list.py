@@ -20,7 +20,11 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+<<<<<<< HEAD
 	get_picked_serial_nos,
+=======
+	get_reserved_serial_nos_for_sre,
+>>>>>>> e53e5b8 (fix(stock): skip serial nos reserved for other vouchers in pick list)
 )
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
@@ -1172,6 +1176,16 @@ def get_available_item_locations(
 			company,
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
+<<<<<<< HEAD
+=======
+		locations = remove_stock_reserved_for_others(item_code, locations, own_vouchers)
+
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
+
+	if exclude_warehouses:
+		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
+>>>>>>> e53e5b8 (fix(stock): skip serial nos reserved for other vouchers in pick list)
 
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
@@ -1453,9 +1467,32 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 	return delivery_note
 
 
+<<<<<<< HEAD
 def create_dn_wo_so(pick_list, delivery_note=None):
 	if not delivery_note:
 		delivery_note = frappe.new_doc("Delivery Note")
+=======
+def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=None):
+	reserved_serial_nos = {
+		row.serial_no
+		for row in get_reserved_serial_nos_for_sre(frappe._dict(item_code=item_code))
+		if row.voucher_no not in (own_vouchers or ())
+	}
+	if not reserved_serial_nos:
+		return locations
+
+	for location in locations:
+		location.serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty = len(location.serial_nos)
+
+	return [location for location in locations if location.qty > 0]
+
+
+def check_pick_list_company(company: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	if not isinstance(company, str) or not company:
+		return
+>>>>>>> e53e5b8 (fix(stock): skip serial nos reserved for other vouchers in pick list)
 
 	delivery_note.company = pick_list.company
 
