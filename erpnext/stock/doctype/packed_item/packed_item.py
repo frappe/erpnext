@@ -267,19 +267,15 @@ def get_component_conversion_factor(packing_item, stock_uom):
 def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
 	# TODO batch_no, actual_batch_qty, incoming_rate
 	if main_item_row.get("so_detail"):
-		warehouse, reserve_stock = (
-			frappe.get_value(
-				"Packed Item",
-				{
-					"parent_detail_docname": main_item_row.so_detail,
-					"parent_item": main_item_row.item_code,
-					"item_code": packing_item.item_code,
-				},
-				["warehouse", "reserve_stock"],
-			)
-			or None,
-			None,
-		)
+		warehouse, reserve_stock = frappe.get_value(
+			"Packed Item",
+			{
+				"parent_detail_docname": main_item_row.so_detail,
+				"parent_item": main_item_row.item_code,
+				"item_code": packing_item.item_code,
+			},
+			["warehouse", "reserve_stock"],
+		) or (None, None)
 
 		if reserve_stock:
 			pi_row.warehouse = warehouse
