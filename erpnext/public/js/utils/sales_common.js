@@ -81,7 +81,12 @@ erpnext.sales_common = {
 						}
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { is_sales_item: 1, customer: customer, has_variants: 0 },
+							filters: {
+								is_sales_item: 1,
+								customer: customer,
+								has_variants: 0,
+								company: me.frm.doc.company,
+							},
 						};
 					});
 				}
