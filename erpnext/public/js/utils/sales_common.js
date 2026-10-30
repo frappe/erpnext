@@ -78,7 +78,7 @@ erpnext.sales_common = {
 					this.frm.set_query("item_code", "items", function () {
 						return {
 							query: "erpnext.controllers.queries.sales_item_query",
-							filters: {
+							query_args: {
 								customer: me.frm.doc.customer,
 								quotation_to: me.frm.doc.quotation_to,
 								party_name: me.frm.doc.party_name,

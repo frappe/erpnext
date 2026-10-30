@@ -115,7 +115,7 @@ $.extend(erpnext.queries, {
 	dispatch_address_query: function (doc) {
 		return {
 			query: "erpnext.controllers.queries.company_address_query",
-			filters: {
+			query_args: {
 				company: doc.company,
 				delivered_by_supplier: (doc.items || []).map((item) => item.delivered_by_supplier),
 			},
@@ -164,7 +164,7 @@ $.extend(erpnext.queries, {
 	get_filtered_dimensions: function (doc, child_fields, dimension, company) {
 		return {
 			query: "erpnext.controllers.queries.dimension_query",
-			filters: {
+			query_args: {
 				dimension: dimension,
 				accounts: child_fields.map((field) => doc[field]),
 				company: company,
@@ -208,7 +208,7 @@ erpnext.queries.setup_warehouse_query = function (frm) {
 	frm.set_query("warehouse", "items", function (doc, cdt, cdn) {
 		return {
 			query: "erpnext.controllers.queries.item_warehouse_query",
-			filters: { company: frm.doc.company, item_code: locals[cdt][cdn].item_code },
+			query_args: { company: frm.doc.company, item_code: locals[cdt][cdn].item_code },
 		};
 	});
 };

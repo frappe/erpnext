@@ -3168,7 +3168,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const item = frappe.get_doc(cdt, cdn);
 		return {
 			query: "erpnext.controllers.queries.transaction_batch_query",
-			filters: {
+			query_args: {
 				voucher_type: doc.doctype,
 				item_code: item.item_code,
 				warehouse: item.warehouse,
@@ -3183,7 +3183,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const item = frappe.get_doc(cdt, cdn);
 		return {
 			query: "erpnext.controllers.queries.item_tax_template_query",
-			filters: {
+			query_args: {
 				item_code: item.item_code,
 				item_group: item.item_group,
 				base_net_rate: item.base_net_rate,

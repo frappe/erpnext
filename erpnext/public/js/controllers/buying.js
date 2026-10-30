@@ -49,7 +49,7 @@ erpnext.buying = {
 					this.frm.set_query("shipping_address", (doc, cdt, cdn, frm) => {
 						const query = erpnext.queries.company_address_query(doc, cdt, cdn, frm);
 						// a drop ship to the customer
-						query.filters.customer = this.frm.doc.customer;
+						query.query_args.customer = this.frm.doc.customer;
 						return query;
 					});
 				}
@@ -88,7 +88,7 @@ erpnext.buying = {
 				this.frm.set_query("item_code", "items", function () {
 					return {
 						query: "erpnext.controllers.queries.purchase_item_query",
-						filters: {
+						query_args: {
 							supplier: me.frm.doc.supplier,
 							company: me.frm.doc.company,
 							is_subcontracted: me.frm.doc.is_subcontracted,

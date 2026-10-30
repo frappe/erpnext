@@ -507,7 +507,7 @@ Object.assign(erpnext.journal_entry, {
 			const row = frappe.get_doc(cdt, cdn);
 			return {
 				query: "erpnext.controllers.queries.project_query",
-				filters: { company: doc.company, party_type: row.party_type, party: row.party },
+				query_args: { company: doc.company, party_type: row.party_type, party: row.party },
 			};
 		});
 

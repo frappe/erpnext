@@ -29,7 +29,7 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_query("project", function (doc) {
 			return {
 				query: "erpnext.controllers.queries.project_query",
-				filters: { company: doc.company, party_type: doc.party_type, party: doc.party },
+				query_args: { company: doc.company, party_type: doc.party_type, party: doc.party },
 			};
 		});
 

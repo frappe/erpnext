@@ -1377,9 +1377,9 @@ def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, 
 	return query.run(as_list=1)
 
 
-# Link queries that take the form's values as filters and work out the search from them, so the
-# form's JS only passes values. Each calls its search through `frappe.call`, which passes it the
-# args Frappe passes a query.
+# Link queries that take the form's values as `query_args` and work out the search from them, so
+# the form's JS only passes values. `filters` are the link field's own (its Link Filters), and are
+# kept. Each calls its search through `frappe.call`, which passes it the args Frappe passes a query.
 
 
 def standard_search(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters, **kwargs):
@@ -1403,11 +1403,6 @@ def standard_search(doctype: str, txt: str, searchfield: str, start: int, page_l
 	)
 
 
-def get_field_filters(filters: dict, *form_fields: str) -> dict:
-	"""The link field's own filters (its Link Filters), which Desk adds to the form's values."""
-	return {fieldname: value for fieldname, value in filters.items() if fieldname not in form_fields}
-
-
 def get_filter_list(doctype: str, filters: dict) -> list:
 	"""`filters` as `[doctype, fieldname, operator, value]` rows."""
 	return [
@@ -1419,71 +1414,75 @@ def get_filter_list(doctype: str, filters: dict) -> list:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def transaction_batch_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The batches of a transaction's item; `voucher_type` is the transaction's doctype."""
-	if not filters.get("item_code"):
+	query_args = query_args or {}
+	if not query_args.get("item_code"):
 		frappe.throw(_("Please enter Item Code to get batch no"))
 
-	field_filters = get_field_filters(
-		filters, "voucher_type", "item_code", "warehouse", "posting_date", "is_return", "update_stock"
-	)
-	voucher_type = filters.get("voucher_type")
+	voucher_type = query_args.get("voucher_type")
 	if voucher_type == "Purchase Receipt" or (
-		voucher_type == "Purchase Invoice" and filters.get("update_stock")
+		voucher_type == "Purchase Invoice" and query_args.get("update_stock")
 	):
-		search_filters = {"item": filters["item_code"], **field_filters}
+		search_filters = {"item": query_args["item_code"], **filters}
 		return standard_search(doctype, txt, searchfield, start, page_len, search_filters, **kwargs)
 
 	batch_filters = {
-		"item_code": filters["item_code"],
-		"posting_date": filters.get("posting_date") or nowdate(),
+		"item_code": query_args["item_code"],
+		"posting_date": query_args.get("posting_date") or nowdate(),
 	}
-	if filters.get("is_return"):
+	if query_args.get("is_return"):
 		batch_filters["is_return"] = 1
 		if voucher_type in ("Sales Invoice", "Delivery Note"):
 			batch_filters["is_inward"] = 1
 
-	if filters.get("warehouse"):
-		batch_filters["warehouse"] = filters["warehouse"]
+	if query_args.get("warehouse"):
+		batch_filters["warehouse"] = query_args["warehouse"]
 
-	batch_filters.update(field_filters)
+	batch_filters.update(filters)
 	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_tax_template_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The tax templates of a transaction's item: its own and its item group's, else the company's."""
-	field_filters = get_field_filters(
-		filters,
-		"item_code",
-		"item_group",
-		"base_net_rate",
-		"transaction_date",
-		"bill_date",
-		"posting_date",
-		"tax_category",
-		"company",
-	)
-	if not filters.get("item_code"):
-		company_filters = {"company": filters.get("company"), **field_filters}
+	query_args = query_args or {}
+	if not query_args.get("item_code"):
+		company_filters = {"company": query_args.get("company"), **filters}
 		return standard_search(doctype, txt, searchfield, start, page_len, company_filters, **kwargs)
 
 	template_filters = {
-		"item_code": filters["item_code"],
+		"item_code": query_args["item_code"],
 		"valid_from": [
 			"<=",
-			filters.get("transaction_date") or filters.get("bill_date") or filters.get("posting_date"),
+			query_args.get("transaction_date")
+			or query_args.get("bill_date")
+			or query_args.get("posting_date"),
 		],
-		"item_group": filters.get("item_group"),
-		"base_net_rate": filters.get("base_net_rate"),
-		"tax_category": filters.get("tax_category"),
-		"company": filters.get("company"),
+		"item_group": query_args.get("item_group"),
+		"base_net_rate": query_args.get("base_net_rate"),
+		"tax_category": query_args.get("tax_category"),
+		"company": query_args.get("company"),
 		"disabled": 0,
-		**field_filters,
+		**filters,
 	}
 	return frappe.call(
 		get_tax_template, doctype, txt, searchfield, start, page_len, template_filters, **kwargs
@@ -1493,18 +1492,26 @@ def item_tax_template_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_warehouse_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""A row's warehouses of the company, with the item's stock in each once the row has an item."""
+	query_args = query_args or {}
 	warehouse_filters = [
-		["Warehouse", "company", "in", ["", filters.get("company") or ""]],
+		["Warehouse", "company", "in", ["", query_args.get("company") or ""]],
 		["Warehouse", "is_group", "=", 0],
-		*get_filter_list("Warehouse", get_field_filters(filters, "company", "item_code")),
+		*get_filter_list("Warehouse", filters),
 	]
-	if not filters.get("item_code"):
+	if not query_args.get("item_code"):
 		return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)
 
-	warehouse_filters.append(["Bin", "item_code", "=", filters["item_code"]])
+	warehouse_filters.append(["Bin", "item_code", "=", query_args["item_code"]])
 	return frappe.call(
 		warehouse_query, doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs
 	)
@@ -1513,35 +1520,51 @@ def item_warehouse_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def purchase_item_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The items a purchase can buy: non-stock ones when subcontracted, else purchase items."""
-	item_filters = {"supplier": filters.get("supplier"), "company": filters.get("company")}
-	if filters.get("is_subcontracted"):
+	query_args = query_args or {}
+	item_filters = {"supplier": query_args.get("supplier"), "company": query_args.get("company")}
+	if query_args.get("is_subcontracted"):
 		item_filters["is_stock_item"] = 0
 	else:
 		item_filters.update({"is_purchase_item": 1, "has_variants": 0})
 
-	item_filters.update(get_field_filters(filters, "supplier", "company", "is_subcontracted"))
+	item_filters.update(filters)
 	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def sales_item_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The items a sale can sell, to its customer: a Quotation's party when it is a customer."""
-	customer = filters.get("customer")
-	if filters.get("quotation_to") == "Customer":
-		customer = filters.get("party_name")
+	query_args = query_args or {}
+	customer = query_args.get("customer")
+	if query_args.get("quotation_to") == "Customer":
+		customer = query_args.get("party_name")
 
 	item_filters = {
 		"is_sales_item": 1,
 		"customer": customer,
 		"has_variants": 0,
-		"company": filters.get("company"),
-		**get_field_filters(filters, "customer", "quotation_to", "party_name", "company"),
+		"company": query_args.get("company"),
+		**filters,
 	}
 	return frappe.call(item_query, doctype, txt, searchfield, start, page_len, item_filters, **kwargs)
 
@@ -1549,15 +1572,23 @@ def sales_item_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def dimension_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""An accounting dimension's values for the first of `accounts` that is set."""
-	account = next((account for account in filters.get("accounts") or [] if account), None)
+	query_args = query_args or {}
+	account = next((account for account in query_args.get("accounts") or [] if account), None)
 	dimension_filters = {
-		"dimension": filters.get("dimension"),
+		"dimension": query_args.get("dimension"),
 		"account": account,
-		"company": filters.get("company"),
-		**get_field_filters(filters, "dimension", "accounts", "company"),
+		"company": query_args.get("company"),
+		**filters,
 	}
 	return frappe.call(
 		get_filtered_dimensions, doctype, txt, searchfield, start, page_len, dimension_filters, **kwargs
@@ -1567,14 +1598,22 @@ def dimension_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def project_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The company's projects, of the party too when it is a customer."""
-	project_filters = {"company": filters.get("company")}
-	if filters.get("party_type") == "Customer":
-		project_filters["customer"] = filters.get("party")
+	query_args = query_args or {}
+	project_filters = {"company": query_args.get("company")}
+	if query_args.get("party_type") == "Customer":
+		project_filters["customer"] = query_args.get("party")
 
-	project_filters.update(get_field_filters(filters, "company", "party_type", "party"))
+	project_filters.update(filters)
 	return frappe.call(
 		get_project_name, doctype, txt, searchfield, start, page_len, project_filters, **kwargs
 	)
@@ -1583,18 +1622,26 @@ def project_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def company_address_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The company's addresses. For a drop ship, the customer's when the document has one, else any:
 	`delivered_by_supplier` are the items' values."""
 	from frappe.contacts.doctype.address.address import address_query
 
-	if filters.get("customer"):
-		address_filters = {"link_doctype": "Customer", "link_name": filters["customer"]}
-	elif any(filters.get("delivered_by_supplier") or []):
+	query_args = query_args or {}
+	if query_args.get("customer"):
+		address_filters = {"link_doctype": "Customer", "link_name": query_args["customer"]}
+	elif any(query_args.get("delivered_by_supplier") or []):
 		address_filters = {}
 	else:
-		address_filters = {"link_doctype": "Company", "link_name": filters.get("company")}
+		address_filters = {"link_doctype": "Company", "link_name": query_args.get("company")}
 
-	address_filters.update(get_field_filters(filters, "customer", "delivered_by_supplier", "company"))
+	address_filters.update(filters)
 	return frappe.call(address_query, doctype, txt, searchfield, start, page_len, address_filters, **kwargs)
