@@ -85,6 +85,17 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		valid.db_set("valid_till", add_days(today(), -1))
 		self.assertRaises(frappe.ValidationError, make_purchase_order, valid.name)
 
+	def test_set_expired_status_skips_drafts(self):
+		rfq = make_request_for_quotation()
+		draft = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[0].supplier)
+		draft.transaction_date = add_days(today(), -10)
+		draft.valid_till = add_days(today(), -2)
+		draft.insert()
+
+		set_expired_status()
+
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", draft.name, "status"), "Draft")
+
 	def test_purchase_order_updates_order_status(self):
 		supplier_quotation = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		supplier_quotation.submit()
