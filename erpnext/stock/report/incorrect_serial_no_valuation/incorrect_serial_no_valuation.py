@@ -173,9 +173,8 @@ def get_columns():
 		{"label": _("Posting Time"), "fieldtype": "Time", "fieldname": "posting_time", "width": 90},
 		{
 			"label": _("Voucher Type"),
-			"fieldtype": "Link",
+			"fieldtype": "Select",
 			"fieldname": "voucher_type",
-			"options": "DocType",
 			"width": 100,
 		},
 		{
