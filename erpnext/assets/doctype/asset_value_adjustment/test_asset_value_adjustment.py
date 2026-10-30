@@ -410,6 +410,10 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertEqual(asset_doc.finance_books[0].value_after_depreciation, 40000.0)
 		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 2000.0)
 
+		adj_doc.cancel()
+		asset_doc.load_from_db()
+		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 5000.0)
+
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)
