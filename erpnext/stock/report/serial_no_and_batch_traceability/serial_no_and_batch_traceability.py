@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
@@ -348,6 +349,9 @@ class ReportData:
 				query = query.where(doctype.item == self.filters.item_code)
 
 		item_field = doctype.item_code if self.doctype_name == "Serial No" else doctype.item
+		if condition := get_allowed_masters_condition(item_field, "Item"):
+			query = query.where(condition)
+
 		number_field = doctype.serial_no if self.doctype_name == "Serial No" else doctype.batch_id
 		return query.orderby(number_field).orderby(item_field).run(as_dict=True)
 

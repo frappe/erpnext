@@ -361,6 +361,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
 		self.update_requested_qty_in_job_card()
+		self.update_requested_qty_in_work_order()
 		self.update_prevdoc_status()
 		if self.material_request_type == "Purchase" and frappe.db.exists(
 			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
@@ -372,6 +373,18 @@ class MaterialRequest(BuyingController):
 
 	def before_submit(self):
 		self.set_status(update=True)
+		self.validate_pending_qty_in_work_order()
+
+	def validate_pending_qty_in_work_order(self):
+		if not self.work_order or self.material_request_type != "Material Transfer":
+			return
+
+		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)
+		incoming = {}
+		for row in self.items:
+			incoming[row.item_code] = incoming.get(row.item_code, 0.0) + flt(row.stock_qty)
+
+		work_order.validate_incoming_material_demand(incoming)
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
@@ -392,6 +405,7 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_requested_qty_in_job_card()
+		self.update_requested_qty_in_work_order()
 
 	def status_can_change(self, status):
 		"""
@@ -422,6 +436,7 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty_in_production_plan(cancel=True)
 		self.update_requested_qty()
 		self.update_requested_qty_in_job_card()
+		self.update_requested_qty_in_work_order()
 		self.update_prevdoc_status()
 
 	def get_mr_items_ordered_qty(self, mr_items):
@@ -512,6 +527,17 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
+
+		self.update_requested_qty_in_work_order()
+
+	def update_requested_qty_in_work_order(self):
+		"""Refresh both counters: stop and cancel also flip pick list coverage."""
+		if not self.work_order or self.material_request_type != "Material Transfer":
+			return
+
+		work_order = frappe.get_doc("Work Order", self.work_order)
+		work_order.update_requested_qty_for_required_items()
+		work_order.update_picked_qty_for_required_items()
 
 	def update_requested_qty_in_job_card(self):
 		if self.job_card:
@@ -1236,7 +1262,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str, company: str):
 	mr = frappe.get_doc("Material Request", material_request)
 	mr.check_permission("read")
