@@ -124,9 +124,11 @@ class FIFOValuation(BinWiseValuation):
 
 			index = None
 			if outgoing_rate > 0 or is_return_purchase_entry:
-				# Find the entry where rate matched with outgoing rate
+				# Compare at database precision without changing the queue rate.
 				for idx, fifo_bin in enumerate(self.queue):
-					if fifo_bin[RATE] == outgoing_rate:
+					if flt(fifo_bin[RATE], 9, rounding_method="Commercial Rounding") == flt(
+						outgoing_rate, 9, rounding_method="Commercial Rounding"
+					):
 						index = idx
 						break
 
