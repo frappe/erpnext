@@ -431,6 +431,113 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 200.0)
 		self.assertEqual(si.payment_schedule[1].paid_amount, 36.0)
 
+	def test_payment_schedule_records_only_applied_discounts(self):
+		create_payment_terms_template_with_discount()
+		create_payment_term("Remaining Balance")
+		frappe.db.set_value("Company", "_Test Company", "default_discount_account", "Write Off - _TC")
+		frappe.db.set_single_value("Accounts Settings", "book_tax_discount_loss", 0)
+		template = frappe.copy_doc(frappe.get_doc("Payment Terms Template", "Test Discount Template"))
+		template.template_name = "_Test Instalment Discount Template"
+		template.terms[0].invoice_portion = 50
+		template.terms[0].discount_validity = 5
+		template.append(
+			"terms",
+			{
+				"payment_term": "Remaining Balance",
+				"invoice_portion": 50,
+				"credit_days_based_on": "Day(s) after invoice date",
+				"credit_days": 30,
+			},
+		)
+		template.insert()
+
+		for discount_type in ("Percentage", "Amount"):
+			template.terms[0].discount_type = discount_type
+			template.terms[0].discount = 10 if discount_type == "Percentage" else 100
+			template.save()
+			for make_invoice in (create_sales_invoice, make_purchase_invoice):
+				for timing in ("late", "early", "without_discount"):
+					with self.subTest(
+						discount_type=discount_type, invoice=make_invoice.__name__, timing=timing
+					):
+						invoice = make_invoice(qty=1, rate=1000, do_not_save=True)
+						invoice.payment_terms_template = template.name
+						invoice.submit()
+						payment = get_payment_entry(
+							invoice.doctype,
+							invoice.name,
+							bank_account="_Test Cash - _TC",
+							reference_date=add_days(nowdate(), 6) if timing == "late" else nowdate(),
+						)
+						payment.references = payment.references[:1]
+						payment.references[0].allocated_amount = 250 if timing == "early" else 500
+						payment.paid_amount = payment.received_amount = 150 if timing == "early" else 500
+						if timing == "without_discount":
+							payment.set("deductions", [])
+						payment.submit()
+						invoice.reload()
+						self.assertEqual(invoice.payment_schedule[0].paid_amount, payment.paid_amount)
+						self.assertEqual(
+							invoice.payment_schedule[0].discounted_amount, 100 if timing == "early" else 0
+						)
+						self.assertEqual(
+							invoice.payment_schedule[0].outstanding, 250 if timing == "early" else 0
+						)
+
+						remaining = get_payment_entry(
+							invoice.doctype,
+							invoice.name,
+							bank_account="_Test Cash - _TC",
+							reference_date=payment.reference_date,
+						)
+						self.assertEqual(
+							[row.allocated_amount for row in remaining.references],
+							[250, 500] if timing == "early" else [500],
+						)
+						self.assertEqual(remaining.paid_amount, 750 if timing == "early" else 500)
+						self.assertFalse(remaining.deductions)
+						remaining.submit()
+						self.assertEqual(invoice.reload().outstanding_amount, 0)
+						self.assertEqual(
+							invoice.payment_schedule[0].paid_amount, 400 if timing == "early" else 500
+						)
+						self.assertEqual(
+							invoice.payment_schedule[0].discounted_amount, 100 if timing == "early" else 0
+						)
+
+						payment.reload().cancel()
+						self.assertEqual(
+							invoice.reload().payment_schedule[0].paid_amount, 250 if timing == "early" else 0
+						)
+						self.assertEqual(invoice.payment_schedule[0].discounted_amount, 0)
+						remaining.reload().cancel()
+						invoice.reload()
+						self.assertEqual(invoice.outstanding_amount, 1000)
+						for term in invoice.payment_schedule:
+							self.assertEqual(term.paid_amount, 0)
+							self.assertEqual(term.discounted_amount, 0)
+							self.assertEqual(term.outstanding, 500)
+							self.assertEqual(term.base_outstanding, 500)
+
+		invoice = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		invoice.payment_terms_template = "Test Discount Template"
+		invoice.submit()
+		request = make_payment_request(
+			dt=invoice.doctype, dn=invoice.name, submit_doc=True, return_doc=True, mute_email=True
+		)
+		payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+		payment.references[0].allocated_amount = 1
+		payment.append("references", frappe.copy_doc(payment.references[0]))
+		payment.references[1].idx = 2
+		payment.references[1].payment_request = None
+		payment.references[1].allocated_amount = 999
+		payment.submit()
+		self.assertEqual([row.payment_term_discount for row in payment.reload().references], [1, 99])
+		self.assertEqual(invoice.reload().payment_schedule[0].paid_amount, 900)
+		payment.cancel()
+		self.assertEqual(invoice.reload().payment_schedule[0].paid_amount, 0)
+		self.assertEqual(request.reload().outstanding_amount, 1000)
+
 	def test_payment_entry_against_payment_terms_with_discount_on_pi(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		create_payment_terms_template_with_discount()
