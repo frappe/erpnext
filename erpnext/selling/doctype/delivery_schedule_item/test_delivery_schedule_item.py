@@ -108,6 +108,27 @@ class TestDeliveryScheduleItem(IntegrationTestCase):
 				other_so.items[0], [{"delivery_date": today(), "qty": 1}]
 			)
 
+	def test_schedule_takes_item_details_from_the_order_row(self):
+		so = make_sales_order(qty=10, do_not_submit=True)
+		row = so.items[0]
+		request_row = row.as_dict()
+		request_row.update({"item_code": "_Test Item 2", "conversion_factor": 5, "warehouse": None})
+
+		DeliveryScheduleService(so).create_delivery_schedule(
+			request_row, [{"delivery_date": today(), "qty": 4}]
+		)
+
+		schedule = frappe.get_all(
+			"Delivery Schedule Item",
+			{"sales_order": so.name},
+			["item_code", "warehouse", "conversion_factor", "stock_qty"],
+		)
+		self.assertEqual(len(schedule), 1)
+		self.assertEqual(schedule[0].item_code, row.item_code)
+		self.assertEqual(schedule[0].warehouse, row.warehouse)
+		self.assertEqual(schedule[0].conversion_factor, row.conversion_factor)
+		self.assertEqual(schedule[0].stock_qty, 4 * row.conversion_factor)
+
 	def test_schedule_needs_write_access_to_the_order(self):
 		so = make_sales_order(qty=10, do_not_submit=True)
 		row = so.items[0]
