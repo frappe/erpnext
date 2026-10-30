@@ -783,28 +783,32 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
-		pending_qty = self.get_pending_qty_to_mfg()
+		transferred_qty = flt(self.wo_doc.material_transferred_for_manufacturing)
+		pending_qty_to_mfg = transferred_qty - self.get_manufactured_qty()
 		fg_completed_qty = flt(self.doc.fg_completed_qty)
 		precision = self.doc.precision("fg_completed_qty")
+		if not self.doc.get("is_return") and (
+			flt(pending_qty_to_mfg, precision) <= 0 or not fg_completed_qty
+		):
+			return
+
 		for material in self.available_materials.values():
-			pending_qty_to_mfg = pending_qty - sum(material.consumed_for.values())
-			if flt(pending_qty_to_mfg, precision) <= 0 and not self.doc.get("is_return"):
-				continue
+			# a material is only covered by the entries that consumed it
+			pending_qty = transferred_qty - sum(material.consumed_for.values())
+			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, precision) <= 0:
+				# an entry for all that is pending consumes what is left
+				self._append_transfer_based_rm(material, fg_completed_qty)
+			elif flt(pending_qty, precision) > 0:
+				self._append_transfer_based_rm(material, pending_qty)
 
-			# an entry for all that is pending consumes what is left
-			if flt(pending_qty_to_mfg - fg_completed_qty, precision) <= 0:
-				pending_qty_to_mfg = fg_completed_qty
-			self._append_transfer_based_rm(material, pending_qty_to_mfg)
-
-	def get_pending_qty_to_mfg(self):
-		"""Qty not manufactured yet; Material Consumption entries are counted per material."""
-		# Count each entry once; For Quantity includes its process loss.
+	def get_manufactured_qty(self):
+		"""For Quantity of the Manufacture entries that consumed raw materials, with their process loss."""
 		manufactured_qty = {
 			row.parent: flt(row.fg_completed_qty)
 			for row in self._consumption_entries
 			if row.purpose == "Manufacture"
 		}
-		return flt(self.wo_doc.material_transferred_for_manufacturing) - sum(manufactured_qty.values())
+		return sum(manufactured_qty.values())
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -1012,8 +1016,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			else:
 				self._deduct_consumed_qty(buckets, flt(row.transfer_qty))
 
-			if row.purpose == "Material Consumption for Manufacture":
-				# it only covers the materials it consumed
+			if row.purpose != "Material Transfer for Manufacture":
 				for bucket, qty in zip(buckets, available_qty, strict=True):
 					if bucket.qty != qty:
 						bucket.consumed_for[row.parent] = flt(row.fg_completed_qty)
