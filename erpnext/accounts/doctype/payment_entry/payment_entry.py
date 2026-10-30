@@ -1008,11 +1008,7 @@ class PaymentEntry(AccountsController):
 		ref_currency, ref_exchange_rate = frappe.db.get_value(
 			reference_doctype, reference_docname, ["currency", "conversion_rate"]
 		)
-		is_single_currency = self.paid_from_account_currency == self.paid_to_account_currency
-		# PE in different currency
-		reference_is_multi_currency = self.paid_from_account_currency != ref_currency
-
-		if not (is_single_currency and reference_is_multi_currency):
+		if self.party_account_currency == ref_currency:
 			return allocated_amount
 
 		allocated_amount = flt(allocated_amount / ref_exchange_rate, self.precision("total_allocated_amount"))
@@ -3077,7 +3073,7 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
-				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments():
+				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments(in_account_currency=True):
 					pe.append(
 						"references",
 						{
@@ -3392,8 +3388,14 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 		outstanding_amount = doc.outstanding_amount
 	elif dt == "Dunning":
 		# only what is left to collect, the totals on the dunning are the ones it was raised with
-		grand_total = sum(outstanding for _row, outstanding in doc.get_unpaid_overdue_payments())
-		grand_total += doc.get_unpaid_dunning_amount()
+		grand_total = sum(
+			outstanding for row, outstanding in doc.get_unpaid_overdue_payments(in_account_currency=True)
+		)
+		grand_total += (
+			doc.get_unpaid_dunning_amount()
+			if party_account_currency == doc.currency
+			else doc.get_unpaid_base_dunning_amount()
+		)
 		outstanding_amount = grand_total
 	else:
 		if party_account_currency == doc.company_currency:
