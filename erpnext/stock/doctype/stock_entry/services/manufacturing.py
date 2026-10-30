@@ -792,8 +792,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				if row.purpose in ("Manufacture", "Material Consumption for Manufacture")
 				and self._get_available_buckets(row)
 			}
-			pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - sum(
-				consumed_fg_qty.values()
+			pending_qty_to_mfg = flt(
+				flt(self.wo_doc.material_transferred_for_manufacturing) - sum(consumed_fg_qty.values()),
+				self.doc.precision("fg_completed_qty"),
 			)
 		if pending_qty_to_mfg <= 0 and not self.doc.get("is_return"):
 			return
