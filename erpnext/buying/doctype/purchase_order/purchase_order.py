@@ -24,6 +24,7 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 )
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from erpnext.stock.get_item_details import get_default_bom
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
@@ -123,6 +124,7 @@ class PurchaseOrder(BuyingController):
 		pricing_rules: DF.Table[PricingRuleDetail]
 		project: DF.Link | None
 		ref_sq: DF.Link | None
+		remarks: DF.SmallText | None
 		represents_company: DF.Link | None
 		rounded_total: DF.Currency
 		rounding_adjustment: DF.Currency
@@ -186,7 +188,15 @@ class PurchaseOrder(BuyingController):
 				"global_allowance_field": "over_order_allowance",
 				"global_allowance_doctype": "Buying Settings",
 				"item_allowance_field": "over_order_allowance",
-			}
+			},
+			{
+				"source_dt": "Purchase Order Item",
+				"target_dt": "Supplier Quotation Item",
+				"join_field": "supplier_quotation_item",
+				"target_field": "ordered_qty",
+				"target_ref_field": "stock_qty",
+				"source_field": "stock_qty",
+			},
 		]
 
 	def onload(self):
@@ -260,6 +270,7 @@ class PurchaseOrder(BuyingController):
 						["conversion_factor", "="],
 					],
 					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
 				},
 				"Material Request": {
 					"ref_dn_field": "material_request",
@@ -393,7 +404,7 @@ class PurchaseOrder(BuyingController):
 									item.idx, item.fg_item
 								)
 							)
-						elif not item.bom and not frappe.get_value("Item", item.fg_item, "default_bom"):
+						elif not item.bom and not get_default_bom(item.fg_item):
 							frappe.throw(
 								_("Row #{0}: Default BOM not found for FG Item {1}").format(
 									item.idx, item.fg_item
@@ -469,6 +480,16 @@ class PurchaseOrder(BuyingController):
 			self.status_updater[0]["source_field"] = "fg_item_qty"
 
 		super().update_prevdoc_status()
+
+		for supplier_quotation in {item.supplier_quotation for item in self.items}:
+			if not supplier_quotation:
+				continue
+
+			doc = frappe.get_doc("Supplier Quotation", supplier_quotation)
+			if doc.docstatus.is_cancelled():
+				frappe.throw(_("Supplier Quotation {0} is cancelled").format(supplier_quotation))
+
+			doc.set_status(update=True)
 
 	def update_status(self, status):
 		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
