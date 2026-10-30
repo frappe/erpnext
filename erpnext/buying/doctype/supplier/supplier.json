@@ -55,6 +55,9 @@
   "tax_withholding_category",
   "tax_withholding_group",
   "settings_tab",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
   "invoice_settings_section",
   "is_transporter",
   "allow_purchase_invoice_creation_without_purchase_order",
@@ -450,6 +453,29 @@
    "label": "Settings"
   },
   {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "description": "If checked, this Supplier is only available for transactions in the companies listed below.",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:doc.restrict_to_companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
+  },
+  {
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
    "label": "Address & Contact"
@@ -578,7 +604,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -658,6 +684,12 @@
   {
    "role": "Website Manager",
    "select": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase Master Manager",
+   "write": 1
   }
  ],
  "quick_entry": 1,

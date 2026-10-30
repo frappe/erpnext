@@ -42,6 +42,7 @@ from erpnext.accounts.party import (
 	complete_contact_details,
 	get_default_contact,
 	get_party_account,
+	validate_party_company,
 )
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -508,6 +509,8 @@ class PaymentEntry(AccountsController):
 			d = frappe._dict(d)
 			latest_lookup.setdefault((d.voucher_type, d.voucher_no), frappe._dict())[d.payment_term] = d
 
+		allocated_amounts = {}
+		allocated_term_amounts = {}
 		for idx, d in enumerate(self.get("references"), start=1):
 			latest = latest_lookup.get((d.reference_doctype, d.reference_name)) or frappe._dict()
 
@@ -545,28 +548,36 @@ class PaymentEntry(AccountsController):
 
 			precision = d.precision("allocated_amount")
 			allocated_amount = flt(d.allocated_amount, precision)
-			outstanding_amount = flt(latest.outstanding_amount, precision)
+			key = (d.reference_doctype, d.reference_name)
+			allocated_amounts[key] = allocated_amounts.get(key, 0) + allocated_amount
+			total_allocated_amount = flt(allocated_amounts[key], precision)
+			outstanding_amount = flt(
+				latest.get("invoice_outstanding_amount", latest.outstanding_amount), precision
+			)
+			term_key = (*key, latest.payment_term)
+			allocated_term_amounts[term_key] = allocated_term_amounts.get(term_key, 0) + allocated_amount
+			allocated_term_amount = flt(allocated_term_amounts[term_key], precision)
 
 			if (
 				d.payment_term
 				and (
-					allocated_amount > 0
+					allocated_term_amount > 0
 					and latest.payment_term_outstanding
-					and (allocated_amount > flt(latest.payment_term_outstanding, precision))
+					and (allocated_term_amount > flt(latest.payment_term_outstanding, precision))
 				)
 				and self.term_based_allocation_enabled_for_reference(d.reference_doctype, d.reference_name)
 			):
 				frappe.throw(
 					_(
 						"Row #{0}: Allocated amount:{1} is greater than outstanding amount:{2} for Payment Term {3}"
-					).format(d.idx, d.allocated_amount, latest.payment_term_outstanding, d.payment_term)
+					).format(d.idx, allocated_term_amount, latest.payment_term_outstanding, d.payment_term)
 				)
 
-			if allocated_amount > 0 and allocated_amount > outstanding_amount:
+			if allocated_amount > 0 and total_allocated_amount > outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
-			if allocated_amount < 0 and allocated_amount < outstanding_amount:
+			if allocated_amount < 0 and total_allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
@@ -997,11 +1008,7 @@ class PaymentEntry(AccountsController):
 		ref_currency, ref_exchange_rate = frappe.db.get_value(
 			reference_doctype, reference_docname, ["currency", "conversion_rate"]
 		)
-		is_single_currency = self.paid_from_account_currency == self.paid_to_account_currency
-		# PE in different currency
-		reference_is_multi_currency = self.paid_from_account_currency != ref_currency
-
-		if not (is_single_currency and reference_is_multi_currency):
+		if self.party_account_currency == ref_currency:
 			return allocated_amount
 
 		allocated_amount = flt(allocated_amount / ref_exchange_rate, self.precision("total_allocated_amount"))
@@ -2615,6 +2622,7 @@ def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates:
 					"voucher_type": invoice.voucher_type,
 					"posting_date": invoice.posting_date,
 					"invoice_amount": flt(invoice.invoice_amount),
+					"invoice_outstanding_amount": invoice.outstanding_amount,
 					"outstanding_amount": payment_term_outstanding
 					if payment_term_outstanding
 					else invoice.outstanding_amount,
@@ -2783,6 +2791,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 	party_to_check = None if has_ignored_field("Payment Entry", party_type) else party
 	frappe.has_permission(party_type, ptype, party_to_check, throw=True)
+	validate_party_company(party_type, party, company)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
@@ -3064,7 +3073,7 @@ def get_payment_entry(
 				pe.append("references", reference)
 		else:
 			if dt == "Dunning":
-				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments():
+				for overdue_payment, outstanding in doc.get_unpaid_overdue_payments(in_account_currency=True):
 					pe.append(
 						"references",
 						{
@@ -3379,8 +3388,14 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 		outstanding_amount = doc.outstanding_amount
 	elif dt == "Dunning":
 		# only what is left to collect, the totals on the dunning are the ones it was raised with
-		grand_total = sum(outstanding for _row, outstanding in doc.get_unpaid_overdue_payments())
-		grand_total += doc.get_unpaid_dunning_amount()
+		grand_total = sum(
+			outstanding for row, outstanding in doc.get_unpaid_overdue_payments(in_account_currency=True)
+		)
+		grand_total += (
+			doc.get_unpaid_dunning_amount()
+			if party_account_currency == doc.currency
+			else doc.get_unpaid_base_dunning_amount()
+		)
 		outstanding_amount = grand_total
 	else:
 		if party_account_currency == doc.company_currency:

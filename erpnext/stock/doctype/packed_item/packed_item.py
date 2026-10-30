@@ -53,6 +53,7 @@ class PackedItem(Document):
 		rate: DF.Currency
 		received_qty: DF.Float
 		requested_qty: DF.Float
+		reserve_stock: DF.Check
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		target_warehouse: DF.Link | None
@@ -227,6 +228,9 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
 
+	if doc.is_new() and doc.get("reserve_stock"):
+		pi_row.reserve_stock = 1
+
 	return pi_row
 
 
@@ -252,7 +256,7 @@ def get_packed_item_details(item_code, company):
 
 def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data):
 	pi_row.parent_item = main_item_row.item_code
-	pi_row.parent_detail_docname = main_item_row.name
+	pi_row.parent_detail_docname = main_item_row.name or main_item_row.idx
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
@@ -275,6 +279,20 @@ def get_component_conversion_factor(packing_item, stock_uom):
 
 def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
 	# TODO batch_no, actual_batch_qty, incoming_rate
+	if main_item_row.get("so_detail") and not doc.get("is_return"):
+		warehouse, reserve_stock = frappe.get_value(
+			"Packed Item",
+			{
+				"parent_detail_docname": main_item_row.so_detail,
+				"parent_item": main_item_row.item_code,
+				"item_code": packing_item.item_code,
+			},
+			["warehouse", "reserve_stock"],
+		) or (None, None)
+
+		if reserve_stock:
+			pi_row.warehouse = warehouse
+
 	if not pi_row.warehouse and not doc.amended_from:
 		fetch_warehouse = doc.get("is_pos") or item_data.is_stock_item or not item_data.default_warehouse
 		pi_row.warehouse = (
