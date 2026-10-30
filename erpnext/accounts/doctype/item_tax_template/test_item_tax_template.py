@@ -157,3 +157,29 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 
 		self.assertEqual(si.items[0].item_tax_template, template_18)
 		self.assertEqual(si.taxes[0].tax_amount, 180)
+
+	def test_actual_charge_breakup_with_not_applicable_item(self):
+		freight_account = "_Test Account Shipping Charges - _TC"
+		not_applicable_template = self.make_template([(freight_account, 0, 1)]).insert().name
+		exempt_item = self.make_item_with_taxes([{"item_tax_template": not_applicable_template}])
+		normal_item = make_item(properties={"is_stock_item": 0}).name
+
+		for first_item, second_item in ((exempt_item, normal_item), (normal_item, exempt_item)):
+			si = create_sales_invoice(item_code=first_item, rate=500, do_not_save=True)
+			si.append("items", {"item_code": second_item, "qty": 1, "rate": 500})
+			si.append(
+				"taxes",
+				{
+					"charge_type": "Actual",
+					"account_head": freight_account,
+					"description": "Freight",
+					"tax_amount": 100,
+				},
+			)
+			si.insert()
+
+			normal_row = next(item.name for item in si.items if item.item_code == normal_item)
+			breakup = {row.item_row: row.amount for row in si.item_wise_tax_details}
+			self.assertEqual(si.taxes[0].tax_amount, 100)
+			self.assertEqual(si.grand_total, 1100)
+			self.assertEqual(breakup, {normal_row: 100})
