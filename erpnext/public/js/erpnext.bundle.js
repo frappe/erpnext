@@ -37,5 +37,6 @@ import "./utils/demo.js";
 import "./financial_statements.js";
 import "./sales_trends_filters.js";
 import "./purchase_trends_filters.js";
+import "./subcontracting_inward_report_filters.js";
 
 // import { sum } from 'frappe/public/utils/util.js'
