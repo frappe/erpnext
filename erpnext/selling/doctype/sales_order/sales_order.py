@@ -18,6 +18,7 @@ from frappe.query_builder.functions import Abs, IfNull, Round, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 from pypika import Order
 
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
@@ -250,9 +251,7 @@ class SalesOrder(SellingController):
 		)
 
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
-
-			validate_coupon_code(self.coupon_code)
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
