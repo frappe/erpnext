@@ -3,6 +3,7 @@
 
 import datetime
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
@@ -10,6 +11,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_months, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import normal_round
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
@@ -17,6 +19,11 @@ test_dependencies = ["Supplier Group", "Customer Group"]
 
 
 class TestTaxWithholdingCategory(FrappeTestCase):
+	def test_commercial_rounding_of_return_tds(self):
+		with patch("frappe.get_system_settings", return_value="Commercial Rounding"):
+			self.assertEqual(normal_round(1006.5), 1007)
+			self.assertEqual(normal_round(-1006.5), -1007)
+
 	@classmethod
 	def setUpClass(self):
 		# create relevant supplier, etc
