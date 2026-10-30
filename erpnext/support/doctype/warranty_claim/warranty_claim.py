@@ -106,11 +106,13 @@ class WarrantyClaim(TransactionBase):
 			frappe.msgprint(message, title=_("Check Serial No"), indicator="orange")
 
 	def get_serial_no_ownership_warning(self) -> str | None:
-		serial = frappe.db.get_value("Serial No", self.serial_no, ["customer", "warehouse"], as_dict=True)
+		serial = frappe.db.get_value(
+			"Serial No", self.serial_no, ["serial_no", "customer", "warehouse"], as_dict=True
+		)
 		if not serial:
 			return None
 
-		serial_no = frappe.bold(escape_html(self.serial_no))
+		serial_no = frappe.bold(escape_html(serial.serial_no))
 		if serial.customer and serial.customer != self.customer:
 			return _("Serial No {0} was delivered to Customer {1}, not to {2}.").format(
 				serial_no, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(self.customer))

@@ -970,6 +970,7 @@ class SellingController(StockController):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_serial_nos_for_voucher_detail_nos,
 		)
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		if self.is_return or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
@@ -1011,6 +1012,7 @@ class SellingController(StockController):
 			):
 				bundle_serial_nos.setdefault(entry.parent, []).append(entry.serial_no)
 
+		identity = SerialBatchIdentity("Serial No")
 		for row in rows:
 			if not reserved_serial_nos.get(row.so_detail):
 				frappe.throw(
@@ -1021,7 +1023,11 @@ class SellingController(StockController):
 				)
 
 			bundle = bundle_map.get(row.name)
-			serial_nos = bundle_serial_nos.get(bundle, []) if bundle else get_serial_nos(row.serial_no)
+			serial_nos = (
+				bundle_serial_nos.get(bundle, [])
+				if bundle
+				else identity.resolve(row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True)
+			)
 			if invalid_serial_nos := [
 				sn for sn in serial_nos if sn not in reserved_serial_nos[row.so_detail]
 			]:
@@ -1029,7 +1035,9 @@ class SellingController(StockController):
 					_(
 						"Row #{0}: Serial No {1} is not reserved against Sales Order {2}. Deliver only the Serial Nos produced and reserved for it."
 					).format(
-						row.idx, frappe.bold(", ".join(invalid_serial_nos)), frappe.bold(row.get(so_field))
+						row.idx,
+						frappe.bold(", ".join(identity.get_label(sn) for sn in invalid_serial_nos)),
+						frappe.bold(row.get(so_field)),
 					),
 					title=_("Serial No Not Reserved"),
 				)

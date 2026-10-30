@@ -398,7 +398,9 @@ class StockController(AccountsController):
 	def validate_batch_is_usable(self, idx, batch_no, expiry_date, disabled):
 		if disabled:
 			frappe.throw(
-				_("Row #{0}: The batch {1} is disabled.").format(idx, get_link_to_form("Batch", batch_no))
+				_("Row #{0}: The batch {1} is disabled.").format(
+					idx, get_link_to_form("Batch", batch_no, SerialBatchIdentity("Batch").get_label(batch_no))
+				)
 			)
 
 		if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
@@ -529,7 +531,12 @@ class StockController(AccountsController):
 			for row in self.get(table_name) or []:
 				item_code = row.get("rm_item_code") or row.item_code
 				if row.get("serial_no"):
-					picked_serial_nos[item_code].extend(get_serial_nos(row.serial_no))
+					picked_serial_nos[item_code].extend(
+						d.name
+						for d in SerialBatchIdentity("Serial No").get_records(
+							item_code, get_serial_nos(row.serial_no), ["name"]
+						)
+					)
 				elif row.get("serial_and_batch_bundle"):
 					bundle_items[row.serial_and_batch_bundle] = item_code
 

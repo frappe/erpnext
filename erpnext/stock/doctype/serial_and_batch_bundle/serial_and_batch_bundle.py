@@ -1534,7 +1534,7 @@ class SerialandBatchBundle(Document):
 					).format(
 						row.idx,
 						abs(row.qty),
-						bold(row.batch_no),
+						bold(SerialBatchIdentity("Batch").get_label(row.batch_no)),
 						max(remaining, 0),
 					)
 				)
