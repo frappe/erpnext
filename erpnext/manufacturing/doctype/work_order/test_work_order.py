@@ -1989,6 +1989,32 @@ class TestWorkOrder(ERPNextTestSuite):
 		mr = make_material_request(work_order.name, for_qty=2.5)
 		self.assertEqual([row.qty for row in mr.items], [2])
 
+	def test_partial_qty_rounds_up_once_for_item_in_two_operations(self):
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg,
+			[
+				{"item_code": rm, "qty": 1, "operation": first_operation},
+				{"item_code": rm, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		work_order = make_review_work_order(fg, bom.name, 3)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			mr = make_material_request(work_order.name, for_qty=1.5)
+		self.assertEqual([row.qty for row in mr.items], [3])
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			mr = make_material_request(work_order.name, for_qty=1.5)
+		self.assertEqual([row.qty for row in mr.items], [2, 1])
+
 	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
 >>>>>>> 63f7e2b (test(manufacturing): partial qty request in whole number uom)
