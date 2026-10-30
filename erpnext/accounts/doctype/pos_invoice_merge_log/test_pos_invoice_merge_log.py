@@ -406,6 +406,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		self.assertNotEqual(consolidated_invoice.outstanding_amount, 800)
 		self.assertEqual(consolidated_invoice.status, "Paid")
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"round_row_wise_tax": 0})
 	@ERPNextTestSuite.change_settings(
 		"System Settings", {"number_format": "#,###.###", "currency_precision": 3, "float_precision": 3}
 	)
@@ -451,13 +452,21 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 			inv.paid_amount = -157
 			inv.save()
 			inv.submit()
+			self.assertEqual(inv.net_total, -136.522)
+			self.assertEqual(inv.total_taxes_and_charges, -20.478)
+			self.assertEqual(inv.grand_total, -157)
+			self.assertEqual(inv.rounding_adjustment, 0)
 
 		self.make_closing_entry()
 
 		inv.load_from_db()
 		consolidated_invoice = frappe.get_doc("Sales Invoice", inv.consolidated_invoice)
 		self.assertEqual(consolidated_invoice.status, "Return")
-		self.assertEqual(consolidated_invoice.rounding_adjustment, -0.002)
+		self.assertEqual(consolidated_invoice.net_total, -273.044)
+		self.assertEqual(consolidated_invoice.total_taxes_and_charges, -40.956)
+		self.assertEqual(consolidated_invoice.grand_total, -314)
+		self.assertEqual(consolidated_invoice.rounding_adjustment, 0)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
 
 	def test_consolidation_rounding_adjustment(self):
 		"""
