@@ -36,6 +36,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import InvalidWarehouseCompany
+from erpnext.tests.permission_test_utils import make_fenced_user
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -61,6 +62,91 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
+
+	def test_maximum_discount_for_percentage_amount_and_rate(self):
+		frappe.db.set_value("Price List", "Standard Selling", "currency", "INR")
+		item = make_item(properties={"is_stock_item": 0, "max_discount": 10})
+		item_price = frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "Standard Selling",
+				"price_list_rate": 100,
+			}
+		).insert()
+		user = make_fenced_user("max-discount@example.com", ["Sales User"])
+
+		with self.set_user(user):
+			for values in (
+				{"discount_percentage": 50},
+				{"discount_amount": 50, "rate": 50},
+				{"rate": 50},
+				{
+					"margin_type": "Percentage",
+					"margin_rate_or_amount": 25,
+					"discount_amount": 25,
+					"rate": 100,
+				},
+			):
+				with self.subTest(values=values):
+					order = make_sales_order(
+						item_list=[{"item_code": item.name, "qty": 1, **values}],
+						selling_price_list="Standard Selling",
+						do_not_save=True,
+					)
+					with self.assertRaisesRegex(frappe.ValidationError, "Maximum discount for Item"):
+						order.insert().submit()
+
+			for values, expected_rate in (
+				({"discount_percentage": 10}, 90),
+				({"discount_amount": 10, "rate": 90}, 90),
+				({"rate": 90}, 90),
+				(
+					{
+						"margin_type": "Percentage",
+						"margin_rate_or_amount": 25,
+						"discount_amount": 12.5,
+						"rate": 112.5,
+					},
+					112.5,
+				),
+			):
+				with self.subTest(values=values):
+					order = make_sales_order(
+						item_list=[{"item_code": item.name, "qty": 1, **values}],
+						selling_price_list="Standard Selling",
+					)
+					self.assertEqual(order.docstatus, 1)
+					self.assertEqual(order.items[0].price_list_rate, 100)
+					self.assertEqual(order.items[0].rate, expected_rate)
+
+		item_price.price_list_rate = 0.06
+		item_price.save()
+		with self.set_user(user):
+			order = make_sales_order(
+				item_list=[{"item_code": item.name, "qty": 1, "discount_percentage": 10}],
+				selling_price_list="Standard Selling",
+			)
+			self.assertAlmostEqual(order.items[0].discount_amount, 0.01)
+			self.assertEqual(order.items[0].rate, 0.05)
+
+		for price_list_rate, rate in ((0, 50), (-100, -100)):
+			item_price.price_list_rate = price_list_rate
+			item_price.save()
+			with (
+				self.subTest(price_list_rate=price_list_rate),
+				change_settings("Selling Settings", {"allow_negative_rates_for_items": 1}),
+				self.set_user(user),
+			):
+				order = make_sales_order(
+					item_list=[
+						{"item_code": item.name, "qty": 1, "rate": rate},
+						{"item_code": "_Test Item", "qty": 1, "rate": 200},
+					],
+					selling_price_list="Standard Selling",
+				)
+				self.assertEqual(order.items[0].rate, rate)
+				self.assertEqual(order.items[0].discount_amount, 0)
 
 	@change_settings(
 		"Stock Settings",
