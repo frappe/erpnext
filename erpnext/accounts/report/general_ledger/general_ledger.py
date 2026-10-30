@@ -8,6 +8,7 @@ from frappe.query_builder import Criterion
 from frappe.utils import cstr, getdate
 
 from erpnext import get_company_currency, get_default_company
+from erpnext.accounts.doctype.account_category.account_category import get_allowed_accounts
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
@@ -1123,6 +1124,14 @@ def _build_gl_conditions_duckdb(filters):
 
 	if not filters.get("show_cancelled_entries"):
 		conditions.append("is_cancelled = 0")
+
+	allowed_accounts = get_allowed_accounts()
+	if allowed_accounts is not None:
+		if allowed_accounts:
+			conditions.append(f"account IN ({', '.join(['?'] * len(allowed_accounts))})")
+			params.extend(allowed_accounts)
+		else:
+			conditions.append("1 = 0")
 
 	accounting_dimensions_list = get_accounting_dimensions(as_list=False)
 	if accounting_dimensions_list:
