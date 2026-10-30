@@ -788,7 +788,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			# Count each consuming entry once; For Quantity includes its process loss.
 			consumed_fg_qty = {
 				row.parent: flt(row.fg_completed_qty)
-				for row in getattr(self, "_consumption_entries", [])
+				for row in self._consumption_entries
 				if row.purpose in ("Manufacture", "Material Consumption for Manufacture")
 				and self._get_available_buckets(row)
 			}
@@ -909,6 +909,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def prepare_available_materials_based_on_transfer(self):
 		self.available_materials = frappe._dict()
+		self._consumption_entries = []
 		self._transfer_entries = self.get_transfer_entries()
 		if not self._transfer_entries:
 			return
