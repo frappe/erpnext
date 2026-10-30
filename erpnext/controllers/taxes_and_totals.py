@@ -8,7 +8,7 @@ import frappe
 from frappe import _, scrub
 from frappe.model.document import Document, bulk_insert
 from frappe.query_builder import functions
-from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
+from frappe.utils import cint, flt, get_link_to_form, round_based_on_smallest_currency_fraction
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
@@ -28,6 +28,7 @@ from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_item_tax_template,
 	get_item_tax_map,
+	get_item_tax_template,
 )
 from erpnext.utilities.regional import temporary_flag
 
@@ -134,7 +135,7 @@ class calculate_taxes_and_totals:
 
 				if taxes:
 					if item.item_tax_template not in taxes:
-						item.item_tax_template = taxes[0]
+						item.item_tax_template = get_item_tax_template(ctx, item_doc)
 						frappe.msgprint(
 							_(
 								"Row {0}: Item Tax template for {1} updated as per validity and rate applied"
@@ -144,6 +145,41 @@ class calculate_taxes_and_totals:
 						# For correct tax_amount calculation re-computation is required
 						if self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total":
 							self.need_recomputation = True
+
+		self.validate_item_tax_templates_are_usable()
+
+	def validate_item_tax_templates_are_usable(self):
+		if self.doc.get("_action") not in ("save", "submit") or self.doc.get("is_consolidated"):
+			return
+
+		for template in self.get_changed_item_tax_templates():
+			disabled, company = frappe.get_cached_value(
+				"Item Tax Template", template, ["disabled", "company"]
+			)
+			if disabled:
+				frappe.throw(
+					_("Item Tax Template {0} is disabled").format(
+						get_link_to_form("Item Tax Template", template)
+					),
+					title=_("Disabled Item Tax Template"),
+				)
+			if company != self.doc.company:
+				frappe.throw(
+					_("Item Tax Template {0} does not belong to Company {1}").format(
+						get_link_to_form("Item Tax Template", template), frappe.bold(self.doc.company)
+					)
+				)
+
+	def get_changed_item_tax_templates(self) -> set:
+		doc_before_save = self.doc.get_doc_before_save()
+		saved_templates = (
+			{item.name: item.item_tax_template for item in doc_before_save.items} if doc_before_save else {}
+		)
+		return {
+			item.item_tax_template
+			for item in self.doc.items
+			if item.get("item_tax_template") and item.item_tax_template != saved_templates.get(item.name)
+		}
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:
