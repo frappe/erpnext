@@ -342,7 +342,7 @@ def get_batches_by_oldest(item_code: str, warehouse: str):
 	return batches_dates
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
