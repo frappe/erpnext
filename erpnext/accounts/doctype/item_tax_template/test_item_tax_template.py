@@ -219,6 +219,27 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 			self.assertEqual(si.grand_total, 1100)
 			self.assertEqual(breakup, {normal_row: 100})
 
+	def test_actual_charge_goes_to_last_item_when_no_item_is_applicable(self):
+		freight_account = "_Test Account Shipping Charges - _TC"
+		not_applicable_template = self.make_template([(freight_account, 0, 1)]).insert().name
+		exempt_item = self.make_item_with_taxes([{"item_tax_template": not_applicable_template}])
+
+		si = create_sales_invoice(item_code=exempt_item, rate=500, do_not_save=True)
+		si.append("items", {"item_code": exempt_item, "qty": 1, "rate": 500})
+		si.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": freight_account,
+				"description": "Freight",
+				"tax_amount": 100,
+			},
+		)
+		si.insert()
+
+		self.assertEqual(si.taxes[0].tax_amount, 100)
+		self.assertEqual(si.grand_total, 1100)
+
 	def test_group_account_throws(self):
 		doc = self.make_template([("Duties and Taxes - _TC", 7, 0)])
 		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
