@@ -18,6 +18,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
 )
+from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.stock.doctype.item.test_item import make_item
@@ -505,7 +506,23 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
 
+<<<<<<< HEAD
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+=======
+	def test_item_last_purchase_rate_in_row_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}]).name
+		frappe.db.set_value("Item", item, "last_purchase_rate", 10)
+
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.get_last_purchase_rate()
+
+		self.assertEqual(po.items[0].rate, 120)
+		self.assertEqual(item_last_purchase_rate(po.name, 1, item, 12), 120)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+>>>>>>> 97a9762 (test(buying): last purchase rate fallback in row UOM)
 	def test_same_item_from_different_material_requests(self):
 		po = make_purchase_order(make_material_request(qty=5).name)
 		po = make_purchase_order(make_material_request(qty=5).name, target_doc=po)
