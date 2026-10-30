@@ -223,7 +223,7 @@ def get_chart_data(filters, chart_columns, income, expense, net_profit_loss, cur
 
 
 def execute_snapshot_report(filters):
-	if has_gl_entry_restrictions():
+	if filters.report_template or has_gl_entry_restrictions():
 		return execute(filters)
 
 	from frappe.database.duckdb.database import get_latest_sync
