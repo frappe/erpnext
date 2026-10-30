@@ -231,7 +231,19 @@ class ProductionPlan(Document):
 
 	def validate_data(self):
 		validated_boms = set()
+		templates = frappe.get_all(
+			"Item",
+			filters={"name": ("in", [d.item_code for d in self.po_items]), "has_variants": 1},
+			pluck="name",
+		)
 		for d in self.get("po_items"):
+			if d.item_code in templates:
+				frappe.throw(
+					_("Row #{0}: Item Template {1} cannot be planned.").format(
+						d.idx, frappe.bold(d.item_code)
+					)
+				)
+
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			elif (d.item_code, d.bom_no) not in validated_boms:
