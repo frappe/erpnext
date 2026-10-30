@@ -267,7 +267,10 @@ frappe.ui.form.on("Sales Order", {
 					onchange: () => {
 						if (dialog.get_value("set_warehouse")) {
 							dialog.fields_dict.items.df.data.forEach((row) => {
-								row.warehouse = dialog.get_value("set_warehouse");
+								// a bundle component reserves in its packed row's warehouse
+								if (!row.is_packed_item) {
+									row.warehouse = dialog.get_value("set_warehouse");
+								}
 							});
 							dialog.fields_dict.items.grid.refresh();
 						}
