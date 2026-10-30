@@ -866,7 +866,7 @@ def make_stock_entry(source_name, target_doc=None):
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str):
 	mr = frappe.get_doc("Material Request", material_request)
 	mr.check_permission("read")
