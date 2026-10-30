@@ -646,13 +646,12 @@ class BuyingController(SubcontractingController):
 			if d.category not in ["Valuation", "Valuation and Total"]:
 				continue
 
-			amount = flt(d.base_tax_amount_after_discount_amount) * (
-				-1 if d.get("add_deduct_tax") == "Deduct" else 1
-			)
+			multiplier = -1 if d.get("add_deduct_tax") == "Deduct" else 1
+			amount = flt(d.base_tax_amount_after_discount_amount) * multiplier
 
 			if d.charge_type == "On Net Total":
 				total_valuation_amount += amount
-				tax_accounts.append(d.account_head)
+				tax_accounts.append((d.account_head, multiplier))
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Capitalize the full amount onto stock/asset items only (e.g. Freight)
 				stock_item_charges.append(amount)
@@ -665,10 +664,8 @@ class BuyingController(SubcontractingController):
 		item_tax_amount = 0.0
 		if item.item_tax_rate:
 			tax_details = json.loads(item.item_tax_rate)
-			for account, rate in tax_details.items():
-				if account not in tax_accounts:
-					continue
-
+			for account, multiplier in tax_accounts:
+				rate = tax_details.get(account, 0)
 				if rate == NOT_APPLICABLE_TAX:
 					continue
 
@@ -676,7 +673,7 @@ class BuyingController(SubcontractingController):
 				if item.sales_incoming_rate:
 					net_rate = item.qty * item.sales_incoming_rate
 
-				item_tax_amount += flt(net_rate) * flt(rate) / 100
+				item_tax_amount += flt(net_rate) * flt(rate) / 100 * multiplier
 
 		return item_tax_amount
 
