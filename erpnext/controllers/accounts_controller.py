@@ -3054,6 +3054,9 @@ class AccountsController(TransactionBase):
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
 				"paid_amount": schedule.paid_amount,
+				"discount_type": schedule.discount_type,
+				"discount": schedule.discount,
+				"discount_date": schedule.discount_date,
 			}
 
 			if automatically_fetch_payment_terms:
@@ -3077,15 +3080,22 @@ class AccountsController(TransactionBase):
 					schedule.precision("base_payment_amount"),
 				)
 				payment_schedule["outstanding"] = payment_schedule["payment_amount"]
+				if schedule.discount_type == "Amount" and schedule.invoice_portion:
+					payment_schedule["discount"] = (
+						flt(
+							flt(schedule.discount)
+							* payment_schedule["payment_amount"]
+							/ schedule.payment_amount,
+							schedule.precision("payment_amount"),
+						)
+						if schedule.payment_amount
+						else 0
+					)
 			else:
 				payment_schedule["base_payment_amount"] = flt(
 					schedule.base_payment_amount * self.get("conversion_rate"),
 					schedule.precision("base_payment_amount"),
 				)
-
-			if schedule.discount_type == "Percentage":
-				payment_schedule["discount_type"] = schedule.discount_type
-				payment_schedule["discount"] = schedule.discount
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
