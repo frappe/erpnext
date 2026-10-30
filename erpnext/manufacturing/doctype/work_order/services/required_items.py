@@ -247,18 +247,20 @@ class RequiredItemsService:
 		transferred = self._material_transfer_qty_by_item(is_return=0)
 		requested = self._material_request_pending_qty_by_item()
 		picked = self._pick_list_pending_qty_by_item()
+		precision = frappe.get_precision("Work Order Item", "required_qty")
 
 		for item_code, incoming_qty in incoming_qty_by_item.items():
 			if item_code not in required_by_item:
 				continue
 
-			pending = (
+			pending = flt(
 				get_allowed_transfer_qty(required_by_item[item_code])
 				- flt(transferred.get(item_code))
 				- flt(requested.get(item_code))
-				- flt(picked.get(item_code))
+				- flt(picked.get(item_code)),
+				precision,
 			)
-			if flt(incoming_qty - pending, 6) > 0:
+			if flt(incoming_qty, precision) > pending:
 				frappe.throw(
 					_("Only {0} {1} of {2} is pending in Work Order {3}.").format(
 						max(pending, 0.0), uom_by_item[item_code], item_code, self.doc.name
