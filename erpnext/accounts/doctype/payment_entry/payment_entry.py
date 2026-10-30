@@ -1158,7 +1158,9 @@ class PaymentEntry(AccountsController):
 	def set_unallocated_amount(self):
 		self.unallocated_amount = flt(
 			self.get_base_unallocated_amount() / self.get_exchange_rate(),
-			self.precision("unallocated_amount"),
+			get_field_precision(
+				self.meta.get_field("unallocated_amount"), self, currency=self.party_account_currency
+			),
 		)
 
 	def get_base_unallocated_amount(self):
