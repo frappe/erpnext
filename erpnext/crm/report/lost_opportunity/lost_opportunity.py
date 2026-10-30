@@ -23,8 +23,7 @@ def get_columns():
 		{
 			"label": _("Opportunity From"),
 			"fieldname": "opportunity_from",
-			"fieldtype": "Link",
-			"options": "DocType",
+			"fieldtype": "Select",
 			"width": 130,
 		},
 		{

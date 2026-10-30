@@ -89,9 +89,8 @@ def get_columns():
 		{"label": _("Posting Date"), "fieldtype": "Date", "fieldname": "posting_date", "width": 110},
 		{
 			"label": _("Voucher Type"),
-			"fieldtype": "Link",
+			"fieldtype": "Select",
 			"fieldname": "voucher_type",
-			"options": "DocType",
 			"width": 120,
 		},
 		{
