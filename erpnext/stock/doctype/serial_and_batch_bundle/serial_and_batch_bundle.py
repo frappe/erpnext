@@ -2691,8 +2691,43 @@ def get_available_serial_nos(kwargs):
 		if kwargs.warehouse:
 			filters["warehouse"] = kwargs.warehouse
 
+<<<<<<< HEAD
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos = get_reserved_serial_nos(kwargs)
+=======
+	reserved_entries = get_reserved_serial_nos_for_sre(kwargs)
+
+	ignore_serial_nos = []
+	if reserved_entries:
+		if kwargs.get("sabb_voucher_type") in ("Delivery Note", "Sales Invoice") and kwargs.get(
+			"against_sales_order"
+		):
+			reserved_voucher_details = [kwargs.get("against_sales_order")]
+		else:
+			reserved_voucher_details = get_reserved_voucher_details(kwargs)
+
+		# Check if serial nos are reserved for the current voucher then fetch only those serial nos
+		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
+			kwargs, reserved_entries, reserved_voucher_details
+		):
+			ignore = set(kwargs.get("ignore_serial_nos") or [])
+			reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
+			if not reserved_serial_nos or not set_batch_filter(filters, kwargs):
+				return []
+
+			filters["name"] = ("in", reserved_serial_nos)
+
+			return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+		# Check if serial nos are reserved for other vouchers then ignore those serial nos
+		elif ignore_reserved_serial_nos := get_other_doc_reserved_serials(
+			kwargs, reserved_entries, reserved_voucher_details
+		):
+			ignore_serial_nos.extend(ignore_reserved_serial_nos)
+
+	if reserved_for_pos := get_reserved_serial_nos_for_pos(kwargs):
+		ignore_serial_nos.extend(reserved_for_pos)
+>>>>>>> 7acc7ed (fix(stock): deliver reserved serial nos from a stock updating sales invoice)
 
 	# To ignore serial nos in the same record for the draft state
 	if kwargs.get("ignore_serial_nos"):
@@ -2837,13 +2872,42 @@ def get_bundle_wise_serial_nos(data, kwargs):
 def get_reserved_serial_nos(kwargs) -> list:
 	"""Returns a list of `Serial No` reserved in POS Invoice and Stock Reservation Entry."""
 
+<<<<<<< HEAD
 	ignore_serial_nos = []
+=======
+	field_mapper = {
+		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
+		"Sales Invoice": [["Sales Invoice Item", "sales_order"]],
+		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_inward_order"]],
+		"Work Order": [["Work Order", "production_plan"], ["Work Order", "subcontracting_inward_order"]],
+	}.get(kwargs.get("sabb_voucher_type"))
+>>>>>>> 7acc7ed (fix(stock): deliver reserved serial nos from a stock updating sales invoice)
 
 	# Extend the list by serial nos reserved in POS Invoice
 	ignore_serial_nos.extend(get_reserved_serial_nos_for_pos(kwargs))
 
+<<<<<<< HEAD
 	# Extend the list by serial nos reserved via SRE
 	ignore_serial_nos.extend(get_reserved_serial_nos_for_sre(kwargs))
+=======
+	voucher_item_filters = {
+		"name": kwargs.get("sabb_voucher_detail_no"),
+		"parent": kwargs.get("sabb_voucher_no"),
+		"docstatus": ("<", 2),
+	}
+	voucher_based_filters = {
+		"Delivery Note": voucher_item_filters,
+		"Sales Invoice": voucher_item_filters,
+		"Stock Entry": {
+			"name": kwargs.get("sabb_voucher_no"),
+			"docstatus": ("<", 2),
+		},
+		"Work Order": {
+			"name": kwargs.get("sabb_voucher_no"),
+			"docstatus": ("<", 2),
+		},
+	}.get(kwargs.get("sabb_voucher_type"))
+>>>>>>> 7acc7ed (fix(stock): deliver reserved serial nos from a stock updating sales invoice)
 
 	return ignore_serial_nos
 
