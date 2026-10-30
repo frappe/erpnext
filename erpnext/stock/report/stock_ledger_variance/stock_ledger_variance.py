@@ -64,9 +64,8 @@ def get_columns():
 		},
 		{
 			"fieldname": "voucher_type",
-			"fieldtype": "Link",
+			"fieldtype": "Select",
 			"label": _("Voucher Type"),
-			"options": "DocType",
 		},
 		{
 			"fieldname": "voucher_no",
