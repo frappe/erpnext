@@ -4,6 +4,7 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.process_subscription.process_subscription import (
 	create_subscription_process,
@@ -54,3 +55,9 @@ class TestProcessSubscription(ERPNextTestSuite):
 		enqueued = self.enqueued_subscriptions()
 		self.assertIn(active.name, enqueued)
 		self.assertNotIn(cancelled.name, enqueued)
+
+	def test_future_posting_date_is_rejected(self):
+		with patch("frappe.enqueue"):
+			self.assertRaises(
+				frappe.ValidationError, create_subscription_process, posting_date=add_days(nowdate(), 1)
+			)
