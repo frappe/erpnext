@@ -590,8 +590,13 @@ def get_available_serial_nos_to_reserve(
 				(sre.docstatus == 1)
 				& (sre.item_code == item_code)
 				& (sre.warehouse == warehouse)
+<<<<<<< HEAD
 				& (sre.reserved_qty >= sre.delivered_qty)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
+=======
+				& (sre.delivered_qty < sre.reserved_qty)
+				& (sb_entry.delivered_qty < sb_entry.qty)
+>>>>>>> 3d2831f (fix(stock): allow reserving a returned serial no from a partly delivered reservation)
 				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)
