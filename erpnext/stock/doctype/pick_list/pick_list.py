@@ -1620,8 +1620,9 @@ def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=Non
 		return locations
 
 	for location in locations:
-		location.serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
-		location.qty = len(location.serial_nos)
+		serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty -= len(location.serial_nos) - len(serial_nos)
+		location.serial_nos = serial_nos
 
 	return [location for location in locations if location.qty > 0]
 
