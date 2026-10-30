@@ -26,8 +26,13 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
+<<<<<<< HEAD
 
 test_dependencies = ["Item"]
+=======
+from erpnext.tests.permission_test_utils import as_user, make_bank_account, make_fenced_user
+from erpnext.tests.utils import ERPNextTestSuite
+>>>>>>> 0c81709 (test(accounts): cover journal rate read permissions)
 
 
 class TestPaymentEntry(FrappeTestCase):
@@ -1082,6 +1087,37 @@ class TestPaymentEntry(FrappeTestCase):
 					)
 					for row in journals:
 						self.assertEqual(frappe.db.get_value("Journal Entry", row.parent, "docstatus"), 2)
+
+	def test_journal_reference_rate_requires_read_permission(self):
+		journal = make_journal_entry("_Test Receivable USD - _TC", "Sales - _TC", 8000, save=False)
+		journal.accounts[0].update(
+			{
+				"party_type": "Customer",
+				"party": "_Test Customer USD",
+				"debit_in_account_currency": 100,
+				"exchange_rate": 80,
+			}
+		)
+		journal.submit()
+		args = {
+			"company": journal.company,
+			"party_type": "Customer",
+			"party": "_Test Customer USD",
+			"party_account": "_Test Receivable USD - _TC",
+			"get_outstanding_invoices": True,
+		}
+		user = make_fenced_user("journal-rate@example.com", ["Accounts User"])
+		with as_user(user):
+			outstanding = get_outstanding_reference_documents(args)
+			self.assertEqual(
+				next(row for row in outstanding if row.voucher_no == journal.name).exchange_rate, 80
+			)
+
+		make_fenced_user(user, ["Sales User"])
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer USD"))
+			self.assertFalse(frappe.has_permission("Journal Entry", "read", journal.name))
+			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
 
 	def test_exchange_gain_loss_split_accounts(self):
 		gain_account = create_account(
