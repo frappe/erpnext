@@ -26,7 +26,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
-from erpnext.tests.permission_test_utils import make_bank_account
+from erpnext.tests.permission_test_utils import as_user, make_bank_account, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1375,6 +1375,182 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(exc_je_for_si, exc_je_for_pe)
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
+
+	def test_journal_payment_uses_booked_exchange_rate(self):
+		settings = frappe.get_doc("Accounts Settings")
+		settings.allow_stale = 1
+		settings.save()
+		exchange = frappe.new_doc("Currency Exchange")
+		exchange.update(
+			{
+				"date": "2019-04-01",
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 85,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		)
+		exchange.insert()
+
+		for party_type, account, counter_account in (
+			("Customer", "_Test Receivable USD - _TC", "Sales - _TC"),
+			("Supplier", "_Test Payable USD - _TC", "Cost of Goods Sold - _TC"),
+		):
+			party = f"_Test {party_type} USD"
+			party_side = "debit" if party_type == "Customer" else "credit"
+			counter_side = "credit" if party_type == "Customer" else "debit"
+			journal = frappe.get_doc(
+				{
+					"doctype": "Journal Entry",
+					"company": "_Test Company",
+					"posting_date": "2019-04-01",
+					"multi_currency": 1,
+					"accounts": [
+						{
+							"account": account,
+							"party_type": party_type,
+							"party": party,
+							"exchange_rate": rate,
+							party_side + "_in_account_currency": amount,
+						}
+						for amount, rate in ((40, 65), (60, 90))
+					],
+				}
+			)
+			journal.append(
+				"accounts",
+				{
+					"account": counter_account,
+					counter_side + "_in_account_currency": 8000,
+					"cost_center": "Main - _TC",
+				},
+			)
+			journal.submit()
+			other_journal = frappe.copy_doc(journal)
+			for row in other_journal.accounts[:2]:
+				row.exchange_rate = 85
+			other_journal.accounts[2].set(counter_side + "_in_account_currency", 8500)
+			other_journal.submit()
+
+			details = get_reference_details("Journal Entry", journal.name, "USD", party_type, party, account)
+			self.assertEqual(details.exchange_rate, 80)
+			outstanding = get_outstanding_reference_documents(
+				{
+					"company": journal.company,
+					"party_type": party_type,
+					"party": party,
+					"party_account": account,
+					"get_outstanding_invoices": True,
+				}
+			)
+			self.assertEqual(
+				next(row for row in outstanding if row.voucher_no == journal.name).exchange_rate, 80
+			)
+
+			for payment_rate, amount in ((80, 100), (90, 100), (90, 40), (70, 40)):
+				with self.subTest(party_type=party_type, payment_rate=payment_rate, amount=amount):
+					payment = frappe.get_doc(
+						{
+							"doctype": "Payment Entry",
+							"company": journal.company,
+							"posting_date": "2019-04-15",
+							"payment_type": "Receive" if party_type == "Customer" else "Pay",
+							"party_type": party_type,
+							"party": party,
+							"paid_from": account if party_type == "Customer" else "_Test Bank USD - _TC",
+							"paid_to": "_Test Bank USD - _TC" if party_type == "Customer" else account,
+							"paid_amount": amount,
+							"received_amount": amount,
+							"source_exchange_rate": payment_rate,
+							"target_exchange_rate": payment_rate,
+							"reference_no": "JE-SETTLEMENT",
+							"reference_date": "2019-04-15",
+							"references": [
+								{
+									"reference_doctype": "Journal Entry",
+									"reference_name": other_journal.name,
+									"allocated_amount": amount,
+								}
+							],
+						}
+					).insert()
+					self.assertNotEqual(payment.references[0].exchange_gain_loss, 0)
+					# Changing a saved draft's reference must refresh its booked rate.
+					payment.references[0].reference_name = journal.name
+					payment.submit()
+					self.assertEqual(payment.references[0].exchange_rate, 80)
+					self.assertEqual(payment.references[0].exchange_gain_loss, (payment_rate - 80) * amount)
+					journals = self.get_journals_for(payment.doctype, payment.name)
+					self.assertEqual(bool(journals), payment_rate != 80)
+					entries = frappe.get_all(
+						"GL Entry",
+						filters={
+							"voucher_no": [
+								"in",
+								[journal.name, payment.name, *(row.parent for row in journals)],
+							],
+							"account": account,
+							"party_type": party_type,
+							"party": party,
+							"is_cancelled": 0,
+						},
+						fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+					)
+					balance = (100 - amount) * (1 if party_type == "Customer" else -1)
+					self.assertEqual(sum(row.debit - row.credit for row in entries), balance * 80)
+					self.assertEqual(
+						sum(
+							row.debit_in_account_currency - row.credit_in_account_currency for row in entries
+						),
+						balance,
+					)
+					self.assertEqual(
+						get_reference_details(
+							"Journal Entry", journal.name, "USD", party_type, party
+						).outstanding_amount,
+						100 - amount,
+					)
+					payment.cancel()
+					self.assertEqual(
+						get_reference_details(
+							"Journal Entry", journal.name, "USD", party_type, party
+						).outstanding_amount,
+						100,
+					)
+					for row in journals:
+						self.assertEqual(frappe.db.get_value("Journal Entry", row.parent, "docstatus"), 2)
+
+	def test_journal_reference_rate_requires_read_permission(self):
+		journal = make_journal_entry("_Test Receivable USD - _TC", "Sales - _TC", 8000, save=False)
+		journal.accounts[0].update(
+			{
+				"party_type": "Customer",
+				"party": "_Test Customer USD",
+				"debit_in_account_currency": 100,
+				"exchange_rate": 80,
+			}
+		)
+		journal.submit()
+		args = {
+			"company": journal.company,
+			"party_type": "Customer",
+			"party": "_Test Customer USD",
+			"party_account": "_Test Receivable USD - _TC",
+			"get_outstanding_invoices": True,
+		}
+		user = make_fenced_user("journal-rate@example.com", ["Accounts User"])
+		with as_user(user):
+			outstanding = get_outstanding_reference_documents(args)
+			self.assertEqual(
+				next(row for row in outstanding if row.voucher_no == journal.name).exchange_rate, 80
+			)
+
+		make_fenced_user(user, ["Sales User"])
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Customer", "read", "_Test Customer USD"))
+			self.assertFalse(frappe.has_permission("Journal Entry", "read", journal.name))
+			self.assertRaises(frappe.PermissionError, get_outstanding_reference_documents, args)
 
 	def test_exchange_gain_loss_split_accounts(self):
 		gain_account = create_account(
