@@ -6619,46 +6619,68 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(srbnb_cost, 1500)
 
-	def test_valuation_rate_for_rejected_materials_withoout_accepted_materials(self):
-		item = make_item("Test Item with Rej Material Valuation WO Accepted", {"is_stock_item": 1})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"bill_for_rejected_quantity_in_purchase_invoice": 1, "set_valuation_rate_for_rejected_materials": 1},
+	)
+	def test_valuation_rate_for_rejected_materials_without_accepted_materials(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+			uoms=[{"uom": "Box", "conversion_factor": 2}],
+		)
 		company = "_Test Company with perpetual inventory"
+		rej_warehouse = create_warehouse("_Test Warehouse - Rejected Material", company=company)
+		stock_account = get_inventory_account(company, rej_warehouse)
+		accrual_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
 
-		warehouse = create_warehouse(
-			"_Test In-ward Warehouse",
-			company="_Test Company with perpetual inventory",
-		)
+		for currency, exchange_rate, uom, conversion_factor in (
+			("INR", 1, "Nos", 1),
+			("USD", 83, "Nos", 1),
+			("USD", 83, "Box", 2),
+		):
+			with self.subTest(currency=currency, uom=uom):
+				pr = make_purchase_receipt(
+					item_code=item.name,
+					qty=0,
+					rejected_qty=5,
+					received_qty=5,
+					rate=10,
+					currency=currency,
+					conversion_rate=exchange_rate,
+					uom=uom,
+					stock_uom="Nos",
+					conversion_factor=conversion_factor,
+					company=company,
+					warehouse="Stores - TCP1",
+					rejected_warehouse=rej_warehouse,
+				)
+				self.assertEqual(pr.items[0].base_net_rate, 10 * exchange_rate)
+				self.assertEqual(pr.items[0].valuation_rate, 10 * exchange_rate / conversion_factor)
+				stock_value = 50 * exchange_rate
+				self.assertEqual(
+					[
+						(row.warehouse, row.actual_qty, row.stock_value_difference)
+						for row in get_sl_entries(pr.doctype, pr.name)
+					],
+					[(rej_warehouse, 5 * conversion_factor, stock_value)],
+				)
+				self.assertEqual(
+					sorted(
+						(row.account, row.debit, row.credit) for row in get_gl_entries(pr.doctype, pr.name)
+					),
+					sorted([(stock_account, stock_value, 0), (accrual_account, 0, stock_value)]),
+				)
 
-		rej_warehouse = create_warehouse(
-			"_Test Warehouse - Rejected Material",
-			company="_Test Company with perpetual inventory",
-		)
-
-		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 1)
-
-		frappe.db.set_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials", 1)
-
-		pr = make_purchase_receipt(
-			item_code=item.name,
-			qty=0,
-			rate=100,
-			company=company,
-			warehouse=warehouse,
-			rejected_qty=5,
-			rejected_warehouse=rej_warehouse,
-		)
-
-		gl_entry = frappe.get_all(
-			"GL Entry", filters={"debit": (">", 0), "voucher_no": pr.name}, pluck="name"
-		)
-
-		stock_value_diff = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"warehouse": rej_warehouse, "voucher_no": pr.name},
-			"stock_value_difference",
-		)
-
-		self.assertTrue(gl_entry)
-		self.assertEqual(stock_value_diff, 500.00)
+				pr.cancel()
+				self.assertFalse(get_gl_entries(pr.doctype, pr.name, skip_cancelled=True))
+				self.assertEqual(
+					frappe.db.get_value(
+						"Bin",
+						{"item_code": item.name, "warehouse": rej_warehouse},
+						["actual_qty", "stock_value"],
+					),
+					(0, 0),
+				)
 
 	def test_no_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material No Valuation", {"is_stock_item": 1})
