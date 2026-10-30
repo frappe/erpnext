@@ -1,17 +1,23 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.desk.query_report import export_query
 from frappe.utils import add_days, getdate, today
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.financial_statements import (
 	build_period_list,
 	get_period_list,
 	is_dimension_grouped,
 )
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import execute
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	execute,
+	execute_snapshot_report,
+)
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -242,3 +248,64 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		for key in expected.keys():
 			with self.subTest(key=key):
 				self.assertEqual(expected.get(key), actual.get(key))
+
+	def test_margin_view_with_numbered_income_account(self):
+		self.create_sales_invoice(qty=1, rate=150)
+		income_root = frappe.db.get_value(
+			"Account", {"company": self.company, "root_type": "Income", "parent_account": ("is", "not set")}
+		)
+		frappe.db.set_value("Account", income_root, "account_number", "4000")
+
+		filters = self.get_report_filters()
+		filters.selected_view = "Margin"
+		period_key = next(p.key for p in build_period_list(filters) if p.from_date <= getdate() <= p.to_date)
+		data = execute(filters)[1]
+
+		root_row = next(row for row in data if row.get("account") == income_root)
+		self.assertEqual(root_row["account_name"], f"4000 - {root_row['acc_name']}")
+		self.assertEqual(root_row[period_key], 100)
+		total_income = next(row for row in data if row.get("account", "").startswith("'Total Income"))
+		self.assertEqual(total_income[period_key], 100)
+
+	def test_snapshot_margin_view_with_numbered_income_account(self):
+		self.create_sales_invoice(qty=1, rate=150)
+		make_journal_entry("_Test Account Cost for Goods Sold - _TC", "_Test Bank - _TC", 30, submit=True)
+		income_root = frappe.db.get_value(
+			"Account", {"company": self.company, "root_type": "Income", "parent_account": ("is", "not set")}
+		)
+		frappe.db.set_value("Account", income_root, "account_number", "4000")
+
+		filters = self.get_report_filters()
+		filters.selected_view = "Margin"
+		period_key = next(p.key for p in build_period_list(filters) if p.from_date <= getdate() <= p.to_date)
+		with patch("frappe.database.duckdb.database.get_latest_sync", return_value=get_gl_entry_snapshot()):
+			data = execute_snapshot_report(filters)[1]
+
+		def margin(account_prefix: str) -> float:
+			return next(row for row in data if row.get("account", "").startswith(account_prefix))[period_key]
+
+		self.assertEqual(margin(income_root), 100)
+		self.assertEqual(margin("'Total Income"), 100)
+		self.assertEqual(margin("'Total Expense"), 20)
+		self.assertEqual(margin("'Profit for the year"), 80)
+
+
+def get_gl_entry_snapshot():
+	"""An in-memory DuckDB copy of the GL Entry columns the snapshot report reads."""
+	import duckdb
+	from frappe.database.duckdb.database import DuckDBConnection
+
+	fields = ["company", "account", "posting_date", "voucher_type", "is_cancelled", "finance_book"]
+	amounts = ["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"]
+	conn = duckdb.connect()
+	conn.execute(
+		'CREATE TABLE "tabGL Entry" (company VARCHAR, account VARCHAR, posting_date DATE, '
+		"voucher_type VARCHAR, is_cancelled INTEGER, finance_book VARCHAR, debit DOUBLE, credit DOUBLE, "
+		"debit_in_account_currency DOUBLE, credit_in_account_currency DOUBLE, account_currency VARCHAR)"
+	)
+	columns = [*fields, *amounts, "account_currency"]
+	rows = frappe.get_all("GL Entry", fields=columns, as_list=True)
+	if rows:
+		placeholders = ", ".join(["?"] * len(columns))
+		conn.executemany(f'INSERT INTO "tabGL Entry" ({", ".join(columns)}) VALUES ({placeholders})', rows)
+	return DuckDBConnection(conn)

@@ -225,7 +225,7 @@ class Customer(TransactionBase):
 				frappe.DuplicateEntryError,
 			)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
 		self.accounts = []

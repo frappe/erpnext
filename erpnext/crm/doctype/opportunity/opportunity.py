@@ -717,8 +717,8 @@ def make_supplier_quotation(source_name, target_doc=None):
 	return doclist
 
 
-@frappe.whitelist()
-def set_multiple_status(names, status):
+@frappe.whitelist(methods=["POST"])
+def set_multiple_status(names: str | list[str], status: str):
 	names = json.loads(names)
 	for name in names:
 		opp = frappe.get_doc("Opportunity", name)
@@ -743,7 +743,7 @@ def auto_close_opportunity():
 		frappe.db.set_value("Opportunity", {"name": ("in", opportunities)}, "status", "Closed")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_opportunity_from_communication(
 	communication: str, company: str, ignore_communication_links: bool = False
 ):

@@ -37,12 +37,16 @@
 		{% if show_pay_button %}
 			<div class="form-column col-sm-6">
 				<div class="page-header-actions-block" data-html-block="header-actions">
-					<p>
-						<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
-							class="btn btn-primary btn-sm" id="pay-for-order">
+					<form method="post" action="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request">
+						<input type="hidden" name="dn" value="{{ doc.name }}">
+						<input type="hidden" name="dt" value="{{ doc.doctype }}">
+						<input type="hidden" name="submit_doc" value="1">
+						<input type="hidden" name="order_type" value="Shopping Cart">
+						<input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
+						<button type="submit" class="btn btn-primary btn-sm" id="pay-for-order">
 							{{ _("Pay", null, "Amount") }} {{ pay_amount }}
-						</a>
-					</p>
+						</button>
+					</form>
 				</div>
 			</div>
 		{% endif %}
