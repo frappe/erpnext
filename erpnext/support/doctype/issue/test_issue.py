@@ -264,6 +264,88 @@ class TestIssue(TestSetUp):
 			)
 		)
 
+	def test_portal_user_cannot_set_customer_or_status(self):
+		user = "test_issue_portal_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Portal",
+					"user_type": "Website User",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		contact = frappe.get_doc("Contact", {"email_id": user})
+		contact.links = []
+		contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		contact.save(ignore_permissions=True)
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+
+		frappe.set_user(user)
+		try:
+			issue = frappe.get_doc(
+				{
+					"doctype": "Issue",
+					"subject": "Portal issue",
+					"customer": "__Test Customer",
+					"status": "Closed",
+					"via_customer_portal": 1,
+				}
+			).insert(ignore_permissions=True)
+			self.assertEqual((issue.customer, issue.status), ("_Test Customer", "Open"))
+
+			issue = frappe.get_doc("Issue", issue.name)
+			issue.customer = "__Test Customer"
+			issue.status = "Closed"
+			issue.save(ignore_permissions=True)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			frappe.db.get_value("Issue", issue.name, ["customer", "status"]), ("_Test Customer", "Open")
+		)
+
+	def test_web_form_ignores_submitted_customer_and_raised_by(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		# a desk user who can see any Customer but cannot create an Issue
+		user = make_fenced_user("test_issue_web_form_user@example.com", ["Stock User"])
+		self.assertTrue(frappe.has_permission("Customer", "read", doc="_Test Customer", user=user))
+		self.assertFalse(frappe.has_permission("Issue", "create", user=user))
+
+		# raised_by is matched to a Contact, which would attribute the issue to its customer
+		victim = "test_issue_web_form_victim@example.com"
+		if not frappe.db.exists("Contact Email", {"email_id": victim}):
+			contact = frappe.get_doc({"doctype": "Contact", "first_name": "Victim"})
+			contact.add_email(victim, is_primary=True)
+			contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+			contact.insert(ignore_permissions=True)
+
+		in_web_form = frappe.flags.get("in_web_form", False)
+		frappe.flags.in_web_form = True
+		try:
+			with as_user(user):
+				issue = frappe.get_doc(
+					{
+						"doctype": "Issue",
+						"subject": "Forged customer",
+						"customer": "_Test Customer",
+						"status": "Closed",
+						"raised_by": victim,
+					}
+				).insert(ignore_permissions=True)
+				self.assertEqual((issue.customer, issue.status, issue.raised_by), (None, "Open", user))
+
+				issue = frappe.get_doc("Issue", issue.name)
+				issue.customer = "_Test Customer"
+				issue.status = "Closed"
+				issue.save(ignore_permissions=True)
+		finally:
+			frappe.flags.in_web_form = in_web_form
+
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, ["customer", "status"]), (None, "Open"))
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
