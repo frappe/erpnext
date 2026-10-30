@@ -754,7 +754,7 @@ def make_reverse_gl_entries(
 			elif posting_date:
 				new_gle["posting_date"] = posting_date
 
-			if new_gle["debit"] or new_gle["credit"]:
+			if any([debit, credit, debit_in_account_currency, credit_in_account_currency]):
 				make_entry(new_gle, adv_adj, "Yes", from_reversal=True)
 
 
