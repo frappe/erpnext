@@ -375,8 +375,15 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True)
 		self.validate_pending_qty_in_work_order()
 
+	@property
+	def is_work_order_transfer(self):
+		"""Job card requests are tracked on the job card, not the work order."""
+		return bool(
+			self.work_order and not self.job_card and self.material_request_type == "Material Transfer"
+		)
+
 	def validate_pending_qty_in_work_order(self):
-		if not self.work_order or self.material_request_type != "Material Transfer":
+		if not self.is_work_order_transfer:
 			return
 
 		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)
@@ -559,6 +566,20 @@ class MaterialRequest(BuyingController):
 				).format(ordered_qty, self.name, allowed_qty, row.item_code)
 			)
 
+<<<<<<< HEAD
+=======
+	def update_requested_qty_in_work_order(self):
+		"""Refresh both counters: stop and cancel also flip pick list coverage."""
+		if not self.is_work_order_transfer:
+			return
+
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		service = RequiredItemsService(frappe.get_doc("Work Order", self.work_order))
+		service.update_requested_qty_for_required_items()
+		service.update_picked_qty_for_required_items()
+
+>>>>>>> 4bf5b30 (fix(manufacturing): keep job card material requests out of work order pending qty)
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_warehouses = dict.fromkeys(
