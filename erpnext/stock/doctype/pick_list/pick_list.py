@@ -24,6 +24,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_reserved_serial_nos_for_sre,
 )
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
@@ -1327,6 +1328,9 @@ def get_available_item_locations(
 			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
+
 	if exclude_warehouses:
 		locations = [location for location in locations if location.warehouse not in exclude_warehouses]
 
@@ -1584,9 +1588,54 @@ def get_available_item_locations_for_other_item(
 	return item_locations
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
 	return create_delivery(source_name, target_doc, "Delivery Note")
+=======
+def remove_stock_reserved_for_others(item_code, locations, own_vouchers=None):
+	if not locations or not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+		return locations
+
+	reserved_qty = defaultdict(float)
+	for row in get_reservation_holders([item_code], [location.warehouse for location in locations]):
+		if row.voucher_no not in (own_vouchers or ()):
+			reserved_qty[row.warehouse] += flt(row.reserved_qty)
+
+	precision = frappe.get_precision("Pick List Item", "stock_qty")
+	for location in locations:
+		location.qty = flt(flt(location.qty) - reserved_qty[location.warehouse], precision)
+
+	return [location for location in locations if location.qty > 0]
+
+
+def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=None):
+	reserved_serial_nos = {
+		row.serial_no
+		for row in get_reserved_serial_nos_for_sre(frappe._dict(item_code=item_code))
+		if row.voucher_no not in (own_vouchers or ())
+	}
+	if not reserved_serial_nos:
+		return locations
+
+	for location in locations:
+		location.serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty = len(location.serial_nos)
+
+	return [location for location in locations if location.qty > 0]
+
+
+def check_pick_list_company(company: str | None) -> None:
+	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
+	if not isinstance(company, str) or not company:
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Pick List")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+>>>>>>> e53e5b8 (fix(stock): skip serial nos reserved for other vouchers in pick list)
 
 
 @frappe.whitelist()
