@@ -294,6 +294,7 @@ permission_query_conditions = {
 }
 
 has_permission = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
 }
 
