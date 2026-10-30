@@ -929,6 +929,62 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		self.assertEqual(result.serial_nos, ["SN1", "SN2"])
 		self.assertEqual(result.batches["B1"], 8)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_serial_and_batch_reserved_stock_delivery_and_cancel(self) -> None:
+		# Regression: delivering a serial/batch reserved Sales Order used to crash with
+		# "Serial and Batch Bundle None not found" when the delivered serial/batch was carried in the
+		# row's serial_no/batch_no fields (use_serial_batch_fields) rather than a bundle. Delivery
+		# must mark the reservation delivered, and cancelling the Delivery Note must restore it.
+		items_details = create_items()
+		create_material_receipt(items_details, self.warehouse, qty=10)
+
+		serial_item = next(
+			name for name, p in items_details.items() if p.get("has_serial_no") and not p.get("has_batch_no")
+		)
+		batch_item = next(
+			name for name, p in items_details.items() if p.get("has_batch_no") and not p.get("has_serial_no")
+		)
+
+		item_list = [
+			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+		]
+		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
+		so.create_stock_reservation_entries()
+
+		def sre_row(so_item):
+			return frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": so.name, "voucher_detail_no": so_item, "docstatus": 1},
+				fields=["reserved_qty", "delivered_qty", "status"],
+			)[0]
+
+		# Deliver the reserved stock (serial/batch carried in row fields, no bundle).
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+		dn.save()
+		dn.submit()
+		for item in so.items:
+			row = sre_row(item.name)
+			self.assertEqual(
+				row.delivered_qty, 10, "delivery should mark the serial/batch reservation delivered"
+			)
+			self.assertEqual(row.status, "Delivered")
+
+		# Cancelling the Delivery Note restores the reservation.
+		dn.cancel()
+		for item in so.items:
+			row = sre_row(item.name)
+			self.assertEqual(row.delivered_qty, 0, "DN cancel must restore the serial/batch reservation")
+			self.assertEqual(row.status, "Reserved")
+
 
 def create_items() -> dict:
 	items_properties = [
