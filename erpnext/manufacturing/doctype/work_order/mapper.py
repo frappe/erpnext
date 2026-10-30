@@ -610,7 +610,8 @@ def _pick_list_mapping(postprocess, allocation):
 
 def _allocate_material_demand(work_order, fraction):
 	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
-	at the group's proportional share of the item's pending pool."""
+	at the group's proportional share of the item's pending pool. Whole number UOMs
+	round up, within the item's own rounded up total."""
 	from erpnext.stock.doctype.stock_entry.services.manufacturing import ceil_qty_if_uom_has_whole_number
 
 	required_by_item = {}
@@ -631,19 +632,26 @@ def _allocate_material_demand(work_order, fraction):
 	}
 
 	precision = frappe.get_precision("Work Order Item", "required_qty")
+	remaining_by_item = {
+		item_code: min(
+			ceil_qty_if_uom_has_whole_number(flt(required_qty * fraction, precision), uom_by_item[item_code]),
+			flt(pending_pool[item_code], precision),
+		)
+		for item_code, required_qty in required_by_item.items()
+	}
+
 	allocation = {}
 	for key, required_qty in required_by_group.items():
 		item_code = key[0]
 		if required_by_item[item_code] <= 0:
 			continue
 
-		pool_share = flt(pending_pool[item_code] * required_qty / required_by_item[item_code], precision)
-		qty = ceil_qty_if_uom_has_whole_number(
-			flt(required_qty * fraction, precision), uom_by_item[item_code]
-		)
-		qty = min(qty, pool_share)
+		pool_share = pending_pool[item_code] * required_qty / required_by_item[item_code]
+		qty = flt(min(required_qty * fraction, pool_share), precision)
+		qty = min(ceil_qty_if_uom_has_whole_number(qty, uom_by_item[item_code]), remaining_by_item[item_code])
 		if qty > 0:
 			allocation[key] = qty
+			remaining_by_item[item_code] = flt(remaining_by_item[item_code] - qty, precision)
 	return allocation
 
 
