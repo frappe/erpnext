@@ -5179,8 +5179,8 @@ def get_missing_company_details(doctype: str, docname: str):
 	}
 
 
-@frappe.whitelist()
-def update_company_master_and_address(current_doctype, name, company, details):
+@frappe.whitelist(methods=["POST"])
+def update_company_master_and_address(current_doctype: str, name: str, company: str, details: dict | str):
 	from frappe.utils import validate_email_address
 
 	if not frappe.has_permission(current_doctype, "write", doc=name, throw=False):
