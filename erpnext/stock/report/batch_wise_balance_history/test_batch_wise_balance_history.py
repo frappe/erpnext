@@ -5,6 +5,7 @@ import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_itemwise_batch
 from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -65,3 +66,14 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 					)
 
 				self.assertEqual([row[BALANCE_VALUE] for row in self.run_report(item)], expected)
+
+	def test_reconciliation_uses_batch_ids(self):
+		item = self.make_batch_item()
+		make_stock_entry(item_code=item, to_warehouse=WH, qty=10, rate=100, posting_date="2026-06-01")
+		(row,) = self.run_report(item)
+		batch = frappe.get_doc("Batch", row.batch)
+		self.assertNotEqual(batch.name, batch.batch_id)
+		self.assertEqual(row.batch_number, batch.batch_id)
+		batches = get_itemwise_batch(WH, "2026-06-01", "_Test Company", item)
+		self.assertEqual(batches[(item, WH)][0].batch_no, batch.name)
+		self.assertEqual(batches[(item, WH)][0].qty, 10)

@@ -9,7 +9,7 @@ from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+from frappe.utils import cint, escape_html, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -47,6 +47,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 # Purposes whose inward (t_warehouse) row is inspected.
@@ -370,17 +371,17 @@ class StockController(AccountsController):
 
 		for d in self.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
-				serial_nos = frappe.get_all(
-					"Serial No",
-					fields=["batch_no", "name", "warehouse"],
-					filters={"name": ("in", get_serial_nos(d.serial_no))},
+				serial_nos = SerialBatchIdentity("Serial No").get_records(
+					d.item_code, get_serial_nos(d.serial_no), ["batch_no", "serial_no", "warehouse"]
 				)
 
 				for row in serial_nos:
 					if row.warehouse and row.batch_no != d.batch_no:
 						frappe.throw(
 							_("Row #{0}: Serial No {1} does not belong to Batch {2}").format(
-								d.idx, row.name, d.batch_no
+								d.idx,
+								escape_html(row.serial_no),
+								SerialBatchIdentity("Batch").get_label(d.batch_no),
 							)
 						)
 
@@ -403,7 +404,7 @@ class StockController(AccountsController):
 		if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
 			frappe.throw(
 				_("Row #{0}: The batch {1} has already expired.").format(
-					idx, get_link_to_form("Batch", batch_no)
+					idx, get_link_to_form("Batch", batch_no, SerialBatchIdentity("Batch").get_label(batch_no))
 				),
 				BatchExpiredError,
 			)
@@ -790,7 +791,16 @@ class StockController(AccountsController):
 	def create_serial_batch_bundle(self, bundle_details, row):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		sn_doc = SerialBatchCreation(bundle_details).make_serial_and_batch_bundle()
+		resolved_details = bundle_details.copy()
+		if bundle_details.get("serial_nos"):
+			resolved_details["serial_nos"] = SerialBatchIdentity("Serial No").resolve(
+				bundle_details["item_code"],
+				bundle_details["serial_nos"],
+				create=bundle_details.get("type_of_transaction") == "Inward",
+				defaults={"company": self.company, "batch_no": bundle_details.get("batch_no")},
+				ignore_permissions=self.flags.ignore_permissions,
+			)
+		sn_doc = SerialBatchCreation(resolved_details).make_serial_and_batch_bundle()
 
 		field = "serial_and_batch_bundle"
 		if bundle_details.get("is_rejected"):
@@ -808,19 +818,15 @@ class StockController(AccountsController):
 		if row.serial_no:
 			serial_nos = frappe.get_all(
 				"Serial and Batch Entry",
-				fields=["serial_no"],
+				pluck="serial_no",
 				filters={"parent": row.serial_and_batch_bundle},
 			)
-			serial_nos = sorted([cstr(d.serial_no) for d in serial_nos])
-			parsed_serial_nos = get_serial_nos(row.serial_no)
-
-			if len(serial_nos) != len(parsed_serial_nos):
-				throw_error = True
-			elif serial_nos != parsed_serial_nos:
-				for serial_no in serial_nos:
-					if serial_no not in parsed_serial_nos:
-						throw_error = True
-						break
+			parsed_serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.get("rm_item_code") or row.item_code,
+				get_serial_nos(row.serial_no),
+				ignore_permissions=self.flags.ignore_permissions,
+			)
+			throw_error = sorted(name or "" for name in serial_nos) != sorted(parsed_serial_nos)
 
 		elif row.batch_no:
 			batches = sorted(
@@ -1615,7 +1621,7 @@ class StockController(AccountsController):
 				_(
 					"The batch {0} is reserved for {1} in the warehouse {2} and the remaining quantity is not enough to cover the reservations. So, cannot proceed with the {3} {4}."
 				).format(
-					frappe.bold(batch_no),
+					frappe.bold(SerialBatchIdentity("Batch").get_label(batch_no)),
 					vouchers,
 					frappe.bold(warehouse),
 					frappe.bold(self.doctype),
@@ -2591,7 +2597,7 @@ def make_quality_inspections(
 				"item_code": item.get("item_code"),
 				"description": item.get("description"),
 				"sample_size": flt(item.get("sample_size")),
-				"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+				"item_serial_no": get_first_serial_id(item),
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),
 			}
@@ -2600,6 +2606,18 @@ def make_quality_inspections(
 		inspections.append(quality_inspection.name)
 
 	return inspections
+
+
+def get_first_serial_id(item):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serial_numbers = get_serial_nos(item.get("serial_no"))
+	if not serial_numbers:
+		return None
+	records = SerialBatchIdentity("Serial No").get_records(
+		item.get("item_code"), serial_numbers[:1], ["name"]
+	)
+	return records[0].name if records else None
 
 
 def is_reposting_pending():

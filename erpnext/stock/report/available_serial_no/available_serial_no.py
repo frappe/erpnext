@@ -14,6 +14,7 @@ from erpnext.stock.report.stock_ledger.stock_ledger import (
 	get_opening_balance,
 	get_stock_ledger_entries,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 
@@ -24,7 +25,7 @@ def execute(filters=None):
 	sl_entries = get_stock_ledger_entries(filters, items) if items else []
 
 	if not sl_entries:
-		return columns, []
+		return prepare_serial_batch_report(columns, [], serial_fields=("serial_no", "balance_serial_no"))
 
 	item_details = get_item_details(items, sl_entries, False)
 	all_entries = list(sl_entries)
@@ -37,7 +38,7 @@ def execute(filters=None):
 	data = process_stock_ledger_entries(
 		sl_entries, item_details, opening_row, precision, filters=filters, opening_entries=opening_entries
 	)
-	return columns, data
+	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no", "balance_serial_no"))
 
 
 def process_stock_ledger_entries(

@@ -25,6 +25,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -189,7 +190,9 @@ class TestPickList(ERPNextTestSuite):
 		serial_nos = ["SADD-0001", "SADD-0002", "SADD-0003", "SADD-0004", "SADD-0005"]
 
 		for serial_no in serial_nos:
-			if not frappe.db.exists("Serial No", serial_no):
+			if not frappe.db.exists(
+				"Serial No", {"item_code": "_Test Serialized Item", "serial_no": serial_no}
+			):
 				frappe.get_doc(
 					{
 						"doctype": "Serial No",
@@ -199,6 +202,7 @@ class TestPickList(ERPNextTestSuite):
 					}
 				).insert()
 
+		serial_ids = SerialBatchIdentity("Serial No").resolve("_Test Serialized Item", serial_nos)
 		stock_reconciliation = frappe.get_doc(
 			{
 				"doctype": "Stock Reconciliation",
@@ -221,7 +225,7 @@ class TestPickList(ERPNextTestSuite):
 									"type_of_transaction": "Inward",
 									"do_not_submit": True,
 									"voucher_type": "Stock Reconciliation",
-									"serial_nos": serial_nos,
+									"serial_nos": serial_ids,
 								}
 							)
 						).name,
@@ -266,8 +270,8 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[0].item_code, "_Test Serialized Item")
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
-		self.assertEqual(
-			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_nos
+		self.assertCountEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_ids
 		)
 
 	def test_pick_list_shows_batch_no_for_batched_item(self):
@@ -1577,8 +1581,9 @@ class TestPickList(ERPNextTestSuite):
 		).name
 
 		# create batch
+		batches = {}
 		for batch_id in ["PICKLT-000001", "PICKLT-000002"]:
-			if not frappe.db.exists("Batch", batch_id):
+			if not frappe.db.exists("Batch", {"item": item, "batch_id": batch_id}):
 				frappe.get_doc(
 					{
 						"doctype": "Batch",
@@ -1586,13 +1591,14 @@ class TestPickList(ERPNextTestSuite):
 						"item": item,
 					}
 				).insert()
+			batches[batch_id] = frappe.db.get_value("Batch", {"item": item, "batch_id": batch_id}, "name")
 
 		make_stock_entry(
 			item=item,
 			to_warehouse=warehouse,
 			qty=50,
 			basic_rate=100,
-			batches=frappe._dict({"PICKLT-000001": 30, "PICKLT-000002": 20}),
+			batches=frappe._dict({batches["PICKLT-000001"]: 30, batches["PICKLT-000002"]: 20}),
 		)
 
 		so = make_sales_order(item_code=item, qty=25.0, rate=100)
@@ -1622,10 +1628,10 @@ class TestPickList(ERPNextTestSuite):
 			)
 
 			for d in data:
-				self.assertTrue(d.batch_no in ["PICKLT-000001", "PICKLT-000002"])
-				if d.batch_no == "PICKLT-000001":
+				self.assertIn(d.batch_no, batches.values())
+				if d.batch_no == batches["PICKLT-000001"]:
 					self.assertEqual(d.qty, 5.0 * -1)
-				elif d.batch_no == "PICKLT-000002":
+				elif d.batch_no == batches["PICKLT-000002"]:
 					self.assertEqual(d.qty, 5.0 * -1)
 
 		pl1.cancel()

@@ -14,6 +14,7 @@ from erpnext import is_perpetual_inventory_enabled
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 class IncorrectCompanyValidationError(frappe.ValidationError):
@@ -577,7 +578,9 @@ class LandedCostVoucher(Document):
 	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
 		for item in receipt_document.get("items"):
 			if not item.is_fixed_asset and item.serial_no:
-				serial_nos = get_serial_nos(item.serial_no)
+				serial_nos = SerialBatchIdentity("Serial No").resolve(
+					item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+				)
 				if serial_nos:
 					frappe.db.sql(
 						"update `tabSerial No` set purchase_rate=%s where name in ({})".format(

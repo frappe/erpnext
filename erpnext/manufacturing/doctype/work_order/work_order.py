@@ -44,6 +44,7 @@ from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -1357,7 +1358,9 @@ class WorkOrder(Document):
 		if not item_details.serial_no_series:
 			self.throw_missing_item_setting("serial_no_series")
 
-		serial_nos = get_available_serial_nos(item_details.serial_no_series, qty or self.qty)
+		serial_nos = get_available_serial_nos(
+			item_details.serial_no_series, qty or self.qty, self.production_item
+		)
 		if not serial_nos:
 			return
 
@@ -1378,7 +1381,8 @@ class WorkOrder(Document):
 		]
 
 		serial_nos_details = []
-		for serial_no in serial_nos:
+		serial_ids = SerialBatchIdentity("Serial No").get_new_names(len(serial_nos))
+		for serial_id, serial_no in zip(serial_ids, serial_nos, strict=True):
 			batch_no = None
 			for capacity in batch_capacity:
 				if capacity[1] > 0:
@@ -1388,7 +1392,7 @@ class WorkOrder(Document):
 
 			serial_nos_details.append(
 				(
-					serial_no,
+					serial_id,
 					serial_no,
 					now(),
 					now(),
@@ -1404,7 +1408,17 @@ class WorkOrder(Document):
 				)
 			)
 
-		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		try:
+			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		except Exception as error:
+			SerialBatchIdentity("Serial No").raise_duplicate(
+				error,
+				self.production_item,
+				message=_(
+					"A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
+				).format(frappe.bold(self.production_item)),
+			)
+			raise
 
 	def create_job_card(self):
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
@@ -3607,23 +3621,25 @@ def get_serial_nos_for_job_card(row, wo_doc):
 	):
 		used_serial_nos.extend(get_serial_nos(d.serial_no))
 
+	used_serial_nos = [
+		d.serial_no
+		for d in SerialBatchIdentity("Serial No").get_records(
+			wo_doc.production_item, used_serial_nos, ["serial_no"]
+		)
+	]
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
 	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
 
 
 def get_serial_nos_for_work_order(work_order, production_item):
-	serial_nos = []
-	for d in frappe.get_all(
+	return frappe.get_all(
 		"Serial No",
-		fields=["name"],
 		filters={
 			"work_order": work_order,
 			"item_code": production_item,
 		},
-	):
-		serial_nos.append(d.name)
-
-	return serial_nos
+		pluck="serial_no",
+	)
 
 
 def validate_operation_data(row):

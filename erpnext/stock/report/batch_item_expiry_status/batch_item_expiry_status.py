@@ -12,6 +12,7 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, today
 
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters=None):
@@ -20,7 +21,7 @@ def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def validate_filters(filters):

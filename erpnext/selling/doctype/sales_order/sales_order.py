@@ -50,6 +50,7 @@ from erpnext.stock.get_item_details import (
 	get_default_bom,
 	get_price_list_rate,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -1323,7 +1324,10 @@ def set_reserved_serial_batch(dn_item, sre, use_serial_batch_fields):
 		batch_nos = list({d.batch_no for d in entries if d.batch_no})
 		if len(batch_nos) < 2:
 			dn_item.use_serial_batch_fields = 1
-			dn_item.serial_no = "\n".join(d.serial_no for d in entries if d.serial_no) or None
+			serial_ids = [d.serial_no for d in entries if d.serial_no]
+			dn_item.serial_no = (
+				"\n".join(SerialBatchIdentity("Serial No").get_numbers(dn_item.item_code, serial_ids)) or None
+			)
 			dn_item.batch_no = batch_nos[0] if batch_nos else None
 			return
 
@@ -1371,7 +1375,9 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 					if len(batch_nos) == 1:
 						target_item.batch_no = batch_nos[0] if batch_nos else None
 					if serial_nos and len(batch_nos) < 2:
-						target_item.serial_no = "\n".join(serial_nos)
+						target_item.serial_no = "\n".join(
+							SerialBatchIdentity("Serial No").get_numbers(target_item.item_code, serial_nos)
+						)
 
 				if not use_serial_batch_fields or len(batch_nos) > 1:
 					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name

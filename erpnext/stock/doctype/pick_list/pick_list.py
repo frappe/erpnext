@@ -12,7 +12,7 @@ from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
-from frappe.utils import ceil, cint, cstr, floor, flt, get_link_to_form
+from frappe.utils import ceil, cint, cstr, escape_html, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
@@ -25,12 +25,14 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
-	get_serial_nos_from_bundle,
+	get_serial_batch_list_from_item,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -168,7 +170,7 @@ class PickList(TransactionBase):
 							row_qty,
 							row.item_code,
 							batch_qty,
-							row.batch_no,
+							escape_html(frappe.get_cached_value("Batch", row.batch_no, "batch_id")),
 							bold(row.warehouse),
 						),
 						title=_("Insufficient Stock"),
@@ -224,20 +226,27 @@ class PickList(TransactionBase):
 				)
 
 	def check_serial_no_status(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 		for row in self.get("locations"):
 			if not row.serial_no:
 				continue
 
-			picked_serial_nos = get_serial_nos(row.serial_no)
-			validated_serial_nos = frappe.get_all(
-				"Serial No",
-				filters={"name": ("in", picked_serial_nos), "warehouse": row.warehouse},
-				pluck="name",
+			serial_numbers = get_serial_nos(row.serial_no)
+			picked_serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.item_code, serial_numbers, ignore_permissions=True
+			)
+			validated_serial_nos = set(
+				frappe.get_all(
+					"Serial No",
+					filters={"name": ("in", picked_serial_nos), "warehouse": row.warehouse},
+					pluck="name",
+				)
 			)
 
-			incorrect_serial_nos = set(picked_serial_nos) - set(validated_serial_nos)
+			incorrect_serial_nos = [
+				escape_html(number)
+				for number, name in zip(serial_numbers, picked_serial_nos, strict=True)
+				if name not in validated_serial_nos
+			]
 			if incorrect_serial_nos:
 				frappe.throw(
 					_("The Serial No at Row #{0}: {1} is not available in warehouse {2}.").format(
@@ -325,7 +334,7 @@ class PickList(TransactionBase):
 			batch = frappe.qb.DocType("Batch")
 			query = (
 				frappe.qb.from_(batch)
-				.select(batch.name)
+				.select(batch.batch_id)
 				.where(
 					(batch.name.isin(batches))
 					& (batch.expiry_date < frappe.utils.nowdate())
@@ -335,7 +344,11 @@ class PickList(TransactionBase):
 
 			expired_batches = query.run(as_dict=True)
 			if expired_batches:
-				msg = "<ul>" + "".join(f"<li>{batch.name}</li>" for batch in expired_batches) + "</ul>"
+				msg = (
+					"<ul>"
+					+ "".join(f"<li>{escape_html(batch.batch_id)}</li>" for batch in expired_batches)
+					+ "</ul>"
+				)
 
 				frappe.throw(
 					_("The following batches are expired, please restock them: <br> {0}").format(msg),
@@ -343,8 +356,6 @@ class PickList(TransactionBase):
 				)
 
 	def make_bundle_using_old_serial_batch_fields(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 		for row in self.locations:
 			if not row.serial_no and not row.batch_no:
 				continue
@@ -363,7 +374,9 @@ class PickList(TransactionBase):
 						"qty": row.stock_qty,
 						"type_of_transaction": "Outward",
 						"company": self.company,
-						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
+						"serial_nos": SerialBatchIdentity("Serial No").resolve(
+							row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+						),
 						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
 						"batch_no": row.batch_no,
 					}
@@ -831,15 +844,12 @@ class PickList(TransactionBase):
 
 		for item_data in items_data:
 			key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
-			serial_no = [x for x in item_data.serial_no.split("\n") if x] if item_data.serial_no else None
+			serial_no, _ = get_serial_batch_list_from_item(item_data)
 
 			if item_data.item_code not in picked_items:
 				picked_items[item_data.item_code] = {}
 
 			if item_data.serial_and_batch_bundle:
-				if not serial_no:
-					serial_no = get_serial_nos_from_bundle(item_data.serial_and_batch_bundle)
-
 				if not item_data.batch_no and not serial_no:
 					bundle_batches = get_batches_from_bundle(item_data.serial_and_batch_bundle)
 					for batch_no, batch_qty in bundle_batches.items():
@@ -873,7 +883,7 @@ class PickList(TransactionBase):
 		for row in self.locations:
 			if flt(row.picked_qty) > 0:
 				key = (row.warehouse, row.batch_no) if row.batch_no else row.warehouse
-				serial_no = [x for x in row.serial_no.split("\n") if x] if row.serial_no else None
+				serial_no, _ = get_serial_batch_list_from_item(row)
 				if row.item_code not in picked_items:
 					picked_items[row.item_code] = {}
 
@@ -1172,7 +1182,11 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 
 		serial_nos = None
 		if item_location.serial_nos:
-			serial_nos = "\n".join(item_location.serial_nos[0 : cint(stock_qty)])
+			serial_nos = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(
+					item_doc.item_code, item_location.serial_nos[0 : cint(stock_qty)]
+				)
+			)
 
 		locations.append(
 			frappe._dict(
