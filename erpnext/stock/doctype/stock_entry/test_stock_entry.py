@@ -6573,7 +6573,8 @@ class TestStockEntryQueries(ERPNextTestSuite):
 			get_search_filters(
 				stock_entry.target_warehouse_query,
 				"Warehouse",
-				{"company": "C", "purpose": "Material Issue", "warehouse_type": ["=", "Stores"]},
+				{"company": "C", "purpose": "Material Issue"},
+				filters={"warehouse_type": ["=", "Stores"]},
 			),
 			{"is_group": 0, "company": "C", "warehouse_type": ["=", "Stores"]},
 		)
