@@ -1012,8 +1012,8 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			if pr.get("__unsaved"):
 				pr.insert(ignore_permissions=True)
-			# the insert above skips permission checks, but submitting needs the caller's own permission
-			pr.flags.ignore_permissions = False
+			# portal payments are checked in get_portal_payment_args; desk users need their own submit permission
+			pr.flags.ignore_permissions = is_portal_payment
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
