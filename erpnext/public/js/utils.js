@@ -735,7 +735,7 @@ erpnext.utils.update_child_items = function (opts) {
 						if (r.message) {
 							const {
 								qty,
-								price_list_rate: rate,
+								price_list_rate,
 								uom,
 								conversion_factor,
 								bom_no,
@@ -749,7 +749,13 @@ erpnext.utils.update_child_items = function (opts) {
 									conversion_factor: me.doc.conversion_factor || conversion_factor,
 									uom: me.doc.uom || uom,
 									qty: me.doc.qty || qty,
+<<<<<<< HEAD
 									rate: me.doc.rate || rate,
+=======
+									rate: me.doc.rate || price_list_rate,
+									price_list_rate: price_list_rate,
+									item_name: item_name,
+>>>>>>> fdbc129 (fix: keep price list rate on rows added through Update Items)
 									bom_no: bom_no,
 									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
 								});
