@@ -1048,17 +1048,10 @@ def make_inter_company_purchase_order(source_name: str, target_doc: str | dict |
 
 @frappe.whitelist()
 def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
+	from erpnext.stock.doctype.pick_list.pick_list import validate_no_reserved_stock
+
 	source_doc = frappe.get_doc("Sales Order", source_name)
 	so_items = {row.name: row for row in source_doc.items}
-
-	def validate_sales_order():
-		for item in source_doc.items:
-			if item.stock_reserved_qty > 0:
-				frappe.throw(
-					_(
-						"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
-					).format(frappe.bold(source_name))
-				)
 
 	def should_pick_packed_item(packed_item) -> bool:
 		# a bundle component is pickable only while its parent row is open, warehouse-delivered and has qty left
@@ -1101,7 +1094,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		)
 
 	# Don't allow a Pick List to be created against a Sales Order that has reserved stock.
-	validate_sales_order()
+	validate_no_reserved_stock(source_name)
 
 	doc = get_mapped_doc(
 		"Sales Order",
