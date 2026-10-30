@@ -249,7 +249,8 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
 
-	if doc.is_new() and doc.get("reserve_stock"):
+	# a component added to a saved order (later save or Update Items) is reserved like a new order's
+	if doc.get("reserve_stock") and (doc.is_new() or not exists):
 		pi_row.reserve_stock = 1
 
 	return pi_row
