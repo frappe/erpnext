@@ -784,30 +784,27 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
 		pending_qty = self.get_pending_qty_to_mfg()
-		for key, material in self.available_materials.items():
-			if pending_qty[key] > 0 or self.doc.get("is_return"):
-				# more than the pending qty only consumes what is left
-				self._append_transfer_based_rm(
-					material, max(pending_qty[key], flt(self.doc.fg_completed_qty))
-				)
+		fg_completed_qty = flt(self.doc.fg_completed_qty)
+		precision = self.doc.precision("fg_completed_qty")
+		for material in self.available_materials.values():
+			pending_qty_to_mfg = pending_qty - sum(material.consumed_for.values())
+			if flt(pending_qty_to_mfg, precision) <= 0 and not self.doc.get("is_return"):
+				continue
+
+			# an entry for all that is pending consumes what is left
+			if flt(pending_qty_to_mfg - fg_completed_qty, precision) <= 0:
+				pending_qty_to_mfg = fg_completed_qty
+			self._append_transfer_based_rm(material, pending_qty_to_mfg)
 
 	def get_pending_qty_to_mfg(self):
-		"""Pending qty per material; Material Consumption entries only cover the materials they consumed."""
+		"""Qty not manufactured yet; Material Consumption entries are counted per material."""
 		# Count each entry once; For Quantity includes its process loss.
-		manufactured_qty, consumed_qty = {}, defaultdict(dict)
-		for row in self._consumption_entries:
-			if row.purpose == "Manufacture":
-				manufactured_qty[row.parent] = flt(row.fg_completed_qty)
-			elif row.purpose == "Material Consumption for Manufacture":
-				for key in self._get_available_keys(row):
-					consumed_qty[key][row.parent] = flt(row.fg_completed_qty)
-
-		pending_qty = flt(self.wo_doc.material_transferred_for_manufacturing) - sum(manufactured_qty.values())
-		precision = self.doc.precision("fg_completed_qty")
-		return {
-			key: flt(pending_qty - sum(consumed_qty[key].values()), precision)
-			for key in self.available_materials
+		manufactured_qty = {
+			row.parent: flt(row.fg_completed_qty)
+			for row in self._consumption_entries
+			if row.purpose == "Manufacture"
 		}
+		return flt(self.wo_doc.material_transferred_for_manufacturing) - sum(manufactured_qty.values())
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -966,6 +963,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 					conversion_factor=1,
 					serial_nos=[],
 					batches=defaultdict(float),
+					consumed_for={},
 				)
 
 			self.available_materials[key].qty += flt(row.transfer_qty)
@@ -1008,27 +1006,31 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			if not buckets:
 				continue
 
+			available_qty = [bucket.qty for bucket in buckets]
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
 				self._deduct_consumed_qty(buckets, flt(row.transfer_qty))
 
-	def _get_available_buckets(self, row):
-		return [self.available_materials[key] for key in self._get_available_keys(row)]
+			if row.purpose == "Material Consumption for Manufacture":
+				# it only covers the materials it consumed
+				for bucket, qty in zip(buckets, available_qty, strict=True):
+					if bucket.qty != qty:
+						bucket.consumed_for[row.parent] = flt(row.fg_completed_qty)
 
-	def _get_available_keys(self, row):
+	def _get_available_buckets(self, row):
 		"""Use exact attribution when present; otherwise drain the direct item first."""
 		key = (row.item_code, row.warehouse, row.original_item or None)
 		if row.original_item and key in self.available_materials:
-			return [key]
+			return [self.available_materials[key]]
 
-		keys = [key] if key in self.available_materials else []
-		keys.extend(
-			material_key
-			for material_key in self.available_materials
+		buckets = [self.available_materials[key]] if key in self.available_materials else []
+		buckets.extend(
+			bucket
+			for material_key, bucket in self.available_materials.items()
 			if material_key[:2] == key[:2] and material_key != key
 		)
-		return keys
+		return buckets
 
 	def _deduct_consumed_qty(self, buckets, consumed_qty):
 		for bucket in buckets[:-1]:
