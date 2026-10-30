@@ -53,6 +53,7 @@
   "get_outstanding_invoices",
   "get_outstanding_orders",
   "references",
+  "payment_term_discounts_calculated",
   "section_break_34",
   "total_allocated_amount",
   "base_total_allocated_amount",
@@ -786,6 +787,63 @@
    "options": "No\nYes",
    "print_hide": 1,
    "search_index": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.party_type == 'Supplier'",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Consider for Tax Withholding"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.apply_tds && doc.docstatus == 0",
+   "depends_on": "eval: doc.apply_tds",
+   "fieldname": "section_tax_withholding_entry",
+   "fieldtype": "Section Break",
+   "label": "Tax Withholding Entry"
+  },
+  {
+   "fieldname": "tax_withholding_group",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Group",
+   "options": "Tax Withholding Group"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_tax_withholding_threshold",
+   "fieldtype": "Check",
+   "label": "Ignore Tax Withholding Threshold"
+  },
+  {
+   "fieldname": "tax_withholding_entries",
+   "fieldtype": "Table",
+   "label": "Tax Withholding Entries",
+   "options": "Tax Withholding Entry",
+   "read_only_depends_on": "eval: !doc.override_tax_withholding_entries"
+  },
+  {
+   "default": "0",
+   "fieldname": "override_tax_withholding_entries",
+   "fieldtype": "Check",
+   "label": "Edit Tax Withholding Entries"
+  },
+  {
+   "fieldname": "auto_repeat_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat"
+  },
+  {
+   "default": "0",
+   "fieldname": "payment_term_discounts_calculated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Payment Term Discounts Calculated",
+   "no_copy": 1,
+   "read_only": 1
+>>>>>>> 46b5201 (fix(accounts): record only applied payment term discounts)
   }
  ],
  "grid_page_length": 50,
@@ -800,7 +858,11 @@
    "table_fieldname": "payment_entries"
   }
  ],
+<<<<<<< HEAD
  "modified": "2026-05-15 13:31:01.166010",
+=======
+ "modified": "2026-10-30 11:26:43.949477",
+>>>>>>> 46b5201 (fix(accounts): record only applied payment term discounts)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
