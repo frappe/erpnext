@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
+from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
@@ -2326,6 +2327,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
+	frappe.has_permission("GL Entry", "read", throw=True)
 	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
@@ -2340,6 +2342,7 @@ def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, valuation_field_type="Currency")
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
+	frappe.has_permission("Stock Ledger Entry", "read", throw=True)
 	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
@@ -2376,9 +2379,10 @@ def get_accounting_ledger_preview(doc, filters):
 
 	doc.make_gl_entries()
 	columns = get_gl_columns(filters)
-	gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
+	masked_fields = frappe.get_meta("GL Entry").get_masked_fields()
+	gl_entries = mask_dict_results(get_gl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields)
 
-	gl_columns = get_columns(columns, fields, erpnext.get_company_currency(filters.company))
+	gl_columns = get_columns(columns, fields, erpnext.get_company_currency(filters.company), masked_fields)
 	gl_data = get_data(fields, gl_entries)
 
 	return gl_columns, gl_data
@@ -2418,9 +2422,14 @@ def get_stock_ledger_preview(doc, filters):
 		doc.update_stock_ledger()
 
 		columns = get_sl_columns(filters)
-		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
+		masked_fields = frappe.get_meta("Stock Ledger Entry").get_masked_fields()
+		sl_entries = mask_dict_results(
+			get_sl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields
+		)
 
-		sl_columns = get_columns(columns, columns_fields, erpnext.get_company_currency(filters.company))
+		sl_columns = get_columns(
+			columns, columns_fields, erpnext.get_company_currency(filters.company), masked_fields
+		)
 		sl_data = get_data(columns_fields, sl_entries)
 
 	return sl_columns, sl_data
@@ -2449,17 +2458,20 @@ def get_gl_entries_for_preview(doctype, docname, fields):
 	return frappe.get_all("GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields)
 
 
-def get_columns(raw_columns, fields, currency):
+def get_columns(raw_columns, fields, currency, masked_fields):
+	masked_fieldnames = {df.fieldname for df in masked_fields}
 	columns = []
 	for source_column in raw_columns:
-		if source_column.get("hidden") or source_column.get("fieldname") not in fields:
+		fieldname = source_column.get("fieldname")
+		if source_column.get("hidden") or fieldname not in fields:
 			continue
 
 		column = {
 			"name": source_column.get("label"),
 			"editable": False,
 			"width": 110,
-			"fieldtype": source_column.get("fieldtype"),
+			# masked values are placeholder text, not numbers
+			"fieldtype": "Data" if fieldname in masked_fieldnames else source_column.get("fieldtype"),
 		}
 		if column["fieldtype"] == "Currency":
 			column["options"] = currency

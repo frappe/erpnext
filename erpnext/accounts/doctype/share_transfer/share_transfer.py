@@ -7,7 +7,7 @@ from frappe import _
 from frappe.exceptions import ValidationError
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.utils import nowdate
+from frappe.utils import flt, nowdate
 
 
 class ShareDontExists(ValidationError):
@@ -58,6 +58,7 @@ class ShareTransfer(Document):
 					"current_state": "Issued",
 				},
 			)
+			shareholder.flags.from_share_transfer = True
 			shareholder.save()
 
 			doc = self.get_shareholder_doc(self.to_shareholder)
@@ -72,6 +73,7 @@ class ShareTransfer(Document):
 					"no_of_shares": self.no_of_shares,
 				},
 			)
+			doc.flags.from_share_transfer = True
 			doc.save()
 
 		elif self.transfer_type == "Purchase":
@@ -92,6 +94,7 @@ class ShareTransfer(Document):
 					"no_of_shares": self.no_of_shares,
 				},
 			)
+			doc.flags.from_share_transfer = True
 			doc.save()
 
 	def on_cancel(self):
@@ -116,6 +119,7 @@ class ShareTransfer(Document):
 				},
 			)
 
+			from_shareholder.flags.from_share_transfer = True
 			from_shareholder.save()
 
 			compnay_shareholder.append(
@@ -130,6 +134,7 @@ class ShareTransfer(Document):
 				},
 			)
 
+			compnay_shareholder.flags.from_share_transfer = True
 			compnay_shareholder.save()
 
 		elif self.transfer_type == "Transfer":
@@ -146,6 +151,7 @@ class ShareTransfer(Document):
 					"no_of_shares": self.no_of_shares,
 				},
 			)
+			from_shareholder.flags.from_share_transfer = True
 			from_shareholder.save()
 
 	def validate(self):
@@ -194,12 +200,12 @@ class ShareTransfer(Document):
 			frappe.throw(_("The seller and the buyer cannot be the same"))
 		if self.no_of_shares != self.to_no - self.from_no + 1:
 			frappe.throw(_("The number of shares and the share numbers are inconsistent"))
-		if not self.amount:
-			self.amount = self.rate * self.no_of_shares
-		if self.amount != self.rate * self.no_of_shares:
+		amount = flt(self.rate * self.no_of_shares, self.precision("amount"))
+		if self.amount and flt(self.amount, self.precision("amount")) != amount:
 			frappe.throw(
 				_("There are inconsistencies between the rate, no of shares and the amount calculated")
 			)
+		self.amount = amount
 
 	def share_exists(self, shareholder):
 		doc = self.get_shareholder_doc(shareholder)
@@ -301,6 +307,7 @@ class ShareTransfer(Document):
 		doc.share_balance = []
 		for entry in new_entries:
 			doc.append("share_balance", entry)
+		doc.flags.from_share_transfer = True
 		doc.save()
 
 	def return_share_balance_entry(self, from_no, to_no, rate):

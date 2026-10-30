@@ -12,8 +12,19 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.lead_query" };
 	},
 
-	customer: function () {
-		return { filters: { disabled: 0 } };
+	party: function (doc) {
+		return {
+			query: "erpnext.controllers.queries.party_query",
+			filters: { disabled: 0, company: doc.company },
+		};
+	},
+
+	customer: function (doc) {
+		return erpnext.queries.party(doc);
+	},
+
+	supplier: function (doc) {
+		return erpnext.queries.party(doc);
 	},
 
 	item: function (filters) {
@@ -111,7 +122,7 @@ $.extend(erpnext.queries, {
 		}
 
 		let filters = { link_doctype: "Company", link_name: doc.company || "" };
-		const is_drop_ship = doc.items.some((item) => item.delivered_by_supplier);
+		const is_drop_ship = (doc.items || []).some((item) => item.delivered_by_supplier);
 		if (is_drop_ship) filters = {};
 
 		return {

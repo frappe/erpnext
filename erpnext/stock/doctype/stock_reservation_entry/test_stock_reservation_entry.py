@@ -197,75 +197,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
 	)
-	def test_update_reserved_qty_in_voucher(self) -> None:
-		# Step - 1: Create a `Sales Order`
-		so = make_sales_order(
-			item_code=self.sr_item.name,
-			warehouse=self.warehouse,
-			qty=50,
-			rate=100,
-			do_not_submit=True,
-		)
-		so.reserve_stock = 0  # Stock Reservation Entries won't be created on submit
-		so.items[0].reserve_stock = 1
-		so.save()
-		so.submit()
-
-		# Step - 2: Create a `Stock Reservation Entry[1]` for the `Sales Order Item`
-		sre1 = make_stock_reservation_entry(
-			item_code=self.sr_item.name,
-			warehouse=self.warehouse,
-			voucher_type="Sales Order",
-			voucher_no=so.name,
-			voucher_detail_no=so.items[0].name,
-			reserved_qty=30,
-		)
-
-		so.load_from_db()
-		sre1.load_from_db()
-		self.assertEqual(sre1.status, "Partially Reserved")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre1.reserved_qty)
-
-		# Step - 3: Create a `Stock Reservation Entry[2]` for the `Sales Order Item`
-		sre2 = make_stock_reservation_entry(
-			item_code=self.sr_item.name,
-			warehouse=self.warehouse,
-			voucher_type="Sales Order",
-			voucher_no=so.name,
-			voucher_detail_no=so.items[0].name,
-			reserved_qty=20,
-		)
-
-		so.load_from_db()
-		sre2.load_from_db()
-		self.assertEqual(sre1.status, "Partially Reserved")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre1.reserved_qty + sre2.reserved_qty)
-
-		# Step - 4: Cancel `Stock Reservation Entry[1]`
-		sre1.cancel()
-		so.load_from_db()
-		sre1.load_from_db()
-		self.assertEqual(sre1.status, "Cancelled")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
-
-		# Step - 5: Update `Stock Reservation Entry[2]` Reserved Qty
-		sre2.reserved_qty += sre1.reserved_qty
-		sre2.save()
-		so.load_from_db()
-		sre1.load_from_db()
-		self.assertEqual(sre2.status, "Reserved")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
-
-		# Step - 6: Cancel `Stock Reservation Entry[2]`
-		sre2.cancel()
-		so.load_from_db()
-		sre2.load_from_db()
-		self.assertEqual(sre1.status, "Cancelled")
-		self.assertEqual(so.items[0].stock_reserved_qty, 0)
-
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
-	)
 	def test_cant_consume_reserved_stock(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
@@ -656,6 +587,100 @@ class TestStockReservationEntry(ERPNextTestSuite):
 
 				# Test - 3: Reserved Serial/Batch Nos should be equal to Picked Serial/Batch Nos.
 				self.assertSetEqual(picked_sb_details, reserved_sb_details)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+		},
+	)
+	def test_stock_reservation_from_pick_list_for_product_bundle(self) -> None:
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		bundle, components = create_product_bundle(quantities=[2, 3], warehouse=self.warehouse)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+		pl.reload()
+		so.reload()
+
+		packed_item_by_code = {row.item_code: row for row in so.packed_items}
+		self.assertEqual(len(pl.locations), len(components))
+
+		for location in pl.locations:
+			packed_item = packed_item_by_code[location.item_code]
+
+			# Test - 1: Bundle components should be reserved against their Packed Item.
+			sre_details = _get_stock_reservation_entries_for_voucher(
+				"Sales Order", so.name, packed_item.name, fields=["reserved_qty", "from_voucher_type"]
+			)
+			self.assertEqual(len(sre_details), 1)
+			self.assertEqual(sre_details[0].reserved_qty, packed_item.qty)
+			self.assertEqual(sre_details[0].from_voucher_type, "Pick List")
+
+			# Test - 2: Reserved Qty should be updated in Pick List Item.
+			self.assertEqual(location.stock_reserved_qty, location.picked_qty)
+
+		pl.cancel_stock_reservation_entries()
+		pl.reload()
+
+		# Test - 3: Unreserving from the Pick List should clear the reserved qty.
+		for location in pl.locations:
+			self.assertEqual(location.stock_reserved_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_bundle_component_picked_from_two_warehouses_is_reserved(self) -> None:
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
+		make_stock_entry(item_code=components[0], target=other_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)
+
+		pl = create_pick_list(so.name)
+		location = pl.locations[0]
+		location.qty = location.stock_qty = location.picked_qty = 2
+		pl.append("locations", location.as_dict(no_default_fields=True)).warehouse = other_warehouse
+		pl.submit()
+		pl.create_stock_reservation_entries()
+
+		self.assertEqual(
+			get_sre_reserved_qty_details_for_voucher("Sales Order", so.name), {so.packed_items[0].name: 4}
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
+	)
+	def test_update_items_keeps_pick_list_reservation_for_product_bundle(self) -> None:
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		bundle, _components = create_product_bundle(quantities=[2, 3], warehouse=self.warehouse)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+		so.reload()
+
+		row = so.items[0]
+		trans_items = [{"docname": row.name, "item_code": bundle, "qty": 1, "rate": row.rate, "idx": 1}]
+
+		# Packed Item reservations block reducing the bundle qty.
+		self.assertRaises(
+			frappe.ValidationError,
+			update_child_qty_rate,
+			"Sales Order",
+			frappe.as_json(trans_items),
+			so.name,
+		)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",

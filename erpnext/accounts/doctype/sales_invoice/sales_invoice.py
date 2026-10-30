@@ -46,6 +46,7 @@ from erpnext.accounts.utils import (
 from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_asset_disposal_values,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
 	reset_depreciation_schedule,
@@ -339,8 +340,7 @@ class SalesInvoice(SellingController):
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
 
-		# Validating coupon code
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			validate_coupon_code(self.coupon_code)
 
 		if cint(self.is_pos):
@@ -516,6 +516,7 @@ class SalesInvoice(SellingController):
 		self.split_asset_based_on_sale_qty()
 
 		self.process_asset_depreciation()
+		self.set_asset_disposal_values()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -542,7 +543,7 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "used")
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -562,6 +563,9 @@ class SalesInvoice(SellingController):
 
 		self.process_common_party_accounting()
 		self.update_billed_qty_in_scio()
+
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 
 	def validate_pos_return(self):
 		if self.is_consolidated:
@@ -654,7 +658,7 @@ class SalesInvoice(SellingController):
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
@@ -698,6 +702,9 @@ class SalesInvoice(SellingController):
 			self.cancel_pos_invoice_credit_note_generated_during_sales_invoice_mode()
 
 		self.update_billed_qty_in_scio()
+
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 
 	def update_status_updater_args(self):
 		if not cint(self.update_stock):
@@ -1659,6 +1666,22 @@ class SalesInvoice(SellingController):
 
 		self.update_asset()
 
+	def set_asset_disposal_values(self) -> None:
+		"""Store the asset values the sale or return entries are built from, so a repost reproduces them."""
+		if self.is_internal_transfer():
+			return
+
+		for item in self.get("items"):
+			if item.is_fixed_asset and item.asset:
+				asset = frappe.get_doc("Asset", item.asset)
+				values = get_asset_disposal_values(asset, item.finance_book)
+				item.db_set(
+					{
+						"asset_value_after_depreciation": values["value_after_depreciation"],
+						"asset_gross_value": values["gross_asset_value"],
+					}
+				)
+
 	def depreciate_asset_on_sale(self):
 		"""
 		Depreciate asset on sale or cancellation of return sales invoice
@@ -1949,6 +1972,7 @@ class SalesInvoice(SellingController):
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		asset = frappe.get_cached_doc("Asset", item.asset)
+		disposal_values = get_stored_asset_disposal_values(item)
 
 		if self.is_return:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
@@ -1958,6 +1982,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 		else:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -1967,6 +1992,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 
 		for gle in fixed_asset_gl_entries:
@@ -2419,6 +2445,35 @@ class SalesInvoice(SellingController):
 			points_to_redeem -= redeemed_points
 			if points_to_redeem < 1:  # since points_to_redeem is integer
 				break
+
+	def counts_coupon_use(self):
+		# Returns and POS consolidation do not redeem the coupon again.
+		if self.is_return or self.get("is_consolidated"):
+			return False
+
+		if not self.items or any(
+			not item.get("sales_order") or not item.get("so_detail") for item in self.items
+		):
+			return True
+
+		# Match each detail to the order that already consumed this coupon.
+		order = frappe.qb.DocType("Sales Order")
+		order_item = frappe.qb.DocType("Sales Order Item")
+		coupon_order_items = dict(
+			frappe.qb.from_(order_item)
+			.join(order)
+			.on(order.name == order_item.parent)
+			.select(order_item.name, order_item.parent)
+			.where(
+				(order_item.name.isin([item.so_detail for item in self.items]))
+				& (order.coupon_code == self.coupon_code)
+				& (order.customer == self.customer)
+				& (order.company == self.company)
+				& (order.docstatus == 1)
+			)
+			.run()
+		)
+		return any(coupon_order_items.get(item.so_detail) != item.sales_order for item in self.items)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
@@ -3456,3 +3511,14 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
+
+
+def get_stored_asset_disposal_values(item) -> dict | None:
+	"""Asset values stored on the row at submit, so a repost does not pick up later changes to the asset."""
+	if not flt(item.asset_gross_value):
+		return None
+
+	return {
+		"value_after_depreciation": item.asset_value_after_depreciation,
+		"gross_asset_value": item.asset_gross_value,
+	}

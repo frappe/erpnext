@@ -1486,16 +1486,17 @@ def update_regional_item_valuation_rate(doc):
 	pass
 
 
-def get_linked_asset_qty(detail_field, details):
+def get_linked_asset_qty(detail_field, details, exclude_asset=None):
 	asset = frappe.qb.DocType("Asset")
-	return dict(
-		(
-			frappe.qb.from_(asset)
-			.select(asset[detail_field], Sum(asset.asset_quantity))
-			.where((asset[detail_field].isin(details)) & (asset.docstatus < 2))
-			.groupby(asset[detail_field])
-		).run()
+	query = (
+		frappe.qb.from_(asset)
+		.select(asset[detail_field], Sum(asset.asset_quantity))
+		.where((asset[detail_field].isin(details)) & (asset.docstatus < 2))
+		.groupby(asset[detail_field])
 	)
+	if exclude_asset:
+		query = query.where(asset.name != exclude_asset)
+	return dict(query.run())
 
 
 @frappe.request_cache

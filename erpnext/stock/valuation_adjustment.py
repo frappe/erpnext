@@ -50,6 +50,10 @@ class BackdatedEntryBeforeAdjustmentError(frappe.ValidationError):
 	pass
 
 
+class ManualAdjustmentEntryError(frappe.ValidationError):
+	pass
+
+
 @dataclass
 class AdjustmentRow:
 	"""One row of an Adjustment Entry: stock counted in at a rate, as a batch, serial nos, or
@@ -309,6 +313,7 @@ def make_adjustment_entry(
 	doc.update(
 		{
 			"purpose": ADJUSTMENT_ENTRY,
+			"is_made_from_valuation_comparison": 1,
 			"company": company,
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -419,6 +424,18 @@ class AdjustmentEntry:
 
 		self.doc.difference_amount = flt(
 			sum(flt(row.amount_difference) for row in self.doc.items), self.doc.precision("difference_amount")
+		)
+
+	def validate_made_from_report(self) -> None:
+		if self.doc.is_made_from_valuation_comparison:
+			return
+
+		frappe.throw(
+			_(
+				"Adjustment Entry can only be used by the system from the Stock Valuation Comparison report. Users can only select the purpose Opening Stock to add opening stock, or Stock Reconciliation to update stock quantity or valuation rate."
+			),
+			title=_("Not Allowed Purpose"),
+			exc=ManualAdjustmentEntryError,
 		)
 
 	def set_row_amounts(self, plan: AdjustmentPlan, rows) -> None:

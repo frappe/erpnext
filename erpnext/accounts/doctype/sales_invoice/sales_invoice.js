@@ -425,7 +425,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					],
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Lost"],
+						status: ["not in", ["Lost", "Expired"]],
 						company: me.frm.doc.company,
 					},
 					allow_child_item_selection: true,

@@ -16,7 +16,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import Criterion, Field, functions
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
 
@@ -52,11 +52,13 @@ class Customer(TransactionBase):
 		from erpnext.selling.doctype.supplier_number_at_customer.supplier_number_at_customer import (
 			SupplierNumberAtCustomer,
 		)
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
 		alias: DF.Data | None
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
@@ -88,12 +90,15 @@ class Customer(TransactionBase):
 		market_segment: DF.Link | None
 		mobile_no: DF.ReadOnly | None
 		naming_series: DF.Literal["CUST-.YYYY.-"]
+		on_hold: DF.Check
 		opportunity_name: DF.Link | None
 		payment_terms: DF.Link | None
 		portal_users: DF.Table[PortalUser]
 		primary_address: DF.TextEditor | None
 		prospect_name: DF.Link | None
+		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		sales_team: DF.Table[SalesTeam]
 		so_required: DF.Check
 		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
@@ -113,6 +118,10 @@ class Customer(TransactionBase):
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
 		self.set_onload("dashboard_info", info)
+
+	def before_save(self):
+		if not self.on_hold:
+			self.release_date = None
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default("cust_master_name")
@@ -635,6 +644,13 @@ def get_nested_links(link_doctype, link_name, ignore_permissions=False):
 	return links
 
 
+def is_customer_blocked(customer: str) -> bool:
+	on_hold, release_date = frappe.db.get_value("Customer", customer, ["on_hold", "release_date"])
+	if not on_hold:
+		return False
+	return not release_date or getdate(today()) <= getdate(release_date)
+
+
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
 	credit_limit = get_credit_limit(customer, company)
 	if not credit_limit:
@@ -878,15 +894,31 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	SalesInvoice = frappe.qb.DocType("Sales Invoice")
 	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 
+	returned_items = (
+		frappe.qb.from_(DeliveryNoteItem)
+		.join(DeliveryNote)
+		.on(DeliveryNote.name == DeliveryNoteItem.parent)
+		.select(DeliveryNoteItem.name, DeliveryNoteItem.dn_detail)
+		.where(DeliveryNote.customer == customer)
+		.where(DeliveryNote.company == company)
+		.where(DeliveryNote.docstatus == 1)
+		.where(DeliveryNote.is_return == 1)
+	).as_("returned_items")
+	# Credits against a return delivery reduce the original delivery row's billed quantity.
+	billed_dn_detail = Coalesce(returned_items.dn_detail, SalesInvoiceItem.dn_detail)
+
 	si_subquery = (
 		frappe.qb.from_(SalesInvoiceItem)
 		.join(SalesInvoice)
 		.on(SalesInvoice.name == SalesInvoiceItem.parent)
-		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.stock_qty).as_("billed_qty"))
+		.left_join(returned_items)
+		.on((returned_items.name == SalesInvoiceItem.dn_detail) & (SalesInvoice.is_return == 1))
+		.select(billed_dn_detail.as_("dn_detail"), Sum(SalesInvoiceItem.stock_qty).as_("billed_qty"))
 		.where(SalesInvoiceItem.docstatus == 1)
 		.where((SalesInvoice.is_return == 0) | (SalesInvoice.update_billed_amount_in_delivery_note == 1))
-		.groupby(SalesInvoiceItem.dn_detail)
+		.groupby(billed_dn_detail)
 	)
+	returned_qty = IfNull(DeliveryNoteItem.returned_qty, 0.0)
 
 	dn_query = (
 		frappe.qb.from_(DeliveryNote)
@@ -898,7 +930,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			Sum(
 				(
 					DeliveryNoteItem.base_net_amount
-					* (DeliveryNoteItem.stock_qty - IfNull(si_subquery.billed_qty, 0.0))
+					* (DeliveryNoteItem.stock_qty - IfNull(si_subquery.billed_qty, 0.0) - returned_qty)
 					/ DeliveryNoteItem.stock_qty
 					/ DeliveryNote.base_net_total
 				)
@@ -910,7 +942,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.where(DeliveryNote.docstatus == 1)
 		.where(DeliveryNote.base_net_total > 0)
 		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
-		.where(DeliveryNoteItem.stock_qty > IfNull(si_subquery.billed_qty, 0.0))
+		.where(DeliveryNoteItem.stock_qty > IfNull(si_subquery.billed_qty, 0.0) + returned_qty)
 		.where(
 			Criterion.any(
 				[DeliveryNoteItem.against_sales_order.isnull(), DeliveryNoteItem.against_sales_order == ""]
