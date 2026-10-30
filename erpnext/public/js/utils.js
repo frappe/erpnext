@@ -843,7 +843,7 @@ erpnext.utils.update_child_items = function (opts) {
 						if (r.message) {
 							const {
 								qty,
-								price_list_rate: rate,
+								price_list_rate,
 								uom,
 								conversion_factor,
 								item_name,
@@ -859,7 +859,8 @@ erpnext.utils.update_child_items = function (opts) {
 									conversion_factor: me.doc.conversion_factor || conversion_factor,
 									uom: me.doc.uom || uom,
 									qty: me.doc.qty || qty,
-									rate: me.doc.rate || rate,
+									rate: me.doc.rate || price_list_rate,
+									price_list_rate: price_list_rate,
 									item_name: item_name,
 									bom_no: bom_no,
 									description: me.doc.description || description,
