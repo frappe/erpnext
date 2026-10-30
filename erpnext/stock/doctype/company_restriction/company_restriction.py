@@ -78,7 +78,7 @@ def get_permission_query_conditions(user, doctype=None):
 	if not allowed_companies:
 		return None
 
-	return get_restriction_criterion(doctype, allowed_companies)
+	return get_sql_condition(get_restriction_criterion(doctype, allowed_companies))
 
 
 def get_allowed_masters_condition(field, doctype, user=None):
@@ -125,7 +125,7 @@ def get_restriction_criterion(doctype, companies):
 
 
 def get_sql_condition(criterion):
-	"""Render a criterion as SQL with escaped values, for callers that only accept strings."""
+	"""Render a criterion as SQL with escaped values; v16 permission hooks must return strings."""
 	param_wrapper = NamedParameterWrapper()
 	quote_char = "`" if frappe.db.db_type == "mariadb" else '"'
 	sql = criterion.get_sql(
@@ -161,7 +161,7 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 		for link, allowed_companies in links
 		if link.doctype in restricted_doctypes
 	]
-	return Criterion.all(conditions) if conditions else None
+	return get_sql_condition(Criterion.all(conditions)) if conditions else None
 
 
 def get_restricted_master_doctypes():
