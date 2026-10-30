@@ -69,7 +69,7 @@ frappe.ui.form.on("Stock Entry", {
 			const item = locals[cdt][cdn];
 			return {
 				query: "erpnext.stock.doctype.stock_entry.stock_entry.batch_query",
-				filters: {
+				query_args: {
 					item_code: item.item_code,
 					s_warehouse: item.s_warehouse,
 					t_warehouse: item.t_warehouse,
@@ -1375,7 +1375,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		const transit_warehouse_query = () => {
 			return {
 				query: "erpnext.stock.doctype.stock_entry.stock_entry.target_warehouse_query",
-				filters: {
+				query_args: {
 					company: this.frm.doc.company,
 					purpose: this.frm.doc.purpose,
 					add_to_transit: this.frm.doc.add_to_transit,
@@ -1482,7 +1482,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.frm.set_query("stock_entry_type", () => {
 			return {
 				query: "erpnext.stock.doctype.stock_entry.stock_entry.stock_entry_type_query",
-				filters: { subcontracting_inward_order: this.frm.doc.subcontracting_inward_order },
+				query_args: { subcontracting_inward_order: this.frm.doc.subcontracting_inward_order },
 			};
 		});
 	}

@@ -2272,71 +2272,89 @@ def get_warehouse_details(args: str | dict):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def batch_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs):
+def batch_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
+):
 	"""The batches of a row's item: of its source warehouse, or its target one when it has none."""
-	from erpnext.controllers.queries import get_batch_no, get_field_filters
+	from erpnext.controllers.queries import get_batch_no
 
-	if not filters.get("item_code"):
+	query_args = query_args or {}
+	if not query_args.get("item_code"):
 		frappe.throw(_("Please enter Item Code to get Batch Number"))
 
-	purpose = filters.get("purpose")
+	purpose = query_args.get("purpose")
 	batch_filters = {
-		"item_code": filters["item_code"],
-		"posting_date": filters.get("posting_date") or nowdate(),
-		"posting_time": filters.get("posting_time") or nowtime(),
+		"item_code": query_args["item_code"],
+		"posting_date": query_args.get("posting_date") or nowdate(),
+		"posting_time": query_args.get("posting_time") or nowtime(),
 	}
 	# User could want to select a manually created empty batch (no warehouse) or a pre-existing batch
 	if purpose != "Material Receipt":
-		batch_filters["warehouse"] = filters.get("s_warehouse") or filters.get("t_warehouse")
+		batch_filters["warehouse"] = query_args.get("s_warehouse") or query_args.get("t_warehouse")
 
-	if not filters.get("s_warehouse") and filters.get("t_warehouse"):
+	if not query_args.get("s_warehouse") and query_args.get("t_warehouse"):
 		batch_filters["is_inward"] = 1
 
 	if purpose in ("Material Receipt", "Material Transfer", "Material Issue"):
 		batch_filters["include_expired_batches"] = 1
 
-	batch_filters.update(
-		get_field_filters(
-			filters, "item_code", "s_warehouse", "t_warehouse", "purpose", "posting_date", "posting_time"
-		)
-	)
+	batch_filters.update(filters)
 	return frappe.call(get_batch_no, doctype, txt, searchfield, start, page_len, batch_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def target_warehouse_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The company's warehouses to move stock to: transit ones for a transfer to transit."""
-	from erpnext.controllers.queries import get_field_filters, standard_search
+	from erpnext.controllers.queries import standard_search
 
-	warehouse_filters = {"is_group": 0, "company": filters.get("company")}
-	if filters.get("purpose") == "Material Transfer" and filters.get("add_to_transit"):
+	query_args = query_args or {}
+	warehouse_filters = {"is_group": 0, "company": query_args.get("company")}
+	if query_args.get("purpose") == "Material Transfer" and query_args.get("add_to_transit"):
 		warehouse_filters["warehouse_type"] = "Transit"
 
-	warehouse_filters.update(get_field_filters(filters, "company", "purpose", "add_to_transit"))
+	warehouse_filters.update(filters)
 	return standard_search(doctype, txt, searchfield, start, page_len, warehouse_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def stock_entry_type_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The stock entry types of a subcontracting inward order's purposes for an entry against one,
 	the others otherwise."""
-	from erpnext.controllers.queries import get_field_filters, standard_search
+	from erpnext.controllers.queries import standard_search
 
-	operator = "in" if filters.get("subcontracting_inward_order") else "not in"
+	operator = "in" if (query_args or {}).get("subcontracting_inward_order") else "not in"
 	purposes = [
 		"Receive from Customer",
 		"Return Raw Material to Customer",
 		"Subcontracting Delivery",
 		"Subcontracting Return",
 	]
-	type_filters = {
-		"purpose": [operator, purposes],
-		**get_field_filters(filters, "subcontracting_inward_order"),
-	}
+	type_filters = {"purpose": [operator, purposes], **filters}
 	return standard_search(doctype, txt, searchfield, start, page_len, type_filters, **kwargs)
