@@ -3,15 +3,60 @@
 
 import frappe
 from frappe import qb
+from frappe.desk.query_report import run
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+test_dependencies = ["Sales Invoice"]
 
 
 class TestGeneralLedger(FrappeTestCase):
+	def test_general_ledger_without_doctype_read_permission(self):
+		journal = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": self.company,
+				"posting_date": today(),
+				"accounts": [
+					{"account": "_Test Bank - _TC", "debit_in_account_currency": 100},
+					{
+						"account": "Sales - _TC",
+						"credit_in_account_currency": 100,
+						"cost_center": "Main - _TC",
+					},
+				],
+			}
+		).insert()
+		journal.submit()
+		filters = {
+			"company": self.company,
+			"from_date": today(),
+			"to_date": today(),
+			"voucher_no": journal.name,
+			"categorize_by": "Categorize by Voucher (Consolidated)",
+		}
+		for role in ("Accounts User", "Accounts Manager"):
+			user = make_fenced_user("gl-report-permissions@example.com", [role])
+			with self.subTest(role=role), as_user(user):
+				self.assertFalse(frappe.has_permission("DocType", "read"))
+				result = run("General Ledger", filters=filters, ignore_prepared_report=True)
+				rows = [row for row in result["result"] if row.get("voucher_no") == journal.name]
+				self.assertEqual(len(rows), 2)
+				self.assertTrue(all(row.voucher_type == "Journal Entry" for row in rows))
+				self.assertEqual(sum(row.debit for row in rows), 100)
+				self.assertEqual(sum(row.credit for row in rows), 100)
+
+		make_fenced_user(user, ["Sales User"])
+		with as_user(user):
+			self.assertRaises(
+				frappe.PermissionError, run, "General Ledger", filters=filters, ignore_prepared_report=True
+			)
+
 	def test_snapshot_reports_use_live_data_for_restricted_users(self):
 		from importlib import import_module
 		from unittest.mock import patch
