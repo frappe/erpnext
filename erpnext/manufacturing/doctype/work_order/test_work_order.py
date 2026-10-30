@@ -1164,6 +1164,9 @@ class TestWorkOrder(ERPNextTestSuite):
 			{row.item_code: row.qty for row in last_stage.items if row.s_warehouse},
 			{raw_materials[1]: 5},
 		)
+		last_stage.submit()
+		for item in raw_materials:
+			self.assertEqual(get_bin(item, work_order.wip_warehouse).actual_qty, 0)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 >>>>>>> 793357c (test(manufacturing): consume transferred materials over partial and staged entries)
