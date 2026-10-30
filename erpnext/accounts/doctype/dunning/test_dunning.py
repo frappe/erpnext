@@ -387,6 +387,41 @@ class TestDunning(FrappeTestCase):
 		self.assertEqual(sales_invoice.status, "Overdue")
 		self.assertEqual(dunning.status, "Unresolved")
 
+	def test_payment_after_partial_invoice_payment_without_term_allocation(self):
+		create_payment_terms_template_for_dunning()
+		template = frappe.get_doc("Payment Terms Template", "_Test 50-50 for Dunning")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+		self.addCleanup(template.db_set, "allocate_payment_based_on_payment_terms", 1)
+		invoice = create_sales_invoice_against_cost_center(
+			posting_date=add_days(today(), -15), qty=1, rate=100, do_not_submit=True
+		)
+		invoice.payment_terms_template = template.name
+		invoice.submit()
+		dunning = create_dunning_from_sales_invoice(invoice.name)
+		dunning.submit()
+		self.assertEqual(len(dunning.overdue_payments), 2)
+
+		partial_payment = get_payment_entry(invoice.doctype, invoice.name)
+		partial_payment.paid_amount = partial_payment.received_amount = 60
+		partial_payment.references[0].allocated_amount = 60
+		partial_payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 40)
+		self.assertEqual([row.outstanding for row in invoice.payment_schedule], [50, 50])
+
+		payment = get_payment_entry("Dunning", dunning.name)
+		self.assertEqual(payment.paid_amount, 40)
+		self.assertEqual(len(payment.references), 1)
+		self.assertEqual(payment.references[0].payment_term, invoice.payment_schedule[1].payment_term)
+		self.assertEqual(payment.references[0].allocated_amount, 40)
+		payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 0)
+		self.assertEqual(dunning.reload().status, "Resolved")
+		payment.cancel()
+		self.assertEqual(invoice.reload().outstanding_amount, 40)
+		self.assertEqual(dunning.reload().status, "Unresolved")
+		self.assertEqual(get_payment_entry("Dunning", dunning.name).paid_amount, 40)
+
 	def test_dunning_resolution_from_credit_note(self):
 		"""
 		Test that dunning is resolved when a credit note is issued against the original invoice.
