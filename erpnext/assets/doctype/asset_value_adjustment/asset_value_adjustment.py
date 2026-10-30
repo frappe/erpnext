@@ -135,21 +135,15 @@ class AssetValueAdjustment(Document):
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
 		for dimension in accounting_dimensions:
-			if dimension.get("mandatory_for_bs"):
-				credit_entry.update(
-					{
-						dimension["fieldname"]: self.get(dimension["fieldname"])
-						or dimension.get("default_dimension")
-					}
-				)
+			value = self.get(dimension["fieldname"])
+			# Dimension defaults and mandatory flags are set per company; explicit values always apply
+			is_own_company = dimension.get("company") == self.company
 
-			if dimension.get("mandatory_for_pl"):
-				debit_entry.update(
-					{
-						dimension["fieldname"]: self.get(dimension["fieldname"])
-						or dimension.get("default_dimension")
-					}
-				)
+			if value or (is_own_company and dimension.get("mandatory_for_bs")):
+				credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+			if value or (is_own_company and dimension.get("mandatory_for_pl")):
+				debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 
 		je.append("accounts", credit_entry)
 		je.append("accounts", debit_entry)

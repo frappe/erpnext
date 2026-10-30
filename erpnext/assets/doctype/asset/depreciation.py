@@ -323,21 +323,15 @@ def _make_journal_entry_for_depreciation(
 	}
 
 	for dimension in accounting_dimensions:
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_bs"):
-			credit_entry.update(
-				{
-					dimension["fieldname"]: asset.get(dimension["fieldname"])
-					or dimension.get("default_dimension")
-				}
-			)
+		value = asset.get(dimension["fieldname"])
+		# Dimension defaults and mandatory flags are set per company; only the asset's company applies
+		is_asset_company = dimension.get("company") == asset.company
 
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_pl"):
-			debit_entry.update(
-				{
-					dimension["fieldname"]: asset.get(dimension["fieldname"])
-					or dimension.get("default_dimension")
-				}
-			)
+		if value or (is_asset_company and dimension.get("mandatory_for_bs")):
+			credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+		if value or (is_asset_company and dimension.get("mandatory_for_pl")):
+			debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 
 	je.append("accounts", credit_entry)
 	je.append("accounts", debit_entry)
