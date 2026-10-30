@@ -1185,45 +1185,28 @@ class PaymentEntry(AccountsController):
 		)
 
 	def set_unallocated_amount(self):
-		self.unallocated_amount = 0
-		if not self.party:
-			return
-
-		deductions_to_consider = sum(
-			flt(d.amount) for d in self.get("deductions") if not d.is_exchange_gain_loss
+		self.unallocated_amount = flt(
+			self.get_base_unallocated_amount() / self.get_exchange_rate(),
+			get_field_precision(
+				self.meta.get_field("unallocated_amount"), self, currency=self.party_account_currency
+			),
 		)
-		included_taxes = self.get_included_taxes()
 
-		if self.payment_type == "Receive" and self.base_total_allocated_amount < (
-			self.base_paid_amount + deductions_to_consider
-		):
-			self.unallocated_amount = (
-				flt(
-					(
-						self.base_paid_amount
-						+ deductions_to_consider
-						- self.base_total_allocated_amount
-						- included_taxes
-					),
-					self.precision("unallocated_amount"),
-				)
-				/ self.source_exchange_rate
-			)
-		elif self.payment_type == "Pay" and self.base_total_allocated_amount < (
-			self.base_received_amount - deductions_to_consider
-		):
-			self.unallocated_amount = (
-				flt(
-					(
-						self.base_received_amount
-						- deductions_to_consider
-						- self.base_total_allocated_amount
-						- included_taxes
-					),
-					self.precision("unallocated_amount"),
-				)
-				/ self.target_exchange_rate
-			)
+	def get_base_unallocated_amount(self):
+		if not self.party or self.payment_type == "Internal Transfer":
+			return 0
+
+		deductions = sum(flt(row.amount) for row in self.deductions if not row.is_exchange_gain_loss)
+		if self.payment_type == "Receive":
+			amount = self.base_paid_amount + deductions - self.base_total_allocated_amount
+		else:
+			amount = self.base_received_amount - deductions - self.base_total_allocated_amount
+
+		return amount - self.get_included_taxes() if amount > 0 else 0
+
+	def get_unallocated_amount_rounding(self):
+		rounding = self.get_base_unallocated_amount() - self.unallocated_amount * self.get_exchange_rate()
+		return flt(rounding * (-1 if self.payment_type == "Pay" else 1), self.precision("difference_amount"))
 
 	def set_exchange_gain_loss(self):
 		other_deductions = 0
@@ -1307,7 +1290,8 @@ class PaymentEntry(AccountsController):
 		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
 
 		self.difference_amount = flt(
-			self.difference_amount - total_deductions, self.precision("difference_amount")
+			self.difference_amount - total_deductions + self.get_unallocated_amount_rounding(),
+			self.precision("difference_amount"),
 		)
 
 	def get_included_taxes(self):
