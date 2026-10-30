@@ -77,6 +77,28 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(new_row.price_list_rate, 1000)
 		self.assertEqual(new_row.discount_amount, 100)
 
+	def test_update_items_keeps_zero_rate_on_priced_row(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item("_Test Update Items Priced Item").name
+		qo = make_quotation()
+		existing_row = qo.items[0]
+		trans_items = [
+			{
+				"item_code": existing_row.item_code,
+				"rate": existing_row.rate,
+				"qty": existing_row.qty,
+				"docname": existing_row.name,
+			},
+			{"item_code": item_code, "rate": 0, "price_list_rate": 1000, "qty": 1},
+		]
+
+		update_child_qty_rate("Quotation", json.dumps(trans_items), qo.name)
+
+		new_row = qo.reload().items[-1]
+		self.assertEqual(new_row.rate, 0)
+		self.assertEqual(new_row.discount_amount, 1000)
+
 	def test_disallow_due_date_before_transaction_date(self):
 		qo = make_quotation(qty=3, do_not_submit=1)
 		qo.payment_schedule[0].due_date = add_days(qo.transaction_date, -2)
