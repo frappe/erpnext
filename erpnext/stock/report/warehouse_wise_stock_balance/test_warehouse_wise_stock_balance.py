@@ -1,0 +1,31 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+
+import frappe
+from frappe.tests.utils import FrappeTestCase
+
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.report.warehouse_wise_stock_balance.warehouse_wise_stock_balance import execute
+
+
+class TestWarehouseWiseStockBalance(FrappeTestCase):
+	def run_report(self, **extra):
+		filters = frappe._dict({"company": "_Test Company", **extra})
+		return execute(filters)[1]
+
+	def row(self, data, warehouse):
+		return next(w for w in data if w["name"] == warehouse)
+
+	def test_nested_warehouses_roll_up_and_indent(self):
+		top = create_warehouse("_Test WWSB Top", properties={"is_group": 1})
+		middle = create_warehouse("_Test WWSB Middle", properties={"is_group": 1, "parent_warehouse": top})
+		leaf = create_warehouse("_Test WWSB Leaf", properties={"parent_warehouse": middle})
+		make_stock_entry(item_code="_Test Item", to_warehouse=leaf, qty=10, rate=100)
+
+		data = self.run_report()
+
+		for warehouse in (top, middle, leaf):
+			self.assertEqual(self.row(data, warehouse)["stock_balance"], 1000)
+		self.assertEqual(self.row(data, middle)["indent"], self.row(data, top)["indent"] + 1)
+		self.assertEqual(self.row(data, leaf)["indent"], self.row(data, middle)["indent"] + 1)
