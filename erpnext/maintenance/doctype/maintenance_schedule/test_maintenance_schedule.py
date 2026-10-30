@@ -133,20 +133,21 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 
 		# With serial no. set in schedule -> returns serial nos.
 		make_serial_item_with_serial(self, item_code)
-		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001, TEST002")
+		serial_ids = [
+			frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": number})
+			for number in ("TEST001", "TEST002")
+		]
+		deliver_serial_nos(item_code, serial_ids)
+		ms = make_maintenance_schedule(
+			item_code=item_code, serial_no="TEST001, TEST002", start_date=add_days(today(), 1)
+		)
 		ms.submit()
 
 		s_item = ms.schedules[0]
 		mv = make_maintenance_visit(source_name=ms.name, item_name=item_code, s_id=s_item.name)
 		mvi = mv.purposes[0]
 		serial_nos = get_serial_nos_from_schedule(mvi.item_name, ms.name)
-		self.assertEqual(
-			serial_nos,
-			[
-				frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": number}, "name")
-				for number in ("TEST001", "TEST002")
-			],
-		)
+		self.assertEqual(serial_nos, serial_ids)
 
 	def test_schedule_with_serials(self):
 		# Checks whether serials are automatically updated when changing in items table.
@@ -457,7 +458,10 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		with as_user(sales_user):
 			self.assertRaises(frappe.PermissionError, get_serial_nos_from_schedule, item_code, ms.name)
 		with as_user(maintenance_user):
-			self.assertEqual(get_serial_nos_from_schedule(item_code, ms.name), ["TEST001"])
+			self.assertEqual(
+				get_serial_nos_from_schedule(item_code, ms.name),
+				[frappe.db.get_value("Serial No", {"item_code": item_code, "serial_no": "TEST001"})],
+			)
 
 
 def deliver_serial_nos(item_code, serial_nos, customer="_Test Customer"):

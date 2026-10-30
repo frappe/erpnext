@@ -90,7 +90,7 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 			item=item, from_date=frappe.utils.today(), to_date=frappe.utils.add_days(frappe.utils.today(), 30)
 		)
 
-		self.assertEqual([row[2] for row in data], [batches["old"].name])
+		self.assertEqual([row.batch for row in data], [batches["old"].name])
 
 	def make_batch_in_two_warehouses(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
@@ -138,11 +138,11 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 
 		data = self.run_report_as_restricted_user(item)
 
-		self.assertEqual([(row[2], row[4]) for row in data], [(batch, 3)])
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch, 3)])
 
 	def test_permission_for_another_doctype_does_not_limit_the_quantity(self):
 		item, batch = self.make_batch_in_two_warehouses()
 
 		data = self.run_report_as_restricted_user(item, applicable_for="Purchase Order")
 
-		self.assertEqual([(row[2], row[4]) for row in data], [(batch, 10)])
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch, 10)])

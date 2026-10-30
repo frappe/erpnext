@@ -2746,9 +2746,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		item = create_item("_Test Reco FIFO Batch Own Rate")
 		item.update({"has_batch_no": 1, "valuation_method": "FIFO"})
 		item.save()
-		first, second = "TRFBOR-1", "TRFBOR-2"
-		for batch_id in (first, second):
-			create_batch_item_with_batch(item.name, batch_id)
+		first, second = (create_batch_item_with_batch(item.name, f"TRFBOR-{i}") for i in (1, 2))
 		posting_date = add_days(nowdate(), -5)
 		for batch_no, rate in ((first, 100), (second, 200)):
 			make_stock_entry(

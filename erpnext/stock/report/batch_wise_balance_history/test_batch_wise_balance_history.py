@@ -10,8 +10,6 @@ from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history 
 from erpnext.tests.utils import ERPNextTestSuite
 
 WH = "Stores - _TC"
-VALUATION_RATE = 9
-BALANCE_VALUE = 10
 
 
 class TestBatchWiseBalanceHistory(ERPNextTestSuite):
@@ -44,8 +42,8 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 		make_stock_entry(item_code=item, to_warehouse=WH, qty=5, rate=600, posting_date="2026-06-04")
 
 		rows = self.run_report(item, to_date="2026-06-03")
-		self.assertEqual([row[VALUATION_RATE] for row in rows], [200, 200])
-		self.assertEqual([row[BALANCE_VALUE] for row in rows], [1000, 2000])
+		self.assertEqual([row.valuation_rate for row in rows], [200, 200])
+		self.assertEqual([row.balance_value for row in rows], [1000, 2000])
 
 	def test_serial_no_valuation_decides_batch_value(self):
 		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
@@ -65,7 +63,7 @@ class TestBatchWiseBalanceHistory(ERPNextTestSuite):
 						item_code=item, to_warehouse=WH, qty=1, rate=rate, posting_date="2026-06-01"
 					)
 
-				self.assertEqual([row[BALANCE_VALUE] for row in self.run_report(item)], expected)
+				self.assertEqual([row.balance_value for row in self.run_report(item)], expected)
 
 	def test_reconciliation_uses_batch_ids(self):
 		item = self.make_batch_item()
