@@ -315,6 +315,9 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	if not pi_row.target_warehouse:
 		pi_row.target_warehouse = main_item_row.get("target_warehouse")
 
+	if not item_data.is_stock_item:
+		pi_row.reserve_stock = 0
+
 	bin = get_packed_item_bin_qty(packing_item.item_code, pi_row.warehouse)
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
