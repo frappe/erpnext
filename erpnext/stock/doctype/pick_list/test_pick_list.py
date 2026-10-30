@@ -117,23 +117,6 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(first_locations[0].serial_no, "SN-1\nSN-2")
 		self.assertEqual(second_locations[0].serial_no, "SN-3\nSN-4")
 
-	def test_pick_list_allocation_takes_advisory_gate(self):
-		if frappe.db.db_type != "postgres":
-			self.skipTest("advisory locks are a PostgreSQL feature")
-
-		item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
-		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
-
-		def held_advisory_locks():
-			return frappe.db.sql(
-				"SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
-			)[0][0]
-
-		before = held_advisory_locks()
-		create_pick_list(sales_order.name)
-		self.assertGreater(held_advisory_locks(), before)
-
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		item_code = make_item().name
 		try:
@@ -1123,6 +1106,19 @@ class TestPickList(ERPNextTestSuite):
 
 		# 12 Nos picked / 12 (1 Box in stock units) = 1 bundle, not 12
 		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
+
+	def test_pick_list_skips_closed_bundle_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		warehouse = "_Test Warehouse - _TC"
+		bundle, _components = create_product_bundle([2], warehouse=warehouse)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		# closing the bundle row drops its components from the pick list too
+		update_closed_status("Sales Order", sales_order.name, [sales_order.items[0].name], 1)
+
+		pick_list = create_pick_list(sales_order.name)
+		self.assertEqual(pick_list.locations, [])
 
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -2183,6 +2179,29 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].rate, 42)
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
+
+	def test_second_delivery_note_maps_only_undelivered_bundles(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, components = create_product_bundle([5, 2], warehouse=warehouse)
+		so = make_sales_order(item_code=bundle, qty=4, rate=42)
+		pl = create_pick_list(so.name).save().submit()
+
+		first_dn = create_delivery_note(pl.name)
+		first_dn.items[0].qty = 1
+		first_dn.save().submit()
+
+		second_dn = create_delivery_note(pl.name)
+		self.assertEqual(second_dn.items[0].qty, 3)
+		packed_qty = {row.item_code: row.qty for row in second_dn.packed_items}
+		self.assertEqual(packed_qty, {components[0]: 15, components[1]: 6})
+
+		second_dn.submit()
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 4)
+		self.assertEqual(so.per_delivered, 100)
+		pl.reload()
+		self.assertEqual(pl.per_delivered, 100)
+		self.assertEqual(pl.status, "Completed")
 
 	def test_pick_list_status(self):
 		warehouse = "_Test Warehouse - _TC"

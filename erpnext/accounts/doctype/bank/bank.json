@@ -96,7 +96,7 @@
   },
   {
    "fieldname": "plaid_access_token",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "hidden": 1,
    "label": "Plaid Access Token",
    "no_copy": 1,
@@ -105,7 +105,7 @@
  ],
  "icon": "landmark",
  "links": [],
- "modified": "2026-08-21 23:11:39.423431",
+ "modified": "2026-10-28 00:20:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",

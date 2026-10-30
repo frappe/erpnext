@@ -2551,6 +2551,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			}
 		)
 
+		# a closed row is not offered for work orders
+		from erpnext.controllers.item_close import update_closed_status
+
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		self.assertNotIn(so.items[1].name, [i["sales_order_item"] for i in get_work_order_items(so.name)])
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 0)
+
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
@@ -2577,6 +2584,16 @@ class TestSalesOrder(ERPNextTestSuite):
 				.where((wo.sales_order == so.name) & (wo.sales_order_item == item))
 			).run()
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+
+	def test_update_status_endpoint_rejects_invalid_status(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		so = make_sales_order()
+		# only Draft / On Hold / Closed are allowed, and only on a submitted order
+		self.assertRaises(frappe.ValidationError, update_status, "Cancelled", so.name)
+
+		draft = make_sales_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_status, "Closed", draft.name)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_work_order_for_duplicate_product_bundle_rows(self):
@@ -2632,6 +2649,48 @@ class TestSalesOrder(ERPNextTestSuite):
 				getdate(work_order.expected_delivery_date),
 				getdate(expected_delivery_dates[work_order.sales_order_item]),
 			)
+
+	def test_update_child_keeps_paid_payment_term_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+			get_payment_entry,
+		)
+
+		create_payment_terms_template()
+		for invoice_portion in (100, 0):
+			with self.subTest(invoice_portion=invoice_portion):
+				so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+				so.payment_terms_template = "Test Receivable Template"
+				so.set("payment_schedule", [])
+				so.append(
+					"payment_schedule",
+					{
+						"payment_term": "Basic Amount Receivable",
+						"due_date": so.delivery_date,
+						"invoice_portion": invoice_portion,
+						"payment_amount": 1000,
+					},
+				)
+				so.insert()
+				so.submit()
+
+				pe = get_payment_entry("Sales Order", so.name, party_amount=400)
+				pe.reference_no = "1"
+				pe.reference_date = nowdate()
+				pe.references[0].allocated_amount = 400
+				pe.insert()
+				pe.submit()
+
+				item = so.items[0]
+				trans_item = json.dumps(
+					[{"item_code": item.item_code, "qty": 1, "rate": 1000, "docname": item.name}]
+				)
+				update_child_qty_rate("Sales Order", trans_item, so.name)
+
+				term = frappe.get_doc("Sales Order", so.name).payment_schedule[0]
+				self.assertEqual(term.paid_amount, 400)
+				self.assertEqual(term.outstanding, 600)
+				self.assertEqual(term.base_outstanding, 600)
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -3353,7 +3412,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		pr = make_payment_request(
 			dt=so.doctype,
 			dn=so.name,
-			order_type="Shopping Cart",
+			make_sales_invoice=True,
 			submit_doc=True,
 			return_doc=True,
 			mute_email=True,

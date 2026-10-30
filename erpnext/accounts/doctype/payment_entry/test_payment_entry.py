@@ -4,15 +4,18 @@
 
 import frappe
 from frappe import qb
+from frappe.desk.notifications import get_open_count
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
 	get_party_details,
 	get_payment_entry,
 	get_reference_details,
 )
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	make_purchase_invoice,
 	make_purchase_invoice_against_cost_center,
@@ -28,6 +31,22 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
+	def test_dashboard_shows_linked_exchange_gain_loss_journal(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		payment_entry = create_payment_entry(save=True)
+		journal_entry = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 100, save=False)
+		journal_entry.accounts[0].reference_type = payment_entry.doctype
+		journal_entry.accounts[0].reference_name = payment_entry.name
+		journal_entry.insert()
+
+		dashboard = get_open_count(payment_entry.doctype, payment_entry.name)
+		linked_counts = {
+			link["doctype"]: link["count"] for link in dashboard["count"]["external_links_found"]
+		}
+
+		self.assertEqual(linked_counts["Journal Entry"], 1)
+
 	def test_payment_creation_excludes_disabled_bank_default(self):
 		bank_account = frappe.get_doc(
 			"Bank Account", make_bank_account("_Test Payment Bank Default", "_Test Company", "HDFC - _TC")
@@ -1564,6 +1583,69 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe.submit()
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
+
+	def test_total_allocation_across_reference_rows(self):
+		invoice = create_sales_invoice(qty=1, rate=100)
+		payment_request = make_payment_request(
+			dt=invoice.doctype, dn=invoice.name, submit_doc=True, return_doc=True, mute_email=True
+		)
+		payment = get_payment_entry(invoice.doctype, invoice.name)
+		self.assertEqual(payment.references[0].payment_request, payment_request.name)
+		payment.append("references", frappe.copy_doc(payment.references[0]))
+		payment.references[1].payment_request = None
+		payment.paid_amount = payment.received_amount = 200
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+			payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 100)
+
+		payment.references[0].allocated_amount = 40
+		payment.references[1].allocated_amount = 60
+		payment.paid_amount = payment.received_amount = 100
+		payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 0)
+		payment.cancel()
+		self.assertEqual(invoice.reload().outstanding_amount, 100)
+
+		create_payment_terms_template()
+		invoice = create_sales_invoice(qty=1, rate=118, do_not_save=True)
+		invoice.payment_terms_template = "Test Receivable Template"
+		invoice.submit()
+		payment = get_payment_entry(invoice.doctype, invoice.name)
+		payment.references[0].allocated_amount = 80
+		payment.references[1].allocated_amount = -10
+		payment.paid_amount = payment.received_amount = 70
+		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+			payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 118)
+		self.assertEqual([row.paid_amount for row in invoice.payment_schedule], [0, 0])
+
+		journal = make_journal_entry("_Test Cash - _TC", invoice.debit_to, 80, save=False)
+		journal.accounts[1].update(
+			{
+				"party_type": "Customer",
+				"party": invoice.customer,
+				"reference_type": invoice.doctype,
+				"reference_name": invoice.name,
+			}
+		)
+		journal.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 38)
+
+		payment = get_payment_entry(invoice.doctype, invoice.name)
+		self.assertEqual(len(payment.references), 2)
+		payment.references[0].allocated_amount = 30
+		payment.references[1].allocated_amount = 18
+		payment.paid_amount = payment.received_amount = 48
+		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+			payment.submit()
+
+		payment.references[0].allocated_amount = 20
+		payment.paid_amount = payment.received_amount = 38
+		payment.submit()
+		self.assertEqual(invoice.reload().outstanding_amount, 0)
+		payment.cancel()
+		self.assertEqual(invoice.reload().outstanding_amount, 38)
 
 	def test_duplicate_payment_entry_partial_allocate_amount(self):
 		si = create_sales_invoice()

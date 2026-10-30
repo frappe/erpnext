@@ -731,14 +731,6 @@ class PickList(TransactionBase):
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 
-		# Serialize concurrent allocations per item on postgres. MariaDB's gap locks on the
-		# picked-items locking read below already make two simultaneous allocations take turns;
-		# postgres locking reads can't see the rows another in-flight allocation is inserting, so
-		# both could claim the same stock. Sorted so overlapping documents can't deadlock.
-		if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
-			for item_code in sorted({d.item_code for d in items}):
-				frappe.db.transaction_advisory_lock(("pick-allocate", item_code))
-
 		picked_items_details = self.get_picked_items_details(items)
 		self.item_location_map = frappe._dict()
 
@@ -1080,8 +1072,8 @@ class PickList(TransactionBase):
 			}
 		return product_bundle_qty_map
 
-	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
-		"""Compute how many full bundles can be created from picked items."""
+	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
+		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
 		possible_bundles = {}
 		for item in self.locations:
@@ -1089,8 +1081,9 @@ class PickList(TransactionBase):
 				continue
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
+				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
 				possible_bundles.setdefault(item.product_bundle_item, 0)
-				possible_bundles[item.product_bundle_item] += item.picked_qty / qty_in_bundle
+				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 

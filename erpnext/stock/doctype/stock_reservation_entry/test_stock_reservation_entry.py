@@ -365,6 +365,56 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
+	def test_closing_sales_order_with_reserved_stock_is_blocked(self) -> None:
+		so = make_sales_order(
+			item_code=self.sr_item.name, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = 1
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+		so.create_stock_reservation_entries()
+
+		# closing must not strand reserved stock; the user has to unreserve first
+		self.assertRaises(frappe.ValidationError, so.update_status, "Closed")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_rate_only_update_items_keeps_reservation(self) -> None:
+		# A rate-only Update Items must not cancel and rebuild reservations, otherwise the
+		# partly delivered reservation is dropped when the Delivery Note is later cancelled.
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+
+		so = make_sales_order(
+			item_code=self.sr_item.name, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = 1
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 4
+		dn.submit()
+
+		trans_items = [{"docname": so.items[0].name, "item_code": self.sr_item.name, "qty": 10, "rate": 150}]
+		update_child_qty_rate("Sales Order", frappe.as_json(trans_items), so.name)
+
+		dn.cancel()
+
+		sre = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": so.name, "docstatus": 1},
+			fields=["reserved_qty", "delivered_qty"],
+		)[0]
+		self.assertEqual(sre.reserved_qty, 10)
+		self.assertEqual(sre.delivered_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
 	def test_reserved_stock_cannot_be_delivered_against_a_different_sales_order(self) -> None:
 		# Spec #2: stock reserved for one Sales Order must not be deliverable through a Delivery Note
 		# raised for a different Sales Order. Pin allow_negative_stock off so the guard is enforced
@@ -1009,6 +1059,50 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		self.assertEqual(
 			get_sre_reserved_qty_details_for_voucher("Sales Order", so.name), {so.packed_items[0].name: 4}
 		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_delivery_consumes_bundle_component_reservation_from_other_warehouse(self) -> None:
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		component_warehouse = "_Test Warehouse 1 - _TC"
+		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
+		make_stock_entry(item_code=components[0], target=component_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=1)
+		so.reserve_stock = 1
+		so.packed_items[0].update({"warehouse": component_warehouse, "reserve_stock": 1})
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		self.assertEqual(dn.packed_items[0].warehouse, component_warehouse)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Reservation Entry", {"voucher_detail_no": so.packed_items[0].name}, "delivered_qty"
+			),
+			4,
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_return_keeps_warehouse_picked_for_reserved_bundle_component(self) -> None:
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
+
+		component_warehouse = "_Test Warehouse 1 - _TC"
+		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
+		make_stock_entry(item_code=components[0], target=component_warehouse, qty=10, rate=100)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=1)
+		so.reserve_stock = 1
+		so.packed_items[0].update({"warehouse": component_warehouse, "reserve_stock": 1})
+		so.submit()
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.packed_items[0].warehouse = self.warehouse
+		return_dn.save()
+
+		self.assertEqual(return_dn.packed_items[0].warehouse, self.warehouse)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
