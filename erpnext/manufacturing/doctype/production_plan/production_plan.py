@@ -2786,7 +2786,7 @@ def reserve_stock_for_production_plan(doc, items=None, table_name=None, notify=F
 		if table_name and table_name != child_table_name:
 			continue
 
-		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name], notify=notify)
+		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name])
 		if doc.docstatus == 1:
 			sre_created = sre.make_stock_reservation_entries()
 			if sre_created:
