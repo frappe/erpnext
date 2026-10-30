@@ -561,7 +561,7 @@ class SellingController(StockController):
 
 	def ensure_customer_is_not_blocked(self):
 		# Consolidated POS invoices only merge POS invoices that already passed this check
-		if self.doctype == "Quotation" or self.get("is_consolidated"):
+		if self.doctype == "Quotation" or self.get("is_consolidated") or self.get("is_return"):
 			return
 
 		if self.customer and is_customer_blocked(self.customer):
