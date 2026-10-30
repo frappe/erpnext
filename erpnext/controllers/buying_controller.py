@@ -804,10 +804,8 @@ class BuyingController(SubcontractingController):
 		item_tax_amount = 0.0
 		if item.item_tax_rate:
 			tax_details = json.loads(item.item_tax_rate)
-			for account, rate in tax_details.items():
-				if account not in tax_accounts:
-					continue
-
+			for account in tax_accounts:
+				rate = tax_details.get(account, NOT_APPLICABLE_TAX)
 				if rate == NOT_APPLICABLE_TAX:
 					continue
 
