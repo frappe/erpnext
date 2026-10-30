@@ -196,39 +196,27 @@ def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fie
 		)
 		if target_item and (sre := [sre for sre in packed_sre if sre.voucher_detail_no == item.name]):
 			if sre[0].reservation_based_on == "Serial and Batch":
-				qty = 0
-				serial_nos = []
-				batch_nos = []
-				if use_serial_batch_fields:
-					target_item.use_serial_batch_fields = 1
-					for item in sre:
-						qty += item.reserved_qty
-						if item.has_serial_no:
-							serial_nos.extend(
-								frappe.get_all(
-									"Serial and Batch Entry",
-									filters={"parent": item.name},
-									pluck="serial_no",
-								)
-							)
-						if item.has_batch_no:
-							batch_nos.extend(
-								frappe.get_all(
-									"Serial and Batch Entry",
-									filters={"parent": item.name},
-									pluck="batch_no",
-								)
-							)
+				set_reserved_serial_and_batch(target_item, sre, use_serial_batch_fields)
 
-					if len(batch_nos) == 1:
-						target_item.batch_no = batch_nos[0] if batch_nos else None
-					if serial_nos and len(batch_nos) < 2:
-						target_item.serial_no = "\n".join(
-							SerialBatchIdentity("Serial No").get_numbers(target_item.item_code, serial_nos)
-						)
 
-				if not use_serial_batch_fields or len(batch_nos) > 1:
-					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name
+def set_reserved_serial_and_batch(row, sre_list, use_serial_batch_fields):
+	"""Carry the undelivered serial/batch of the reservations onto a delivery row."""
+	if not use_serial_batch_fields:
+		row.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre_list).name
+		return
+
+	# A single field can't hold multiple batches, so fall back to a bundle in that case.
+	row.use_serial_batch_fields = 1
+	sb_entries = get_serial_batch_entries_for_voucher([sre.name for sre in sre_list])
+	serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
+	batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
+	if serial_nos:
+		row.serial_no = "\n".join(SerialBatchIdentity("Serial No").get_numbers(row.item_code, serial_nos))
+	if len(batch_nos) == 1:
+		row.batch_no = batch_nos[0]
+	elif len(batch_nos) > 1:
+		row.use_serial_batch_fields = 0
+		row.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre_list).name
 
 
 @frappe.whitelist()
@@ -403,24 +391,7 @@ def make_delivery_note(
 				dn_item.warehouse = sre.warehouse
 
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
-					if use_serial_batch_fields:
-						# Carry the reserved serial/batch in the row fields. A single field can't hold
-						# multiple batches, so fall back to a bundle in that case.
-						dn_item.use_serial_batch_fields = 1
-						sb_entries = get_serial_batch_entries_for_voucher([sre.name])
-						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
-						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
-						if serial_nos:
-							dn_item.serial_no = "\n".join(
-								SerialBatchIdentity("Serial No").get_numbers(dn_item.item_code, serial_nos)
-							)
-						if len(batch_nos) == 1:
-							dn_item.batch_no = batch_nos[0]
-						elif len(batch_nos) > 1:
-							dn_item.use_serial_batch_fields = 0
-							dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
-					else:
-						dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
+					set_reserved_serial_and_batch(dn_item, [sre], use_serial_batch_fields)
 
 				target_doc.append("items", dn_item)
 			# Correct rows index.
