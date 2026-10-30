@@ -3596,6 +3596,92 @@ class TestDeliveryNote(ERPNextTestSuite):
 						serial_batch_map[row.item_code].batch_no_valuation[entry.batch_no],
 					)
 
+	def test_sales_return_for_product_bundle_with_legacy_serial_nos(self):
+		bundle_item = make_item("_Packed Legacy Bundle Item", {"is_stock_item": 0}).name
+		stock_item = make_item("_Packed Legacy Stock Item", {"is_stock_item": 1}).name
+		serial_items = [
+			make_item(
+				f"_Packed Legacy Serial Item {i}",
+				{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": f"SN-PACKED-LEGACY-{i}-.#####"},
+			).name
+			for i in (1, 2)
+		]
+		for item_code in [stock_item, *serial_items]:
+			make_stock_entry(item=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		make_product_bundle(bundle_item, [stock_item, *serial_items])
+
+		dn = create_delivery_note(item_code=bundle_item, warehouse="_Test Warehouse - _TC", qty=2)
+		dn.reload()
+
+		# Delivery notes from before v15 have serial nos in the packed items without a bundle
+		delivered_serial_nos = {}
+		for packed_item in dn.packed_items:
+			if packed_item.item_code not in serial_items:
+				continue
+
+			bundle = packed_item.serial_and_batch_bundle
+			serial_nos = get_serial_nos_from_bundle(bundle)
+			delivered_serial_nos[packed_item.item_code] = sorted(serial_nos)
+			legacy_values = {"serial_no": "\n".join(serial_nos), "serial_and_batch_bundle": None}
+			packed_item.db_set(legacy_values)
+			frappe.db.set_value(
+				"Stock Ledger Entry",
+				{"voucher_no": dn.name, "item_code": packed_item.item_code},
+				legacy_values,
+			)
+			frappe.db.delete("Serial and Batch Entry", {"parent": bundle})
+			frappe.db.delete("Serial and Batch Bundle", bundle)
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.submit()
+		return_dn.reload()
+
+		returned_serial_nos = {
+			row.item_code: sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle))
+			for row in return_dn.packed_items
+			if row.item_code in serial_items
+		}
+		self.assertEqual(returned_serial_nos, delivered_serial_nos)
+
+		# The return gets the stock value of the delivery: 2 units at 100
+		for item_code in serial_items:
+			stock_value_difference = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": return_dn.name, "item_code": item_code, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			self.assertEqual(stock_value_difference, 200)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_partial_sales_return_for_product_bundle_with_serial_fields_and_bundle(self):
+		bundle_item = make_item("_Packed Serial Fields Bundle Item", {"is_stock_item": 0}).name
+		serial_item = make_item(
+			"_Packed Serial Fields Serial Item",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-PACKED-FIELDS-.#####"},
+		).name
+		se = make_stock_entry(item=serial_item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		delivered_serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		make_product_bundle(bundle_item, [serial_item])
+
+		# With serial / batch fields enabled, the packed item keeps its serial nos and gets a bundle
+		dn = create_delivery_note(
+			item_code=bundle_item, warehouse="_Test Warehouse - _TC", qty=2, do_not_submit=True
+		)
+		dn.packed_items[0].serial_no = "\n".join(delivered_serial_nos)
+		dn.submit()
+		dn.reload()
+		self.assertTrue(dn.packed_items[0].serial_no)
+		self.assertTrue(dn.packed_items[0].serial_and_batch_bundle)
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = -1
+		return_dn.submit()
+		return_dn.reload()
+
+		returned_serial_nos = get_serial_nos_from_bundle(return_dn.packed_items[0].serial_and_batch_bundle)
+		self.assertEqual(len(returned_serial_nos), 1)
+		self.assertIn(returned_serial_nos[0], delivered_serial_nos)
+
 	def test_negative_stock_with_higher_precision(self):
 		original_flt_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_single_value("System Settings", "float_precision", 7)
