@@ -785,8 +785,15 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.prepare_available_materials_based_on_transfer()
 		pending_qty_to_mfg = flt(self.doc.fg_completed_qty)
 		if self.doc.work_order:
-			pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - flt(
-				self.wo_doc.produced_qty
+			# Count each consuming entry once; For Quantity includes its process loss.
+			consumed_fg_qty = {
+				row.parent: flt(row.fg_completed_qty)
+				for row in getattr(self, "_consumption_entries", [])
+				if row.purpose in ("Manufacture", "Material Consumption for Manufacture")
+				and self._get_available_buckets(row)
+			}
+			pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - sum(
+				consumed_fg_qty.values()
 			)
 		if pending_qty_to_mfg <= 0 and not self.doc.get("is_return"):
 			return
@@ -968,7 +975,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.select(stock_entry_detail.star)
+			.select(stock_entry_detail.star, stock_entry.fg_completed_qty, stock_entry.purpose)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (IfNull(stock_entry_detail.s_warehouse, "") != "")
