@@ -2,9 +2,11 @@
 # MIT License. See license.txt
 
 import frappe
+from frappe.utils import flt
 from frappe.utils.data import today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company 6"
@@ -106,10 +108,124 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertIn("'Provisional Profit / Loss (Credit)'", name_and_total)
 		self.assertEqual(name_and_total["'Provisional Profit / Loss (Credit)'"], 100)
 
+	def test_unclosed_profit_of_earlier_years_is_not_provisional(self):
+		create_account("My Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
+		filters = frappe._dict(
+			company=COMPANY,
+			filter_based_on="Date Range",
+			period_start_date="2026-01-01",
+			period_end_date="2026-12-31",
+			periodicity="Yearly",
+			accumulated_values=1,
+		)
+		unclosed, provisional = get_profit_loss_rows(filters)
 
-def make_journal_entry(rows):
+		for amount, posting_date in ((1000, "2025-06-01"), (300, "2026-06-01")):
+			make_journal_entry(
+				[
+					dict(account_name="My Bank", debit_in_account_currency=amount),
+					dict(account_name="Sales", credit_in_account_currency=amount),
+				],
+				posting_date=posting_date,
+			)
+
+		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional + 300))
+
+		# a current loss that exactly offsets all earlier profit must still be shown
+		make_journal_entry(
+			[
+				dict(account_name="Capital Stock", credit_in_account_currency=1300),
+				dict(account_name="Sales", debit_in_account_currency=1300),
+			],
+			posting_date="2026-07-01",
+		)
+		self.assertEqual(get_profit_loss_rows(filters), (unclosed + 1000, provisional - 1000))
+
+	def test_group_by_dimension(self):
+		create_account("BS Dim Test Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
+
+		cc1 = frappe.db.get_value("Cost Center", {"company": COMPANY, "is_group": 0}, "name")
+		parent_cc = frappe.db.get_value("Cost Center", {"company": COMPANY, "is_group": 1}, "name")
+
+		cc2 = frappe.new_doc("Cost Center")
+		cc2.cost_center_name = "BS Test CC 2"
+		cc2.parent_cost_center = parent_cc
+		cc2.company = COMPANY
+		cc2.insert()
+
+		make_journal_entry(
+			[
+				dict(
+					account_name="BS Dim Test Bank",
+					debit_in_account_currency=300,
+					credit_in_account_currency=0,
+					cost_center=cc1,
+				),
+				dict(
+					account_name="Capital Stock",
+					debit_in_account_currency=0,
+					credit_in_account_currency=300,
+					cost_center=cc1,
+				),
+			]
+		)
+		make_journal_entry(
+			[
+				dict(
+					account_name="BS Dim Test Bank",
+					debit_in_account_currency=500,
+					credit_in_account_currency=0,
+					cost_center=cc2.name,
+				),
+				dict(
+					account_name="Capital Stock",
+					debit_in_account_currency=0,
+					credit_in_account_currency=500,
+					cost_center=cc2.name,
+				),
+			]
+		)
+
+		filters = frappe._dict(
+			company=COMPANY,
+			period_start_date=today(),
+			period_end_date=today(),
+			periodicity="Yearly",
+			filter_based_on="Date Range",
+			accumulated_values=True,
+			group_by_dimension="Cost Center",
+		)
+		period_list = build_period_list(filters)
+		self.assertTrue(is_dimension_grouped(period_list))
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		columns, data, *_ = execute(filters)
+
+		# each dimension group starts with exactly one flagged column (UI boundary marker)
+		first_flags = [c["dimension_value"] for c in columns if c.get("is_first_in_dimension")]
+		self.assertEqual(len(first_flags), len(set(first_flags)))
+		self.assertLessEqual({cc1, cc2.name}, set(first_flags))
+
+		bank_row = next((r for r in data if r.get("account_name") == "BS Dim Test Bank"), None)
+		self.assertIsNotNone(bank_row)
+		self.assertEqual(bank_row[key_for(cc1)], 300)
+		self.assertEqual(bank_row[key_for(cc2.name)], 500)
+		self.assertEqual(bank_row["total"], 800)
+
+
+def get_profit_loss_rows(filters):
+	rows = {row.get("account"): flt(row.get("total")) for row in execute(frappe._dict(filters))[1]}
+	return (
+		rows.get("'Unclosed Fiscal Years Profit / Loss (Credit)'", 0),
+		rows.get("'Provisional Profit / Loss (Credit)'", 0),
+	)
+
+
+def make_journal_entry(rows, posting_date=None):
 	jv = frappe.new_doc("Journal Entry")
-	jv.posting_date = today()
+	jv.posting_date = posting_date or today()
 	jv.company = COMPANY
 	jv.user_remark = "test"
 

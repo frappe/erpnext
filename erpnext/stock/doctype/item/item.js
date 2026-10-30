@@ -42,7 +42,17 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
+		frm.set_query("item_group", () => ({ filters: { is_group: 0 } }));
+		frm.set_query("allowed_companies", () => ({
+			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
+		}));
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");
 		frm.add_fetch("attribute", "to_range", "to_range");
@@ -966,10 +976,7 @@ $.extend(erpnext.item, {
 			],
 		});
 
-		dialog.set_primary_action(__("Create"), function () {
-			var data = dialog.get_values();
-			if (!data) return;
-
+		dialog.set_primary_action(__("Create"), function (data) {
 			// call the server to make the variant
 			data.template = frm.doc.name;
 			frappe.call({
@@ -1308,15 +1315,13 @@ $.extend(erpnext.item, {
 			fields: fields,
 		});
 
-		d.set_primary_action(__("Create"), function () {
-			var args = d.get_values();
-			if (!args) return;
+		d.set_primary_action(__("Create"), function (args) {
 			frappe.call({
 				method: "erpnext.controllers.item_variant.get_variant",
 				btn: d.get_primary_btn(),
 				args: {
 					template: frm.doc.name,
-					args: d.get_values(),
+					args: args,
 				},
 				callback: function (r) {
 					// returns variant item
@@ -1343,7 +1348,7 @@ $.extend(erpnext.item, {
 							method: "erpnext.controllers.item_variant.create_variant",
 							args: {
 								item: frm.doc.name,
-								args: d.get_values(),
+								args: args,
 								use_template_image: args.use_template_image,
 							},
 							callback: function (r) {
@@ -1484,7 +1489,7 @@ frappe.tour["Item"] = [
 	},
 	{
 		fieldname: "include_item_in_manufacturing",
-		title: "Include Item in Manufacturing",
+		title: __("Include Item in Manufacturing"),
 		description: __(
 			"This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked."
 		),

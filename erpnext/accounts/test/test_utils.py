@@ -3,10 +3,14 @@ import unittest
 import frappe
 from frappe.test_runner import make_test_objects
 
+from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
+	get_account_balances_coa,
+	get_balance_on,
 	get_currency_precision,
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
@@ -20,6 +24,63 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestUtils(ERPNextTestSuite):
+	def test_balances_respect_finance_books(self):
+		company = "_Test Company"
+		frappe.db.set_value("Company", company, "default_finance_book", "")
+		books = [
+			frappe.get_doc(doctype="Finance Book", finance_book_name=name).insert().name
+			for name in ("_Test Balance Default Book", "_Test Balance Alternative Book")
+		]
+		group = create_account(
+			account_name="_Test Finance Book Balances",
+			company=company,
+			parent_account="Bank Accounts - _TC",
+			is_group=1,
+		)
+		account = create_account(
+			account_name="_Test Finance Book Balance Ledger", company=company, parent_account=group
+		)
+		for book, amount in ((None, 100), ("", 200), (books[0], 300), (books[1], 400)):
+			journal = make_journal_entry(account, "Cash - _TC", amount, save=False)
+			journal.finance_book = book
+			journal.submit()
+			frappe.db.set_value(
+				"GL Entry",
+				{"voucher_type": journal.doctype, "voucher_no": journal.name},
+				"finance_book",
+				book,
+			)
+
+		for default_book in ("", books[0]):
+			frappe.db.set_value("Company", company, "default_finance_book", default_book)
+			for include_default in (False, True):
+				with self.subTest(default_book=default_book, include_default=include_default):
+					balances = {
+						row["value"]: row["balance"]
+						for row in get_account_balances_coa(company, include_default)
+					}
+					expected = 600 if default_book and include_default else 300
+					self.assertEqual(balances[account], expected)
+					self.assertEqual(balances[group], expected)
+					for selected in (None, "", *books):
+						expected = 300
+						if selected == books[0] or (default_book and include_default):
+							expected += 300
+						if selected == books[1]:
+							expected += 400
+						for name in (account, group):
+							with self.subTest(account=name, selected=selected):
+								self.assertEqual(
+									get_balance_on(
+										account=name,
+										company=company,
+										finance_book=selected,
+										include_default_fb_balances=include_default,
+									),
+									expected,
+								)
+		self.assertEqual(get_balance_on(account=account), 300)
+
 	def test_get_party_shipping_address(self):
 		address = get_party_shipping_address("Customer", "_Test Customer 1")
 		self.assertEqual(address, "_Test Billing Address 2 Title-Billing")

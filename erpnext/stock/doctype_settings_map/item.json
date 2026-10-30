@@ -16,15 +16,7 @@
    "settings_doctype": "Stock Settings"
   },
   {
-   "setting_field": "default_warehouse",
-   "settings_doctype": "Stock Settings"
-  },
-  {
    "setting_field": "valuation_method",
-   "settings_doctype": "Stock Settings"
-  },
-  {
-   "setting_field": "sample_retention_warehouse",
    "settings_doctype": "Stock Settings"
   },
   {

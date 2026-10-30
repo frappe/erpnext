@@ -20,6 +20,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 from erpnext.controllers.accounts_controller import AccountsController
 
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method
 class AssetRepair(AccountsController):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -163,7 +164,8 @@ class AssetRepair(AccountsController):
 			row.purchase_invoice, row.expense_account, exclude_asset_repair=self.name
 		)
 
-		if flt(row.repair_cost) > available_amount:
+		row.repair_cost = flt(row.repair_cost, row.precision("repair_cost"))
+		if row.repair_cost > available_amount:
 			frappe.throw(
 				_(
 					"Row #{0}: Repair cost {1} exceeds available amount {2} for Purchase Invoice {3} and Account {4}"
@@ -584,7 +586,8 @@ def get_unallocated_repair_cost(
 	used_amount = get_allocated_repair_cost(purchase_invoice, expense_account, exclude_asset_repair)
 	total_amount = get_total_expense_amount(purchase_invoice, expense_account)
 
-	return flt(total_amount - used_amount)
+	precision = frappe.get_precision("Asset Repair Purchase Invoice", "repair_cost")
+	return flt(total_amount - used_amount, precision)
 
 
 def get_allocated_repair_cost(

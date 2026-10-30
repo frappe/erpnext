@@ -204,7 +204,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	set_dynamic_field_label() {
 		if (this.frm.doc.quotation_to == "Customer") {
 			this.frm.set_df_property("party_name", "label", "Customer");
-			this.frm.fields_dict.party_name.get_query = null;
+			this.frm.fields_dict.party_name.get_query = erpnext.queries.customer;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			this.frm.set_df_property("party_name", "label", "Lead");
 			this.frm.fields_dict.party_name.get_query = function () {
@@ -380,26 +380,6 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			</p>`
 		);
 		dialog.show();
-	}
-
-	currency() {
-		super.currency();
-		let me = this;
-		const company_currency = this.get_company_currency();
-		if (this.frm.doc.currency && this.frm.doc.currency !== company_currency) {
-			this.get_exchange_rate(
-				this.frm.doc.transaction_date,
-				this.frm.doc.currency,
-				company_currency,
-				function (exchange_rate) {
-					if (exchange_rate != me.frm.doc.conversion_rate) {
-						me.set_margin_amount_based_on_currency(exchange_rate);
-						me.set_actual_charges_based_on_currency(exchange_rate);
-						me.frm.set_value("conversion_rate", exchange_rate);
-					}
-				}
-			);
-		}
 	}
 
 	disable_customer_if_creating_from_opportunity(doc) {

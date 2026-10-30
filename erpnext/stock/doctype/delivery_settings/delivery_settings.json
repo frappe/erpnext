@@ -46,7 +46,8 @@
    "description": "In minutes",
    "fieldname": "stop_delay",
    "fieldtype": "Int",
-   "label": "Delay between Delivery Stops"
+   "label": "Delay between Delivery Stops",
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
@@ -54,7 +55,7 @@
  "icon": "settings",
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.371015",
+ "modified": "2026-10-07 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Settings",

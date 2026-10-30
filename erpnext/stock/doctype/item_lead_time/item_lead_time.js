@@ -37,11 +37,7 @@ frappe.ui.form.on("Item Lead Time", {
 	},
 
 	calculate_no_of_units_produced(frm) {
-		let no_of_units_produced = (frm.doc.total_workstation_time / frm.doc.manufacturing_time_in_mins) * 60;
-		frm.set_value("no_of_units_produced", no_of_units_produced);
-	},
-
-	no_of_units_produced(frm) {
+		frm.set_value("no_of_units_produced", Math.trunc(get_units_produced(frm)));
 		frm.trigger("calculate_capacity_per_day");
 	},
 
@@ -50,7 +46,15 @@ frappe.ui.form.on("Item Lead Time", {
 	},
 
 	calculate_capacity_per_day(frm) {
-		let capacity_per_day = (frm.doc.daily_yield * frm.doc.no_of_units_produced) / 100;
+		let capacity_per_day = (frm.doc.daily_yield * get_units_produced(frm)) / 100;
 		frm.set_value("capacity_per_day", Math.ceil(capacity_per_day));
 	},
 });
+
+function get_units_produced(frm) {
+	if (!frm.doc.total_workstation_time || !frm.doc.manufacturing_time_in_mins) {
+		return 0;
+	}
+
+	return (frm.doc.total_workstation_time / frm.doc.manufacturing_time_in_mins) * 60;
+}

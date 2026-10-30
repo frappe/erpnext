@@ -24,9 +24,6 @@
   "allow_to_edit_stock_uom_qty_for_purchase",
   "allow_to_edit_stock_uom_qty_for_stock_entry",
   "allow_uom_with_conversion_rate_defined_in_item",
-  "warehouse_defaults_section",
-  "default_warehouse",
-  "sample_retention_warehouse",
   "stock_validations_tab",
   "negative_stock_section",
   "allow_negative_stock",
@@ -113,19 +110,6 @@
    "in_list_view": 1,
    "label": "Default Stock UOM",
    "options": "UOM"
-  },
-  {
-   "fieldname": "default_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "documentation_url": "https://docs.frappe.io/erpnext/retain-sample-stock",
-   "fieldname": "sample_retention_warehouse",
-   "fieldtype": "Link",
-   "label": "Sample Retention Warehouse",
-   "options": "Warehouse"
   },
   {
    "fieldname": "column_break_4",
@@ -262,7 +246,6 @@
    "label": "Disable Serial No and Batch selector"
   },
   {
-   "depends_on": "eval: doc.over_delivery_receipt_allowance>0",
    "description": "Users with this role are allowed to over deliver/receive against orders above the allowance percentage",
    "fieldname": "role_allowed_to_over_deliver_receive",
    "fieldtype": "Link",
@@ -535,11 +518,6 @@
    "label": "Activate Serial / Batch No for Item"
   },
   {
-   "fieldname": "warehouse_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Warehouse Defaults"
-  },
-  {
    "fieldname": "internal_transfer_rules_section",
    "fieldtype": "Section Break",
    "label": "Internal Transfer Rules"
@@ -619,7 +597,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-01 12:00:00.000000",
+ "modified": "2026-10-19 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

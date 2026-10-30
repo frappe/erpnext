@@ -37,6 +37,7 @@ class WorkOrderItem(Document):
 		source_warehouse: DF.Link | None
 		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None
+		subcontracted_qty: DF.Float
 		transferred_qty: DF.Float
 		voucher_detail_reference: DF.Data | None
 	# end: auto-generated types

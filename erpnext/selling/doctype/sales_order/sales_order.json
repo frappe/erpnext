@@ -180,6 +180,8 @@
   "column_break_yvzv",
   "inter_company_order_reference",
   "party_account_currency",
+  "proforma_tab",
+  "proforma_html",
   "connections_tab"
  ],
  "fields": [
@@ -499,6 +501,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only_depends_on": "eval:doc.inter_company_order_reference",
    "reqd": 1,
    "width": "100px"
   },
@@ -1524,6 +1527,17 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "proforma_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Proforma"
+  },
+  {
+   "fieldname": "proforma_html",
+   "fieldtype": "HTML",
+   "label": "Proforma Invoices"
+  },
+  {
    "fieldname": "connections_tab",
    "fieldtype": "Tab Break",
    "label": "Connections",
@@ -1765,7 +1779,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-13 12:12:32.190935",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1820,6 +1834,7 @@
    "email": 1,
    "print": 1,
    "read": 1,
+   "report": 1,
    "role": "Accounts User"
   },
   {

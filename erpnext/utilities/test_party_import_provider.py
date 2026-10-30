@@ -3,8 +3,11 @@
 
 import csv
 import io
+from unittest.mock import patch
 
 import frappe
+from frappe.core.doctype.data_import.exporter import Exporter
+from frappe.core.doctype.data_import.import_provider import get_import_provider
 from frappe.core.doctype.data_import.importer import INSERT, UPDATE, Importer
 
 from erpnext.tests.utils import ERPNextTestSuite
@@ -214,6 +217,235 @@ class TestPartyImportProvider(ERPNextTestSuite):
 			frappe.db.get_value("Contact", {"email_id": "co@example.com"}, "company_name"),
 			f"{PREFIX} Company",
 		)
+
+	def test_export_includes_contacts_and_addresses(self):
+		self.run_import(
+			"Customer",
+			INSERT,
+			[
+				[
+					"customer_name",
+					"customer_type",
+					"customer_group",
+					"territory",
+					"contacts.first_name",
+					"contacts.email_id",
+					"contacts.is_primary_contact",
+					"addresses.address_line1",
+					"addresses.city",
+					"addresses.country",
+				],
+				[
+					f"{PREFIX} Export",
+					"Company",
+					self.customer_group,
+					self.territory,
+					"Ann",
+					"ann-export@example.com",
+					"",
+					"1 Main St",
+					"Berlin",
+					"Germany",
+				],
+				["", "", "", "", "Bob", "bob-export@example.com", "1", "", "", ""],
+			],
+		)
+		name = self.get_party("Customer", f"{PREFIX} Export")
+
+		with self.set_user(USER):
+			export = Exporter(
+				"Customer",
+				export_fields={
+					"Customer": ["name", "customer_name"],
+					"contacts": ["first_name", "email_id"],
+					"addresses": ["address_line1", "city"],
+				},
+				export_data=True,
+				export_filters={"name": name},
+			).get_csv_array()
+
+		self.assertEqual(
+			export,
+			[
+				[
+					"ID",
+					"Customer Name",
+					"First Name (Contact)",
+					"Email Address (Contact)",
+					"Address Line 1 (Address)",
+					"City/Town (Address)",
+				],
+				# the primary contact comes first
+				[name, f"{PREFIX} Export", "Bob", "bob-export@example.com", "1 Main St", "Berlin"],
+				["", "", "Ann", "ann-export@example.com", "", ""],
+			],
+		)
+
+		# importing the export back as an update applies it without duplicating the linked records
+		export[1][1] = f"{PREFIX} Export Renamed"
+		self.run_import("Customer", UPDATE, export)
+		self.assertEqual(frappe.db.get_value("Customer", name, "customer_name"), f"{PREFIX} Export Renamed")
+		self.assertEqual(len(self.linked("Contact", "Customer", name)), 2)
+		self.assertEqual(len(self.linked("Address", "Customer", name)), 1)
+
+	def test_export_orders_by_each_partys_own_primary(self):
+		columns = ["customer_name", "customer_type", "customer_group", "territory", "contacts.email_id"]
+		for party, email in (("A", "shared@example.com"), ("B", "own-b@example.com")):
+			values = [f"{PREFIX} Shared {party}", "Company", self.customer_group, self.territory, email]
+			self.run_import("Customer", INSERT, [columns, values])
+		party_a = self.get_party("Customer", f"{PREFIX} Shared A")
+		party_b = self.get_party("Customer", f"{PREFIX} Shared B")
+
+		# A's primary contact also links to B, where it is not the primary
+		shared = frappe.get_doc(
+			"Contact", frappe.db.get_value("Customer", party_a, "customer_primary_contact")
+		)
+		shared.append("links", {"link_doctype": "Customer", "link_name": party_b})
+		shared.save(ignore_permissions=True)
+		frappe.db.commit()  # nosemgrep
+		self.assertTrue(shared.is_primary_contact)
+
+		with self.set_user(USER):
+			export = Exporter(
+				"Customer",
+				export_fields={"Customer": ["name"], "contacts": ["email_id", "is_primary_contact"]},
+				export_data=True,
+				export_filters={"name": party_b},
+			).get_csv_array()
+
+		self.assertEqual(
+			export[1:],
+			[[party_b, "own-b@example.com", 1], ["", "shared@example.com", 0]],
+		)
+
+	def test_reimporting_an_export_keeps_unset_primaries_unset(self):
+		columns = [
+			"customer_name",
+			"customer_type",
+			"customer_group",
+			"territory",
+			"contacts.email_id",
+			"addresses.address_line1",
+			"addresses.city",
+			"addresses.country",
+		]
+		values = [
+			f"{PREFIX} No Primary",
+			"Company",
+			self.customer_group,
+			self.territory,
+			"no-primary@example.com",
+			"1 Main St",
+			"Berlin",
+			"Germany",
+		]
+		self.run_import("Customer", INSERT, [columns, values])
+		name = self.get_party("Customer", values[0])
+
+		# what "Unset as Primary" on the Customer form does, including the fields fetched from the primary
+		frappe.db.set_value(
+			"Customer",
+			name,
+			{
+				"customer_primary_contact": None,
+				"mobile_no": None,
+				"email_id": None,
+				"first_name": None,
+				"last_name": None,
+				"customer_primary_address": None,
+			},
+		)
+		frappe.db.commit()  # nosemgrep
+
+		with self.set_user(USER):
+			export = Exporter(
+				"Customer",
+				export_fields={
+					"Customer": ["name"],
+					"contacts": ["email_id", "is_primary_contact"],
+					"addresses": ["address_line1", "city", "is_primary_address"],
+				},
+				export_data=True,
+				export_filters={"name": name},
+			).get_csv_array()
+		self.assertEqual(export[1:], [[name, "no-primary@example.com", 0, "1 Main St", "Berlin", 0]])
+
+		self.run_import("Customer", UPDATE, export)
+
+		self.assertEqual(
+			frappe.db.get_value("Customer", name, ["customer_primary_contact", "customer_primary_address"]),
+			(None, None),
+		)
+
+	def test_rows_added_to_an_export_keep_the_primaries(self):
+		columns = [
+			"customer_name",
+			"customer_type",
+			"customer_group",
+			"territory",
+			"contacts.email_id",
+			"addresses.address_line1",
+			"addresses.city",
+			"addresses.country",
+		]
+		values = [
+			f"{PREFIX} Added Rows",
+			"Company",
+			self.customer_group,
+			self.territory,
+			"kept@example.com",
+			"1 Main St",
+			"Berlin",
+			"Germany",
+		]
+		self.run_import("Customer", INSERT, [columns, values])
+		name = self.get_party("Customer", values[0])
+		primaries = frappe.db.get_value(
+			"Customer", name, ["customer_primary_contact", "customer_primary_address"]
+		)
+
+		# exported without the primary flag columns
+		with self.set_user(USER):
+			export = Exporter(
+				"Customer",
+				export_fields={
+					"Customer": ["name"],
+					"contacts": ["email_id"],
+					"addresses": ["address_line1", "city", "country"],
+				},
+				export_data=True,
+				export_filters={"name": name},
+			).get_csv_array()
+		export.append(["", "added@example.com", "9 Dock Rd", "Hamburg", "Germany"])
+
+		self.run_import("Customer", UPDATE, export)
+
+		self.assertEqual(len(self.linked("Contact", "Customer", name)), 2)
+		self.assertEqual(len(self.linked("Address", "Customer", name)), 2)
+		self.assertEqual(
+			frappe.db.get_value("Customer", name, ["customer_primary_contact", "customer_primary_address"]),
+			primaries,
+		)
+
+	def test_tables_the_user_cannot_read_are_left_out(self):
+		has_permission = frappe.has_permission
+
+		def cannot_read_contacts(doctype, *args, **kwargs):
+			return doctype != "Contact" and has_permission(doctype, *args, **kwargs)
+
+		with self.set_user(USER), patch("frappe.has_permission", cannot_read_contacts):
+			tables = [
+				t["fieldname"] for t in get_import_provider("Customer").get_import_fields()["child_tables"]
+			]
+			# a request naming the table anyway gets no column for it
+			header = Exporter(
+				"Customer",
+				export_fields={"Customer": ["customer_name"], "contacts": ["email_id"]},
+			).get_csv_array()[0]
+
+		self.assertNotIn("contacts", tables)
+		self.assertIn("addresses", tables)
+		self.assertEqual(header, ["Customer Name"])
 
 	def get_importer(self, doctype, import_type, rows):
 		content = io.StringIO()

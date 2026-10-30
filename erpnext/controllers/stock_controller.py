@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
+from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
@@ -31,6 +32,7 @@ from erpnext.exceptions import (
 	QualityInspectionRejectedError,
 	QualityInspectionRequiredError,
 )
+from erpnext.projects.doctype.project.project import update_consumed_material_cost
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account, get_warehouse_account_map
@@ -382,19 +384,53 @@ class StockController(AccountsController):
 							)
 						)
 
-			if is_material_issue:
-				continue
-
 			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
-				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
+				expiry_date, disabled = frappe.get_cached_value(
+					"Batch", d.get("batch_no"), ["expiry_date", "disabled"]
+				)
+				self.validate_batch_is_usable(
+					d.idx, d.batch_no, None if is_material_issue else expiry_date, disabled
+				)
 
-				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
-					frappe.throw(
-						_("Row #{0}: The batch {1} has already expired.").format(
-							d.idx, get_link_to_form("Batch", d.get("batch_no"))
-						),
-						BatchExpiredError,
-					)
+		self.validate_outward_bundle_batches(check_expiry=not is_material_issue)
+
+	def validate_batch_is_usable(self, idx, batch_no, expiry_date, disabled):
+		if disabled:
+			frappe.throw(
+				_("Row #{0}: The batch {1} is disabled.").format(idx, get_link_to_form("Batch", batch_no))
+			)
+
+		if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
+			frappe.throw(
+				_("Row #{0}: The batch {1} has already expired.").format(
+					idx, get_link_to_form("Batch", batch_no)
+				),
+				BatchExpiredError,
+			)
+
+	def validate_outward_bundle_batches(self, check_expiry=True, rows=None, qty_field="qty"):
+		if self.get("is_return") or not self.get("posting_date") or self.docstatus == 2:
+			return
+
+		if rows is None:
+			rows = (self.get("items") or []) + (self.get("packed_items") or [])
+
+		row_idx_by_bundle = {
+			d.serial_and_batch_bundle: d.idx
+			for d in rows
+			if d.get("serial_and_batch_bundle") and flt(d.get(qty_field)) > 0
+		}
+		if not row_idx_by_bundle:
+			return
+
+		posting_date = self.posting_date if check_expiry else None
+		for row in get_unusable_outward_bundle_batches(list(row_idx_by_bundle), posting_date):
+			self.validate_batch_is_usable(
+				row_idx_by_bundle[row.bundle],
+				row.batch_no,
+				row.expiry_date if check_expiry else None,
+				row.disabled,
+			)
 
 	def clean_serial_nos(self):
 		from erpnext.stock.doctype.serial_no.serial_no import clean_serial_no_string
@@ -427,6 +463,9 @@ class StockController(AccountsController):
 		if table_name == "packed_items":
 			parent_details = self.get_parent_details_for_packed_items()
 
+		auto_pick_outward = self.auto_picks_outward_serial_batch()
+		picked_serial_nos = self.get_serial_nos_used_in_rows() if auto_pick_outward else None
+
 		for row in self.get(table_name):
 			item_code = row.get("rm_item_code") or row.get("item_code")
 			if not item_code or not self.is_serial_batch_item(item_code):
@@ -440,7 +479,8 @@ class StockController(AccountsController):
 				self.validate_serial_nos_and_batches_with_bundle(row)
 
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
-				continue
+				if not (auto_pick_outward and row.get("use_serial_batch_fields") and flt(row.get("qty")) > 0):
+					continue
 
 			if not row.use_serial_batch_fields and (
 				row.serial_no or row.batch_no or row.get("rejected_serial_no")
@@ -473,11 +513,52 @@ class StockController(AccountsController):
 
 				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, parent_details=parent_details)
-					self.create_serial_batch_bundle(bundle_details, row)
+					self.create_auto_picked_bundle(bundle_details, row, picked_serial_nos)
 
 				if row.get("rejected_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
+
+	def get_serial_nos_used_in_rows(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		picked_serial_nos = defaultdict(list)
+		bundle_items = {}
+		for table_name in ("items", "packed_items"):
+			for row in self.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.item_code
+				if row.get("serial_no"):
+					picked_serial_nos[item_code].extend(get_serial_nos(row.serial_no))
+				elif row.get("serial_and_batch_bundle"):
+					bundle_items[row.serial_and_batch_bundle] = item_code
+
+		if bundle_items:
+			for entry in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": ("in", list(bundle_items)), "serial_no": ("is", "set")},
+				fields=["parent", "serial_no"],
+			):
+				picked_serial_nos[bundle_items[entry.parent]].append(entry.serial_no)
+
+		return picked_serial_nos
+
+	def create_auto_picked_bundle(self, bundle_details, row, picked_serial_nos):
+		if picked_serial_nos is None or row.serial_no:
+			self.create_serial_batch_bundle(bundle_details, row)
+			return
+
+		item_code = bundle_details["item_code"]
+		bundle_details["ignore_serial_nos"] = list(picked_serial_nos[item_code])
+		sn_doc = self.create_serial_batch_bundle(bundle_details, row)
+		picked_serial_nos[item_code].extend(d.serial_no for d in sn_doc.get("entries") or [] if d.serial_no)
+
+	def auto_picks_outward_serial_batch(self):
+		if self.doctype not in ("Delivery Note", "Sales Invoice", "POS Invoice") or self.get("is_return"):
+			return False
+
+		return bool(
+			frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward")
+		)
 
 	def get_parent_details_for_packed_items(self):
 		parent_details = frappe._dict()
@@ -717,6 +798,8 @@ class StockController(AccountsController):
 
 		row.set(field, sn_doc.name)
 		row.db_set({field: sn_doc.name})
+
+		return sn_doc
 
 	def validate_serial_nos_and_batches_with_bundle(self, row):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1645,7 +1728,10 @@ class StockController(AccountsController):
 		):
 			return
 
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import validate_qi_reference
+
 		for row in self.get("items"):
+			validate_qi_reference(self, row)
 			qi_required = False
 			if inspection_required_fieldname and frappe.get_cached_value(
 				"Item", row.item_code, inspection_required_fieldname
@@ -1663,6 +1749,7 @@ class StockController(AccountsController):
 					"Purchase Invoice",
 					"Sales Invoice",
 					"Delivery Note",
+					"Subcontracting Receipt",
 				] and frappe.get_single_value(
 					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
 				):
@@ -1704,7 +1791,7 @@ class StockController(AccountsController):
 		action = frappe.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
 		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
 
-		if qa_status == "Rejected":
+		if qa_status != "Accepted":
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = _("Row #{0}: Quality Inspection {1} was rejected for item {2}").format(
 				row.idx, link, row.item_code
@@ -1715,9 +1802,9 @@ class StockController(AccountsController):
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
 	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
+		blanket_orders = sorted({d.blanket_order for d in self.items if d.blanket_order})
 		for blanket_order in blanket_orders:
-			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
+			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
 		for d in self.get("items"):
@@ -1780,7 +1867,7 @@ class StockController(AccountsController):
 			frappe.throw(_("Internal transfers can only be done in company's default currency"))
 
 	def validate_packed_items(self):
-		if self.doctype in ("Sales Invoice", "Delivery Note Item") and self.get("packed_items"):
+		if self.doctype == "Sales Invoice" and self.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
 
 	def validate_internal_transfer_qty(self):
@@ -1788,9 +1875,9 @@ class StockController(AccountsController):
 			return
 
 		self.__inter_company_reference = (
-			self.get("inter_company_reference")
+			self.get("inter_company_invoice_reference")
 			if self.doctype == "Purchase Invoice"
-			else self.get("inter_company_invoice_reference")
+			else self.get("inter_company_reference")
 		)
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
@@ -1815,13 +1902,16 @@ class StockController(AccountsController):
 				)
 
 			if recevied_qty > flt(transferred_qty, precision):
+				from erpnext.controllers.status_updater import OverAllowanceError
+
 				frappe.throw(
 					_("For Item {0} cannot be received more than {1} qty against the {2} {3}").format(
 						bold(key[1]),
 						bold(flt(transferred_qty, precision)),
 						bold(parent_doctype),
 						get_link_to_form(parent_doctype, self.__inter_company_reference),
-					)
+					),
+					OverAllowanceError,
 				)
 
 	def get_item_wise_inter_transfer_qty(self):
@@ -1846,13 +1936,34 @@ class StockController(AccountsController):
 			)
 			.where((parent_tab.name == self.__inter_company_reference) & (parent_tab.docstatus == 1))
 		)
+		if parent_doctype == "Delivery Note":
+			query = query.select(child_tab.returned_qty, child_tab.stock_qty, child_tab.conversion_factor)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+			returned_qty = flt(row.get("returned_qty")) / (flt(row.get("conversion_factor")) or 1)
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - returned_qty
+
+		if parent_doctype == "Delivery Note":
+			self.add_component_transfer_qty(item_wise_transfer_qty, self.__inter_company_reference, data)
 
 		return item_wise_transfer_qty
+
+	def add_component_transfer_qty(self, item_wise_transfer_qty, delivery_note, bundle_rows):
+		from erpnext.stock.doctype.delivery_note.delivery_note import get_pending_component_qty
+
+		bundle_rows = {row.name: row for row in bundle_rows}
+		for packed in frappe.get_all(
+			"Packed Item",
+			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
+			fields=["name", "item_code", "qty", "parent_detail_docname"],
+		):
+			if bundle_row := bundle_rows.get(packed.parent_detail_docname):
+				item_wise_transfer_qty.pop((bundle_row.name, bundle_row.item_code), None)
+				item_wise_transfer_qty[(packed.name, packed.item_code)] += get_pending_component_qty(
+					packed, bundle_row
+				)
 
 	def get_item_wise_inter_received_qty(self):
 		child_doctype = self.doctype + " Item"
@@ -1882,21 +1993,29 @@ class StockController(AccountsController):
 		else:
 			query = query.select(
 				child_tab.delivery_note_item.as_("name"),
+				child_tab.delivery_note_packed_item,
 			)
 
 			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
 
-		data = query.run(as_dict=True)
-		item_wise_transfer_qty = defaultdict(float)
-		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+		query = query.where(parent_tab.name != self.name)
+		item_wise_received_qty = defaultdict(float)
+		for row in query.run(as_dict=True):
+			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
+				row.qty
+			)
 
-		return item_wise_transfer_qty
+		reference_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
+		for row in self.items:
+			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
+
+		return item_wise_received_qty
 
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled
 		# and if rule was applied on the transaction, validate it.
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import get_available_putaway_capacity
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _get_available_putaway_capacity
 
 		valid_doctype = self.doctype in (
 			"Purchase Receipt",
@@ -1940,7 +2059,7 @@ class StockController(AccountsController):
 						rule_map[rule_name]["capacity"] = (
 							rule.stock_capacity
 							if self.doctype == "Stock Reconciliation"
-							else get_available_putaway_capacity(rule_name)
+							else _get_available_putaway_capacity(rule_name)
 						)
 					rule_map[rule_name]["qty_put"] += flt(stock_qty)
 
@@ -1986,6 +2105,10 @@ class StockController(AccountsController):
 				)
 			else:
 				create_repost_item_valuation_entry(args)
+
+	def update_project_consumed_material_cost(self):
+		projects = {self.get("project"), *(d.get("project") for d in self.get("items"))}
+		update_consumed_material_cost(projects - {None, ""})
 
 	def add_gl_entry(
 		self,
@@ -2115,7 +2238,12 @@ class StockController(AccountsController):
 						if sre_doc.has_serial_no:
 							serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos:
+								is_open = (
+									entry.qty > entry.delivered_qty
+									if self._action == "submit"
+									else entry.delivered_qty
+								)
+								if entry.serial_no in serial_nos and is_open:
 									entry.delivered_qty = 1 if self._action == "submit" else 0
 									entry.db_update()
 									working_qty += 1
@@ -2199,6 +2327,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
+	frappe.has_permission("GL Entry", "read", throw=True)
 	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
@@ -2213,6 +2342,7 @@ def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, valuation_field_type="Currency")
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
+	frappe.has_permission("Stock Ledger Entry", "read", throw=True)
 	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
@@ -2249,9 +2379,10 @@ def get_accounting_ledger_preview(doc, filters):
 
 	doc.make_gl_entries()
 	columns = get_gl_columns(filters)
-	gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
+	masked_fields = frappe.get_meta("GL Entry").get_masked_fields()
+	gl_entries = mask_dict_results(get_gl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields)
 
-	gl_columns = get_columns(columns, fields, erpnext.get_company_currency(filters.company))
+	gl_columns = get_columns(columns, fields, erpnext.get_company_currency(filters.company), masked_fields)
 	gl_data = get_data(fields, gl_entries)
 
 	return gl_columns, gl_data
@@ -2291,9 +2422,14 @@ def get_stock_ledger_preview(doc, filters):
 		doc.update_stock_ledger()
 
 		columns = get_sl_columns(filters)
-		sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
+		masked_fields = frappe.get_meta("Stock Ledger Entry").get_masked_fields()
+		sl_entries = mask_dict_results(
+			get_sl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields
+		)
 
-		sl_columns = get_columns(columns, columns_fields, erpnext.get_company_currency(filters.company))
+		sl_columns = get_columns(
+			columns, columns_fields, erpnext.get_company_currency(filters.company), masked_fields
+		)
 		sl_data = get_data(columns_fields, sl_entries)
 
 	return sl_columns, sl_data
@@ -2322,17 +2458,20 @@ def get_gl_entries_for_preview(doctype, docname, fields):
 	return frappe.get_all("GL Entry", filters={"voucher_type": doctype, "voucher_no": docname}, fields=fields)
 
 
-def get_columns(raw_columns, fields, currency):
+def get_columns(raw_columns, fields, currency, masked_fields):
+	masked_fieldnames = {df.fieldname for df in masked_fields}
 	columns = []
 	for source_column in raw_columns:
-		if source_column.get("hidden") or source_column.get("fieldname") not in fields:
+		fieldname = source_column.get("fieldname")
+		if source_column.get("hidden") or fieldname not in fields:
 			continue
 
 		column = {
 			"name": source_column.get("label"),
 			"editable": False,
 			"width": 110,
-			"fieldtype": source_column.get("fieldtype"),
+			# masked values are placeholder text, not numbers
+			"fieldtype": "Data" if fieldname in masked_fieldnames else source_column.get("fieldtype"),
 		}
 		if column["fieldtype"] == "Currency":
 			column["options"] = currency
@@ -2666,7 +2805,7 @@ def make_bundle_for_material_transfer(**kwargs):
 		row.stock_value_difference = abs(row.stock_value_difference)
 		if kwargs.type_of_transaction == "Outward":
 			row.qty *= -1
-			row.stock_value_difference *= row.stock_value_difference
+			row.stock_value_difference *= -1
 			row.is_outward = 1
 
 		row.warehouse = kwargs.warehouse
@@ -2685,6 +2824,8 @@ def make_bundle_for_material_transfer(**kwargs):
 		bundle_doc.save(ignore_permissions=True)
 	else:
 		bundle_doc.submit()
+		if kwargs.docstatus != 2:
+			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
 
@@ -2761,3 +2902,31 @@ def get_expenses_added_to_stock_accounts(item_code, company):
 			details[field] = frappe.get_cached_value("Company", company, field)
 
 	return details
+
+
+def get_unusable_outward_bundle_batches(bundles, posting_date):
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	batch = frappe.qb.DocType("Batch")
+
+	return (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.join(batch)
+		.on(entry.batch_no == batch.name)
+		.select(bundle.name.as_("bundle"), entry.batch_no, batch.expiry_date, batch.disabled)
+		.where(
+			bundle.name.isin(bundles)
+			& (bundle.type_of_transaction == "Outward")
+			& (unusable_batch_condition(batch, posting_date))
+		)
+		.run(as_dict=True)
+	)
+
+
+def unusable_batch_condition(batch, posting_date):
+	if not posting_date:
+		return batch.disabled == 1
+
+	return (batch.expiry_date < getdate(posting_date)) | (batch.disabled == 1)

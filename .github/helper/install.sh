@@ -36,7 +36,27 @@ export GIT_TERMINAL_PROMPT=0
 
 githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
 frappeuser=${FRAPPE_USER:-"frappe"}
-frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
+frappecommitish=${FRAPPE_BRANCH:-}
+
+# A stacked pull request targets another erpnext branch, which has no counterpart in frappe.
+# Fall back to version-16-hotfix so the bench is still installed. An explicit FRAPPE_BRANCH is trusted as
+# given, since it can be a commit sha rather than a branch.
+if [ -z "$frappecommitish" ]; then
+    frappecommitish=$githubbranch
+
+    # git ls-remote --exit-code reports 2 for a branch that is not there and 128 for a remote it
+    # could not reach. Only the first one is proof of absence; keep the branch on anything else so
+    # a flaky probe cannot install an unrelated frappe.
+    probe=0
+    git ls-remote --exit-code --heads "https://github.com/${frappeuser}/frappe" "$frappecommitish" >/dev/null 2>&1 || probe=$?
+
+    if [ "$probe" -eq 2 ]; then
+        echo "frappe has no branch ${frappecommitish}, falling back to version-16-hotfix"
+        frappecommitish=version-16-hotfix
+    elif [ "$probe" -ne 0 ]; then
+        echo "could not reach frappe to check for branch ${frappecommitish} (git ls-remote exited ${probe}), keeping it"
+    fi
+fi
 db_host=${DB_HOST:-"127.0.0.1"}
 db_user_host=${DB_USER_HOST:-"localhost"}
 wkhtmltox_deb=${WKHTMLTOX_DEB:-"/tmp/wkhtmltox.deb"}
@@ -198,7 +218,7 @@ restore_warm_bench() {
         # Phase 1 already fetched ~/frappe to the exact live develop SHA. Fetch that commit
         # straight from it (bench init names the remote 'upstream', not 'origin', and points
         # it at this local clone — so a plain `git fetch origin` does not work).
-        git fetch --no-tags "$HOME/frappe" HEAD || exit 1
+        git fetch --no-tags --update-shallow "$HOME/frappe" HEAD || exit 1
         git checkout --force FETCH_HEAD || exit 1
     ); then
         echo "Fast-forward to ${frappe_sha} failed; falling back to full init"
@@ -273,7 +293,7 @@ if ! restore_warm_bench; then
     sed -i 's/socketio:/# socketio:/g' Procfile
     sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
-    CI=Yes bench build --app frappe
+    if [ "$TYPE" != "patch" ]; then CI=Yes bench build --app frappe; fi
     save_warm_bench
 fi
 
@@ -339,7 +359,7 @@ fi
 
 cd ~/frappe-bench || exit
 
-run_ci_step "Get payments app" bench get-app payments --branch develop
+if [ "$TYPE" != "patch" ]; then run_ci_step "Get payments app" bench get-app payments --branch develop; fi
 
 # Opt-in: skip building erpnext's frontend assets. Server tests don't need them, but PDF
 # tests (print formats) do — they pass only if the PDF renderer ignores missing assets.
@@ -390,4 +410,4 @@ wait_for_redis
 # Site setup: build the schema (~1000 DocTypes) into the DB. This is the single-threaded-Python
 # bottleneck, but the fan-out amortises it — it runs once here in the setup job, and the test
 # shards start the DB on the baked datadir instead of repeating the reinstall.
-run_ci_step "Reinstall test site" bench --site test_site reinstall --yes
+if [ "$TYPE" != "patch" ]; then run_ci_step "Reinstall test site" bench --site test_site reinstall --yes; fi

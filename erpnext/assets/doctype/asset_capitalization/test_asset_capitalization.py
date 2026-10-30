@@ -19,6 +19,13 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
 )
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -426,6 +433,39 @@ class TestAssetCapitalization(ERPNextTestSuite):
 
 		rates = [d.valuation_rate for d in asset_capitalization.stock_items]
 		self.assertEqual(rates, [100, 200])
+
+	def test_items_tagged_to_wip_composite_asset(self):
+		from erpnext.assets.doctype.asset_capitalization.asset_capitalization import (
+			get_items_tagged_to_wip_composite_asset,
+		)
+
+		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+		pr = make_purchase_receipt(do_not_save=1)
+		pr.items[0].wip_composite_asset = target_asset.name
+		pr.insert()
+		pr.submit()
+
+		def build_kwargs(name):
+			return {"params": {"target_asset": name}}
+
+		roles = ["Manufacturing Manager", "Stock User"]
+		with as_user(
+			make_company_fenced_user("capitalization-other-company@example.com", roles, "_Test Company 1")
+		):
+			assert_refused_for_names(
+				self, get_items_tagged_to_wip_composite_asset, build_kwargs, [target_asset.name]
+			)
+
+		with as_user(make_fenced_user("capitalization-quality_manager@example.com", ["Quality Manager"])):
+			assert_refused_without(
+				self, [pr.name], get_items_tagged_to_wip_composite_asset, **build_kwargs(target_asset.name)
+			)
+
+		with as_user(make_fenced_user("capitalization-manufacturing_manager@example.com", roles)):
+			stock_items, _asset_items = get_items_tagged_to_wip_composite_asset(
+				**build_kwargs(target_asset.name)
+			)
+		self.assertEqual(stock_items[0].purchase_receipt, pr.name)
 
 
 def create_asset_capitalization_data():

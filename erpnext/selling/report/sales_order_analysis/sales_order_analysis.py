@@ -6,9 +6,10 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
-from frappe.query_builder import CustomFunction
-from frappe.query_builder.functions import Max
-from frappe.utils import date_diff, flt
+from frappe.query_builder import Case, CustomFunction
+from frappe.query_builder.functions import Coalesce, Max, Sum
+from frappe.utils import date_diff, flt, nowdate
+from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
 
@@ -23,8 +24,7 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-	conditions = get_conditions(filters)
-	data = get_data(conditions, filters)
+	data = get_data(filters)
 	so_elapsed_time = {} if filters.get("group_by_item") else get_so_elapsed_time(data)
 
 	if not data:
@@ -50,63 +50,100 @@ def validate_filters(filters):
 		frappe.throw(_("Group the report by Sales Order or by Item, not both."))
 
 
-def get_conditions(filters):
-	conditions = ""
-	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " and so.transaction_date between %(from_date)s and %(to_date)s"
+def get_data(filters):
+	permitted_orders = get_permitted_sales_orders(filters)
+	if not permitted_orders:
+		return []
 
-	conditions += " and so.company = %(company)s"
+	so = qb.DocType("Sales Order")
+	soi = qb.DocType("Sales Order Item")
+	sii = qb.DocType("Sales Invoice Item")
+	si = qb.DocType("Sales Invoice")
 
-	if filters.get("sales_order"):
-		conditions += " and so.name in %(sales_order)s"
+	# use the app's today rather than the DB server's CURRENT_DATE so delay_days is timezone-stable
+	datediff = CustomFunction("DATEDIFF", ["end_date", "start_date"])
+	delay = datediff(nowdate(), soi.delivery_date)
+	conversion_rate = Coalesce(so.conversion_rate, 1)
+	is_closed = so.status == "Closed"
+	no_delay = so.status.isin(["Completed", "To Bill", "Closed"])
 
-	if filters.get("status"):
-		conditions += " and so.status in %(status)s"
-
-	if filters.get("warehouse"):
-		conditions += " and soi.warehouse = %(warehouse)s"
-
-	return conditions
-
-
-def get_data(conditions, filters):
-	data = frappe.db.sql(
-		f"""
-		SELECT
-			so.transaction_date as date,
-			soi.delivery_date as delivery_date,
-			so.name as sales_order,
-			so.status, so.customer, soi.item_code, soi.uom,
-			DATEDIFF(CURRENT_DATE, soi.delivery_date) as delay_days,
-			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
-			soi.qty, soi.delivered_qty,
-			(soi.qty - soi.delivered_qty) AS pending_qty,
-			IFNULL(SUM(sii.qty), 0) as billed_qty,
-			soi.base_amount as amount,
-			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
-			(soi.billed_amt * IFNULL(so.conversion_rate, 1)) as billed_amount,
-			(soi.base_amount - (soi.billed_amt * IFNULL(so.conversion_rate, 1))) as pending_amount,
-			soi.warehouse as warehouse,
-			so.company, soi.name,
-			soi.description as description
-		FROM
-			`tabSales Order` so,
-			`tabSales Order Item` soi
-		LEFT JOIN `tabSales Invoice Item` sii
-			ON sii.so_detail = soi.name and sii.docstatus = 1
-		WHERE
-			soi.parent = so.name
-			and so.status not in ('Stopped', 'On Hold')
-			and so.docstatus = 1
-			{conditions}
-		GROUP BY soi.name
-		ORDER BY so.transaction_date ASC, soi.item_code ASC
-	""",
-		filters,
-		as_dict=1,
+	# credit notes don't reduce the order's billed_amt, so exclude them to keep billed qty in step
+	counts_as_billed = (Coalesce(si.is_return, 0) == 0) | (
+		Coalesce(si.update_billed_amount_in_sales_order, 0) == 1
 	)
 
-	return data
+	query = (
+		qb.from_(so)
+		.join(soi)
+		.on(soi.parent == so.name)
+		.left_join(sii)
+		.on((sii.so_detail == soi.name) & (sii.docstatus == 1))
+		.left_join(si)
+		.on(si.name == sii.parent)
+		.select(
+			so.transaction_date.as_("date"),
+			soi.delivery_date.as_("delivery_date"),
+			so.name.as_("sales_order"),
+			so.status,
+			so.customer,
+			soi.item_code,
+			soi.uom,
+			delay.as_("delay_days"),
+			Case().when(no_delay, 0).else_(delay).as_("delay"),
+			soi.qty,
+			soi.delivered_qty,
+			Case().when(is_closed, 0).else_(soi.qty - soi.delivered_qty).as_("pending_qty"),
+			(
+				Coalesce(Sum(Case().when(counts_as_billed, sii.qty * sii.conversion_factor).else_(0)), 0)
+				/ soi.conversion_factor
+			).as_("billed_qty"),
+			soi.base_amount.as_("amount"),
+			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
+			(soi.billed_amt * conversion_rate).as_("billed_amount"),
+			Case()
+			.when(is_closed, 0)
+			.else_(soi.base_amount - (soi.billed_amt * conversion_rate))
+			.as_("pending_amount"),
+			soi.warehouse.as_("warehouse"),
+			so.company,
+			soi.name,
+			soi.description.as_("description"),
+		)
+		.where(so.name.isin(permitted_orders))
+		.groupby(soi.name, so.name)
+		.orderby(so.transaction_date)
+		.orderby(soi.item_code)
+	)
+
+	if filters.get("warehouse"):
+		warehouses = [*get_descendants_of("Warehouse", filters.get("warehouse")), filters.get("warehouse")]
+		query = query.where(soi.warehouse.isin(warehouses))
+
+	return query.run(as_dict=True)
+
+
+def get_permitted_sales_orders(filters):
+	so_filters = [
+		["Sales Order", "docstatus", "=", 1],
+		["Sales Order", "company", "=", filters.get("company")],
+		["Sales Order", "status", "not in", ["Stopped", "On Hold"]],
+	]
+
+	if filters.get("from_date") and filters.get("to_date"):
+		so_filters.append(
+			["Sales Order", "transaction_date", "between", [filters.get("from_date"), filters.get("to_date")]]
+		)
+	if filters.get("sales_order"):
+		so_filters.append(["Sales Order", "name", "in", filters.get("sales_order")])
+	if filters.get("status"):
+		so_filters.append(["Sales Order", "status", "in", filters.get("status")])
+
+	return frappe.qb.get_query(
+		table="Sales Order",
+		fields=["name"],
+		filters=so_filters,
+		ignore_permissions=False,
+	).run(pluck="name")
 
 
 def get_so_elapsed_time(data):
@@ -122,7 +159,17 @@ def get_so_elapsed_time(data):
 		dn = qb.DocType("Delivery Note")
 		dni = qb.DocType("Delivery Note Item")
 
-		to_seconds = CustomFunction("TO_SECONDS", ["date"])
+		# TO_SECONDS is MariaDB-only. On postgres, subtracting dates yields days, so multiply
+		# by 86400 for the equivalent second delta. so.transaction_date is neither aggregated nor
+		# in the GROUP BY, but it is selectable under postgres' strict GROUP BY because it is
+		# functionally dependent on the grouped so.name (a doctype's `name` is always the PK).
+		if frappe.db.db_type == "postgres":
+			elapsed_seconds = ((Max(dn.posting_date) - so.transaction_date) * 86400).as_("elapsed_seconds")
+		else:
+			to_seconds = CustomFunction("TO_SECONDS", ["date"])
+			elapsed_seconds = (to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_(
+				"elapsed_seconds"
+			)
 
 		query = (
 			qb.from_(so)
@@ -135,11 +182,11 @@ def get_so_elapsed_time(data):
 			.select(
 				so.name.as_("sales_order"),
 				soi.item_code.as_("so_item_code"),
-				(to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_("elapsed_seconds"),
+				elapsed_seconds,
 			)
 			.where((so.name.isin(sales_orders)) & (dn.docstatus == 1))
 			.orderby(so.name, soi.name)
-			.groupby(soi.name)
+			.groupby(soi.name, so.name)
 		)
 		dn_elapsed_time = query.run(as_dict=True)
 
@@ -170,7 +217,7 @@ def prepare_data(data, so_elapsed_time, filters):
 		completed += row["billed_amount"]
 		pending += row["pending_amount"]
 
-		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
+		row["qty_to_bill"] = 0 if row["status"] == "Closed" else flt(row["qty"]) - flt(row["billed_qty"])
 		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
 		row["time_taken_to_deliver"] = (
 			so_elapsed_time.get((row.sales_order, row.item_code))
@@ -197,12 +244,16 @@ def group_by_sales_order(data):
 			sales_order_map[row["sales_order"]] = copy.deepcopy(row)
 			continue
 
-		group["delay"] = (
-			min(group["delay"], row["delay"]) if row["delay"] and group["delay"] else group["delay"]
-		)
+		group["delay"] = least_delay(group["delay"], row["delay"])
 		add_aggregated_fields(group, row)
 
 	return list(sales_order_map.values())
+
+
+def least_delay(*delays):
+	# completed/closed/not-yet-due lines carry 0; ignore them so none masks an overdue line
+	overdue = [d for d in delays if d]
+	return min(overdue) if overdue else 0
 
 
 def group_by_item(data):

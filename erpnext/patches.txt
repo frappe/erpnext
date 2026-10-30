@@ -260,6 +260,7 @@ execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Deta
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
+erpnext.patches.v16_0.deduplicate_bank_account_balances
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -514,6 +515,32 @@ erpnext.patches.v16_0.mirror_select_perms_to_custom_docperm
 erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost
 erpnext.patches.v16_0.disable_add_total_row_in_trends_reports
 erpnext.patches.v16_0.mirror_release_perms_to_custom_docperm #2026-10-05
+erpnext.patches.v16_0.mirror_warehouse_stock_manager_perms
 erpnext.patches.v16_0.remove_all_role_from_payment_terms_template
 execute:from erpnext.setup.install import grant_address_read_to_accounts_manager; grant_address_read_to_accounts_manager()
 erpnext.patches.v16_0.remove_invalid_fetch_from_italy_payment_schedule_swift_number
+erpnext.patches.v16_0.set_stock_value_in_stock_closing_balance
+erpnext.patches.v16_0.reset_fifo_queue_in_stock_closing_balance
+erpnext.patches.v16_0.move_warehouse_defaults_to_company
+erpnext.patches.v16_0.replace_legacy_print_formats_with_classic
+execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report", 1)
+erpnext.patches.v16_0.set_user_on_timesheets
+erpnext.patches.v16_0.remove_invalid_fields_from_copy_fields_to_variants
+erpnext.patches.v16_0.unhide_item_barcode_fields
+erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types
+erpnext.patches.v16_0.set_default_mins_between_operations
+erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
+erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
+erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
+erpnext.patches.v16_0.apply_selling_settings_section_toggles
+erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
+erpnext.patches.v16_0.set_output_qty_in_work_order_operations
+erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
+erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
+execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
+execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
+execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
+erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
+erpnext.patches.v16_0.set_supplier_quotation_order_status
