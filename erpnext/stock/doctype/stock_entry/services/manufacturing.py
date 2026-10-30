@@ -784,7 +784,9 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
 		transferred_qty = flt(self.wo_doc.material_transferred_for_manufacturing)
-		pending_qty_to_mfg = transferred_qty - self.get_manufactured_qty()
+		pending_qty_to_mfg = (
+			transferred_qty - flt(self.wo_doc.produced_qty) - flt(self.wo_doc.process_loss_qty)
+		)
 		fg_completed_qty = flt(self.doc.fg_completed_qty)
 		precision = self.doc.precision("fg_completed_qty")
 		if not self.doc.get("is_return") and (
@@ -800,15 +802,6 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				self._append_transfer_based_rm(material, fg_completed_qty)
 			elif flt(pending_qty, precision) > 0:
 				self._append_transfer_based_rm(material, pending_qty)
-
-	def get_manufactured_qty(self):
-		"""For Quantity of the Manufacture entries that consumed raw materials, with their process loss."""
-		manufactured_qty = {
-			row.parent: flt(row.fg_completed_qty)
-			for row in self._consumption_entries
-			if row.purpose == "Manufacture"
-		}
-		return sum(manufactured_qty.values())
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -919,7 +912,6 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def prepare_available_materials_based_on_transfer(self):
 		self.available_materials = frappe._dict()
-		self._consumption_entries = []
 		self._transfer_entries = self.get_transfer_entries()
 		if not self._transfer_entries:
 			return
