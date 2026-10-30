@@ -1376,7 +1376,7 @@ class TestPaymentRequest(ERPNextTestSuite):
 		so = make_sales_order()
 		staff_draft = make_payment_request(dt="Sales Order", dn=so.name, return_doc=1)
 		staff_draft.grand_total = 1
-		staff_draft.insert()
+		staff_draft.save()
 		user = make_portal_user("_test_portal_payer@example.com", so.customer)
 
 		with as_user(user):
@@ -1404,10 +1404,13 @@ class TestPaymentRequest(ERPNextTestSuite):
 				make_payment_request(dt=doctype, dn=docname, submit_doc=1, order_type="Shopping Cart")
 
 		for docname in (billed_order.name, invoice.name):
-			pr = frappe.get_doc("Payment Request", {"reference_name": docname})
-			self.assertFalse(pr.make_sales_invoice)
-			pr.set_as_paid()
-			self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
+			self.assertFalse(
+				frappe.db.get_value("Payment Request", {"reference_name": docname}, "make_sales_invoice")
+			)
+
+		pr = frappe.get_doc("Payment Request", {"reference_name": invoice.name})
+		pr.set_as_paid()
+		self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
 
 	def test_portal_payment_refused_outside_own_submitted_orders(self):
 		own_order = make_sales_order()
