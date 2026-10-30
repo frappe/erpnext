@@ -51,7 +51,7 @@ def _non_phantom_item_amounts(bom, table):
 			continue
 
 		items.setdefault(d.item_code, 0)
-		items[d.item_code] += flt(d.amount)
+		items[d.item_code] += flt(d.base_amount if table == "items" else d.amount)
 	return items
 
 
