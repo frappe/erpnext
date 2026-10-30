@@ -3487,15 +3487,23 @@ def get_linked_bank_transactions(payment_entry: str) -> list:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def account_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The accounts Paid From or Paid To can take: `bank_payment_type` is the payment type that
 	pays from (or to) a bank, and `other_account` the account on the other side."""
-	from erpnext.controllers.queries import get_field_filters, standard_search
+	from erpnext.controllers.queries import standard_search
 
-	party_type = filters.get("party_type")
-	payment_type = filters.get("payment_type")
-	if payment_type in (filters.get("bank_payment_type"), "Internal Transfer"):
+	query_args = query_args or {}
+	party_type = query_args.get("party_type")
+	payment_type = query_args.get("payment_type")
+	if payment_type in (query_args.get("bank_payment_type"), "Internal Transfer"):
 		account_types = ["Bank", "Cash"]
 	else:
 		account_types = [erpnext.get_party_account_type(party_type) if party_type else None]
@@ -3506,70 +3514,89 @@ def account_query(
 	account_filters = {
 		"account_type": ["in", account_types],
 		"is_group": 0,
-		"company": filters.get("company"),
+		"company": query_args.get("company"),
 	}
-	if payment_type == "Internal Transfer" and filters.get("other_account"):
-		account_filters["name"] = ["!=", filters["other_account"]]
+	if payment_type == "Internal Transfer" and query_args.get("other_account"):
+		account_filters["name"] = ["!=", query_args["other_account"]]
 
-	account_filters.update(
-		get_field_filters(
-			filters, "payment_type", "bank_payment_type", "party_type", "company", "other_account"
-		)
-	)
+	account_filters.update(filters)
 	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def payment_party_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The parties of the payment's party type."""
 	from erpnext.controllers import queries
 
-	party_type = filters.get("party_type")
+	query_args = query_args or {}
+	party_type = query_args.get("party_type")
 	if party_type == "Employee":
 		return frappe.call(queries.employee_query, doctype, txt, searchfield, start, page_len, {}, **kwargs)
 
 	if party_type in ("Customer", "Supplier"):
-		party_filters = {"disabled": 0, "company": filters.get("company")}
+		party_filters = {"disabled": 0, "company": query_args.get("company")}
 		return frappe.call(
 			queries.party_query, doctype, txt, searchfield, start, page_len, party_filters, **kwargs
 		)
 
-	party_filters = {"company": filters.get("company")} if party_type == "Shareholder" else {}
+	party_filters = {"company": query_args.get("company")} if party_type == "Shareholder" else {}
 	return queries.standard_search(doctype, txt, searchfield, start, page_len, party_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def reference_doctype_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The doctypes a payment of the party type can reference."""
-	from erpnext.controllers.queries import get_field_filters, standard_search
+	from erpnext.controllers.queries import standard_search
 
 	doctypes = {
 		"Customer": ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"],
 		"Supplier": ["Purchase Order", "Purchase Invoice", "Journal Entry"],
-	}.get(filters.get("party_type"), ["Journal Entry"])
-	doctype_filters = {"name": ["in", doctypes], **get_field_filters(filters, "party_type")}
+	}.get((query_args or {}).get("party_type"), ["Journal Entry"])
+	doctype_filters = {"name": ["in", doctypes], **filters}
 	return standard_search(doctype, txt, searchfield, start, page_len, doctype_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def reference_name_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The submitted documents of the company a payment can reference, of the party for an order,
 	invoice or dunning; `doctype` is the reference's."""
 	from erpnext.controllers.queries import standard_search
 
-	reference_filters = {"docstatus": 1, "company": filters.get("company")}
+	query_args = query_args or {}
+	reference_filters = {"docstatus": 1, "company": query_args.get("company")}
 	party_doctypes = ("Sales Invoice", "Sales Order", "Purchase Invoice", "Purchase Order", "Dunning")
-	if doctype in party_doctypes and filters.get("party_type"):
-		reference_filters[filters["party_type"].lower()] = filters.get("party")
+	if doctype in party_doctypes and query_args.get("party_type"):
+		reference_filters[query_args["party_type"].lower()] = query_args.get("party")
 
 	return standard_search(doctype, txt, searchfield, start, page_len, reference_filters, **kwargs)
 
@@ -3577,20 +3604,23 @@ def reference_name_query(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def payment_term_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The payment terms of the referenced invoice, or all of them for another reference."""
-	from erpnext.controllers.queries import (
-		get_field_filters,
-		get_payment_terms_for_references,
-		standard_search,
-	)
+	from erpnext.controllers.queries import get_payment_terms_for_references, standard_search
 
-	field_filters = get_field_filters(filters, "reference_doctype", "reference_name")
-	if filters.get("reference_doctype") in ("Purchase Invoice", "Sales Invoice") and filters.get(
+	query_args = query_args or {}
+	if query_args.get("reference_doctype") in ("Purchase Invoice", "Sales Invoice") and query_args.get(
 		"reference_name"
 	):
-		reference_filters = {"reference": filters["reference_name"], **field_filters}
+		reference_filters = {"reference": query_args["reference_name"], **filters}
 		return frappe.call(
 			get_payment_terms_for_references,
 			doctype,
@@ -3602,4 +3632,4 @@ def payment_term_query(
 			**kwargs,
 		)
 
-	return standard_search(doctype, txt, searchfield, start, page_len, field_filters, **kwargs)
+	return standard_search(doctype, txt, searchfield, start, page_len, filters, **kwargs)

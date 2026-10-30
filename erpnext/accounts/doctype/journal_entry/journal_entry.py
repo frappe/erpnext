@@ -1363,55 +1363,71 @@ def get_exchange_rate(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def account_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
 	"""The company's ledger accounts, in its currency unless the entry is multi-currency."""
-	from erpnext.controllers.queries import get_field_filters, standard_search
+	from erpnext.controllers.queries import standard_search
 
-	company = filters.get("company")
+	query_args = query_args or {}
+	company = query_args.get("company")
 	account_filters = {"company": company, "is_group": 0}
-	if not filters.get("multi_currency"):
+	if not query_args.get("multi_currency"):
 		currency = erpnext.get_company_currency(company) or frappe.db.get_default("currency")
 		account_filters["account_currency"] = ["in", [currency, None]]
 
-	account_filters.update(get_field_filters(filters, "company", "multi_currency"))
+	account_filters.update(filters)
 	return standard_search(doctype, txt, searchfield, start, page_len, account_filters, **kwargs)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def reference_name_query(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+	query_args: dict | None = None,
+	**kwargs,
 ):
-	"""The documents a row can reference, `filters` being the row's values; `doctype` is its
+	"""The documents a row can reference, `query_args` being the row's values; `doctype` is its
 	reference type."""
 	from erpnext.controllers.queries import standard_search
 
+	row = query_args or {}
 	if doctype == "Journal Entry":
-		validate_missing(filters, "account")
-		jv_filters = {"account": filters.get("account"), "party": filters.get("party")}
+		validate_missing(row, "account")
+		jv_filters = {"account": row.get("account"), "party": row.get("party")}
 		return frappe.call(get_against_jv, doctype, txt, searchfield, start, page_len, jv_filters, **kwargs)
 
 	reference_filters = [[doctype, "docstatus", "=", 1]]
 	if doctype in ("Sales Invoice", "Purchase Invoice"):
 		reference_filters.append([doctype, "outstanding_amount", "!=", 0])
-		if filters.get("cost_center"):
-			reference_filters.append([doctype, "cost_center", "in", ["", filters["cost_center"]]])
+		if row.get("cost_center"):
+			reference_filters.append([doctype, "cost_center", "in", ["", row["cost_center"]]])
 
-		validate_missing(filters, "account")
+		validate_missing(row, "account")
 		party_account_field = "debit_to" if doctype == "Sales Invoice" else "credit_to"
-		reference_filters.append([doctype, party_account_field, "=", filters["account"]])
+		reference_filters.append([doctype, party_account_field, "=", row["account"]])
 
 	if doctype in ("Sales Order", "Purchase Order"):
-		validate_missing(filters, "party_type")
-		validate_missing(filters, "party")
+		validate_missing(row, "party_type")
+		validate_missing(row, "party")
 		reference_filters.append([doctype, "per_billed", "<", 100])
 
 	party_field = (
 		"customer" if doctype.startswith("Sales") else "supplier" if doctype.startswith("Purchase") else None
 	)
-	if party_field and filters.get("party_type") and filters.get("party"):
-		reference_filters.append([doctype, party_field, "=", filters["party"]])
+	if party_field and row.get("party_type") and row.get("party"):
+		reference_filters.append([doctype, party_field, "=", row["party"]])
 
 	return standard_search(doctype, txt, searchfield, start, page_len, reference_filters, **kwargs)
 

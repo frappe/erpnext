@@ -528,7 +528,7 @@ Object.assign(erpnext.journal_entry, {
 	reference_name_query(row) {
 		return {
 			query: "erpnext.accounts.doctype.journal_entry.journal_entry.reference_name_query",
-			filters: {
+			query_args: {
 				account: row.account,
 				party_type: row.party_type,
 				party: row.party,
@@ -540,7 +540,7 @@ Object.assign(erpnext.journal_entry, {
 	account_query(frm) {
 		return {
 			query: "erpnext.accounts.doctype.journal_entry.journal_entry.account_query",
-			filters: { company: frm.doc.company, multi_currency: frm.doc.multi_currency },
+			query_args: { company: frm.doc.company, multi_currency: frm.doc.multi_currency },
 		};
 	},
 

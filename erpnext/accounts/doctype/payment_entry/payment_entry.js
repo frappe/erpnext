@@ -46,7 +46,7 @@ frappe.ui.form.on("Payment Entry", {
 			frm.events.validate_company(frm);
 			return {
 				query: "erpnext.accounts.doctype.payment_entry.payment_entry.account_query",
-				filters: {
+				query_args: {
 					payment_type: doc.payment_type,
 					bank_payment_type: "Pay",
 					party_type: doc.party_type,
@@ -100,7 +100,7 @@ frappe.ui.form.on("Payment Entry", {
 			frm.events.validate_company(frm);
 			return {
 				query: "erpnext.accounts.doctype.payment_entry.payment_entry.account_query",
-				filters: {
+				query_args: {
 					payment_type: doc.payment_type,
 					bank_payment_type: "Receive",
 					party_type: doc.party_type,
@@ -132,7 +132,7 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_query("reference_doctype", "references", function () {
 			return {
 				query: "erpnext.accounts.doctype.payment_entry.payment_entry.reference_doctype_query",
-				filters: { party_type: frm.doc.party_type },
+				query_args: { party_type: frm.doc.party_type },
 			};
 		});
 
@@ -140,14 +140,17 @@ frappe.ui.form.on("Payment Entry", {
 			const child = locals[cdt][cdn];
 			return {
 				query: "erpnext.accounts.doctype.payment_entry.payment_entry.payment_term_query",
-				filters: { reference_doctype: child.reference_doctype, reference_name: child.reference_name },
+				query_args: {
+					reference_doctype: child.reference_doctype,
+					reference_name: child.reference_name,
+				},
 			};
 		});
 
 		frm.set_query("reference_name", "references", function (doc) {
 			return {
 				query: "erpnext.accounts.doctype.payment_entry.payment_entry.reference_name_query",
-				filters: { company: doc.company, party_type: doc.party_type, party: doc.party },
+				query_args: { company: doc.company, party_type: doc.party_type, party: doc.party },
 			};
 		});
 
@@ -434,7 +437,7 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_query("party", function () {
 			return {
 				query: "erpnext.accounts.doctype.payment_entry.payment_entry.payment_party_query",
-				filters: { party_type: frm.doc.party_type, company: frm.doc.company },
+				query_args: { party_type: frm.doc.party_type, company: frm.doc.company },
 			};
 		});
 
