@@ -354,8 +354,9 @@ class TestFormValueQueries(ERPNextTestSuite):
 			get_search_filters(
 				queries.purchase_item_query,
 				"Item",
-				{"supplier": "S", "company": "C", "item_group": ["=", "G"]},
+				{"supplier": "S", "company": "C"},
 				"erpnext.controllers.queries.item_query",
+				filters={"item_group": ["=", "G"]},
 			),
 			{
 				"supplier": "S",
@@ -367,11 +368,15 @@ class TestFormValueQueries(ERPNextTestSuite):
 		)
 		self.assertEqual(
 			get_search_filters(
-				queries.item_warehouse_query, "Warehouse", {"company": "C", "warehouse_type": ["=", "T"]}
+				queries.item_warehouse_query,
+				"Warehouse",
+				{"company": "C"},
+				filters={"company": ["=", "C"], "warehouse_type": ["=", "T"]},
 			),
 			[
 				["Warehouse", "company", "in", ["", "C"]],
 				["Warehouse", "is_group", "=", 0],
+				["Warehouse", "company", "=", "C"],
 				["Warehouse", "warehouse_type", "=", "T"],
 			],
 		)

@@ -3437,11 +3437,11 @@ def make_email_template(subject: str, response: str) -> str:
 	return template.name
 
 
-def get_search_filters(query, doctype, filters, search=None):
-	"""The filters a link query that works them out from a form's values passes `search` (a query's
-	path), or Frappe's own search."""
+def get_search_filters(query, doctype, query_args, search=None, filters=None):
+	"""The filters a link query passes `search` (a query's path), or Frappe's own search, given the
+	form's values `query_args` and the link field's own `filters`."""
 	with patch(search or "frappe.desk.search.search_widget", return_value=[]) as searched:
-		query(doctype, "", "name", 0, 20, filters)
+		query(doctype, "", "name", 0, 20, filters or {}, query_args=query_args)
 
 	call = searched.call_args
 	return call.args[5] if search else call.kwargs["filters"]
