@@ -210,7 +210,7 @@ class PaymentReconciliation(Document):
 		if self.get("cost_center"):
 			conditions.append(jea.cost_center == self.cost_center)
 
-		account_type = erpnext.get_party_account_type(self.party_type)
+		account_type = frappe.get_cached_value("Account", self.receivable_payable_account, "account_type")
 
 		if account_type == "Receivable":
 			dr_or_cr = jea.credit_in_account_currency - jea.debit_in_account_currency
@@ -542,10 +542,9 @@ class PaymentReconciliation(Document):
 
 	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		adjust_allocations_for_taxes(self)
+		account_type = frappe.get_cached_value("Account", self.receivable_payable_account, "account_type")
 		dr_or_cr = (
-			"credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == "Receivable"
-			else "debit_in_account_currency"
+			"credit_in_account_currency" if account_type == "Receivable" else "debit_in_account_currency"
 		)
 
 		entry_list = []
