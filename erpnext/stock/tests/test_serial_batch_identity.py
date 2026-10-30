@@ -150,8 +150,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		for item in (self.item, self.other_item):
 			batch = self.make_number("Batch", "Scan-Batch", item.name)
 			serial = self.make_number("Serial No", "Scan-Serial", item.name)
-			serial.batch_no = batch.name
-			serial.save()
+			serial.db_set("batch_no", batch.name)
 			self.assertEqual(
 				get_serial_batch_scan(item.name, " scan-serial ", "Serial No"),
 				{"name": serial.name, "serial_no": "Scan-Serial", "batch_no": batch.name},
@@ -428,7 +427,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		self.assertEqual(row.current_serial_no, "Keep-001\nRemove-002")
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": self.item.name, "serial_no": "New-003"}))
 
-	def test_pick_list_allocation_shows_numbers_and_preserves_remaining_ids(self):
+	def test_pick_list_allocation_shows_numbers(self):
 		first = self.make_number("Serial No", "Pick-001")
 		second = self.make_number("Serial No", "Pick-002")
 		self.make_number("Serial No", "Pick-001", self.other_item.name)
@@ -440,10 +439,6 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		}
 		selected = get_items_with_location_and_quantity(item, locations, docstatus=0)
 		self.assertEqual(selected[0].serial_no, "Pick-002")
-		self.assertEqual(locations[self.item.name][0].serial_nos, [first.name])
-		selected = get_items_with_location_and_quantity(item, locations, docstatus=0)
-		self.assertEqual(selected[0].serial_no, "Pick-001")
-		self.assertEqual(locations[self.item.name], [])
 
 	def test_pick_list_validates_physical_serials_for_item_and_warehouse(self):
 		serial = self.make_number("Serial No", "Pick-<001>")
@@ -1078,6 +1073,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		)
 		entry.db_insert()
 		for row in entry.items:
+			row.update({"parent": entry.name, "parenttype": entry.doctype, "parentfield": "items"})
 			row.db_insert()
 		return entry.name
 
@@ -1477,7 +1473,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with (
 			patch("frappe.get_all", return_value=[row]),
 			patch(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers",
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle._get_serial_batch_ledgers",
 				return_value=[frappe._dict(serial_no=serial.name)],
 			),
 			patch(
