@@ -210,6 +210,8 @@ class TestSupplierScorecard(FrappeTestCase):
 		doc.name = supplier
 		doc.insert()
 
+		# v15 get_open_count leaves a 1s statement timeout on the session
+		self.addCleanup(frappe.db.set_execution_timeout, 0)
 		endpoint = get_data().get("method") or "frappe.desk.notifications.get_open_count"
 		dashboard = frappe.get_attr(endpoint)("Supplier Scorecard", doc.name)
 

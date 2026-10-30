@@ -36,8 +36,7 @@ def get_columns():
 		{
 			"fieldname": "doctype",
 			"label": _("Transaction Type"),
-			"fieldtype": "Link",
-			"options": "DocType",
+			"fieldtype": "Select",
 			"width": 120,
 		},
 		{
