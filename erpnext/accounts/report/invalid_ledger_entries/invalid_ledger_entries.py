@@ -28,7 +28,7 @@ def get_columns() -> list[dict]:
 	One field definition per column, just like a DocType field definition.
 	"""
 	return [
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "fieldtype": "Link", "options": "DocType"},
+		{"label": _("Voucher Type"), "fieldname": "voucher_type", "fieldtype": "Select"},
 		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",
