@@ -2033,6 +2033,35 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.delete()
 
+	def test_on_net_total_charges_sharing_an_account_are_allocated_to_each_item(self):
+		items = [make_item(properties={"is_stock_item": 1}).name for _ in range(3)]
+		pr = make_purchase_receipt(
+			item_code=items[0],
+			qty=10,
+			rate=100,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			do_not_save=True,
+		)
+		for item_code in items[1:]:
+			pr.append("items", {"item_code": item_code, "qty": 10, "rate": 100, "warehouse": "Stores - TCP1"})
+		for description in ("Freight", "Handling"):
+			pr.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": "_Test Account Shipping Charges - TCP1",
+					"category": "Valuation and Total",
+					"cost_center": "Main - TCP1",
+					"description": description,
+					"rate": 10,
+				},
+			)
+		pr.insert()
+
+		self.assertEqual([row.item_tax_amount for row in pr.items], [200, 200, 200])
+		self.assertEqual([row.valuation_rate for row in pr.items], [120, 120, 120])
+
 	def test_valuation_tax_distribution_with_non_stock_item(self):
 		"""When "Allocate Full Amount to Stock Items" is unchecked, a "Valuation and Total"
 		actual charge is distributed across all items by net amount, but only stock/asset items
