@@ -1545,3 +1545,22 @@ def project_query(
 	return frappe.call(
 		get_project_name, doctype, txt, searchfield, start, page_len, project_filters, **kwargs
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def company_address_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, **kwargs
+):
+	"""The company's addresses. For a drop ship, the customer's when the document has one, else any:
+	`delivered_by_supplier` are the items' values."""
+	from frappe.contacts.doctype.address.address import address_query
+
+	if filters.get("customer"):
+		address_filters = {"link_doctype": "Customer", "link_name": filters["customer"]}
+	elif any(filters.get("delivered_by_supplier") or []):
+		address_filters = {}
+	else:
+		address_filters = {"link_doctype": "Company", "link_name": filters.get("company")}
+
+	return frappe.call(address_query, doctype, txt, searchfield, start, page_len, address_filters, **kwargs)

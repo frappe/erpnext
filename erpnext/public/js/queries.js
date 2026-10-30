@@ -109,23 +109,16 @@ $.extend(erpnext.queries, {
 			erpnext.queries.alert_missing_field(frm, doc, "company");
 		}
 
-		let filters = { link_doctype: "Company", link_name: doc.company || "" };
-		const is_drop_ship = (doc.items || []).some((item) => item.delivered_by_supplier);
-		if (is_drop_ship) filters = {};
-
-		return {
-			query: "frappe.contacts.doctype.address.address.address_query",
-			filters: filters,
-		};
+		return erpnext.queries.dispatch_address_query(doc);
 	},
 
 	dispatch_address_query: function (doc) {
-		let filters = { link_doctype: "Company", link_name: doc.company || "" };
-		const is_drop_ship = doc.items.some((item) => item.delivered_by_supplier);
-		if (is_drop_ship) filters = {};
 		return {
-			query: "frappe.contacts.doctype.address.address.address_query",
-			filters: filters,
+			query: "erpnext.controllers.queries.company_address_query",
+			filters: {
+				company: doc.company,
+				delivered_by_supplier: (doc.items || []).map((item) => item.delivered_by_supplier),
+			},
 		};
 	},
 
