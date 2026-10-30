@@ -975,17 +975,21 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				else:
 					round_off_account = round_off_for_opening
 
+			round_off_account_currency = get_account_currency(round_off_account)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
 						"against": doc.supplier,
-						"debit_in_account_currency": doc.rounding_adjustment,
+						"debit_in_account_currency": doc.base_rounding_adjustment
+						if round_off_account_currency == doc.company_currency
+						else doc.rounding_adjustment,
 						"debit": doc.base_rounding_adjustment,
 						"cost_center": round_off_cost_center
 						if doc.use_company_roundoff_cost_center
 						else (doc.cost_center or round_off_cost_center),
 					},
+					round_off_account_currency,
 					item=doc,
 				)
 			)
