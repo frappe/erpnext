@@ -2084,6 +2084,41 @@ class TestWorkOrder(ERPNextTestSuite):
 		first.submit()
 		self.assertRaises(frappe.ValidationError, second.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"transfer_extra_materials_percentage": 10, "backflush_raw_materials_based_on": "BOM"},
+	)
+	def test_material_request_allows_transfer_extra_materials_percentage(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		self.receive_test_fg_raw_materials()
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		def draft_with_extra(extra_pct):
+			mr = make_material_request(work_order.name)
+			mr.schedule_date = today()
+			for item in mr.items:
+				item.schedule_date = today()
+				item.qty = flt(item.qty * (1 + extra_pct / 100), item.precision("qty"))
+			return mr.insert()
+
+		self.assertRaises(frappe.ValidationError, draft_with_extra(20).submit)
+
+		mr = draft_with_extra(10)
+		mr.submit()
+
+		stock_entry = frappe.get_doc(mr_to_stock_entry(mr.name))
+		stock_entry.insert()
+		stock_entry.submit()
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(
+				row.transferred_qty, flt(row.required_qty * 1.1, row.precision("transferred_qty"))
+			)
+
 	def test_picked_qty_counts_pick_list_of_stopped_material_request(self):
 		from erpnext.stock.doctype.material_request.mapper import create_pick_list as mr_to_pick_list
 
