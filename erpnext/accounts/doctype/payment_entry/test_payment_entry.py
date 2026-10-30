@@ -3326,6 +3326,7 @@ class TestPaymentEntryQueries(ERPNextTestSuite):
 		filters = get_search_filters(
 			payment_entry.account_query,
 			"Account",
-			{"payment_type": "Pay", "bank_payment_type": "Pay", "company": "C", "root_type": ["=", "Asset"]},
+			{"payment_type": "Pay", "bank_payment_type": "Pay", "company": "C"},
+			filters={"root_type": ["=", "Asset"]},
 		)
 		self.assertEqual(filters["root_type"], ["=", "Asset"])
