@@ -834,7 +834,7 @@ def update_child_item_rate_and_discount(
 
 	child_item.rate = row_rate
 
-	if parent_doctype not in ("Sales Order", "Purchase Order") or not flt(child_item.price_list_rate):
+	if not flt(child_item.price_list_rate):
 		return
 
 	if flt(child_item.rate) > flt(child_item.price_list_rate):
