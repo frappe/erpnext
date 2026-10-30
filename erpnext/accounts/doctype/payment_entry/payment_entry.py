@@ -2598,6 +2598,7 @@ def get_company_defaults(company: str):
 
 
 def get_journal_entry_exchange_rate(voucher_no, party_type, party, account_currency, party_account=None):
+	frappe.has_permission("Journal Entry", "read", voucher_no, throw=True)
 	filters = {
 		"parent": voucher_no,
 		"party_type": party_type,
