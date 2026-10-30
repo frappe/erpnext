@@ -11,7 +11,7 @@ from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.permissions import get_user_permissions, has_user_permission
-from frappe.query_builder.functions import Abs, CombineDatetime, Sum
+from frappe.query_builder.functions import Abs, Coalesce, CombineDatetime, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -2994,7 +2994,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			POS_Invoice_Item.serial_and_batch_bundle,
 		)
 		.where(
-			(POS_Invoice.consolidated_invoice.isnull())
+			(Coalesce(POS_Invoice.consolidated_invoice, "") == "")
 			& (POS_Invoice.docstatus == 1)
 			& (POS_Invoice_Item.item_code == kwargs.item_code)
 		)
