@@ -27,7 +27,9 @@ class DeliveryScheduleService:
 		if isinstance(schedules, str):
 			schedules = parse_json(schedules)
 
-		if not frappe.db.exists(
+		# take the item details from the order's own row, not from the request
+		order_row = next((row for row in self.doc.items if row.name == child_row.name), None)
+		if not order_row or not frappe.db.exists(
 			"Sales Order Item",
 			{"name": child_row.name, "parent": self.doc.name, "parenttype": self.doc.doctype},
 		):
@@ -35,6 +37,8 @@ class DeliveryScheduleService:
 				_("Row {0} is not an item of Sales Order {1}").format(child_row.name, self.doc.name),
 				title=_("Invalid Sales Order Item"),
 			)
+
+		child_row = order_row
 
 		names = []
 		first_delivery_date = None
