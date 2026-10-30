@@ -13,6 +13,54 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGLEntry(ERPNextTestSuite):
+	def test_unregistered_party_type_is_rejected_without_a_party(self):
+		entry = frappe.get_doc(doctype="GL Entry", account="Debtors - _TC", party_type="User", is_cancelled=0)
+		self.assertRaises(frappe.ValidationError, entry.validate_party)
+
+	def test_unregistered_party_type_on_untyped_account_is_rejected(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		account = create_account(
+			account_name="_Test Party Type Untyped",
+			parent_account=frappe.get_value("Account", "Debtors - _TC", "parent_account"),
+			company="_Test Company",
+		)
+		entry = frappe.get_doc(
+			doctype="GL Entry", account=account, party_type="User", party="Administrator", is_cancelled=0
+		)
+		self.assertRaises(frappe.ValidationError, entry.validate_party)
+		entry.is_cancelled = 1
+		entry.validate_party()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_immutable_ledger_can_reverse_historical_unregistered_party(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		account = create_account(
+			account_name="_Test Historical Party Type",
+			parent_account=frappe.get_value("Account", "Debtors - _TC", "parent_account"),
+			company="_Test Company",
+		)
+		journal = make_journal_entry(account, "_Test Cash - _TC", 10, submit=True)
+		entry = frappe.get_value("GL Entry", {"voucher_no": journal.name, "account": account}, "name")
+		# Simulate a ledger entry posted before Party Type validation existed.
+		frappe.db.set_value("GL Entry", entry, {"party_type": "User", "party": "Administrator"})
+		frappe.db.set_value(
+			"Journal Entry Account",
+			journal.accounts[0].name,
+			{"party_type": "User", "party": "Administrator"},
+		)
+		journal.reload()
+		journal.cancel()
+		entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": journal.name, "account": account, "is_cancelled": 0},
+			fields=["debit", "credit", "party_type", "party"],
+		)
+		self.assertEqual(len(entries), 2)
+		self.assertEqual(sum(row.debit - row.credit for row in entries), 0)
+		self.assertTrue(all(row.party_type == "User" and row.party == "Administrator" for row in entries))
+
 	def test_round_off_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
 		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
