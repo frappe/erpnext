@@ -892,8 +892,9 @@ class SellingController(StockController):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(
-					((flt(item.stock_uom_rate) - flt(item.valuation_rate)) * item.stock_qty),
-					self.precision("amount", item),
+					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
+					* item.stock_qty,
+					self.precision("gross_profit", item),
 				)
 
 	def set_customer_address(self):
