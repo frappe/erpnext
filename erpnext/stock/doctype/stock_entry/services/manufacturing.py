@@ -783,32 +783,32 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
-		for material in self.available_materials.values():
-			pending_qty_to_mfg = self.get_pending_qty_to_mfg(material)
-			if pending_qty_to_mfg > 0 or self.doc.get("is_return"):
+		pending_qty = self.get_pending_qty_to_mfg()
+		for key, material in self.available_materials.items():
+			if pending_qty[key] > 0 or self.doc.get("is_return"):
 				# more than the pending qty only consumes what is left
-				pending_qty_to_mfg = max(pending_qty_to_mfg, flt(self.doc.fg_completed_qty))
-				self._append_transfer_based_rm(material, pending_qty_to_mfg)
+				self._append_transfer_based_rm(
+					material, max(pending_qty[key], flt(self.doc.fg_completed_qty))
+				)
 
-	def get_pending_qty_to_mfg(self, material):
-		"""Material consumption entries only cover the materials they consumed."""
-		if not self.doc.work_order:
-			return flt(self.doc.fg_completed_qty)
-
+	def get_pending_qty_to_mfg(self):
+		"""Pending qty per material; Material Consumption entries only cover the materials they consumed."""
 		# Count each entry once; For Quantity includes its process loss.
-		covered_qty = {
-			row.parent: flt(row.fg_completed_qty)
-			for row in self._consumption_entries
-			if (row.purpose == "Manufacture" and self._get_available_buckets(row))
-			or (
-				row.purpose == "Material Consumption for Manufacture"
-				and any(bucket is material for bucket in self._get_available_buckets(row))
-			)
+		manufactured_qty, consumed_qty = {}, defaultdict(dict)
+		for row in self._consumption_entries:
+			keys = self._get_available_keys(row)
+			if row.purpose == "Manufacture" and keys:
+				manufactured_qty[row.parent] = flt(row.fg_completed_qty)
+			elif row.purpose == "Material Consumption for Manufacture":
+				for key in keys:
+					consumed_qty[key][row.parent] = flt(row.fg_completed_qty)
+
+		pending_qty = flt(self.wo_doc.material_transferred_for_manufacturing) - sum(manufactured_qty.values())
+		precision = self.doc.precision("fg_completed_qty")
+		return {
+			key: flt(pending_qty - sum(consumed_qty[key].values()), precision)
+			for key in self.available_materials
 		}
-		return flt(
-			flt(self.wo_doc.material_transferred_for_manufacturing) - sum(covered_qty.values()),
-			self.doc.precision("fg_completed_qty"),
-		)
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -1015,18 +1015,21 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 				self._deduct_consumed_qty(buckets, flt(row.transfer_qty))
 
 	def _get_available_buckets(self, row):
+		return [self.available_materials[key] for key in self._get_available_keys(row)]
+
+	def _get_available_keys(self, row):
 		"""Use exact attribution when present; otherwise drain the direct item first."""
 		key = (row.item_code, row.warehouse, row.original_item or None)
 		if row.original_item and key in self.available_materials:
-			return [self.available_materials[key]]
+			return [key]
 
-		buckets = [self.available_materials[key]] if key in self.available_materials else []
-		buckets.extend(
-			bucket
-			for material_key, bucket in self.available_materials.items()
+		keys = [key] if key in self.available_materials else []
+		keys.extend(
+			material_key
+			for material_key in self.available_materials
 			if material_key[:2] == key[:2] and material_key != key
 		)
-		return buckets
+		return keys
 
 	def _deduct_consumed_qty(self, buckets, consumed_qty):
 		for bucket in buckets[:-1]:
