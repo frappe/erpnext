@@ -481,7 +481,7 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 	return out
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
