@@ -5,22 +5,28 @@ from functools import cached_property
 
 import frappe
 from frappe import qb
-from frappe.query_builder.functions import Count, Extract, Sum
+from frappe.query_builder.functions import Coalesce, Count, Extract, Sum
 from frappe.utils import flt, getdate
 from pypika.enums import DatePart
 
-from erpnext.accounts.doctype.budget.budget import get_ordered_amount, get_requested_amount
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.projects.doctype.project.costing.project_costing import can_read, month_range
+from erpnext.projects.doctype.project.costing.project_costing import (
+	can_read,
+	month_range,
+	permitted_reports,
+)
 from erpnext.projects.doctype.project.project_overview import check_access
 
+# The Accounts reports; each opens on the project's fiscal year.
+ACCOUNTS_REPORTS = ("Budget Variance Report", "General Ledger", "Profit and Loss Statement")
 # A budget whose actual plus committed spend reaches this percent of it is near its limit.
 NEAR_LIMIT = 90
-# Where a Budget starts checking spend, earliest stage first, with the field that turns the check
-# on and the field holding what happens when the annual budget is exceeded there.
+# Where a Budget checks spend, with the field that turns the check on and the field holding what
+# happens when the annual budget is exceeded there. Orders come first: they are what a budget most
+# often holds back.
 CONTROL_STAGES = (
-	("Material Request", "applicable_on_material_request", "action_if_annual_budget_exceeded_on_mr"),
 	("Purchase Order", "applicable_on_purchase_order", "action_if_annual_budget_exceeded_on_po"),
+	("Material Request", "applicable_on_material_request", "action_if_annual_budget_exceeded_on_mr"),
 	("Expense", "applicable_on_booking_actual_expenses", "action_if_annual_budget_exceeded"),
 )
 BUDGET_FIELDS = ["name", "account", "budget_amount", "revision_of"] + [
@@ -58,8 +64,12 @@ def get_ledger_entries(
 	start: int = 0,
 	page_length: int = 20,
 ) -> list[dict]:
-	"""One page of the project's ledger entries in the current fiscal year, newest first, optionally
-	for one account or the accounts of one root type ("Expense" or "Income")."""
+	"""One page of the project's ledger entries on Profit and Loss accounts in the current fiscal
+	year, newest first, optionally for one account or the accounts of one root type ("Expense" or
+	"Income").
+
+	The balance sheet side of each voucher (debtors, creditors, stock) is left out, so an amount
+	shows once, on the account it was spent or earned on."""
 	check_access(project)
 	company = frappe.db.get_value("Project", project, "company")
 	period = current_fiscal_year(company)
@@ -69,13 +79,8 @@ def get_ledger_entries(
 		"is_cancelled": 0,
 		"posting_date": ["between", [period.year_start_date, period.year_end_date]],
 	}
-	if account:
-		filters["account"] = account
-	elif root_type:
-		filters["account"] = [
-			"in",
-			frappe.get_all("Account", {"company": company, "root_type": root_type}, pluck="name"),
-		]
+	accounts = profit_and_loss_accounts(company, root_type)
+	filters["account"] = account if account in accounts else ["in", accounts]
 	return frappe.get_list(
 		"GL Entry",
 		filters=filters,
@@ -84,6 +89,13 @@ def get_ledger_entries(
 		start=start,
 		page_length=page_length,
 	)
+
+
+def profit_and_loss_accounts(company: str, root_type: str | None = None) -> list[str]:
+	filters = {"company": company, "report_type": "Profit and Loss"}
+	if root_type:
+		filters["root_type"] = root_type
+	return frappe.get_all("Account", filters=filters, pluck="name")
 
 
 def current_fiscal_year(company: str) -> frappe._dict:
@@ -117,6 +129,7 @@ class ProjectAccounts:
 				"budgets": self.can_read_budgets,
 				"manage_budgets": bool(frappe.has_permission("Budget", "create")),
 			},
+			"reports": permitted_reports(ACCOUNTS_REPORTS),
 			"rows": rows,
 			"monthly": self.monthly(),
 		}
@@ -131,29 +144,74 @@ class ProjectAccounts:
 			"root_type": account.root_type,
 			"actual": sign * flt(booked.get("balance")),
 			"entries": booked.get("entries", 0),
-			"committed": self.committed(account.name) if account.root_type == "Expense" else 0,
+			"committed": self.committed.get(account.name, 0) if account.root_type == "Expense" else 0,
 			"budget": budget and budget_summary(budget),
 		}
 		row["status"] = account_status(row) if account.root_type == "Expense" else None
 		return row
 
-	def committed(self, account: str) -> float:
-		"""Open purchase orders and material requests on the account, as Budget checks them."""
-		params = frappe._dict(
-			expense_account=account,
-			budget_against_field="project",
-			project=self.project.name,
-			from_fiscal_year=self.fiscal_year.name,
-			to_fiscal_year=self.fiscal_year.name,
+	@cached_property
+	def committed(self) -> dict[str, float]:
+		"""Open purchase orders and material requests on each expense account, counted as Budget
+		counts them (`get_ordered_amount` and `get_requested_amount`), for every account at once."""
+		committed = {}
+		for amounts in (self.ordered_by_account(), self.requested_by_account()):
+			for account, amount in amounts:
+				committed[account] = committed.get(account, 0) + flt(amount)
+		return {account: amount for account, amount in committed.items() if amount}
+
+	def ordered_by_account(self) -> list[tuple[str, float]]:
+		"""What submitted, open purchase orders dated in the fiscal year have not billed yet."""
+		item, order = qb.DocType("Purchase Order Item"), qb.DocType("Purchase Order")
+		unbilled = (item.amount - item.billed_amt) * Coalesce(order.conversion_rate, 1)
+		query = (
+			qb.from_(item)
+			.join(order)
+			.on(order.name == item.parent)
+			.where(order.docstatus == 1)
+			.where(order.status != "Closed")
+			.where(item.closed == 0)
+			.where(item.amount > item.billed_amt)
+			.where(order.transaction_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date])
 		)
-		return flt(get_ordered_amount(params)) + flt(get_requested_amount(params))
+		return self.by_expense_account(query, item, unbilled)
+
+	def requested_by_account(self) -> list[tuple[str, float]]:
+		"""What submitted purchase material requests scheduled in the fiscal year have not ordered yet."""
+		item, request = qb.DocType("Material Request Item"), qb.DocType("Material Request")
+		unordered = (item.stock_qty - item.ordered_qty) * item.rate / item.conversion_factor
+		query = (
+			qb.from_(item)
+			.join(request)
+			.on(request.name == item.parent)
+			.where(request.docstatus == 1)
+			.where(request.material_request_type == "Purchase")
+			.where(request.status != "Stopped")
+			.where(item.stock_qty > item.ordered_qty)
+			.where(request.schedule_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date])
+		)
+		return self.by_expense_account(query, item, unordered)
+
+	def by_expense_account(self, query, item, amount) -> list[tuple[str, float]]:
+		return (
+			query.where(item.project == self.project.name)
+			.select(item.expense_account, Sum(amount))
+			.groupby(item.expense_account)
+			.run()
+		)
 
 	def monthly(self) -> list[dict]:
 		"""Expense to date and the expense budget accumulated to date, month by month, from the start
-		of the fiscal year to this month or its end."""
+		of the fiscal year to this month or its end.
+
+		With budgets, both lines cover the budgeted expense accounts only, so spend on an account
+		without a budget never shows as going over one. Without budgets, the actual line covers
+		every expense account."""
 		last = min(getdate(), getdate(self.fiscal_year.year_end_date))
 		months = month_range(str(self.fiscal_year.year_start_date)[:7], str(last)[:7])
 		expense = {account.name for account in self.accounts if account.root_type == "Expense"}
+		if self.budgets:
+			expense &= set(self.budgets)
 		actual, budget, rows = 0.0, 0.0, []
 		for month in months:
 			actual += sum(self.ledger_by_month.get((account, month), 0) for account in expense)
@@ -165,9 +223,11 @@ class ProjectAccounts:
 
 	@cached_property
 	def accounts(self) -> list[frappe._dict]:
-		"""Profit and Loss accounts with ledger entries, a budget or a commitment for the project."""
-		names = set(self.ledger_totals) | set(self.budgets) | set(self.ordered_accounts())
-		return frappe.get_all(
+		"""Profit and Loss accounts with ledger entries, a budget or a commitment for the project,
+		that the user may read: an account hidden by a User Permission leaves out its budget and
+		commitments too."""
+		names = set(self.ledger_totals) | set(self.budgets) | set(self.committed)
+		return frappe.get_list(
 			"Account",
 			filters={"name": ["in", list(names)], "report_type": "Profit and Loss"},
 			fields=["name", "account_name", "root_type"],
@@ -210,28 +270,21 @@ class ProjectAccounts:
 		)
 
 	def ledger_query(self):
+		"""The project's GL Entries in the fiscal year that the user may read. The rules come from the
+		framework's query builder, so User Permissions on accounts, cost centers and the like apply,
+		as they do to the ledger list."""
 		gle = qb.DocType("GL Entry")
+		readable = frappe.qb.get_query(
+			"GL Entry", fields=["name"], filters={"project": self.project.name}, ignore_permissions=False
+		)
 		return (
 			qb.from_(gle)
+			.where(gle.name.isin(readable))
 			.where(gle.project == self.project.name)
 			.where(gle.company == self.project.company)
 			.where(gle.is_cancelled == 0)
 			.where(gle.posting_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date])
 		)
-
-	def ordered_accounts(self) -> set[str]:
-		"""Expense accounts named on the project's submitted purchase orders and material requests."""
-		accounts = set()
-		for doctype in ("Purchase Order Item", "Material Request Item"):
-			accounts.update(
-				frappe.get_all(
-					doctype,
-					filters={"project": self.project.name, "docstatus": 1, "expense_account": ["is", "set"]},
-					pluck="expense_account",
-					distinct=True,
-				)
-			)
-		return accounts
 
 	@cached_property
 	def budgets(self) -> dict[str, dict]:
@@ -284,22 +337,31 @@ def budget_summary(budget: dict) -> dict:
 		),
 		"revision_of": budget["revision_of"],
 		"control": budget_control(budget),
+		"stops": [stage for stage, action in stage_actions(budget) if action == "Stop"],
 	}
 
 
 def budget_control(budget: dict) -> dict | None:
-	"""The earliest stage at which the Budget acts on an exceeded annual amount, and how: "Stop" or
-	"Warn". None when it only tracks."""
-	for stage, applies, action in CONTROL_STAGES:
-		if budget[applies] and budget[action] in ("Stop", "Warn"):
-			return {"stage": stage, "action": budget[action]}
+	"""The Budget's strongest rule, to name it by: a stop before a warning, and orders before
+	requests before expenses. None when it only tracks."""
+	actions = stage_actions(budget)
+	for wanted in ("Stop", "Warn"):
+		for stage, action in actions:
+			if action == wanted:
+				return {"stage": stage, "action": action}
 	return None
 
 
+def stage_actions(budget: dict) -> list[tuple[str, str]]:
+	"""What the Budget does at each stage it checks, when the annual amount is exceeded there."""
+	return [(stage, budget[action]) for stage, applies, action in CONTROL_STAGES if budget[applies]]
+
+
 def account_status(row: dict) -> str:
-	"""none: no budget; over: actual spend is past it; blocked: commitments take it past a budget
-	that stops new orders; over_committed: commitments take it past one that does not; near: actual
-	plus committed reach NEAR_LIMIT percent of it; ok otherwise."""
+	"""none: no budget; over: actual spend is past it. When commitments take it past the budget:
+	blocked if the budget stops new purchase orders, requests_blocked if it stops only new material
+	requests, over_committed otherwise. near: actual plus committed reach NEAR_LIMIT percent of it;
+	ok otherwise."""
 	budget = row["budget"]
 	if not budget:
 		return "none"
@@ -307,9 +369,11 @@ def account_status(row: dict) -> str:
 	if row["actual"] > budget["amount"]:
 		return "over"
 	if used > budget["amount"]:
-		control = budget["control"] or {}
-		stops_orders = control.get("action") == "Stop" and control.get("stage") != "Expense"
-		return "blocked" if stops_orders else "over_committed"
+		if "Purchase Order" in budget["stops"]:
+			return "blocked"
+		if "Material Request" in budget["stops"]:
+			return "requests_blocked"
+		return "over_committed"
 	if used >= budget["amount"] * NEAR_LIMIT / 100:
 		return "near"
 	return "ok"

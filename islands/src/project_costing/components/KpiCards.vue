@@ -7,7 +7,7 @@ defineProps({
 	items: { type: Array, required: true },
 });
 
-const COLUMNS = { 3: "lg:grid-cols-3", 5: "lg:grid-cols-5" };
+const COLUMNS = { 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 5: "lg:grid-cols-5" };
 </script>
 
 <template>

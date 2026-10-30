@@ -43,11 +43,15 @@ const tab = ref("activities");
 const hours_only = computed(() => LABOUR.includes(tab.value) && !props.view.access.labour);
 const measure = computed(() => (hours_only.value ? "hours" : "amount"));
 
+// In cost, an activity whose hours all lack a costing rate has nothing to draw, so it is left out
+// rather than shown as an empty bar; the Cost to date card says how many hours that is.
 const rows = computed(() =>
-	(drivers.value[tab.value] || []).map((row) => ({
-		...row,
-		name: row.label || row.name || DIMENSIONS[tab.value].unnamed,
-	}))
+	(drivers.value[tab.value] || [])
+		.filter((row) => hours_only.value || row.amount)
+		.map((row) => ({
+			...row,
+			name: row.label || row.name || DIMENSIONS[tab.value].unnamed,
+		}))
 );
 
 // Hours or invoice counts ride along in the tooltip, in their own unit.

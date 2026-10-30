@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.classes.context_managers import freeze_time
+from frappe.tests.classes.context_managers import freeze_time, patch_hooks
 from frappe.utils import add_months, add_to_date, get_first_day, getdate, now_datetime, nowdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -12,6 +12,7 @@ from erpnext.projects.doctype.project.costing.project_costing import (
 	CostingSummary,
 	get_project_costing,
 	monthly_rows,
+	permitted_reports,
 )
 from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries
 from erpnext.projects.doctype.project.project import update_costing_and_billing
@@ -25,6 +26,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 UNPRICED_ACTIVITY = "_Test Unpriced Activity"
 VIEWER = "costing-viewer@example.com"
+ADD_GENERAL_LEDGER = "erpnext.projects.doctype.project.costing.test_project_costing.add_general_ledger"
 
 
 class TestProjectCosting(ERPNextTestSuite):
@@ -39,7 +41,6 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertEqual(running["margin"], 900)
 		self.assertEqual(running["margin_percent"], 60)
 		self.assertEqual(running["billed_percent"], 75)
-		self.assertEqual(running["projected_margin"], 800)
 		self.assertEqual(running["planned_margin"], 1000)
 
 		self.assertEqual(summary(percent_complete=50, estimate=1000, cost=510)["health"], "ok")
@@ -54,12 +55,9 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertEqual(bare["health"], "none")
 		self.assertIsNone(bare["variance"])
 		self.assertIsNone(bare["margin_percent"])
-		self.assertIsNone(bare["projected_margin"])
+		self.assertIsNone(bare["planned_margin"])
 		self.assertTrue(bare["internal"])
 		self.assertFalse(summary(customer="_Test Customer", cost=400)["internal"])
-
-		over_billed = summary(percent_complete=100, cost=600, billed=1200, contract=1000)
-		self.assertEqual(over_billed["projected_margin"], 600)
 
 	def test_monthly_rows_fill_the_months_between(self) -> None:
 		rows = monthly_rows({"labour": {"2025-11": 100.0}, "billed": {"2026-02": 50.0}})
@@ -69,14 +67,13 @@ class TestProjectCosting(ERPNextTestSuite):
 
 	def test_rate_gaps_flag_understated_labour(self) -> None:
 		activities = [
-			frappe._dict(name="Development", hours=92, amount=1840, unpriced_hours=0, unpriced_rows=0),
-			frappe._dict(name=None, hours=3, amount=0, unpriced_hours=3, unpriced_rows=1),
-			frappe._dict(name="Design", hours=5, amount=0, unpriced_hours=5, unpriced_rows=2),
+			frappe._dict(name="Development", hours=92, amount=1840, unpriced_hours=0),
+			frappe._dict(name=None, hours=3, amount=0, unpriced_hours=3),
+			frappe._dict(name="Design", hours=5, amount=0, unpriced_hours=5),
 		]
 		gaps = summarise_rate_gaps(activities)
 		self.assertEqual((gaps["hours"], gaps["share"], gaps["estimate"]), (8, 8, 160))
 		self.assertTrue(gaps["understated"])
-		self.assertEqual([row["name"] for row in gaps["activities"]], ["Design", None])
 		self.assertIsNone(summarise_rate_gaps(activities[1:])["estimate"])
 
 	def test_costing_matches_the_stored_totals(self) -> None:
@@ -98,11 +95,33 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertEqual(
 			[invoice["amount"] for invoice in billing["invoices"]], [project.total_billed_amount]
 		)
-		self.assertEqual(billing["left_to_bill"], project.total_sales_amount - project.total_billed_amount)
+		self.assertEqual((billing["invoice_count"], billing["sales_order_count"]), (1, 1))
 		self.assertEqual(costing["rate_gaps"]["hours"], 6)
 		self.assertTrue(costing["rate_gaps"]["understated"])
 		self.assertEqual(costing["drivers"]["activities"][0]["unpriced_hours"], 0)
-		self.assertEqual(billing["unbilled"]["amount"], 0)
+
+	def test_invoice_filter_finds_the_counted_invoices(self) -> None:
+		"""The Billing card's link to the invoice list filters by the invoice's project, by the
+		items' project, or by name when the project's invoices mix the two."""
+		project = make_project({"project_name": f"_Test Invoice Links {frappe.generate_hash(length=6)}"}).name
+		invoice_for_project(project, qty=1)
+		self.assertEqual(billing_of(project)["invoice_filter"], {"project": project})
+
+		item_billed = make_project(
+			{"project_name": f"_Test Item Links {frappe.generate_hash(length=6)}"}
+		).name
+		item_invoice_for_project(item_billed)
+		self.assertEqual(
+			billing_of(item_billed)["invoice_filter"], {"Sales Invoice Item.project": item_billed}
+		)
+
+		item_invoice = item_invoice_for_project(project)
+		billing = billing_of(project)
+		self.assertEqual(billing["invoice_filter"]["name"][0], "in")
+		self.assertEqual(
+			set(billing["invoice_filter"]["name"][1]), {row["name"] for row in billing["invoices"]}
+		)
+		self.assertIn(item_invoice, billing["invoice_filter"]["name"][1])
 
 	def test_viewer_without_cost_access_sees_totals_only(self) -> None:
 		"""A Projects User sees the same totals, but not costing rates or the invoices behind them."""
@@ -120,7 +139,6 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertFalse(costing["access"]["labour"])
 		self.assertEqual(costing["summary"]["cost"], cost)
 		self.assertIsNone(costing["billing"]["invoices"])
-		self.assertIsNone(costing["billing"]["unbilled"])
 		self.assertIsNone(costing["rate_gaps"])
 		self.assertNotIn("amount", costing["drivers"]["activities"][0])
 
@@ -146,6 +164,30 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertEqual([row.name for row in costing["drivers"]["employees"]], [self.priced_employee])
 		self.assertEqual(sum(row.hours for row in costing["drivers"]["activities"]), 2)
 		self.assertEqual(costing["summary"]["hours"], 8)
+
+	def test_reports_come_from_the_dashboard_and_keep_to_those_that_open(self) -> None:
+		"""The Reports menu lists the Project dashboard's reports, including those another app adds,
+		filtered to the project; a disabled report, or one the user's roles may not open, is left out."""
+		project = self.project_with_documents()
+		with patch_hooks({"override_doctype_dashboards": {"Project": [ADD_GENERAL_LEDGER]}}):
+			reports = get_project_costing(project.name)["reports"]
+
+		self.assertEqual(
+			reports,
+			[
+				{"name": "Timesheet Billing Summary", "filters": {"project": project.name}},
+				{"name": "General Ledger", "filters": {"project_name": project.name}},
+			],
+		)
+
+		names = ("General Ledger", "Timesheet Billing Summary", "_Test Missing Report")
+		frappe.set_user(make_viewer())
+		try:
+			self.assertEqual(permitted_reports(names), ["Timesheet Billing Summary"])
+		finally:
+			frappe.set_user("Administrator")
+		frappe.db.set_value("Report", "Timesheet Billing Summary", "disabled", 1)
+		self.assertEqual(permitted_reports(names), ["General Ledger"])
 
 	def test_monthly_amounts_add_up_to_the_stored_totals(self) -> None:
 		"""Every source, split by month, sums to the total the Project stores for it, and each
@@ -264,6 +306,13 @@ def log_unpriced_time(employee: str, project: str) -> None:
 	timesheet.submit()
 
 
+def add_general_ledger(data: dict) -> dict:
+	"""A dashboard override, as another app would add its report, with a filter field of its own."""
+	data["reports"].append({"label": "Accounts", "items": ["General Ledger"]})
+	data["non_standard_fieldnames"]["General Ledger"] = "project_name"
+	return data
+
+
 def make_viewer() -> str:
 	if not frappe.db.exists("User", VIEWER):
 		user = frappe.get_doc(
@@ -271,6 +320,18 @@ def make_viewer() -> str:
 		).insert()
 		user.add_roles("Projects User")
 	return VIEWER
+
+
+def billing_of(project: str) -> dict:
+	return get_project_costing(project)["billing"]
+
+
+def item_invoice_for_project(project: str) -> str:
+	"""An invoice that names the project only on its item."""
+	invoice = create_sales_invoice(qty=1, rate=1000, do_not_submit=True)
+	invoice.items[0].project = project
+	invoice.submit()
+	return invoice.name
 
 
 def invoice_for_project(project: str, qty: int, is_return: int = 0) -> None:

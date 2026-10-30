@@ -5,14 +5,14 @@ import { useHost } from "@framework/ui/island";
 
 import AccountsView from "./components/AccountsView.vue";
 import BillingCard from "./components/BillingCard.vue";
-import BudgetCard from "./components/BudgetCard.vue";
+import EstimateCard from "./components/EstimateCard.vue";
 import CostBreakdown from "./components/CostBreakdown.vue";
 import CostDrivers from "./components/CostDrivers.vue";
 import CostTrend from "./components/CostTrend.vue";
 import KpiCards from "./components/KpiCards.vue";
-import MarginCard from "./components/MarginCard.vue";
+import { accountsReports } from "./accounts.js";
 import { hiddenFor } from "./alerts.js";
-import { toView } from "./costing.js";
+import { report_route, toView } from "./costing.js";
 import { createFormat, provideFormat } from "./format.js";
 import { kpisFor } from "./kpis.js";
 import { useProjectAccounts, useProjectCosting } from "./useProjectCosting.js";
@@ -31,7 +31,7 @@ const host = useHost();
 const element = ref(null);
 const mode = ref("project");
 const modes = [
-	{ value: "project", label: __("Project") },
+	{ value: "project", label: __("Project cost") },
 	{ value: "accounts", label: __("Accounts") },
 ];
 
@@ -59,12 +59,17 @@ const failed = computed(() => mode.value === "project" && Object.keys(costing.da
 // Only a viewer who may read the ledger gets the Accounts view.
 const has_accounts = computed(() => Boolean(view.value?.access.ledger));
 
-const reports = computed(() =>
-	["Project Profitability", "Project Billing Summary", "Timesheet Billing Summary"].map((report) => ({
-		label: __(report),
-		onClick: () => host.navigate?.(`query-report/${report}?project=${encodeURIComponent(props.name)}`),
-	}))
-);
+// Each mode offers the reports behind its own numbers, those the site has and the user may open.
+const reports = computed(() => {
+	const items =
+		mode.value === "accounts"
+			? accounts.data && accountsReports(accounts.data)
+			: costing.data?.reports?.map((report) => [
+					__(report.name),
+					report_route(report.name, report.filters),
+			  ]);
+	return (items || []).map(([label, route]) => ({ label, onClick: () => host.navigate?.(route) }));
+});
 
 function new_timesheet() {
 	host.navigate?.(`Form/Timesheet/new?parent_project=${encodeURIComponent(props.name)}`);
@@ -76,7 +81,7 @@ function new_timesheet() {
 		<template v-if="!is_new">
 			<div class="flex flex-wrap items-center gap-3">
 				<TabButtons v-if="has_accounts" v-model="mode" :options="modes" size="sm" />
-				<div class="ml-auto">
+				<div v-if="reports.length" class="ml-auto">
 					<Dropdown :options="reports">
 						<Button size="sm" :label="__('Reports')" icon-right="lucide-chevron-down" />
 					</Dropdown>
@@ -87,6 +92,7 @@ function new_timesheet() {
 				v-if="costing.error"
 				theme="red"
 				:title="__('Could not load the costing')"
+				:primary-action="{ label: __('Try again'), onClick: () => costing.reload() }"
 				:description="costing.error.message"
 			/>
 
@@ -95,13 +101,14 @@ function new_timesheet() {
 					v-if="accounts.error"
 					theme="red"
 					:title="__('Could not load the accounts')"
+					:primary-action="{ label: __('Try again'), onClick: () => accounts.reload() }"
 					:description="accounts.error.message"
 				/>
 				<AccountsView
 					v-else-if="accounts.data"
 					:payload="accounts.data"
-					:internal="view.internal"
 					:closed="view.closed"
+					:has_labour="view.sources.some((source) => source.key === 'labour' && source.amount)"
 				/>
 				<div v-else class="space-y-5">
 					<div class="grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -140,17 +147,14 @@ function new_timesheet() {
 			<template v-else>
 				<KpiCards :items="kpis" />
 				<div class="grid gap-5 lg:grid-cols-5">
-					<BudgetCard class="lg:col-span-2" :view="view" />
+					<EstimateCard class="lg:col-span-2" :view="view" />
 					<CostTrend class="lg:col-span-3" :view="view" />
 				</div>
 				<div class="grid gap-5 lg:grid-cols-2">
 					<CostBreakdown :view="view" />
 					<CostDrivers v-if="view.drivers" :view="view" />
 				</div>
-				<div v-if="!view.internal" class="grid gap-5 lg:grid-cols-2">
-					<BillingCard v-if="view.billing" :view="view" />
-					<MarginCard :view="view" />
-				</div>
+				<BillingCard v-if="!view.internal && view.billing" :view="view" />
 			</template>
 
 			<ErrorMessage
