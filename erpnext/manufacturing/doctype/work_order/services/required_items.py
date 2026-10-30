@@ -253,7 +253,7 @@ class RequiredItemsService:
 				continue
 
 			pending = (
-				required_by_item[item_code]
+				get_allowed_transfer_qty(required_by_item[item_code])
 				- flt(transferred.get(item_code))
 				- flt(requested.get(item_code))
 				- flt(picked.get(item_code))
@@ -578,6 +578,14 @@ def distribute_transfers_over_rows(rows, qty_by_item_warehouse_and_operation):
 			qty_by_row[name] += share
 
 	return qty_by_row
+
+
+def get_allowed_transfer_qty(required_qty):
+	"""Required qty plus the Transfer Extra Materials Percentage allowance."""
+	extra_pct = flt(
+		frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+	)
+	return flt(required_qty) + flt(required_qty) * extra_pct / 100
 
 
 def is_row_of_operation(row, operation):
