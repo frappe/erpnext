@@ -6,6 +6,7 @@ from frappe.utils import add_days, today
 
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.buying.report.requested_items_to_order_and_receive.requested_items_to_order_and_receive import (
+	execute,
 	get_data,
 )
 from erpnext.stock.doctype.item.test_item import create_item
@@ -43,6 +44,11 @@ class TestRequestedItemsToOrderAndReceive(ERPNextTestSuite):
 		self.assertEqual(len(data), 2)
 		self.assertEqual(data[0].ordered_qty, 0.0)
 		self.assertEqual(data[1].ordered_qty, 57.0)
+
+	def test_group_by_material_request_leaves_out_request_uom_qty(self):
+		columns = execute(self.filters.update({"group_by_mr": 1}))[0]
+
+		self.assertNotIn("qty", [column["fieldname"] for column in columns])
 
 	def setup_material_request(self, order=False, receive=False, days=0):
 		po = None

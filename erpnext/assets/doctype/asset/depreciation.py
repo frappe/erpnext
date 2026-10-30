@@ -54,7 +54,7 @@ def book_depreciation_entries(date):
 		(depr_schedule_name, asset_name, sch_start_idx, sch_end_idx) = data
 
 		try:
-			make_depreciation_entry(
+			_make_depreciation_entry(
 				depr_schedule_name,
 				date,
 				sch_start_idx,
@@ -127,7 +127,7 @@ def get_companies_with_frozen_limits():
 def make_depreciation_entry_on_disposal(asset_doc, disposal_date=None):
 	for row in asset_doc.get("finance_books"):
 		depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, "Active", row.finance_book)
-		make_depreciation_entry(depr_schedule_name, disposal_date)
+		_make_depreciation_entry(depr_schedule_name, disposal_date)
 
 
 def get_credit_debit_accounts_for_asset(asset_category, company):
@@ -170,6 +170,22 @@ def make_depreciation_entry(
 	sch_start_idx=None,
 	sch_end_idx=None,
 	accounting_dimensions=None,
+):
+	depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", depr_schedule_name)
+	frappe.has_permission("Asset Depreciation Schedule", "write", depr_schedule_doc, throw=True)
+	frappe.has_permission("Asset", "write", depr_schedule_doc.asset, throw=True)
+
+	return _make_depreciation_entry(
+		depr_schedule_name, date, sch_start_idx, sch_end_idx, accounting_dimensions
+	)
+
+
+def _make_depreciation_entry(
+	depr_schedule_name: str,
+	date: DateTimeLikeObject | None = None,
+	sch_start_idx: int | None = None,
+	sch_end_idx: int | None = None,
+	accounting_dimensions: list[dict] | None = None,
 ):
 	frappe.has_permission("Journal Entry", throw=True)
 	date = date or today()
@@ -281,15 +297,15 @@ def get_credit_and_debit_entry(
 	}
 
 	for dimension in dimensions:
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_bs"):
-			credit_entry[dimension["fieldname"]] = asset.get(dimension["fieldname"]) or dimension.get(
-				"default_dimension"
-			)
+		value = asset.get(dimension["fieldname"])
+		# Dimension defaults and mandatory flags are set per company; only the asset's company applies
+		is_asset_company = dimension.get("company") == asset.company
 
-		if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_pl"):
-			debit_entry[dimension["fieldname"]] = asset.get(dimension["fieldname"]) or dimension.get(
-				"default_dimension"
-			)
+		if value or (is_asset_company and dimension.get("mandatory_for_bs")):
+			credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+		if value or (is_asset_company and dimension.get("mandatory_for_pl")):
+			debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 	return credit_entry, debit_entry
 
 
@@ -580,7 +596,13 @@ def get_depreciation_amount_in_je(journal_entry):
 
 
 def get_gl_entries_on_asset_regain(
-	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
+	asset,
+	selling_amount=0,
+	finance_book=None,
+	voucher_type=None,
+	voucher_no=None,
+	date=None,
+	disposal_values: dict | None = None,
 ):
 	if not date:
 		date = getdate()
@@ -593,7 +615,7 @@ def get_gl_entries_on_asset_regain(
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
-	) = get_asset_details(asset, finance_book)
+	) = get_asset_details(asset, finance_book, disposal_values)
 
 	gl_entries = [
 		asset.get_gl_dict(
@@ -633,7 +655,13 @@ def get_gl_entries_on_asset_regain(
 
 
 def get_gl_entries_on_asset_disposal(
-	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
+	asset,
+	selling_amount=0,
+	finance_book=None,
+	voucher_type=None,
+	voucher_no=None,
+	date=None,
+	disposal_values: dict | None = None,
 ):
 	if not date:
 		date = getdate()
@@ -646,7 +674,7 @@ def get_gl_entries_on_asset_disposal(
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
-	) = get_asset_details(asset, finance_book)
+	) = get_asset_details(asset, finance_book, disposal_values)
 
 	gl_entries = [
 		asset.get_gl_dict(
@@ -689,9 +717,10 @@ def get_gl_entries_on_asset_disposal(
 	return gl_entries
 
 
-def get_asset_details(asset, finance_book=None):
-	value_after_depreciation = asset.get_value_after_depreciation(finance_book)
-	accumulated_depr_amount = flt(asset.net_purchase_amount) - flt(value_after_depreciation)
+def get_asset_details(asset, finance_book=None, disposal_values: dict | None = None):
+	disposal_values = disposal_values or get_asset_disposal_values(asset, finance_book)
+	value_after_depreciation = flt(disposal_values["value_after_depreciation"])
+	accumulated_depr_amount = flt(disposal_values["gross_asset_value"]) - value_after_depreciation
 
 	fixed_asset_account, accumulated_depr_account, _ = get_depreciation_accounts(
 		asset.asset_category, asset.company
@@ -708,6 +737,14 @@ def get_asset_details(asset, finance_book=None):
 		disposal_account,
 		value_after_depreciation,
 	)
+
+
+def get_asset_disposal_values(asset, finance_book: str | None = None) -> dict:
+	"""Current value after depreciation and gross value of the asset, used to post its disposal."""
+	return {
+		"value_after_depreciation": asset.get_value_after_depreciation(finance_book),
+		"gross_asset_value": asset.net_purchase_amount,
+	}
 
 
 def get_depreciation_accounts(asset_category, company):

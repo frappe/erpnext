@@ -22,9 +22,10 @@ frappe.ui.form.on("Material Request", {
 			return doc.stock_qty <= doc.ordered_qty ? "green" : "orange";
 		});
 
-		frm.set_query("item_code", "items", function () {
+		frm.set_query("item_code", "items", function (doc) {
 			return {
 				query: "erpnext.controllers.queries.item_query",
+				filters: { company: doc.company },
 			};
 		});
 
@@ -793,15 +794,14 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 	onload() {
 		this.frm.set_query("item_code", "items", function (doc, cdt, cdn) {
-			let filters = { is_stock_item: 1 };
+			let filters = { is_stock_item: 1, company: doc.company };
 
 			if (doc.material_request_type == "Customer Provided") {
 				filters.customer = doc.customer;
-			} else if (
-				doc.material_request_type == "Purchase" ||
-				doc.material_request_type == "Subcontracting"
-			) {
+			} else if (doc.material_request_type == "Purchase") {
 				filters = { is_purchase_item: 1 };
+			} else if (doc.material_request_type == "Subcontracting") {
+				filters = { is_stock_item: 1, is_sub_contracted_item: 1 };
 			} else if (doc.material_request_type == "Manufacture") {
 				filters.include_item_in_manufacturing = 1;
 			}

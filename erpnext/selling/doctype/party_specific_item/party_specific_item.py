@@ -33,37 +33,44 @@ class PartySpecificItem(Document):
 				"party": self.party,
 				"restrict_based_on": self.restrict_based_on,
 				"based_on_value": self.based_on_value,
+				"name": ("!=", self.name),
 			},
 		)
 		if exists:
 			frappe.throw(_("This item filter has already been applied for the {0}").format(self.party_type))
 
 
-def get_restricted_items_condition(party_type, party):
-	"""Return a condition matching items reserved for other parties and not for this party."""
+def get_allowed_items_condition(party_type, party):
 	group_type = f"{party_type} Group"
+	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
 	rules = frappe.get_all(
 		"Party Specific Item",
-		filters={"party_type": ("in", [party_type, group_type])},
-		fields=["party_type", "party", "restrict_based_on", "based_on_value"],
+		filters={"party_type": party_type, "party": party},
+		fields=["restrict_based_on", "based_on_value"],
 	)
-	if not rules:
-		return None
+	# a group rule applies to the party's group and every group above it in the tree
+	party_groups = get_group_ancestors(group_type, party_group) if party_group else []
+	if party_groups:
+		rules += frappe.get_all(
+			"Party Specific Item",
+			filters={"party_type": group_type, "party": ("in", party_groups)},
+			fields=["restrict_based_on", "based_on_value"],
+		)
+	return get_rules_condition(rules) if rules else None
 
-	party_group = frappe.db.get_value(party_type, party, frappe.scrub(group_type))
-	own_rules, other_rules = [], []
-	for rule in rules:
-		allowed_party = party if rule.party_type == party_type else party_group
-		if rule.party == allowed_party:
-			own_rules.append(rule)
-		else:
-			other_rules.append(rule)
 
-	if not other_rules:
-		return None
-	if not own_rules:
-		return get_rules_condition(other_rules)
-	return get_rules_condition(other_rules) & ~get_rules_condition(own_rules)
+def get_group_ancestors(group_type, group):
+	"""Return the group and all its ancestor groups (nested set)."""
+	node = frappe.qb.DocType(group_type)
+	ancestor = frappe.qb.DocType(group_type).as_("ancestor")
+	return (
+		frappe.qb.from_(node)
+		.join(ancestor)
+		.on((node.lft >= ancestor.lft) & (node.rgt <= ancestor.rgt))
+		.select(ancestor.name)
+		.where(node.name == group)
+		.run(pluck=True)
+	)
 
 
 def get_rules_condition(rules):
@@ -75,7 +82,7 @@ def get_rules_condition(rules):
 
 	conditions = []
 	if values["Item"]:
-		conditions.append(item.name.isin(values["Item"]))
+		conditions.append(item.name.isin(values["Item"]) | IfNull(item.variant_of, "").isin(values["Item"]))
 	if values["Item Group"]:
 		conditions.append(item.item_group.isin(get_item_group_subtree_query(values["Item Group"])))
 	if values["Brand"]:

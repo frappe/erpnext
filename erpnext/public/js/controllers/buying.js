@@ -91,7 +91,7 @@ erpnext.buying = {
 
 				this.frm.set_query("item_code", "items", function () {
 					if (me.frm.doc.is_subcontracted) {
-						var filters = { supplier: me.frm.doc.supplier };
+						var filters = { supplier: me.frm.doc.supplier, company: me.frm.doc.company };
 						if (me.frm.doc.is_old_subcontracting_flow) {
 							filters["is_sub_contracted_item"] = 1;
 						} else {
@@ -105,7 +105,12 @@ erpnext.buying = {
 					} else {
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { supplier: me.frm.doc.supplier, is_purchase_item: 1, has_variants: 0 },
+							filters: {
+								supplier: me.frm.doc.supplier,
+								is_purchase_item: 1,
+								has_variants: 0,
+								company: me.frm.doc.company,
+							},
 						};
 					}
 				});
@@ -180,7 +185,11 @@ erpnext.buying = {
 
 						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+						const is_drop_ship = this.frm.doc.items.some((item) => item.delivered_by_supplier);
+						if (
+							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+							!is_drop_ship
+						) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},

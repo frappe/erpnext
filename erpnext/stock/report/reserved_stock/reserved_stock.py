@@ -4,6 +4,10 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Date
+from frappe.utils import flt
+from pypika.terms import ValueWrapper
+
+AVAILABLE_QTY_INDEX = 9
 
 
 def execute(filters=None):
@@ -31,9 +35,9 @@ def validate_filters(filters):
 
 def get_data(filters):
 	sre = frappe.qb.DocType("Stock Reservation Entry")
-	query = (
-		frappe.qb.from_(sre)
-		.select(
+	query = frappe.qb.get_query(
+		"Stock Reservation Entry",
+		fields=[
 			sre.creation,
 			sre.warehouse,
 			sre.item_code,
@@ -41,7 +45,9 @@ def get_data(filters):
 			sre.voucher_qty,
 			sre.reserved_qty,
 			sre.delivered_qty,
-			(sre.available_qty - sre.reserved_qty).as_("available_qty"),
+			sre.transferred_qty,
+			sre.consumed_qty,
+			ValueWrapper(0).as_("available_qty"),
 			sre.voucher_type,
 			sre.voucher_no,
 			sre.from_voucher_type,
@@ -50,15 +56,12 @@ def get_data(filters):
 			sre.status,
 			sre.project,
 			sre.company,
-		)
-		.where(
-			(sre.docstatus == 1)
-			& (sre.company == filters.get("company"))
-			& (
-				(Date(sre.creation) >= filters.get("from_date"))
-				& (Date(sre.creation) <= filters.get("to_date"))
-			)
-		)
+		],
+		ignore_permissions=False,
+	).where(
+		(sre.docstatus == 1)
+		& (sre.company == filters.get("company"))
+		& ((Date(sre.creation) >= filters.get("from_date")) & (Date(sre.creation) <= filters.get("to_date")))
 	)
 
 	for field in [
@@ -79,8 +82,31 @@ def get_data(filters):
 		query = query.where(sre.name == value)
 
 	data = query.run(as_list=True)
+	set_available_qty(data)
 
 	return data
+
+
+def set_available_qty(data):
+	if not data:
+		return
+
+	bin = frappe.qb.DocType("Bin")
+	free_qty = {
+		(item_code, warehouse): flt(actual_qty) - flt(reserved_stock)
+		for item_code, warehouse, actual_qty, reserved_stock in (
+			frappe.qb.from_(bin)
+			.select(bin.item_code, bin.warehouse, bin.actual_qty, bin.reserved_stock)
+			.where(
+				(bin.item_code.isin({row[2] for row in data}))
+				& (bin.warehouse.isin({row[1] for row in data}))
+			)
+			.run()
+		)
+	}
+
+	for row in data:
+		row[AVAILABLE_QTY_INDEX] = free_qty.get((row[2], row[1]), 0.0)
 
 
 def get_columns():
@@ -134,6 +160,20 @@ def get_columns():
 			"convertible": "qty",
 		},
 		{
+			"fieldname": "transferred_qty",
+			"label": _("Transferred Qty"),
+			"fieldtype": "Float",
+			"width": 110,
+			"convertible": "qty",
+		},
+		{
+			"fieldname": "consumed_qty",
+			"label": _("Consumed Qty"),
+			"fieldtype": "Float",
+			"width": 110,
+			"convertible": "qty",
+		},
+		{
 			"fieldname": "available_qty",
 			"label": _("Available Qty to Reserve"),
 			"fieldtype": "Float",
@@ -143,7 +183,8 @@ def get_columns():
 		{
 			"fieldname": "voucher_type",
 			"label": _("Voucher Type"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 110,
 		},
 		{
@@ -156,7 +197,8 @@ def get_columns():
 		{
 			"fieldname": "from_voucher_type",
 			"label": _("From Voucher Type"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 110,
 		},
 		{
