@@ -565,7 +565,7 @@ class BOM(WebsiteGenerator):
 		for item in self.secondary_items:
 			total_cost_allocation_per += flt(item.cost_allocation_per)
 
-		if total_cost_allocation_per != 100:
+		if flt(total_cost_allocation_per, self.precision("cost_allocation_per")) != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
 
 	def on_update_after_submit(self):
