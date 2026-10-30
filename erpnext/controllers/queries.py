@@ -184,7 +184,7 @@ def item_query(
 	searchfield: str,
 	start: int,
 	page_len: int,
-	filters: dict | str | None,
+	filters: dict | list | str | None,
 	as_dict: bool = False,
 ):
 	doctype = "Item"
@@ -296,6 +296,28 @@ def get_allowed_items_cond(party_type, party):
 	item = frappe.qb.DocType("Item")
 	allowed_items = frappe.qb.from_(item).select(item.name).where(allowed_items_condition)
 	return f"and tabItem.name in ({allowed_items})"
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def subcontracted_item_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
+	"""Sub-contracted stock items with a default BOM of their own or of their template."""
+	bom_filter = ["default_bom", "is", "set"]
+	if templates := frappe.get_all(
+		"Item", filters={"has_variants": 1, "default_bom": ["is", "set"]}, pluck="name"
+	):
+		bom_filter = [bom_filter, "or", ["variant_of", "in", templates]]
+
+	subcontracted_filters = [
+		["is_stock_item", "=", 1],
+		"and",
+		["is_sub_contracted_item", "=", 1],
+		"and",
+		bom_filter,
+	]
+	return item_query(doctype, txt, searchfield, start, page_len, subcontracted_filters)
 
 
 @frappe.whitelist()
