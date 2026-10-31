@@ -174,6 +174,7 @@ def make_stock_entry(source_name: str, target_doc: str | dict | Document | None 
 			"Job Card": {
 				"doctype": "Stock Entry",
 				"field_map": {"name": "job_card", "for_quantity": "fg_completed_qty"},
+				"field_no_map": ["naming_series"],
 			},
 			"Job Card Item": {
 				"doctype": "Stock Entry Detail",
