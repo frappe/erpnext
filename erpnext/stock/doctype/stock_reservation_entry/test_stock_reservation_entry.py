@@ -27,6 +27,20 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0})
+	def test_closing_sales_order_with_reserved_stock_is_blocked(self) -> None:
+		so = make_sales_order(
+			item_code=self.sr_item.name, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = 1
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+		so.create_stock_reservation_entries()
+
+		# closing must not strand reserved stock; the user has to unreserve first
+		self.assertRaises(frappe.ValidationError, so.update_status, "Closed")
+
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (

@@ -547,6 +547,9 @@ class SalesOrder(SellingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
+		if status == "Closed":
+			self.validate_no_reserved_stock()
+
 		self.set_status(update=True, status=status)
 		# Upon Sales Order Re-open, check for credit limit.
 		# Limit should be checked after the 'Hold/Closed' status is reset.
@@ -556,6 +559,15 @@ class SalesOrder(SellingController):
 		self.notify_update()
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
+
+	def validate_no_reserved_stock(self):
+		"""Closing must not strand reserved stock; the user unreserves it deliberately (like row close)."""
+		if has_reserved_stock(self.doctype, self.name):
+			frappe.throw(
+				_("Sales Order {0} has reserved stock. Unreserve it before closing.").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
