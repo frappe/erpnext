@@ -338,6 +338,18 @@ class ChildItemUpdater:
 				)
 			)
 
+		# The Supplier Quotation form hides Update Items for these states; enforce it server-side too.
+		if self.parent_doctype == "Supplier Quotation" and self.parent.status in (
+			"Ordered",
+			"Stopped",
+			"Expired",
+		):
+			frappe.throw(
+				_("Cannot update items of Supplier Quotation {0} because it is {1}.").format(
+					self.parent.name, _(self.parent.status)
+				)
+			)
+
 		# The Quotation form hides Update Items for these states; enforce it server-side too.
 		if self.parent_doctype == "Quotation":
 			quotation = self.parent
