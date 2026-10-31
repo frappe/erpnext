@@ -13,6 +13,12 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 	make_payment_order,
 )
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	make_payment_order as make_payment_order_from_payment_request,
+)
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	make_payment_request,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -56,6 +62,92 @@ class TestPaymentOrder(ERPNextTestSuite):
 
 		self.assertEqual(payment_order.naming_series, "PMO-")
 		self.assertTrue(payment_order.name.startswith("PMO-"))
+
+	def test_payment_order_references_must_be_submitted_and_not_in_another_order(self):
+		payment_entry = self.make_payment_entry()
+		create_payment_order_against_payment_entry(payment_entry, "Payment Entry", self.bank_account)
+
+		second_order = make_payment_order(payment_entry.name)
+		second_order.company_bank_account = self.bank_account
+		self.assertRaisesRegex(frappe.ValidationError, "is already in Payment Order", second_order.insert)
+
+		draft_payment_request = self.make_payment_request(submit_doc=0)
+		payment_order = make_payment_order_from_payment_request(draft_payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		self.assertRaisesRegex(frappe.ValidationError, "must be submitted", payment_order.insert)
+
+	def test_payment_order_accepts_payment_request_without_company(self):
+		payment_request = self.make_payment_request()
+		payment_request.db_set("company", None)
+
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company = "_Test Company"
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		self.assertEqual(payment_order.references[0].payment_request, payment_request.name)
+
+	def test_payment_entry_order_ignores_payment_request_order_with_same_reference_name(self):
+		payment_request = self.make_payment_request()
+		request_order = make_payment_order_from_payment_request(payment_request.name)
+		request_order.company_bank_account = self.bank_account
+		request_order.insert()
+		request_order.submit()
+
+		payment_entry = self.make_payment_entry()
+		frappe.db.set_value(
+			"Payment Order Reference", request_order.references[0].name, "reference_name", payment_entry.name
+		)
+
+		payment_order = make_payment_order(payment_entry.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		self.assertEqual(payment_order.references[0].reference_name, payment_entry.name)
+
+	def test_payment_order_submit_rereads_payment_request_status(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+
+		frappe.db.set_value("Payment Request", payment_request.name, "status", "Payment Ordered")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is already in another Payment Order", payment_order.submit
+		)
+
+	def test_payment_order_submit_rereads_payment_entry_order_status(self):
+		payment_entry = self.make_payment_entry()
+		payment_order = make_payment_order(payment_entry.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+
+		frappe.db.set_value("Payment Entry", payment_entry.name, "payment_order_status", "Payment Ordered")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is already in another Payment Order", payment_order.submit
+		)
+
+	def make_payment_request(self, submit_doc=1, rate=1000):
+		purchase_invoice = make_purchase_invoice(rate=rate)
+		if not frappe.db.exists("Bank Account", {"party_type": "Supplier", "party": "_Test Supplier"}):
+			frappe.get_doc(
+				{
+					"doctype": "Bank Account",
+					"account_name": "_Test Supplier Account",
+					"bank": "Citi Bank",
+					"party_type": "Supplier",
+					"party": "_Test Supplier",
+					"is_default": 1,
+				}
+			).insert()
+
+		return make_payment_request(
+			dt="Purchase Invoice",
+			dn=purchase_invoice.name,
+			party_type="Supplier",
+			party="_Test Supplier",
+			mute_email=1,
+			submit_doc=submit_doc,
+			return_doc=1,
+		)
 
 	def make_payment_entry(self):
 		purchase_invoice = make_purchase_invoice()
