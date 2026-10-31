@@ -1270,6 +1270,7 @@ class JobCard(Document):
 				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
 					work_order, process_loss_qty=work_order.process_loss_qty
 				)
+			work_order.update_work_order_qty_in_sales_orders()
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
@@ -1323,6 +1324,7 @@ class JobCard(Document):
 
 		if wo.track_semi_finished_goods:
 			wo.set_process_loss_qty()
+			wo.update_work_order_qty_in_sales_orders()
 
 		wo.status = wo.get_status()
 		wo.save()

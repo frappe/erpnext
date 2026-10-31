@@ -222,6 +222,8 @@ class StatusService:
 		for purpose, fieldname in _QTY_PURPOSES:
 			self._update_qty_for_purpose(purpose, fieldname)
 
+		self.update_work_order_qty_in_sales_orders()
+
 		if self.doc.production_plan:
 			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
@@ -478,6 +480,14 @@ class StatusService:
 
 		result = query.run()
 		return flt(result[0][0]) if result else 0
+
+	def update_work_order_qty_in_sales_orders(self):
+		if self.doc.production_plan and frappe.db.exists(
+			"Production Plan Item Reference", {"parent": self.doc.production_plan}
+		):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
 
 	def update_work_order_qty_in_so(self):
 		if (
