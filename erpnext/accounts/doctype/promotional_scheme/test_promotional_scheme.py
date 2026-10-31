@@ -3,6 +3,7 @@
 import unittest
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.accounts.doctype.promotional_scheme.promotional_scheme import TransactionExists
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -173,6 +174,122 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		ps.mixed_conditions = True
 		self.assertRaises(frappe.ValidationError, ps.save)
 
+	def test_pricing_rule_of_removed_slab_is_deleted(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertFalse(frappe.db.exists("Pricing Rule", pricing_rule))
+		self.assertEqual(len(frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})), 1)
+
+	def test_pricing_rule_of_removed_disabled_slab_is_deleted(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		ps.price_discount_slabs[1].disable = 1
+		ps.save()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertFalse(frappe.db.exists("Pricing Rule", pricing_rule))
+
+	def test_pricing_rule_of_removed_slab_used_in_transaction_is_disabled(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		so = make_sales_order(qty=10, price_list_rate=100, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 30)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+		so = make_sales_order(qty=10, price_list_rate=100, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 0)
+
+		modified = frappe.db.get_value("Pricing Rule", pricing_rule, "modified")
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "modified"), modified)
+
+	def test_pricing_rule_of_removed_slab_used_in_cancelled_transaction_is_disabled(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		so = make_sales_order(qty=10, price_list_rate=100)
+		so.cancel()
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+	def test_pricing_rule_of_removed_slab_used_in_coupon_code_is_disabled(self):
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Scheme Coupon",
+				"coupon_type": "Promotional",
+				"pricing_rule": pricing_rule,
+			}
+		).insert()
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+	def test_pricing_rule_of_removed_slab_used_in_a_custom_link_is_disabled(self):
+		make_property_setter("Contact", "user", "options", "Pricing Rule", "Text")
+		self.addCleanup(frappe.clear_cache, doctype="Contact")
+		self.addCleanup(frappe.flags.pop, "link_fields", None)
+		frappe.flags.pop("link_fields", None)
+
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		frappe.get_doc({"doctype": "Contact", "first_name": "_Test Scheme", "user": pricing_rule}).insert()
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
+	def test_pricing_rule_of_removed_slab_used_in_a_single_doctype_or_missing_doctype_link(self):
+		make_property_setter("Selling Settings", "customer_group", "options", "Pricing Rule", "Text")
+		frappe.get_doc(
+			{
+				"doctype": "Property Setter",
+				"doctype_or_field": "DocField",
+				"doc_type": "_Test Missing Doctype",
+				"field_name": "pricing_rule",
+				"property": "options",
+				"value": "Pricing Rule",
+				"property_type": "Text",
+			}
+		).db_insert()
+		self.addCleanup(frappe.clear_cache, doctype="Selling Settings")
+		self.addCleanup(frappe.flags.pop, "link_fields", None)
+		frappe.flags.pop("link_fields", None)
+
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		frappe.db.set_single_value("Selling Settings", "customer_group", pricing_rule)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)
@@ -202,4 +319,15 @@ def make_promotional_scheme(**args):
 
 	ps.save()
 
+	return ps
+
+
+def make_promotional_scheme_with_two_slabs():
+	ps = make_promotional_scheme()
+	ps.price_discount_slabs[0].max_qty = 9
+	ps.append(
+		"price_discount_slabs",
+		{"min_qty": 10, "discount_percentage": 30, "rule_description": "Ten or more"},
+	)
+	ps.save()
 	return ps
