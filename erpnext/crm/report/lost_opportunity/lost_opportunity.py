@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.custom import GROUP_CONCAT
-from frappe.query_builder.functions import Date
 from frappe.utils.nestedset import get_descendants_of
 
 Opportunity = DocType("Opportunity")
@@ -93,7 +92,7 @@ def get_data(filters):
 		.where(
 			(Opportunity.status == "Lost")
 			& (Opportunity.company == filters.get("company"))
-			& (Date(Opportunity.modified).between(filters.get("from_date"), filters.get("to_date")))
+			& (Opportunity.lost_on.between(filters.get("from_date"), filters.get("to_date")))
 		)
 		.groupby(Opportunity.name)
 		.orderby(Opportunity.creation)
