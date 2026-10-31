@@ -5,6 +5,7 @@
 
 
 import json
+from collections import Counter
 
 import frappe
 import frappe.defaults
@@ -128,16 +129,28 @@ def get_indexed_packed_items_table(doc):
 	Use: to quickly retrieve/check if row existed in table instead of looping n times.
 	A component repeated on a bundle shares one key, so rows are kept as a list and
 	consumed per occurrence rather than collapsed onto a single row.
+
+	A new doc (e.g. mapped) has no link to its item rows yet, so its packed rows are
+	consumed in order per parent item and component. This is only safe if the item rows
+	need exactly these rows, e.g. no item row was removed after mapping.
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
 		key = (
 			packed_item.parent_item,
 			packed_item.item_code,
-			packed_item.parent_detail_docname,
+			None if doc.is_new() else packed_item.parent_detail_docname,
 		)
 
 		indexed_table.setdefault(key, []).append(packed_item)
+
+	if doc.is_new():
+		needed_counts = Counter(
+			(item_row.item_code, bundle_item.item_code, None)
+			for item_row in doc.get("items")
+			for bundle_item in get_product_bundle_items(item_row.item_code)
+		)
+		indexed_table = {key: rows for key, rows in indexed_table.items() if len(rows) == needed_counts[key]}
 
 	return indexed_table
 
@@ -200,7 +213,7 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	key = (
 		main_item_row.item_code,
 		packing_item.item_code,
-		main_item_row.idx if doc.is_new() else main_item_row.name,
+		None if doc.is_new() else main_item_row.name,
 	)
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
