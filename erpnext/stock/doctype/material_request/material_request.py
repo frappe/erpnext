@@ -364,7 +364,13 @@ class MaterialRequest(BuyingController):
 
 	def before_submit(self):
 		self.set_status(update=True)
+		self.validate_pending_qty_in_job_card()
 		self.validate_pending_qty_in_work_order()
+
+	def validate_pending_qty_in_job_card(self):
+		if self.job_card:
+			job_card = frappe.get_doc("Job Card", self.job_card, for_update=True)
+			job_card.validate_incoming_material_demand(self)
 
 	def validate_pending_qty_in_work_order(self):
 		if not self.work_order or self.material_request_type != "Material Transfer":
