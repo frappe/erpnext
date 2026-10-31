@@ -1,0 +1,13 @@
+all_scopes: false
+checking_base_sha: 2acc7cec19c99bde2de350a43ceecad9c28a2df3
+previous_check_retries:
+  - attempt: 1
+    batch_pr_head_sha: 463c9dcff1b49efdc628c0e221422c79dcc5287b
+    batch_pr_number: 63294
+    draft_pr_head_sha: 463c9dcff1b49efdc628c0e221422c79dcc5287b
+    draft_pr_number: 63294
+previous_failed_batches: []
+pull_requests:
+  - number: 62216
+    scopes: []
+scopes: []
