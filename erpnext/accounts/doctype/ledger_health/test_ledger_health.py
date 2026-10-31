@@ -105,3 +105,34 @@ class TestLedgerHealth(ERPNextTestSuite, AccountsTestMixin):
 		)
 		self.assertEqual(len(actual), 1)
 		self.assertEqual(expected, actual[0])
+
+	def get_ledger_health_rows(self):
+		return frappe.db.get_all(
+			"Ledger Health",
+			fields=[
+				"voucher_type",
+				"voucher_no",
+				"debit_credit_mismatch",
+				"general_and_payment_ledger_mismatch",
+			],
+		)
+
+	def test_gl_and_pl_mismatch_in_account_currency(self):
+		self.create_journal()
+		frappe.db.set_value(
+			"Payment Ledger Entry", {"voucher_no": self.je.name}, "amount_in_account_currency", 9000
+		)
+
+		run_ledger_health_checks()
+
+		self.assertEqual(
+			self.get_ledger_health_rows(),
+			[
+				{
+					"voucher_type": self.je.doctype,
+					"voucher_no": self.je.name,
+					"debit_credit_mismatch": False,
+					"general_and_payment_ledger_mismatch": True,
+				}
+			],
+		)
