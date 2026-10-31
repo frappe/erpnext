@@ -299,7 +299,7 @@ class TestCustomer(ERPNextTestSuite):
 		self.assertFalse(is_customer_blocked("_Test Customer"))
 
 	def test_blocked_customer_can_make_returns(self):
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		sales_invoice = create_sales_invoice()
