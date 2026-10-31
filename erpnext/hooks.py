@@ -348,6 +348,7 @@ has_permission = {
 	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
 	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",

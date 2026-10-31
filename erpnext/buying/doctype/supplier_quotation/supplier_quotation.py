@@ -403,7 +403,8 @@ def set_expired_status():
 		frappe.qb.update(supplier_quotation)
 		.set(supplier_quotation.status, "Expired")
 		.where(
-			(supplier_quotation.status.notin(["Cancelled", "Stopped", "Expired"]))
+			(supplier_quotation.docstatus == 1)
+			& (supplier_quotation.status.notin(["Expired", "Stopped"]))
 			& (supplier_quotation.valid_till < nowdate())
 			& ExistsCriterion(purchase_order_against_quotation).negate()
 		)

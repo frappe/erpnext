@@ -181,13 +181,13 @@ class MaterialRequest(BuyingController):
 
 	def validate(self):
 		self.clear_source_warehouse()
+		self.validate_material_request_type()
 		super().validate()
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_material_request_type()
 
 		if not self.status:
 			self.status = "Draft"
@@ -376,7 +376,8 @@ class MaterialRequest(BuyingController):
 		self.validate_pending_qty_in_work_order()
 
 	def validate_pending_qty_in_work_order(self):
-		if not self.work_order or self.material_request_type != "Material Transfer":
+		"""Job card requests are tracked on the job card, not the work order."""
+		if not self.work_order or self.job_card or self.material_request_type != "Material Transfer":
 			return
 
 		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)

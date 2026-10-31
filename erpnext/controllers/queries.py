@@ -340,7 +340,7 @@ def item_query(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			description_cond=description_cond,
 			candidate_cond=candidate_cond,
 			allowed_items_cond=allowed_items_cond.replace("%", "%%"),
@@ -412,7 +412,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			key=searchfield,
 		),
 		{

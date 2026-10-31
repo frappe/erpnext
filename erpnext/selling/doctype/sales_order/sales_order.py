@@ -18,6 +18,7 @@ from frappe.query_builder.functions import Abs, IfNull, Round, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, parse_json, strip_html
 from pypika import Order
 
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
@@ -280,9 +281,7 @@ class SalesOrder(SellingController):
 		)
 
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
-
-			validate_coupon_code(self.coupon_code)
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		if not self.get("is_subcontracted"):
 			self.enable_auto_reserve_stock()
@@ -322,7 +321,7 @@ class SalesOrder(SellingController):
 						"Subcontracting BOM",
 						{"finished_good": item.fg_item, "is_active": 1},
 						"finished_good_bom",
-					) and not frappe.get_value("Item", item.fg_item, "default_bom"):
+					) and not get_default_bom(item.fg_item):
 						frappe.throw(
 							_("Row #{0}: BOM not found for FG Item {1}").format(item.idx, item.fg_item)
 						)
@@ -504,7 +503,12 @@ class SalesOrder(SellingController):
 		if enq:
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s", (flag, enq[0][0]))
 
-	def update_prevdoc_status(self, flag=None):
+	def update_prevdoc_status(self, flag=None, update_quotation_qty=False):
+		# Update Items edits ordered rows without going through on_submit/on_cancel,
+		# so recompute the quotation's ordered_qty and re-run the over-order check here.
+		if update_quotation_qty:
+			super().update_prevdoc_status()
+
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
@@ -513,6 +517,33 @@ class SalesOrder(SellingController):
 
 				doc.set_status(update=True)
 				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
+
+	def update_ordered_qty_in_quotation_for_removed_items(self, removed_items):
+		"""Recompute Quotation Item ordered_qty for rows removed via Update Items.
+
+		`update_qty` on the surviving rows never visits a removed row's quotation_item,
+		so without this it keeps counting as ordered even after the row (or the SO) is gone.
+		"""
+		soi = frappe.qb.DocType("Sales Order Item")
+		quotations = set()
+		for item in removed_items:
+			quotation_item = item.get("quotation_item")
+			if not quotation_item:
+				continue
+
+			ordered_qty = (
+				frappe.qb.from_(soi)
+				.select(Sum(soi.stock_qty))
+				.where((soi.quotation_item == quotation_item) & (soi.docstatus == 1))
+			).run()[0][0]
+			frappe.db.set_value("Quotation Item", quotation_item, "ordered_qty", flt(ordered_qty))
+
+			quotation = frappe.db.get_value("Quotation Item", quotation_item, "parent")
+			if quotation:
+				quotations.add(quotation)
+
+		for quotation in quotations:
+			frappe.get_doc("Quotation", quotation).set_status(update=True)
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):
@@ -633,6 +664,9 @@ class SalesOrder(SellingController):
 		)
 
 		self.check_modified_date()
+		if status == "Closed":
+			self.validate_no_reserved_stock()
+
 		if status != "Closed" and self.status == "Closed":
 			validate_reopen_against_blanket_order(self)
 
@@ -646,6 +680,15 @@ class SalesOrder(SellingController):
 		self.notify_update()
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
+
+	def validate_no_reserved_stock(self):
+		"""Closing must not strand reserved stock; the user unreserves it deliberately (like row close)."""
+		if has_reserved_stock(self.doctype, self.name):
+			frappe.throw(
+				_("Sales Order {0} has reserved stock. Unreserve it before closing.").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def update_subcontracting_order_status(self):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
@@ -1202,21 +1245,20 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 		)
 
 	def get_remaining_packed_item_qty(so_item):
-		delivered_qty = frappe.db.get_value(
-			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
+		parent = frappe.db.get_value(
+			"Sales Order Item",
+			so_item.parent_detail_docname,
+			["delivered_qty", "qty"],
+			as_dict=True,
 		)
-
-		bundle_item_qty = frappe.db.get_value(
-			"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
-		)
+		# components per parent qty frozen on the row (delivered_qty is in the row's sales UOM),
+		# so a later bundle edit can't shift the pending qty
+		components_per_unit = flt(so_item.qty) / (flt(parent.qty) or 1)
 
 		return flt(
 			flt(so_item.qty)
 			- flt(requested_item_qty.get(so_item.name, {}).get("qty"))
-			- max(
-				flt(delivered_qty) * flt(bundle_item_qty),
-				0,
-			)
+			- max(flt(parent.delivered_qty) * components_per_unit, 0)
 		)
 
 	def update_item(source, target, source_parent):
@@ -1694,6 +1736,9 @@ def make_sales_invoice(
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if target.item_code:
+			target.enable_deferred_revenue = frappe.get_cached_value(
+				"Item", target.item_code, "enable_deferred_revenue"
+			)
 			item = get_item_defaults(target.item_code, source_parent.company)
 			item_group = get_item_group_defaults(target.item_code, source_parent.company)
 			cost_center = item.get("selling_cost_center") or item_group.get("selling_cost_center")

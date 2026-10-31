@@ -2260,18 +2260,20 @@ class WorkOrder(Document):
 		transferred = self._material_transfer_qty_by_item(is_return=0)
 		requested = self._material_request_pending_qty_by_item()
 		picked = self._pick_list_pending_qty_by_item()
+		precision = frappe.get_precision("Work Order Item", "required_qty")
 
 		for item_code, incoming_qty in incoming_qty_by_item.items():
 			if item_code not in required_by_item:
 				continue
 
-			pending = (
-				required_by_item[item_code]
+			pending = flt(
+				get_allowed_transfer_qty(required_by_item[item_code])
 				- flt(transferred.get(item_code))
 				- flt(requested.get(item_code))
-				- flt(picked.get(item_code))
+				- flt(picked.get(item_code)),
+				precision,
 			)
-			if flt(incoming_qty - pending, 6) > 0:
+			if flt(incoming_qty, precision) > pending:
 				frappe.throw(
 					_("Only {0} {1} of {2} is pending in Work Order {3}.").format(
 						max(pending, 0.0), uom_by_item[item_code], item_code, self.name
@@ -2296,6 +2298,7 @@ class WorkOrder(Document):
 			.where(
 				(mr.docstatus == 1)
 				& (mr.work_order == self.name)
+				& (fn.Coalesce(mr.job_card, "") == "")
 				& (mr.material_request_type == "Material Transfer")
 				& (mr.status != "Stopped")
 				& (mr_item.stock_qty > mr_item.ordered_qty)
@@ -3505,6 +3508,14 @@ def distribute_over_rows(rows, qty_by_item):
 	for item_code, item_rows in rows_by_item.items():
 		split_item_qty(item_rows, flt(qty_by_item.get(item_code)), qty_by_row)
 	return qty_by_row
+
+
+def get_allowed_transfer_qty(required_qty):
+	"""Required qty plus the Transfer Extra Materials Percentage allowance."""
+	extra_pct = flt(
+		frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+	)
+	return flt(required_qty) + flt(required_qty) * extra_pct / 100
 
 
 def split_item_qty(rows, qty, qty_by_row):
