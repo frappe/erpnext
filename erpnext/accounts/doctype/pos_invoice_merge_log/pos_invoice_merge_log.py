@@ -134,10 +134,11 @@ class POSInvoiceMergeLog(Document):
 
 	def on_cancel(self):
 		pos_invoice_docs = [frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
+		credit_notes = self.get_consolidated_credit_notes()
 
 		self.update_pos_invoices(pos_invoice_docs)
 		self.serial_and_batch_bundle_reference_for_pos_invoice()
-		self.cancel_linked_invoices()
+		self.cancel_linked_invoices(credit_notes)
 		self.delink_serial_and_batch_bundle()
 
 	def process_merging_into_sales_invoice(self, data):
@@ -428,13 +429,20 @@ class POSInvoiceMergeLog(Document):
 
 		return []
 
-	def cancel_linked_invoices(self):
-		invoices = [self.consolidated_invoice, self.consolidated_credit_note]
-		if not invoices:
-			return
+	def get_consolidated_credit_notes(self):
+		return frappe.get_all(
+			"POS Invoice",
+			filters={
+				"name": ["in", [d.pos_invoice for d in self.pos_invoices]],
+				"is_return": 1,
+				"consolidated_invoice": ["is", "set"],
+			},
+			pluck="consolidated_invoice",
+			distinct=True,
+		)
 
-		invoices.reverse()
-		for si_name in invoices:
+	def cancel_linked_invoices(self, credit_notes):
+		for si_name in [*credit_notes, self.consolidated_invoice]:
 			if not si_name:
 				continue
 			si = frappe.get_doc("Sales Invoice", si_name)
