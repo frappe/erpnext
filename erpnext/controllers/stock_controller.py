@@ -1282,18 +1282,11 @@ class StockController(AccountsController):
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
-<<<<<<< HEAD
-	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
-		for blanket_order in blanket_orders:
-			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
-=======
 	def update_blanket_order(self, extra_blanket_orders=()):
 		"""Refresh ordered qty of the blanket orders on the items and of `extra_blanket_orders`."""
 		blanket_orders = {d.blanket_order for d in self.items if d.blanket_order}
-		for blanket_order in sorted(blanket_orders.union(extra_blanket_orders)):
-			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
->>>>>>> 5a72e8f (fix(manufacturing): refresh blanket orders of rows removed by Update Items)
+		for blanket_order in blanket_orders.union(extra_blanket_orders):
+			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
 		for d in self.get("items"):
