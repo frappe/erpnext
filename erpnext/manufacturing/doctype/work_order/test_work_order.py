@@ -1923,53 +1923,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in mr.items:
 			self.assertEqual(row.qty, required_qty[row.item_code])
 
-<<<<<<< HEAD
-	def test_material_request_qty_capped_at_pending_qty(self):
-		work_order = make_wo_order_test_record(
-			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
-		)
-		partially_transferred = work_order.required_items[0]
-		partially_transferred.db_set("transferred_qty", flt(partially_transferred.required_qty) - 1)
-		work_order.reload()
-
-		mr = make_material_request(work_order.name, for_qty=10)
-		requested_qty = {row.item_code: row.qty for row in mr.items}
-		self.assertEqual(requested_qty[partially_transferred.item_code], 1)
-
-	def test_material_request_maps_only_selected_rows(self):
-		work_order = make_wo_order_test_record(
-			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
-		)
-		selected = work_order.required_items[0]
-
-		try:
-			frappe.flags.selected_children = {"required_items": [selected.name]}
-			mr = make_material_request(work_order.name, for_qty=4)
-		finally:
-			frappe.flags.selected_children = None
-
-		self.assertEqual([row.item_code for row in mr.items], [selected.item_code])
-		self.assertEqual(mr.items[0].qty, flt(selected.required_qty) * 4 / 10)
-
-	def test_material_request_rejects_nonpositive_qty(self):
-		work_order = make_wo_order_test_record(
-			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
-		)
-
-		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=0)
-		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=-1)
-		self.assertRaises(
-			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("inf")
-		)
-		self.assertRaises(
-			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("nan")
-		)
-
-	def test_pick_list_rejects_nonpositive_qty(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
-=======
 	def test_partial_qty_rounds_up_whole_number_uom(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
 
 		fg = make_item(properties={"is_stock_item": 1}).name
 		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
@@ -2035,9 +1990,49 @@ class TestWorkOrder(ERPNextTestSuite):
 		mr = make_material_request(work_order.name, for_qty=1)
 		self.assertEqual([row.qty for row in mr.items], [1])
 
-	def test_nonpositive_qty_is_rejected(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
->>>>>>> 63f7e2b (test(manufacturing): partial qty request in whole number uom)
+	def test_material_request_qty_capped_at_pending_qty(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		partially_transferred = work_order.required_items[0]
+		partially_transferred.db_set("transferred_qty", flt(partially_transferred.required_qty) - 1)
+		work_order.reload()
+
+		mr = make_material_request(work_order.name, for_qty=10)
+		requested_qty = {row.item_code: row.qty for row in mr.items}
+		self.assertEqual(requested_qty[partially_transferred.item_code], 1)
+
+	def test_material_request_maps_only_selected_rows(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+		selected = work_order.required_items[0]
+
+		try:
+			frappe.flags.selected_children = {"required_items": [selected.name]}
+			mr = make_material_request(work_order.name, for_qty=4)
+		finally:
+			frappe.flags.selected_children = None
+
+		self.assertEqual([row.item_code for row in mr.items], [selected.item_code])
+		self.assertEqual(mr.items[0].qty, flt(selected.required_qty) * 4 / 10)
+
+	def test_material_request_rejects_nonpositive_qty(self):
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=0)
+		self.assertRaises(frappe.ValidationError, make_material_request, work_order.name, for_qty=-1)
+		self.assertRaises(
+			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("inf")
+		)
+		self.assertRaises(
+			frappe.ValidationError, make_material_request, work_order.name, for_qty=float("nan")
+		)
+
+	def test_pick_list_rejects_nonpositive_qty(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
 
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
