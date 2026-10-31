@@ -2184,6 +2184,40 @@ class TestPricingRule(ERPNextTestSuite):
 
 		self.assertEqual(get_qty_and_rate_for_mixed_conditions(doc, rule, args)[:2], (11, 600))
 
+	def test_recursive_product_rule_on_transaction_is_not_allowed(self):
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Transaction Rule",
+				"apply_on": "Transaction",
+				"selling": 1,
+				"company": "_Test Company",
+				"currency": "INR",
+				"price_or_product_discount": "Product",
+				"free_item": free_item,
+				"free_qty": 1,
+				"is_recursive": 1,
+				"recurse_for": 1,
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is not supported", rule.insert)
+
+	def test_saved_recursive_product_rule_on_transaction_does_not_break_invoice(self):
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+		rule.db_set({"is_recursive": 1, "recurse_for": 1})
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_submit=True)
+		self.assertEqual([(d.item_code, d.qty) for d in si.items if d.is_free_item], [(free_item, 1)])
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
