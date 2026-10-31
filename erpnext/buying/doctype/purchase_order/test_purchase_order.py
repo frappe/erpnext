@@ -1422,6 +1422,59 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
+	def test_update_items_adds_variant_fg_item_without_bom(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+			make_subcontracted_variant,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		variant, _ = make_subcontracted_variant()
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA7",
+					"fg_item_qty": 10,
+				},
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+		)
+		trans_items = [
+			{
+				"docname": po.items[0].name,
+				"item_code": po.items[0].item_code,
+				"qty": 10,
+				"rate": 100,
+				"fg_item_qty": 10,
+			},
+			{
+				"item_code": "Subcontracted Service Item 7",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": variant.name,
+				"fg_item_qty": 5,
+			},
+		]
+
+		update_child_qty_rate(po.doctype, json.dumps(trans_items), po.name)
+
+		po.reload()
+		self.assertEqual(po.items[1].fg_item, variant.name)
+
 	def test_new_sc_flow(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 
