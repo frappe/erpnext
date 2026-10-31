@@ -643,6 +643,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	add_custom_buttons: function (frm) {
 		if (
 			frm.doc.docstatus == 1 &&
+			!frm.doc.is_return &&
 			frm.doc.per_received < 100 &&
 			frm.doc.update_stock == 0 &&
 			frappe.model.can_create("Purchase Receipt")

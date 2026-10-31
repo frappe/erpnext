@@ -347,22 +347,50 @@ class PurchaseInvoice(BuyingController):
 			self.per_received = total_received_qty / total_billed_qty * 100
 
 	def validate_exchange_rate_with_purchase_receipt(self):
-		if self.is_internal_transfer() or not erpnext.is_perpetual_inventory_enabled(self.company):
+		if self.is_internal_transfer():
 			return
 
 		stock_items = self.get_stock_items()
-		receipts = {
+		stock_receipts = {
 			item.purchase_receipt
 			for item in self.items
 			if item.purchase_receipt and item.item_code in stock_items
 		}
+		# the landed cost repost adjusts stock valuation only, so asset receipts must always match
+		asset_receipts = {
+			item.purchase_receipt
+			for item in self.items
+			if item.purchase_receipt and item.is_fixed_asset and item.item_code not in stock_items
+		}
+		if not erpnext.is_perpetual_inventory_enabled(self.company) or frappe.db.get_single_value(
+			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
+		):
+			stock_receipts = set()
+
+		if mismatched := self.get_receipts_with_other_exchange_rate(asset_receipts):
+			frappe.throw(
+				_(
+					"Exchange rate {0} does not match the exchange rate of Purchase Receipt {1}. Use the same exchange rate as the Purchase Receipt for asset items."
+				).format(frappe.bold(self.conversion_rate), ", ".join(mismatched))
+			)
+
+		if mismatched := self.get_receipts_with_other_exchange_rate(stock_receipts - asset_receipts):
+			frappe.throw(
+				_(
+					"Exchange rate {0} does not match the exchange rate of Purchase Receipt {1}. Use the same exchange rate as the Purchase Receipt or enable {2} in {3} to adjust the landed cost based on this invoice."
+				).format(
+					frappe.bold(self.conversion_rate),
+					", ".join(mismatched),
+					frappe.bold(_("Set Landed Cost Based on Purchase Invoice Rate")),
+					get_link_to_form("Buying Settings", "Buying Settings", _("Buying Settings")),
+				)
+			)
+
+	def get_receipts_with_other_exchange_rate(self, receipts):
 		if not receipts:
-			return
+			return []
 
-		if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"):
-			return
-
-		mismatched = [
+		return [
 			f"{frappe.bold(row.name)} ({row.conversion_rate})"
 			for row in frappe.get_all(
 				"Purchase Receipt",
@@ -373,23 +401,13 @@ class PurchaseInvoice(BuyingController):
 			and flt(row.conversion_rate)
 			and flt(row.conversion_rate) != flt(self.conversion_rate)
 		]
-		if not mismatched:
-			return
-
-		frappe.throw(
-			_(
-				"Exchange rate {0} does not match the exchange rate of Purchase Receipt {1}. Use the same exchange rate as the Purchase Receipt or enable {2} in {3} to adjust the landed cost based on this invoice."
-			).format(
-				frappe.bold(self.conversion_rate),
-				", ".join(mismatched),
-				frappe.bold(_("Set Landed Cost Based on Purchase Invoice Rate")),
-				get_link_to_form("Buying Settings", "Buying Settings", _("Buying Settings")),
-			)
-		)
 
 	def validate_invoice_hold(self):
 		if self.is_return:
 			frappe.throw(_("Return Purchase Invoice cannot be held."))
+
+		if self.docstatus == 2:
+			frappe.throw(_("Cancelled Purchase Invoice cannot be held."))
 
 		if self.docstatus < 1:
 			frappe.throw(_("Purchase Invoice can be held after submitting."))
@@ -810,7 +828,7 @@ class PurchaseInvoice(BuyingController):
 			update_voucher_outstanding(
 				voucher_type=self.doctype,
 				voucher_no=self.return_against
-				if (cint(self.is_return) and self.return_against)
+				if (cint(self.is_return) and self.return_against and not self.update_outstanding_for_self)
 				else self.name,
 				account=self.credit_to,
 				party_type="Supplier",
