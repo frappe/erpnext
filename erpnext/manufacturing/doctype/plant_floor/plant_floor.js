@@ -49,6 +49,9 @@ frappe.ui.form.on("Plant Floor", {
 
 		if (!frm.is_new()) {
 			frm.trigger("add_workstation");
+			frm.add_custom_button(__("Open Plant Builder"), () =>
+				frappe.set_route("plant-builder", frm.doc.name)
+			);
 			frm.disable_save();
 		}
 	},
