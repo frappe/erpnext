@@ -16,7 +16,7 @@ from frappe.utils import add_days, now_datetime, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.stock.report.stock_balance import stock_balance
+from erpnext.stock.report.stock_balance import stock_balance, stock_balance_snapshot
 from erpnext.stock.report.stock_balance import test_stock_balance as live_tests
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -227,6 +227,20 @@ class TestStockBalanceSnapshot(ERPNextTestSuite):
 			for dimension_filters in ({"show_dimension_wise_stock": 1}, {"project": ["A", "B"]}, {}):
 				with self.subTest(filters=dimension_filters):
 					self.assert_snapshot_matches(**dimension_filters)
+
+	def test_inventory_dimension_added_after_the_sync(self):
+		self.make_movement(qty=10, basic_rate=100)
+		ledger = capture_ledger(self.filters)
+		dimensions = [frappe._dict(fieldname="project", doctype="Project")]
+		with patch.object(stock_balance, "get_inventory_dimensions", return_value=dimensions):
+			for dimension_filters in ({"show_dimension_wise_stock": 1}, {"project": ["DuckDB Project"]}):
+				filters = frappe._dict(self.filters, **dimension_filters)
+				expected = stock_balance.execute(deepcopy(filters))
+				with self.subTest(filters=dimension_filters), ledger_snapshot(ledger):
+					stock_balance_snapshot.get_duckdb().execute(
+						'ALTER TABLE "tabStock Ledger Entry" DROP COLUMN project'
+					)
+					self.assertEqual(stock_balance.execute_snapshot_report(deepcopy(filters)), expected)
 
 	def test_serial_and_batch_items(self):
 		self.use_item("_Test DuckDB Serial Item", {"has_serial_no": 1, "serial_no_series": "DUCK-SN-.#####"})
