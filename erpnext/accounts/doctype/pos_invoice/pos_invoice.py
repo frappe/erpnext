@@ -245,6 +245,7 @@ class POSInvoice(SalesInvoice):
 			validate_coupon_code(self.coupon_code, self.customer)
 
 	def before_submit(self):
+		POSService(self).validate_mandatory_pos_fields()
 		self.set_outstanding_amount()
 
 	def on_submit(self):

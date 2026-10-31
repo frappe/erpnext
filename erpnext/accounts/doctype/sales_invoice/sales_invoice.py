@@ -436,6 +436,8 @@ class SalesInvoice(SellingController):
 
 	def before_submit(self):
 		self.add_remarks()
+		if cint(self.is_created_using_pos):
+			POSService(self).validate_mandatory_pos_fields()
 
 	def on_submit(self):
 		POSService(self).validate_pos_paid_amount()
