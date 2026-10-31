@@ -1083,26 +1083,12 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		return
 
 	precision = frappe.get_precision("Payment Entry Reference", "allocated_amount")
-	referenced_payment_requests = frappe.get_all(
-		"Payment Request",
-		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},
-		fields=[
-			"name",
-			"grand_total",
-			"outstanding_amount",
-			"payment_request_type",
-			"currency",
-			"party_account_currency",
-			"company",
-			"reference_doctype",
-			"reference_name",
-		],
-	)
-
-	for pr in referenced_payment_requests:
-		pr.total_requested = get_requested_amount_in_party_account_currency(pr)
-
-	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
+	referenced_payment_requests = {
+		pr.name: pr
+		for pr in get_payment_requests_with_total_requested(
+			list({row.payment_request for row in references if row.payment_request})
+		)
+	}
 	doc_updates = {}
 
 	for ref in references:
@@ -1129,24 +1115,46 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 				title=_("Invalid Allocated Amount"),
 			)
 
-		# determine status
-		total_requested = payment_request.total_requested
-		if total_requested > 0 and flt(new_outstanding_amount, precision) >= flt(total_requested, precision):
-			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
-		elif new_outstanding_amount <= 0:
-			status = "Paid"
-		elif new_outstanding_amount > 0:
-			status = "Partially Paid"
-
 		# prepare bulk update data
 		doc_updates[ref.payment_request] = {
 			"outstanding_amount": new_outstanding_amount,
-			"status": status,
+			"status": get_payment_request_status(
+				payment_request, new_outstanding_amount, payment_request.total_requested, precision
+			),
 		}
 
 	# bulk update all payment requests
 	if doc_updates:
 		frappe.db.bulk_update("Payment Request", doc_updates)
+
+
+def get_payment_requests_with_total_requested(names: list[str]) -> list[frappe._dict]:
+	payment_requests = frappe.get_all(
+		"Payment Request",
+		filters={"name": ["in", names]},
+		fields=[
+			"name",
+			"grand_total",
+			"outstanding_amount",
+			"payment_request_type",
+			"currency",
+			"party_account_currency",
+			"company",
+			"reference_doctype",
+			"reference_name",
+		],
+	)
+	for payment_request in payment_requests:
+		payment_request.total_requested = get_requested_amount_in_party_account_currency(payment_request)
+
+	return payment_requests
+
+
+def get_payment_request_status(payment_request, outstanding_amount, total_requested, precision):
+	if total_requested > 0 and flt(outstanding_amount, precision) >= flt(total_requested, precision):
+		return "Initiated" if payment_request.payment_request_type == "Outward" else "Requested"
+
+	return "Paid" if outstanding_amount <= 0 else "Partially Paid"
 
 
 def get_dummy_message(doc):
