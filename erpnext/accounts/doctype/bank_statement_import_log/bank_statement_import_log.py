@@ -5,6 +5,7 @@ import io
 import json
 import re
 from datetime import datetime
+from itertools import pairwise
 
 import frappe
 from frappe import _
@@ -589,9 +590,34 @@ def get_statement_period(transactions: list, date_format: str):
 	end_date = max(date for date, _transaction in dated)
 	last_day = [transaction for date, transaction in dated if date == end_date]
 	newest_first = dated[0][0] > dated[-1][0]
+	if dated[0][0] == dated[-1][0]:
+		# a statement of one day: the dates do not give the order, the running balance does
+		newest_first = is_balance_newest_first(last_day)
 	closing_row = last_day[0] if newest_first else last_day[-1]
 
 	return getdate(start_date), getdate(end_date), get_float_amount(closing_row.get("balance"))
+
+
+def is_balance_newest_first(transactions: list) -> bool:
+	"""True when each row's balance is the next row's balance plus this row's amount."""
+
+	def get_amount(row):
+		return flt(get_float_amount(row.get("deposit"))) - flt(get_float_amount(row.get("withdrawal")))
+
+	for row, next_row in pairwise(transactions):
+		balance, next_balance = (
+			get_float_amount(row.get("balance")),
+			get_float_amount(next_row.get("balance")),
+		)
+		if balance is None or next_balance is None:
+			continue
+
+		oldest_first = flt(next_balance - balance - get_amount(next_row), 2) == 0
+		newest_first = flt(balance - next_balance - get_amount(row), 2) == 0
+		if oldest_first != newest_first:
+			return newest_first
+
+	return False
 
 
 def parse_statement_date(date: str, date_format: str) -> datetime:

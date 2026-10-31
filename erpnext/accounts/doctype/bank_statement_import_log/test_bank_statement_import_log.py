@@ -759,6 +759,14 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(doc.closing_balance, 1300)
 		self.assertEqual(getdate(doc.end_date), getdate("2026-03-07"))
 
+	def test_one_day_statement_closing_balance(self):
+		# all rows on one date: the running balance gives the order
+		newest_first = "07/03/2026,Refund,,100,1300\n07/03/2026,Rent,50,,1200\n"
+		oldest_first = "07/03/2026,Rent,50,,1200\n07/03/2026,Refund,,100,1300\n"
+		for rows in (newest_first, oldest_first):
+			doc = self._create_csv_import_log("Date,Narration,Withdrawal,Deposit,Balance\n" + rows)
+			self.assertEqual(doc.closing_balance, 1300)
+
 	def test_month_first_dates(self):
 		csv_text = (
 			"Date,Narration,Amount\n03/02/2026,A,10\n03/05/2026,B,20\n03/09/2026,C,30\n03/20/2026,D,40\n"
