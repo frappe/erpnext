@@ -1,6 +1,8 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
@@ -59,6 +61,14 @@ class TestAccountingDimension(ERPNextTestSuite):
 
 		self.assertIn("_Test Company", default_dimensions)
 		self.assertNotIn("_Test Company 1", default_dimensions)
+
+	def test_get_dimensions_reads_permitted_companies_once_per_request(self):
+		frappe.local.request_cache.clear()
+		with patch("frappe.get_list", wraps=frappe.get_list) as get_list:
+			get_dimensions()
+			get_dimensions()
+
+		self.assertEqual(get_list.call_count, 1)
 
 	def test_get_dimensions_skips_defaults_of_disabled_dimension(self):
 		self.assertIn("location", get_dimensions()[1]["_Test Company"])

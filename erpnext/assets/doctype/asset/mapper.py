@@ -42,7 +42,7 @@ def make_sales_invoice(asset: str, item_code: str, company: str, sell_qty: int, 
 	)
 
 	dimensions, default_dimensions = get_dimensions(with_cost_center_and_project=True)
-	company_defaults = default_dimensions.get(asset_doc.company, {})
+	company_defaults = default_dimensions.get(company, {})
 	for dimension in dimensions:
 		fieldname = dimension["fieldname"]
 		si.update({fieldname: asset_doc.get(fieldname) or company_defaults.get(fieldname)})
