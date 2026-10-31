@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import unittest
+from unittest.mock import patch
 
 import frappe
 
@@ -500,6 +501,49 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		make_paid_pos_invoice([("Cash", 100)], account_for_change_amount=change_account)
 
 		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 90})
+
+	def test_closing_refuses_session_invoices_left_out(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+		self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
+
+	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+		closing_entry.db_set("status", "Failed")
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+
+		with patch(consolidate) as consolidate_pos_invoices:
+			with self.assertRaises(frappe.ValidationError) as context:
+				closing_entry.retry()
+			consolidate_pos_invoices.assert_not_called()
+
+		self.assertIn(late_sale.name, str(context.exception))
+
+	def test_missing_invoices_message_lists_first_ten(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sales = [make_paid_pos_invoice([("Cash", 90)]).name for _ in range(11)]
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			closing_entry.submit()
+
+		message = str(context.exception)
+		self.assertIn("and 1 more", message)
+		self.assertEqual(sum(name in message for name in late_sales), 10)
 
 
 def init_user_and_profile(**args):
