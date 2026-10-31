@@ -386,6 +386,341 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
+<<<<<<< HEAD
+=======
+	@ERPNextTestSuite.change_settings(
+		"System Settings",
+		{"number_format": "#,###.##", "currency_precision": 2, "rounding_method": "Commercial Rounding"},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_inclusive_tax_net_amount_rounding(self):
+		for item_values, tax_rate, round_row_wise_tax, discount, net_total, tax_amount in (
+			([(1, 379)] * 2, 21, 0, 0, 626.45, 131.55),
+			([(1, 379)] * 20, 21, 0, 0, 6264.46, 1315.54),
+			([(1, 379)] * 2, 21, 1, 0, 626.44, 131.56),
+			([(1, 379)] * 2, 21, 0, 10, 563.80, 118.40),
+			([(1, 379)] * 20, 21, 0, 10, 5638.02, 1183.98),
+			([(1, 379)] * 2, 21, 1, 10, 563.80, 118.40),
+			([(100, 50)], 14, 0, 2, 4298.25, 601.75),
+			([(20, 800), (10, 1000)], 7, 0, 0, 24299.07, 1700.93),
+			([(20, 800), (10, 1000)], 7, 1, 0, 24299.06, 1700.94),
+		):
+			with (
+				self.subTest(
+					items=item_values,
+					tax_rate=tax_rate,
+					round_row_wise_tax=round_row_wise_tax,
+					discount=discount,
+				),
+				self.change_settings("Accounts Settings", round_row_wise_tax=round_row_wise_tax),
+			):
+				si = create_sales_invoice(qty=item_values[0][0], rate=item_values[0][1], do_not_save=True)
+				si.disable_rounded_total = 1
+				si.apply_discount_on = "Grand Total"
+				si.additional_discount_percentage = discount
+				for idx, (qty, rate) in enumerate(item_values[1:], start=2):
+					si.append("items", {**si.items[0].as_dict(), "idx": idx, "qty": qty, "rate": rate})
+				si.append(
+					"taxes",
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Service Tax - _TC",
+						"description": f"Tax {tax_rate}%",
+						"rate": tax_rate,
+						"included_in_print_rate": 1,
+					},
+				)
+				si.insert()
+				si.submit()
+				si.reload()
+
+				self.assertEqual(si.net_total, net_total)
+				self.assertEqual(flt(sum(item.net_amount for item in si.items), 2), net_total)
+				grand_total = flt(sum(qty * rate for qty, rate in item_values) * (1 - discount / 100), 2)
+				self.assertEqual(si.taxes[0].tax_amount_after_discount_amount, tax_amount)
+				self.assertEqual(si.total_taxes_and_charges, tax_amount)
+				self.assertEqual(flt(si.net_total + si.total_taxes_and_charges, 2), grand_total)
+				self.assertEqual(si.taxes[0].total, grand_total)
+				self.assertEqual(si.grand_total, grand_total)
+				self.assertEqual(si.outstanding_amount, si.grand_total)
+				self.assertEqual(si.rounding_adjustment, 0)
+				if discount and not round_row_wise_tax:
+					self.assertEqual(
+						flt(sum(item.distributed_discount_amount for item in si.items), 2),
+						flt(
+							sum(qty * rate for qty, rate in item_values) / (1 + tax_rate / 100) - net_total, 2
+						),
+					)
+				self.assertCountEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"voucher_type": si.doctype, "voucher_no": si.name},
+						fields=["account", "debit", "credit"],
+						as_list=True,
+					),
+					[
+						("Debtors - _TC", grand_total, 0),
+						("Sales - _TC", 0, net_total),
+						("_Test Account Service Tax - _TC", 0, tax_amount),
+					],
+				)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
+	def test_inclusive_tax_zero_decimal_currency(self):
+		"""Tax-included prices in zero-decimal currencies (e.g. JPY) must not produce
+		net + tax != gross due to double rounding of the net amount."""
+		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# With currency_precision=0 (like JPY, KRW):
+		# 50,000 / 1.10 = 45,454.545... → net rounds to 45,455
+		# Tax from unrounded net: 0.10 * 45,454.545 = 4,545.4545 → rounds to 4,545
+		# The fix ensures net + tax = gross without double rounding error
+		self.assertEqual(si.items[0].net_amount, 45455)
+		self.assertEqual(si.taxes[0].tax_amount, 4545)
+		self.assertEqual(si.grand_total, 50000)
+
+	def test_inclusive_tax_decimal_value_currency(self):
+		"""Tax-included prices with decimal currency values must preserve gross total."""
+		si = create_sales_invoice(qty=1, rate=10000.04, do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# 10,000.04 / 1.10 = 9,090.94545... → net rounds to 9,090.95
+		# Tax from unrounded net: 0.10 * 9,090.94545... = 909.0945... → rounds to 909.09
+		# If tax were calculated from rounded net instead, it would become 909.10 and grand total 10,000.05.
+		self.assertEqual(si.items[0].net_amount, 9090.95)
+		self.assertEqual(si.taxes[0].tax_amount, 909.09)
+		self.assertEqual(si.grand_total, 10000.04)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
+	def test_inclusive_tax_zero_decimal_currency_multiple_items(self):
+		"""Multiple items with tax-included prices in zero-decimal currency."""
+		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
+		create_item("_Test Inclusive Tax Item 2")
+		si.append(
+			"items",
+			{
+				"item_code": "_Test Inclusive Tax Item 2",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 30000,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# With currency_precision=0:
+		# Item 1: 50,000 / 1.10 = 45,454.545 → net 45,455, tax 4,545
+		# Cumulative net: 80,000 / 1.10 = 72,727.272 → 72,727
+		# Item 2 absorbs the rounding difference: 72,727 - 45,455 = 27,272
+		self.assertEqual(si.items[0].net_amount, 45455)
+		self.assertEqual(si.items[1].net_amount, 27272)
+		self.assertEqual(si.net_total, 72727)
+		self.assertEqual(si.taxes[0].tax_amount, 7273)
+		self.assertEqual(si.taxes[0].total, 80000)
+		self.assertEqual(si.grand_total, 80000)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
+	def test_inclusive_tax_zero_decimal_currency_many_items(self):
+		"""Test with 10 items (mixed 10% and 5% tax) to verify tolerance of 1 is sufficient."""
+		si = create_sales_invoice(qty=1, rate=50000, do_not_save=True)
+
+		# Add 9 more items - mix of amounts and tax rates
+		# Using similar amounts to maximize same-direction rounding
+		item_configs = [
+			("_Test Inclusive Tax Item 2", 50100, None),  # 10% (default)
+			("_Test Inclusive Tax Item 3", 50200, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 4", 50300, None),  # 10%
+			("_Test Inclusive Tax Item 5", 50400, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 6", 50500, None),  # 10%
+			("_Test Inclusive Tax Item 7", 50600, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+			("_Test Inclusive Tax Item 8", 50700, None),  # 10%
+			("_Test Inclusive Tax Item 9", 50800, None),  # 10%
+			("_Test Inclusive Tax Item 10", 50900, '{"_Test Account Service Tax - _TC": 5}'),  # 5%
+		]
+
+		for item_code, rate, item_tax_rate in item_configs:
+			create_item(item_code)
+			item_dict = {
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": rate,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			}
+			if item_tax_rate:
+				item_dict["item_tax_rate"] = item_tax_rate
+			si.append("items", item_dict)
+
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# Verify each item: net + tax = gross (within rounding tolerance)
+		total_gross = 0
+		for item in si.items:
+			total_gross += item.amount
+
+		# Grand total should match sum of gross amounts
+		# This tests that the tolerance of 1 handles mixed tax rates and similar amounts
+		self.assertEqual(si.grand_total, total_gross)
+
+	def test_inclusive_tax_with_decimal_value_on_previous_row_amount(self):
+		"""Inclusive tax with decimal value and On Previous Row Amount must not double-round net amount."""
+		si = create_sales_invoice(qty=1, rate=50000.55, do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Previous Row Amount",
+				"account_head": "_Test Account Education Cess - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Cess 5% on Tax 10%",
+				"rate": 5,
+				"row_id": 1,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# Tax fractions: 10% + (5% of 10%) = 10.5%
+		# 50,000.55 / 1.105 = 45,249.3665... → net rounds to 45,249.37
+		# Taxes are calculated from the unrounded net to keep the inclusive gross stable.
+		self.assertEqual(si.items[0].net_amount, 45249.37)
+		self.assertEqual(si.taxes[0].tax_amount, 4524.94)
+		self.assertEqual(si.taxes[1].tax_amount, 226.25)
+		self.assertEqual(si.grand_total, 50000.55)
+
+	def test_inclusive_tax_with_decimal_value_on_previous_row_amount_non_inclusive(self):
+		"""Non-inclusive previous-row tax should be added after inclusive tax extraction."""
+		si = create_sales_invoice(qty=1, rate=10000.04, do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Previous Row Amount",
+				"account_head": "_Test Account Education Cess - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Cess 5% on Tax 10%",
+				"rate": 5,
+				"row_id": 1,
+				"included_in_print_rate": 0,
+			},
+		)
+		si.insert()
+
+		# Only the first tax is inclusive:
+		# 10,000.04 / 1.10 = 9,090.94545... → net rounds to 9,090.95
+		# Inclusive tax = 909.09, restoring the original gross of 10,000.04
+		# The non-inclusive previous-row tax is added afterward: 5% of 909.09 = 45.45
+		self.assertEqual(si.items[0].net_amount, 9090.95)
+		self.assertEqual(si.taxes[0].tax_amount, 909.09)
+		self.assertEqual(si.taxes[1].tax_amount, 45.45)
+		self.assertEqual(si.grand_total, 10045.49)
+
+	def test_inclusive_tax_with_decimal_value_on_previous_row_total(self):
+		"""Inclusive tax with decimal value and On Previous Row Total must not double-round net amount."""
+		si = create_sales_invoice(qty=1, rate=50000.55, do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Tax 10%",
+				"rate": 10,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Previous Row Total",
+				"account_head": "_Test Account Education Cess - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Cess 5% on Previous Total",
+				"rate": 5,
+				"row_id": 1,
+				"included_in_print_rate": 1,
+			},
+		)
+		si.insert()
+
+		# Tax fractions: 10% + (5% of 110%) = 15.5%
+		# 50,000.55 / 1.155 = 43,290.5195... → net rounds to 43,290.52
+		# Taxes are calculated from the unrounded net/previous total to keep the inclusive gross stable.
+		self.assertEqual(si.items[0].net_amount, 43290.52)
+		self.assertEqual(si.taxes[0].tax_amount, 4329.05)
+		self.assertEqual(si.taxes[1].tax_amount, 2380.98)
+		self.assertEqual(si.grand_total, 50000.55)
+
+>>>>>>> e148da0 (test(accounts): cover inclusive net rounding)
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(test_records[3])
 		si.discount_amount = 104.94
@@ -2346,7 +2681,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.save()
 		si.submit()
 		self.assertEqual(si.net_total, si.base_net_total)
-		self.assertEqual(si.net_total, 4007.15)
+		self.assertEqual(si.net_total, 4007.16)
 		self.assertEqual(si.grand_total, 4488.02)
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
 		self.assertEqual(si.rounding_adjustment, -0.02)
@@ -2358,8 +2693,8 @@ class TestSalesInvoice(FrappeTestCase):
 				[si.debit_to, 4488.0, 0.0],
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
-				["Sales - _TC", 0.0, 4007.15],
-				[round_off_account, 0.01, 0.0],
+				["Sales - _TC", 0.0, 4007.16],
+				[round_off_account, 0.02, 0.0],
 			]
 		)
 
@@ -4528,7 +4863,164 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(len(res), 1)
 		self.assertEqual(res[0][0], pos_return.return_against)
 
+<<<<<<< HEAD
 	@change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+=======
+	def test_validation_on_opening_invoice_with_rounding(self):
+		si = create_sales_invoice(qty=1, rate=99.98, do_not_submit=True)
+		si.is_opening = "Yes"
+		si.items[0].income_account = "Temporary Opening - _TC"
+		si.save()
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+	def _create_opening_roundoff_account(self, company_name):
+		liability_root = frappe.db.get_all(
+			"Account",
+			filters={"company": company_name, "root_type": "Liability", "disabled": 0},
+			order_by="lft",
+			limit=1,
+		)[0]
+
+		# setup round off account
+		if acc := frappe.db.exists(
+			"Account",
+			{
+				"account_name": "Round Off for Opening",
+				"account_type": "Round Off for Opening",
+				"company": company_name,
+			},
+		):
+			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc)
+		else:
+			acc = frappe.new_doc("Account")
+			acc.company = company_name
+			acc.parent_account = liability_root.name
+			acc.account_name = "Round Off for Opening"
+			acc.account_type = "Round Off for Opening"
+			acc.save()
+			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc.name)
+
+	def test_opening_invoice_with_rounding_adjustment(self):
+		si = create_sales_invoice(qty=1, rate=99.98, do_not_submit=True)
+		si.is_opening = "Yes"
+		si.items[0].income_account = "Temporary Opening - _TC"
+		si.save()
+
+		self._create_opening_roundoff_account(si.company)
+
+		si.reload()
+		si.submit()
+		res = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": si.name, "is_opening": "Yes"},
+			fields=["account", "debit", "credit", "is_opening"],
+		)
+		self.assertEqual(len(res), 3)
+
+	def _create_opening_invoice_with_inclusive_tax(self):
+		si = create_sales_invoice(qty=1, rate=90, do_not_submit=True)
+		si.is_opening = "Yes"
+		si.items[0].income_account = "Temporary Opening - _TC"
+		item_template = si.items[0].as_dict()
+		item_template.name = None
+		item_template.rate = 55
+		si.append("items", item_template)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Testing...",
+				"rate": 5,
+				"included_in_print_rate": True,
+			},
+		)
+		si.save()
+		return si
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_rounding_validation_for_opening_with_inclusive_tax(self):
+		si = self._create_opening_invoice_with_inclusive_tax()
+		# Cumulative net rounding avoids a loss requiring 'Round Off for Opening'.
+		si.submit()
+		self.assertEqual(si.net_total, 138.10)
+		self.assertEqual(si.taxes[0].total, si.grand_total)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	def test_ledger_entries_on_opening_invoice_with_rounding_loss_by_inclusive_tax(self):
+		si = self._create_opening_invoice_with_inclusive_tax()
+		# 'Round Off for Opening' is set in Company master
+		self._create_opening_roundoff_account(si.company)
+
+		si.submit()
+		actual = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": si.name, "is_opening": "Yes", "is_cancelled": False},
+			fields=["account", "debit", "credit", "is_opening"],
+			order_by="account,debit",
+		)
+		expected = [
+			{"account": "_Test Account Service Tax - _TC", "debit": 0.0, "credit": 6.9, "is_opening": "Yes"},
+			{"account": "Debtors - _TC", "debit": 145.0, "credit": 0.0, "is_opening": "Yes"},
+			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.10, "is_opening": "Yes"},
+		]
+		self.assertEqual(len(actual), 3)
+		# DB account collation isn't portable across MariaDB/Postgres; compare order-independently.
+		self.assertCountEqual(actual, expected)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"round_row_wise_tax": 0})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	@ERPNextTestSuite.change_settings(
+		"System Settings", {"currency_precision": 2, "rounding_method": "Commercial Rounding"}
+	)
+	def test_opening_invoice_with_tax_group_rounding(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Opening Inclusive Tax",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 21}],
+			}
+		).insert()
+		frappe.db.set_value("Company", "_Test Company", "round_off_for_opening", None)
+
+		for round_off_configured in (False, True):
+			with self.subTest(round_off_configured=round_off_configured):
+				si = self._create_opening_invoice_with_inclusive_tax()
+				si.items[1].item_tax_template = template.name
+				si.save()
+				self.assertEqual(si.net_total, 131.16)
+				self.assertEqual(si.taxes[0].tax_amount, 13.83)
+				self.assertEqual(si.taxes[0].total, 144.99)
+				self.assertEqual(si.grand_total, 145)
+				self.assertEqual(si.rounding_adjustment, 0)
+
+				if not round_off_configured:
+					with self.assertRaisesRegex(frappe.ValidationError, "Please set.*Round Off for Opening"):
+						si.submit()
+					self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": si.name}))
+					continue
+
+				self._create_opening_roundoff_account(si.company)
+				si.submit()
+				self.assertCountEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"voucher_no": si.name, "is_cancelled": False},
+						fields=["account", "debit", "credit", "is_opening"],
+						as_list=True,
+					),
+					[
+						("Debtors - _TC", 145, 0, "Yes"),
+						("Temporary Opening - _TC", 0, 131.16, "Yes"),
+						("_Test Account Service Tax - _TC", 0, 13.83, "Yes"),
+						("Round Off for Opening - _TC", 0, 0.01, "Yes"),
+					],
+				)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+>>>>>>> e148da0 (test(accounts): cover inclusive net rounding)
 	def test_common_party_with_foreign_currency_jv(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
