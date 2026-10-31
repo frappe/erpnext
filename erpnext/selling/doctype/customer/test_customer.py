@@ -280,7 +280,7 @@ class TestCustomer(ERPNextTestSuite):
 
 		customer = frappe.get_doc("Customer", "_Test Customer")
 		customer.on_hold = 1
-		customer.release_date = nowdate()
+		customer.release_date = add_days(nowdate(), 1)
 		customer.save()
 
 		make_quotation(do_not_save=True).save()
@@ -291,6 +291,21 @@ class TestCustomer(ERPNextTestSuite):
 		customer.release_date = add_days(nowdate(), -1)
 		customer.save()
 		sales_order.save()
+
+	def test_customer_hold_ends_on_release_date(self):
+		from erpnext.selling.doctype.customer.customer import is_customer_blocked
+
+		frappe.db.set_value("Customer", "_Test Customer", {"on_hold": 1, "release_date": nowdate()})
+		self.assertFalse(is_customer_blocked("_Test Customer"))
+
+	def test_blocked_customer_can_make_returns(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		sales_invoice = create_sales_invoice()
+		frappe.db.set_value("Customer", sales_invoice.customer, "on_hold", 1)
+
+		make_sales_return(sales_invoice.name).submit()
 
 	def test_duplicate_customer(self):
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
