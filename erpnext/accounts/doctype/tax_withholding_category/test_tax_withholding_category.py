@@ -932,11 +932,8 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi.name, invoice_expected_entries)
 		self.cleanup_invoices(vouchers)
 
-	def test_tds_withholding_group_different_rates(self):
-		"""
-		Test that Tax Withholding Group applies different rates for different groups
-		within the same Tax Withholding Category.
-		"""
+	def setup_group_rate_category(self):
+		"""Category "TDS Group Rate Category" with 1% for group Individual and 2% for group Company"""
 		for group_name in ["Individual", "Company"]:
 			if not frappe.db.exists("Tax Withholding Group", group_name):
 				frappe.get_doc({"doctype": "Tax Withholding Group", "group_name": group_name}).insert()
@@ -975,6 +972,12 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 				}
 			).insert()
 
+	def test_tds_withholding_group_different_rates(self):
+		"""
+		Test that Tax Withholding Group applies different rates for different groups
+		within the same Tax Withholding Category.
+		"""
+		self.setup_group_rate_category()
 		invoices = []
 
 		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "TDS Group Rate Category")
@@ -996,6 +999,65 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.assertEqual(abs(total), 2000, "Company rate should be 2% (2000 on 100000)")
 
 		self.cleanup_invoices(invoices)
+
+	def test_tds_withholding_group_from_party_on_payment_entry(self):
+		self.setup_group_rate_category()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "TDS Group Rate Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier5", "tax_withholding_group", "Individual")
+
+		pe = create_payment_entry(
+			payment_type="Pay", party_type="Supplier", party="Test TDS Supplier5", paid_amount=10000
+		)
+		pe.apply_tds = 1
+		pe.tax_withholding_category = "TDS Group Rate Category"
+		pe.save()
+		pe.submit()
+
+		self.assertEqual(pe.tax_withholding_group, "Individual")
+		entries = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={"parenttype": "Payment Entry", "parent": pe.name},
+			fields=["tax_rate", "withholding_amount"],
+		)
+		self.assertEqual(entries, [{"tax_rate": 1.0, "withholding_amount": 100.0}])
+		self.cleanup_invoices([pe])
+
+	def test_tds_withholding_group_from_party_on_journal_entry(self):
+		self.setup_group_rate_category()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "TDS Group Rate Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier5", "tax_withholding_group", "Individual")
+
+		jv = make_journal_entry_with_tax_withholding(
+			party_type="Supplier",
+			party="Test TDS Supplier5",
+			voucher_type="Debit Note",
+			amount=10000,
+			save=False,
+		)
+		jv.apply_tds = 1
+		jv.tax_withholding_category = "TDS Group Rate Category"
+		jv.save()
+
+		self.assertEqual(jv.tax_withholding_group, "Individual")
+		tds_row = next(row for row in jv.accounts if row.get("is_tax_withholding_account"))
+		self.assertEqual(tds_row.credit, 100)
+
+	def test_tax_withholding_entry_keeps_the_group(self):
+		self.setup_group_rate_category()
+		self.setup_party_with_category("Supplier", "Test TDS Supplier5", "TDS Group Rate Category")
+		frappe.db.set_value("Supplier", "Test TDS Supplier5", "tax_withholding_group", "Individual")
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier5", rate=100000)
+		pi.submit()
+
+		groups = frappe.get_all(
+			"Tax Withholding Entry",
+			filters={"parenttype": "Purchase Invoice", "parent": pi.name},
+			pluck="tax_withholding_group",
+		)
+		self.assertTrue(groups)
+		self.assertEqual(set(groups), {"Individual"})
+		self.cleanup_invoices([pi])
 
 	def test_null_and_empty_tax_withholding_group_are_equivalent(self):
 		"""
