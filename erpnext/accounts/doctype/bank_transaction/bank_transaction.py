@@ -169,6 +169,8 @@ class BankTransaction(Document):
 
 		self.reset_unallocated_rows()
 		self.allocate_payment_entries()
+		# trusted for this save only, a later save of the same instance allocates again
+		self.flags.pop("allocated_rows", None)
 		self.set_status()
 
 		if frappe.get_single_value("Accounts Settings", "enable_party_matching"):
@@ -180,6 +182,7 @@ class BankTransaction(Document):
 		self.update_allocated_amount()
 		self.delink_old_payment_entries()
 		self.allocate_payment_entries()
+		self.flags.pop("allocated_rows", None)
 		self.set_status()
 
 	def reset_unallocated_rows(self):

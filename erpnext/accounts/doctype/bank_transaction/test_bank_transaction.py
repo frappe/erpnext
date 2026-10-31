@@ -261,6 +261,19 @@ class TestBankTransaction(ERPNextTestSuite):
 		self.assertEqual(bank_transaction.payment_entries[0].allocated_amount, 100)
 		self.assertEqual(bank_transaction.unallocated_amount, 0)
 
+	def test_allocated_amount_edited_after_reconcile_is_reset(self):
+		bank_transaction = add_transaction(self.bank_account, "Receipt", "2018-10-27", deposit=100)
+		payment = self.receive_payment(1000)
+		vouchers = json.dumps([{"payment_doctype": "Payment Entry", "payment_name": payment.name}])
+		bank_transaction = reconcile_vouchers(bank_transaction.name, vouchers)
+
+		# same instance, saved again with a typed allocation
+		bank_transaction.payment_entries[0].allocated_amount = 5000
+		bank_transaction.save()
+
+		self.assertEqual(bank_transaction.payment_entries[0].allocated_amount, 100)
+		self.assertEqual(bank_transaction.unallocated_amount, 0)
+
 	def test_deposit_does_not_reconcile_outgoing_voucher(self):
 		bank_transaction = add_transaction(self.bank_account, "Refund", "2018-10-23", deposit=1700)
 		payment = pay_purchase_invoice(self.gl_account, "Mr G", 1700, "Herr G Dec 18", "2018-11-01")
