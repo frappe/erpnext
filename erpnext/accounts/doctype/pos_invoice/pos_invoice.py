@@ -254,6 +254,7 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+		self.update_status_of_return_against()
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
@@ -299,6 +300,7 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 
 		self.db_set("status", "Cancelled")
+		self.update_status_of_return_against()
 
 		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
@@ -306,6 +308,10 @@ class POSInvoice(SalesInvoice):
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		self.delink_serial_and_batch_bundle()
+
+	def update_status_of_return_against(self):
+		if self.is_return and self.return_against:
+			frappe.get_doc("POS Invoice", self.return_against).set_status(update=True)
 
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
