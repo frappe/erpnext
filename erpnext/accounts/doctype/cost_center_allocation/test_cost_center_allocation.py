@@ -322,6 +322,15 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 		self.assertEqual(flt(sum(row.credit_in_transaction_currency for row in sales_rows), 2), 100.01)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 100.01)
 
+	def test_negative_percentage_is_not_allowed(self):
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": -50, "Sub Cost Center 2 - _TC": 150},
+			save=False,
+		)
+		self.assertRaises(WrongPercentageAllocation, cca.save)
+
 
 def get_gl_entries(voucher_type, voucher_no):
 	gle = frappe.qb.DocType("GL Entry")
