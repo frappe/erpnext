@@ -1815,6 +1815,25 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual([row.qty for row in make_pi_from_po(po.name).items], [0])
 >>>>>>> 144d0d4 (fix(buying): bill the remaining amount after the full qty is billed)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_full_qty_billed_below_amount_is_mapped_with_zero_qty(self):
+		po = create_purchase_order(qty=1, rate=1000)
+		pi = make_pi_from_po(po.name)
+		pi.items[0].rate = 400
+		pi.submit()
+
+		pi = make_pi_from_po(po.name)
+		self.assertEqual([row.qty for row in pi.items], [0])
+		self.assertEqual(len(make_pi_from_po(po.name, target_doc=pi).items), 1)
+
+		pi.items[0].qty = 1
+		pi.items[0].rate = 600
+		pi.submit()
+
+		po.reload()
+		self.assertEqual(po.per_billed, 100)
+		self.assertFalse(make_pi_from_po(po.name).items)
+
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
