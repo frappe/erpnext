@@ -990,10 +990,15 @@ def get_stock_availability(item_code: str | None, warehouse: str):
 
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
-		bin_qty = get_bin_qty(item_code, warehouse)
+		bin_data = get_bin_data(item_code, warehouse)
+		bin_qty = flt(bin_data.actual_qty) - flt(bin_data.reserved_stock)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 
-		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
+		return (
+			bin_qty - pos_sales_qty,
+			is_stock_item,
+			is_negative_stock_allowed_in_pos(item_code, bin_data.reserved_stock),
+		)
 	else:
 		is_stock_item = True
 		if get_active_product_bundle(item_code):
@@ -1022,14 +1027,27 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 
 def get_bin_qty(item_code, warehouse):
-	bin_qty = frappe.db.get_value(
-		"Bin",
-		{"item_code": item_code, "warehouse": warehouse},
-		["actual_qty", "reserved_stock"],
-		as_dict=True,
+	bin_data = get_bin_data(item_code, warehouse)
+	return flt(bin_data.actual_qty) - flt(bin_data.reserved_stock)
+
+
+def get_bin_data(item_code, warehouse):
+	return (
+		frappe.db.get_value(
+			"Bin",
+			{"item_code": item_code, "warehouse": warehouse},
+			["actual_qty", "reserved_stock"],
+			as_dict=True,
+		)
+		or frappe._dict()
 	)
 
-	return flt(bin_qty.actual_qty) - flt(bin_qty.reserved_stock) if bin_qty else 0
+
+def is_negative_stock_allowed_in_pos(item_code, reserved_stock):
+	if frappe.get_cached_doc("Stock Settings").allow_negative_stock:
+		return True
+
+	return flt(reserved_stock) <= 0 and is_negative_stock_allowed(item_code=item_code)
 
 
 def get_pos_reserved_qty(item_code, warehouse):
