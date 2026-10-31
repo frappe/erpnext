@@ -267,7 +267,8 @@ class ChildItemUpdater:
 		self._validate_workflow()
 
 		if self.parent_doctype in ("Purchase Order", "Sales Order"):
-			parent.update_blanket_order()
+			# Covers blanket orders of removed rows, which are no longer on the items
+			parent.update_blanket_order({blanket_order for blanket_order, _ in self._blanket_order_change})
 			parent.update_billing_percentage()
 			parent.set_status()
 
