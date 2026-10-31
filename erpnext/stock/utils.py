@@ -303,7 +303,7 @@ def get_bin_qty_map(rows) -> dict[tuple[str, str], frappe._dict]:
 	bins = frappe.get_all(
 		"Bin",
 		filters={"item_code": ["in", item_codes], "warehouse": ["in", warehouses]},
-		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+		fields=["item_code", "warehouse", "actual_qty", "projected_qty", "reserved_stock"],
 	)
 
 	return {(bin.item_code, bin.warehouse): bin for bin in bins}
