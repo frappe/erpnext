@@ -1032,6 +1032,13 @@ def remove_ref_from_advance_section(ref_doc: object = None, payment_name: str | 
 		)
 		frappe.db.delete(child_table, {"name": ("in", row_names)})
 
+		total_advance = sum(
+			flt(adv.allocated_amount, adv.precision("allocated_amount"))
+			for adv in ref_doc.advances
+			if adv.name not in row_names
+		)
+		ref_doc.db_set("total_advance", flt(total_advance, ref_doc.precision("total_advance")))
+
 
 def unlink_ref_doc_from_payment_entries(ref_doc: object = None, payment_name: str | None = None):
 	remove_ref_doc_link_from_jv(ref_doc.doctype, ref_doc.name, payment_name)
