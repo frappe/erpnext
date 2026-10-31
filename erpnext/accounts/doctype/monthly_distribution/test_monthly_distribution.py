@@ -97,6 +97,48 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 		# April to March: December is the ninth month
 		self.assertEqual(allocations, [0] * 8 + [100] + [0] * 3)
 
+	def make_migrated_budget(self, fiscal_year, percentages):
+		"""A Budget as the old migration made it: the percentages in row order from the year start."""
+		budget = frappe.new_doc("Budget")
+		budget.update(
+			{
+				"budget_against": "Cost Center",
+				"company": "_Test Company",
+				"cost_center": "_Test Cost Center - _TC",
+				"account": "_Test Account Cost for Goods Sold - _TC",
+				"from_fiscal_year": fiscal_year,
+				"to_fiscal_year": fiscal_year,
+				"budget_start_date": "2061-04-01",
+				"budget_end_date": "2062-03-31",
+				"budget_amount": 1200,
+				"distribution_frequency": "Monthly",
+				"distribute_equally": 1 if len(set(percentages)) == 1 else 0,
+			}
+		)
+		for i, percent in enumerate(percentages):
+			start = add_months(getdate("2061-04-01"), i)
+			budget.append(
+				"budget_distribution",
+				{
+					"start_date": start,
+					"end_date": get_last_day(start),
+					"percent": percent,
+					"amount": 1200 * percent / 100,
+				},
+			)
+		budget.flags.ignore_validate = True
+		budget.insert(ignore_mandatory=True)
+		return budget
+
+	def get_months_with_percent(self, budget_name):
+		rows = frappe.get_all(
+			"Budget Distribution",
+			filters={"parent": budget_name},
+			fields=["start_date", "percent", "amount"],
+			order_by="idx asc",
+		)
+		return [(r.start_date, r.percent, r.amount) for r in rows if r.percent]
+
 	def test_fix_migrated_budget_months(self):
 		from erpnext.patches.v16_0.fix_budget_distribution_month_order import fix_migrated_budgets
 
@@ -113,38 +155,19 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 
 		distribution = self.make_distribution([("December", 100)])
 		distribution.insert()
-
-		budget = frappe.new_doc("Budget")
-		budget.update(
-			{
-				"budget_against": "Cost Center",
-				"company": "_Test Company",
-				"cost_center": "_Test Cost Center - _TC",
-				"account": "_Test Account Cost for Goods Sold - _TC",
-				"from_fiscal_year": fiscal_year,
-				"to_fiscal_year": fiscal_year,
-				"budget_start_date": "2061-04-01",
-				"budget_end_date": "2062-03-31",
-				"budget_amount": 1200,
-				"distribution_frequency": "Monthly",
-			}
+		# December's row on the twelfth month (March)
+		budget = self.make_migrated_budget(
+			fiscal_year, [row.percentage_allocation for row in distribution.percentages]
 		)
-		# as the migration made it: December's row on the twelfth month (March)
-		for i, row in enumerate(distribution.percentages):
-			start = add_months(getdate("2061-04-01"), i)
-			budget.append(
-				"budget_distribution",
-				{
-					"start_date": start,
-					"end_date": get_last_day(start),
-					"percent": row.percentage_allocation,
-					"amount": 1200 * row.percentage_allocation / 100,
-				},
-			)
-		budget.flags.ignore_validate = True
-		budget.insert(ignore_mandatory=True)
+		edited = self.make_migrated_budget(
+			fiscal_year, [row.percentage_allocation for row in distribution.percentages]
+		)
+		# amount changed after the migration, percent left as it was
+		frappe.db.set_value("Budget Distribution", {"parent": edited.name, "idx": 12}, "amount", 1000)
 
 		old = frappe._dict(
+			name="_Test MD Old Budget",
+			modified=frappe.utils.now_datetime(),
 			company="_Test Company",
 			budget_against="Cost Center",
 			cost_center="_Test Cost Center - _TC",
@@ -152,18 +175,15 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 			fiscal_year=fiscal_year,
 			monthly_distribution=distribution.name,
 		)
+		# made after the old budget was cancelled, so not by the migration
+		later = self.make_migrated_budget(
+			fiscal_year, [row.percentage_allocation for row in distribution.percentages]
+		)
 		fix_migrated_budgets(old)
 
-		rows = frappe.get_all(
-			"Budget Distribution",
-			filters={"parent": budget.name},
-			fields=["start_date", "percent", "amount"],
-			order_by="idx asc",
-		)
-		self.assertEqual(
-			[(r.start_date, r.percent, r.amount) for r in rows if r.percent],
-			[(getdate("2061-12-01"), 100, 1200)],
-		)
+		self.assertEqual(self.get_months_with_percent(budget.name), [(getdate("2061-12-01"), 100, 1200)])
+		self.assertEqual(self.get_months_with_percent(edited.name)[0][0], getdate("2062-03-01"))
+		self.assertEqual(self.get_months_with_percent(later.name)[0][0], getdate("2062-03-01"))
 
 		# a budget whose distribution was changed after the migration is left as it is
 		frappe.db.set_value("Budget Distribution", {"parent": budget.name, "idx": 1}, "percent", 0.5)
@@ -171,3 +191,44 @@ class TestMonthlyDistribution(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value("Budget Distribution", {"parent": budget.name, "idx": 9}, "percent"), 100
 		)
+
+	def test_fix_migrated_budget_months_partial_distribution(self):
+		from erpnext.patches.v16_0.fix_budget_distribution_month_order import fix_migrated_budgets
+
+		fiscal_year = "_Test MD Fiscal Year 2061-2062"
+		if not frappe.db.exists("Fiscal Year", fiscal_year):
+			frappe.get_doc(
+				{
+					"doctype": "Fiscal Year",
+					"year": fiscal_year,
+					"year_start_date": "2061-04-01",
+					"year_end_date": "2062-03-31",
+				}
+			).insert()
+
+		# saved before months were validated: only the months with an allocation
+		distribution = self.make_distribution([("December", 100)])
+		distribution.percentages = [row for row in distribution.percentages if row.percentage_allocation]
+		distribution.flags.ignore_validate = True
+		distribution.insert()
+
+		# the migration made one row, on April
+		budget = self.make_migrated_budget(fiscal_year, [100])
+		fix_migrated_budgets(
+			frappe._dict(
+				name="_Test MD Old Budget",
+				modified=frappe.utils.now_datetime(),
+				company="_Test Company",
+				budget_against="Cost Center",
+				cost_center="_Test Cost Center - _TC",
+				project=None,
+				fiscal_year=fiscal_year,
+				monthly_distribution=distribution.name,
+			)
+		)
+
+		self.assertEqual(
+			frappe.db.count("Budget Distribution", {"parent": budget.name, "parenttype": "Budget"}), 12
+		)
+		self.assertEqual(self.get_months_with_percent(budget.name), [(getdate("2061-12-01"), 100, 1200)])
+		self.assertEqual(frappe.db.get_value("Budget", budget.name, "distribute_equally"), 0)
