@@ -1,10 +1,8 @@
-from collections import OrderedDict
-
 import frappe
 from frappe import _, qb
-from frappe.query_builder import Criterion
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import flt, fmt_money
+from frappe.utils import flt, fmt_money, get_last_day, getdate
 
 from erpnext.accounts.doctype.budget.budget import BudgetError, get_accumulated_monthly_budget
 from erpnext.accounts.utils import get_fiscal_year
@@ -40,61 +38,97 @@ class BudgetValidation:
 		self.validate_for_overbooking()
 
 	def build_validation_map(self):
-		self.build_budget_keys()
-		self.build_item_keys()
-		self.build_to_validate_map()
+		"""One entry per budget that the document or GL map touches. A budget on a group dimension
+		covers every row posted to a node of its subtree."""
+		self.to_validate = frappe._dict()
+		for budget in self.get_budget_records():
+			rows = self.get_rows_for_budget(budget)
+			if rows:
+				self.to_validate[budget.name] = self.initialize_dict(budget, rows)
 
-	def initialize_dict(self, key):
+	def get_accounts(self) -> list:
+		if self.document_type in ["Purchase Order", "Material Request"]:
+			return list({row.expense_account for row in self.doc.items if row.expense_account})
+
+		return list({row.get("account") for row in self.gl_map if row.get("account")})
+
+	def get_rows_for_budget(self, budget) -> list:
+		if self.document_type in ["Purchase Order", "Material Request"]:
+			rows = [row for row in self.doc.items if row.expense_account == budget.account]
+			return [row for row in rows if row.get(budget.dimension_field) in budget.dimension_values]
+
+		start, end = getdate(budget.budget_start_date), getdate(budget.budget_end_date)
+		rows = []
+		for row in self.gl_map:
+			if row.get("account") != budget.account or not (start <= getdate(row.posting_date) <= end):
+				continue
+
+			if row.get(budget.dimension_field) in budget.dimension_values:
+				rows.append(row)
+			elif share := self.get_allocated_share(row, budget):
+				# the row is split to sub cost centers of a Cost Center Allocation when it is posted
+				rows.append(frappe._dict(row, debit=flt(row.debit) * share, credit=flt(row.credit) * share))
+
+		return rows
+
+	def get_allocated_share(self, row, budget) -> float:
+		"""Share of a row on a main cost center that its Cost Center Allocation posts to the budget's
+		cost centers (see `distribute_gl_based_on_cost_center_allocation`)."""
+		from erpnext.accounts.general_ledger import get_cost_center_allocation_data
+
+		if budget.dimension_field != "cost_center" or not row.get("cost_center"):
+			return 0
+
+		allocation = get_cost_center_allocation_data(self.company, self.doc_date, row.cost_center)
+		if not allocation:
+			return 0
+
+		if row.account == frappe.get_cached_value("Company", self.company, "round_off_account"):
+			return 1 if allocation[0][0] in budget.dimension_values else 0
+
+		return (
+			sum(
+				flt(percentage)
+				for cost_center, percentage in allocation
+				if cost_center in budget.dimension_values
+			)
+			/ 100
+		)
+
+	def initialize_dict(self, budget, rows):
 		_obj = frappe._dict(
 			{
-				"budget_amount": self.budget_map[key].budget_amount,
-				"budget_doc": self.budget_map[key],
+				"budget_amount": budget.budget_amount,
+				"budget_doc": budget,
 				"requested_amount": 0,
 				"ordered_amount": 0,
 				"actual_expense": 0,
+				"requested_amount_to_month_end": 0,
+				"ordered_amount_to_month_end": 0,
+				"actual_expense_to_month_end": 0,
 				"current_requested_amount": 0,
 				"current_ordered_amount": 0,
 				"current_actual_exp_amount": 0,
-			}
-		)
-		_obj.update(
-			{
-				"accumulated_monthly_budget": get_accumulated_monthly_budget(
-					self.budget_map[key].name,
-					self.doc_date,
-				)
+				"accumulated_monthly_budget": get_accumulated_monthly_budget(budget.name, self.doc_date),
 			}
 		)
 
 		if self.document_type in ["Purchase Order", "Material Request"]:
-			_obj.update({"items_to_process": self.item_map[key]})
+			_obj.update({"items_to_process": rows})
 		elif self.document_type == "GL Map":
-			_obj.update({"gl_to_process": self.item_map[key]})
+			_obj.update({"gl_to_process": rows})
 		return _obj
-
-	@property
-	def overlap(self):
-		return self.budget_keys & self.item_keys
-
-	def build_to_validate_map(self):
-		self.to_validate = frappe._dict()
-		for key in self.overlap:
-			self.to_validate[key] = self.initialize_dict(key)
 
 	def validate_for_overbooking(self):
 		for key, v in self.to_validate.items():
-			self.get_ordered_amount(key)
-			self.get_requested_amount(key)
-
-			# Pre-emptive validation before hitting ledger
-			self.handle_actions(key, v)
-
 			# Validation happens after submit for Purchase Order and
 			# Material Request and so will be included in the query
 			# result. so no need to set current document amount
 			if self.document_type == "GL Map":
 				v.current_actual_exp_amount = sum([x.debit - x.credit for x in v.get("gl_to_process", [])])
 
+			self.get_ordered_amount(key)
+			self.get_requested_amount(key)
 			self.get_actual_expense(key)
 			self.handle_actions(key, v)
 
@@ -104,51 +138,18 @@ class BudgetValidation:
 		)[0]
 		return frappe.db.get_all(budget_against, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, as_list=1)
 
-	@property
-	def budget_keys(self):
-		return self.budget_map.keys()
+	def get_dimension_values(self, budget) -> list:
+		dimension = budget.get(budget.dimension_field)
+		if budget.is_tree and frappe.get_cached_value(budget.budget_against, dimension, "is_group"):
+			return [child[0] for child in self.get_child_nodes(budget.budget_against, dimension)]
 
-	def build_budget_keys(self):
-		"""
-		key structure - (dimension_type, dimension, GL account)
-		"""
-		self.budget_map = OrderedDict()
-		for _bud in self.get_budget_records():
-			budget_against = frappe.scrub(_bud.budget_against)
-			dimension = _bud.get(budget_against)
+		return [dimension]
 
-			if _bud.is_tree and frappe.get_cached_value(_bud.budget_against, dimension, "is_group"):
-				child_nodes = self.get_child_nodes(_bud.budget_against, dimension)
-				for child in child_nodes:
-					key = (budget_against, child[0], _bud.account)
-					self.budget_map[key] = _bud
-			else:
-				key = (budget_against, dimension, _bud.account)
-				# TODO: ensure duplicate keys are not possible
-				self.budget_map[key] = _bud
-
-	@property
-	def item_keys(self):
-		return self.item_map.keys()
-
-	def build_item_keys(self):
-		"""
-		key structure - (dimension_type, dimension, GL account)
-		"""
-		self.item_map = OrderedDict()
-		if self.document_type in ["Purchase Order", "Material Request"]:
-			for itm in self.doc.items:
-				for dim in self.dimensions:
-					if itm.get(dim.get("fieldname")):
-						key = (dim.get("fieldname"), itm.get(dim.get("fieldname")), itm.expense_account)
-						# TODO: How to handle duplicate items - same item with same dimension with same account
-						self.item_map.setdefault(key, []).append(itm)
-		elif self.document_type == "GL Map":
-			for gl in self.gl_map:
-				for dim in self.dimensions:
-					if gl.get(dim.get("fieldname")):
-						key = (dim.get("fieldname"), gl.get(dim.get("fieldname")), gl.get("account"))
-						self.item_map.setdefault(key, []).append(gl)
+	def get_period(self, budget) -> tuple:
+		"""The budget's own period (it may span several fiscal years), and the same period up to the
+		end of the posting month for the accumulated monthly limit."""
+		month_end = min(getdate(get_last_day(self.doc_date)), getdate(budget.budget_end_date))
+		return getdate(budget.budget_start_date), getdate(budget.budget_end_date), month_end
 
 	def get_dimensions(self):
 		self.dimensions = []
@@ -192,6 +193,7 @@ class BudgetValidation:
 			.where(
 				(bud.docstatus == 1)
 				& (bud.company == self.company)
+				& (bud.account.isin(self.get_accounts() or [""]))
 				& (bud.budget_start_date <= self.doc_date)
 				& (bud.budget_end_date >= self.doc_date)
 			)
@@ -204,11 +206,16 @@ class BudgetValidation:
 
 		for x in _budgets:
 			x.is_tree = frappe.get_meta(x.budget_against).is_tree
+			x.dimension_field = frappe.scrub(x.budget_against)
+			x.dimension_values = self.get_dimension_values(x)
 
 		return _budgets
 
-	def get_ordered_amount(self, key: tuple | None = None):
+	def get_ordered_amount(self, key: str | None = None):
 		if key:
+			v = self.to_validate[key]
+			budget = v.budget_doc
+			start, end, month_end = self.get_period(budget)
 			po = qb.DocType("Purchase Order")
 			poi = qb.DocType("Purchase Order Item")
 
@@ -216,30 +223,32 @@ class BudgetValidation:
 			conditions.append(po.company.eq(self.company))
 			conditions.append(po.docstatus.eq(1))
 			conditions.append(po.status.ne("Closed"))
-			conditions.append(po.transaction_date[self.fy_start_date : self.fy_end_date])
+			conditions.append(po.transaction_date[start:end])
 			conditions.append(poi.amount.gt(poi.billed_amt))
 			conditions.append(poi.closed.eq(0))
-			conditions.append(poi.expense_account.eq(key[2]))
+			conditions.append(poi.expense_account.eq(budget.account))
+			conditions.append(poi[budget.dimension_field].isin(budget.dimension_values))
 
-			# key structure - (dimension_type, dimension, GL account)
-			conditions.append(poi[key[0]].eq(key[1]))
-
+			amount = (IfNull(poi.amount, 0) - IfNull(poi.billed_amt, 0)) * IfNull(po.conversion_rate, 1)
 			if ordered_amount := (
 				qb.from_(po)
 				.inner_join(poi)
 				.on(po.name == poi.parent)
 				.select(
-					Sum(
-						(IfNull(poi.amount, 0) - IfNull(poi.billed_amt, 0)) * IfNull(po.conversion_rate, 1)
-					).as_("amount")
+					Sum(amount).as_("amount"),
+					Sum(Case().when(po.transaction_date <= month_end, amount).else_(0)).as_("to_month_end"),
 				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
 			):
-				self.to_validate[key].ordered_amount = ordered_amount[0].amount or 0
+				v.ordered_amount = flt(ordered_amount[0].amount)
+				v.ordered_amount_to_month_end = flt(ordered_amount[0].to_month_end)
 
-	def get_requested_amount(self, key: tuple | None = None):
+	def get_requested_amount(self, key: str | None = None):
 		if key:
+			v = self.to_validate[key]
+			budget = v.budget_doc
+			start, end, month_end = self.get_period(budget)
 			mr = qb.DocType("Material Request")
 			mri = qb.DocType("Material Request Item")
 
@@ -248,47 +257,55 @@ class BudgetValidation:
 			conditions.append(mr.docstatus.eq(1))
 			conditions.append(mr.material_request_type.eq("Purchase"))
 			conditions.append(mr.status.ne("Stopped"))
-			conditions.append(mr.transaction_date[self.fy_start_date : self.fy_end_date])
+			conditions.append(mr.transaction_date[start:end])
 			conditions.append(mri.stock_qty.gt(mri.ordered_qty))
-			conditions.append(mri.expense_account.eq(key[2]))
+			conditions.append(mri.expense_account.eq(budget.account))
+			conditions.append(mri[budget.dimension_field].isin(budget.dimension_values))
 
-			# key structure - (dimension_type, dimension, GL account)
-			conditions.append(mri[key[0]].eq(key[1]))
-
+			amount = (
+				(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0))
+				* IfNull(mri.rate, 0)
+				/ mri.conversion_factor
+			)
 			if requested_amount := (
 				qb.from_(mr)
 				.inner_join(mri)
 				.on(mr.name == mri.parent)
 				.select(
-					Sum(
-						(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0))
-						* IfNull(mri.rate, 0)
-						/ mri.conversion_factor
-					).as_("amount")
+					Sum(amount).as_("amount"),
+					Sum(Case().when(mr.transaction_date <= month_end, amount).else_(0)).as_("to_month_end"),
 				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
 			):
-				self.to_validate[key].requested_amount = requested_amount[0].amount or 0
+				v.requested_amount = flt(requested_amount[0].amount)
+				v.requested_amount_to_month_end = flt(requested_amount[0].to_month_end)
 
-	def get_actual_expense(self, key: tuple | None = None):
+	def get_actual_expense(self, key: str | None = None):
 		if key:
+			v = self.to_validate[key]
+			budget = v.budget_doc
+			start, end, month_end = self.get_period(budget)
 			gl = qb.DocType("GL Entry")
 
+			balance = gl.debit - gl.credit
 			query = (
 				qb.from_(gl)
-				.select((Sum(gl.debit) - Sum(gl.credit)).as_("balance"))
+				.select(
+					Sum(balance).as_("balance"),
+					Sum(Case().when(gl.posting_date <= month_end, balance).else_(0)).as_("to_month_end"),
+				)
 				.where(
 					gl.is_cancelled.eq(0)
-					& gl.account.eq(key[2])
-					& gl.fiscal_year.eq(self.fiscal_year)
+					& gl.account.eq(budget.account)
 					& gl.company.eq(self.company)
-					& gl[key[0]].eq(key[1])
-					& gl.posting_date[self.fy_start_date : self.fy_end_date]
+					& gl[budget.dimension_field].isin(budget.dimension_values)
+					& gl.posting_date[start:end]
 				)
 			)
 			if actual_expense := query.run(as_dict=True):
-				self.to_validate[key].actual_expense = actual_expense[0].balance or 0
+				v.actual_expense = flt(actual_expense[0].balance)
+				v.actual_expense_to_month_end = flt(actual_expense[0].to_month_end)
 
 	def stop(self, msg):
 		frappe.throw(msg, BudgetError, title=_("Budget Exceeded"))
@@ -309,40 +326,56 @@ class BudgetValidation:
 		if action == "Stop":
 			self.stop(msg)
 
+	def get_budget_label(self, budget) -> tuple:
+		return (
+			frappe.bold(budget.account),
+			frappe.bold(budget.budget_against),
+			frappe.bold(budget.get(budget.dimension_field)),
+		)
+
 	def handle_individual_doctype_action(
-		self, key, config, budget, budget_amt, existing_amt, current_amt, acc_monthly_budget
+		self,
+		config,
+		budget,
+		budget_amt,
+		existing_amt,
+		existing_amt_to_month_end,
+		current_amt,
+		acc_monthly_budget,
 	):
 		if config.applies:
 			currency = frappe.get_cached_value("Company", self.company, "default_currency")
+			account, budget_against, dimension = self.get_budget_label(budget)
 			annual_diff = flt((existing_amt + current_amt) - budget_amt, self.amount_precision)
 			if annual_diff > 0:
 				_msg = _(
 					"Annual Budget for Account {0} against {1}: {2} is {3}. It will be exceeded by {4}"
 				).format(
-					frappe.bold(key[2]),
-					frappe.bold(frappe.unscrub(key[0])),
-					frappe.bold(key[1]),
+					account,
+					budget_against,
+					dimension,
 					frappe.bold(fmt_money(budget_amt, currency=currency)),
 					frappe.bold(fmt_money(annual_diff, currency=currency)),
 				)
 				self.execute_action(config.action_for_annual, _msg)
 
-			monthly_diff = flt((existing_amt + current_amt) - acc_monthly_budget, self.amount_precision)
+			monthly_diff = flt(
+				(existing_amt_to_month_end + current_amt) - acc_monthly_budget, self.amount_precision
+			)
 			if monthly_diff > 0:
 				_msg = _(
 					"Accumulated Monthly Budget for Account {0} against {1}: {2} is {3}. It will be exceeded by {4}"
 				).format(
-					frappe.bold(key[2]),
-					frappe.bold(frappe.unscrub(key[0])),
-					frappe.bold(key[1]),
+					account,
+					budget_against,
+					dimension,
 					frappe.bold(fmt_money(acc_monthly_budget, currency=currency)),
 					frappe.bold(fmt_money(monthly_diff, currency=currency)),
 				)
 				self.execute_action(config.action_for_monthly, _msg)
 
-	def handle_purchase_order_overlimit(self, key, v_map):
+	def handle_purchase_order_overlimit(self, v_map):
 		self.handle_individual_doctype_action(
-			key,
 			frappe._dict(
 				{
 					"applies": v_map.budget_doc.applicable_on_purchase_order,
@@ -350,16 +383,16 @@ class BudgetValidation:
 					"action_for_monthly": v_map.budget_doc.action_if_accumulated_monthly_budget_exceeded_on_po,
 				}
 			),
-			v_map.budget_doc.name,
+			v_map.budget_doc,
 			v_map.budget_amount,
 			v_map.ordered_amount,
+			v_map.ordered_amount_to_month_end,
 			v_map.current_ordered_amount,
 			v_map.accumulated_monthly_budget,
 		)
 
-	def handle_material_request_overlimit(self, key, v_map):
+	def handle_material_request_overlimit(self, v_map):
 		self.handle_individual_doctype_action(
-			key,
 			frappe._dict(
 				{
 					"applies": v_map.budget_doc.applicable_on_material_request,
@@ -367,16 +400,16 @@ class BudgetValidation:
 					"action_for_monthly": v_map.budget_doc.action_if_accumulated_monthly_budget_exceeded_on_mr,
 				}
 			),
-			v_map.budget_doc.name,
+			v_map.budget_doc,
 			v_map.budget_amount,
 			v_map.requested_amount,
+			v_map.requested_amount_to_month_end,
 			v_map.current_requested_amount,
 			v_map.accumulated_monthly_budget,
 		)
 
-	def handle_actual_expense_overlimit(self, key, v_map):
+	def handle_actual_expense_overlimit(self, v_map):
 		self.handle_individual_doctype_action(
-			key,
 			frappe._dict(
 				{
 					"applies": v_map.budget_doc.applicable_on_booking_actual_expenses,
@@ -384,17 +417,23 @@ class BudgetValidation:
 					"action_for_monthly": v_map.budget_doc.action_if_accumulated_monthly_budget_exceeded,
 				}
 			),
-			v_map.budget_doc.name,
+			v_map.budget_doc,
 			v_map.budget_amount,
 			v_map.actual_expense,
+			v_map.actual_expense_to_month_end,
 			v_map.current_actual_exp_amount,
 			v_map.accumulated_monthly_budget,
 		)
 
 	def handle_actions(self, key, v_map):
-		self.handle_purchase_order_overlimit(key, v_map)
-		self.handle_material_request_overlimit(key, v_map)
-		self.handle_actual_expense_overlimit(key, v_map)
+		# Each document checks its own limit: a ledger posting does not re-check open orders and requests
+		if self.document_type == "Purchase Order":
+			self.handle_purchase_order_overlimit(v_map)
+		elif self.document_type == "Material Request":
+			self.handle_material_request_overlimit(v_map)
+		else:
+			self.handle_actual_expense_overlimit(v_map)
+
 		# PO + MR + Actual Expense
 		self.handle_cumulative_overlimit(key, v_map)
 
@@ -423,21 +462,22 @@ class BudgetValidation:
 			v_map.current_ordered_amount + v_map.current_requested_amount + v_map.current_actual_exp_amount
 		)
 		monthly_diff = flt(
-			v_map.ordered_amount
-			+ v_map.requested_amount
-			+ v_map.actual_expense
+			v_map.ordered_amount_to_month_end
+			+ v_map.requested_amount_to_month_end
+			+ v_map.actual_expense_to_month_end
 			+ current_amt
 			- v_map.accumulated_monthly_budget,
 			self.amount_precision,
 		)
 		if monthly_diff > 0:
 			currency = frappe.get_cached_value("Company", self.company, "default_currency")
+			account, budget_against, dimension = self.get_budget_label(v_map.budget_doc)
 			_msg = _(
 				"Accumulated Monthly Budget for Account {0} against {1} {2} is {3}. It will be collectively ({4}) exceeded by {5}"
 			).format(
-				frappe.bold(key[2]),
-				frappe.bold(frappe.unscrub(key[0])),
-				frappe.bold(key[1]),
+				account,
+				budget_against,
+				dimension,
 				frappe.bold(fmt_money(v_map.accumulated_monthly_budget, currency=currency)),
 				self.budget_applicable_for(v_map, current_amt),
 				frappe.bold(fmt_money(monthly_diff, currency=currency)),
@@ -461,12 +501,13 @@ class BudgetValidation:
 		)
 		if total_diff > 0:
 			currency = frappe.get_cached_value("Company", self.company, "default_currency")
+			account, budget_against, dimension = self.get_budget_label(v_map.budget_doc)
 			_msg = _(
 				"Annual Budget for Account {0} against {1} {2} is {3}. It will be collectively ({4}) exceeded by {5}"
 			).format(
-				frappe.bold(key[2]),
-				frappe.bold(frappe.unscrub(key[0])),
-				frappe.bold(key[1]),
+				account,
+				budget_against,
+				dimension,
 				frappe.bold(fmt_money(v_map.budget_amount, currency=currency)),
 				self.budget_applicable_for(v_map, current_amt),
 				frappe.bold(fmt_money(total_diff, currency=currency)),

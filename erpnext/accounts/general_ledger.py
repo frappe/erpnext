@@ -42,7 +42,7 @@ def make_gl_entries(
 	if gl_map:
 		if (
 			not cancel
-			and not cint(frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"))
+			and not use_legacy_budget_controller()
 			and gl_map[0].voucher_type != "Period Closing Voucher"
 		):
 			bud_val = BudgetValidation(gl_map=gl_map)
@@ -176,7 +176,7 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			continue
 
 		# Validate budget against main cost center
-		if not from_repost:
+		if not from_repost and use_legacy_budget_controller():
 			validate_expense_against_budget(
 				d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision)
 			)
@@ -405,6 +405,10 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
 
+def use_legacy_budget_controller() -> bool:
+	return cint(frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"))
+
+
 def make_entry(args, adv_adj, update_outstanding, from_repost=False, *, from_reversal=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
@@ -423,7 +427,9 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False, *, from_rev
 		and gle.voucher_type != "Period Closing Voucher"
 		and (gle.is_cancelled == 0 or gle.voucher_type == "Journal Entry")
 	):
-		validate_expense_against_budget(args)
+		# on submit, BudgetValidation in make_gl_entries already checked the whole voucher
+		if gle.is_cancelled or use_legacy_budget_controller():
+			validate_expense_against_budget(args)
 
 
 def process_debit_credit_difference(gl_map):
