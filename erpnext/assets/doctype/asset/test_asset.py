@@ -2346,6 +2346,38 @@ class TestDepreciationBasics(AssetSetup):
 		asset.reload()
 		self.assertEqual(asset.get_value_after_depreciation(), 100000)
 
+	def test_manual_depreciation_is_limited_to_asset_value(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			asset_type="Existing Asset",
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			submit=1,
+		)
+
+		def depreciation_entry(amount, asset_name):
+			jv = make_journal_entry(
+				"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", amount, save=False
+			)
+			for d in jv.accounts:
+				d.reference_type = "Asset"
+				d.reference_name = asset_name
+			jv.voucher_type = "Depreciation Entry"
+			return jv
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"cannot be greater than its value after depreciation",
+			depreciation_entry(150000, asset.name).insert,
+		)
+		depreciation_entry(100000, asset.name).insert()
+
+		draft = create_asset(item_code="Macbook Pro", asset_type="Existing Asset", do_not_save=1)
+		draft.insert()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is not submitted", depreciation_entry(100, draft.name).insert
+		)
+
 	def test_manual_depreciation_for_depreciable_asset(self):
 		asset = create_asset(
 			item_code="Macbook Pro",
