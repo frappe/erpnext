@@ -325,6 +325,7 @@ class POSInvoice(SalesInvoice):
 		map_doc(self, return_sales_invoice, table_map={"doctype": return_sales_invoice.doctype})
 		return_sales_invoice.is_created_using_pos = 1
 		return_sales_invoice.is_consolidated = 1
+		return_sales_invoice.flags.is_consolidated = True
 		return_sales_invoice.return_against = frappe.db.get_value(
 			"POS Invoice", self.return_against, "consolidated_invoice"
 		)
