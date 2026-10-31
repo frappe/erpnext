@@ -421,6 +421,69 @@ class TestAccount(ERPNextTestSuite):
 		self.assertRaises(InvalidAccountMergeError, merge_account, receivable, deposit)
 		self.assertTrue(frappe.db.exists("Account", receivable))
 
+	def test_child_company_account_rename_from_request_ignores_from_descendant(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Request Rename Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		child_account = frappe.db.get_value(
+			"Account", {"account_name": "Test Request Rename Account", "company": "_Test Company 4"}
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			frappe.call,
+			update_account_number,
+			name=child_account,
+			account_name="Local Name",
+			from_descendant=1,
+		)
+		self.assertTrue(frappe.db.exists("Account", child_account))
+
+	def test_update_account_number_with_deprecated_from_descendant(self):
+		account = create_account(
+			account_name="Deprecated Argument Account",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+
+		with self.assertWarns(Warning):
+			new_name = update_account_number(account, "Deprecated Argument Renamed", from_descendant=True)
+
+		self.assertEqual(new_name, "Deprecated Argument Renamed - _TC")
+
+	def test_parent_company_account_checks_run_before_child_company_rename(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		number_holder = frappe.new_doc("Account")
+		number_holder.account_name = "Test Number Holder Account"
+		number_holder.account_number = "8800"
+		number_holder.parent_account = "Temporary Accounts - _TC3"
+		number_holder.company = "_Test Company 3"
+		number_holder.flags.ignore_root_company_validation = True
+		number_holder.insert()
+
+		account = frappe.new_doc("Account")
+		account.account_name = "Test Rename Order Account"
+		account.parent_account = "Temporary Accounts - _TC3"
+		account.company = "_Test Company 3"
+		account.insert()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already used",
+			update_account_number,
+			account.name,
+			"Test Rename Order Account",
+			"8800",
+		)
+		self.assertFalse(
+			frappe.db.exists("Account", {"account_number": "8800", "company": "_Test Company 4"})
+		)
+
 
 def get_inventory_account(company, warehouse=None):
 	account = None

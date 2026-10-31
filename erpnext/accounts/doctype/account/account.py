@@ -8,6 +8,7 @@ from frappe.utils import add_to_date, cint, cstr, pretty_date
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 import erpnext
+from erpnext.deprecation_dumpster import deprecation_warning
 
 
 class RootNotEditable(frappe.ValidationError):
@@ -580,66 +581,81 @@ def get_account_autoname(account_number, account_name, company):
 	return " - ".join(parts)
 
 
-@frappe.whitelist()
-def update_account_number(name, account_name, account_number=None, from_descendant=False):
+@frappe.whitelist(methods=["POST"])
+def update_account_number(
+	name: str, account_name: str, account_number: str | None = None, from_descendant: bool = False
+):
+	if from_descendant:
+		deprecation_warning(
+			"2026-10-26",
+			"v18",
+			"The from_descendant argument of update_account_number is ignored. Use update_child_company_account_number to rename a synced child company account.",
+		)
+
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
 	account.check_permission("write")
-	if not account:
+	validate_rename_in_child_company(account)
+
+	old_account_name, old_account_number = account.account_name, account.account_number
+	new_name = set_account_name_and_number(account, account_name, account_number)
+
+	descendants = get_descendants_of("Company", account.company)
+	if descendants:
+		sync_update_account_number_in_child(
+			descendants, old_account_name, account_name, account_number, old_account_number
+		)
+
+	return new_name
+
+
+def validate_rename_in_child_company(account: Account):
+	if frappe.get_cached_value("Company", account.company, "allow_account_creation_against_child_company"):
 		return
 
-	old_acc_name, old_acc_number = account.account_name, account.account_number
+	for ancestor in get_ancestors_of("Company", account.company):
+		if frappe.db.exists(
+			"Account",
+			{
+				"account_number": account.account_number,
+				"account_name": account.account_name,
+				"company": ancestor,
+			},
+		):
+			allow_child_account_creation = _("Allow Account Creation Against Child Company")
 
-	# check if account exists in parent company
-	ancestors = get_ancestors_of("Company", account.company)
-	allow_independent_account_creation = frappe.get_cached_value(
-		"Company", account.company, "allow_account_creation_against_child_company"
+			message = _("Account {0} exists in parent company {1}.").format(
+				frappe.bold(account.account_name), frappe.bold(ancestor)
+			)
+			message += "<br>"
+			message += _("Renaming it is only allowed via parent company {0}, to avoid mismatch.").format(
+				frappe.bold(ancestor)
+			)
+			message += "<br><br>"
+			message += _("To overrule this, enable '{0}' in company {1}").format(
+				allow_child_account_creation, frappe.bold(account.company)
+			)
+
+			frappe.throw(message, title=_("Rename Not Allowed"))
+
+
+def update_child_company_account_number(name: str, account_name: str, account_number: str | None = None):
+	account = frappe.get_cached_doc("Account", name)
+	account.check_permission("write")
+	return set_account_name_and_number(account, account_name, account_number)
+
+
+def set_account_name_and_number(account: Account, account_name: str, account_number: str | None = None):
+	account.validate_account_number(account_number)
+	frappe.db.set_value(
+		"Account",
+		account.name,
+		{"account_number": cstr(account_number).strip(), "account_name": account_name.strip()},
 	)
 
-	if ancestors and not allow_independent_account_creation:
-		for ancestor in ancestors:
-			old_name = frappe.db.get_value(
-				"Account",
-				{"account_number": old_acc_number, "account_name": old_acc_name, "company": ancestor},
-				"name",
-			)
-
-			if old_name and not from_descendant:
-				# same account in parent company exists
-				allow_child_account_creation = _("Allow Account Creation Against Child Company")
-
-				message = _("Account {0} exists in parent company {1}.").format(
-					frappe.bold(old_acc_name), frappe.bold(ancestor)
-				)
-				message += "<br>"
-				message += _("Renaming it is only allowed via parent company {0}, to avoid mismatch.").format(
-					frappe.bold(ancestor)
-				)
-				message += "<br><br>"
-				message += _("To overrule this, enable '{0}' in company {1}").format(
-					allow_child_account_creation, frappe.bold(account.company)
-				)
-
-				frappe.throw(message, title=_("Rename Not Allowed"))
-
-	account.validate_account_number(account_number)
-	if account_number:
-		frappe.db.set_value("Account", name, "account_number", account_number.strip())
-	else:
-		frappe.db.set_value("Account", name, "account_number", "")
-	frappe.db.set_value("Account", name, "account_name", account_name.strip())
-
-	if not from_descendant:
-		# Update and rename in child company accounts as well
-		descendants = get_descendants_of("Company", account.company)
-		if descendants:
-			sync_update_account_number_in_child(
-				descendants, old_acc_name, account_name, account_number, old_acc_number
-			)
-
 	new_name = get_account_autoname(account_number, account_name, account.company)
-	if name != new_name:
-		frappe.rename_doc("Account", name, new_name, force=1)
+	if account.name != new_name:
+		frappe.rename_doc("Account", account.name, new_name, force=1)
 		return new_name
 
 
@@ -704,7 +720,7 @@ def sync_update_account_number_in_child(
 		filters["account_number"] = old_acc_number
 
 	for d in frappe.db.get_values("Account", filters=filters, fieldname=["company", "name"], as_dict=True):
-		update_account_number(d["name"], account_name, account_number, from_descendant=True)
+		update_child_company_account_number(d["name"], account_name, account_number)
 
 
 def _ensure_idle_system():
