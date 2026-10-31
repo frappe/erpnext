@@ -1923,6 +1923,73 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in mr.items:
 			self.assertEqual(row.qty, required_qty[row.item_code])
 
+	def test_partial_qty_rounds_up_whole_number_uom(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		test_stock_entry.make_stock_entry(item_code=rm, target="Stores - _TC", qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, source_warehouse="Stores - _TC"
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in pick_list.locations], [3])
+
+		mr = self.submit_material_request(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in mr.items], [3])
+
+		# rounding up stays within the 2 left to request
+		mr = make_material_request(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in mr.items], [2])
+
+	def test_partial_qty_rounds_up_once_for_item_in_two_operations(self):
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg,
+			[
+				{"item_code": rm, "qty": 1, "operation": first_operation},
+				{"item_code": rm, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		work_order = make_review_work_order(fg, bom.name, 3)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			mr = make_material_request(work_order.name, for_qty=1.5)
+		self.assertEqual([row.qty for row in mr.items], [3])
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			mr = make_material_request(work_order.name, for_qty=1.5)
+		self.assertEqual([row.qty for row in mr.items], [2, 1])
+
+	def test_full_request_fits_unrounded_pending_qty(self):
+		rm = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
+		).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 2}], quantity=3)
+		work_order = make_review_work_order(fg, bom.name, 1)
+
+		mr = self.submit_material_request(work_order.name)
+		self.assertEqual(mr.docstatus, 1)
+
+	def test_partial_qty_rounds_up_whole_number_demand_below_precision(self):
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM", "valuation_rate": 100}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 1}], quantity=10000)
+		work_order = make_review_work_order(fg, bom.name, 10000)
+
+		mr = make_material_request(work_order.name, for_qty=1)
+		self.assertEqual([row.qty for row in mr.items], [1])
+
 	def test_material_request_qty_capped_at_pending_qty(self):
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
