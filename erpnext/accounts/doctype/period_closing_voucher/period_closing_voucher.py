@@ -152,6 +152,25 @@ class PeriodClosingVoucher(AccountsController):
 				).format(action, future_closing_voucher, self.period_end_date)
 			)
 
+	def block_if_previous_closing_voucher_incomplete(self):
+		previous_closing_voucher = frappe.db.get_value(
+			"Period Closing Voucher",
+			{
+				"period_end_date": ("<", self.period_end_date),
+				"docstatus": 1,
+				"company": self.company,
+				"gle_processing_status": ("!=", "Completed"),
+			},
+			"name",
+		)
+		if previous_closing_voucher:
+			frappe.throw(
+				_(
+					"Period Closing Voucher {0} has not finished posting its closing entries. Complete it before closing a later period."
+				).format(get_link_to_form("Period Closing Voucher", previous_closing_voucher)),
+				title=_("Previous Closing Incomplete"),
+			)
+
 	def get_future_closing_voucher(self):
 		return frappe.db.get_value(
 			"Period Closing Voucher",
@@ -194,6 +213,8 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 
 	def before_submit(self):
+		self.block_if_previous_closing_voucher_incomplete()
+
 		if not self.has_stock_transactions():
 			return
 

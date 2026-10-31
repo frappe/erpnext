@@ -172,7 +172,11 @@ def get_rootwise_opening_balances(
 
 	last_period_closing_voucher = ""
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
-	ignore_closing_balances = ignore_closing_balances or has_gl_entry_restrictions()
+	ignore_closing_balances = (
+		ignore_closing_balances
+		or has_gl_entry_restrictions()
+		or pl_opening_starts_at_fiscal_year(filters, report_type)
+	)
 
 	if not ignore_closing_balances:
 		last_period_closing_voucher = frappe.db.get_all(
@@ -242,6 +246,12 @@ def get_rootwise_opening_balances(
 				opening[d.account]["opening_credit"] += flt(d.credit_in_reporting_currency)
 
 	return opening
+
+
+def pl_opening_starts_at_fiscal_year(filters, report_type) -> bool:
+	"""Account Closing Balance holds P&L from the first closing onwards, so it cannot give a
+	P&L opening that starts at the fiscal year."""
+	return report_type == "Profit and Loss" and not filters.get("show_unclosed_fy_pl_balances")
 
 
 def get_equity_accounts(company: str) -> set[str]:
@@ -762,7 +772,9 @@ def get_opening_balances_duckdb(conn, filters, ignore_is_opening):
 
 def _get_rootwise_opening_duckdb(conn, filters, report_type, ignore_is_opening):
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
+	ignore_closing_balances = frappe.get_single_value(
+		"Accounts Settings", "ignore_account_closing_balance"
+	) or pl_opening_starts_at_fiscal_year(filters, report_type)
 	last_pcv = ""
 
 	if not ignore_closing_balances:
