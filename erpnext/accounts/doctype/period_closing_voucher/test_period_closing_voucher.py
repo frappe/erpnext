@@ -785,6 +785,30 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": pcv.name}))
 		self.assertFalse(frappe.db.exists("Account Closing Balance", {"period_closing_voucher": pcv.name}))
 
+	def make_sale_and_refund(self, posting_date, amount):
+		self.make_income_entry(posting_date, amount)
+		self.make_income_entry(posting_date, -amount)
+
+	def assert_period_closed_without_entries(self, pcv):
+		self.assertEqual(pcv.gle_processing_status, "Completed")
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": pcv.name}))
+
+		late_entry = make_journal_entry(
+			posting_date="2021-12-20",
+			amount=100,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=create_cost_center("Test Cost Center 1"),
+			company="Test PCV Company",
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Books have been closed", late_entry.submit)
+
+	def test_close_period_with_zero_profit_and_loss_in_legacy_controller(self):
+		self.make_sale_and_refund("2021-03-15", 1000)
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		pcv.reload()
+		self.assert_period_closed_without_entries(pcv)
+
 
 def create_account():
 	account = frappe.get_doc(
