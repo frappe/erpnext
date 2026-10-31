@@ -6,6 +6,7 @@ from datetime import date
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, today
 
@@ -63,7 +64,14 @@ def get_loyalty_details(
 		frappe.qb.from_(LoyaltyPointEntry)
 		.select(
 			Sum(LoyaltyPointEntry.loyalty_points).as_("loyalty_points"),
-			Sum(LoyaltyPointEntry.purchase_amount).as_("total_spent"),
+			Sum(
+				Case()
+				.when(
+					LoyaltyPointEntry.redeem_against.isnull() | (LoyaltyPointEntry.redeem_against == ""),
+					LoyaltyPointEntry.purchase_amount,
+				)
+				.else_(0)
+			).as_("total_spent"),
 		)
 		.where(
 			(LoyaltyPointEntry.customer == customer)
