@@ -766,17 +766,4 @@ def is_valid_certificate(ldc, posting_date, limit_consumed):
 
 
 def normal_round(number):
-	"""
-	Rounds a number to the nearest integer.
-	:param number: The number to round.
-	"""
-	decimal_part = number - int(number)
-
-	if decimal_part >= 0.5:
-		decimal_part = 1
-	else:
-		decimal_part = 0
-
-	number = int(number) + decimal_part
-
-	return number
+	return flt(number, 0)
