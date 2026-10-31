@@ -3,10 +3,11 @@
 
 import frappe
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation import (
+	DuplicateCostCenterAllocation,
 	InvalidChildCostCenter,
 	InvalidDateError,
 	InvalidMainCostCenter,
@@ -27,6 +28,7 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 			"Sub Cost Center 1",
 			"Sub Cost Center 2",
 			"Sub Cost Center 3",
+			"Sub Cost Center 4",
 		]
 		for cc in cost_centers:
 			create_cost_center(cost_center_name=cc, company="_Test Company")
@@ -300,6 +302,112 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 
 						credit_note.cancel()
 						invoice.reload().cancel()
+
+	def test_split_rows_add_up_to_the_original_amount(self):
+		create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 30, "Sub Cost Center 3 - _TC": 20},
+		)
+		si = create_sales_invoice(rate=100.01, cost_center="Main Cost Center 1 - _TC", do_not_submit=True)
+		si.cost_center = "Main Cost Center 1 - _TC"
+		si.disable_rounded_total = 1
+		si.submit()
+
+		gl_entries = get_gl_entries("Sales Invoice", si.name)
+		receivable_rows = [row for row in gl_entries if row.account == si.debit_to]
+		sales_rows = [row for row in gl_entries if row.account == "Sales - _TC"]
+		self.assertEqual(len(receivable_rows), 3)
+		self.assertEqual(flt(sum(row.debit for row in receivable_rows), 2), 100.01)
+		self.assertEqual(flt(sum(row.credit for row in sales_rows), 2), 100.01)
+		self.assertEqual(flt(sum(row.credit_in_transaction_currency for row in sales_rows), 2), 100.01)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 100.01)
+
+	def test_negative_percentage_is_not_allowed(self):
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": -50, "Sub Cost Center 2 - _TC": 150},
+			save=False,
+		)
+		self.assertRaises(WrongPercentageAllocation, cca.save)
+
+	def test_total_percentage_with_decimals(self):
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{
+				"Sub Cost Center 1 - _TC": 64.07,
+				"Sub Cost Center 2 - _TC": 3.95,
+				"Sub Cost Center 3 - _TC": 17.15,
+				"Sub Cost Center 4 - _TC": 14.83,
+			},
+		)
+		self.assertEqual(cca.docstatus, 1)
+
+	def test_two_allocations_with_same_valid_from(self):
+		create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50},
+		)
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
+			save=False,
+		)
+		self.assertRaises(DuplicateCostCenterAllocation, cca.save)
+
+	def test_latest_allocation_is_used_when_valid_from_is_same(self):
+		from erpnext.accounts.general_ledger import get_cost_center_allocation_data
+
+		create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50},
+		)
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
+			save=False,
+		)
+		cca.flags.ignore_validate = True
+		cca.submit()
+
+		self.assertEqual(
+			dict(get_cost_center_allocation_data("_Test Company", today(), "Main Cost Center 1 - _TC")),
+			{"Sub Cost Center 3 - _TC": 70, "Sub Cost Center 4 - _TC": 30},
+		)
+
+	def test_child_cost_center_must_be_usable_for_company(self):
+		frappe.db.set_value("Cost Center", "Sub Cost Center 4 - _TC", "disabled", 1)
+		for invalid_cost_center in ("_Test Company - _TC", "Main - _TC1", "Sub Cost Center 4 - _TC"):
+			cca = create_cost_center_allocation(
+				"_Test Company",
+				"Main Cost Center 1 - _TC",
+				{"Sub Cost Center 1 - _TC": 50, invalid_cost_center: 50},
+				save=False,
+			)
+			self.assertRaises(InvalidChildCostCenter, cca.save)
+
+
+def get_gl_entries(voucher_type, voucher_no):
+	gle = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gle)
+		.select(
+			gle.account,
+			gle.cost_center,
+			gle.debit,
+			gle.credit,
+			gle.debit_in_transaction_currency,
+			gle.credit_in_transaction_currency,
+		)
+		.where((gle.voucher_type == voucher_type) & (gle.voucher_no == voucher_no) & (gle.is_cancelled == 0))
+		.orderby(gle.cost_center)
+	).run(as_dict=1)
 
 
 def create_cost_center_allocation(
