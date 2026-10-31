@@ -957,8 +957,6 @@ class TestPickList(ERPNextTestSuite):
 		pick_list = create_pick_list_from_wo(work_order.name, None, 5)
 		self.assertNotIn(wip_warehouse, [row.warehouse for row in pick_list.locations])
 
-<<<<<<< HEAD
-=======
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_work_order_pick_uses_serials_reserved_for_it(self):
 		pick_list = make_work_order_pick_list_with_reserved_serials()
@@ -969,11 +967,7 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(
 			sorted(sn for row in pick_list.locations for sn in get_serial_nos(row.serial_no)),
-			sorted(
-				SerialBatchIdentity("Serial No").get_numbers(
-					pick_list.locations[0].item_code, reserved_serial_nos
-				)
-			),
+			sorted(reserved_serial_nos),
 		)
 		pick_list.submit()
 
@@ -989,23 +983,6 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(stock_entry.items[0].serial_no, pick_list.locations[0].serial_no)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
-	def test_pick_leaves_stock_reserved_for_other_orders(self):
-		item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		make_stock_entry(item=item, to_warehouse="_Test Warehouse 1 - _TC", qty=10, basic_rate=100)
-
-		reserving_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=8, rate=100)
-		reserving_order.create_stock_reservation_entries(notify=False)
-		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=5, rate=100)
-		pick_list = create_pick_list(sales_order.name)
-
-		self.assertEqual(
-			[(row.warehouse, row.qty) for row in pick_list.locations],
-			[("_Test Warehouse - _TC", 2), ("_Test Warehouse 1 - _TC", 3)],
-		)
-
->>>>>>> b590f23 (test(stock): pick list uses serials reserved for its work order)
 	def test_delivery_note_maps_only_the_selected_pick_list_rows(self):
 		items = [make_item(properties={"is_stock_item": 1}).name for _item in range(2)]
 		for item in items:
@@ -2900,39 +2877,17 @@ class TestPickList(ERPNextTestSuite):
 			else:
 				self.assertEqual(doc.shipping_address_name, customer_shipping_address_1.name)
 				item_codes = [item.item_code for item in doc.items]
-<<<<<<< HEAD
 				self.assertTrue(item1 in item_codes)
 				self.assertTrue(item2 in item_codes)
-=======
-				self.assertIn(item1, item_codes)
-				self.assertIn(item2, item_codes)
-
-	def test_get_pick_list_query_postgres_valid(self):
-		"""get_pick_list_query selects Sales Order.customer (a joined-table column) under
-		GROUP BY Pick List.name. Postgres rejects that bare column (PK functional dependency does
-		not cross tables), so the link query raised GroupingError. customer is pinned to one value
-		by the filter, so adding it to the GROUP BY is identical on MariaDB and valid on Postgres."""
-		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
-
-		warehouse = "_Test Warehouse - _TC"
-		item = make_item().name
-		make_stock_entry(item=item, to_warehouse=warehouse, qty=100, basic_rate=100)
-		so = make_sales_order(item_code=item, qty=5, rate=100)
-		pl = create_pick_list(so.name)
-		pl.submit()
-
-		# must run without raising on either engine (GroupingError on Postgres before the fix)
-		result = get_pick_list_query(
-			"Pick List", "", "name", 0, 20, {"company": so.company, "customer": so.customer}
-		)
-		self.assertIn(pl.name, [row["name"] for row in result])
 
 
 def make_work_order_pick_list_with_reserved_serials():
 	"""Saved pick list for a Work Order that reserves 2 of 4 serial nos of its raw material."""
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-	from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as create_pick_list_from_wo
 	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+	from erpnext.manufacturing.doctype.work_order.work_order import (
+		create_pick_list as create_pick_list_from_wo,
+	)
 
 	raw_material = make_item(
 		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PL-WO-SN-.#####"}
@@ -2952,4 +2907,3 @@ def make_work_order_pick_list_with_reserved_serials():
 	pick_list = create_pick_list_from_wo(work_order.name, None, 2)
 	pick_list.save()
 	return pick_list
->>>>>>> efc52ac (test(stock): stock entry from work order pick list moves picked serials)
