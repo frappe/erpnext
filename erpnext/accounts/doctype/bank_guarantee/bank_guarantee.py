@@ -75,6 +75,8 @@ class BankGuarantee(Document):
 			["docstatus", party_field, "project"],
 			as_dict=True,
 		)
+		if order:
+			validate_reference_company(reference_doctype, self.reference_docname)
 		if not order or order.docstatus != 1:
 			frappe.throw(
 				_("{0} {1} must be submitted.").format(
@@ -128,12 +130,16 @@ def get_voucher_details(bank_guarantee_type: str, reference_name: str):
 
 	# and scope the referenced order to the caller's own Company restrictions, which costs nobody
 	# who has none
+	validate_reference_company(doctype, reference_name)
+
+	return frappe.db.get_value(doctype, reference_name, fields_to_fetch, as_dict=True)
+
+
+def validate_reference_company(doctype, name):
 	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
 
 	allowed_companies = get_allowed_companies(frappe.session.user, "Bank Guarantee")
 	if allowed_companies:
-		company = frappe.db.get_value(doctype, reference_name, "company")
+		company = frappe.db.get_value(doctype, name, "company")
 		if company and company not in allowed_companies:
 			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
-
-	return frappe.db.get_value(doctype, reference_name, fields_to_fetch, as_dict=True)

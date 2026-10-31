@@ -103,3 +103,20 @@ class TestBankGuarantee(ERPNextTestSuite):
 		doc.reference_doctype = "Sales Order"
 		doc.reference_docname = draft.name
 		self.assertRaisesRegex(frappe.ValidationError, "must be submitted", doc.insert)
+
+	def test_reference_of_another_company_is_refused(self):
+		so = make_sales_order()
+		user = "test_bg_company_restriction@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "BG", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", user)
+
+		doc = self.make_bg()
+		doc.reference_doctype = "Sales Order"
+		doc.reference_docname = so.name
+		with self.set_user(user):
+			self.assertRaisesRegex(
+				frappe.PermissionError, "Not permitted for _Test Company", doc.insert, ignore_permissions=True
+			)
