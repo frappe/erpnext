@@ -592,6 +592,7 @@ def get_available_serial_nos_to_reserve(
 				& (sre.warehouse == warehouse)
 				& (sre.reserved_qty >= sre.delivered_qty)
 				& (sre.status.notin(["Delivered", "Cancelled"]))
+				& (sb_entry.delivered_qty < sb_entry.qty)
 				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)
