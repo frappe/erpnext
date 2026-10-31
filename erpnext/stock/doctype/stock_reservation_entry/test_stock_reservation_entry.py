@@ -800,6 +800,9 @@ class TestStockReservationEntry(FrappeTestCase):
 	)
 	def test_returned_serial_from_partly_delivered_reservation_can_be_reserved_again(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_nos_from_bundle,
+		)
 
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		make_stock_entry(
@@ -815,7 +818,9 @@ class TestStockReservationEntry(FrappeTestCase):
 
 		delivery = make_delivery_note(sales_order.name, kwargs={"for_reserved_stock": 1})
 		delivery.items[0].qty = 1
-		returned_serial_no = delivery.items[0].serial_no.split("\n")[0]
+		returned_serial_no = get_serial_nos_from_bundle(delivery.items[0].serial_and_batch_bundle)[0]
+		delivery.items[0].serial_and_batch_bundle = None
+		delivery.items[0].use_serial_batch_fields = 1
 		delivery.items[0].serial_no = returned_serial_no
 		delivery.submit()
 		make_sales_return(delivery.name).submit()
