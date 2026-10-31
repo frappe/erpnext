@@ -1106,6 +1106,15 @@ class TestJournalEntry(ERPNextTestSuite):
 		second.reversal_of = jv.name
 		self.assertRaisesRegex(frappe.ValidationError, "already exists", second.insert)
 
+		# a reversal cannot be reversed by setting Reversal Of directly either
+		reversal_of_reversal = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC", "_Test Bank - _TC", 700, save=False
+		)
+		reversal_of_reversal.reversal_of = reversal.name
+		self.assertRaisesRegex(
+			frappe.ValidationError, "is already a Reverse Journal Entry", reversal_of_reversal.insert
+		)
+
 	def test_purchase_order_advance_remark(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 

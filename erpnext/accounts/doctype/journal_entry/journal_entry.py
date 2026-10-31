@@ -178,8 +178,7 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.validate_inter_company_accounts()
 		AssetService(self).validate_depr_account_and_depr_entry_voucher_type()
-		if not frappe.flags.is_reverse_depr_entry:
-			AssetService(self).validate_depreciated_assets()
+		AssetService(self).validate_depreciated_assets()
 		self.validate_reversal_of()
 		self.validate_company_in_accounting_dimension()
 		self.validate_advance_accounts()
@@ -190,9 +189,17 @@ class JournalEntry(AccountsController):
 			self.title = self.get_title()
 
 	def validate_reversal_of(self):
-		"""A Journal Entry can be reversed by one submitted Journal Entry only."""
+		"""A Journal Entry can be reversed by one submitted Journal Entry only, and a reversal cannot be reversed."""
 		if not self.reversal_of:
 			return
+
+		if reversal_of_target := frappe.db.get_value("Journal Entry", self.reversal_of, "reversal_of"):
+			frappe.throw(
+				_("{0} is already a Reverse Journal Entry of {1}. Cancel it instead of reversing it.").format(
+					get_link_to_form("Journal Entry", self.reversal_of),
+					get_link_to_form("Journal Entry", reversal_of_target),
+				)
+			)
 
 		existing_reverse = frappe.db.exists(
 			"Journal Entry",
