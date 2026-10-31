@@ -2218,6 +2218,36 @@ class TestPricingRule(ERPNextTestSuite):
 		si = create_sales_invoice(qty=5, rate=100, do_not_submit=True)
 		self.assertEqual([(d.item_code, d.qty) for d in si.items if d.is_free_item], [(free_item, 1)])
 
+	def test_remove_pricing_rule_checks_transaction_permission(self):
+		from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
+			remove_pricing_rule_for_item,
+			remove_pricing_rules,
+		)
+
+		rule = make_item_pricing_rule("_Test Item", discount_percentage=10)
+		user = "pr-no-invoice-access@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc({"doctype": "User", "email": user, "first_name": "No Invoice Access"}).insert()
+
+		item_details = {
+			"doctype": "Sales Invoice Item",
+			"parenttype": "Sales Invoice",
+			"item_code": "_Test Item",
+		}
+		frappe.set_user(user)
+		try:
+			self.assertRaises(
+				frappe.PermissionError, remove_pricing_rule_for_item, rule.name, frappe.as_json(item_details)
+			)
+			self.assertRaises(
+				frappe.PermissionError, remove_pricing_rules, [{**item_details, "pricing_rules": rule.name}]
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		details = remove_pricing_rule_for_item(rule.name, frappe.as_json(item_details))
+		self.assertTrue(details.pricing_rule_removed)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
