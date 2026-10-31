@@ -785,9 +785,8 @@ class PickList(TransactionBase):
 				priority_warehouses.extend(get_descendants_of("Warehouse", source_warehouse))
 				from_warehouses = list(dict.fromkeys(priority_warehouses + from_warehouses))
 
-			self.item_location_map.setdefault(
-				item_code,
-				get_available_item_locations(
+			if item_code not in self.item_location_map:
+				self.item_location_map[item_code] = get_available_item_locations(
 					item_code,
 					from_warehouses,
 					self.item_count_map.get(item_code),
@@ -801,8 +800,7 @@ class PickList(TransactionBase):
 					),
 					exclude_warehouses=excluded_warehouses,
 					own_vouchers=own_vouchers,
-				),
-			)
+				)
 
 			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
