@@ -422,6 +422,7 @@ doc_events = {
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
+		"before_cancel": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
 	},
 	("Item", "Customer", "Supplier"): {
 		"validate": "erpnext.stock.doctype.company_restriction.company_restriction.validate_allowed_companies",

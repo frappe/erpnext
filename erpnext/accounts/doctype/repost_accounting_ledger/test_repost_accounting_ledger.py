@@ -447,6 +447,22 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": si.name}), gl_entries)
 		self.assertEqual(ral.vouchers[0].status, "Pending")
 
+	def test_vouchers_in_closed_accounting_period_are_refused(self):
+		from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
+		from erpnext.accounts.doctype.accounting_period.test_accounting_period import (
+			create_accounting_period,
+		)
+
+		si = self.make_invoice()
+		create_accounting_period(period_name="Test Repost Closed Period").save()
+
+		self.assertRaises(ClosedAccountingPeriod, self.create_repost_doc, [si])
+
+		# company is optional on the repost; the voucher's company is checked
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		self.assertRaises(ClosedAccountingPeriod, ral.save)
+
 	def test_15_failed_repost_skips_cancelled_voucher(self):
 		si = self.make_invoice()
 
