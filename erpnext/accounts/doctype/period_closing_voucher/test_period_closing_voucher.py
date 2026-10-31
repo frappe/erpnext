@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import flt, formatdate, today
+from frappe.utils import flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -808,6 +808,55 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
 		pcv.reload()
 		self.assert_period_closed_without_entries(pcv)
+
+	def get_balance_sheet_figure(self, account_name, period_end_date):
+		from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+		from erpnext.accounts.report.financial_statements import build_period_list
+
+		filters = frappe._dict(
+			company="Test PCV Company",
+			period_start_date=period_end_date,
+			period_end_date=period_end_date,
+			periodicity="Yearly",
+			filter_based_on="Date Range",
+			accumulated_values=True,
+		)
+		period_key = build_period_list(filters)[0].key
+		return next(row[period_key] for row in execute(filters)[1] if row.get("account_name") == account_name)
+
+	def get_gl_balance(self, account, to_date):
+		return frappe.get_all(
+			"GL Entry",
+			filters={"account": account, "posting_date": ("<=", to_date), "is_cancelled": 0},
+			fields=[{"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
+		)[0]
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_immutable_ledger_cancel_and_reclose_in_legacy_controller(self):
+		self.make_income_entry("2021-03-15", 1000)
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		pcv.cancel()
+
+		reversal_dates = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pcv.name, "remarks": ("like", "On cancellation%")},
+			pluck="posting_date",
+			distinct=True,
+		)
+		self.assertEqual(reversal_dates, [getdate("2021-12-31")])
+
+		new_pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		sales = self.get_gl_balance("Sales - TPC", "2021-12-31")
+		self.assertEqual(flt(sales.debit) - flt(sales.credit), 0)
+		self.assertEqual(self.get_balance_sheet_figure("Reserve and Surplus", "2021-12-31"), 1000)
+		self.assertEqual(
+			frappe.db.get_value(
+				"GL Entry",
+				{"voucher_no": new_pcv.name, "account": "Sales - TPC", "is_cancelled": 0},
+				"debit",
+			),
+			1000,
+		)
 
 
 def create_account():
