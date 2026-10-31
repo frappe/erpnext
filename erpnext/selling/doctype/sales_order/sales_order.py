@@ -1829,9 +1829,15 @@ def make_work_orders(items: str, sales_order: str, company: str, project: str | 
 
 @frappe.whitelist()
 def update_status(status, name):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	frappe.has_permission("Sales Order", "submit", name, throw=True)
 
 	so = frappe.get_doc("Sales Order", name)
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
