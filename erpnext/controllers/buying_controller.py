@@ -458,14 +458,17 @@ class BuyingController(SubcontractingController):
 
 	def validate_deduct_with_valuation_taxes(self):
 		taxes = [tax for tax in self.get("taxes") or [] if is_deduct_with_valuation(tax)]
-		if not taxes or self.get("is_return") or self.get("amended_from"):
-			return
+		if taxes:
+			validate_deduct_with_valuation_category(taxes, self.get_deduct_with_valuation_heads_from_source())
 
-		validate_deduct_with_valuation_category(taxes, self.get_deduct_with_valuation_heads_from_source())
+	def get_deduct_with_valuation_source_names(self) -> set:
+		source_fields = ("purchase_order", "purchase_receipt", "purchase_invoice", "supplier_quotation")
+		source_names = {item.get(field) for item in self.get("items") for field in source_fields}
+		source_names.update((self.get("amended_from"), self.get("return_against")))
+		return source_names - {None, ""}
 
 	def get_deduct_with_valuation_heads_from_source(self) -> set:
-		source_fields = ("purchase_order", "purchase_receipt", "purchase_invoice", "supplier_quotation")
-		source_names = {item.get(field) for item in self.get("items") for field in source_fields} - {None, ""}
+		source_names = self.get_deduct_with_valuation_source_names()
 		if not source_names:
 			return set()
 
@@ -476,7 +479,7 @@ class BuyingController(SubcontractingController):
 			.distinct()
 			.where(
 				taxes.parent.isin(source_names)
-				& (taxes.docstatus == 1)
+				& (taxes.docstatus != 0)
 				& (taxes.category == "Valuation")
 				& (taxes.add_deduct_tax == "Deduct")
 			)

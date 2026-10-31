@@ -55,10 +55,22 @@ class TestPurchaseTaxesandChargesTemplate(ERPNextTestSuite):
 
 		amended_receipt = frappe.copy_doc(purchase_receipt)
 		amended_receipt.amended_from = purchase_receipt.name
+		amended_receipt.append("taxes", get_deduct_tax_row("Valuation", "_Test Account Customs Duty - _TC"))
+		self.assertRaisesRegex(frappe.ValidationError, DEDUCT_WITH_VALUATION_MESSAGE, amended_receipt.submit)
+
+		amended_receipt.taxes.pop()
 		amended_receipt.submit()
 
 		purchase_return = make_purchase_return(amended_receipt.name)
+		purchase_return.append("taxes", get_deduct_tax_row("Valuation", "_Test Account Customs Duty - _TC"))
+		self.assertRaisesRegex(frappe.ValidationError, DEDUCT_WITH_VALUATION_MESSAGE, purchase_return.insert)
+
+		purchase_return.taxes.pop()
 		purchase_return.submit()
+
+		debit_note = make_purchase_invoice(update_stock=1, is_return=1, qty=-1, do_not_save=True)
+		debit_note.append("taxes", get_deduct_tax_row("Valuation"))
+		self.assertRaisesRegex(frappe.ValidationError, DEDUCT_WITH_VALUATION_MESSAGE, debit_note.insert)
 
 		purchase_invoice = make_purchase_invoice_from_receipt(amended_receipt.name)
 		purchase_invoice.insert()
