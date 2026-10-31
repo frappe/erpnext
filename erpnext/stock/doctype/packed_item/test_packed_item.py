@@ -319,7 +319,7 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertReturns(expected_returns, dn_ret.packed_items)
 
 	def test_return_keeps_packed_item_warehouse(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		other_warehouse = "_Test Warehouse 1 - _TC"
 		for item in self.bundle_items:
