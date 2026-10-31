@@ -793,6 +793,26 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		for credit_note in credit_notes:
 			self.assertEqual(frappe.db.get_value("Sales Invoice", credit_note, "docstatus"), 2)
 
+	def test_every_consolidated_credit_note_needs_the_closing_entry_cancelled(self):
+		first_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		second_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		refunds = [refund_over_the_counter(sale, qty=-1) for sale in (first_sale, second_sale)]
+		self.make_closing_entry()
+
+		for refund in refunds:
+			credit_note = frappe.get_doc(
+				"Sales Invoice", frappe.db.get_value("POS Invoice", refund.name, "consolidated_invoice")
+			)
+			self.assertRaisesRegex(
+				frappe.ValidationError, "you need to cancel the POS Closing Entry", credit_note.cancel
+			)
+
 	def test_change_on_one_sale_is_not_netted_against_another_sale(self):
 		self.pos_profile.allow_partial_payment = 1
 		self.pos_profile.save()

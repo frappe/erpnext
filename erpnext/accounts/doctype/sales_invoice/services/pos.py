@@ -273,18 +273,35 @@ class POSService:
 	def check_if_consolidated_invoice(self) -> None:
 		doc = self.doc
 		if doc.doctype == "Sales Invoice" and doc.is_consolidated:
-			invoice_or_credit_note = "consolidated_credit_note" if doc.is_return else "consolidated_invoice"
-			pos_closing_entry = frappe.get_all(
-				"POS Invoice Merge Log",
-				filters={invoice_or_credit_note: doc.name},
-				pluck="pos_closing_entry",
-			)
-			if pos_closing_entry and pos_closing_entry[0]:
+			pos_closing_entry = self.get_pos_closing_entry_of_consolidated_invoice()
+			if pos_closing_entry:
 				msg = _("To cancel a {0} you need to cancel the POS Closing Entry {1}.").format(
 					frappe.bold(_("Consolidated Sales Invoice")),
-					get_link_to_form("POS Closing Entry", pos_closing_entry[0]),
+					get_link_to_form("POS Closing Entry", pos_closing_entry),
 				)
 				frappe.throw(msg, title=_("Not Allowed"))
+
+	def get_pos_closing_entry_of_consolidated_invoice(self) -> str | None:
+		merge_log = frappe.qb.DocType("POS Invoice Merge Log")
+		query = frappe.qb.from_(merge_log).select(merge_log.pos_closing_entry).limit(1)
+
+		if self.doc.is_return:
+			merge_log_item = frappe.qb.DocType("POS Invoice Reference")
+			pos_invoice = frappe.qb.DocType("POS Invoice")
+			query = (
+				query.join(merge_log_item)
+				.on(merge_log_item.parent == merge_log.name)
+				.join(pos_invoice)
+				.on(pos_invoice.name == merge_log_item.pos_invoice)
+				.where(pos_invoice.consolidated_invoice == self.doc.name)
+			)
+		else:
+			query = query.where(merge_log.consolidated_invoice == self.doc.name)
+
+		result = query.where(
+			merge_log.pos_closing_entry.isnotnull() & (merge_log.pos_closing_entry != "")
+		).run()
+		return result[0][0] if result else None
 
 	def check_if_created_using_pos_and_pos_closing_entry_generated(self) -> None:
 		doc = self.doc
