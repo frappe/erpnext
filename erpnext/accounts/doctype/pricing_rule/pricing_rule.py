@@ -34,6 +34,34 @@ PRICING_TRANSACTION_DOCTYPES = frozenset(
 	}
 )
 
+PRICING_ROW_FIELDS = (
+	"item_code",
+	"qty",
+	"uom",
+	"conversion_factor",
+	"price_list_rate",
+	"warehouse",
+	"pricing_rules",
+)
+
+PRICING_PARENT_FIELDS = (
+	"company",
+	"currency",
+	"coupon_code",
+	"customer",
+	"supplier",
+	"party_name",
+	"customer_group",
+	"supplier_group",
+	"territory",
+	"campaign",
+	"sales_partner",
+	"selling_price_list",
+	"buying_price_list",
+	"posting_date",
+	"transaction_date",
+)
+
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
 
 other_fields = ["other_item_code", "other_item_group", "other_brand"]
@@ -623,10 +651,23 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 def select_pricing_rules(args, doc, for_validate):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules, get_pricing_rules
 
-	if for_validate and args.get("pricing_rules") and doc and doc.get("_action") == "submit":
+	if for_validate and args.get("pricing_rules") and is_row_unchanged_since_save(args, doc):
 		return get_applied_pricing_rules(args.get("pricing_rules"))
 
 	return get_pricing_rules(args, doc)
+
+
+def is_row_unchanged_since_save(args, doc):
+	if not doc or doc.get("_action") != "submit" or not doc.get_doc_before_save():
+		return False
+
+	row = next((d for d in doc.get("items") or [] if d.name == args.child_docname), None)
+	if not row or not row.get_doc_before_save():
+		return False
+
+	return not any(row.has_value_changed(field) for field in PRICING_ROW_FIELDS) and not any(
+		doc.has_value_changed(field) for field in PRICING_PARENT_FIELDS if doc.meta.has_field(field)
+	)
 
 
 def notify_removed_pricing_rules(args, removed_rules):

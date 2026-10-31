@@ -2191,6 +2191,32 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].discount_percentage, 10)
 		self.assertEqual(si.items[0].rate, 90)
 
+	def test_pricing_rule_posted_on_a_submitted_invoice_is_rechecked(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		other_item = make_item("PR Recheck Other Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			other_item, discount_percentage=40, applicable_for="Customer", customer="_Test Customer 1"
+		)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.items[0].pricing_rules = frappe.as_json([rule.name])
+		si.docstatus = 1
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_pricing_rule_is_rechecked_on_submit_when_the_row_changed(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(item, min_qty=5, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		si.items[0].qty = 1
+		si.submit()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_cumulative_totals_are_read_once_per_document(self):
 		from erpnext.accounts.doctype.pricing_rule import utils
