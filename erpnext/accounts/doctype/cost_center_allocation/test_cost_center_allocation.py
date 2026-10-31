@@ -333,6 +333,19 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 		)
 		self.assertRaises(WrongPercentageAllocation, cca.save)
 
+	def test_total_percentage_with_decimals(self):
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{
+				"Sub Cost Center 1 - _TC": 64.07,
+				"Sub Cost Center 2 - _TC": 3.95,
+				"Sub Cost Center 3 - _TC": 17.15,
+				"Sub Cost Center 4 - _TC": 14.83,
+			},
+		)
+		self.assertEqual(cca.docstatus, 1)
+
 	def test_two_allocations_with_same_valid_from(self):
 		create_cost_center_allocation(
 			"_Test Company",
