@@ -28,6 +28,10 @@ def get_pricing_rules(args, doc=None):
 	pricing_rules = []
 	values = {}
 
+	# used as a column name in the queries below
+	if args.transaction_type not in ("buying", "selling"):
+		frappe.throw(_("Invalid Transaction Type"))
+
 	if not frappe.db.exists("Pricing Rule", {"disable": 0, args.transaction_type: 1}):
 		return
 
