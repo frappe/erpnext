@@ -4026,6 +4026,10 @@ class TestJobCard(ERPNextTestSuite):
 		second_request.items[0].qty = 20
 		self.assertRaises(frappe.ValidationError, second_request.submit)
 
+		duplicate = frappe.copy_doc(first_request)
+		duplicate.items[0].qty = 20
+		self.assertRaises(frappe.ValidationError, duplicate.submit)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_material_request_updates_job_card_requested_qty(self):
 		workstation = make_jc_review_workstation()
