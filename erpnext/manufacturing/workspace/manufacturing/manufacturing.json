@@ -339,9 +339,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Visual Plant Floor",
+   "label": "Plant Builder",
    "link_count": 0,
-   "link_to": "visual-plant-floor",
+   "link_to": "plant-builder",
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
@@ -385,7 +385,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-30 12:33:46.909819",
+ "modified": "2026-11-02 09:27:04.558399",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",
