@@ -1021,40 +1021,33 @@ class TestPickList(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_work_order_pick_uses_serials_reserved_for_it(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.mapper import (
-			create_pick_list as create_pick_list_from_wo,
-		)
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-
-		raw_material = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PL-WO-SN-.#####"}
-		).name
-		finished_good = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
-		make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=4, basic_rate=100)
-		work_order = make_wo_order_test_record(
-			production_item=finished_good,
-			bom_no=bom.name,
-			qty=2,
-			reserve_stock=1,
-			source_warehouse="_Test Warehouse - _TC",
-			wip_warehouse="_Test Warehouse 2 - _TC",
-		)
-		sre_name = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": work_order.name})
+		pick_list = make_work_order_pick_list_with_reserved_serials()
+		sre_name = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": pick_list.work_order})
 		reserved_serial_nos = frappe.get_all(
 			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
 		)
 
-		pick_list = create_pick_list_from_wo(work_order.name, None, 2)
-		pick_list.save()
 		self.assertEqual(
 			sorted(sn for row in pick_list.locations for sn in get_serial_nos(row.serial_no)),
-			sorted(SerialBatchIdentity("Serial No").get_numbers(raw_material, reserved_serial_nos)),
+			sorted(
+				SerialBatchIdentity("Serial No").get_numbers(
+					pick_list.locations[0].item_code, reserved_serial_nos
+				)
+			),
 		)
 		pick_list.submit()
 
 		self.assertEqual(pick_list.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_stock_entry_from_work_order_pick_list_moves_picked_serials(self):
+		pick_list = make_work_order_pick_list_with_reserved_serials()
+		pick_list.submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.submit()
+
+		self.assertEqual(stock_entry.items[0].serial_no, pick_list.locations[0].serial_no)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_pick_leaves_stock_reserved_for_other_orders(self):
@@ -3126,3 +3119,29 @@ class TestPickList(ERPNextTestSuite):
 			"Pick List", "", "name", 0, 20, {"company": so.company, "customer": so.customer}
 		)
 		self.assertIn(pl.name, [row["name"] for row in result])
+
+
+def make_work_order_pick_list_with_reserved_serials():
+	"""Saved pick list for a Work Order that reserves 2 of 4 serial nos of its raw material."""
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as create_pick_list_from_wo
+	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+	raw_material = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PL-WO-SN-.#####"}
+	).name
+	finished_good = make_item(properties={"is_stock_item": 1}).name
+	bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+	make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=4, basic_rate=100)
+	work_order = make_wo_order_test_record(
+		production_item=finished_good,
+		bom_no=bom.name,
+		qty=2,
+		reserve_stock=1,
+		source_warehouse="_Test Warehouse - _TC",
+		wip_warehouse="_Test Warehouse 2 - _TC",
+	)
+
+	pick_list = create_pick_list_from_wo(work_order.name, None, 2)
+	pick_list.save()
+	return pick_list
