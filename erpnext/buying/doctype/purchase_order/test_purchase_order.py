@@ -1410,10 +1410,20 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
 	def test_update_items_adds_variant_fg_item_without_bom(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
 		from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 			make_subcontracted_variant,
 		)
 
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
 		variant, _ = make_subcontracted_variant()
 		po = create_purchase_order(
 			rm_items=[
