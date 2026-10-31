@@ -547,6 +547,9 @@ class SalesOrder(SellingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
+		if status == "Closed":
+			self.validate_no_reserved_stock()
+
 		self.set_status(update=True, status=status)
 		# Upon Sales Order Re-open, check for credit limit.
 		# Limit should be checked after the 'Hold/Closed' status is reset.
@@ -556,6 +559,15 @@ class SalesOrder(SellingController):
 		self.notify_update()
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
+
+	def validate_no_reserved_stock(self):
+		"""Closing must not strand reserved stock; the user unreserves it deliberately (like row close)."""
+		if has_reserved_stock(self.doctype, self.name):
+			frappe.throw(
+				_("Sales Order {0} has reserved stock. Unreserve it before closing.").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -1817,9 +1829,15 @@ def make_work_orders(items: str, sales_order: str, company: str, project: str | 
 
 @frappe.whitelist()
 def update_status(status, name):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	frappe.has_permission("Sales Order", "submit", name, throw=True)
 
 	so = frappe.get_doc("Sales Order", name)
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
