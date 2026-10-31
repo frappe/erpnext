@@ -1324,6 +1324,22 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		self.assertRaisesRegex(frappe.ValidationError, pos_return.consolidated_invoice, pos_return.cancel)
 
+	def test_update_payments_refuses_negative_amount_and_other_modes(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos = create_pos_invoice(pos_profile=self.pos_profile.name, rate=1000, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 400})
+		pos.insert().submit()
+
+		for payment, message in (
+			({"mode_of_payment": "Cash", "amount": -300}, "must be greater than 0"),
+			({"mode_of_payment": "Bank Draft", "amount": 200}, "is not allowed in POS Profile"),
+		):
+			with self.subTest(payment=payment):
+				self.assertRaisesRegex(
+					frappe.ValidationError, message, pos.update_payments, payments=[payment]
+				)
+				self.assertEqual(frappe.db.get_value("POS Invoice", pos.name, "paid_amount"), 400)
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name

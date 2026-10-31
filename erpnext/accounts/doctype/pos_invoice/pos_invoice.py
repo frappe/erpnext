@@ -846,6 +846,22 @@ class POSInvoice(SalesInvoice):
 
 				return pay_req
 
+	def validate_payments_to_collect(self, payments):
+		allowed_modes = frappe.get_all(
+			"POS Payment Method", filters={"parent": self.pos_profile}, pluck="mode_of_payment"
+		)
+		for payment in payments:
+			payment = frappe._dict(payment)
+			if flt(payment.amount) <= 0:
+				frappe.throw(_("Payment amount must be greater than 0."))
+
+			if payment.mode_of_payment not in allowed_modes:
+				frappe.throw(
+					_("Mode of Payment {0} is not allowed in POS Profile {1}.").format(
+						bold(payment.mode_of_payment), bold(self.pos_profile)
+					)
+				)
+
 	def get_new_payment_request(self, mop):
 		payment_gateway_account = frappe.db.get_value(
 			"Payment Gateway Account",
@@ -887,10 +903,12 @@ class POSInvoice(SalesInvoice):
 		if pr:
 			return frappe.get_doc("Payment Request", pr)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def update_payments(self, payments):
 		if self.status == "Consolidated":
 			frappe.throw(_("Create Payment Entry for Consolidated POS Invoices."))
+
+		self.validate_payments_to_collect(payments)
 
 		paid_amount = flt(self.paid_amount, self.precision("paid_amount"))
 		total = flt(
