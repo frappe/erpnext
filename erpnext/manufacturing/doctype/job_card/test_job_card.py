@@ -4387,6 +4387,44 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "requested_qty"), 0)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_material_requests_skip_work_order_pending_check(self):
+		workstation = make_jc_review_workstation()
+		first_operation = make_jc_review_operation(workstation)
+		second_operation = make_jc_review_operation(workstation)
+		rm_item = make_jc_review_item()
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": rm_item, "qty": 3, "operation": first_operation},
+				{"item_code": rm_item, "qty": 2, "operation": second_operation},
+			],
+			[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 60},
+				{"operation": second_operation, "workstation": workstation, "time_in_mins": 60},
+			],
+			transfer_material_against="Job Card",
+		)
+		first_card, second_card = get_jc_review_job_cards(wo.name)
+
+		first_request = make_material_request(first_card.name)
+		first_request.schedule_date = today()
+		first_request.submit()
+
+		transfer = make_stock_entry_from_jc(first_card.name)
+		transfer.insert()
+		transfer.submit()
+
+		second_request = make_material_request(second_card.name)
+		second_request.schedule_date = today()
+		second_request.submit()
+
+		self.assertEqual(second_request.docstatus, 1)
+		self.assertEqual(
+			frappe.get_all("Work Order Item", filters={"parent": wo.name}, pluck="requested_qty"), [0, 0]
+		)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_two_operators_on_one_card_take_one_workstation_slot(self):
 		workstation = make_jc_review_workstation(capacity=2)
 		operation = make_jc_review_operation(workstation)

@@ -367,7 +367,8 @@ class MaterialRequest(BuyingController):
 		self.validate_pending_qty_in_work_order()
 
 	def validate_pending_qty_in_work_order(self):
-		if not self.work_order or self.material_request_type != "Material Transfer":
+		"""Job card requests are tracked on the job card, not the work order."""
+		if not self.work_order or self.job_card or self.material_request_type != "Material Transfer":
 			return
 
 		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
