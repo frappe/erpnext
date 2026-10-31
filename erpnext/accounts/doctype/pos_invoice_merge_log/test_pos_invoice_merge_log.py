@@ -153,6 +153,18 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		self.assertEqual(consolidated.docstatus, 1)
 		self.assertTrue(any(payment.mode_of_payment == mode.name for payment in consolidated.payments))
 
+	def test_consolidation_for_customer_on_hold(self):
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
+		pos_inv.save()
+		pos_inv.submit()
+		frappe.db.set_value("Customer", pos_inv.customer, "on_hold", 1)
+
+		self.make_closing_entry()
+
+		pos_inv.load_from_db()
+		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
+
 	def test_consolidation_and_return_do_not_consume_coupon_again(self):
 		test_create_test_data()
 		frappe.db.set_value("Coupon Code", "SAVE30", {"used": 0, "maximum_use": 1})
