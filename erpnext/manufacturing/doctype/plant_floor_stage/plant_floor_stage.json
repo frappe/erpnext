@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "creation": "2026-10-31 11:19:28.131391",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "stage_name",
+  "workstation",
+  "workstation_type",
+  "operation",
+  "column_break_stage",
+  "semi_finished_good",
+  "yield_percentage",
+  "time_in_mins"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "stage_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Stage Name",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Workstation",
+   "options": "Workstation",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "workstation.workstation_type",
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operation",
+   "options": "Operation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_stage",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "description": "Item this stage makes. Leave it empty on the packing stage, which makes the finished good.",
+   "fieldname": "semi_finished_good",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Semi-finished Good",
+   "options": "Item",
+   "show_description_on_click": 1
+  },
+  {
+   "columns": 1,
+   "default": "100",
+   "description": "Share of the weight that comes out of this stage.",
+   "fieldname": "yield_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Yield",
+   "show_description_on_click": 1
+  },
+  {
+   "columns": 1,
+   "default": "30",
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Time (Minutes)",
+   "non_negative": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-31 11:24:27.415390",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Plant Floor Stage",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
