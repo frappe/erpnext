@@ -458,6 +458,40 @@ class TestAccount(ERPNextTestSuite):
 		self.assertEqual(frappe.get_all("Account", {"account_number": "9627011"}, pluck="name"), [owner])
 		self.assertEqual(frappe.db.get_value("Account", other, "account_name"), "Number Taker")
 
+	def test_freeze_account_without_frozen_entries_role(self):
+		account = frappe.get_doc("Account", "Cash - _TC")
+		account.run_method("onload")
+		self.assertFalse(account.get_onload().get("can_freeze_account"))
+
+		frappe.db.set_value("Company", "_Test Company", "role_allowed_for_frozen_entries", "Accounts Manager")
+		account = frappe.get_doc("Account", "Cash - _TC")
+		account.run_method("onload")
+		self.assertTrue(account.get_onload().get("can_freeze_account"))
+
+	def test_freeze_parent_company_account_syncs_to_child_company(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+		frappe.db.set_value(
+			"Company", "_Test Company 3", "role_allowed_for_frozen_entries", "Accounts Manager"
+		)
+
+		account = frappe.new_doc("Account")
+		account.account_name = "Test Freeze Sync Account"
+		account.parent_account = "Temporary Accounts - _TC3"
+		account.company = "_Test Company 3"
+		account.insert()
+
+		account.freeze_account = "Yes"
+		account.save()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Account",
+				{"account_name": "Test Freeze Sync Account", "company": "_Test Company 4"},
+				"freeze_account",
+			),
+			"Yes",
+		)
+
 	def test_update_account_number_with_deprecated_from_descendant(self):
 		account = create_account(
 			account_name="Deprecated Argument Account",
