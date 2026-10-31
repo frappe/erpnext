@@ -7,15 +7,8 @@ from frappe.core.doctype.user_permission.user_permission import add_user_permiss
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
-<<<<<<< HEAD
-=======
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
-	make_subcontracted_variant,
-)
-from erpnext.tests.permission_test_utils import as_user, make_company_fenced_user
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 120389a (test(stock): item search shows items of a permitted company with % in its name)
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 
 def add_default_params(func, doctype):
@@ -59,45 +52,25 @@ class TestQueries(unittest.TestCase):
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
 
-<<<<<<< HEAD
-=======
-	def test_item_query_with_percent_in_permitted_company(self):
-		company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "_Test 100% Company",
-				"abbr": "_T100",
-				"default_currency": "INR",
-				"country": "India",
-			}
-		).insert()
-		item = make_item(
-			properties={
-				"is_stock_item": 0,
-				"restrict_to_companies": 1,
-				"allowed_companies": [{"company": company.name}],
-			}
+	def test_item_query_with_percent_in_permitted_item_group(self):
+		if not frappe.db.exists("Item Group", "_Test 100% Item Group"):
+			frappe.get_doc(
+				{
+					"doctype": "Item Group",
+					"item_group_name": "_Test 100% Item Group",
+					"parent_item_group": "All Item Groups",
+				}
+			).insert()
+		item = make_item(properties={"is_stock_item": 0, "item_group": "_Test 100% Item Group"})
+		user = make_fenced_user(
+			"item-query-percent@example.com", ["Stock User"], [("Item Group", "_Test 100% Item Group")]
 		)
-		user = make_company_fenced_user("item-query-percent@example.com", ["Stock User"], company.name)
 
 		with as_user(user):
 			items = queries.item_query("Item", item.name, "name", 0, 20, {})
 
 		self.assertIn(item.name, [row[0] for row in items])
 
-	def test_subcontracted_item_query(self):
-		variant, _ = make_subcontracted_variant()
-		item_without_bom = make_item(
-			"Subcontracted Item Without BOM", {"is_stock_item": 1, "is_sub_contracted_item": 1}
-		)
-		query = add_default_params(queries.subcontracted_item_query, "Item")
-
-		items = query(txt="Subcontracted", page_len=100)
-
-		self.assert_nested_in(variant.name, items)
-		self.assertNotIn(item_without_bom.name, [row[0] for row in items])
-
->>>>>>> 120389a (test(stock): item search shows items of a permitted company with % in its name)
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")
 
