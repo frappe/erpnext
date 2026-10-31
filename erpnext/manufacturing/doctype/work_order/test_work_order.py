@@ -2022,6 +2022,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		mr = self.submit_material_request(work_order.name)
 		self.assertEqual(mr.docstatus, 1)
 
+	def test_partial_qty_rounds_up_whole_number_demand_below_precision(self):
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM", "valuation_rate": 100}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 1}], quantity=10000)
+		work_order = make_review_work_order(fg, bom.name, 10000)
+
+		mr = make_material_request(work_order.name, for_qty=1)
+		self.assertEqual([row.qty for row in mr.items], [1])
+
 	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
 
