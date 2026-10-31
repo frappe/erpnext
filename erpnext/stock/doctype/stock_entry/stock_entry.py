@@ -746,8 +746,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
 			if flt(d.transfer_qty):
+				secondary_items_qty = sum(
+					flt(item.transfer_qty)
+					for item in self.items
+					if item.bom_secondary_item == d.bom_secondary_item
+					and not item.s_warehouse
+					and not item.set_basic_rate_manually
+					and not is_costed_out_of_finished_item(item)
+				)
 				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
-				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / d.transfer_qty
+				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 				has_derived_rate = True
 
 		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
