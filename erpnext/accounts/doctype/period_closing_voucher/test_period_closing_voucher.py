@@ -9,6 +9,7 @@ from frappe.utils import flt, formatdate, getdate, today
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher import (
+	get_period_start_end_date,
 	process_gl_and_closing_entries,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -941,6 +942,34 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertRaisesRegex(
 			frappe.ValidationError, f"Period Closing Entry {next_pcv.name} exists after", pcv.cancel
 		)
+
+	def test_period_dates_need_read_permission(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		user = create_user_with_roles("pcv_stock_user@example.com", "Stock User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+
+		self.assertRaises(
+			frappe.PermissionError, get_period_start_end_date, "_Test Fiscal Year 2021", "Test PCV Company"
+		)
+
+	def test_period_dates_need_permission_on_requested_company(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		user = create_user_with_roles("pcv_restricted_accounts_manager@example.com", "Accounts Manager").name
+		add_user_permission("Company", "_Test Company", user)
+
+		with self.set_user(user):
+			get_period_start_end_date("_Test Fiscal Year 2021", "_Test Company")
+			self.assertRaises(
+				frappe.PermissionError,
+				get_period_start_end_date,
+				"_Test Fiscal Year 2021",
+				"Test PCV Company",
+			)
 
 
 def create_account():

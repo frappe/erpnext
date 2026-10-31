@@ -723,6 +723,9 @@ def delete_closing_entries(voucher_no):
 
 @frappe.whitelist()
 def get_period_start_end_date(fiscal_year, company):
+	frappe.get_doc(
+		{"doctype": "Period Closing Voucher", "company": company, "fiscal_year": fiscal_year}
+	).check_permission("read")
 	fy_start_date, fy_end_date = frappe.db.get_value(
 		"Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"]
 	)
