@@ -4,8 +4,10 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_purchase_invoice_from_receipt,
 )
@@ -78,6 +80,27 @@ class TestPurchaseTaxesandChargesTemplate(ERPNextTestSuite):
 
 		purchase_invoice.append("taxes", get_deduct_tax_row("Valuation", "_Test Account Customs Duty - _TC"))
 		self.assertRaisesRegex(frappe.ValidationError, DEDUCT_WITH_VALUATION_MESSAGE, purchase_invoice.save)
+
+	def test_deduct_with_valuation_category_in_auto_repeat_of_existing_purchase_order(self):
+		purchase_order = create_purchase_order(do_not_save=True)
+		purchase_order.items[0].schedule_date = add_days(today(), 90)
+		purchase_order.append("taxes", get_deduct_tax_row("Valuation"))
+		with patch("erpnext.controllers.buying_controller.validate_deduct_with_valuation_category"):
+			purchase_order.insert()
+			purchase_order.submit()
+
+		auto_repeat = frappe.get_doc(
+			{
+				"doctype": "Auto Repeat",
+				"reference_doctype": "Purchase Order",
+				"reference_document": purchase_order.name,
+				"frequency": "Monthly",
+				"start_date": add_days(today(), -1),
+			}
+		).insert()
+
+		repeated_order = auto_repeat.make_new_document()
+		self.assertEqual(repeated_order.taxes[0].add_deduct_tax, "Deduct")
 
 
 def get_deduct_tax_row(category, account_head="_Test Account Shipping Charges - _TC"):

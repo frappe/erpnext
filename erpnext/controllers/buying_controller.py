@@ -465,6 +465,8 @@ class BuyingController(SubcontractingController):
 		source_fields = ("purchase_order", "purchase_receipt", "purchase_invoice", "supplier_quotation")
 		source_names = {item.get(field) for item in self.get("items") for field in source_fields}
 		source_names.update((self.get("amended_from"), self.get("return_against")))
+		if self.get("auto_repeat"):
+			source_names.add(frappe.db.get_value("Auto Repeat", self.auto_repeat, "reference_document"))
 		return source_names - {None, ""}
 
 	def get_deduct_with_valuation_heads_from_source(self) -> set:
