@@ -1031,31 +1031,39 @@ class SalesOrder(SellingController):
 
 	@frappe.whitelist()
 	def create_delivery_schedule(self, child_row, schedules):
+		self.check_permission("write")
+
 		if isinstance(child_row, dict):
 			child_row = frappe._dict(child_row)
 
 		if isinstance(schedules, str):
 			schedules = parse_json(schedules)
 
+		# trust the server-side row, never the client's item/uom/qty
+		item_row = next((r for r in self.items if r.name == child_row.name), None)
+		if not item_row:
+			frappe.throw(_("Row {0} does not belong to this Sales Order").format(child_row.name))
+
+		schedules = [frappe._dict(row) for row in schedules]
+		conversion_factor = flt(item_row.conversion_factor) or 1.0
+
+		total_qty = sum(flt(row.qty) for row in schedules)
+		if flt(total_qty, item_row.precision("qty")) > flt(item_row.qty, item_row.precision("qty")):
+			frappe.throw(_("Total delivery schedule quantity cannot be greater than the item quantity"))
+
 		names = []
-		first_delivery_date = None
 		for row in schedules:
-			row = frappe._dict(row)
-
-			if not first_delivery_date:
-				first_delivery_date = row.delivery_date
-
 			data = {
 				"delivery_date": row.delivery_date,
 				"qty": row.qty,
-				"uom": child_row.uom,
-				"stock_uom": child_row.stock_uom,
-				"item_code": child_row.item_code,
-				"conversion_factor": child_row.conversion_factor or 1.0,
-				"warehouse": child_row.warehouse,
-				"sales_order_item": child_row.name,
+				"uom": item_row.uom,
+				"stock_uom": item_row.stock_uom,
+				"item_code": item_row.item_code,
+				"conversion_factor": conversion_factor,
+				"warehouse": item_row.warehouse,
+				"sales_order_item": item_row.name,
 				"sales_order": self.name,
-				"stock_qty": row.qty * (child_row.conversion_factor or 1.0),
+				"stock_qty": flt(row.qty) * conversion_factor,
 			}
 
 			if frappe.db.exists("Delivery Schedule Item", row.name):
@@ -1068,10 +1076,13 @@ class SalesOrder(SellingController):
 			names.append(doc.name)
 
 		if names:
-			self.delete_delivery_schedule_items(child_row.name, names)
+			self.delete_delivery_schedule_items(item_row.name, names)
 
-		if first_delivery_date:
-			self.update_delivery_date_based_on_schedule(child_row, first_delivery_date)
+		# keep the row's original date value (a string); the field compares against other string dates
+		dated_schedules = [row for row in schedules if row.delivery_date]
+		if dated_schedules:
+			earliest = min(dated_schedules, key=lambda row: getdate(row.delivery_date))
+			self.update_delivery_date_based_on_schedule(item_row, earliest.delivery_date)
 
 	def update_delivery_date_based_on_schedule(self, child_row, first_delivery_date):
 		for row in self.items:
@@ -2193,7 +2204,13 @@ def make_production_plan(source_name, target_doc=None):
 
 @frappe.whitelist(methods=["POST"])
 def update_status(status, name):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
