@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
@@ -1038,11 +1039,19 @@ class TestPickList(ERPNextTestSuite):
 			qty=2,
 			reserve_stock=1,
 			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="_Test Warehouse 2 - _TC",
 		)
-		self.assertTrue(frappe.db.exists("Stock Reservation Entry", {"voucher_no": work_order.name}))
+		sre_name = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": work_order.name})
+		reserved_serial_nos = frappe.get_all(
+			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
+		)
 
 		pick_list = create_pick_list_from_wo(work_order.name, None, 2)
 		pick_list.save()
+		self.assertEqual(
+			sorted(sn for row in pick_list.locations for sn in get_serial_nos(row.serial_no)),
+			sorted(SerialBatchIdentity("Serial No").get_numbers(raw_material, reserved_serial_nos)),
+		)
 		pick_list.submit()
 
 		self.assertEqual(pick_list.docstatus, 1)
