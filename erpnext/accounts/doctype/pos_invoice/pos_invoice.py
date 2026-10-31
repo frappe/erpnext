@@ -281,12 +281,16 @@ class POSInvoice(SalesInvoice):
 				pluck="parent",
 				limit=1,
 			)
-			frappe.throw(
-				_("You need to cancel POS Closing Entry {} to be able to cancel this document.").format(
+			if pos_closing_entry:
+				msg = _("You need to cancel POS Closing Entry {} to be able to cancel this document.").format(
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
-				),
-				title=_("Not Allowed"),
-			)
+				)
+			else:
+				msg = _("You need to cancel Sales Invoice {0} to be able to cancel this document.").format(
+					get_link_to_form("Sales Invoice", self.consolidated_invoice)
+				)
+
+			frappe.throw(msg, title=_("Not Allowed"))
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ["Payment Ledger Entry", "Serial and Batch Bundle"]
