@@ -131,12 +131,39 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
+		self.validate_party(ref_doc)
 		self.validate_bank_account()
 		self.validate_print_format()
 		self.validate_against_payment_reference()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_party(self, ref_doc):
+		if not self.party_type:
+			return
+
+		party_field = frappe.scrub(self.party_type)
+		if not ref_doc.meta.has_field(party_field):
+			frappe.throw(
+				_("Party Type {0} is not valid for {1} {2}").format(
+					frappe.bold(_(self.party_type)),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Party Type"),
+			)
+
+		if self.party and self.party != ref_doc.get(party_field):
+			frappe.throw(
+				_("{0} {1} is not the {0} of {2} {3}").format(
+					_(self.party_type),
+					frappe.bold(self.party),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Party"),
+			)
 
 	def validate_bank_account(self):
 		if not self.bank_account:
@@ -760,11 +787,12 @@ def make_payment_request(**args):
 			pr.save()
 
 	else:
-		bank_account = (
-			get_party_bank_account(args.get("party_type"), args.get("party"))
-			if args.get("party_type")
-			else ""
+		party_type = args.get("party_type") or (
+			"Supplier" if ref_doc.doctype in ["Purchase Order", "Purchase Invoice"] else "Customer"
 		)
+		party_field = frappe.scrub(party_type)
+		party = ref_doc.get(party_field)
+		bank_account = get_party_bank_account(party_type, party) if args.get("party_type") else ""
 		pr = frappe.new_doc("Payment Request")
 
 		if not args.get("payment_request_type"):
@@ -772,11 +800,10 @@ def make_payment_request(**args):
 				"Outward" if args.get("dt") in ["Purchase Order", "Purchase Invoice"] else "Inward"
 			)
 
-		party_type = args.get("party_type") or "Customer"
 		party_account_currency = ref_doc.get("party_account_currency")
 
 		if not party_account_currency:
-			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
+			party_account = get_party_account(party_type, party, ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
 		subscription_plans = get_subscription_details(ref_doc.doctype, ref_doc.name)
@@ -798,10 +825,11 @@ def make_payment_request(**args):
 				"reference_name": ref_doc.name,
 				"company": ref_doc.get("company"),
 				"party_type": party_type,
-				"party": args.get("party") or ref_doc.get("customer"),
+				"party": party,
 				"bank_account": bank_account,
-				"party_name": args.get("party_name") or ref_doc.get("customer_name"),
-				"make_sales_invoice": (
+				"party_name": ref_doc.get(f"{party_field}_name"),
+				"make_sales_invoice": ref_doc.doctype == "Sales Order"
+				and (
 					args.make_sales_invoice  # new standard
 					or args.order_type == "Shopping Cart"  # compat for webshop app
 				),
