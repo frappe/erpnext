@@ -1873,6 +1873,39 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].discount_percentage, 0)
 		self.assertEqual(si.items[0].rate, 100)
 
+	def test_free_item_of_unmatched_transaction_rule_is_removed(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		item_free_item = make_item("PR Recheck Other Free Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, min_qty=2, price_or_product_discount="Product", free_item=item_free_item, free_qty=1
+		)
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			min_amt=1000,
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=10, rate=100, do_not_submit=True)
+		self.assertEqual(sorted(d.item_code for d in si.items if d.is_free_item), [free_item, item_free_item])
+
+		si.items[0].qty = 5
+		si.save()
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [item_free_item])
+
+		si.items[0].qty = 10
+		si.save()
+		self.assertEqual(sorted(d.item_code for d in si.items if d.is_free_item), [free_item, item_free_item])
+
+		rule.disable = 1
+		rule.save()
+		si.save()
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [item_free_item])
+
 	def test_saved_pricing_rule_stays_on_submit(self):
 		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
 		rule = make_item_pricing_rule(item, discount_percentage=10)
@@ -1916,6 +1949,23 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].discount_percentage, 0)
 		self.assertEqual(si.items[0].rate, 100)
 
+	def test_unmatched_transaction_rule_keeps_free_item_of_item_rule(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, min_qty=2, price_or_product_discount="Product", free_item=free_item, free_qty=1
+		)
+		make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			min_amt=1000000,
+			discount_percentage=10,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=2, do_not_submit=True)
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -1933,6 +1983,7 @@ def make_pricing_rule(**args):
 			"buying": args.buying or 0,
 			"min_qty": args.min_qty or 0.0,
 			"max_qty": args.max_qty or 0.0,
+			"min_amt": args.min_amt or 0.0,
 			"rate_or_discount": args.rate_or_discount or "Discount Percentage",
 			"discount_percentage": args.discount_percentage or 0.0,
 			"rate": args.rate or 0.0,
