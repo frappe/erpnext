@@ -2918,6 +2918,7 @@ def get_reserved_voucher_details(kwargs):
 		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
 		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_inward_order"]],
 		"Work Order": [["Work Order", "production_plan"], ["Work Order", "subcontracting_inward_order"]],
+		"Pick List": [["Pick List", "work_order"]],
 	}.get(kwargs.get("sabb_voucher_type"))
 
 	if not field_mapper or not kwargs.get("sabb_voucher_no"):
@@ -2934,6 +2935,10 @@ def get_reserved_voucher_details(kwargs):
 			"docstatus": ("<", 2),
 		},
 		"Work Order": {
+			"name": kwargs.get("sabb_voucher_no"),
+			"docstatus": ("<", 2),
+		},
+		"Pick List": {
 			"name": kwargs.get("sabb_voucher_no"),
 			"docstatus": ("<", 2),
 		},
