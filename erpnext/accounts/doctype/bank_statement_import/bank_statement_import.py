@@ -13,9 +13,10 @@ import mt940
 import openpyxl
 from frappe import _
 from frappe.core.doctype.data_import.data_import import DataImport
-from frappe.core.doctype.data_import.importer import Importer, ImportFile
+from frappe.core.doctype.data_import.importer import Importer, ImportFile, get_item_at_index
+from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.utils.background_jobs import enqueue
-from frappe.utils.file_manager import get_file, save_file
+from frappe.utils.file_manager import save_file
 from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
@@ -55,6 +56,9 @@ class BankStatementImport(DataImport):
 		super().__init__(*args, **kwargs)
 
 	def validate(self):
+		if self.import_file and (self.is_new() or self.has_value_changed("import_file")):
+			get_readable_file(self.import_file)
+
 		doc_before_save = self.get_doc_before_save()
 		if (
 			not (self.import_file or self.google_sheets_url)
@@ -76,12 +80,17 @@ class BankStatementImport(DataImport):
 			self.validate_google_sheets_url()
 
 	def start_import(self):
-		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
-			self.import_file, self.google_sheets_url
-		)
+		bsi = frappe.get_doc("Bank Statement Import", self.name)
+		bsi.set_delimiters_flag()
+		importer = bsi.get_importer()
+		preview = importer.get_data_for_import_preview()
 
 		if "Bank Account" not in json.dumps(preview["columns"]):
 			frappe.throw(_("Please add the Bank Account column"))
+
+		# an uploaded file gets the import's bank account written in; a Google Sheet cannot
+		if not self.import_file:
+			validate_bank_account_column(importer.import_file, self.bank_account)
 
 		from frappe.utils.background_jobs import is_job_enqueued
 		from frappe.utils.scheduler import is_scheduler_inactive
@@ -171,7 +180,9 @@ def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
 	doc = frappe.get_doc("Bank Statement Import", data_import)
 	doc.check_permission("write")
 
-	_file_doc, content = get_file(mt940_file_path)
+	content = get_readable_file(mt940_file_path).get_content()
+	if isinstance(content, bytes):
+		content = content.decode()
 
 	is_mt940 = is_mt940_format(content)
 	if not is_mt940:
@@ -189,6 +200,8 @@ def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
 
 	if not transactions:
 		frappe.throw(_("Parsed file is not in valid MT940 format or contains no transactions."))
+
+	validate_statement_account(doc.bank_account, transactions.data.get("account_identification"))
 
 	# Use in-memory file buffer instead of writing to temp file
 	csv_buffer = io.StringIO()
@@ -212,8 +225,12 @@ def convert_mt940_to_csv(data_import: str, mt940_file_path: str):
 		parts = raw_amount.strip().split()
 		amount_value = float(parts[0]) if parts else 0.0
 
-		deposit = amount_value if amount_value > 0 else ""
-		withdrawal = abs(amount_value) if amount_value < 0 else ""
+		# the library signs only "D"; "RC" (reversal of a credit) also takes money out
+		status = (txn.data.get("status") or "").upper()
+		is_withdrawal = status in ("D", "RC") if status else amount_value < 0
+
+		deposit = abs(amount_value) if amount_value and not is_withdrawal else ""
+		withdrawal = abs(amount_value) if amount_value and is_withdrawal else ""
 		description = txn.data.get("transaction_details") or txn.data.get("extra_details") or ""
 		reference = get_transaction_reference(txn.data)
 		currency = txn.data.get("currency", "")
@@ -238,6 +255,8 @@ def get_preview_from_template(
 ):
 	bsi = frappe.get_doc("Bank Statement Import", data_import)
 	bsi.check_permission()
+	if import_file:
+		get_readable_file(import_file)
 	return bsi.get_preview_from_template(import_file, google_sheets_url)
 
 
@@ -260,6 +279,74 @@ def download_import_log(data_import_name: str):
 	bsi = frappe.get_doc("Bank Statement Import", data_import_name)
 	bsi.check_permission()
 	return bsi.download_import_log()
+
+
+def get_readable_file(file: str):
+	"""The File for a URL or File name, if the user may read it."""
+	# several Files can share a URL (same content attached elsewhere); any readable one will do
+	file_doc = find_file_by_url(file)
+	if file_doc:
+		return file_doc
+
+	if frappe.db.exists("File", {"file_url": file}):
+		frappe.throw(
+			_("You do not have permission to read file {0}").format(frappe.bold(file)), frappe.PermissionError
+		)
+	if not frappe.db.exists("File", file):
+		frappe.throw(_("File {0} does not exist").format(frappe.bold(file)), frappe.DoesNotExistError)
+
+	file_doc = frappe.get_doc("File", file)
+	file_doc.check_permission("read")
+	return file_doc
+
+
+def validate_bank_account_column(import_file: ImportFile, bank_account: str):
+	"""Check every row, not just the ones in the preview."""
+	index = next(
+		(
+			column.index
+			for column in import_file.columns
+			if column.df and column.df.fieldname == "bank_account" and column.df.parent == "Bank Transaction"
+		),
+		None,
+	)
+	if index is None:
+		frappe.throw(_("Please add the Bank Account column"))
+
+	rows = [row.row_number for row in import_file.data if get_item_at_index(row.data, index) != bank_account]
+	if rows:
+		frappe.throw(
+			_("Rows {0} are for another bank account. Every row must be for Bank Account {1}.").format(
+				", ".join(str(row) for row in rows), frappe.bold(bank_account)
+			),
+			title=_("Wrong Bank Account"),
+		)
+
+
+def validate_statement_account(bank_account: str, account_identification: str | None):
+	"""Refuse an MT940 statement whose :25: account is not this bank account's number or IBAN."""
+	known = [
+		normalize_account(number)
+		for number in frappe.db.get_value("Bank Account", bank_account, ["bank_account_no", "iban"])
+		if number
+	]
+	if not account_identification or not known:
+		return
+
+	# :25: is the IBAN or "bank code/account number", sometimes with a "/currency" suffix
+	statement_account = normalize_account(account_identification)
+	candidates = {statement_account, *statement_account.split("/")}
+	if not candidates.intersection(known):
+		frappe.throw(
+			_(
+				"The statement is for account {0}, which is not the account number or IBAN of Bank Account {1}."
+			).format(frappe.bold(account_identification), frappe.bold(bank_account)),
+			title=_("Wrong Bank Account"),
+		)
+
+
+def normalize_account(number: str) -> str:
+	return re.sub(r"\s", "", number).upper()
 
 
 def is_mt940_format(content: str) -> bool:
@@ -296,12 +383,13 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 	if not data_import.get("payload_count"):
 		data_import.payload_count = len(data) - 1
 
+	file_path = None
 	if import_file_path:
 		add_bank_account(data, bank_account)
-		write_files(import_file, data)
+		file_path = write_files(import_file, data, data_import)
 
 	try:
-		i = Importer(data_import.reference_doctype, data_import=data_import)
+		i = Importer(data_import.reference_doctype, data_import=data_import, file_path=file_path)
 		i.import_data()
 	except Exception:
 		frappe.db.rollback()
@@ -347,19 +435,25 @@ def add_bank_account(data, bank_account):
 			row.append(bank_account)
 
 
-def write_files(import_file, data):
-	"""Write processed data to CSV or Excel files."""
-	full_file_path = import_file.file_doc.get_full_path()
-	parts = import_file.file_doc.get_extension()
-	extension = parts[1]
-	extension = extension.lstrip(".")
+def write_files(import_file, data, data_import) -> str | None:
+	"""Write the rows with the bank account to a new private file attached to the import, and
+	return its URL. The uploaded statement is kept as it is."""
+	extension = import_file.file_doc.get_extension()[1].lstrip(".").lower()
 
 	if extension == "csv":
-		with open(full_file_path, "w", newline="") as file:
-			writer = csv.writer(file)
-			writer.writerows(data)
+		buffer = io.StringIO()
+		csv.writer(buffer).writerows(data)
+		content = buffer.getvalue().encode("utf-8")
 	elif extension in ("xlsx", "xls"):
-		write_xlsx(data, "trans", file_path=full_file_path)
+		buffer = io.BytesIO()
+		write_xlsx(data, "trans", file_path=buffer)
+		content = buffer.getvalue()
+		extension = "xlsx"
+	else:
+		return None
+
+	file_name = f"{data_import.name}-with-bank-account.{extension}"
+	return save_file(file_name, content, data_import.doctype, data_import.name, is_private=1).file_url
 
 
 def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
