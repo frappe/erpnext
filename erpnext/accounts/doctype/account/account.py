@@ -615,8 +615,8 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 		return new_name
 
 
-@frappe.whitelist()
-def merge_account(old, new):
+@frappe.whitelist(methods=["POST"])
+def merge_account(old: str, new: str):
 	_ensure_idle_system()
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
@@ -646,7 +646,7 @@ def merge_account(old, new):
 			exc=InvalidAccountMergeError,
 		)
 
-	if old_account.is_group and new_account.parent_account == old:
+	if old_account.is_group and old in get_ancestors_of("Account", new):
 		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
