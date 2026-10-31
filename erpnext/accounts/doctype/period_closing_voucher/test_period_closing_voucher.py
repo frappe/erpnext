@@ -104,8 +104,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
 		pcv.db_set("gle_processing_status", "Failed")
 
+		# the next closing can be drafted, but not submitted
+		next_pcv = self.make_period_closing_voucher(posting_date="2022-12-31", submit=False)
 		with self.assertRaises(frappe.ValidationError):
-			self.make_period_closing_voucher(posting_date="2022-12-31")
+			next_pcv.submit()
 
 	def test_cost_center_wise_posting(self):
 		surplus_account = create_account()

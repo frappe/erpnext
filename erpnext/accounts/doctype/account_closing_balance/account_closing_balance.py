@@ -164,23 +164,6 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	return entries
 
 
-def set_amount_in_reporting_currency(cle, company, closing_date):
-	reporting_currency_exchange_rate = get_reporting_currency_exchange_rate(company, closing_date)
-	if not reporting_currency_exchange_rate:
-		return
-
-	debit_in_reporting_currency = flt(cle.get("debit", 0) * reporting_currency_exchange_rate)
-	credit_in_reporting_currency = flt(cle.get("credit", 0) * reporting_currency_exchange_rate)
-
-	cle.update(
-		{
-			"reporting_currency_exchange_rate": reporting_currency_exchange_rate,
-			"debit_in_reporting_currency": debit_in_reporting_currency,
-			"credit_in_reporting_currency": credit_in_reporting_currency,
-		}
-	)
-
-
 def get_reporting_currency_exchange_rate(company, closing_date) -> float:
 	default_currency, reporting_currency = frappe.get_cached_value(
 		"Company", company, ["default_currency", "reporting_currency"]

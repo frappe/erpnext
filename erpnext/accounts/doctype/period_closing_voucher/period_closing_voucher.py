@@ -62,7 +62,6 @@ class PeriodClosingVoucher(AccountsController):
 		self.validate_start_and_end_date()
 		self.check_if_previous_year_closed()
 		self.block_if_future_closing_voucher_exists()
-		self.block_if_previous_closing_voucher_incomplete()
 		self.check_closing_account_type()
 		self.check_closing_account_currency()
 		self.validate_accounts_not_frozen()
@@ -180,6 +179,8 @@ class PeriodClosingVoucher(AccountsController):
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 
 	def before_submit(self):
+		self.block_if_previous_closing_voucher_incomplete()
+
 		if not self.has_stock_transactions():
 			return
 
