@@ -306,6 +306,33 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		ps.save()
 		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
 
+	def test_pricing_rule_of_removed_slab_used_in_a_single_doctype_or_missing_doctype_link(self):
+		make_property_setter("Selling Settings", "customer_group", "options", "Pricing Rule", "Text")
+		frappe.get_doc(
+			{
+				"doctype": "Property Setter",
+				"doctype_or_field": "DocField",
+				"doc_type": "_Test Missing Doctype",
+				"field_name": "pricing_rule",
+				"property": "options",
+				"value": "Pricing Rule",
+				"property_type": "Text",
+			}
+		).db_insert()
+		self.addCleanup(frappe.clear_cache, doctype="Selling Settings")
+		self.addCleanup(frappe.flags.pop, "link_fields", None)
+		frappe.flags.pop("link_fields", None)
+
+		ps = make_promotional_scheme_with_two_slabs()
+		pricing_rule = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme_id": ps.price_discount_slabs[1].name}
+		)
+		frappe.db.set_single_value("Selling Settings", "customer_group", pricing_rule)
+
+		ps.remove(ps.price_discount_slabs[1])
+		ps.save()
+		self.assertEqual(frappe.db.get_value("Pricing Rule", pricing_rule, "disable"), 1)
+
 	def test_blank_or_group_warehouse_overlaps_its_warehouses(self):
 		ps = make_promotional_scheme()
 		for warehouse, other_warehouse in (

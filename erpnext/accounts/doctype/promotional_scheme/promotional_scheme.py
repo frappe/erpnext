@@ -363,6 +363,13 @@ def raise_for_transaction_exists(name):
 def get_linked_pricing_rules(pricing_rules):
 	linked_pricing_rules = set()
 	for link_field in get_link_fields("Pricing Rule"):
+		if link_field.issingle is None:
+			continue
+
+		if link_field.issingle:
+			linked_pricing_rules.add(frappe.db.get_single_value(link_field.parent, link_field.fieldname))
+			continue
+
 		linked_pricing_rules.update(
 			frappe.get_all(
 				link_field.parent,
