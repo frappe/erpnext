@@ -1180,7 +1180,8 @@ def make_installation_note(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
 	from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
-	from erpnext.stock.utils import get_valid_serial_nos
+	from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+	from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 	# returned_qty_map is keyed by DN Item row and already in the row's sales UOM
 	returned_qty_map = get_returned_qty_map(source_name)
@@ -1188,11 +1189,12 @@ def make_installation_note(
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(returned_qty_map.get(obj.name, 0)) - flt(obj.installed_qty)
 
-		if obj.serial_no:
+		serial_ids = get_serial_batch_list_from_item(obj)[0]
+		if serial_ids:
 			returned = set(get_returned_serial_nos(obj, source_parent))
-			target.serial_no = "\n".join(s for s in get_valid_serial_nos(obj.serial_no) if s not in returned)
-		else:
-			target.serial_no = obj.serial_no
+			serial_ids = [serial_id for serial_id in serial_ids if serial_id not in returned]
+		target.serial_no = "\n".join(SerialBatchIdentity("Serial No").get_numbers(obj.item_code, serial_ids))
+		target.serial_and_batch_bundle = None
 
 	doclist = get_mapped_doc(
 		"Delivery Note",

@@ -58,10 +58,16 @@ class MaintenanceVisit(TransactionBase):
 			if not d.serial_no:
 				continue
 			serial = frappe.db.get_value(
-				"Serial No", d.serial_no, ["serial_no", "warehouse", "customer"], as_dict=True
+				"Serial No", d.serial_no, ["serial_no", "item_code", "warehouse", "customer"], as_dict=True
 			)
 			if not serial:
-				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
+				frappe.throw(_("Row #{0}: Selected Serial No no longer exists.").format(d.idx))
+			if serial.item_code != d.item_code:
+				frappe.throw(
+					_("Serial No {0} does not belong to Item {1}").format(
+						escape_html(serial.serial_no), escape_html(d.item_code)
+					)
+				)
 			if serial.warehouse and was_delivered_to(d.serial_no, d.item_code, self.customer):
 				continue
 			validate_serial_no_for_customer(serial, self.customer)

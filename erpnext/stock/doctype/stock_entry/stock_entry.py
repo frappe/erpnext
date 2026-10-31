@@ -60,6 +60,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_empty_batches_based_work_order,
 	get_serial_or_batch_items,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity, SerialBatchNotFoundError
 from erpnext.stock.stock_ledger import (
 	NegativeStockError,
 	get_previous_sle,
@@ -446,12 +447,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if self.pro_doc.has_serial_no:
 			serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
+			if serial_nos:
+				try:
+					serial_nos = SerialBatchIdentity("Serial No").resolve(
+						row.item_code, serial_nos, ignore_permissions=True
+					)
+				except SerialBatchNotFoundError:
+					if not frappe.flags.mute_messages:
+						frappe.clear_last_message()
+					return True
 			if not serial_nos and row.serial_and_batch_bundle:
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 			if serial_nos:
 				valid_serial_nos = frappe.get_all(
 					"Serial No",
-					filters={"name": ("in", serial_nos), "work_order": self.work_order},
+					filters={
+						"name": ("in", serial_nos),
+						"item_code": row.item_code,
+						"work_order": self.work_order,
+					},
 					pluck="name",
 				)
 				return bool(set(serial_nos) - set(valid_serial_nos))
@@ -576,7 +590,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if source_bundle.get("serial_nos"):
 				serial_nos = get_serial_nos(source_bundle["serial_nos"])
 			elif source_row.serial_no:
-				serial_nos = get_serial_nos(source_row.serial_no)
+				serial_nos = SerialBatchIdentity("Serial No").resolve(
+					source_row.item_code, get_serial_nos(source_row.serial_no), ignore_permissions=True
+				)
 
 			serial_nos = [serial_no for serial_no in serial_nos if serial_no not in used.serial_nos][
 				: int(row.transfer_qty)
@@ -2440,7 +2456,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 					if row.use_serial_batch_fields:
 						if serial_nos_list and not row.serial_no:
-							row.serial_no = "\n".join(serial_nos_list)
+							row.serial_no = "\n".join(
+								SerialBatchIdentity("Serial No").get_numbers(row.item_code, serial_nos_list)
+							)
 						if batch_nos_list and not row.batch_no:
 							row.batch_no = next(iter(batch_nos_list.keys()))
 
@@ -3793,22 +3811,26 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.batch_no:
 				details.batch_no[d.batch_no] += d.qty
 				if d.serial_no:
-					details.batchwise_sn[d.batch_no].extend(d.serial_no.split("\n"))
+					details.batchwise_sn[d.batch_no].append(d.serial_number)
 			elif d.serial_no:
-				details.serial_no.append(d.serial_no)
+				details.serial_no.append(d.serial_number)
 
 		return itemwise_serial_batch_qty
 
 	def get_reserved_materials(self):
 		doctype = frappe.qb.DocType("Stock Reservation Entry")
 		serial_batch_doc = frappe.qb.DocType("Serial and Batch Entry")
+		serial_no = frappe.qb.DocType("Serial No")
 
 		query = (
 			frappe.qb.from_(doctype)
 			.inner_join(serial_batch_doc)
 			.on(doctype.name == serial_batch_doc.parent)
+			.left_join(serial_no)
+			.on((serial_no.name == serial_batch_doc.serial_no) & (serial_no.item_code == doctype.item_code))
 			.select(
 				serial_batch_doc.serial_no,
+				serial_no.serial_no.as_("serial_number"),
 				serial_batch_doc.batch_no,
 				serial_batch_doc.qty,
 				doctype.item_code,
@@ -4439,7 +4461,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
-		batches = sorted(batches.items(), key=lambda x: x[0])
+		numbers = SerialBatchIdentity("Batch").get_number_map(list(batches))
+		batches = sorted(batches.items(), key=lambda x: numbers.get(x[0], x[0]))
 
 		for batch_no, batch_qty in batches:
 			if qty_to_be_consumed <= 0 or batch_qty <= 0:
@@ -4482,7 +4505,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"expense_account": item.expense_account,
 			"cost_center": item.buying_cost_center,
 			"original_item": item.original_item,
-			"serial_no": "\n".join(row.serial_nos)
+			"serial_no": "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(item.item_code, row.serial_nos)
+			)
 			if row.serial_nos and not row.batches_to_be_consume
 			else "",
 			"use_serial_batch_fields": use_serial_batch_fields,
@@ -4502,7 +4527,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 				if row.serial_nos:
 					serial_nos = row.serial_nos[0 : cint(batch_qty)]
-					ste_item_details["serial_no"] = "\n".join(serial_nos)
+					ste_item_details["serial_no"] = "\n".join(
+						SerialBatchIdentity("Serial No").get_numbers(item.item_code, serial_nos)
+					)
 
 					row.serial_nos = [sn for sn in row.serial_nos if sn not in serial_nos]
 
@@ -4815,12 +4842,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 							if getdate(self.posting_date) > getdate(expiry_date):
 								frappe.throw(
 									_("Batch {0} of Item {1} has expired.").format(
-										item.batch_no, item.item_code
+										SerialBatchIdentity("Batch").get_label(item.batch_no), item.item_code
 									)
 								)
 					else:
 						frappe.throw(
-							_("Batch {0} of Item {1} is disabled.").format(item.batch_no, item.item_code)
+							_("Batch {0} of Item {1} is disabled.").format(
+								SerialBatchIdentity("Batch").get_label(item.batch_no), item.item_code
+							)
 						)
 
 	def update_subcontract_order_supplied_items(self):
@@ -5622,10 +5651,11 @@ def validate_sample_quantity(
 		retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code)
 	max_retain_qty = frappe.get_value("Item", item_code, "sample_quantity")
 	if retainted_qty >= max_retain_qty:
+		batch_label = SerialBatchIdentity("Batch").get_label(batch_no)
 		frappe.msgprint(
 			_(
 				"Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
-			).format(retainted_qty, batch_no, item_code, batch_no),
+			).format(retainted_qty, batch_label, item_code, batch_label),
 			alert=True,
 		)
 		sample_quantity = 0
@@ -5633,7 +5663,7 @@ def validate_sample_quantity(
 	if cint(sample_quantity) > cint(qty_diff):
 		if batch_no:
 			message = _("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
-				max_retain_qty, batch_no, item_code
+				max_retain_qty, SerialBatchIdentity("Batch").get_label(batch_no), item_code
 			)
 		else:
 			message = _("Maximum Samples - {0} can be retained for Item {1}.").format(
@@ -5739,13 +5769,10 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 				for batch_no, qty in row.batch_nos.items():
 					item_data.batch_details[batch_no] += qty
 
-			if row.serial_no:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
-				item_data.serial_nos.sort()
-
-			elif row.serial_nos:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
-				item_data.serial_nos.sort()
+			known = set(item_data.serial_nos)
+			item_data.serial_nos.extend(
+				serial_no for serial_no in row.serial_nos or [] if serial_no not in known
+			)
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
 			buckets = _get_consumption_buckets(available_materials, key) or [
@@ -5753,7 +5780,15 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 			]
 			_deduct_consumed_material(buckets, row)
 
+	sort_serial_nos_by_number(available_materials)
 	return available_materials
+
+
+def sort_serial_nos_by_number(available_materials):
+	serial_nos = [serial_no for material in available_materials.values() for serial_no in material.serial_nos]
+	numbers = SerialBatchIdentity("Serial No").get_number_map(serial_nos)
+	for material in available_materials.values():
+		material.serial_nos.sort(key=lambda name: numbers.get(name, name))
 
 
 def _get_available_material(available_materials, key, row):
@@ -5789,7 +5824,7 @@ def _deduct_consumed_material(buckets, row):
 		_deduct_consumed_batch_qty(buckets, batch_no, batch_qty)
 		consumed_qty -= batch_qty
 
-	for serial_no in get_serial_nos(row.serial_no or row.serial_nos):
+	for serial_no in row.serial_nos or []:
 		bucket = next((bucket for bucket in buckets if serial_no in bucket.serial_nos), None)
 		if not bucket:
 			continue
@@ -5903,6 +5938,11 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 			if bundle_data.get(key):
 				row.update(bundle_data.get(key))
 
+	for row in data:
+		if row.serial_no and not row.serial_nos:
+			row.serial_nos = SerialBatchIdentity("Serial No").resolve(
+				row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True
+			)
 	return data
 
 
@@ -5973,10 +6013,12 @@ def get_batchwise_serial_nos(item_code, row):
 		serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"item_code": item_code, "batch_no": batch_no, "name": ("in", row.serial_nos)},
+			fields=["name", "serial_no"],
 		)
 
 		if serial_nos:
-			batchwise_serial_nos[batch_no] = sorted([serial_no.name for serial_no in serial_nos])
+			serial_nos = sorted(serial_nos, key=lambda serial: serial.serial_no)
+			batchwise_serial_nos[batch_no] = [serial.name for serial in serial_nos]
 
 	return batchwise_serial_nos
 

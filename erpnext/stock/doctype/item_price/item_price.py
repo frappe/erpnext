@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Cast_
 
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
 
 class ItemPriceDuplicateItem(frappe.ValidationError):
 	pass
@@ -129,7 +131,9 @@ class ItemPrice(Document):
 	def validate_batch(self):
 		if self.batch_no and frappe.db.get_value("Batch", self.batch_no, "item") != self.item_code:
 			frappe.throw(
-				_("Batch {0} does not belong to Item {1}").format(bold(self.batch_no), bold(self.item_code))
+				_("Batch {0} does not belong to Item {1}").format(
+					bold(SerialBatchIdentity("Batch").get_label(self.batch_no)), bold(self.item_code)
+				)
 			)
 
 	def before_save(self):

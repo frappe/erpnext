@@ -17,6 +17,7 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.valuation_adjustment import validate_no_later_adjustment_entry
 
@@ -248,7 +249,8 @@ class StockLedgerEntry(Document):
 			if mismatches:
 				frappe.throw(
 					_("Serial No {0} is not available in the selected inventory dimensions: {1}").format(
-						frappe.bold(serial_no), frappe.bold(", ".join(mismatches))
+						frappe.bold(SerialBatchIdentity("Serial No").get_label(serial_no)),
+						frappe.bold(", ".join(mismatches)),
 					),
 					title=_("Incorrect Inventory Dimension"),
 					exc=SerialNoInventoryDimensionError,
@@ -388,7 +390,9 @@ class StockLedgerEntry(Document):
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):
 					frappe.throw(
-						_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code)
+						_("Batch {0} of Item {1} has expired.").format(
+							SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+						)
 					)
 
 	def validate_and_set_fiscal_year(self):

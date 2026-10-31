@@ -11,6 +11,7 @@ from frappe.utils.nestedset import get_descendants_of
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
 	maintains_fifo_queue,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
 
 SLE_FIELDS = (
@@ -37,7 +38,7 @@ SLE_FIELDS = (
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_data(filters):

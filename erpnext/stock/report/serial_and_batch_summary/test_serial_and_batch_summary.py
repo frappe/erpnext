@@ -90,3 +90,34 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 			rows = get_batch_nos("Batch", "Summary-Hidden", "name", 0, 5, {"item_code": item})
 
 		self.assertEqual(rows, [])
+
+	def test_batch_filter_shows_numbers_to_a_select_only_role(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_batch_nos
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc(doctype="Batch", item=item, batch_id="Summary-Filter-Batch").insert()
+		user = "summary-sales-user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				doctype="User",
+				email=user,
+				first_name="Summary",
+				send_welcome_email=0,
+				roles=[{"role": "Sales User"}],
+			).insert()
+
+		with self.set_user(user):
+			self.assertFalse(frappe.has_permission("Batch", "read"))
+			rows = get_batch_nos("Batch", "Summary-Filter", "name", 0, 5, {"item_code": item})
+
+		self.assertEqual([tuple(row) for row in rows], [(batch.name, "Summary-Filter-Batch", item)])
+
+	def test_filters_list_nothing_without_item_or_voucher(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_batch_nos
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		frappe.get_doc(doctype="Batch", item=item, batch_id="Summary-Unscoped-Batch").insert()
+
+		self.assertEqual(get_batch_nos("Batch", "Summary-Unscoped", "name", 0, 5, {}), [])

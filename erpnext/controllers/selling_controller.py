@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Min
-from frappe.utils import cint, flt, get_link_to_form, nowtime
+from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
@@ -131,14 +131,14 @@ class SellingController(StockController):
 			if serial_nos := frappe.get_all(
 				"Serial No",
 				filters={"name": ("in", serial_nos), "customer": ("is", "set")},
-				fields=["name", "customer"],
+				fields=["serial_no", "customer"],
 			):
 				for sn in serial_nos:
 					if sn.customer and sn.customer != self.customer:
 						frappe.throw(
 							_(
 								"Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
-							).format(frappe.bold(sn.name), frappe.bold(sn.customer)),
+							).format(frappe.bold(escape_html(sn.serial_no)), frappe.bold(sn.customer)),
 							title=_("Serial No Already Assigned"),
 						)
 
@@ -970,6 +970,7 @@ class SellingController(StockController):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_serial_nos_for_voucher_detail_nos,
 		)
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 		if self.is_return or not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
@@ -1011,6 +1012,7 @@ class SellingController(StockController):
 			):
 				bundle_serial_nos.setdefault(entry.parent, []).append(entry.serial_no)
 
+		identity = SerialBatchIdentity("Serial No")
 		for row in rows:
 			if not reserved_serial_nos.get(row.so_detail):
 				frappe.throw(
@@ -1021,7 +1023,11 @@ class SellingController(StockController):
 				)
 
 			bundle = bundle_map.get(row.name)
-			serial_nos = bundle_serial_nos.get(bundle, []) if bundle else get_serial_nos(row.serial_no)
+			serial_nos = (
+				bundle_serial_nos.get(bundle, [])
+				if bundle
+				else identity.resolve(row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True)
+			)
 			if invalid_serial_nos := [
 				sn for sn in serial_nos if sn not in reserved_serial_nos[row.so_detail]
 			]:
@@ -1029,7 +1035,9 @@ class SellingController(StockController):
 					_(
 						"Row #{0}: Serial No {1} is not reserved against Sales Order {2}. Deliver only the Serial Nos produced and reserved for it."
 					).format(
-						row.idx, frappe.bold(", ".join(invalid_serial_nos)), frappe.bold(row.get(so_field))
+						row.idx,
+						frappe.bold(", ".join(identity.get_label(sn) for sn in invalid_serial_nos)),
+						frappe.bold(row.get(so_field)),
 					),
 					title=_("Serial No Not Reserved"),
 				)
@@ -1101,9 +1109,14 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
+						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
+						# present so this never crashes on a missing bundle.
+						(
+							delivered_serial_nos,
+							delivered_batch_qty,
+						) = get_delivered_serial_batch_for_reservation(item)
 						if sre_doc.has_serial_no:
-							delivered_serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
 									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
@@ -1111,16 +1124,16 @@ class SellingController(StockController):
 									qty_can_be_deliver += 1
 									delivered_serial_nos.remove(entry.serial_no)
 						else:
-							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in delivered_batch_qty:
+								available_batch_qty = delivered_batch_qty.get(entry.batch_no, 0)
+								if available_batch_qty > 0:
 									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), delivered_batch_qty[entry.batch_no]
+										(entry.qty - entry.delivered_qty), available_batch_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
 									qty_can_be_deliver += delivered_qty
-									delivered_batch_qty[entry.batch_no] -= delivered_qty
+									delivered_batch_qty[entry.batch_no] = available_batch_qty - delivered_qty
 					else:
 						# `Delivered Qty` should be less than or equal to `Reserved Qty`.
 						qty_can_be_deliver = min(
@@ -1328,3 +1341,34 @@ def get_reserved_warehouses_by_order_row(so_details: list) -> dict:
 def get_ledger_qty(qty) -> float:
 	"""Stock qty as the stock ledger keeps balances, rounded to its precision."""
 	return flt(qty, frappe.get_precision("Stock Ledger Entry", "actual_qty"))
+
+
+def get_delivered_serial_batch_for_reservation(item):
+	"""Serial nos and per-batch qty delivered by a stock row.
+
+	The detail may be stored in a Serial and Batch Bundle or directly in the row's
+	``serial_no``/``batch_no`` fields (``use_serial_batch_fields``). Reading from whichever is
+	present keeps the Stock Reservation Entry delivered-qty update independent of a bundle being
+	created -- delivering reserved serial/batch stock used to crash when the row had no bundle.
+	"""
+	serial_nos, batch_qty = [], {}
+
+	if item.get("serial_and_batch_bundle"):
+		bundle = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+		for row in bundle.entries:
+			if row.serial_no:
+				serial_nos.append(row.serial_no)
+			if row.batch_no:
+				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
+	else:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+
+		if item.get("serial_no"):
+			serial_nos = SerialBatchIdentity("Serial No").resolve(
+				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
+			)
+		if item.get("batch_no"):
+			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
+
+	return serial_nos, batch_qty

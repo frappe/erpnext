@@ -2854,7 +2854,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 
 		batch_no = "BATCH-BNGS-0001"
-		if not frappe.db.exists("Batch", batch_no):
+		if not frappe.db.exists("Batch", {"item": fg_item, "batch_id": batch_no}):
 			frappe.get_doc(
 				{
 					"doctype": "Batch",
@@ -2862,6 +2862,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 					"item": fg_item,
 				}
 			).insert()
+		batch_no = frappe.db.get_value("Batch", {"item": fg_item, "batch_id": batch_no}, "name")
 
 		scr = make_subcontracting_receipt(sco.name)
 		self.assertFalse(scr.items[0].serial_and_batch_bundle)
@@ -2927,7 +2928,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 
 		batch_no = "BATCH-REJ-BNGS-0001"
-		if not frappe.db.exists("Batch", batch_no):
+		if not frappe.db.exists("Batch", {"item": fg_item, "batch_id": batch_no}):
 			frappe.get_doc(
 				{
 					"doctype": "Batch",
@@ -2935,6 +2936,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 					"item": fg_item,
 				}
 			).insert()
+		batch_no = frappe.db.get_value("Batch", {"item": fg_item, "batch_id": batch_no}, "name")
 
 		rej_warehouse = create_warehouse("_Test Subcontract Warehouse For Rejected Qty")
 
