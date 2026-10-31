@@ -35,11 +35,14 @@
   "paid_from_account_type",
   "paid_from_account_currency",
   "paid_from_bank_account",
+  "reference_no",
   "column_break_18",
   "paid_to",
   "paid_to_account_type",
   "paid_to_account_currency",
   "paid_to_bank_account",
+  "reference_date",
+  "clearance_date",
   "payment_amounts_section",
   "paid_amount",
   "paid_amount_after_tax",
@@ -78,11 +81,6 @@
   "ignore_tax_withholding_threshold",
   "override_tax_withholding_entries",
   "tax_withholding_entries",
-  "transaction_references",
-  "reference_no",
-  "column_break_23",
-  "reference_date",
-  "clearance_date",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -224,10 +222,9 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
-   "label": "Accounts"
+   "label": "Accounts and Transaction Details"
   },
   {
    "bold": 1,
@@ -428,11 +425,6 @@
    "options": "Payment Entry Deduction"
   },
   {
-   "fieldname": "transaction_references",
-   "fieldtype": "Section Break",
-   "label": "Transaction ID"
-  },
-  {
    "bold": 1,
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
@@ -442,10 +434,6 @@
    "in_standard_filter": 1,
    "label": "Cheque/Reference No",
    "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
-  },
-  {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
   },
   {
    "bold": 1,
@@ -820,7 +808,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-10-13 12:00:00.000000",
+ "modified": "2026-10-30 18:18:14.136318",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
