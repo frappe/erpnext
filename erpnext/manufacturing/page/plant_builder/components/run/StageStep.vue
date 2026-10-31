@@ -34,7 +34,19 @@ const meta = computed(() => {
 	};
 });
 
-const status = computed(() => ({ waiting: "waiting", done: "done" }[props.stage.phase] ?? "active"));
+const canStart = computed(() => {
+	const stages = run.stages.value;
+	const firstOpen = stages.findIndex((s) => s.phase !== "done");
+	return (
+		props.stage.phase === "waiting" &&
+		props.index === firstOpen &&
+		run.state.value.work_order.docstatus === 1
+	);
+});
+const status = computed(() => {
+	if (canStart.value) return "active";
+	return { waiting: "waiting", done: "done" }[props.stage.phase] ?? "active";
+});
 const busy = computed(() => ["charging", "processing"].includes(props.stage.phase));
 const badge = computed(() => {
 	const phase = props.stage.phase;
@@ -91,8 +103,25 @@ const inputErrors = computed(() => {
 		/>
 		<div v-if="status === 'active'" class="space-y-4 px-3 pb-4">
 			<p class="text-p-sm text-ink-gray-6">{{ meta.instruction }}</p>
+			<template v-if="canStart">
+				<p class="text-p-sm text-ink-amber-5">
+					{{
+						__("{0} is busy with another batch. Start this stage when it is free.", [
+							stage.workstation,
+						])
+					}}
+				</p>
+				<Button
+					variant="solid"
+					icon-left="lucide-play"
+					:label="__('Start Stage')"
+					class="w-full"
+					:loading="run.busy.value"
+					@click="run.start"
+				/>
+			</template>
 			<StageInputs
-				v-if="stage.phase !== 'review'"
+				v-if="!canStart && stage.phase !== 'review'"
 				:stage="stage"
 				:editable="stage.phase === 'ready' && !run.paused.value"
 			/>

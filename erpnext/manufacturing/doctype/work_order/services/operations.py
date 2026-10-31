@@ -118,6 +118,8 @@ class OperationsService:
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
 
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
+		if self.doc.is_plant_floor_order:
+			enable_capacity_planning = False
 		plan_days = get_capacity_planning_days()
 
 		for idx, row in enumerate(self.doc.operations):
