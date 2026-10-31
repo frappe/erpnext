@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, getdate
 
 from erpnext import allow_regional
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import validate_account_head
 
 
@@ -46,8 +47,8 @@ class TaxWithholdingCategory(Document):
 	def validate_dates(self):
 		group_rates = defaultdict(list)
 		for d in self.get("rates"):
-			if getdate(d.from_date) >= getdate(d.to_date):
-				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
+			if getdate(d.from_date) > getdate(d.to_date):
+				frappe.throw(_("Row #{0}: From Date cannot be after To Date").format(d.idx))
 			group_rates[cstr(d.tax_withholding_group)].append(d)
 
 		# Validate overlapping dates within each group
@@ -138,6 +139,10 @@ class TaxWithholdingDetails:
 			return category_details
 
 		ldc_details = self.get_ldc_details()
+		fiscal_year = (
+			get_fiscal_year(self.posting_date, company=self.company, as_dict=True, raise_on_missing=False)
+			or {}
+		)
 
 		for category_name in self.tax_withholding_categories:
 			doc: TaxWithholdingCategory = frappe.get_cached_doc("Tax Withholding Category", category_name)
@@ -154,6 +159,9 @@ class TaxWithholdingDetails:
 				to_date=row.to_date,
 				single_threshold=row.single_threshold,
 				cumulative_threshold=row.cumulative_threshold,
+				# thresholds are counted over the fiscal year, the row gives the rates
+				threshold_from_date=fiscal_year.get("year_start_date") or row.from_date,
+				threshold_to_date=fiscal_year.get("year_end_date") or row.to_date,
 				# settings
 				tax_deduction_basis=doc.tax_deduction_basis,
 				round_off_tax_amount=doc.round_off_tax_amount,
