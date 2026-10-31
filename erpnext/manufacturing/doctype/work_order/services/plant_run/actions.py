@@ -6,6 +6,10 @@ from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as ma
 from erpnext.manufacturing.page.shop_floor.shop_floor import submit_quality_inspection
 
 
+class MachineBusyError(frappe.ValidationError):
+	pass
+
+
 class PlantRun:
 	def __init__(self, work_order):
 		if isinstance(work_order, str):
@@ -42,8 +46,11 @@ class PlantRun:
 	def start(self):
 		if self.work_order.docstatus == 0:
 			self.work_order.submit()
+			return self.start_when_machine_is_free(self.active_job_card)
 
-		self.start_job_card(self.active_job_card)
+		if job_card := self.active_job_card:
+			self.validate_machine_is_free(job_card)
+			self.start_job_card(job_card)
 
 	@staticmethod
 	def start_job_card(job_card):
@@ -139,7 +146,34 @@ class PlantRun:
 
 		next_job_card = self.active_job_card
 		self.carry_output(job_card, output_qty, next_job_card)
-		self.start_job_card(next_job_card)
+		self.start_when_machine_is_free(next_job_card)
+
+	def start_when_machine_is_free(self, job_card):
+		if job_card and not self.get_busy_job_cards(job_card):
+			self.start_job_card(job_card)
+
+	def validate_machine_is_free(self, job_card):
+		if busy := self.get_busy_job_cards(job_card):
+			frappe.throw(
+				_("{0} is busy with {1}. Start this stage when it is free.").format(
+					frappe.bold(job_card.workstation), ", ".join(busy)
+				),
+				MachineBusyError,
+			)
+
+	@staticmethod
+	def get_busy_job_cards(job_card):
+		busy = frappe.get_all(
+			"Job Card",
+			filters={
+				"workstation": job_card.workstation,
+				"docstatus": 0,
+				"status": ("in", ["Work In Progress", "On Hold"]),
+				"name": ("!=", job_card.name),
+			},
+			pluck="name",
+		)
+		return busy if len(busy) >= job_card.get_production_capacity() else []
 
 	@staticmethod
 	def carry_output(job_card, output_qty, next_job_card):

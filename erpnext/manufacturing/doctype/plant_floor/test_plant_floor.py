@@ -9,7 +9,7 @@ from frappe.permissions import add_user_permission
 from frappe.utils import add_to_date, now_datetime
 
 from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_stock_summary
-from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
+from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import MachineBusyError, PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
@@ -174,6 +174,28 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(run["plan"].input_weight, 1250)
 		self.assertEqual(run["stages"][1]["items"][0].item_code, "_Test Ketchup Pre-mix")
 		self.assertTrue(run["stages"][1]["items"][0].is_fixed)
+
+	def test_next_stage_waits_while_its_machine_is_busy(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		first = plant_floor.make_work_order(1000)
+		second = plant_floor.make_work_order(1000)
+
+		run_stage(first, 240, 220, output_qty=625)
+		with minutes_ago(215):
+			run = PlantRun(first.name)
+			job_card = run.active_job_card
+			run.consume(job_card.name, get_quantities(job_card, {}))
+
+		run_stage(second, 210, 200, output_qty=625)
+		self.assertEqual(PlantRunState(PlantRun(second.name)).as_dict().stages[1].phase, "waiting")
+		self.assertRaises(MachineBusyError, PlantRun(second.name).start)
+
+		with minutes_ago(150):
+			PlantRun(first.name).produce(job_card.name, 500)
+		with minutes_ago(140):
+			PlantRun(second.name).start()
+		self.assertEqual(PlantRunState(PlantRun(second.name)).as_dict().stages[1].phase, "ready")
 
 
 def minutes_ago(minutes):
