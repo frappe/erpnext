@@ -12,6 +12,7 @@ from frappe.model.mapper import map_child_doc, map_doc
 from frappe.query_builder import DocType
 from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
+from frappe.utils.nestedset import get_descendants_of
 from frappe.utils.scheduler import is_scheduler_inactive
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -65,6 +66,7 @@ class POSInvoiceMergeLog(Document):
 
 	def validate_customer(self):
 		if self.merge_invoices_based_on == "Customer Group":
+			self.validate_customer_group()
 			return
 
 		for d in self.pos_invoices:
@@ -72,6 +74,30 @@ class POSInvoiceMergeLog(Document):
 				frappe.throw(
 					_("Row #{}: POS Invoice {} is not against customer {}").format(
 						d.idx, d.pos_invoice, self.customer
+					)
+				)
+
+	def validate_customer_group(self):
+		if not self.customer_group:
+			frappe.throw(_("Customer Group is mandatory to merge invoices based on Customer Group"))
+
+		customer_groups = [self.customer_group, *get_descendants_of("Customer Group", self.customer_group)]
+		customers_outside_group = frappe.get_all(
+			"Customer",
+			filters={
+				"name": ["in", list({d.customer for d in self.pos_invoices})],
+				"customer_group": ["not in", customer_groups],
+			},
+			pluck="name",
+		)
+		for d in self.pos_invoices:
+			if d.customer in customers_outside_group:
+				frappe.throw(
+					_("Row #{0}: Customer {1} of POS Invoice {2} is not in Customer Group {3}").format(
+						d.idx,
+						frappe.bold(d.customer),
+						frappe.bold(d.pos_invoice),
+						frappe.bold(self.customer_group),
 					)
 				)
 

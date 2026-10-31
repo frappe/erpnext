@@ -879,6 +879,30 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 			[20],
 		)
 
+	def test_customer_group_merge_refuses_invoice_of_customer_outside_group(self):
+		sale = create_pos_invoice(rate=700, do_not_submit=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 700})
+		sale.save().submit()
+
+		merge_log = frappe.get_doc(
+			{
+				"doctype": "POS Invoice Merge Log",
+				"company": "_Test Company",
+				"posting_date": frappe.utils.nowdate(),
+				"posting_time": frappe.utils.nowtime(),
+				"merge_invoices_based_on": "Customer Group",
+				"customer": "_Test Customer 2",
+				"pos_invoices": [{"pos_invoice": sale.name}],
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Customer Group is mandatory", merge_log.insert)
+
+		merge_log.customer_group = "_Test Customer Group 1"
+		self.assertRaisesRegex(frappe.ValidationError, "is not in Customer Group", merge_log.insert)
+
+		merge_log.customer_group = "All Customer Groups"
+		merge_log.insert()
+
 	def test_copy_of_consolidated_invoice_computes_its_own_change_amount(self):
 		sale = create_pos_invoice(rate=900, do_not_submit=1)
 		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
