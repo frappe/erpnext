@@ -220,6 +220,11 @@ def delete_accounting_dimension(doc):
 	budget_against_property.value = "\nCost Center\nProject\n" + "\n".join(value_list)
 	budget_against_property.save()
 
+	for name in frappe.get_all(
+		"Accounting Dimension Filter", filters={"accounting_dimension": doc.document_type}, pluck="name"
+	):
+		frappe.delete_doc("Accounting Dimension Filter", name, ignore_permissions=True)
+
 	for doctype in doclist:
 		frappe.clear_cache(doctype=doctype)
 
