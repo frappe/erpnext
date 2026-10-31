@@ -406,6 +406,21 @@ class TestAccount(ERPNextTestSuite):
 		account.parent_account = "Current Assets - _TC1"
 		self.assertRaises(frappe.CannotChangeConstantError, account.save)
 
+	def test_merge_ledgers_with_different_account_type(self):
+		company = "_Test Company"
+		receivable = create_account(
+			account_name="Merge Receivable",
+			parent_account="Accounts Receivable - _TC",
+			company=company,
+			account_type="Receivable",
+		)
+		deposit = create_account(
+			account_name="Merge Deposit", parent_account="Current Assets - _TC", company=company
+		)
+
+		self.assertRaises(InvalidAccountMergeError, merge_account, receivable, deposit)
+		self.assertTrue(frappe.db.exists("Account", receivable))
+
 
 def get_inventory_account(company, warehouse=None):
 	account = None

@@ -38,14 +38,16 @@ frappe.ui.form.on("Ledger Merge", {
 			frm.doc.merge_accounts.forEach((row) => {
 				acc.push(row.account);
 			});
-			return {
-				filters: {
-					is_group: doc.is_group,
-					root_type: doc.root_type,
-					name: ["not in", acc],
-					company: doc.company,
-				},
+			let filters = {
+				is_group: doc.is_group,
+				root_type: doc.root_type,
+				name: ["not in", acc],
+				company: doc.company,
 			};
+			if (!doc.is_group) {
+				filters.account_type = doc.account_type || "";
+			}
+			return { filters: filters };
 		});
 	},
 

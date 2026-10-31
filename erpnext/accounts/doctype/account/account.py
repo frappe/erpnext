@@ -655,24 +655,7 @@ def merge_account(old: str, new: str):
 	if not new_account:
 		throw(_("Account {0} does not exist").format(new))
 
-	if (
-		cint(new_account.is_group),
-		new_account.root_type,
-		new_account.company,
-		cstr(new_account.account_currency),
-	) != (
-		cint(old_account.is_group),
-		old_account.root_type,
-		old_account.company,
-		cstr(old_account.account_currency),
-	):
-		throw(
-			msg=_(
-				"""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"""
-			),
-			title=("Invalid Accounts"),
-			exc=InvalidAccountMergeError,
-		)
+	validate_accounts_can_be_merged(old_account, new_account)
 
 	if old_account.is_group and old in get_ancestors_of("Account", new):
 		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
@@ -680,6 +663,27 @@ def merge_account(old: str, new: str):
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
 
 	return new
+
+
+def validate_accounts_can_be_merged(old_account: Account, new_account: Account):
+	if get_merge_properties(new_account) != get_merge_properties(old_account):
+		throw(
+			msg=_(
+				"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company, Account Currency and, for ledger accounts, Account Type"
+			),
+			title=("Invalid Accounts"),
+			exc=InvalidAccountMergeError,
+		)
+
+
+def get_merge_properties(account: Account) -> tuple:
+	return (
+		cint(account.is_group),
+		account.root_type,
+		account.company,
+		cstr(account.account_currency),
+		"" if cint(account.is_group) else cstr(account.account_type),
+	)
 
 
 @frappe.whitelist()
