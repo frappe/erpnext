@@ -192,7 +192,7 @@ erpnext.financial_statements = {
 
 		if (formatting.warn_if_negative && typeof value === "number" && value < 0) {
 			styles.push("color: #dc3545"); // text-danger
-		} else if (formatting.color) {
+		} else if (formatting.color && CSS.supports("color", formatting.color)) {
 			styles.push(`color: ${formatting.color}`);
 		}
 
@@ -218,7 +218,7 @@ erpnext.financial_statements = {
 			}
 		}
 
-		return `<span style="${style_string}">${formatted_value}</span>`;
+		return `<span style="${frappe.utils.escape_html(style_string)}">${formatted_value}</span>`;
 	},
 
 	_format_special_view: function (value, row, column, data, default_formatter) {
