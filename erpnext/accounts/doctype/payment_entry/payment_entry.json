@@ -17,6 +17,7 @@
   "posting_date",
   "company",
   "mode_of_payment",
+  "bank_account",
   "party_section",
   "party_type",
   "party",
@@ -26,7 +27,6 @@
   "apply_tds",
   "tax_withholding_category",
   "column_break_11",
-  "bank_account",
   "party_bank_account",
   "contact_person",
   "contact_email",
@@ -555,7 +555,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
    "fieldname": "bank_account",
    "fieldtype": "Link",
    "label": "Company Bank Account",
@@ -820,7 +820,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-10-13 12:00:00.000000",
+ "modified": "2026-10-30 18:22:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
