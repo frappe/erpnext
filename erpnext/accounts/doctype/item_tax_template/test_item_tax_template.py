@@ -51,3 +51,21 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		)
 
 		self.assertEqual(self.get_template_for(item_code, base_net_rate=500), template_18)
+
+	def test_rate_band_without_valid_from_on_backdated_transaction(self):
+		template_5 = self.make_tax_template(5)
+		template_12 = self.make_tax_template(12)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_5, "minimum_net_rate": 0, "maximum_net_rate": 1000},
+				{"item_tax_template": template_12, "minimum_net_rate": 1000.01, "maximum_net_rate": 1000000},
+			]
+		)
+
+		yesterday = add_days(today(), -1)
+		self.assertEqual(
+			self.get_template_for(item_code, posting_date=yesterday, base_net_rate=500), template_5
+		)
+		self.assertEqual(
+			self.get_template_for(item_code, posting_date=yesterday, base_net_rate=5000), template_12
+		)
