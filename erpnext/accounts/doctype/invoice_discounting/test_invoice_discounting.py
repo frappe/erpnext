@@ -383,6 +383,24 @@ class TestInvoiceDiscounting(ERPNextTestSuite):
 		self.assertIn(inv.name, [d.sales_invoice for d in get_invoices({"company": "_Test Company"})])
 		self.assertNotIn(inv.name, [d.sales_invoice for d in get_invoices({"company": "_Test Company 1"})])
 
+	def test_get_invoices_applies_sales_invoice_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		inv = create_sales_invoice(rate=400)
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test_invoice_discounting@example.com",
+				"first_name": "Test",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+		user.add_roles("Accounts Manager")
+		add_user_permission("Customer", "_Test Customer 1", user.name)
+
+		with self.set_user(user.name):
+			self.assertNotIn(inv.name, [d.sales_invoice for d in get_invoices({"company": "_Test Company"})])
+
 	def test_cancel_reverses_posted_entries(self):
 		self.check_cancel_reverses_posted_entries()
 

@@ -374,21 +374,16 @@ def get_invoices(filters: str | dict):
 
 	discounted = frappe.qb.from_(di).select(di.sales_invoice).where(di.docstatus == 1)
 
-	query = (
-		frappe.qb.from_(si)
-		.select(
-			si.name.as_("sales_invoice"),
-			si.customer,
-			si.posting_date,
-			si.outstanding_amount,
-			si.debit_to,
-		)
-		.where(
-			(si.company == filters.company)
-			& (si.docstatus == 1)
-			& (si.outstanding_amount > 0)
-			& si.name.notin(discounted)
-		)
+	# apply Sales Invoice permissions of the user
+	query = frappe.qb.get_query(
+		"Sales Invoice",
+		fields=["name as sales_invoice", "customer", "posting_date", "outstanding_amount", "debit_to"],
+		ignore_permissions=False,
+	).where(
+		(si.company == filters.company)
+		& (si.docstatus == 1)
+		& (si.outstanding_amount > 0)
+		& si.name.notin(discounted)
 	)
 
 	if filters.customer:
