@@ -610,12 +610,15 @@ def _pick_list_mapping(postprocess, allocation):
 
 def _allocate_material_demand(work_order, fraction):
 	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
-	at the group's proportional share of the item's pending pool."""
+	at the group's proportional share of the item's pending pool. Whole number UOMs
+	round up, within the item's rounded up total and its unrounded pending qty."""
 	required_by_item = {}
 	covered_by_item = {}
 	required_by_group = {}
+	uom_by_item = {}
 	for row in work_order.required_items:
 		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+		uom_by_item.setdefault(row.item_code, row.stock_uom)
 		covered_by_item.setdefault(row.item_code, flt(row.requested_qty) + flt(row.picked_qty))
 		covered_by_item[row.item_code] += flt(row.transferred_qty)
 		key = _allocation_key(row)
@@ -626,6 +629,15 @@ def _allocate_material_demand(work_order, fraction):
 		for item_code, required_qty in required_by_item.items()
 	}
 
+	precision = frappe.get_precision("Work Order Item", "required_qty")
+	remaining_by_item = {
+		item_code: min(
+			_round_demand(required_qty * fraction, uom_by_item[item_code], precision),
+			pending_pool[item_code],
+		)
+		for item_code, required_qty in required_by_item.items()
+	}
+
 	allocation = {}
 	for key, required_qty in required_by_group.items():
 		item_code = key[0]
@@ -633,10 +645,20 @@ def _allocate_material_demand(work_order, fraction):
 			continue
 
 		pool_share = pending_pool[item_code] * required_qty / required_by_item[item_code]
-		qty = min(required_qty * fraction, pool_share)
+		qty = _round_demand(min(required_qty * fraction, pool_share), uom_by_item[item_code], precision)
+		qty = min(qty, remaining_by_item[item_code])
 		if qty > 0:
 			allocation[key] = qty
+			remaining_by_item[item_code] -= qty
 	return allocation
+
+
+def _round_demand(qty, stock_uom, precision):
+	"""Whole number UOMs round up even a demand below field precision. Rounding to 9
+	decimals first keeps float noise (30 * 0.1) from adding a unit."""
+	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
+		return math.ceil(flt(qty, 9))
+	return flt(qty, precision)
 
 
 def _allocation_key(row):
