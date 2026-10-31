@@ -134,6 +134,35 @@ class TestBankTransaction(ERPNextTestSuite):
 
 		self.assertFalse(amended.clearance_date)
 
+	def test_cancelled_status_cleared_on_amend(self):
+		bank_transaction = add_transaction(
+			self.bank_account,
+			"_Test amended Bank Transaction status",
+			"2018-10-26",
+			deposit=100,
+		)
+		bank_transaction.cancel()
+
+		amended = frappe.copy_doc(bank_transaction)
+		amended.amended_from = bank_transaction.name
+		amended.docstatus = 0
+		amended.insert()
+		self.assertEqual(amended.status, "Pending")
+
+	def test_status_reset_on_duplicate(self):
+		bank_transaction = add_transaction(
+			self.bank_account,
+			"_Test duplicated Bank Transaction status",
+			"2018-10-26",
+			deposit=100,
+		)
+		self.assertEqual(bank_transaction.status, "Unreconciled")
+
+		duplicate = frappe.copy_doc(bank_transaction)
+		duplicate.docstatus = 0
+		duplicate.insert()
+		self.assertEqual(duplicate.status, "Pending")
+
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
 		bank_transaction = frappe.get_doc(
