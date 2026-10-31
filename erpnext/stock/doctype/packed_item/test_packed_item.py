@@ -355,10 +355,12 @@ class TestPackedItem(ERPNextTestSuite):
 		so.submit()
 		so.cancel()
 
-		# amending from the desk keeps no-copy fields, so packed rows still point to the cancelled rows
+		# amending from the desk keeps no-copy fields, so packed rows still point to the cancelled rows,
+		# but resets the workflow state (a Sales Order workflow left by another test would block insert)
 		amended = frappe.copy_doc(so, ignore_no_copy=True)
 		amended.amended_from = so.name
 		amended.docstatus = 0
+		amended.workflow_state = None
 		amended.insert()
 
 		self.assertEqual([row.warehouse for row in amended.packed_items], [other_warehouse] * 2)
