@@ -2143,6 +2143,47 @@ class TestPricingRule(ERPNextTestSuite):
 		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
 		self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), 2)
 
+	def test_mixed_conditions_with_same_item_in_two_rows(self):
+		item = make_item(
+			"PR Mixed Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_amt=250,
+			discount_percentage=5,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=1, do_not_save=True)
+		si.append("items", {**si.items[0].as_dict(), "name": None, "idx": 2, "qty": 2})
+		si.items[0].name = "row-1"
+		si.items[1].name = "row-2"
+		for row in si.items:
+			row.stock_qty = row.qty
+			self.assertEqual(get_pricing_details_for_row(si, row).discount_percentage, 5)
+
+	def test_mixed_conditions_values_unnamed_rows_at_their_own_amount(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import get_qty_and_rate_for_mixed_conditions
+
+		rule = make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_amt=500,
+			discount_percentage=5,
+		)
+		item_group = "_Test Item Group Desktops"
+		doc = frappe._dict(
+			items=[
+				frappe._dict(item_code="A", item_group=item_group, qty=1, stock_qty=1, price_list_rate=100),
+				frappe._dict(item_code="B", item_group=item_group, qty=10, stock_qty=10, price_list_rate=50),
+			]
+		)
+		args = frappe._dict(item_code="A", item_group=item_group, qty=1, stock_qty=1, price_list_rate=100)
+
+		self.assertEqual(get_qty_and_rate_for_mixed_conditions(doc, rule, args)[:2], (11, 600))
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)

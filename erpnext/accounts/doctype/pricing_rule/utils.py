@@ -483,7 +483,7 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 
 			if pr_doc.mixed_conditions:
 				amt = args.get("qty") * args.get("price_list_rate")
-				if args.get("item_code") != row.get("item_code"):
+				if not is_row_being_priced(row, args):
 					amt = flt(row.get("qty")) * flt(row.get("price_list_rate") or args.get("rate"))
 
 				sum_qty += flt(row.get("stock_qty")) or flt(args.get("stock_qty")) or flt(args.get("qty"))
@@ -497,6 +497,13 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 				sum_amt += data[1]
 
 	return sum_qty, sum_amt, items
+
+
+def is_row_being_priced(row, args):
+	if args.get("child_docname"):
+		return row.get("name") == args.get("child_docname")
+
+	return row.get("item_code") == args.get("item_code")
 
 
 def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
