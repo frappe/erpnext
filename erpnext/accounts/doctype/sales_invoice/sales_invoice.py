@@ -2009,7 +2009,7 @@ class SalesInvoice(SellingController):
 		return self._enable_discount_accounting
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
-		if cint(self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated):
+		if cint(self.redeem_loyalty_points and self.loyalty_points):
 			gl_entries.append(
 				self.get_gl_dict(
 					{
