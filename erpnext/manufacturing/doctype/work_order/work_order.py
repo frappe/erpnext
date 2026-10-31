@@ -2296,6 +2296,7 @@ class WorkOrder(Document):
 			.where(
 				(mr.docstatus == 1)
 				& (mr.work_order == self.name)
+				& (fn.Coalesce(mr.job_card, "") == "")
 				& (mr.material_request_type == "Material Transfer")
 				& (mr.status != "Stopped")
 				& (mr_item.stock_qty > mr_item.ordered_qty)
