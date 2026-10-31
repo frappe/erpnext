@@ -211,7 +211,7 @@ class Customer(TransactionBase):
 			if flt(total, self.precision("allocated_percentage", "sales_team")) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
 		self.accounts = []
@@ -648,7 +648,7 @@ def is_customer_blocked(customer: str) -> bool:
 	on_hold, release_date = frappe.db.get_value("Customer", customer, ["on_hold", "release_date"])
 	if not on_hold:
 		return False
-	return not release_date or getdate(today()) <= getdate(release_date)
+	return not release_date or getdate(today()) < getdate(release_date)
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):

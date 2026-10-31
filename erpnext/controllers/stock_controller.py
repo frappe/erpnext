@@ -1801,9 +1801,10 @@ class StockController(AccountsController):
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
-	def update_blanket_order(self):
-		blanket_orders = sorted({d.blanket_order for d in self.items if d.blanket_order})
-		for blanket_order in blanket_orders:
+	def update_blanket_order(self, extra_blanket_orders=()):
+		"""Refresh ordered qty of the blanket orders on the items and of `extra_blanket_orders`."""
+		blanket_orders = {d.blanket_order for d in self.items if d.blanket_order}
+		for blanket_order in sorted(blanket_orders.union(extra_blanket_orders)):
 			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
@@ -2560,7 +2561,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_quality_inspections(
 	company: str, doctype: str, docname: str, items: str | list, inspection_type: str
 ):

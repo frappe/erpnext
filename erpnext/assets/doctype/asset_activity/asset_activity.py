@@ -44,3 +44,11 @@ def get_permission_query_conditions(user: str | None = None, doctype: str | None
 
 	readable_assets = frappe.qb.get_query("Asset", fields=["name"], ignore_permissions=False, user=user)
 	return f"`tabAsset Activity`.`asset` in ({readable_assets.get_sql()})"
+
+
+def has_permission(doc, user=None, ptype=None):
+	user = user or frappe.session.user
+	if not frappe.has_permission("Asset", "select", user=user):
+		return False
+
+	return bool(frappe.get_list("Asset", filters={"name": doc.asset}, user=user, limit=1))

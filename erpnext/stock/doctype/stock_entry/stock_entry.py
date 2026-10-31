@@ -1782,10 +1782,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not wo:
 			return
 
+		from erpnext.manufacturing.doctype.work_order.work_order import get_allowed_transfer_qty
+
 		pending_by_item = {}
 		for r in wo.required_items:
 			pending_by_item[r.item_code] = (
-				pending_by_item.get(r.item_code, 0.0) + flt(r.required_qty) - flt(r.transferred_qty)
+				pending_by_item.get(r.item_code, 0.0)
+				+ get_allowed_transfer_qty(r.required_qty)
+				- flt(r.transferred_qty)
 			)
 
 		transfer_by_item = {}
@@ -4590,6 +4594,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		"""
 		Gets Work Order Required Items only if Stock Entry purpose is **Material Transferred for Manufacture**.
 		"""
+		from erpnext.manufacturing.doctype.work_order.work_order import get_allowed_transfer_qty
+
 		item_dict, job_card_items = frappe._dict(), []
 		work_order = frappe.get_doc("Work Order", self.work_order)
 
@@ -4601,10 +4607,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			wip_warehouse = work_order.wip_warehouse
 		else:
 			wip_warehouse = None
-
-		transfer_extra_materials_percentage = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
-		)
 
 		job_card_operation = (
 			frappe.db.get_value(
@@ -4621,13 +4623,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if consider_job_card and not is_row_of_job_card_operation(d, job_card_operation):
 				continue
 
-			additional_qty = 0.0
-			if transfer_extra_materials_percentage:
-				additional_qty = transfer_extra_materials_percentage * flt(d.required_qty) / 100
-
-			transfer_pending = flt(d.required_qty) > flt(d.transferred_qty)
-			if additional_qty:
-				transfer_pending = (flt(d.required_qty) + additional_qty) > flt(d.transferred_qty)
+			transfer_pending = get_allowed_transfer_qty(d.required_qty) > flt(d.transferred_qty)
 
 			can_transfer = transfer_pending or (backflush_based_on == "Material Transferred for Manufacture")
 

@@ -342,7 +342,7 @@ class SalesInvoice(SellingController):
 		)
 
 		if self.coupon_code and self.counts_coupon_use():
-			validate_coupon_code(self.coupon_code)
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -3335,7 +3335,9 @@ def update_multi_mode_option(doc, pos_profile):
 		payment.account = payment_mode.default_account
 		payment.type = payment_mode.type
 
-	mop_refetched = bool(doc.payments) and not doc.is_created_using_pos
+	# is_created_using_pos exists on Sales Invoice but not POS Invoice; use get() so this
+	# shared helper doesn't raise AttributeError when called on a POS Invoice
+	mop_refetched = bool(doc.payments) and not doc.get("is_created_using_pos")
 
 	doc.set("payments", [])
 	invalid_modes = []

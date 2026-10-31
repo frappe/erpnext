@@ -315,6 +315,31 @@ class TestAssetMaintenance(ERPNextTestSuite):
 			}
 		).insert()
 
+	def test_cancelled_or_removed_task_cancels_only_its_open_logs(self):
+		asset_maintenance = self.make_asset_maintenance()
+		cancelled_task = asset_maintenance.asset_maintenance_tasks[0]
+		removed_task = asset_maintenance.asset_maintenance_tasks[1].name
+		completed_log = frappe.get_last_doc("Asset Maintenance Log", {"task": removed_task})
+		completed_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		completed_log.submit()
+
+		asset_maintenance.reload()
+		asset_maintenance.asset_maintenance_tasks[0].maintenance_status = "Cancelled"
+		asset_maintenance.asset_maintenance_tasks.pop()
+		asset_maintenance.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Asset Maintenance Log", {"task": cancelled_task.name}, "maintenance_status"),
+			"Cancelled",
+		)
+		statuses = dict(
+			frappe.get_all(
+				"Asset Maintenance Log", {"task": removed_task}, ["name", "maintenance_status"], as_list=True
+			)
+		)
+		self.assertEqual(statuses.pop(completed_log.name), "Completed")
+		self.assertEqual(set(statuses.values()), {"Cancelled"})
+
 
 def get_maintenance_tasks():
 	return [

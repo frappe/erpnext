@@ -11,16 +11,14 @@ from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import Concat, Locate, Lower, Sum
+from frappe.query_builder.terms import NamedParameterWrapper
 from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
-from erpnext.stock.doctype.company_restriction.company_restriction import (
-	get_restriction_criterion,
-	get_sql_condition,
-)
+from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
@@ -301,8 +299,11 @@ def item_query(
 			filters.pop("supplier", None)
 
 	company_cond = ""
+	company_params = NamedParameterWrapper()
 	if company:
-		company_cond = "and " + get_sql_condition(get_restriction_criterion("Item", [company]))
+		company_cond = "and " + get_restriction_criterion("Item", [company]).get_sql(
+			with_namespace=True, quote_char="`", param_wrapper=company_params, subquery=True
+		)
 
 	description_cond = ""
 	if frappe.db.estimate_count(doctype) < 50000:
@@ -339,7 +340,7 @@ def item_query(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			description_cond=description_cond,
 			candidate_cond=candidate_cond,
 			allowed_items_cond=allowed_items_cond.replace("%", "%%"),
@@ -352,6 +353,7 @@ def item_query(
 			"start": start,
 			"page_len": page_len,
 			"candidates": tuple(candidates or ()),
+			**company_params.get_parameters(),
 		},
 		as_dict=as_dict,
 	)
@@ -410,7 +412,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			key=searchfield,
 		),
 		{

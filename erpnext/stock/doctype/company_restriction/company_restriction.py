@@ -1,7 +1,6 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import re
 from collections import defaultdict
 from typing import NamedTuple
 
@@ -9,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull
-from frappe.query_builder.terms import NamedParameterWrapper
 from frappe.utils import comma_and
 from pypika.terms import Bracket, Criterion, ExistsCriterion
 
@@ -19,6 +17,7 @@ COMPANY_RESTRICTION_EXEMPT_DOCTYPES = frozenset(
 	{
 		"Asset",
 		"Bank Transaction",
+		"Communication",
 		"Exchange Rate Revaluation",
 		"Landed Cost Voucher",
 		"POS Closing Entry",
@@ -78,7 +77,7 @@ def get_permission_query_conditions(user, doctype=None):
 	if not allowed_companies:
 		return None
 
-	return get_sql_condition(get_restriction_criterion(doctype, allowed_companies))
+	return get_restriction_criterion(doctype, allowed_companies)
 
 
 def get_allowed_masters_condition(field, doctype, user=None):
@@ -124,17 +123,6 @@ def get_restriction_criterion(doctype, companies):
 	return Bracket((parent.restrict_to_companies == 0) | ExistsCriterion(allowed_rows))
 
 
-def get_sql_condition(criterion):
-	"""Render a criterion as SQL with escaped values; v16 permission hooks must return strings."""
-	param_wrapper = NamedParameterWrapper()
-	quote_char = "`" if frappe.db.db_type == "mariadb" else '"'
-	sql = criterion.get_sql(
-		with_namespace=True, quote_char=quote_char, param_wrapper=param_wrapper, subquery=True
-	)
-	parameters = param_wrapper.get_parameters()
-	return re.sub(r"%\((param\d+)\)s", lambda match: frappe.db.escape(parameters[match.group(1)]), sql)
-
-
 def has_permission(doc, ptype=None, user=None):
 	if not doc.get("restrict_to_companies"):
 		return True
@@ -161,7 +149,7 @@ def get_inherited_permission_query_conditions(user, doctype=None):
 		for link, allowed_companies in links
 		if link.doctype in restricted_doctypes
 	]
-	return get_sql_condition(Criterion.all(conditions)) if conditions else None
+	return Criterion.all(conditions) if conditions else None
 
 
 def get_restricted_master_doctypes():
