@@ -16,6 +16,7 @@ from erpnext.accounts.doctype.account_closing_balance.account_closing_balance im
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
 from erpnext.accounts.general_ledger import check_freezing_date
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
@@ -51,7 +52,7 @@ class PeriodClosingVoucher(AccountsController):
 		self.validate_start_and_end_date()
 		self.check_if_previous_period_closed()
 		self.block_if_future_closing_voucher_exists()
-		self.check_closing_account_type()
+		self.check_closing_account()
 		self.check_closing_account_currency()
 		self.validate_accounts_not_frozen()
 
@@ -147,13 +148,33 @@ class PeriodClosingVoucher(AccountsController):
 			"name",
 		)
 
-	def check_closing_account_type(self):
-		closing_account_type = frappe.get_cached_value("Account", self.closing_account_head, "root_type")
+	def check_closing_account(self):
+		account = frappe.get_cached_value(
+			"Account",
+			self.closing_account_head,
+			["root_type", "company", "is_group", "disabled"],
+			as_dict=True,
+		)
 
-		if closing_account_type not in ["Liability", "Equity"]:
+		if account.root_type not in ["Liability", "Equity"]:
 			frappe.throw(
 				_("Closing Account {0} must be of type Liability / Equity").format(self.closing_account_head)
 			)
+
+		if account.company != self.company:
+			frappe.throw(
+				_("Closing Account {0} does not belong to Company {1}").format(
+					self.closing_account_head, self.company
+				)
+			)
+
+		if account.is_group:
+			frappe.throw(_("Closing Account {0} cannot be a group account").format(self.closing_account_head))
+
+		if account.disabled:
+			frappe.throw(_("Closing Account {0} is disabled").format(self.closing_account_head))
+
+		validate_frozen_account(self.company, self.closing_account_head)
 
 	def check_closing_account_currency(self):
 		account_currency = get_account_currency(self.closing_account_head)
