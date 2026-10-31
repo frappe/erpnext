@@ -561,6 +561,24 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			closing_entry.retry()
 			consolidate_pos_invoices.assert_called_once()
 
+	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+		closing_entry.db_set("status", "Failed")
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+
+		with patch(consolidate) as consolidate_pos_invoices:
+			with self.assertRaises(frappe.ValidationError) as context:
+				closing_entry.retry()
+			consolidate_pos_invoices.assert_not_called()
+
+		self.assertIn(late_sale.name, str(context.exception))
+
 	def test_failed_cancel_keeps_closing_entry_submitted(self):
 		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 		make_paid_pos_invoice([("Cash", 90)])

@@ -265,6 +265,7 @@ class POSClosingEntry(StatusUpdater):
 			unconsolidate_pos_invoices(closing_entry=self)
 		else:
 			self.check_permission("submit")
+			self.validate_session_invoices_are_included()
 			consolidate_pos_invoices(closing_entry=self)
 
 	def update_opening_entry(self, for_cancel=False):
