@@ -4814,6 +4814,7 @@ def update_child_qty_rate(
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 	had_mapped_discount = parent.has_mapped_discount
 	rfqs_before_update = set()
+	blanket_orders_before_update = {d.blanket_order for d in parent.items if d.get("blanket_order")}
 
 	check_doc_permissions(parent, "write")
 	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
@@ -5061,7 +5062,8 @@ def update_child_qty_rate(
 	validate_workflow_conditions(parent)
 
 	if parent_doctype in ["Purchase Order", "Sales Order"]:
-		parent.update_blanket_order()
+		# Covers blanket orders of removed rows, which are no longer on the items
+		parent.update_blanket_order(blanket_orders_before_update)
 		parent.update_billing_percentage()
 		parent.set_status()
 
