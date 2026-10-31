@@ -426,6 +426,45 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr2.grand_total = 900
 		self.assertRaises(frappe.ValidationError, pr2.save)
 
+	def test_foreign_currency_invoice_paid_into_company_currency_bank(self):
+		si_usd = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+		)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si_usd.name,
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			submit_doc=1,
+			return_doc=1,
+		)
+		pe = pr.create_payment_entry()
+
+		# 100 USD received in INR at the payment's rate: the bank gets the converted amount
+		self.assertEqual(pe.paid_amount, 100)
+		self.assertEqual(pe.received_amount, pe.base_paid_amount)
+		accounts = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "is_cancelled": 0},
+			pluck="account",
+		)
+		self.assertEqual(sorted(accounts), ["_Test Bank - _TC", "_Test Receivable USD - _TC"])
+
+	def test_gateway_account_in_party_account_currency(self):
+		si_usd = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+		)
+		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, mute_email=1, return_doc=1)
+		self.assertEqual(frappe.db.get_value("Account", pr.payment_account, "account_currency"), "USD")
+
 	def test_conversion_on_foreign_currency_accounts(self):
 		po_doc = create_purchase_order(supplier="_Test Supplier USD", currency="USD", do_not_submit=1)
 		po_doc.conversion_rate = 80

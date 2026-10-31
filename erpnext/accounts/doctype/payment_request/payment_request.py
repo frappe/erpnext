@@ -590,6 +590,14 @@ class PaymentRequest(Document):
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			exchange_rate = ref_doc.get("conversion_rate")
 			bank_amount = flt(self.outstanding_amount / exchange_rate, self.precision("grand_total"))
+		elif (
+			self.payment_request_type == "Inward"
+			and party_account_currency != ref_doc.company_currency
+			and self.payment_account
+			and get_account_currency(self.payment_account) == ref_doc.company_currency
+		):
+			# the bank in the company currency receives the outstanding converted at the payment's rate
+			bank_amount = None
 
 		# outstanding amount is already in Part's account currency
 		payment_entry = get_payment_entry(
@@ -820,7 +828,13 @@ def make_payment_request(**args):
 	if not args.get("company"):
 		args.company = ref_doc.company
 
-	gateway_account = get_gateway_details(args) or frappe._dict()
+	# a customer pays through the gateway in the currency of the party account
+	currency = (
+		ref_doc.get("party_account_currency")
+		if args.dt not in ["Purchase Order", "Purchase Invoice"]
+		else None
+	)
+	gateway_account = get_gateway_details(args, currency) or frappe._dict()
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
 	# Any existing Payment Entry forces legacy (amount-based) flow.
@@ -1237,12 +1251,30 @@ def get_existing_payment_request_amount(ref_doc, statuses: list | None = None) -
 	return os_amount_in_transaction_currency
 
 
-def get_gateway_details(args):  # nosemgrep
+def get_gateway_details(args, currency=None):  # nosemgrep
 	"""
-	Return gateway and payment account of default payment gateway
+	Return gateway and payment account of the payment gateway account in `args`, else of the
+	company's gateway account in `currency` (the default one first), else of the company's default
+	in the company currency.
 	"""
-	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
-	return get_payment_gateway_account(gateway_account)
+	if args.get("payment_gateway_account"):
+		return get_payment_gateway_account(args.payment_gateway_account)
+
+	if currency:
+		names = frappe.get_all(
+			"Payment Gateway Account",
+			filters={"company": args.company, "currency": currency},
+			order_by="is_default desc, creation asc",
+			pluck="name",
+			limit=1,
+		)
+		if names:
+			return get_payment_gateway_account(names[0])
+
+	company_currency = frappe.get_cached_value("Company", args.company, "default_currency")
+	return get_payment_gateway_account(
+		{"is_default": 1, "company": args.company, "currency": company_currency}
+	) or get_payment_gateway_account({"is_default": 1, "company": args.company})
 
 
 def get_payment_gateway_account(filter):
