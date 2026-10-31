@@ -352,13 +352,14 @@ class Subscription(Document):
 		"""
 		Returns `True` if the current generated invoice is overdue
 		"""
-		if not self.current_invoice or self.is_paid(self.current_invoice):
+		invoice = self.current_invoice
+		if not invoice or invoice.docstatus != 1 or self.is_paid(invoice):
 			return False
 
-		if not self.current_invoice.due_date:
+		if not invoice.due_date:
 			return False
 
-		return getdate(posting_date) > getdate(self.current_invoice.due_date)
+		return getdate(posting_date) > getdate(invoice.due_date)
 
 	@property
 	def invoice_document_type(self) -> str:
