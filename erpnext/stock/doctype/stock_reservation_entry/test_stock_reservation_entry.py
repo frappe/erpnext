@@ -17,7 +17,6 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1409,7 +1408,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		},
 	)
 	def test_returned_serial_from_partly_delivered_reservation_can_be_reserved_again(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		make_stock_entry(
@@ -1439,9 +1438,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		reserved_serial_nos = frappe.get_all(
 			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
 		)
-		self.assertEqual(
-			SerialBatchIdentity("Serial No").get_numbers(item_code, reserved_serial_nos), [returned_serial_no]
-		)
+		self.assertEqual(reserved_serial_nos, [returned_serial_no])
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
