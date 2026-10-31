@@ -37,6 +37,10 @@ ALLOWED_FUNCTIONS = frozenset(FORMULA_FUNCTIONS) | frozenset(
 UNSUPPORTED_NODES = (ast.NamedExpr, ast.Lambda)
 
 
+# rows that have values (the rest are layout rows)
+DATA_SOURCES_WITH_VALUES = ("Account Data", "Calculated Amount", "Custom API")
+
+
 def get_valid_api_method(api_path: str):
 	"""Resolve `api_path`, ensuring it is whitelisted and permits GET (i.e. read-only)."""
 	method = frappe.get_attr(api_path)
@@ -223,7 +227,7 @@ class TemplateStructureValidator(Validator):
 				)
 
 			# Calculation formula required
-			if row.data_source in ["Account Data", "Calculated Amount", "Custom API"]:
+			if row.data_source in DATA_SOURCES_WITH_VALUES:
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
