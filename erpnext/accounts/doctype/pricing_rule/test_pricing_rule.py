@@ -2045,6 +2045,19 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertTrue(details.pricing_rule_removed)
 		self.assertEqual(details.remove_free_item, free_item)
 
+	def test_min_amount_rule_applied_on_insert(self):
+		item = make_item("PR Min Amount Item", {"is_stock_item": 0}).name
+		make_item_price(item, "_Test Price List", 100)
+		make_item_pricing_rule(item, min_amt=50, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.selling_price_list = "_Test Price List"
+		si.items[0].price_list_rate = None
+		si.items[0].rate = None
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+		self.assertEqual(si.items[0].rate, 90)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
