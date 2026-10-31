@@ -933,6 +933,15 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		pcv.cancel()
 		self.assertEqual(self.get_account_currency_balance(account.name), (0, -20))
 
+	def test_future_closing_voucher_message_shows_full_name(self):
+		self.make_income_entry("2021-03-15", 1000)
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		next_pcv = self.make_period_closing_voucher(posting_date="2022-12-31")
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, f"Period Closing Entry {next_pcv.name} exists after", pcv.cancel
+		)
+
 
 def create_account():
 	account = frappe.get_doc(
