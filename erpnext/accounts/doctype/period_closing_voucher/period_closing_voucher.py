@@ -414,7 +414,7 @@ class PeriodClosingVoucher(AccountsController):
 			pl_entries = [
 				self.get_gle_for_pl_account(acc, balances, dimensions)
 				for acc, balances in account_balances.items()
-				if acc != "balances" and flt(balances.debit) - flt(balances.credit)
+				if acc != "balances" and has_balance(balances)
 			]
 			if not pl_entries:
 				continue
@@ -745,6 +745,13 @@ def get_previous_closed_period_in_current_year(fiscal_year, company):
 		order_by="period_end_date desc",
 	)
 	return prev_closed_period_end_date
+
+
+def has_balance(balances):
+	return bool(
+		flt(balances.debit) - flt(balances.credit)
+		or flt(balances.debit_in_account_currency) - flt(balances.credit_in_account_currency)
+	)
 
 
 def is_within_stock_value_tolerance(stock_value, difference):

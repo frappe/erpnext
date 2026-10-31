@@ -878,6 +878,61 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 				pcv.closing_account_head = account
 				self.assertRaisesRegex(frappe.ValidationError, message, pcv.save)
 
+	def make_foreign_currency_income_entry(self, posting_date, account, amount, exchange_rate):
+		jv = frappe.new_doc("Journal Entry")
+		jv.update({"posting_date": posting_date, "company": "Test PCV Company", "multi_currency": 1})
+		income_side = "credit" if amount > 0 else "debit"
+		cash_side = "debit" if amount > 0 else "credit"
+		for row in (
+			{"account": "Cash - TPC", f"{cash_side}_in_account_currency": abs(amount) * exchange_rate},
+			{
+				"account": account,
+				"exchange_rate": exchange_rate,
+				f"{income_side}_in_account_currency": abs(amount),
+			},
+		):
+			jv.append("accounts", {**row, "cost_center": create_cost_center("Test Cost Center 1")})
+
+		jv.submit()
+
+	def get_account_currency_balance(self, account):
+		balance = frappe.get_all(
+			"GL Entry",
+			filters={"account": account, "is_cancelled": 0},
+			fields=[
+				{"SUM": "debit", "as": "debit"},
+				{"SUM": "credit", "as": "credit"},
+				{"SUM": "debit_in_account_currency", "as": "debit_in_account_currency"},
+				{"SUM": "credit_in_account_currency", "as": "credit_in_account_currency"},
+			],
+		)[0]
+		return (
+			flt(balance.debit) - flt(balance.credit),
+			flt(balance.debit_in_account_currency) - flt(balance.credit_in_account_currency),
+		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_close_foreign_currency_balance_in_legacy_controller(self):
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "Sales EUR",
+				"parent_account": "Direct Income - TPC",
+				"company": "Test PCV Company",
+				"account_currency": "EUR",
+			}
+		).insert(ignore_if_duplicate=True)
+		self.make_foreign_currency_income_entry("2021-03-15", account.name, 100, 80)
+		self.make_foreign_currency_income_entry("2021-04-15", account.name, -80, 100)
+		self.assertEqual(self.get_account_currency_balance(account.name), (0, -20))
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		self.assertEqual(pcv.gle_processing_status, "Completed")
+		self.assertEqual(self.get_account_currency_balance(account.name), (0, 0))
+
+		pcv.cancel()
+		self.assertEqual(self.get_account_currency_balance(account.name), (0, -20))
+
 
 def create_account():
 	account = frappe.get_doc(
