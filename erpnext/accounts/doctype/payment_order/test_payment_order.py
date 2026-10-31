@@ -13,6 +13,10 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 	make_payment_order,
 )
+from erpnext.accounts.doctype.payment_order.payment_order import (
+	make_journal_entry,
+	make_payment_records,
+)
 from erpnext.accounts.doctype.payment_request.payment_request import (
 	make_payment_order as make_payment_order_from_payment_request,
 )
@@ -130,6 +134,55 @@ class TestPaymentOrder(ERPNextTestSuite):
 		paid_order.company_bank_account = self.bank_account
 		self.assertRaisesRegex(frappe.ValidationError, "is already paid", paid_order.insert)
 
+	def test_journal_entry_from_payment_order_updates_payment_request(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		payment_order.submit()
+
+		make_payment_records(payment_order.name, "_Test Supplier")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Journal Entries are already created",
+			make_payment_records,
+			payment_order.name,
+			"_Test Supplier",
+		)
+
+		journal_entry = frappe.get_doc(
+			"Journal Entry", frappe.db.get_value("Journal Entry", {"payment_order": payment_order.name})
+		)
+		journal_entry.cheque_no = "_Test_Payment_Order"
+		journal_entry.cheque_date = getdate()
+		journal_entry.submit()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, ["status", "outstanding_amount"]),
+			("Paid", 0),
+		)
+
+		journal_entry.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, ["status", "outstanding_amount"]),
+			("Payment Ordered", 1000),
+		)
+		self.assertIsNone(
+			frappe.db.get_value(
+				"Payment Order Reference", {"parent": payment_order.name}, "payment_reference"
+			)
+		)
+
+		make_payment_records(payment_order.name, "_Test Supplier")
+		draft_journal_entry = frappe.db.get_value(
+			"Payment Order Reference", {"parent": payment_order.name}, "payment_reference"
+		)
+		frappe.delete_doc("Journal Entry", draft_journal_entry)
+		self.assertIsNone(
+			frappe.db.get_value(
+				"Payment Order Reference", {"parent": payment_order.name}, "payment_reference"
+			)
+		)
+
 	def test_payment_order_submit_rereads_payment_request_status(self):
 		payment_request = self.make_payment_request()
 		payment_order = make_payment_order_from_payment_request(payment_request.name)
@@ -150,6 +203,51 @@ class TestPaymentOrder(ERPNextTestSuite):
 		frappe.db.set_value("Payment Entry", payment_entry.name, "payment_order_status", "Payment Ordered")
 		self.assertRaisesRegex(
 			frappe.ValidationError, "is already in another Payment Order", payment_order.submit
+		)
+
+	def test_journal_entry_skips_rows_claimed_after_payment_order_was_loaded(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		payment_order.submit()
+
+		loaded_order = frappe.get_doc("Payment Order", payment_order.name)
+		make_payment_records(payment_order.name, "_Test Supplier")
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Journal Entries are already created",
+			make_journal_entry,
+			loaded_order,
+			"_Test Supplier",
+		)
+		self.assertEqual(frappe.db.count("Journal Entry", {"payment_order": payment_order.name}), 1)
+
+	def test_partial_journal_entry_from_payment_order_updates_payment_request(self):
+		payment_request = self.make_payment_request()
+		payment_order = make_payment_order_from_payment_request(payment_request.name)
+		payment_order.company_bank_account = self.bank_account
+		payment_order.insert()
+		payment_order.submit()
+		make_payment_records(payment_order.name, "_Test Supplier")
+
+		journal_entry = frappe.get_doc(
+			"Journal Entry", frappe.db.get_value("Journal Entry", {"payment_order": payment_order.name})
+		)
+		journal_entry.accounts[0].debit_in_account_currency = 400
+		journal_entry.accounts[1].credit_in_account_currency = 400
+		journal_entry.cheque_no = "_Test_Payment_Order"
+		journal_entry.cheque_date = getdate()
+		journal_entry.submit()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, ["status", "outstanding_amount"]),
+			("Partially Paid", 600),
+		)
+
+		journal_entry.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Payment Request", payment_request.name, ["status", "outstanding_amount"]),
+			("Payment Ordered", 1000),
 		)
 
 	def make_payment_request(self, submit_doc=1, rate=1000):
