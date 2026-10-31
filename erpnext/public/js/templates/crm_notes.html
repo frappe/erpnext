@@ -22,7 +22,7 @@
 									{{ strip_html(notes[i].added_by) }}
 								</div>
 								<div class="time small text-muted">
-									{{ frappe.datetime.global_date_format(notes[i].added_on) }}
+									{{ frappe.datetime.str_to_user(notes[i].added_on) }}
 								</div>
 							</div>
 						</div>
