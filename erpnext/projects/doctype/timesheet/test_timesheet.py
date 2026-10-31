@@ -252,6 +252,23 @@ class TestTimesheet(ERPNextTestSuite):
 			timesheet.reload()
 			self.assertFalse(timesheet.time_logs[0].sales_invoice)
 
+	def test_partial_sales_return_keeps_timesheet_billed(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+		timesheet, sales_invoice = self._bill_timesheet_into_invoice(emp)
+
+		first_return = make_sales_return(sales_invoice.name)
+		first_return.items[0].qty = first_return.items[0].qty / 2
+		first_return.insert()
+		first_return.submit()
+		timesheet.reload()
+		self.assertEqual(timesheet.time_logs[0].sales_invoice, sales_invoice.name)
+
+		second_return = make_sales_return(sales_invoice.name)
+		second_return.insert()
+		second_return.submit()
+		timesheet.reload()
+		self.assertFalse(timesheet.time_logs[0].sales_invoice)
+
 	def test_timesheet_billing_validations(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 

@@ -424,6 +424,22 @@ class DeliveryNote(SellingController):
 		self._validate_dependent_item_fields(
 			"against_sales_invoice", "si_detail", _("References to Sales Invoices are Incomplete")
 		)
+		self.validate_invoices_do_not_update_stock()
+
+	def validate_invoices_do_not_update_stock(self):
+		"""An invoice that updates stock already delivered its goods."""
+		invoices = {d.against_sales_invoice for d in self.items if d.against_sales_invoice}
+		if not invoices:
+			return
+
+		if stock_invoices := frappe.get_all(
+			"Sales Invoice", filters={"name": ("in", list(invoices)), "update_stock": 1}, pluck="name"
+		):
+			frappe.throw(
+				_("Sales Invoice {0} has Update Stock enabled, so its items are already delivered.").format(
+					", ".join(frappe.bold(name) for name in stock_invoices)
+				)
+			)
 
 	def _validate_dependent_item_fields(self, field_a: str, field_b: str, error_title: str):
 		errors = []
