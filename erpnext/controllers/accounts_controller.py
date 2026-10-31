@@ -81,6 +81,7 @@ from erpnext.stock.get_item_details import (
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
+	get_default_bom,
 	get_item_tax_map,
 	get_item_warehouse_,
 )
@@ -4794,15 +4795,11 @@ def update_child_qty_rate(
 					)
 				)
 			else:
-				is_sub_contracted_item, default_bom = frappe.db.get_value(
-					"Item", new_data["fg_item"], ["is_sub_contracted_item", "default_bom"]
-				)
-
-				if not is_sub_contracted_item:
+				if not frappe.db.get_value("Item", new_data["fg_item"], "is_sub_contracted_item"):
 					frappe.throw(
 						_("Finished Good Item {0} must be a sub-contracted item").format(new_data["fg_item"])
 					)
-				elif not default_bom:
+				elif not get_default_bom(new_data["fg_item"]):
 					frappe.throw(_("Default BOM not found for FG Item {0}").format(new_data["fg_item"]))
 
 		if not new_data.get("fg_item_qty"):
