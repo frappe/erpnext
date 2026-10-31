@@ -69,3 +69,47 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		self.assertEqual(
 			self.get_template_for(item_code, posting_date=yesterday, base_net_rate=5000), template_12
 		)
+
+	def test_undated_row_is_kept_for_its_tax_category(self):
+		in_state = self.make_tax_category("_Test In-State")
+		out_state = self.make_tax_category("_Test Out-State")
+		template_in_state = self.make_tax_template(5)
+		template_out_state = self.make_tax_template(18)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_in_state, "tax_category": in_state},
+				{
+					"item_tax_template": template_out_state,
+					"tax_category": out_state,
+					"valid_from": add_days(today(), -10),
+				},
+			]
+		)
+
+		self.assertEqual(self.get_template_for(item_code, tax_category=in_state), template_in_state)
+		self.assertEqual(self.get_template_for(item_code, tax_category=out_state), template_out_state)
+
+	def test_template_of_old_tax_category_is_replaced(self):
+		in_state = self.make_tax_category("_Test In-State")
+		out_state = self.make_tax_category("_Test Out-State")
+		template_in_state = self.make_tax_template(5)
+		template_out_state = self.make_tax_template(18)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_in_state, "tax_category": in_state},
+				{
+					"item_tax_template": template_out_state,
+					"tax_category": out_state,
+					"valid_from": add_days(today(), -10),
+				},
+			]
+		)
+
+		self.assertEqual(
+			self.get_template_for(item_code, tax_category=out_state, item_tax_template=template_in_state),
+			template_out_state,
+		)
+		self.assertEqual(
+			self.get_template_for(item_code, tax_category=None, item_tax_template=template_in_state),
+			template_in_state,
+		)
