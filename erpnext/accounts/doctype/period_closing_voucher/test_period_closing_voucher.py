@@ -8,6 +8,9 @@ from frappe.utils import flt, formatdate, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.period_closing_voucher.period_closing_voucher import (
+	process_gl_and_closing_entries,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.accounts.utils import get_fiscal_year
@@ -760,6 +763,27 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			frappe.ValidationError, f"{pending_pcv.name}.*GL Entry Processing Status"
 		):
 			self.make_period_closing_voucher(posting_date="2022-12-31")
+
+	def test_closing_error_fails_submit_in_legacy_controller(self):
+		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
+		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
+
+		pcv = self.make_period_closing_voucher(posting_date="2021-03-31", submit=False)
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled accounts"):
+			pcv.submit()
+
+	def test_closing_error_marks_voucher_failed_in_background_job(self):
+		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
+		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
+
+		pcv = self.make_period_closing_voucher_in_background(posting_date="2021-03-31")
+		process_gl_and_closing_entries(pcv)
+		pcv.reload()
+
+		self.assertEqual(pcv.gle_processing_status, "Failed")
+		self.assertIn("disabled accounts", pcv.error_message)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": pcv.name}))
+		self.assertFalse(frappe.db.exists("Account Closing Balance", {"period_closing_voucher": pcv.name}))
 
 
 def create_account():
