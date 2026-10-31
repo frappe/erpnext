@@ -7,8 +7,9 @@ import unittest
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, cint, nowdate
 
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -1391,6 +1392,69 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Payment Request", existing_pr.name, "status"), "Requested")
 
+	def test_loyalty_points_in_payment_request(self):
+		customer = frappe.db.get_value("Customer", {"customer_name": "Test Loyalty Customer"})
+		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
+		create_sales_invoice(customer=customer, qty=1, rate=10000)
+		points = cint(
+			get_loyalty_details(customer, "Test Single Loyalty", company="_Test Company").get(
+				"loyalty_points"
+			)
+		)
+		rate = points + 1000
+
+		normal_order = make_sales_order(customer=customer, qty=1, rate=rate)
+		first_cart_order = make_shopping_cart_order(customer, rate)
+		second_cart_order = make_shopping_cart_order(customer, rate)
+		order_without_program = make_shopping_cart_order("_Test Customer", rate)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"only for Shopping Cart orders",
+			make_payment_request,
+			dt="Sales Order",
+			dn=normal_order.name,
+			loyalty_points=10,
+			mute_email=1,
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not enrolled in a Loyalty Program",
+			make_payment_request,
+			dt="Sales Order",
+			dn=order_without_program.name,
+			loyalty_points=10,
+			mute_email=1,
+		)
+		with self.set_user(get_accounts_user()):
+			self.assertRaises(
+				frappe.PermissionError,
+				make_payment_request,
+				dt="Sales Order",
+				dn=first_cart_order.name,
+				loyalty_points=10,
+				mute_email=1,
+			)
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=first_cart_order.name,
+			loyalty_points=points,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+		self.assertEqual(pr.grand_total, 1000)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Only 0 Loyalty Points",
+			make_payment_request,
+			dt="Sales Order",
+			dn=second_cart_order.name,
+			loyalty_points=1,
+			mute_email=1,
+		)
+
 
 def get_payment_schedules_json(doc):
 	return json.dumps(
@@ -1417,3 +1481,11 @@ def get_accounts_user():
 		user.add_roles("Accounts User")
 
 	return accounts_user
+
+
+def make_shopping_cart_order(customer, rate=1000):
+	so = make_sales_order(customer=customer, qty=1, rate=rate, do_not_save=True)
+	so.order_type = "Shopping Cart"
+	so.save()
+	so.submit()
+	return so
