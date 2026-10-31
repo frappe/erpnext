@@ -4,7 +4,7 @@
 import frappe
 from frappe import _, qb, query_builder
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Max, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 from frappe.utils.dateutils import getdate
 from pypika.terms import Bracket, LiteralValue
@@ -206,11 +206,11 @@ def get_so_with_invoices(filters):
 			ps.due_date,
 			ps.invoice_portion,
 			ps.base_payment_amount,
-			ps.paid_amount,
+			ps.base_paid_amount.as_("paid_amount"),
 		)
 		.where(
 			(so.docstatus == 1)
-			& (so.status.isin(["To Deliver and Bill", "To Bill", "To Pay"]))
+			& (so.status != "Closed")
 			& (so.company == conditions.company)
 			& (so.transaction_date[conditions.start_date : conditions.end_date])
 		)
@@ -237,15 +237,10 @@ def get_so_with_invoices(filters):
 			.inner_join(soi)
 			.on(soi.name == sii.so_detail)
 			.select(
-				# One row per (invoice, sales_order). An invoice can bill several Sales Orders; grouping
-				# by the invoice alone and taking Max(sales_order) credited the whole invoice to one
-				# arbitrary order and starved the rest. sales_order/invoice are GROUP BY keys and
-				# base_grand_total is constant per invoice; the grand total is split across the orders
-				# below in proportion to each order's net line amount on this invoice.
+				# one row per (invoice, sales_order); the invoice's received cash is split across its orders below
 				sii.sales_order.as_("sales_order"),
 				sii.parent.as_("invoice"),
 				Sum(sii.base_net_amount).as_("order_net_amount"),
-				Max(si.base_grand_total).as_("invoice_grand_total"),
 			)
 			.where(
 				sii.parent.isin(
@@ -256,15 +251,62 @@ def get_so_with_invoices(filters):
 			.groupby(sii.parent, sii.sales_order)
 		)
 		invoices = query_inv.run(as_dict=True)
-		allocate_invoice_amount_across_orders(invoices)
+		received = get_invoice_payments([x.invoice for x in invoices])
+		allocate_invoice_amount_across_orders(invoices, received)
 
 	return sorders, invoices
 
 
-def allocate_invoice_amount_across_orders(invoices):
-	"""Split each invoice's grand total across the Sales Orders it bills, proportional to each order's net
-	line amount. A single-order invoice keeps the full grand total (ratio 1). The last order (sorted, so
-	both engines agree) absorbs the rounding residual, so the shares always sum back to the grand total."""
+def get_invoice_payments(invoices):
+	"""Cash received per invoice (company currency): ledger payments plus POS cash, less advances already counted on the order."""
+	if not invoices:
+		return {}
+
+	received = {inv: 0.0 for inv in invoices}
+
+	# payments and journal entries booked against the invoice (credit notes / write-offs excluded)
+	ple = qb.DocType("Payment Ledger Entry")
+	for r in (
+		qb.from_(ple)
+		.select(ple.against_voucher_no.as_("invoice"), Sum(ple.amount).as_("delta"))
+		.where(
+			(ple.against_voucher_type == "Sales Invoice")
+			& (ple.against_voucher_no.isin(invoices))
+			& (ple.delinked == 0)
+			& (ple.voucher_type.isin(["Payment Entry", "Journal Entry"]))
+		)
+		.groupby(ple.against_voucher_no)
+	).run(as_dict=True):
+		received[r.invoice] -= flt(r.delta)  # payments credit the receivable (negative); flip to received
+
+	# POS cash is booked on the invoice itself, so it never reaches the ledger query above
+	sip = qb.DocType("Sales Invoice Payment")
+	for r in (
+		qb.from_(sip)
+		.select(sip.parent.as_("invoice"), Sum(sip.base_amount).as_("amount"))
+		.where(sip.parent.isin(invoices))
+		.groupby(sip.parent)
+	).run(as_dict=True):
+		received[r.invoice] += flt(r.amount)
+
+	# advances applied to the invoice are already counted on the order's payment schedule
+	si = qb.DocType("Sales Invoice")
+	for r in (
+		qb.from_(si)
+		.select(
+			si.name.as_("invoice"),
+			si.total_advance.as_("total_advance"),
+			si.conversion_rate.as_("conversion_rate"),
+		)
+		.where(si.name.isin(invoices))
+	).run(as_dict=True):
+		received[r.invoice] -= flt(r.total_advance) * flt(r.conversion_rate)
+
+	return received
+
+
+def allocate_invoice_amount_across_orders(invoices, received):
+	"""Split each invoice's received cash (company currency) across its orders by net amount."""
 	rows_by_invoice = {}
 	for row in invoices:
 		rows_by_invoice.setdefault(row.invoice, []).append(row)
@@ -272,40 +314,44 @@ def allocate_invoice_amount_across_orders(invoices):
 	for rows in rows_by_invoice.values():
 		rows.sort(key=lambda r: r.sales_order)
 		total_net = sum(flt(r.order_net_amount) for r in rows)
-		grand_total = flt(rows[0].invoice_grand_total)
+		first = rows[0]
+		cash = flt(received.get(first.invoice, 0))
 		if not total_net:
 			for r in rows:
-				r.invoice_amount = grand_total / len(rows)
+				r.invoice_amount = cash / len(rows)
 			continue
 		allocated = 0.0
 		for r in rows[:-1]:
-			r.invoice_amount = grand_total * flt(r.order_net_amount) / total_net
+			r.invoice_amount = cash * flt(r.order_net_amount) / total_net
 			allocated += r.invoice_amount
-		rows[-1].invoice_amount = grand_total - allocated
+		rows[-1].invoice_amount = cash - allocated  # last order absorbs the rounding residual
+
+
+def get_term_status(term):
+	if flt(term.base_payment_amount) - flt(term.paid_amount) <= 0.005:
+		return "Completed"
+	if flt(term.paid_amount) > 0:
+		return "Partly Paid"
+	return term.status  # due-date based Overdue / Unpaid from the query
 
 
 def set_payment_terms_statuses(sales_orders, invoices, filters):
-	"""
-	compute status for payment terms with associated sales invoice using FIFO
-	"""
+	"""Fill each term's paid amount from the term advance plus the order's invoice cash (FIFO), then set its status."""
+	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
 	for so in sales_orders:
-		so.currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+		so.currency = company_currency
 		so.invoices = ""
+		remaining = flt(so.base_payment_amount) - flt(so.paid_amount)
 		for inv in [x for x in invoices if x.sales_order == so.name and x.invoice_amount > 0]:
-			if so.base_payment_amount - so.paid_amount > 0:
-				amount = so.base_payment_amount - so.paid_amount
-				if inv.invoice_amount >= amount:
-					inv.invoice_amount -= amount
-					so.paid_amount += amount
-					so.invoices += "," + inv.invoice
-					so.status = "Completed"
-					break
-				else:
-					so.paid_amount += inv.invoice_amount
-					inv.invoice_amount = 0
-					so.invoices += "," + inv.invoice
-					so.status = "Partly Paid"
+			if remaining <= 0:
+				break
+			taken = min(inv.invoice_amount, remaining)
+			inv.invoice_amount -= taken
+			so.paid_amount += taken
+			remaining -= taken
+			so.invoices += "," + inv.invoice
+		so.status = get_term_status(so)
 
 	return sales_orders, invoices
 
