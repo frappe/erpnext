@@ -1836,6 +1836,86 @@ class TestPricingRule(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, get_pricing_rules, args)
 
+	def test_saved_pricing_rule_is_rechecked_on_save(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(item, min_qty=5, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		si.items[0].qty = 1
+		frappe.clear_messages()
+		si.save()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+		self.assertTrue(any(d.get("title") == "Pricing Rule Removed" for d in frappe.get_message_log()))
+
+		si.items[0].qty = 6
+		si.save()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		rule.disable = 1
+		rule.save()
+		si.save()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_pricing_rule_of_another_item_is_not_applied_on_save(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		other_item = make_item("PR Recheck Other Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			other_item, discount_percentage=40, applicable_for="Customer", customer="_Test Customer 1"
+		)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.items[0].pricing_rules = frappe.as_json([rule.name])
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_saved_pricing_rule_stays_on_submit(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(item, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, do_not_submit=True)
+		self.assertEqual(si.items[0].rate, 90)
+
+		rule.valid_from = add_days(today(), -10)
+		rule.valid_upto = add_days(today(), -1)
+		rule.save()
+		make_item_pricing_rule(item, discount_percentage=20)
+
+		si.reload()
+		si.submit()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+		self.assertEqual(si.items[0].rate, 90)
+
+	def test_pricing_rule_posted_on_a_submitted_invoice_is_rechecked(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		other_item = make_item("PR Recheck Other Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			other_item, discount_percentage=40, applicable_for="Customer", customer="_Test Customer 1"
+		)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.items[0].pricing_rules = frappe.as_json([rule.name])
+		si.docstatus = 1
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_pricing_rule_is_rechecked_on_submit_when_the_row_changed(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(item, min_qty=5, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		si.items[0].qty = 1
+		si.submit()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -1910,3 +1990,24 @@ def make_item_price(item, price_list_name, item_price):
 			"price_list_rate": item_price,
 		}
 	).insert(ignore_permissions=True, ignore_mandatory=True)
+
+
+def make_item_pricing_rule(item_code=None, **fields):
+	apply_on = fields.pop("apply_on", "Item Code")
+	child_field = frappe.scrub(apply_on)
+	child_row = {child_field: fields.pop(child_field, item_code), "uom": fields.pop("uom", None)}
+	doc = frappe.get_doc(
+		{
+			"doctype": "Pricing Rule",
+			"title": frappe.generate_hash(length=10),
+			"company": "_Test Company",
+			"currency": "INR",
+			"selling": 1,
+			"apply_on": apply_on,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			{"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}[apply_on]: [child_row],
+			**fields,
+		}
+	)
+	return doc.insert()
