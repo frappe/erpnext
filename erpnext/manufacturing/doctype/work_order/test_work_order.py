@@ -2091,7 +2091,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		{"transfer_extra_materials_percentage": 10, "backflush_raw_materials_based_on": "BOM"},
 	)
 	def test_material_request_allows_transfer_extra_materials_percentage(self):
-		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+		from erpnext.stock.doctype.material_request.material_request import (
+			make_stock_entry as mr_to_stock_entry,
+		)
 
 		self.receive_test_fg_raw_materials()
 		work_order = make_wo_order_test_record(
