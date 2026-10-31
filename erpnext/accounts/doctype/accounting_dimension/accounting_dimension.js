@@ -60,6 +60,7 @@ frappe.ui.form.on("Accounting Dimension", {
 	},
 
 	label: function (frm) {
+		if (!frm.is_new()) return;
 		frm.set_value("fieldname", frm.doc.label.replace(/ /g, "_").replace(/-/g, "_").toLowerCase());
 	},
 
