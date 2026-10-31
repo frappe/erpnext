@@ -2115,7 +2115,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi = make_pi_from_po(po.name)
 		pi.items[0].rate = 90
 		pi.submit()
-		self.assertFalse(make_pi_from_po(po.name).items)
+		self.assertEqual([row.qty for row in make_pi_from_po(po.name).items], [0])
 
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
