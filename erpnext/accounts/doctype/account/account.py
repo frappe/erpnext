@@ -649,7 +649,8 @@ def merge_account(old: str, new: str):
 		)
 
 	if old_account.is_group and new_account.parent_account == old:
-		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
+		new_account.parent_account = frappe.get_cached_value("Account", old, "parent_account")
+		new_account.save()
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
 
