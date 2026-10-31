@@ -188,11 +188,6 @@ class MaterialRequest(BuyingController):
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-<<<<<<< HEAD
-		self.validate_material_request_type()
-=======
-		self.validate_uom_is_integer("stock_uom", "stock_qty")
->>>>>>> 2d58ce0 (fix(stock): clear stale customer before party specific item validation)
 
 		if not self.status:
 			self.status = "Draft"

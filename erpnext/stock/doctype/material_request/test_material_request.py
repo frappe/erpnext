@@ -2055,17 +2055,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 		)
 		self.assertIn(">30.0<", message)
 
-<<<<<<< HEAD
-=======
-	def test_purchase_request_clears_source_warehouse(self):
-		mr = make_material_request(
-			from_warehouse="_Test Warehouse - _TC",
-			warehouse="_Test Warehouse - _TC",
-			do_not_submit=True,
-		)
-
-		self.assertIsNone(mr.items[0].from_warehouse)
-
 	def test_purchase_request_ignores_customer_item_restrictions(self):
 		from erpnext.selling.doctype.party_specific_item.test_party_specific_item import (
 			create_party_specific_item,
@@ -2083,7 +2072,6 @@ class TestMaterialRequest(ERPNextTestSuite):
 
 		self.assertIsNone(mr.customer)
 
->>>>>>> 0e54fc8 (test(stock): purchase request ignores customer item restrictions)
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)
