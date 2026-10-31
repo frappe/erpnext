@@ -20,6 +20,18 @@ class WorkstationType(Document):
 
 		description: DF.SmallText | None
 		hour_rate: DF.Currency
+		machine_model: DF.Literal[
+			"",
+			"Mixer",
+			"Steam Kettle",
+			"Reactor",
+			"Fermenter",
+			"Mill",
+			"Dryer",
+			"Cooler",
+			"Filling Line",
+			"Bagging Line",
+		]
 		workstation_costs: DF.Table[WorkstationCost]
 		workstation_type: DF.Data
 	# end: auto-generated types
