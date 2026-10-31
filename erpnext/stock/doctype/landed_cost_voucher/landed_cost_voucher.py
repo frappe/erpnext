@@ -873,11 +873,16 @@ def get_item_account_wise_lcv_entries(doc):
 			for item in landed_cost_voucher_doc.items:
 				total_item_cost += item.get(based_on_field)
 
+		taxes = landed_cost_voucher_doc.taxes
+		total_base_amount = sum(flt(account.base_amount) for account in taxes)
+
 		for item in landed_cost_voucher_doc.items:
 			if item.receipt_document == doc.name:
 				charges = item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
+				precision = item.precision("applicable_charges")
+				remaining_charges = flt(item.applicable_charges, precision)
 
-				for account in landed_cost_voucher_doc.taxes:
+				for idx, account in enumerate(taxes):
 					exchange_rate = account.exchange_rate or 1
 					dimensions = get_row_dimensions(account, item, dimension_fields)
 					group_key = (
@@ -894,7 +899,19 @@ def get_item_account_wise_lcv_entries(doc):
 							dimensions=dimensions,
 						)
 
-					if total_item_cost > 0:
+					if total_base_amount:
+						if idx == len(taxes) - 1:
+							base_share = remaining_charges
+						else:
+							base_share = flt(
+								flt(item.applicable_charges) * flt(account.base_amount) / total_base_amount,
+								precision,
+							)
+							remaining_charges = flt(remaining_charges - base_share, precision)
+
+						item_row.base_amount += base_share
+						item_row.amount += flt(base_share / exchange_rate, precision)
+					elif total_item_cost > 0:
 						item_row.amount += account.amount * item.get(based_on_field) / total_item_cost
 
 						item_row.base_amount += (
