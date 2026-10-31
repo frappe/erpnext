@@ -25,7 +25,6 @@ from erpnext.accounts.report.financial_statements import (
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_keys_for_total,
-	is_dimension_grouped,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_net_profit_loss,
@@ -148,16 +147,8 @@ def execute(filters=None):
 		add_blank_row=False,
 	)
 
-	if filters.show_opening_and_closing_balance and not is_dimension_grouped(period_list):
+	if filters.show_opening_and_closing_balance:
 		show_opening_and_closing_balance(data, period_list, currency, net_change_in_cash, filters)
-	elif filters.show_opening_and_closing_balance:
-		filters.show_opening_and_closing_balance = False
-
-		frappe.msgprint(
-			indicator="orange",
-			title=_("Not Supported"),
-			msg=_("Opening and Closing balance is not supported for dimension grouped cash flow statement"),
-		)
 
 	columns = get_columns(
 		filters.periodicity,
@@ -435,25 +426,36 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 		"currency": currency,
 	}
 
-	opening_amount = get_opening_balance(filters.company, period_list, filters) or 0.0
-	running_total = opening_amount
+	# clear the dimension left by the rows above, else only that one is fetched
+	filters.dimension_field = filters.dimension_value = None
 
-	for i, period in enumerate(period_list):
+	openings = get_opening_balance(
+		filters.company,
+		period_list,
+		filters,
+		group_by=period_list[0].get("dimension_field"),
+	)
+	running_total = {}
+
+	for period in period_list:
 		key = period["key"]
-		change = net_change_in_cash.get(key, 0.0)
+		dimension = period.get("dimension_value")
 
-		opening_balance[key] = opening_amount if i == 0 else running_total
-		running_total += change
-		closing_balance[key] = running_total
+		if dimension not in running_total:
+			running_total[dimension] = openings.get(dimension, 0.0)
 
-	opening_balance["total"] = opening_balance[period_list[0]["key"]]
-	closing_balance["total"] = closing_balance[period_list[-1]["key"]]
+		opening_balance[key] = running_total[dimension]
+		running_total[dimension] += net_change_in_cash.get(key, 0.0)
+		closing_balance[key] = running_total[dimension]
+
+	opening_balance["total"] = sum(openings.get(dimension, 0.0) for dimension in running_total)
+	closing_balance["total"] = sum(running_total.values())
 
 	out.extend([opening_balance, net_change_in_cash, closing_balance, {}])
 
 
-def get_opening_balance(company, period_list, filters):
-	"""Balance of the Cash and Bank accounts before the first period, plus their opening entries."""
+def get_opening_balance(company, period_list, filters, group_by=None):
+	"""Cash and Bank balance before the first period: {dimension: amount}, or {None: amount} if not grouped."""
 	gl = frappe.qb.DocType("GL Entry")
 	account = frappe.qb.DocType("Account")
 
@@ -479,8 +481,11 @@ def get_opening_balance(company, period_list, filters):
 		query = query.where(before_first_period | (gl.is_opening == "Yes"))
 	query = apply_gl_filters(query, gl, company, filters)
 
-	result = query.run()
-	return flt(result[0][0]) if result else 0.0
+	if not group_by:
+		return {None: flt(query.run()[0][0])}
+
+	query = query.select(gl[group_by]).groupby(gl[group_by])
+	return {dimension: flt(amount) for amount, dimension in query.run()}
 
 
 def get_report_summary(summary_data, currency):
