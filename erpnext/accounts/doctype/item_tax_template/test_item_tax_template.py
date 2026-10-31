@@ -224,3 +224,78 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 
 		self.assertEqual(si.taxes[0].tax_amount, 100)
 		self.assertEqual(si.grand_total, 1100)
+
+	def test_group_account_throws(self):
+		doc = self.make_template([("Duties and Taxes - _TC", 7, 0)])
+		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
+
+	def test_disabled_template_on_transaction_throws(self):
+		template = self.make_template([(TAX_ACCOUNT, 28, 0)])
+		template.disabled = 1
+		template.insert()
+
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template.name
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", si.insert)
+
+	def test_draft_submits_after_its_template_is_disabled(self):
+		template = self.make_tax_template(28)
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template
+		si.insert()
+
+		frappe.db.set_value("Item Tax Template", template, "disabled", 1)
+		si.reload()
+		si.submit()
+		self.assertEqual(si.docstatus, 1)
+
+		draft = create_sales_invoice(rate=1000, do_not_submit=True)
+		draft.append(
+			"items", {"item_code": "_Test Item", "qty": 1, "rate": 1000, "item_tax_template": template}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", draft.save)
+
+	def test_template_of_other_company_on_transaction_throws(self):
+		other_company_template = frappe.db.get_value("Item Tax Template", {"company": "_Test Company 1"})
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = other_company_template
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", si.insert)
+
+	def test_inter_company_purchase_invoice_drops_seller_template(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_parties
+
+		create_internal_parties()
+		seller_template = frappe.new_doc("Item Tax Template")
+		seller_template.title = f"_Test ITT {frappe.generate_hash(length=6)}"
+		seller_template.company = "Wind Power LLC"
+		seller_template.append("taxes", {"tax_type": "ST 6% - WP", "tax_rate": 6})
+		seller_template.insert()
+
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.items[0].item_tax_template = seller_template.name
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC1",
+				"cost_center": "Main - _TC1",
+				"warehouse": "Stores - _TC1",
+			}
+		)
+		pi.submit()
+
+		self.assertEqual(pi.company, "_Test Company 1")
+		self.assertNotEqual(pi.items[0].item_tax_template, seller_template.name)
