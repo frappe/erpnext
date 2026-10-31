@@ -316,6 +316,8 @@ class POSInvoiceMergeLog(Document):
 		invoice.set("base_rounding_adjustment", base_rounding_adjustment)
 		invoice.set("rounded_total", rounded_total)
 		invoice.set("base_rounded_total", base_rounded_total)
+		set_summed_amounts(invoice, data, ["change_amount", "base_change_amount"])
+		invoice.flags.keep_change_amount = True
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
@@ -448,6 +450,11 @@ class POSInvoiceMergeLog(Document):
 			si = frappe.get_doc("Sales Invoice", si_name)
 			si.flags.ignore_validate = True
 			si.cancel()
+
+
+def set_summed_amounts(invoice, data, fieldnames):
+	for fieldname in fieldnames:
+		invoice.set(fieldname, sum(flt(doc.get(fieldname)) for doc in data))
 
 
 def get_reversed_rows(return_against):
