@@ -1809,7 +1809,11 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi.items = pi.items[:1]
 		pi.items[0].rate = 90
 		pi.submit()
+<<<<<<< HEAD
 		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
+=======
+		self.assertEqual([row.qty for row in make_pi_from_po(po.name).items], [0])
+>>>>>>> 144d0d4 (fix(buying): bill the remaining amount after the full qty is billed)
 
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
