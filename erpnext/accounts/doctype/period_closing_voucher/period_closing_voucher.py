@@ -17,7 +17,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.general_ledger import check_freezing_date, is_immutable_ledger_enabled
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import apply_unscoped_filters
 from erpnext.stock.utils import get_stock_value_on
@@ -49,7 +49,7 @@ class PeriodClosingVoucher(AccountsController):
 
 	def validate(self):
 		self.validate_start_and_end_date()
-		self.check_if_previous_year_closed()
+		self.check_if_previous_period_closed()
 		self.block_if_future_closing_voucher_exists()
 		self.check_closing_account_type()
 		self.check_closing_account_currency()
@@ -83,36 +83,56 @@ class PeriodClosingVoucher(AccountsController):
 		if getdate(self.period_end_date) > getdate(self.fy_end_date):
 			frappe.throw(_("Period End Date cannot be greater than Fiscal Year End Date"))
 
-	def check_if_previous_year_closed(self):
-		last_year_closing = add_days(self.fy_start_date, -1)
-		previous_fiscal_year = get_fiscal_year(last_year_closing, company=self.company, boolean=True)
-		if not previous_fiscal_year:
+	def check_if_previous_period_closed(self):
+		last_closing = self.get_last_closing()
+		if last_closing and last_closing.gle_processing_status != "Completed":
+			frappe.throw(
+				_(
+					"Period Closing Voucher {0} has GL Entry Processing Status {1}. Complete or cancel it before closing the next period."
+				).format(
+					get_link_to_form(self.doctype, last_closing.name), _(last_closing.gle_processing_status)
+				)
+			)
+
+		last_closed_date = last_closing.period_end_date if last_closing else None
+		if last_closed_date and getdate(add_days(last_closed_date, 1)) == getdate(self.period_start_date):
 			return
 
-		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
-		previous_fiscal_year_closed = frappe.db.exists(
+		first_unclosed_date = self.get_first_unclosed_date(last_closed_date)
+		if first_unclosed_date:
+			open_from = add_days(last_closed_date, 1) if last_closed_date else first_unclosed_date
+			frappe.throw(
+				_("Previous period is not closed. Close the period from {0} first.").format(
+					frappe.bold(formatdate(open_from))
+				)
+			)
+
+	def get_last_closing(self):
+		return frappe.db.get_value(
 			"Period Closing Voucher",
-			{
-				"period_end_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
-				"docstatus": 1,
-				"company": self.company,
-			},
+			{"company": self.company, "docstatus": 1, "period_end_date": ("<", self.period_start_date)},
+			["name", "period_end_date", "gle_processing_status"],
+			order_by="period_end_date desc",
+			as_dict=True,
 		)
-		if previous_fiscal_year_closed:
-			return
 
-		gle_exists_in_previous_year = frappe.db.exists(
+	def get_first_unclosed_date(self, last_closed_date):
+		posting_date = ("<", self.period_start_date)
+		if last_closed_date:
+			posting_date = ("between", [add_days(last_closed_date, 1), add_days(self.period_start_date, -1)])
+
+		return frappe.db.get_value(
 			"GL Entry",
 			{
-				"posting_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
 				"company": self.company,
+				"posting_date": posting_date,
 				"is_cancelled": 0,
+				"is_opening": "No",
+				"voucher_type": ("!=", "Period Closing Voucher"),
 			},
+			"posting_date",
+			order_by="posting_date asc",
 		)
-		if not gle_exists_in_previous_year:
-			return
-
-		frappe.throw(_("Previous Year is not closed, please close it first"))
 
 	def block_if_future_closing_voucher_exists(self):
 		future_closing_voucher = self.get_future_closing_voucher()
