@@ -33,6 +33,10 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
+		frm.set_query("plant_floor", () => ({
+			filters: { production_item: ["is", "set"], company: frm.doc.company },
+		}));
+
 		// Set query for BOM
 		frm.set_query("bom_no", function () {
 			if (frm.doc.production_item) {
@@ -224,6 +228,12 @@ frappe.ui.form.on("Work Order", {
 			});
 		}
 		erpnext.work_order.add_start_button(frm);
+
+		if (frm.doc.plant_floor && !frm.doc.bom_no && !frm.is_new()) {
+			frm.add_custom_button(__("Open in Plant Builder"), () => {
+				frappe.set_route("plant-builder", frm.doc.plant_floor, frm.doc.name);
+			});
+		}
 
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
@@ -715,8 +725,24 @@ frappe.ui.form.on("Work Order", {
 		}
 	},
 
+	plant_floor(frm) {
+		if (!frm.doc.plant_floor) {
+			return;
+		}
+
+		frappe.db
+			.get_value("Plant Floor", frm.doc.plant_floor, ["production_item", "batch_size"])
+			.then(({ message }) => {
+				frm.set_value({
+					bom_no: "",
+					production_item: message.production_item,
+					qty: frm.doc.qty || message.batch_size,
+				});
+			});
+	},
+
 	production_item: function (frm) {
-		if (frm.doc.production_item) {
+		if (frm.doc.production_item && !frm.doc.plant_floor) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_item_details",
 				args: {
@@ -761,6 +787,10 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	bom_no: function (frm) {
+		if (!frm.doc.bom_no && frm.doc.plant_floor) {
+			return;
+		}
+
 		return frm.call({
 			doc: frm.doc,
 			method: "get_items_and_operations_from_bom",

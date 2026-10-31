@@ -560,7 +560,9 @@ def _job_card_core_values(work_order, row, qty):
 
 
 def _job_card_warehouse_values(work_order, row, qty):
-	if not work_order.skip_transfer or work_order.from_wip_warehouse:
+	if work_order.get("plant_floor") and not work_order.bom_no:
+		wip_warehouse = row.get("wip_warehouse") or work_order.wip_warehouse
+	elif not work_order.skip_transfer or work_order.from_wip_warehouse:
 		wip_warehouse = work_order.wip_warehouse or row.get("wip_warehouse")
 	else:
 		wip_warehouse = work_order.source_warehouse or row.get("source_warehouse")

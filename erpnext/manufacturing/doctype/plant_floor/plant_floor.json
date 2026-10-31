@@ -18,7 +18,18 @@
   "column_break_mvbx",
   "floor_name",
   "company",
-  "warehouse"
+  "warehouse",
+  "column_break_process",
+  "production_item",
+  "batch_size",
+  "fg_warehouse",
+  "formula_tolerance",
+  "process_tab",
+  "materials",
+  "stages_section",
+  "stages",
+  "packing_section",
+  "packing_materials"
  ],
  "fields": [
   {
@@ -52,7 +63,9 @@
    "fieldtype": "Link",
    "label": "Warehouse",
    "options": "Warehouse",
-   "set_only_once": 1
+   "set_only_once": 1,
+   "description": "Raw materials are taken from this warehouse.",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "eval:!doc.__islocal && doc.warehouse",
@@ -71,13 +84,83 @@
    "label": "Company",
    "options": "Company",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_process",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Leave it empty for a floor that only groups workstations.",
+   "fieldname": "production_item",
+   "fieldtype": "Link",
+   "label": "Finished Good",
+   "options": "Item",
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "production_item",
+   "description": "Finished good units in one Work Order.",
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size",
+   "non_negative": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "production_item",
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Finished Goods Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "2",
+   "depends_on": "production_item",
+   "description": "How far an actual raw material quantity may differ from the formula.",
+   "fieldname": "formula_tolerance",
+   "fieldtype": "Percent",
+   "label": "Formula Tolerance",
+   "non_negative": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "production_item",
+   "fieldname": "process_tab",
+   "fieldtype": "Tab Break",
+   "label": "Process"
+  },
+  {
+   "fieldname": "materials",
+   "fieldtype": "Table",
+   "label": "Formula",
+   "options": "Plant Floor Material"
+  },
+  {
+   "fieldname": "stages_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stages",
+   "fieldtype": "Table",
+   "label": "Stages",
+   "options": "Plant Floor Stage"
+  },
+  {
+   "fieldname": "packing_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "packing_materials",
+   "fieldtype": "Table",
+   "label": "Packing Materials",
+   "options": "Plant Floor Packing Material"
   }
  ],
  "hide_toolbar": 1,
  "icon": "layout-grid",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-21 23:11:45.858553",
+ "modified": "2026-10-31 11:19:28.135798",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
@@ -97,6 +180,19 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
    "role": "Manufacturing User",
    "select": 1
   }
