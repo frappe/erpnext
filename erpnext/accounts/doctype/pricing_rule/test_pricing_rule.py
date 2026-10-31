@@ -1924,6 +1924,39 @@ class TestPricingRule(ERPNextTestSuite):
 		si = create_sales_invoice(item_code=item, qty=2, do_not_submit=True)
 		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
 
+	def test_free_item_of_unmatched_transaction_rule_is_removed(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		item_free_item = make_item("PR Recheck Other Free Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, min_qty=2, price_or_product_discount="Product", free_item=item_free_item, free_qty=1
+		)
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			min_amt=1000,
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=10, rate=100, do_not_submit=True)
+		self.assertEqual(sorted(d.item_code for d in si.items if d.is_free_item), [free_item, item_free_item])
+
+		si.items[0].qty = 5
+		si.save()
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [item_free_item])
+
+		si.items[0].qty = 10
+		si.save()
+		self.assertEqual(sorted(d.item_code for d in si.items if d.is_free_item), [free_item, item_free_item])
+
+		rule.disable = 1
+		rule.save()
+		si.save()
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [item_free_item])
+
 	def test_cumulative_pricing_rule_counts_only_the_customers_sales(self):
 		item = make_item("PR Cumulative Item", {"is_stock_item": 0}).name
 		make_item_pricing_rule(

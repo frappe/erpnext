@@ -642,59 +642,57 @@ def apply_pricing_rule_on_transaction(doc):
 	applied_rules = []
 
 	if pricing_rules:
-		transaction_rules = {d.name for d in pricing_rules}
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
 		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
-		if not pricing_rules:
-			remove_free_item(doc, transaction_rules)
+	remove_free_item(doc, {d.name for d in pricing_rules})
 
-		for d in pricing_rules:
-			if d.price_or_product_discount == "Price":
-				if d.coupon_code_based and not is_coupon_of_pricing_rule(doc, d.name):
+	for d in pricing_rules:
+		if d.price_or_product_discount == "Price":
+			if d.coupon_code_based and not is_coupon_of_pricing_rule(doc, d.name):
+				continue
+
+			coupon_rule_applied = False
+			fields_set = set()
+
+			for field in ["additional_discount_percentage", "discount_amount"]:
+				pr_field = "discount_percentage" if field == "additional_discount_percentage" else field
+
+				if not d.get(pr_field):
 					continue
 
-				coupon_rule_applied = False
-				fields_set = set()
+				if (
+					d.validate_applied_rule
+					and doc.get(field) is not None
+					and doc.get(field) < d.get(pr_field)
+				):
+					frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
+				else:
+					if d.apply_discount_on:
+						doc.set("apply_discount_on", d.apply_discount_on)
+					doc.set(field, d.get(pr_field))
+					fields_set.add(field)
+					applied_rules.append(d.name)
 
-				for field in ["additional_discount_percentage", "discount_amount"]:
-					pr_field = "discount_percentage" if field == "additional_discount_percentage" else field
+					if d.coupon_code_based:
+						coupon_rule_applied = True
+						break
 
-					if not d.get(pr_field):
-						continue
+			if has_rule_discount and fields_set:
+				# clear the discount set by the previously applied rule which this rule does not set
+				for field in {"additional_discount_percentage", "discount_amount"} - fields_set:
+					doc.set(field, 0)
 
-					if (
-						d.validate_applied_rule
-						and doc.get(field) is not None
-						and doc.get(field) < d.get(pr_field)
-					):
-						frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
-					else:
-						if d.apply_discount_on:
-							doc.set("apply_discount_on", d.apply_discount_on)
-						doc.set(field, d.get(pr_field))
-						fields_set.add(field)
-						applied_rules.append(d.name)
+			doc.calculate_taxes_and_totals()
 
-						if d.coupon_code_based:
-							coupon_rule_applied = True
-							break
-
-				if has_rule_discount and fields_set:
-					# clear the discount set by the previously applied rule which this rule does not set
-					for field in {"additional_discount_percentage", "discount_amount"} - fields_set:
-						doc.set(field, 0)
-
-				doc.calculate_taxes_and_totals()
-
-				if coupon_rule_applied:
-					break
-			elif d.price_or_product_discount == "Product":
-				item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
-				get_product_discount_rule(d, item_details, doc=doc)
-				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
-				doc.set_missing_values()
-				doc.calculate_taxes_and_totals()
+			if coupon_rule_applied:
+				break
+		elif d.price_or_product_discount == "Product":
+			item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
+			get_product_discount_rule(d, item_details, doc=doc)
+			apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
+			doc.set_missing_values()
+			doc.calculate_taxes_and_totals()
 
 	if has_rule_discount and not applied_rules:
 		remove_transaction_discount(doc, previously_applied_rules)
@@ -803,9 +801,22 @@ def remove_transaction_discount(doc, pricing_rules):
 	)
 
 
-def remove_free_item(doc, pricing_rules):
+def remove_free_item(doc, matched_rules):
+	free_item_rules = {d.pricing_rules for d in doc.items if d.is_free_item and d.pricing_rules}
+	if not free_item_rules - matched_rules:
+		return
+
+	pricing_rule = frappe.qb.DocType("Pricing Rule")
+	transaction_rules = set(
+		frappe.qb.from_(pricing_rule)
+		.select(pricing_rule.name)
+		.where(pricing_rule.name.isin(list(free_item_rules - matched_rules)))
+		.where(pricing_rule.apply_on == "Transaction")
+		.run(pluck=True)
+	)
+
 	for d in list(doc.items):
-		if d.is_free_item and d.pricing_rules in pricing_rules:
+		if d.is_free_item and d.pricing_rules in transaction_rules:
 			doc.remove(d)
 
 
