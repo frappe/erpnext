@@ -335,6 +335,35 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		first_return.cancel()
 		self.assertEqual(frappe.db.get_value("Loyalty Point Entry", earning, "loyalty_points"), 1000)
 
+	def test_return_ignores_entries_of_another_invoice_type(self):
+		customer = make_loyalty_customer(
+			"Test Return Invoice Type Loyalty",
+			[{"tier_name": "Basic", "collection_factor": 1, "min_spent": 0}],
+		)
+		invoice = make_loyalty_invoice(customer, 500, qty=2)
+		earning = frappe.get_doc("Loyalty Point Entry", {"invoice": invoice.name})
+		# entries of a POS Invoice with the same name, with some of its points redeemed
+		pos_earning = frappe.copy_doc(earning)
+		pos_earning.invoice_type = "POS Invoice"
+		pos_earning.insert(ignore_links=True)
+		pos_redemption = frappe.copy_doc(pos_earning)
+		pos_redemption.update(
+			{"redeem_against": pos_earning.name, "loyalty_points": -10, "purchase_amount": 0}
+		)
+		pos_redemption.insert(ignore_links=True)
+
+		make_loyalty_invoice(customer, 500, qty=-1, return_against=invoice.name)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Loyalty Point Entry",
+				{"invoice_type": "Sales Invoice", "invoice": invoice.name, "loyalty_points": (">", 0)},
+				"loyalty_points",
+			),
+			500,
+		)
+		self.assertEqual(frappe.db.get_value("Loyalty Point Entry", pos_earning.name, "loyalty_points"), 1000)
+		self.assertTrue(frappe.db.exists("Loyalty Point Entry", pos_redemption.name))
+
 
 def get_points_earned(self):
 	def get_returned_amount():

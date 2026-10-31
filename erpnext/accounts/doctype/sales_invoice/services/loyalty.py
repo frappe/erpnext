@@ -50,7 +50,9 @@ class LoyaltyService:
 		so that the redemptions keep their link to it."""
 		doc = self.doc
 		lp_entry = frappe.db.get_value(
-			"Loyalty Point Entry", {"invoice": doc.name, "loyalty_points": (">", 0)}, "name"
+			"Loyalty Point Entry",
+			{"invoice_type": doc.doctype, "invoice": doc.name, "loyalty_points": (">", 0)},
+			"name",
 		)
 		redeemed = lp_entry and -flt(
 			frappe.get_all(
@@ -107,7 +109,9 @@ class LoyaltyService:
 	def delete_loyalty_point_entry(self) -> None:
 		doc = self.doc
 		lp_entry = frappe.db.get_all(
-			"Loyalty Point Entry", filters={"invoice": doc.name, "loyalty_points": (">", 0)}, fields=["name"]
+			"Loyalty Point Entry",
+			filters={"invoice_type": doc.doctype, "invoice": doc.name, "loyalty_points": (">", 0)},
+			fields=["name"],
 		)
 
 		if not lp_entry:
@@ -128,7 +132,9 @@ class LoyaltyService:
 				).format(doc.doctype, doc.doctype, invoice_list)
 			)
 		else:
-			frappe.db.delete("Loyalty Point Entry", filters={"invoice": doc.name})
+			frappe.db.delete(
+				"Loyalty Point Entry", filters={"invoice_type": doc.doctype, "invoice": doc.name}
+			)
 			self._set_loyalty_program_tier()
 
 	def apply_loyalty_points(self) -> None:
