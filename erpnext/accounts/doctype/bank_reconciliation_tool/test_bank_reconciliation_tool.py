@@ -1005,3 +1005,5 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 
 		match = next(v for v in vouchers if v.get("name") == invoice.name)
 		self.assertEqual(match.paid_amount, 4000)
+		# shown in the bank account currency, as the amount is
+		self.assertEqual(match.currency, "INR")

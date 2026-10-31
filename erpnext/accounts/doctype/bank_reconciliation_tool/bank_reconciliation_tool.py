@@ -1739,7 +1739,8 @@ def get_si_matching_query(exact_match, currency, common_filters, transaction, co
 			si.customer.as_("party"),
 			ConstantColumn("Customer").as_("party_type"),
 			si.posting_date,
-			si.currency,
+			# the amount above is in the bank account currency
+			ConstantColumn(currency).as_("currency") if in_company_currency else si.currency,
 		)
 		.where(si.docstatus == 1)
 		.where(sip.clearance_date.isnull())
@@ -1783,7 +1784,8 @@ def get_pi_matching_query(exact_match, currency, common_filters, company_currenc
 			purchase_invoice.supplier.as_("party"),
 			ConstantColumn("Supplier").as_("party_type"),
 			purchase_invoice.posting_date,
-			purchase_invoice.currency,
+			# the amount above is in the bank account currency
+			ConstantColumn(currency).as_("currency") if in_company_currency else purchase_invoice.currency,
 		)
 		.where(purchase_invoice.docstatus == 1)
 		.where(purchase_invoice.is_paid == 1)
