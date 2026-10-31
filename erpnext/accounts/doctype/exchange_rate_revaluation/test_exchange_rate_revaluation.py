@@ -479,6 +479,55 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 		"Accounts Settings",
 		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
 	)
+	def test_cancelled_journal_is_made_again(self):
+		# _Test Customer: 5 USD and 0 INR, revalued by the zero balance journal
+		si = self._usd_invoice(posting_date=add_days(today(), -1))
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.paid_amount = 95
+		pe.source_exchange_rate = 84.2105
+		pe.received_amount = 8000
+		pe.references = []
+		pe.save().submit()
+		# _Test Customer 1: 100 USD at 80, revalued by the revaluation journal
+		create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer="_Test Customer 1",
+			debit_to=self.debtors_usd,
+			posting_date=add_days(today(), -1),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			price_list_rate=100,
+			currency="USD",
+			conversion_rate=80,
+		)
+
+		err = self._revaluation().save().submit()
+		journals = err.make_jv_entries()
+		zero_balance_jv = frappe.get_doc("Journal Entry", journals.get("zero_balance_jv")).submit()
+		revaluation_jv = frappe.get_doc("Journal Entry", journals.get("revaluation_jv")).submit()
+		self.assertTrue(err.check_journal_and_reversal().get("journals_posted"))
+
+		# only the cancelled journal is made again
+		zero_balance_jv.cancel()
+		self.assertFalse(err.check_journal_and_reversal().get("journals_posted"))
+		journals = err.make_jv_entries()
+		self.assertTrue(journals.get("zero_balance_jv"))
+		self.assertIsNone(journals.get("revaluation_jv"))
+		frappe.get_doc("Journal Entry", journals.get("zero_balance_jv")).submit()
+		self.assertTrue(err.check_journal_and_reversal().get("journals_posted"))
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
+
+		revaluation_jv.cancel()
+		journals = err.make_jv_entries()
+		self.assertIsNone(journals.get("zero_balance_jv"))
+		self.assertTrue(journals.get("revaluation_jv"))
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
 	def test_balances_are_read_again_on_submit(self):
 		si = self._usd_invoice()
 		err = self._revaluation().save()

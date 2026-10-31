@@ -9,12 +9,15 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
 from frappe.query_builder.functions import Max, NullIf, Sum
-from frappe.utils import flt, formatdate, get_link_to_form, nowdate
+from frappe.utils import cint, flt, formatdate, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
 from erpnext.accounts.utils import get_currency_precision
 from erpnext.setup.utils import get_exchange_rate
+
+ZERO_BALANCE_VOUCHER_TYPE = "Exchange Gain Or Loss"
+REVALUATION_VOUCHER_TYPE = "Exchange Rate Revaluation"
 
 
 class ExchangeRateRevaluation(Document):
@@ -216,7 +219,11 @@ class ExchangeRateRevaluation(Document):
 		reversals_posted = False
 
 		journals = self.get_journals()
-		journals_posted = bool(journals) and all(d.docstatus == 1 for d in journals)
+		journals_posted = (
+			bool(journals)
+			and all(d.docstatus == 1 for d in journals)
+			and not self.get_journals_to_make(journals)
+		)
 
 		je = qb.DocType("Journal Entry")
 		jea = qb.DocType("Journal Entry Account")
@@ -413,11 +420,42 @@ class ExchangeRateRevaluation(Document):
 			)
 		return unrealized_exchange_gain_loss_account
 
+	def get_journals_to_make(self, journals):
+		"""Voucher types of the journals of this revaluation that are not made yet, or were cancelled.
+
+		A journal is made when one of the existing journals posts to a row it is made for."""
+		posted_rows = set()
+		if journals:
+			posted_rows = {
+				get_row_key(d)
+				for d in frappe.get_all(
+					"Journal Entry Account",
+					filters={
+						"parent": ("in", [d.name for d in journals]),
+						"reference_type": "Exchange Rate Revaluation",
+						"reference_name": self.name,
+					},
+					fields=["account", "party_type", "party"],
+				)
+			}
+
+		to_make = set()
+		for voucher_type, zero_balance, gain_loss in (
+			(ZERO_BALANCE_VOUCHER_TYPE, 1, self.gain_loss_booked),
+			(REVALUATION_VOUCHER_TYPE, 0, self.gain_loss_unbooked),
+		):
+			rows = {get_row_key(d) for d in self.accounts if cint(d.zero_balance) == zero_balance}
+			if gain_loss and rows and not rows & posted_rows:
+				to_make.add(voucher_type)
+		return to_make
+
 	def validate_journals_can_be_made(self):
 		if self.docstatus != 1:
 			frappe.throw(_("Submit the Exchange Rate Revaluation before creating its Journal Entries"))
 
-		if journals := self.get_journals():
+		journals = self.get_journals()
+		to_make = self.get_journals_to_make(journals)
+		if journals and not to_make:
 			frappe.throw(
 				_("Journal Entries are already created for this Exchange Rate Revaluation: {0}").format(
 					", ".join(get_link_to_form("Journal Entry", d.name) for d in journals)
@@ -426,6 +464,10 @@ class ExchangeRateRevaluation(Document):
 
 		ledger_balances = self.get_ledger_balances()
 		for row in self.accounts:
+			# rows of a journal that is already made are changed by it
+			if (ZERO_BALANCE_VOUCHER_TYPE if row.zero_balance else REVALUATION_VOUCHER_TYPE) not in to_make:
+				continue
+
 			balance = ledger_balances.get(get_row_key(row)) or frappe._dict(
 				balance=0, balance_in_account_currency=0
 			)
@@ -445,17 +487,19 @@ class ExchangeRateRevaluation(Document):
 					)
 				)
 
+		return to_make
+
 	@frappe.whitelist()
 	def make_jv_entries(self):
 		frappe.has_permission("Journal Entry", "write", throw=True)
-		self.validate_journals_can_be_made()
-		zero_balance_jv = self.make_jv_for_zero_balance()
+		to_make = self.validate_journals_can_be_made()
+		zero_balance_jv = ZERO_BALANCE_VOUCHER_TYPE in to_make and self.make_jv_for_zero_balance()
 		if zero_balance_jv:
 			frappe.msgprint(
 				_("Zero Balance Journal: {0}").format(get_link_to_form("Journal Entry", zero_balance_jv.name))
 			)
 
-		revaluation_jv = self.make_jv_for_revaluation()
+		revaluation_jv = REVALUATION_VOUCHER_TYPE in to_make and self.make_jv_for_revaluation()
 		if revaluation_jv:
 			frappe.msgprint(
 				_("Revaluation Journal: {0}").format(get_link_to_form("Journal Entry", revaluation_jv.name))
@@ -478,7 +522,7 @@ class ExchangeRateRevaluation(Document):
 		unrealized_exchange_gain_loss_account = self.get_for_unrealized_gain_loss_account()
 
 		journal_entry = frappe.new_doc("Journal Entry")
-		journal_entry.voucher_type = "Exchange Gain Or Loss"
+		journal_entry.voucher_type = ZERO_BALANCE_VOUCHER_TYPE
 		journal_entry.company = self.company
 		journal_entry.posting_date = self.posting_date
 		journal_entry.multi_currency = 1
@@ -597,7 +641,7 @@ class ExchangeRateRevaluation(Document):
 		unrealized_exchange_gain_loss_account = self.get_for_unrealized_gain_loss_account()
 
 		journal_entry = frappe.new_doc("Journal Entry")
-		journal_entry.voucher_type = "Exchange Rate Revaluation"
+		journal_entry.voucher_type = REVALUATION_VOUCHER_TYPE
 		journal_entry.company = self.company
 		journal_entry.posting_date = self.posting_date
 		journal_entry.multi_currency = 1
