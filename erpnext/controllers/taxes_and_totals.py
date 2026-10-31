@@ -27,6 +27,7 @@ from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	_get_item_tax_template,
 	get_item_tax_map,
+	get_item_tax_template,
 )
 from erpnext.utilities.regional import temporary_flag
 
@@ -133,7 +134,7 @@ class calculate_taxes_and_totals:
 
 				if taxes:
 					if item.item_tax_template not in taxes:
-						item.item_tax_template = taxes[0]
+						item.item_tax_template = get_item_tax_template(ctx, item_doc)
 						frappe.msgprint(
 							_("Row {0}: Item Tax template updated as per validity and rate applied").format(
 								item.idx, frappe.bold(item.item_code)

@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_item_tax_template
 from erpnext.tests.utils import ERPNextTestSuite
@@ -113,3 +114,66 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 			self.get_template_for(item_code, tax_category=None, item_tax_template=template_in_state),
 			template_in_state,
 		)
+
+	def test_superseded_template_is_replaced_on_transaction(self):
+		template_12 = self.make_tax_template(12)
+		template_18 = self.make_tax_template(18)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_12, "valid_from": add_days(today(), -60)},
+				{"item_tax_template": template_18, "valid_from": add_days(today(), -10)},
+			]
+		)
+
+		self.assertEqual(self.get_template_for(item_code, item_tax_template=template_12), template_18)
+
+		si = create_sales_invoice(item_code=item_code, rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template_12
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": TAX_ACCOUNT,
+				"description": "VAT",
+				"rate": 0,
+			},
+		)
+		si.insert()
+
+		self.assertEqual(si.items[0].item_tax_template, template_18)
+		self.assertEqual(si.taxes[0].tax_amount, 180)
+
+	def make_item_group_with_taxes(self, taxes):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": f"_Test ITT Group {frappe.generate_hash(length=6)}",
+				"parent_item_group": "All Item Groups",
+				"taxes": taxes,
+			}
+		)
+		return item_group.insert().name
+
+	def test_superseded_template_is_replaced_with_item_row_before_item_group_row(self):
+		template_5 = self.make_tax_template(5)
+		template_12 = self.make_tax_template(12)
+		template_18 = self.make_tax_template(18)
+		item_group = self.make_item_group_with_taxes(
+			[
+				{"item_tax_template": template_12, "valid_from": add_days(today(), -60)},
+				{"item_tax_template": template_18, "valid_from": add_days(today(), -10)},
+			]
+		)
+		item_code = make_item(
+			properties={
+				"item_group": item_group,
+				"taxes": [{"item_tax_template": template_5, "valid_from": add_days(today(), -20)}],
+			}
+		).name
+
+		si = create_sales_invoice(item_code=item_code, rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template_12
+		si.insert()
+
+		self.assertEqual(self.get_template_for(item_code), template_5)
+		self.assertEqual(si.items[0].item_tax_template, template_5)
