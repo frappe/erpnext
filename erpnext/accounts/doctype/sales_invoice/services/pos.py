@@ -213,9 +213,7 @@ class POSService:
 
 	def validate_mandatory_pos_fields(self) -> None:
 		doc = self.doc
-		if doc.get("is_consolidated") or (
-			frappe.db.get_single_value("POS Settings", "invoice_type") != doc.doctype
-		):
+		if frappe.db.get_single_value("POS Settings", "invoice_type") != doc.doctype:
 			return
 
 		mandatory_fields = frappe.get_all(
