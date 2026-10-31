@@ -542,6 +542,7 @@ def unconsolidate_pos_invoices(closing_entry):
 	)
 
 	if len(closing_entry.pos_invoices) >= 10:
+		closing_entry.ignore_linked_doctypes = ("POS Invoice Merge Log", "Sales Invoice")
 		closing_entry.set_status(update=True, status="Queued")
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
@@ -698,6 +699,7 @@ def enqueue_job(job, **kwargs):
 			event="processing_merge_logs",
 			job_id=job_id,
 			now=frappe.conf.developer_mode or frappe.in_test,
+			enqueue_after_commit=True,
 		)
 
 		if job == create_merge_logs:
