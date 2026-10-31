@@ -161,6 +161,20 @@ class TestPlantFloor(ERPNextTestSuite):
 				frappe.ValidationError, "4.0% off the formula", run.consume, job_card.name, quantities
 			)
 
+	def test_plant_builder_checks_unsaved_plant_and_reads_run(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import check_plant, get_run
+
+		plant_floor = make_ketchup_plant()
+		unsaved = plant_floor.as_dict()
+		unsaved.update(name=None, floor_name="_Test Unsaved Plant", packing_materials=[])
+		self.assertIn("Add at least one packing material", check_plant(unsaved)["errors"])
+
+		run = get_run(plant_floor.make_work_order(2000).name)
+		self.assertEqual([stage.phase for stage in run["stages"]], ["waiting", "waiting", "waiting"])
+		self.assertEqual(run["plan"].input_weight, 1250)
+		self.assertEqual(run["stages"][1]["items"][0].item_code, "_Test Ketchup Pre-mix")
+		self.assertTrue(run["stages"][1]["items"][0].is_fixed)
+
 
 def minutes_ago(minutes):
 	return patch(
