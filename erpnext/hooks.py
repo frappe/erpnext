@@ -510,6 +510,8 @@ auto_cancel_exempted_doctypes = [
 	# May be linked to Period Closing Voucher, but cancelled with custom logic in PCV.
 	# This is better to avoid stale docs when cancelling PCV from backend.
 	"Account Closing Balance",
+	# Payment Entry and Cheque Book cancel their cheques in on_cancel.
+	"Cheque",
 ]
 
 scheduler_events = {

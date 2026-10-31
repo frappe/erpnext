@@ -1,0 +1,373 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+
+from unittest.mock import patch
+
+import frappe
+from frappe.handler import run_doc_method
+from frappe.utils import getdate
+
+from erpnext.accounts.doctype.cheque.cheque import Cheque
+from erpnext.accounts.doctype.cheque.cheque_payment import (
+	cancel_cheque_payment,
+	get_next_cheque,
+	issue_cheque,
+	lock_cheque,
+	validate_cheque,
+)
+from erpnext.accounts.doctype.cheque_book.test_cheque_book import (
+	make_cheque_book,
+	make_company_bank_account,
+	record_locks,
+)
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.tests.utils import ERPNextTestSuite
+
+BANK_LEDGER = "_Test Cheque Bank - _TC"
+
+
+class TestCheque(ERPNextTestSuite):
+	def setUp(self):
+		self.book = make_cheque_book(make_company_bank_account(), "000101", "000105")
+		self.cheque = frappe.get_doc("Cheque", f"{self.book.name}-000101")
+
+	def test_cheque_cannot_be_created_or_changed_by_hand(self):
+		new_cheque = frappe.copy_doc(self.cheque)
+		new_cheque.update({"docstatus": 0, "cheque_no": "000999"})
+		self.assertRaisesRegex(frappe.ValidationError, "changes only through", new_cheque.insert)
+
+		self.cheque.remarks = "Edited by hand"
+		self.assertRaisesRegex(frappe.ValidationError, "changes only through", self.cheque.save)
+
+		cheque = frappe.get_doc("Cheque", self.cheque.name)
+		self.assertRaisesRegex(frappe.ValidationError, "changes only through", cheque.cancel)
+
+	def test_cancel_with_reason(self):
+		# Frappe saves no versions in tests unless in_test is off
+		with patch.object(frappe, "in_test", False):
+			self.cheque.cancel_with_reason(" Spoiled ", "Torn while writing")
+
+		self.cheque.reload()
+		self.assertEqual((self.cheque.docstatus, self.cheque.status), (2, "Cancelled"))
+		self.assertEqual(self.cheque.cancellation_reason, "Spoiled")
+		self.assertEqual(self.cheque.remarks, "Torn while writing")
+		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "status"), "Submitted")
+
+		version = frappe.db.get_value(
+			"Version", {"ref_doctype": "Cheque", "docname": self.cheque.name}, "data"
+		)
+		self.assertIn(["status", "Available", "Cancelled"], frappe.parse_json(version)["changed"])
+
+	def test_reason_is_required(self):
+		self.assertRaises(frappe.MandatoryError, self.cheque.cancel_with_reason, "  ")
+
+	def test_cancelling_the_last_free_cheque_finishes_the_book(self):
+		for name in frappe.get_all("Cheque", filters={"cheque_book": self.book.name}, pluck="name"):
+			frappe.get_doc("Cheque", name).cancel_with_reason("Lost")
+		self.assertEqual(frappe.db.get_value("Cheque Book", self.book.name, "status"), "Finished")
+
+	def test_only_accounts_manager_can_cancel_a_cheque(self):
+		user = make_fenced_user("cheque.user@example.com", ["Accounts User"])
+		with as_user(user):
+			self.assertRaises(frappe.PermissionError, call_from_form, self.cheque.name, reason="Spoiled")
+
+		manager = make_fenced_user("cheque.manager@example.com", ["Accounts Manager"])
+		with as_user(manager):
+			self.assertRaises(
+				frappe.PermissionError, call_from_form, self.cheque.name, http_method="GET", reason="Spoiled"
+			)
+			call_from_form(self.cheque.name, reason="Spoiled")
+		self.assertEqual(frappe.db.get_value("Cheque", self.cheque.name, "docstatus"), 2)
+
+
+class TestChequePayment(ERPNextTestSuite):
+	def setUp(self):
+		if not frappe.db.exists("Mode of Payment", "Cheque"):
+			frappe.get_doc(
+				{"doctype": "Mode of Payment", "mode_of_payment": "Cheque", "type": "Bank"}
+			).insert()
+		self.bank_account = make_company_bank_account()
+		self.book = make_cheque_book(self.bank_account, "000101", "000105")
+
+	def name_of(self, cheque_no, book=None):
+		return f"{(book or self.book).name}-{cheque_no}"
+
+	def pay(self, cheque_no=None, submit=True, book=None, taxes=(), **args):
+		"""Make a cheque payment from the test bank ledger. With no cheque number, the server suggests one."""
+		args.setdefault("paid_from", BANK_LEDGER)
+		payment = create_payment_entry(**args)
+		payment.mode_of_payment = "Cheque"
+		payment.cheque_book = (book or self.book).name
+		payment.reference_no = cheque_no
+		for tax in taxes:
+			payment.append("taxes", tax)
+		payment.save()
+		if submit:
+			payment.submit()
+		return payment
+
+	def test_suggestion_follows_the_highest_used_cheque(self):
+		self.assertEqual(get_next_cheque(BANK_LEDGER).get("cheque_no"), "000101")
+
+		self.pay("000103")
+		self.assertEqual(get_next_cheque(BANK_LEDGER).get("cheque_no"), "000104")
+
+		frappe.get_doc("Cheque", self.name_of("000104")).cancel_with_reason("Spoiled")
+		self.assertEqual(get_next_cheque(BANK_LEDGER).get("cheque_no"), "000105")
+
+	def test_suggestion_moves_to_the_next_book(self):
+		self.pay("000105")
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {})  # 000101 to 000104 stay free for a manual pick
+
+		book = make_cheque_book(self.bank_account, "000201", "000205")
+		suggestion = get_next_cheque(BANK_LEDGER)
+		self.assertEqual((suggestion["cheque_book"], suggestion["cheque_no"]), (book.name, "000201"))
+
+	def test_disabled_book_or_bank_account_gets_no_suggestion(self):
+		self.book.status = "Disabled"
+		self.book.save()
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {})
+
+		self.book.status = "Submitted"
+		self.book.save()
+		frappe.db.set_value("Bank Account", self.bank_account, "disabled", 1)
+		self.assertEqual(get_next_cheque(BANK_LEDGER), {})
+
+	def test_suggestion_for_a_book_shows_its_free_count(self):
+		self.pay("000101")
+		self.assertEqual(
+			get_next_cheque(BANK_LEDGER, self.book.name),
+			{
+				"cheque_book": self.book.name,
+				"cheque_no": "000102",
+				"free": 4,
+				"cheque_start_no": "000101",
+				"cheque_end_no": "000105",
+			},
+		)
+
+		# a chosen book with no next number still shows its free count
+		self.pay("000105")
+		suggestion = get_next_cheque(BANK_LEDGER, self.book.name)
+		self.assertEqual(suggestion["free"], 3)
+		self.assertNotIn("cheque_no", suggestion)
+
+	def test_submit_records_the_payment_on_the_cheque(self):
+		payment = self.pay(paid_amount=2500)  # no number, so the server takes the suggestion
+		self.assertEqual((payment.reference_no, payment.cheque), ("000101", self.name_of("000101")))
+
+		cheque = frappe.get_doc("Cheque", self.name_of("000101"))
+		self.assertEqual((cheque.status, cheque.payment_entry), ("Issued", payment.name))
+		self.assertEqual((cheque.party_name, cheque.amount), (payment.party_name, 2500))
+		self.assertEqual(getdate(cheque.cheque_date), getdate(payment.reference_date))
+
+	def test_cheque_shows_the_clearance_date_of_its_payment(self):
+		payment = self.pay("000101")
+		frappe.db.set_value("Payment Entry", payment.name, "clearance_date", "2026-01-31")
+
+		# the form gets this through as_dict, and the status shows Cleared from it
+		cheque = frappe.get_doc("Cheque", self.name_of("000101")).as_dict()
+		self.assertEqual(getdate(cheque.clearance_date), getdate("2026-01-31"))
+
+	def test_cheque_amount_is_what_the_bank_pays(self):
+		# a tax outside the paid amount also moves money from the bank, so it is on the cheque
+		for add_deduct, bank_pays in (("Add", 1100), ("Deduct", 900)):
+			with self.subTest(add_deduct=add_deduct):
+				tax = {
+					"account_head": "_Test Account Service Tax - _TC",
+					"charge_type": "Actual",
+					"tax_amount": 100,
+					"add_deduct_tax": add_deduct,
+					"description": "Test",
+				}
+				payment = self.pay(paid_amount=1000, taxes=[tax])
+				self.assertEqual(payment.paid_amount_after_tax, bank_pays)
+				self.assertEqual(frappe.db.get_value("Cheque", payment.cheque, "amount"), bank_pays)
+
+	def test_typed_number_is_padded_and_must_be_in_the_book(self):
+		payment = self.pay("102", submit=False)
+		self.assertEqual((payment.reference_no, payment.cheque), ("000102", self.name_of("000102")))
+
+		for cheque_no in ("999", "10a"):
+			with self.subTest(cheque_no=cheque_no):
+				self.assertRaisesRegex(frappe.ValidationError, "is not in Cheque Book", self.pay, cheque_no)
+
+	def test_payment_on_the_last_cheque_finishes_the_book(self):
+		book = make_cheque_book(self.bank_account, "000201", "000201")
+		self.pay("000201", book=book)
+		self.assertEqual(frappe.db.get_value("Cheque Book", book.name, "status"), "Finished")
+
+	def test_cheque_must_match_the_payment(self):
+		with self.assertRaisesRegex(frappe.ValidationError, "Account Paid From"):
+			self.pay("000101", paid_from="_Test Bank - _TC")
+
+		self.book.status = "Disabled"
+		self.book.save()
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", self.pay, "000101")
+
+		self.book.status = "Submitted"
+		self.book.save()
+		frappe.db.set_value("Bank Account", self.bank_account, "disabled", 1)
+		self.assertRaisesRegex(frappe.ValidationError, "enabled Company Account", self.pay, "000101")
+
+	def test_book_disabled_after_validation_issues_no_cheque(self):
+		payment = self.pay("000101", submit=False)
+		# another user disables the book after this payment passed validation
+		frappe.db.set_value("Cheque Book", self.book.name, "status", "Disabled")
+
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", issue_cheque, payment)
+		self.assertEqual(frappe.db.get_value("Cheque", self.name_of("000101"), "status"), "Available")
+
+	def test_bank_account_disabled_after_validation_issues_no_cheque(self):
+		payment = self.pay("000101", submit=False)
+		# another user disables the bank account after this payment passed validation
+		frappe.db.set_value("Bank Account", self.bank_account, "disabled", 1)
+
+		self.assertRaisesRegex(frappe.ValidationError, "enabled Company Account", issue_cheque, payment)
+		self.assertEqual(frappe.db.get_value("Cheque", self.name_of("000101"), "status"), "Available")
+
+	def test_used_or_cancelled_cheque_is_rejected(self):
+		self.pay("000101")
+		self.assertRaisesRegex(frappe.ValidationError, "already used", self.pay, "000101")
+
+		frappe.get_doc("Cheque", self.name_of("000102")).cancel_with_reason("Lost")
+		self.assertRaisesRegex(frappe.ValidationError, "is cancelled", self.pay, "000102")
+
+	def test_first_submit_wins_when_two_drafts_take_a_cheque(self):
+		first = self.pay("000101", submit=False)
+		second = self.pay("000101", submit=False)
+		first.submit()
+		self.assertRaisesRegex(frappe.ValidationError, "already used", second.submit)
+
+	def test_draft_with_a_cancelled_cheque_link_takes_another_number(self):
+		first = self.pay("000101", submit=False)
+		second = self.pay("000101", submit=False)
+		first.submit()
+		first.cancel()  # cancels cheque 000101, which the second draft still links to
+
+		second.reload()  # as an API caller sees it: the hidden link still points to 000101
+		second.reference_no = "000102"
+		second.save()
+		self.assertEqual(second.cheque, self.name_of("000102"))
+
+	def test_other_payment_modes_drop_the_cheque(self):
+		payment = self.pay("000101", submit=False)
+		payment.mode_of_payment = "Cash"
+		payment.save()
+		self.assertEqual((payment.cheque_book, payment.cheque), (None, None))
+
+	def test_issued_cheque_is_cancelled_with_its_payment(self):
+		payment = self.pay("000101")
+		cheque = frappe.get_doc("Cheque", self.name_of("000101"))
+		with self.assertRaisesRegex(frappe.ValidationError, "Cancel the Payment Entry"):
+			cheque.cancel_with_reason("Lost")
+		frappe.db.savepoint("book_cancel")  # the refused cancel has already written docstatus 2
+		with self.assertRaisesRegex(frappe.ValidationError, "000101"):
+			self.book.cancel()
+		frappe.db.rollback(save_point="book_cancel")
+
+		payment.cancel()
+		cheque.reload()
+		self.assertEqual(
+			(cheque.docstatus, cheque.status, cheque.payment_entry), (2, "Cancelled", payment.name)
+		)
+		self.assertIsNone(cheque.cancellation_reason)
+		self.assertEqual(cheque.remarks, f"Cancelled with Payment Entry {payment.name}")
+		self.assertEqual(get_next_cheque(BANK_LEDGER).get("cheque_no"), "000102")
+
+	def test_cancel_endpoint_records_the_reason(self):
+		payment = self.pay("000101")
+		cancel_cheque_payment(payment.name, " Spoiled ", "Printer jam")
+
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 2)
+		cheque = frappe.get_doc("Cheque", self.name_of("000101"))
+		self.assertEqual(cheque.status, "Cancelled")
+		self.assertEqual((cheque.cancellation_reason, cheque.remarks), ("Spoiled", "Printer jam"))
+
+	def test_cancel_endpoint_needs_a_reason(self):
+		payment = self.pay("000101")
+		self.assertRaises(frappe.MandatoryError, cancel_cheque_payment, payment.name, " ")
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 1)
+
+	def test_failed_cancel_keeps_the_payment_and_the_cheque(self):
+		payment = self.pay("000101")
+		frappe.db.savepoint("cheque_cancel")
+		with patch.object(Cheque, "void", side_effect=frappe.ValidationError("Void failed")):
+			self.assertRaisesRegex(
+				frappe.ValidationError, "Void failed", cancel_cheque_payment, payment.name, "Spoiled"
+			)
+		frappe.db.rollback(save_point="cheque_cancel")
+
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "docstatus"), 1)
+		cheque = frappe.get_doc("Cheque", self.name_of("000101"))
+		self.assertEqual((cheque.status, cheque.cancellation_reason), ("Issued", None))
+
+	def test_amended_payment_needs_a_new_cheque(self):
+		payment = self.pay("000101")
+		payment.cancel()
+
+		amended = frappe.copy_doc(payment)
+		amended.docstatus = 0  # copy_doc keeps the cancelled docstatus in tests
+		amended.amended_from = payment.name
+		self.assertRaisesRegex(frappe.ValidationError, "is cancelled", amended.insert)
+
+		amended.reference_no = None  # the form replaces the copied number with the suggestion
+		amended.insert()
+		amended.submit()
+		self.assertEqual(amended.reference_no, "000102")
+
+	def test_accounts_user_uses_cheques_through_payments(self):
+		user = make_fenced_user("cheque.user@example.com", ["Accounts User"])
+		payment = self.pay("000101", submit=False)
+		with as_user(user):
+			frappe.get_doc("Payment Entry", payment.name).submit()
+			cancel_cheque_payment(payment.name, "Spoiled")
+
+		cheque = frappe.get_doc("Cheque", self.name_of("000101"))
+		self.assertEqual((cheque.status, cheque.cancellation_reason), ("Cancelled", "Spoiled"))
+
+	def test_suggestion_and_validation_keep_their_query_budgets(self):
+		make_cheque_book(self.bank_account, "000201", "000205")
+		self.pay("000102")
+		payment = self.pay(submit=False)
+		get_next_cheque(BANK_LEDGER)  # load the meta and permission caches first
+		validate_cheque(payment)
+
+		queries = count_queries(lambda: get_next_cheque(BANK_LEDGER))
+		self.assertTrue(0 < len(queries) <= 3, queries)  # bank accounts, books, used cheques
+		queries = count_queries(lambda: validate_cheque(payment))
+		self.assertTrue(0 < len(queries) <= 2, queries)  # the cheque with its book and bank account, drafts
+
+	def test_submit_locks_bank_account_then_book_then_cheque(self):
+		payment = self.pay("000101", submit=False)
+		locks = record_locks(payment.submit)
+		self.assertLess(locks.index("Bank Account"), locks.index("Cheque Book"))
+		self.assertLess(locks.index("Cheque Book"), locks.index("Cheque"))
+
+	def test_missing_cheque_is_refused_before_any_lock(self):
+		locks = record_locks(lambda: self.assertRaises(frappe.DoesNotExistError, lock_cheque, "missing"))
+		self.assertEqual(locks, [])
+
+
+def count_queries(action):
+	"""Run the action and return the SQL queries that it sends."""
+	queries = []
+	sql = frappe.db.sql
+
+	def record(query, *args, **kwargs):
+		queries.append(str(query))
+		return sql(query, *args, **kwargs)
+
+	with patch.object(frappe.db, "sql", side_effect=record):
+		action()
+	return queries
+
+
+def call_from_form(cheque, http_method="POST", **args):
+	"""Call cancel_with_reason the way the Cheque form does."""
+	with (
+		patch.object(frappe.local, "request", frappe._dict(method=http_method), create=True),
+		patch.dict(frappe.response, {"docs": []}),
+	):
+		return run_doc_method("cancel_with_reason", dt="Cheque", dn=cheque, args=args)
