@@ -4,6 +4,9 @@ import unittest
 
 import frappe
 
+from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.patches.v16_0.append_fieldname_to_pos_search_fields import execute as append_fieldname
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -134,3 +137,20 @@ class TestPOSSettings(ERPNextTestSuite):
 		self.settings.save()
 
 		self.assertEqual(self.settings.invoice_fields[0].fieldname, "customer")
+
+	def test_invoice_type_cannot_switch_to_sales_invoice_with_unconsolidated_pos_invoices(self):
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		sale = create_pos_invoice(rate=100, do_not_save=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		sale.insert().submit()
+		frappe.db.set_value("POS Opening Entry", opening_entry.name, "status", "Closed")
+		frappe.set_user("Administrator")
+
+		settings = frappe.get_single("POS Settings")
+		settings.invoice_type = "Sales Invoice"
+		with self.assertRaises(frappe.ValidationError) as context:
+			settings.save()
+
+		self.assertIn(sale.name, str(context.exception))
