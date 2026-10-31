@@ -1340,6 +1340,16 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 				)
 				self.assertEqual(frappe.db.get_value("POS Invoice", pos.name, "paid_amount"), 400)
 
+	def test_split_payment_matching_total_is_full_payment(self):
+		with self.change_settings("Global Defaults", {"disable_rounded_total": 1}):
+			pos = create_pos_invoice(rate=10.80, do_not_save=1)
+			pos.set("payments", [])
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 10.70, "default": 1})
+			pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 0.10})
+			pos.insert()
+			pos.submit()
+			self.assertEqual((pos.paid_amount, pos.outstanding_amount), (10.80, 0))
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name

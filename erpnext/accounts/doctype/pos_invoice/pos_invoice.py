@@ -567,6 +567,9 @@ class POSInvoice(SalesInvoice):
 			self.base_paid_amount += flt(self.loyalty_amount)
 			self.paid_amount += flt(self.loyalty_amount) / flt(self.conversion_rate)
 
+		self.paid_amount = flt(self.paid_amount, self.precision("paid_amount"))
+		self.base_paid_amount = flt(self.base_paid_amount, self.precision("base_paid_amount"))
+
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
 		self.change_amount = self.base_change_amount = 0
