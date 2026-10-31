@@ -127,6 +127,7 @@ class PaymentEntry(AccountsController):
 		party_type: DF.Link | None
 		payment_order: DF.Link | None
 		payment_order_status: DF.Literal["Initiated", "Payment Ordered"]
+		payment_term_discounts_calculated: DF.Check
 		payment_type: DF.Literal["Receive", "Pay", "Internal Transfer"]
 		posting_date: DF.Date
 		print_heading: DF.Link | None
@@ -918,6 +919,9 @@ class PaymentEntry(AccountsController):
 						)
 
 	def update_payment_schedule(self, cancel=0):
+		if not cancel:
+			self.set_payment_term_discounts()
+
 		invoice_payment_amount_map = {}
 		invoice_paid_amount_map = {}
 
@@ -946,7 +950,8 @@ class PaymentEntry(AccountsController):
 					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
 					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
-					if not (term.discount_type and term.discount):
+					# Older payments booked the configured discount, even when it was not applied.
+					if self.payment_term_discounts_calculated or not (term.discount_type and term.discount):
 						continue
 
 					if term.discount_type == "Percentage":
@@ -955,6 +960,11 @@ class PaymentEntry(AccountsController):
 						)
 					else:
 						invoice_paid_amount_map[invoice_key]["discounted_amt"] = term.discount
+
+			if self.payment_term_discounts_calculated and key in invoice_paid_amount_map:
+				invoice_paid_amount_map[key]["discounted_amt"] = invoice_paid_amount_map[key].get(
+					"discounted_amt", 0
+				) + flt(ref.payment_term_discount)
 
 		for idx, (key, allocated_amount) in enumerate(invoice_payment_amount_map.items(), 1):
 			if not invoice_paid_amount_map.get(key):
@@ -1009,6 +1019,69 @@ class PaymentEntry(AccountsController):
 						.set(ps.base_outstanding, ps.base_outstanding - base_outstanding)
 						.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
 					).run()
+
+	def set_payment_term_discounts(self):
+		documents = {}
+		remaining_discounts = {}
+		remaining_deductions = {
+			row.name: max(0, row.amount * (-1 if self.payment_type == "Pay" else 1))
+			for row in self.deductions
+			if not row.is_exchange_gain_loss and not row.dunning
+		}
+		company = frappe.get_cached_doc("Company", self.company)
+		for ref in self.references:
+			ref.payment_term_discount = 0
+			if not ref.payment_term or not ref.allocated_amount:
+				continue
+
+			key = (ref.reference_doctype, ref.reference_name)
+			if key not in documents:
+				documents[key] = frappe.get_doc(*key)
+			doc = documents[key]
+			term = next(
+				(row for row in doc.get("payment_schedule", []) if row.payment_term == ref.payment_term), None
+			)
+			term_key = (*key, ref.payment_term)
+			if term_key not in remaining_discounts:
+				remaining_discounts[term_key] = 0
+				if (
+					term
+					and term.discount
+					and not term.discounted_amount
+					and term.discount_date
+					and getdate(self.reference_date or self.posting_date) <= getdate(term.discount_date)
+				):
+					remaining_discounts[term_key] = (
+						doc.grand_total * term.discount / 100
+						if term.discount_type == "Percentage"
+						else term.discount
+					)
+			if not remaining_discounts[term_key]:
+				ref.db_set("payment_term_discount", 0)
+				continue
+
+			discount = min(
+				remaining_discounts[term_key],
+				self.get_allocated_amount_in_transaction_currency(ref.allocated_amount, *key),
+			)
+
+			discount_accounts = {company.default_discount_account, company.round_off_account}
+			discount_accounts.update(row.account_head for row in doc.taxes)
+			for deduction in self.deductions:
+				if deduction.account not in discount_accounts or deduction.name not in remaining_deductions:
+					continue
+				amount = min(
+					remaining_deductions[deduction.name],
+					max(0, discount - ref.payment_term_discount) * doc.conversion_rate,
+				)
+				ref.payment_term_discount += amount / doc.conversion_rate
+				remaining_deductions[deduction.name] -= amount
+
+			ref.payment_term_discount = flt(ref.payment_term_discount, term.precision("discounted_amount"))
+			remaining_discounts[term_key] -= ref.payment_term_discount
+			ref.db_set("payment_term_discount", ref.payment_term_discount)
+
+		self.db_set("payment_term_discounts_calculated", 1)
 
 	def get_allocated_amount_in_transaction_currency(
 		self, allocated_amount, reference_doctype, reference_docname
@@ -3221,7 +3294,12 @@ def apply_early_payment_discount(paid_amount, received_amount, doc, party_accoun
 
 	if doc.doctype in eligible_for_payments and has_payment_schedule:
 		for term in doc.payment_schedule:
-			if not term.discounted_amount and term.discount and reference_date <= term.discount_date:
+			if (
+				term.outstanding
+				and not term.discounted_amount
+				and term.discount
+				and reference_date <= term.discount_date
+			):
 				if term.discount_type == "Percentage":
 					grand_total = doc.get("grand_total") if is_multi_currency else doc.get("base_grand_total")
 					discount_amount = flt(grand_total) * (term.discount / 100)
@@ -3375,9 +3453,7 @@ def get_reference_as_per_payment_terms(
 	)
 
 	for payment_term in payment_schedule:
-		payment_term_outstanding = flt(
-			payment_term.payment_amount - payment_term.paid_amount, payment_term.precision("payment_amount")
-		)
+		payment_term_outstanding = flt(payment_term.outstanding, payment_term.precision("payment_amount"))
 		if not is_multi_currency_acc:
 			# If accounting is done in company currency for multi-currency transaction
 			payment_term_outstanding = flt(
