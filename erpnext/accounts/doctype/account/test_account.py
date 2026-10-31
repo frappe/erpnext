@@ -391,6 +391,21 @@ class TestAccount(ERPNextTestSuite):
 		account.save()
 		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Liability")
 
+	def test_company_of_account_cannot_be_changed(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		ledger = create_account(
+			account_name="Company Change Ledger",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+		make_journal_entry(ledger, "Cash - _TC", 300, submit=True)
+
+		account = frappe.get_doc("Account", ledger)
+		account.company = "_Test Company 1"
+		account.parent_account = "Current Assets - _TC1"
+		self.assertRaises(frappe.CannotChangeConstantError, account.save)
+
 
 def get_inventory_account(company, warehouse=None):
 	account = None
