@@ -69,7 +69,8 @@ class PlantRunState:
 			order_by="creation asc",
 		)
 		names = [card.name for card in cards]
-		items, logs = get_child_rows("Job Card Item", names), get_child_rows("Job Card Time Log", names)
+		items = get_child_rows("Job Card Item", names, "items")
+		logs = get_child_rows("Job Card Time Log", names, "time_logs")
 		for card in cards:
 			card.materials = items.get(card.name, [])
 			card.update(get_timing(logs.get(card.name, [])))
@@ -112,6 +113,7 @@ class PlantRunState:
 				transferred_qty=flt(row.get("transferred_qty")),
 				is_balance_item=row.item_code in self.balance_items,
 				is_fixed=row.item_code in fixed,
+				weight_factor=flt(self.plan.weight_factors.get(row.item_code)),
 			)
 			for row in rows
 		]
@@ -178,12 +180,13 @@ class PlantRunState:
 		)
 
 
-def get_child_rows(doctype, parents):
+def get_child_rows(doctype, parents, parentfield):
 	rows = defaultdict(list)
 	if not parents:
 		return rows
 
-	for row in frappe.get_all(doctype, filters={"parent": ("in", parents)}, fields=["*"], order_by="idx"):
+	filters = {"parenttype": "Job Card", "parentfield": parentfield, "parent": ("in", parents)}
+	for row in frappe.get_all(doctype, filters=filters, fields=["*"], order_by="idx"):
 		rows[row.parent].append(row)
 	return rows
 

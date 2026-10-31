@@ -123,6 +123,7 @@ class PlantRun:
 			frappe.throw(_("Consume the materials of this stage first"))
 
 		if readings and job_card.quality_inspection_template:
+			readings = [{**row, "reading_value": str(row.get("reading_value") or "")} for row in readings]
 			submit_quality_inspection(job_card.name, frappe.as_json(readings))
 			job_card.reload()
 
