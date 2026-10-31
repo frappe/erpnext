@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.utils import flt
-from frappe.utils.data import today
+from frappe.utils.data import add_years, today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
 from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
@@ -256,6 +256,85 @@ class TestBalanceSheet(ERPNextTestSuite):
 		self.assertEqual(bank_row[key_for(cc1)], 300)
 		self.assertEqual(bank_row[key_for(cc2.name)], 500)
 		self.assertEqual(bank_row["total"], 800)
+
+	def test_unclosed_fiscal_years_split_by_dimension(self):
+		"""An unclosed previous year must be split across dimension columns, not dropped."""
+		create_account("BS Unclosed Test Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
+
+		parent_cc = frappe.db.get_value("Cost Center", {"company": COMPANY, "is_group": 1}, "name")
+		cost_centers = []
+		for name in ("BS Unclosed CC A", "BS Unclosed CC B"):
+			cc = frappe.new_doc("Cost Center")
+			cc.cost_center_name = name
+			cc.parent_cost_center = parent_cc
+			cc.company = COMPANY
+			cc.insert()
+			cost_centers.append(cc.name)
+		cc_a, cc_b = cost_centers
+
+		def book_profit(cost_center, amount, posting_date=None):
+			"""A sale when amount is positive, a loss (sale reversed) when negative."""
+			debit, credit = ("BS Unclosed Test Bank", "Sales")
+			if amount < 0:
+				debit, credit = credit, debit
+
+			make_journal_entry(
+				[
+					dict(account_name=debit, debit_in_account_currency=abs(amount), cost_center=cost_center),
+					dict(
+						account_name=credit, credit_in_account_currency=abs(amount), cost_center=cost_center
+					),
+				],
+				posting_date=posting_date,
+			)
+
+		# last year, never closed: profit in CC A, the same loss in CC B (they cancel in the total)
+		last_year = add_years(today(), -1)
+		book_profit(cc_a, 300, last_year)
+		book_profit(cc_b, -300, last_year)
+
+		# this year's profit
+		book_profit(cc_a, 100)
+		book_profit(cc_b, 100)
+
+		# execute() rewrites period_start_date, so each run needs its own filters
+		def make_filters(accumulated_values):
+			return frappe._dict(
+				company=COMPANY,
+				period_start_date=today(),
+				period_end_date=today(),
+				periodicity="Yearly",
+				filter_based_on="Date Range",
+				accumulated_values=accumulated_values,
+				group_by_dimension="Cost Center",
+			)
+
+		period_list = build_period_list(make_filters(True))
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
+
+		def find_row(data, name):
+			return next((r for r in data if name in str(r.get("account_name", ""))), None)
+
+		def values(row):
+			# (CC A, CC B, Total), as the report shows them
+			return (row[key_for(cc_a)], row[key_for(cc_b)], row["total"])
+
+		# Accumulated: last year gets its own row, Provisional keeps only this year
+		_columns, data, message, *_ = execute(make_filters(True))
+		self.assertEqual(message, "Previous Financial Year is not closed")
+
+		unclosed = find_row(data, "Unclosed Fiscal Years")
+		self.assertIsNotNone(unclosed)
+		self.assertEqual(values(unclosed), (300, -300, 0))
+		self.assertEqual(values(find_row(data, "Provisional Profit / Loss")), (100, 100, 200))
+
+		# Not accumulated: columns are this year's movement only, nothing to split out
+		_columns, data, message, *_ = execute(make_filters(False))
+		self.assertEqual(message, "Previous Financial Year is not closed")
+		self.assertIsNone(find_row(data, "Unclosed Fiscal Years"))
+		self.assertEqual(values(find_row(data, "Provisional Profit / Loss")), (100, 100, 200))
 
 
 def get_profit_loss_rows(filters):
