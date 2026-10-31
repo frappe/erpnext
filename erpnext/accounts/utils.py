@@ -999,16 +999,18 @@ def update_accounting_ledgers_after_reference_removal(
 
 	# Advance Payment
 	adv = qb.DocType("Advance Payment Ledger Entry")
+	against_ref = (adv.against_voucher_type == ref_type) & (adv.against_voucher_no == ref_no)
+	own_rows = (adv.voucher_type == ref_type) & (adv.voucher_no == ref_no)
+	# With an immutable ledger, the cancelled voucher's own rows stay linked: the reversal rows posted
+	# on cancel offset them. Delinking them here would leave only the reversal counted as an advance.
+	condition = against_ref if is_immutable_ledger_enabled() else (against_ref | own_rows)
 	adv_ple = (
 		qb.update(adv)
 		.set(adv.delinked, 1)
 		.set(adv.modified, now())
 		.set(adv.modified_by, frappe.session.user)
 		.where(adv.delinked == 0)
-		.where(
-			((adv.against_voucher_type == ref_type) & (adv.against_voucher_no == ref_no))
-			| ((adv.voucher_type == ref_type) & (adv.voucher_no == ref_no))
-		)
+		.where(condition)
 	)
 	if payment_name:
 		adv_ple = adv_ple.where(adv.voucher_no == payment_name)

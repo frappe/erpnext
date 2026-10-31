@@ -95,6 +95,104 @@ class TestAdvancePaymentLedgerEntry(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(so.advance_paid, 0)
 		self.assertEqual(so.party_account_currency, "USD")
 
+	def make_order_advance(self, so, amount):
+		pe = get_payment_entry(so.doctype, so.name, bank_account=self.cash)
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = pe.received_amount = amount
+		pe.references[0].allocated_amount = amount
+		return pe.save().submit()
+
+	def test_invoice_cancel_releases_order_advance(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.accounts.utils import reconcile_against_document
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so = self.create_sales_order(rate=1000)
+		pe = self.make_order_advance(so, 1000)
+		so.reload()
+		self.assertEqual(so.advance_paid, 1000)
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 0
+		si.set_advances()
+		si.advances[0].allocated_amount = 1000
+		si.save().submit()
+		so.reload()
+		self.assertEqual(so.advance_paid, 1000)
+
+		# the payment is unallocated again, so the order holds no advance
+		si.reload()
+		si.cancel()
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
+
+		other_si = create_sales_invoice(customer=self.customer, rate=1000)
+		pe.reload()
+		reconcile_against_document(
+			[
+				frappe._dict(
+					voucher_type="Payment Entry",
+					voucher_no=pe.name,
+					voucher_detail_no=None,
+					against_voucher_type="Sales Invoice",
+					against_voucher=other_si.name,
+					account=pe.paid_from,
+					party_type="Customer",
+					party=self.customer,
+					dr_or_cr="credit_in_account_currency",
+					unreconciled_amount=1000,
+					unadjusted_amount=1000,
+					allocated_amount=1000,
+					difference_amount=0,
+					exchange_rate=1,
+				)
+			]
+		)
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_order_advance_cancel_with_immutable_ledger(self):
+		so = self.create_sales_order(rate=1000)
+		pe = self.make_order_advance(so, 400)
+		so.reload()
+		self.assertEqual(so.advance_paid, 400)
+
+		pe.reload()
+		pe.cancel()
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_order_journal_advance_cancel_with_immutable_ledger(self):
+		so = self.create_sales_order(rate=1000)
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": self.company,
+				"posting_date": so.transaction_date,
+				"accounts": [
+					{
+						"account": "Debtors - _TC",
+						"party_type": "Customer",
+						"party": so.customer,
+						"credit_in_account_currency": 250,
+						"is_advance": "Yes",
+						"reference_type": so.doctype,
+						"reference_name": so.name,
+					},
+					{"account": self.cash, "debit_in_account_currency": 250},
+				],
+			}
+		).submit()
+		so.reload()
+		self.assertEqual(so.advance_paid, 250)
+
+		je.cancel()
+		so.reload()
+		self.assertEqual(so.advance_paid, 0)
+
 	def test_so_advance_paid_and_currency_with_journal(self):
 		self.create_customer("_Test USD Customer", "USD")
 
