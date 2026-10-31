@@ -341,7 +341,10 @@ def are_price_lists_distinct(slab, other_slab):
 	if "" not in price_lists:
 		return True
 
-	return all(d.get("rate_or_discount") == "Discount Percentage" for d in (slab, other_slab))
+	return all(
+		(d.get("rate_or_discount") or "Discount Percentage") == "Discount Percentage"
+		for d in (slab, other_slab)
+	)
 
 
 def are_ranges_overlapping(min_value, max_value, other_min_value, other_max_value):

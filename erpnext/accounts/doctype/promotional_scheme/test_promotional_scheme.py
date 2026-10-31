@@ -333,6 +333,16 @@ class TestPromotionalScheme(ERPNextTestSuite):
 		ps.price_discount_slabs[1].rate = 50
 		self.assertRaisesRegex(frappe.ValidationError, "apply to the same quantity", ps.save)
 
+	def test_price_list_price_slab_and_product_slab_for_the_same_quantity(self):
+		ps = make_promotional_scheme()
+		ps.price_discount_slabs[0].for_price_list = "_Test Price List"
+		ps.append(
+			"product_discount_slabs",
+			{"min_qty": 4, "free_item": "_Test Item 2", "free_qty": 1, "rule_description": "Free"},
+		)
+		ps.save()
+		self.assertEqual(len(frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})), 2)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)
