@@ -478,7 +478,7 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 
 	if items and doc.get("items"):
 		for row in doc.get("items"):
-			if (row.get(apply_on) or args.get(apply_on)) not in items:
+			if row.get("is_free_item") or (row.get(apply_on) or args.get(apply_on)) not in items:
 				continue
 
 			if pr_doc.mixed_conditions:

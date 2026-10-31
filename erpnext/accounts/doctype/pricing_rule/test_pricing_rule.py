@@ -2019,6 +2019,32 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(descendants.call_count, 1)
 		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
 
+	def test_mixed_conditions_does_not_count_free_item(self):
+		item = make_item(
+			"PR Mixed Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		free_item = make_item(
+			"PR Mixed Free Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_qty=5,
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
+
+		si.items[0].qty = 4
+		si.items[0].stock_qty = 4
+		details = get_pricing_details_for_row(si, si.items[0])
+		self.assertTrue(details.pricing_rule_removed)
+		self.assertEqual(details.remove_free_item, free_item)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -2115,3 +2141,21 @@ def make_item_pricing_rule(item_code=None, **fields):
 		}
 	)
 	return doc.insert()
+
+
+def get_pricing_details_for_row(doc, row):
+	from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+
+	args = {
+		"doctype": doc.doctype,
+		"name": doc.name,
+		"company": doc.company,
+		"customer": doc.customer,
+		"currency": doc.currency,
+		"conversion_rate": doc.conversion_rate,
+		"price_list": doc.selling_price_list,
+		"plc_conversion_rate": 1,
+		"transaction_date": doc.posting_date,
+		"items": [{**row.as_dict(), "child_docname": row.name}],
+	}
+	return frappe._dict(apply_pricing_rule(args, doc=doc.as_dict())[0])
