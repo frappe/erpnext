@@ -409,13 +409,20 @@ class POSInvoice(SalesInvoice):
 
 		bundle_items = get_active_bundle_items({d.item_code for d in rows})
 		required_qty = get_required_stock_qty(rows, bundle_items)
-		available_qty = get_available_stock_qty(required_qty)
+		available_qty, reserved_stock_keys = get_available_stock_qty(required_qty)
 		items = get_stock_item_details({item_code for item_code, warehouse in required_qty})
+		keys_to_check = {
+			key
+			for key in required_qty
+			if is_stock_check_needed(items.get(key[0]), key in reserved_stock_keys)
+		}
 
 		for d in rows:
 			if d.item_code in bundle_items:
-				self.validate_bundle_stock(d, bundle_items[d.item_code], required_qty, available_qty, items)
-			elif is_stock_check_needed(items.get(d.item_code)):
+				self.validate_bundle_stock(
+					d, bundle_items[d.item_code], required_qty, available_qty, keys_to_check
+				)
+			elif (d.item_code, d.warehouse) in keys_to_check:
 				self.validate_item_stock(d, required_qty, available_qty)
 
 	def validate_item_stock(self, row, required_qty, available_qty):
@@ -438,13 +445,11 @@ class POSInvoice(SalesInvoice):
 				title=_("Insufficient Stock"),
 			)
 
-	def validate_bundle_stock(self, row, components, required_qty, available_qty, items):
+	def validate_bundle_stock(self, row, components, required_qty, available_qty, keys_to_check):
 		error_msgs = []
 		for component in components:
 			key = (component.item_code, row.warehouse)
-			if is_stock_check_needed(items.get(component.item_code)) and (
-				available_qty[key] < required_qty[key]
-			):
+			if key in keys_to_check and available_qty[key] < required_qty[key]:
 				error_msgs.append(
 					_("<li>Packed Item {0}: Required {1}, Available {2}</li>").format(
 						frappe.bold(component.item_code),
@@ -917,10 +922,15 @@ def get_stock_availability(item_code, warehouse):
 			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
-		bin_qty = get_bin_qty(item_code, warehouse)
+		bin_data = get_bin_data(item_code, warehouse)
+		bin_qty = flt(bin_data.actual_qty) - flt(bin_data.reserved_stock)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 
-		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
+		return (
+			bin_qty - pos_sales_qty,
+			is_stock_item,
+			is_negative_stock_allowed_in_pos(item_code, bin_data.reserved_stock),
+		)
 	else:
 		is_stock_item = True
 		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
@@ -949,15 +959,27 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 
 def get_bin_qty(item_code, warehouse):
-	bin_qty = frappe.db.sql(
-		"""select actual_qty from `tabBin`
-		where item_code = %s and warehouse = %s
-		limit 1""",
-		(item_code, warehouse),
-		as_dict=1,
+	bin_data = get_bin_data(item_code, warehouse)
+	return flt(bin_data.actual_qty) - flt(bin_data.reserved_stock)
+
+
+def get_bin_data(item_code, warehouse):
+	return (
+		frappe.db.get_value(
+			"Bin",
+			{"item_code": item_code, "warehouse": warehouse},
+			["actual_qty", "reserved_stock"],
+			as_dict=True,
+		)
+		or frappe._dict()
 	)
 
-	return bin_qty[0].actual_qty or 0 if bin_qty else 0
+
+def is_negative_stock_allowed_in_pos(item_code, reserved_stock):
+	if frappe.get_cached_doc("Stock Settings").allow_negative_stock:
+		return True
+
+	return flt(reserved_stock) <= 0 and is_negative_stock_allowed(item_code=item_code)
 
 
 def get_pos_reserved_qty(item_code, warehouse):
@@ -1024,11 +1046,14 @@ def get_available_stock_qty(required_qty):
 	bin_qty = get_bin_qty_map(keys)
 	reserved_qty = get_pos_reserved_qty_map({d.item_code for d in keys}, {d.warehouse for d in keys})
 
-	available_qty = {}
+	available_qty, reserved_stock_keys = {}, set()
 	for key in required_qty:
-		available_qty[key] = flt(bin_qty[key].actual_qty if key in bin_qty else 0) - reserved_qty[key]
+		bin_data = bin_qty.get(key) or frappe._dict()
+		available_qty[key] = flt(bin_data.actual_qty) - flt(bin_data.reserved_stock) - reserved_qty[key]
+		if flt(bin_data.reserved_stock) > 0:
+			reserved_stock_keys.add(key)
 
-	return available_qty
+	return available_qty, reserved_stock_keys
 
 
 def get_stock_item_details(item_codes):
@@ -1040,8 +1065,8 @@ def get_stock_item_details(item_codes):
 	return {item.name: item for item in items}
 
 
-def is_stock_check_needed(item):
-	return bool(item and item.is_stock_item and not item.allow_negative_stock)
+def is_stock_check_needed(item, has_reserved_stock):
+	return bool(item and item.is_stock_item and (has_reserved_stock or not item.allow_negative_stock))
 
 
 @frappe.whitelist()
