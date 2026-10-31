@@ -714,3 +714,213 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		pos_return.load_from_db()
 		credit_note = frappe.get_doc("Sales Invoice", pos_return.consolidated_invoice)
 		self.assertEqual(credit_note.items[0].incoming_rate, 80)
+
+	def test_consolidated_invoice_posts_redeemed_loyalty_amount(self):
+		customer = "Test Loyalty Customer"
+		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
+
+		earning_sale = create_pos_invoice(customer=customer, rate=10000, do_not_save=1)
+		earning_sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 10000})
+		earning_sale.insert().submit()
+
+		redeeming_sale = create_pos_invoice(customer=customer, rate=10000, do_not_save=1)
+		redeeming_sale.redeem_loyalty_points = 1
+		redeeming_sale.loyalty_points = 10
+		redeeming_sale.loyalty_amount = 10
+		redeeming_sale.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 9990}
+		)
+		redeeming_sale.paid_amount = 10000
+		redeeming_sale.submit()
+		self.assertEqual(redeeming_sale.loyalty_amount, 10)
+
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", redeeming_sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.loyalty_amount, 10)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+		self.assertEqual(consolidated_invoice.status, "Paid")
+		redemption_debit = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": consolidated_invoice.name,
+				"account": consolidated_invoice.loyalty_redemption_account,
+				"is_cancelled": 0,
+			},
+			pluck="debit",
+		)
+		self.assertEqual(redemption_debit, [10])
+		self.assertEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": consolidated_invoice.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+		)
+
+	def test_cancel_cancels_every_consolidated_credit_note(self):
+		first_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		second_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		refund_over_the_counter(first_sale, qty=-1)
+		refund_over_the_counter(second_sale, qty=-1)
+		closing_entry = self.make_closing_entry()
+
+		consolidated_invoices = [
+			frappe.db.get_value("POS Invoice", sale.name, "consolidated_invoice")
+			for sale in (first_sale, second_sale)
+		]
+		credit_notes = frappe.get_all(
+			"Sales Invoice",
+			filters={"is_return": 1, "return_against": ["in", consolidated_invoices]},
+			pluck="name",
+		)
+		self.assertEqual(len(credit_notes), 2)
+
+		closing_entry.reload()
+		closing_entry.cancel()
+
+		for credit_note in credit_notes:
+			self.assertEqual(frappe.db.get_value("Sales Invoice", credit_note, "docstatus"), 2)
+
+	def test_every_consolidated_credit_note_needs_the_closing_entry_cancelled(self):
+		first_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		second_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+		self.make_closing_entry()
+		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		refunds = [refund_over_the_counter(sale, qty=-1) for sale in (first_sale, second_sale)]
+		self.make_closing_entry()
+
+		for refund in refunds:
+			credit_note = frappe.get_doc(
+				"Sales Invoice", frappe.db.get_value("POS Invoice", refund.name, "consolidated_invoice")
+			)
+			self.assertRaisesRegex(
+				frappe.ValidationError, "you need to cancel the POS Closing Entry", credit_note.cancel
+			)
+
+	def test_change_on_one_sale_is_not_netted_against_another_sale(self):
+		self.pos_profile.allow_partial_payment = 1
+		self.pos_profile.save()
+
+		overpaid_sale = create_pos_invoice(rate=900, do_not_submit=1)
+		overpaid_sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
+		overpaid_sale.save().submit()
+		self.assertEqual(overpaid_sale.change_amount, 100)
+
+		underpaid_sale = create_pos_invoice(rate=500, do_not_submit=1)
+		underpaid_sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+		underpaid_sale.save().submit()
+
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", overpaid_sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.grand_total, 1400)
+		self.assertEqual(consolidated_invoice.change_amount, 100)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 400)
+
+		cash_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": consolidated_invoice.name, "account": "Cash - _TC", "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(sum(entry.debit - entry.credit for entry in cash_entries), 1000)
+		self.assertEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": consolidated_invoice.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			400,
+		)
+
+	def test_consolidated_invoice_keeps_pos_invoice_write_off(self):
+		self.pos_profile.allow_partial_payment = 1
+		self.pos_profile.save()
+
+		sales = []
+		for _ in range(2):
+			sale = create_pos_invoice(rate=1000, do_not_submit=1)
+			sale.write_off_amount = 10
+			sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 990})
+			sale.save().submit()
+			sales.append(sale)
+
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", sales[0].name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.write_off_amount, 20)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+		self.assertEqual(consolidated_invoice.status, "Paid")
+		self.assertEqual(
+			frappe.get_all(
+				"GL Entry",
+				filters={
+					"voucher_no": consolidated_invoice.name,
+					"account": "_Test Write Off - _TC",
+					"is_cancelled": 0,
+				},
+				pluck="debit",
+			),
+			[20],
+		)
+
+	def test_customer_group_merge_refuses_invoice_of_customer_outside_group(self):
+		sale = create_pos_invoice(rate=700, do_not_submit=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 700})
+		sale.save().submit()
+
+		merge_log = frappe.get_doc(
+			{
+				"doctype": "POS Invoice Merge Log",
+				"company": "_Test Company",
+				"posting_date": frappe.utils.nowdate(),
+				"posting_time": frappe.utils.nowtime(),
+				"merge_invoices_based_on": "Customer Group",
+				"customer": "_Test Customer 2",
+				"pos_invoices": [{"pos_invoice": sale.name}],
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Customer Group is mandatory", merge_log.insert)
+
+		merge_log.customer_group = "_Test Customer Group 1"
+		self.assertRaisesRegex(frappe.ValidationError, "is not in Customer Group", merge_log.insert)
+
+		merge_log.customer_group = "All Customer Groups"
+		merge_log.insert()
+
+	def test_copy_of_consolidated_invoice_computes_its_own_change_amount(self):
+		sale = create_pos_invoice(rate=900, do_not_submit=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
+		sale.save().submit()
+		self.make_closing_entry()
+
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(consolidated_invoice.change_amount, 100)
+
+		copied_invoice = frappe.copy_doc(consolidated_invoice)
+		copied_invoice.change_amount = copied_invoice.base_change_amount = 0
+		copied_invoice.calculate_taxes_and_totals()
+		self.assertEqual(copied_invoice.change_amount, 100)
