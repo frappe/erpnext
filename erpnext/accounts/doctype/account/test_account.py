@@ -367,6 +367,30 @@ class TestAccount(ERPNextTestSuite):
 			[bottom, "Current Assets - _TC", "Application of Funds (Assets) - _TC"],
 		)
 
+	def test_move_account_with_ledger_entries_to_another_report_type(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		company = "_Test Company"
+		group = create_account(
+			account_name="Root Type Group", is_group=1, parent_account="Current Assets - _TC", company=company
+		)
+		ledger = create_account(account_name="Root Type Ledger", parent_account=group, company=company)
+		make_journal_entry(ledger, "Cash - _TC", 500, submit=True)
+
+		account = frappe.get_doc("Account", ledger)
+		account.parent_account = "Indirect Income - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change Report Type", account.save)
+
+		account = frappe.get_doc("Account", group)
+		account.parent_account = "Indirect Expenses - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change Report Type", account.save)
+		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Asset")
+
+		account = frappe.get_doc("Account", ledger)
+		account.parent_account = "Current Liabilities - _TC"
+		account.save()
+		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Liability")
+
 
 def get_inventory_account(company, warehouse=None):
 	account = None
