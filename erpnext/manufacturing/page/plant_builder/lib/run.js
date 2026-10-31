@@ -36,8 +36,10 @@ export function useRun(workOrder) {
 	const status = computed(() => {
 		const order = workOrderData.value;
 		if (!order) return "";
-		if (order.docstatus === 0) return "Not Started";
-		return paused.value && order.status !== "Completed" ? "On Hold" : order.status;
+		if (order.status === "Completed") return order.status;
+		if (paused.value) return "On Hold";
+		const started = (state.value.stages || []).some((stage) => stage.phase !== "waiting");
+		return order.docstatus === 1 && started ? "In Process" : "Not Started";
 	});
 
 	const serverNow = () => now.value + offset;

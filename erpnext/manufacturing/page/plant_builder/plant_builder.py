@@ -193,4 +193,5 @@ def produce_output(
 def run_action(work_order, method, **kwargs):
 	frappe.has_permission("Work Order", "write", doc=work_order, throw=True)
 	getattr(PlantRun(work_order), method)(**kwargs)
+	frappe.clear_messages()
 	return get_run(work_order)
