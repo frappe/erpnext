@@ -2086,6 +2086,23 @@ class TestPricingRule(ERPNextTestSuite):
 		si.save()
 		self.assertEqual(si.additional_discount_percentage, 0)
 
+	def test_transaction_rule_for_another_price_list_is_not_applied(self):
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule", selling=1, apply_on="Transaction", discount_percentage=10
+		)
+		rule.db_set("for_price_list", "_Test Price List 2")
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=True)
+		si.selling_price_list = "_Test Price List"
+		si.insert()
+		self.assertFalse(si.additional_discount_percentage)
+		self.assertEqual(si.grand_total, 500)
+
+		si.selling_price_list = "_Test Price List 2"
+		si.save()
+		self.assertEqual(si.additional_discount_percentage, 10)
+		self.assertEqual(si.grand_total, 450)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
