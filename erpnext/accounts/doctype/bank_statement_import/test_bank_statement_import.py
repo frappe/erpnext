@@ -11,7 +11,6 @@ import mt940
 from frappe.utils import random_string
 
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
-	BankStatementImport,
 	convert_mt940_to_csv,
 	get_preview_from_template,
 	get_transaction_reference,
@@ -454,6 +453,9 @@ class TestBankStatementImport(ERPNextTestSuite):
 		data_import = self.make_statement_import(bank_account, import_mt940_fromat=1)
 
 		self.assertRaises(frappe.ValidationError, convert_mt940_to_csv, data_import.name, mt940_file.file_url)
+		# a short number that is only part of the statement's IBAN is not a match
+		frappe.db.set_value("Bank Account", bank_account, "bank_account_no", "3000")
+		self.assertRaises(frappe.ValidationError, convert_mt940_to_csv, data_import.name, mt940_file.file_url)
 		frappe.db.set_value("Bank Account", bank_account, "bank_account_no", "DE89 3704 0044 0532 0130 00")
 		self.assertTrue(convert_mt940_to_csv(data_import.name, mt940_file.file_url))
 
@@ -479,6 +481,11 @@ class TestBankStatementImport(ERPNextTestSuite):
 			self.assertRaises(
 				frappe.PermissionError, convert_mt940_to_csv, data_import.name, private_file.name
 			)
+			# a File name is not looked up by its (non-unique) file name
+			own_file = self.make_file(private_file.file_name, "Date\n")
+			self.assertRaises(
+				frappe.DoesNotExistError, get_preview_from_template, data_import.name, own_file.file_name
+			)
 			data_import.reload()
 			data_import.import_file = private_file.file_url
 			self.assertRaises(frappe.PermissionError, data_import.save)
@@ -489,12 +496,13 @@ class TestBankStatementImport(ERPNextTestSuite):
 		bank_account = self.make_bank_account()
 		data_import = self.make_statement_import(bank_account)
 		data_import.db_set("google_sheets_url", "https://docs.google.com/spreadsheets/d/x")
-		preview = frappe._dict(
-			columns=[{"header_title": "Sr. No"}, {"header_title": "Date"}, {"header_title": "Bank Account"}],
-			data=[[2, "2026-10-01", bank_account], [3, "2026-10-02", "Another Account"]],
-		)
-		with patch.object(BankStatementImport, "get_preview_from_template", return_value=preview):
-			self.assertRaises(frappe.ValidationError, data_import.start_import)
+		# the wrong row is past the 10 rows of the preview
+		rows = [f"2026-10-01,{i},{bank_account}" for i in range(11)] + ["2026-10-02,5,Another Account"]
+		sheet = "\n".join(["Date,Deposit,Bank Account", *rows])
+		with patch(
+			"frappe.core.doctype.data_import.importer.get_csv_content_from_google_sheets", return_value=sheet
+		):
+			self.assertRaisesRegex(frappe.ValidationError, "Rows 13 are", data_import.start_import)
 
 	def test_import_keeps_the_uploaded_statement(self):
 		bank_account = self.make_bank_account()

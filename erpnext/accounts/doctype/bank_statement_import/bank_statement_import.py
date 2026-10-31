@@ -13,7 +13,8 @@ import mt940
 import openpyxl
 from frappe import _
 from frappe.core.doctype.data_import.data_import import DataImport
-from frappe.core.doctype.data_import.importer import Importer, ImportFile
+from frappe.core.doctype.data_import.importer import Importer, ImportFile, get_item_at_index
+from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.file_manager import save_file
 from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
@@ -79,16 +80,17 @@ class BankStatementImport(DataImport):
 			self.validate_google_sheets_url()
 
 	def start_import(self):
-		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
-			self.import_file, self.google_sheets_url
-		)
+		bsi = frappe.get_doc("Bank Statement Import", self.name)
+		bsi.set_delimiters_flag()
+		importer = bsi.get_importer()
+		preview = importer.get_data_for_import_preview()
 
 		if "Bank Account" not in json.dumps(preview["columns"]):
 			frappe.throw(_("Please add the Bank Account column"))
 
 		# an uploaded file gets the import's bank account written in; a Google Sheet cannot
 		if not self.import_file:
-			validate_bank_account_column(preview, self.bank_account)
+			validate_bank_account_column(importer.import_file, self.bank_account)
 
 		from frappe.utils.background_jobs import is_job_enqueued
 		from frappe.utils.scheduler import is_scheduler_inactive
@@ -280,24 +282,38 @@ def download_import_log(data_import_name: str):
 
 
 def get_readable_file(file: str):
-	"""The File for a URL, name or file name, if the user may read it."""
-	name = (
-		frappe.db.get_value("File", {"file_url": file})
-		or frappe.db.get_value("File", {"name": file})
-		or frappe.db.get_value("File", {"file_name": file})
-	)
-	if not name:
+	"""The File for a URL or File name, if the user may read it."""
+	# several Files can share a URL (same content attached elsewhere); any readable one will do
+	file_doc = find_file_by_url(file)
+	if file_doc:
+		return file_doc
+
+	if frappe.db.exists("File", {"file_url": file}):
+		frappe.throw(
+			_("You do not have permission to read file {0}").format(frappe.bold(file)), frappe.PermissionError
+		)
+	if not frappe.db.exists("File", file):
 		frappe.throw(_("File {0} does not exist").format(frappe.bold(file)), frappe.DoesNotExistError)
 
-	file_doc = frappe.get_doc("File", name)
+	file_doc = frappe.get_doc("File", file)
 	file_doc.check_permission("read")
 	return file_doc
 
 
-def validate_bank_account_column(preview: dict, bank_account: str):
-	columns = [column.get("header_title") for column in preview["columns"]]
-	index = columns.index("Bank Account")
-	rows = [row[0] for row in preview["data"] if row[index] != bank_account]
+def validate_bank_account_column(import_file: ImportFile, bank_account: str):
+	"""Check every row, not just the ones in the preview."""
+	index = next(
+		(
+			column.index
+			for column in import_file.columns
+			if column.df and column.df.fieldname == "bank_account" and column.df.parent == "Bank Transaction"
+		),
+		None,
+	)
+	if index is None:
+		frappe.throw(_("Please add the Bank Account column"))
+
+	rows = [row.row_number for row in import_file.data if get_item_at_index(row.data, index) != bank_account]
 	if rows:
 		frappe.throw(
 			_("Rows {0} are for another bank account. Every row must be for Bank Account {1}.").format(
@@ -317,8 +333,10 @@ def validate_statement_account(bank_account: str, account_identification: str | 
 	if not account_identification or not known:
 		return
 
+	# :25: is the IBAN or "bank code/account number", sometimes with a "/currency" suffix
 	statement_account = normalize_account(account_identification)
-	if not any(number in statement_account for number in known):
+	candidates = {statement_account, *statement_account.split("/")}
+	if not candidates.intersection(known):
 		frappe.throw(
 			_(
 				"The statement is for account {0}, which is not the account number or IBAN of Bank Account {1}."
