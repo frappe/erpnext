@@ -1248,6 +1248,53 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		make_merge_log_for(pos)
 		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
 
+	def test_write_off_counts_as_paid(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 990})
+		pos.insert()
+		pos.submit()
+		self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
+
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos = create_pos_invoice(pos_profile=self.pos_profile.name, rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 900})
+		pos.insert().submit()
+		self.assertEqual(pos.outstanding_amount, 90)
+
+		pos.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 90}])
+		self.assertEqual((pos.outstanding_amount, pos.change_amount, pos.status), (0, 0, "Paid"))
+
+	def test_write_off_comparisons_are_rounded(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos = create_pos_invoice(pos_profile=self.pos_profile.name, rate=100, do_not_save=1)
+		pos.write_off_amount = 8.04
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 91.96})
+		pos.insert().submit()
+		self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been paid",
+			pos.update_payments,
+			payments=[{"mode_of_payment": "Cash", "amount": 1}],
+		)
+
+		set_allow_partial_payment(self.pos_profile, 0)
+		with self.change_settings("Global Defaults", {"disable_rounded_total": 1}):
+			pos = create_pos_invoice(rate=10.80, do_not_save=1)
+			pos.write_off_amount = 0.10
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 10.70})
+			pos.insert().submit()
+			self.assertEqual((pos.outstanding_amount, pos.status), (0, "Paid"))
+
+	def test_payment_and_write_off_above_total_gives_change(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 995})
+		pos.insert().submit()
+		self.assertEqual((pos.change_amount, pos.base_change_amount, pos.outstanding_amount), (5, 5, 0))
+
 
 def make_stock_item_with_qty(qty):
 	item_code = make_item(properties={"is_stock_item": 1}).name

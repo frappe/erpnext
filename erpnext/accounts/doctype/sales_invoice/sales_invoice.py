@@ -1300,7 +1300,8 @@ class SalesInvoice(SellingController):
 			self.docstatus == 1
 			and not self.is_return
 			and not allow_partial_payment
-			and self.paid_amount < invoice_total
+			and flt(flt(self.paid_amount) + flt(self.write_off_amount), self.precision("grand_total"))
+			< invoice_total
 		):
 			frappe.throw(
 				msg=_("Partial Payment in POS Transactions are not allowed."),

@@ -559,15 +559,15 @@ class POSInvoice(SalesInvoice):
 
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
-		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
 		self.change_amount = self.base_change_amount = 0
-		if grand_total < flt(self.paid_amount):
+		if grand_total < flt(
+			flt(self.paid_amount) + flt(self.write_off_amount), self.precision("grand_total")
+		):
 			self.change_amount = flt(
 				self.paid_amount - grand_total + flt(self.write_off_amount), self.precision("change_amount")
 			)
 			self.base_change_amount = flt(
-				flt(self.base_paid_amount) - base_grand_total + flt(self.base_write_off_amount),
-				self.precision("base_change_amount"),
+				self.change_amount * flt(self.conversion_rate), self.precision("base_change_amount")
 			)
 
 		if flt(self.change_amount) and not self.account_for_change_amount:
@@ -597,8 +597,12 @@ class POSInvoice(SalesInvoice):
 			)
 
 	def set_outstanding_amount(self):
-		total = flt(self.rounded_total) or flt(self.grand_total)
-		self.outstanding_amount = total - flt(self.paid_amount) if total > flt(self.paid_amount) else 0
+		precision = self.precision("outstanding_amount")
+		total = flt(
+			(flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount), precision
+		)
+		paid_amount = flt(self.paid_amount, precision)
+		self.outstanding_amount = flt(total - paid_amount, precision) if total > paid_amount else 0
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
@@ -878,8 +882,11 @@ class POSInvoice(SalesInvoice):
 		if self.status == "Consolidated":
 			frappe.throw(_("Create Payment Entry for Consolidated POS Invoices."))
 
-		paid_amount = flt(self.paid_amount)
-		total = flt(self.rounded_total) or flt(self.grand_total)
+		paid_amount = flt(self.paid_amount, self.precision("paid_amount"))
+		total = flt(
+			(flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount),
+			self.precision("grand_total"),
+		)
 
 		if paid_amount >= total:
 			frappe.throw(title=_("Invoice Paid"), msg=_("This invoice has already been paid."))
