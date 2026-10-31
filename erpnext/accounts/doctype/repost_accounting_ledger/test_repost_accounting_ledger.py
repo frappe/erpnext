@@ -458,6 +458,11 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 
 		self.assertRaises(ClosedAccountingPeriod, self.create_repost_doc, [si])
 
+		# company is optional on the repost; the voucher's company is checked
+		ral = frappe.new_doc("Repost Accounting Ledger")
+		ral.append("vouchers", {"voucher_type": si.doctype, "voucher_no": si.name})
+		self.assertRaises(ClosedAccountingPeriod, ral.save)
+
 	def test_15_failed_repost_skips_cancelled_voucher(self):
 		si = self.make_invoice()
 

@@ -97,11 +97,19 @@ class RepostAccountingLedger(Document):
 			if not names:
 				continue
 
-			for posting_date in frappe.get_all(
-				vtype, filters={"name": ["in", names]}, pluck="posting_date", distinct=True
+			# the voucher's own company, as its GL entries carry it; the header company is optional
+			for voucher in frappe.get_all(
+				vtype,
+				filters={"name": ["in", names]},
+				fields=["company", "posting_date"],
+				distinct=True,
 			):
 				validate_accounting_period(
-					[frappe._dict(company=self.company, voucher_type=vtype, posting_date=posting_date)]
+					[
+						frappe._dict(
+							company=voucher.company, voucher_type=vtype, posting_date=voucher.posting_date
+						)
+					]
 				)
 
 	def validate_vouchers(self):
