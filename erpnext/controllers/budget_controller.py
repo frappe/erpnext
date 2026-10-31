@@ -55,10 +55,45 @@ class BudgetValidation:
 	def get_rows_for_budget(self, budget) -> list:
 		if self.document_type in ["Purchase Order", "Material Request"]:
 			rows = [row for row in self.doc.items if row.expense_account == budget.account]
-		else:
-			rows = [row for row in self.gl_map if row.get("account") == budget.account]
+			return [row for row in rows if row.get(budget.dimension_field) in budget.dimension_values]
 
-		return [row for row in rows if row.get(budget.dimension_field) in budget.dimension_values]
+		start, end = getdate(budget.budget_start_date), getdate(budget.budget_end_date)
+		rows = []
+		for row in self.gl_map:
+			if row.get("account") != budget.account or not (start <= getdate(row.posting_date) <= end):
+				continue
+
+			if row.get(budget.dimension_field) in budget.dimension_values:
+				rows.append(row)
+			elif share := self.get_allocated_share(row, budget):
+				# the row is split to sub cost centers of a Cost Center Allocation when it is posted
+				rows.append(frappe._dict(row, debit=flt(row.debit) * share, credit=flt(row.credit) * share))
+
+		return rows
+
+	def get_allocated_share(self, row, budget) -> float:
+		"""Share of a row on a main cost center that its Cost Center Allocation posts to the budget's
+		cost centers (see `distribute_gl_based_on_cost_center_allocation`)."""
+		from erpnext.accounts.general_ledger import get_cost_center_allocation_data
+
+		if budget.dimension_field != "cost_center" or not row.get("cost_center"):
+			return 0
+
+		allocation = get_cost_center_allocation_data(self.company, self.doc_date, row.cost_center)
+		if not allocation:
+			return 0
+
+		if row.account == frappe.get_cached_value("Company", self.company, "round_off_account"):
+			return 1 if allocation[0][0] in budget.dimension_values else 0
+
+		return (
+			sum(
+				flt(percentage)
+				for cost_center, percentage in allocation
+				if cost_center in budget.dimension_values
+			)
+			/ 100
+		)
 
 	def initialize_dict(self, budget, rows):
 		_obj = frappe._dict(

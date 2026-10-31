@@ -497,6 +497,68 @@ class TestBudget(ERPNextTestSuite):
 		warnings = [m for m in frappe.local.message_log if "Annual Budget" in str(m)]
 		self.assertEqual(len(warnings), 1)
 
+	def test_gl_rows_outside_budget_period_are_not_counted(self):
+		from erpnext.controllers.budget_controller import BudgetValidation
+
+		cost_center = create_cost_center(cost_center_name="_Test Budget GL Period")
+		cost_center = "_Test Budget GL Period - _TC"
+		make_budget(
+			budget_against="Cost Center", cost_center=cost_center, budget_amount=100, submit_budget=True
+		)
+		this_year = get_fiscal_year(nowdate())
+		next_year = get_fiscal_year(add_days(this_year[2], 1))
+
+		def validate(*rows):
+			gl_map = [
+				frappe._dict(
+					company=self.company,
+					account=self.account,
+					cost_center=cost_center,
+					posting_date=posting_date,
+					debit=debit,
+					credit=credit,
+				)
+				for posting_date, debit, credit in rows
+			]
+			BudgetValidation(gl_map=gl_map).validate()
+
+		# a debit of the next fiscal year does not stop a posting within the budget
+		validate((nowdate(), 50, 0), (next_year[1], 500, 0))
+		# a credit of the next fiscal year does not let an overrun through
+		with assert_raises_with_savepoint(self, BudgetError):
+			validate((nowdate(), 150, 0), (next_year[1], 0, 100))
+
+	def test_budget_on_sub_cost_center_of_allocation(self):
+		from erpnext.accounts.doctype.cost_center_allocation.test_cost_center_allocation import (
+			create_cost_center_allocation,
+		)
+
+		for name in ("_Test Budget Alloc Main", "_Test Budget Alloc A", "_Test Budget Alloc B"):
+			create_cost_center(cost_center_name=name)
+		if not frappe.db.exists(
+			"Cost Center Allocation", {"main_cost_center": "_Test Budget Alloc Main - _TC", "docstatus": 1}
+		):
+			create_cost_center_allocation(
+				self.company,
+				"_Test Budget Alloc Main - _TC",
+				{"_Test Budget Alloc A - _TC": 60, "_Test Budget Alloc B - _TC": 40},
+			)
+		make_budget(
+			budget_against="Cost Center",
+			cost_center="_Test Budget Alloc A - _TC",
+			budget_amount=100,
+			submit_budget=True,
+		)
+
+		# 60% of 150 = 90 is posted to A, within its 100
+		make_journal_entry(
+			self.account, "_Test Bank - _TC", 150, "_Test Budget Alloc Main - _TC", submit=True
+		)
+		# 60% of 50 = 30 more takes A to 120
+		jv = make_journal_entry(self.account, "_Test Bank - _TC", 50, "_Test Budget Alloc Main - _TC")
+		with assert_raises_with_savepoint(self, BudgetError):
+			jv.submit()
+
 	def test_monthly_budget_crossed_stop2(self):
 		set_total_expense_zero(nowdate(), "project")
 
