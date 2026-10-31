@@ -287,7 +287,7 @@ def get_cost_center_allocation_data(company, posting_date, cost_center):
 			"main_cost_center": cost_center,
 		},
 		pluck=True,
-		order_by="valid_from desc",
+		order_by="valid_from desc, creation desc",
 	)
 
 	if not cost_center_allocation:
