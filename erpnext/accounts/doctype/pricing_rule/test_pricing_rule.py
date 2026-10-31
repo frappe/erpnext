@@ -2058,6 +2058,34 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].discount_percentage, 10)
 		self.assertEqual(si.items[0].rate, 90)
 
+	def test_coupon_based_transaction_rule_keeps_manual_discount(self):
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule", selling=1, apply_on="Transaction", discount_percentage=5
+		)
+		rule.db_set("coupon_code_based", 1)
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=True)
+		si.additional_discount_percentage = 7
+		si.insert()
+		self.assertEqual(si.additional_discount_percentage, 7)
+		self.assertEqual(si.grand_total, 465)
+
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Transaction Coupon",
+				"coupon_code": "TRANSACTION5",
+				"pricing_rule": rule.name,
+			}
+		).insert()
+		si.coupon_code = coupon.name
+		si.save()
+		self.assertEqual(si.additional_discount_percentage, 5)
+
+		si.coupon_code = None
+		si.save()
+		self.assertEqual(si.additional_discount_percentage, 0)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)

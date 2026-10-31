@@ -635,8 +635,10 @@ def apply_pricing_rule_on_transaction(doc):
 
 	for d in pricing_rules:
 		if d.price_or_product_discount == "Price":
-			# Variable to track whether the condition has been met
-			condition_met = False
+			if d.coupon_code_based and not is_coupon_of_pricing_rule(doc, d.name):
+				continue
+
+			coupon_rule_applied = False
 			fields_set = set()
 
 			for field in ["additional_discount_percentage", "discount_amount"]:
@@ -652,28 +654,15 @@ def apply_pricing_rule_on_transaction(doc):
 				):
 					frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
 				else:
-					if not d.coupon_code_based:
-						if d.apply_discount_on:
-							doc.set("apply_discount_on", d.apply_discount_on)
-						doc.set(field, d.get(pr_field))
-						fields_set.add(field)
-						applied_rules.append(d.name)
-					elif doc.get("coupon_code"):
-						# coupon code based pricing rule
-						coupon_code_pricing_rule = frappe.db.get_value(
-							"Coupon Code", doc.get("coupon_code"), "pricing_rule"
-						)
-						if coupon_code_pricing_rule == d.name:
-							# if selected coupon code is linked with pricing rule
-							if d.apply_discount_on:
-								doc.set("apply_discount_on", d.apply_discount_on)
-							doc.set(field, d.get(pr_field))
-							fields_set.add(field)
-							applied_rules.append(d.name)
+					if d.apply_discount_on:
+						doc.set("apply_discount_on", d.apply_discount_on)
+					doc.set(field, d.get(pr_field))
+					fields_set.add(field)
+					applied_rules.append(d.name)
 
-							# Set the condition_met variable to True and break out of the loop
-							condition_met = True
-							break
+					if d.coupon_code_based:
+						coupon_rule_applied = True
+						break
 
 			if has_rule_discount and fields_set:
 				# clear the discount set by the previously applied rule which this rule does not set
@@ -682,8 +671,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 			doc.calculate_taxes_and_totals()
 
-			# Break out of the main loop if the condition is met
-			if condition_met:
+			if coupon_rule_applied:
 				break
 		elif d.price_or_product_discount == "Product":
 			item_details = frappe._dict({"parenttype": doc.doctype, "free_item_data": []})
@@ -700,6 +688,13 @@ def apply_pricing_rule_on_transaction(doc):
 	if flt(doc.get("grand_total")) != flt(grand_total):
 		# payment schedule is validated before pricing rules are applied, so it has to be reset as per the new total
 		doc.validate_all_documents_schedule()
+
+
+def is_coupon_of_pricing_rule(doc, pricing_rule):
+	coupon_code = doc.get("coupon_code")
+	return (
+		bool(coupon_code) and frappe.db.get_value("Coupon Code", coupon_code, "pricing_rule") == pricing_rule
+	)
 
 
 def get_transaction_pricing_rules(doc):
