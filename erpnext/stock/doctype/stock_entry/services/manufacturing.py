@@ -783,15 +783,25 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
-		pending_qty_to_mfg = flt(self.doc.fg_completed_qty)
-		if self.doc.work_order:
-			pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - flt(
-				self.wo_doc.produced_qty
-			)
-		if pending_qty_to_mfg <= 0 and not self.doc.get("is_return"):
+		transferred_qty = flt(self.wo_doc.material_transferred_for_manufacturing)
+		pending_qty_to_mfg = (
+			transferred_qty - flt(self.wo_doc.produced_qty) - flt(self.wo_doc.process_loss_qty)
+		)
+		fg_completed_qty = flt(self.doc.fg_completed_qty)
+		precision = self.doc.precision("fg_completed_qty")
+		if not self.doc.get("is_return") and (
+			flt(pending_qty_to_mfg, precision) <= 0 or not fg_completed_qty
+		):
 			return
-		for key in self.available_materials:
-			self._append_transfer_based_rm(self.available_materials[key], pending_qty_to_mfg)
+
+		for material in self.available_materials.values():
+			# a material is only covered by the entries that consumed it
+			pending_qty = transferred_qty - sum(material.consumed_for.values())
+			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, precision) <= 0:
+				# an entry for all that is pending consumes what is left
+				self._append_transfer_based_rm(material, fg_completed_qty)
+			elif flt(pending_qty, precision) > 0:
+				self._append_transfer_based_rm(material, pending_qty)
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -949,6 +959,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 					conversion_factor=1,
 					serial_nos=[],
 					batches=defaultdict(float),
+					consumed_for={},
 				)
 
 			self.available_materials[key].qty += flt(row.transfer_qty)
@@ -968,7 +979,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.select(stock_entry_detail.star)
+			.select(stock_entry_detail.star, stock_entry.fg_completed_qty, stock_entry.purpose)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (IfNull(stock_entry_detail.s_warehouse, "") != "")
@@ -991,10 +1002,16 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			if not buckets:
 				continue
 
+			available_qty = [bucket.qty for bucket in buckets]
 			if row.serial_and_batch_bundle:
 				self._deduct_consumed_serial_batch(buckets, row.serial_and_batch_bundle)
 			else:
 				self._deduct_consumed_qty(buckets, flt(row.transfer_qty))
+
+			if row.purpose != "Material Transfer for Manufacture":
+				for bucket, qty in zip(buckets, available_qty, strict=True):
+					if bucket.qty != qty:
+						bucket.consumed_for[row.parent] = flt(row.fg_completed_qty)
 
 	def _get_available_buckets(self, row):
 		"""Use exact attribution when present; otherwise drain the direct item first."""
