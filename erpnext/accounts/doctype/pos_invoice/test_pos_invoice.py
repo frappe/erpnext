@@ -1129,6 +1129,26 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
 			self.assertEqual({d.batch_no for d in entries}, {batch_no})
 
+	def test_stock_check_adds_up_rows_of_same_item(self):
+		item_code = make_stock_item_with_qty(20)
+		pos = create_pos_invoice(item=item_code, qty=15, rate=100, do_not_save=1)
+		pos.append("items", copy.deepcopy(pos.items[0]))
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 3000})
+		pos.insert()
+		self.assertRaisesRegex(frappe.ValidationError, "Needed <strong>30.0</strong>", pos.submit)
+
+		pos.reload()
+		pos.items[1].qty = 5
+		pos.payments[-1].amount = 2000
+		pos.submit()
+		self.assertEqual(pos.docstatus, 1)
+
+
+def make_stock_item_with_qty(qty):
+	item_code = make_item(properties={"is_stock_item": 1}).name
+	make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
+	return item_code
+
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
