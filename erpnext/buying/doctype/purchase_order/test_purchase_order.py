@@ -1849,11 +1849,13 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po.items[0].billed_amt, po.items[0].amount)
 		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
 
-	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_portal_purchase_invoice_skips_zero_qty_rows(self):
+		from unittest.mock import patch
+
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice_from_portal
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice_from_portal
 
 		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
 		po.append(
@@ -1877,7 +1879,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		supplier.append("portal_users", {"user": user})
 		supplier.save()
 
-		with self.set_user(user):
+		with self.set_user(user), patch("frappe.db.commit"):
 			make_purchase_invoice_from_portal(po.name)
 
 		self.assertEqual(
