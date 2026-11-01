@@ -125,6 +125,8 @@ class GlobalDefaults(Document):
 			"Purchase Order",
 			"Purchase Invoice",
 			"Purchase Receipt",
+			"Payment Entry",
+			"Subcontracting Receipt",
 		):
 			make_property_setter(
 				doctype,
