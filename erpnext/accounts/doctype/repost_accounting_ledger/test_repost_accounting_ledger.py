@@ -537,6 +537,76 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 		make_reverse_gl_entries.assert_called_once_with(voucher_type=doc.doctype, voucher_no=doc.name)
 		self.assertEqual(doc.calls, ["repost"])
 
+	def test_19_deletion_flag_with_immutable_ledger(self):
+		je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 500, submit=True)
+		ral = self.create_repost_doc([je], delete_cancelled_entries=True)
+
+		with self.change_settings("Accounts Settings", {"enable_immutable_ledger": 1}):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"Immutable Ledger",
+				self.create_repost_doc,
+				[je],
+				delete_cancelled_entries=True,
+			)
+
+			# a repost saved before the ledger was made immutable does not delete entries either
+			gl_entries = frappe.db.count("GL Entry", {"voucher_no": je.name})
+			self.assertRaisesRegex(frappe.ValidationError, "Immutable Ledger", repost, ral.name, commit=False)
+			self.assertEqual(frappe.db.count("GL Entry", {"voucher_no": je.name}), gl_entries)
+
+	def test_20_type_without_repost_handler(self):
+		settings = frappe.get_doc("Accounts Settings")
+		settings.append("repost_allowed_types", {"document_type": "Payment Request"})
+		self.assertRaisesRegex(frappe.ValidationError, "not supported", settings.save)
+
+		# a row saved before the check does not block saving the settings
+		settings.reload()
+		settings.append("repost_allowed_types", {"document_type": "Payment Request"}).db_insert()
+		settings.reload()
+		settings.save()
+
+		# but its vouchers fail, so delete mode cannot leave them without entries
+		doc = frappe._dict(doctype="Payment Request", name="_Test Payment Request")
+		self.assertRaisesRegex(frappe.ValidationError, "not supported", _repost_vouchers, doc, True)
+
+	def test_21_purchase_receipt_repost_into_frozen_account(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		frappe.db.set_value("Company", "_Test Company", "service_expense_account", "Marketing Expenses - _TC")
+		provisional_account = create_account(
+			account_name="Provision Account",
+			parent_account="Current Liabilities - _TC",
+			company="_Test Company",
+		)
+
+		company = frappe.get_doc("Company", "_Test Company")
+		role_allowed_for_frozen_entries = company.role_allowed_for_frozen_entries
+		company.enable_provisional_accounting_for_non_stock_items = 1
+		company.default_provisional_account = provisional_account
+		company.role_allowed_for_frozen_entries = None
+		company.save()
+
+		item = make_item(properties={"is_stock_item": 0})
+		pr = make_purchase_receipt(company="_Test Company", item_code=item.name, rate=1000.0, qty=1.0)
+		pr_gl_entries = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+
+		frappe.db.set_value("Account", provisional_account, "freeze_account", "Yes")
+		repost_doc = self.create_repost_doc([pr], delete_cancelled_entries=True, submit=True)
+
+		# the new entries are checked as on submit, so the frozen account refuses them
+		self.assertEqual(repost_doc.status, "Failed")
+		self.assertIn("is frozen", repost_doc.vouchers[0].traceback)
+		self.assertEqual(get_gl_entries(pr.doctype, pr.name, skip_cancelled=True), pr_gl_entries)
+
+		# teardown
+		frappe.db.set_value("Account", provisional_account, "freeze_account", "No")
+		company.reload()
+		company.enable_provisional_accounting_for_non_stock_items = 0
+		company.default_provisional_account = None
+		company.role_allowed_for_frozen_entries = role_allowed_for_frozen_entries
+		company.save()
+
 
 def update_repost_settings():
 	allowed_types = [

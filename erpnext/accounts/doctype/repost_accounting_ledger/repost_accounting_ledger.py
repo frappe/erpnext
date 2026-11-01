@@ -54,6 +54,17 @@ class RepostAccountingLedger(Document):
 		the ledger. Vouchers cancelled since are skipped one by one while reposting."""
 		self.validate_for_closed_fiscal_year()
 		self.validate_for_deferred_accounting()
+		self.validate_for_immutable_ledger()
+
+	def validate_for_immutable_ledger(self):
+		from erpnext.accounts.utils import is_immutable_ledger_enabled
+
+		if self.delete_cancelled_entries and is_immutable_ledger_enabled():
+			frappe.throw(
+				_("Cannot delete ledger entries when Immutable Ledger is enabled in {0}.").format(
+					frappe.utils.get_link_to_form("Accounts Settings")
+				)
+			)
 
 	def validate_for_deferred_accounting(self):
 		sales_docs = [x.voucher_no for x in self.vouchers if x.voucher_type == "Sales Invoice"]
@@ -398,6 +409,9 @@ def _repost_vouchers(doc, delete_cancelled_entries: bool | int | None):
 	elif doc.doctype in frappe.get_hooks("repost_allowed_doctypes"):
 		_repost_allowed_hook_doctypes(doc, delete_cancelled_entries)
 
+	else:
+		frappe.throw(_("Reposting {0} is not supported.").format(frappe.bold(doc.doctype)))
+
 
 def _repost_invoices(invoice_doc, delete_cancelled_entries):
 	if not delete_cancelled_entries:
@@ -418,7 +432,7 @@ def _repost_purchase_receipt(receipt_doc, delete_cancelled_entries):
 		receipt_doc.make_gl_entries_on_cancel(from_repost=True)
 
 	receipt_doc.docstatus = 1
-	receipt_doc.make_gl_entries(from_repost=True)
+	receipt_doc.make_gl_entries()
 
 
 def _repost_pe_je(entry_doc, delete_cancelled_entries):
