@@ -1695,7 +1695,8 @@ class TestQuotation(ERPNextTestSuite):
 		)
 
 		cache = frappe.cache()
-		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
+		# QAR is pegged against USD, so the USD to INR rate is fetched and cached under its own pair
+		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "USD", "INR")
 		value = cache.get_value(key)
 		expected_rate = flt(value) / 3.64
 
