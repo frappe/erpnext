@@ -177,7 +177,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			self.bank_account,
 			"1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G",
 			"2018-10-23",
-			deposit=1200,
+			withdrawal=1200,
 		)
 		payment = pay_purchase_invoice(self.gl_account, "Mr G", 1200, "Herr G Oct 18", "2018-10-24")
 		vouchers = json.dumps(
@@ -218,7 +218,7 @@ class TestBankTransaction(ERPNextTestSuite):
 			self.bank_account,
 			"I2015000011 VD/000002514 ATWWXXX AT4701345000003510057 Bio",
 			"2018-10-27",
-			withdrawal=109080,
+			deposit=109080,
 		)
 		payment = self.make_wire_transfer_pos_invoice()
 		vouchers = json.dumps(
@@ -239,12 +239,164 @@ class TestBankTransaction(ERPNextTestSuite):
 			frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date"), None
 		)
 
+	def test_allocated_amount_from_client_is_allocated_again(self):
+		bank_transaction = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Receipt with a typed allocation",
+				"date": "2018-10-27",
+				"currency": "INR",
+				"bank_account": self.bank_account,
+				"deposit": 100,
+			}
+		)
+		payment = self.receive_payment(1000)
+		bank_transaction.append(
+			"payment_entries",
+			{"payment_document": "Payment Entry", "payment_entry": payment.name, "allocated_amount": 5000},
+		)
+		bank_transaction.insert()
+		bank_transaction.submit()
+
+		self.assertEqual(bank_transaction.payment_entries[0].allocated_amount, 100)
+		self.assertEqual(bank_transaction.unallocated_amount, 0)
+
+	def test_allocated_amount_edited_after_reconcile_is_reset(self):
+		bank_transaction = add_transaction(self.bank_account, "Receipt", "2018-10-27", deposit=100)
+		payment = self.receive_payment(1000)
+		vouchers = json.dumps([{"payment_doctype": "Payment Entry", "payment_name": payment.name}])
+		bank_transaction = reconcile_vouchers(bank_transaction.name, vouchers)
+
+		# same instance, saved again with a typed allocation
+		bank_transaction.payment_entries[0].allocated_amount = 5000
+		bank_transaction.save()
+
+		self.assertEqual(bank_transaction.payment_entries[0].allocated_amount, 100)
+		self.assertEqual(bank_transaction.unallocated_amount, 0)
+
+	def test_deposit_does_not_reconcile_outgoing_voucher(self):
+		bank_transaction = add_transaction(self.bank_account, "Refund", "2018-10-23", deposit=1700)
+		payment = pay_purchase_invoice(self.gl_account, "Mr G", 1700, "Herr G Dec 18", "2018-11-01")
+		vouchers = json.dumps(
+			[{"payment_doctype": "Payment Entry", "payment_name": payment.name, "amount": 1700}]
+		)
+		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction.name, vouchers)
+
+		other_deposit = add_transaction(self.bank_account, "Another deposit", "2018-10-23", deposit=1700)
+		vouchers = json.dumps(
+			[{"payment_doctype": "Bank Transaction", "payment_name": other_deposit.name, "amount": 1700}]
+		)
+		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction.name, vouchers)
+
+	def test_invalid_amounts_and_duplicate_transaction_id(self):
+		self.assertRaises(
+			frappe.ValidationError, add_transaction, self.bank_account, "Negative", "2018-10-23", deposit=-100
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			add_transaction,
+			self.bank_account,
+			"Both sides",
+			"2018-10-23",
+			deposit=100,
+			withdrawal=100,
+		)
+		self.assertRaises(frappe.ValidationError, add_transaction, self.bank_account, "Zero", "2018-10-23")
+
+		add_transaction(self.bank_account, "First", "2018-10-23", deposit=100, transaction_id="TXN-1")
+		self.assertRaises(
+			frappe.ValidationError,
+			add_transaction,
+			self.bank_account,
+			"Second",
+			"2018-10-23",
+			deposit=100,
+			transaction_id="TXN-1",
+		)
+
+	def test_amended_transaction_clears_voucher_again(self):
+		bank_transaction, payment = self.add_herr_g_payment()
+		vouchers = json.dumps(
+			[{"payment_doctype": "Payment Entry", "payment_name": payment.name, "amount": 1700}]
+		)
+		reconcile_vouchers(bank_transaction.name, vouchers)
+		bank_transaction.reload()
+		bank_transaction.cancel()
+		self.assertFalse(frappe.db.get_value("Payment Entry", payment.name, "clearance_date"))
+
+		amended = frappe.copy_doc(bank_transaction)
+		amended.amended_from = bank_transaction.name
+		amended.docstatus = 0
+		amended.insert()
+		amended.submit()
+
+		self.assertEqual(amended.status, "Reconciled")
+		self.assertTrue(frappe.db.get_value("Payment Entry", payment.name, "clearance_date"))
+
+	def test_pos_invoice_clears_only_bank_payment_row(self):
+		bank_transaction = add_transaction(self.bank_account, "POS wire", "2018-10-27", deposit=700)
+		make_pos_profile()
+		mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Wire Transfer"})
+		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", self.gl_account)
+
+		si = create_sales_invoice(customer=make_customer("Fayva"), qty=1, rate=1000, do_not_save=1)
+		si.is_pos = 1
+		si.append("payments", {"mode_of_payment": "Cash", "amount": 300})
+		si.append("payments", {"mode_of_payment": "Wire Transfer", "amount": 700})
+		si.insert()
+		si.submit()
+
+		vouchers = json.dumps([{"payment_doctype": "Sales Invoice", "payment_name": si.name, "amount": 700}])
+		reconcile_vouchers(bank_transaction.name, vouchers)
+
+		cleared = frappe.get_all(
+			"Sales Invoice Payment", {"parent": si.name}, ["mode_of_payment", "clearance_date"]
+		)
+		self.assertEqual(
+			{row.mode_of_payment: bool(row.clearance_date) for row in cleared},
+			{"Cash": False, "Wire Transfer": True},
+		)
+
+	def test_journal_entry_with_two_bank_lines_is_cleared_by_net_amount(self):
+		bank_transaction = add_transaction(self.bank_account, "Net receipt", "2018-10-27", deposit=600)
+		journal_entry = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"company": "_Test Company",
+				"posting_date": "2018-10-27",
+				"accounts": [
+					{"account": self.gl_account, "debit_in_account_currency": 1000},
+					{"account": self.gl_account, "credit_in_account_currency": 400},
+					{"account": "Cash - _TC", "credit_in_account_currency": 600},
+				],
+			}
+		).submit()
+
+		vouchers = json.dumps(
+			[{"payment_doctype": "Journal Entry", "payment_name": journal_entry.name, "amount": 600}]
+		)
+		reconcile_vouchers(bank_transaction.name, vouchers)
+
+		self.assertEqual(
+			frappe.db.get_value("Bank Transaction", bank_transaction.name, "unallocated_amount"), 0
+		)
+		self.assertTrue(frappe.db.get_value("Journal Entry", journal_entry.name, "clearance_date"))
+
+	def receive_payment(self, amount):
+		si = create_sales_invoice(customer=make_customer("Poore Simon's"), qty=1, rate=amount)
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account=self.gl_account)
+		pe.reference_no = "Receipt " + frappe.generate_hash(length=6)
+		pe.reference_date = "2018-10-27"
+		pe.insert()
+		pe.submit()
+		return pe
+
 	def add_herr_g_payment(self):
 		bank_transaction = add_transaction(
 			self.bank_account,
 			"1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G",
 			"2018-10-23",
-			deposit=1700,
+			withdrawal=1700,
 		)
 		payment = pay_purchase_invoice(self.gl_account, "Mr G", 1700, "Herr G Nov 18", "2018-11-01")
 		return bank_transaction, payment
