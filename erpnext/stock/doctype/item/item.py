@@ -1756,13 +1756,19 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	from_uom, to_uom = uom, stock_uom  # renaming for readability
 
 	exact_match = frappe.db.get_value(
-		"UOM Conversion Factor", {"to_uom": to_uom, "from_uom": from_uom}, ["value"], as_dict=1
+		"UOM Conversion Factor",
+		{"to_uom": to_uom, "from_uom": from_uom, "value": [">", 0]},
+		["value"],
+		as_dict=1,
 	)
 	if exact_match:
 		return exact_match.value
 
 	inverse_match = frappe.db.get_value(
-		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
+		"UOM Conversion Factor",
+		{"to_uom": from_uom, "from_uom": to_uom, "value": [">", 0]},
+		["value"],
+		as_dict=1,
 	)
 	if inverse_match and inverse_match.value:
 		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
@@ -1792,7 +1798,12 @@ def _get_conv_factor_via_shared_uom(shared_field, other_field, first_uom, second
 		.join(second)
 		.on((first[shared_field] == second[shared_field]) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first[other_field] == first_uom) & (second[other_field] == second_uom) & (second.value != 0))
+		.where(
+			(first[other_field] == first_uom)
+			& (second[other_field] == second_uom)
+			& (first.value > 0)
+			& (second.value > 0)
+		)
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
