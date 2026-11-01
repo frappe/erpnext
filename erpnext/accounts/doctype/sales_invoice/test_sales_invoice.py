@@ -154,6 +154,22 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
 
+	def test_historical_print_preserves_empty_terms_after_template_disabled(self):
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions", title="Historical invoice terms", selling=1
+		).insert()
+		invoice = create_sales_invoice(do_not_save=True)
+		invoice.tc_name = terms.name
+		invoice.insert()
+		invoice.submit()
+		terms.disabled = 1
+		terms.save()
+		invoice.before_print(frappe._dict())
+		self.assertFalse(invoice.terms)
+		invoice.cancel()
+		invoice.before_print(frappe._dict())
+		self.assertFalse(invoice.terms)
+
 	def test_add_terms_after_save(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.insert()
