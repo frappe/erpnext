@@ -3,8 +3,9 @@
 
 
 import frappe
+from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils import cstr, filter_strip_join
+from frappe.utils import cstr, filter_strip_join, flt
 from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.setup.doctype.target_detail.target_detail import validate_targets
@@ -53,6 +54,8 @@ class SalesPartner(WebsiteGenerator):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
 		super().validate()
+		self.validate_route()
+		self.validate_targets()
 		if self.partner_website:
 			from urllib.parse import urlsplit, urlunsplit
 
@@ -65,11 +68,26 @@ class SalesPartner(WebsiteGenerator):
 
 			self.partner_website = urlunsplit(parts)
 
+	def validate_route(self):
+		if frappe.db.exists("Sales Partner", {"route": self.route, "name": ["!=", self.name]}):
+			frappe.throw(
+				_("Route {0} is already used by another Sales Partner. Please choose another route.").format(
+					frappe.bold(self.route)
+				)
+			)
+
+	def validate_targets(self):
+		for target in self.get("targets") or []:
+			if not flt(target.target_qty) and not flt(target.target_amount):
+				frappe.throw(
+					_("Row #{0}: Either Target Qty or Target Amount is mandatory").format(target.idx)
+				)
+
 	def get_context(self, context):
 		address_names = frappe.db.get_all(
 			"Dynamic Link",
 			filters={"link_doctype": "Sales Partner", "link_name": self.name, "parenttype": "Address"},
-			pluck=["parent"],
+			pluck="parent",
 		)
 
 		addresses = []
@@ -86,10 +104,17 @@ class SalesPartner(WebsiteGenerator):
 			addresses.append(
 				{
 					"email": address_doc.email_id,
-					"partner_address": filter_strip_join(address_rows, "\n<br>"),
-					"phone": filter_strip_join(cstr(address_doc.phone).split(","), "\n<br>"),
+					"partner_address": filter_strip_join(address_rows, "\n"),
+					"phone": filter_strip_join(cstr(address_doc.phone).split(","), "\n"),
 				}
 			)
 
 		context["addresses"] = addresses
 		return context
+
+
+@frappe.whitelist()
+def get_commission_rate(sales_partner: str) -> float:
+	partner = frappe.get_doc("Sales Partner", sales_partner)
+	partner.check_permission("select")
+	return flt(partner.commission_rate)
