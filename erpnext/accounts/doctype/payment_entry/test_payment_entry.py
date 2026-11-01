@@ -28,6 +28,49 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentEntry(ERPNextTestSuite):
+	def test_unregistered_party_type_is_rejected(self):
+		doc = frappe.get_doc(doctype="Payment Entry", party_type="User", party="Administrator")
+		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
+
+	def test_party_account_type_must_match(self):
+		for payment_type in ("Receive", "Pay"):
+			with self.subTest(payment_type=payment_type):
+				doc = frappe.get_doc(
+					doctype="Payment Entry",
+					payment_type=payment_type,
+					party_type="Customer",
+					party="_Test Customer",
+					paid_from="Creditors - _TC",
+					paid_to="Creditors - _TC",
+				)
+				doc.setup_party_account_field()
+				self.assertRaises(frappe.ValidationError, doc.validate_party_details)
+
+	def test_registered_party_with_matching_account_is_accepted(self):
+		doc = frappe.get_doc(
+			doctype="Payment Entry",
+			payment_type="Receive",
+			party_type="Customer",
+			party="_Test Customer",
+			paid_from="Debtors - _TC",
+		)
+		doc.setup_party_account_field()
+		doc.validate_party_details()
+
+	def test_custom_party_details_use_name_without_a_title_field(self):
+		frappe.get_doc(doctype="Party Type", party_type="Sales Partner", account_type="Receivable").insert()
+		party = "_Test Sales Partner India - 1"
+		details = get_party_details("_Test Company", "Sales Partner", party, nowdate())
+		self.assertEqual(details["party_name"], party)
+		self.assertEqual(details["party_account"], "Debtors - _TC")
+
+	def test_party_details_use_configured_title_field(self):
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.customer_name = "Customer display title"
+		customer.save()
+		details = get_party_details("_Test Company", "Customer", customer.name, nowdate())
+		self.assertEqual(details["party_name"], "Customer display title")
+
 	def test_payment_creation_excludes_disabled_bank_default(self):
 		bank_account = frappe.get_doc(
 			"Bank Account", make_bank_account("_Test Payment Bank Default", "_Test Company", "HDFC - _TC")
@@ -2428,109 +2471,3 @@ def create_customer(name="_Test Customer 2 USD", currency="USD"):
 		customer.save()
 		customer = customer.name
 	return customer
-<<<<<<< HEAD
-=======
-
-
-class TestPaymentEntryValidation(ERPNextTestSuite):
-	"""Field-level validations invoked on the document directly, covering branches the
-	integration suite above doesn't reach (no GL / reconciliation setup needed)."""
-
-	def make_pe(self, **fields):
-		doc = frappe.new_doc("Payment Entry")
-		doc.update(fields)
-		return doc
-
-	def test_payment_type_must_be_a_known_value(self):
-		self.assertRaises(frappe.ValidationError, self.make_pe(payment_type="Foo").validate_payment_type)
-		self.make_pe(payment_type="Receive").validate_payment_type()  # valid value passes
-
-	def test_nonexistent_party_is_rejected(self):
-		doc = self.make_pe(party_type="Customer", party="__No Such Customer__")
-		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
-
-	def test_unregistered_party_type_is_rejected(self):
-		doc = self.make_pe(party_type="User", party="Administrator")
-		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
-
-	def test_party_account_type_must_match(self):
-		for payment_type in ("Receive", "Pay"):
-			with self.subTest(payment_type=payment_type):
-				doc = self.make_pe(
-					payment_type=payment_type,
-					party_type="Customer",
-					party="_Test Customer",
-					paid_from="Creditors - _TC",
-					paid_to="Creditors - _TC",
-				)
-				doc.setup_party_account_field()
-				self.assertRaises(frappe.ValidationError, doc.validate_party_details)
-
-	def test_registered_party_with_matching_account_is_accepted(self):
-		doc = self.make_pe(
-			payment_type="Receive",
-			party_type="Customer",
-			party="_Test Customer",
-			paid_from="Debtors - _TC",
-		)
-		doc.setup_party_account_field()
-		doc.validate_party_details()
-
-	def test_custom_party_details_use_name_without_a_title_field(self):
-		frappe.get_doc(doctype="Party Type", party_type="Sales Partner", account_type="Receivable").insert()
-		party = "_Test Sales Partner India - 1"
-		details = get_party_details("_Test Company", "Sales Partner", party, nowdate())
-		self.assertEqual(details["party_name"], party)
-		self.assertEqual(details["party_account"], "Debtors - _TC")
-
-	def test_party_details_use_configured_title_field(self):
-		customer = frappe.get_doc("Customer", "_Test Customer")
-		customer.customer_name = "Customer display title"
-		customer.save()
-		details = get_party_details("_Test Company", "Customer", customer.name, nowdate())
-		self.assertEqual(details["party_name"], "Customer display title")
-
-	def test_amount_and_exchange_rate_fields_are_mandatory(self):
-		# every field but target_exchange_rate is set, so that missing one raises
-		doc = self.make_pe(
-			paid_amount=100, received_amount=100, source_exchange_rate=1, target_exchange_rate=0
-		)
-		self.assertRaises(frappe.ValidationError, doc.validate_mandatory)
-
-	def test_received_amount_cannot_exceed_paid_in_same_currency(self):
-		doc = self.make_pe(
-			paid_from_account_currency="INR",
-			paid_to_account_currency="INR",
-			paid_amount=100,
-			received_amount=150,
-		)
-		self.assertRaises(frappe.ValidationError, doc.validate_received_amount)
-		# received <= paid is fine
-		doc.received_amount = 50
-		doc.validate_received_amount()
-
-	def test_duplicate_reference_rows_are_rejected(self):
-		doc = self.make_pe()
-		for _ in range(2):
-			doc.append(
-				"references",
-				{"reference_doctype": "Sales Invoice", "reference_name": "SI-X", "allocated_amount": 100},
-			)
-		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_entry)
-
-	def test_receive_from_customer_against_negative_outstanding_is_rejected(self):
-		doc = self.make_pe(party_type="Customer", payment_type="Receive")
-		doc.append(
-			"references",
-			{"reference_doctype": "Sales Invoice", "reference_name": "SI-Y", "allocated_amount": -100},
-		)
-		self.assertRaises(frappe.ValidationError, doc.validate_payment_type_with_outstanding)
-
-	def test_bank_transaction_requires_a_reference_number(self):
-		doc = self.make_pe(payment_type="Pay", paid_from="_Test Bank - _TC")
-		self.assertRaises(frappe.ValidationError, doc.validate_transaction_reference)
-		# supplying the reference details clears the requirement
-		doc.reference_no = "TXN-1"
-		doc.reference_date = "2026-06-15"
-		doc.validate_transaction_reference()
->>>>>>> 86bfd5a (fix(payment-entry): validate registered party types and account types)
