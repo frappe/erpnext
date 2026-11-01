@@ -147,6 +147,13 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual([stage.phase for stage in state.stages], ["done", "done", "done"])
 		self.assertEqual(state.stages[1].output.process_loss_qty, 10)
 		self.assertEqual(len(state.entries), 6)
+		cooked = next(
+			entry
+			for entry in state.entries
+			if entry.purpose == "Manufacture" and entry.job_card == state.stages[1].job_card.name
+		)
+		finished = next(row for row in cooked["items"] if row.is_finished_item)
+		self.assertTrue(finished.batch_id.startswith("_TKB-"))
 
 	def test_consume_refuses_quantity_off_formula(self):
 		plant_floor = make_ketchup_plant()
@@ -226,10 +233,21 @@ def make_ketchup_items():
 		("_Test Tomato Paste", "Kg"),
 		("_Test Ketchup Sugar", "Kg"),
 		("_Test Ketchup Pre-mix", "Kg"),
-		("_Test Cooked Ketchup Base", "Kg"),
 		("_Test Ketchup PET Bottle", "Nos"),
 	):
 		make_item(item_code, {"is_stock_item": 1, "stock_uom": stock_uom, "valuation_rate": 10})
+
+	make_item(
+		"_Test Cooked Ketchup Base",
+		{
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"valuation_rate": 10,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "_TKB-.#####",
+		},
+	)
 
 	make_item(
 		"_Test Process Water",

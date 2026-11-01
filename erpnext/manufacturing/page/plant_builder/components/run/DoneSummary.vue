@@ -27,8 +27,8 @@ const kpis = computed(() => {
 
 const batchesOf = (entry, finished) =>
 	entry.items
-		.filter((row) => !!row.is_finished_item === finished && row.batch_no)
-		.map((row) => row.batch_no);
+		.filter((row) => !!row.is_finished_item === finished && row.batch_id)
+		.map((row) => row.batch_id);
 
 const chain = computed(() => {
 	const entries = state.value.entries;

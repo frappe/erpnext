@@ -136,12 +136,15 @@ class PlantRunState:
 		entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
 		bundle = frappe.qb.DocType("Serial and Batch Entry")
+		batch = frappe.qb.DocType("Batch")
 		rows = (
 			frappe.qb.from_(entry)
 			.join(detail)
 			.on(detail.parent == entry.name)
 			.left_join(bundle)
 			.on(bundle.parent == detail.serial_and_batch_bundle)
+			.left_join(batch)
+			.on(batch.name == bundle.batch_no)
 			.select(
 				entry.name,
 				entry.purpose,
@@ -153,7 +156,7 @@ class PlantRunState:
 				detail.qty,
 				detail.uom,
 				detail.is_finished_item,
-				bundle.batch_no,
+				batch.batch_id,
 			)
 			.where((entry.work_order == self.work_order.name) & (entry.docstatus == 1))
 			.orderby(entry.creation, order=frappe.qb.desc)
@@ -255,7 +258,7 @@ def group_entries(rows):
 				qty=row.qty,
 				uom=row.uom,
 				is_finished_item=row.is_finished_item,
-				batch_no=row.batch_no,
+				batch_id=row.batch_id,
 			)
 		)
 	return list(entries.values())
