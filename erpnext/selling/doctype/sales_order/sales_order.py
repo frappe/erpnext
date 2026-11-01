@@ -18,6 +18,7 @@ from frappe.query_builder.functions import Abs, IfNull, Round, Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 from pypika import Order
 
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
@@ -40,7 +41,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
-from erpnext.stock.get_item_details import get_bin_details, get_default_bom, get_price_list_rate
+from erpnext.stock.get_item_details import _get_bin_details, get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -250,9 +251,7 @@ class SalesOrder(SellingController):
 		)
 
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
-
-			validate_coupon_code(self.coupon_code)
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
@@ -548,6 +547,9 @@ class SalesOrder(SellingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
+		if status == "Closed":
+			self.validate_no_reserved_stock()
+
 		self.set_status(update=True, status=status)
 		# Upon Sales Order Re-open, check for credit limit.
 		# Limit should be checked after the 'Hold/Closed' status is reset.
@@ -557,6 +559,15 @@ class SalesOrder(SellingController):
 		self.notify_update()
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
+
+	def validate_no_reserved_stock(self):
+		"""Closing must not strand reserved stock; the user unreserves it deliberately (like row close)."""
+		if has_reserved_stock(self.doctype, self.name):
+			frappe.throw(
+				_("Sales Order {0} has reserved stock. Unreserve it before closing.").format(
+					frappe.bold(self.name)
+				)
+			)
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -905,7 +916,7 @@ def get_requested_item_qty(sales_order):
 
 
 @frappe.whitelist()
-def make_material_request(source_name, target_doc=None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
 	def postprocess(source, target):
@@ -929,7 +940,7 @@ def make_material_request(source_name, target_doc=None):
 		target.project = source_parent.project
 		target.qty = get_remaining_qty(source)
 		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
-		target.actual_qty = get_bin_details(
+		target.actual_qty = _get_bin_details(
 			target.item_code, target.warehouse, source_parent.company, True
 		).get("actual_qty", 0)
 
@@ -1304,6 +1315,9 @@ def make_sales_invoice(
 		if source_parent.project:
 			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
 		if target.item_code:
+			target.enable_deferred_revenue = frappe.get_cached_value(
+				"Item", target.item_code, "enable_deferred_revenue"
+			)
 			item = get_item_defaults(target.item_code, source_parent.company)
 			item_group = get_item_group_defaults(target.item_code, source_parent.company)
 			cost_center = item.get("selling_cost_center") or item_group.get("selling_cost_center")
@@ -1779,7 +1793,7 @@ def is_product_bundle(item_code):
 	return frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0})
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_work_orders(items: str, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
 	frappe.has_permission("Sales Order", "read", sales_order, throw=True)
@@ -1817,9 +1831,15 @@ def make_work_orders(items: str, sales_order: str, company: str, project: str | 
 
 @frappe.whitelist()
 def update_status(status, name):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	frappe.has_permission("Sales Order", "submit", name, throw=True)
 
 	so = frappe.get_doc("Sales Order", name)
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
@@ -1891,7 +1911,7 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name, target_doc=None):
+def create_pick_list(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 	def validate_sales_order():
@@ -1912,7 +1932,7 @@ def create_pick_list(source_name, target_doc=None):
 		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
 
 		# update available qty
-		bin_details = get_bin_details(source.item_code, source.warehouse, source_parent.company)
+		bin_details = _get_bin_details(source.item_code, source.warehouse, source_parent.company)
 		target.actual_qty = bin_details.get("actual_qty")
 		target.company_total_stock = bin_details.get("company_total_stock")
 

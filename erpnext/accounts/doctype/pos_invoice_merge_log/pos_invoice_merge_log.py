@@ -237,7 +237,11 @@ class POSInvoiceMergeLog(Document):
 				item.amount = item.net_amount
 				item.base_amount = item.base_net_amount
 				item.price_list_rate = 0
-				si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
+				si_item = map_child_doc(
+					item,
+					invoice,
+					{"doctype": "Sales Invoice Item", "field_map": {"incoming_rate": "incoming_rate"}},
+				)
 				si_item.pos_invoice = doc.name
 				si_item.pos_invoice_item = item.name
 				if doc.is_return:
