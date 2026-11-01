@@ -1539,6 +1539,9 @@ class JobCard(Document):
 	def validate_incoming_material_demand(self, material_request):
 		"""Reject requests beyond an item's required qty; callers must hold the
 		job card row lock (for_update=True)."""
+		if frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer"):
+			return
+
 		incoming = {}
 		for row in material_request.items:
 			incoming[row.job_card_item] = incoming.get(row.job_card_item, 0.0) + flt(row.stock_qty)
