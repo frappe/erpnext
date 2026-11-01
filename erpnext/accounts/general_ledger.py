@@ -236,30 +236,7 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			new_gl_map.append(d)
 			continue
 
-		transaction_precision = get_transaction_currency_precision(d, precision)
-		allocated_percentage = 0
-		allocated_transaction_amounts = {
-			"debit_in_transaction_currency": 0,
-			"credit_in_transaction_currency": 0,
-		}
-		for sub_cost_center, percentage in cost_center_allocation:
-			gle = copy.deepcopy(d)
-			gle.cost_center = sub_cost_center
-			for field in (
-				"debit",
-				"credit",
-				"debit_in_account_currency",
-				"credit_in_account_currency",
-			):
-				gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
-
-			# Round cumulative amounts so each allocation carries forward the rounding remainder.
-			allocated_percentage += percentage
-			for field, allocated_amount in allocated_transaction_amounts.items():
-				cumulative_amount = flt(flt(d.get(field)) * allocated_percentage / 100, transaction_precision)
-				gle[field] = flt(cumulative_amount - allocated_amount, transaction_precision)
-				allocated_transaction_amounts[field] = cumulative_amount
-			new_gl_map.append(gle)
+		new_gl_map.extend(split_gl_entry_by_cost_center_allocation(d, cost_center_allocation, precision))
 
 	return new_gl_map
 
@@ -273,6 +250,32 @@ def get_transaction_currency_precision(entry, default_precision):
 	)
 
 
+def split_gl_entry_by_cost_center_allocation(gl_entry, cost_center_allocation, precision):
+	transaction_precision = get_transaction_currency_precision(gl_entry, precision)
+	field_precisions = {
+		"debit": precision,
+		"credit": precision,
+		"debit_in_account_currency": precision,
+		"credit_in_account_currency": precision,
+		"debit_in_transaction_currency": transaction_precision,
+		"credit_in_transaction_currency": transaction_precision,
+	}
+	split_entries = []
+	cumulative_percentage = 0
+	allocated = dict.fromkeys(field_precisions, 0)
+	for sub_cost_center, percentage in cost_center_allocation:
+		cumulative_percentage += percentage
+		entry = copy.deepcopy(gl_entry)
+		entry.cost_center = sub_cost_center
+		for field, field_precision in field_precisions.items():
+			allocated_till_now = flt(flt(gl_entry.get(field)) * cumulative_percentage / 100, field_precision)
+			entry[field] = flt(allocated_till_now - allocated[field], field_precision)
+			allocated[field] = allocated_till_now
+		split_entries.append(entry)
+
+	return split_entries
+
+
 @request_cache
 def get_cost_center_allocation_data(company, posting_date, cost_center):
 	cost_center_allocation = frappe.db.get_value(
@@ -284,7 +287,7 @@ def get_cost_center_allocation_data(company, posting_date, cost_center):
 			"main_cost_center": cost_center,
 		},
 		pluck=True,
-		order_by="valid_from desc",
+		order_by="valid_from desc, creation desc",
 	)
 
 	if not cost_center_allocation:
@@ -294,6 +297,7 @@ def get_cost_center_allocation_data(company, posting_date, cost_center):
 		"Cost Center Allocation Percentage",
 		{"parent": cost_center_allocation},
 		["cost_center", "percentage"],
+		order_by="idx",
 		as_list=True,
 	)
 
