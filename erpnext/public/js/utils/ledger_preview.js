@@ -3,7 +3,7 @@ frappe.provide("erpnext.accounts");
 erpnext.accounts.ledger_preview = {
 	show_accounting_ledger_preview(frm) {
 		let me = this;
-		if (!frm.is_new() && frm.doc.docstatus == 0) {
+		if (!frm.is_new() && frm.doc.docstatus == 0 && frappe.model.can_read("GL Entry")) {
 			frm.add_custom_button(
 				__("Accounting Ledger"),
 				function () {
@@ -32,7 +32,7 @@ erpnext.accounts.ledger_preview = {
 
 	show_stock_ledger_preview(frm) {
 		let me = this;
-		if (!frm.is_new() && frm.doc.docstatus == 0) {
+		if (!frm.is_new() && frm.doc.docstatus == 0 && frappe.model.can_read("Stock Ledger Entry")) {
 			frm.add_custom_button(
 				__("Stock Ledger"),
 				function () {

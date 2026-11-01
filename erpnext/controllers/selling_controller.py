@@ -11,8 +11,9 @@ from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
+from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.stock.doctype.item.item import set_item_default
-from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
+from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
 
@@ -31,7 +32,7 @@ class SellingController(StockController):
 				company = self.company
 
 				item.update(
-					get_bin_details(
+					_get_bin_details(
 						item.item_code, item.warehouse, company=company, include_child_warehouses=True
 					)
 				)
@@ -51,6 +52,7 @@ class SellingController(StockController):
 
 	def validate(self):
 		super().validate()
+		self.ensure_customer_is_not_blocked()
 		self.validate_items()
 		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
@@ -504,6 +506,14 @@ class SellingController(StockController):
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 
+	def ensure_customer_is_not_blocked(self):
+		# Consolidated POS invoices only merge POS invoices that already passed this check
+		if self.doctype == "Quotation" or self.get("is_consolidated") or self.get("is_return"):
+			return
+
+		if self.customer and is_customer_blocked(self.customer):
+			frappe.throw(_("{0} is blocked so this transaction cannot proceed").format(self.customer))
+
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
 		if self.is_return:
 			return
@@ -557,10 +567,18 @@ class SellingController(StockController):
 				):
 					d.incoming_rate = 0
 
-		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+		is_standalone = self.get("is_return") and not self.get("return_against")
+
+		if self.doctype not in ("Delivery Note", "Sales Invoice") and not (
+			self.doctype == "POS Invoice" and is_standalone
+		):
 			return
 
-		if self.doctype == "Sales Invoice" and not self.update_stock and not self.is_internal_transfer():
+		if (
+			self.doctype in ("Sales Invoice", "POS Invoice")
+			and not self.update_stock
+			and not self.is_internal_transfer()
+		):
 			return
 
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
@@ -571,8 +589,6 @@ class SellingController(StockController):
 		set_zero_rate_for_expired_batch = frappe.db.get_single_value(
 			"Selling Settings", "set_zero_rate_for_expired_batch"
 		)
-
-		is_standalone = self.is_return and not self.return_against
 
 		old_doc = self.get_doc_before_save()
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -1028,8 +1044,31 @@ class SellingController(StockController):
 
 		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
 
+		items = []
+		for item in self.items:
+			packed_items = [
+				packed_item
+				for packed_item in self.packed_items
+				if packed_item.parent_detail_docname == item.name
+			]
+			if not packed_items:
+				items.append(item)
+			else:
+				for d in packed_items:
+					d.set(so_field, item.get(so_field))
+					d.so_detail = frappe.get_value(
+						"Packed Item",
+						{
+							"parent_detail_docname": item.so_detail,
+							"parent_item": item.item_code,
+							"item_code": d.item_code,
+							"warehouse": d.warehouse,
+						},
+					)
+					items.append(d)
+
 		if self._action == "submit":
-			for item in self.get("items"):
+			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if not item.get(so_field) or not item.so_detail:
 					continue
@@ -1054,7 +1093,7 @@ class SellingController(StockController):
 				if not sre_list:
 					continue
 
-				qty_to_deliver = item.stock_qty
+				qty_to_deliver = item.get("stock_qty") or item.qty
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -1102,7 +1141,7 @@ class SellingController(StockController):
 					qty_to_deliver -= qty_can_be_deliver
 
 		if self._action == "cancel":
-			for item in self.get("items"):
+			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if not item.get(so_field) or not item.so_detail:
 					continue
@@ -1124,7 +1163,7 @@ class SellingController(StockController):
 				if not sre_list:
 					continue
 
-				qty_to_undelivered = item.stock_qty
+				qty_to_undelivered = item.get("stock_qty") or item.qty
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break
