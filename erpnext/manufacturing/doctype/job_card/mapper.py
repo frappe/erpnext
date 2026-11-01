@@ -58,18 +58,19 @@ def make_subcontracting_po(source_name: str, target_doc: str | dict | Document |
 def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	shortages = get_shortages_to_request(source_name)
 	pending = get_pending_qty_to_request(source_name)
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 
 	def update_item(obj, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
 		if shortages is not None:
 			target.qty = shortages[obj.name]
-		if pending is not None:
+		if pending[obj.name] > 0:
 			target.qty = min(flt(target.qty), pending[obj.name])
 
 	def can_request(row):
 		if shortages is not None and row.name not in shortages:
 			return False
-		return pending is None or pending[row.name] > 0
+		return allow_excess_transfer or pending[row.name] > 0
 
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Transfer"
@@ -99,10 +100,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 
 
 def get_pending_qty_to_request(job_card):
-	"""Qty per item still open to request, or None when excess transfer is allowed."""
-	if frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer"):
-		return None
-
+	"""Qty per item still open to request."""
 	doc = frappe.get_doc("Job Card", job_card)
 	requested = doc.get_requested_qty_by_item()
 	return {
