@@ -12,6 +12,7 @@ from frappe.utils.data import today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
 from erpnext.buying.doctype.purchase_order.purchase_order import (
+	item_last_purchase_rate,
 	make_inter_company_sales_order,
 	make_purchase_receipt,
 )
@@ -606,6 +607,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		update_child_qty_rate("Purchase Order", trans_item, po.name)
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
+
+	def test_item_last_purchase_rate_in_row_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}]).name
+		frappe.db.set_value("Item", item, "last_purchase_rate", 10)
+
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.get_last_purchase_rate()
+
+		self.assertEqual(po.items[0].rate, 120)
+		self.assertEqual(item_last_purchase_rate(po.name, 1, item, 12), 120)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
