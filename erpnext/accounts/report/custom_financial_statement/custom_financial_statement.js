@@ -9,6 +9,12 @@ erpnext.utils.add_dimensions(CFS_REPORT_NAME, 10);
 
 frappe.query_reports[CFS_REPORT_NAME]["filters"].push(
 	{
+		fieldname: "group_by_dimension",
+		label: __("Group by Dimension"),
+		fieldtype: "Select",
+		options: erpnext.financial_statements.get_accounting_dimension_options(),
+	},
+	{
 		fieldname: "report_template",
 		label: __("Report Template"),
 		fieldtype: "Link",
