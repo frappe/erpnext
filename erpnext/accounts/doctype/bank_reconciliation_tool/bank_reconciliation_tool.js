@@ -133,8 +133,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					frm.doc.bank_statement_from_date &&
 					frm.doc.bank_statement_to_date
 				) {
-					frm.trigger("render_chart");
-					frm.trigger("render");
+					frm.trigger("render_chart").then(() => frm.trigger("render"));
 					frappe.utils.scroll_to(frm.get_field("reconciliation_tool_cards").$wrapper, true, 30);
 				}
 			});
@@ -174,7 +173,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 
 	render_chart(frm) {
 		// the bank account trigger can fire before refresh has loaded the bundle
-		frappe.require("bank-reconciliation-tool.bundle.js", () => {
+		return frappe.require("bank-reconciliation-tool.bundle.js", () => {
 			frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager({
 				$reconciliation_tool_cards: frm.get_field("reconciliation_tool_cards").$wrapper,
 				bank_statement_closing_balance: frm.doc.bank_statement_closing_balance,
