@@ -590,6 +590,9 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 					debit_credit_diff -= flt(d.debit) - flt(d.credit)
 				else:
 					debit_credit_diff += flt(d.credit)
+				trx_cur_debit_credit_diff -= flt(d.debit_in_transaction_currency) - flt(
+					d.credit_in_transaction_currency
+				)
 				round_off_account_exists = True
 
 		debit_credit_diff = flt(debit_credit_diff, precision)
