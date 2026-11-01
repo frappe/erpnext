@@ -2691,6 +2691,29 @@ def get_available_serial_nos(kwargs):
 		if kwargs.warehouse:
 			filters["warehouse"] = kwargs.warehouse
 
+	# A row delivering against a Sales Order takes the serial nos reserved for that order
+	if kwargs.get("against_sales_order") and (
+		reserved_serial_nos := get_reserved_serial_nos_for_sre(
+			frappe._dict(kwargs, reserved_for=kwargs.against_sales_order)
+		)
+	):
+		ignore = set(kwargs.get("ignore_serial_nos") or [])
+		filters["name"] = ("in", [sn for sn in reserved_serial_nos if sn not in ignore])
+	elif not set_unreserved_serial_no_filter(filters, kwargs):
+		return []
+
+	if kwargs.get("batches"):
+		batches = get_non_expired_batches(kwargs.get("batches"))
+		if not batches:
+			return []
+
+		filters["batch_no"] = ("in", batches)
+
+	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def set_unreserved_serial_no_filter(filters, kwargs) -> bool:
+	"""Limit the filters to serial nos in stock and not reserved; returns False when none are."""
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos = get_reserved_serial_nos(kwargs)
 
@@ -2703,7 +2726,7 @@ def get_available_serial_nos(kwargs):
 		time_based_serial_nos = get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos)
 
 		if not time_based_serial_nos:
-			return []
+			return False
 
 		filters["name"] = ("in", time_based_serial_nos)
 	elif ignore_serial_nos:
@@ -2711,14 +2734,7 @@ def get_available_serial_nos(kwargs):
 	elif kwargs.get("serial_nos"):
 		filters["name"] = ("in", kwargs.get("serial_nos"))
 
-	if kwargs.get("batches"):
-		batches = get_non_expired_batches(kwargs.get("batches"))
-		if not batches:
-			return []
-
-		filters["batch_no"] = ("in", batches)
-
-	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+	return True
 
 
 def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
@@ -2943,6 +2959,9 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
+
+	if kwargs.reserved_for:
+		query = query.where(sre.voucher_no == kwargs.reserved_for)
 
 	return [row[0] for row in query.run()]
 
