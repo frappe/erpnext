@@ -114,6 +114,18 @@ jobs:
             honcho start -f ~/frappe-bench/Procfile $procs &>> ~/frappe-bench/bench_start.log &
           }
 
+          # Redis can take a few seconds to save and release its port after honcho is killed.
+          # Starting the bench before that fails with "Address already in use".
+          function stop_bench() {
+            pgrep honcho | xargs kill
+            for _ in {1..60}; do
+              pgrep -f "honcho|redis-server" >/dev/null || return 0
+              sleep 1
+            done
+            echo "Bench did not stop within 60s"
+            return 1
+          }
+
           function retry() {
             for attempt in 1 2 3; do
               "$@" && return
@@ -136,8 +148,7 @@ jobs:
             git -C "apps/erpnext" checkout -q -f $branch_name
 
             # Resetup env and install apps
-            pgrep honcho | xargs kill
-            sleep 10
+            stop_bench
             rm -rf ~/frappe-bench/env
             bench -v setup env --python "$2"
             bench pip install -e ./apps/erpnext
@@ -178,7 +189,7 @@ jobs:
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
 
-          pgrep honcho | xargs kill
+          stop_bench
           rm -rf ~/frappe-bench/env
           bench -v setup env --python python3.14
           bench pip install -e ./apps/erpnext
