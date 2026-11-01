@@ -45,6 +45,7 @@ from erpnext.accounts.party import (
 )
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
+	cancel_remaining_payment_ledger_entries,
 	get_account_currency,
 	get_advance_payment_doctypes,
 	get_outstanding_invoices,
@@ -376,6 +377,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_requests(cancel=True)
 		self.update_payment_schedule(cancel=1)
 		self.make_gl_entries(cancel=1)
+		cancel_remaining_payment_ledger_entries(self.doctype, self.name)
 		self.update_outstanding_amounts()
 		self.update_linked_dunnings()
 		self.delink_advance_entry_references()
