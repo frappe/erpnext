@@ -90,6 +90,30 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			label: __("Group by Purchase Order"),
 			fieldtype: "Check",
 			default: 0,
+			on_change: (report) => {
+				if (report.get_filter_value("group_by_po") && report.get_filter_value("group_by_item")) {
+					report.set_filter_value("group_by_item", 0);
+					return;
+				}
+				if (!report._no_refresh) {
+					report.refresh(true);
+				}
+			},
+		},
+		{
+			fieldname: "group_by_item",
+			label: __("Group by Item"),
+			fieldtype: "Check",
+			default: 0,
+			on_change: (report) => {
+				if (report.get_filter_value("group_by_po") && report.get_filter_value("group_by_item")) {
+					report.set_filter_value("group_by_po", 0);
+					return;
+				}
+				if (!report._no_refresh) {
+					report.refresh(true);
+				}
+			},
 		},
 	],
 

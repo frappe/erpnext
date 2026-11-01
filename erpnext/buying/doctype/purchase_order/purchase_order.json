@@ -164,6 +164,7 @@
   "is_internal_supplier",
   "inter_company_order_reference",
   "is_old_subcontracting_flow",
+  "remarks",
   "connections_tab"
  ],
  "fields": [
@@ -942,6 +943,13 @@
    "read_only": 1
   },
   {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
    "fieldname": "column_break_74",
    "fieldtype": "Column Break"
   },
@@ -1326,7 +1334,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-13 12:12:32.190935",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

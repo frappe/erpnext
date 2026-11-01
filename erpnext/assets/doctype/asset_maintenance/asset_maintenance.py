@@ -20,7 +20,7 @@ class AssetMaintenance(Document):
 
 		from erpnext.assets.doctype.asset_maintenance_task.asset_maintenance_task import AssetMaintenanceTask
 
-		asset_category: DF.ReadOnly | None
+		asset_category: DF.Link | None
 		asset_maintenance_tasks: DF.Table[AssetMaintenanceTask]
 		asset_name: DF.Link
 		company: DF.Link
@@ -35,7 +35,7 @@ class AssetMaintenance(Document):
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
-			if getdate(task.next_due_date) < getdate(nowdate()):
+			if task.maintenance_status != "Cancelled" and getdate(task.next_due_date) < getdate(nowdate()):
 				task.maintenance_status = "Overdue"
 			if not task.assign_to and self.docstatus == 0:
 				throw(_("Row #{}: Please assign task to a member.").format(task.idx))
@@ -53,6 +53,8 @@ class AssetMaintenance(Document):
 	def sync_maintenance_tasks(self):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
+			if task.maintenance_status == "Cancelled":
+				continue
 			tasks_names.append(task.name)
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
@@ -60,7 +62,12 @@ class AssetMaintenance(Document):
 		asset_maintenance_logs = frappe.get_all(
 			"Asset Maintenance Log",
 			fields=["name"],
-			filters={"asset_maintenance": self.name, "task": ("not in", tasks_names)},
+			filters={
+				"asset_maintenance": self.name,
+				"task": ("not in", tasks_names),
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+			},
 		)
 		if asset_maintenance_logs:
 			for asset_maintenance_log in asset_maintenance_logs:

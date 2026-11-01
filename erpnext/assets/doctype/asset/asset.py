@@ -1476,7 +1476,7 @@ def process_asset_split(existing_asset, split_qty, splitted_asset=None, is_new_a
 
 def set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset):
 	asset_doc.net_purchase_amount = existing_asset.net_purchase_amount * scaling_factor
-	asset_doc.purchase_amount = existing_asset.net_purchase_amount * scaling_factor
+	asset_doc.purchase_amount = asset_doc.net_purchase_amount
 	asset_doc.additional_asset_cost = existing_asset.additional_asset_cost * scaling_factor
 	asset_doc.total_asset_cost = asset_doc.net_purchase_amount + asset_doc.additional_asset_cost
 	asset_doc.opening_accumulated_depreciation = (

@@ -72,7 +72,7 @@ class AssetRepair(AccountsController):
 		self.set_downtime()
 
 	def validate_asset(self):
-		if self.asset_doc.status in ("Sold", "Scrapped"):
+		if self.asset_doc.status in ("Sold", "Scrapped", "Capitalized"):
 			frappe.throw(
 				_("Asset {0} is in {1} status and cannot be repaired.").format(
 					get_link_to_form("Asset", self.asset), self.asset_doc.status

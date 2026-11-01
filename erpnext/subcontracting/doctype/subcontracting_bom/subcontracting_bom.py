@@ -6,6 +6,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from erpnext.controllers.queries import bom
+from erpnext.stock.get_item_details import get_default_bom
+
 
 class SubcontractingBOM(Document):
 	# begin: auto-generated types
@@ -48,7 +51,7 @@ class SubcontractingBOM(Document):
 			frappe.throw(_("Finished Good {0} is disabled.").format(frappe.bold(self.finished_good)))
 		if not is_stock_item:
 			frappe.throw(_("Finished Good {0} must be a stock item.").format(frappe.bold(self.finished_good)))
-		if not default_bom:
+		if not default_bom and not get_default_bom(self.finished_good):
 			frappe.throw(
 				_("Finished Good {0} does not have a default BOM.").format(frappe.bold(self.finished_good))
 			)
@@ -58,7 +61,15 @@ class SubcontractingBOM(Document):
 			)
 
 	def validate_finished_good_bom(self):
-		is_active, docstatus = frappe.db.get_value("BOM", self.finished_good_bom, ["is_active", "docstatus"])
+		bom_item, is_active, docstatus = frappe.db.get_value(
+			"BOM", self.finished_good_bom, ["item", "is_active", "docstatus"]
+		)
+		if bom_item not in get_applicable_bom_items(self.finished_good):
+			frappe.throw(
+				_("BOM {0} does not belong to Item {1}").format(
+					frappe.bold(self.finished_good_bom), frappe.bold(self.finished_good)
+				)
+			)
 		if self.is_active and (not is_active or docstatus != 1):
 			frappe.throw(
 				_("BOM {0} must be active and submitted.").format(frappe.bold(self.finished_good_bom))
@@ -95,6 +106,38 @@ class SubcontractingBOM(Document):
 
 	def set_conversion_factor(self):
 		self.conversion_factor = flt(self.service_item_qty) / flt(self.finished_good_qty)
+
+
+def get_finished_good_bom(item: Document) -> str | None:
+	"""BOM of the active Subcontracting BOM, else the default BOM of the item or its template."""
+	return (
+		frappe.db.get_value(
+			"Subcontracting BOM", {"finished_good": item.name, "is_active": 1}, "finished_good_bom"
+		)
+		or item.default_bom
+		or get_default_bom(item.variant_of)
+	)
+
+
+def get_applicable_bom_items(item_code: str) -> list[str]:
+	"""Items whose BOMs can be used for `item_code`: the item and its template."""
+	template = frappe.get_cached_value("Item", item_code, "variant_of")
+	return [item_code, template] if template else [item_code]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def finished_good_bom_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
+	"""BOMs of the finished good and of its template."""
+	filters = filters or {}
+	finished_good = filters.pop("finished_good", None)
+	if not finished_good or not isinstance(finished_good, str):
+		return []
+
+	filters["item"] = ["in", get_applicable_bom_items(finished_good)]
+	return bom(doctype, txt, searchfield, start, page_len, filters)
 
 
 LOOKUP_FIELDS = [

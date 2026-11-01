@@ -8,7 +8,7 @@ import frappe
 from frappe import _, scrub
 from frappe.model.document import Document, bulk_insert
 from frappe.query_builder import functions
-from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
+from frappe.utils import cint, flt, get_link_to_form, round_based_on_smallest_currency_fraction
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
@@ -27,6 +27,7 @@ from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	_get_item_tax_template,
 	get_item_tax_map,
+	get_item_tax_template,
 )
 from erpnext.utilities.regional import temporary_flag
 
@@ -133,7 +134,7 @@ class calculate_taxes_and_totals:
 
 				if taxes:
 					if item.item_tax_template not in taxes:
-						item.item_tax_template = taxes[0]
+						item.item_tax_template = get_item_tax_template(ctx, item_doc)
 						frappe.msgprint(
 							_("Row {0}: Item Tax template updated as per validity and rate applied").format(
 								item.idx, frappe.bold(item.item_code)
@@ -143,6 +144,41 @@ class calculate_taxes_and_totals:
 						# For correct tax_amount calculation re-computation is required
 						if self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total":
 							self.need_recomputation = True
+
+		self.validate_item_tax_templates_are_usable()
+
+	def validate_item_tax_templates_are_usable(self):
+		if self.doc.get("_action") not in ("save", "submit") or self.doc.get("is_consolidated"):
+			return
+
+		for template in self.get_changed_item_tax_templates():
+			disabled, company = frappe.get_cached_value(
+				"Item Tax Template", template, ["disabled", "company"]
+			)
+			if disabled:
+				frappe.throw(
+					_("Item Tax Template {0} is disabled").format(
+						get_link_to_form("Item Tax Template", template)
+					),
+					title=_("Disabled Item Tax Template"),
+				)
+			if company != self.doc.company:
+				frappe.throw(
+					_("Item Tax Template {0} does not belong to Company {1}").format(
+						get_link_to_form("Item Tax Template", template), frappe.bold(self.doc.company)
+					)
+				)
+
+	def get_changed_item_tax_templates(self) -> set:
+		doc_before_save = self.doc.get_doc_before_save()
+		saved_templates = (
+			{item.name: item.item_tax_template for item in doc_before_save.items} if doc_before_save else {}
+		)
+		return {
+			item.item_tax_template
+			for item in self.doc.items
+			if item.get("item_tax_template") and item.item_tax_template != saved_templates.get(item.name)
+		}
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:
@@ -489,6 +525,7 @@ class calculate_taxes_and_totals:
 				if tax.charge_type == "Actual"
 			]
 		)
+		self.set_actual_tax_distribution()
 
 		for n, item in enumerate(self._items):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
@@ -504,7 +541,7 @@ class calculate_taxes_and_totals:
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
 					actual_tax_dict[tax.idx] -= current_tax_amount
-					if n == len(self._items) - 1:
+					if n == self._actual_tax_distribution[tax.idx].last_idx:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# accumulate tax amount into tax.tax_amount
@@ -568,6 +605,27 @@ class calculate_taxes_and_totals:
 			self._set_in_company_currency(tax, ["total"])
 
 		self.adjust_rounding_in_item_wise_tax_details()
+
+	def set_actual_tax_distribution(self):
+		# Actual taxes are split only over the items they apply to
+		self._actual_tax_distribution = {}
+		item_tax_maps = [self._load_item_tax_rate(item.item_tax_rate) for item in self._items]
+
+		for tax in self.doc.taxes:
+			if tax.charge_type != "Actual":
+				continue
+
+			net_total, last_idx = 0.0, None
+			for n, item in enumerate(self._items):
+				if self._get_tax_rate(tax, item_tax_maps[n]) != NOT_APPLICABLE_TAX:
+					net_total += flt(item.net_amount)
+					last_idx = n
+
+			# no applicable item: keep the remainder on the last item as before
+			if last_idx is None:
+				last_idx = len(self._items) - 1
+
+			self._actual_tax_distribution[tax.idx] = frappe._dict(net_total=net_total, last_idx=last_idx)
 
 	def adjust_rounding_in_item_wise_tax_details(self):
 		if ignore_item_wise_tax_details(self.doc):
@@ -658,7 +716,12 @@ class calculate_taxes_and_totals:
 			current_net_amount = item.net_amount
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+			distribution = self._actual_tax_distribution[tax.idx]
+			if distribution.net_total:
+				current_tax_amount = item.net_amount * actual / distribution.net_total
+			elif item is self._items[distribution.last_idx]:
+				# nothing to distribute over, allocate to the last applicable item
+				current_tax_amount = actual
 
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
@@ -1197,6 +1260,9 @@ class calculate_taxes_and_totals:
 		self.doc.base_paid_amount = flt(base_paid_amount, self.doc.precision("base_paid_amount"))
 
 	def calculate_change_amount(self):
+		if self.doc.flags.keep_change_amount and any(d.type == "Cash" for d in self.doc.payments):
+			return
+
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
 		grand_total = self.doc.rounded_total or self.doc.grand_total

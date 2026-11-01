@@ -158,6 +158,9 @@ def set_amount_in_reporting_currency(cle, company, closing_date):
 		"Company", company, ["default_currency", "reporting_currency"]
 	)
 
+	if not reporting_currency:
+		return
+
 	reporting_currency_exchange_rate = get_exchange_rate(default_currency, reporting_currency, closing_date)
 	if not reporting_currency_exchange_rate:
 		frappe.throw(

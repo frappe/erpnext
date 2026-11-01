@@ -8,6 +8,7 @@ from frappe.utils import add_to_date, cint, cstr, pretty_date
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
 import erpnext
+from erpnext.deprecation_dumpster import deprecation_warning
 
 
 class RootNotEditable(frappe.ValidationError):
@@ -93,11 +94,14 @@ class Account(NestedSet):
 			super().on_update()
 
 	def onload(self):
-		role_allowed_for_frozen_entries = frappe.db.get_value(
+		if self.is_allowed_to_set_frozen_value():
+			self.set_onload("can_freeze_account", True)
+
+	def is_allowed_to_set_frozen_value(self) -> bool:
+		role_allowed_for_frozen_entries = frappe.get_cached_value(
 			"Company", self.company, "role_allowed_for_frozen_entries"
 		)
-		if not role_allowed_for_frozen_entries or role_allowed_for_frozen_entries in frappe.get_roles():
-			self.set_onload("can_freeze_account", True)
+		return bool(role_allowed_for_frozen_entries) and role_allowed_for_frozen_entries in frappe.get_roles()
 
 	def autoname(self):
 		from erpnext.accounts.utils import get_autoname_with_number
@@ -172,6 +176,8 @@ class Account(NestedSet):
 			if par.root_type:
 				self.root_type = par.root_type
 
+		self.validate_report_type_change()
+
 		if cint(self.is_group):
 			db_value = self.get_doc_before_save()
 			if db_value:
@@ -189,6 +195,18 @@ class Account(NestedSet):
 		if self.root_type and not self.report_type:
 			self.report_type = (
 				"Balance Sheet" if self.root_type in ("Asset", "Liability", "Equity") else "Profit and Loss"
+			)
+
+	def validate_report_type_change(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save or doc_before_save.report_type == self.report_type:
+			return
+
+		if has_ledger_entries_in_subtree(doc_before_save.lft, doc_before_save.rgt):
+			throw(
+				_(
+					"Cannot change Report Type of {0} from {1} to {2} because the account or its child accounts have ledger entries."
+				).format(frappe.bold(self.name), _(doc_before_save.report_type), _(self.report_type))
 			)
 
 	def validate_receivable_payable_account_type(self):
@@ -336,10 +354,10 @@ class Account(NestedSet):
 		if not doc_before_save or doc_before_save.freeze_account == self.freeze_account:
 			return
 
-		role_allowed_for_frozen_entries = frappe.get_cached_value(
-			"Company", self.company, "role_allowed_for_frozen_entries"
-		)
-		if not role_allowed_for_frozen_entries or role_allowed_for_frozen_entries not in frappe.get_roles():
+		if self.flags.ignore_root_company_validation:
+			return
+
+		if not self.is_allowed_to_set_frozen_value():
 			throw(_("You are not authorized to set Frozen value"))
 
 	def validate_balance_must_be_debit_or_credit(self):
@@ -443,6 +461,7 @@ class Account(NestedSet):
 			elif child_account:
 				# update the parent company's value in child companies
 				doc = frappe.get_doc("Account", child_account)
+				doc.flags.ignore_root_company_validation = True
 				parent_value_changed = False
 				for field in ["account_type", "freeze_account", "balance_must_be"]:
 					if doc.get(field) != self.get(field):
@@ -519,6 +538,20 @@ def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 
+def has_ledger_entries_in_subtree(lft: int, rgt: int) -> bool:
+	account = frappe.qb.DocType("Account")
+	gl_entry = frappe.qb.DocType("GL Entry")
+	return bool(
+		frappe.qb.from_(gl_entry)
+		.inner_join(account)
+		.on(gl_entry.account == account.name)
+		.select(gl_entry.name)
+		.where((account.lft >= lft) & (account.rgt <= rgt) & (gl_entry.is_cancelled == 0))
+		.limit(1)
+		.run()
+	)
+
+
 def get_account_currency(account):
 	"""Helper function to get account currency"""
 	if not account:
@@ -552,71 +585,88 @@ def get_account_autoname(account_number, account_name, company):
 	return " - ".join(parts)
 
 
-@frappe.whitelist()
-def update_account_number(name, account_name, account_number=None, from_descendant=False):
+@frappe.whitelist(methods=["POST"])
+def update_account_number(
+	name: str, account_name: str, account_number: str | None = None, from_descendant: bool = False
+):
+	if from_descendant:
+		deprecation_warning(
+			"2026-10-26",
+			"v18",
+			"The from_descendant argument of update_account_number is ignored. Use update_child_company_account_number to rename a synced child company account.",
+		)
+
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
 	account.check_permission("write")
-	if not account:
+	validate_rename_in_child_company(account)
+
+	old_account_name, old_account_number = account.account_name, account.account_number
+	new_name = set_account_name_and_number(account, account_name, account_number)
+
+	descendants = get_descendants_of("Company", account.company)
+	if descendants:
+		sync_update_account_number_in_child(
+			descendants, old_account_name, account_name, account_number, old_account_number
+		)
+
+	return new_name
+
+
+def validate_rename_in_child_company(account: Account):
+	if frappe.get_cached_value("Company", account.company, "allow_account_creation_against_child_company"):
 		return
 
-	old_acc_name, old_acc_number = account.account_name, account.account_number
+	for ancestor in get_ancestors_of("Company", account.company):
+		if frappe.db.exists(
+			"Account",
+			{
+				"account_number": account.account_number,
+				"account_name": account.account_name,
+				"company": ancestor,
+			},
+		):
+			allow_child_account_creation = _("Allow Account Creation Against Child Company")
 
-	# check if account exists in parent company
-	ancestors = get_ancestors_of("Company", account.company)
-	allow_independent_account_creation = frappe.get_cached_value(
-		"Company", account.company, "allow_account_creation_against_child_company"
-	)
-
-	if ancestors and not allow_independent_account_creation:
-		for ancestor in ancestors:
-			old_name = frappe.db.get_value(
-				"Account",
-				{"account_number": old_acc_number, "account_name": old_acc_name, "company": ancestor},
-				"name",
+			message = _("Account {0} exists in parent company {1}.").format(
+				frappe.bold(account.account_name), frappe.bold(ancestor)
+			)
+			message += "<br>"
+			message += _("Renaming it is only allowed via parent company {0}, to avoid mismatch.").format(
+				frappe.bold(ancestor)
+			)
+			message += "<br><br>"
+			message += _("To overrule this, enable '{0}' in company {1}").format(
+				allow_child_account_creation, frappe.bold(account.company)
 			)
 
-			if old_name and not from_descendant:
-				# same account in parent company exists
-				allow_child_account_creation = _("Allow Account Creation Against Child Company")
+			frappe.throw(message, title=_("Rename Not Allowed"))
 
-				message = _("Account {0} exists in parent company {1}.").format(
-					frappe.bold(old_acc_name), frappe.bold(ancestor)
-				)
-				message += "<br>"
-				message += _("Renaming it is only allowed via parent company {0}, to avoid mismatch.").format(
-					frappe.bold(ancestor)
-				)
-				message += "<br><br>"
-				message += _("To overrule this, enable '{0}' in company {1}").format(
-					allow_child_account_creation, frappe.bold(account.company)
-				)
 
-				frappe.throw(message, title=_("Rename Not Allowed"))
+def update_child_company_account_number(name: str, account_name: str, account_number: str | None = None):
+	account = frappe.get_cached_doc("Account", name)
+	account.check_permission("write")
+	return set_account_name_and_number(account, account_name, account_number)
+
+
+def set_account_name_and_number(account: Account, account_name: str, account_number: str | None = None):
+	account_name, account_number = cstr(account_name).strip(), cstr(account_number).strip()
+	if not account_name:
+		throw(_("Account Name cannot be empty"))
 
 	account.validate_account_number(account_number)
-	if account_number:
-		frappe.db.set_value("Account", name, "account_number", account_number.strip())
-	else:
-		frappe.db.set_value("Account", name, "account_number", "")
-	frappe.db.set_value("Account", name, "account_name", account_name.strip())
-
-	if not from_descendant:
-		# Update and rename in child company accounts as well
-		descendants = get_descendants_of("Company", account.company)
-		if descendants:
-			sync_update_account_number_in_child(
-				descendants, old_acc_name, account_name, account_number, old_acc_number
-			)
+	frappe.db.set_value(
+		"Account", account.name, {"account_number": account_number, "account_name": account_name}
+	)
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
-	if name != new_name:
-		frappe.rename_doc("Account", name, new_name, force=1)
+	if account.name != new_name:
+		frappe.rename_doc("Account", account.name, new_name, force=1)
 		return new_name
 
 
-@frappe.whitelist()
-def merge_account(old, new):
+@frappe.whitelist(methods=["POST"])
+def merge_account(old: str, new: str):
 	_ensure_idle_system()
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
@@ -627,31 +677,69 @@ def merge_account(old, new):
 	if not new_account:
 		throw(_("Account {0} does not exist").format(new))
 
-	if (
-		cint(new_account.is_group),
-		new_account.root_type,
-		new_account.company,
-		cstr(new_account.account_currency),
-	) != (
-		cint(old_account.is_group),
-		old_account.root_type,
-		old_account.company,
-		cstr(old_account.account_currency),
-	):
-		throw(
-			msg=_(
-				"""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"""
-			),
-			title=("Invalid Accounts"),
-			exc=InvalidAccountMergeError,
-		)
+	validate_accounts_can_be_merged(old_account, new_account)
+	validate_balance_after_merge(old_account, new_account)
 
-	if old_account.is_group and new_account.parent_account == old:
+	if old_account.is_group and old in get_ancestors_of("Account", new):
 		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
 
 	return new
+
+
+def validate_accounts_can_be_merged(old_account: Account, new_account: Account):
+	if get_merge_properties(new_account) != get_merge_properties(old_account):
+		throw(
+			msg=_(
+				"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company, Account Currency and, for ledger accounts, Account Type"
+			),
+			title=("Invalid Accounts"),
+			exc=InvalidAccountMergeError,
+		)
+
+
+def validate_balance_after_merge(old_account: Account, new_account: Account):
+	if not new_account.balance_must_be:
+		return
+
+	balance = get_balance_after_merge(old_account.name, new_account.name)
+	if (balance > 0 and new_account.balance_must_be == "Credit") or (
+		balance < 0 and new_account.balance_must_be == "Debit"
+	):
+		throw(
+			_(
+				"Cannot merge into {0}. Its balance after the merge would be in {1}, but its Balance must be is {2}."
+			).format(
+				frappe.bold(new_account.name),
+				_("Debit") if balance > 0 else _("Credit"),
+				_(new_account.balance_must_be),
+			),
+			title=_("Invalid Accounts"),
+			exc=InvalidAccountMergeError,
+		)
+
+
+def get_balance_after_merge(old: str, new: str) -> float:
+	from erpnext.accounts.utils import get_balance_on
+
+	old_lft, old_rgt = frappe.db.get_value("Account", old, ["lft", "rgt"])
+	new_lft, new_rgt = frappe.db.get_value("Account", new, ["lft", "rgt"])
+	if old_lft <= new_lft and new_rgt <= old_rgt:
+		return get_balance_on(old)
+	if new_lft <= old_lft and old_rgt <= new_rgt:
+		return get_balance_on(new)
+	return get_balance_on(old) + get_balance_on(new)
+
+
+def get_merge_properties(account: Account) -> tuple:
+	return (
+		cint(account.is_group),
+		account.root_type,
+		account.company,
+		cstr(account.account_currency),
+		"" if cint(account.is_group) else cstr(account.account_type),
+	)
 
 
 @frappe.whitelist()
@@ -672,7 +760,7 @@ def sync_update_account_number_in_child(
 		filters["account_number"] = old_acc_number
 
 	for d in frappe.db.get_values("Account", filters=filters, fieldname=["company", "name"], as_dict=True):
-		update_account_number(d["name"], account_name, account_number, from_descendant=True)
+		update_child_company_account_number(d["name"], account_name, account_number)
 
 
 def _ensure_idle_system():

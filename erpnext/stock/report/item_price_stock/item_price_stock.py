@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import today
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
 	frappe.has_permission("Item Price", "read", throw=True)
@@ -137,6 +139,9 @@ def get_item_price_qty_data(filters):
 
 	if filters.get("item_code"):
 		query = query.where(item_price.item_code == filters.get("item_code"))
+
+	if condition := get_allowed_masters_condition(item_price.item_code, "Item"):
+		query = query.where(condition)
 
 	item_results = query.run(as_dict=True)
 

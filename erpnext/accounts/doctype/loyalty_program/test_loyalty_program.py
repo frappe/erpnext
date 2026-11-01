@@ -1,9 +1,9 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
+from unittest.mock import patch
 
 import frappe
-from frappe.utils import cint, flt, getdate, today
+from frappe.utils import add_days, cint, flt, getdate, today
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_details,
@@ -195,7 +195,7 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		for d in company_wise_info:
 			self.assertTrue(d.get("loyalty_points"))
 
-	@unittest.mock.patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_details")
+	@patch("erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_details")
 	def test_tier_selection(self, mock_get_loyalty_details):
 		# Create a new loyalty program with multiple tiers
 		loyalty_program = frappe.get_doc(
@@ -258,6 +258,32 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 
 		# Clean up
 		loyalty_program.delete()
+
+	def test_points_never_expire_when_expiry_duration_is_zero(self):
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
+		frappe.db.set_value(
+			"Loyalty Program",
+			"Test Single Loyalty",
+			{"expiry_duration": 0, "from_date": add_days(today(), -30)},
+		)
+		before = get_loyalty_program_details_with_points(
+			"Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty"
+		)
+
+		si = create_sales_invoice_record()
+		si.set_posting_time = 1
+		si.posting_date = add_days(today(), -1)
+		si.insert()
+		si.submit()
+
+		after = get_loyalty_program_details_with_points(
+			"Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty"
+		)
+		self.assertEqual(after.loyalty_points, before.loyalty_points + 10)
+		self.assertEqual(
+			getdate(frappe.db.get_value("Loyalty Point Entry", {"invoice": si.name}, "expiry_date")),
+			getdate("9999-12-31"),
+		)
 
 
 def get_points_earned(self):

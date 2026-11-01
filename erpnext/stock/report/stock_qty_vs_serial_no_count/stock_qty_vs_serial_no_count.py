@@ -9,6 +9,7 @@ from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cstr, flt
 from pypika import analytics as an
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.serial_batch_bundle import get_serial_no_status
 
 
@@ -61,9 +62,14 @@ def get_data(warehouse, show_disabled_items):
 	filters = {"has_serial_no": True}
 	if not show_disabled_items:
 		filters["disabled"] = False
+
+	item_filters = [filters]
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		item_filters.append(condition)
+
 	serial_item_list = frappe.get_all(
 		"Item",
-		filters=filters,
+		filters=item_filters,
 		fields=["item_code", "item_name"],
 	)
 

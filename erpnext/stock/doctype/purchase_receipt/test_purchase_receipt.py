@@ -14,8 +14,9 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
+from erpnext.controllers.sales_and_purchase_return import StockOverReturnError
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item, make_uom_conversion_factor
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -28,6 +29,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1006,6 +1008,65 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr_direct.cancel()
 		pi.reload()
 		pi.cancel()
+		po.reload()
+		po.cancel()
+
+	def test_pr_billing_status_with_mixed_direct_and_po_invoice(self):
+		"""A receipt with partial direct billing consumes PO-invoiced amount through
+		the amount-capped branch. The consumed qty must shrink along with the amount,
+		otherwise the next receipt divides by a stale qty and is under-billed.
+
+		Flow:
+		1. PO (Qty: 10, Rate: 500) -> PI for Qty 5 (Amount 2500)
+		2. PO -> PR1 (Qty 3), then a direct PI for 500 against PR1
+		3. PO -> PR2 (Qty 3) -> reallocation must leave both receipts fully billed
+		"""
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as make_purchase_invoice_from_po,
+		)
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		# Qty: 10, Rate: 500
+		po = create_purchase_order()
+
+		pi = make_purchase_invoice_from_po(po.name)
+		pi.get("items")[0].qty = 5
+		pi.submit()
+
+		pr1 = make_purchase_receipt(po.name)
+		pr1.get("items")[0].received_qty = 3
+		pr1.get("items")[0].qty = 3
+		pr1.submit()
+
+		direct_pi = make_purchase_invoice(pr1.name)
+		direct_pi.get("items")[0].qty = 1
+		direct_pi.submit()
+
+		pr2 = make_purchase_receipt(po.name)
+		pr2.get("items")[0].received_qty = 3
+		pr2.get("items")[0].qty = 3
+		pr2.submit()
+
+		# PR1: 500 direct + 1000 from the PO invoice (2 qty worth) -> fully billed.
+		pr1.load_from_db()
+		self.assertEqual(pr1.get("items")[0].billed_amt, 1500)
+		self.assertEqual(pr1.per_billed, 100)
+		self.assertEqual(pr1.status, "Completed")
+
+		# PR2 gets the remaining 1500 (3 qty worth), not 1500 * 3/5 = 900.
+		pr2.load_from_db()
+		self.assertEqual(pr2.get("items")[0].billed_amt, 1500)
+		self.assertEqual(pr2.per_billed, 100)
+		self.assertEqual(pr2.status, "Completed")
+
+		pr2.cancel()
+		direct_pi.reload()
+		direct_pi.cancel()
+		pi.reload()
+		pi.cancel()
+		pr1.reload()
+		pr1.cancel()
 		po.reload()
 		po.cancel()
 
@@ -4901,6 +4962,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(pr.items[0].conversion_factor, 1.0)
 
+	def test_conversion_factor_via_shared_target_uom(self):
+		transaction_uom = "_Test 3 Kg Bag"
+		stock_uom = "_Test 25 Kg Bag"
+		make_uom_conversion_factor(transaction_uom, "Kg", 3)
+		make_uom_conversion_factor(stock_uom, "Kg", 25)
+		item = make_item("Test Item for Shared Target UOM", {"stock_uom": stock_uom})
+
+		conversion_factor = get_conversion_factor(item.name, transaction_uom).get("conversion_factor")
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=10,
+			uom=transaction_uom,
+			stock_uom=stock_uom,
+			conversion_factor=conversion_factor,
+		)
+
+		self.assertEqual(conversion_factor, 0.12)
+		self.assertEqual(pr.items[0].stock_qty, 1.2)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_type": pr.doctype, "voucher_no": pr.name, "voucher_detail_no": pr.items[0].name},
+				"actual_qty",
+			),
+			1.2,
+		)
+
 	def test_purchase_receipt_return_valuation_without_use_serial_batch_field(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -5996,6 +6084,53 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertEqual(return_entry.items[0].qty, -2)
 		self.assertEqual(return_entry.items[0].rejected_qty, 0)  # 3-3=0
+
+	def test_rejected_warehouse_return_after_accepted_return(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		pr = make_purchase_receipt(
+			qty=5,
+			rejected_qty=5,
+			warehouse="_Test Warehouse - _TC",
+			rejected_warehouse="_Test Rejected Warehouse - _TC",
+		)
+
+		accepted_return = make_purchase_return(pr.name)
+		accepted_return.items[0].rejected_qty = 0
+		accepted_return.submit()
+
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.submit()
+
+		over_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		over_return.items[0].qty = -1
+		over_return.items[0].received_qty = -1
+		self.assertRaises(StockOverReturnError, over_return.save)
+
+	def test_accepted_return_after_rejected_warehouse_return(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		pr = make_purchase_receipt(
+			qty=5,
+			rejected_qty=5,
+			warehouse="_Test Warehouse - _TC",
+			rejected_warehouse="_Test Rejected Warehouse - _TC",
+		)
+
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.submit()
+
+		accepted_return = make_purchase_return(pr.name)
+		accepted_return.items[0].qty = -5
+		accepted_return.items[0].rejected_qty = 0
+		accepted_return.items[0].received_qty = -5
+		accepted_return.submit()
 
 	def test_do_not_use_batchwise_valuation_with_fifo(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
