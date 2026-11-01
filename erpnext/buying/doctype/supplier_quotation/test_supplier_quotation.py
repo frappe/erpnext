@@ -345,10 +345,10 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			)
 			update_child_qty_rate("Supplier Quotation", trans_items, supplier_quotation.name)
 
-		update_qty(5)
+		update_qty(6)
 		supplier_quotation.reload()
 		self.assertEqual(supplier_quotation.items[0].conversion_factor, 2)
-		self.assertEqual(supplier_quotation.items[0].stock_qty, 10)
+		self.assertEqual(supplier_quotation.items[0].stock_qty, 12)
 
 		self.assertRaisesRegex(
 			frappe.ValidationError,
