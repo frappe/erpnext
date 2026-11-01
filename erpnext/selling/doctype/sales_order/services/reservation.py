@@ -114,10 +114,16 @@ class SalesOrderStockReservation:
 			if not frappe.db.exists("Sales Order Item", item.get("sales_order_item"))
 		]
 
+		packed_item_warehouses = {d.name: d.warehouse for d in self.doc.packed_items}
 		for item in packed_items:
 			items_details.remove(item)
 			item["qty"] = item.pop("qty_to_reserve")
 			item["from_voucher_type"] = from_voucher_type
+			if not from_voucher_type:
+				# a manual reservation of a component is made in its packed row's warehouse
+				item["warehouse"] = packed_item_warehouses.get(
+					item.get("sales_order_item"), item.get("warehouse")
+				)
 
 			picked_bundle = item.pop("serial_and_batch_bundle", None)
 			if picked_bundle:
