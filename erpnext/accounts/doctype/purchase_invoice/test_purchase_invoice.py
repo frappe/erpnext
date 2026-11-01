@@ -419,6 +419,14 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(on_hold, 0)
 		self.assertIsNone(saved_release_date)
 
+	def test_purchase_invoice_hold_comment_markup_is_sanitized(self):
+		pi = make_purchase_invoice()
+		pi.block_invoice(hold_comment='Waiting <img src="x" onerror="alert(1)">')
+
+		hold_comment = frappe.db.get_value("Purchase Invoice", pi.name, "hold_comment")
+		self.assertTrue(hold_comment.startswith("Waiting"))
+		self.assertNotIn("onerror", hold_comment)
+
 	def test_purchase_invoice_cannot_be_held_before_submission(self):
 		pi = make_purchase_invoice(do_not_save=True)
 		pi.on_hold = 1

@@ -9,7 +9,7 @@ from functools import cached_property
 import frappe
 from frappe import _
 from frappe.model.workflow import get_workflow_name
-from frappe.utils import flt, get_link_to_form, getdate
+from frappe.utils import flt, get_link_to_form, getdate, sanitize_html
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.buying.utils import update_last_purchase_rate
@@ -125,7 +125,7 @@ class ChildItemUpdater:
 						child_item.fg_item = d["fg_item"]
 
 				child_item.qty = flt(d.get("qty"))
-				child_item.description = d.get("description")
+				child_item.description = sanitize_html(d.get("description"), linkify=True)
 				update_child_item_rate_and_discount(
 					self.parent_doctype, child_item, d, self.allow_zero_qty, rate_unchanged=rate_unchanged
 				)
