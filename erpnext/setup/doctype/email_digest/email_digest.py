@@ -8,7 +8,6 @@ import frappe
 import frappe.desk.notifications
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.core.doctype.user.user import STANDARD_USERS
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, IfNull, Sum
 from frappe.utils import (
@@ -24,7 +23,7 @@ from frappe.utils import (
 	today,
 )
 
-from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
+from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year, get_fiscal_years
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -84,34 +83,44 @@ class EmailDigest(Document):
 		self._accounts = {}
 		self.currency = frappe.db.get_value("Company", self.company, "default_currency")
 
-	@frappe.whitelist()
-	def get_users(self):
-		"""get list of users"""
-		user_list = frappe.get_all(
-			"User",
-			filters={"name": ["not in", STANDARD_USERS], "user_type": ["!=", "Website User"]},
-			fields=["name", "enabled"],
-			order_by="enabled desc, name asc",
+	def validate(self):
+		valid_users = self.get_eligible_recipients()
+		for row in self.recipients:
+			if row.recipient not in valid_users:
+				frappe.throw(
+					_("Row {0}: Recipient {1} must be an enabled System User.").format(row.idx, row.recipient)
+				)
+
+	def get_eligible_recipients(self):
+		recipients = [row.recipient for row in self.recipients if row.recipient]
+		if not recipients:
+			return set()
+		return set(
+			frappe.get_all(
+				"User",
+				filters={"name": ["in", recipients], "enabled": 1, "user_type": "System User"},
+				pluck="name",
+			)
 		)
-
-		if self.recipient_list:
-			recipient_list = self.recipient_list.split("\n")
-		else:
-			recipient_list = []
-		for p in user_list:
-			p["checked"] = p["name"] in recipient_list and 1 or 0
-
-		frappe.response["user_list"] = user_list
 
 	@frappe.whitelist()
 	def send(self):
-		# send email only to enabled users
-		valid_users = frappe.get_all("User", filters={"enabled": 1}, pluck="name")
+		valid_users = self.get_eligible_recipients()
 
 		if self.recipients:
 			for row in self.recipients:
-				msg_for_this_recipient = self.get_msg_html()
-				if msg_for_this_recipient and row.recipient in valid_users:
+				if row.recipient not in valid_users:
+					continue
+				original_session = frappe._dict(frappe.session)
+				original_form = frappe.local.form_dict
+				try:
+					frappe.set_user(row.recipient)
+					msg_for_this_recipient = self.get_msg_html()
+				finally:
+					frappe.set_user(original_session.user)
+					frappe.local.session.update(original_session)
+					frappe.local.form_dict = original_form
+				if msg_for_this_recipient:
 					frappe.sendmail(
 						recipients=row.recipient,
 						subject=_("{0} Digest").format(_(self.frequency)),
@@ -123,7 +132,14 @@ class EmailDigest(Document):
 
 	def get_msg_html(self):
 		"""Build email digest content"""
+		previous = frappe.flags.get("ignore_account_permission")
 		frappe.flags.ignore_account_permission = True
+		try:
+			return self._get_msg_html()
+		finally:
+			frappe.flags.ignore_account_permission = previous
+
+	def _get_msg_html(self):
 		from erpnext.setup.doctype.email_digest.quotes import get_random_quote
 
 		context = frappe._dict()
@@ -155,8 +171,6 @@ class EmailDigest(Document):
 
 		if not context:
 			return None
-
-		frappe.flags.ignore_account_permission = False
 
 		# style
 		return frappe.render_template(
@@ -265,13 +279,12 @@ class EmailDigest(Document):
 		if not user_id:
 			user_id = frappe.session.user
 
-		meta = frappe.get_meta("Issue")
-		role_permissions = frappe.permissions.get_role_permissions(meta, user_id)
-		if not role_permissions.get("read"):
+		if not frappe.has_permission("Issue", "read", user=user_id):
 			return None
 
-		issue_list = frappe.get_all(
+		issue_list = frappe.get_list(
 			"Issue",
+			user=user_id,
 			filters={"status": ["in", ["Replied", "Open"]]},
 			fields=["*"],
 			order_by="creation asc",
@@ -285,15 +298,23 @@ class EmailDigest(Document):
 
 	def get_issue_count(self):
 		"""Get count of Issue"""
-		return frappe.db.count("Issue", {"status": ["in", ["Open", "Replied"]]})
+		if not frappe.has_permission("Issue", "read"):
+			return 0
+		return frappe.get_list(
+			"Issue", filters={"status": ["in", ["Open", "Replied"]]}, fields=[{"COUNT": "*", "as": "count"}]
+		)[0].count
 
 	def get_project_list(self, user_id=None):
 		"""Get project list"""
 		if not user_id:
 			user_id = frappe.session.user
 
-		project_list = frappe.get_all(
+		if not frappe.has_permission("Project", "read", user=user_id):
+			return []
+
+		project_list = frappe.get_list(
 			"Project",
+			user=user_id,
 			filters={"status": "Open", "project_type": "External"},
 			fields=["*"],
 			order_by="creation asc",
@@ -301,13 +322,19 @@ class EmailDigest(Document):
 		)
 
 		for t in project_list:
-			t.link = get_url_to_form("Issue", t.name)
+			t.link = get_url_to_form("Project", t.name)
 
 		return project_list
 
 	def get_project_count(self):
 		"""Get count of Project"""
-		return frappe.db.count("Project", {"status": "Open", "project_type": "External"})
+		if not frappe.has_permission("Project", "read"):
+			return 0
+		return frappe.get_list(
+			"Project",
+			filters={"status": "Open", "project_type": "External"},
+			fields=[{"COUNT": "*", "as": "count"}],
+		)[0].count
 
 	def set_accounting_cards(self, context):
 		"""Create accounting cards if checked"""
@@ -415,11 +442,12 @@ class EmailDigest(Document):
 		"""Get income to date"""
 		balance = 0.0
 		count = 0
-		fy_start_date = get_fiscal_year(self.future_to_date)[1]
+		fiscal_year = get_digest_fiscal_year(self.future_to_date)
 
-		for account in self.get_root_type_accounts(root_type):
-			balance += get_balance_on(account, date=self.future_to_date, start_date=fy_start_date)
-			count += get_count_on(account, fieldname, date=self.future_to_date)
+		if fiscal_year:
+			for account in self.get_root_type_accounts(root_type):
+				balance += get_balance_on(account, date=self.future_to_date, start_date=fiscal_year[1])
+				count += get_count_on(account, fieldname, date=self.future_to_date)
 
 		if fieldname == "income":
 			filters = {"currency": self.currency}
@@ -492,11 +520,12 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(so)
 			.select(
-				IfNull(Sum(so.grand_total) - Sum(so.grand_total * so.per_billed / 100), 0),
+				IfNull(Sum(so.base_grand_total) - Sum(so.base_grand_total * so.per_billed / 100), 0),
 				Count("*"),
 			)
 			.where(
 				(so.transaction_date <= self.future_to_date)
+				& (so.docstatus == 1)
 				& (so.billing_status != "Fully Billed")
 				& (so.company == self.company)
 				& so.status.notin(["Closed", "Cancelled", "Completed"])
@@ -510,7 +539,8 @@ class EmailDigest(Document):
 			report_type="Report Builder",
 			doctype="Sales Order",
 			filters={
-				"status": [["!=", "Closed"], ["!=", "Cancelled"]],
+				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
+				"docstatus": 1,
 				"per_billed": [["<", 100]],
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
@@ -526,11 +556,12 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(so)
 			.select(
-				IfNull(Sum(so.grand_total) - Sum(so.grand_total * so.per_delivered / 100), 0),
+				IfNull(Sum(so.base_grand_total) - Sum(so.base_grand_total * so.per_delivered / 100), 0),
 				Count("*"),
 			)
 			.where(
 				(so.transaction_date <= self.future_to_date)
+				& (so.docstatus == 1)
 				& (so.delivery_status != "Fully Delivered")
 				& (so.company == self.company)
 				& so.status.notin(["Closed", "Cancelled", "Completed"])
@@ -546,6 +577,7 @@ class EmailDigest(Document):
 			filters={
 				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
 				"delivery_status": [["!=", "Fully Delivered"]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -560,11 +592,12 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(po)
 			.select(
-				IfNull(Sum(po.grand_total) - Sum(po.grand_total * po.per_received / 100), 0),
+				IfNull(Sum(po.base_grand_total) - Sum(po.base_grand_total * po.per_received / 100), 0),
 				Count("*"),
 			)
 			.where(
 				(po.transaction_date <= self.future_to_date)
+				& (po.docstatus == 1)
 				& (po.per_received < 100)
 				& (po.company == self.company)
 				& po.status.notin(["Closed", "Cancelled", "Completed"])
@@ -580,6 +613,7 @@ class EmailDigest(Document):
 			filters={
 				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
 				"per_received": [["<", 100]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -594,11 +628,12 @@ class EmailDigest(Document):
 		value, count = (
 			frappe.qb.from_(po)
 			.select(
-				IfNull(Sum(po.grand_total) - Sum(po.grand_total * po.per_billed / 100), 0),
+				IfNull(Sum(po.base_grand_total) - Sum(po.base_grand_total * po.per_billed / 100), 0),
 				Count("*"),
 			)
 			.where(
 				(po.transaction_date <= self.future_to_date)
+				& (po.docstatus == 1)
 				& (po.per_billed < 100)
 				& (po.company == self.company)
 				& po.status.notin(["Closed", "Cancelled", "Completed"])
@@ -613,7 +648,8 @@ class EmailDigest(Document):
 			doctype="Purchase Order",
 			filters={
 				"status": [["!=", "Closed"], ["!=", "Cancelled"], ["!=", "Completed"]],
-				"per_received": [["<", 100]],
+				"per_billed": [["<", 100]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -750,13 +786,14 @@ class EmailDigest(Document):
 		value, count, billed_value, delivered_value = (
 			frappe.qb.from_(doc)
 			.select(
-				IfNull(Sum(doc.grand_total), 0),
+				IfNull(Sum(doc.base_grand_total), 0),
 				Count("*"),
-				IfNull(Sum(doc.grand_total * doc.per_billed / 100), 0),
-				IfNull(Sum(doc.grand_total * doc[getfield] / 100), 0),
+				IfNull(Sum(doc.base_grand_total * doc.per_billed / 100), 0),
+				IfNull(Sum(doc.base_grand_total * doc[getfield] / 100), 0),
 			)
 			.where(
 				(doc.transaction_date <= self.future_to_date)
+				& (doc.docstatus == 1)
 				& doc.status.notin(["Closed", "Cancelled", "Completed"])
 				& (doc.company == self.company)
 			)
@@ -775,22 +812,25 @@ class EmailDigest(Document):
 		quotation = frappe.qb.DocType("Quotation")
 		value, count = (
 			frappe.qb.from_(quotation)
-			.select(IfNull(Sum(quotation.grand_total), 0), Count("*"))
+			.select(IfNull(Sum(quotation.base_grand_total), 0), Count("*"))
 			.where(
 				(quotation.transaction_date <= self.future_to_date)
+				& (quotation.docstatus == 1)
 				& (quotation.company == self.company)
-				& quotation.status.notin(["Ordered", "Cancelled", "Lost"])
+				& quotation.status.notin(["Ordered", "Cancelled", "Lost", "Expired"])
 			)
 			.run()
 		)[0]
 
 		last_value = (
 			frappe.qb.from_(quotation)
-			.select(IfNull(Sum(quotation.grand_total), 0))
+			.select(IfNull(Sum(quotation.base_grand_total), 0))
 			.where(
 				(quotation.transaction_date <= self.past_to_date)
+				& (quotation.docstatus == 1)
 				& (quotation.company == self.company)
 				& quotation.status.notin(["Ordered", "Cancelled", "Lost"])
+				& (quotation.valid_till.isnull() | (quotation.valid_till >= self.past_to_date))
 			)
 			.run()
 		)[0][0]
@@ -801,8 +841,8 @@ class EmailDigest(Document):
 			report_type="Report Builder",
 			doctype="Quotation",
 			filters={
-				"status": [["!=", "Ordered"], ["!=", "Cancelled"], ["!=", "Lost"]],
-				"per_received": [["<", 100]],
+				"status": [["!=", "Ordered"], ["!=", "Cancelled"], ["!=", "Lost"], ["!=", "Expired"]],
+				"docstatus": 1,
 				"transaction_date": [["<=", self.future_to_date]],
 				"company": self.company,
 			},
@@ -822,6 +862,7 @@ class EmailDigest(Document):
 
 		filters = {
 			date_field: [[">=", self.future_from_date], ["<=", self.future_to_date]],
+			"docstatus": 1,
 			"status": [["!=", "Cancelled"]],
 			"company": self.company,
 		}
@@ -845,10 +886,11 @@ class EmailDigest(Document):
 			doc_type,
 			filters={
 				date_field: ["between", (from_date, to_date)],
+				"docstatus": 1,
 				"status": ["not in", ("Cancelled")],
 				"company": self.company,
 			},
-			fields=[{"COUNT": "*", "as": "count"}, {"SUM": "grand_total", "as": "grand_total"}],
+			fields=[{"COUNT": "*", "as": "count"}, {"SUM": "base_grand_total", "as": "grand_total"}],
 		)
 
 	def get_from_to_date(self):
@@ -911,11 +953,14 @@ class EmailDigest(Document):
 			return fmt_money(value, currency=self.currency)
 
 	def get_purchase_orders_items_overdue_list(self):
+		if not frappe.has_permission("Purchase Order", "read"):
+			return frappe._dict()
+
 		po = frappe.qb.DocType("Purchase Order")
 		poi = frappe.qb.DocType("Purchase Order Item")
 
 		query = (
-			frappe.qb.from_(poi)
+			frappe.qb.get_query("Purchase Order", fields=["name"], ignore_permissions=False)
 			.select(
 				poi.parent,
 				poi.schedule_date,
@@ -926,7 +971,7 @@ class EmailDigest(Document):
 				poi.amount,
 				po.currency,
 			)
-			.inner_join(po)
+			.inner_join(poi)
 			.on(po.name == poi.parent)
 			.where(po.status != "Closed")
 			.where(poi.docstatus == 1)
@@ -955,9 +1000,14 @@ def send():
 	for ed in frappe.get_all(
 		"Email Digest", filters={"enabled": 1, "docstatus": ["<", 2]}, fields=["name"], as_list=True
 	):
-		ed_obj = frappe.get_doc("Email Digest", ed[0])
-		if now_date == ed_obj.get_next_sending():
-			ed_obj.send()
+		frappe.db.savepoint("email_digest")
+		try:
+			ed_obj = frappe.get_doc("Email Digest", ed[0])
+			if now_date == ed_obj.get_next_sending():
+				ed_obj.send()
+		except Exception:
+			frappe.db.rollback(save_point="email_digest")
+			frappe.log_error(title=f"Email Digest failed: {ed[0]}")
 
 
 @frappe.whitelist()
@@ -969,12 +1019,15 @@ def get_digest_msg(name: str):
 
 def get_incomes_expenses_for_period(account, from_date, to_date):
 	"""Get amounts for current and past periods"""
+	fiscal_year = get_digest_fiscal_year(to_date)
+	if not fiscal_year:
+		return 0.0
 
 	val = 0.0
 	balance_on_to_date = get_balance_on(account, date=to_date)
 	balance_before_from_date = get_balance_on(account, date=from_date - timedelta(days=1))
 
-	fy_start_date = get_fiscal_year(to_date)[1]
+	fy_start_date = fiscal_year[1]
 
 	if from_date == fy_start_date:
 		val = balance_on_to_date
@@ -988,11 +1041,14 @@ def get_incomes_expenses_for_period(account, from_date, to_date):
 
 
 def get_count_for_period(account, fieldname, from_date, to_date):
+	fiscal_year = get_digest_fiscal_year(to_date)
+	if not fiscal_year:
+		return 0.0
 	count = 0.0
 	count_on_to_date = get_count_on(account, fieldname, to_date)
 	count_before_from_date = get_count_on(account, fieldname, from_date - timedelta(days=1))
 
-	fy_start_date = get_fiscal_year(to_date)[1]
+	fy_start_date = fiscal_year[1]
 	if from_date == fy_start_date:
 		count = count_on_to_date
 	elif from_date > fy_start_date:
@@ -1002,6 +1058,17 @@ def get_count_for_period(account, fieldname, from_date, to_date):
 		count = count_on_to_date + (last_year_closing_count - count_before_from_date)
 
 	return count
+
+
+def get_digest_fiscal_year(date):
+	fiscal_year = get_fiscal_year(date, raise_on_missing=False)
+	if fiscal_year:
+		return fiscal_year
+
+	years = get_fiscal_years()
+	if years and date < min(year.year_start_date for year in years):
+		return None
+	return get_fiscal_year(date)
 
 
 def get_future_date_for_calendaer_event(frequency):
