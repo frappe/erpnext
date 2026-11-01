@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from "vue";
-import { Badge, Button, Dropdown, Select, TextInput } from "frappe-ui";
+import { Badge, Button, Dropdown, TextInput } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
-import LinkField from "../LinkField.vue";
+import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH } from "../../lib/machines";
 import { balancePercentage } from "../../lib/plant";
@@ -69,8 +69,8 @@ const add = () =>
 					class="size-4 rounded-full border border-outline-gray-3"
 					:class="SWATCH[MATERIAL_TONES[i % MATERIAL_TONES.length]]"
 				/>
-				<LinkField v-model="row.item_code" doctype="Item" :filters="{ is_stock_item: 1 }" />
-				<Select v-model="row.storage" :options="STORAGE_OPTIONS" size="sm" />
+				<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
+				<DeskControl v-model="row.storage" fieldtype="Select" :options="STORAGE_OPTIONS" />
 				<span
 					v-if="row.is_balance_item"
 					class="text-right text-sm tabular-nums text-ink-gray-6"
