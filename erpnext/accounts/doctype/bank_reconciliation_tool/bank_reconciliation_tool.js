@@ -173,11 +173,14 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 	},
 
 	render_chart(frm) {
-		frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager({
-			$reconciliation_tool_cards: frm.get_field("reconciliation_tool_cards").$wrapper,
-			bank_statement_closing_balance: frm.doc.bank_statement_closing_balance,
-			cleared_balance: frm.cleared_balance,
-			currency: frm.doc.account_currency,
+		// the bank account trigger can fire before refresh has loaded the bundle
+		frappe.require("bank-reconciliation-tool.bundle.js", () => {
+			frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager({
+				$reconciliation_tool_cards: frm.get_field("reconciliation_tool_cards").$wrapper,
+				bank_statement_closing_balance: frm.doc.bank_statement_closing_balance,
+				cleared_balance: frm.cleared_balance,
+				currency: frm.doc.account_currency,
+			});
 		});
 	},
 
