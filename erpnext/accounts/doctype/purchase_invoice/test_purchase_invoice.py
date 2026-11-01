@@ -3147,6 +3147,63 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		"Buying Settings",
 		{
 			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 0,
+		},
+	)
+	def test_debit_note_for_returned_unvalued_rejected_qty_clears_srbnb(self):
+		"""Debit notes for returned rejected material reverse its expense, so SRBNB nets to zero."""
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		srbnb, expense_account = frappe.get_cached_value(
+			"Company", company, ["stock_received_but_not_billed", "default_expense_account"]
+		)
+		rejected_warehouse = create_warehouse("_Test Unvalued Rejected Warehouse", company=company)
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		for make_return in (make_purchase_return_against_rejected_warehouse, make_purchase_return):
+			pr = make_purchase_receipt(
+				item_code=item,
+				company=company,
+				warehouse="Stores - TCP1",
+				rejected_warehouse=rejected_warehouse,
+				supplier_warehouse="Work In Progress - TCP1",
+				cost_center="Main - TCP1",
+				qty=8,
+				rejected_qty=2,
+				rate=100,
+			)
+			pi = create_purchase_invoice_from_receipt(pr.name)
+			pi.submit()
+			pr_return = make_return(pr.name)
+			pr_return.submit()
+			debit_note = create_purchase_invoice_from_receipt(pr_return.name)
+			debit_note.submit()
+
+			self.assertEqual(
+				frappe.db.get_value(
+					"GL Entry", {"voucher_no": debit_note.name, "account": expense_account}, "credit"
+				),
+				200,
+			)
+			vouchers = [pr.name, pi.name, pr_return.name, debit_note.name]
+			for account in (srbnb, expense_account):
+				balance = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_no": ("in", vouchers), "account": account, "is_cancelled": 0},
+					fields=[{"SUM": "debit"}, {"SUM": "credit"}],
+					as_list=True,
+				)[0]
+				self.assertEqual(flt(balance[0]) - flt(balance[1]), 0, (make_return.__name__, account))
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
 			"set_valuation_rate_for_rejected_materials": 1,
 		},
 	)
