@@ -81,6 +81,32 @@ class TestStockReservationEntry(FrappeTestCase):
 		self.assertEqual(sre.reserved_qty, 10)
 		self.assertEqual(sre.delivered_qty, 0)
 
+	@change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_delivery_note_picks_serial_nos_reserved_for_its_sales_order(self) -> None:
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SRDN-.#####"}
+		)
+		create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=5)
+
+		so = make_sales_order(item_code=item.name, warehouse=self.warehouse, qty=2, rate=100)
+		so.create_stock_reservation_entries()
+		sre = frappe.get_all("Stock Reservation Entry", {"voucher_no": so.name, "docstatus": 1}, pluck="name")
+		reserved = frappe.get_all("Serial and Batch Entry", {"parent": ["in", sre]}, pluck="serial_no")
+
+		# mapped without for_reserved_stock, as "Get Items From > Sales Order" does
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		delivered = frappe.get_all(
+			"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, pluck="serial_no"
+		)
+		self.assertEqual(sorted(delivered), sorted(reserved))
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre[0], "status"), "Delivered")
+
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
