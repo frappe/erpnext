@@ -889,7 +889,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual([t.outstanding for t in si.payment_schedule], [84.75, 15.25])
 		self.assertEqual([t.paid_amount for t in si.payment_schedule], [0, 0])
 
-	def test_cancelling_journal_then_discounted_term_payment_keeps_schedule_rows_valid(self):
+	def make_invoice_with_discounted_second_term(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
 
 		for term in ("_Test Term Without Discount", "_Test Term With Discount"):
@@ -926,6 +926,42 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		si.payment_terms_template = "_Test Template With Discount On Second Term"
 		si.set("payment_schedule", [])
 		si.save().submit()
+		return si
+
+	def test_unreconciling_discounted_payment_restores_payment_schedule(self):
+		si = self.make_invoice_with_discounted_second_term()
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assertEqual([t.discounted_amount for t in si.payment_schedule], [0, 20])
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		unreconcile.save().submit()
+
+		self.assert_schedule_matches_outstanding(si)
+		self.assert_schedule_rows_valid(si)
+		self.assertEqual(si.outstanding_amount, 200)
+		self.assertEqual([t.outstanding for t in si.payment_schedule], [100, 100])
+		self.assertEqual([t.paid_amount for t in si.payment_schedule], [0, 0])
+		self.assertEqual([t.discounted_amount for t in si.payment_schedule], [0, 0])
+
+		# the invoice can be paid in full again
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.save().submit()
+		self.assert_schedule_matches_outstanding(si)
+		self.assertEqual(si.outstanding_amount, 0)
+
+	def test_cancelling_journal_then_discounted_term_payment_keeps_schedule_rows_valid(self):
+		si = self.make_invoice_with_discounted_second_term()
 
 		je = self.create_journal_entry(self.bank, self.debit_to, 100)
 		je.accounts[1].party_type = "Customer"

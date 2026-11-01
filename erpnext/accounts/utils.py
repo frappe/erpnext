@@ -2282,30 +2282,32 @@ def sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc=None):
 	precision = ref_doc.precision("outstanding_amount")
 	amount = flt(sum(flt(term.outstanding) for term in ref_doc.payment_schedule) - outstanding, precision)
 	terms = sorted(ref_doc.payment_schedule, key=lambda t: (getdate(t.due_date), t.idx), reverse=amount < 0)
-	for term in terms:
-		if not amount:
-			break
+	# A reversal takes back paid amounts first. A cash discount stays with its payment, unless the
+	# outstanding still needs more, which means the discounted payment itself was reversed.
+	for field in ("paid_amount", "discounted_amount") if amount < 0 else ("paid_amount",):
+		for term in terms:
+			if not amount:
+				break
 
-		if amount > 0:
-			change = min(amount, flt(term.outstanding))
-		else:
-			# restore only what was paid; a cash discount stays with the payment that gave it
-			change = max(amount, -flt(term.paid_amount))
+			if amount > 0:
+				change = min(amount, flt(term.outstanding))
+			else:
+				change = max(amount, -flt(term.get(field)))
 
-		if not change:
-			continue
+			if not change:
+				continue
 
-		base_change = flt(change * rate, term.precision("base_outstanding"))
-		term.db_set(
-			{
+			base_change = flt(change * rate, term.precision("base_outstanding"))
+			values = {
 				"outstanding": flt(term.outstanding) - change,
-				"paid_amount": flt(term.paid_amount) + change,
+				field: flt(term.get(field)) + change,
 				"base_outstanding": flt(term.base_outstanding) - base_change,
-				"base_paid_amount": flt(term.base_paid_amount) + base_change,
-			},
-			update_modified=False,
-		)
-		amount = flt(amount - change, precision)
+			}
+			if field == "paid_amount":
+				values["base_paid_amount"] = flt(term.base_paid_amount) + base_change
+
+			term.db_set(values, update_modified=False)
+			amount = flt(amount - change, precision)
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):
