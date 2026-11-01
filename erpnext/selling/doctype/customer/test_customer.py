@@ -32,6 +32,18 @@ class TestCustomer(FrappeTestCase):
 		if frappe.db.exists("Customer", "_Test Customer"):
 			set_credit_limit("_Test Customer", "_Test Company", 0)
 
+	def test_buying_price_list_cannot_be_customer_default(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Buying Price Customer",
+				"customer_type": "Individual",
+				"default_price_list": "Standard Buying",
+			}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			customer.insert()
+
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"
@@ -42,8 +54,18 @@ class TestCustomer(FrappeTestCase):
 		test_account_details = {
 			"company": "_Test Company",
 			"account": "Debtors - _TC",
+			"advance_account": "Debtors - _TC",
 		}
+<<<<<<< HEAD
 		test_credit_limits = {"company": "_Test Company", "credit_limit": 350000}
+=======
+		test_credit_limits = {
+			"company": "_Test Company",
+			"credit_limit": 350000,
+			"overdue_billing_threshold": 5000,
+			"bypass_credit_limit_check": 1,
+		}
+>>>>>>> c39828f (fix(customer): preserve group account and credit limit flags on fetch)
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
 		doc.insert()
@@ -60,9 +82,15 @@ class TestCustomer(FrappeTestCase):
 
 		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
 		self.assertEqual(c_doc.accounts[0].account, "Debtors - _TC")
+		self.assertEqual(c_doc.accounts[0].advance_account, "Debtors - _TC")
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
+<<<<<<< HEAD
+=======
+		self.assertEqual(c_doc.credit_limits[0].overdue_billing_threshold, 5000)
+		self.assertEqual(c_doc.credit_limits[0].bypass_credit_limit_check, 1)
+>>>>>>> c39828f (fix(customer): preserve group account and credit limit flags on fetch)
 		c_doc.delete()
 		doc.delete()
 

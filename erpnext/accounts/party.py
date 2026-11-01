@@ -675,7 +675,7 @@ def validate_party_accounts(doc):
 		if account.advance_account:
 			validate_account_head(account.idx, account.advance_account, account.company)
 
-		validate_party_account_type(doc.doctype, account)
+		validate_party_account_type("Customer" if doc.doctype == "Customer Group" else doc.doctype, account)
 
 
 def validate_party_account_type(party_type, row):
