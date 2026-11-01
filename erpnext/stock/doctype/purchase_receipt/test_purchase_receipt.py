@@ -2133,6 +2133,55 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# Only the stock items' share (20) is capitalized; the service item's 10 is excluded
 		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 20.0, places=2)
 
+	def test_landed_cost_split_across_receipts_posts_rounded_amounts(self):
+		company = "_Test Company with perpetual inventory"
+		charge_accounts = ("Expenses Included In Valuation - TCP1", "_Test Account Shipping Charges - TCP1")
+		receipts = [
+			make_purchase_receipt(company=company, warehouse="Stores - TCP1", qty=qty, rate=rate)
+			for qty, rate in ((2, 7), (1, 16))
+		]
+
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = company
+		lcv.distribute_charges_based_on = "Amount"
+		for receipt in receipts:
+			lcv.append(
+				"purchase_receipts",
+				{
+					"receipt_document_type": receipt.doctype,
+					"receipt_document": receipt.name,
+					"supplier": receipt.supplier,
+					"posting_date": receipt.posting_date,
+					"grand_total": receipt.base_grand_total,
+				},
+			)
+		for account, amount in zip(charge_accounts, (60, 40), strict=True):
+			lcv.append("taxes", {"description": account, "expense_account": account, "amount": amount})
+		lcv.insert()
+		lcv.submit()
+
+		for receipt in receipts:
+			receipt.reload()
+			gl_entries = frappe.get_all(
+				"GL Entry",
+				filters={
+					"voucher_type": receipt.doctype,
+					"voucher_no": receipt.name,
+					"account": ["in", charge_accounts],
+					"is_cancelled": 0,
+				},
+				fields=["account", "credit", "credit_in_account_currency"],
+			)
+
+			self.assertEqual(len(gl_entries), 2)
+			for row in gl_entries:
+				self.assertEqual(row.credit, flt(row.credit, 2))
+				self.assertEqual(row.credit_in_account_currency, row.credit)
+			self.assertEqual(
+				flt(sum(row.credit for row in gl_entries), 2),
+				flt(sum(item.landed_cost_voucher_amount for item in receipt.items), 2),
+			)
+
 	def test_full_actual_charge_capitalized_on_stock_items_only(self):
 		"""When "Allocate Full Amount to Stock Items" is checked (the default), an actual
 		valuation charge such as Freight is fully capitalized onto stock/asset items only. For a
