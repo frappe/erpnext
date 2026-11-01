@@ -21,6 +21,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 	get_picked_serial_nos,
+	get_reserved_serial_nos_for_sre,
 )
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
@@ -570,6 +571,7 @@ class PickList(TransactionBase):
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
+		own_vouchers = self.get_own_vouchers()
 
 		# reset
 		reset_rows = []
@@ -592,9 +594,8 @@ class PickList(TransactionBase):
 				priority_warehouses.extend(get_descendants_of("Warehouse", source_warehouse))
 				from_warehouses = list(dict.fromkeys(priority_warehouses + from_warehouses))
 
-			self.item_location_map.setdefault(
-				item_code,
-				get_available_item_locations(
+			if item_code not in self.item_location_map:
+				self.item_location_map[item_code] = get_available_item_locations(
 					item_code,
 					from_warehouses,
 					self.item_count_map.get(item_code),
@@ -602,8 +603,8 @@ class PickList(TransactionBase):
 					picked_item_details=picked_items_details.get(item_code),
 					consider_rejected_warehouses=self.consider_rejected_warehouses,
 					priority_warehouses=priority_warehouses,
-				),
-			)
+					own_vouchers=own_vouchers,
+				)
 
 			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
@@ -747,6 +748,10 @@ class PickList(TransactionBase):
 				"picked_qty",
 				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
 			)
+
+	def get_own_vouchers(self):
+		"""Vouchers whose stock reservations this pick list may pick."""
+		return {row.sales_order for row in self.locations if row.sales_order}
 
 	def get_picked_items_details(self, items):
 		picked_items = frappe._dict()
@@ -1137,6 +1142,7 @@ def get_available_item_locations(
 	picked_item_details=None,
 	consider_rejected_warehouses=False,
 	priority_warehouses=None,
+	own_vouchers=None,
 ):
 	locations = []
 
@@ -1175,6 +1181,10 @@ def get_available_item_locations(
 
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+	# after picked serials are removed, so a reserved pick is not deducted twice
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
 
 	if locations:
 		locations = get_locations_based_on_required_qty(locations, required_qty, priority_warehouses)
@@ -1255,6 +1265,28 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			filterd_locations.append(row)
 
 	return filterd_locations
+
+
+def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=None):
+	own_reservations = frappe.get_all(
+		"Stock Reservation Entry",
+		filters={"item_code": item_code, "voucher_no": ["in", list(own_vouchers or [])], "docstatus": 1},
+		pluck="name",
+	)
+	reserved_serial_nos = set(
+		get_reserved_serial_nos_for_sre(
+			frappe._dict(item_code=item_code, ignore_voucher_nos=own_reservations)
+		)
+	)
+	if not reserved_serial_nos:
+		return locations
+
+	for location in locations:
+		serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty -= len(location.serial_nos) - len(serial_nos)
+		location.serial_nos = serial_nos
+
+	return [location for location in locations if location.qty > 0]
 
 
 def get_available_item_locations_for_serial_and_batched_item(
