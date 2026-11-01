@@ -858,11 +858,18 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
 		return billed_qty + flt(mapped_qty_by_item.get(po_item.name, 0))
 
+	def is_qty_billed_below_amount(po_item):
+		return (
+			po_item.name not in mapped_qty_by_item
+			and po_item.qty <= get_billed_and_mapped_qty(po_item)
+			and abs(flt(po_item.billed_amt)) < abs(flt(po_item.amount))
+		)
+
 	def update_item(obj, target, source_parent):
 		target.qty = (
 			0
 			if is_unit_price_row(obj, has_unit_price_items)
-			else flt(obj.qty) - get_billed_and_mapped_qty(obj)
+			else max(flt(obj.qty) - get_billed_and_mapped_qty(obj), 0)
 		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
@@ -904,7 +911,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"condition": lambda doc: (
 				doc.name not in mapped_qty_by_item
 				if is_unit_price_row(doc, has_unit_price_items)
-				else doc.qty > get_billed_and_mapped_qty(doc)
+				else doc.qty > get_billed_and_mapped_qty(doc) or is_qty_billed_below_amount(doc)
 			)
 			and select_item(doc),
 		},
