@@ -485,10 +485,17 @@ class BOM(WebsiteGenerator):
 				own_cost += flt(item.cost)
 			total_secondary_items_per += flt(item.cost_allocation_per)
 
+<<<<<<< HEAD
 		if self.cost_allocation_per == 100 and total_secondary_items_per:
 			self.cost_allocation_per -= total_secondary_items_per
+=======
+		self.cost_allocation_per = flt(100 - total_secondary_items_per, self.precision("cost_allocation_per"))
+>>>>>>> b72e833 (fix(manufacturing): round bom finished good cost allocation to field precision)
 
-		self.cost_allocation = (self.raw_material_cost - own_cost) * (self.cost_allocation_per / 100)
+		self.cost_allocation = flt(
+			(self.raw_material_cost - own_cost) * self.cost_allocation_per / 100,
+			self.precision("cost_allocation"),
+		)
 
 	def validate_secondary_items_cost(self):
 		if flt(self.secondary_items_cost) > flt(self.raw_material_cost):
@@ -503,7 +510,7 @@ class BOM(WebsiteGenerator):
 		for item in self.secondary_items:
 			total_cost_allocation_per += flt(item.cost_allocation_per)
 
-		if total_cost_allocation_per != 100:
+		if flt(total_cost_allocation_per, self.precision("cost_allocation_per")) != 100:
 			frappe.throw(_("Cost allocation between finished goods and secondary items should equal 100%"))
 
 	def on_update_after_submit(self):
