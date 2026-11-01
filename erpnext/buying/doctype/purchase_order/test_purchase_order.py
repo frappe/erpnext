@@ -2136,6 +2136,44 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.per_billed, 100)
 		self.assertFalse(make_pi_from_po(po.name).items)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_portal_purchase_invoice_skips_zero_qty_rows(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice_from_portal
+
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 1000,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.items = pi.items[:1]
+		pi.items[0].rate = 400
+		pi.submit()
+
+		user = create_user("portal_pi_supplier@example.com", "Accounts User").name
+		supplier = frappe.get_doc("Supplier", po.supplier)
+		supplier.append("portal_users", {"user": user})
+		supplier.save()
+
+		with self.set_user(user):
+			make_purchase_invoice_from_portal(po.name)
+
+		self.assertEqual(
+			frappe.get_all(
+				"Purchase Invoice Item", {"purchase_order": po.name, "docstatus": 0}, pluck="po_detail"
+			),
+			[po.items[1].name],
+		)
+
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
