@@ -1809,26 +1809,45 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi.items = pi.items[:1]
 		pi.items[0].rate = 90
 		pi.submit()
-		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
+		self.assertEqual(
+			[(row.po_detail, row.qty) for row in make_pi_from_po(po.name).items],
+			[(po.items[0].name, 0), (po.items[1].name, 10)],
+		)
 
 	@change_settings("Buying Settings", {"maintain_same_rate": 0})
 	def test_full_qty_billed_below_amount_is_mapped_with_zero_qty(self):
-		po = create_purchase_order(qty=1, rate=1000)
+		# The second row keeps the mapped invoice non-empty once the first row is fully billed.
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 1000,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
 		pi = make_pi_from_po(po.name)
+		pi.items = pi.items[:1]
 		pi.items[0].rate = 400
 		pi.submit()
 
 		pi = make_pi_from_po(po.name)
-		self.assertEqual([row.qty for row in pi.items], [0])
-		self.assertEqual(len(make_pi_from_po(po.name, target_doc=pi).items), 1)
+		self.assertEqual(
+			[(row.po_detail, row.qty) for row in pi.items], [(po.items[0].name, 0), (po.items[1].name, 1)]
+		)
+		self.assertEqual(len(make_pi_from_po(po.name, target_doc=pi).items), 2)
 
+		pi.items = pi.items[:1]
 		pi.items[0].qty = 1
 		pi.items[0].rate = 600
 		pi.submit()
 
 		po.reload()
-		self.assertEqual(po.per_billed, 100)
-		self.assertFalse(make_pi_from_po(po.name).items)
+		self.assertEqual(po.items[0].billed_amt, po.items[0].amount)
+		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
 
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
