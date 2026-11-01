@@ -49,12 +49,12 @@ class AuthorizationRule(Document):
 	# end: auto-generated types
 
 	def check_duplicate_entry(self):
-<<<<<<< HEAD
 		exists = frappe.db.sql(
 			"""select name, docstatus from `tabAuthorization Rule`
-			where transaction = %s and based_on = %s and system_user = %s
-			and system_role = %s and approving_user = %s and approving_role = %s
-			and to_emp =%s and to_designation=%s and name != %s""",
+			where transaction = %s and based_on = %s and coalesce(system_user, '') = %s
+			and coalesce(system_role, '') = %s and coalesce(approving_user, '') = %s and coalesce(approving_role, '') = %s
+			and coalesce(to_emp, '') = %s and coalesce(to_designation, '') = %s and coalesce(master_name, '') = %s
+			and coalesce(company, '') = %s and value = %s and name != %s""",
 			(
 				self.transaction,
 				self.based_on,
@@ -64,27 +64,11 @@ class AuthorizationRule(Document):
 				cstr(self.approving_role),
 				cstr(self.to_emp),
 				cstr(self.to_designation),
+				cstr(self.master_name),
+				cstr(self.company),
+				self.value or 0,
 				self.name,
 			),
-=======
-		exists = frappe.get_all(
-			"Authorization Rule",
-			filters={
-				"transaction": self.transaction,
-				"based_on": self.based_on,
-				"system_user": cstr(self.system_user),
-				"system_role": cstr(self.system_role),
-				"approving_user": cstr(self.approving_user),
-				"approving_role": cstr(self.approving_role),
-				"to_emp": cstr(self.to_emp),
-				"to_designation": cstr(self.to_designation),
-				"master_name": cstr(self.master_name),
-				"company": cstr(self.company),
-				"value": self.value or 0,
-				"name": ["!=", self.name],
-			},
-			pluck="name",
->>>>>>> 9acccfd (fix(setup): distinguish authorization rules by scope and limit)
 		)
 		auth_exists = exists and exists[0][0] or ""
 		if auth_exists:
