@@ -2279,11 +2279,20 @@ def get_operations(doctype: str, txt: str, searchfield: str, start: int, page_le
 @frappe.whitelist()
 def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	shortages = get_shortages_to_request(source_name)
+	pending = get_pending_qty_to_request(source_name)
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 
 	def update_item(obj, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
 		if shortages is not None:
 			target.qty = shortages[obj.name]
+		if pending[obj.name] > 0:
+			target.qty = min(flt(target.qty), pending[obj.name])
+
+	def can_request(row):
+		if shortages is not None and row.name not in shortages:
+			return False
+		return allow_excess_transfer or pending[row.name] > 0
 
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Transfer"
@@ -2302,7 +2311,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 				"doctype": "Material Request Item",
 				"field_map": {"required_qty": "qty", "uom": "stock_uom", "name": "job_card_item"},
 				"postprocess": update_item,
-				"condition": lambda row: shortages is None or row.name in shortages,
+				"condition": can_request,
 			},
 		},
 		target_doc,
@@ -2310,6 +2319,16 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 	)
 
 	return doclist
+
+
+def get_pending_qty_to_request(job_card):
+	"""Qty per item still open to request."""
+	doc = frappe.get_doc("Job Card", job_card)
+	requested = doc.get_requested_qty_by_item()
+	return {
+		item.name: flt(flt(item.required_qty) - flt(requested.get(item.name)), item.precision("required_qty"))
+		for item in doc.items
+	}
 
 
 def get_shortages_to_request(job_card):
