@@ -17,7 +17,6 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1222,7 +1221,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		},
 	)
 	def test_stock_updating_invoice_delivers_the_reserved_serial(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		make_stock_entry(
@@ -1242,10 +1241,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		sales_invoice.insert()
 		sales_invoice.submit()
 
-		self.assertEqual(
-			sales_invoice.items[0].serial_no,
-			SerialBatchIdentity("Serial No").get_numbers(item_code, [sre.sb_entries[0].serial_no])[0],
-		)
+		self.assertEqual(sales_invoice.items[0].serial_no, sre.sb_entries[0].serial_no)
 		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", sre.name, "status"), "Delivered")
 
 	@ERPNextTestSuite.change_settings(
@@ -1258,7 +1254,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		},
 	)
 	def test_stock_updating_invoice_bundle_picks_the_reserved_serial(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		make_stock_entry(
