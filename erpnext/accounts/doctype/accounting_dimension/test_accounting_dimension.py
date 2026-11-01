@@ -1,10 +1,14 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.tests.permission_test_utils import as_user, make_company_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -34,6 +38,44 @@ class TestAccountingDimension(ERPNextTestSuite):
 		gle = frappe.get_doc("GL Entry", {"voucher_no": si.name, "account": "Sales - _TC"})
 
 		self.assertEqual(gle.get("department"), "_Test Department - _TC")
+
+	def test_fieldname_cannot_change_after_creation(self):
+		dimension = frappe.get_doc("Accounting Dimension", "Department")
+		dimension.fieldname = "department_renamed"
+
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change the fieldname", dimension.save)
+
+	def test_get_dimensions_returns_defaults_of_permitted_companies(self):
+		dimension = frappe.get_doc("Accounting Dimension", "Department")
+		dimension.append(
+			"dimension_defaults",
+			{"company": "_Test Company 1", "reference_document": "Department", "default_dimension": None},
+		)
+		dimension.save()
+
+		self.assertIn("_Test Company 1", get_dimensions()[1])
+
+		user = make_company_fenced_user("dimension-reader@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			default_dimensions = get_dimensions()[1]
+
+		self.assertIn("_Test Company", default_dimensions)
+		self.assertNotIn("_Test Company 1", default_dimensions)
+
+	def test_get_dimensions_reads_permitted_companies_once_per_request(self):
+		frappe.local.request_cache.clear()
+		with patch("frappe.get_list", wraps=frappe.get_list) as get_list:
+			get_dimensions()
+			get_dimensions()
+
+		self.assertEqual(get_list.call_count, 1)
+
+	def test_get_dimensions_skips_defaults_of_disabled_dimension(self):
+		self.assertIn("location", get_dimensions()[1]["_Test Company"])
+
+		frappe.db.set_value("Accounting Dimension", "Location", "disabled", 1)
+
+		self.assertNotIn("location", get_dimensions()[1]["_Test Company"])
 
 	def test_dimension_against_journal_entry(self):
 		je = make_journal_entry("Sales - _TC", "Sales Expenses - _TC", 500, save=False)

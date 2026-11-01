@@ -11,6 +11,7 @@ from frappe.database.schema import validate_column_name
 from frappe.model import core_doctypes_list
 from frappe.model.document import Document
 from frappe.utils import cstr
+from frappe.utils.caching import request_cache
 
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	get_allowed_types_from_settings,
@@ -76,6 +77,7 @@ class AccountingDimension(Document):
 
 		if not self.is_new():
 			self.validate_document_type_change()
+			self.validate_fieldname_change()
 
 	def validate_document_type_change(self):
 		doctype_before_save = frappe.db.get_value("Accounting Dimension", self.name, "document_type")
@@ -83,6 +85,17 @@ class AccountingDimension(Document):
 			message = _("Cannot change Reference Document Type.")
 			message += _("Please create a new Accounting Dimension if required.")
 			frappe.throw(message)
+
+	def validate_fieldname_change(self):
+		# custom fields, GL values and dimension filters all use the fieldname given at creation
+		fieldname_before_save = frappe.db.get_value("Accounting Dimension", self.name, "fieldname")
+		if fieldname_before_save != self.fieldname:
+			frappe.throw(
+				_("Cannot change the fieldname of an Accounting Dimension from {0} to {1}.").format(
+					frappe.bold(fieldname_before_save), frappe.bold(self.fieldname)
+				),
+				title=_("Fieldname Cannot Change"),
+			)
 
 	def validate_fieldname_conflict(self):
 		conflicting_doctypes = []
@@ -309,6 +322,12 @@ def get_dimension_with_children(doctype, dimensions):
 	return all_dimensions
 
 
+@request_cache
+def get_permitted_companies(user: str) -> list[str]:
+	# get_dimensions runs per ledger row; `user` keys the cache, get_list checks the session user
+	return frappe.get_list("Company", pluck="name")
+
+
 @frappe.whitelist()
 def get_dimensions(with_cost_center_and_project: str | bool = False):
 	c = frappe.qb.DocType("Accounting Dimension Detail")
@@ -321,6 +340,8 @@ def get_dimensions(with_cost_center_and_project: str | bool = False):
 		.inner_join(p)
 		.on(c.parent == p.name)
 		.select(p.fieldname, c.company, c.default_dimension)
+		.where(p.disabled == 0)
+		.where(c.company.isin(get_permitted_companies(frappe.session.user) or [""]))
 		.run(as_dict=1)
 	)
 

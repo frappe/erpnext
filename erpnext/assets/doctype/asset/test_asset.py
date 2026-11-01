@@ -1943,6 +1943,21 @@ class TestDepreciationBasics(AssetSetup):
 		departments = frappe.get_all("Journal Entry Account", {"parent": journal_entry}, pluck="department")
 		self.assertNotIn(other_company_department, departments)
 
+	def test_asset_sale_invoice_gets_default_dimension(self):
+		dimension = frappe.get_doc("Accounting Dimension", "Department")
+		row = next(d for d in dimension.dimension_defaults if d.company == "_Test Company")
+		row.update({"reference_document": "Department", "default_dimension": "_Test Department - _TC"})
+		dimension.save()
+
+		asset = create_asset(item_code="Macbook Pro", submit=1)
+		self.assertFalse(asset.get("department"))
+
+		si = make_sales_invoice(
+			asset=asset.name, item_code="Macbook Pro", company="_Test Company", sell_qty=asset.asset_quantity
+		)
+
+		self.assertEqual(si.department, "_Test Department - _TC")
+
 	def test_post_depreciation_entries(self):
 		"""Tests if post_depreciation_entries() works as expected."""
 
