@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters: dict | None = None):
 	report = ReportData(filters)
@@ -344,6 +346,10 @@ class ReportData:
 				query = query.where(doctype.item_code == self.filters.item_code)
 			else:
 				query = query.where(doctype.item == self.filters.item_code)
+
+		item_field = doctype.item_code if self.doctype_name == "Serial No" else doctype.item
+		if condition := get_allowed_masters_condition(item_field, "Item"):
+			query = query.where(condition)
 
 		return query.run(as_dict=True)
 

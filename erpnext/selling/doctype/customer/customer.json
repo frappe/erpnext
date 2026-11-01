@@ -66,11 +66,18 @@
   "tax_withholding_group",
   "tax_withholding_category",
   "settings_tab",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
+  "section_break_ario",
   "so_required",
   "dn_required",
   "column_break_53",
   "disabled",
   "is_frozen",
+  "block_customer_section",
+  "on_hold",
+  "release_date",
   "sales_team_tab",
   "account_manager",
   "sales_team",
@@ -432,6 +439,26 @@
    "show_description_on_click": 1
   },
   {
+   "fieldname": "block_customer_section",
+   "fieldtype": "Section Break",
+   "label": "Block Customer"
+  },
+  {
+   "default": "0",
+   "description": "Blocks saving or submitting Sales Orders, Delivery Notes, Sales Invoices and POS Invoices for this customer.",
+   "fieldname": "on_hold",
+   "fieldtype": "Check",
+   "label": "Block Customer",
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "eval:doc.on_hold",
+   "description": "Leave blank if the Customer is blocked indefinitely",
+   "fieldname": "release_date",
+   "fieldtype": "Date",
+   "label": "Release Date"
+  },
+  {
    "description": "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists.",
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
@@ -533,6 +560,29 @@
    "fieldname": "settings_tab",
    "fieldtype": "Tab Break",
    "label": "Settings"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:doc.restrict_to_companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
@@ -697,6 +747,10 @@
   {
    "fieldname": "credit_limit_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ario",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "user-round",
@@ -710,7 +764,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -726,11 +780,6 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales User"
   },
   {
    "email": 1,

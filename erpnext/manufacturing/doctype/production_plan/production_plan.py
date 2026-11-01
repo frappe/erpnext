@@ -1220,7 +1220,7 @@ class ProductionPlan(Document):
 			if frappe.db.get_value("BOM", row.bom_no, "track_semi_finished_goods"):
 				frappe.msgprint(
 					_(
-						"Row #{0}: Since 'Produce an Item at Each Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+						"Row #{0}: Since 'Produce Item per Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
 					).format(row.idx, row.bom_no)
 				)
 				continue
@@ -1230,7 +1230,6 @@ class ProductionPlan(Document):
 			track_semi_finished_goods = False
 
 			get_sub_assembly_items(
-				[item.production_item for item in sub_assembly_items_store],
 				bin_details,
 				row.bom_no,
 				bom_data,
@@ -2416,7 +2415,6 @@ def get_item_data(item_code):
 
 
 def get_sub_assembly_items(
-	sub_assembly_items,
 	bin_details,
 	bom_no,
 	bom_data,
@@ -2438,7 +2436,7 @@ def get_sub_assembly_items(
 				bins = get_bin_details(d, company, for_warehouse=warehouse)
 				bin_details[d.item_code] = frappe._dict(_aggregate_bin_details(bins))
 
-			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
+			if skip_available_sub_assembly_item:
 				bin_dict = bin_details[d.item_code]
 				available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
 				if available_qty >= stock_qty:
@@ -2447,7 +2445,6 @@ def get_sub_assembly_items(
 				elif available_qty > 0:
 					bin_dict.available_qty = 0
 					stock_qty -= available_qty
-					sub_assembly_items.append(d.item_code)
 
 			if not d.is_phantom_item:
 				bom_data.append(
@@ -2474,7 +2471,6 @@ def get_sub_assembly_items(
 
 			if d.value:
 				get_sub_assembly_items(
-					sub_assembly_items,
 					bin_details,
 					d.value,
 					bom_data,
@@ -2538,10 +2534,7 @@ def _get_material_request_plan_query(item_code):
 		.select(
 			table.name.as_("production_plan"),
 			child.warehouse,
-			Sum(
-				Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity)
-				* child.conversion_factor
-			).as_("reserved_qty"),
+			Sum(child.required_bom_qty).as_("reserved_qty"),
 		)
 		.where(_is_open_plan(table) & (child.item_code == item_code))
 		.groupby(table.name, child.warehouse)
@@ -2793,7 +2786,7 @@ def reserve_stock_for_production_plan(doc, items=None, table_name=None, notify=F
 		if table_name and table_name != child_table_name:
 			continue
 
-		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name], notify=notify)
+		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name])
 		if doc.docstatus == 1:
 			sre_created = sre.make_stock_reservation_entries()
 			if sre_created:

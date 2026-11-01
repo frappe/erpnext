@@ -53,6 +53,7 @@ class StockReconciliation(StockController):
 		cost_center: DF.Link | None
 		difference_amount: DF.Currency
 		expense_account: DF.Link | None
+		is_made_from_valuation_comparison: DF.Check
 		items: DF.Table[StockReconciliationItem]
 		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
 		posting_date: DF.Date
@@ -108,6 +109,8 @@ class StockReconciliation(StockController):
 	def validate_adjustment_entry(self):
 		"""An Adjustment Entry resets each item-warehouse to its rows (erpnext.stock.valuation_adjustment),
 		so none of the counting a reconciliation does applies to it."""
+		AdjustmentEntry(self).validate_made_from_report()
+
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
@@ -1134,8 +1137,8 @@ class StockReconciliation(StockController):
 					frappe.bold(self.expense_account)
 				)
 			)
-		elif self.purpose == "Opening Stock" or not frappe.db.sql(
-			"""select name from `tabStock Ledger Entry` limit 1"""
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all(
+			"Stock Ledger Entry", filters={"company": self.company, "is_cancelled": 0}, limit=1
 		):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
@@ -1638,18 +1641,17 @@ def get_stock_balance_for(
 			"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 		}
 
-	# TODO: fetch only selected batch's values
 	data = _get_stock_balance(
 		item_code,
 		warehouse,
 		posting_date,
 		posting_time,
 		with_valuation_rate=True,
-		with_serial_no=has_serial_no,
+		with_serial_no=has_serial_no and not has_batch_no,
 		inventory_dimensions_dict=inventory_dimensions_dict,
 	)
 
-	if has_serial_no:
+	if has_serial_no and not has_batch_no:
 		qty, rate, serial_nos = data
 	else:
 		qty, rate = data
@@ -1667,6 +1669,20 @@ def get_stock_balance_for(
 			)
 			or 0
 		)
+
+		if has_serial_no:
+			serial_no_details = get_available_serial_nos(
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": warehouse,
+						"posting_datetime": combine_datetime(posting_date, posting_time),
+						"ignore_warehouse": 1,
+						"has_batch_no": 1,
+					}
+				)
+			)
+			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			rate = _get_incoming_rate(

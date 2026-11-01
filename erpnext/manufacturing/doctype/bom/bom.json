@@ -601,7 +601,7 @@
    "label": "Finished Goods based Operating Cost"
   },
   {
-   "depends_on": "fg_based_operating_cost",
+   "depends_on": "eval:!doc.with_operations && !doc.is_phantom_bom",
    "fieldname": "fg_based_section_section",
    "fieldtype": "Section Break",
    "label": "Finished Goods Based Operating Cost"
@@ -646,7 +646,7 @@
    "description": "Each operation produces its own output item and puts it in stock, for example Cut Sheet, then Painted Sheet, then the final Box.",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
-   "label": "Produce an Item at Each Operation"
+   "label": "Produce Item per Operation"
   },
   {
    "fieldname": "default_source_warehouse",
@@ -782,7 +782,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-20 23:10:00.000000",
+ "modified": "2026-10-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

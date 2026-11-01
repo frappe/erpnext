@@ -319,7 +319,7 @@ def get_children(doctype, parent=None, company=None, is_root=False, include_disa
 	return frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
