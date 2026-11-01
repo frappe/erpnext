@@ -4169,10 +4169,17 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 				operating_cost_per_unit += flt(d.planned_operating_cost) / flt(work_order.qty)
 
 	# Get operating cost from BOM if not found in work_order.
+<<<<<<< HEAD
 	if not operating_cost_per_unit and bom_no:
 		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+=======
+	if not remaining_operating_cost and bom_no:
+		bom = frappe.db.get_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=1)
+		if bom.quantity:
+			remaining_operating_cost = flt(bom.base_operating_cost) / flt(bom.quantity)
+>>>>>>> 09ba1d2 (fix(manufacturing): use base currency for BOM costs)
 
 	return operating_cost_per_unit
 
