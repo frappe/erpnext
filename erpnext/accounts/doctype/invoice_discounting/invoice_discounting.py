@@ -6,13 +6,13 @@ import json
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, flt, getdate, nowdate
+from frappe.utils import add_days, flt
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -68,7 +68,18 @@ class InvoiceDiscounting(AccountsController):
 			)
 		]
 
+		company_currency = erpnext.get_company_currency(self.company)
+		added = set()
+
 		for record in self.invoices:
+			if record.sales_invoice in added:
+				frappe.throw(
+					_("Row({0}): {1} is added more than once").format(
+						record.idx, frappe.bold(record.sales_invoice)
+					)
+				)
+			added.add(record.sales_invoice)
+
 			if record.sales_invoice in discounted_invoices:
 				frappe.throw(
 					_("Row({0}): {1} is already discounted in {2}").format(
@@ -76,14 +87,43 @@ class InvoiceDiscounting(AccountsController):
 					)
 				)
 
-			actual_outstanding = frappe.db.get_value(
-				"Sales Invoice", record.sales_invoice, "outstanding_amount"
+			invoice = frappe.db.get_value(
+				"Sales Invoice",
+				record.sales_invoice,
+				["docstatus", "company", "outstanding_amount", "party_account_currency"],
+				as_dict=1,
 			)
-			if record.outstanding_amount > actual_outstanding:
+			if invoice.docstatus != 1:
+				frappe.throw(
+					_("Row({0}): {1} is not submitted").format(record.idx, frappe.bold(record.sales_invoice))
+				)
+
+			if invoice.company != self.company:
+				frappe.throw(
+					_("Row({0}): {1} does not belong to Company {2}").format(
+						record.idx, frappe.bold(record.sales_invoice), frappe.bold(self.company)
+					)
+				)
+
+			if (invoice.party_account_currency or company_currency) != company_currency:
+				frappe.throw(
+					_(
+						"Row({0}): {1} is receivable in {2}. Only invoices receivable in the company currency {3} can be discounted."
+					).format(
+						record.idx,
+						frappe.bold(record.sales_invoice),
+						invoice.party_account_currency,
+						company_currency,
+					)
+				)
+
+			if record.outstanding_amount > invoice.outstanding_amount:
 				frappe.throw(
 					_(
 						"Row({0}): Outstanding Amount cannot be greater than actual Outstanding Amount {1} in {2}"
-					).format(record.idx, frappe.bold(actual_outstanding), frappe.bold(record.sales_invoice))
+					).format(
+						record.idx, frappe.bold(invoice.outstanding_amount), frappe.bold(record.sales_invoice)
+					)
 				)
 
 	def calculate_total_amount(self):
@@ -94,9 +134,11 @@ class InvoiceDiscounting(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
 		self.set_status(cancel=1)
 		self.update_sales_invoice()
-		self.make_gl_entries()
+		# reverse the rows as posted, not as they would be posted today
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name, update_outstanding="No")
 
 	def set_status(self, status=None, cancel=0):
 		if status:
@@ -140,8 +182,12 @@ class InvoiceDiscounting(AccountsController):
 			inv = frappe.db.get_value("Sales Invoice", d.sales_invoice, invoice_fields, as_dict=1)
 
 			if d.outstanding_amount:
+				# the row's outstanding is in the party account currency
 				outstanding_in_company_currency = flt(
-					d.outstanding_amount * inv.conversion_rate, d.precision("outstanding_amount")
+					d.outstanding_amount
+					if inv.party_account_currency == company_currency
+					else d.outstanding_amount * inv.conversion_rate,
+					d.precision("outstanding_amount"),
 				)
 				ar_credit_account_currency = frappe.get_cached_value(
 					"Account", self.accounts_receivable_credit, "currency"
@@ -281,37 +327,34 @@ class InvoiceDiscounting(AccountsController):
 			},
 		)
 
-		if getdate(self.loan_end_date) > getdate(nowdate()):
-			for d in self.invoices:
-				outstanding_amount = frappe.db.get_value(
-					"Sales Invoice", d.sales_invoice, "outstanding_amount"
+		for d in self.invoices:
+			outstanding_amount = frappe.db.get_value("Sales Invoice", d.sales_invoice, "outstanding_amount")
+			if flt(outstanding_amount) > 0:
+				je.append(
+					"accounts",
+					{
+						"account": self.accounts_receivable_discounted,
+						"credit_in_account_currency": flt(outstanding_amount),
+						"cost_center": erpnext.get_default_cost_center(self.company),
+						"reference_type": "Invoice Discounting",
+						"reference_name": self.name,
+						"party_type": "Customer",
+						"party": d.customer,
+					},
 				)
-				if flt(outstanding_amount) > 0:
-					je.append(
-						"accounts",
-						{
-							"account": self.accounts_receivable_discounted,
-							"credit_in_account_currency": flt(outstanding_amount),
-							"cost_center": erpnext.get_default_cost_center(self.company),
-							"reference_type": "Invoice Discounting",
-							"reference_name": self.name,
-							"party_type": "Customer",
-							"party": d.customer,
-						},
-					)
 
-					je.append(
-						"accounts",
-						{
-							"account": self.accounts_receivable_unpaid,
-							"debit_in_account_currency": flt(outstanding_amount),
-							"cost_center": erpnext.get_default_cost_center(self.company),
-							"reference_type": "Invoice Discounting",
-							"reference_name": self.name,
-							"party_type": "Customer",
-							"party": d.customer,
-						},
-					)
+				je.append(
+					"accounts",
+					{
+						"account": self.accounts_receivable_unpaid,
+						"debit_in_account_currency": flt(outstanding_amount),
+						"cost_center": erpnext.get_default_cost_center(self.company),
+						"reference_type": "Invoice Discounting",
+						"reference_name": self.name,
+						"party_type": "Customer",
+						"party": d.customer,
+					},
+				)
 
 		return je
 
@@ -331,16 +374,16 @@ def get_invoices(filters: str | dict):
 
 	discounted = frappe.qb.from_(di).select(di.sales_invoice).where(di.docstatus == 1)
 
-	query = (
-		frappe.qb.from_(si)
-		.select(
-			si.name.as_("sales_invoice"),
-			si.customer,
-			si.posting_date,
-			si.outstanding_amount,
-			si.debit_to,
-		)
-		.where((si.docstatus == 1) & (si.outstanding_amount > 0) & si.name.notin(discounted))
+	# apply Sales Invoice permissions of the user
+	query = frappe.qb.get_query(
+		"Sales Invoice",
+		fields=["name as sales_invoice", "customer", "posting_date", "outstanding_amount", "debit_to"],
+		ignore_permissions=False,
+	).where(
+		(si.company == filters.company)
+		& (si.docstatus == 1)
+		& (si.outstanding_amount > 0)
+		& si.name.notin(discounted)
 	)
 
 	if filters.customer:
