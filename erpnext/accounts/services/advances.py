@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimensions,
 )
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.services.payment_schedule import get_redeemed_loyalty_amount
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes
 from erpnext.setup.utils import get_exchange_rate
 
@@ -32,11 +33,12 @@ def set_advances(doc) -> None:
 
 	doc.set("advances", [])
 	advance_allocated = 0
+	loyalty_amount, base_loyalty_amount = get_redeemed_loyalty_amount(doc)
 	for d in res:
 		if doc.get("party_account_currency") == doc.company_currency:
-			amount = doc.get("base_rounded_total") or doc.base_grand_total
+			amount = (doc.get("base_rounded_total") or doc.base_grand_total) - base_loyalty_amount
 		else:
-			amount = doc.get("rounded_total") or doc.grand_total
+			amount = (doc.get("rounded_total") or doc.grand_total) - loyalty_amount
 		allocated_amount = min(amount - advance_allocated, d.amount)
 		advance_allocated += flt(allocated_amount)
 
