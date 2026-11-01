@@ -130,6 +130,14 @@ class Employee(NestedSet):
 		self.validate_email()
 		self.validate_status()
 		self.validate_reports_to()
+		department_to_restore = self.flags.pop("department_to_restore", None)
+		if (
+			self.department
+			and self.has_value_changed("department")
+			and self.department != department_to_restore
+		):
+			if frappe.db.get_value("Department", self.department, "disabled"):
+				frappe.throw(_("Cannot assign a disabled Department"))
 		self.set_preferred_email()
 		self.validate_preferred_email()
 
