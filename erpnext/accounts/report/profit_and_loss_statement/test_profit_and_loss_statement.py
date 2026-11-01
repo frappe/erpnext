@@ -289,6 +289,17 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(margin("'Total Expense"), 20)
 		self.assertEqual(margin("'Profit for the year"), 80)
 
+	def test_snapshot_total_with_accumulated_monthly_values(self):
+		self.create_sales_invoice(qty=1, rate=150)
+		filters = self.get_report_filters()
+		filters.accumulated_values = True
+		with patch("frappe.database.duckdb.database.get_latest_sync", return_value=get_gl_entry_snapshot()):
+			snapshot = execute_snapshot_report(frappe._dict(filters))[1][-1]
+
+		expected = execute(frappe._dict(filters))[1][-1]
+		self.assertEqual(expected["account"], "'Profit for the year'")
+		self.assertEqual(snapshot["total"], expected["total"])
+
 
 def get_gl_entry_snapshot():
 	"""An in-memory DuckDB copy of the GL Entry columns the snapshot report reads."""
