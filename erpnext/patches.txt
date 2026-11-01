@@ -542,3 +542,6 @@ execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_p
 execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
 execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
 erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
+erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
+erpnext.patches.v16_0.set_supplier_quotation_order_status
+erpnext.patches.v16_0.set_work_order_requested_and_picked_qty

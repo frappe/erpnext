@@ -199,7 +199,7 @@ class Workstation(Document):
 
 		return schedule_date
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
 		doc = self.get_open_job_card(job_card, "write")
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
@@ -207,7 +207,7 @@ class Workstation(Document):
 
 		return doc
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
 		doc = self.get_open_job_card(job_card, "submit")
 		pending_qty = flt(qty)

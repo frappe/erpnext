@@ -478,8 +478,8 @@ def get_past_order_list(search_term, status, limit=20):
 	return invoice_list
 
 
-@frappe.whitelist()
-def set_customer_info(fieldname, customer, value=""):
+@frappe.whitelist(methods=["POST"])
+def set_customer_info(fieldname: str, customer: str, value: str = ""):
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_doc.check_permission("write")
 

@@ -12,6 +12,7 @@ from frappe.utils.data import today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
 from erpnext.buying.doctype.purchase_order.purchase_order import (
+	item_last_purchase_rate,
 	make_inter_company_sales_order,
 	make_purchase_receipt,
 )
@@ -278,6 +279,38 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].qty, 7)
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
+
+	def test_update_child_qty_with_conversion_factor_after_receipt(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		purchase_order = create_purchase_order(item_code=item.item_code, qty=6, do_not_save=True)
+		purchase_order.items[0].uom = "Box"
+		purchase_order.items[0].conversion_factor = 5
+		purchase_order.save()
+		purchase_order.submit()
+		create_pr_against_po(purchase_order.name, 2)
+
+		row = purchase_order.items[0]
+		trans_items = json.dumps(
+			[
+				{
+					"item_code": row.item_code,
+					"rate": row.rate,
+					"qty": 4,
+					"uom": row.uom,
+					"conversion_factor": 2,
+					"docname": row.name,
+				}
+			]
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot set quantity less than received quantity",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_items,
+			purchase_order.name,
+		)
 
 	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
@@ -574,6 +607,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		update_child_qty_rate("Purchase Order", trans_item, po.name)
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
+
+	def test_item_last_purchase_rate_in_row_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}]).name
+		frappe.db.set_value("Item", item, "last_purchase_rate", 10)
+
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.get_last_purchase_rate()
+
+		self.assertEqual(po.items[0].rate, 120)
+		self.assertEqual(item_last_purchase_rate(po.name, 1, item, 12), 120)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
@@ -1377,6 +1422,59 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
+	def test_update_items_adds_variant_fg_item_without_bom(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+			make_subcontracted_variant,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		variant, _ = make_subcontracted_variant()
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA7",
+					"fg_item_qty": 10,
+				},
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+		)
+		trans_items = [
+			{
+				"docname": po.items[0].name,
+				"item_code": po.items[0].item_code,
+				"qty": 10,
+				"rate": 100,
+				"fg_item_qty": 10,
+			},
+			{
+				"item_code": "Subcontracted Service Item 7",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": variant.name,
+				"fg_item_qty": 5,
+			},
+		]
+
+		update_child_qty_rate(po.doctype, json.dumps(trans_items), po.name)
+
+		po.reload()
+		self.assertEqual(po.items[1].fg_item, variant.name)
+
 	def test_new_sc_flow(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
 
@@ -2030,7 +2128,64 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi = make_pi_from_po(po.name)
 		pi.items[0].rate = 90
 		pi.submit()
+		self.assertEqual([row.qty for row in make_pi_from_po(po.name).items], [0])
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_full_qty_billed_below_amount_is_mapped_with_zero_qty(self):
+		po = create_purchase_order(qty=1, rate=1000)
+		pi = make_pi_from_po(po.name)
+		pi.items[0].rate = 400
+		pi.submit()
+
+		pi = make_pi_from_po(po.name)
+		self.assertEqual([row.qty for row in pi.items], [0])
+		self.assertEqual(len(make_pi_from_po(po.name, target_doc=pi).items), 1)
+
+		pi.items[0].qty = 1
+		pi.items[0].rate = 600
+		pi.submit()
+
+		po.reload()
+		self.assertEqual(po.per_billed, 100)
 		self.assertFalse(make_pi_from_po(po.name).items)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_portal_purchase_invoice_skips_zero_qty_rows(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice_from_portal
+
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 1000,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.items = pi.items[:1]
+		pi.items[0].rate = 400
+		pi.submit()
+
+		user = create_user("portal_pi_supplier@example.com", "Accounts User").name
+		supplier = frappe.get_doc("Supplier", po.supplier)
+		supplier.append("portal_users", {"user": user})
+		supplier.save()
+
+		with self.set_user(user):
+			make_purchase_invoice_from_portal(po.name)
+
+		self.assertEqual(
+			frappe.get_all(
+				"Purchase Invoice Item", {"purchase_order": po.name, "docstatus": 0}, pluck="po_detail"
+			),
+			[po.items[1].name],
+		)
 
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status

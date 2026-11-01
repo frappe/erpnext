@@ -10,7 +10,7 @@ from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval, Tuple
 from frappe.query_builder.functions import CombineDatetime, IfNull, Max, Now
-from frappe.utils import cint, get_link_to_form, get_weekday, getdate, now, nowtime, to_timedelta
+from frappe.utils import add_days, cint, get_link_to_form, get_weekday, getdate, now, nowtime, to_timedelta
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
@@ -32,6 +32,7 @@ from erpnext.stock.stock_ledger import (
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
+from erpnext.utilities import clear_logs_with_references
 
 RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
@@ -75,13 +76,12 @@ class RepostItemValuation(Document):
 	@staticmethod
 	def clear_old_logs(days=None):
 		days = days or 90
-		table = DocType("Repost Item Valuation")
-		frappe.db.delete(
-			table,
-			filters=(
-				(table.creation < (Now() - Interval(days=days)))
-				& (table.status.isin(["Completed", "Skipped"]))
-			),
+		clear_logs_with_references(
+			"Repost Item Valuation",
+			{
+				"creation": ("<", add_days(now(), -days)),
+				"status": ("in", ["Completed", "Skipped"]),
+			},
 		)
 
 	def on_discard(self):
