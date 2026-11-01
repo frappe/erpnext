@@ -9,14 +9,16 @@ import frappe
 from frappe import _, qb
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
-from frappe.query_builder import Case, Criterion
-from frappe.query_builder.functions import Concat, Locate, Sum
+from frappe.query_builder import Case, Criterion, DocType
+from frappe.query_builder.functions import Concat, Locate, Lower, Sum
+from frappe.query_builder.terms import NamedParameterWrapper
 from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
@@ -178,13 +180,72 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+def party_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None = None,
+):
+	party_name_field = {"Customer": "customer_name", "Supplier": "supplier_name"}.get(doctype)
+	if not party_name_field:
+		frappe.throw(_("Invalid party type: {0}").format(doctype))
+
+	filters = frappe.parse_json(filters) if filters else {}
+	if not isinstance(filters, dict):
+		frappe.throw(_("Party query filters must be a dictionary"))
+
+	company = filters.pop("company", None)
+	fields = get_fields(doctype, ["name", party_name_field])
+	party = DocType(doctype)
+	search_str = f"%{txt}%"
+	txt_no_percent = txt.replace("%", "")
+	search_fields = list(dict.fromkeys([searchfield, *fields]))
+	search_conditions = [party[field].like(search_str) for field in search_fields]
+
+	query = (
+		frappe.qb.get_query(doctype, fields=fields, filters=filters, ignore_permissions=False)
+		.where(party.docstatus < 2)
+		.where(Criterion.any(search_conditions))
+		.orderby(
+			Case()
+			.when(
+				Locate(Lower(txt_no_percent), Lower(party.name)) > 0,
+				Locate(Lower(txt_no_percent), Lower(party.name)),
+			)
+			.else_(99999)
+		)
+		.orderby(
+			Case()
+			.when(
+				Locate(Lower(txt_no_percent), Lower(party[party_name_field])) > 0,
+				Locate(Lower(txt_no_percent), Lower(party[party_name_field])),
+			)
+			.else_(99999)
+		)
+		.orderby(party.idx, order=Order.desc)
+		.orderby(party.name)
+		.orderby(party[party_name_field])
+		.limit(page_len)
+		.offset(start)
+	)
+
+	if company:
+		query = query.where(get_restriction_criterion(doctype, [company]))
+
+	return query.run()
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def item_query(
 	doctype: str,
 	txt: str,
 	searchfield: str,
 	start: int,
 	page_len: int,
-	filters: dict | str | None,
+	filters: dict | list | str | None,
 	as_dict: bool = False,
 ):
 	doctype = "Item"
@@ -192,6 +253,8 @@ def item_query(
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
+
+	company = filters.pop("company", None) if isinstance(filters, dict) else None
 
 	# Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta(doctype, cached=True)
@@ -235,6 +298,13 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
+	company_cond = ""
+	company_params = NamedParameterWrapper()
+	if company:
+		company_cond = "and " + get_restriction_criterion("Item", [company]).get_sql(
+			with_namespace=True, quote_char="`", param_wrapper=company_params, subquery=True
+		)
+
 	description_cond = ""
 	if frappe.db.estimate_count(doctype) < 50000:
 		# scan description only if items are less than 50000
@@ -260,7 +330,7 @@ def item_query(
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
-			{fcond} {mcond} {candidate_cond} {allowed_items_cond}
+			{fcond} {mcond} {candidate_cond} {allowed_items_cond} {company_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -270,10 +340,11 @@ def item_query(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			description_cond=description_cond,
 			candidate_cond=candidate_cond,
 			allowed_items_cond=allowed_items_cond.replace("%", "%%"),
+			company_cond=company_cond,
 		),
 		{
 			"today": nowdate(),
@@ -282,6 +353,7 @@ def item_query(
 			"start": start,
 			"page_len": page_len,
 			"candidates": tuple(candidates or ()),
+			**company_params.get_parameters(),
 		},
 		as_dict=as_dict,
 	)
@@ -296,6 +368,28 @@ def get_allowed_items_cond(party_type, party):
 	item = frappe.qb.DocType("Item")
 	allowed_items = frappe.qb.from_(item).select(item.name).where(allowed_items_condition)
 	return f"and tabItem.name in ({allowed_items})"
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def subcontracted_item_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
+	"""Sub-contracted stock items with a default BOM of their own or of their template."""
+	bom_filter = ["default_bom", "is", "set"]
+	if templates := frappe.get_all(
+		"Item", filters={"has_variants": 1, "default_bom": ["is", "set"]}, pluck="name"
+	):
+		bom_filter = [bom_filter, "or", ["variant_of", "in", templates]]
+
+	subcontracted_filters = [
+		["is_stock_item", "=", 1],
+		"and",
+		["is_sub_contracted_item", "=", 1],
+		"and",
+		bom_filter,
+	]
+	return item_query(doctype, txt, searchfield, start, page_len, subcontracted_filters)
 
 
 @frappe.whitelist()
@@ -318,7 +412,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			key=searchfield,
 		),
 		{

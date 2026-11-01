@@ -743,6 +743,41 @@ erpnext.utils.update_child_items = function (opts) {
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
+	const get_item_details = (item_code, row) =>
+		frm.call({
+			method: "erpnext.stock.get_item_details.get_item_details",
+			args: {
+				doc: frm.doc,
+				ctx: {
+					item_code: item_code,
+					set_warehouse: frm.doc.set_warehouse,
+					customer: frm.doc.customer || frm.doc.party_name,
+					quotation_to: frm.doc.quotation_to,
+					supplier: frm.doc.supplier,
+					currency: frm.doc.currency,
+					is_internal_supplier: frm.doc.is_internal_supplier,
+					is_internal_customer: frm.doc.is_internal_customer,
+					conversion_rate: frm.doc.conversion_rate,
+					price_list: frm.doc.selling_price_list || frm.doc.buying_price_list,
+					price_list_currency: frm.doc.price_list_currency,
+					plc_conversion_rate: frm.doc.plc_conversion_rate,
+					company: frm.doc.company,
+					order_type: frm.doc.order_type,
+					is_pos: cint(frm.doc.is_pos),
+					is_return: cint(frm.doc.is_return),
+					is_subcontracted: frm.doc.is_subcontracted,
+					ignore_pricing_rule: frm.doc.ignore_pricing_rule,
+					doctype: frm.doc.doctype,
+					name: frm.doc.name,
+					qty: row.qty || 1,
+					uom: row.uom,
+					pos_profile: cint(frm.doc.is_pos) ? frm.doc.pos_profile : "",
+					tax_category: frm.doc.tax_category,
+					child_doctype: frm.doc.doctype + " Item",
+					is_old_subcontracting_flow: frm.doc.is_old_subcontracting_flow,
+				},
+			},
+		});
 
 	this.data = frm.doc[opts.child_docname].map((d) => {
 		return {
@@ -806,69 +841,36 @@ erpnext.utils.update_child_items = function (opts) {
 			change: function () {
 				const me = this;
 
-				frm.call({
-					method: "erpnext.stock.get_item_details.get_item_details",
-					args: {
-						doc: frm.doc,
-						ctx: {
-							item_code: this.value,
-							set_warehouse: frm.doc.set_warehouse,
-							customer: frm.doc.customer || frm.doc.party_name,
-							quotation_to: frm.doc.quotation_to,
-							supplier: frm.doc.supplier,
-							currency: frm.doc.currency,
-							is_internal_supplier: frm.doc.is_internal_supplier,
-							is_internal_customer: frm.doc.is_internal_customer,
-							conversion_rate: frm.doc.conversion_rate,
-							price_list: frm.doc.selling_price_list || frm.doc.buying_price_list,
-							price_list_currency: frm.doc.price_list_currency,
-							plc_conversion_rate: frm.doc.plc_conversion_rate,
-							company: frm.doc.company,
-							order_type: frm.doc.order_type,
-							is_pos: cint(frm.doc.is_pos),
-							is_return: cint(frm.doc.is_return),
-							is_subcontracted: frm.doc.is_subcontracted,
-							ignore_pricing_rule: frm.doc.ignore_pricing_rule,
-							doctype: frm.doc.doctype,
-							name: frm.doc.name,
-							qty: me.doc.qty || 1,
-							uom: me.doc.uom,
-							pos_profile: cint(frm.doc.is_pos) ? frm.doc.pos_profile : "",
-							tax_category: frm.doc.tax_category,
-							child_doctype: frm.doc.doctype + " Item",
-							is_old_subcontracting_flow: frm.doc.is_old_subcontracting_flow,
-						},
-					},
-					callback: function (r) {
-						if (r.message) {
-							const {
-								qty,
-								price_list_rate: rate,
-								uom,
-								conversion_factor,
-								item_name,
-								bom_no,
-								description,
-								warehouse,
-							} = r.message;
-							const row = dialog.fields_dict.trans_items.df.data.find(
-								(row) => row.name == me.doc.name
-							);
-							if (row) {
-								Object.assign(row, {
-									conversion_factor: me.doc.conversion_factor || conversion_factor,
-									uom: me.doc.uom || uom,
-									qty: me.doc.qty || qty,
-									rate: me.doc.rate || rate,
-									item_name: item_name,
-									bom_no: bom_no,
-									description: me.doc.description || description,
-									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
-								});
-								dialog.fields_dict.trans_items.grid.refresh();
-							}
+				get_item_details(this.value, me.doc).then((r) => {
+					if (r.message) {
+						const {
+							qty,
+							price_list_rate,
+							uom,
+							conversion_factor,
+							item_name,
+							bom_no,
+							description,
+							warehouse,
+						} = r.message;
+						const row = dialog.fields_dict.trans_items.df.data.find(
+							(row) => row.name == me.doc.name
+						);
+						if (row) {
+							Object.assign(row, {
+								conversion_factor: me.doc.conversion_factor || conversion_factor,
+								uom: me.doc.uom || uom,
+								qty: me.doc.qty || qty,
+								rate: me.doc.rate || price_list_rate,
+								price_list_rate: price_list_rate,
+								item_name: item_name,
+								bom_no: bom_no,
+								description: me.doc.description || description,
+								warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
+							});
+							dialog.fields_dict.trans_items.grid.refresh();
 						}
-					},
+					}
 				});
 			},
 		},
@@ -905,6 +907,12 @@ erpnext.utils.update_child_items = function (opts) {
 						}
 					},
 				});
+
+				if (!this.doc.docname) {
+					get_item_details(this.doc.item_code, this.doc).then((r) => {
+						this.doc.price_list_rate = r.message.price_list_rate;
+					});
+				}
 			},
 		},
 		{
@@ -991,11 +999,7 @@ erpnext.utils.update_child_items = function (opts) {
 				label: __("Finished Good Item"),
 				get_query: () => {
 					return {
-						filters: {
-							is_stock_item: 1,
-							is_sub_contracted_item: 1,
-							default_bom: ["!=", ""],
-						},
+						query: "erpnext.controllers.queries.subcontracted_item_query",
 					};
 				},
 			},
