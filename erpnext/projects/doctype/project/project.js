@@ -93,6 +93,20 @@ frappe.ui.form.on("Project", {
 		// the Tasks tab holds only this field, so hiding it hides the tab, as for the Gantt and Kanban views
 		frm.toggle_display("tasks_html", frappe.model.can_read("Task"));
 
+		// the costing dashboard shows these totals; they stay in the meta for reports and list views
+		frm.toggle_display(
+			[
+				"total_costing_amount",
+				"total_purchase_cost",
+				"total_sales_amount",
+				"total_billable_amount",
+				"total_billed_amount",
+				"total_consumed_material_cost",
+				"margin",
+			],
+			false
+		);
+
 		// the Tasks list is (re)built only once its tab is shown for this document
 		frm.tasks_list = null;
 		frm.trigger("load_tasks_tab");
