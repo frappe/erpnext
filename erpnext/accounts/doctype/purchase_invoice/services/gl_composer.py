@@ -546,7 +546,13 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		company = self.doc.company
 		return get_default_expense_account(
-			frappe._dict({"expense_account": self.doc.get_company_default("default_expense_account")}),
+			frappe._dict(
+				{
+					"expense_account": self.doc.get_company_default(
+						"default_expense_account", ignore_validation=True
+					)
+				}
+			),
 			get_item_defaults(item.item_code, company),
 			get_item_group_defaults(item.item_code, company),
 			get_brand_defaults(item.item_code, company),
