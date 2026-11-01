@@ -62,7 +62,13 @@ class TestPaymentEntry(FrappeTestCase):
 
 	def test_custom_party_details_use_name_without_a_title_field(self):
 		frappe.get_doc(doctype="Party Type", party_type="Sales Partner", account_type="Receivable").insert()
-		party = "_Test Sales Partner India - 1"
+		party = (
+			frappe.get_doc(
+				doctype="Sales Partner", partner_name="_Test Party Details Partner", commission_rate=1
+			)
+			.insert()
+			.name
+		)
 		details = get_party_details("_Test Company", "Sales Partner", party, nowdate())
 		self.assertEqual(details["party_name"], party)
 		self.assertEqual(details["party_account"], "Debtors - _TC")

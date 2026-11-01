@@ -43,11 +43,16 @@ class TestPartyType(FrappeTestCase):
 			self.assertFalse(frappe.has_permission("Party Type", "write"))
 
 	def test_account_type_cannot_change_after_ledger_entries(self):
+		frappe.db.savepoint("party_type_ledger")
+		self.addCleanup(frappe.db.rollback, save_point="party_type_ledger")
 		party_type = frappe.get_doc(
 			doctype="Party Type", party_type="Sales Partner", account_type="Receivable"
 		).insert()
+		partner = frappe.get_doc(
+			doctype="Sales Partner", partner_name="_Test Party Type Partner", commission_rate=1
+		).insert()
 		journal = make_journal_entry("Debtors - _TC", "_Test Cash - _TC", 10, save=False)
-		journal.accounts[0].update({"party_type": "Sales Partner", "party": "_Test Sales Partner India - 1"})
+		journal.accounts[0].update({"party_type": "Sales Partner", "party": partner.name})
 		journal.insert().submit()
 		self.assertTrue(frappe.db.exists("GL Entry", {"party_type": party_type.name}))
 		party_type.save()
