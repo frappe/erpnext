@@ -175,6 +175,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		adjust_incoming_rate = frappe.db.get_single_value(
 			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
 		)
+		unvalued_rejected_shares = self.get_unvalued_rejected_shares()
 
 		for item in doc.get("items"):
 			if flt(item.base_net_amount) or (
@@ -359,13 +360,20 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						# Variance. Here we only clear "Stock Received But Not Billed" at the full billed
 						# amount against the supplier - booking PPV again would double count it and leave
 						# SRBNB partially uncleared.
+						rejected_amount, rejected_base_amount = self.make_unvalued_rejected_gl_entry(
+							gl_entries, item, expense_account, amount, base_amount, unvalued_rejected_shares
+						)
 						gl_entries.append(
 							self.get_gl_dict(
 								{
 									"account": expense_account,
 									"against": doc.supplier,
-									"debit": base_amount,
-									"debit_in_transaction_currency": amount,
+									"debit": flt(
+										base_amount - rejected_base_amount, item.precision("base_net_amount")
+									),
+									"debit_in_transaction_currency": flt(
+										amount - rejected_amount, item.precision("net_amount")
+									),
 									"cost_center": item.cost_center,
 									"project": item.project or doc.project,
 								},
@@ -465,6 +473,84 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 			if item.is_fixed_asset and item.landed_cost_voucher_amount:
 				self.update_net_purchase_amount_for_linked_assets(item)
+
+	def get_unvalued_rejected_shares(self) -> dict:
+		"""Share of each Purchase Receipt row that was rejected into stock at no value."""
+		doc = self.doc
+		pr_details = [d.pr_detail for d in doc.items if d.pr_detail]
+		if (
+			doc.update_stock
+			or not doc.auto_accounting_for_stock
+			or not pr_details
+			or not frappe.db.get_single_value(
+				"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+			)
+		):
+			return {}
+
+		pr_item = frappe.qb.DocType("Purchase Receipt Item")
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		rows = (
+			frappe.qb.from_(pr_item)
+			.inner_join(sle)
+			.on((sle.voucher_detail_no == pr_item.name) & (sle.warehouse == pr_item.rejected_warehouse))
+			.select(pr_item.name, pr_item.rejected_qty, pr_item.received_qty, sle.stock_value_difference)
+			.where(
+				pr_item.name.isin(pr_details)
+				& (pr_item.rejected_qty > 0)
+				& (sle.voucher_type == "Purchase Receipt")
+				& (sle.is_cancelled == 0)
+			)
+		).run(as_dict=True)
+
+		return {
+			d.name: flt(d.rejected_qty) / flt(d.received_qty)
+			for d in rows
+			if flt(d.received_qty) and not flt(d.stock_value_difference)
+		}
+
+	def make_unvalued_rejected_gl_entry(self, gl_entries, item, expense_account, amount, base_amount, shares):
+		"""Expense the billed share of material the receipt rejected at no stock value.
+
+		The receipt never credited "Stock Received But Not Billed" for it, so debiting it there would
+		leave a balance that nothing clears.
+		"""
+		share = shares.get(item.pr_detail) if expense_account == self.doc.stock_received_but_not_billed else 0
+		if not share:
+			return 0.0, 0.0
+
+		rejected_amount = flt(amount * share, item.precision("net_amount"))
+		rejected_base_amount = flt(base_amount * share, item.precision("base_net_amount"))
+		account = self.get_rejected_expense_account(item)
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": account,
+					"against": self.doc.supplier,
+					"debit": rejected_base_amount,
+					"debit_in_transaction_currency": rejected_amount,
+					"cost_center": item.cost_center,
+					"project": item.project or self.doc.project,
+				},
+				get_account_currency(account),
+				item=item,
+			)
+		)
+		return rejected_amount, rejected_base_amount
+
+	def get_rejected_expense_account(self, item) -> str:
+		from erpnext.setup.doctype.brand.brand import get_brand_defaults
+		from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+		from erpnext.stock.doctype.item.item import get_item_defaults
+		from erpnext.stock.get_item_details import get_default_expense_account
+
+		company = self.doc.company
+		return get_default_expense_account(
+			frappe._dict({"expense_account": self.doc.get_company_default("default_expense_account")}),
+			get_item_defaults(item.item_code, company),
+			get_item_group_defaults(item.item_code, company),
+			get_brand_defaults(item.item_code, company),
+		)
 
 	def get_provisional_accounts(self):
 		from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
