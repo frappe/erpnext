@@ -263,14 +263,10 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
-<<<<<<< HEAD
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
-=======
-		if not (self.is_fully_ordered() or self.is_partially_ordered() or self.has_ordered_versions):
 			if not lost_reasons_list:
 				frappe.throw(_("Please select at least one Lost Reason"))
 
->>>>>>> 03771ae (fix(quotation): require a reason before declaring lost)
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			self.db_set("status", "Lost")
