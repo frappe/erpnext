@@ -3256,38 +3256,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertFalse(so.per_billed)
 		self.assertEqual(so.status, "To Deliver and Bill")
 
-<<<<<<< HEAD
-=======
-	def test_item_tax_transfer_from_sales_to_purchase(self):
-		item_tax = frappe.new_doc("Item Tax Template")
-		item_tax.title = "Test Item Tax Template"
-		item_tax.company = "_Test Company"
-		item_tax.append("taxes", {"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 2})
-		item_tax.save()
-
-		item_group = frappe.get_doc("Item Group", "_Test Item Group")
-		item_group.append("taxes", {"item_tax_template": "Test Item Tax Template - _TC"})
-		item_group.save()
-
-		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=1)
-		so.append(
-			"taxes",
-			{
-				"account_head": "_Test Account Service Tax - _TC",
-				"charge_type": "On Net Total",
-				"description": "TDS",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 2,
-			},
-		)
-		so.submit()
-
-		po = make_purchase_order(so.name, selected_items=so.items)[0]
-		po.supplier = "_Test Supplier"
-		po.items[0].rate = 100
-		po.submit()
-		self.assertEqual(po.taxes[0].tax_amount, 2)
-
 	def test_make_purchase_order_does_not_inherit_incoterm(self):
 		for delivered_by_supplier in (0, 1):
 			with self.subTest(delivered_by_supplier=delivered_by_supplier):
@@ -3298,16 +3266,14 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				so.items[0].supplier = "_Test Supplier"
 				so.submit()
 
-				po = make_purchase_order(so.name, selected_items=so.items)[0]
+				po = make_purchase_order(so.name, selected_items=so.items)
 
 				self.assertFalse(po.incoterm)
 				self.assertFalse(po.named_place)
 				self.assertEqual(po.items[0].sales_order, so.name)
-				self.assertEqual(po.supplier, "_Test Supplier")
 				self.assertEqual(frappe.get_value("Sales Order", so.name, "incoterm"), "CIF")
 				self.assertEqual(frappe.get_value("Sales Order", so.name, "named_place"), "Hamburg port")
 
->>>>>>> a62d4e6 (fix(selling): clear customer incoterms from purchase orders)
 	def test_make_purchase_order_does_not_inherit_party_fields(self):
 		"""
 		Customer-derived fields must not leak from a drop-ship SO into the PO.

@@ -1641,6 +1641,8 @@ def make_purchase_order(
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
+		target.incoterm = ""
+		target.named_place = ""
 		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
