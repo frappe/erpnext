@@ -315,7 +315,7 @@ class ShareTransfer(Document):
 			"from_no": from_no,
 			"to_no": to_no,
 			"rate": rate,
-			"amount": self.rate * (to_no - from_no + 1),
+			"amount": rate * (to_no - from_no + 1),
 			"no_of_shares": to_no - from_no + 1,
 		}
 
