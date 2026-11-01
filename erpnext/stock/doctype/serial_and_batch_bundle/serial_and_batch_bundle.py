@@ -2961,7 +2961,7 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
 	if kwargs.reserved_for:
-		query = query.where(sre.voucher_no == kwargs.reserved_for).orderby(sb_entry.idx)
+		query = query.where(sre.voucher_no == kwargs.reserved_for)
 
 	return [row[0] for row in query.run()]
 
