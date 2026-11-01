@@ -51,9 +51,6 @@ class TestQuotation(FrappeTestCase):
 		qo.reload()
 		self.assertEqual(qo.get("items")[0].qty, 11)
 		self.assertEqual(qo.get("items")[-1].rate, 100)
-<<<<<<< HEAD
-=======
-		self.assertEqual(qo.get("items")[1].description, "test")
 
 	def test_update_items_keeps_price_list_rate_on_new_row(self):
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -98,12 +95,6 @@ class TestQuotation(FrappeTestCase):
 		new_row = qo.reload().items[-1]
 		self.assertEqual(new_row.rate, 0)
 		self.assertEqual(new_row.discount_amount, 1000)
-
-	def test_disallow_due_date_before_transaction_date(self):
-		qo = make_quotation(qty=3, do_not_submit=1)
-		qo.payment_schedule[0].due_date = add_days(qo.transaction_date, -2)
-		self.assertRaises(frappe.ValidationError, qo.save)
->>>>>>> af2b7ed (test: price list rate on rows added through Update Items)
 
 	def test_update_child_rate_change(self):
 		from erpnext.stock.doctype.item.test_item import make_item

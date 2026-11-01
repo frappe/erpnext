@@ -646,7 +646,7 @@ erpnext.utils.update_child_items = function (opts) {
 			method: "erpnext.stock.get_item_details.get_item_details",
 			args: {
 				doc: frm.doc,
-				ctx: {
+				args: {
 					item_code: item_code,
 					set_warehouse: frm.doc.set_warehouse,
 					customer: frm.doc.customer || frm.doc.party_name,
@@ -672,6 +672,7 @@ erpnext.utils.update_child_items = function (opts) {
 					pos_profile: cint(frm.doc.is_pos) ? frm.doc.pos_profile : "",
 					tax_category: frm.doc.tax_category,
 					child_doctype: frm.doc.doctype + " Item",
+					is_old_subcontracting_flow: frm.doc.is_old_subcontracting_flow,
 				},
 			},
 		});
@@ -732,85 +733,11 @@ erpnext.utils.update_child_items = function (opts) {
 			change: function () {
 				const me = this;
 
-<<<<<<< HEAD
-				frm.call({
-					method: "erpnext.stock.get_item_details.get_item_details",
-					args: {
-						doc: frm.doc,
-						args: {
-							item_code: this.value,
-							set_warehouse: frm.doc.set_warehouse,
-							customer: frm.doc.customer || frm.doc.party_name,
-							quotation_to: frm.doc.quotation_to,
-							supplier: frm.doc.supplier,
-							currency: frm.doc.currency,
-							is_internal_supplier: frm.doc.is_internal_supplier,
-							is_internal_customer: frm.doc.is_internal_customer,
-							conversion_rate: frm.doc.conversion_rate,
-							price_list: frm.doc.selling_price_list || frm.doc.buying_price_list,
-							price_list_currency: frm.doc.price_list_currency,
-							plc_conversion_rate: frm.doc.plc_conversion_rate,
-							company: frm.doc.company,
-							order_type: frm.doc.order_type,
-							is_pos: cint(frm.doc.is_pos),
-							is_return: cint(frm.doc.is_return),
-							is_subcontracted: frm.doc.is_subcontracted,
-							ignore_pricing_rule: frm.doc.ignore_pricing_rule,
-							doctype: frm.doc.doctype,
-							name: frm.doc.name,
-							qty: me.doc.qty || 1,
-							uom: me.doc.uom,
-							pos_profile: cint(frm.doc.is_pos) ? frm.doc.pos_profile : "",
-							tax_category: frm.doc.tax_category,
-							child_doctype: frm.doc.doctype + " Item",
-							is_old_subcontracting_flow: frm.doc.is_old_subcontracting_flow,
-						},
-					},
-					callback: function (r) {
-						if (r.message) {
-							const {
-								qty,
-								price_list_rate,
-								uom,
-								conversion_factor,
-								bom_no,
-								warehouse,
-							} = r.message;
-							const row = dialog.fields_dict.trans_items.df.data.find(
-								(doc) => doc.idx == me.doc.idx
-							);
-							if (row) {
-								Object.assign(row, {
-									conversion_factor: me.doc.conversion_factor || conversion_factor,
-									uom: me.doc.uom || uom,
-									qty: me.doc.qty || qty,
-<<<<<<< HEAD
-									rate: me.doc.rate || rate,
-=======
-									rate: me.doc.rate || price_list_rate,
-									price_list_rate: price_list_rate,
-									item_name: item_name,
->>>>>>> fdbc129 (fix: keep price list rate on rows added through Update Items)
-									bom_no: bom_no,
-									warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
-								});
-								dialog.fields_dict.trans_items.grid.refresh();
-							}
-=======
 				get_item_details(this.value, me.doc).then((r) => {
 					if (r.message) {
-						const {
-							qty,
-							price_list_rate,
-							uom,
-							conversion_factor,
-							item_name,
-							bom_no,
-							description,
-							warehouse,
-						} = r.message;
+						const { qty, price_list_rate, uom, conversion_factor, bom_no, warehouse } = r.message;
 						const row = dialog.fields_dict.trans_items.df.data.find(
-							(row) => row.name == me.doc.name
+							(doc) => doc.idx == me.doc.idx
 						);
 						if (row) {
 							Object.assign(row, {
@@ -819,13 +746,10 @@ erpnext.utils.update_child_items = function (opts) {
 								qty: me.doc.qty || qty,
 								rate: me.doc.rate || price_list_rate,
 								price_list_rate: price_list_rate,
-								item_name: item_name,
 								bom_no: bom_no,
-								description: me.doc.description || description,
 								warehouse: me.doc.docname ? me.doc.warehouse : warehouse,
 							});
 							dialog.fields_dict.trans_items.grid.refresh();
->>>>>>> 7a1ad07 (fix: refetch price list rate when UOM changes on a new Update Items row)
 						}
 					}
 				});
