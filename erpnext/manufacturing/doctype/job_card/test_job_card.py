@@ -4448,6 +4448,33 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual(material_request.docstatus, 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 1, "job_card_excess_transfer": 1}
+	)
+	def test_job_card_material_request_prefills_pending_qty_with_excess_transfer(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 2, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		first_request = make_material_request(job_card.name)
+		first_request.schedule_date = today()
+		first_request.items[0].qty = 5
+		first_request.submit()
+
+		second_request = make_material_request(job_card.name)
+		self.assertEqual(second_request.items[0].qty, 15)
+		second_request.schedule_date = today()
+		second_request.submit()
+
+		# nothing pending falls back to the full required qty
+		self.assertEqual(make_material_request(job_card.name).items[0].qty, 20)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_material_request_updates_job_card_requested_qty(self):
 		workstation = make_jc_review_workstation()
