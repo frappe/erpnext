@@ -373,7 +373,12 @@ var calculate_end_time = function (frm, cdt, cdn) {
 
 	if (!child.from_time) {
 		// if from_time value is not available then set the current datetime
-		frappe.model.set_value(cdt, cdn, "from_time", frappe.datetime.get_datetime_as_string());
+		frappe.model.set_value(
+			cdt,
+			cdn,
+			"from_time",
+			frappe.datetime.get_datetime_as_string(frappe.datetime.system_datetime())
+		);
 	}
 
 	let d = moment(child.from_time);
