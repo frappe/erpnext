@@ -28,6 +28,8 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	aggregate_bin_details,
 	get_bin_details,
 	get_item_data,
+	get_plan_process_loss_percentage,
+	get_qty_before_process_loss,
 	get_sales_orders,
 	get_uom_conversion_factor,
 	get_warehouse_list,
@@ -313,7 +315,9 @@ def _build_sub_assembly_map(doc):
 		if d.get("type_of_manufacturing") == "Material Request":
 			continue
 		key = (d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
-		sub_assembly_items[key] += d.get("qty")
+		sub_assembly_items[key] += get_qty_before_process_loss(
+			d.get("qty"), d.get("process_loss_percentage"), d.get("stock_uom")
+		)
 	return {k[:2]: v for k, v in sub_assembly_items.items()}
 
 
@@ -350,6 +354,9 @@ def _collect_item_details(doc, po_items):
 
 def _item_details_for_row(doc, data, company, sub_assembly_items, existing_sub_assembly_items):
 	planned_qty = data.get("required_qty") or data.get("planned_qty")
+	if data.get("bom_no") and not data.get("required_qty"):
+		loss_percentage = get_plan_process_loss_percentage(doc, data.get("bom_no"))
+		planned_qty = get_qty_before_process_loss(planned_qty, loss_percentage, data.get("stock_uom"))
 	if data.get("bom") or data.get("bom_no"):
 		return _bom_item_details(
 			doc, data, company, planned_qty, sub_assembly_items, existing_sub_assembly_items
