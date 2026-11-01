@@ -4389,15 +4389,43 @@ class TestJobCard(ERPNextTestSuite):
 		first_request.schedule_date = today()
 		first_request.submit()
 
-		# the work order still has 20 pending for the second operation
-		second_request = make_material_request(first_card.name)
-		second_request.schedule_date = today()
-		second_request.items[0].qty = 20
-		self.assertRaises(frappe.ValidationError, second_request.submit)
+		# a fully requested card leaves nothing to prefill
+		self.assertFalse(make_material_request(first_card.name).items)
 
+		# the work order still has 20 pending for the second operation
 		duplicate = frappe.copy_doc(first_request)
 		duplicate.items[0].qty = 20
 		self.assertRaises(frappe.ValidationError, duplicate.submit)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_material_request_prefills_only_pending_qty(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		first_item, second_item = make_jc_review_item(), make_jc_review_item()
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": first_item, "qty": 2, "operation": operation},
+				{"item_code": second_item, "qty": 1, "operation": operation},
+			],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		first_request = make_material_request(job_card.name)
+		first_request.schedule_date = today()
+		first_request.items = [row for row in first_request.items if row.item_code == first_item]
+		first_request.items[0].qty = 5
+		first_request.submit()
+
+		second_request = make_material_request(job_card.name)
+		self.assertEqual(
+			sorted((row.item_code, row.qty) for row in second_request.items),
+			sorted([(first_item, 15), (second_item, 10)]),
+		)
+		second_request.schedule_date = today()
+		second_request.submit()
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"disable_capacity_planning": 1, "job_card_excess_transfer": 1}
