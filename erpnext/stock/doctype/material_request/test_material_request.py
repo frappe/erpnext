@@ -214,6 +214,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 			mr.material_request_type = "Subcontracting"
 			mr.items = mr.items[:1]
 			mr.items[0].item_code = item.name
+			mr.items[0].uom = item.stock_uom
 			self.assertRaises(frappe.ValidationError, mr.insert)
 
 		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
@@ -640,7 +641,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 				"item_name": "_Test FG Item",
 				"qty": 10,
 				"schedule_date": today(),
-				"uom": "_Test UOM 1",
+				"uom": "_Test UOM",
 				"warehouse": "_Test Warehouse - _TC",
 			},
 		)
