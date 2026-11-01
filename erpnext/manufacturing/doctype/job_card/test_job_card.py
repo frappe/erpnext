@@ -4399,6 +4399,27 @@ class TestJobCard(ERPNextTestSuite):
 		duplicate.items[0].qty = 20
 		self.assertRaises(frappe.ValidationError, duplicate.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 1, "job_card_excess_transfer": 1}
+	)
+	def test_job_card_material_request_is_not_capped_with_excess_transfer(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 2, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		for _ in range(2):
+			material_request = make_material_request(job_card.name)
+			material_request.schedule_date = today()
+			material_request.submit()
+
+		self.assertEqual(material_request.docstatus, 1)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_material_request_updates_job_card_requested_qty(self):
 		workstation = make_jc_review_workstation()
