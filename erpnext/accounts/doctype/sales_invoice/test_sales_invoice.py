@@ -2745,6 +2745,60 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_rounding_adjustment_in_foreign_currency(self):
+		"""The receivable is posted at the base rounded total and the round off at the base
+		adjustment, so the entries balance without a second round off."""
+		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		debit_to = create_account(
+			account_name="_Test Receivable JPY",
+			parent_account="Accounts Receivable - _TC",
+			company="_Test Company",
+			account_currency="JPY",
+			account_type="Receivable",
+		)
+		if not frappe.db.exists("Customer", "_Test Customer JPY"):
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Customer JPY",
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+					"default_currency": "JPY",
+				}
+			).insert()
+
+		si = create_sales_invoice(
+			customer="_Test Customer JPY",
+			currency="JPY",
+			conversion_rate=0.567,
+			debit_to=debit_to,
+			rate=1701.4,
+		)
+
+		self.assertEqual(si.rounded_total, 1701)
+		self.assertEqual(si.rounding_adjustment, -0.4)
+		self.assertEqual(si.base_grand_total, 964.69)
+		self.assertEqual(si.base_rounding_adjustment, -0.23)
+		self.assertEqual(si.base_rounded_total, 964.46)
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit", "debit_in_account_currency"],
+			order_by="account asc",
+		)
+		expected_values = {
+			debit_to: [964.46, 0.0],
+			"Round Off - _TC": [0.23, 0.0],
+			"Sales - _TC": [0.0, 964.69],
+		}
+		self.assertEqual({gle.account for gle in gl_entries}, set(expected_values))
+		for gle in gl_entries:
+			self.assertEqual([gle.debit, gle.credit], expected_values[gle.account])
+			if gle.account == "Round Off - _TC":
+				# the round off account is in company currency, so both amounts are the base adjustment
+				self.assertEqual(gle.debit_in_account_currency, 0.23)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_rounding_adjustment_2(self):
 		si = create_sales_invoice(rate=400, do_not_save=True)

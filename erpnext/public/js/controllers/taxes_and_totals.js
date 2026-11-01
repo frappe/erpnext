@@ -941,6 +941,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
+
+			if (this.frm.doc.rounded_total) {
+				// keep the base rounded total tied to the base totals the ledger is posted with
+				this.frm.doc.base_rounded_total = flt(
+					this.frm.doc.base_grand_total + this.frm.doc.base_rounding_adjustment,
+					precision("base_rounded_total")
+				);
+			}
 		}
 	}
 
