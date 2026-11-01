@@ -1300,7 +1300,7 @@ class SerialBatchCreation:
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
 
-		if self.has_serial_no:
+		if self.has_serial_no and not self.get("serial_nos"):
 			kwargs["against_sales_order"] = self.get_sales_order()
 
 		if (
