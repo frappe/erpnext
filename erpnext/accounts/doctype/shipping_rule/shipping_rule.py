@@ -132,7 +132,9 @@ class ShippingRule(Document):
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= flt(value) <= flt(condition.to_value)):
+			if flt(condition.from_value) <= flt(value) and (
+				not condition.to_value or flt(value) <= flt(condition.to_value)
+			):
 				return condition.shipping_amount
 
 		return 0.0
@@ -176,10 +178,7 @@ class ShippingRule(Document):
 
 		shipping_charge_filters = shipping_charge.copy()
 		if not self.cost_center:
-			shipping_charge_filters["cost_center"] = (
-				"in",
-				(None, "", erpnext.get_default_cost_center(doc.company)),
-			)
+			shipping_charge_filters["cost_center"] = self.get_cost_center_filter(doc)
 
 		existing_shipping_charge = doc.get("taxes", filters=shipping_charge_filters)
 		if existing_shipping_charge:
@@ -190,9 +189,31 @@ class ShippingRule(Document):
 			shipping_charge["description"] = self.label
 			doc.append("taxes", shipping_charge)
 
+	def remove_from_tax_table(self, doc):
+		"""Remove the shipping row of this rule from the doc. Return True if a row was removed."""
+		existing_shipping_charge = doc.get(
+			"taxes",
+			filters={
+				"charge_type": "Actual",
+				"account_head": self.account,
+				"cost_center": self.get_cost_center_filter(doc),
+			},
+		)
+		if not existing_shipping_charge:
+			return False
+
+		doc.remove(existing_shipping_charge[-1])
+		return True
+
+	def get_cost_center_filter(self, doc):
+		if self.cost_center:
+			return self.cost_center
+
+		return ("in", (None, "", erpnext.get_default_cost_center(doc.company)))
+
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""
-		self.shipping_rules_conditions = sorted(self.conditions, key=lambda d: flt(d.from_value))
+		self.conditions.sort(key=lambda d: flt(d.from_value))
 		for i, d in enumerate(self.conditions):
 			d.idx = i + 1
 
