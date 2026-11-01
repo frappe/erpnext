@@ -56,6 +56,62 @@ class TestEmployee(ERPNextTestSuite):
 			linked.save()
 		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 0)
 
+	def test_hr_user_cannot_reenable_user_through_employee_status(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-disabled-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+		frappe.db.set_value("User", staff, "enabled", 0)
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.status = "Inactive"
+			linked.save()
+			linked.status = "Active"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
+		linked = frappe.get_doc("Employee", employee)
+		linked.status = "Inactive"
+		linked.save()
+		linked.status = "Active"
+		linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 1)
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.status = "Inactive"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
+	def test_hr_user_reenables_only_users_disabled_through_employee_status(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-returning-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+
+		def set_status_as_hr(status):
+			with as_user(hr_user):
+				linked = frappe.get_doc("Employee", employee)
+				linked.status = status
+				linked.save()
+
+		set_status_as_hr("Inactive")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+		set_status_as_hr("Active")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 1)
+
+		user = frappe.get_doc("User", staff)
+		user.enabled = 0
+		user.save(ignore_version=False)
+		set_status_as_hr("Inactive")
+		set_status_as_hr("Active")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
 	def test_hr_roles_link_any_user_except_admins(self):
 		from frappe.permissions import add_permission, reset_perms
 
@@ -108,6 +164,22 @@ class TestEmployee(ERPNextTestSuite):
 				"User Permission", {"allow": "Employee", "for_value": employees[user], "user": user}
 			)
 			self.assertEqual(bool(has_permission), expected)
+
+	def test_hr_user_sets_image_of_employee_linked_to_user(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+		image = frappe.get_doc(doctype="File", file_name="employee-image.png", content=b"image").insert()
+
+		with as_user(hr_user):
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.image = image.file_url
+			employee_doc.save()
+
+		self.assertEqual(frappe.db.get_value("User", staff, "user_image"), image.file_url)
 
 	def test_employee_user_permission(self):
 		employee1 = make_employee(

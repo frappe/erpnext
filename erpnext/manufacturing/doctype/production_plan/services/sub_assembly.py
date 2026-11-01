@@ -48,7 +48,6 @@ class SubAssemblyService:
 
 		bom_data = []
 		get_sub_assembly_items(
-			[item.production_item for item in sub_assembly_items_store],
 			bin_details,
 			row.bom_no,
 			bom_data,

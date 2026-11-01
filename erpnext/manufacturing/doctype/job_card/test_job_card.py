@@ -269,6 +269,16 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.submit()
 		self.assertEqual(job_card.status, "Completed")
 
+	def test_removing_all_time_logs_clears_actual_dates(self):
+		job_card = self.get_first_job_card(self.work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00"})
+		job_card.save()
+		self.assertTrue(job_card.actual_start_date and job_card.actual_end_date)
+
+		job_card.set("time_logs", [])
+		job_card.save()
+		self.assertEqual((job_card.actual_start_date, job_card.actual_end_date), (None, None))
+
 	def test_shop_floor_save_and_continue_holds_only_unfinished_job(self):
 		from erpnext.manufacturing.page.shop_floor.shop_floor import save_and_continue
 
@@ -4356,6 +4366,116 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual((job_card.total_completed_qty, job_card.total_time_in_mins), (10, 60))
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_material_request_is_capped_at_required_qty(self):
+		workstation = make_jc_review_workstation()
+		first_operation = make_jc_review_operation(workstation)
+		second_operation = make_jc_review_operation(workstation)
+		rm_item = make_jc_review_item()
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": rm_item, "qty": 3, "operation": first_operation},
+				{"item_code": rm_item, "qty": 2, "operation": second_operation},
+			],
+			[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 60},
+				{"operation": second_operation, "workstation": workstation, "time_in_mins": 60},
+			],
+			transfer_material_against="Job Card",
+		)
+		first_card = get_jc_review_job_cards(wo.name)[0]
+
+		first_request = make_material_request(first_card.name)
+		first_request.schedule_date = today()
+		first_request.submit()
+
+		# a fully requested card leaves nothing to prefill
+		self.assertFalse(make_material_request(first_card.name).items)
+
+		# the work order still has 20 pending for the second operation
+		duplicate = frappe.copy_doc(first_request)
+		duplicate.items[0].qty = 20
+		self.assertRaises(frappe.ValidationError, duplicate.submit)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_material_request_prefills_only_pending_qty(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		first_item, second_item = make_jc_review_item(), make_jc_review_item()
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": first_item, "qty": 2, "operation": operation},
+				{"item_code": second_item, "qty": 1, "operation": operation},
+			],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		first_request = make_material_request(job_card.name)
+		first_request.schedule_date = today()
+		first_request.items = [row for row in first_request.items if row.item_code == first_item]
+		first_request.items[0].qty = 5
+		first_request.submit()
+
+		second_request = make_material_request(job_card.name)
+		self.assertEqual(
+			sorted((row.item_code, row.qty) for row in second_request.items),
+			sorted([(first_item, 15), (second_item, 10)]),
+		)
+		second_request.schedule_date = today()
+		second_request.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 1, "job_card_excess_transfer": 1}
+	)
+	def test_job_card_material_request_is_not_capped_with_excess_transfer(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 2, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		for _ in range(2):
+			material_request = make_material_request(job_card.name)
+			material_request.schedule_date = today()
+			material_request.submit()
+
+		self.assertEqual(material_request.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 1, "job_card_excess_transfer": 1}
+	)
+	def test_job_card_material_request_prefills_pending_qty_with_excess_transfer(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 2, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+
+		first_request = make_material_request(job_card.name)
+		first_request.schedule_date = today()
+		first_request.items[0].qty = 5
+		first_request.submit()
+
+		second_request = make_material_request(job_card.name)
+		self.assertEqual(second_request.items[0].qty, 15)
+		second_request.schedule_date = today()
+		second_request.submit()
+
+		# nothing pending falls back to the full required qty
+		self.assertEqual(make_material_request(job_card.name).items[0].qty, 20)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_material_request_updates_job_card_requested_qty(self):
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation)
@@ -4375,6 +4495,44 @@ class TestJobCard(ERPNextTestSuite):
 
 		material_request.cancel()
 		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "requested_qty"), 0)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_job_card_material_requests_skip_work_order_pending_check(self):
+		workstation = make_jc_review_workstation()
+		first_operation = make_jc_review_operation(workstation)
+		second_operation = make_jc_review_operation(workstation)
+		rm_item = make_jc_review_item()
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[
+				{"item_code": rm_item, "qty": 3, "operation": first_operation},
+				{"item_code": rm_item, "qty": 2, "operation": second_operation},
+			],
+			[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 60},
+				{"operation": second_operation, "workstation": workstation, "time_in_mins": 60},
+			],
+			transfer_material_against="Job Card",
+		)
+		first_card, second_card = get_jc_review_job_cards(wo.name)
+
+		first_request = make_material_request(first_card.name)
+		first_request.schedule_date = today()
+		first_request.submit()
+
+		transfer = make_stock_entry_from_jc(first_card.name)
+		transfer.insert()
+		transfer.submit()
+
+		second_request = make_material_request(second_card.name)
+		second_request.schedule_date = today()
+		second_request.submit()
+
+		self.assertEqual(second_request.docstatus, 1)
+		self.assertEqual(
+			frappe.get_all("Work Order Item", filters={"parent": wo.name}, pluck="requested_qty"), [0, 0]
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_two_operators_on_one_card_take_one_workstation_slot(self):

@@ -21,6 +21,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item, make_item
@@ -1453,6 +1454,65 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.append("payment_schedule", dict(due_date="2017-01-01", invoice_portion=50.00, payment_amount=50))
 
 		self.assertRaises(frappe.ValidationError, pi.insert)
+
+	def test_standalone_return_updates_paid_invoice_status(self):
+		invoice = make_purchase_invoice(qty=2, rate=100)
+		payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment.reference_no = "Return status test"
+		payment.reference_date = nowdate()
+		payment.insert()
+		payment.submit()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
+
+		return_invoice = make_return_doc(invoice.doctype, invoice.name)
+		return_invoice.update_outstanding_for_self = 1
+		return_invoice.insert()
+		return_invoice.submit()
+
+		invoice.reload()
+		self.assertEqual(invoice.status, "Debit Note Issued")
+		self.assertEqual(invoice.outstanding_amount, 0)
+		self.assertEqual(return_invoice.outstanding_amount, -invoice.grand_total)
+
+		return_invoice.cancel()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
+
+	def test_payment_term_outstanding_without_invoice_portion(self):
+		pi = make_purchase_invoice(qty=1, rate=1000, do_not_save=1)
+		pi.append("payment_schedule", dict(due_date=nowdate(), invoice_portion=0, payment_amount=1000))
+		pi.insert()
+
+		term = pi.payment_schedule[0]
+		self.assertEqual(term.payment_amount, pi.grand_total)
+		self.assertEqual(term.outstanding, term.payment_amount)
+		self.assertEqual(term.base_outstanding, term.base_payment_amount)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+	def test_payment_term_outstanding_fetched_from_order_without_invoice_portion(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+		)
+
+		create_payment_terms_template()
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=1)
+		po.payment_terms_template = "Test Receivable Template"
+		po.append("payment_schedule", dict(due_date=nowdate(), invoice_portion=0, payment_amount=1000))
+		po.insert()
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+
+		term = pi.payment_schedule[0]
+		self.assertEqual(term.invoice_portion, 0)
+		self.assertEqual(term.payment_amount, pi.grand_total)
+		self.assertEqual(term.base_payment_amount, pi.base_grand_total)
+		self.assertEqual(term.outstanding, term.payment_amount)
+		self.assertEqual(term.base_outstanding, term.base_payment_amount)
 
 	def test_debit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

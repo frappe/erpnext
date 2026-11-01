@@ -1159,6 +1159,9 @@ class JobCard(Document):
 			)
 
 	def set_expected_and_actual_time(self):
+		if not self.time_logs:
+			self.actual_start_date = self.actual_end_date = None
+
 		for child_table, start_field, end_field, time_required in [
 			("scheduled_time_logs", "expected_start_date", "expected_end_date", "time_required"),
 			("time_logs", "actual_start_date", "actual_end_date", "total_time_in_mins"),
@@ -1381,7 +1384,7 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.qty))
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
 			.where(
 				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
 			)
@@ -1429,7 +1432,7 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.qty))
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
 			.where(
 				(sed.job_card_item.isin(job_card_items))
 				& (se.docstatus == 1)
@@ -1518,10 +1521,11 @@ class JobCard(Document):
 			return cint(row.operation_row_id) == cint(self.operation_row_id)
 		return row.operation == self.operation
 
-	def set_requested_qty(self):
+	def get_requested_qty_by_item(self):
+		"""Stock qty per job card item in submitted, unstopped Material Requests."""
 		mr = frappe.qb.DocType("Material Request")
 		mr_item = frappe.qb.DocType("Material Request Item")
-		requested = frappe._dict(
+		return frappe._dict(
 			(
 				frappe.qb.from_(mr_item)
 				.inner_join(mr)
@@ -1532,6 +1536,32 @@ class JobCard(Document):
 			).run()
 		)
 
+	def validate_incoming_material_demand(self, material_request):
+		"""Reject requests beyond an item's required qty; callers must hold the
+		job card row lock (for_update=True)."""
+		if frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer"):
+			return
+
+		incoming = {}
+		for row in material_request.items:
+			incoming[row.job_card_item] = incoming.get(row.job_card_item, 0.0) + flt(row.stock_qty)
+
+		requested = self.get_requested_qty_by_item()
+		for item in self.items:
+			if item.name not in incoming:
+				continue
+
+			pending = flt(item.required_qty) - flt(requested.get(item.name))
+			if flt(incoming[item.name] - pending, item.precision("required_qty")) > 0:
+				frappe.throw(
+					_("Only {0} {1} of {2} is pending to request in Job Card {3}.").format(
+						max(pending, 0.0), item.stock_uom, item.item_code, self.name
+					),
+					title=_("Exceeds Pending Qty"),
+				)
+
+	def set_requested_qty(self):
+		requested = self.get_requested_qty_by_item()
 		items = [d for d in self.items if flt(d.required_qty) > 0]
 		requested_fraction = (
 			min(flt(requested.get(d.name)) / flt(d.required_qty) for d in items) if items else 0.0

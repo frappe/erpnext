@@ -171,13 +171,14 @@ class MaterialRequest(BuyingController):
 
 	def validate(self):
 		self.clear_source_warehouse()
+		self.validate_material_request_type()
 		super().validate()
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_material_request_type()
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
 		if not self.status:
 			self.status = "Draft"
@@ -363,10 +364,17 @@ class MaterialRequest(BuyingController):
 
 	def before_submit(self):
 		self.set_status(update=True)
+		self.validate_pending_qty_in_job_card()
 		self.validate_pending_qty_in_work_order()
 
+	def validate_pending_qty_in_job_card(self):
+		if self.job_card:
+			job_card = frappe.get_doc("Job Card", self.job_card, for_update=True)
+			job_card.validate_incoming_material_demand(self)
+
 	def validate_pending_qty_in_work_order(self):
-		if not self.work_order or self.material_request_type != "Material Transfer":
+		"""Job card requests are tracked on the job card, not the work order."""
+		if not self.work_order or self.job_card or self.material_request_type != "Material Transfer":
 			return
 
 		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService

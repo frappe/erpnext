@@ -56,6 +56,7 @@
   "get_outstanding_invoices",
   "get_outstanding_orders",
   "references",
+  "payment_term_discounts_calculated",
   "section_break_34",
   "total_allocated_amount",
   "base_total_allocated_amount",
@@ -805,6 +806,15 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "default": "0",
+   "fieldname": "payment_term_discounts_calculated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Payment Term Discounts Calculated",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -820,7 +830,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-10-13 12:00:00.000000",
+ "modified": "2026-10-30 11:26:43.949477",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

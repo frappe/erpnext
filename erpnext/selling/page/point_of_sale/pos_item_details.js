@@ -132,11 +132,12 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		function get_description_html() {
 			if (description) {
+				description = frappe.utils.html2text(description);
 				description =
 					description.indexOf("...") === -1 && description.length > 140
 						? description.substr(0, 139) + "..."
 						: description;
-				return description;
+				return frappe.utils.escape_html(description);
 			}
 			return ``;
 		}

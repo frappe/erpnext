@@ -250,6 +250,7 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		JournalTaxWithholding(self).on_submit()
+		self.update_payment_order_requests()
 		self.sync_payment_schedules()
 
 	@frappe.whitelist()
@@ -368,7 +369,21 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		AssetService(self).unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.update_payment_order_requests(cancel=True)
 		self.sync_payment_schedules()
+
+	def on_trash(self):
+		from erpnext.accounts.doctype.payment_order.payment_order import clear_payment_reference
+
+		super().on_trash()
+		clear_payment_reference(self)
+
+	def update_payment_order_requests(self, cancel=False):
+		from erpnext.accounts.doctype.payment_order.payment_order import (
+			update_payment_requests_from_journal_entry,
+		)
+
+		update_payment_requests_from_journal_entry(self, cancel=cancel)
 
 	def sync_payment_schedules(self):
 		"""A reference moves the invoice outstanding through the ledger only, so follow it in the schedule."""

@@ -516,6 +516,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	def test_additional_costs_of_foreign_currency_bom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import make_usd_bom
+
+		rm_item = make_item("_Test USD BOM RM", {"is_stock_item": 1, "valuation_rate": 80}).name
+		service_item = make_item("_Test USD BOM Service", {"is_stock_item": 0, "valuation_rate": 160}).name
+		fg_item = make_item("_Test USD BOM FG", {"is_stock_item": 1}).name
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=2, basic_rate=80
+		)
+		bom = make_usd_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}, {"item_code": service_item, "qty": 1}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=3,
+		)
+
+		for use_multi_level_bom in (0, 1):
+			wo = make_wo_order_test_record(
+				item=fg_item,
+				bom_no=bom.name,
+				qty=1,
+				skip_transfer=1,
+				use_multi_level_bom=use_multi_level_bom,
+				source_warehouse="_Test Warehouse - _TC",
+			)
+			ste = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+			ste.insert()
+			# USD 2 service + USD 3 operating cost at 80
+			self.assertEqual(ste.total_additional_costs, 400)
+
 	@timeout(seconds=60)
 	def test_job_card(self):
 		stock_entries = []
@@ -1964,6 +1994,73 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in mr.items:
 			self.assertEqual(row.qty, required_qty[row.item_code])
 
+	def test_partial_qty_rounds_up_whole_number_uom(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+
+		fg = make_item(properties={"is_stock_item": 1}).name
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
+		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse="Stores - _TC")
+		test_stock_entry.make_stock_entry(item_code=rm, target="Stores - _TC", qty=10, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg, bom_no=bom.name, qty=5, source_warehouse="Stores - _TC"
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in pick_list.locations], [3])
+
+		mr = self.submit_material_request(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in mr.items], [3])
+
+		# rounding up stays within the 2 left to request
+		mr = make_material_request(work_order.name, for_qty=2.5)
+		self.assertEqual([row.qty for row in mr.items], [2])
+
+	def test_partial_qty_rounds_up_once_for_item_in_two_operations(self):
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM"}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		first_operation, workstation = make_review_operation()
+		second_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg,
+			[
+				{"item_code": rm, "qty": 1, "operation": first_operation},
+				{"item_code": rm, "qty": 1, "operation": second_operation},
+			],
+			operations=[
+				{"operation": first_operation, "workstation": workstation, "time_in_mins": 6},
+				{"operation": second_operation, "workstation": _workstation, "time_in_mins": 6},
+			],
+		)
+		work_order = make_review_work_order(fg, bom.name, 3)
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 0}):
+			mr = make_material_request(work_order.name, for_qty=1.5)
+		self.assertEqual([row.qty for row in mr.items], [3])
+
+		with self.change_settings("Buying Settings", {"allow_multiple_items": 1}):
+			mr = make_material_request(work_order.name, for_qty=1.5)
+		self.assertEqual([row.qty for row in mr.items], [2, 1])
+
+	def test_full_request_fits_unrounded_pending_qty(self):
+		rm = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
+		).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 2}], quantity=3)
+		work_order = make_review_work_order(fg, bom.name, 1)
+
+		mr = self.submit_material_request(work_order.name)
+		self.assertEqual(mr.docstatus, 1)
+
+	def test_partial_qty_rounds_up_whole_number_demand_below_precision(self):
+		rm = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM", "valuation_rate": 100}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 1}], quantity=10000)
+		work_order = make_review_work_order(fg, bom.name, 10000)
+
+		mr = make_material_request(work_order.name, for_qty=1)
+		self.assertEqual([row.qty for row in mr.items], [1])
+
 	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
 
@@ -2083,6 +2180,41 @@ class TestWorkOrder(ERPNextTestSuite):
 		first, second = full_draft(), full_draft()
 		first.submit()
 		self.assertRaises(frappe.ValidationError, second.submit)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"transfer_extra_materials_percentage": 10, "backflush_raw_materials_based_on": "BOM"},
+	)
+	def test_material_request_allows_transfer_extra_materials_percentage(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		self.receive_test_fg_raw_materials()
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
+		)
+
+		def draft_with_extra(extra_pct):
+			mr = make_material_request(work_order.name)
+			mr.schedule_date = today()
+			for item in mr.items:
+				item.schedule_date = today()
+				item.qty = flt(item.qty * (1 + extra_pct / 100), item.precision("qty"))
+			return mr.insert()
+
+		self.assertRaises(frappe.ValidationError, draft_with_extra(20).submit)
+
+		mr = draft_with_extra(10)
+		mr.submit()
+
+		stock_entry = frappe.get_doc(mr_to_stock_entry(mr.name))
+		stock_entry.insert()
+		stock_entry.submit()
+
+		work_order.reload()
+		for row in work_order.required_items:
+			self.assertEqual(
+				row.transferred_qty, flt(row.required_qty * 1.1, row.precision("transferred_qty"))
+			)
 
 	def test_picked_qty_counts_pick_list_of_stopped_material_request(self):
 		from erpnext.stock.doctype.material_request.mapper import create_pick_list as mr_to_pick_list

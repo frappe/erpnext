@@ -61,6 +61,7 @@ class StockReconciliation(StockController):
 		cost_center: DF.Link | None
 		difference_amount: DF.Currency
 		expense_account: DF.Link | None
+		is_made_from_valuation_comparison: DF.Check
 		items: DF.Table[StockReconciliationItem]
 		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
 		posting_date: DF.Date
@@ -117,6 +118,8 @@ class StockReconciliation(StockController):
 	def validate_adjustment_entry(self):
 		"""An Adjustment Entry resets each item-warehouse to its rows (erpnext.stock.valuation_adjustment),
 		so none of the counting a reconciliation does applies to it."""
+		AdjustmentEntry(self).validate_made_from_report()
+
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
@@ -1294,7 +1297,9 @@ class StockReconciliation(StockController):
 					frappe.bold(self.expense_account)
 				)
 			)
-		elif self.purpose == "Opening Stock" or not frappe.db.get_all("Stock Ledger Entry", limit=1):
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all(
+			"Stock Ledger Entry", filters={"company": self.company, "is_cancelled": 0}, limit=1
+		):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
 					_(

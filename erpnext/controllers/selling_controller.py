@@ -349,7 +349,14 @@ class SellingController(StockController):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						flt(d.rate_with_margin) > 0
+						and flt(d.discount_amount)
+						> flt(flt(d.rate_with_margin) * discount / 100, d.precision("discount_amount"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
@@ -560,7 +567,8 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def ensure_customer_is_not_blocked(self):
-		if self.doctype == "Quotation":
+		# Consolidated POS invoices only merge POS invoices that already passed this check
+		if self.doctype == "Quotation" or self.get("is_consolidated") or self.get("is_return"):
 			return
 
 		if self.customer and is_customer_blocked(self.customer):
@@ -619,10 +627,18 @@ class SellingController(StockController):
 				):
 					d.incoming_rate = 0
 
-		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+		is_standalone = self.get("is_return") and not self.get("return_against")
+
+		if self.doctype not in ("Delivery Note", "Sales Invoice") and not (
+			self.doctype == "POS Invoice" and is_standalone
+		):
 			return
 
-		if self.doctype == "Sales Invoice" and not self.update_stock and not self.is_internal_transfer():
+		if (
+			self.doctype in ("Sales Invoice", "POS Invoice")
+			and not self.update_stock
+			and not self.is_internal_transfer()
+		):
 			return
 
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
@@ -633,8 +649,6 @@ class SellingController(StockController):
 		set_zero_rate_for_expired_batch = frappe.db.get_single_value(
 			"Selling Settings", "set_zero_rate_for_expired_batch"
 		)
-
-		is_standalone = self.is_return and not self.return_against
 
 		old_doc = self.get_doc_before_save()
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -886,8 +900,9 @@ class SellingController(StockController):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(
-					((flt(item.stock_uom_rate) - flt(item.valuation_rate)) * item.stock_qty),
-					self.precision("amount", item),
+					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
+					* item.stock_qty,
+					self.precision("gross_profit", item),
 				)
 
 	def set_customer_address(self):

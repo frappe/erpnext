@@ -47,8 +47,8 @@ erpnext.PointOfSale.Controller = class {
 			if (!pos_profile) return;
 			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
 				dialog.fields_dict.balance_details.df.data = [];
-				payments.forEach((pay) => {
-					const { mode_of_payment } = pay;
+				const modes_of_payment = new Set(payments.map((pay) => pay.mode_of_payment));
+				modes_of_payment.forEach((mode_of_payment) => {
 					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: "0" });
 				});
 				dialog.fields_dict.balance_details.grid.refresh();
@@ -175,7 +175,7 @@ erpnext.PointOfSale.Controller = class {
 				const msg =
 					data.operation === "Closed"
 						? __("POS has been closed at {0}. Please refresh the page.", [
-								frappe.datetime.str_to_user(data.doc?.creation).bold(),
+								frappe.datetime.str_to_user(data.creation).bold(),
 						  ])
 						: __("POS Opening Entry has been cancelled. Please refresh the page.");
 				frappe.msgprint({
@@ -729,13 +729,13 @@ erpnext.PointOfSale.Controller = class {
 
 				this.update_cart_html(item_row);
 
-				if (this.item_details.$component.is(":visible")) this.edit_item_details_of(item_row);
-
 				if (
-					this.check_serial_batch_selection_needed(item_row) &&
-					!this.item_details.$component.is(":visible")
-				)
+					this.item_details.$component.is(":visible") ||
+					(item_row.has_batch_no && !batch_no) ||
+					this.check_serial_batch_selection_needed(item_row)
+				) {
 					this.edit_item_details_of(item_row);
+				}
 			}
 		} catch (error) {
 			console.log(error);
@@ -762,11 +762,11 @@ erpnext.PointOfSale.Controller = class {
 			// if item is clicked twice from item selector
 			// then "item_code, batch_no, uom, rate" will help in getting the exact item
 			// to increase the qty by one
-			const has_batch_no = batch_no !== "null" && batch_no !== null;
+			const has_batch_no = batch_no && batch_no !== "null";
 			item_row = this.frm.doc.items.find(
 				(i) =>
 					i.item_code === item_code &&
-					(!has_batch_no || (has_batch_no && i.batch_no === batch_no)) &&
+					(has_batch_no ? i.batch_no === batch_no : !i.batch_no) &&
 					i.uom === uom &&
 					flt(i.price_list_rate, precision("price_list_rate", i)) ===
 						flt(rate, precision("price_list_rate", i))

@@ -10,7 +10,7 @@ import re
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_link_to_form
 
 # the transactions the pricing engine is called for, from transaction.js and the POS
 PRICING_TRANSACTION_DOCTYPES = frozenset(
@@ -32,6 +32,34 @@ PRICING_TRANSACTION_DOCTYPES = frozenset(
 		# no client sends this one, but set_transaction_type below still branches on it
 		"Opportunity",
 	}
+)
+
+PRICING_ROW_FIELDS = (
+	"item_code",
+	"qty",
+	"uom",
+	"conversion_factor",
+	"price_list_rate",
+	"warehouse",
+	"pricing_rules",
+)
+
+PRICING_PARENT_FIELDS = (
+	"company",
+	"currency",
+	"coupon_code",
+	"customer",
+	"supplier",
+	"party_name",
+	"customer_group",
+	"supplier_group",
+	"territory",
+	"campaign",
+	"sales_partner",
+	"selling_price_list",
+	"buying_price_list",
+	"posting_date",
+	"transaction_date",
 )
 
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
@@ -277,6 +305,14 @@ class PricingRule(Document):
 			if flt(self.recurse_for) <= 0:
 				self.recurse_for = 1
 		if self.is_recursive:
+			if self.apply_on == "Transaction":
+				throw(
+					_("{0} is not supported when {1} is {2}").format(
+						frappe.bold(_("Is Recursive")),
+						frappe.bold(_("Apply On")),
+						frappe.bold(_("Transaction")),
+					)
+				)
 			if flt(self.apply_recursion_over) > flt(self.min_qty):
 				throw(_("Min Qty should be greater than Recurse Over Qty"))
 			if flt(self.apply_recursion_over) < 0:
@@ -435,7 +471,6 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
-		get_pricing_rules,
 		get_product_discount_rule,
 	)
 
@@ -461,7 +496,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	if args.ignore_pricing_rule or not args.item_code:
 		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rules"):
-			item_details = remove_pricing_rule_for_item(
+			item_details = reset_pricing_rule_details(
 				args.get("pricing_rules"),
 				item_details,
 				item_code=args.get("item_code"),
@@ -471,14 +506,53 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 	update_args_for_pricing_rule(args)
 
-	pricing_rules = (
-		get_applied_pricing_rules(args.get("pricing_rules"))
-		if for_validate and args.get("pricing_rules")
-		else get_pricing_rules(args, doc)
+	applied_rules = get_applied_pricing_rules(args.get("pricing_rules"))
+	coupon_pricing_rule = (
+		frappe.get_cached_value("Coupon Code", args.coupon_code, "pricing_rule")
+		if args.get("coupon_code")
+		else None
 	)
+	pricing_rules = select_pricing_rules(args, doc, for_validate)
+
+	selected_rules = {
+		rule if isinstance(rule, str) else rule.get("name") for rule in (pricing_rules or []) if rule
+	}
+	removed_rules = [rule for rule in applied_rules if rule not in selected_rules]
+	if for_validate:
+		notify_removed_pricing_rules(args, removed_rules)
+
+	restore_rate = any(
+		frappe.get_cached_value("Pricing Rule", rule, "rate_or_discount") == "Rate" for rule in removed_rules
+	)
+	if restore_rate:
+		get_price_list_rate = frappe.get_attr("erpnext.stock.get_item_details.get_price_list_rate")
+		# A rate rule overwrites the row's price-list rate. Do not reuse it for the next coupon.
+		price_args = args.copy()
+		price_args.update(price_list_rate=0, rate=0)
+		item = frappe.get_cached_doc("Item", args.item_code)
+		price = get_price_list_rate(price_args, item)
+		if (
+			price.get("price_list_rate") is None
+			and args.transaction_type == "selling"
+			and frappe.get_single_value("Selling Settings", "fallback_to_default_price_list")
+		):
+			price_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			price_args.price_list_uom_dependant = None
+			price = get_price_list_rate(price_args, item)
+		if price.get("price_list_rate") is not None:
+			args.price_list_rate = item_details.price_list_rate = flt(price.get("price_list_rate"))
+
+	rules = []
 
 	if pricing_rules:
-		rules = []
+		if removed_rules:
+			item_details = reset_pricing_rule_details(
+				frappe.as_json(removed_rules),
+				item_details,
+				item_code=args.item_code,
+				rate=args.price_list_rate,
+			)
+
 		price_rules = []
 
 		for pricing_rule in pricing_rules:
@@ -496,10 +570,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			if pricing_rule.get("coupon_code_based") == 1:
 				if not args.coupon_code:
 					continue
-				coupon_code = frappe.db.get_value(
-					doctype="Coupon Code", filters={"pricing_rule": pricing_rule.name}, fieldname="name"
-				)
-				if args.coupon_code != coupon_code:
+				if coupon_pricing_rule != pricing_rule.name:
 					continue
 
 			if pricing_rule.get("suggestion"):
@@ -558,12 +629,16 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 		item_details.pricing_rules = frappe.as_json([d.pricing_rule for d in rules])
 
-		if not doc:
-			return item_details
+	if restore_rate and item_details.get("price_list_rate") is None:
+		frappe.throw(
+			_("Set an Item Price for item {0} before removing or replacing its Rate pricing rule.").format(
+				args.item_code
+			)
+		)
 
-	# "[]" means no rule was applied, so there is none to remove and the rate typed in stays
-	elif get_applied_pricing_rules(args.get("pricing_rules")):
-		item_details = remove_pricing_rule_for_item(
+	# "[]" means no rule was applied, so keep the manually entered rate.
+	if not rules and applied_rules:
+		item_details = reset_pricing_rule_details(
 			args.get("pricing_rules"),
 			item_details,
 			item_code=args.get("item_code"),
@@ -571,6 +646,39 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		)
 
 	return item_details
+
+
+def select_pricing_rules(args, doc, for_validate):
+	from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules, get_pricing_rules
+
+	if for_validate and args.get("pricing_rules") and is_row_unchanged_since_save(args, doc):
+		return get_applied_pricing_rules(args.get("pricing_rules"))
+
+	return get_pricing_rules(args, doc)
+
+
+def is_row_unchanged_since_save(args, doc):
+	if not doc or doc.get("_action") != "submit" or not doc.get_doc_before_save():
+		return False
+
+	row = next((d for d in doc.get("items") or [] if d.name == args.child_docname), None)
+	if not row or not row.get_doc_before_save():
+		return False
+
+	return not any(row.has_value_changed(field) for field in PRICING_ROW_FIELDS) and not any(
+		doc.has_value_changed(field) for field in PRICING_PARENT_FIELDS if doc.meta.has_field(field)
+	)
+
+
+def notify_removed_pricing_rules(args, removed_rules):
+	for pricing_rule in removed_rules:
+		frappe.msgprint(
+			_("Row {0}: Pricing Rule {1} no longer applies to item {2} and has been removed").format(
+				args.idx, get_link_to_form("Pricing Rule", pricing_rule), frappe.bold(args.item_code)
+			),
+			title=_("Pricing Rule Removed"),
+			indicator="orange",
+		)
 
 
 def update_args_for_pricing_rule(args):
@@ -702,12 +810,17 @@ def remove_pricing_rule_for_item(
 	item_code: str | None = None,
 	rate: float | None = None,
 ):
+	item_details = frappe._dict(frappe.parse_json(item_details))
+	validate_pricing_context(frappe._dict(doctype=item_details.parenttype, name=item_details.parent))
+
+	return reset_pricing_rule_details(pricing_rules, item_details, item_code=item_code, rate=rate)
+
+
+def reset_pricing_rule_details(pricing_rules, item_details, item_code=None, rate=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 	)
-
-	item_details = frappe._dict(frappe.parse_json(item_details))
 
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d):
@@ -715,13 +828,10 @@ def remove_pricing_rule_for_item(
 		pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 
 		if pricing_rule.price_or_product_discount == "Price":
-			if pricing_rule.rate_or_discount == "Discount Percentage":
+			if pricing_rule.rate_or_discount in ["Rate", "Discount Percentage", "Discount Amount"]:
 				item_details.discount_percentage = 0.0
 				item_details.discount_amount = 0.0
 				item_details.rate = rate or 0.0
-
-			if pricing_rule.rate_or_discount == "Discount Amount":
-				item_details.discount_amount = 0.0
 
 			if pricing_rule.margin_type in ["Percentage", "Amount"]:
 				item_details.margin_rate_or_amount = 0.0
@@ -748,14 +858,15 @@ def remove_pricing_rule_for_item(
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list: str | list):
-	item_list = frappe.parse_json(item_list)
+	item_list = [frappe._dict(item) for item in frappe.parse_json(item_list)]
+	for doctype, name in {(item.parenttype, item.parent) for item in item_list}:
+		validate_pricing_context(frappe._dict(doctype=doctype, name=name))
 
 	out = []
 	for item in item_list:
-		item = frappe._dict(item)
 		if item.get("pricing_rules"):
 			out.append(
-				remove_pricing_rule_for_item(
+				reset_pricing_rule_details(
 					item.get("pricing_rules"), item, item.item_code, item.get("price_list_rate")
 				)
 			)

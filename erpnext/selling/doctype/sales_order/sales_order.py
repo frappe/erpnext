@@ -14,6 +14,7 @@ from frappe.query_builder.functions import Abs, IfNull, Round, Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate
 from pypika import Order
 
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
@@ -216,6 +217,7 @@ class SalesOrder(SellingController):
 
 	def onload(self) -> None:
 		super().onload()
+		self.set_proforma_onload()
 
 		if self.get("is_subcontracted"):
 			self.set_onload("can_update_items", self.can_update_items())
@@ -234,6 +236,20 @@ class SalesOrder(SellingController):
 				has_potentially_billable_items(self.name),
 			)
 			self.set_onload("has_over_deliverable_rows", self.has_over_deliverable_rows())
+
+	def set_proforma_onload(self) -> None:
+		"""Pass proforma settings to the form, since Sales Users cannot read Selling Settings."""
+		if self.docstatus == 0:
+			return
+
+		if not frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice"):
+			return
+
+		self.set_onload("enable_proforma_invoice", True)
+		self.set_onload(
+			"default_proforma_print_format",
+			frappe.db.get_single_value("Selling Settings", "default_proforma_print_format"),
+		)
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
@@ -268,9 +284,7 @@ class SalesOrder(SellingController):
 		)
 
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
-
-			validate_coupon_code(self.coupon_code)
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		if not self.get("is_subcontracted"):
 			SalesOrderStockReservation(self).enable_auto_reserve_stock()
@@ -507,7 +521,12 @@ class SalesOrder(SellingController):
 		if opportunity_name:
 			frappe.db.set_value("Opportunity", opportunity_name, "status", flag)
 
-	def update_prevdoc_status(self, flag=None):
+	def update_prevdoc_status(self, flag=None, update_quotation_qty=False):
+		# Update Items edits ordered rows without going through on_submit/on_cancel,
+		# so recompute the quotation's ordered_qty and re-run the over-order check here.
+		if update_quotation_qty:
+			super().update_prevdoc_status()
+
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
@@ -522,6 +541,33 @@ class SalesOrder(SellingController):
 
 				doc.set_status(update=True)
 				doc.update_opportunity("Converted" if flag == "submit" else "Quotation")
+
+	def update_ordered_qty_in_quotation_for_removed_items(self, removed_items):
+		"""Recompute Quotation Item ordered_qty for rows removed via Update Items.
+
+		`update_qty` on the surviving rows never visits a removed row's quotation_item,
+		so without this it keeps counting as ordered even after the row (or the SO) is gone.
+		"""
+		soi = frappe.qb.DocType("Sales Order Item")
+		quotations = set()
+		for item in removed_items:
+			quotation_item = item.get("quotation_item")
+			if not quotation_item:
+				continue
+
+			ordered_qty = (
+				frappe.qb.from_(soi)
+				.select(Sum(soi.stock_qty))
+				.where((soi.quotation_item == quotation_item) & (soi.docstatus == 1))
+			).run()[0][0]
+			frappe.db.set_value("Quotation Item", quotation_item, "ordered_qty", flt(ordered_qty))
+
+			quotation = frappe.db.get_value("Quotation Item", quotation_item, "parent")
+			if quotation:
+				quotations.add(quotation)
+
+		for quotation in quotations:
+			frappe.get_doc("Quotation", quotation).set_status(update=True)
 
 	def validate_drop_ship(self):
 		for d in self.get("items"):
@@ -752,6 +798,7 @@ class SalesOrder(SellingController):
 
 	@frappe.whitelist()
 	def create_delivery_schedule(self, child_row: dict | frappe._dict, schedules: str | list[dict]):
+		self.check_permission("write")
 		DeliveryScheduleService(self).create_delivery_schedule(child_row, schedules)
 
 
@@ -851,7 +898,13 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 
 @frappe.whitelist(methods=["POST"])
 def update_status(status: str, name: str):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
@@ -876,6 +929,7 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.controllers.item_close import is_bundle_of_closed_row
 	from erpnext.manufacturing.doctype.work_order.services.status import qty_against_sales_order
 
 	if sales_order:
@@ -901,6 +955,10 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		)
 		for table in [so.items, so.packed_items]:
 			for i in table:
+				row_closed = is_bundle_of_closed_row(i) if i.doctype == "Packed Item" else i.closed
+				if row_closed:
+					continue
+
 				bom = get_default_bom(i.item_code)
 				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
 
