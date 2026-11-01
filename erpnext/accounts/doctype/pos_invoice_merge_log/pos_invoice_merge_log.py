@@ -582,6 +582,7 @@ def unconsolidate_pos_invoices(closing_entry):
 	)
 
 	if len(closing_entry.pos_invoices) >= 10:
+		closing_entry.ignore_linked_doctypes = ("POS Invoice Merge Log", "Sales Invoice")
 		closing_entry.set_status(update=True, status="Queued")
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
@@ -677,10 +678,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			error_message = get_error_message(message_log)
 
 			if closing_entry:
-				closing_entry.set_status(update=True, status="Failed")
-				if isinstance(error_message, list):
-					error_message = json.dumps(error_message)
-				closing_entry.db_set("error_message", error_message)
+				set_closing_entry_status_after_failure(closing_entry, "Failed", error_message)
 			raise
 
 		finally:
@@ -714,13 +712,23 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			error_message = get_error_message(message_log)
 
 			if closing_entry:
-				closing_entry.set_status(update=True, status="Submitted")
-				closing_entry.db_set("error_message", error_message)
+				set_closing_entry_status_after_failure(closing_entry, "Submitted", error_message)
 			raise
 
 		finally:
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
+
+
+def set_closing_entry_status_after_failure(closing_entry, status, error_message):
+	docstatus = frappe.db.get_value("POS Closing Entry", closing_entry.name, "docstatus")
+	if not docstatus:
+		return
+
+	if isinstance(error_message, list):
+		error_message = json.dumps(error_message)
+
+	closing_entry.db_set({"status": "Failed" if docstatus == 2 else status, "error_message": error_message})
 
 
 def enqueue_job(job, **kwargs):
@@ -738,6 +746,7 @@ def enqueue_job(job, **kwargs):
 			event="processing_merge_logs",
 			job_id=job_id,
 			now=frappe.conf.developer_mode or frappe.in_test,
+			enqueue_after_commit=True,
 		)
 
 		if job == create_merge_logs:
