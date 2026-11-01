@@ -3,9 +3,6 @@
 
 import frappe
 
-<<<<<<< HEAD
-import frappe
-=======
 from erpnext.accounts.party import DuplicatePartyAccountError
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -96,4 +93,3 @@ class TestCustomerGroup(ERPNextTestSuite):
 		group.accounts = []
 		group.append("accounts", {"company": "_Test Company", "account": "Debtors - _TC"})
 		group.insert()
->>>>>>> 981737c (fix(customer group): validate party accounts before saving)

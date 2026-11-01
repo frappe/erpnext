@@ -185,11 +185,8 @@ class SupplierScorecard(Document):
 		return above_min and (not standing.max_grade or standing.max_grade > score)
 
 
-@frappe.whitelist()
-def get_timeline_data(doctype, name):
-	# Get a list of all the associated scorecards
+def get_timeline_data(doctype: str, name: str) -> dict[float, float]:
 	scs = frappe.get_doc(doctype, name)
-	out = {}
 	timeline_data = {}
 	scorecards = frappe.db.sql(
 		"""
@@ -211,8 +208,7 @@ def get_timeline_data(doctype, name):
 		for single_date in daterange(start_date, end_date):
 			timeline_data[time.mktime(single_date.timetuple())] = total_score
 
-	out["timeline_data"] = timeline_data
-	return out
+	return timeline_data
 
 
 def daterange(start_date, end_date):

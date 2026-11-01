@@ -63,7 +63,7 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		asset_maintenance_log_doc = frappe.get_doc("Asset Maintenance Log", asset_maintenance_log)
 		asset_maintenance_log_doc.update(
 			{
-				"completion_date": add_days(nowdate(), 2),
+				"completion_date": nowdate(),
 				"maintenance_status": "Completed",
 			}
 		)
@@ -73,6 +73,42 @@ class TestAssetMaintenance(ERPNextTestSuite):
 
 		asset_maintenance.reload()
 		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
+
+	def test_cancelled_or_removed_task_cancels_only_its_open_logs(self):
+		asset_maintenance = self.make_asset_maintenance()
+		cancelled_task = asset_maintenance.asset_maintenance_tasks[0]
+		removed_task = asset_maintenance.asset_maintenance_tasks[1].name
+		completed_log = frappe.get_last_doc("Asset Maintenance Log", {"task": removed_task})
+		completed_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		completed_log.submit()
+
+		asset_maintenance.reload()
+		asset_maintenance.asset_maintenance_tasks[0].maintenance_status = "Cancelled"
+		asset_maintenance.asset_maintenance_tasks.pop()
+		asset_maintenance.save()
+
+		self.assertEqual(
+			frappe.db.get_value("Asset Maintenance Log", {"task": cancelled_task.name}, "maintenance_status"),
+			"Cancelled",
+		)
+		statuses = dict(
+			frappe.get_all(
+				"Asset Maintenance Log", {"task": removed_task}, ["name", "maintenance_status"], as_list=True
+			)
+		)
+		self.assertEqual(statuses.pop(completed_log.name), "Completed")
+		self.assertEqual(set(statuses.values()), {"Cancelled"})
+
+	def make_asset_maintenance(self):
+		return frappe.get_doc(
+			{
+				"doctype": "Asset Maintenance",
+				"asset_name": self.asset_name,
+				"maintenance_team": "Team Awesome",
+				"company": "_Test Company",
+				"asset_maintenance_tasks": get_maintenance_tasks(),
+			}
+		).insert()
 
 
 def get_maintenance_tasks():

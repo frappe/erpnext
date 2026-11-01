@@ -96,6 +96,59 @@ class TestPOSOpeningEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, opening_entry.cancel)
 
+	def test_user_not_in_pos_profile_cannot_open_session(self):
+		_, pos_profile = self.init_user_and_profile()
+		other_user = create_user("test_other_cashier@example.com", "Sales User")
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			create_opening_entry(pos_profile, other_user.name)
+
+		self.assertIn("Applicable for Users", str(context.exception))
+
+	def test_blank_user_row_keeps_pos_profile_open_to_every_user(self):
+		test_user = self.init_user_and_profile(do_not_create_pos_profile=1)
+		pos_profile = make_pos_profile()
+		pos_profile.append("applicable_for_users", {"default": 1})
+		pos_profile.save()
+
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+
+		self.assertEqual(opening_entry.status, "Open")
+
+	def test_blank_user_row_lets_unlisted_user_open_session(self):
+		_, pos_profile = self.init_user_and_profile()
+		pos_profile.append("applicable_for_users", {})
+		pos_profile.save()
+		other_user = create_user("test_other_cashier@example.com", "Sales User")
+
+		opening_entry = create_opening_entry(pos_profile, other_user.name)
+
+		self.assertEqual(opening_entry.status, "Open")
+
+	def test_negative_or_duplicate_opening_balance_is_refused(self):
+		test_user, pos_profile = self.init_user_and_profile()
+		for balance_details, message in (
+			([{"mode_of_payment": "Cash", "opening_amount": -500}], "cannot be negative"),
+			(
+				[
+					{"mode_of_payment": "Cash", "opening_amount": 200},
+					{"mode_of_payment": "Cash", "opening_amount": 100},
+				],
+				"added more than once",
+			),
+		):
+			opening_entry = frappe.get_doc(
+				{
+					"doctype": "POS Opening Entry",
+					"pos_profile": pos_profile.name,
+					"user": test_user.name,
+					"company": pos_profile.company,
+					"period_start_date": frappe.utils.get_datetime(),
+					"balance_details": balance_details,
+				}
+			)
+			self.assertRaisesRegex(frappe.ValidationError, message, opening_entry.insert)
+
 
 def create_opening_entry(pos_profile, user, get_obj=False):
 	entry = frappe.new_doc("POS Opening Entry")
