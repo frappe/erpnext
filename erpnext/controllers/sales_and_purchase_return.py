@@ -85,6 +85,20 @@ def validate_return_against(doc):
 					)
 				)
 
+			if (
+				doc.doctype == "Purchase Invoice"
+				and doc.update_stock
+				and not ref_doc.update_stock
+				and not frappe.db.exists(
+					"Purchase Receipt Item", {"purchase_invoice": doc.return_against, "docstatus": 1}
+				)
+			):
+				frappe.throw(
+					_("'Update Stock' cannot be checked because items are not received via {0}").format(
+						doc.return_against
+					)
+				)
+
 
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
@@ -155,6 +169,17 @@ def validate_returned_items(doc):
 					and flt(d.rate) > ref.rate
 					and doc.doctype in ("Delivery Note", "Sales Invoice")
 					and get_valuation_method(d.item_code, doc.company) != "Moving Average"
+				):
+					frappe.throw(
+						_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}").format(
+							d.idx, doc.doctype, doc.return_against
+						)
+					)
+
+				if (
+					ref.rate
+					and doc.doctype in ("Purchase Invoice", "Purchase Receipt")
+					and flt(d.rate, d.precision("rate")) > flt(ref.rate, d.precision("rate"))
 				):
 					frappe.throw(
 						_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}").format(

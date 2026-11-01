@@ -102,6 +102,7 @@ def make_purchase_receipt(
 				"doctype": "Purchase Receipt",
 				"validation": {
 					"docstatus": ["=", 1],
+					"is_return": ["=", 0],
 				},
 			},
 			"Purchase Invoice Item": {
