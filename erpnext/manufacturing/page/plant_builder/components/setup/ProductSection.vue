@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { FormControl } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
-import LinkField from "../LinkField.vue";
+import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { fmt } from "../../lib/format";
 
@@ -24,11 +24,11 @@ const weightText = computed(() => {
 		/>
 		<div class="grid grid-cols-2 gap-3">
 			<FormControl v-model="doc.floor_name" :label="__('Plant Name')" :disabled="isSaved" />
-			<LinkField v-model="doc.company" doctype="Company" :label="__('Company')" :disabled="isSaved" />
+			<DeskControl v-model="doc.company" options="Company" :label="__('Company')" :disabled="isSaved" />
 		</div>
-		<LinkField
+		<DeskControl
 			v-model="doc.production_item"
-			doctype="Item"
+			options="Item"
 			:label="__('Finished Good')"
 			:filters="{ is_stock_item: 1, has_variants: 0 }"
 			:description="doc.production_item ? weightText : ''"
@@ -38,16 +38,16 @@ const weightText = computed(() => {
 			<FormControl v-model="doc.formula_tolerance" type="number" :label="__('Formula Tolerance (%)')" />
 		</div>
 		<div class="grid grid-cols-2 gap-3">
-			<LinkField
+			<DeskControl
 				v-model="doc.warehouse"
-				doctype="Warehouse"
+				options="Warehouse"
 				:label="__('Raw Material Store')"
 				:filters="warehouseFilters"
 				:disabled="isSaved && !!doc.warehouse"
 			/>
-			<LinkField
+			<DeskControl
 				v-model="doc.fg_warehouse"
-				doctype="Warehouse"
+				options="Warehouse"
 				:label="__('Finished Goods Warehouse')"
 				:filters="warehouseFilters"
 			/>

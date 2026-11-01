@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { Button, FormControl, TextInput, Tooltip } from "frappe-ui";
-import LinkField from "../LinkField.vue";
+import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { MACHINES } from "../../lib/machines";
 
@@ -86,21 +86,21 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 		<div class="space-y-3 p-3">
 			<div class="grid grid-cols-2 gap-3">
 				<FormControl v-model="stage.stage_name" :label="__('Stage Name')" />
-				<LinkField
+				<DeskControl
 					v-model="stage.workstation"
-					doctype="Workstation"
+					options="Workstation"
 					:label="__('Machine')"
 					:filters="workstationFilters"
 				/>
 			</div>
 			<div class="grid grid-cols-2 gap-3">
-				<LinkField v-model="stage.operation" doctype="Operation" :label="__('Operation')" />
+				<DeskControl v-model="stage.operation" options="Operation" :label="__('Operation')" />
 				<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
 			</div>
 			<template v-if="!isPacking">
-				<LinkField
+				<DeskControl
 					v-model="stage.semi_finished_good"
-					doctype="Item"
+					options="Item"
 					:label="__('Semi-finished Good')"
 					:filters="{ is_stock_item: 1 }"
 				/>
@@ -120,7 +120,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					:key="row.name || i"
 					class="grid grid-cols-[minmax(0,1fr)_5rem_1.75rem] items-center gap-2"
 				>
-					<LinkField v-model="row.item_code" doctype="Item" :filters="{ is_stock_item: 1 }" />
+					<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
 					<TextInput
 						v-model="row.qty_per_unit"
 						type="number"
