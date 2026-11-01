@@ -446,9 +446,10 @@ class PurchaseOrder(BuyingController):
 						"Item", d.item_code, "last_purchase_rate"
 					)
 					if item_last_purchase_rate:
-						d.base_price_list_rate = (
-							d.base_rate
-						) = d.price_list_rate = d.rate = d.last_purchase_rate = item_last_purchase_rate
+						d.base_price_list_rate = d.base_rate = item_last_purchase_rate * (
+							flt(d.conversion_factor) or 1.0
+						)
+						d.price_list_rate = d.rate = d.last_purchase_rate = d.base_rate / conversion_rate
 
 	def update_ordered_qty(self, po_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -799,7 +800,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 	else:
 		item_last_purchase_rate = frappe.get_cached_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
-			return item_last_purchase_rate
+			return item_last_purchase_rate * (flt(conversion_factor) or 1.0) / conversion_rate
 
 
 @frappe.whitelist(methods=["POST"])
