@@ -48,7 +48,7 @@ def get_pricing_rules(args, doc=None):
 				and rule.name in get_applied_pricing_rules(args.get("pricing_rules"))
 			)
 		]
-		pricing_rules.extend(candidates)
+		pricing_rules.extend(filter_pricing_rule_based_on_condition(candidates, doc))
 		if pricing_rules and pricing_rules[0].has_priority:
 			continue
 
@@ -56,8 +56,6 @@ def get_pricing_rules(args, doc=None):
 			break
 
 	rules = []
-
-	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 	if not pricing_rules:
 		return []
