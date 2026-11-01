@@ -197,6 +197,9 @@ def _get_item_details(
 		if ctx.get(key) is None:
 			ctx[key] = value
 
+	if not ctx.price_list_rate:
+		ctx.price_list_rate = out.price_list_rate
+
 	if not source_row:
 		out.update(get_pricing_rule_for_item(ctx, doc=doc, for_validate=for_validate))
 
