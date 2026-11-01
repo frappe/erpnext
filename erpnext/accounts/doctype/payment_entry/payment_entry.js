@@ -597,10 +597,17 @@ frappe.ui.form.on("Payment Entry", {
 	apply_tds: function (frm) {
 		if (!frm.doc.apply_tds) {
 			frm.set_value("tax_withholding_category", "");
+			frm.set_value("tax_withholding_group", "");
 		} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
-			frappe.db.get_value(frm.doc.party_type, frm.doc.party, "tax_withholding_category", (values) => {
-				frm.set_value("tax_withholding_category", values.tax_withholding_category);
-			});
+			frappe.db.get_value(
+				frm.doc.party_type,
+				frm.doc.party,
+				["tax_withholding_category", "tax_withholding_group"],
+				(values) => {
+					frm.set_value("tax_withholding_category", values.tax_withholding_category);
+					frm.set_value("tax_withholding_group", values.tax_withholding_group);
+				}
+			);
 		}
 		frm.clear_table("tax_withholding_entries");
 	},
