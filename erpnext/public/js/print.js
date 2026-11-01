@@ -64,8 +64,8 @@ function open_company_details_dialog(data, current_doctype) {
 
 function build_dialog_fields(data) {
 	return [
-		make_field(__("Company Logo"), "company_logo", "Attach Image", data.company_logo),
-		make_field(__("Website"), "website", "Data", data.website),
+		make_field(__("Company Logo"), "company_logo", "Attach Image", data.company_logo, false),
+		make_field(__("Website"), "website", "Data", data.website, false),
 		make_field(__("Phone No"), "phone_no", "Data", data.phone_no),
 		{
 			label: __("Email"),

@@ -349,7 +349,14 @@ class SellingController(StockController):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						flt(d.rate_with_margin) > 0
+						and flt(d.discount_amount)
+						> flt(flt(d.rate_with_margin) * discount / 100, d.precision("discount_amount"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
@@ -560,7 +567,8 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def ensure_customer_is_not_blocked(self):
-		if self.doctype == "Quotation":
+		# Consolidated POS invoices only merge POS invoices that already passed this check
+		if self.doctype == "Quotation" or self.get("is_consolidated") or self.get("is_return"):
 			return
 
 		if self.customer and is_customer_blocked(self.customer):

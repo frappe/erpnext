@@ -15,7 +15,11 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import _get_party_details
-from erpnext.accounts.services.taxes import _get_taxes_and_charges
+from erpnext.accounts.services.taxes import (
+	_get_taxes_and_charges,
+	is_deduct_with_valuation,
+	validate_deduct_with_valuation_category,
+)
 from erpnext.buying.doctype.buying_settings.buying_settings import (
 	bills_rejected_quantity,
 	is_rejected_material_valued,
@@ -59,6 +63,7 @@ class BuyingController(SubcontractingController):
 		validate_item_uoms(self.get("items"))
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
+		self.validate_deduct_with_valuation_taxes()
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
@@ -451,6 +456,39 @@ class BuyingController(SubcontractingController):
 			msg = _('Tax Category has been changed to "Total" because all the Items are non-stock items')
 			self.update_tax_category(msg)
 
+	def validate_deduct_with_valuation_taxes(self):
+		taxes = [tax for tax in self.get("taxes") or [] if is_deduct_with_valuation(tax)]
+		if taxes:
+			validate_deduct_with_valuation_category(taxes, self.get_deduct_with_valuation_heads_from_source())
+
+	def get_deduct_with_valuation_source_names(self) -> set:
+		source_fields = ("purchase_order", "purchase_receipt", "purchase_invoice", "supplier_quotation")
+		source_names = {item.get(field) for item in self.get("items") for field in source_fields}
+		source_names.update((self.get("amended_from"), self.get("return_against")))
+		if self.get("auto_repeat"):
+			source_names.add(frappe.db.get_value("Auto Repeat", self.auto_repeat, "reference_document"))
+		return source_names - {None, ""}
+
+	def get_deduct_with_valuation_heads_from_source(self) -> set:
+		source_names = self.get_deduct_with_valuation_source_names()
+		if not source_names:
+			return set()
+
+		taxes = frappe.qb.DocType("Purchase Taxes and Charges")
+		account_heads = (
+			frappe.qb.from_(taxes)
+			.select(taxes.account_head)
+			.distinct()
+			.where(
+				taxes.parent.isin(source_names)
+				& (taxes.docstatus != 0)
+				& (taxes.category == "Valuation")
+				& (taxes.add_deduct_tax == "Deduct")
+			)
+			.run(pluck=True)
+		)
+		return set(account_heads)
+
 	def update_tax_category(self, msg):
 		tax_for_valuation = [
 			d for d in self.get("taxes") if d.category in ["Valuation", "Valuation and Total"]
@@ -739,7 +777,7 @@ class BuyingController(SubcontractingController):
 						"Buying Settings", "set_valuation_rate_for_rejected_materials"
 					)
 				):
-					net_rate = item.rejected_qty * item.net_rate
+					net_rate = item.rejected_qty * item.base_net_rate
 
 				qty_in_stock_uom = (
 					self.get_valued_stock_qty(item)
@@ -785,13 +823,12 @@ class BuyingController(SubcontractingController):
 			if d.category not in ["Valuation", "Valuation and Total"]:
 				continue
 
-			amount = flt(d.base_tax_amount_after_discount_amount) * (
-				-1 if d.get("add_deduct_tax") == "Deduct" else 1
-			)
+			multiplier = -1 if d.get("add_deduct_tax") == "Deduct" else 1
+			amount = flt(d.base_tax_amount_after_discount_amount) * multiplier
 
 			if d.charge_type == "On Net Total":
 				total_valuation_amount += amount
-				tax_accounts.append(d.account_head)
+				tax_accounts.append((d.account_head, multiplier))
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Allocate the full amount to stock/asset items only (e.g. Freight)
 				total_actual_tax_on_stock_items += amount
@@ -804,10 +841,8 @@ class BuyingController(SubcontractingController):
 		item_tax_amount = 0.0
 		if item.item_tax_rate:
 			tax_details = json.loads(item.item_tax_rate)
-			for account, rate in tax_details.items():
-				if account not in tax_accounts:
-					continue
-
+			for account, multiplier in tax_accounts:
+				rate = tax_details.get(account, 0)
 				if rate == NOT_APPLICABLE_TAX:
 					continue
 
@@ -815,7 +850,7 @@ class BuyingController(SubcontractingController):
 				if item.sales_incoming_rate:
 					net_rate = item.qty * item.sales_incoming_rate
 
-				item_tax_amount += flt(net_rate) * flt(rate) / 100
+				item_tax_amount += flt(net_rate) * flt(rate) / 100 * multiplier
 
 		return item_tax_amount
 
