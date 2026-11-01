@@ -1319,7 +1319,7 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.qty))
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
 			.where(
 				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
 			)
@@ -1398,6 +1398,51 @@ class JobCard(Document):
 
 		self.set_status(update_status=True)
 
+<<<<<<< HEAD
+=======
+	def get_job_card_items_transferred_qty(self, ste_doc):
+		from frappe.query_builder.functions import Sum
+
+		job_card_items = [x.get("job_card_item") for x in ste_doc.get("items") if x.get("job_card_item")]
+		if not job_card_items:
+			return {}
+
+		se = frappe.qb.DocType("Stock Entry")
+		sed = frappe.qb.DocType("Stock Entry Detail")
+
+		query = (
+			frappe.qb.from_(sed)
+			.join(se)
+			.on(sed.parent == se.name)
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
+			.where(
+				(sed.job_card_item.isin(job_card_items))
+				& (se.docstatus == 1)
+				& (se.purpose == "Material Transfer for Manufacture")
+			)
+			.groupby(sed.job_card_item)
+		)
+
+		return frappe._dict(query.run(as_list=True))
+
+	def validate_over_transfer(self, ste_doc, row, transferred_qty):
+		"Block over transfer of items if not allowed in settings."
+		required_qty = frappe.db.get_value("Job Card Item", row.job_card_item, "required_qty")
+		if flt(transferred_qty) > flt(required_qty):
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
+				).format(
+					row.idx,
+					frappe.bold(self.get_qty_with_uom(required_qty, row.item_code)),
+					frappe.bold(row.item_code),
+					ste_doc.job_card,
+				),
+				title=_("Excess Transfer"),
+				exc=JobCardOverTransferError,
+			)
+
+>>>>>>> 5036b02 (fix(manufacturing): count job card transfers and consumption in stock uom)
 	def set_transferred_qty(self, update_status=False):
 		from frappe.query_builder.functions import Sum
 
