@@ -243,26 +243,7 @@ class PaymentRequest(Document):
 				)
 
 	def before_submit(self):
-		if (
-			self.currency != self.party_account_currency
-			and self.party_account_currency == get_company_currency(self.company)
-		):
-			# set outstanding amount in party account currency
-			invoice = frappe.get_value(
-				self.reference_doctype,
-				self.reference_name,
-				["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
-				as_dict=1,
-			)
-			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
-			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
-			self.outstanding_amount = flt(
-				self.grand_total / grand_total * base_grand_total,
-				self.precision("outstanding_amount"),
-			)
-
-		else:
-			self.outstanding_amount = self.grand_total
+		self.outstanding_amount = get_requested_amount_in_party_account_currency(self)
 
 	def on_submit(self):
 		if self.payment_request_type == "Outward":
@@ -634,7 +615,7 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_request(**args):
 	"""Make payment request"""
 
@@ -930,6 +911,40 @@ def make_payment_entry(docname):
 	return doc.create_payment_entry(submit=False).as_dict()
 
 
+def get_requested_amount_in_party_account_currency(doc) -> float:
+	"""Return the total requested amount converted to party account currency when applicable."""
+	company = doc.get("company")
+	if (
+		doc.get("currency") != doc.get("party_account_currency")
+		and doc.get("party_account_currency") == get_company_currency(company)
+		and doc.get("reference_doctype")
+		and doc.get("reference_name")
+	):
+		invoice = frappe.get_value(
+			doc.get("reference_doctype"),
+			doc.get("reference_name"),
+			["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
+			as_dict=1,
+		)
+		if invoice:
+			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
+			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
+			if grand_total:
+				precision = (
+					doc.precision("outstanding_amount")
+					if callable(getattr(doc, "precision", None))
+					else frappe.get_precision(
+						"Payment Request", "outstanding_amount", currency=doc.get("party_account_currency")
+					)
+				)
+				return flt(
+					flt(doc.get("grand_total")) / grand_total * base_grand_total,
+					precision,
+				)
+
+	return flt(doc.get("grand_total"))
+
+
 def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	"""
 	Update Payment Request's `Status` and `Outstanding Amount` based on Payment Entry Reference's `Allocated Amount`.
@@ -946,8 +961,16 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			"grand_total",
 			"outstanding_amount",
 			"payment_request_type",
+			"currency",
+			"party_account_currency",
+			"company",
+			"reference_doctype",
+			"reference_name",
 		],
 	)
+
+	for pr in referenced_payment_requests:
+		pr.total_requested = get_requested_amount_in_party_account_currency(pr)
 
 	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
 	doc_updates = {}
@@ -977,9 +1000,10 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			)
 
 		# determine status
-		if new_outstanding_amount == payment_request["grand_total"]:
+		total_requested = payment_request.total_requested
+		if total_requested > 0 and flt(new_outstanding_amount, precision) >= flt(total_requested, precision):
 			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
-		elif new_outstanding_amount == 0:
+		elif new_outstanding_amount <= 0:
 			status = "Paid"
 		elif new_outstanding_amount > 0:
 			status = "Partially Paid"
