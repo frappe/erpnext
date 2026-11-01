@@ -916,6 +916,8 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 		"Portal User", {"parenttype": "Supplier", "parent": doc.supplier}, pluck="user"
 	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+	for item in [item for item in doc.items if not item.qty]:
+		doc.remove(item)
 	doc.save()
 	if not frappe.in_test:
 		frappe.db.commit()

@@ -2140,7 +2140,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	def test_portal_purchase_invoice_skips_zero_qty_rows(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice_from_portal
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice_from_portal
 
 		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
 		po.append(
