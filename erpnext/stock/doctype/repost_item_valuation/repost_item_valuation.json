@@ -27,6 +27,7 @@
   "allow_zero_rate",
   "recreate_stock_ledgers",
   "recalculate_valuation_rate",
+  "created_by_scheduler",
   "error_section",
   "error_log",
   "reposting_info_section",
@@ -268,6 +269,16 @@
    "fieldtype": "Check",
    "label": "Recalculate Valuation Rate",
    "show_description_on_click": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "created_by_scheduler",
+   "fieldname": "created_by_scheduler",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Created by Scheduler",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -275,7 +286,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-24 12:00:00.000000",
+ "modified": "2026-11-01 15:13:26.219278",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
