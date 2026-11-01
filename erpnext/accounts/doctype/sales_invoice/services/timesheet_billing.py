@@ -5,6 +5,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
@@ -54,6 +55,39 @@ class TimesheetBillingService:
 				timesheet.flags.ignore_validate_update_after_submit = True
 				timesheet.set_status()
 				timesheet.db_update_all()
+
+	def returns_whole_invoice(self) -> bool:
+		"""Whether the submitted returns, this one included, return every row of the original invoice."""
+		doc = self.doc
+		if not doc.timesheets:
+			return False
+
+		invoice = frappe.qb.DocType("Sales Invoice")
+		invoice_item = frappe.qb.DocType("Sales Invoice Item")
+		returned_qty = frappe._dict(
+			(
+				frappe.qb.from_(invoice_item)
+				.join(invoice)
+				.on(invoice.name == invoice_item.parent)
+				.select(invoice_item.sales_invoice_item, Sum(invoice_item.qty))
+				.where(
+					(invoice.return_against == doc.return_against)
+					& (invoice.is_return == 1)
+					& (invoice.docstatus == 1)
+				)
+				.groupby(invoice_item.sales_invoice_item)
+			).run()
+		)
+
+		precision = frappe.get_precision("Sales Invoice Item", "qty")
+		return all(
+			flt(abs(flt(returned_qty.get(row.name))), precision) >= flt(row.qty, precision)
+			for row in frappe.get_all(
+				"Sales Invoice Item",
+				filters={"parent": doc.return_against, "parenttype": "Sales Invoice"},
+				fields=["name", "qty"],
+			)
+		)
 
 	def unlink_sales_invoice_from_timesheets(self) -> None:
 		for row in self.doc.timesheets:

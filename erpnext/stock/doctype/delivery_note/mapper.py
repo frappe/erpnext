@@ -26,6 +26,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 def get_invoiced_qty_map(delivery_note: str) -> dict:
 	"""returns a map: {dn_detail: invoiced_qty}"""
+	si = DocType("Sales Invoice")
 	sii = DocType("Sales Invoice Item")
 	dni = DocType("Delivery Note Item")
 
@@ -34,8 +35,15 @@ def get_invoiced_qty_map(delivery_note: str) -> dict:
 			frappe.qb.from_(sii)
 			.join(dni)
 			.on(dni.name == sii.dn_detail)
+			.join(si)
+			.on(si.name == sii.parent)
 			.select(dni.name, (Sum(sii.qty * sii.conversion_factor) / dni.conversion_factor).as_("qty"))
-			.where((sii.delivery_note == delivery_note) & (sii.docstatus == 1))
+			.where(
+				(sii.delivery_note == delivery_note)
+				& (sii.docstatus == 1)
+				# a credit note that does not update the delivery note's billed amount is not counted
+				& ((si.is_return == 0) | (si.update_billed_amount_in_delivery_note == 1))
+			)
 			.groupby(dni.name)
 		).run()
 	)

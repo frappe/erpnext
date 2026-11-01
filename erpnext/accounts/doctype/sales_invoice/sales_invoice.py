@@ -304,6 +304,7 @@ class SalesInvoice(SellingController):
 
 	def validate(self):
 		self.validate_auto_set_posting_time()
+		POSService(self).allow_write_off_only_on_pos()
 		super().validate()
 
 		self.is_subcontracted()
@@ -392,7 +393,6 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
-		POSService(self).allow_write_off_only_on_pos()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
@@ -498,9 +498,11 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
-		TimesheetBillingService(self).update_time_sheet(
-			None if (self.is_return and self.return_against) else self.name
-		)
+		timesheet_billing = TimesheetBillingService(self)
+		if not (self.is_return and self.return_against):
+			timesheet_billing.update_time_sheet(self.name)
+		elif timesheet_billing.returns_whole_invoice():
+			timesheet_billing.update_time_sheet(None)
 
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
 			update_company_current_month_sales(self.company)
@@ -537,9 +539,11 @@ class SalesInvoice(SellingController):
 		POSService(self).check_if_consolidated_invoice()
 
 		super().before_cancel()
-		TimesheetBillingService(self).update_time_sheet(
-			self.return_against if (self.is_return and self.return_against) else None
-		)
+		timesheet_billing = TimesheetBillingService(self)
+		if not (self.is_return and self.return_against):
+			timesheet_billing.update_time_sheet(None)
+		elif timesheet_billing.returns_whole_invoice():
+			timesheet_billing.update_time_sheet(self.return_against)
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
@@ -1161,7 +1165,7 @@ class SalesInvoice(SellingController):
 				update_voucher_outstanding(
 					voucher_type=self.doctype,
 					voucher_no=self.return_against
-					if cint(self.is_return) and self.return_against
+					if (cint(self.is_return) and self.return_against and not self.update_outstanding_for_self)
 					else self.name,
 					account=self.debit_to,
 					party_type="Customer",
@@ -1191,6 +1195,7 @@ class SalesInvoice(SellingController):
 
 		updated_delivery_notes = []
 
+		SalesInvoice = frappe.qb.DocType("Sales Invoice")
 		SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 		from frappe.query_builder.functions import Coalesce, Sum
 
@@ -1198,9 +1203,16 @@ class SalesInvoice(SellingController):
 			if d.dn_detail:
 				query = (
 					frappe.qb.from_(SalesInvoiceItem)
+					.inner_join(SalesInvoice)
+					.on(SalesInvoice.name == SalesInvoiceItem.parent)
 					.select(Coalesce(Sum(SalesInvoiceItem.amount), 0))
 					.where(SalesInvoiceItem.dn_detail == d.dn_detail)
 					.where(SalesInvoiceItem.docstatus == 1)
+					# a credit note that does not update the delivery note's billed amount is not counted
+					.where(
+						(SalesInvoice.is_return == 0)
+						| (SalesInvoice.update_billed_amount_in_delivery_note == 1)
+					)
 				)
 
 				res = query.run()

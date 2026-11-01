@@ -698,6 +698,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		if doc.get("discount_amount"):
 			doc.discount_amount = -1 * source.discount_amount
 
+		remove_fully_returned_rows(doc)
+
 		if doctype == "Subcontracting Receipt":
 			doc.set_warehouse = source.set_warehouse
 			doc.supplier_warehouse = source.supplier_warehouse
@@ -933,6 +935,19 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 	)
 
 	return doclist
+
+
+def remove_fully_returned_rows(doc):
+	"""Drop rows that earlier returns returned in full; they are mapped at qty 0.
+
+	When every row is returned in full, keep the rows so that validation reports it.
+	"""
+	fully_returned = [d for d in doc.get("items") if not flt(d.qty) and not flt(d.get("rejected_qty"))]
+	if not fully_returned or len(fully_returned) == len(doc.get("items")):
+		return
+
+	for row in fully_returned:
+		doc.remove(row)
 
 
 def get_rate_for_return(

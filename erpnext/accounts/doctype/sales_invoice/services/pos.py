@@ -355,8 +355,14 @@ class POSService:
 		frappe.db.delete("Sales Invoice Payment", filters={"parent": doc.name, "amount": 0})
 
 	def allow_write_off_only_on_pos(self) -> None:
-		if not self.doc.is_pos and self.doc.write_off_account:
-			self.doc.write_off_account = None
+		"""A write-off is posted only for POS invoices, so clear it before the totals use it."""
+		doc = self.doc
+		if doc.is_pos:
+			return
+
+		doc.write_off_account = None
+		doc.write_off_amount = doc.base_write_off_amount = 0
+		doc.write_off_outstanding_amount_automatically = 0
 
 	def verify_payment_amount_is_positive(self) -> None:
 		for entry in self.doc.payments:

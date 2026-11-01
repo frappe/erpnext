@@ -5973,6 +5973,152 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.update_stock = 1
 		self.assertRaises(frappe.ValidationError, si.save)
 
+	def test_delivery_note_cannot_be_made_from_stock_updating_invoice(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		si = create_sales_invoice(qty=5, update_stock=1)
+		self.assertRaises(frappe.ValidationError, make_delivery_note, si.name)
+
+	def test_credit_note_without_delivery_note_update_keeps_billed_amount(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		dn = create_delivery_note(qty=10, rate=100)
+
+		first_invoice = make_sales_invoice(dn.name)
+		first_invoice.items[0].qty = 5
+		first_invoice.insert()
+		first_invoice.submit()
+
+		credit_note = make_sales_return(first_invoice.name)
+		credit_note.items[0].qty = -2
+		credit_note.update_billed_amount_in_delivery_note = 0
+		credit_note.insert()
+		credit_note.submit()
+
+		second_invoice = make_sales_invoice(dn.name)
+		self.assertEqual(second_invoice.items[0].qty, 5)
+		second_invoice.insert()
+		second_invoice.submit()
+
+		self.assertEqual(frappe.db.get_value("Delivery Note Item", dn.items[0].name, "billed_amt"), 1000)
+
+	def test_pos_credit_note_write_off_stays_on_its_own_outstanding(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		pos_profile = make_pos_profile()
+		pos_profile.payments = []
+		pos_profile.append("payments", {"default": 1, "mode_of_payment": "Cash"})
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		pos.insert()
+		pos.submit()
+
+		pos_return = make_sales_return(pos.name)
+		pos_return.update_outstanding_for_self = 1
+		pos_return.payments[0].amount = -90
+		pos_return.write_off_amount = -10
+		pos_return.write_off_account = "_Test Write Off - _TC"
+		pos_return.write_off_cost_center = "_Test Cost Center - _TC"
+		pos_return.insert()
+		pos_return.submit()
+
+		against_vouchers = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pos_return.name, "account": pos.debit_to, "is_cancelled": 0},
+			pluck="against_voucher",
+		)
+		self.assertEqual(set(against_vouchers), {pos_return.name})
+		pos.reload()
+		self.assertEqual(pos.outstanding_amount, 0)
+
+	def test_pos_change_is_netted_from_cash_row_on_another_account(self):
+		from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
+
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 0)
+
+		si = create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		si.is_pos = 1
+		si.party_account_currency = "INR"
+		si.account_for_change_amount = "_Test Bank - _TC"
+		si.change_amount = 10
+		si.base_change_amount = 10
+		si.append(
+			"payments",
+			{
+				"mode_of_payment": "Cash",
+				"type": "Cash",
+				"account": "Cash - _TC",
+				"amount": 110,
+				"base_amount": 110,
+			},
+		)
+
+		gl_entries = []
+		SalesInvoiceGLComposer(si).make_pos_gl_entries(gl_entries)
+
+		debtors_entry = next(entry for entry in gl_entries if entry["account"] == si.debit_to)
+		cash_entry = next(entry for entry in gl_entries if entry["account"] == "Cash - _TC")
+
+		self.assertEqual(flt(debtors_entry["credit"]), 100.0)
+		self.assertEqual(flt(cash_entry["debit"]), 100.0)
+		self.assertEqual(si.payments[0].base_amount, 110)
+
+		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
+
+	def test_write_off_amount_is_cleared_on_non_pos_invoice(self):
+		si = create_sales_invoice(qty=1, rate=100, do_not_save=True)
+		si.write_off_amount = 10
+		si.write_off_account = "_Test Write Off - _TC"
+		si.insert()
+
+		self.assertEqual(si.write_off_amount, 0)
+		self.assertEqual(si.outstanding_amount, 100)
+		self.assertEqual(sum(row.payment_amount for row in si.payment_schedule), 100)
+
+	def test_return_skips_rows_already_returned_in_full(self):
+		si = create_sales_invoice(qty=5, rate=100, do_not_submit=True)
+		second_item = frappe.copy_doc(si.items[0])
+		second_item.item_code = "_Test Item 2"
+		second_item.item_name = "_Test Item 2"
+		si.append("items", second_item)
+		si.save()
+		si.submit()
+
+		first_return = make_return_doc(si.doctype, si.name)
+		first_return.set("items", [row for row in first_return.items if row.item_code == "_Test Item"])
+		first_return.insert()
+		first_return.submit()
+
+		second_return = make_return_doc(si.doctype, si.name)
+		self.assertEqual([row.item_code for row in second_return.items], ["_Test Item 2"])
+		self.assertEqual(second_return.items[0].idx, 1)
+
+	def test_partial_credit_note_checks_outstanding_on_its_new_total(self):
+		invoice = create_sales_invoice(qty=10, rate=100)
+		pe = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = 600
+		pe.references[0].allocated_amount = pe.paid_amount
+		pe.submit()
+
+		credit_note = make_return_doc(invoice.doctype, invoice.name)
+		credit_note.update_outstanding_for_self = 0
+		credit_note.items[0].qty = -2
+		credit_note.save()
+		self.assertEqual(credit_note.update_outstanding_for_self, 0)
+
+		credit_note.submit()
+		invoice.reload()
+		self.assertEqual(invoice.outstanding_amount, 200)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
