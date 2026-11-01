@@ -19,6 +19,7 @@ frappe.ui.form.on("Accounting Dimension Filter", {
 			return {
 				filters: {
 					company: frm.doc.company,
+					is_group: 0,
 				},
 			};
 		});
