@@ -22,7 +22,10 @@ from frappe.utils import (
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
+	create_production_plan,
+	make_bom,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import (
 	make_material_request,
 	make_stock_entry,
@@ -468,6 +471,39 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(wo_order.docstatus, 1)
 
 		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+	def test_sales_order_counts_planned_process_loss_from_production_plan(self):
+		fg_item = make_item("_Test SO Plan Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		rm_item = make_item("_Test SO Plan Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20)
+		so = make_sales_order(item_code=fg_item, qty=80)
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+		plan = create_production_plan(
+			get_items_from="Sales Order", sales_order=so, consider_process_loss=1, skip_getting_mr_items=True
+		)
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		self.assertEqual(work_order.qty, 100)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 80)
+
+	def test_sales_order_work_order_ignores_bom_process_loss(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		fg_item = make_item("_Test SO Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		rm_item = make_item("_Test SO Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20)
+		so = make_sales_order(item_code=fg_item, qty=80)
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+		self.assertEqual(get_work_order_items(so.name)[0]["pending_qty"], 80)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, sales_order=so.name, qty=81, stock_uom="Kg", do_not_save=True
+		)
+		work_order.sales_order_item = so.items[0].name
+		self.assertRaises(OverProductionError, work_order.save)
 
 	def test_work_order_with_non_stock_item(self):
 		items = {
