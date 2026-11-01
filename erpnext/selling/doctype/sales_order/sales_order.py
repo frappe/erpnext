@@ -232,6 +232,7 @@ class SalesOrder(SellingController):
 
 	def onload(self) -> None:
 		super().onload()
+		self.set_proforma_onload()
 
 		if self.get("is_subcontracted"):
 			self.set_onload("can_update_items", self.can_update_items())
@@ -249,6 +250,20 @@ class SalesOrder(SellingController):
 				"has_potentially_billable_items",
 				has_potentially_billable_items(self.name),
 			)
+
+	def set_proforma_onload(self) -> None:
+		"""Pass proforma settings to the form, since Sales Users cannot read Selling Settings."""
+		if self.docstatus == 0:
+			return
+
+		if not frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice"):
+			return
+
+		self.set_onload("enable_proforma_invoice", True)
+		self.set_onload(
+			"default_proforma_print_format",
+			frappe.db.get_single_value("Selling Settings", "default_proforma_print_format"),
+		)
 
 	def can_update_items(self) -> bool:
 		result = True
