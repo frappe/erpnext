@@ -1836,6 +1836,418 @@ class TestPricingRule(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, get_pricing_rules, args)
 
+	def test_saved_pricing_rule_is_rechecked_on_save(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(item, min_qty=5, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		si.items[0].qty = 1
+		frappe.clear_messages()
+		si.save()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+		self.assertTrue(any(d.get("title") == "Pricing Rule Removed" for d in frappe.get_message_log()))
+
+		si.items[0].qty = 6
+		si.save()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		rule.disable = 1
+		rule.save()
+		si.save()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_pricing_rule_of_another_item_is_not_applied_on_save(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		other_item = make_item("PR Recheck Other Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			other_item, discount_percentage=40, applicable_for="Customer", customer="_Test Customer 1"
+		)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.items[0].pricing_rules = frappe.as_json([rule.name])
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_free_item_of_unmatched_transaction_rule_is_removed(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		item_free_item = make_item("PR Recheck Other Free Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, min_qty=2, price_or_product_discount="Product", free_item=item_free_item, free_qty=1
+		)
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			min_amt=1000,
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=10, rate=100, do_not_submit=True)
+		self.assertEqual(sorted(d.item_code for d in si.items if d.is_free_item), [free_item, item_free_item])
+
+		si.items[0].qty = 5
+		si.save()
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [item_free_item])
+
+		si.items[0].qty = 10
+		si.save()
+		self.assertEqual(sorted(d.item_code for d in si.items if d.is_free_item), [free_item, item_free_item])
+
+		rule.disable = 1
+		rule.save()
+		si.save()
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [item_free_item])
+
+	def test_saved_pricing_rule_stays_on_submit(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(item, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, do_not_submit=True)
+		self.assertEqual(si.items[0].rate, 90)
+
+		rule.valid_from = add_days(today(), -10)
+		rule.valid_upto = add_days(today(), -1)
+		rule.save()
+		make_item_pricing_rule(item, discount_percentage=20)
+
+		si.reload()
+		si.submit()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+		self.assertEqual(si.items[0].rate, 90)
+
+	def test_pricing_rule_posted_on_a_submitted_invoice_is_rechecked(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		other_item = make_item("PR Recheck Other Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			other_item, discount_percentage=40, applicable_for="Customer", customer="_Test Customer 1"
+		)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.items[0].pricing_rules = frappe.as_json([rule.name])
+		si.docstatus = 1
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_pricing_rule_is_rechecked_on_submit_when_the_row_changed(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(item, min_qty=5, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 10)
+
+		si.items[0].qty = 1
+		si.submit()
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+	def test_unmatched_transaction_rule_keeps_free_item_of_item_rule(self):
+		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, min_qty=2, price_or_product_discount="Product", free_item=free_item, free_qty=1
+		)
+		make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			min_amt=1000000,
+			discount_percentage=10,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=2, do_not_submit=True)
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
+
+	def test_cumulative_pricing_rule_counts_only_the_customers_sales(self):
+		item = make_item("PR Cumulative Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item,
+			is_cumulative=1,
+			min_qty=10,
+			discount_percentage=15,
+			applicable_for="Customer",
+			customer="_Test Customer",
+			valid_from=add_days(today(), -30),
+			valid_upto=add_days(today(), 30),
+		)
+		create_sales_invoice(item_code=item, qty=9, customer="_Test Customer 1")
+
+		si = create_sales_invoice(item_code=item, qty=1, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 0)
+
+		create_sales_invoice(item_code=item, qty=9)
+		si = create_sales_invoice(item_code=item, qty=1, do_not_submit=True)
+		self.assertEqual(si.items[0].discount_percentage, 15)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_cumulative_totals_are_read_once_per_document(self):
+		from erpnext.accounts.doctype.pricing_rule import utils
+
+		items = [make_item(f"PR Cumulative Item {i}", {"is_stock_item": 0}).name for i in range(3)]
+		make_item_pricing_rule(
+			items=[{"item_code": item} for item in items],
+			is_cumulative=1,
+			min_qty=10,
+			discount_percentage=15,
+			applicable_for="Customer Group",
+			customer_group="All Customer Groups",
+			valid_from=add_days(today(), -30),
+			valid_upto=add_days(today(), 30),
+		)
+		create_sales_invoice(item_code=items[0], qty=9)
+		si = create_sales_invoice(item_code=items[0], qty=1, do_not_save=True)
+		for item in items[1:]:
+			si.append("items", {**si.items[0].as_dict(), "name": None, "idx": None, "item_code": item})
+
+		frappe.local.request_cache.clear()
+		with (
+			patch.object(frappe.db, "sql", wraps=frappe.db.sql) as sql,
+			patch.object(utils, "get_descendants_of", wraps=utils.get_descendants_of) as descendants,
+		):
+			si.insert()
+
+		cumulative_queries = [d for d in sql.call_args_list if "SUM(" in str(d.args[0]).upper()]
+		self.assertEqual(len(cumulative_queries), 1)
+		self.assertEqual(descendants.call_count, 1)
+		self.assertEqual([d.discount_percentage for d in si.items], [15, 0, 0])
+
+	def test_mixed_conditions_does_not_count_free_item(self):
+		item = make_item(
+			"PR Mixed Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		free_item = make_item(
+			"PR Mixed Free Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_qty=5,
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
+
+		si.items[0].qty = 4
+		si.items[0].stock_qty = 4
+		details = get_pricing_details_for_row(si, si.items[0])
+		self.assertTrue(details.pricing_rule_removed)
+		self.assertEqual(details.remove_free_item, free_item)
+
+	def test_min_amount_rule_applied_on_insert(self):
+		item = make_item("PR Min Amount Item", {"is_stock_item": 0}).name
+		make_item_price(item, "_Test Price List", 100)
+		make_item_pricing_rule(item, min_amt=50, discount_percentage=10)
+
+		si = create_sales_invoice(item_code=item, do_not_save=True)
+		si.selling_price_list = "_Test Price List"
+		si.items[0].price_list_rate = None
+		si.items[0].rate = None
+		si.insert()
+		self.assertEqual(si.items[0].discount_percentage, 10)
+		self.assertEqual(si.items[0].rate, 90)
+
+	def test_coupon_based_transaction_rule_keeps_manual_discount(self):
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule", selling=1, apply_on="Transaction", discount_percentage=5
+		)
+		rule.db_set("coupon_code_based", 1)
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=True)
+		si.additional_discount_percentage = 7
+		si.insert()
+		self.assertEqual(si.additional_discount_percentage, 7)
+		self.assertEqual(si.grand_total, 465)
+
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Transaction Coupon",
+				"coupon_code": "TRANSACTION5",
+				"pricing_rule": rule.name,
+			}
+		).insert()
+		si.coupon_code = coupon.name
+		si.save()
+		self.assertEqual(si.additional_discount_percentage, 5)
+
+		si.coupon_code = None
+		si.save()
+		self.assertEqual(si.additional_discount_percentage, 0)
+
+	def test_transaction_rule_for_another_price_list_is_not_applied(self):
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule", selling=1, apply_on="Transaction", discount_percentage=10
+		)
+		rule.db_set("for_price_list", "_Test Price List 2")
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_save=True)
+		si.selling_price_list = "_Test Price List"
+		si.insert()
+		self.assertFalse(si.additional_discount_percentage)
+		self.assertEqual(si.grand_total, 500)
+
+		si.selling_price_list = "_Test Price List 2"
+		si.save()
+		self.assertEqual(si.additional_discount_percentage, 10)
+		self.assertEqual(si.grand_total, 450)
+
+	def test_free_qty_with_apply_recursion_over(self):
+		item = make_item("PR Recursion Item", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item,
+			min_qty=3,
+			price_or_product_discount="Product",
+			same_item=1,
+			free_qty=1,
+			is_recursive=1,
+			recurse_for=2,
+			apply_recursion_over=3,
+			round_free_qty=1,
+		)
+
+		for qty, free_qty in ((3, 1), (4, 1), (5, 2), (7, 3)):
+			si = create_sales_invoice(item_code=item, qty=qty, do_not_submit=True)
+			self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), free_qty)
+
+	def test_free_qty_with_apply_recursion_over_below_min_qty(self):
+		item = make_item("PR Recursion Item", {"is_stock_item": 0}).name
+		rule = make_item_pricing_rule(
+			item,
+			min_qty=4,
+			price_or_product_discount="Product",
+			same_item=1,
+			free_qty=1,
+			is_recursive=1,
+			recurse_for=2,
+			apply_recursion_over=2,
+			round_free_qty=1,
+		)
+
+		for qty, free_qty in ((4, 1), (6, 2), (8, 3)):
+			si = create_sales_invoice(item_code=item, qty=qty, do_not_submit=True)
+			self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), free_qty)
+
+		rule.db_set({"min_qty": 5, "apply_recursion_over": 1})
+		si = create_sales_invoice(item_code=item, qty=5, do_not_submit=True)
+		self.assertEqual(sum(d.qty for d in si.items if d.is_free_item), 2)
+
+	def test_mixed_conditions_with_same_item_in_two_rows(self):
+		item = make_item(
+			"PR Mixed Item", {"is_stock_item": 0, "item_group": "_Test Item Group Desktops"}
+		).name
+		make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_amt=250,
+			discount_percentage=5,
+		)
+
+		si = create_sales_invoice(item_code=item, qty=1, do_not_save=True)
+		si.append("items", {**si.items[0].as_dict(), "name": None, "idx": 2, "qty": 2})
+		si.items[0].name = "row-1"
+		si.items[1].name = "row-2"
+		for row in si.items:
+			row.stock_qty = row.qty
+			self.assertEqual(get_pricing_details_for_row(si, row).discount_percentage, 5)
+
+	def test_mixed_conditions_values_unnamed_rows_at_their_own_amount(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import get_qty_and_rate_for_mixed_conditions
+
+		rule = make_item_pricing_rule(
+			apply_on="Item Group",
+			item_group="_Test Item Group Desktops",
+			mixed_conditions=1,
+			min_amt=500,
+			discount_percentage=5,
+		)
+		item_group = "_Test Item Group Desktops"
+		doc = frappe._dict(
+			items=[
+				frappe._dict(item_code="A", item_group=item_group, qty=1, stock_qty=1, price_list_rate=100),
+				frappe._dict(item_code="B", item_group=item_group, qty=10, stock_qty=10, price_list_rate=50),
+			]
+		)
+		args = frappe._dict(item_code="A", item_group=item_group, qty=1, stock_qty=1, price_list_rate=100)
+
+		self.assertEqual(get_qty_and_rate_for_mixed_conditions(doc, rule, args)[:2], (11, 600))
+
+	def test_recursive_product_rule_on_transaction_is_not_allowed(self):
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Transaction Rule",
+				"apply_on": "Transaction",
+				"selling": 1,
+				"company": "_Test Company",
+				"currency": "INR",
+				"price_or_product_discount": "Product",
+				"free_item": free_item,
+				"free_qty": 1,
+				"is_recursive": 1,
+				"recurse_for": 1,
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is not supported", rule.insert)
+
+	def test_saved_recursive_product_rule_on_transaction_does_not_break_invoice(self):
+		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
+		rule = make_pricing_rule(
+			title="_Test Transaction Rule",
+			selling=1,
+			apply_on="Transaction",
+			price_or_product_discount="Product",
+			free_item=free_item,
+			free_qty=1,
+		)
+		rule.db_set({"is_recursive": 1, "recurse_for": 1})
+
+		si = create_sales_invoice(qty=5, rate=100, do_not_submit=True)
+		self.assertEqual([(d.item_code, d.qty) for d in si.items if d.is_free_item], [(free_item, 1)])
+
+	def test_remove_pricing_rule_checks_transaction_permission(self):
+		from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
+			remove_pricing_rule_for_item,
+			remove_pricing_rules,
+		)
+
+		rule = make_item_pricing_rule("_Test Item", discount_percentage=10)
+		user = "pr-no-invoice-access@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc({"doctype": "User", "email": user, "first_name": "No Invoice Access"}).insert()
+
+		item_details = {
+			"doctype": "Sales Invoice Item",
+			"parenttype": "Sales Invoice",
+			"item_code": "_Test Item",
+		}
+		frappe.set_user(user)
+		try:
+			self.assertRaises(
+				frappe.PermissionError, remove_pricing_rule_for_item, rule.name, frappe.as_json(item_details)
+			)
+			self.assertRaises(
+				frappe.PermissionError, remove_pricing_rules, [{**item_details, "pricing_rules": rule.name}]
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		details = remove_pricing_rule_for_item(rule.name, frappe.as_json(item_details))
+		self.assertTrue(details.pricing_rule_removed)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
@@ -1853,6 +2265,7 @@ def make_pricing_rule(**args):
 			"buying": args.buying or 0,
 			"min_qty": args.min_qty or 0.0,
 			"max_qty": args.max_qty or 0.0,
+			"min_amt": args.min_amt or 0.0,
 			"rate_or_discount": args.rate_or_discount or "Discount Percentage",
 			"discount_percentage": args.discount_percentage or 0.0,
 			"rate": args.rate or 0.0,
@@ -1910,3 +2323,42 @@ def make_item_price(item, price_list_name, item_price):
 			"price_list_rate": item_price,
 		}
 	).insert(ignore_permissions=True, ignore_mandatory=True)
+
+
+def make_item_pricing_rule(item_code=None, **fields):
+	apply_on = fields.pop("apply_on", "Item Code")
+	child_field = frappe.scrub(apply_on)
+	child_row = {child_field: fields.pop(child_field, item_code), "uom": fields.pop("uom", None)}
+	doc = frappe.get_doc(
+		{
+			"doctype": "Pricing Rule",
+			"title": frappe.generate_hash(length=10),
+			"company": "_Test Company",
+			"currency": "INR",
+			"selling": 1,
+			"apply_on": apply_on,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			{"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}[apply_on]: [child_row],
+			**fields,
+		}
+	)
+	return doc.insert()
+
+
+def get_pricing_details_for_row(doc, row):
+	from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+
+	args = {
+		"doctype": doc.doctype,
+		"name": doc.name,
+		"company": doc.company,
+		"customer": doc.customer,
+		"currency": doc.currency,
+		"conversion_rate": doc.conversion_rate,
+		"price_list": doc.selling_price_list,
+		"plc_conversion_rate": 1,
+		"transaction_date": doc.posting_date,
+		"items": [{**row.as_dict(), "child_docname": row.name}],
+	}
+	return frappe._dict(apply_pricing_rule(args, doc=doc.as_dict())[0])
