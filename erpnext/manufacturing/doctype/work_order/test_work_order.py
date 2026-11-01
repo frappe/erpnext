@@ -8052,6 +8052,31 @@ class TestWorkOrder(ERPNextTestSuite):
 			[(sub_assembly_bom.name, 120), (fg_bom.name, 60)],
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_multi_level_bom_fetches_sub_assembly_operations_without_fg_operations(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		sub_assembly_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 30}],
+		)
+		fg_bom = make_review_bom(
+			fg_item, [{"item_code": sub_assembly, "qty": 2, "bom_no": sub_assembly_bom.name}]
+		)
+		self.assertFalse(fg_bom.with_operations)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 5, submit=False, use_multi_level_bom=1)
+		self.assertEqual(
+			[(row.bom, row.operation, row.time_in_mins) for row in wo.operations],
+			[(sub_assembly_bom.name, operation, 300)],
+		)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 5, submit=False, use_multi_level_bom=0)
+		self.assertEqual(wo.operations, [])
+
 	def test_planned_qty_leaves_out_process_loss(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name

@@ -230,10 +230,18 @@ class OperationsService:
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 		self.doc.set("operations", [])
-		if not self.doc.bom_no or not frappe.get_cached_value("BOM", self.doc.bom_no, "with_operations"):
+		if not self.doc.bom_no:
+			return
+
+		# With multi-level BOM, sub-assembly operations apply even when the top-level BOM has none
+		if not self.doc.use_multi_level_bom and not frappe.get_cached_value(
+			"BOM", self.doc.bom_no, "with_operations"
+		):
 			return
 
 		operations = self._collect_bom_operations()
+		if not operations:
+			return
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index
 
