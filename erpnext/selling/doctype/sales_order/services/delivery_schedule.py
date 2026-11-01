@@ -29,7 +29,10 @@ class DeliveryScheduleService:
 
 		# trust the server-side row, never the client's item/uom/qty
 		item_row = next((r for r in self.doc.items if r.name == child_row.name), None)
-		if not item_row:
+		if not item_row or not frappe.db.exists(
+			"Sales Order Item",
+			{"name": item_row.name, "parent": self.doc.name, "parenttype": self.doc.doctype},
+		):
 			frappe.throw(_("Row {0} does not belong to this Sales Order").format(child_row.name))
 
 		schedules = [frappe._dict(row) for row in schedules]
@@ -54,7 +57,10 @@ class DeliveryScheduleService:
 				"stock_qty": flt(row.qty) * conversion_factor,
 			}
 
-			if frappe.db.exists("Delivery Schedule Item", row.name):
+			if row.name and frappe.db.exists(
+				"Delivery Schedule Item",
+				{"name": row.name, "sales_order": self.doc.name, "sales_order_item": item_row.name},
+			):
 				doc = frappe.get_doc("Delivery Schedule Item", row.name)
 			else:
 				doc = frappe.new_doc("Delivery Schedule Item")
