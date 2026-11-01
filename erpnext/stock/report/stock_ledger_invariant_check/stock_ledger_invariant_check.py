@@ -174,9 +174,8 @@ def get_columns():
 		},
 		{
 			"fieldname": "voucher_type",
-			"fieldtype": "Link",
+			"fieldtype": "Select",
 			"label": _("Voucher Type"),
-			"options": "DocType",
 		},
 		{
 			"fieldname": "voucher_no",
@@ -314,8 +313,8 @@ def get_columns():
 	]
 
 
-@frappe.whitelist()
-def create_reposting_entries(rows, item_code=None, warehouse=None):
+@frappe.whitelist(methods=["POST"])
+def create_reposting_entries(rows: str | list, item_code: str | None = None, warehouse: str | None = None):
 	if isinstance(rows, str):
 		rows = parse_json(rows)
 

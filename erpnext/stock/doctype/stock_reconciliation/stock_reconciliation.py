@@ -15,6 +15,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_in
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_available_serial_nos,
+	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
@@ -360,36 +361,64 @@ class StockReconciliation(StockController):
 		reco_obj = cls_obj.duplicate_package()
 
 		total_current_qty = 0.0
+		entries_in_stock = []
+		serial_nos_in_stock = self.get_serial_nos_in_stock(row, reco_obj.entries)
+
 		for entry in reco_obj.entries:
 			if not entry.batch_no or entry.serial_no:
-				total_current_qty += entry.qty
-				entry.qty *= -1
-				continue
+				if entry.serial_no not in serial_nos_in_stock:
+					continue
 
-			current_qty = get_batch_qty(
-				entry.batch_no,
-				row.warehouse,
-				row.item_code,
-				ignore_voucher_nos=[self.name],
-				posting_date=self.posting_date,
-				posting_time=self.posting_time,
-				for_stock_levels=True,
-				consider_negative_batches=True,
-				do_not_check_future_batches=True,
-			)
+				current_qty = entry.qty
+			else:
+				current_qty = get_batch_qty(
+					entry.batch_no,
+					row.warehouse,
+					row.item_code,
+					ignore_voucher_nos=[self.name],
+					posting_date=self.posting_date,
+					posting_time=self.posting_time,
+					for_stock_levels=True,
+					consider_negative_batches=True,
+					do_not_check_future_batches=True,
+				)
 
-			if not current_qty:
-				continue
+				if not current_qty:
+					continue
 
 			total_current_qty += current_qty
 			entry.qty = current_qty * -1
+			entries_in_stock.append(entry)
 
 		if total_current_qty:
+			reco_obj.set("entries", entries_in_stock)
 			reco_obj.save()
 
 			row.current_qty = total_current_qty
 
 			return reco_obj
+
+	def get_serial_nos_in_stock(self, row, entries) -> set:
+		"""Serial nos of the row that hold stock in the warehouse as of the posting datetime."""
+		serial_nos = [entry.serial_no for entry in entries if entry.serial_no]
+		if not serial_nos:
+			return set()
+
+		in_stock = get_serial_nos_based_on_posting_date(
+			frappe._dict(
+				{
+					"item_code": row.item_code,
+					"warehouse": row.warehouse,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
+					"serial_nos": serial_nos,
+					"check_serial_nos": True,
+					"voucher_no": self.name,
+				}
+			),
+			[],
+		)
+
+		return set(in_stock)
 
 	def has_change_in_serial_batch(self, row) -> bool:
 		bundles = {row.serial_and_batch_bundle: [], row.current_serial_and_batch_bundle: []}
@@ -1009,8 +1038,8 @@ class StockReconciliation(StockController):
 
 		if not self.expense_account:
 			frappe.throw(_("Please enter Expense Account"))
-		elif self.purpose == "Opening Stock" or not frappe.db.sql(
-			"""select name from `tabStock Ledger Entry` limit 1"""
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all(
+			"Stock Ledger Entry", filters={"company": self.company, "is_cancelled": 0}, limit=1
 		):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
@@ -1460,18 +1489,17 @@ def get_stock_balance_for(
 			"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 		}
 
-	# TODO: fetch only selected batch's values
 	data = _get_stock_balance(
 		item_code,
 		warehouse,
 		posting_date,
 		posting_time,
 		with_valuation_rate=with_valuation_rate,
-		with_serial_no=has_serial_no,
+		with_serial_no=has_serial_no and not has_batch_no,
 		inventory_dimensions_dict=inventory_dimensions_dict,
 	)
 
-	if has_serial_no:
+	if has_serial_no and not has_batch_no:
 		qty, rate, serial_nos = data
 	else:
 		qty, rate = data
@@ -1489,6 +1517,20 @@ def get_stock_balance_for(
 			)
 			or 0
 		)
+
+		if has_serial_no:
+			serial_no_details = get_available_serial_nos(
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": warehouse,
+						"posting_datetime": combine_datetime(posting_date, posting_time),
+						"ignore_warehouse": 1,
+						"has_batch_no": 1,
+					}
+				)
+			)
+			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			rate = _get_incoming_rate(

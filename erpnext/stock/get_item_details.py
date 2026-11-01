@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _, throw
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model import child_table_fields, default_fields
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
@@ -66,7 +67,12 @@ def get_item_details(
 ):
 	args = frappe._dict(frappe.parse_json(args))
 	validate_pricing_context(args)
-	return _get_item_details(args, doc, for_validate, overwrite_warehouse)
+	out = _get_item_details(args, doc, for_validate, overwrite_warehouse)
+	for warehouse in (out.warehouse, args.warehouse, args.from_warehouse):
+		if warehouse:
+			erpnext.require_user_permission("Warehouse", warehouse)
+
+	return out
 
 
 def _get_item_details(
@@ -149,6 +155,7 @@ def _get_item_details(
 		):
 			fallback_args = args.copy()
 			fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			fallback_args.price_list_uom_dependant = None
 			out.update(get_price_list_rate(fallback_args, item))
 
 	args.customer = current_customer
@@ -273,10 +280,10 @@ def set_valuation_rate(out, args):
 
 def update_bin_details(args, out, doc):
 	if args.get("doctype") == "Material Request" and args.get("material_request_type") == "Material Transfer":
-		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
+		out.update(_get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		bin_details = get_bin_details(
+		bin_details = _get_bin_details(
 			args.item_code, out.warehouse, args.company, include_child_warehouses=True
 		)
 
@@ -284,8 +291,6 @@ def update_bin_details(args, out, doc):
 
 
 def update_stock(ctx, out, doc=None):
-	from erpnext.stock.doctype.batch.batch import get_available_batches
-
 	if (
 		(
 			ctx.get("doctype") in ["Delivery Note", "POS Invoice"]
@@ -309,27 +314,14 @@ def update_stock(ctx, out, doc=None):
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
 
-		qty = out.stock_qty
-		batches = []
 		if out.has_batch_no and not ctx.get("batch_no"):
-			batches = get_available_batches(kwargs)
-			if doc:
-				filter_batches(batches, doc)
-
-			for batch_no, batch_qty in batches.items():
+			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
+			if batch_no:
+				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
 				rate = _get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
-				if batch_qty >= qty:
-					out.update({"batch_no": batch_no, "actual_batch_qty": qty})
-					if rate:
-						out.update({"rate": rate, "price_list_rate": rate})
-					break
-				else:
-					qty -= batch_qty
-
-				out.update({"batch_no": batch_no, "actual_batch_qty": batch_qty})
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
 
@@ -350,8 +342,9 @@ def needs_serial_nos(ctx, out):
 def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 
-	if out.has_batch_no:
-		kwargs["batches"] = [ctx.get("batch_no") or out.get("batch_no")]
+	batch_no = ctx.get("batch_no") or out.get("batch_no")
+	if out.has_batch_no and batch_no:
+		kwargs["batches"] = [batch_no]
 
 	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
 	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
@@ -368,6 +361,20 @@ def has_incorrect_serial_nos(ctx, out):
 		return True
 
 	return False
+
+
+def get_batch_no_covering_qty(kwargs, doc, qty):
+	from erpnext.stock.doctype.batch.batch import get_available_batches
+
+	batches = get_available_batches(frappe._dict(kwargs, qty=0))
+	if doc:
+		filter_batches(batches, doc)
+
+	batch_no = next(iter(batches), None)
+	if batch_no and flt(batches[batch_no]) >= flt(qty):
+		return batch_no
+
+	return None
 
 
 def filter_batches(batches, doc):
@@ -708,9 +715,11 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults=None):
 	if overwrite_warehouse or not args.warehouse:
 		warehouse = (
 			args.get("set_warehouse")
-			or defaults.item_defaults.get("default_warehouse")
-			or defaults.item_group_defaults.get("default_warehouse")
-			or defaults.brand_defaults.get("default_warehouse")
+			or get_accessible_warehouse(
+				defaults.item_defaults.get("default_warehouse"),
+				defaults.item_group_defaults.get("default_warehouse"),
+				defaults.brand_defaults.get("default_warehouse"),
+			)
 			or args.get("warehouse")
 		)
 
@@ -723,9 +732,25 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults=None):
 			default_warehouse
 			and frappe.get_cached_value("Warehouse", default_warehouse, "company") == args.company
 		):
-			return default_warehouse
+			return get_accessible_warehouse(default_warehouse)
 
 	return warehouse
+
+
+def get_accessible_warehouse(*warehouses: str | None) -> str | None:
+	"""First of `warehouses` the user's Warehouse User Permissions allow."""
+	warehouses = [warehouse for warehouse in warehouses if warehouse]
+	if not get_user_permissions().get("Warehouse"):
+		return next(iter(warehouses), None)
+
+	return next(
+		(
+			warehouse
+			for warehouse in warehouses
+			if erpnext._is_within_user_permissions("Warehouse", warehouse)
+		),
+		None,
+	)
 
 
 def update_barcode_value(out):
@@ -1065,6 +1090,12 @@ def get_price_list_rate(args, item_doc, out=None):
 
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
+
+		# Transactions have no field for this flag, so item rows must read it from the Price List
+		if args.get("price_list_uom_dependant") is None and args.price_list:
+			args.price_list_uom_dependant = frappe.get_cached_value(
+				"Price List", args.price_list, "price_not_uom_dependent"
+			)
 
 		price_list_rate = get_price_list_rate_for(args, item_doc.name)
 
@@ -1446,7 +1477,7 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(
+			res.actual_qty = _get_bin_details(
 				args.item_code, res.warehouse, include_child_warehouses=True
 			).get("actual_qty")
 
@@ -1529,10 +1560,11 @@ def get_conversion_factor(item_code, uom):
 
 
 @frappe.whitelist()
-def get_projected_qty(item_code, warehouse):
+def get_projected_qty(item_code: str, warehouse: str):
 	# record-level read on the item, matching what get_item_details() in this file already does.
 	# Nothing in the tree calls this, so there is no caller whose roles constrain the choice.
 	frappe.has_permission("Item", doc=item_code, throw=True)
+	erpnext.require_user_permission("Warehouse", warehouse)
 
 	return {
 		"projected_qty": frappe.db.get_value(
@@ -1542,10 +1574,21 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
-	# `select`, not `read`: the selling/buying rows and SellingController reach this with no Item read row
+def get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
+	# `select`, not `read`: the selling/buying rows reach this with no Item read row
 	frappe.has_permission("Item", ptype="select", throw=True)
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
 
+	return _get_bin_details(item_code, warehouse, company, include_child_warehouses)
+
+
+def _get_bin_details(
+	item_code: str, warehouse: str | None, company: str | None = None, include_child_warehouses: bool = False
+):
+	# no guard here: internal callers read the warehouse already on the document
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
@@ -1586,9 +1629,10 @@ def get_company_total_stock(item_code, company):
 
 
 @frappe.whitelist()
-def get_batch_qty(batch_no, warehouse, item_code):
+def get_batch_qty(batch_no: str, warehouse: str, item_code: str):
 	from erpnext.stock.doctype.batch import batch
 
+	erpnext.require_user_permission("Warehouse", warehouse)
 	if batch_no:
 		return {"actual_batch_qty": batch.get_batch_qty(batch_no, warehouse)}
 
@@ -1690,7 +1734,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_details = get_price_list_details(args.price_list)
 
 	price_list_currency = price_list_details.get("currency")
-	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+	price_list_uom_dependant = price_list_details.get("price_not_uom_dependent")
 
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)
@@ -1764,7 +1808,7 @@ def _get_valuation_rate(item_code, company, warehouse=None):
 	item = get_item_defaults(item_code, company)
 	# item = frappe.get_doc("Item", item_code)
 	if item.get("is_stock_item"):
-		warehouse = warehouse or get_default_warehouse(item_code, company)
+		warehouse = warehouse or get_accessible_warehouse(get_default_warehouse(item_code, company))
 		return frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
 		) or {"valuation_rate": item.get("valuation_rate") or 0}
