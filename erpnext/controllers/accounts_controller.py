@@ -4621,6 +4621,14 @@ def update_child_qty_rate(
 				)
 			)
 
+		# The Supplier Quotation form hides Update Items for these states; enforce it server-side too.
+		if doc.doctype == "Supplier Quotation" and doc.status in ("Ordered", "Stopped", "Expired"):
+			frappe.throw(
+				_("Cannot update items of Supplier Quotation {0} because it is {1}.").format(
+					doc.name, _(doc.status)
+				)
+			)
+
 		# The Quotation form hides Update Items for these states; enforce it server-side too.
 		if doc.doctype == "Quotation":
 			if doc.status in ("Lost", "Ordered"):
