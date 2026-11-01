@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.utils import cint, flt, get_link_to_form
 
 import erpnext
@@ -475,7 +476,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				self.update_net_purchase_amount_for_linked_assets(item)
 
 	def get_unvalued_rejected_shares(self) -> dict:
-		"""Share of each Purchase Receipt row that was rejected into stock at no value."""
+		"""Share of each Purchase Receipt row that moved rejected stock at no value."""
 		doc = self.doc
 		pr_details = [d.pr_detail for d in doc.items if d.pr_detail]
 		if (
@@ -490,14 +491,23 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		pr_item = frappe.qb.DocType("Purchase Receipt Item")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
+		# A return from the rejected warehouse moves only rejected stock, from the row's own warehouse
+		from_rejected = pr_item.return_qty_from_rejected_warehouse == 1
+		rejected_warehouse = Case().when(from_rejected, pr_item.warehouse).else_(pr_item.rejected_warehouse)
+		rejected_qty = Case().when(from_rejected, pr_item.qty).else_(pr_item.rejected_qty)
 		rows = (
 			frappe.qb.from_(pr_item)
 			.inner_join(sle)
-			.on((sle.voucher_detail_no == pr_item.name) & (sle.warehouse == pr_item.rejected_warehouse))
-			.select(pr_item.name, pr_item.rejected_qty, pr_item.received_qty, sle.stock_value_difference)
+			.on((sle.voucher_detail_no == pr_item.name) & (sle.warehouse == rejected_warehouse))
+			.select(
+				pr_item.name,
+				rejected_qty.as_("rejected_qty"),
+				pr_item.received_qty,
+				sle.stock_value_difference,
+			)
 			.where(
 				pr_item.name.isin(pr_details)
-				& (pr_item.rejected_qty > 0)
+				& (rejected_qty != 0)
 				& (sle.voucher_type == "Purchase Receipt")
 				& (sle.is_cancelled == 0)
 			)
