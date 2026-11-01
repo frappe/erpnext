@@ -3843,6 +3843,27 @@ def validate_inclusive_tax(tax, doc):
 			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
+def is_deduct_with_valuation(tax) -> bool:
+	return tax.get("category") == "Valuation" and tax.get("add_deduct_tax") == "Deduct"
+
+
+def validate_deduct_with_valuation_category(
+	taxes: list | None, allowed_account_heads: set | None = None
+) -> None:
+	for tax in taxes or []:
+		if is_deduct_with_valuation(tax) and tax.account_head not in (allowed_account_heads or set()):
+			throw(
+				_("Row {0}: {1} cannot be {2} when {3} is {4}").format(
+					tax.idx,
+					frappe.bold(_("Add or Deduct")),
+					frappe.bold(_("Deduct")),
+					frappe.bold(_("Consider Tax or Charge for")),
+					frappe.bold(_("Valuation")),
+				),
+				title=_("Invalid Tax Row"),
+			)
+
+
 def set_balance_in_account_currency(
 	gl_dict, account_currency=None, conversion_rate=None, company_currency=None
 ):
