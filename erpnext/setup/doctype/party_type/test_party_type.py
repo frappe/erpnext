@@ -1,22 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-<<<<<<< HEAD
-import unittest
-
-# test_records = frappe.get_test_records('Party Type')
-
-
-class TestPartyType(unittest.TestCase):
-	pass
-=======
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPartyType(ERPNextTestSuite):
+class TestPartyType(FrappeTestCase):
 	def test_managers_can_create_and_edit_party_types(self):
 		for role in ("System Manager", "Accounts Manager"):
 			with self.subTest(role=role):
@@ -64,4 +55,3 @@ class TestPartyType(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, party_type.save)
 		journal.cancel()
 		self.assertRaises(frappe.ValidationError, party_type.save)
->>>>>>> f874108 (fix(party-type): allow managers to maintain unused party types)

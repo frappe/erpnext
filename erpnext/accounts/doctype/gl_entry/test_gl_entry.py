@@ -6,6 +6,7 @@ import unittest
 
 import frappe
 from frappe.model.naming import parse_naming_series
+from frappe.tests.utils import change_settings
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
@@ -13,10 +14,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.general_ledger import make_round_off_gle
 
 
-<<<<<<< HEAD
 class TestGLEntry(unittest.TestCase):
-=======
-class TestGLEntry(ERPNextTestSuite):
 	def test_unregistered_party_type_is_rejected_without_a_party(self):
 		entry = frappe.get_doc(doctype="GL Entry", account="Debtors - _TC", party_type="User", is_cancelled=0)
 		self.assertRaises(frappe.ValidationError, entry.validate_party)
@@ -36,7 +34,7 @@ class TestGLEntry(ERPNextTestSuite):
 		entry.is_cancelled = 1
 		entry.validate_party()
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	@change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
 	def test_immutable_ledger_can_reverse_historical_unregistered_party(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
@@ -65,7 +63,6 @@ class TestGLEntry(ERPNextTestSuite):
 		self.assertEqual(sum(row.debit - row.credit for row in entries), 0)
 		self.assertTrue(all(row.party_type == "User" and row.party == "Administrator" for row in entries))
 
->>>>>>> 91c731f (fix(accounts): reject unregistered journal and GL party types)
 	def test_round_off_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
 		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")

@@ -363,13 +363,6 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		pe = create_payment_entry(
 			payment_type="Receive", party_type="Customer", party="Test TCS Customer", paid_amount=30000
 		)
-<<<<<<< HEAD
-		pe.paid_from = "Debtors - _TC"
-		pe.paid_to = "Cash - _TC"
-=======
-		pe.apply_tds = 1
-		pe.tax_withholding_category = "Cumulative Threshold TCS"
->>>>>>> 86bfd5a (fix(payment-entry): validate registered party types and account types)
 		pe.submit()
 		vouchers.append(pe)
 

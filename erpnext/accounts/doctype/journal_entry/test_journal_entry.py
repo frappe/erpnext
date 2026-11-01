@@ -15,14 +15,7 @@ from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.selling.doctype.customer.test_customer import make_customer, set_credit_limit
 
 
-<<<<<<< HEAD
 class TestJournalEntry(unittest.TestCase):
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
-=======
-class TestJournalEntry(ERPNextTestSuite):
-	def setUp(self):
-		self.load_test_records("Journal Entry")
-
 	def test_unregistered_party_type_on_untyped_account_is_rejected(self):
 		account = create_account(
 			account_name="_Test Party Type Untyped",
@@ -44,8 +37,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		journal.insert().submit()
 		self.assertTrue(frappe.db.exists("GL Entry", {"voucher_no": journal.name, "party_type": "Customer"}))
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
->>>>>>> 91c731f (fix(accounts): reject unregistered journal and GL party types)
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_journal_entry_with_against_jv(self):
 		jv_invoice = frappe.copy_doc(test_records[2])
 		base_jv = frappe.copy_doc(test_records[0])
