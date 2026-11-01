@@ -1,13 +1,18 @@
 # Copyright (c) 2020, Frappe Technologies and Contributors
 # See license.txt
 
+import csv
+import io
 import json
+from unittest.mock import patch
 
 import frappe
 import mt940
 from frappe.utils import random_string
 
 from erpnext.accounts.doctype.bank_statement_import.bank_statement_import import (
+	convert_mt940_to_csv,
+	get_preview_from_template,
 	get_transaction_reference,
 	is_mt940_format,
 	preprocess_mt940_content,
@@ -395,6 +400,140 @@ class TestBankStatementImport(ERPNextTestSuite):
 			2,
 		)
 
+	def make_bank_account(self, bank_account_no=None):
+		frappe.get_doc({"doctype": "Bank", "bank_name": "_Test BSI Bank"}).insert(ignore_if_duplicate=True)
+		bank_account = frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": "_Test BSI Account",
+				"bank": "_Test BSI Bank",
+				"account": "_Test Bank - _TC",
+				"is_company_account": 1,
+				"company": "_Test Company",
+			}
+		).insert(ignore_if_duplicate=True)
+		if bank_account_no is not None:
+			bank_account.db_set("bank_account_no", bank_account_no)
+		return bank_account.name
+
+	def make_statement_import(self, bank_account, import_file=None, **values):
+		return frappe.get_doc(
+			{
+				"doctype": "Bank Statement Import",
+				"company": "_Test Company",
+				"bank_account": bank_account,
+				"bank": "_Test BSI Bank",
+				"reference_doctype": "Bank Transaction",
+				"import_type": "Insert New Records",
+				"import_file": import_file,
+				**values,
+			}
+		).insert()
+
+	def make_file(self, file_name, content):
+		return frappe.get_doc(
+			{"doctype": "File", "file_name": file_name, "content": content, "is_private": 1}
+		).insert(ignore_permissions=True)
+
+	def test_mt940_reversal_of_credit_is_a_withdrawal(self):
+		bank_account = self.make_bank_account(bank_account_no="")
+		mt940_file = self.make_file(f"rc-{random_string(6)}.txt", MT940_WITH_REVERSAL)
+		data_import = self.make_statement_import(bank_account, import_mt940_fromat=1)
+
+		csv_url = convert_mt940_to_csv(data_import.name, mt940_file.file_url)
+
+		rows = list(csv.reader(io.StringIO(frappe.get_doc("File", {"file_url": csv_url}).get_content())))
+		self.assertEqual(
+			[(row[1], row[2]) for row in rows[1:]], [("500.0", ""), ("", "500.0"), ("", "100.0")]
+		)
+
+	def test_mt940_of_another_account_is_refused(self):
+		bank_account = self.make_bank_account(bank_account_no="1111222233")
+		mt940_file = self.make_file(f"other-{random_string(6)}.txt", MT940_WITH_REVERSAL)
+		data_import = self.make_statement_import(bank_account, import_mt940_fromat=1)
+
+		self.assertRaises(frappe.ValidationError, convert_mt940_to_csv, data_import.name, mt940_file.file_url)
+		# a short number that is only part of the statement's IBAN is not a match
+		frappe.db.set_value("Bank Account", bank_account, "bank_account_no", "3000")
+		self.assertRaises(frappe.ValidationError, convert_mt940_to_csv, data_import.name, mt940_file.file_url)
+		frappe.db.set_value("Bank Account", bank_account, "bank_account_no", "DE89 3704 0044 0532 0130 00")
+		self.assertTrue(convert_mt940_to_csv(data_import.name, mt940_file.file_url))
+
+	def test_another_users_file_is_refused(self):
+		bank_account = self.make_bank_account()
+		private_file = self.make_file(f"salaries-{random_string(6)}.csv", "Employee,Salary\nCEO,9900000\n")
+		data_import = self.make_statement_import(bank_account)
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "bsi-other@example.com",
+				"first_name": "Other",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+		user.add_roles("System Manager")
+
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError, get_preview_from_template, data_import.name, private_file.file_url
+			)
+			self.assertRaises(
+				frappe.PermissionError, convert_mt940_to_csv, data_import.name, private_file.name
+			)
+			# a File name is not looked up by its (non-unique) file name
+			own_file = self.make_file(private_file.file_name, "Date\n")
+			self.assertRaises(
+				frappe.DoesNotExistError, get_preview_from_template, data_import.name, own_file.file_name
+			)
+			data_import.reload()
+			data_import.import_file = private_file.file_url
+			self.assertRaises(frappe.PermissionError, data_import.save)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_google_sheet_rows_must_be_for_the_import_bank_account(self):
+		bank_account = self.make_bank_account()
+		data_import = self.make_statement_import(bank_account)
+		data_import.db_set("google_sheets_url", "https://docs.google.com/spreadsheets/d/x")
+		# the wrong row is past the 10 rows of the preview
+		rows = [f"2026-10-01,{i},{bank_account}" for i in range(11)] + ["2026-10-02,5,Another Account"]
+		sheet = "\n".join(["Date,Deposit,Bank Account", *rows])
+		with patch(
+			"frappe.core.doctype.data_import.importer.get_csv_content_from_google_sheets", return_value=sheet
+		):
+			self.assertRaisesRegex(frappe.ValidationError, "Rows 13 are", data_import.start_import)
+
+	def test_import_keeps_the_uploaded_statement(self):
+		bank_account = self.make_bank_account()
+		tag = random_string(8)
+		content = f"Date,Deposit,Withdrawal,Description,Reference Number\n2026-10-01,100,0,BSI {tag} credit,{tag}-1\n"
+		file = frappe.get_doc(
+			{"doctype": "File", "file_name": f"bsi-{tag}.csv", "content": content, "is_private": 1}
+		).insert()
+		data_import = self.make_statement_import(bank_account, file.file_url)
+		self.addCleanup(delete_imported_statement, data_import.name, file.name, tag)
+		template_options = json.dumps(
+			{
+				"column_to_field_map": {
+					"Date": "date",
+					"Deposit": "deposit",
+					"Withdrawal": "withdrawal",
+					"Description": "description",
+					"Reference Number": "reference_number",
+				}
+			}
+		)
+
+		start_import(data_import.name, bank_account, file.file_url, None, "_Test BSI Bank", template_options)
+
+		self.assertEqual(frappe.db.get_value("Bank Statement Import", data_import.name, "status"), "Success")
+		self.assertEqual(frappe.get_doc("File", file.name).get_content(), content)
+		self.assertEqual(
+			frappe.db.get_value("Bank Transaction", {"description": f"BSI {tag} credit"}, "bank_account"),
+			bank_account,
+		)
+
 
 def delete_imported_statement(data_import_name, file_name, tag):
 	"""The importer commits row by row, so the rollback in tearDown leaves these behind."""
@@ -410,3 +549,18 @@ def delete_imported_statement(data_import_name, file_name, tag):
 	frappe.delete_doc_if_exists("Bank Statement Import", data_import_name, force=1)
 	frappe.delete_doc_if_exists("File", file_name, force=1)
 	frappe.db.commit()  # nosemgrep
+
+
+MT940_WITH_REVERSAL = """{1:F0112345678901X0000000000}{2:I94012345678901XN}{4:
+:20:STMTREF12345
+:25:DE89370400440532013000
+:28C:12345/1
+:60F:C261001EUR1000,00
+:61:2610011001C500,00NMSCCUST-1
+:86:Customer payment
+:61:2610021002RC500,00NMSCCUST-1-REV
+:86:Reversal of customer payment
+:61:2610031003D100,00NMSCFEE-1
+:86:Bank fee
+:62F:C261003EUR900,00
+-}"""
