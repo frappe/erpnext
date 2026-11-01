@@ -24,6 +24,147 @@ class TestEmployee(ERPNextTestSuite):
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
 
+	def test_department_must_belong_to_employee_company(self):
+		department = frappe.get_doc(
+			doctype="Department", department_name="Employee Other Company", company="_Test Company 1"
+		).insert()
+		employee = new_employee("company-department@example.com")
+		employee.user_id = None
+		employee.department = department.name
+		with self.assertRaises(frappe.ValidationError):
+			employee.insert()
+
+		employee.department = None
+		employee.insert()
+		employee.department = department.name
+		with self.assertRaises(frappe.ValidationError):
+			employee.save()
+
+	def test_unknown_employee_holiday_list_and_existing_user_email(self):
+		from unittest.mock import patch
+
+		from erpnext.setup.doctype.employee.employee import create_user, get_holiday_list_for_employee
+
+		get_hooks = frappe.get_hooks
+		with patch(
+			"frappe.get_hooks",
+			side_effect=lambda key, *args: [] if key == "employee_holiday_list" else get_hooks(key, *args),
+		):
+			with self.assertRaisesRegex(frappe.DoesNotExistError, "Employee .* not found"):
+				get_holiday_list_for_employee("NONEXISTENT-EMPLOYEE")
+
+		existing_email = "employee-existing-email@example.com"
+		make_employee(existing_email, company="_Test Company")
+		employee = new_employee("employee-new@example.com")
+		employee.user_id = None
+		employee.insert()
+		with self.assertRaisesRegex(frappe.ValidationError, "already exists"):
+			create_user(employee.name, existing_email)
+		self.assertFalse(employee.reload().user_id)
+
+	def test_missing_employee_without_holiday_exception(self):
+		from unittest.mock import patch
+
+		from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee, is_holiday
+
+		get_hooks = frappe.get_hooks
+		with patch(
+			"frappe.get_hooks",
+			side_effect=lambda key, *args: [] if key == "employee_holiday_list" else get_hooks(key, *args),
+		):
+			self.assertFalse(get_holiday_list_for_employee("NONEXISTENT-EMPLOYEE", raise_exception=False))
+			self.assertFalse(is_holiday("NONEXISTENT-EMPLOYEE", raise_exception=False))
+
+	def test_active_employee_requires_active_manager(self):
+		manager = frappe.get_doc(
+			"Employee", make_employee("manager-tree@example.com", company="_Test Company")
+		)
+		reportee = frappe.get_doc(
+			"Employee", make_employee("reportee-tree@example.com", company="_Test Company")
+		)
+		reportee.reports_to = manager.name
+		reportee.save()
+		manager.reload()
+		manager.status = "Inactive"
+		self.assertRaises(InactiveEmployeeStatusError, manager.save)
+		reportee.status = "Inactive"
+		reportee.save()
+		manager.reload()
+		manager.status = "Left"
+		manager.relieving_date = "2020-01-01"
+		manager.save()
+
+		reportee.status = "Active"
+		self.assertRaises(frappe.ValidationError, reportee.save)
+		new_reportee = new_employee("reportee-tree-new@example.com")
+		new_reportee.user_id = None
+		new_reportee.reports_to = manager.name
+		self.assertRaises(frappe.ValidationError, new_reportee.insert)
+
+	def test_existing_employee_with_inactive_manager_can_be_edited(self):
+		from unittest.mock import patch
+
+		manager = frappe.get_doc(
+			"Employee", make_employee("legacy-manager@example.com", company="_Test Company")
+		)
+		reportee = frappe.get_doc(
+			"Employee", make_employee("legacy-reportee@example.com", company="_Test Company")
+		)
+		reportee.reports_to = manager.name
+		reportee.save()
+		manager.reload()
+		manager.status = "Inactive"
+		# This transition was allowed before the new reporting validation.
+		with patch.object(type(manager), "validate_status"):
+			manager.save()
+
+		reportee.reload()
+		reportee.cell_number = "1234567890"
+		reportee.save()
+		self.assertEqual(reportee.reload().cell_number, "1234567890")
+		reportee.status = "Inactive"
+		reportee.save()
+		reportee.status = "Active"
+		with self.assertRaisesRegex(frappe.ValidationError, "must report to an Active employee"):
+			reportee.save()
+
+	def test_sales_person_disabled_only_after_employee_leaves(self):
+		from erpnext.setup.doctype.employee.employee import deactivate_sales_person
+
+		employee = frappe.get_doc(
+			"Employee", make_employee("employee-sales@example.com", company="_Test Company")
+		)
+		person = frappe.get_doc(
+			doctype="Sales Person", sales_person_name="Employee Sales Test", employee=employee.name
+		).insert()
+		deactivate_sales_person("Left", employee.name)
+		self.assertEqual(person.reload().enabled, 1)
+
+		employee.status = "Left"
+		employee.relieving_date = "2020-01-01"
+		employee.save()
+		self.assertEqual(person.reload().enabled, 0)
+
+	def test_edit_left_employee_after_rehire(self):
+		user = "employee-rehire@example.com"
+		old = frappe.get_doc("Employee", make_employee(user, company="_Test Company"))
+		old.status = "Left"
+		old.relieving_date = "2020-01-01"
+		old.save()
+		rehire = new_employee(user).insert()
+
+		old.reason_for_leaving = "Changed after rehire"
+		old.date_of_birth = "1989-05-08"
+		old.save()
+		self.assertEqual(str(frappe.db.get_value("User", user, "birth_date")), "1990-05-08")
+		old.status = "Inactive"
+		old.save()
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
+		self.assertEqual(old.reload().reason_for_leaving, "Changed after rehire")
+		self.assertEqual(rehire.status, "Active")
+		old.status = "Active"
+		self.assertRaises(frappe.DuplicateEntryError, old.save)
+
 	def test_user_has_employee(self):
 		employee = make_employee("test_emp_user_creation@company.com", company="_Test Company")
 		employee_doc = frappe.get_doc("Employee", employee)
@@ -311,7 +452,9 @@ def make_employee(user, company=None, **kwargs):
 				"user_id": user,
 				"date_of_birth": "1990-05-08",
 				"date_of_joining": "2013-01-01",
-				"department": frappe.get_all("Department", fields="name")[0].name,
+				"department": frappe.db.get_value(
+					"Department", {"company": company or erpnext.get_default_company()}
+				),
 				"gender": "Female",
 				"company_email": user,
 				"prefered_contact_email": "Company Email",
