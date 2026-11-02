@@ -10,20 +10,6 @@ from frappe.utils import flt
 
 MACHINE_SHAPES = frappe.get_file_json(Path(__file__).with_name("machine_shapes.json"))
 PACKING_MACHINE_MODELS = ("Filling Line", "Bagging Line")
-SHAPE_FIELDS = (
-	"shape",
-	"finish",
-	"x",
-	"y",
-	"z",
-	"width",
-	"depth",
-	"radius",
-	"height",
-	"shows_level",
-	"is_small",
-	"shakes",
-)
 
 
 class WorkstationType(Document):
@@ -66,7 +52,10 @@ class WorkstationType(Document):
 	@property
 	def machine_shapes(self) -> list[dict]:
 		if self.shapes:
-			return [{field: row.get(field) for field in SHAPE_FIELDS} for row in self.shapes]
+			return [
+				row.as_dict(no_default_fields=True, no_child_table_fields=True, no_private_properties=True)
+				for row in self.shapes
+			]
 		return get_preset_shapes(self.machine_model)
 
 	@frappe.whitelist(methods=["POST"])
