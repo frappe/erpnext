@@ -680,6 +680,65 @@ class TestTaxWithholdingCategory(FrappeTestCase):
 		pi2.cancel()
 		pi3.cancel()
 
+	def test_return_reverses_at_certificate_rate_and_gives_limit_back(self):
+		set_ldc_supplier_and_certificate()
+
+		# 50,000 at 2% uses up the limit and the remaining 20,000 is deducted at 10%
+		pi = create_purchase_invoice(supplier="Test LDC Supplier", rate=70000)
+		pi.submit()
+		self.assertEqual(pi.taxes_and_charges_deducted, 3000)
+
+		pi_return = create_purchase_invoice(
+			supplier="Test LDC Supplier", is_return=1, return_against=pi.name, qty=-1, rate=60000
+		)
+		pi_return.submit()
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -2000)
+
+		next_pi = create_purchase_invoice(supplier="Test LDC Supplier", rate=20000)
+		next_pi.submit()
+		self.assertEqual(next_pi.taxes_and_charges_deducted, 400)
+
+	def test_return_reverses_certificate_deduction_made_by_a_later_invoice(self):
+		set_ldc_supplier_and_certificate()
+
+		# below the threshold, so it is deducted at 2% only through the next invoice
+		pi1 = create_purchase_invoice(supplier="Test LDC Supplier", rate=1500)
+		pi1.submit()
+		self.assertEqual(pi1.taxes_and_charges_deducted, 0)
+
+		pi2 = create_purchase_invoice(supplier="Test LDC Supplier", rate=5000)
+		pi2.submit()
+		self.assertEqual(pi2.taxes_and_charges_deducted, 130)
+
+		pi_return = create_purchase_invoice(
+			supplier="Test LDC Supplier", is_return=1, return_against=pi1.name, qty=-1, rate=1500
+		)
+		pi_return.submit()
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -30)
+
+	def test_return_after_certificate_expiry_reverses_at_certificate_rate(self):
+		fiscal_year = get_fiscal_year(today(), company="_Test Company")
+		valid_upto = add_months(fiscal_year[1], 1)
+		set_ldc_supplier_and_certificate(valid_from=fiscal_year[1], valid_upto=valid_upto)
+
+		pi = create_purchase_invoice(
+			supplier="Test LDC Supplier", rate=10000, posting_date=fiscal_year[1], set_posting_time=True
+		)
+		pi.submit()
+		self.assertEqual(pi.taxes_and_charges_deducted, 200)
+
+		pi_return = create_purchase_invoice(
+			supplier="Test LDC Supplier",
+			is_return=1,
+			return_against=pi.name,
+			qty=-1,
+			rate=4000,
+			posting_date=add_days(valid_upto, 1),
+			set_posting_time=True,
+		)
+		pi_return.submit()
+		self.assertEqual(pi_return.taxes_and_charges_deducted, -80)
+
 	def test_ldc_at_0_rate(self):
 		frappe.db.set_value(
 			"Supplier",
@@ -968,6 +1027,8 @@ def create_purchase_invoice(**args):
 			"posting_date": args.posting_date or today(),
 			"apply_tds": 0 if args.do_not_apply_tds else 1,
 			"supplier": args.supplier,
+			"is_return": args.is_return or 0,
+			"return_against": args.return_against,
 			"company": "_Test Company",
 			"taxes_and_charges": "",
 			"currency": "INR",
@@ -1404,6 +1465,24 @@ def create_lower_deduction_certificate(
 				"certificate_limit": limit,
 			}
 		).insert()
+
+
+def set_ldc_supplier_and_certificate(valid_from=None, valid_upto=None):
+	"""Link Test LDC Supplier to Test Service Category (10%) with a 2% certificate up to 50,000."""
+	frappe.db.set_value(
+		"Supplier",
+		"Test LDC Supplier",
+		{"tax_withholding_category": "Test Service Category", "pan": "ABCTY1234D"},
+	)
+	create_lower_deduction_certificate(
+		supplier="Test LDC Supplier",
+		certificate_no="1AE0423AAJ",
+		tax_withholding_category="Test Service Category",
+		tax_rate=2,
+		limit=50000,
+		valid_from=valid_from,
+		valid_upto=valid_upto,
+	)
 
 
 def make_pan_no_field():
