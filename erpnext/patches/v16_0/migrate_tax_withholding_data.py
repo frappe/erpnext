@@ -44,9 +44,19 @@ def execute():
 
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
-	PurchaseInvoiceMigrator(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs).migrate()
+	purchase_migrator = PurchaseInvoiceMigrator(
+		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs
+	)
+	purchase_migrator.migrate()
 	migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
-	migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
+	migrate_journal_entries(
+		tds_accounts,
+		tax_rate_map,
+		column_cache,
+		party_tax_id_cache,
+		skip_docs,
+		purchase_migrator.tds_paid_by_other,
+	)
 
 	# Copy tax_withholding_category to item level
 	copy_category_to_items_for_purchase(column_cache)
@@ -1203,7 +1213,9 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 # =============================================================================
 
 
-def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
+def migrate_journal_entries(
+	tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, tds_paid_by_other
+):
 	"""
 	Migrate Journal Entry TDS data.
 
@@ -1370,6 +1382,68 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		all_entries[("Journal Entry", je_name)] = entries
 
 		category_wise_jes[category].add(je_name)
+
+	# v15 counted journals without TDS towards the threshold, but taxed them on the crossing invoice only in
+	# categories that are not tax on excess; the ones no invoice taxed are still open
+	journals_without_tds = (
+		frappe.qb.from_(je)
+		.join(jea)
+		.on(jea.parent == je.name)
+		.select(
+			je.name,
+			je.company,
+			je.posting_date,
+			je.tax_withholding_category,
+			jea.party,
+			Max(jea.account_currency).as_("account_currency"),
+			Max(jea.exchange_rate).as_("exchange_rate"),
+			Sum(jea.credit - jea.debit).as_("amount"),
+		)
+		.where(je.docstatus == 1)
+		.where(je.is_opening == "No")
+		.where(je.apply_tds == 1)
+		.where(IfNull(je.tax_withholding_category, "") != "")
+		.where(jea.party_type == "Supplier")
+		.where(IfNull(jea.reference_type, "") != "Purchase Invoice")
+		.groupby(je.name, je.company, je.posting_date, je.tax_withholding_category, jea.party)
+		.run(as_dict=True)
+	)
+
+	for row in journals_without_tds:
+		if (
+			not row.amount
+			or row.name in je_taxes
+			or row.name in tds_paid_by_other
+			or ("Journal Entry", row.name) in skip_docs
+		):
+			continue
+
+		tax_rate, tax_on_excess = get_tax_rate_for_date(
+			tax_rate_map, row.tax_withholding_category, row.posting_date
+		)
+		if tax_on_excess:
+			continue
+
+		all_entries.setdefault(("Journal Entry", row.name), []).append(
+			{
+				"company": row.company,
+				"party_type": "Supplier",
+				"party": row.party,
+				"tax_id": get_party_tax_id("Supplier", row.party, column_cache, party_tax_id_cache),
+				"tax_withholding_category": row.tax_withholding_category,
+				"taxable_amount": row.amount,
+				"tax_rate": tax_rate,
+				"withholding_amount": 0,
+				"taxable_doctype": "Journal Entry",
+				"taxable_name": row.name,
+				"taxable_date": row.posting_date,
+				"withholding_doctype": "",
+				"withholding_name": "",
+				"withholding_date": None,
+				"currency": row.account_currency or "",
+				"conversion_rate": flt(row.exchange_rate, 9) or 1,
+			}
+		)
 
 	bulk_insert_entries(all_entries)
 
