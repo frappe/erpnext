@@ -765,11 +765,9 @@ def get_asset_details(asset, finance_book=None):
 
 
 def get_gross_asset_value(asset, finance_book: str | None = None) -> float:
-	"""Value carried in the fixed asset account: cost, capitalised additions and revaluations."""
+	"""Value carried in the fixed asset account: cost and revaluations."""
 	return flt(
-		flt(asset.gross_purchase_amount)
-		+ flt(asset.additional_asset_cost)
-		+ get_value_adjustment_amount(asset, finance_book),
+		flt(asset.gross_purchase_amount) + get_value_adjustment_amount(asset, finance_book),
 		asset.precision("gross_purchase_amount"),
 	)
 
