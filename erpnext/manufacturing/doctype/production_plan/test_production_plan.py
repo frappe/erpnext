@@ -4615,9 +4615,32 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assert_receipt_reserves_only_the_plan_shortfall("Batch RM For SR Shortfall")
 
 	def assert_receipt_reserves_only_the_plan_shortfall(self, rm_item):
-		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		plan = self.make_plan_short_of_stock(rm_item)
+		self.receive_for_plan(plan, 15)
+
+		reserved_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+		reserved_qty = {row.name: row.reserved_qty for row in reserved_entries}
+		self.assertEqual(sum(reserved_qty.values()), 10)
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "stock_reserved_qty"), 10
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_receipt_hands_reserved_stock_to_submitted_work_orders(self):
+		plan = self.make_plan_short_of_stock("RM For SR Work Order Hand Off")
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.source_warehouse = work_order.wip_warehouse = "_Test Warehouse - _TC"
+		work_order.fg_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+
+		self.receive_for_plan(plan, 6)
+
+		reserved_entries = StockReservation(work_order).get_reserved_entries("Work Order", work_order.name)
+		self.assertEqual(sum({row.name: row.reserved_qty for row in reserved_entries}.values()), 10)
+
+	def make_plan_short_of_stock(self, rm_item):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		parent_bom = create_nested_bom({f"FG For {rm_item}": {rm_item: {}}}, prefix="")
 		warehouse = "_Test Warehouse - _TC"
@@ -4640,20 +4663,18 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		plan.submit_material_request = 1
 		plan.make_material_request()
+		return plan
+
+	def receive_for_plan(self, plan, qty):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		mr_name = frappe.db.get_value("Material Request", {"production_plan": plan.name})
 		po = make_purchase_order(mr_name)
 		po.supplier = "_Test Supplier"
-		po.items[0].qty = 15
+		po.items[0].qty = qty
 		po.submit()
 		make_purchase_receipt(po.name).submit()
-
-		reserved_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
-		reserved_qty = {row.name: row.reserved_qty for row in reserved_entries}
-		self.assertEqual(sum(reserved_qty.values()), 10)
-		self.assertEqual(
-			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "stock_reserved_qty"), 10
-		)
 
 	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
