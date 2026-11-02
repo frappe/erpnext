@@ -270,6 +270,7 @@ def bulk_insert_entries(all_entries):
 		"withholding_date",
 		"status",
 		"under_withheld_reason",
+		"lower_deduction_certificate",
 		"currency",
 		"conversion_rate",
 		"created_by_migration",
@@ -318,6 +319,7 @@ def bulk_insert_entries(all_entries):
 					entry.get("withholding_date"),
 					status,
 					entry.get("under_withheld_reason", ""),
+					entry.get("lower_deduction_certificate", ""),
 					entry.get("currency", ""),
 					flt(entry.get("conversion_rate"), 9) or 1,
 					1,  # created_by_migration
@@ -351,6 +353,7 @@ class PurchaseInvoiceMigrator:
 		self._all_withheld_vouchers = []
 		self._all_advance_taxes = []
 		self._pe_tds_entries = []
+		self._threshold_invoices = []
 
 		# Lookups
 		self.invoice_taxes = {}  # {invoice_name: {"info": row, "tax_rows": [], "tds_total": float}}
@@ -359,11 +362,12 @@ class PurchaseInvoiceMigrator:
 		self.pe_allocated = defaultdict(float)  # {pe_name: total_allocated}
 		self.pe_taxes = {}  # {pe_name: {"info": row, "tax_rows": [], "tds_total": float}}
 		self.invoice_info = {}  # {invoice_name: row}
+		self.nil_certificates = defaultdict(list)  # {(supplier, company, category): [certificates]}
 
 		# Sets for tracking
 		self.invoices_with_twv = set()
 		self.invoices_with_advance_tax = set()
-		self.tds_paid_by_other = {}  # {taxable_invoice: withholding_invoice}
+		self.tds_paid_by_other = set()
 
 		# Date lookups
 		self.pe_dates = {}
@@ -519,6 +523,45 @@ class PurchaseInvoiceMigrator:
 			.run(as_dict=True)
 		)
 
+		# Query 5: Invoices v15 counted towards the threshold, with or without TDS of their own
+		self._threshold_invoices = (
+			frappe.qb.from_(pi)
+			.select(
+				pi.name,
+				pi.supplier,
+				pi.company,
+				pi.posting_date,
+				pi.base_net_total,
+				pi.base_tax_withholding_net_total,
+				pi.tax_withholding_category,
+				pi.is_return,
+				pi.currency,
+				pi.conversion_rate,
+			)
+			.where(pi.docstatus == 1)
+			.where(pi.is_opening == "No")
+			.where(pi.apply_tds == 1)
+			.where(IfNull(pi.tax_withholding_category, "") != "")
+			.run(as_dict=True)
+		)
+
+		ldc = frappe.qb.DocType("Lower Deduction Certificate")
+		for row in (
+			frappe.qb.from_(ldc)
+			.select(
+				ldc.name,
+				ldc.supplier,
+				ldc.company,
+				ldc.tax_withholding_category,
+				ldc.valid_from,
+				ldc.valid_upto,
+				ldc.certificate_limit.as_("balance"),
+			)
+			.where(ldc.rate == 0)
+			.run(as_dict=True)
+		):
+			self.nil_certificates[(row.supplier, row.company, row.tax_withholding_category)].append(row)
+
 	# -------------------------------------------------------------------------
 	# Lookup Building
 	# -------------------------------------------------------------------------
@@ -543,11 +586,6 @@ class PurchaseInvoiceMigrator:
 		for row in self._all_withheld_vouchers:
 			self.withheld_by_invoice[row.parent].append(row)
 			self.invoices_with_twv.add(row.parent)
-
-			# Track cross-invoice TDS payment
-			if row.voucher_name != row.parent and row.parent in self.invoice_taxes:
-				if row.voucher_name not in self.tds_paid_by_other:
-					self.tds_paid_by_other[row.voucher_name] = row.parent
 
 			if row.voucher_type != "Purchase Invoice":
 				continue
@@ -591,6 +629,10 @@ class PurchaseInvoiceMigrator:
 			if row.parent not in self.invoice_info:
 				self.invoice_info[row.parent] = row
 
+		for row in self._threshold_invoices:
+			if row.name not in self.invoice_info:
+				self.invoice_info[row.name] = row
+
 	def _fetch_dates(self):
 		pe = frappe.qb.DocType("Payment Entry")
 		pi = frappe.qb.DocType("Purchase Invoice")
@@ -619,10 +661,18 @@ class PurchaseInvoiceMigrator:
 
 	def _process_invoices(self):
 		all_invoice_names = (
-			set(self.invoice_taxes.keys()) | self.invoices_with_twv | self.invoices_with_advance_tax
+			set(self.invoice_taxes.keys())
+			| self.invoices_with_twv
+			| self.invoices_with_advance_tax
+			| {row.name for row in self._threshold_invoices}
 		)
 
-		for invoice_name in all_invoice_names:
+		# Invoices with TDS first, so the invoices they paid TDS for are known before the rest
+		# and by date, so certificate limits are used up in the order v15 used them
+		for invoice_name in sorted(
+			all_invoice_names,
+			key=lambda name: (name not in self.invoice_taxes, self.invoice_info[name].posting_date, name),
+		):
 			self._process_invoice(invoice_name)
 
 	def _process_invoice(self, invoice_name):
@@ -641,11 +691,9 @@ class PurchaseInvoiceMigrator:
 		if ctx["total_tds_in_invoice"]:
 			entries.extend(self._process_invoice_tds(invoice_name, ctx))
 
-		# Handle under-withheld (TWV exists but no TDS)
-		elif invoice_name in self.invoices_with_twv:
-			entry = self._process_underwithheld(invoice_name, ctx)
-			if entry:
-				entries.append(entry)
+		# Handle under-withheld (no TDS)
+		else:
+			entries.extend(self._process_underwithheld(invoice_name, ctx))
 
 		if entries:
 			self._add_entries("Purchase Invoice", invoice_name, entries)
@@ -806,6 +854,7 @@ class PurchaseInvoiceMigrator:
 			if voucher.voucher_name == invoice_name:
 				continue
 
+			self.tds_paid_by_other.add(voucher.voucher_name)
 			voucher_date = self.pi_dates.get(voucher.voucher_name) or info.posting_date
 			voucher_taxable = flt(voucher.taxable_amount)
 			voucher_tds = flt(voucher_taxable * tax_rate / 100, 2) if tax_rate else 0
@@ -834,24 +883,54 @@ class PurchaseInvoiceMigrator:
 	def _process_underwithheld(self, invoice_name, ctx):
 		# Skip if TDS was paid by another invoice or the advance covered the whole invoice
 		if invoice_name in self.tds_paid_by_other or not ctx["current_taxable"]:
-			return None
+			return []
 
 		info = ctx["info"]
-		tax_on_excess = ctx["tax_on_excess"]
-		under_withheld_reason = "Threshold Exemption" if tax_on_excess else ""
+		entries = []
+		taxable = ctx["current_taxable"]
+		values = {
+			"withholding_amount": 0,
+			"taxable_doctype": "Purchase Invoice",
+			"taxable_name": invoice_name,
+			"taxable_date": info.posting_date,
+			"withholding_doctype": "",
+			"withholding_name": "",
+			"withholding_date": None,
+		}
 
-		return self._create_entry(
-			ctx,
-			taxable_amount=ctx["current_taxable"],
-			withholding_amount=0,
-			taxable_doctype="Purchase Invoice",
-			taxable_name=invoice_name,
-			taxable_date=info.posting_date,
-			withholding_doctype="",
-			withholding_name="",
-			withholding_date=None,
-			under_withheld_reason=under_withheld_reason,
-		)
+		# v15 counted invoices under a nil rate certificate as zero; the new flow tracks its limit on these rows
+		for ldc in self.nil_certificates.get((info.supplier, info.company, ctx["category"]), []):
+			if not (ldc.valid_from <= info.posting_date <= ldc.valid_upto):
+				continue
+
+			# a return gives back the limit its invoice used
+			covered = taxable if info.is_return else min(taxable, ldc.balance)
+			ldc.balance += covered if info.is_return else -covered
+			if covered:
+				entries.append(
+					self._create_entry(
+						ctx,
+						taxable_amount=covered,
+						tax_rate=0,
+						under_withheld_reason="Lower Deduction Certificate",
+						lower_deduction_certificate=ldc.name,
+						**values,
+					)
+				)
+				taxable -= covered
+			break
+
+		if taxable:
+			entries.append(
+				self._create_entry(
+					ctx,
+					taxable_amount=taxable,
+					under_withheld_reason="Threshold Exemption" if ctx["tax_on_excess"] else "",
+					**values,
+				)
+			)
+
+		return entries
 
 	# -------------------------------------------------------------------------
 	# Payment Entry Over-Withheld Processing
