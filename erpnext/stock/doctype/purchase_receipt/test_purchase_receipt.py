@@ -6027,8 +6027,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.items[0].conversion_factor, 1.0)
 
 	def test_conversion_factor_via_shared_target_uom(self):
-		transaction_uom = "_Test 3 Kg Bag"
-		stock_uom = "_Test 25 Kg Bag"
+		transaction_uom = "_Test PR 3 Kg Bag"
+		stock_uom = "_Test PR 25 Kg Bag"
 		make_uom_conversion_factor(transaction_uom, "Kg", 3)
 		make_uom_conversion_factor(stock_uom, "Kg", 25)
 		item = make_item("Test Item for Shared Target UOM", {"stock_uom": stock_uom})
