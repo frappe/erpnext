@@ -189,6 +189,22 @@ class ProductionPlanStockReservation:
 		StockReservation(self.doc).cancel_stock_reservation_entries(sre_list)
 		self.doc.reload()
 
+	def release_untouched(self) -> None:
+		sre_list = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"docstatus": 1,
+				"status": ("in", ["Reserved", "Partially Reserved"]),
+			},
+			pluck="name",
+		)
+		for sre_name in sre_list:
+			sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+			sre_doc.flags.ignore_permissions = True
+			sre_doc.cancel()
+
 	def reserve_received(self, receipt: Document, rows: list) -> None:
 		unclaimed_qty = self.get_unclaimed_qty({plan_row for _row, plan_row in rows})
 		items = []
