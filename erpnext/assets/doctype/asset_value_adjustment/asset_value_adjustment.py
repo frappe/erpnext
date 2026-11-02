@@ -45,6 +45,23 @@ class AssetValueAdjustment(Document):
 		self.validate_date()
 		self.set_current_asset_value()
 		self.set_difference_amount()
+		self.validate_finance_book()
+
+	def validate_finance_book(self):
+		if self.finance_book or not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
+			return
+
+		# The adjustment updates only the matching book row, but its GL entries without a book apply to all books
+		if frappe.db.exists(
+			"Asset Finance Book",
+			{"parent": self.asset, "parenttype": "Asset", "finance_book": ["is", "set"]},
+		):
+			frappe.throw(
+				_("Select a Finance Book, as Asset {0} has named finance books").format(
+					get_link_to_form("Asset", self.asset)
+				),
+				title=_("Missing Finance Book"),
+			)
 
 	def on_submit(self):
 		self.make_depreciation_entry()
