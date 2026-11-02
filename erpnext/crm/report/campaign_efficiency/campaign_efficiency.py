@@ -11,7 +11,7 @@ from frappe.utils import add_days, flt
 def execute(filters=None):
 	columns, data = [], []
 	columns = get_columns("utm_campaign")
-	data = get_lead_data(filters or {}, "utm_campaign")
+	data = get_lead_data(filters, "utm_campaign")
 	return columns, data
 
 
@@ -30,6 +30,7 @@ def get_columns(based_on):
 
 
 def get_lead_data(filters, based_on):
+	filters = frappe._dict(filters or {})
 	based_on_field = frappe.scrub(based_on)
 
 	lead_filters = [[based_on_field, "is", "set"]]
@@ -69,7 +70,7 @@ def get_converted_customers(leads):
 
 
 def get_lead_quotation_count(leads, customers):
-	return count_by_party("Quotation", "quotation_to", leads, customers)
+	return count_by_party("Quotation", "quotation_to", leads, customers, {"docstatus": 1})
 
 
 def get_lead_opp_count(leads, customers):
@@ -107,7 +108,8 @@ def get_order_amount(leads, customers):
 		frappe.qb.from_(so_item)
 		.select(Sum(so_item.base_net_amount))
 		.where(
-			so_item.prevdoc_docname.isin(
+			(so_item.docstatus == 1)
+			& so_item.prevdoc_docname.isin(
 				frappe.qb.from_(quotation).select(quotation.name).where(party_condition)
 			)
 		)

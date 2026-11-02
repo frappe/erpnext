@@ -545,3 +545,4 @@ erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
 erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
 erpnext.patches.v16_0.set_supplier_quotation_order_status
 erpnext.patches.v16_0.set_work_order_requested_and_picked_qty
+erpnext.patches.v16_0.set_lost_on_in_opportunity
