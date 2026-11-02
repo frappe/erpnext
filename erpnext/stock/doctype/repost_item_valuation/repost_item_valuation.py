@@ -510,11 +510,19 @@ class RepostItemValuation(Document):
 			and not frappe.db.get_single_value("Stock Reposting Settings", "enable_parallel_reposting")
 		)
 
+	def get_item_reposts(self):
+		"""This repost's item-warehouse, followed by those of the reposts merged into it."""
+		items = json.loads(self.items_to_be_repost or "[]")
+		if len(items) > 1:
+			return [frappe._dict(row) for row in items]
+
+		return [get_repost_item(self)]
+
 	def skip_merged_reposts(self):
-		if self.based_on != "Item and Warehouse" or not self.items_to_be_repost:
+		merged = [row.repost_item_valuation for row in self.get_item_reposts()[1:]]
+		if self.based_on != "Item and Warehouse" or not merged:
 			return
 
-		merged = [row.get("repost_item_valuation") for row in json.loads(self.items_to_be_repost)[1:]]
 		riv = frappe.qb.DocType("Repost Item Valuation")
 		(
 			frappe.qb.update(riv)
@@ -605,14 +613,14 @@ def get_mergeable_item_reposts(doc):
 
 
 def get_repost_item(row):
-	return {
-		"item_code": row.item_code,
-		"warehouse": row.warehouse,
-		"posting_date": row.posting_date,
-		"posting_time": row.posting_time,
-		"posting_datetime": get_combine_datetime(row.posting_date, row.posting_time),
-		"repost_item_valuation": row.name,
-	}
+	return frappe._dict(
+		item_code=row.item_code,
+		warehouse=row.warehouse,
+		posting_date=row.posting_date,
+		posting_time=row.posting_time,
+		posting_datetime=get_combine_datetime(row.posting_date, row.posting_time),
+		repost_item_valuation=row.name,
+	)
 
 
 def get_queued_item_reposts(source_name, item_codes, started_at=None):
@@ -846,18 +854,7 @@ def repost_sl_entries(doc):
 		)
 	else:
 		repost_future_sle(
-			items_to_be_repost=[frappe._dict(row) for row in json.loads(doc.items_to_be_repost)]
-			if doc.items_to_be_repost
-			else [
-				frappe._dict(
-					{
-						"item_code": doc.item_code,
-						"warehouse": doc.warehouse,
-						"posting_date": doc.posting_date,
-						"posting_time": doc.posting_time,
-					}
-				)
-			],
+			items_to_be_repost=doc.get_item_reposts(),
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
 			doc=doc,
@@ -932,11 +929,9 @@ def _get_directly_dependent_vouchers(doc):
 		items.update(sle_items)
 		warehouses.update(sle_warehouses)
 	else:
-		items.add(doc.item_code)
-		warehouses.add(doc.warehouse)
-		for row in json.loads(doc.items_to_be_repost or "[]"):
-			items.add(row.get("item_code"))
-			warehouses.add(row.get("warehouse"))
+		for row in doc.get_item_reposts():
+			items.add(row.item_code)
+			warehouses.add(row.warehouse)
 
 	affected_vouchers = get_future_stock_vouchers(
 		posting_date=doc.posting_date,
