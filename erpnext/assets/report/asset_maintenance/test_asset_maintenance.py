@@ -34,7 +34,7 @@ class TestAssetMaintenanceReport(ERPNextTestSuite):
 
 
 def make_asset_maintenance(item_code: str) -> str:
-	asset = create_asset(item_code=item_code, maintenance_required=1)
+	asset = create_asset(item_code=item_code, maintenance_required=1, submit=1)
 	return (
 		frappe.get_doc(
 			{

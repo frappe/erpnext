@@ -422,8 +422,10 @@ class JournalEntry(AccountsController):
 				if asset.calculate_depreciation:
 					self.update_journal_entry_link_on_depr_schedule(asset, d)
 					self.update_value_after_depreciation(asset, d.debit)
+					asset.sync_value_after_depreciation()
+				else:
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 
-				asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 				asset.set_status()
 				asset.set_total_booked_depreciations()
 
@@ -574,7 +576,10 @@ class JournalEntry(AccountsController):
 						fb_row = asset.get("finance_books")[fb_idx - 1]
 						fb_row.value_after_depreciation += d.debit
 						fb_row.db_update()
-				asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
+					asset.sync_value_after_depreciation()
+				else:
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
+
 				asset.set_status()
 				asset.set_total_booked_depreciations()
 			elif self.voucher_type == "Journal Entry" and d.reference_type == "Asset" and d.reference_name:
@@ -1831,6 +1836,10 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	if not frappe.has_permission("Journal Entry", doc=source_name):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
+	return map_reverse_journal_entry(source_name, target_doc)
+
+
+def map_reverse_journal_entry(source_name: str, target_doc=None, ignore_permissions: bool = False):
 	reversal_of = frappe.db.get_value("Journal Entry", source_name, "reversal_of")
 	if reversal_of:
 		frappe.throw(
@@ -1878,6 +1887,7 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 		},
 		target_doc,
 		post_process,
+		ignore_permissions=ignore_permissions,
 	)
 
 	return doclist
