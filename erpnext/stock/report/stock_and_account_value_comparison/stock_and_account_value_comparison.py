@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Min
 from frappe.utils import create_batch, get_datetime, get_link_to_form, getdate, parse_json, today
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
 from erpnext.stock.doctype.stock_reposting_settings.stock_reposting_settings import get_stock_ledgers
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
@@ -40,10 +41,11 @@ def get_data(report_filters):
 	# Optional lower bound: lets callers (e.g. the weekly auto-repost job) scope the scan to the current
 	# fiscal year in the query itself instead of loading every voucher ever posted and filtering later.
 	if report_filters.get("from_date"):
-		if report_filters.as_on_date and getdate(report_filters.from_date) > getdate(
-			report_filters.as_on_date
-		):
-			frappe.throw(_("From Date cannot be after As On Date"))
+		validate_date_range(
+			report_filters,
+			to_field="as_on_date",
+			message=_("From Date cannot be after As On Date"),
+		)
 
 		filters["posting_date"] = ("between", [report_filters.from_date, report_filters.as_on_date])
 

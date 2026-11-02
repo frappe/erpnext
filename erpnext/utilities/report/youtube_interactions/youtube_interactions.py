@@ -6,10 +6,14 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	if not frappe.db.get_single_value("Video Settings", "enable_youtube_tracking") or not filters:
 		return [], []
+
+	validate_date_range(filters)
 
 	columns = get_columns()
 	data = get_data(filters)

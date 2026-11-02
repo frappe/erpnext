@@ -21,10 +21,17 @@ from frappe.utils import (
 )
 from frappe.utils.nestedset import get_descendants_of
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
 def execute(filters: dict | None = None):
+	validate_date_range(filters)
+
 	obj = MaterialRequirementsPlanningReport(filters)
 	data, chart = obj.generate_mrp()
 	columns = obj.get_columns()

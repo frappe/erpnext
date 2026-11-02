@@ -9,11 +9,18 @@ from frappe.query_builder.functions import Locate
 from frappe.utils import flt, get_datetime
 from pypika.terms import ExistsCriterion
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	return get_columns(filters), get_data(filters)
+=======
+	validate_date_range(filters)
+
+	return prepare_serial_batch_report(get_columns(filters), get_data(filters))
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 def get_data(report_filters):

@@ -8,6 +8,12 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
 	maintains_fifo_queue,
 )
@@ -35,6 +41,8 @@ SLE_FIELDS = (
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data
