@@ -1087,6 +1087,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			Max(Case().when(gle.account.isin(tcs_accounts_list), gle.account).else_(None)).as_("account"),
 		)
 		.where(si.docstatus == 1)
+		.where(si.is_opening == "No")
 		.groupby(si.name)
 		.run(as_dict=True)
 	)
@@ -1176,7 +1177,8 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			"currency": row.currency,
 			"conversion_rate": row.conversion_rate or 1,
 		}
-		entries.append(entry)
+		if total_tcs:
+			entries.append(entry)
 
 		all_entries[("Sales Invoice", row.invoice_name)] = entries
 		category_wise_invoices[category].append(row.invoice_name)
