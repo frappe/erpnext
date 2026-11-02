@@ -48,7 +48,13 @@ def group_by_party_and_category(data, filters):
 	party_category_wise_map = {}
 
 	for row in data:
-		key = (row.get("party_type"), row.get("party"), row.get("tax_withholding_category"))
+		# a mid-year rate change must not merge into the earlier rate
+		key = (
+			row.get("party_type"),
+			row.get("party"),
+			row.get("tax_withholding_category"),
+			row.get("rate"),
+		)
 		party_category_wise_map.setdefault(
 			key,
 			{
