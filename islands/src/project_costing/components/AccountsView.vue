@@ -32,11 +32,11 @@ const months = computed(() =>
 );
 
 const account = ref(null);
+// The island renders in a shadow root, out of `document`'s reach, so the entries are found by ref.
+const ledger = ref(null);
 function select(name) {
 	account.value = name;
-	nextTick(() =>
-		document.getElementById("ledger-entries")?.scrollIntoView({ behavior: "smooth", block: "start" })
-	);
+	nextTick(() => ledger.value?.$el?.scrollIntoView({ behavior: "smooth", block: "start" }));
 }
 </script>
 
@@ -72,6 +72,6 @@ function select(name) {
 				:y-axis="{ format: format.short, min: 0 }"
 			/>
 		</ChartCard>
-		<LedgerEntries v-model:account="account" :accounts="accounts" />
+		<LedgerEntries ref="ledger" v-model:account="account" :accounts="accounts" />
 	</div>
 </template>

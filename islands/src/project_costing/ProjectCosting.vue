@@ -11,7 +11,7 @@ import CostDrivers from "./components/CostDrivers.vue";
 import CostTrend from "./components/CostTrend.vue";
 import KpiCards from "./components/KpiCards.vue";
 import { accountsReports } from "./accounts.js";
-import { hiddenFor } from "./alerts.js";
+import { hiddenFor } from "./access.js";
 import { report_route, toView } from "./costing.js";
 import { createFormat, provideFormat } from "./format.js";
 import { kpisFor } from "./kpis.js";
@@ -56,6 +56,8 @@ const hidden = computed(() => {
 	return accounts.data && !accounts.data.access.budgets ? [__("Budget records")] : [];
 });
 const failed = computed(() => mode.value === "project" && Object.keys(costing.data?.errors || {}).length > 0);
+// A list the user may not read comes back as null; with none left, the card goes.
+const has_drivers = computed(() => Object.values(view.value?.drivers || {}).some((list) => list != null));
 // Only a viewer who may read the ledger gets the Accounts view.
 const has_accounts = computed(() => Boolean(view.value?.access.ledger));
 
@@ -134,7 +136,7 @@ function new_timesheet() {
 				</div>
 				<p class="text-base text-ink-gray-7">{{ __("No costs booked yet") }}</p>
 				<Button
-					v-if="!view.closed"
+					v-if="!view.closed && view.access.create.Timesheet"
 					variant="solid"
 					theme="gray"
 					icon-left="lucide-clock"
@@ -152,7 +154,7 @@ function new_timesheet() {
 				</div>
 				<div class="grid gap-5 lg:grid-cols-2">
 					<CostBreakdown :view="view" />
-					<CostDrivers v-if="view.drivers" :view="view" />
+					<CostDrivers v-if="has_drivers" :view="view" />
 				</div>
 				<BillingCard v-if="!view.internal && view.billing" :view="view" />
 			</template>

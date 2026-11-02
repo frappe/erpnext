@@ -40,7 +40,7 @@ function open_source(event) {
 		toast.info(__("You don't have access to the entries behind {0}", [source.label]));
 		return;
 	}
-	host.navigate?.(source.route(props.view.project));
+	host.navigate?.(source.route(props.view));
 }
 </script>
 

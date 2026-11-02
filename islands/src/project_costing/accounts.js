@@ -2,28 +2,28 @@ import { report_route } from "./costing.js";
 
 const __ = window.__;
 
-// How each account stands against its budget, as `account_status` in accounts.py names it.
+// How each account stands against its budget, as `account_status` in budgets.py names it.
 export const ACCOUNT_STATUS = {
 	ok: { label: __("On track"), theme: "green" },
-	near: { label: __("Near limit"), theme: "amber" },
-	over_committed: { label: __("Over with open orders"), theme: "amber" },
-	blocked: { label: __("New orders blocked"), theme: "red" },
-	requests_blocked: { label: __("New requests blocked"), theme: "red" },
-	over: { label: __("Over budget"), theme: "red" },
+	over_to_date: { label: __("Over budget to date"), theme: "amber" },
+	over: { label: __("Over budget"), theme: "amber" },
+	blocked: { label: __("Spending blocked"), theme: "red" },
 	none: { label: __("No budget"), theme: "gray" },
 };
 
-// What a Budget does once exceeded, by its action and the earliest stage it checks.
+// What a Budget does once exceeded, by its strongest action and the stage that triggers it.
 const CONTROLS = {
 	Stop: {
-		"Material Request": __("Blocks new requests"),
-		"Purchase Order": __("Blocks new orders"),
-		Expense: __("Blocks expenses"),
+		"Purchase Order": __("Stops on orders"),
+		"Material Request": __("Stops on requests"),
+		Expense: __("Stops on expenses"),
+		Cumulative: __("Stops on total spend"),
 	},
 	Warn: {
-		"Material Request": __("Warns on requests"),
 		"Purchase Order": __("Warns on orders"),
+		"Material Request": __("Warns on requests"),
 		Expense: __("Warns on expenses"),
+		Cumulative: __("Warns on total spend"),
 	},
 };
 

@@ -2,19 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import flt, nowdate
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.utils import nowdate
 
-from erpnext.accounts.doctype.budget.budget import get_ordered_amount, get_requested_amount
+from erpnext.accounts.doctype.budget.budget import BudgetError
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.projects.doctype.project.costing.accounts import (
-	account_status,
-	budget_control,
-	budget_summary,
-	get_ledger_entries,
-	get_project_accounts,
-)
+from erpnext.projects.doctype.project.costing.accounts import get_ledger_entries, get_project_accounts
+from erpnext.projects.doctype.project.costing.budgets import account_status, budget_control
 from erpnext.projects.doctype.project.costing.test_project_costing import invoice_for_project
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
@@ -44,11 +40,11 @@ class TestProjectAccounts(ERPNextTestSuite):
 		accounts = get_project_accounts(project)
 		expense = row_for(accounts, EXPENSE_ACCOUNT)
 		self.assertEqual((expense["actual"], expense["committed"]), (6000, 5000))
-		self.assertEqual(expense["committed"], budget_committed(project, EXPENSE_ACCOUNT))
 		self.assertEqual(expense["entries"], 1)
 		self.assertEqual(expense["budget"]["amount"], 10000)
 		self.assertEqual(expense["budget"]["control"], {"stage": "Purchase Order", "action": "Warn"})
-		self.assertEqual(expense["status"], "over_committed")
+		# orders and actual spend are each checked on their own, and each is within the budget
+		self.assertEqual(expense["status"], "ok")
 
 		income = next(row for row in accounts["rows"] if row["root_type"] == "Income")
 		self.assertEqual(income["actual"], 2000)
@@ -58,39 +54,45 @@ class TestProjectAccounts(ERPNextTestSuite):
 		self.assertEqual(accounts["monthly"][-1]["actual"], 6000)
 		self.assertGreater(accounts["monthly"][-1]["budget"], 0)
 
-	def test_account_status_follows_budget_control(self) -> None:
-		orders_stop = {"amount": 1000, "stops": ["Purchase Order"]}
-		self.assertEqual(account_status(status_row(None, actual=500)), "none")
-		self.assertEqual(account_status(status_row(orders_stop, actual=1100)), "over")
-		self.assertEqual(
-			account_status(status_row(orders_stop, actual=600, committed=500, ordered=500)), "blocked"
-		)
-		# a purchase order's check counts orders only: requests past the budget leave orders open
-		requested = status_row(orders_stop, actual=100, committed=1100, ordered=100)
-		self.assertEqual(account_status(requested), "over_committed")
-		both_stop = {**orders_stop, "stops": ["Purchase Order", "Material Request"]}
-		self.assertEqual(account_status({**requested, "budget": both_stop}), "requests_blocked")
-		self.assertEqual(account_status(status_row(orders_stop, actual=600, committed=300)), "near")
-		self.assertEqual(account_status(status_row(orders_stop, actual=600, committed=100)), "ok")
-		requests_stop = {**orders_stop, "stops": ["Material Request"]}
-		self.assertEqual(
-			account_status(status_row(requests_stop, actual=600, committed=500)), "requests_blocked"
-		)
-		expense_stop = {**orders_stop, "stops": ["Expense"]}
-		self.assertEqual(
-			account_status(status_row(expense_stop, actual=600, committed=500)), "over_committed"
-		)
+	def test_budget_rules_follow_erpnext_checks(self) -> None:
+		"""Each stage the Budget checks compares its own amount with the budget, and with the monthly
+		distribution to date; a Stop on any exceeded check blocks the account. The account is named by
+		its strongest rule, monthly rules included."""
+		self.assertEqual(account_status(None, spend(actual=500)), "none")
+		orders_stop = budget_doc(po="Stop")
+		self.assertEqual(account_status(orders_stop, spend(ordered=1100)), "blocked")
+		self.assertEqual(account_status(budget_doc(po="Warn"), spend(ordered=1100)), "over")
+		# up to the budget itself is within it
+		self.assertEqual(account_status(orders_stop, spend(ordered=1000)), "ok")
+		# requests past the budget trip the request check, not the order check
+		self.assertEqual(account_status(orders_stop, spend(ordered=100, requested=1100)), "over")
+		# without the cumulative check, stages within the budget each pass however they add up
+		mixed = spend(actual=600, ordered=600, requested=600)
+		self.assertEqual(account_status(orders_stop, mixed), "ok")
+		self.assertEqual(account_status(budget_doc(po="Stop", cumulative="Stop"), mixed), "blocked")
 
-	def test_budget_control_names_the_strongest_rule(self) -> None:
-		"""A stop wins over a warning wherever each applies, so a request stop with an order warning
-		names the stop, and an order stop with a request warning names the order stop."""
+		# within the year, but past the months distributed so far
+		by_month = {nowdate()[:7]: 500, "9999-12": 500}
+		self.assertEqual(account_status(budget_doc(by_month=by_month), spend(ordered=600)), "over_to_date")
+		monthly_stop = budget_doc(by_month=by_month, po_monthly="Stop")
+		self.assertEqual(account_status(monthly_stop, spend(ordered=600)), "blocked")
+
+		self.assertEqual(budget_control(monthly_stop), {"stage": "Purchase Order", "action": "Stop"})
 		requests_stop = budget_doc(mr="Stop", po="Warn")
 		self.assertEqual(budget_control(requests_stop), {"stage": "Material Request", "action": "Stop"})
-		self.assertEqual(budget_summary(requests_stop)["stops"], ["Material Request"])
-		orders_stop = budget_doc(mr="Warn", po="Stop")
-		self.assertEqual(budget_control(orders_stop), {"stage": "Purchase Order", "action": "Stop"})
-		self.assertEqual(budget_summary(orders_stop)["stops"], ["Purchase Order"])
 		self.assertIsNone(budget_control(budget_doc(mr="Ignore", po="Ignore", expense="Ignore")))
+
+	def test_status_matches_what_erpnext_enforces(self) -> None:
+		"""ERPNext's budget controller warns on orders past a budget that warns, and refuses the next
+		order once the budget stops: the account reads over, then blocked."""
+		project = self.project_with_budget(budget_amount=4000)
+		self.book(project, invoiced=1000, ordered=[3000, 2000])
+		self.assertEqual(row_for(get_project_accounts(project), EXPENSE_ACCOUNT)["status"], "over")
+
+		frappe.db.set_value("Budget", {"project": project}, "action_if_annual_budget_exceeded_on_po", "Stop")
+		self.assertEqual(row_for(get_project_accounts(project), EXPENSE_ACCOUNT)["status"], "blocked")
+		with self.assertRaises(BudgetError):
+			order_for_project(project, rate=100)
 
 	def test_ledger_entries_filter_by_account_and_root_type(self) -> None:
 		project = self.project_with_budget(budget_amount=10000)
@@ -110,8 +112,8 @@ class TestProjectAccounts(ERPNextTestSuite):
 		project = self.project_with_budget(budget_amount=10000)
 		self.book(project, invoiced=6000)
 
-		accounts_viewer = make_user(ACCOUNTS_VIEWER, "Accounts User", "Projects User")
-		projects_viewer = make_user(PROJECTS_VIEWER, "Projects User")
+		accounts_viewer = create_user(ACCOUNTS_VIEWER, "Accounts User", "Projects User").name
+		projects_viewer = create_user(PROJECTS_VIEWER, "Projects User").name
 		try:
 			frappe.set_user(accounts_viewer)
 			accounts = get_project_accounts(project)
@@ -125,10 +127,10 @@ class TestProjectAccounts(ERPNextTestSuite):
 		self.assertIsNone(row_for(accounts, EXPENSE_ACCOUNT)["budget"])
 
 	def test_accounts_keep_to_what_the_user_may_read(self) -> None:
-		"""A user limited to one account by User Permission sees only that account, in the rows, the
-		monthly series and the ledger list alike."""
+		"""A user limited by User Permission to one account, and to orders from another supplier, sees
+		only that account in the rows, the monthly series and the ledger, and none of the orders."""
 		project = self.project_with_budget(budget_amount=10000)
-		self.book(project, invoiced=6000)
+		self.book(project, invoiced=6000, ordered=[3000])
 		make_purchase_invoice(
 			item_code=make_item(properties={"is_stock_item": 0}).name,
 			qty=1,
@@ -136,10 +138,12 @@ class TestProjectAccounts(ERPNextTestSuite):
 			project=project,
 			expense_account=UNBUDGETED_ACCOUNT,
 		)
-		viewer = make_user(RESTRICTED_VIEWER, "Accounts User", "Projects User")
-		frappe.get_doc(
-			{"doctype": "User Permission", "user": viewer, "allow": "Account", "for_value": EXPENSE_ACCOUNT}
-		).insert()
+		viewer = create_user(RESTRICTED_VIEWER, "Accounts User", "Projects User").name
+		# the test orders are from "_Test Supplier"
+		for allow, value in (("Account", EXPENSE_ACCOUNT), ("Supplier", "_Test Supplier 1")):
+			frappe.get_doc(
+				{"doctype": "User Permission", "user": viewer, "allow": allow, "for_value": value}
+			).insert()
 
 		try:
 			frappe.set_user(viewer)
@@ -151,6 +155,8 @@ class TestProjectAccounts(ERPNextTestSuite):
 		self.assertEqual([row["account"] for row in accounts["rows"]], [EXPENSE_ACCOUNT])
 		self.assertEqual(accounts["monthly"][-1]["actual"], 6000)
 		self.assertEqual({row.account for row in ledger}, {EXPENSE_ACCOUNT})
+		self.assertEqual(row_for(accounts, EXPENSE_ACCOUNT)["committed"], 0)
+		self.assertEqual(row_for(get_project_accounts(project), EXPENSE_ACCOUNT)["committed"], 3000)
 
 	def project_with_budget(self, budget_amount: float) -> str:
 		"""A customer project with a Budget on the expense account: warn from purchase order."""
@@ -166,7 +172,8 @@ class TestProjectAccounts(ERPNextTestSuite):
 				"budget_amount": budget_amount,
 				"from_fiscal_year": fiscal_year,
 				"to_fiscal_year": fiscal_year,
-				"distribution_frequency": "Monthly",
+				# all of it in the first month, so the monthly check is the annual one on any date
+				"distribution_frequency": "Yearly",
 				"distribute_equally": 1,
 				"applicable_on_booking_actual_expenses": 1,
 				"action_if_annual_budget_exceeded": "Warn",
@@ -185,52 +192,52 @@ class TestProjectAccounts(ERPNextTestSuite):
 		service = make_item(properties={"is_stock_item": 0}).name
 		make_purchase_invoice(item_code=service, qty=1, rate=invoiced, project=project)
 		for rate in ordered or []:
-			order = create_purchase_order(item_code=service, qty=1, rate=rate, do_not_save=True)
-			order.set_missing_values()
-			order.items[0].update({"project": project, "expense_account": EXPENSE_ACCOUNT})
-			order.insert()
-			order.submit()
+			order_for_project(project, rate, service)
 		invoice_for_project(project, qty=2)
 
 
-def budget_committed(project: str, account: str) -> float:
-	"""What ERPNext's Budget counts as committed on the account, one account at a time."""
-	fiscal_year = get_fiscal_year(nowdate(), company="_Test Company")[0]
-	params = frappe._dict(
-		expense_account=account,
-		budget_against_field="project",
-		project=project,
-		from_fiscal_year=fiscal_year,
-		to_fiscal_year=fiscal_year,
-	)
-	return flt(get_ordered_amount(params)) + flt(get_requested_amount(params))
+def order_for_project(project: str, rate: float, item_code: str | None = None) -> None:
+	"""A submitted purchase order for the project on the expense account."""
+	item_code = item_code or make_item(properties={"is_stock_item": 0}).name
+	order = create_purchase_order(item_code=item_code, qty=1, rate=rate, do_not_save=True)
+	order.set_missing_values()
+	order.items[0].update({"project": project, "expense_account": EXPENSE_ACCOUNT})
+	order.insert()
+	order.submit()
 
 
 def row_for(accounts: dict, account: str) -> dict:
 	return next(row for row in accounts["rows"] if row["account"] == account)
 
 
-def budget_doc(mr: str, po: str, expense: str = "Warn") -> dict:
-	"""A Budget checking material requests, purchase orders and expenses, with these actions."""
+def budget_doc(
+	po: str = "Warn",
+	mr: str = "Warn",
+	expense: str = "Warn",
+	cumulative: str | None = None,
+	po_monthly: str = "Ignore",
+	by_month: dict | None = None,
+) -> dict:
+	"""A Budget of 1,000 checking requests, orders and expenses with these annual actions, the
+	monthly rule on orders, and a cumulative check when its action is given. Without `by_month`, all
+	of it falls in the first month."""
 	return {
-		"name": "BUDGET-TEST",
-		"revision_of": None,
-		"by_month": {},
-		"applicable_on_material_request": 1,
-		"action_if_annual_budget_exceeded_on_mr": mr,
+		"budget_amount": 1000,
+		"by_month": by_month or {"2000-01": 1000},
 		"applicable_on_purchase_order": 1,
 		"action_if_annual_budget_exceeded_on_po": po,
+		"action_if_accumulated_monthly_budget_exceeded_on_po": po_monthly,
+		"applicable_on_material_request": 1,
+		"action_if_annual_budget_exceeded_on_mr": mr,
+		"action_if_accumulated_monthly_budget_exceeded_on_mr": "Ignore",
 		"applicable_on_booking_actual_expenses": 1,
 		"action_if_annual_budget_exceeded": expense,
+		"action_if_accumulated_monthly_budget_exceeded": "Ignore",
+		"applicable_on_cumulative_expense": int(bool(cumulative)),
+		"action_if_annual_exceeded_on_cumulative_expense": cumulative,
+		"action_if_accumulated_monthly_exceeded_on_cumulative_expense": None,
 	}
 
 
-def status_row(budget: dict | None, actual: float, committed: float = 0, ordered: float = 0) -> dict:
-	return {"budget": budget, "actual": actual, "committed": committed, "ordered": ordered}
-
-
-def make_user(email: str, *roles: str) -> str:
-	if not frappe.db.exists("User", email):
-		user = frappe.get_doc({"doctype": "User", "email": email, "first_name": email.split("@")[0]}).insert()
-		user.add_roles(*roles)
-	return email
+def spend(actual: float = 0, ordered: float = 0, requested: float = 0) -> dict[str, float]:
+	return {"actual": actual, "ordered": ordered, "requested": requested}

@@ -15,7 +15,7 @@ from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries
 
 DRIVER_LIMIT = 5
 # Unpriced hours at this share of all hours (in percent) leave labour cost understated.
-UNPRICED_HOURS_ALERT = 5
+UNDERSTATED_LABOUR_SHARE = 5
 
 
 class CostDrivers:
@@ -33,9 +33,12 @@ class CostDrivers:
 
 	def build(self) -> dict:
 		timesheet = qb.DocType("Timesheet")
+		labour = self.access["timesheets"]
 		return {
-			"activities": self.activities[:DRIVER_LIMIT],
-			"employees": self.labour_by(timesheet.employee, Max(timesheet.employee_name), DRIVER_LIMIT),
+			"activities": self.activities[:DRIVER_LIMIT] if labour else None,
+			"employees": self.labour_by(timesheet.employee, Max(timesheet.employee_name), DRIVER_LIMIT)
+			if labour
+			else None,
 			"suppliers": self.suppliers() if self.access["purchases"] else None,
 			"items": self.items() if self.access["materials"] else None,
 		}
@@ -106,5 +109,5 @@ def summarise_rate_gaps(activities: list[dict]) -> dict:
 		"hours": unpriced_hours,
 		"share": share,
 		"estimate": unpriced_hours * average_rate if average_rate else None,
-		"understated": share >= UNPRICED_HOURS_ALERT,
+		"understated": share >= UNDERSTATED_LABOUR_SHARE,
 	}

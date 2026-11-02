@@ -26,9 +26,9 @@ class ProjectCostQueries:
 	"""A project's cost and billing, worked out from the documents booked against it, as a total or
 	by month.
 
-	The rules match the ones the Project uses for the totals it stores (see `Project.update_costing`
-	and HRMS's override of it), so the two agree; a test checks that they do. A month is keyed
-	"YYYY-MM" and taken from the posting date of the document that booked the amount.
+	The Project stores its totals from these same queries (see `Project.update_costing` and HRMS's
+	override of it), so the Costing tab and the Project form agree. A month is keyed "YYYY-MM" and
+	taken from the posting date of the document that booked the amount.
 	"""
 
 	def __init__(self, project: str, readable_only: bool = False):

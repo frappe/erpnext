@@ -112,6 +112,8 @@ const summary = computed(() =>
 		: __("{0} billed", [format.money(props.view.billed)])
 );
 
+const can_create = computed(() => props.view.access.create);
+
 function create(doctype) {
 	const options = new URLSearchParams({ project: props.view.project, customer: props.view.customer || "" });
 	host.navigate?.(`Form/${doctype}/new?${options}`);
@@ -122,7 +124,7 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 <template>
 	<ChartCard>
 		<ChartContainer :title="__('Billing')">
-			<template v-if="view.access.invoices && !not_started && !view.closed" #actions>
+			<template v-if="can_create['Sales Invoice'] && !not_started && !view.closed" #actions>
 				<Button
 					size="sm"
 					:label="__('Create invoice')"
@@ -142,14 +144,14 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 					<p class="text-base text-ink-gray-7">{{ __("Not billed yet") }}</p>
 					<div v-if="!view.closed" class="mt-2 flex flex-wrap justify-center gap-2">
 						<Button
-							v-if="view.access.sales_orders"
+							v-if="can_create['Sales Order']"
 							variant="solid"
 							theme="gray"
 							:label="__('Create sales order')"
 							@click="create('Sales Order')"
 						/>
 						<Button
-							v-if="view.access.invoices"
+							v-if="can_create['Sales Invoice']"
 							variant="ghost"
 							:label="__('Create invoice')"
 							@click="create('Sales Invoice')"

@@ -8,35 +8,36 @@ export const SOURCES = [
 		key: "labour",
 		label: __("Labour"),
 		via: __("timesheets"),
-		route: (project) => list_route("Timesheet", { "Timesheet Detail.project": project, docstatus: 1 }),
+		access: "timesheets",
+		route: (view) => list_route("Timesheet", { "Timesheet Detail.project": view.project, docstatus: 1 }),
 	},
 	{
 		key: "purchases",
 		label: __("Purchases"),
 		via: __("purchase invoices"),
 		access: "purchases",
-		route: (project) =>
-			list_route("Purchase Invoice", { "Purchase Invoice Item.project": project, docstatus: 1 }),
+		route: (view) =>
+			list_route("Purchase Invoice", { "Purchase Invoice Item.project": view.project, docstatus: 1 }),
 	},
 	{
 		key: "materials",
 		label: __("Materials"),
 		via: __("stock consumption"),
 		access: "materials",
-		// the stock ledger rows the total is read from: stock entries, delivery notes and sales
-		// invoices that take stock out for the project
-		route: (project) =>
+		// the stock ledger rows the total is read from
+		route: (view) =>
 			list_route("Stock Ledger Entry", {
-				project,
+				project: view.project,
 				is_cancelled: 0,
-				voucher_type: ["in", ["Stock Entry", "Delivery Note", "Sales Invoice"]],
+				voucher_type: ["in", view.consumption_voucher_types],
 			}),
 	},
 	{
 		key: "expenses",
 		label: __("Expenses"),
 		via: __("expense claims"),
-		route: (project) => list_route("Expense Claim", { project, docstatus: 1 }),
+		access: "expenses",
+		route: (view) => list_route("Expense Claim", { project: view.project, docstatus: 1 }),
 	},
 ];
 
@@ -50,7 +51,8 @@ export function list_route(doctype, filters) {
 	return `List/${doctype}?${new URLSearchParams(values)}`;
 }
 
-export const form_route = (doctype, name) => `Form/${doctype}/${name}`;
+// The name is encoded: a naming series such as "SINV/25-26/0001" would otherwise split the route.
+export const form_route = (doctype, name) => `Form/${doctype}/${encodeURIComponent(name)}`;
 
 /** A query report's route, opened with `filters` set. */
 export const report_route = (report, filters) => `query-report/${report}?${new URLSearchParams(filters)}`;
@@ -68,9 +70,9 @@ export function toView(payload, doc) {
 		...summary,
 		project: payload.project,
 		customer: doc.customer,
-		customer_name: payload.customer_name,
 		expected_end_date: doc.expected_end_date,
 		access: payload.access,
+		consumption_voucher_types: payload.consumption_voucher_types,
 		phase,
 		closed: phase === "completed" || phase === "cancelled",
 		has_estimate: summary.estimate != null,

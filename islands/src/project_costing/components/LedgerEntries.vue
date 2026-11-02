@@ -57,7 +57,7 @@ const open_report = () => host.navigate?.(ledgerReportRoute(props.accounts, acco
 </script>
 
 <template>
-	<ChartCard id="ledger-entries">
+	<ChartCard>
 		<ChartContainer :title="__('Ledger entries')">
 			<template #actions>
 				<Button

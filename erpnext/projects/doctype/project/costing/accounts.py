@@ -10,7 +10,9 @@ from frappe.utils import flt, getdate
 from pypika.enums import DatePart
 
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.projects.doctype.project.costing.budgets import BUDGET_FIELDS, account_status, budget_summary
 from erpnext.projects.doctype.project.costing.project_costing import (
+	can_create,
 	can_read,
 	month_range,
 	permitted_reports,
@@ -19,19 +21,6 @@ from erpnext.projects.doctype.project.project_overview import check_access
 
 # The Accounts reports; each opens on the project's fiscal year.
 ACCOUNTS_REPORTS = ("Budget Variance Report", "General Ledger", "Profit and Loss Statement")
-# A budget whose actual plus committed spend reaches this percent of it is near its limit.
-NEAR_LIMIT = 90
-# Where a Budget checks spend, with the field that turns the check on and the field holding what
-# happens when the annual budget is exceeded there. Orders come first: they are what a budget most
-# often holds back.
-CONTROL_STAGES = (
-	("Purchase Order", "applicable_on_purchase_order", "action_if_annual_budget_exceeded_on_po"),
-	("Material Request", "applicable_on_material_request", "action_if_annual_budget_exceeded_on_mr"),
-	("Expense", "applicable_on_booking_actual_expenses", "action_if_annual_budget_exceeded"),
-)
-BUDGET_FIELDS = ["name", "account", "budget_amount", "revision_of"] + [
-	field for stage in CONTROL_STAGES for field in stage[1:]
-]
 LEDGER_FIELDS = [
 	"name",
 	"posting_date",
@@ -43,7 +32,7 @@ LEDGER_FIELDS = [
 ]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def get_project_accounts(project: str) -> dict:
 	"""Return the data behind the Costing tab's Accounts view: the project's ledger, commitments and
 	Budget records by account, for the company's current fiscal year.
@@ -56,7 +45,7 @@ def get_project_accounts(project: str) -> dict:
 	return ProjectAccounts(project).build()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def get_ledger_entries(
 	project: str,
 	account: str | None = None,
@@ -86,8 +75,8 @@ def get_ledger_entries(
 		filters=filters,
 		fields=LEDGER_FIELDS,
 		order_by="posting_date desc, creation desc",
-		start=start,
-		page_length=page_length,
+		offset=max(start, 0),
+		limit=page_length,
 	)
 
 
@@ -127,7 +116,7 @@ class ProjectAccounts:
 			"to_date": str(self.fiscal_year.year_end_date),
 			"access": {
 				"budgets": self.can_read_budgets,
-				"manage_budgets": bool(frappe.has_permission("Budget", "create")),
+				"manage_budgets": can_create("Budget"),
 			},
 			"reports": permitted_reports(ACCOUNTS_REPORTS),
 			"rows": rows,
@@ -138,32 +127,28 @@ class ProjectAccounts:
 		sign = -1 if account.root_type == "Income" else 1
 		booked = self.ledger_totals.get(account.name, {})
 		budget = self.budgets.get(account.name)
-		row = {
+		expense = account.root_type == "Expense"
+		spend = {
+			"actual": sign * flt(booked.get("balance")),
+			"ordered": self.ordered.get(account.name, 0) if expense else 0,
+			"requested": self.requested.get(account.name, 0) if expense else 0,
+		}
+		return {
 			"account": account.name,
 			"account_name": account.account_name,
 			"root_type": account.root_type,
-			"actual": sign * flt(booked.get("balance")),
+			"actual": spend["actual"],
 			"entries": booked.get("entries", 0),
-			"committed": self.committed.get(account.name, 0) if account.root_type == "Expense" else 0,
-			# the part of committed a purchase order's budget check counts
-			"ordered": self.ordered.get(account.name, 0) if account.root_type == "Expense" else 0,
+			"committed": spend["ordered"] + spend["requested"],
 			"budget": budget and budget_summary(budget),
+			"status": account_status(budget, spend) if expense else None,
 		}
-		row["status"] = account_status(row) if account.root_type == "Expense" else None
-		return row
-
-	@cached_property
-	def committed(self) -> dict[str, float]:
-		"""Open purchase orders and material requests on each expense account, counted as Budget
-		counts them (`get_ordered_amount` and `get_requested_amount`), for every account at once."""
-		committed = {}
-		for amounts in (self.ordered, self.requested):
-			for account, amount in amounts.items():
-				committed[account] = committed.get(account, 0) + amount
-		return {account: amount for account, amount in committed.items() if amount}
 
 	@cached_property
 	def ordered(self) -> dict[str, float]:
+		"""Open purchase orders and material requests on each expense account, counted as ERPNext's
+		budget controller counts them (`BudgetValidation.get_ordered_amount` and
+		`get_requested_amount`), for every account at once."""
 		return {account: flt(amount) for account, amount in self.ordered_by_account()}
 
 	@cached_property
@@ -184,10 +169,10 @@ class ProjectAccounts:
 			.where(item.amount > item.billed_amt)
 			.where(order.transaction_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date])
 		)
-		return self.by_expense_account(query, item, unbilled)
+		return self.by_expense_account(query, item, unbilled, "Purchase Order")
 
 	def requested_by_account(self) -> list[tuple[str, float]]:
-		"""What submitted purchase material requests scheduled in the fiscal year have not ordered yet."""
+		"""What submitted purchase material requests dated in the fiscal year have not ordered yet."""
 		item, request = qb.DocType("Material Request Item"), qb.DocType("Material Request")
 		unordered = (item.stock_qty - item.ordered_qty) * item.rate / item.conversion_factor
 		query = (
@@ -198,13 +183,21 @@ class ProjectAccounts:
 			.where(request.material_request_type == "Purchase")
 			.where(request.status != "Stopped")
 			.where(item.stock_qty > item.ordered_qty)
-			.where(request.schedule_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date])
+			.where(
+				request.transaction_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date]
+			)
 		)
-		return self.by_expense_account(query, item, unordered)
+		return self.by_expense_account(query, item, unordered, "Material Request")
 
-	def by_expense_account(self, query, item, amount) -> list[tuple[str, float]]:
+	def by_expense_account(self, query, item, amount, doctype: str) -> list[tuple[str, float]]:
+		"""`amount` for each expense account, over the `doctype` documents the user may read, as the
+		ledger keeps to the entries they may read."""
+		if not can_read(doctype):
+			return []
+		readable = frappe.qb.get_query(doctype, fields=["name"], ignore_permissions=False)
 		return (
 			query.where(item.project == self.project.name)
+			.where(item.parent.isin(readable))
 			.select(item.expense_account, Sum(amount))
 			.groupby(item.expense_account)
 			.run()
@@ -236,7 +229,8 @@ class ProjectAccounts:
 		"""Profit and Loss accounts with ledger entries, a budget or a commitment for the project,
 		that the user may read: an account hidden by a User Permission leaves out its budget and
 		commitments too."""
-		names = set(self.ledger_totals) | set(self.budgets) | set(self.committed)
+		names = set(self.ledger_totals) | set(self.budgets) | set(self.ordered) | set(self.requested)
+		names.discard(None)
 		return frappe.get_list(
 			"Account",
 			filters={"name": ["in", list(names)], "report_type": "Profit and Loss"},
@@ -298,18 +292,20 @@ class ProjectAccounts:
 
 	@cached_property
 	def budgets(self) -> dict[str, dict]:
-		"""The submitted Budget on each account that covers the fiscal year, with the part of its
-		distribution that falls in it, by month."""
+		"""The submitted Budget on each account that applies today, as ERPNext picks the one to check
+		a new document against, with its distribution by month."""
 		if not self.can_read_budgets:
 			return {}
-		budgets = frappe.get_all(
+		today = getdate()
+		budgets = frappe.get_list(
 			"Budget",
 			filters={
 				"budget_against": "Project",
 				"project": self.project.name,
+				"company": self.project.company,
 				"docstatus": 1,
-				"budget_start_date": ["<=", self.fiscal_year.year_end_date],
-				"budget_end_date": [">=", self.fiscal_year.year_start_date],
+				"budget_start_date": ["<=", today],
+				"budget_end_date": [">=", today],
 			},
 			fields=BUDGET_FIELDS,
 		)
@@ -319,11 +315,7 @@ class ProjectAccounts:
 	def distribution_by_month(self, budgets: list[str]) -> dict[str, dict[str, float]]:
 		rows = frappe.get_all(
 			"Budget Distribution",
-			filters={
-				"parenttype": "Budget",
-				"parent": ["in", budgets],
-				"start_date": ["between", [self.fiscal_year.year_start_date, self.fiscal_year.year_end_date]],
-			},
+			filters={"parenttype": "Budget", "parent": ["in", budgets]},
 			fields=["parent", "start_date", "amount"],
 		)
 		by_month = {}
@@ -332,60 +324,3 @@ class ProjectAccounts:
 			month = str(row.start_date)[:7]
 			months[month] = months.get(month, 0) + flt(row.amount)
 		return by_month
-
-
-def budget_summary(budget: dict) -> dict:
-	"""A Budget's amount in the fiscal year, the part of it due by this month, and how it is enforced."""
-	this_month = str(getdate())[:7]
-	precision = frappe.get_precision("Budget Distribution", "amount")
-	return {
-		"name": budget["name"],
-		# monthly shares are rounded, so their sum is too
-		"amount": flt(sum(budget["by_month"].values()), precision),
-		"to_date": flt(
-			sum(amount for month, amount in budget["by_month"].items() if month <= this_month), precision
-		),
-		"revision_of": budget["revision_of"],
-		"control": budget_control(budget),
-		"stops": [stage for stage, action in stage_actions(budget) if action == "Stop"],
-	}
-
-
-def budget_control(budget: dict) -> dict | None:
-	"""The Budget's strongest rule, to name it by: a stop before a warning, and orders before
-	requests before expenses. None when it only tracks."""
-	actions = stage_actions(budget)
-	for wanted in ("Stop", "Warn"):
-		for stage, action in actions:
-			if action == wanted:
-				return {"stage": stage, "action": action}
-	return None
-
-
-def stage_actions(budget: dict) -> list[tuple[str, str]]:
-	"""What the Budget does at each stage it checks, when the annual amount is exceeded there."""
-	return [(stage, budget[action]) for stage, applies, action in CONTROL_STAGES if budget[applies]]
-
-
-def account_status(row: dict) -> str:
-	"""none: no budget; over: actual spend is past it. When commitments take it past the budget,
-	each stage is checked as ERPNext checks it: blocked if the budget stops purchase orders and
-	actual plus ordered pass it; requests_blocked if it stops material requests, which count
-	requests and orders both; over_committed otherwise. near: actual plus committed reach
-	NEAR_LIMIT percent of it; ok otherwise."""
-	budget = row["budget"]
-	if not budget:
-		return "none"
-	amount = budget["amount"]
-	used = row["actual"] + row["committed"]
-	if row["actual"] > amount:
-		return "over"
-	if used > amount:
-		if "Purchase Order" in budget["stops"] and row["actual"] + row["ordered"] > amount:
-			return "blocked"
-		if "Material Request" in budget["stops"]:
-			return "requests_blocked"
-		return "over_committed"
-	if used >= amount * NEAR_LIMIT / 100:
-		return "near"
-	return "ok"
