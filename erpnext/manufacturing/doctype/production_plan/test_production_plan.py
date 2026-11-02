@@ -4651,6 +4651,15 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertFalse(StockReservation(work_order).get_reserved_entries("Work Order", work_order.name))
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_receipt_hand_off_updates_work_order_status(self):
+		plan = self.make_plan_short_of_stock("RM For SR Work Order Status")
+		work_order = self.submit_plan_work_order(plan)
+
+		self.receive_for_plan(plan, 6)
+
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "status"), "Stock Reserved")
+
 	def submit_plan_work_order(self, plan):
 		plan.make_work_order()
 		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
