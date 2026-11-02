@@ -152,6 +152,11 @@ def create_mps(source_name: str, target_doc: str | dict | Document | None = None
 	def postprocess(source, doc):
 		doc.naming_series = "MPS.YY.-.######"
 
+		for item_code in {d.item_code for d in source.items if d.item_code}:
+			doc.append("select_items", {"item_code": item_code})
+
+		doc.get_actual_demand()
+
 	doc = get_mapped_doc(
 		"Sales Forecast",
 		source_name,
