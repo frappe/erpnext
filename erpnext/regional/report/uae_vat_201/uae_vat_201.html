@@ -1,6 +1,7 @@
 {%
 	var report_columns = report.get_columns_for_print();
 	report_columns = report_columns.filter(col => !col.hidden);
+	const expenses_start = data.findIndex(row => row.no == "9");
 %}
 <style>
 	.print-format {
@@ -26,7 +27,7 @@
     </thead>
 
     <tbody>
-        {% for (let j=1; j<12; j++)  { %}
+        {% for (let j=1; j<expenses_start-2; j++)  { %}
         {%
             var row = data[j];
         %}
@@ -57,7 +58,7 @@
     </thead>
 
     <tbody>
-        {% for (let j=14; j<data.length; j++)  { %}
+        {% for (let j=expenses_start; j<data.length; j++)  { %}
         {%
             var row = data[j];
         %}
