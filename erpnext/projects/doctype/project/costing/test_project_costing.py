@@ -13,6 +13,7 @@ from erpnext.projects.doctype.project.costing.drivers import summarise_rate_gaps
 from erpnext.projects.doctype.project.costing.project_costing import (
 	CostingSummary,
 	get_project_costing,
+	get_project_invoices,
 	monthly_rows,
 	permitted_reports,
 )
@@ -28,6 +29,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 UNPRICED_ACTIVITY = "_Test Unpriced Activity"
 VIEWER = "costing-viewer@example.com"
+EMPLOYEE_USER = "costing-employee@example.com"
+HR_MANAGER = "costing-hr-manager@example.com"
 ADD_GENERAL_LEDGER = "erpnext.projects.doctype.project.costing.test_project_costing.add_general_ledger"
 
 
@@ -103,8 +106,8 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertEqual(costing["drivers"]["activities"][0]["unpriced_hours"], 0)
 
 	def test_invoice_filter_finds_the_counted_invoices(self) -> None:
-		"""The Billing card's link to the invoice list filters by the invoice's project, by the
-		items' project, or by name when the project's invoices mix the two, up to a limit."""
+		"""The Billing card's link to the invoice list filters by the invoice's project or by the
+		items' project. A mix of the two has no filter, so the card pages through the invoices."""
 		project = make_project({"project_name": f"_Test Invoice Links {frappe.generate_hash(length=6)}"}).name
 		invoice_for_project(project, qty=1)
 		self.assertEqual(billing_of(project)["invoice_filter"], {"project": project})
@@ -119,14 +122,16 @@ class TestProjectCosting(ERPNextTestSuite):
 
 		item_invoice = item_invoice_for_project(project)
 		billing = billing_of(project)
-		self.assertEqual(billing["invoice_filter"]["name"][0], "in")
-		self.assertEqual(
-			set(billing["invoice_filter"]["name"][1]), {row["name"] for row in billing["invoices"]}
-		)
-		self.assertIn(item_invoice, billing["invoice_filter"]["name"][1])
+		self.assertIsNone(billing["invoice_filter"])
 
-		with patch("erpnext.projects.doctype.project.costing.billing.NAME_FILTER_LIMIT", 1):
-			self.assertIsNone(billing_of(project)["invoice_filter"])
+		# a mix pages through every invoice instead, newest first, a page at a time
+		with patch("erpnext.projects.doctype.project.costing.project_costing.INVOICE_PAGE", 1):
+			pages = [get_project_invoices(project, start=start) for start in range(3)]
+		self.assertEqual([len(page) for page in pages], [1, 1, 0])
+		self.assertEqual(
+			[page[0]["name"] for page in pages[:2]], [row["name"] for row in billing["invoices"]]
+		)
+		self.assertIn(item_invoice, {page[0]["name"] for page in pages[:2]})
 
 	def test_viewer_without_cost_access_sees_totals_only(self) -> None:
 		"""A Projects User sees the same totals, but not costing rates or the invoices behind them."""
@@ -186,13 +191,30 @@ class TestProjectCosting(ERPNextTestSuite):
 		)
 
 		names = ("General Ledger", "Timesheet Billing Summary", "_Test Missing Report")
+		# an Employee is on the report's roles, but may not run reports on Timesheet
+		employee = make_user_with_roles(EMPLOYEE_USER, "Employee")
 		frappe.set_user(make_viewer())
 		try:
 			self.assertEqual(permitted_reports(names), ["Timesheet Billing Summary"])
+			frappe.set_user(employee)
+			self.assertEqual(permitted_reports(names), [])
 		finally:
 			frappe.set_user("Administrator")
+		# a Custom Report opens as the report it is saved from, so it follows that report's roles
+		custom = timesheet_custom_report()
+		frappe.set_user(make_user_with_roles(HR_MANAGER, "HR Manager"))
+		try:
+			# both checks pass on the Custom Report itself
+			self.assertTrue(frappe.get_doc("Report", custom).is_permitted())
+			self.assertTrue(frappe.has_permission("Timesheet", "report"))
+			self.assertEqual(permitted_reports((custom,)), [])
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual(permitted_reports((custom,)), [custom])
+
 		frappe.db.set_value("Report", "Timesheet Billing Summary", "disabled", 1)
 		self.assertEqual(permitted_reports(names), ["General Ledger"])
+		self.assertEqual(permitted_reports((custom,)), [])
 
 	def test_monthly_amounts_add_up_to_the_stored_totals(self) -> None:
 		"""Every source, split by month, sums to the total the Project stores for it, and each
@@ -318,13 +340,36 @@ def add_general_ledger(data: dict) -> dict:
 	return data
 
 
-def make_viewer() -> str:
-	if not frappe.db.exists("User", VIEWER):
-		user = frappe.get_doc(
-			{"doctype": "User", "email": VIEWER, "first_name": "Costing Viewer", "send_welcome_email": 0}
+def timesheet_custom_report() -> str:
+	"""A Custom Report saved from Timesheet Billing Summary. It takes its roles from Timesheet, which
+	lets an HR Manager in, while the report it is saved from does not."""
+	name = "_Test Costing Timesheet Custom"
+	if not frappe.db.exists("Report", name):
+		frappe.get_doc(
+			{
+				"doctype": "Report",
+				"report_name": name,
+				"report_type": "Custom Report",
+				"reference_report": "Timesheet Billing Summary",
+				"ref_doctype": "Timesheet",
+				"is_standard": "No",
+				"module": "Projects",
+			}
 		).insert()
-		user.add_roles("Projects User")
-	return VIEWER
+	return name
+
+
+def make_viewer() -> str:
+	return make_user_with_roles(VIEWER, "Projects User")
+
+
+def make_user_with_roles(email: str, *roles: str) -> str:
+	if not frappe.db.exists("User", email):
+		user = frappe.get_doc(
+			{"doctype": "User", "email": email, "first_name": "Costing Test", "send_welcome_email": 0}
+		).insert()
+		user.add_roles(*roles)
+	return email
 
 
 def billing_of(project: str) -> dict:

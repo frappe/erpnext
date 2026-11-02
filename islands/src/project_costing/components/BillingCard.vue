@@ -1,12 +1,15 @@
 <script setup>
-import { computed, ref } from "vue";
-import { Badge, Button, Progress, TabButtons } from "frappe-ui";
+import { computed, ref, watch } from "vue";
+import { Badge, Button, ErrorMessage, Progress, TabButtons, useCall } from "frappe-ui";
 import { ChartCard, ChartContainer } from "frappe-ui/charts";
 import { List, ListCell, ListHeader, ListHeaderCell, ListRow } from "frappe-ui/list";
 import { useHost } from "@framework/ui/island";
 
 import { form_route, list_route } from "../costing.js";
 import { useFormat } from "../format.js";
+
+const INVOICES =
+	"/api/v2/method/erpnext.projects.doctype.project.costing.project_costing.get_project_invoices";
 
 const props = defineProps({
 	view: { type: Object, required: true },
@@ -30,8 +33,32 @@ const ORDER_THEMES = { "To Bill": "blue", "To Deliver and Bill": "blue", Complet
 const billing = computed(() => props.view.billing);
 const orders = computed(() => billing.value.sales_orders || []);
 
+// Invoices that name the project in different ways have no list filter that finds them all, so
+// the card loads them a page at a time instead of linking to the list.
+const loaded_invoices = ref([]);
+const invoices = computed(() => [...(billing.value.invoices || []), ...loaded_invoices.value]);
+const invoice_page = useCall({ url: INVOICES, method: "GET", immediate: false });
+const can_load_invoices = computed(
+	() => !billing.value.invoice_filter && billing.value.invoice_count > invoices.value.length
+);
+// A reload of the billing starts the list over; a page asked for before it no longer follows on.
+let generation = 0;
+watch(billing, () => {
+	generation++;
+	loaded_invoices.value = [];
+});
+
+async function load_invoices() {
+	const asked_in = generation;
+	const page = await invoice_page
+		.submit({ project: props.view.project, start: invoices.value.length })
+		// the error shows under the list
+		.catch(() => null);
+	if (asked_in !== generation) return;
+	loaded_invoices.value = [...loaded_invoices.value, ...(page || [])];
+}
+
 // Each list shows the newest few; past that, a link opens the desk list filtered to the project.
-// Without an invoice filter, the project's invoices are too many and too mixed to link to.
 const more = computed(() => {
 	const order_count = billing.value.sales_order_count;
 	const invoice_count = billing.value.invoice_count;
@@ -41,7 +68,7 @@ const more = computed(() => {
 				? more_link("Sales Order", __("View all {0} sales orders", [order_count]))
 				: null,
 		invoices:
-			invoice_count > (billing.value.invoices?.length || 0) && billing.value.invoice_filter
+			invoice_count > invoices.value.length && billing.value.invoice_filter
 				? more_link(
 						"Sales Invoice",
 						__("View all {0} sales invoices", [invoice_count]),
@@ -152,7 +179,7 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 							<ListHeaderCell class="justify-end">{{ __("Status") }}</ListHeaderCell>
 						</ListHeader>
 						<ListRow
-							v-for="invoice in billing.invoices"
+							v-for="invoice in invoices"
 							:key="invoice.name"
 							@click="open('Sales Invoice', invoice.name)"
 						>
@@ -189,6 +216,16 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 						:label="more.invoices.label"
 						@click="host.navigate?.(more.invoices.route)"
 					/>
+					<template v-if="active_list === 'invoices' && can_load_invoices">
+						<ErrorMessage v-if="invoice_page.error" :message="invoice_page.error.message" />
+						<Button
+							variant="ghost"
+							size="sm"
+							:loading="invoice_page.loading"
+							:label="__('Show more')"
+							@click="load_invoices"
+						/>
+					</template>
 					<List v-if="active_list === 'orders'" :columns="LIST_COLUMNS" :row-height="48">
 						<ListHeader>
 							<ListHeaderCell>{{ __("Sales order") }}</ListHeaderCell>

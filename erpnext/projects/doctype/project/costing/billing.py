@@ -8,8 +8,8 @@ from erpnext.projects.doctype.project.costing.queries import ProjectCostQueries,
 
 # Orders and invoices the Billing card lists, newest first; it links to the rest.
 LIST_LIMIT = 5
-# The most invoices the link to the rest names one by one, which keeps its address near 3 KB.
-NAME_FILTER_LIMIT = 100
+# Invoices the Billing card loads at a time when no list filter finds them all.
+INVOICE_PAGE = 20
 
 
 class ProjectBilling:
@@ -46,9 +46,9 @@ class ProjectBilling:
 			order_by="transaction_date desc",
 		)
 
-	def invoices(self) -> list[dict] | None:
+	def invoices(self, start: int = 0, page_length: int | None = None) -> list[dict] | None:
 		"""Invoices billed to the project that the user may read, newest first, each with the amount
-		it bills to this project."""
+		it bills to this project: all of them, or the page from `start` when `page_length` is given."""
 		if not self.access["invoices"]:
 			return None
 		amounts = self.billed_by_invoice()
@@ -58,22 +58,22 @@ class ProjectBilling:
 			"Sales Invoice",
 			filters={"name": ["in", list(amounts)]},
 			fields=["name", "posting_date", "status", "project"],
-			order_by="posting_date desc",
+			# by name too, so pages of invoices dated the same day neither repeat nor skip one
+			order_by="posting_date desc, name desc",
+			offset=start,
+			limit=page_length,
 		)
 		return [{**invoice, "amount": amounts[invoice.name]} for invoice in invoices]
 
 	def invoice_filter(self, invoices: list[dict]) -> dict | None:
 		"""The Sales Invoice list filter that finds the invoices counted here. An invoice can name the
-		project on itself or only on its items, and the list cannot match either at once, so a mix
-		of the two is matched by name. None when the mix is too long to name in an address."""
+		project on itself or only on its items, and the list cannot match either at once. None for
+		a mix of the two: the Billing card then pages through them with `get_project_invoices`."""
 		if all(invoice["project"] == self.project for invoice in invoices):
 			return {"project": self.project}
-		names = [invoice["name"] for invoice in invoices]
-		if set(names) <= self.item_billed_invoices:
+		if {invoice["name"] for invoice in invoices} <= self.item_billed_invoices:
 			return {"Sales Invoice Item.project": self.project}
-		if len(names) > NAME_FILTER_LIMIT:
-			return None
-		return {"name": ["in", names]}
+		return None
 
 	def billed_by_invoice(self) -> dict[str, float]:
 		invoice = qb.DocType("Sales Invoice")
