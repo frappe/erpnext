@@ -664,9 +664,6 @@ class Item(Document):
 					DuplicateReorderRows,
 				)
 
-			if flt(d.warehouse_reorder_level) < 0 or flt(d.warehouse_reorder_qty) < 0:
-				frappe.throw(_("Row #{0}: Re-order Level and Re-order Qty cannot be negative").format(d.idx))
-
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
 				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
 
