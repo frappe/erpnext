@@ -37,6 +37,7 @@ class StockReservationEntry(Document):
 			"",
 			"Pick List",
 			"Purchase Receipt",
+			"Purchase Invoice",
 			"Stock Entry",
 			"Work Order",
 			"Production Plan",
@@ -172,13 +173,16 @@ class StockReservationEntry(Document):
 		)
 
 	def validate_reserved_entries(self):
+		if self.from_voucher_type not in ("Purchase Receipt", "Purchase Invoice"):
+			return
+
 		entries = frappe.get_all(
 			"Stock Reservation Entry",
 			fields=["voucher_no as name"],
 			filters={
 				"status": "Closed",
 				"docstatus": 1,
-				"from_voucher_type": "Purchase Receipt",
+				"from_voucher_type": self.from_voucher_type,
 				"from_voucher_no": self.from_voucher_no,
 			},
 		)
@@ -2079,7 +2083,7 @@ def cancel_stock_reservation_entries(
 	voucher_type: str | None = None,
 	voucher_no: str | None = None,
 	voucher_detail_no: str | None = None,
-	from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
+	from_voucher_type: Literal["Pick List", "Purchase Receipt", "Purchase Invoice"] = None,
 	from_voucher_no: str | None = None,
 	from_voucher_detail_no: str | None = None,
 	sre_list: list | None = None,
