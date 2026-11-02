@@ -10,11 +10,16 @@ from frappe import _
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, flt, getdate
 
+<<<<<<< HEAD
 from erpnext.stock.report.stock_ageing.stock_ageing import (
 	FIFOSlots,
 	get_average_age,
 	normalize_fifo_queue,
 )
+=======
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 from erpnext.stock.report.stock_analytics.stock_analytics import (
 	get_item_details,
 	get_items,
@@ -25,6 +30,8 @@ from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	is_reposting_item_valuation_in_progress()
 	if not filters:
 		filters = {}

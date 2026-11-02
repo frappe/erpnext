@@ -6,6 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, get_datetime, getdate
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.report.utils import validate_date_range
+
+# start of each three hour slot
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 time_slots = {
 	"12AM - 3AM": "00:00:00-03:00:00",
 	"3AM - 6AM": "03:00:00-06:00:00",
@@ -19,6 +25,8 @@ time_slots = {
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	if not filters.get("periodicity"):
 		filters["periodicity"] = "Daily"

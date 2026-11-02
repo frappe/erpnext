@@ -6,8 +6,21 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, formatdate
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.report.utils import validate_date_range
+
+DISPOSAL_VALUE_FIELDS = {
+	"Sold": "value_of_sold_asset",
+	"Scrapped": "value_of_scrapped_asset",
+	"Capitalized": "value_of_capitalized_asset",
+}
+
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters.day_before_from_date = add_days(filters.from_date, -1)
 	columns, data = get_columns(filters), get_data(filters)
 	return columns, data

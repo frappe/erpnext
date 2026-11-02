@@ -7,11 +7,18 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
+=======
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
+from frappe.query_builder.functions import IfNull, Sum
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 from frappe.utils import cint, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import (
@@ -21,6 +28,10 @@ from erpnext.stock.utils import (
 
 
 def execute(filters=None):
+<<<<<<< HEAD
+=======
+	validate_date_range(filters)
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -136,6 +147,7 @@ def execute(filters=None):
 	return columns, data
 
 
+<<<<<<< HEAD
 def set_opening_row_for_inv_dimension(
 	inv_dimension_wise_dict, filters, inv_dimension_key=None, opening_row=None
 ):
@@ -153,6 +165,12 @@ def set_opening_row_for_inv_dimension(
 	if inv_dimension_key and opening_row and filters.get("item_code") and filters.get("warehouse"):
 		new_key = copy.deepcopy(inv_dimension_key)
 		new_key.extend([filters.item_code[0], filters.warehouse[0]])
+=======
+def set_bundle_qty_and_value(sle, bundle_info):
+	"""Keep only the qty and value of the filtered batch, as a bundle can hold other batches too."""
+	sle.actual_qty = sum(flt(row.qty) for row in bundle_info)
+	sle.stock_value_difference = sum(flt(row.stock_value_difference) for row in bundle_info)
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 		opening_key = tuple(new_key)
 		inv_dimension_wise_dict[opening_key] = {

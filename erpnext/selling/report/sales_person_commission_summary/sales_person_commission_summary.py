@@ -6,8 +6,16 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.query_builder import Criterion
 
+<<<<<<< HEAD
+=======
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = {}
 

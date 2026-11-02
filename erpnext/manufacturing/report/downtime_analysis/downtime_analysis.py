@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -29,8 +31,17 @@ def get_data(filters):
 		"remarks",
 	]
 
+<<<<<<< HEAD
 	query_filters["from_time"] = (">=", filters.get("from_date"))
 	query_filters["to_time"] = ("<=", filters.get("to_date"))
+=======
+	from_date = get_datetime(filters.get("from_date"))
+	to_date = get_datetime(filters.get("to_date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
+
+	query_filters["from_time"] = ("<", to_date)
+	query_filters["to_time"] = (">", from_date)
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 	if filters.get("workstation"):
 		query_filters["workstation"] = filters.get("workstation")

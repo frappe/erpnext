@@ -11,9 +11,16 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext import get_region
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+<<<<<<< HEAD
+=======
+	validate_date_range(filters)
+
+	validate_company(filters)
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 	validate_company_region(filters)
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)

@@ -2,7 +2,13 @@ import frappe
 from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
+<<<<<<< HEAD
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+=======
+from frappe.utils import flt, formatdate, get_datetime, get_datetime_str, get_link_to_form, get_table_name
+from frappe.utils.data import DateTimeLikeObject
+from frappe.utils.nestedset import get_descendants_of
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
@@ -26,8 +32,18 @@ def validate_mandatory_date_range(filters, from_field="from_date", to_field="to_
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
 
-	if from_date > to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range(filters, from_field, to_field)
+
+
+def validate_date_range(filters, from_field="from_date", to_field="to_date", message=None):
+	if not filters:
+		return
+
+	from_date = filters.get(from_field)
+	to_date = filters.get(to_field)
+
+	if from_date and to_date and get_datetime(from_date) > get_datetime(to_date):
+		frappe.throw(message or _("From Date must be before To Date"))
 
 
 def get_currency(filters):

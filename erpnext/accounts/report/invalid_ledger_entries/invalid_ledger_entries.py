@@ -6,6 +6,8 @@ from frappe import _, qb
 from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters: dict | None = None):
 	"""Return columns and data for the report.
@@ -76,8 +78,7 @@ def validate_filters(filters: dict | None = None):
 	if not filters.company:
 		frappe.throw(_("Company is mandatory"))
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("Start Date should be lower than End Date"))
+	validate_date_range(filters)
 
 
 def build_query_filters(filters: dict | None = None) -> list:

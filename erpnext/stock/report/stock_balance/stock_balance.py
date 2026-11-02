@@ -14,6 +14,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.analytics import RowNumber
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.stock_ageing.stock_ageing import (
@@ -41,9 +42,22 @@ SLEntry = dict[str, Any]
 
 
 def execute(filters: StockBalanceFilter | None = None):
+	validate_date_range(filters)
+
 	return StockBalanceReport(filters).run()
 
 
+<<<<<<< HEAD
+=======
+def execute_snapshot_report(filters: StockBalanceFilter | None = None):
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import execute as execute_from_snapshot
+
+	validate_date_range(filters)
+
+	return execute_from_snapshot(filters)
+
+
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 class StockBalanceReport:
 	def __init__(self, filters: StockBalanceFilter | None) -> None:
 		self.filters = filters

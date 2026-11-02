@@ -7,8 +7,19 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
 
+<<<<<<< HEAD:erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py
+=======
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
+SALES_VOUCHER_TYPES = ("Delivery Note", "Sales Invoice")
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
+
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges):erpnext/stock/report/item_wise_consumption/item_wise_consumption.py
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns = get_columns(filters)
 	consumed_details = get_consumed_details(filters)
 	supplier_details = get_suppliers_details(filters)

@@ -1,0 +1,1592 @@
+# Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+import math
+from datetime import datetime, timedelta
+
+import frappe
+from frappe import _
+from frappe.query_builder.functions import Sum
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	days_diff,
+	flt,
+	formatdate,
+	get_first_day,
+	getdate,
+	parse_json,
+	today,
+)
+
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
+from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+from erpnext.stock.get_item_details import get_conversion_factor
+
+
+def execute(filters: dict | None = None):
+	validate_date_range(filters)
+
+	obj = MaterialRequirementsPlanningReport(filters)
+	data, chart = obj.generate_mrp()
+	columns = obj.get_columns()
+
+	return columns, data, None, chart
+
+
+class MaterialRequirementsPlanningReport:
+	def __init__(self, filters):
+		self.filters = frappe._dict(filters or {})
+		self._warehouses = None
+		self._warehouses_with_groups = None
+
+	def get_warehouses(self, include_group_warehouses=False):
+		cache_attr = "_warehouses_with_groups" if include_group_warehouses else "_warehouses"
+		if getattr(self, cache_attr) is not None:
+			return getattr(self, cache_attr)
+
+		warehouses = get_filter_values(self.filters.get("warehouse"))
+		if not warehouses:
+			setattr(self, cache_attr, [])
+			return []
+
+		warehouse_group_map = {
+			row.name: row.is_group
+			for row in frappe.get_all(
+				"Warehouse",
+				filters={"name": ["in", warehouses]},
+				fields=["name", "is_group"],
+			)
+		}
+
+		all_warehouses = []
+		for warehouse in warehouses:
+			child_warehouses = get_child_warehouses(warehouse)
+			if include_group_warehouses or not warehouse_group_map.get(warehouse):
+				all_warehouses.extend(child_warehouses)
+			else:
+				all_warehouses.extend(w for w in child_warehouses if w != warehouse)
+
+		warehouses = list(set(all_warehouses))
+		setattr(self, cache_attr, warehouses)
+		return warehouses
+
+	def generate_mrp(self):
+		if not self.get_warehouses():
+			frappe.throw(_("Warehouse is required"))
+
+		self.fg_items = []
+		self.rm_items = []
+		self.dates = self.get_dates()
+		self.mps_data = self.get_mps_data()
+		items = self.get_items_from_mps(self.mps_data)
+		self.update_sales_forecast_data()
+
+		self.item_rm_details = self.get_raw_materials_data(items)
+
+		self._bin_details = self.get_item_wise_bin_details()
+		self._safety_stock_reserved = set()
+		self.add_non_planned_orders(items)
+
+		self._wo_details = self.get_work_order_data()
+		self._po_details = self.get_purchase_order_data()
+		self._so_details = self.get_sales_order_data()
+
+		data, chart = self.get_mrp_data()
+
+		return data, chart
+
+	def add_non_planned_orders(self, items):
+		_adhoc_so_details = frappe._dict({})
+
+		so = frappe.qb.DocType("Sales Order")
+		so_item = frappe.qb.DocType("Sales Order Item")
+
+		query = (
+			frappe.qb.from_(so)
+			.inner_join(so_item)
+			.on(so.name == so_item.parent)
+			.select(
+				so_item.item_code,
+				so_item.item_name,
+				so_item.delivery_date,
+				so_item.warehouse,
+				((so_item.qty - so_item.delivered_qty) * so_item.conversion_factor).as_("adhoc_qty"),
+			)
+			.where(
+				(so.docstatus == 1)
+				& (so.status.notin(["Closed", "Completed", "Stopped"]))
+				& (so_item.docstatus == 1)
+			)
+		)
+
+		if items:
+			query = query.where(so_item.item_code.isin(items))
+
+		if self.filters.get("warehouse"):
+			query = query.where(so_item.warehouse.isin(self.get_warehouses()))
+
+		if self.filters.get("from_date"):
+			query = query.where(so_item.delivery_date >= self.filters.get("from_date"))
+
+		if self.filters.get("to_date"):
+			query = query.where(so_item.delivery_date <= self.filters.get("to_date"))
+
+		skipped_data = []
+		if skip_orders := self.get_orders_to_skip():
+			skipped_data = query.where(so.name.isin(skip_orders)).run(as_dict=True)
+			query = query.where(so.name.notin(skip_orders))
+
+		data = query.run(as_dict=True)
+
+		for row in self.get_demand_beyond_mps(data, skipped_data):
+			self.mps_data.append(
+				frappe._dict(
+					{
+						"item_code": row.item_code,
+						"item_name": row.item_code,
+						"delivery_date": row.delivery_date,
+						"adhoc_qty": row.adhoc_qty,
+						"warehouse": row.warehouse,
+						"is_adhoc": 1,
+					}
+				)
+			)
+
+	def get_demand_beyond_mps(self, data, skipped_data=None):
+		planned = {}
+		for row in self.mps_data:
+			key = (row.item_code, getdate(row.delivery_date))
+			planned[key] = planned.get(key, 0.0) + flt(row.planned_qty)
+
+		for row in skipped_data or []:
+			key = (row.item_code, getdate(row.delivery_date))
+			planned[key] = max(planned.get(key, 0.0) - flt(row.adhoc_qty), 0.0)
+
+		demand = {}
+		for row in data:
+			key = (row.item_code, getdate(row.delivery_date))
+			if key in demand:
+				demand[key].adhoc_qty += flt(row.adhoc_qty)
+			else:
+				demand[key] = row
+
+		for key, row in demand.items():
+			row.adhoc_qty = flt(row.adhoc_qty) - planned.get(key, 0.0)
+			if row.adhoc_qty > 0:
+				yield row
+
+	def get_orders_to_skip(self):
+		return frappe.get_all(
+			"Production Plan Sales Order",
+			filters={"parent": self.filters.mps},
+			pluck="sales_order",
+		)
+
+	def get_item_wise_bin_details(self):
+		items = self.fg_items + self.rm_items
+		if not items:
+			return {}
+
+		_bin_details = frappe._dict({})
+
+		doctype = frappe.qb.DocType("Bin")
+		query = (
+			frappe.qb.from_(doctype)
+			.select(
+				doctype.item_code,
+				Sum(doctype.actual_qty).as_("actual_qty"),
+				Sum(doctype.reserved_stock).as_("reserved_stock"),
+				Sum(doctype.indented_qty).as_("indented_qty"),
+				Sum(doctype.reserved_qty_for_production).as_("reserved_qty_for_production"),
+				Sum(doctype.reserved_qty_for_sub_contract).as_("reserved_qty_for_sub_contract"),
+				Sum(doctype.reserved_qty_for_production_plan).as_("reserved_qty_for_production_plan"),
+				Sum(doctype.reserved_qty).as_("reserved_qty"),
+				Sum(doctype.projected_qty).as_("projected_qty"),
+			)
+			.where(doctype.item_code.isin(items))
+			.groupby(doctype.item_code)
+		)
+
+		warehouses = self.get_warehouses() or None
+		if warehouses:
+			query = query.where(doctype.warehouse.isin(warehouses))
+
+		bin_data = query.run(as_dict=True)
+		work_order_reserved = get_stock_reserved_for_work_orders(items, warehouses)
+
+		for row in bin_data:
+			row.reserved_stock = max(
+				flt(row.reserved_stock) - work_order_reserved.get(row.item_code, 0.0), 0.0
+			)
+			if row.item_code not in _bin_details:
+				_bin_details[row.item_code] = row
+
+		self.update_mps_data_with_bin_details(_bin_details)
+
+		return _bin_details
+
+	def update_mps_data_with_bin_details(self, bin_details):
+		if not self.filters.mps:
+			return
+
+		items = self.fg_items + self.rm_items
+
+		if not items:
+			return
+
+		sales_orders = frappe.get_all(
+			"Production Plan Sales Order",
+			filters={"parent": self.filters.mps},
+			pluck="sales_order",
+		)
+
+		if not sales_orders:
+			return
+
+		sales_order_items = frappe.get_all(
+			"Sales Order Item",
+			filters={"parent": ["in", sales_orders], "docstatus": 1, "item_code": ["in", items]},
+			fields=["item_code", "qty", "delivered_qty", "conversion_factor"],
+		)
+
+		if not sales_order_items:
+			return
+
+		for row in sales_order_items:
+			reserved_qty = flt(flt(row.qty) - flt(row.delivered_qty)) * flt(row.conversion_factor)
+			if reserved_qty <= 0:
+				continue
+
+			if details := bin_details.get(row.item_code, {}):
+				details.reserved_qty -= reserved_qty
+				details.projected_qty += reserved_qty
+
+	def update_sales_forecast_data(self):
+		sales_forecast_data = self.get_sales_forecast_data()
+
+		if not sales_forecast_data:
+			return
+
+		rows_by_key = {}
+		for d in self.mps_data:
+			d.sales_forecast_qty = flt(d.sales_forecast_qty)
+			rows_by_key.setdefault((d.item_code, getdate(d.delivery_date)), []).append(d)
+
+		forecast_by_key = {}
+		for row in sales_forecast_data:
+			key = (row.item_code, getdate(row.delivery_date))
+			if key in forecast_by_key:
+				forecast_by_key[key].qty = flt(forecast_by_key[key].qty) + flt(row.qty)
+			else:
+				forecast_by_key[key] = frappe._dict(row)
+
+		for key, row in forecast_by_key.items():
+			if rows := rows_by_key.get(key):
+				split_forecast_qty(rows, flt(row.qty))
+				continue
+
+			new_row = frappe._dict(
+				{
+					"item_code": row.item_code,
+					"item_name": row.item_code,
+					"delivery_date": row.delivery_date,
+					"projected_qty": 0,
+					"sales_forecast_qty": row.qty,
+					"warehouse": row.parent_warehouse,
+				}
+			)
+			self.mps_data.append(new_row)
+			rows_by_key[key] = [new_row]
+
+	def get_mrp_data(self):
+		data = self.get_detailed_view_data()
+		data = self.filter_based_on_type_of_materials(data)
+		chart = self.get_chart_data(data) or {}
+
+		if self.filters.show_in_bucket_view:
+			return self.get_bucket_view_data(data), chart
+
+		return data, chart
+
+	def filter_based_on_type_of_materials(self, data):
+		new_data = []
+		if self.filters.type_of_material == "All":
+			return data
+
+		mapper = {
+			"Finished Goods": "Manufacture",
+			"Raw Materials": "Purchase",
+		}.get(self.filters.type_of_material)
+
+		for row in data:
+			if row.type_of_material == mapper:
+				row.indent = 0
+				new_data.append(row)
+
+		return new_data
+
+	def get_chart_data(self, data):
+		# Prepare chart for demand vs supply
+
+		if self.filters.get("show_in_bucket_view"):
+			return self.get_bucket_view_chart_data(data)
+		else:
+			return self.get_detailed_view_chart_data(data)
+
+	def get_detailed_view_chart_data(self, data):
+		chart_data = frappe._dict({})
+
+		sorted_data = sorted(data, key=lambda x: getdate(x.get("delivery_date")))
+		for row in sorted_data:
+			if not row.delivery_date:
+				continue
+
+			if getdate(row.delivery_date) < getdate(today()):
+				continue
+
+			delivery_date = getdate(row.delivery_date)
+			if delivery_date not in chart_data:
+				chart_data[delivery_date] = frappe._dict(
+					{
+						"demand": 0.0,
+						"supply": 0.0,
+					}
+				)
+
+			demand_supply_data = chart_data[delivery_date]
+			demand_supply_data.demand += math.ceil(flt(row.planned_qty))
+			demand_supply_data.supply += (
+				flt(row.in_hand_qty) + flt(row.po_ordered_qty) + flt(row.wo_ordered_qty)
+			)
+
+		demand_data = []
+		supply_data = []
+		delivery_dates = list(chart_data)
+		for row in chart_data:
+			value = chart_data[row]
+
+			demand_data.append(math.ceil(flt(value.demand)))
+			supply_data.append(math.ceil(flt(value.supply)))
+
+		return {
+			"data": {
+				"labels": self.get_detailed_chart_labels(delivery_dates),
+				"datasets": [
+					{
+						"name": _("Demand"),
+						"values": demand_data,
+					},
+					{
+						"name": _("Supply"),
+						"values": supply_data,
+					},
+				],
+			},
+			"type": "bar",
+			"height": 350,
+			"colors": ["#7cd6fd", "green"],
+			"title": _("Demand vs Supply"),
+		}
+
+	def get_detailed_chart_labels(self, delivery_dates):
+		date_format = "dd MMM yyyy" if len({date.year for date in delivery_dates}) > 1 else "dd MMM"
+		return [formatdate(date, date_format) for date in delivery_dates]
+
+	def get_bucket_view_chart_data(self, data):
+		chart_data = frappe._dict({})
+		labels = []
+		i = 0
+		for row in self.dates:
+			if self.filters.bucket_size == "Daily" and i == 15:
+				break
+
+			if self.filters.bucket_size == "Weekly" and i == 12:
+				break
+
+			row = frappe._dict(row)
+			for d in data:
+				if getdate(d.delivery_date) >= getdate(row.from_date) and getdate(d.delivery_date) <= getdate(
+					row.to_date
+				):
+					if row.from_date not in chart_data:
+						i += 1
+						label = row.label
+						if self.filters.bucket_size == "Weekly":
+							label = formatdate(row.from_date, "dd") + "-" + formatdate(row.to_date, "dd MMM")
+
+						labels.append(label)
+						chart_data[row.from_date] = frappe._dict(
+							{
+								"demand": 0.0,
+								"supply": 0.0,
+							}
+						)
+
+					demand_supply_data = chart_data[row.from_date]
+					demand_supply_data.demand += math.ceil(flt(d.planned_qty))
+					demand_supply_data.supply += (
+						flt(d.in_hand_qty) + flt(d.po_ordered_qty) + flt(d.wo_ordered_qty)
+					)
+
+		demand_data = []
+		supply_data = []
+
+		for row in chart_data:
+			value = chart_data[row]
+
+			demand_data.append(math.ceil(flt(value.demand)))
+			supply_data.append(math.ceil(flt(value.supply)))
+
+		return {
+			"data": {
+				"labels": labels,
+				"datasets": [
+					{
+						"name": _("Demand"),
+						"values": demand_data,
+					},
+					{
+						"name": _("Supply"),
+						"values": supply_data,
+					},
+				],
+			},
+			"type": "bar",
+			"height": 350,
+			"colors": ["#7cd6fd", "green"],
+			"title": _("Demand vs Supply"),
+		}
+
+	def get_bucket_view_data(self, data):
+		new_data = []
+
+		item_wise_data = frappe._dict({})
+		for item in data:
+			if item.item_code not in item_wise_data:
+				item_wise_data[item.item_code] = frappe._dict(
+					{
+						"item_code": item.item_code,
+						"item_name": item.item_name,
+						"lead_time": item.lead_time,
+						"parents_bom": item.parent_bom,
+						"bom_no": item.bom_no,
+						"indent": item.indent,
+						"capacity": item.capacity,
+					}
+				)
+
+			item_data = item_wise_data[item.item_code]
+
+			for date in self.dates:
+				date = frappe._dict(date)
+				if date["from_date"] not in item_data:
+					item_data[date["from_date"]] = 0.0
+
+				if self.filters.bucket_view == "Delivery Date":
+					if getdate(item.delivery_date) >= getdate(date.from_date) and getdate(
+						item.delivery_date
+					) <= getdate(date.to_date):
+						item_data[date["from_date"]] += flt(item.required_qty)
+				else:
+					if getdate(item.release_date) >= getdate(date.from_date) and getdate(
+						item.release_date
+					) <= getdate(date.to_date):
+						item_data[date["from_date"]] += flt(item.required_qty)
+
+		for row in item_wise_data:
+			new_data.append(frappe._dict(item_wise_data[row]))
+
+		return new_data
+
+	def get_detailed_view_data(self):
+		data = []
+		i = 0
+
+		sorted_data = sorted(self.mps_data, key=lambda x: getdate(x["delivery_date"]))
+
+		for row in sorted_data:
+			rm_details = self.item_rm_details.get(row.item_code) or frappe._dict({})
+
+			row.indent = 0
+			row.bom_no = rm_details.get("bom_no")
+			if not row.sales_forecast_qty:
+				row.sales_forecast_qty = 0
+
+			row.demand_qty = max(flt(row.planned_qty), flt(row.sales_forecast_qty))
+			row.planned_qty = max(flt(row.planned_qty), flt(row.sales_forecast_qty))
+			if row.get("is_adhoc"):
+				row.planned_qty += row.adhoc_qty
+
+			for field in ("min_order_qty", "purchase_uom", "safety_stock", "default_supplier"):
+				if rm_details.get(field):
+					row[field] = rm_details.get(field)
+
+			self.update_required_qty(row)
+			if i != 0:
+				data.append(frappe._dict({}))
+
+			i += 1
+			row.capacity = 0
+			row.type_of_material = get_type_of_material(rm_details.get("is_purchase_item"), row.bom_no)
+			if rm_details.raw_materials:
+				row.capacity = get_item_capacity(row.item_code, self.filters.bucket_size)
+
+			self.set_lead_time(row)
+			data.append(row)
+			if rm_details.raw_materials:
+				self.update_rm_details(
+					rm_details.raw_materials,
+					row.release_date,
+					row.required_qty,
+					rm_details.bom_no,
+					data,
+					row.get("warehouse") or row.get("parent_warehouse"),
+				)
+
+		return data
+
+	def set_lead_time(self, row):
+		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
+		row.lead_time = math.ceil(lead_time)
+		row.release_date = add_days(row.delivery_date, -row.lead_time)
+
+	def add_non_planned_so(self, row):
+		if row.demand_parts is None:
+			row.demand_parts = [[getdate(row.delivery_date), flt(row.planned_qty)]]
+
+		keys = [
+			key
+			for key in self._so_details
+			if key[0] == row.item_code and getdate(key[1]) <= getdate(row.delivery_date)
+		]
+		if not keys:
+			return
+
+		for key in keys:
+			qty = flt(self._so_details.pop(key).qty)
+			row.adhoc_qty = flt(row.adhoc_qty) + qty
+			row.planned_qty = flt(row.planned_qty) + qty
+			row.demand_parts.append([getdate(key[1]), qty])
+
+	def add_bin_details(self, row):
+		if bin_details := self._bin_details.get(row.item_code):
+			current_qty = get_free_stock(bin_details)
+			if current_qty > 0:
+				covered_qty = cover_demand(row, current_qty)
+				row.in_hand_qty = covered_qty
+				bin_details["actual_qty"] = flt(bin_details["actual_qty"]) - covered_qty
+
+	def add_po_details(self, row):
+		row.po_ordered_qty = flt(row.po_ordered_qty) + apply_dated_supply(row, self._po_details)
+
+	def add_wo_details(self, row):
+		row.wo_ordered_qty = flt(row.wo_ordered_qty) + apply_dated_supply(row, self._wo_details)
+
+	def update_required_qty(self, row):
+		row.demand_parts = None
+		self.add_non_planned_so(row)
+		row.demand_parts.sort(key=lambda part: part[0])
+		row.required_qty = flt(row.planned_qty)
+		row.in_hand_qty = 0.0
+
+		self.reserve_safety_stock(row)
+		self.add_bin_details(row)
+		self.add_po_details(row)
+		self.add_wo_details(row)
+		row.pop("demand_parts", None)
+
+	def reserve_safety_stock(self, row):
+		if not self.filters.add_safety_stock or not flt(row.safety_stock):
+			return
+
+		if row.item_code in self._safety_stock_reserved:
+			return
+
+		self._safety_stock_reserved.add(row.item_code)
+		bin_details = self._bin_details.setdefault(
+			row.item_code, frappe._dict({"actual_qty": 0.0, "reserved_stock": 0.0})
+		)
+		available = max(get_free_stock(bin_details), 0.0)
+		reserved = min(flt(row.safety_stock), available)
+		bin_details.actual_qty = flt(bin_details.actual_qty) - reserved
+		row.required_qty += flt(row.safety_stock) - reserved
+		row.demand_parts.insert(0, [row.demand_parts[0][0], flt(row.safety_stock) - reserved])
+
+	def get_work_order_data(self):
+		wo_details = frappe._dict({})
+
+		doctype = frappe.qb.DocType("Work Order")
+		query = (
+			frappe.qb.from_(doctype)
+			.select(
+				(doctype.qty - doctype.produced_qty).as_("qty"),
+				doctype.production_item.as_("item_code"),
+				doctype.planned_end_date.as_("delivery_date"),
+			)
+			.where((doctype.docstatus == 1) & (doctype.status.notin(["Stopped", "Closed", "Completed"])))
+		)
+
+		items = self.fg_items + self.rm_items
+
+		if items:
+			query = query.where(doctype.production_item.isin(items))
+
+		if self.filters.get("warehouse"):
+			query = query.where(doctype.fg_warehouse.isin(self.get_warehouses()))
+
+		data = query.run(as_dict=True)
+
+		for row in data:
+			key = (row.item_code, row.delivery_date)
+			if key not in wo_details:
+				wo_details[key] = row
+			else:
+				wo_details[key].qty += row.qty
+
+		return wo_details
+
+	def get_purchase_order_data(self):
+		po_details = frappe._dict({})
+
+		parent_doctype = frappe.qb.DocType("Purchase Order")
+		doctype = frappe.qb.DocType("Purchase Order Item")
+
+		query = (
+			frappe.qb.from_(parent_doctype)
+			.inner_join(doctype)
+			.on(parent_doctype.name == doctype.parent)
+			.select(
+				((doctype.qty - doctype.received_qty) * doctype.conversion_factor).as_("qty"),
+				doctype.item_code.as_("item_code"),
+				doctype.schedule_date.as_("delivery_date"),
+			)
+			.where(
+				(doctype.docstatus == 1)
+				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
+			)
+		)
+
+		items = self.fg_items + self.rm_items
+		if items:
+			query = query.where(doctype.item_code.isin(items))
+
+		if self.filters.get("warehouse"):
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
+
+		data = query.run(as_dict=True)
+
+		for row in data:
+			key = (row.item_code, row.delivery_date)
+			if key not in po_details:
+				po_details[key] = row
+			else:
+				po_details[key].qty += row.qty
+
+		if sco := self.get_subcontracted_data():
+			for row in sco:
+				key = (row.item_code, row.delivery_date)
+				if key not in po_details:
+					po_details[key] = row
+				else:
+					po_details[key].qty += row.qty
+
+		return po_details
+
+	def get_sales_order_data(self):
+		if not self.rm_items:
+			return frappe._dict({})
+
+		so_details = frappe._dict({})
+
+		parent_doctype = frappe.qb.DocType("Sales Order")
+		doctype = frappe.qb.DocType("Sales Order Item")
+
+		query = (
+			frappe.qb.from_(parent_doctype)
+			.inner_join(doctype)
+			.on(parent_doctype.name == doctype.parent)
+			.select(
+				((doctype.qty - doctype.delivered_qty) * doctype.conversion_factor).as_("qty"),
+				doctype.item_code.as_("item_code"),
+				doctype.delivery_date,
+			)
+			.where(
+				(doctype.docstatus == 1)
+				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
+			)
+		)
+
+		if self.rm_items:
+			query = query.where(doctype.item_code.isin(self.rm_items))
+
+		if self.filters.get("warehouse"):
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
+
+		data = query.run(as_dict=True)
+
+		for row in data:
+			key = (row.item_code, row.delivery_date)
+			if key not in so_details:
+				so_details[key] = row
+			else:
+				so_details[key].qty += row.qty
+
+		if packed_items := self.get_packed_items_sales_order():
+			for row in packed_items:
+				key = (row.item_code, row.delivery_date)
+				if key not in so_details:
+					so_details[key] = row
+				else:
+					so_details[key].qty += row.qty
+
+		return so_details
+
+	def get_packed_items_sales_order(self):
+		parent_doctype = frappe.qb.DocType("Sales Order")
+		so_item = frappe.qb.DocType("Sales Order Item")
+		doctype = frappe.qb.DocType("Packed Item")
+
+		query = (
+			frappe.qb.from_(parent_doctype)
+			.inner_join(so_item)
+			.on(parent_doctype.name == so_item.parent)
+			.inner_join(doctype)
+			.on(so_item.name == doctype.parent_detail_docname)
+			.select(
+				((doctype.qty) * doctype.conversion_factor).as_("qty"),
+				doctype.item_code,
+				doctype.item_name,
+				so_item.delivery_date,
+			)
+			.where(
+				(doctype.docstatus == 1)
+				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
+				& ((so_item.qty - so_item.delivered_qty) > 0)
+			)
+		)
+
+		if self.rm_items:
+			query = query.where(doctype.item_code.isin(self.rm_items))
+
+		if self.filters.get("warehouse"):
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
+
+		return query.run(as_dict=True)
+
+	def get_subcontracted_data(self):
+		parent_doctype = frappe.qb.DocType("Subcontracting Order")
+		doctype = frappe.qb.DocType("Subcontracting Order Item")
+
+		query = (
+			frappe.qb.from_(parent_doctype)
+			.inner_join(doctype)
+			.on(parent_doctype.name == doctype.parent)
+			.select(
+				(doctype.qty - doctype.received_qty).as_("qty"),
+				doctype.item_code.as_("item_code"),
+				doctype.schedule_date.as_("delivery_date"),
+			)
+			.where(
+				(doctype.docstatus == 1) & (parent_doctype.status.notin(["Stopped", "Closed", "Completed"]))
+			)
+		)
+
+		items = self.fg_items + self.rm_items
+		if items:
+			query = query.where(doctype.item_code.isin(items))
+
+		if self.filters.get("warehouse"):
+			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
+
+		return query.run(as_dict=True)
+
+	def update_rm_details(self, raw_materials, delivery_date, planned_qty, bom_no, data, warehouse=None):
+		for material in raw_materials:
+			row = frappe._dict(
+				{
+					"item_code": material.item_code,
+					"item_name": material.item_name,
+					"default_warehouse": material.default_warehouse,
+					"default_supplier": material.default_supplier,
+					"planned_qty": material.qty * planned_qty,
+					"projected_qty": 0,
+					"delivery_date": delivery_date,
+					"indent": material.indent + 1,
+					"parent_bom": bom_no,
+					"bom_no": material.bom_no,
+					"warehouse": warehouse,
+					"min_order_qty": flt(material.get("min_order_qty", 0)),
+					"purchase_uom": material.get("purchase_uom"),
+					"safety_stock": flt(material.get("safety_stock", 0)),
+				}
+			)
+
+			row.capacity = 0
+			row.type_of_material = get_type_of_material(material.get("is_purchase_item"), material.bom_no)
+			if material.raw_materials:
+				row.capacity = get_item_capacity(material.item_code, self.filters.bucket_size)
+
+			self.update_required_qty(row)
+			self.set_lead_time(row)
+
+			data.append(row)
+
+			if material.raw_materials:
+				self.update_rm_details(
+					material.raw_materials,
+					row.release_date,
+					row.required_qty,
+					material.bom_no,
+					data,
+					warehouse,
+				)
+
+	def get_mps_data(self):
+		doctype = frappe.qb.DocType("Master Production Schedule")
+		child_doctype = frappe.qb.DocType("Master Production Schedule Item")
+
+		query = (
+			frappe.qb.from_(doctype)
+			.inner_join(child_doctype)
+			.on(doctype.name == child_doctype.parent)
+			.select(
+				child_doctype.item_code,
+				child_doctype.delivery_date,
+				doctype.parent_warehouse,
+				child_doctype.name,
+				child_doctype.item_name,
+				child_doctype.planned_qty,
+				child_doctype.uom,
+			)
+			.where(
+				(doctype.from_date >= self.filters.from_date)
+				& (doctype.to_date <= self.filters.to_date)
+				& (child_doctype.parentfield == "items")
+			)
+			.orderby(child_doctype.delivery_date)
+		)
+
+		if self.filters.get("warehouse"):
+			query = query.where(doctype.parent_warehouse.isin(self.get_warehouses(True)))
+
+		fields = {
+			"name": self.filters.get("mps"),
+			"item_code": self.filters.get("item_code"),
+		}
+
+		for field, value in fields.items():
+			if not value:
+				continue
+
+			if field == "item_code":
+				query = query.where(child_doctype[field] == value)
+			else:
+				query = query.where(doctype[field] == value)
+
+		return query.run(as_dict=True)
+
+	def get_items_from_mps(self, mps_data):
+		items = []
+		for row in mps_data:
+			if row.item_code not in items:
+				items.append(row.item_code)
+
+		if self.filters.mps:
+			sales_forecasts = frappe.get_all(
+				"Master Production Schedule",
+				filters={"name": self.filters.mps},
+				pluck="sales_forecast",
+			)
+
+			if sales_forecasts:
+				sales_forecast_items = frappe.get_all(
+					"Sales Forecast Item",
+					filters={"parent": ("in", sales_forecasts)},
+					pluck="item_code",
+				)
+
+				if sales_forecast_items:
+					items.extend(sales_forecast_items)
+
+		return items
+
+	def get_raw_materials_data(self, items):
+		item_wise_rm_details = frappe._dict()
+		for item_code in items:
+			if item_code not in item_wise_rm_details:
+				item_wise_rm_details[item_code] = frappe.db.get_value(
+					"Item",
+					item_code,
+					[
+						"default_bom as bom_no",
+						"safety_stock",
+						"min_order_qty",
+						"purchase_uom",
+						"is_purchase_item",
+					],
+					as_dict=True,
+				)
+
+			item_data = item_wise_rm_details[item_code]
+			if details := get_item_details(item_code, self.filters.get("company")):
+				item_data.update(details)
+
+			if item_code not in self.fg_items:
+				self.fg_items.append(item_code)
+
+			if item_data.bom_no:
+				item_data.raw_materials = self.get_raw_materials(item_data.bom_no, indent=0)
+
+		return item_wise_rm_details
+
+	def get_raw_materials(self, bom_no, indent=0):
+		company = self.filters.get("company")
+		raw_materials = frappe.get_all(
+			"BOM",
+			filters=[["BOM Item", "parent", "=", bom_no], ["BOM", "docstatus", "=", 1]],
+			fields=[
+				"`tabBOM Item`.`item_code`",
+				"`tabBOM Item`.`stock_qty`",
+				"`tabBOM`.quantity as parent_qty",
+				"`tabBOM Item`.`bom_no`",
+				"`tabBOM`.`name` as parent_bom",
+				"`tabBOM Item`.`item_name`",
+				"`tabBOM Item`.`stock_uom` as uom",
+			],
+		)
+
+		for material in raw_materials:
+			material.indent = indent
+			material.qty = flt(material.stock_qty / material.parent_qty)
+
+			if details := get_item_details(material.item_code, company):
+				material.update(details)
+
+			if material.item_code not in self.rm_items:
+				self.rm_items.append(material.item_code)
+
+			if material.bom_no:
+				material.raw_materials = self.get_raw_materials(material.bom_no, indent + 1)
+
+		return raw_materials
+
+	def get_columns(self):
+		if self.filters.show_in_bucket_view:
+			columns = [
+				{
+					"fieldname": "item_code",
+					"label": _("Item Code"),
+					"fieldtype": "Link",
+					"options": "Item",
+					"width": 150,
+				},
+				{
+					"fieldname": "item_name",
+					"label": _("Item Name"),
+					"fieldtype": "Data",
+				},
+			]
+
+			label = _("Capacity") + " (" + _(self.filters.bucket_size) + ")"
+			columns.append(
+				{
+					"fieldname": "capacity",
+					"label": _(label),
+					"fieldtype": "Int",
+				}
+			)
+
+			for date in self.dates:
+				columns.append(
+					{
+						"fieldname": date["from_date"],
+						"label": date["label"],
+						"fieldtype": "Float",
+						"width": 135,
+					}
+				)
+
+			return columns
+
+		columns = [
+			{
+				"fieldname": "item_code",
+				"label": _("Item Code"),
+				"fieldtype": "Link",
+				"options": "Item",
+				"width": 150,
+			},
+			{
+				"fieldname": "item_name",
+				"label": _("Item Name"),
+				"fieldtype": "Data",
+			},
+			{
+				"fieldname": "type_of_material",
+				"label": _("Type"),
+				"fieldtype": "Data",
+				"width": 100,
+			},
+			{
+				"fieldname": "warehouse",
+				"label": _("Warehouse"),
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"hidden": True,
+			},
+		]
+
+		columns += [
+			{
+				"fieldname": "demand_qty",
+				"label": _("Demand Qty"),
+				"fieldtype": "Float",
+				"width": 120,
+			},
+			{
+				"fieldname": "adhoc_qty",
+				"label": _("Ad-hoc Qty"),
+				"fieldtype": "Float",
+				"width": 120,
+			},
+		]
+
+		columns += [
+			{
+				"fieldname": "planned_qty",
+				"label": _("Planned Qty"),
+				"fieldtype": "Float",
+				"width": 120,
+			},
+			{
+				"fieldname": "in_hand_qty",
+				"label": _("On Hand"),
+				"fieldtype": "Float",
+				"width": 90,
+			},
+			{
+				"fieldname": "po_ordered_qty",
+				"label": _("Planned Purchase Order"),
+				"fieldtype": "Float",
+			},
+			{
+				"fieldname": "wo_ordered_qty",
+				"label": _("Planned Work Order"),
+				"fieldtype": "Float",
+			},
+			{
+				"fieldname": "safety_stock",
+				"label": _("Safety Stock"),
+				"fieldtype": "Float",
+			},
+			{
+				"fieldname": "required_qty",
+				"label": _("Required Qty"),
+				"fieldtype": "Float",
+			},
+			{
+				"fieldname": "min_order_qty",
+				"label": _("Min Order Qty"),
+				"fieldtype": "Float",
+			},
+			{
+				"fieldname": "delivery_date",
+				"label": _("Delivery Date"),
+				"fieldtype": "Date",
+			},
+			{
+				"fieldname": "lead_time",
+				"label": _("Lead Time"),
+				"fieldtype": "Int",
+			},
+			{
+				"fieldname": "release_date",
+				"label": _("Release Date"),
+				"fieldtype": "Date",
+			},
+			{
+				"fieldname": "bom_no",
+				"label": _("BOM No"),
+				"fieldtype": "Link",
+				"options": "BOM",
+				"width": 150,
+			},
+		]
+
+		return columns
+
+	def get_dates(self):
+		bucket_size = self.filters.bucket_size
+
+		from_date = self.filters.from_date
+		if bucket_size == "Weekly":
+			from_date = self.get_first_date_of_week(from_date)
+		elif bucket_size == "Monthly":
+			from_date = get_first_day(from_date)
+
+		dates_list = []
+		while getdate(from_date) <= getdate(self.filters.to_date):
+			args = {"from_date": from_date}
+
+			days = 1 if bucket_size == "Daily" else 7
+			if bucket_size == "Monthly":
+				from_date = add_months(from_date, 1)
+			else:
+				from_date = add_days(from_date, days)
+
+			args["to_date"] = add_days(from_date, -1)
+
+			if bucket_size == "Monthly":
+				args["label"] = formatdate(args["from_date"], "MMM YYYY")
+			else:
+				if bucket_size == "Weekly":
+					args["label"] = (
+						formatdate(args["from_date"], "dd MMM")
+						+ " - "
+						+ formatdate(args["to_date"], "dd MMM")
+					)
+				else:
+					args["label"] = formatdate(args["to_date"], "dd MMM")
+
+			dates_list.append(args)
+
+		return dates_list
+
+	def get_first_date_of_week(self, input_date):
+		# convert string to datetime
+		if isinstance(input_date, str):
+			input_date = datetime.strptime(input_date, "%Y-%m-%d")
+
+		start_of_week = input_date - timedelta(days=input_date.weekday())
+		return start_of_week.strftime("%Y-%m-%d")
+
+	def get_last_date_of_week(self, input_date):
+		# convert string to datetime
+		if isinstance(input_date, str):
+			input_date = datetime.strptime(input_date, "%Y-%m-%d")
+
+		end_of_week = input_date + timedelta(days=(6 - input_date.weekday()))
+		return end_of_week.strftime("%Y-%m-%d")
+
+	def get_sales_forecast_data(self):
+		forecast_doc = frappe.qb.DocType("Sales Forecast")
+		doctype = frappe.qb.DocType("Sales Forecast Item")
+
+		query = (
+			frappe.qb.from_(forecast_doc)
+			.inner_join(doctype)
+			.on(forecast_doc.name == doctype.parent)
+			.select(
+				forecast_doc.frequency,
+				doctype.item_code,
+				doctype.delivery_date,
+				doctype.parent.as_("sales_forecast"),
+				doctype.uom.as_("stock_uom"),
+				doctype.demand_qty.as_("qty"),
+				forecast_doc.parent_warehouse,
+			)
+			.where((forecast_doc.docstatus == 1) & (doctype.parentfield == "items"))
+			.orderby(doctype.idx)
+		)
+
+		if self.filters.mps:
+			forecast = frappe.db.get_value("Master Production Schedule", self.filters.mps, "sales_forecast")
+			query = query.where(forecast_doc.name == forecast)
+
+		if self.filters.from_date:
+			query = query.where(doctype.delivery_date >= self.filters.from_date)
+
+		if self.filters.to_date:
+			query = query.where(doctype.delivery_date <= self.filters.to_date)
+
+		if self.filters.warehouse:
+			query = query.where(forecast_doc.parent_warehouse.isin(self.get_warehouses(True)))
+
+		if self.filters.item_code:
+			query = query.where(doctype.item_code == self.filters.item_code)
+
+		sales_data = query.run(as_dict=True)
+
+		return convert_to_daily_bucket_data(sales_data)
+
+
+def get_stock_reserved_for_work_orders(items, warehouses=None):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	query = (
+		frappe.qb.from_(sre)
+		.select(
+			sre.item_code,
+			sre.warehouse,
+			Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Work Order")
+			& (sre.item_code.isin(items))
+			& (sre.status.notin(["Delivered", "Cancelled", "Closed"]))
+		)
+		.groupby(sre.item_code, sre.warehouse)
+	)
+	if warehouses:
+		query = query.where(sre.warehouse.isin(warehouses))
+
+	reserved_for_production = get_reserved_for_production_by_warehouse(items, warehouses)
+	overlap = {}
+	for item_code, warehouse, qty in query.run():
+		counted = min(flt(qty), reserved_for_production.get((item_code, warehouse), 0.0))
+		overlap[item_code] = overlap.get(item_code, 0.0) + max(counted, 0.0)
+
+	return overlap
+
+
+def get_reserved_for_production_by_warehouse(items, warehouses=None):
+	filters = {"item_code": ("in", items)}
+	if warehouses:
+		filters["warehouse"] = ("in", warehouses)
+
+	return {
+		(row.item_code, row.warehouse): flt(row.reserved_qty_for_production)
+		for row in frappe.get_all(
+			"Bin", filters=filters, fields=["item_code", "warehouse", "reserved_qty_for_production"]
+		)
+	}
+
+
+def apply_dated_supply(row, supply_details):
+	supplied_qty = 0.0
+	if row.required_qty <= 0 or not supply_details:
+		return supplied_qty
+
+	keys = [key for key in supply_details if key[0] == row.item_code]
+	for key in sorted(keys, key=lambda key: getdate(key[1])):
+		covered_qty = cover_demand(row, flt(supply_details[key].qty), getdate(key[1]))
+		supplied_qty += covered_qty
+		supply_details[key].qty = flt(supply_details[key].qty) - covered_qty
+		if supply_details[key].qty <= 0:
+			del supply_details[key]
+
+		if row.required_qty <= 0:
+			break
+
+	return supplied_qty
+
+
+def cover_demand(row, qty, supply_date=None):
+	covered_qty = 0.0
+	for part in row.demand_parts:
+		if qty <= 0:
+			break
+
+		if part[1] <= 0 or (supply_date and part[0] < supply_date):
+			continue
+
+		covered = min(part[1], qty)
+		part[1] -= covered
+		qty -= covered
+		covered_qty += covered
+
+	row.required_qty = flt(row.required_qty) - covered_qty
+	return covered_qty
+
+
+def get_free_stock(bin_details):
+	return flt(bin_details.get("actual_qty")) - sum(
+		flt(bin_details.get(field))
+		for field in (
+			"reserved_stock",
+			"reserved_qty_for_production",
+			"reserved_qty_for_sub_contract",
+			"reserved_qty_for_production_plan",
+		)
+	)
+
+
+def get_type_of_material(is_purchase_item, bom_no):
+	return "Purchase" if is_purchase_item and not bom_no else "Manufacture"
+
+
+@frappe.request_cache
+def get_item_details(item_code, company):
+	data = frappe.db.get_value(
+		"Item",
+		item_code,
+		["safety_stock", "min_order_qty", "purchase_uom", "is_purchase_item"],
+		as_dict=True,
+	) or frappe._dict({"safety_stock": 0})
+
+	default_data = frappe.db.get_value(
+		"Item Default",
+		{"parent": item_code, "company": company},
+		["default_warehouse", "default_supplier"],
+		as_dict=True,
+	)
+
+	if default_data:
+		data.update(default_data)
+
+	if not data.get("default_supplier"):
+		# fall back to the item's Item Group default supplier (mirrors BuyingController)
+		item_group = frappe.db.get_value("Item", item_code, "item_group")
+		data.default_supplier = frappe.db.get_value(
+			"Item Default", {"parent": item_group, "company": company}, "default_supplier"
+		)
+
+	return data
+
+
+def get_item_lead_time(item_code, type_of_material, qty=1):
+	"""Return calendar days, scaling only manufacturing time by the required quantity."""
+	details = get_item_lead_time_details(item_code)
+	if type_of_material == "Manufacture":
+		if qty <= 0:
+			return 0
+		# Keep MRP's 24-hour planning day; buffer days do not increase production capacity.
+		time_in_days = max(flt(details.manufacturing_time_in_mins), 0) * qty / 1440.0
+	else:
+		if details.purchase_time is None:
+			return 0
+		time_in_days = flt(details.purchase_time)
+
+	return time_in_days + flt(details.buffer_time)
+
+
+@frappe.request_cache
+def get_item_lead_time_details(item_code):
+	return (
+		frappe.db.get_value(
+			"Item Lead Time",
+			{"item_code": item_code},
+			["manufacturing_time_in_mins", "purchase_time", "buffer_time"],
+			as_dict=True,
+		)
+		or frappe._dict()
+	)
+
+
+def convert_to_daily_bucket_data(data):
+	bucketed_data = []
+
+	for row in data:
+		if row.frequency == "Monthly":
+			# Convert monthly data to daily buckets
+			start_date = get_first_day(row.delivery_date)
+			no_of_days = days_diff(add_months(start_date, 1), start_date)
+
+			for i in range(no_of_days):  # Assuming 30 days in a month
+				bucketed_data.append(
+					frappe._dict(
+						{
+							"frequency": "Daily",
+							"item_code": row.item_code,
+							"delivery_date": add_days(start_date, i),
+							"sales_forecast": row.sales_forecast,
+							"stock_uom": row.stock_uom,
+							"parent_warehouse": row.parent_warehouse,
+							"qty": row.qty / no_of_days,  # Assuming equal distribution across days
+						}
+					)
+				)
+
+		elif row.frequency == "Weekly":
+			# Convert weekly data to daily buckets
+			start_date = getdate(row.delivery_date)
+			for i in range(7):
+				bucketed_data.append(
+					frappe._dict(
+						{
+							"frequency": "Daily",
+							"item_code": row.item_code,
+							"delivery_date": add_days(start_date, i),
+							"sales_forecast": row.sales_forecast,
+							"stock_uom": row.stock_uom,
+							"parent_warehouse": row.parent_warehouse,
+							"qty": row.qty / 7,  # Assuming equal distribution across days
+						}
+					)
+				)
+
+	return bucketed_data
+
+
+@frappe.request_cache
+def get_item_capacity(item_code, bucket_size):
+	capacity = frappe.db.get_value(
+		"Item Lead Time",
+		{"item_code": item_code},
+		"capacity_per_day",
+	)
+
+	if not capacity:
+		return 0.0
+
+	no_of_days = 7 if bucket_size == "Weekly" else 30
+	if bucket_size == "Daily":
+		no_of_days = 1
+
+	return math.ceil(cint(capacity) * no_of_days)
+
+
+@frappe.whitelist()
+def make_order(selected_rows: str | list, company: str, warehouse: str | None = None, mps: str | None = None):
+	if not frappe.has_permission("Purchase Order", "create"):
+		frappe.throw(_("Not permitted to make Purchase Orders"), frappe.PermissionError)
+
+	if isinstance(selected_rows, str):
+		selected_rows = parse_json(selected_rows)
+
+	if not frappe.db.exists("Company", company):
+		frappe.throw(_("Company {0} does not exist").format(company))
+
+	qty_precision = frappe.get_precision("Purchase Order Item", "qty")
+	purchase_orders = {}
+	work_orders = []
+	covered_rows = 0
+	missing_bom = []
+	missing_supplier = []
+	for row in selected_rows:
+		row = frappe._dict(row)
+		# what is left to order once stock and the orders already placed are counted. rounding
+		# to the precision an order is stored in, so what is left of a covered row after all the
+		# subtracting does not become an order line of its own
+		if flt(row.required_qty, qty_precision) <= 0:
+			covered_rows += 1
+			continue
+
+		if row.type_of_material == "Purchase":
+			if row.default_supplier:
+				purchase_orders.setdefault((row.default_supplier, row.release_date), []).append(row)
+			elif row.item_code not in missing_supplier:
+				missing_supplier.append(row.item_code)
+
+		if row.type_of_material == "Manufacture":
+			if row.bom_no:
+				work_orders.append(row)
+			elif row.item_code not in missing_bom:
+				missing_bom.append(row.item_code)
+
+	if missing_bom:
+		frappe.throw(_("Default BOM for {0} not found").format(", ".join(missing_bom)))
+
+	if missing_supplier:
+		frappe.throw(_("Default Supplier for {0} not found").format(", ".join(missing_supplier)))
+
+	if not purchase_orders and not work_orders:
+		frappe.msgprint(
+			_("Nothing to order, the selected rows are already covered by stock or existing orders")
+			if covered_rows
+			else _("Nothing to order from the selected rows")
+		)
+		return
+
+	if purchase_orders:
+		make_purchase_orders(purchase_orders, company, warehouse=warehouse, mps=mps)
+
+	if work_orders:
+		make_work_orders(work_orders, company, warehouse=warehouse, mps=mps)
+
+
+def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
+	for (supplier, release_date), items in purchase_orders.items():
+		po_items = [get_purchase_order_item(item, warehouse) for item in items]
+
+		if not po_items:
+			continue
+
+		po = frappe.new_doc("Purchase Order")
+		po.supplier = supplier
+		po.company = company
+		po.mps = mps
+		po.transaction_date = release_date
+		po.set("items", po_items)
+
+		po.run_method("set_missing_values")
+		po.insert()
+
+		frappe.msgprint(
+			_("Purchase Order {0} created").format(frappe.bold(po.name)),
+			alert=True,
+		)
+
+
+def get_purchase_order_item(item, warehouse=None):
+	uom = item.purchase_uom or item.uom
+	if not uom:
+		uom_details = get_item_uom(item.item_code)
+		uom = uom_details.purchase_uom or uom_details.stock_uom
+
+	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
+	qty = max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor
+	if is_whole_number(uom):
+		qty = math.ceil(qty)
+
+	return {
+		"item_code": item.item_code,
+		"qty": qty,
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"schedule_date": item.delivery_date if item.delivery_date else today(),
+		"warehouse": warehouse or item.default_warehouse,
+	}
+
+
+def make_work_orders(work_orders, company, warehouse=None, mps=None):
+	for item in work_orders:
+		uom = get_item_uom(item.item_code).stock_uom
+		if is_whole_number(uom):
+			item.required_qty = math.ceil(item.required_qty)
+
+		wo = frappe.new_doc("Work Order")
+		wo.production_item = item.item_code
+		wo.bom_no = item.bom_no
+		wo.company = company
+		wo.qty = item.required_qty
+		wo.mps = mps
+		wo.stock_uom = uom
+		wo.wip_warehouse = item.default_warehouse
+		wo.fg_warehouse = warehouse or item.default_warehouse
+		wo.planned_start_date = item.release_date if item.release_date else today()
+		wo.planned_end_date = item.delivery_date if item.delivery_date else today()
+		wo.flags.ignore_mandatory = True
+		wo.insert()
+		frappe.msgprint(
+			_("Work Order {0} created").format(frappe.bold(wo.name)),
+			alert=True,
+		)
+
+
+@frappe.request_cache
+def get_item_uom(item_code):
+	return frappe.get_cached_value("Item", item_code, ["stock_uom", "purchase_uom"], as_dict=True)
+
+
+@frappe.request_cache
+def is_whole_number(uom):
+	return frappe.get_cached_value("UOM", uom, "must_be_whole_number")
+
+
+def split_forecast_qty(rows, qty):
+	total_planned_qty = sum(flt(d.planned_qty) for d in rows)
+	shares = [
+		qty * flt(d.planned_qty) / total_planned_qty if total_planned_qty else (qty if idx == 0 else 0)
+		for idx, d in enumerate(rows)
+	]
+	if flt(qty) == round(qty) and is_whole_number_item(rows[0].item_code):
+		shares = round_shares_keeping_total(shares, round(qty))
+
+	for d, share in zip(rows, shares, strict=True):
+		d.sales_forecast_qty += share
+
+
+def is_whole_number_item(item_code):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	return bool(stock_uom and frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"))
+
+
+def round_shares_keeping_total(shares, total):
+	rounded = [math.floor(share) for share in shares]
+	by_remainder = sorted(range(len(shares)), key=lambda idx: shares[idx] - rounded[idx], reverse=True)
+	for idx in by_remainder[: max(total - sum(rounded), 0)]:
+		rounded[idx] += 1
+	return rounded

@@ -7,11 +7,53 @@ from frappe import _, scrub
 from frappe.query_builder import DocType
 from frappe.utils import add_days, add_to_date, flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	return Analytics(filters).run()
+=======
+	validate_date_range(filters)
+
+	filters = frappe._dict(filters or {})
+	# Special report showing all doctype totals on a single chart; overrides some filters
+	if filters.doc_type == "All":
+		filters.tree_type = "Customer"
+		filters.value_quantity = "Value"
+		filters.curves = "total"
+		output = None
+		for dt in [
+			"Quotation",
+			"Sales Order",
+			"Delivery Note",
+			"Sales Invoice",
+			N_("Sales Invoice (due)"),
+			"Payment Entry",
+		]:
+			filters.doc_type = dt
+			output = append_report(dt, output, Analytics(filters).run())
+		return output
+	else:
+		return Analytics(filters).run()
+
+
+def append_report(dt, org, new):
+	# idx 1 is data, 3 is chart
+	new[1].insert(0, {"entity": _(dt)})  # heading
+	new[1].append({})  # empty row
+	# datasets can be an empty list if no dates are supplied by the Dashboard Chart
+	if not new[3]["data"]["datasets"]:
+		new[3]["data"]["datasets"].append({"name": None, "values": []})
+	new[3]["data"]["datasets"][0]["name"] = _(dt)  # override curve name
+	if org:
+		org[1].extend(new[1])
+		org[3]["data"]["datasets"].extend(new[3]["data"]["datasets"])
+		return org
+	else:
+		return new
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 class Analytics:

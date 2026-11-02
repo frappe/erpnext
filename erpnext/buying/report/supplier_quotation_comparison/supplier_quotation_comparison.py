@@ -8,10 +8,16 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+<<<<<<< HEAD
 from erpnext.setup.utils import get_exchange_rate
+=======
+from erpnext.accounts.report.utils import validate_date_range
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		return [], []
 

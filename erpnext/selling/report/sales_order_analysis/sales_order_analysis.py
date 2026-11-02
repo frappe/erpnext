@@ -7,11 +7,20 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Case, CustomFunction
+<<<<<<< HEAD
 from frappe.query_builder.functions import Coalesce, Max, Sum
 from frappe.utils import date_diff, flt, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
+=======
+from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
+from frappe.utils import flt, getdate, nowdate
+from frappe.utils.nestedset import get_descendants_of
+
+import erpnext
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 def execute(filters=None):
@@ -43,8 +52,8 @@ def validate_filters(filters):
 
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
-	elif date_diff(to_date, from_date) < 0:
-		frappe.throw(_("To Date cannot be before From Date."))
+
+	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
 
 	if filters.get("group_by_so") and filters.get("group_by_item"):
 		frappe.throw(_("Group the report by Sales Order or by Item, not both."))

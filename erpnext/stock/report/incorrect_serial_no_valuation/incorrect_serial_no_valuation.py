@@ -7,13 +7,23 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	columns, data = [], []
 	columns = get_columns()
 	data = get_data(filters)
+=======
+	validate_date_range(filters)
+
+	columns, data = prepare_serial_batch_report(get_columns(), get_data(filters))
+	for row in data:
+		if row.total_label:
+			row.serial_no_number = row.total_label
+>>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 	return columns, data
 
 
