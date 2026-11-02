@@ -26,7 +26,8 @@ class TestAccountsPayableSummary(FrappeTestCase):
 	def _filters(self, **overrides):
 		filters = {
 			"company": self.company,
-			"supplier": self.supplier,
+			"party_type": "Supplier",
+			"party": [self.supplier],
 			"posting_date": today(),
 			"range": "30, 60, 90, 120",
 		}
