@@ -35,6 +35,9 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	get_plan_process_loss_percentage,
 	get_reserved_qty_from_stock,
 )
+from erpnext.manufacturing.doctype.production_plan.services.plant_floor_planning import (
+	PlantFloorPlanning,
+)
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 	ProductionPlanStockReservation,
 	cancel_stock_reservation_entries,
@@ -296,8 +299,8 @@ class ProductionPlan(Document):
 					)
 				)
 
-			if not d.bom_no:
-				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
+			if not (d.bom_no or d.plant_floor):
+				frappe.throw(_("Please select BOM or Plant Floor for Item in Row {0}").format(d.idx))
 
 			if not flt(d.planned_qty):
 				frappe.throw(
@@ -307,10 +310,11 @@ class ProductionPlan(Document):
 				)
 
 		self.validate_boms()
+		PlantFloorPlanning(self).validate()
 
 	def validate_boms(self):
 		"""Each BOM must produce the item of its row."""
-		boms = dict.fromkeys((d.item_code, d.bom_no) for d in self.po_items)
+		boms = dict.fromkeys((d.item_code, d.bom_no) for d in self.po_items if d.bom_no)
 		boms.update(dict.fromkeys((d.production_item, d.bom_no) for d in self.sub_assembly_items if d.bom_no))
 		for item_code, bom_no in boms:
 			validate_production_bom(item_code, bom_no)
@@ -729,7 +733,10 @@ class ProductionPlan(Document):
 
 def get_schedule_signature(doc):
 	return (
-		sorted((row.name, row.item_code, row.bom_no, flt(row.planned_qty)) for row in doc.po_items),
+		sorted(
+			(row.name, row.item_code, row.bom_no, row.plant_floor, flt(row.planned_qty))
+			for row in doc.po_items
+		),
 		sorted(
 			(row.name, row.production_item, row.bom_no, flt(row.qty), row.type_of_manufacturing)
 			for row in doc.sub_assembly_items
