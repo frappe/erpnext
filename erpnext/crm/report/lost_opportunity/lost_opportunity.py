@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils.nestedset import get_descendants_of
 
 
 def execute(filters=None):
@@ -81,7 +82,7 @@ def get_data(filters):
 			{get_join(filters)}
 		WHERE
 			`tabOpportunity`.status = 'Lost' and `tabOpportunity`.company = %(company)s
-			AND DATE(`tabOpportunity`.modified) BETWEEN %(from_date)s AND %(to_date)s
+			AND `tabOpportunity`.lost_on BETWEEN %(from_date)s AND %(to_date)s
 			{get_conditions(filters)}
 		GROUP BY
 			`tabOpportunity`.name
@@ -96,7 +97,11 @@ def get_conditions(filters):
 	conditions = []
 
 	if filters.get("territory"):
-		conditions.append(" and `tabOpportunity`.territory=%(territory)s")
+		filters["territories"] = (
+			filters.get("territory"),
+			*get_descendants_of("Territory", filters.get("territory")),
+		)
+		conditions.append(" and `tabOpportunity`.territory in %(territories)s")
 
 	if filters.get("opportunity_from"):
 		conditions.append(" and `tabOpportunity`.opportunity_from=%(opportunity_from)s")
