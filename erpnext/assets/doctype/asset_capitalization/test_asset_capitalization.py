@@ -546,14 +546,12 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		target_asset.reload()
 		target_asset.submit()
-		self.assertRaises(
-			frappe.ValidationError,
-			make_purchase_receipt,
-			qty=5,
-			rate=300,
-			posting_date=add_days(today(), -4),
-			**receipt_args,
+		backdated_receipt = make_purchase_receipt(
+			qty=5, rate=300, posting_date=add_days(today(), -4), do_not_submit=1, **receipt_args
 		)
+		frappe.db.savepoint("before_backdated_receipt")
+		self.assertRaises(frappe.ValidationError, backdated_receipt.submit)
+		frappe.db.rollback(save_point="before_backdated_receipt")
 		self.assertEqual(target_asset.db_get("gross_purchase_amount"), 800)
 		self.assertEqual(asset_capitalization.db_get("total_value"), 800)
 

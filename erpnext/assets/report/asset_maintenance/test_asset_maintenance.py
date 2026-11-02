@@ -11,7 +11,7 @@ class TestAssetMaintenanceReport(FrappeTestCase):
 			user = f"test_asset_maintenance_{frappe.scrub(role)}@example.com"
 			create_user_with_roles(user, role)
 			with self.set_user(user):
-				self.assertTrue(frappe.has_permission("Report", "read", "Asset Maintenance"))
+				self.assertTrue(frappe.get_doc("Report", "Asset Maintenance").is_permitted())
 				self.assertTrue(frappe.has_permission("Asset Maintenance", "read"))
 
 
