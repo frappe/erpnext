@@ -1461,9 +1461,16 @@ def update_existing_asset(asset, remaining_qty, new_asset):
 		asset.precision("gross_purchase_amount"),
 	)
 
+	remaining_additional_asset_cost = flt(
+		asset.additional_asset_cost - new_asset.additional_asset_cost,
+		asset.precision("additional_asset_cost"),
+	)
+
 	remaining_asset_values = {
 		"opening_accumulated_depreciation": opening_accumulated_depreciation,
 		"gross_purchase_amount": remaining_gross_purchase_amount,
+		"additional_asset_cost": remaining_additional_asset_cost,
+		"total_asset_cost": remaining_gross_purchase_amount + remaining_additional_asset_cost,
 		"value_after_depreciation": value_after_depreciation,
 		"asset_quantity": remaining_qty,
 	}
@@ -1530,6 +1537,10 @@ def create_new_asset_after_split(asset, split_qty):
 	)
 
 	new_asset.gross_purchase_amount = new_gross_purchase_amount
+	new_asset.additional_asset_cost = flt(
+		(asset.additional_asset_cost * split_qty) / asset.asset_quantity,
+		asset.precision("additional_asset_cost"),
+	)
 	if asset.purchase_amount:
 		new_asset.purchase_amount = new_gross_purchase_amount
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation

@@ -613,13 +613,19 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.asset_quantity, 10)
 		self.assertEqual(asset.gross_purchase_amount, 120000)
 
+		# a capitalised repair of 10,000 is shared by quantity
+		asset.db_set({"additional_asset_cost": 10000, "total_asset_cost": 130000})
 		new_asset = split_asset(asset.name, 2)
 		asset.load_from_db()
 		self.assertEqual(asset.asset_quantity, 8)
 		self.assertEqual(asset.gross_purchase_amount, 96000)
+		self.assertEqual(asset.additional_asset_cost, 8000)
+		self.assertEqual(asset.total_asset_cost, 104000)
 
 		self.assertEqual(new_asset.asset_quantity, 2)
 		self.assertEqual(new_asset.gross_purchase_amount, 24000)
+		self.assertEqual(new_asset.additional_asset_cost, 2000)
+		self.assertEqual(new_asset.total_asset_cost, 26000)
 		self.assertEqual(asset.purchase_receipt_item, pr.items[0].name)
 		self.assertEqual(new_asset.purchase_receipt_item, pr.items[0].name)
 
