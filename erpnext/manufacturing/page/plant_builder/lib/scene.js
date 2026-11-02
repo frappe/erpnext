@@ -1,4 +1,4 @@
-import { MACHINES } from "./machines";
+import { MACHINES, machineSize } from "./machines";
 import { YC } from "./layout";
 import { fmt, plural } from "./format";
 
@@ -26,7 +26,15 @@ function stationTag(plant, station, view, holding) {
 	const active = view.active[station.i];
 	const sub = holding ? holding(station.i) : machine.label;
 	if (!station.pack) {
-		return { id: `s${station.i}`, x: station.x, y: YC, z: machine.height + 12, title, sub, active };
+		return {
+			id: `s${station.i}`,
+			x: station.x,
+			y: YC,
+			z: machineSize(station.stage).height + 12,
+			title,
+			sub,
+			active,
+		};
 	}
 	return { id: `s${station.i}`, x: station.zone.x + 205, y: YC - 30, z: 84, title, sub, active };
 }

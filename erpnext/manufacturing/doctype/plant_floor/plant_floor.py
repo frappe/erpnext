@@ -192,7 +192,12 @@ def get_workstation_details(workstations):
 		frappe.qb.from_(workstation)
 		.left_join(workstation_type)
 		.on(workstation_type.name == workstation.workstation_type)
-		.select(workstation.name, workstation.warehouse, workstation_type.machine_model)
+		.select(
+			workstation.name,
+			workstation.warehouse,
+			workstation.workstation_type,
+			workstation_type.machine_model,
+		)
 		.where(workstation.name.isin(workstations))
 	).run(as_dict=True)
 	return {row.name: row for row in rows}

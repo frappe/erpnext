@@ -1,84 +1,33 @@
+import MACHINE_SHAPES from "../../../doctype/workstation_type/machine_shapes.json";
+import { num } from "./format";
+
 export const MACHINES = {
-	mixer: {
-		label: "Mixer",
-		stage: "Blending",
-		icon: "lucide-blend",
-		kind: "process",
-		verb: "Mixing",
-		half: 56,
-		height: 162,
-	},
+	mixer: { label: "Mixer", stage: "Blending", icon: "lucide-blend", kind: "process", verb: "Mixing" },
 	kettle: {
 		label: "Steam Kettle",
 		stage: "Cooking",
 		icon: "lucide-flame",
 		kind: "process",
 		verb: "Cooking",
-		half: 62,
-		height: 110,
 	},
-	reactor: {
-		label: "Reactor",
-		stage: "Reaction",
-		icon: "lucide-atom",
-		kind: "process",
-		verb: "Reacting",
-		half: 54,
-		height: 186,
-	},
+	reactor: { label: "Reactor", stage: "Reaction", icon: "lucide-atom", kind: "process", verb: "Reacting" },
 	fermenter: {
 		label: "Fermenter",
 		stage: "Fermentation",
 		icon: "lucide-flask-round",
 		kind: "process",
 		verb: "Fermenting",
-		half: 46,
-		height: 180,
 	},
-	mill: {
-		label: "Mill",
-		stage: "Grinding",
-		icon: "lucide-cog",
-		kind: "process",
-		verb: "Grinding",
-		half: 58,
-		height: 92,
-	},
-	dryer: {
-		label: "Dryer",
-		stage: "Drying",
-		icon: "lucide-wind",
-		kind: "process",
-		verb: "Drying",
-		half: 82,
-		height: 70,
-	},
-	cooler: {
-		label: "Cooler",
-		stage: "Cooling",
-		icon: "lucide-snowflake",
-		kind: "process",
-		verb: "Cooling",
-		half: 44,
-		height: 100,
-	},
-	filler: {
-		label: "Filling Line",
-		stage: "Filling",
-		icon: "lucide-milk",
-		kind: "pack",
-		verb: "Filling",
-		half: 0,
-		height: 80,
-	},
+	mill: { label: "Mill", stage: "Grinding", icon: "lucide-cog", kind: "process", verb: "Grinding" },
+	dryer: { label: "Dryer", stage: "Drying", icon: "lucide-wind", kind: "process", verb: "Drying" },
+	cooler: { label: "Cooler", stage: "Cooling", icon: "lucide-snowflake", kind: "process", verb: "Cooling" },
+	filler: { label: "Filling Line", stage: "Filling", icon: "lucide-milk", kind: "pack", verb: "Filling" },
 	bagger: {
 		label: "Bagging Line",
 		stage: "Bagging",
 		icon: "lucide-package",
 		kind: "pack",
 		verb: "Bagging",
-		half: 0,
-		height: 80,
 	},
 	generic: {
 		label: "Machine",
@@ -86,8 +35,6 @@ export const MACHINES = {
 		icon: "lucide-factory",
 		kind: "process",
 		verb: "Processing",
-		half: 48,
-		height: 96,
 	},
 };
 
@@ -106,6 +53,65 @@ const MODEL_KEYS = {
 export const machineKey = (model) => MODEL_KEYS[model] || "generic";
 export const machineOf = (model) => MACHINES[machineKey(model)];
 export const isPack = (stage) => MACHINES[stage?.machine]?.kind === "pack";
+
+export const SHAPES = MACHINE_SHAPES.shapes;
+export const PRESETS = MACHINE_SHAPES.presets;
+const PRESET_OF = Object.fromEntries(
+	Object.keys(PRESETS).map((model) => [machineKey(model), PRESETS[model]])
+);
+const PACK_SIZE = { half: 0, height: 80 };
+
+export const stageShapes = (stage) =>
+	stage?.shapes?.length ? stage.shapes : PRESET_OF[stage?.machine] || [];
+
+export function newShape(shape) {
+	const spec = SHAPES[shape];
+	return {
+		shape,
+		finish: spec.finish || "",
+		x: 0,
+		y: 0,
+		z: 0,
+		width: 0,
+		depth: 0,
+		radius: 0,
+		height: 0,
+		...spec.size,
+		shows_level: 1,
+		is_small: 0,
+		shakes: 0,
+	};
+}
+
+export function shapeExtent(shape) {
+	const size = SHAPES[shape.shape]?.size || {};
+	const round = "radius" in size;
+	const flat = "width" in size;
+	const halfX = round ? num(shape.radius) : flat ? num(shape.width) / 2 : 0;
+	const halfY = round ? num(shape.radius) : flat ? num(shape.depth) / 2 : 0;
+	const top = num(shape.z) + ("height" in size ? num(shape.height) : 0);
+	return { x: num(shape.x), y: num(shape.y), z: num(shape.z), halfX, halfY, top, round };
+}
+
+export function machineBounds(shapes) {
+	const bounds = { left: 0, right: 0, back: 0, front: 0, top: 0, round: false };
+	let largest = 0;
+	shapes.map(shapeExtent).forEach((e) => {
+		bounds.left = Math.min(bounds.left, e.x - e.halfX);
+		bounds.right = Math.max(bounds.right, e.x + e.halfX);
+		bounds.back = Math.min(bounds.back, e.y - e.halfY);
+		bounds.front = Math.max(bounds.front, e.y + e.halfY);
+		bounds.top = Math.max(bounds.top, e.top);
+		if (e.halfX * e.halfY > largest) [largest, bounds.round] = [e.halfX * e.halfY, e.round];
+	});
+	return bounds;
+}
+
+export function machineSize(stage) {
+	if (isPack(stage)) return PACK_SIZE;
+	const bounds = machineBounds(stageShapes(stage));
+	return { half: Math.max(-bounds.left, bounds.right), height: bounds.top };
+}
 
 export const TONES = ["red", "amber", "cream", "blue", "green", "violet", "gray"];
 export const MATERIAL_TONES = ["red", "blue", "cream", "amber", "gray", "violet", "green"];

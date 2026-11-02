@@ -9,6 +9,7 @@ from erpnext.manufacturing.doctype.plant_floor.plant_floor import (
 )
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
+from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_preset_shapes
 
 PLANT_FIELDS = ["name", "floor_name", "production_item", "batch_size", "modified"]
 
@@ -91,11 +92,24 @@ def get_plant_data(plant_floor):
 		"doc": plant_floor.as_dict(),
 		"is_saved": bool(plant_floor.get("creation")),
 		"item": get_item(plant_floor.production_item),
-		"machines": get_workstation_details(tuple({row.workstation for row in plant_floor.stages})),
+		"machines": get_machines(tuple({row.workstation for row in plant_floor.stages})),
 		"errors": errors,
 		"plan": None if errors else plant_floor.get_batch_plan().as_dict(),
 		"work_orders": get_work_orders(plant_floor.name) if plant_floor.get("creation") else [],
 	}
+
+
+def get_machines(workstations):
+	machines = get_workstation_details(workstations)
+	for machine in machines.values():
+		machine.shapes = get_machine_shapes(machine)
+	return machines
+
+
+def get_machine_shapes(machine):
+	if not machine.workstation_type:
+		return get_preset_shapes(machine.machine_model)
+	return frappe.get_cached_doc("Workstation Type", machine.workstation_type).machine_shapes
 
 
 def get_item(item_code):
@@ -119,10 +133,13 @@ def get_work_orders(plant_floor):
 
 @frappe.whitelist()
 def get_machine_catalog() -> dict:
+	designed = frappe.get_all(
+		"Workstation Type Shape", filters={"parenttype": "Workstation Type"}, pluck="parent", distinct=True
+	)
 	return {
 		"workstation_types": frappe.get_list(
 			"Workstation Type",
-			filters={"machine_model": ("is", "set")},
+			or_filters={"machine_model": ("is", "set"), "name": ("in", designed)},
 			fields=["name", "machine_model"],
 			order_by="name",
 		),
@@ -132,7 +149,28 @@ def get_machine_catalog() -> dict:
 
 @frappe.whitelist()
 def get_workstation(name: str) -> dict:
-	return get_workstation_details((name,)).get(name)
+	return get_machines((name,)).get(name)
+
+
+@frappe.whitelist()
+def get_machine_design(workstation_type: str) -> dict:
+	doc = frappe.get_doc("Workstation Type", workstation_type)
+	doc.check_permission("read")
+	return {
+		"name": doc.name,
+		"machine_model": doc.machine_model,
+		"shapes": doc.machine_shapes,
+		"is_custom": bool(doc.shapes),
+		"can_write": bool(doc.has_permission("write")),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_machine_design(workstation_type: str, shapes: str | list) -> dict:
+	doc = frappe.get_doc("Workstation Type", workstation_type)
+	doc.set("shapes", frappe.parse_json(shapes))
+	doc.save()
+	return get_machine_design(doc.name)
 
 
 @frappe.whitelist(methods=["POST"])
