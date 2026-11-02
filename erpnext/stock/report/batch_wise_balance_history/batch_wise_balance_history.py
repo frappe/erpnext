@@ -13,12 +13,19 @@ from erpnext.accounts.report.utils import validate_mandatory_date_range
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_valuation_method
 
 SLE_COUNT_LIMIT = 100_000
 
 
 def execute(filters=None):
+	data = get_data(filters)
+	return prepare_serial_batch_report(get_columns(filters), data)
+
+
+def get_data(filters=None):
 	if not filters:
 		filters = {}
 
@@ -38,15 +45,15 @@ def execute(filters=None):
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
-	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
+	batch_numbers = get_batch_numbers(iwb_map)
 
 	data = []
 	for item in sorted(iwb_map):
 		if not filters.get("item") or filters.get("item") == item:
 			for wh in sorted(iwb_map[item]):
-				for batch in sorted(iwb_map[item][wh]):
+				for batch in sorted(iwb_map[item][wh], key=lambda batch: batch_numbers.get(batch, batch)):
 					qty_dict = iwb_map[item][wh][batch]
 					if qty_dict.opening_qty or qty_dict.in_qty or qty_dict.out_qty or qty_dict.bal_qty:
 						data.append(
@@ -69,7 +76,13 @@ def execute(filters=None):
 							]
 						)
 
-	return columns, data
+	return data
+
+
+def get_batch_numbers(iwb_map):
+	return SerialBatchIdentity("Batch").get_number_map(
+		{batch for warehouses in iwb_map.values() for batches in warehouses.values() for batch in batches}
+	)
 
 
 def get_columns(filters):

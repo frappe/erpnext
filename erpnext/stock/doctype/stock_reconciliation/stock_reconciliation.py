@@ -23,6 +23,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
 from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
 
@@ -198,7 +199,9 @@ class StockReconciliation(StockController):
 						"type_of_transaction": "Outward" if row.current_qty > 0 else "Inward",
 						"company": self.company,
 						"is_rejected": 0,
-						"serial_nos": get_serial_nos(row.current_serial_no)
+						"serial_nos": SerialBatchIdentity("Serial No").resolve(
+							row.item_code, get_serial_nos(row.current_serial_no), ignore_permissions=True
+						)
 						if row.current_serial_no
 						else None,
 						"batches": frappe._dict({row.batch_no: row.current_qty}) if row.batch_no else None,
@@ -1459,15 +1462,31 @@ def get_item_and_warehouses(item_code, warehouse):
 	from frappe.utils.nestedset import get_descendants_of
 
 	items = []
-	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	stock_uom, has_serial_no = frappe.get_cached_value("Item", item_code, ["stock_uom", "has_serial_no"])
 	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
 		childrens = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
 		for ch_warehouse in childrens:
 			items.append(
-				frappe._dict({"item_code": item_code, "warehouse": ch_warehouse, "stock_uom": stock_uom})
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": ch_warehouse,
+						"stock_uom": stock_uom,
+						"has_serial_no": has_serial_no,
+					}
+				)
 			)
 	else:
-		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse, "stock_uom": stock_uom})]
+		items = [
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"stock_uom": stock_uom,
+					"has_serial_no": has_serial_no,
+				}
+			)
+		]
 
 	return items
 
@@ -1548,7 +1567,7 @@ def get_item_data(row, qty, valuation_rate, serial_no=None):
 
 
 def get_itemwise_batch(warehouse, posting_date, company, item_code=None, posting_time=None):
-	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
+	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import get_data
 
 	itemwise_batch_data = {}
 
@@ -1561,7 +1580,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None, posting
 	if item_code:
 		filters.item_code = item_code
 
-	columns, data = execute(filters)
+	data = get_data(filters)
 
 	for row in data:
 		itemwise_batch_data.setdefault((row[0], row[3]), []).append(
@@ -1682,7 +1701,11 @@ def get_stock_balance_for(
 					}
 				)
 			)
-			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
+			serial_nos = "\n".join(
+				SerialBatchIdentity("Serial No").get_numbers(
+					item_code, [d.serial_no for d in serial_no_details if d.batch_no == batch_no]
+				)
+			)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			rate = _get_incoming_rate(

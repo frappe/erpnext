@@ -8,12 +8,14 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, get_datetime, today
 
+from erpnext.stock.report.utils import prepare_serial_batch_report
+
 
 def execute(filters=None):
 	columns, data = [], []
 	data = get_data(filters)
 	columns = get_columns(filters)
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_columns(filters):
@@ -107,7 +109,8 @@ def get_batchwise_data_from_stock_ledger(filters):
 			Sum(table.actual_qty).as_("balance_qty"),
 		)
 		.where(table.is_cancelled == 0)
-		.groupby(table.batch_no, table.item_code, table.warehouse)
+		.groupby(table.batch_no, table.item_code, table.warehouse, batch.name)
+		.orderby(batch.batch_id, table.item_code, table.warehouse)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)
@@ -138,7 +141,8 @@ def get_batchwise_data_from_serial_batch_bundle(batchwise_data, filters):
 			Sum(ch_table.qty).as_("balance_qty"),
 		)
 		.where((table.is_cancelled == 0) & (table.docstatus == 1))
-		.groupby(ch_table.batch_no, table.item_code, ch_table.warehouse)
+		.groupby(ch_table.batch_no, table.item_code, ch_table.warehouse, batch.name)
+		.orderby(batch.batch_id, table.item_code, ch_table.warehouse)
 	)
 
 	query = get_query_based_on_filters(query, batch, table, filters)

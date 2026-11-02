@@ -47,19 +47,20 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 
 		data = self.run_report(item=item)
 
-		row = next((r for r in data if r[2] == batch_no), None)
+		row = next((r for r in data if r.batch == batch_no), None)
 		self.assertIsNotNone(row, f"Batch {batch_no} not found in report for item {item}")
 
-		self.assertEqual(row[0], item)
-		self.assertEqual(row[2], batch_no)
-		self.assertEqual(row[4], 10)
+		self.assertEqual(row.item, item)
+		self.assertEqual(row.batch, batch_no)
+		self.assertEqual(row.batch_number, frappe.db.get_value("Batch", batch_no, "batch_id"))
+		self.assertEqual(row.quantity, 10)
 		# expiry = batch manufacturing_date + 30 day shelf life; matches the Batch record
 		batch_expiry = frappe.db.get_value("Batch", batch_no, "expiry_date")
-		self.assertIsNotNone(row[5], "Expiry date should be set for a batch with shelf life")
-		self.assertEqual(frappe.utils.getdate(row[5]), frappe.utils.getdate(batch_expiry))
+		self.assertIsNotNone(row.expires_on, "Expiry date should be set for a batch with shelf life")
+		self.assertEqual(frappe.utils.getdate(row.expires_on), frappe.utils.getdate(batch_expiry))
 		# Expiry (In Days) column = days until expiry
 		expected_days = frappe.utils.date_diff(batch_expiry, frappe.utils.today())
-		self.assertEqual(row[6], expected_days)
+		self.assertEqual(row["expiry_(in_days)"], expected_days)
 
 	def test_batches_are_filtered_by_expiry_date(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
@@ -89,7 +90,7 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 			item=item, from_date=frappe.utils.today(), to_date=frappe.utils.add_days(frappe.utils.today(), 30)
 		)
 
-		self.assertEqual([row[2] for row in data], [batches["old"].name])
+		self.assertEqual([row.batch for row in data], [batches["old"].name])
 
 	def make_batch_in_two_warehouses(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
@@ -137,11 +138,11 @@ class TestBatchItemExpiryStatus(ERPNextTestSuite):
 
 		data = self.run_report_as_restricted_user(item)
 
-		self.assertEqual([(row[2], row[4]) for row in data], [(batch, 3)])
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch, 3)])
 
 	def test_permission_for_another_doctype_does_not_limit_the_quantity(self):
 		item, batch = self.make_batch_in_two_warehouses()
 
 		data = self.run_report_as_restricted_user(item, applicable_for="Purchase Order")
 
-		self.assertEqual([(row[2], row[4]) for row in data], [(batch, 10)])
+		self.assertEqual([(row.batch, row.quantity) for row in data], [(batch, 10)])

@@ -50,6 +50,7 @@ class WarrantyClaim(TransactionBase):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_serial_no()
 		self.warn_if_serial_no_not_delivered_to_customer()
 		if self.status == "Cancelled" and self.has_value_changed("status"):
 			self.validate_no_active_visits()
@@ -58,6 +59,17 @@ class WarrantyClaim(TransactionBase):
 
 		self.set_resolution()
 		self.set_warranty_amc_status()
+
+	def validate_serial_no(self):
+		if not self.serial_no or not self.item_code:
+			return
+		serial = frappe.db.get_value("Serial No", self.serial_no, ["serial_no", "item_code"], as_dict=True)
+		if serial and serial.item_code != self.item_code:
+			frappe.throw(
+				_("Serial No {0} does not belong to Item {1}").format(
+					escape_html(serial.serial_no), escape_html(self.item_code)
+				)
+			)
 
 	def set_resolution(self):
 		previous_status = frappe.db.get_value("Warranty Claim", self.name, "status")
@@ -94,11 +106,13 @@ class WarrantyClaim(TransactionBase):
 			frappe.msgprint(message, title=_("Check Serial No"), indicator="orange")
 
 	def get_serial_no_ownership_warning(self) -> str | None:
-		serial = frappe.db.get_value("Serial No", self.serial_no, ["customer", "warehouse"], as_dict=True)
+		serial = frappe.db.get_value(
+			"Serial No", self.serial_no, ["serial_no", "customer", "warehouse"], as_dict=True
+		)
 		if not serial:
 			return None
 
-		serial_no = frappe.bold(escape_html(self.serial_no))
+		serial_no = frappe.bold(escape_html(serial.serial_no))
 		if serial.customer and serial.customer != self.customer:
 			return _("Serial No {0} was delivered to Customer {1}, not to {2}.").format(
 				serial_no, frappe.bold(escape_html(serial.customer)), frappe.bold(escape_html(self.customer))
