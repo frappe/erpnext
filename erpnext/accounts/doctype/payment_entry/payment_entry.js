@@ -564,7 +564,7 @@ frappe.ui.form.on("Payment Entry", {
 							() => frm.clear_table("tax_withholding_entries"),
 							() => frm.events.hide_unhide_fields(frm),
 							() => frm.events.set_dynamic_labels(frm),
-							async () => {
+							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.party_bank_account) {
 									frm.set_value("party_bank_account", r.message.party_bank_account);
@@ -572,8 +572,11 @@ frappe.ui.form.on("Payment Entry", {
 								if (r.message.bank_account) {
 									// Auto-filled default bank account should not override Mode of Payment account
 									frm.set_bank_account_based_on_party = true;
-									await frm.set_value("bank_account", r.message.bank_account);
-									frm.set_bank_account_based_on_party = false;
+									return frm
+										.set_value("bank_account", r.message.bank_account)
+										.finally(() => {
+											frm.set_bank_account_based_on_party = false;
+										});
 								}
 							},
 							() =>
@@ -1369,10 +1372,15 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	bank_account: function (frm) {
-		if (frm.set_company_bank_account_based_on_coa) return;
+		if (frm.set_company_bank_account_based_on_coa) {
+			frm.set_company_bank_account_based_on_coa = false;
+			return;
+		}
 
-		// Read now: the flag is reset before the server calls below return
+		// Only the current event is an automatic selection; later user edits must take precedence.
 		const auto_filled = frm.set_bank_account_based_on_party;
+		frm.set_bank_account_based_on_party = false;
+		const bank_account = frm.doc.bank_account;
 		const field = frm.doc.payment_type == "Pay" ? "paid_from" : "paid_to";
 		if (frm.doc.bank_account && ["Pay", "Receive"].includes(frm.doc.payment_type)) {
 			frappe.call({
@@ -1381,6 +1389,8 @@ frappe.ui.form.on("Payment Entry", {
 					bank_account: frm.doc.bank_account,
 				},
 				callback: function (r) {
+					if (frm.doc.bank_account != bank_account) return;
+
 					if (r.message) {
 						if (!auto_filled || !frm.doc.mode_of_payment) {
 							frm.set_value(field, r.message.account);
@@ -1397,6 +1407,8 @@ frappe.ui.form.on("Payment Entry", {
 									parent: "Mode of Payment",
 								},
 								callback: function (res) {
+									if (frm.doc.bank_account != bank_account) return;
+
 									if (!res.message.default_account) {
 										frm.set_value(field, r.message.account);
 									}
@@ -1418,7 +1430,8 @@ frappe.ui.form.on("Payment Entry", {
 
 		if (!frm.doc.company || !frm.doc[field]) return;
 
-		frm.set_company_bank_account_based_on_coa = true;
+		const account = frm.doc[field];
+		const bank_account = frm.doc.bank_account;
 
 		frappe.call({
 			method: "frappe.client.get_value",
@@ -1431,10 +1444,15 @@ frappe.ui.form.on("Payment Entry", {
 				},
 				fieldname: ["name"],
 			},
-			callback: async function (r) {
-				if (r.message) await frm.set_value("bank_account", r.message.name);
+			callback: function (r) {
+				if (frm.doc[field] != account || frm.doc.bank_account != bank_account) return;
 
-				frm.set_company_bank_account_based_on_coa = false;
+				if (r.message) {
+					frm.set_company_bank_account_based_on_coa = true;
+					return frm.set_value("bank_account", r.message.name).finally(() => {
+						frm.set_company_bank_account_based_on_coa = false;
+					});
+				}
 			},
 		});
 	},
