@@ -609,7 +609,13 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 
 		self.assertEqual(
 			get_reference_details(
-				"Journal Entry", jv.name, "USD", "Customer", self.customer, today()
+				"Journal Entry",
+				jv.name,
+				"USD",
+				"Customer",
+				self.customer,
+				party_account=self.debtors_usd,
+				posting_date=today(),
 			).exchange_rate,
 			84,
 		)
