@@ -3,10 +3,7 @@ from collections import Counter
 import frappe
 from frappe.utils import flt
 
-from erpnext.manufacturing.doctype.plant_floor.plant_floor import (
-	PACKING_MACHINE_MODELS,
-	get_workstation_details,
-)
+from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_workstation_details
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_preset_shapes
@@ -144,7 +141,6 @@ def get_machine_catalog() -> dict:
 			fields=["name", "machine_model"],
 			order_by="name",
 		),
-		"packing_models": PACKING_MACHINE_MODELS,
 	}
 
 

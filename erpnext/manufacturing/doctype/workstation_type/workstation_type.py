@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import flt
 
 MACHINE_SHAPES = frappe.get_file_json(Path(__file__).with_name("machine_shapes.json"))
+PACKING_MACHINE_MODELS = ("Filling Line", "Bagging Line")
 SHAPE_FIELDS = (
 	"shape",
 	"finish",

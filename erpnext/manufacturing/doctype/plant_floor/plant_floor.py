@@ -9,8 +9,7 @@ from frappe.utils import cint, flt, get_link_to_form, nowdate, nowtime
 
 from erpnext.manufacturing.doctype.plant_floor.services.batch_plan import BatchPlan
 from erpnext.manufacturing.doctype.plant_floor.services.setup_check import PlantSetupCheck
-
-PACKING_MACHINE_MODELS = ("Filling Line", "Bagging Line")
+from erpnext.manufacturing.doctype.workstation_type.workstation_type import PACKING_MACHINE_MODELS
 
 
 class PlantFloor(Document):
