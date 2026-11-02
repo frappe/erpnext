@@ -52,3 +52,24 @@ class TestStockLedgerConversions(ERPNextTestSuite):
 			"posting_datetime": now_datetime(),
 		}
 		self.assertIsInstance(get_future_sle_with_negative_qty(args), list | tuple)
+
+
+class TestRepostQueue(ERPNextTestSuite):
+	def test_entries_pop_in_posting_order_with_ties_in_insertion_order(self):
+		from erpnext.stock.stock_ledger import RepostQueue
+
+		def entry(name, posting_datetime, creation="2026-01-01 10:00:00"):
+			return frappe._dict(name=name, posting_datetime=posting_datetime, creation=creation)
+
+		queue = RepostQueue([entry("a", "2026-01-02 00:00:01"), entry("b", "2026-01-04 00:00:01")])
+		queue.extend(
+			[
+				entry("c", "2026-01-01 00:00:01"),
+				entry("d", "2026-01-02 00:00:01"),
+				entry("e", "2026-01-02 00:00:01", creation="2026-01-01 09:00:00"),
+			]
+		)
+
+		self.assertEqual([row.name for row in queue.peek(2)], ["c", "e"])
+		self.assertEqual(len(queue), 5)
+		self.assertEqual([queue.popleft().name for _ in range(len(queue))], ["c", "e", "a", "d", "b"])
