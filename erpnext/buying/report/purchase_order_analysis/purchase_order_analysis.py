@@ -57,7 +57,7 @@ def validate_filters(filters):
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
 
-	validate_date_range(filters)
+	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
 
 	if filters.get("group_by_po") and filters.get("group_by_item"):
 		frappe.throw(_("Group the report by Purchase Order or by Item, not both."))

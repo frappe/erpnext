@@ -23,8 +23,9 @@ def execute(filters=None):
 	float_precision = frappe.db.get_default("float_precision")
 
 	avg_daily_outgoing = 0
-	validate_date_range(filters)
-	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
+	from_date, to_date = getdate(filters.get("from_date")), getdate(filters.get("to_date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
+	diff = (to_date - from_date).days + 1
 
 	columns = get_columns()
 	items = get_item_info(filters)
