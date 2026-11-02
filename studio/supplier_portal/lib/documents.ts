@@ -41,6 +41,8 @@ function statuses(): Record<string, { theme: string; label: string }> {
 		Overdue: { theme: "red", label: __("Overdue") },
 		Paid: { theme: "green", label: __("Paid") },
 		"Debit Note Issued": { theme: "gray", label: __("Debit Note Issued") },
+		// a returned Purchase Invoice: see invoiceStatus()
+		"Debit note": { theme: "gray", label: __("Debit note") },
 	}
 }
 
@@ -224,6 +226,12 @@ export function receiptNote(r: any): string {
 }
 
 // ---------------------------------------------------------------- invoices
+/** An invoice's status for its badge. ERPNext calls a debit note "Return", as it does a returned
+ *  receipt; on an invoice the supplier knows it as a debit note. */
+export function invoiceStatus(v: any): string {
+	return v?.status === "Return" ? "Debit note" : v?.status ?? ""
+}
+
 export function invoiceOutstanding(v: any): number {
 	return Number(v.outstanding_amount ?? 0)
 }

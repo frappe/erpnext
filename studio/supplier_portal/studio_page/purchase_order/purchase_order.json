@@ -851,10 +851,7 @@
                           "title": "{{ item.description }}"
                          },
                          "baseStyles": {
-                          "color": "var(--ink-gray-5)",
-                          "overflow": "hidden",
-                          "textOverflow": "ellipsis",
-                          "whiteSpace": "nowrap"
+                          "color": "var(--ink-gray-5)"
                          },
                          "blockName": "TextBlock",
                          "componentId": "TextBlock-td81v7deq",

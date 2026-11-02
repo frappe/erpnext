@@ -7,6 +7,7 @@ import { formatDate, formatMoney } from "@app/utils"
 import {
 	invoiceIsOverdue,
 	invoiceNote,
+	invoiceStatus,
 	orderIsOverdue,
 	orderNote,
 	orderStatus,
@@ -140,8 +141,8 @@ export default function setup(context) {
 		}, (v) => ({
 			note: invoiceNote(v),
 			urgent: invoiceIsOverdue(v),
-			status: statusText(v.status),
-			theme: statusTheme(v.status),
+			status: statusText(invoiceStatus(v)),
+			theme: statusTheme(invoiceStatus(v)),
 			amount: formatMoney(payableTotal(v), v.currency),
 		})),
 	])

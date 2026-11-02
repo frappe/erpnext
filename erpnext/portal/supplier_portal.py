@@ -1134,6 +1134,7 @@ def get_invoice(name: str) -> dict:
 		**_reply(invoice, INVOICE_FIELDS, INVOICE_ITEM_FIELDS),
 		"payments": _payments(invoice.name),
 		"party_total": get_total_in_party_account_currency(invoice),
+		"debited": 0 if invoice.is_return else _debited(invoice.name),
 	}
 
 
@@ -1215,7 +1216,7 @@ def _order_lines(receipt) -> list[dict]:
 	return frappe.get_all(
 		"Purchase Order Item",
 		filters={"parenttype": "Purchase Order", "parent": ["in", visible]},
-		fields=["parent as purchase_order", "item_code", "qty", "received_qty"],
+		fields=["parent as purchase_order", "item_code", "qty", "received_qty", "uom"],
 	)
 
 
@@ -1243,12 +1244,26 @@ def _payments(invoice: str) -> list[dict]:
 			fields=["name", "posting_date", "mode_of_payment", "reference_no"],
 		)
 	}
-	payments = [
-		{**entries[row.parent], "allocated_amount": row.allocated_amount}
-		for row in allocations
-		if row.parent in entries
-	]
+	# a payment split over the invoice's payment terms has one reference row per term: one payment
+	allocated = {}
+	for row in allocations:
+		if row.parent in entries:
+			allocated[row.parent] = allocated.get(row.parent, 0) + row.allocated_amount
+	payments = [{**entries[name], "allocated_amount": amount} for name, amount in allocated.items()]
 	return sorted(payments, key=lambda payment: (payment["posting_date"], payment["name"]))
+
+
+def _debited(invoice: str) -> float:
+	"""What the supplier's debit notes against one invoice took off what it owes, a positive amount."""
+	notes = frappe.get_all(
+		"Purchase Invoice",
+		# one that keeps its own outstanding leaves this invoice's balance alone
+		filters={"return_against": invoice, "is_return": 1, "docstatus": 1, "update_outstanding_for_self": 0},
+		pluck="name",
+	)
+	return -sum(
+		get_total_in_party_account_currency(frappe.get_doc("Purchase Invoice", note)) for note in notes
+	)
 
 
 # the documents a supplier can talk about with the buyer, from the portal
