@@ -13,6 +13,42 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestQuotation(ERPNextTestSuite):
+	def test_declare_lost_requires_a_reason_without_changing_the_quotation(self):
+		quotation = make_quotation()
+		previous_status = quotation.status
+
+		with self.assertRaises(frappe.ValidationError):
+			quotation.declare_enquiry_lost([], [], "New detailed reason")
+
+		quotation.reload()
+		self.assertEqual(quotation.status, previous_status)
+		self.assertFalse(quotation.order_lost_reason)
+		self.assertFalse(quotation.lost_reasons)
+		self.assertFalse(quotation.competitors)
+
+	def test_declare_lost_on_ordered_quotation_preserves_sales_order_error(self):
+		quotation = make_quotation()
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = nowdate()
+		sales_order.submit()
+		quotation.reload()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Cannot set as Lost as Sales Order is made"):
+			quotation.declare_enquiry_lost([], [])
+
+	def test_declare_lost_with_a_reason(self):
+		reason = "_Test Quotation Lost Reason"
+		if not frappe.db.exists("Quotation Lost Reason", reason):
+			frappe.get_doc({"doctype": "Quotation Lost Reason", "order_lost_reason": reason}).insert()
+		quotation = make_quotation()
+
+		quotation.declare_enquiry_lost([{"lost_reason": reason}], [], "Too expensive")
+
+		quotation.reload()
+		self.assertEqual(quotation.status, "Lost")
+		self.assertEqual(quotation.order_lost_reason, "Too expensive")
+		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [reason])
+
 	def setUp(self):
 		self.load_test_records("Quotation")
 
