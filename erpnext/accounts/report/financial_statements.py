@@ -252,7 +252,7 @@ def calculate_values(
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
-						not ignore_accumulated_values_for_fy
+						not (accumulated_values and ignore_accumulated_values_for_fy)
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
@@ -736,23 +736,16 @@ def compute_growth_view_data(data, columns):
 			data[row_idx][current_period_key] = growth_percent
 
 
-def compute_margin_view_data(data, columns, accumulated_values):
-	if not columns:
+def compute_margin_view_data(data, columns, accumulated_values, base_row: dict | None):
+	"""Express every row as a percentage of `base_row`, the income total row."""
+	if not columns or not base_row:
 		return
 
 	if not accumulated_values:
 		columns.append({"key": "total"})
 
 	data_copy = copy.deepcopy(data)
-
-	base_row = None
-	for row in data_copy:
-		if row.get("account_name") == _("Income"):
-			base_row = row
-			break
-
-	if not base_row:
-		return
+	base_row = copy.deepcopy(base_row)
 
 	for row_idx in range(len(data_copy)):
 		# Taking the total income from each column (for all the financial years) as the base (100%)
