@@ -119,6 +119,7 @@ class Asset(AccountsController):
 		supplier: DF.Link | None
 		total_asset_cost: DF.Currency
 		total_number_of_depreciations: DF.Int
+		value_adjustment_amount: DF.Currency
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
 
@@ -1356,11 +1357,16 @@ def update_existing_asset(asset, remaining_qty, new_asset):
 		(asset.value_after_depreciation * remaining_qty) / asset.asset_quantity,
 		asset.precision("gross_purchase_amount"),
 	)
+	value_adjustment_amount = flt(
+		(flt(asset.value_adjustment_amount) * remaining_qty) / asset.asset_quantity,
+		asset.precision("gross_purchase_amount"),
+	)
 
 	remaining_asset_values = {
 		"opening_accumulated_depreciation": opening_accumulated_depreciation,
 		"gross_purchase_amount": remaining_gross_purchase_amount,
 		"value_after_depreciation": value_after_depreciation,
+		"value_adjustment_amount": value_adjustment_amount,
 		"asset_quantity": remaining_qty,
 	}
 	if asset.purchase_amount:
@@ -1386,6 +1392,12 @@ def update_existing_asset(asset, remaining_qty, new_asset):
 			row.name,
 			"expected_value_after_useful_life",
 			expected_value_after_useful_life,
+		)
+		frappe.db.set_value(
+			"Asset Finance Book",
+			row.name,
+			"value_adjustment_amount",
+			flt((flt(row.value_adjustment_amount) * remaining_qty) / asset.asset_quantity),
 		)
 
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
@@ -1433,11 +1445,18 @@ def create_new_asset_after_split(asset, split_qty):
 		(asset.value_after_depreciation * split_qty) / asset.asset_quantity,
 		asset.precision("gross_purchase_amount"),
 	)
+	new_asset.value_adjustment_amount = flt(
+		(flt(asset.value_adjustment_amount) * split_qty) / asset.asset_quantity,
+		asset.precision("gross_purchase_amount"),
+	)
 
 	for row in new_asset.get("finance_books"):
 		row.value_after_depreciation = flt((row.value_after_depreciation * split_qty) / asset.asset_quantity)
 		row.expected_value_after_useful_life = flt(
 			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
+		)
+		row.value_adjustment_amount = flt(
+			(flt(row.value_adjustment_amount) * split_qty) / asset.asset_quantity
 		)
 
 	new_asset.insert()

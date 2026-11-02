@@ -47,6 +47,23 @@ class AssetValueAdjustment(Document):
 		self.set_difference_amount()
 		self.validate_finance_book()
 
+	def before_cancel(self):
+		self.validate_asset_not_split()
+
+	def validate_asset_not_split(self):
+		# self.modified is already the cancel time here; the stored value is the submission time
+		submitted_on = frappe.db.get_value(self.doctype, self.name, "modified")
+		split_asset = frappe.db.get_value(
+			"Asset", {"split_from": self.asset, "creation": (">", submitted_on)}, "name"
+		)
+		if split_asset:
+			frappe.throw(
+				_(
+					"Asset {0} was split into Asset {1} after this adjustment, so it cannot be cancelled. Adjust the value of each asset instead."
+				).format(get_link_to_form("Asset", self.asset), get_link_to_form("Asset", split_asset)),
+				title=_("Asset Split"),
+			)
+
 	def validate_finance_book(self):
 		if self.finance_book or not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
 			return
@@ -224,7 +241,10 @@ class AssetValueAdjustment(Document):
 					)
 					row.expected_value_after_useful_life += salvage_value_adjustment
 					row.value_after_depreciation = row.value_after_depreciation + flt(difference_amount)
+					row.value_adjustment_amount = flt(row.value_adjustment_amount) + flt(difference_amount)
 					row.db_update()
+		else:
+			asset.value_adjustment_amount = flt(asset.value_adjustment_amount) + flt(difference_amount)
 
 		asset.value_after_depreciation += flt(difference_amount)
 		asset.db_update()
