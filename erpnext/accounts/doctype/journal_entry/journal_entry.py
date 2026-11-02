@@ -536,23 +536,13 @@ class JournalEntry(AccountsController):
 			)
 		)
 		if customers:
-			from erpnext.selling.doctype.customer.customer import check_credit_limit
-
-			customer_details = frappe._dict(
-				frappe.db.get_all(
-					"Customer Credit Limit",
-					filters={
-						"parent": ["in", customers],
-						"parenttype": ["=", "Customer"],
-						"company": ["=", self.company],
-					},
-					fields=["parent", "bypass_credit_limit_check"],
-					as_list=True,
-				)
+			from erpnext.selling.doctype.customer.customer import (
+				check_credit_limit,
+				is_sales_order_credit_check_bypassed,
 			)
 
 			for customer in customers:
-				ignore_outstanding_sales_order = bool(customer_details.get(customer))
+				ignore_outstanding_sales_order = is_sales_order_credit_check_bypassed(customer, self.company)
 				check_credit_limit(customer, self.company, ignore_outstanding_sales_order)
 
 	def validate_cheque_info(self):
