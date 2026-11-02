@@ -11,12 +11,17 @@ from erpnext.assets.doctype.asset.depreciation import (
 	_make_depreciation_entry,
 	post_depreciation_entries,
 )
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.test_asset import (
+	create_asset,
+	create_asset_data,
+	set_depreciation_settings_in_company,
+)
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_asset_depreciation_schedule,
 	get_depr_schedule,
 )
+from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_asset_value_adjustment,
 )
@@ -461,6 +466,31 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		asset = create_monthly_asset(**args, expected_value_after_useful_life=100)
 		self.assertLess(asset.finance_books[0].rate_of_depreciation, 100)
 
+	def test_repair_keeps_entered_wdv_rate(self):
+		set_depreciation_settings_in_company()
+		asset = create_yearly_wdv_asset(rate_of_depreciation=40)
+		finance_book = asset.finance_books[0]
+		self.assertTrue(finance_book.is_rate_of_depreciation_entered)
+
+		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
+		self.assertEqual(get_rate_of_depreciation(finance_book), 40)
+		self.assertEqual(get_asset_depr_schedule_doc(asset.name, "Active").rate_of_depreciation, 40)
+
+		# Finance books saved before the flag existed are judged by their first schedule
+		finance_book.db_set("is_rate_of_depreciation_entered", 0)
+		create_asset_repair(asset=frappe.get_doc("Asset", asset.name), capitalize_repair_cost=1, submit=1)
+		self.assertEqual(get_rate_of_depreciation(finance_book), 40)
+
+	def test_repair_recomputes_derived_wdv_rate(self):
+		set_depreciation_settings_in_company()
+		asset = create_yearly_wdv_asset()
+		finance_book = asset.finance_books[0]
+		self.assertFalse(finance_book.is_rate_of_depreciation_entered)
+		derived_rate = get_rate_of_depreciation(finance_book)
+
+		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
+		self.assertNotEqual(get_rate_of_depreciation(finance_book), derived_rate)
+
 	def test_manual_schedule_rows_are_validated(self):
 		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
 
@@ -538,3 +568,20 @@ def get_depreciation_entry_count(asset_name: str) -> int:
 
 def get_finance_book_value(asset_name: str) -> float:
 	return frappe.db.get_value("Asset Finance Book", {"parent": asset_name}, "value_after_depreciation")
+
+
+def create_yearly_wdv_asset(**args):
+	return create_monthly_asset(
+		gross_purchase_amount=120000,
+		purchase_amount=120000,
+		depreciation_method="Written Down Value",
+		expected_value_after_useful_life=10000,
+		depreciation_start_date="2023-12-31",
+		frequency_of_depreciation=12,
+		total_number_of_depreciations=5,
+		**args,
+	)
+
+
+def get_rate_of_depreciation(finance_book) -> float:
+	return flt(frappe.db.get_value(finance_book.doctype, finance_book.name, "rate_of_depreciation"), 2)

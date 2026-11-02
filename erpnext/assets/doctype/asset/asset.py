@@ -34,6 +34,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	convert_draft_asset_depr_schedules_into_active,
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
+	is_depreciation_rate_entered,
 	make_draft_asset_depr_schedules,
 	make_draft_asset_depr_schedules_if_not_present,
 	update_draft_asset_depr_schedules,
@@ -519,9 +520,44 @@ class Asset(AccountsController):
 	def set_depreciation_rate(self):
 		for d in self.get("finance_books"):
 			self.validate_asset_finance_books(d)
+			if self.docstatus == 0 or getattr(self, "_action", None) == "submit":
+				d.is_rate_of_depreciation_entered = self.is_entered_depreciation_rate(d)
+			if self.flags.increase_in_asset_value_due_to_repair and is_depreciation_rate_entered(self, d):
+				continue
+
 			d.rate_of_depreciation = flt(
 				self.get_depreciation_rate(d, on_validate=True), d.precision("rate_of_depreciation")
 			)
+
+	def is_entered_depreciation_rate(self, settings) -> bool:
+		"""A Written Down Value rate is entered when it differs from the rate derived from the salvage value.
+
+		`settings` is a finance book row or a depreciation schedule that recorded its original values."""
+		rate = flt(settings.get("rate_of_depreciation"))
+		if settings.get("depreciation_method") != "Written Down Value" or not rate:
+			return False
+		if not flt(settings.get("expected_value_after_useful_life")):
+			return True
+
+		precision = frappe.get_precision("Asset Finance Book", "rate_of_depreciation")
+		return flt(rate, precision) != flt(self.get_initial_depreciation_rate(settings), precision)
+
+	def get_initial_depreciation_rate(self, settings) -> float:
+		fieldnames = (
+			"depreciation_method",
+			"expected_value_after_useful_life",
+			"total_number_of_depreciations",
+			"frequency_of_depreciation",
+		)
+		# derive the rate from the purchase value, not from the value raised by a repair
+		increase_in_asset_value_due_to_repair = self.flags.increase_in_asset_value_due_to_repair
+		self.flags.increase_in_asset_value_due_to_repair = False
+		try:
+			return self.get_depreciation_rate(
+				{fieldname: settings.get(fieldname) for fieldname in fieldnames}
+			)
+		finally:
+			self.flags.increase_in_asset_value_due_to_repair = increase_in_asset_value_due_to_repair
 
 	def validate_asset_finance_books(self, row):
 		row.expected_value_after_useful_life = flt(

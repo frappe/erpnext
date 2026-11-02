@@ -1228,9 +1228,10 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
-		if asset_doc.flags.increase_in_asset_value_due_to_repair and row.depreciation_method in (
-			"Written Down Value",
-			"Double Declining Balance",
+		if (
+			asset_doc.flags.increase_in_asset_value_due_to_repair
+			and row.depreciation_method in ("Written Down Value", "Double Declining Balance")
+			and not is_depreciation_rate_entered(asset_doc, row)
 		):
 			new_rate_of_depreciation = flt(
 				asset_doc.get_depreciation_rate(row), row.precision("rate_of_depreciation")
@@ -1252,6 +1253,32 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 		current_asset_depr_schedule_doc.cancel()
 
 		new_asset_depr_schedule_doc.submit()
+
+
+def is_depreciation_rate_entered(asset_doc, row) -> bool:
+	"""Finance books saved before the flag existed are judged by their first schedule."""
+	if row.is_rate_of_depreciation_entered:
+		return True
+
+	first_schedule = get_first_depreciation_schedule(asset_doc.name, row.finance_book)
+	return bool(first_schedule) and asset_doc.is_entered_depreciation_rate(first_schedule)
+
+
+def get_first_depreciation_schedule(asset: str, finance_book: str | None) -> dict | None:
+	schedules = frappe.get_all(
+		"Asset Depreciation Schedule",
+		filters={"asset": asset, "finance_book": finance_book or ["is", "not set"]},
+		fields=[
+			"depreciation_method",
+			"rate_of_depreciation",
+			"expected_value_after_useful_life",
+			"total_number_of_depreciations",
+			"frequency_of_depreciation",
+		],
+		order_by="creation asc",
+		limit=1,
+	)
+	return schedules[0] if schedules else None
 
 
 def get_temp_asset_depr_schedule_doc(
