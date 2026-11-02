@@ -20,7 +20,7 @@ New Structure:
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder import Case, Tuple
+from frappe.query_builder import Tuple
 from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import flt, now
 
@@ -1071,13 +1071,26 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 		return
 
 	# Get Sales Invoices with TCS amounts aggregated
-	# Use conditional sum to aggregate TCS amounts only from TCS accounts
 	tcs_accounts_list = list(all_tcs_accounts)
+
+	# Only the TCS rows of GL Entry are aggregated, through the account index
+	tcs_gl = (
+		frappe.qb.from_(gle)
+		.select(
+			gle.voucher_no,
+			Sum(gle.credit - gle.debit).as_("total_tcs"),
+			Max(gle.account).as_("account"),
+		)
+		.where(gle.voucher_type == "Sales Invoice")
+		.where(gle.is_cancelled == 0)
+		.where(gle.account.isin(tcs_accounts_list))
+		.groupby(gle.voucher_no)
+	).as_("tcs_gl")
 
 	tcs_entries = (
 		frappe.qb.from_(si)
-		.left_join(gle)
-		.on((gle.voucher_no == si.name) & (gle.voucher_type == "Sales Invoice") & (gle.is_cancelled == 0))
+		.left_join(tcs_gl)
+		.on(tcs_gl.voucher_no == si.name)
 		.join(cust)
 		.on(si.customer == cust.name)
 		.select(
@@ -1090,14 +1103,13 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			si.currency,
 			si.conversion_rate,
 			cust.tax_withholding_category,
-			Sum(Case().when(gle.account.isin(tcs_accounts_list), gle.credit - gle.debit).else_(0)).as_(
-				"total_tcs"
-			),
-			Max(Case().when(gle.account.isin(tcs_accounts_list), gle.account).else_(None)).as_("account"),
+			IfNull(tcs_gl.total_tcs, 0).as_("total_tcs"),
+			tcs_gl.account,
 		)
 		.where(si.docstatus == 1)
 		.where(si.is_opening == "No")
-		.groupby(si.name)
+		# without a category or a TCS row there is no rate, so the invoice would be skipped below
+		.where((IfNull(cust.tax_withholding_category, "") != "") | tcs_gl.account.isnotnull())
 		.run(as_dict=True)
 	)
 
