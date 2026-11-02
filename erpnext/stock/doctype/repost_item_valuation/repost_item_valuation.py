@@ -594,6 +594,8 @@ def get_mergeable_item_reposts(doc):
 		.select(riv.name, riv.item_code, riv.warehouse, riv.posting_date, riv.posting_time)
 		.where(
 			(riv.name != doc.name)
+			# the walk starts this item-warehouse at doc's date, so an earlier repost of it would be lost
+			& ((riv.item_code != doc.item_code) | (riv.warehouse != doc.warehouse))
 			& (riv.based_on == "Item and Warehouse")
 			& (riv.status == "Queued")
 			& (riv.docstatus == 1)
