@@ -1446,7 +1446,6 @@ class TestGrossProfit(FrappeTestCase):
 		return data[-1].buying_amount
 
 
-
 def make_sales_person(sales_person_name="_Test Sales Person"):
 	if not frappe.db.exists("Sales Person", {"sales_person_name": sales_person_name}):
 		sales_person_doc = frappe.get_doc(
