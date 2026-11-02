@@ -1326,7 +1326,7 @@ class TestGrossProfit(FrappeTestCase):
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 390)
 
 	def test_sales_order_delivered_in_parts_uses_qty_weighted_rate(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		item = create_item("_Test Gross Profit Partly Delivered Item").name
@@ -1349,9 +1349,9 @@ class TestGrossProfit(FrappeTestCase):
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
 
 	def test_sales_order_with_fully_returned_delivery_uses_valuation_rate(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		item = create_item("_Test Gross Profit Returned Delivery Item").name
 		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=2, basic_rate=100)
