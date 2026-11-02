@@ -170,7 +170,7 @@ frappe.tour["Employee"] = [
 	},
 	{
 		fieldname: "reports_to",
-		title: "Reports To",
+		title: __("Reports To"),
 		description: __(
 			"Here, you can select a senior of this Employee. Based on this, Organization Chart will be populated."
 		),

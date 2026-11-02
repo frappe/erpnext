@@ -28,6 +28,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.stock_entry.stock_entry import (
+	DuplicateEntryForWorkOrderError,
 	FinishedGoodError,
 	get_pending_work_orders,
 	make_stock_in_entry,
@@ -640,15 +641,45 @@ class TestStockEntry(ERPNextTestSuite):
 			serial_no=get_serial_nos_from_bundle(bundle)[:1] if has_serial_no else None,
 		)
 
-		outward, inward = (
+		outward, inward = self.get_transfer_leg_values(transfer.name)
+		self.assertEqual(flt(inward, 2), -flt(outward, 2))
+
+	def test_half_cent_transfer_moves_no_value_after_target_warehouse_repost(self):
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=10.005,
+			posting_date=add_days(today(), -10),
+		)
+		transfer = make_stock_entry(
+			item_code=item_code,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 1 - _TC",
+			qty=1,
+			basic_rate=7,
+			posting_date=add_days(today(), -8),
+		)
+
+		outward, inward = self.get_transfer_leg_values(transfer.name)
+		self.assertEqual(flt(inward, 2), -flt(outward, 2))
+
+	def get_transfer_leg_values(self, voucher_no):
+		return tuple(
 			frappe.db.get_value(
 				"Stock Ledger Entry",
-				{"voucher_no": transfer.name, "warehouse": warehouse, "is_cancelled": 0},
+				{"voucher_no": voucher_no, "warehouse": warehouse, "is_cancelled": 0},
 				"stock_value_difference",
 			)
 			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
 		)
-		self.assertEqual(flt(inward, 2), -flt(outward, 2))
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -1426,6 +1457,42 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.items[0].qty = 0.002
 		with self.assertRaises(frappe.ValidationError):
 			stock_entry._validate_no_excess_transfer()
+
+	def test_tracked_consumption_deducts_matching_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import (
+			_deduct_consumed_batch_qty,
+			_deduct_consumed_material,
+		)
+
+		serial_buckets = [
+			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"]),
+			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"]),
+		]
+		_deduct_consumed_material(serial_buckets, frappe._dict(qty=1, serial_no="SERIAL-3"))
+		self.assertEqual([bucket.qty for bucket in serial_buckets], [2, 1])
+		self.assertEqual(serial_buckets[1].serial_nos, ["SERIAL-4"])
+
+		batch_buckets = [
+			frappe._dict(qty=2, batch_details={"BATCH-1": 2}),
+			frappe._dict(qty=3, batch_details={"BATCH-2": 3}),
+		]
+		_deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
+		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
+		self.assertEqual(batch_buckets[1].batch_details["BATCH-2"], 2)
+
+	def test_consumption_prefers_exact_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import _get_consumption_buckets
+
+		alternative = frappe._dict(original_item="REQUIRED-ITEM")
+		direct = frappe._dict(original_item=None)
+		available_materials = {("ITEM", "WIP", "REQUIRED-ITEM"): alternative, ("ITEM", "WIP", None): direct}
+
+		self.assertEqual(
+			_get_consumption_buckets(available_materials, ("ITEM", "WIP", None)), [direct, alternative]
+		)
+		self.assertEqual(
+			_get_consumption_buckets(available_materials, ("ITEM", "WIP", "REQUIRED-ITEM")), [alternative]
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
@@ -2398,6 +2465,35 @@ class TestStockEntry(ERPNextTestSuite):
 				se_ok.reload()
 				se_ok.submit()
 				self.assertEqual(se_ok.docstatus, 1)
+
+	def test_duplicate_entry_for_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		wo = make_wo_order_test_record(qty=1)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=100
+		)
+
+		transfer = frappe.get_doc(make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		for d in transfer.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer.insert()
+		transfer.submit()
+
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		mfg.insert()
+
+		self.assertRaises(DuplicateEntryForWorkOrderError, make_wo_stock_entry, wo.name, "Manufacture", 1)
+
+		with self.change_settings(
+			"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
+		):
+			within_allowance = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+			within_allowance.insert()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
 	def test_quality_inspection_required_for_manufacture(self):

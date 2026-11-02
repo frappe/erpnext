@@ -49,6 +49,12 @@ def execute(filters: StockBalanceFilter | None = None):
 	return StockBalanceReport(filters).run()
 
 
+def execute_snapshot_report(filters: StockBalanceFilter | None = None):
+	from erpnext.stock.report.stock_balance.stock_balance_snapshot import execute as execute_from_snapshot
+
+	return execute_from_snapshot(filters)
+
+
 class StockBalanceReport:
 	def __init__(self, filters: StockBalanceFilter | None) -> None:
 		self.filters = filters
@@ -60,6 +66,7 @@ class StockBalanceReport:
 		self.columns = []
 		self.sle_entries: list[SLEntry] = []
 		self.item_warehouse_balances = {}
+		self.latest_valuation_rates = {}
 		self.set_company_currency()
 
 	def set_company_currency(self) -> None:
@@ -120,6 +127,12 @@ class StockBalanceReport:
 		# The SLE query then starts from the very first entry, so loading the closing balance as
 		# opening too would count everything up to the closing date twice.
 		if self.filters.get("ignore_closing_balance"):
+			return []
+
+		# Dimension-wise rows need the balance of each combination of dimension values, including
+		# stock with none. The closing balance keeps only item-warehouse and per-dimension totals,
+		# so the SLE query starts from the very first entry instead.
+		if self.filters.get("show_dimension_wise_stock"):
 			return []
 
 		stk_cl_obj = StockClosing(self.filters.company, self.from_date, self.from_date)
@@ -221,14 +234,13 @@ class StockBalanceReport:
 
 		# HACK: This is required to avoid causing db query in flt
 		_system_settings = frappe.get_cached_doc("System Settings")
-		adjustment_netting = AdjustmentNetting()
-		self.latest_valuation_rates = {}
+		self.adjustment_netting = AdjustmentNetting()
 		track_rates = self.shows_whole_pools
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
 
-			for entry in adjustment_netting.net(self.sle_entries):
+			for entry in self.adjustment_netting.net(self.sle_entries):
 				group_by_key = self.get_group_by_key(entry)
 				if group_by_key not in self.item_warehouse_map:
 					self.initialize_data(group_by_key, entry)
@@ -473,13 +485,9 @@ class StockBalanceReport:
 		for field in self.inventory_dimensions:
 			qty_dict[field] = entry.get(field)
 
-		# An adjustment entry only writes off stock value that is stranded on an item with no
-		# quantity left; it moves nothing. Its qty_after_transaction and stock_value are therefore
-		# not a statement of the balance the way a real reconciliation's are, and the write-off it
-		# carries lives solely in stock_value_difference. Treat it as the plain delta it is.
 		if (
 			entry.voucher_type == "Stock Reconciliation"
-			and not entry.is_adjustment_entry
+			and self.is_reconciled_balance(entry)
 			and (not entry.batch_no or entry.serial_no or entry.serial_and_batch_bundle)
 			and len(group_by_key) == 2
 		):
@@ -516,9 +524,15 @@ class StockBalanceReport:
 		qty_dict.val_rate = entry.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
-		if balance is not qty_dict:
-			balance.bal_qty += qty_diff
-			balance.bal_val += value_diff
+		self.add_to_item_warehouse_balance(balance, qty_dict, qty_diff, value_diff)
+
+	def is_reconciled_balance(self, entry) -> bool:
+		"""A write-off of stranded value moves nothing, so it is a plain delta. An Adjustment Entry
+		resets the item and warehouse to the stock its rows hold, so its balance is the new balance."""
+		if entry.is_adjustment_entry:
+			return self.adjustment_netting.is_adjustment(entry)
+
+		return True
 
 	def get_item_warehouse_balance(self, entry, qty_dict) -> frappe._dict:
 		"""Balance of the whole item and warehouse, which a dimension-wise row holds only part of."""
@@ -531,6 +545,11 @@ class StockBalanceReport:
 			self.item_warehouse_balances[key] = frappe._dict(bal_qty=opening.bal_qty, bal_val=opening.bal_val)
 
 		return self.item_warehouse_balances[key]
+
+	def add_to_item_warehouse_balance(self, balance, qty_dict, qty_diff, value_diff):
+		if balance is not qty_dict:
+			balance.bal_qty += qty_diff
+			balance.bal_val += value_diff
 
 	def initialize_data(self, group_by_key, entry):
 		self.item_warehouse_map[group_by_key] = frappe._dict(

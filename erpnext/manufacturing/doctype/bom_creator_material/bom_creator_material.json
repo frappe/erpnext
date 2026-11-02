@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "creation": "2026-10-24 15:02:51.497413",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bom_node_id",
+  "operation_id",
+  "from_operation_id",
+  "part_node_id",
+  "column_break_item",
+  "item_code",
+  "qty",
+  "uom"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "Node of the design part. 0 means the finished good.",
+   "fieldname": "bom_node_id",
+   "fieldtype": "Int",
+   "label": "BOM Node",
+   "allow_on_submit": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "operation_id",
+   "fieldtype": "Int",
+   "label": "Operation ID",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "from_operation_id",
+   "fieldtype": "Int",
+   "label": "Output of Operation ID",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "part_node_id",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "columns": 1,
+   "label": "Part Node",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "column_break_item",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "columns": 3,
+   "label": "Item Code",
+   "options": "Item",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "columns": 1,
+   "label": "Quantity",
+   "non_negative": 1,
+   "reqd": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "columns": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "allow_on_submit": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-24 15:28:43.659518",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Creator Material",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

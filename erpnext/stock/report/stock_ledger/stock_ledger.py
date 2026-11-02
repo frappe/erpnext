@@ -57,7 +57,7 @@ def execute(filters=None):
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 	bundle_details = {}
 
-	if filters.get("segregate_serial_batch_bundle"):
+	if filters.get("segregate_serial_batch_bundle") or filters.get("batch_no"):
 		bundle_details = get_serial_batch_bundle_details(sl_entries, filters)
 
 	data = []
@@ -85,7 +85,10 @@ def execute(filters=None):
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
-		if bundle_info := bundle_details.get(sle.serial_and_batch_bundle):
+		bundle_info = bundle_details.get(sle.serial_and_batch_bundle)
+		if bundle_info and not filters.get("segregate_serial_batch_bundle"):
+			set_bundle_qty_and_value(sle, bundle_info)
+		elif bundle_info:
 			segregated_entries = get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict, filters)
 			data.extend(segregated_entries)
 			if include_uom:
@@ -103,7 +106,7 @@ def execute(filters=None):
 					batch_balance_dict[sle.batch_no] = [0, 0]
 
 				batch_balance_dict[sle.batch_no][0] += sle.actual_qty
-				batch_balance_dict[sle.batch_no][1] += stock_value
+				batch_balance_dict[sle.batch_no][1] += sle.stock_value_difference
 
 			if filters.get("segregate_serial_batch_bundle"):
 				actual_qty = batch_balance_dict[sle.batch_no][0]
@@ -145,6 +148,12 @@ def execute(filters=None):
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
+
+
+def set_bundle_qty_and_value(sle, bundle_info):
+	"""Keep only the qty and value of the filtered batch, as a bundle can hold other batches too."""
+	sle.actual_qty = sum(flt(row.qty) for row in bundle_info)
+	sle.stock_value_difference = sum(flt(row.stock_value_difference) for row in bundle_info)
 
 
 def set_reconciliation_in_out_qty(sle, prev_sle):

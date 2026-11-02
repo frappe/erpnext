@@ -851,6 +851,11 @@ frappe.ui.form.on("Stock Entry", {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
+		if (item.set_basic_rate_manually) {
+			frm.events.calculate_basic_amount(frm, item);
+			return;
+		}
+
 		let args = {
 			item_code: item.item_code,
 			posting_date: frm.doc.posting_date,
@@ -1194,6 +1199,18 @@ frappe.ui.form.on("Stock Entry Detail", {
 		frappe.model.set_value(cdt, cdn, "set_basic_rate_manually", row.valuation_type === "Manual" ? 1 : 0);
 	},
 
+	qty(frm, cdt, cdn) {
+		const item = locals[cdt][cdn];
+		if (item.s_warehouse) {
+			frm.events.set_basic_rate(frm, cdt, cdn);
+			return;
+		}
+
+		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
+		frm.events.calculate_basic_amount(frm, item);
+		refresh_field("items");
+	},
+
 	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
 	},
@@ -1438,7 +1455,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		};
 
 		this.frm.fields_dict.items.grid.get_field("item_code").get_query = function () {
-			return erpnext.queries.item({ is_stock_item: 1 });
+			return erpnext.queries.item({ is_stock_item: 1, company: me.frm.doc.company });
 		};
 
 		this.frm.set_query("purchase_order", function () {

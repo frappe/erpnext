@@ -22,6 +22,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 				query: "erpnext.controllers.queries.item_query",
 				filters: {
 					is_stock_item: 1,
+					company: doc.company,
 				},
 			};
 		});

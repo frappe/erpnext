@@ -477,9 +477,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						if (
 							(["Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype) &&
 								!this.frm.doc.is_return) ||
-							(this.frm.doc.doctype === "Stock Entry" &&
-								(this.frm.doc.purpose === "Material Receipt" ||
-									(this.frm.doc.purpose === "Manufacture" && this.item.is_finished_item)))
+							(this.frm.doc.doctype === "Stock Entry" && !this.item.s_warehouse)
 						) {
 							is_inward = true;
 						}

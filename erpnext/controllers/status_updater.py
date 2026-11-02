@@ -42,6 +42,18 @@ status_map = {
 		["Ordered", "is_fully_ordered"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
+	"Supplier Quotation": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		[
+			"Expired",
+			"eval:self.docstatus==1 and self.valid_till and getdate(self.valid_till) < getdate(nowdate())",
+		],
+		["Stopped", "eval:self.status=='Stopped'"],
+		["Partially Ordered", "is_partially_ordered"],
+		["Ordered", "is_fully_ordered"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
 	"Sales Order": [
 		["Draft", None],
 		[
@@ -432,10 +444,15 @@ class StatusUpdater(Document):
 		# installation is not a stock movement, so bundles and non-stock items are installable too
 		if is_qty_check and not is_installation:
 			item_table = frappe.qb.DocType("Item")
+			bundle = frappe.qb.DocType("Product Bundle")
+			# a bundle parent is non-stock, but its packed items move real stock, so limit it like a stock item
+			active_bundle_items = (
+				frappe.qb.from_(bundle).select(bundle.new_item_code).where(bundle.disabled == 0)
+			)
 			query = (
 				query.join(item_table)
 				.on(item_table.name == item_field_col)
-				.where(item_table.is_stock_item == 1)
+				.where((item_table.is_stock_item == 1) | item_field_col.isin(active_bundle_items))
 			)
 
 		return query.run(as_dict=True)
@@ -508,6 +525,7 @@ class StatusUpdater(Document):
 
 		if args["source_dt"] != "Pick List Item" and args["target_dt"] not in [
 			"Quotation Item",
+			"Supplier Quotation Item",
 			"Packed Item",
 		]:
 			if args.get("target_dt") == "Material Request Item":

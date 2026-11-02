@@ -199,10 +199,12 @@ def get_serial_nos_data(serial_nos):
 
 
 @frappe.whitelist()
-def get_latest_stock_qty(item_code, warehouse=None):
+def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
 	# Same guard as get_stock_balance above, which returns the same Bin quantity. Loser-free for the
 	# only caller: Work Order write is held by Manufacturing User, who holds Item read.
 	frappe.has_permission("Item", "read", throw=True)
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
 
 	values, condition = [item_code], ""
 	if warehouse:
@@ -285,7 +287,7 @@ def get_bin_qty_map(rows) -> dict[tuple[str, str], frappe._dict]:
 	bins = frappe.get_all(
 		"Bin",
 		filters={"item_code": ["in", item_codes], "warehouse": ["in", warehouses]},
-		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+		fields=["item_code", "warehouse", "actual_qty", "projected_qty", "reserved_stock"],
 	)
 
 	return {(bin.item_code, bin.warehouse): bin for bin in bins}

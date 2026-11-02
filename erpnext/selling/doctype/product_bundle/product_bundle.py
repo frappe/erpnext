@@ -32,6 +32,8 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
+		self.validate_not_nested()
+		self.validate_child_items_uom()
 		self.validate_child_items_qty_non_zero()
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 
@@ -82,12 +84,62 @@ class ProductBundle(Document):
 
 	def validate_child_items(self):
 		for item in self.items:
+			if item.item_code == self.new_item_code:
+				frappe.throw(
+					_("Row #{0}: A Product Bundle cannot contain its own parent Item {1}.").format(
+						item.idx, frappe.bold(item.item_code)
+					)
+				)
 			if frappe.db.exists("Product Bundle", {"name": item.item_code, "disabled": 0}):
 				frappe.throw(
 					_(
 						"Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
 					).format(item.idx, frappe.bold(item.item_code))
 				)
+
+	def validate_not_nested(self):
+		# the parent item must not already be a component of another enabled bundle,
+		# otherwise that bundle would silently nest this one
+		pb = frappe.qb.DocType("Product Bundle")
+		pbi = frappe.qb.DocType("Product Bundle Item")
+		outer = (
+			frappe.qb.from_(pbi)
+			.join(pb)
+			.on(pbi.parent == pb.name)
+			.select(pb.name)
+			.where((pbi.item_code == self.new_item_code) & (pb.name != self.name) & (pb.disabled == 0))
+			.limit(1)
+		).run(pluck=True)
+		if outer:
+			frappe.throw(
+				_(
+					"Item {0} is already a component of Product Bundle {1}; nested bundles are not supported."
+				).format(frappe.bold(self.new_item_code), frappe.bold(outer[0])),
+				title=_("Nested Product Bundle"),
+			)
+
+	def validate_child_items_uom(self):
+		# a component's UOM must resolve the same way packing's get_conversion_factor does:
+		# the item or its template's UOM Conversion Detail, else a global UOM Conversion Factor
+		from erpnext.stock.doctype.item.item import get_uom_conv_factor
+
+		for item in self.items:
+			if not item.uom:
+				continue
+			item_info = frappe.db.get_value("Item", item.item_code, ["stock_uom", "variant_of"], as_dict=True)
+			if not item_info or item.uom == item_info.stock_uom:
+				continue
+			stock_uom, variant_of = item_info.stock_uom, item_info.variant_of
+			parents = [item.item_code, variant_of] if variant_of else [item.item_code]
+			if frappe.db.exists("UOM Conversion Detail", {"parent": ["in", parents], "uom": item.uom}):
+				continue
+			if get_uom_conv_factor(item.uom, stock_uom):
+				continue
+			frappe.throw(
+				_(
+					"Row #{0}: UOM {1} is not configured for Item {2}. Add a UOM conversion on the Item or use its stock UOM."
+				).format(item.idx, frappe.bold(item.uom), frappe.bold(item.item_code))
+			)
 
 	def validate_child_items_qty_non_zero(self):
 		for item in self.items:

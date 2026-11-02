@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
 )
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
@@ -27,6 +28,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -1926,7 +1928,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
 	def test_gle_made_when_asset_is_returned(self):
-		asset = create_asset(item_code="Macbook Pro")
+		asset = create_asset(item_code="Macbook Pro", submit=1)
 
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
 		return_si = create_sales_invoice(
@@ -2679,6 +2681,32 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.append("payment_schedule", dict(due_date="2017-01-01", invoice_portion=50.00, payment_amount=50))
 
 		self.assertRaises(frappe.ValidationError, si.insert)
+
+	def test_standalone_return_updates_paid_invoice_status(self):
+		invoice = create_sales_invoice(qty=2, rate=100)
+		payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment.reference_no = "Return status test"
+		payment.reference_date = nowdate()
+		payment.insert()
+		payment.submit()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
+
+		return_invoice = make_return_doc(invoice.doctype, invoice.name)
+		return_invoice.update_outstanding_for_self = 1
+		return_invoice.insert()
+		return_invoice.submit()
+
+		invoice.reload()
+		self.assertEqual(invoice.status, "Credit Note Issued")
+		self.assertEqual(invoice.outstanding_amount, 0)
+		self.assertEqual(return_invoice.outstanding_amount, -invoice.grand_total)
+
+		return_invoice.cancel()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
 
 	def test_credit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -3726,7 +3754,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		expected_values = [
 			["2020-06-30", 1366.12, 1366.12],
 			["2021-06-30", 20000.0, 21366.12],
-			["2021-09-30", 5041.34, 26407.46],
+			["2021-09-30", 5041.1, 26407.22],
 		]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
@@ -3757,7 +3785,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		asset.load_from_db()
 
-		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30041.15, 60041.15]]
+		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)

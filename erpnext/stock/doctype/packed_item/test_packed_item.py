@@ -60,6 +60,53 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertEqual(so.packed_items[0].item_code, self.bundle_items[0])
 		self.assertEqual(so.packed_items[0].qty, 2)
 
+	def test_component_uom_is_converted_to_stock_qty(self):
+		"A component measured in a non-stock UOM packs the converted stock quantity."
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		make_stock_entry(item=component, to_warehouse=self.warehouse, qty=100, rate=100)
+
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=True)
+		# 1 Box (= 12 Nos) x 2 bundles = 24 Nos, packed in the component's stock UOM
+		self.assertEqual(so.packed_items[0].qty, 24)
+		self.assertEqual(so.packed_items[0].uom, "Nos")
+
+	def test_get_items_from_product_bundle_converts_component_uom(self):
+		"The buying dialog returns component qty in stock units, like packing."
+		import json
+
+		from erpnext.stock.doctype.packed_item.packed_item import get_items_from_product_bundle
+
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+
+		items = get_items_from_product_bundle(
+			json.dumps(
+				{
+					"item_code": bundle,
+					"quantity": 2,
+					"doctype": "Purchase Order",
+					"parenttype": "Purchase Order",
+					"company": "_Test Company",
+					"currency": "INR",
+					"conversion_rate": 1,
+					"transaction_date": nowdate(),
+				}
+			)
+		)
+		self.assertEqual([i.qty for i in items], [24])  # 2 x 1 Box (= 12 Nos)
+
 	def test_updating_bundle_item(self):
 		"Test impact on packed items if bundle item row is updated."
 		so = make_sales_order(item_code=self.bundle, qty=1, do_not_submit=True)
@@ -75,6 +122,22 @@ class TestPackedItem(ERPNextTestSuite):
 		so.save()
 
 		self.assertEqual(len(so.packed_items), 0)
+
+	def test_updating_bundle_with_a_repeated_component(self):
+		component = make_item().name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.append("items", {"item_code": component, "qty": 3})
+		bundle_doc.insert()
+
+		so = make_sales_order(item_code=bundle, qty=1, do_not_submit=True)
+		self.assertEqual([pi.qty for pi in so.packed_items], [2, 3])
+
+		# both rows must scale with the bundle qty; the bug updated one and left the other stale
+		so.items[0].qty = 2
+		so.save()
+		self.assertEqual(sorted(pi.qty for pi in so.packed_items), [4, 6])
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_recurring_bundle_item(self):
@@ -254,6 +317,53 @@ class TestPackedItem(ERPNextTestSuite):
 
 		expected_returns = [d for d in dn.packed_items if d.parent_item == self.bundle]
 		self.assertReturns(expected_returns, dn_ret.packed_items)
+
+	def test_return_keeps_packed_item_warehouse(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		for item in self.bundle_items:
+			make_stock_entry(item_code=item, to_warehouse=other_warehouse, qty=10, rate=100)
+
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1)
+		dn = make_delivery_note(so.name)
+		dn.save()
+		for row in dn.packed_items:
+			row.warehouse = other_warehouse
+		dn.save()
+		dn.submit()
+
+		dn_ret = make_sales_return(dn.name)
+		dn_ret.packed_items[1].warehouse = "_Test Warehouse 2 - _TC"
+		dn_ret.save()
+
+		# components return to where they were delivered from, and an edit before save sticks
+		self.assertEqual(
+			[row.warehouse for row in dn_ret.packed_items], [other_warehouse, "_Test Warehouse 2 - _TC"]
+		)
+
+	def test_amended_order_keeps_packed_item_warehouse(self):
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		item_list = [
+			{"item_code": item_code, "warehouse": self.warehouse, "qty": 1, "rate": 100}
+			for item_code in (self.normal_item, self.bundle)
+		]
+		so = make_sales_order(item_list=item_list, do_not_submit=True)
+		for row in so.packed_items:
+			row.warehouse = other_warehouse
+		so.save()
+		so.submit()
+		so.cancel()
+
+		# amending from the desk keeps no-copy fields, so packed rows still point to the cancelled rows,
+		# but resets the workflow state (a Sales Order workflow left by another test would block insert)
+		amended = frappe.copy_doc(so, ignore_no_copy=True)
+		amended.amended_from = so.name
+		amended.docstatus = 0
+		amended.workflow_state = None
+		amended.insert()
+
+		self.assertEqual([row.warehouse for row in amended.packed_items], [other_warehouse] * 2)
 
 	def test_returning_partial_bundle_qty(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return

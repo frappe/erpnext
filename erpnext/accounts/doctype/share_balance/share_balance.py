@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -27,4 +29,8 @@ class ShareBalance(Document):
 		to_no: DF.Int
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		frappe.throw(_("Share balances can only be changed through Share Transfer"), title=_("Not Allowed"))
+
+	def on_trash(self):
+		frappe.throw(_("Share balances can only be changed through Share Transfer"), title=_("Not Allowed"))

@@ -63,6 +63,7 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
@@ -332,6 +333,26 @@ sounds = [
 
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
+permission_query_conditions = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.get_permission_query_conditions",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.get_permission_query_conditions",
+	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
+	"*": "erpnext.stock.doctype.company_restriction.company_restriction.get_inherited_permission_query_conditions",
+}
+
+has_permission = {
+	"Call Log": "erpnext.telephony.doctype.call_log.call_log.has_permission",
+	"Voice Call Settings": "erpnext.telephony.doctype.voice_call_settings.voice_call_settings.has_permission",
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
+	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"Supplier": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
+	"*": "erpnext.stock.doctype.company_restriction.company_restriction.has_inherited_permission",
+}
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -375,6 +396,7 @@ doc_events = {
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
+			"erpnext.stock.doctype.company_restriction.company_restriction.validate_transaction_company",
 		],
 	},
 	tuple(period_closing_doctypes): {
@@ -383,6 +405,9 @@ doc_events = {
 	"Item": {
 		"on_update": "erpnext.stock.doctype.item.item_search.reindex_item",
 		"after_rename": "erpnext.stock.doctype.item.item_search.reindex_renamed_item",
+	},
+	("Item", "Customer", "Supplier"): {
+		"validate": "erpnext.stock.doctype.company_restriction.company_restriction.validate_allowed_companies",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
@@ -397,6 +422,7 @@ doc_events = {
 		"on_update": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.on_communication_update",
 			"erpnext.support.doctype.issue.issue.set_first_response_time",
+			"erpnext.support.doctype.issue.issue.reopen_issue_without_sla",
 		],
 		"after_insert": [
 			"erpnext.crm.utils.link_communications_with_prospect",
@@ -427,6 +453,9 @@ doc_events = {
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
+	"Company": {
+		"after_rename": "erpnext.regional.rename_vat_settings",
+	},
 	"Address": {
 		"validate": [
 			"erpnext.regional.italy.utils.set_state_code",
@@ -434,8 +463,11 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": ["erpnext.crm.utils.update_lead_phone_numbers"],
+	},
+	"Lead": {
+		"on_update": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -474,6 +506,7 @@ scheduler_events = {
 	},
 	"hourly": [
 		"erpnext.projects.doctype.project.project.hourly_reminder",
+		"erpnext.support.doctype.service_level_agreement.service_level_agreement.fail_overdue_agreements",
 	],
 	"hourly_long": [],
 	"hourly_maintenance": [
@@ -697,6 +730,7 @@ global_search_doctypes = {
 }
 
 ignore_links_on_delete = [
+	"Asset Activity",
 	"Tax Withholding Entry",
 ]
 

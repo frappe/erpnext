@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Field
+from frappe.query_builder.functions import Avg, Date, Floor, UnixTimestamp
 
 
 def execute(filters=None):
@@ -17,19 +19,33 @@ def execute(filters=None):
 		},
 	]
 
-	data = frappe.db.sql(
-		"""
-		SELECT
-			date(creation) as creation_date,
-			avg(first_response_time) as avg_response_time
-		FROM tabIssue
-		WHERE
-			date(creation) between %s and %s
-			and first_response_time > 0
-		GROUP BY creation_date
-		ORDER BY creation_date desc
-	""",
-		(filters.from_date, filters.to_date),
+	issue = frappe.qb.DocType("Issue")
+	# Issues with an SLA store working time in first_response_time, so measure calendar time for all
+	first_response_time = get_epoch_seconds(issue.first_responded_on) - get_epoch_seconds(issue.creation)
+	data = (
+		frappe.qb.from_(issue)
+		.select(
+			Date(issue.creation).as_("creation_date"),
+			Avg(first_response_time).as_("avg_response_time"),
+		)
+		.where(
+			Date(issue.creation).between(filters.from_date, filters.to_date)
+			& (first_response_time > 0)
+			& issue.name.isin(get_permitted_issues(filters))
+		)
+		.groupby(Date(issue.creation))
+		.orderby(Date(issue.creation), order=frappe.qb.desc)
+		.run()
 	)
 
 	return columns, data
+
+
+def get_epoch_seconds(field: Field) -> Floor:
+	# PostgreSQL truncates UnixTimestamp to whole seconds while MariaDB keeps the fraction
+	return Floor(UnixTimestamp(field))
+
+
+def get_permitted_issues(filters: frappe._dict):
+	company_filter = {"company": filters.company} if filters.get("company") else {}
+	return frappe.qb.get_query("Issue", fields=["name"], filters=company_filter, ignore_permissions=False)

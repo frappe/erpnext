@@ -20,6 +20,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
@@ -1402,6 +1403,32 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(frappe.ValidationError, pi.insert)
 
+	def test_standalone_return_updates_paid_invoice_status(self):
+		invoice = make_purchase_invoice(qty=2, rate=100)
+		payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment.reference_no = "Return status test"
+		payment.reference_date = nowdate()
+		payment.insert()
+		payment.submit()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
+
+		return_invoice = make_return_doc(invoice.doctype, invoice.name)
+		return_invoice.update_outstanding_for_self = 1
+		return_invoice.insert()
+		return_invoice.submit()
+
+		invoice.reload()
+		self.assertEqual(invoice.status, "Debit Note Issued")
+		self.assertEqual(invoice.outstanding_amount, 0)
+		self.assertEqual(return_invoice.outstanding_amount, -invoice.grand_total)
+
+		return_invoice.cancel()
+		invoice.reload()
+		self.assertEqual(invoice.status, "Paid")
+		self.assertEqual(invoice.outstanding_amount, 0)
+
 	def test_debit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
@@ -2417,6 +2444,25 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
 
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
+	)
+	def test_adjust_incoming_rate_keeps_discounted_pr_value(self):
+		pr = make_purchase_receipt(qty=10, rate=100, do_not_submit=True)
+		pr.apply_discount_on = "Net Total"
+		pr.additional_discount_percentage = 10
+		pr.submit()
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.submit()
+		pr.reload()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": pr.name, "is_cancelled": 0}, "stock_value_difference"
+		)
+		self.assertEqual(pr.items[0].amount_difference_with_purchase_invoice, 0)
+		self.assertEqual(stock_value_difference, 900)
 
 	def test_item_less_defaults(self):
 		pi = frappe.new_doc("Purchase Invoice")

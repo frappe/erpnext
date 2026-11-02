@@ -2,11 +2,14 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import qb
+from frappe import _, qb
+from frappe.database.operator_map import OPERATOR_MAP
 from frappe.model.document import Document
-from frappe.query_builder.functions import Count
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, Sum
 from frappe.utils import cint
 from pypika import Order
+from pypika.queries import QueryBuilder, Table
 
 
 class BulkTransactionLog(Document):
@@ -57,40 +60,34 @@ class BulkTransactionLog(Document):
 		)
 		super(Document, self).__init__(serialize_transaction_log(transaction_log))
 
+	# nosemgrep: frappe-semgrep-rules.rules.overusing-args -- reviewed: frappe calls virtual doctype get_list with `args=`
 	@staticmethod
 	def get_list(args):
-		filter_date = parse_list_filters(args)
-		limit = cint(args.get("page_length")) or 20
+		frappe.has_permission("Bulk Transaction Log", "read", throw=True)
 		log_detail = qb.DocType("Bulk Transaction Log Detail")
-
-		dates_query = (
+		query = (
 			qb.from_(log_detail)
-			.select(log_detail.date)
-			.distinct()
-			.orderby(log_detail.date, order=Order.desc)
-			.limit(limit)
-		)
-		if filter_date:
-			dates_query = dates_query.where(log_detail.date == filter_date)
-		dates = dates_query.run()
-
-		transaction_logs = []
-		if dates:
-			transaction_logs_query = (
-				qb.from_(log_detail)
-				.select(log_detail.date.as_("date"), Count(log_detail.date).as_("count"))
-				.where(log_detail.date.isin(dates))
-				.orderby(log_detail.date, order=Order.desc)
-				.groupby(log_detail.date)
-				.limit(limit)
+			.select(
+				log_detail.date,
+				Count(log_detail.date).as_("count"),
+				count_with_status(log_detail, "Success").as_("succeeded"),
+				count_with_status(log_detail, "Failed").as_("failed"),
 			)
-			transaction_logs = transaction_logs_query.run(as_dict=True)
+			.groupby(log_detail.date)
+			.orderby(log_detail.date, order=Order.desc)
+			.offset(cint(args.get("start")))
+			.limit(cint(args.get("page_length")) or 20)
+		)
+		query = filter_by_date(query, log_detail, parse_list_filters(args.get("filters")))
+		return [serialize_transaction_log(x) for x in query.run(as_dict=True)]
 
-		return [serialize_transaction_log(x) for x in transaction_logs]
-
+	# nosemgrep: frappe-semgrep-rules.rules.overusing-args -- reviewed: frappe calls virtual doctype get_count with `args=`
 	@staticmethod
 	def get_count(args):
-		pass
+		frappe.has_permission("Bulk Transaction Log", "read", throw=True)
+		log_detail = qb.DocType("Bulk Transaction Log Detail")
+		query = qb.from_(log_detail).select(Count(log_detail.date).distinct())
+		return filter_by_date(query, log_detail, parse_list_filters(args.get("filters"))).run()[0][0]
 
 	@staticmethod
 	def get_stats(args):
@@ -113,12 +110,36 @@ def serialize_transaction_log(data):
 	)
 
 
-def parse_list_filters(args):
-	# parse date filter
-	filter_date = None
-	for fil in args.get("filters"):
-		if isinstance(fil, list):
-			for elem in fil:
-				if elem == "date":
-					filter_date = fil[3]
-	return filter_date
+def count_with_status(log_detail: Table, status: str) -> Sum:
+	return Sum(Case().when(log_detail.transaction_status == status, 1).else_(0))
+
+
+def filter_by_date(query: QueryBuilder, log_detail: Table, conditions: list[tuple]) -> QueryBuilder:
+	for operator, value in conditions:
+		if operator not in OPERATOR_MAP:
+			frappe.throw(_("Unsupported filter operator {0}").format(operator))
+		query = query.where(OPERATOR_MAP[operator](log_detail.date, value))
+	return query
+
+
+def parse_list_filters(filters: dict | list | None) -> list[tuple]:
+	"""Return (operator, value) pairs for the date filters in dict or 2-, 3- and 4-item list filters."""
+	filters = filters or []
+	if isinstance(filters, dict):
+		filters = [[field, *value] if is_list(value) else [field, value] for field, value in filters.items()]
+
+	conditions = [with_operator(condition) for condition in filters if is_list(condition)]
+	return [
+		(str(condition[-2]).lower(), condition[-1])
+		for condition in conditions
+		if len(condition) >= 3 and condition[-3] == "date"
+	]
+
+
+def with_operator(condition: list | tuple) -> list:
+	"""Expand the [field, value] equality shorthand to [field, "=", value]."""
+	return [condition[0], "=", condition[1]] if len(condition) == 2 else list(condition)
+
+
+def is_list(value) -> bool:
+	return isinstance(value, list | tuple)

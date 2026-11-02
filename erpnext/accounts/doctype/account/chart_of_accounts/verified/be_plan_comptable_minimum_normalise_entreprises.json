@@ -602,9 +602,7 @@
                 },
                 "account_number": "37"
             },
-            "Stock livré non facturé": {
-                "account_type": "Stock Delivered But Not Billed"
-            }
+            "Stock livré non facturé": {}
         },
         "CLASSE 4 : CRÉANCES À UN AN AU PLUS": {
             "root_type": "Asset",

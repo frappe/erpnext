@@ -2055,6 +2055,23 @@ class TestMaterialRequest(ERPNextTestSuite):
 		)
 		self.assertIn(">30.0<", message)
 
+	def test_purchase_request_ignores_customer_item_restrictions(self):
+		from erpnext.selling.doctype.party_specific_item.test_party_specific_item import (
+			create_party_specific_item,
+		)
+
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value="_Test FG Item",
+		)
+		mr = make_material_request(do_not_submit=True)
+		mr.customer = "_Test Customer"
+		mr.save()
+
+		self.assertIsNone(mr.customer)
+
 
 def create_item_with_default_supplier(item_code, supplier):
 	item = create_item(item_code)

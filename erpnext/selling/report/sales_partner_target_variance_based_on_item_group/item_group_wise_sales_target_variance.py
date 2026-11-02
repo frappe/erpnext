@@ -57,7 +57,9 @@ def get_data(filters, period_list, partner_doctype):
 
 	date_field = "transaction_date" if filters.get("doctype") == "Sales Order" else "posting_date"
 
-	actual_data = get_actual_data(filters, sales_users, date_field, sales_field)
+	sales_user_map = get_sales_user_map(partner_doctype, sales_users)
+	actual_users = {name for names in sales_user_map.values() for name in names}
+	actual_data = get_actual_data(filters, list(actual_users), date_field, sales_field)
 
 	return prepare_data(
 		filters,
@@ -67,7 +69,21 @@ def get_data(filters, period_list, partner_doctype):
 		date_field,
 		period_list,
 		sales_field,
+		sales_user_map,
 	)
+
+
+def get_sales_user_map(partner_doctype, sales_users):
+	if partner_doctype not in ("Territory", "Sales Person"):
+		return {name: {name} for name in sales_users}
+
+	nodes = frappe.get_all(partner_doctype, fields=["name", "lft", "rgt"])
+	by_name = {node.name: node for node in nodes}
+	return {
+		name: {node.name for node in nodes if by_name[name].lft <= node.lft <= by_name[name].rgt}
+		for name in sales_users
+		if name in by_name
+	}
 
 
 def get_columns(filters, period_list, partner_doctype):
@@ -160,6 +176,7 @@ def prepare_data(
 	date_field,
 	period_list,
 	sales_field,
+	sales_user_map=None,
 ):
 	rows = {}
 
@@ -169,43 +186,32 @@ def prepare_data(
 	item_group_parent_child_map = get_item_group_parent_child_map()
 
 	for d in sales_users_data:
-		key = (d.parent, d.item_group)
+		key = (d.parent, d.item_group or None)
 		dist_data = get_periodwise_distribution_data(d.distribution_id, period_list, filters.get("period"))
+		details = rows.setdefault(key, {"total_target": 0, "total_achieved": 0})
+		for period in period_list:
+			target_key = f"target_{period.key}"
+			target = (d.get(target_qty_amt_field) * dist_data.get(period.key)) / 100
+			details[target_key] = details.get(target_key, 0) + target
+			details["total_target"] += target
 
-		if key not in rows:
-			rows.setdefault(key, {"total_target": 0, "total_achieved": 0, "total_variance": 0})
-
-		details = rows[key]
+	for (parent, item_group), details in rows.items():
 		for period in period_list:
 			p_key = period.key
-			if p_key not in details:
-				details[p_key] = 0
-
-			target_key = f"target_{p_key}"
-			variance_key = f"variance_{p_key}"
-			details[target_key] = (d.get(target_qty_amt_field) * dist_data.get(p_key)) / 100
-			details[variance_key] = 0
-			details["total_target"] += details[target_key]
-
-			for r in actual_data:
-				if (
-					r.get(sales_field) == d.parent
-					and period.from_date <= r.get(date_field)
-					and r.get(date_field) <= period.to_date
-					and (
-						not d.item_group
-						or not sales_user_wise_item_groups.get(d.parent)
-						or r.item_group == d.item_group
-						or r.item_group in item_group_parent_child_map.get(d.item_group, [])
-					)
-				):
-					details[p_key] += r.get(qty_or_amount_field, 0)
-					details[variance_key] = details.get(p_key) - details.get(target_key)
-				else:
-					details[variance_key] = details.get(p_key) - details.get(target_key)
-
-			details["total_achieved"] += details.get(p_key)
-			details["total_variance"] = details.get("total_achieved") - details.get("total_target")
+			details[p_key] = sum(
+				r.get(qty_or_amount_field, 0)
+				for r in actual_data
+				if r.get(sales_field) in (sales_user_map or {}).get(parent, {parent})
+				and period.from_date <= r.get(date_field) <= period.to_date
+				and (
+					not item_group
+					or r.item_group == item_group
+					or r.item_group in item_group_parent_child_map.get(item_group, [])
+				)
+			)
+			details[f"variance_{p_key}"] = details[p_key] - details[f"target_{p_key}"]
+			details["total_achieved"] += details[p_key]
+		details["total_variance"] = details["total_achieved"] - details["total_target"]
 
 	return rows
 
@@ -233,13 +239,17 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
 	doctype = filters.get("doctype")
 
+	doc_filters = {
+		"docstatus": 1,
+		date_field: ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
+	}
+	if filters.get("company"):
+		doc_filters["company"] = filters.company
+
 	permitted_docs = frappe.qb.get_query(
 		table=doctype,
 		fields=["name"],
-		filters={
-			"docstatus": 1,
-			date_field: ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
-		},
+		filters=doc_filters,
 		ignore_permissions=False,
 	)
 
