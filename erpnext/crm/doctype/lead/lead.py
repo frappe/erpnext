@@ -525,6 +525,12 @@ def get_leads_with_phone_number(number: str | None) -> list[str]:
 	]
 
 
+def get_lead_with_phone_number(number: str | None) -> str | None:
+	"""Return the latest lead matching the given number, kept for callers of the old helper."""
+	leads = get_leads_with_phone_number(number)
+	return leads[0] if leads else None
+
+
 @frappe.whitelist(methods=["POST"])
 def add_lead_to_prospect(lead: str, prospect: str):
 	if lead:
