@@ -6,10 +6,17 @@ import { __, loadTranslations } from "@app/lib/translate"
 
 const METHOD = "erpnext.portal.supplier_portal.get_portal_context"
 
-export type PortalUser = { fullName: string; email: string; initials: string }
+/** `supplier` is the company the person signs in for: what the sidebar's account block shows. */
+export type PortalUser = {
+	fullName: string
+	email: string
+	initials: string
+	supplier: string
+	supplierInitials: string
+}
 export type PortalCompany = { name: string; logo: string }
 
-const user = ref<PortalUser>({ fullName: "", email: "", initials: "" })
+const user = ref<PortalUser>({ fullName: "", email: "", initials: "", supplier: "", supplierInitials: "" })
 /** The company the portal is branded as; its logo is an empty string when it has none. */
 const company = ref<PortalCompany>({ name: "", logo: "" })
 
@@ -28,7 +35,15 @@ function load(): void {
 	call(METHOD)
 		.then((data: any) => {
 			const fullName = data?.full_name || data?.user || ""
-			user.value = { fullName, email: data?.email || "", initials: initialsOf(fullName) }
+			// a person linked to two suppliers signs in for both
+			const supplier = (data?.supplier_names ?? []).join(", ") || fullName
+			user.value = {
+				fullName,
+				email: data?.email || "",
+				initials: initialsOf(fullName),
+				supplier,
+				supplierInitials: initialsOf(supplier),
+			}
 			company.value = { name: data?.company?.name || "", logo: data?.company?.logo || "" }
 		})
 		.catch(() => {
@@ -47,14 +62,15 @@ async function logout(): Promise<void> {
 }
 
 /**
- * The account menu behind the sidebar's user block. The address is the group
- * heading rather than a row, which is also where it stops being truncated.
+ * The account menu behind the sidebar's account block, which shows the supplier. "My account"
+ * joins it in useNotifications.
  */
 const userMenuOptions = computed(() => [
 	{
 		// `group`, not `label` — a group keyed on `label` is read as a plain action row
 		// and its `options` are dropped (frappe-ui MenuGroupOption)
-		group: user.value.email,
+		group: "account",
+		hideLabel: true,
 		options: [{ label: __("Log out"), icon: "lucide-log-out", onClick: logout }],
 	},
 ])

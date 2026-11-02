@@ -1540,96 +1540,6 @@ def _aggregate(doctype: str, filters: list, columns: dict[str, tuple[str, str]])
 	}
 
 
-# ---------------------------------------------------------------- addresses
-# what a supplier may read and write on their own addresses; the links that say whose address it is
-# are the server's to set
-PORTAL_ADDRESS_FIELDS = (
-	"address_title",
-	"address_type",
-	"address_line1",
-	"address_line2",
-	"city",
-	"state",
-	"country",
-	"pincode",
-	"email_id",
-	"phone",
-	"is_primary_address",
-	"is_shipping_address",
-)
-
-
-def _address_filters(suppliers: list[str]) -> list:
-	return [
-		["Dynamic Link", "link_doctype", "=", "Supplier"],
-		["Dynamic Link", "link_name", "in", suppliers],
-		["disabled", "=", 0],
-	]
-
-
-@frappe.whitelist()
-def get_portal_addresses() -> list[dict]:
-	"""The supplier's address book, whoever wrote it: an address the buyer entered is still theirs."""
-	suppliers = get_parents_for_user("Supplier")
-	if not suppliers:
-		return []
-	addresses = frappe.get_all(
-		"Address",
-		filters=_address_filters(suppliers),
-		fields=["name", *PORTAL_ADDRESS_FIELDS],
-		distinct=True,
-		ignore_permissions=True,
-	)
-	# sorted here because frappe drops ORDER BY from a distinct query on Postgres
-	return sorted(
-		addresses,
-		key=lambda a: (
-			not a.is_primary_address,
-			not a.is_shipping_address,
-			(a.address_title or "").casefold(),
-		),
-	)
-
-
-@frappe.whitelist()
-def get_portal_address_options() -> dict:
-	"""What the address dialog's pickers offer, read from the site."""
-	if not get_parents_for_user("Supplier"):
-		raise frappe.PermissionError
-	address_type = frappe.get_meta("Address").get_field("address_type")
-	options = (address_type.options or "").split("\n") if address_type else []
-	return {
-		"address_types": [option for option in options if option],
-		"countries": frappe.get_all("Country", pluck="name", order_by="name", ignore_permissions=True),
-		"default_country": frappe.db.get_single_value("Global Defaults", "country") or "",
-	}
-
-
-@frappe.whitelist(methods=["POST"])
-@rate_limit(limit=30, seconds=60 * 60, user_based=True, ip_based=False)
-def save_portal_address(values: dict | str, name: str | None = None) -> str:
-	"""Add an address to the supplier's book, or change one already in it."""
-	suppliers = get_parents_for_user("Supplier")
-	if not suppliers:
-		raise frappe.PermissionError
-
-	values = frappe.parse_json(values) if isinstance(values, str) else dict(values or {})
-	if name:
-		if not frappe.db.exists("Address", [["Address", "name", "=", name], *_address_filters(suppliers)]):
-			raise frappe.DoesNotExistError
-		doc = frappe.get_doc("Address", name)
-	else:
-		doc = frappe.new_doc("Address")
-		# whose address this is, is not the caller's to say
-		doc.append("links", {"link_doctype": "Supplier", "link_name": suppliers[0]})
-
-	for field in PORTAL_ADDRESS_FIELDS:
-		if field in values:
-			doc.set(field, values[field])
-	doc.save(ignore_permissions=True)
-	return doc.name
-
-
 def get_portal_boot() -> dict:
 	"""The language and the number and currency formats, as Desk reads them, for the portal's first render."""
 	return {
@@ -1655,20 +1565,37 @@ def get_portal_context() -> dict:
 	"""Who the signed-in portal user is, and which suppliers they may see."""
 	user = frappe.session.user
 	full_name, email = frappe.db.get_value("User", user, ["full_name", "email"]) or (None, None)
+	suppliers = get_parents_for_user("Supplier")
 
 	return {
 		"user": user,
 		"full_name": full_name,
 		"email": email,
-		"suppliers": get_parents_for_user("Supplier"),
+		"suppliers": suppliers,
+		# the names the sidebar shows; a supplier's ID can be a naming series
+		"supplier_names": frappe.get_all(
+			"Supplier",
+			filters={"name": ["in", suppliers or [""]]},
+			pluck="supplier_name",
+			order_by="supplier_name",
+		),
 		"company": _portal_company(),
 	}
 
 
 def _portal_company() -> dict:
-	"""The company the portal is branded as: the one on the supplier's latest RFQ, else the site default."""
-	invited = _invited_rfqs()
+	"""The company the portal is branded as: the one the supplier does business with, by their latest
+	invoice, else order, else quotation, as the customer portal does; else their latest RFQ, which
+	any company may send; else the site default."""
 	company = None
+	for doctype in ("Purchase Invoice", "Purchase Order", "Supplier Quotation"):
+		company = frappe.db.get_value(
+			doctype, _supplier_filters(doctype), "company", order_by="creation desc"
+		)
+		if company:
+			break
+
+	invited = None if company else _invited_rfqs()
 	if invited:
 		company = frappe.db.get_value(
 			"Request for Quotation", {"name": ["in", list(invited)]}, "company", order_by="creation desc"

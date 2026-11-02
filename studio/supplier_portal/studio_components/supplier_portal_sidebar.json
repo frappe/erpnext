@@ -123,17 +123,6 @@
          "label": "{{ __('Invoices') }}",
          "route": "/invoices"
         }
-       },
-       {
-        "blockName": "SidebarItem",
-        "componentId": "SidebarItem-94cqjxrw5",
-        "componentName": "SidebarItem",
-        "componentProps": {
-         "active": "{{ route.path === '/addresses' }}",
-         "icon": "lucide-map-pin",
-         "label": "{{ __('Addresses') }}",
-         "route": "/addresses"
-        }
        }
       ],
       "componentId": "container-748b1oaal",
@@ -179,6 +168,7 @@
              "flexDirection": "row",
              "height": "40px",
              "minWidth": "0px",
+             "outline": "none",
              "padding": "0px 6px",
              "width": "100%"
             },
@@ -189,7 +179,7 @@
               "componentId": "Avatar-jdhf6rknx",
               "componentName": "Avatar",
               "componentProps": {
-               "label": "{{ user.initials }}",
+               "label": "{{ user.supplierInitials }}",
                "shape": "circle",
                "size": "lg"
               }
@@ -217,7 +207,7 @@
                 "componentProps": {
                  "fontSize": "text-base-medium",
                  "tag": "span",
-                 "text": "{{ user.fullName }}"
+                 "text": "{{ user.supplier }}"
                 }
                }
               ],
