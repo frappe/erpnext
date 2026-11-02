@@ -619,6 +619,7 @@ def execute_snapshot_report(filters):
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
+		validate_company_permission(filters.company)
 		validate_filters(filters)
 		columns = get_columns()
 		data = get_data_duckdb(filters, conn)
