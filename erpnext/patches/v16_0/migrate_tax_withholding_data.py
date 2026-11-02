@@ -20,11 +20,12 @@ New Structure:
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder.functions import IfNull, Max, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Sum
 from frappe.utils import create_batch, flt, now
 from pypika.terms import Bracket
 
-# Names per IN list, so the statements stay well below max_allowed_packet on large sites
+# Names per IN list, so the statements stay well below max_allowed_packet on large sites,
+# and purchase invoices per group of suppliers migrated at a time, so memory stays bounded
 BATCH_SIZE = 50000
 
 
@@ -93,10 +94,15 @@ def execute():
 
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
-	purchase_migrator = PurchaseInvoiceMigrator(
-		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
-	)
-	purchase_migrator.migrate()
+	paid_journals = set()
+	for suppliers in get_supplier_groups(column_cache, party_tax_id_cache, created_before):
+		purchase_migrator = PurchaseInvoiceMigrator(
+			tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before, suppliers
+		)
+		purchase_migrator.migrate()
+		paid_journals.update(
+			name for doctype, name in purchase_migrator.tds_paid_by_other if doctype == "Journal Entry"
+		)
 	migrate_sales_invoices(
 		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
 	)
@@ -107,13 +113,61 @@ def execute():
 		party_tax_id_cache,
 		skip_docs,
 		created_before,
-		purchase_migrator.tds_paid_by_other,
+		paid_journals,
 		party_categories,
 	)
 
 	# Copy tax_withholding_category to item level
 	copy_category_to_items_for_purchase(column_cache)
 	copy_category_to_items_for_sales(column_cache)
+
+
+def get_supplier_groups(column_cache, party_tax_id_cache, created_before):
+	"""Suppliers in groups of about BATCH_SIZE purchase invoices, with the suppliers of a PAN together"""
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pe = frappe.qb.DocType("Payment Entry")
+
+	invoice_counts = defaultdict(int)
+	for supplier, count in (
+		frappe.qb.from_(pi)
+		.select(pi.supplier, Count("*"))
+		.where(pi.docstatus == 1)
+		.where(pi.creation < created_before)
+		.groupby(pi.supplier)
+		.run()
+	):
+		invoice_counts[supplier] += count
+
+	for (supplier,) in (
+		frappe.qb.from_(pe)
+		.select(pe.party)
+		.distinct()
+		.where(pe.docstatus == 1)
+		.where(pe.creation < created_before)
+		.where(pe.party_type == "Supplier")
+		.where(pe.apply_tds == 1)
+		.run()
+	):
+		invoice_counts[supplier] += 0
+
+	# v15 counted all suppliers with the same PAN together, and nothing across PANs
+	suppliers_by_pan = defaultdict(list)
+	for supplier in invoice_counts:
+		pan = column_cache["Supplier"]["pan"] and party_tax_id_cache.get(("Supplier", supplier))
+		suppliers_by_pan[pan or supplier].append(supplier)
+
+	group, group_invoices = [], 0
+	for suppliers in suppliers_by_pan.values():
+		invoices = sum(invoice_counts[supplier] for supplier in suppliers)
+		if group and (group_invoices + invoices > BATCH_SIZE or len(group) + len(suppliers) > BATCH_SIZE):
+			yield group
+			group, group_invoices = [], 0
+
+		group.extend(suppliers)
+		group_invoices += invoices
+
+	if group:
+		yield group
 
 
 def get_column_cache():
@@ -295,15 +349,19 @@ def bulk_insert_entries(all_entries):
 	if not all_entries:
 		return
 
-	# Get existing names to avoid collisions
-	existing_names = set(frappe.get_all("Tax Withholding Entry", pluck="name"))
+	# Names unique among themselves and in the table, checked in batches rather than reading every name
+	twe = frappe.qb.DocType("Tax Withholding Entry")
+	needed = sum(len(entries) for entries in all_entries.values())
+	names = set()
+	while len(names) < needed:
+		new_names = {frappe.generate_hash(length=10) for _ in range(needed - len(names))} - names
+		for batch in create_batch(list(new_names), BATCH_SIZE):
+			new_names -= set(
+				frappe.qb.from_(twe).select(twe.name).where(twe.name.isin(batch)).run(pluck=True)
+			)
+		names |= new_names
 
-	def generate_unique_name():
-		while True:
-			name = frappe.generate_hash(length=10)
-			if name not in existing_names:
-				existing_names.add(name)
-				return name
+	names = iter(names)
 
 	# Prepare all entries with proper fields
 	fields = [
@@ -356,7 +414,7 @@ def bulk_insert_entries(all_entries):
 
 			values.append(
 				(
-					generate_unique_name(),  # name
+					next(names),  # name
 					current_time,  # creation
 					current_time,  # modified
 					current_user,  # modified_by
@@ -401,7 +459,14 @@ def bulk_insert_entries(all_entries):
 
 class PurchaseInvoiceMigrator:
 	def __init__(
-		self, tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
+		self,
+		tds_accounts,
+		tax_rate_map,
+		column_cache,
+		party_tax_id_cache,
+		skip_docs,
+		created_before,
+		suppliers,
 	):
 		self.tds_accounts = tds_accounts
 		self.tax_rate_map = tax_rate_map
@@ -409,6 +474,7 @@ class PurchaseInvoiceMigrator:
 		self.party_tax_id_cache = party_tax_id_cache
 		self.skip_docs = skip_docs
 		self.created_before = created_before
+		self.suppliers = suppliers
 
 		# Build TDS account set
 		self.all_tds_accounts = set()
@@ -512,6 +578,7 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(pi.docstatus == 1)
 			.where(pi.creation < self.created_before)
+			.where(pi.supplier.isin(self.suppliers))
 			.where(tds_row)
 			.run(as_dict=True)
 		)
@@ -531,6 +598,7 @@ class PurchaseInvoiceMigrator:
 					.select(ptc.parent)
 					.where(pi.docstatus == 1)
 					.where(pi.creation < self.created_before)
+					.where(pi.supplier.isin(self.suppliers))
 					.where(tds_row)
 				)
 			)
@@ -562,6 +630,7 @@ class PurchaseInvoiceMigrator:
 			.where(at.reference_type == "Payment Entry")
 			.where(pi.docstatus == 1)
 			.where(pi.creation < self.created_before)
+			.where(pi.supplier.isin(self.suppliers))
 			.run(as_dict=True)
 		)
 
@@ -589,6 +658,8 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(pe.docstatus == 1)
 			.where(pe.creation < self.created_before)
+			.where(pe.party_type == "Supplier")
+			.where(pe.party.isin(self.suppliers))
 			.where(pe.apply_tds == 1)
 			.where(atc.account_head.isin(list(self.all_tds_accounts)))
 			.run(as_dict=True)
@@ -611,6 +682,7 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(pi.docstatus == 1)
 			.where(pi.creation < self.created_before)
+			.where(pi.supplier.isin(self.suppliers))
 			.where(pi.is_opening == "No")
 			.where(pi.apply_tds == 1)
 			.where(IfNull(pi.tax_withholding_category, "") != "")
@@ -916,7 +988,7 @@ class PurchaseInvoiceMigrator:
 			if voucher.voucher_name == invoice_name or not flt(voucher.taxable_amount):
 				continue
 
-			self.tds_paid_by_other.add(voucher.voucher_name)
+			self.tds_paid_by_other.add((voucher.voucher_type, voucher.voucher_name))
 			voucher_date = self.pi_dates.get(voucher.voucher_name) or info.posting_date
 			voucher_taxable = flt(voucher.taxable_amount)
 			voucher_tds = flt(voucher_taxable * tax_rate / 100, 2) if tax_rate else 0
@@ -944,7 +1016,7 @@ class PurchaseInvoiceMigrator:
 
 	def _process_underwithheld(self, invoice_name, ctx):
 		# Skip if TDS was paid by another invoice or the advance covered the whole invoice
-		if invoice_name in self.tds_paid_by_other or not ctx["current_taxable"]:
+		if ("Purchase Invoice", invoice_name) in self.tds_paid_by_other or not ctx["current_taxable"]:
 			return []
 
 		info = ctx["info"]
@@ -1295,7 +1367,7 @@ def migrate_journal_entries(
 	party_tax_id_cache,
 	skip_docs,
 	created_before,
-	tds_paid_by_other,
+	paid_journals,
 	party_categories,
 ):
 	"""
@@ -1512,7 +1584,7 @@ def migrate_journal_entries(
 		if (
 			not row.amount
 			or row.name in je_taxes
-			or row.name in tds_paid_by_other
+			or row.name in paid_journals
 			or ("Journal Entry", row.name) in skip_docs
 		):
 			continue
