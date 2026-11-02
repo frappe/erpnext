@@ -23,3 +23,6 @@ node_modules/
 # Banking SPA
 erpnext/public/banking
 erpnext/www/banking.html
+
+# Studio app builds
+erpnext/public/app_builds

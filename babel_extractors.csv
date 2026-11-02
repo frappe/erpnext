@@ -3,3 +3,5 @@
 **/setup/setup_wizard/data/*.txt,erpnext.gettext.extractors.lines_from_txt_file.extract
 **.tsx,frappe.gettext.extractors.html_template.extract
 **.ts,frappe.gettext.extractors.html_template.extract
+**/studio_page/*/*.json,frappe.gettext.extractors.html_template.extract
+**/studio_components/*.json,frappe.gettext.extractors.html_template.extract
