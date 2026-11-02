@@ -20,7 +20,7 @@ New Structure:
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder import Case
+from frappe.query_builder import Case, Tuple
 from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import flt, now
 
@@ -33,19 +33,26 @@ def execute():
 	tax_rate_map = get_tax_rate_map()
 	column_cache = get_column_cache()
 	party_tax_id_cache = {}
+	skip_docs = get_docs_with_entries()
 
-	# Clean up any existing migration entries
-	frappe.db.delete("Tax Withholding Entry", filters={"created_by_migration": 1})
+	# Clean up existing migration entries, except on documents the new flow has already used
+	twe = frappe.qb.DocType("Tax Withholding Entry")
+	query = frappe.qb.from_(twe).delete().where(twe.created_by_migration == 1)
+	if skip_docs:
+		query = query.where(Tuple(twe.parenttype, twe.parent).notin(list(skip_docs)))
+	query.run()
 
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
-	PurchaseInvoiceMigrator(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache).migrate()
-	migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache)
-	migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache)
+	PurchaseInvoiceMigrator(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs).migrate()
+	migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
+	migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
 
 	# Copy tax_withholding_category to item level
 	copy_category_to_items_for_purchase(column_cache)
 	copy_category_to_items_for_sales(column_cache)
+
+	mark_tax_withholding_rows()
 
 
 def get_column_cache():
@@ -131,17 +138,36 @@ def get_tax_rate_map():
 	return rate_map
 
 
-def get_docs_with_entries(doctype):
-	# Documents posted on the new flow before this patch ran already have their own entries
+def get_docs_with_entries():
+	# The new flow adjusts the entries of the documents it references, so neither side can be rebuilt
 	twe = frappe.qb.DocType("Tax Withholding Entry")
 
-	return (
+	rows = (
 		frappe.qb.from_(twe)
-		.select(twe.parent)
-		.where(twe.parenttype == doctype)
+		.select(
+			twe.parenttype,
+			twe.parent,
+			twe.taxable_doctype,
+			twe.taxable_name,
+			twe.withholding_doctype,
+			twe.withholding_name,
+		)
 		.where(twe.created_by_migration == 0)
-		.where(twe.parent.isnotnull())
+		.where(twe.docstatus == 1)
+		.run(as_dict=True)
 	)
+
+	docs = set()
+	for row in rows:
+		for doctype, name in (
+			(row.parenttype, row.parent),
+			(row.taxable_doctype, row.taxable_name),
+			(row.withholding_doctype, row.withholding_name),
+		):
+			if doctype and name:
+				docs.add((doctype, name))
+
+	return docs
 
 
 def get_tax_rate_for_date(tax_rate_map, category, posting_date):
@@ -310,11 +336,12 @@ def bulk_insert_entries(all_entries):
 
 
 class PurchaseInvoiceMigrator:
-	def __init__(self, tds_accounts, tax_rate_map, column_cache, party_tax_id_cache):
+	def __init__(self, tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
 		self.tds_accounts = tds_accounts
 		self.tax_rate_map = tax_rate_map
 		self.column_cache = column_cache
 		self.party_tax_id_cache = party_tax_id_cache
+		self.skip_docs = skip_docs
 
 		# Build TDS account set
 		self.all_tds_accounts = set()
@@ -358,7 +385,10 @@ class PurchaseInvoiceMigrator:
 		self._fetch_dates()
 		self._process_invoices()
 		self._process_pe_overwithheld()
-		bulk_insert_entries(self.all_entries)
+		# Skipped documents are still processed, as they may hold the entries of other documents
+		bulk_insert_entries(
+			{key: rows for key, rows in self.all_entries.items() if key not in self.skip_docs}
+		)
 
 	# -------------------------------------------------------------------------
 	# Data Fetching
@@ -393,7 +423,6 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(pi.docstatus == 1)
 			.where(ptc.account_head.isin(list(self.all_tds_accounts)))
-			.where(pi.name.notin(get_docs_with_entries("Purchase Invoice")))
 			.run(as_dict=True)
 		)
 
@@ -420,7 +449,6 @@ class PurchaseInvoiceMigrator:
 			)
 			.where(twv.parenttype == "Purchase Invoice")
 			.where(pi.docstatus == 1)
-			.where(pi.name.notin(get_docs_with_entries("Purchase Invoice")))
 			.run(as_dict=True)
 		)
 
@@ -448,7 +476,6 @@ class PurchaseInvoiceMigrator:
 			.where(at.parenttype == "Purchase Invoice")
 			.where(at.reference_type == "Payment Entry")
 			.where(pi.docstatus == 1)
-			.where(pi.name.notin(get_docs_with_entries("Purchase Invoice")))
 			.run(as_dict=True)
 		)
 
@@ -477,7 +504,6 @@ class PurchaseInvoiceMigrator:
 			.where(pe.docstatus == 1)
 			.where(pe.apply_tds == 1)
 			.where(atc.account_head.isin(list(self.all_tds_accounts)))
-			.where(pe.name.notin(get_docs_with_entries("Payment Entry")))
 			.run(as_dict=True)
 		)
 
@@ -916,7 +942,7 @@ class PurchaseInvoiceMigrator:
 # =============================================================================
 
 
-def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache):
+def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
 	"""
 	Migrate Sales Invoice TCS data.
 
@@ -962,7 +988,6 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			Max(Case().when(gle.account.isin(tcs_accounts_list), gle.account).else_(None)).as_("account"),
 		)
 		.where(si.docstatus == 1)
-		.where(si.name.notin(get_docs_with_entries("Sales Invoice")))
 		.groupby(si.name)
 		.run(as_dict=True)
 	)
@@ -971,6 +996,9 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 	category_wise_invoices = defaultdict(list)
 
 	for row in tcs_entries:
+		if ("Sales Invoice", row.invoice_name) in skip_docs:
+			continue
+
 		total_tcs = row.total_tcs
 		net_grand_total = abs(row.base_grand_total - total_tcs)
 
@@ -1071,7 +1099,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 # =============================================================================
 
 
-def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache):
+def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
 	"""
 	Migrate Journal Entry TDS data.
 
@@ -1110,7 +1138,6 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 		.where(gle.is_cancelled == 0)
 		.where(je.docstatus == 1)
 		.where(gle.account.isin(list(all_tds_accounts)))
-		.where(je.name.notin(get_docs_with_entries("Journal Entry")))
 		.run(as_dict=True)
 	)
 
@@ -1152,6 +1179,9 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 	category_wise_jes = defaultdict(set)
 
 	for je_name, data in je_taxes.items():
+		if ("Journal Entry", je_name) in skip_docs:
+			continue
+
 		info = data["info"]
 
 		# Assume TCS not allowed in Journal Entry
@@ -1306,3 +1336,40 @@ def copy_category_to_items_for_sales(column_cache):
 		.where(IfNull(item.tax_withholding_category, "") == "")
 		.run()
 	)
+
+
+# =============================================================================
+# TAX ROW FLAGS
+# =============================================================================
+
+
+def mark_tax_withholding_rows():
+	# Sales Invoice and Journal Entry are migrated from GL, so their tax rows were never flagged
+	twe = frappe.qb.DocType("Tax Withholding Entry")
+	twa = frappe.qb.DocType("Tax Withholding Account")
+
+	for parent_doctype, tax_doctype, account_field in (
+		("Sales Invoice", "Sales Taxes and Charges", "account_head"),
+		("Journal Entry", "Journal Entry Account", "account"),
+	):
+		tax = frappe.qb.DocType(tax_doctype)
+		migrated_docs = (
+			frappe.qb.from_(twe)
+			.select(twe.parent)
+			.where(twe.parenttype == parent_doctype)
+			.where(twe.created_by_migration == 1)
+		)
+
+		query = (
+			frappe.qb.update(tax)
+			.set(tax.is_tax_withholding_account, 1)
+			.where(tax.parenttype == parent_doctype)
+			.where(tax.parent.isin(migrated_docs))
+			.where(getattr(tax, account_field).isin(frappe.qb.from_(twa).select(twa.account)))
+		)
+
+		if tax_doctype == "Journal Entry Account":
+			# the deduction is the credit row; a debit on the account is a TDS payment
+			query = query.where(tax.credit > 0)
+
+		query.run()
