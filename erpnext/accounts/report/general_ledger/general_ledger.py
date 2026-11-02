@@ -214,7 +214,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
 	else:
 		return gl_entries
 
@@ -471,28 +471,34 @@ def get_totals_dict():
 	)
 
 
-def group_by_field(group_by):
+def get_group_by_fields(group_by: str | None) -> tuple[str, ...]:
 	if group_by == "Categorize by Party":
-		return "party"
+		return ("party_type", "party")
 	elif group_by in ["Categorize by Voucher (Consolidated)", "Categorize by Account"]:
-		return "account"
+		return ("account",)
 	else:
-		return "voucher_no"
+		return ("voucher_no",)
+
+
+def get_group_by_value(gle: dict, group_by_fields: tuple[str, ...]) -> tuple:
+	return tuple(gle.get(field) for field in group_by_fields)
 
 
 def initialize_gle_map(gl_entries, filters, totals_dict):
 	gle_map = OrderedDict()
-	group_by = group_by_field(filters.get("categorize_by"))
+	group_by = get_group_by_fields(filters.get("categorize_by"))
 
 	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=copy.deepcopy(totals_dict), entries=[]))
+		gle_map.setdefault(
+			get_group_by_value(gle, group_by), _dict(totals=copy.deepcopy(totals_dict), entries=[])
+		)
 	return gle_map
 
 
 def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, totals):
 	entries = []
 	consolidated_gle = OrderedDict()
-	group_by = group_by_field(filters.get("categorize_by"))
+	group_by = get_group_by_fields(filters.get("categorize_by"))
 	group_by_voucher_consolidated = filters.get("categorize_by") == "Categorize by Voucher (Consolidated)"
 
 	if filters.get("show_net_values_in_party_account"):
@@ -543,7 +549,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, tot
 	show_opening_entries = filters.get("show_opening_entries")
 
 	for gle in gl_entries:
-		group_by_value = gle.get(group_by)
+		group_by_value = get_group_by_value(gle, group_by)
 		gle.voucher_type = gle.voucher_type
 
 		if gle.posting_date < from_date or (
@@ -946,7 +952,7 @@ def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
 	return gl_entries
 
 
