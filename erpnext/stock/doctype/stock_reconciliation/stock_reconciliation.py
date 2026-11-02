@@ -1087,14 +1087,6 @@ class StockReconciliation(StockController):
 
 		With ``voucher_detail_no``, only that row is refreshed and the total is summed from all rows.
 		"""
-<<<<<<< HEAD
-		difference_amount = 0.0
-=======
-		if self.purpose == ADJUSTMENT_ENTRY:
-			AdjustmentEntry(self).set_difference_amount_from_ledger()
-			return
->>>>>>> 9626fd6 (perf(stock): refresh only the reposted row of a stock reconciliation)
-
 		for row in self.items:
 			if voucher_detail_no in (None, row.name):
 				self.set_row_values_from_ledger(row)
@@ -1106,10 +1098,7 @@ class StockReconciliation(StockController):
 			update_modified=False,
 		)
 
-<<<<<<< HEAD
-	def is_adjustment_row(self, row) -> bool:
-=======
-	def set_row_values_from_ledger(self, row: StockReconciliationItem):
+	def set_row_values_from_ledger(self, row):
 		stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
 		amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
 
@@ -1137,8 +1126,7 @@ class StockReconciliation(StockController):
 			update_modified=False,
 		)
 
-	def is_adjustment_row(self, row: StockReconciliationItem) -> bool:
->>>>>>> 9626fd6 (perf(stock): refresh only the reposted row of a stock reconciliation)
+	def is_adjustment_row(self, row) -> bool:
 		# Read once for the whole voucher: both callers run per row, and a reconciliation
 		# submits and cancels synchronously for up to 100 of them.
 		if self.flags.adjustment_rows is None:
