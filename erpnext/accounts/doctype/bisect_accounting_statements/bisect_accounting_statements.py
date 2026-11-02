@@ -183,7 +183,7 @@ class BisectAccountingStatements(Document):
 			self.get_report_summary()
 			self.update_node()
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def bisect_left(self):
 		if self.current_node is not None:
 			cur_node = frappe.get_doc("Bisect Nodes", self.current_node)
@@ -197,7 +197,7 @@ class BisectAccountingStatements(Document):
 			else:
 				frappe.msgprint(_("No more children on Left"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def bisect_right(self):
 		if self.current_node is not None:
 			cur_node = frappe.get_doc("Bisect Nodes", self.current_node)
@@ -211,7 +211,7 @@ class BisectAccountingStatements(Document):
 			else:
 				frappe.msgprint(_("No more children on Right"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def move_up(self):
 		if self.current_node is not None:
 			cur_node = frappe.get_doc("Bisect Nodes", self.current_node)

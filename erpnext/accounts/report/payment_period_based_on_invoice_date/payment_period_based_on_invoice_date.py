@@ -73,8 +73,7 @@ def get_columns(filters):
 		{
 			"fieldname": "payment_document",
 			"label": _("Payment Document Type"),
-			"fieldtype": "Link",
-			"options": "DocType",
+			"fieldtype": "Select",
 			"width": 100,
 		},
 		{
@@ -87,8 +86,7 @@ def get_columns(filters):
 		{
 			"fieldname": "party_type",
 			"label": _("Party Type"),
-			"fieldtype": "Link",
-			"options": "DocType",
+			"fieldtype": "Select",
 			"width": 100,
 		},
 		{

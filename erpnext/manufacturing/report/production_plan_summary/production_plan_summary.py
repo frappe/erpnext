@@ -151,8 +151,7 @@ def get_column(filters):
 		},
 		{
 			"label": _("Document Type"),
-			"fieldtype": "Link",
-			"options": "DocType",
+			"fieldtype": "Select",
 			"fieldname": "document_type",
 			"width": 150,
 		},

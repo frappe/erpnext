@@ -210,6 +210,21 @@ class TestPackedItem(FrappeTestCase):
 		self.assertEqual(dn.packed_items[2].qty, 6)
 		self.assertEqual(dn.packed_items[3].qty, 6)
 
+	def test_newly_mapped_doc_with_removed_bundle_row(self):
+		"Packed items of a removed row must not move to another row with the same bundle."
+		so_items = [
+			{"item_code": self.bundle, "qty": 1, "rate": 400, "warehouse": warehouse}
+			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		]
+		so = make_sales_order(item_list=so_items)
+
+		dn = make_delivery_note(so.name)
+		dn.items.pop(0)
+		dn.insert()
+
+		self.assertEqual(len(dn.packed_items), 2)
+		self.assertEqual({pi.warehouse for pi in dn.packed_items}, {"_Test Warehouse 1 - _TC"})
+
 	def test_reposting_packed_items(self):
 		warehouse = "Stores - TCP1"
 		company = "_Test Company with perpetual inventory"

@@ -667,13 +667,13 @@ erpnext.PointOfSale.Controller = class {
 
 				this.update_cart_html(item_row);
 
-				if (this.item_details.$component.is(":visible")) this.edit_item_details_of(item_row);
-
 				if (
-					this.check_serial_batch_selection_needed(item_row) &&
-					!this.item_details.$component.is(":visible")
-				)
+					this.item_details.$component.is(":visible") ||
+					(item_row.has_batch_no && !batch_no) ||
+					this.check_serial_batch_selection_needed(item_row)
+				) {
 					this.edit_item_details_of(item_row);
+				}
 			}
 		} catch (error) {
 			console.log(error);
@@ -700,11 +700,11 @@ erpnext.PointOfSale.Controller = class {
 			// if item is clicked twice from item selector
 			// then "item_code, batch_no, uom, rate" will help in getting the exact item
 			// to increase the qty by one
-			const has_batch_no = batch_no !== "null" && batch_no !== null;
+			const has_batch_no = batch_no && batch_no !== "null";
 			item_row = this.frm.doc.items.find(
 				(i) =>
 					i.item_code === item_code &&
-					(!has_batch_no || (has_batch_no && i.batch_no === batch_no)) &&
+					(has_batch_no ? i.batch_no === batch_no : !i.batch_no) &&
 					i.uom === uom &&
 					i.price_list_rate === flt(rate)
 			);

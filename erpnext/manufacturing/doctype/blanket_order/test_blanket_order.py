@@ -1,10 +1,13 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+import json
+
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_months, today
 
 from erpnext import get_company_currency
+from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.stock.doctype.item.test_item import make_item
 
 from .blanket_order import make_order
@@ -164,6 +167,28 @@ class TestBlanketOrder(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, orders[2].submit)
 
+	def test_update_items_refreshes_blanket_order_of_removed_row(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		second_item = make_item("_Test Blanket Order Second Item", {"is_stock_item": 1}).name
+		po.append(
+			"items",
+			{
+				"item_code": second_item,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": today(),
+			},
+		)
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 10)
+
+		# Keep only the row without a blanket order
+		update_purchase_order_row_qty(po, po.items[1], 5)
+
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 0)
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
@@ -200,3 +225,16 @@ def make_purchase_order_against(blanket_order, qty):
 	po.schedule_date = today()
 	po.items[0].qty = qty
 	return po
+
+
+def update_purchase_order_row_qty(po, row, qty):
+	payload = {
+		"docname": row.name,
+		"item_code": row.item_code,
+		"qty": qty,
+		"rate": row.rate,
+		"uom": row.uom,
+		"conversion_factor": row.conversion_factor,
+		"schedule_date": str(row.schedule_date),
+	}
+	update_child_qty_rate("Purchase Order", json.dumps([payload]), po.name)

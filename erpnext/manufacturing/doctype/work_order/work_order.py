@@ -36,7 +36,7 @@ from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from erpnext.stock.utils import _get_latest_stock_qty, get_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -758,7 +758,7 @@ class WorkOrder(Document):
 		)
 
 		if enable_capacity_planning and job_card_doc:
-			row.planned_start_time = job_card_doc.scheduled_time_logs[-1].from_time
+			row.planned_start_time = job_card_doc.scheduled_time_logs[0].from_time
 			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
 
 			if date_diff(row.planned_end_time, self.planned_start_date) > plan_days:
@@ -1238,10 +1238,10 @@ class WorkOrder(Document):
 	def set_available_qty(self):
 		for d in self.get("required_items"):
 			if d.source_warehouse:
-				d.available_qty_at_source_warehouse = get_latest_stock_qty(d.item_code, d.source_warehouse)
+				d.available_qty_at_source_warehouse = _get_latest_stock_qty(d.item_code, d.source_warehouse)
 
 			if self.wip_warehouse:
-				d.available_qty_at_wip_warehouse = get_latest_stock_qty(d.item_code, self.wip_warehouse)
+				d.available_qty_at_wip_warehouse = _get_latest_stock_qty(d.item_code, self.wip_warehouse)
 
 	def set_required_items(self, reset_only_qty=False):
 		"""set required_items for production to keep track of reserved qty"""
@@ -1631,8 +1631,8 @@ def check_if_scrap_warehouse_mandatory(bom_no):
 	return res
 
 
-@frappe.whitelist()
-def set_work_order_ops(name):
+@frappe.whitelist(methods=["POST"])
+def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()
 	po.save()

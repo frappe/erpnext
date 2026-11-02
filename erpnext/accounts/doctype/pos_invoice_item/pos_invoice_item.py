@@ -48,6 +48,7 @@ class POSInvoiceItem(Document):
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
 		income_account: DF.Link
+		incoming_rate: DF.Currency
 		is_fixed_asset: DF.Check
 		is_free_item: DF.Check
 		item_code: DF.Link | None

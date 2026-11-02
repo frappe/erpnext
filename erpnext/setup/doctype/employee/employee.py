@@ -197,11 +197,40 @@ class Employee(NestedSet):
 			return
 
 		user = frappe.get_doc("User", self.user_id)
-		enabled = user.enabled
-		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
-			user.enabled = not enabled
-			# Keep linked User status in sync from the Employee lifecycle and record the audit log.
-			user.save(ignore_permissions=True)
+		enable = self.status == "Active"
+		if user.enabled == enable:
+			return
+
+		if enable and not self.can_reenable_user(user):
+			frappe.msgprint(
+				_("User {0} is disabled. Only a user who can edit Users can enable it.").format(
+					frappe.bold(self.user_id)
+				)
+			)
+			return
+
+		user.enabled = enable
+		# Keep linked User status in sync from the Employee lifecycle and record the audit log,
+		# which can_reenable_user reads.
+		user.save(ignore_permissions=True, ignore_version=False)
+
+	def can_reenable_user(self, user):
+		"""Allow if the session user can edit the User, or if an Employee status change disabled it last."""
+		if frappe.has_permission("User", "write", user):
+			return True
+
+		last_change = frappe.get_all(
+			"Version",
+			filters={"ref_doctype": "User", "docname": user.name, "data": ("like", '%["enabled",%')},
+			pluck="owner",
+			order_by="creation desc",
+			limit=1,
+		)
+		# Without User write access, the only way to disable a User is an Employee status change.
+		# Every user has their own User shared with them, so check role permissions only.
+		return bool(last_change) and not frappe.has_permission(
+			"User", "write", user=last_change[0], ignore_share_permissions=True
+		)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
@@ -340,8 +369,8 @@ def deactivate_sales_person(status=None, employee=None):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
 
 
-@frappe.whitelist()
-def create_user(employee, user=None, email=None):
+@frappe.whitelist(methods=["POST"])
+def create_user(employee: str, user: str | None = None, email: str | None = None):
 	emp = frappe.get_doc("Employee", employee)
 	emp.check_permission("write")
 	if emp.user_id:

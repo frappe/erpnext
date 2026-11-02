@@ -244,7 +244,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			description_cond=description_cond,
 		),
 		{
@@ -278,7 +278,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
+			mcond=get_match_cond(doctype),
 			key=searchfield,
 		),
 		{

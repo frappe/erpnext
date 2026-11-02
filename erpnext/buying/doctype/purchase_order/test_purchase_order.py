@@ -12,6 +12,7 @@ from frappe.utils.data import today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
 from erpnext.buying.doctype.purchase_order.purchase_order import (
+	item_last_purchase_rate,
 	make_inter_company_sales_order,
 	make_purchase_receipt,
 )
@@ -504,6 +505,18 @@ class TestPurchaseOrder(FrappeTestCase):
 		update_child_qty_rate("Purchase Order", trans_item, po.name)
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 0)
+
+	def test_item_last_purchase_rate_in_row_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}]).name
+		frappe.db.set_value("Item", item, "last_purchase_rate", 10)
+
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.get_last_purchase_rate()
+
+		self.assertEqual(po.items[0].rate, 120)
+		self.assertEqual(item_last_purchase_rate(po.name, 1, item, 12), 120)
 
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
@@ -1796,7 +1809,85 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi.items = pi.items[:1]
 		pi.items[0].rate = 90
 		pi.submit()
+		self.assertEqual(
+			[(row.po_detail, row.qty) for row in make_pi_from_po(po.name).items],
+			[(po.items[0].name, 0), (po.items[1].name, 10)],
+		)
+
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_full_qty_billed_below_amount_is_mapped_with_zero_qty(self):
+		# The second row keeps the mapped invoice non-empty once the first row is fully billed.
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 1000,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.items = pi.items[:1]
+		pi.items[0].rate = 400
+		pi.submit()
+
+		pi = make_pi_from_po(po.name)
+		self.assertEqual(
+			[(row.po_detail, row.qty) for row in pi.items], [(po.items[0].name, 0), (po.items[1].name, 1)]
+		)
+		self.assertEqual(len(make_pi_from_po(po.name, target_doc=pi).items), 2)
+
+		pi.items = pi.items[:1]
+		pi.items[0].qty = 1
+		pi.items[0].rate = 600
+		pi.submit()
+
+		po.reload()
+		self.assertEqual(po.items[0].billed_amt, po.items[0].amount)
 		self.assertEqual([row.po_detail for row in make_pi_from_po(po.name).items], [po.items[1].name])
+
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_portal_purchase_invoice_skips_zero_qty_rows(self):
+		from unittest.mock import patch
+
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice_from_portal
+
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=True)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 1000,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.items[0].schedule_date,
+			},
+		)
+		po.submit()
+		pi = make_pi_from_po(po.name)
+		pi.items = pi.items[:1]
+		pi.items[0].rate = 400
+		pi.submit()
+
+		user = create_user("portal_pi_supplier@example.com", "Accounts User").name
+		supplier = frappe.get_doc("Supplier", po.supplier)
+		supplier.append("portal_users", {"user": user})
+		supplier.save()
+
+		with self.set_user(user), patch("frappe.db.commit"):
+			make_purchase_invoice_from_portal(po.name)
+
+		self.assertEqual(
+			frappe.get_all(
+				"Purchase Invoice Item", {"purchase_order": po.name, "docstatus": 0}, pluck="po_detail"
+			),
+			[po.items[1].name],
+		)
 
 	def test_update_items_refused_on_closed_and_on_hold_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status

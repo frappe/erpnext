@@ -264,6 +264,88 @@ class TestIssue(TestSetUp):
 			)
 		)
 
+	def test_portal_user_cannot_set_customer_or_status(self):
+		user = "test_issue_portal_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Portal",
+					"user_type": "Website User",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		contact = frappe.get_doc("Contact", {"email_id": user})
+		contact.links = []
+		contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		contact.save(ignore_permissions=True)
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+
+		frappe.set_user(user)
+		try:
+			issue = frappe.get_doc(
+				{
+					"doctype": "Issue",
+					"subject": "Portal issue",
+					"customer": "__Test Customer",
+					"status": "Closed",
+					"via_customer_portal": 1,
+				}
+			).insert(ignore_permissions=True)
+			self.assertEqual((issue.customer, issue.status), ("_Test Customer", "Open"))
+
+			issue = frappe.get_doc("Issue", issue.name)
+			issue.customer = "__Test Customer"
+			issue.status = "Closed"
+			issue.save(ignore_permissions=True)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			frappe.db.get_value("Issue", issue.name, ["customer", "status"]), ("_Test Customer", "Open")
+		)
+
+	def test_web_form_ignores_submitted_customer_and_raised_by(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		# a desk user who can see any Customer but cannot create an Issue
+		user = make_fenced_user("test_issue_web_form_user@example.com", ["Stock User"])
+		self.assertTrue(frappe.has_permission("Customer", "read", doc="_Test Customer", user=user))
+		self.assertFalse(frappe.has_permission("Issue", "create", user=user))
+
+		# raised_by is matched to a Contact, which would attribute the issue to its customer
+		victim = "test_issue_web_form_victim@example.com"
+		if not frappe.db.exists("Contact Email", {"email_id": victim}):
+			contact = frappe.get_doc({"doctype": "Contact", "first_name": "Victim"})
+			contact.add_email(victim, is_primary=True)
+			contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+			contact.insert(ignore_permissions=True)
+
+		in_web_form = frappe.flags.get("in_web_form", False)
+		frappe.flags.in_web_form = True
+		try:
+			with as_user(user):
+				issue = frappe.get_doc(
+					{
+						"doctype": "Issue",
+						"subject": "Forged customer",
+						"customer": "_Test Customer",
+						"status": "Closed",
+						"raised_by": victim,
+					}
+				).insert(ignore_permissions=True)
+				self.assertEqual((issue.customer, issue.status, issue.raised_by), (None, "Open", user))
+
+				issue = frappe.get_doc("Issue", issue.name)
+				issue.customer = "_Test Customer"
+				issue.status = "Closed"
+				issue.save(ignore_permissions=True)
+		finally:
+			frappe.flags.in_web_form = in_web_form
+
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, ["customer", "status"]), (None, "Open"))
+
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 
@@ -625,6 +707,38 @@ class TestFirstResponseTime(TestSetUp):
 		frappe.set_user(self._get_no_perm_user())
 		self.assertRaises(frappe.PermissionError, set_multiple_status, json.dumps([issue.name]), "Closed")
 		frappe.set_user("Administrator")
+
+	def test_split_issue_is_whitelisted_for_post(self):
+		from erpnext.support.doctype.issue.issue import Issue
+
+		self.assertTrue(Issue.split_issue in frappe.whitelisted)
+		self.assertEqual(frappe.allowed_http_methods_for_whitelisted_func[Issue.split_issue], ["POST"])
+
+	def test_split_issue_through_run_doc_method(self):
+		from frappe.handler import run_doc_method
+		from frappe.utils import set_request
+
+		issue = make_issue(index=1)
+		create_communication(issue.name, "test@example.com", "Received", get_datetime())
+		communication = frappe.get_all(
+			"Communication", {"reference_doctype": "Issue", "reference_name": issue.name}, pluck="name"
+		)[0]
+
+		previous_request = getattr(frappe.local, "request", None)
+		try:
+			set_request(method="POST", path="/api/method/run_doc_method")
+			run_doc_method(
+				"split_issue",
+				dt="Issue",
+				dn=issue.name,
+				args={"subject": "_Test Split Issue", "communication_id": communication},
+			)
+		finally:
+			frappe.local.request = previous_request
+
+		new_issue = frappe.response["message"]
+		self.assertEqual(frappe.db.get_value("Issue", new_issue, "issue_split_from"), issue.name)
+		self.assertEqual(frappe.db.get_value("Communication", communication, "reference_name"), new_issue)
 
 
 def create_issue_and_communication(issue_creation, first_responded_on):

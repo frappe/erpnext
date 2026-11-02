@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
@@ -1046,6 +1046,94 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(dn.packed_items[0].warehouse, warehouse)
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
+		pl.reload()
+		for location in pl.locations:
+			self.assertEqual(location.delivered_qty, location.picked_qty)
+		self.assertEqual(pl.per_delivered, 100)
+		self.assertEqual(pl.delivery_status, "Fully Delivered")
+		self.assertEqual(pl.status, "Completed")
+
+		dn.cancel()
+		pl.reload()
+		for location in pl.locations:
+			self.assertEqual(location.delivered_qty, 0)
+		self.assertEqual(pl.per_delivered, 0)
+		self.assertEqual(pl.delivery_status, "Not Delivered")
+		self.assertEqual(pl.status, "Open")
+
+	def test_partial_delivery_of_picklist_with_bundle(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, _components = create_product_bundle([1, 1], warehouse=warehouse)
+		so = make_sales_order(item_code=bundle, qty=2, rate=42)
+
+		pl = create_pick_list(so.name).save().submit()
+		dn = create_delivery_note(pl.name)
+		dn.items[0].qty = 1
+		dn.save().submit()
+
+		pl.reload()
+		for location in pl.locations:
+			self.assertEqual(location.delivered_qty, 1)
+		self.assertEqual(pl.per_delivered, 50)
+		self.assertEqual(pl.delivery_status, "Partly Delivered")
+		self.assertEqual(pl.status, "Partly Delivered")
+
+		dn.cancel()
+		pl.reload()
+		for location in pl.locations:
+			self.assertEqual(location.delivered_qty, 0)
+		self.assertEqual(pl.per_delivered, 0)
+		self.assertEqual(pl.delivery_status, "Not Delivered")
+		self.assertEqual(pl.status, "Open")
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_partial_bundle_delivery_with_split_pick_list_rows(self):
+		primary_warehouse = "_Test Warehouse - _TC"
+		secondary_warehouse = "_Test Warehouse 2 - _TC"
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		serialized_component = make_item(
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": f"PL-BUNDLE-{frappe.generate_hash(length=6)}-.#####",
+			}
+		).name
+		other_component = make_item().name
+		make_product_bundle(bundle, [serialized_component, other_component])
+		make_stock_entry(item=serialized_component, to_warehouse=primary_warehouse, qty=1)
+		make_stock_entry(item=serialized_component, to_warehouse=secondary_warehouse, qty=2)
+		make_stock_entry(item=other_component, to_warehouse=primary_warehouse, qty=3)
+		so = make_sales_order(item_code=bundle, qty=3, rate=42)
+
+		pl = create_pick_list(so.name).save().submit()
+		serialized_locations = [row for row in pl.locations if row.item_code == serialized_component]
+		self.assertEqual(len(serialized_locations), 2)
+
+		dn = create_delivery_note(pl.name)
+		dn.items[0].qty = 2
+		dn.save().submit()
+		delivered_component = next(row for row in dn.packed_items if row.item_code == serialized_component)
+		self.assertEqual(delivered_component.warehouse, secondary_warehouse)
+		delivered_location = next(row for row in serialized_locations if row.warehouse == secondary_warehouse)
+		self.assertEqual(
+			set(delivered_component.serial_no.split("\n")),
+			set(delivered_location.serial_no.split("\n")),
+		)
+
+		pl.reload()
+		for location in pl.locations:
+			if location.item_code == serialized_component:
+				expected_qty = 2 if location.warehouse == secondary_warehouse else 0
+				self.assertEqual(location.delivered_qty, expected_qty)
+			else:
+				self.assertEqual(location.delivered_qty, 2)
+		self.assertEqual(pl.per_delivered, 66.666667)
+		self.assertEqual(pl.delivery_status, "Partly Delivered")
+		self.assertEqual(pl.status, "Partly Delivered")
+
+		dn.cancel()
+		pl.reload()
+		for location in pl.locations:
+			self.assertEqual(location.delivered_qty, 0)
 
 	def test_picklist_with_partial_bundles(self):
 		# from test_records.json
@@ -1933,3 +2021,60 @@ class TestPickList(FrappeTestCase):
 		pick_list.cancel()
 		sales_order.cancel()
 		stock_entry.cancel()
+
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
+	def test_pick_skips_serial_nos_reserved_for_other_orders(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRSN-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=3, basic_rate=100)
+
+		reserving_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
+		reserving_order.create_stock_reservation_entries(notify=False)
+		sre_name = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": reserving_order.name})
+		reserved_serial_nos = frappe.get_all(
+			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
+		)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		self.assertNotIn(
+			pick_list.locations[0].serial_no,
+			reserved_serial_nos,
+		)
+
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
+	def test_pick_counts_serial_nos_reserved_by_other_pick_list_once(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRPL-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=3, basic_rate=100)
+
+		reserving_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
+		reserving_pick_list = create_pick_list(reserving_order.name)
+		reserving_pick_list.submit()
+		reserving_pick_list.create_stock_reservation_entries(notify=False)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+
+		self.assertEqual([row.qty for row in pick_list.locations], [1])
+
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
+	def test_pick_keeps_draft_hold_without_serial_nos_when_skipping_reserved(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRDH-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		holding_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
+		holding_pick_list = create_pick_list(holding_order.name)
+		holding_pick_list.pick_manually = 1
+		holding_pick_list.locations[0].serial_no = ""
+		holding_pick_list.save()
+		reserving_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		reserving_order.create_stock_reservation_entries(notify=False)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+
+		self.assertEqual(sum(row.qty for row in pick_list.locations), 2)

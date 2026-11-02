@@ -848,6 +848,16 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
 
+	def test_update_status_endpoint_rejects_invalid_status(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		so = make_sales_order()
+		# only Draft / On Hold / Closed are allowed, and only on a submitted order
+		self.assertRaises(frappe.ValidationError, update_status, "Cancelled", so.name)
+
+		draft = make_sales_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_status, "Closed", draft.name)
+
 	def test_sales_order_on_hold(self):
 		so = make_sales_order(item_code="_Test Product Bundle Item")
 		so.db_set("status", "On Hold")

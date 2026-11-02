@@ -527,10 +527,29 @@ class StockController(AccountsController):
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
 				parent_rows = self.get("items", {"name": row.parent_detail_docname}) or []
 				for d in parent_rows:
-					if d.get(field) and not d.get(bundle_field):
+					if (
+						d.get(field)
+						and not d.get(bundle_field)
+						and not self.is_legacy_packed_item(row, d.get(field))
+					):
 						reference_ids.append(d.get(field))
 
 		return field, reference_ids
+
+	def is_legacy_packed_item(self, row, source_parent_detail_docname):
+		"""Packed items delivered before v15 have serial / batch fields, but no bundle to return
+		against. make_bundle_using_old_serial_batch_fields handles them."""
+		if not (row.serial_no or row.batch_no):
+			return False
+
+		return not frappe.db.exists(
+			"Packed Item",
+			{
+				"parent_detail_docname": source_parent_detail_docname,
+				"item_code": row.item_code,
+				"serial_and_batch_bundle": ("is", "set"),
+			},
+		)
 
 	@frappe.request_cache
 	def is_serial_batch_item(self, item_code) -> bool:
@@ -1263,9 +1282,10 @@ class StockController(AccountsController):
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
-	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
-		for blanket_order in blanket_orders:
+	def update_blanket_order(self, extra_blanket_orders=()):
+		"""Refresh ordered qty of the blanket orders on the items and of `extra_blanket_orders`."""
+		blanket_orders = {d.blanket_order for d in self.items if d.blanket_order}
+		for blanket_order in blanket_orders.union(extra_blanket_orders):
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
@@ -1589,6 +1609,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_doc(doctype, docname)
 	doc.check_permission("read")
+	frappe.has_permission("GL Entry", "read", throw=True)
 	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
@@ -1603,6 +1624,7 @@ def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, valuation_field_type="Currency")
 	doc = frappe.get_doc(doctype, docname)
 	doc.check_permission("read")
+	frappe.has_permission("Stock Ledger Entry", "read", throw=True)
 	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
@@ -1811,8 +1833,8 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
-@frappe.whitelist()
-def make_quality_inspections(company, doctype, docname, items):
+@frappe.whitelist(methods=["POST"])
+def make_quality_inspections(company: str, doctype: str, docname: str, items: str | list):
 	if isinstance(items, str):
 		items = json.loads(items)
 

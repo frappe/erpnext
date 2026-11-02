@@ -72,10 +72,10 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
+	_get_bin_details,
 	_get_item_details,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
-	get_bin_details,
 	get_conversion_factor,
 	get_item_tax_map,
 	get_item_warehouse,
@@ -1208,6 +1208,7 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			self.pricing_rules = []
+			removed_pricing_rules = set()
 
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -1229,6 +1230,11 @@ class AccountsController(TransactionBase):
 						args["is_subcontracted"] = self.is_subcontracted
 
 					ret = _get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+					if ret.get("pricing_rule_removed"):
+						removed_pricing_rules.update(
+							set(get_applied_pricing_rules(args.get("pricing_rules")))
+							- set(get_applied_pricing_rules(ret.get("pricing_rules")))
+						)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -1269,6 +1275,7 @@ class AccountsController(TransactionBase):
 								and value is not None
 								and fieldname
 								in [
+									"price_list_rate",
 									"discount_percentage",
 									"discount_amount",
 									"rate",
@@ -1310,6 +1317,19 @@ class AccountsController(TransactionBase):
 						or item.get("conversion_factor")
 						or 1
 					)
+
+			if removed_pricing_rules:
+				# Keep free items when the same rule still applies to another row.
+				removed_pricing_rules.difference_update(row.pricing_rule for row in self.pricing_rules)
+				for item in self.items[:]:
+					if (
+						item.get("is_free_item")
+						and item.get("pricing_rules") in removed_pricing_rules
+						and not frappe.get_cached_value(
+							"Pricing Rule", item.pricing_rules, "dont_enforce_free_item_qty"
+						)
+					):
+						self.remove(item)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -1923,10 +1943,11 @@ class AccountsController(TransactionBase):
 							party_account = arg.get("account")
 							gain_loss_account = arg.get("difference_account")
 							difference_amount = arg.get("difference_amount") or arg.get("exchange_gain_loss")
-							if difference_amount > 0:
-								dr_or_cr = "debit" if arg.get("party_type") == "Customer" else "credit"
-							else:
-								dr_or_cr = "credit" if arg.get("party_type") == "Customer" else "debit"
+							dr_or_cr = "debit" if difference_amount > 0 else "credit"
+							if self.is_payable_account(self.doctype, party_account) and arg.get(
+								"against_voucher_type"
+							) not in ("Journal Entry", "Payment Entry"):
+								dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 
 							reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
@@ -2921,6 +2942,9 @@ class AccountsController(TransactionBase):
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
 				"paid_amount": schedule.paid_amount,
+				"discount_type": schedule.discount_type,
+				"discount": schedule.discount,
+				"discount_date": schedule.discount_date,
 			}
 
 			if automatically_fetch_payment_terms:
@@ -2944,15 +2968,22 @@ class AccountsController(TransactionBase):
 					schedule.precision("base_payment_amount"),
 				)
 				payment_schedule["outstanding"] = payment_schedule["payment_amount"]
+				if schedule.discount_type == "Amount" and schedule.invoice_portion:
+					payment_schedule["discount"] = (
+						flt(
+							flt(schedule.discount)
+							* payment_schedule["payment_amount"]
+							/ schedule.payment_amount,
+							schedule.precision("payment_amount"),
+						)
+						if schedule.payment_amount
+						else 0
+					)
 			else:
 				payment_schedule["base_payment_amount"] = flt(
 					schedule.base_payment_amount * self.get("conversion_rate"),
 					schedule.precision("base_payment_amount"),
 				)
-
-			if schedule.discount_type == "Percentage":
-				payment_schedule["discount_type"] = schedule.discount_type
-				payment_schedule["discount"] = schedule.discount
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
@@ -4167,7 +4198,8 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item.warehouse = get_new_child_item_warehouse(p_doc, item, trans_item, child_doctype)
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get("conversion_factor")) or conversion_factor
-	child_item.update(get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
+	child_item.price_list_rate = flt(trans_item.get("price_list_rate"))
+	child_item.update(_get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
 
 	if child_doctype in ["Purchase Order Item", "Supplier Quotation Item"]:
 		# Initialized value will update in parent validation
@@ -4357,6 +4389,19 @@ def update_child_qty_rate(
 				)
 			)
 
+		# The Quotation form hides Update Items for these states; enforce it server-side too.
+		if doc.doctype == "Quotation":
+			if doc.status in ("Lost", "Ordered"):
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it is {1}.").format(
+						doc.name, _(doc.status)
+					)
+				)
+			if doc.valid_till and getdate(doc.valid_till) < getdate():
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it has expired.").format(doc.name)
+				)
+
 	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
@@ -4530,6 +4575,7 @@ def update_child_qty_rate(
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 	had_mapped_discount = parent.has_mapped_discount
 	rfqs_before_update = set()
+	blanket_orders_before_update = {d.blanket_order for d in parent.items if d.get("blanket_order")}
 
 	check_doc_permissions(parent, "write")
 	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
@@ -4675,27 +4721,26 @@ def update_child_qty_rate(
 		if d.get("bom_no") and parent_doctype == "Sales Order":
 			child_item.bom_no = d.get("bom_no")
 
-		if parent_doctype in ["Sales Order", "Purchase Order"]:
-			if flt(child_item.price_list_rate):
-				if flt(child_item.rate) > flt(child_item.price_list_rate):
-					#  if rate is greater than price_list_rate, set margin
-					#  or set discount
-					child_item.discount_percentage = 0
-					child_item.margin_type = "Amount"
-					child_item.margin_rate_or_amount = flt(
-						child_item.rate - child_item.price_list_rate,
-						child_item.precision("margin_rate_or_amount"),
-					)
-					child_item.rate_with_margin = child_item.rate
-				else:
-					child_item.discount_percentage = flt(
-						(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
-						child_item.precision("discount_percentage"),
-					)
-					child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
-					child_item.margin_type = ""
-					child_item.margin_rate_or_amount = 0
-					child_item.rate_with_margin = 0
+		if flt(child_item.price_list_rate):
+			if flt(child_item.rate) > flt(child_item.price_list_rate):
+				#  if rate is greater than price_list_rate, set margin
+				#  or set discount
+				child_item.discount_percentage = 0
+				child_item.margin_type = "Amount"
+				child_item.margin_rate_or_amount = flt(
+					child_item.rate - child_item.price_list_rate,
+					child_item.precision("margin_rate_or_amount"),
+				)
+				child_item.rate_with_margin = child_item.rate
+			else:
+				child_item.discount_percentage = flt(
+					(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
+					child_item.precision("discount_percentage"),
+				)
+				child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
+				child_item.margin_type = ""
+				child_item.margin_rate_or_amount = 0
+				child_item.rate_with_margin = 0
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
@@ -4717,6 +4762,8 @@ def update_child_qty_rate(
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()
+	elif parent_doctype == "Quotation":
+		make_packing_list(parent)
 	frappe.get_doc("Authorization Control").validate_approving_authority(
 		parent.doctype, parent.company, parent.base_grand_total
 	)
@@ -4774,11 +4821,15 @@ def update_child_qty_rate(
 	elif parent_doctype == "Supplier Quotation":
 		parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), rfqs_before_update)
 
+	elif parent_doctype == "Quotation":
+		parent.set_status(update=True)
+
 	parent.reload()
 	validate_workflow_conditions(parent)
 
 	if parent_doctype in ["Purchase Order", "Sales Order"]:
-		parent.update_blanket_order()
+		# Covers blanket orders of removed rows, which are no longer on the items
+		parent.update_blanket_order(blanket_orders_before_update)
 		parent.update_billing_percentage()
 		parent.set_status()
 
@@ -4792,7 +4843,14 @@ def update_child_qty_rate(
 			has_reserved_stock,
 		)
 
-		if parent.per_picked == 0 and has_reserved_stock(parent.doctype, parent.name):
+		# Only rebuild reservations when a stock-relevant change happened. A rate/discount edit
+		# must not cancel and re-create them, which would drop delivered and partial reservations
+		# and re-reserve rows the user had deliberately unreserved.
+		if (
+			parent.per_picked == 0
+			and (any_qty_changed or any_conversion_factor_changed or items_added_or_removed)
+			and has_reserved_stock(parent.doctype, parent.name)
+		):
 			cancel_stock_reservation_entries(parent.doctype, parent.name)
 			parent.create_stock_reservation_entries()
 

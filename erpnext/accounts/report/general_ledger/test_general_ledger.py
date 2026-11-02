@@ -362,3 +362,21 @@ class TestGeneralLedger(FrappeTestCase):
 		)
 		actual = set([x.voucher_no for x in data if x.voucher_no])
 		self.assertEqual(expected, actual)
+
+	def test_accounts_user_can_run_report(self):
+		from frappe.desk.query_report import generate_report_result
+
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		create_sales_invoice(company=self.company)
+		user = make_fenced_user("gl-accounts-user@example.com", ["Accounts User"])
+		filters = {
+			"company": self.company,
+			"from_date": today(),
+			"to_date": today(),
+			"categorize_by": "Categorize by Voucher (Consolidated)",
+		}
+		with as_user(user):
+			result = generate_report_result(frappe.get_doc("Report", "General Ledger"), filters, user)
+
+		self.assertTrue(result["result"])

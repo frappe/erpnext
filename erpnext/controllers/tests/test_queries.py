@@ -7,6 +7,8 @@ from frappe.core.doctype.user_permission.user_permission import add_user_permiss
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 
 def add_default_params(func, doctype):
@@ -49,6 +51,25 @@ class TestQueries(unittest.TestCase):
 		query(txt="", filters={"customer": ""})
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
+
+	def test_item_query_with_percent_in_permitted_item_group(self):
+		if not frappe.db.exists("Item Group", "_Test 100% Item Group"):
+			frappe.get_doc(
+				{
+					"doctype": "Item Group",
+					"item_group_name": "_Test 100% Item Group",
+					"parent_item_group": "All Item Groups",
+				}
+			).insert()
+		item = make_item(properties={"is_stock_item": 0, "item_group": "_Test 100% Item Group"})
+		user = make_fenced_user(
+			"item-query-percent@example.com", ["Stock User"], [("Item Group", "_Test 100% Item Group")]
+		)
+
+		with as_user(user):
+			items = queries.item_query("Item", item.name, "name", 0, 20, {})
+
+		self.assertIn(item.name, [row[0] for row in items])
 
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")

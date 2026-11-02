@@ -136,8 +136,8 @@ class CallLog(Document):
 			self.employee_user_id = employees[0].get("user_id")
 
 
-@frappe.whitelist()
-def add_call_summary_and_call_type(call_log, summary, call_type):
+@frappe.whitelist(methods=["POST"])
+def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str | None = None):
 	doc = frappe.get_doc("Call Log", call_log)
 	doc.type_of_call = call_type
 	doc.save()

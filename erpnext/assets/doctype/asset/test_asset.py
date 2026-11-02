@@ -1465,6 +1465,31 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
+	def test_depreciation_ignores_dimension_defaults_of_other_companies(self):
+		"""A dimension default that is mandatory for another company must not be stamped on this
+		company's depreciation entry, or every scheduled posting fails company validation."""
+		other_company_department = set_mandatory_dimension_default_for_other_company(self)
+
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			available_for_use_date="2019-12-31",
+			depreciation_start_date="2020-12-31",
+			frequency_of_depreciation=12,
+			total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000,
+			submit=1,
+		)
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		journal_entry = get_depr_schedule(asset.name, "Active")[0].journal_entry
+		self.assertNotEqual(asset.depr_entry_posting_status, "Failed")
+		self.assertTrue(journal_entry)
+		departments = frappe.get_all("Journal Entry Account", {"parent": journal_entry}, pluck="department")
+		self.assertNotIn(other_company_department, departments)
+
 	def test_post_depreciation_entries(self):
 		"""Tests if post_depreciation_entries() works as expected."""
 
@@ -1999,6 +2024,50 @@ def create_asset(**args):
 		asset.submit()
 
 	return asset
+
+
+def set_mandatory_dimension_default_for_other_company(test_case):
+	"""Make Department mandatory for P&L in _Test Company 1 with a default that belongs to it.
+
+	These test classes do not roll back after each test, so the change is reverted on cleanup."""
+	department = frappe.get_doc(
+		{
+			"doctype": "Department",
+			"department_name": "_Test Asset Dimension Department",
+			"company": "_Test Company 1",
+			"parent_department": "All Departments",
+		}
+	).insert(ignore_if_duplicate=True)
+
+	dimension = get_department_dimension()
+	test_case.addCleanup(restore_department_dimension, dimension.disabled)
+	dimension.disabled = 0
+	dimension.append(
+		"dimension_defaults",
+		{
+			"company": "_Test Company 1",
+			"reference_document": "Department",
+			"default_dimension": department.name,
+			"mandatory_for_pl": 1,
+		},
+	)
+	dimension.save()
+	return department.name
+
+
+def get_department_dimension():
+	if frappe.db.exists("Accounting Dimension", "Department"):
+		return frappe.get_doc("Accounting Dimension", "Department")
+	return frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Department"})
+
+
+def restore_department_dimension(disabled):
+	dimension = frappe.get_doc("Accounting Dimension", "Department")
+	dimension.disabled = disabled
+	dimension.dimension_defaults = [
+		row for row in dimension.dimension_defaults if row.company != "_Test Company 1"
+	]
+	dimension.save()
 
 
 def create_asset_category():
