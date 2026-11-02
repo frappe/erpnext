@@ -42,7 +42,16 @@ def execute():
 	tax_rate_map = get_tax_rate_map()
 	column_cache = get_column_cache()
 	party_tax_id_cache = {}
+	party_categories = {}
 	skip_docs = get_docs_with_entries()
+
+	# One query per party type instead of one per party; other party types are still looked up one by one
+	for party_type in ("Supplier", "Customer"):
+		tax_id_field = next((f for f in ("pan", "tax_id") if column_cache[party_type][f]), None)
+		fields = ["name", "tax_withholding_category", *([tax_id_field] if tax_id_field else [])]
+		for row in frappe.get_all(party_type, fields=fields):
+			party_tax_id_cache[(party_type, row.name)] = row.get(tax_id_field) if tax_id_field else None
+			party_categories[(party_type, row.name)] = row.tax_withholding_category
 
 	# Clean up existing migration entries, except on documents the new flow has already used
 	twe = frappe.qb.DocType("Tax Withholding Entry")
@@ -65,6 +74,7 @@ def execute():
 		party_tax_id_cache,
 		skip_docs,
 		purchase_migrator.tds_paid_by_other,
+		party_categories,
 	)
 
 	# Copy tax_withholding_category to item level
@@ -1237,7 +1247,13 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 
 
 def migrate_journal_entries(
-	tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, tds_paid_by_other
+	tds_accounts,
+	tax_rate_map,
+	column_cache,
+	party_tax_id_cache,
+	skip_docs,
+	tds_paid_by_other,
+	party_categories,
 ):
 	"""
 	Migrate Journal Entry TDS data.
@@ -1349,8 +1365,7 @@ def migrate_journal_entries(
 				break
 
 		category = category or info.tax_withholding_category
-		if not category and party_type in ("Supplier", "Customer"):
-			category = frappe.get_cached_value(party_type, party, "tax_withholding_category")
+		category = category or party_categories.get((party_type, party))
 
 		tax_id = get_party_tax_id(party_type, party, column_cache, party_tax_id_cache) if party else None
 		tax_rate, tax_on_excess = get_tax_rate_for_date(tax_rate_map, category, info.posting_date)
