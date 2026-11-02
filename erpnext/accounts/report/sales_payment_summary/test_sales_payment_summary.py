@@ -224,6 +224,27 @@ class TestSalesPaymentSummaryRegressions(FrappeTestCase):
 				frappe.set_user("Administrator")
 			self.assertEqual((row[3], row[5]), (10000, 10000))
 
+	def test_restricted_user_cannot_supply_permitted_invoices(self):
+		customer = make_customer("_Test Sales Payment Summary Customer")
+		other_customer = make_customer("_Test Sales Payment Summary Other Customer")
+		make_pos_invoice(customer, paid=10000)
+		other_invoice = make_pos_invoice(other_customer, paid=20000)
+		user = make_restricted_user(customer)
+		self.addCleanup(frappe.clear_cache, user=user)
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=today(),
+			to_date=today(),
+			permitted_invoices=(other_invoice.name,),
+		)
+
+		frappe.set_user(user)
+		try:
+			row = execute(filters)[1][0]
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual(row[3], 10000)
+
 	def test_unrestricted_user_gets_no_invoice_name_filter(self):
 		customer = make_customer("_Test Sales Payment Summary Customer")
 		other_customer = make_customer("_Test Sales Payment Summary Other Customer")

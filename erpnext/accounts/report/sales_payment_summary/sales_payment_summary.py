@@ -8,6 +8,9 @@ from frappe.utils import cstr
 
 
 def execute(filters=None):
+	filters = frappe._dict(filters or {})
+	# computed on the server for restricted users; never taken from the caller
+	filters.pop("permitted_invoices", None)
 	columns, data = [], []
 	columns = get_columns(filters)
 	data = (
