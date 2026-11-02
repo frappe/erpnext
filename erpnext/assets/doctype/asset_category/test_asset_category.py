@@ -61,7 +61,7 @@ class TestAssetCategory(unittest.TestCase):
 		asset = create_asset(asset_category="Computers", company="_Test Company", submit=1)
 		asset_category = frappe.get_doc("Asset Category", "Computers")
 		row = next(row for row in asset_category.accounts if row.company_name == asset.company)
-		row.fixed_asset_account = "Furniture and Fixtures - _TC"
+		row.fixed_asset_account = "Furnitures and Fixtures - _TC"
 		self.assertRaisesRegex(frappe.ValidationError, "Fixed Asset Account", asset_category.save)
 
 		asset_category.reload()
@@ -74,5 +74,5 @@ class TestAssetCategory(unittest.TestCase):
 		asset_category.reload()
 		next(
 			row for row in asset_category.accounts if row.company_name == asset.company
-		).fixed_asset_account = "Furniture and Fixtures - _TC"
+		).fixed_asset_account = "Furnitures and Fixtures - _TC"
 		asset_category.save()
