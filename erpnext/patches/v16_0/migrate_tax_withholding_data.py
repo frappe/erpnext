@@ -39,17 +39,7 @@ def execute():
 	):
 		return
 
-	tds_accounts = get_tds_accounts()
-	if not tds_accounts:
-		return
-
-	tax_rate_map = get_tax_rate_map()
-	column_cache = get_column_cache()
-	party_tax_id_cache = {}
-	party_categories = {}
-	skip_docs = get_docs_with_entries()
-
-	# On a re-run, documents created after the first run belong to the new flow, even without entries
+	# On a re-run, documents and withholding accounts created after the first run belong to the new flow
 	created_before = (
 		frappe.db.get_value(
 			"Patch Log",
@@ -59,6 +49,16 @@ def execute():
 		)
 		or now()
 	)
+
+	tds_accounts = get_tds_accounts(created_before)
+	if not tds_accounts:
+		return
+
+	tax_rate_map = get_tax_rate_map()
+	column_cache = get_column_cache()
+	party_tax_id_cache = {}
+	party_categories = {}
+	skip_docs = get_docs_with_entries()
 
 	# Suppliers and customers are read up front; other party types are looked up one by one
 	for party_type in ("Supplier", "Customer"):
@@ -199,11 +199,14 @@ def get_column_cache():
 	}
 
 
-def get_tds_accounts():
+def get_tds_accounts(created_before):
 	twa = frappe.qb.DocType("Tax Withholding Account")
 
 	result = (
-		frappe.qb.from_(twa).select(twa.account, twa.company, twa.parent.as_("category")).run(as_dict=True)
+		frappe.qb.from_(twa)
+		.select(twa.account, twa.company, twa.parent.as_("category"))
+		.where(twa.creation < created_before)
+		.run(as_dict=True)
 	)
 
 	if not result:
