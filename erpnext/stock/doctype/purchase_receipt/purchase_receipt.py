@@ -1118,6 +1118,12 @@ class PurchaseReceipt(BuyingController):
 				(sre.docstatus == 1)
 				& (sre.voucher_type == "Production Plan")
 				& sre.voucher_no.isin(list(plans))
+				& (
+					sre.voucher_detail_no.isin(
+						frappe.qb.from_(mr_item).select(mr_item.name).where(mr_item.parent.isin(list(plans)))
+					)
+					| (sre.from_voucher_type == "Purchase Receipt")
+				)
 			)
 			.groupby(sre.voucher_no, sre.item_code)
 		).run()
