@@ -11,8 +11,8 @@ from itertools import islice
 import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import Order
-from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.query_builder import Case, Order
+from frappe.query_builder.functions import CombineDatetime, Concat, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -2496,15 +2496,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
 		)
 
-	query = (
-		frappe.qb.update(sle)
-		.set(sle.qty_after_transaction, sle.qty_after_transaction + qty_shift)
-		.where(
-			(sle.item_code == args.get("item_code"))
-			& (sle.warehouse == args.get("warehouse"))
-			& (sle.is_cancelled == 0)
-			& future_condition
-		)
+	query = frappe.qb.update(sle).where(
+		(sle.item_code == args.get("item_code"))
+		& (sle.warehouse == args.get("warehouse"))
+		& (sle.is_cancelled == 0)
+		& future_condition
 	)
 
 	# find the next nearest stock reco so that we only recalculate SLEs till that point
@@ -2512,9 +2508,61 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	if next_stock_reco_detail:
 		query = query.where(get_datetime_limit_condition(sle, next_stock_reco_detail[0]))
 
+	new_qty = sle.qty_after_transaction + qty_shift
+	valuation_method = get_valuation_method(args.get("item_code"))
+	query = set_value_shift_in_future_sle(query, sle, args, new_qty, valuation_method)
+	query = query.set(sle.qty_after_transaction, new_qty)
 	query.run()
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
+
+def set_value_shift_in_future_sle(query, sle, args, new_qty, valuation_method):
+	value_shift = get_value_shift_for_future_sle(args)
+	if not value_shift:
+		return query
+
+	new_value = sle.stock_value + value_shift
+	new_rate = Case().when(new_qty != 0, new_value / new_qty).else_(sle.valuation_rate)
+
+	if valuation_method in ("FIFO", "LIFO") and not (args.has_serial_no or args.has_batch_no):
+		query = query.set(sle.stock_queue, Concat("[[", new_qty, ", ", new_rate, "]]"))
+
+	return query.set(sle.valuation_rate, new_rate).set(sle.stock_value, new_value)
+
+
+def get_value_shift_for_future_sle(args):
+	from erpnext.controllers.stock_controller import future_sle_exists
+
+	if not future_sle_exists(args):
+		return 0.0
+
+	if not args.get("is_cancelled"):
+		return flt(frappe.db.get_value("Stock Ledger Entry", args.name, "stock_value_difference"))
+
+	return -get_stock_value_difference_of_cancelled_entry(args)
+
+
+def get_stock_value_difference_of_cancelled_entry(args):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	entry = (
+		frappe.qb.from_(sle)
+		.select(sle.stock_value_difference)
+		.where(
+			(sle.voucher_type == args.voucher_type)
+			& (sle.voucher_no == args.voucher_no)
+			& (sle.voucher_detail_no == args.voucher_detail_no)
+			& (sle.item_code == args.item_code)
+			& (sle.warehouse == args.warehouse)
+			& (sle.is_cancelled == 1)
+			& (sle.name != args.name)
+			& (sle.actual_qty * flt(args.actual_qty) <= 0)
+		)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+	).run()
+
+	return flt(entry[0][0]) if entry else 0.0
 
 
 def get_stock_reco_qty_shift(args):
