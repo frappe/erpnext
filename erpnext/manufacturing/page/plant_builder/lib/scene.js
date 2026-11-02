@@ -1,4 +1,4 @@
-import { MACHINES, machineSize } from "./machines";
+import { machineOf, machineSize } from "./machines";
 import { YC } from "./layout";
 import { fmt, plural } from "./format";
 
@@ -21,7 +21,7 @@ export function previewView(plant, animate, focus) {
 }
 
 function stationTag(plant, station, view, holding) {
-	const machine = MACHINES[station.stage.machine];
+	const machine = machineOf(station.stage.machine_model);
 	const title = station.stage.name || machine.label;
 	const active = view.active[station.i];
 	const sub = holding ? holding(station.i) : machine.label;

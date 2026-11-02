@@ -7,7 +7,7 @@ import { shapeExtent } from "../../lib/machines";
 import { useClock } from "../../lib/clock";
 
 const props = defineProps({
-	type: String,
+	machineModel: String,
 	shapes: Array,
 	selected: { type: Number, default: null },
 	running: Boolean,
@@ -92,7 +92,7 @@ useEventListener(window, "pointerup", () => (orbit.on = false));
 				<div class="absolute inset-y-0 w-px bg-surface-gray-4" :style="{ left: `${CENTRE}px` }" />
 				<div class="absolute inset-x-0 h-px bg-surface-gray-4" :style="{ top: `${CENTRE}px` }" />
 				<MachineModel
-					:type="type"
+					:machine-model="machineModel"
 					:shapes="shapes"
 					:x="CENTRE"
 					:y="CENTRE"

@@ -2,7 +2,7 @@
 import { computed, inject } from "vue";
 import { Button } from "frappe-ui";
 import { __, call, setRoute } from "../../lib/api";
-import { MACHINES } from "../../lib/machines";
+import { machineOf } from "../../lib/machines";
 import { fmt, fmtTimer, num, plural, round } from "../../lib/format";
 
 const run = inject("run");
@@ -38,7 +38,7 @@ const chain = computed(() => {
 		meta: [...new Set(rawBatches)].join(", ") || __("Not batch tracked"),
 		icon: "lucide-boxes",
 	};
-	const steps = state.value.stages.map((stage, i) => {
+	const steps = state.value.stages.map((stage) => {
 		const batches = entries
 			.filter((row) => row.purpose === "Manufacture" && stage.job_cards.includes(row.job_card))
 			.flatMap((entry) => batchesOf(entry, true));
@@ -48,8 +48,8 @@ const chain = computed(() => {
 			stage.lot > 1 ? __("{0} lots", [stage.lot]) : "",
 			fmtTimer(Math.floor(stage.worked_seconds || 0)),
 		];
-		const machine = MACHINES[run.plant.value.stages[i]?.machine] || MACHINES.generic;
-		return { title: stage.output.item_name, meta: parts.filter(Boolean).join(" · "), icon: machine.icon };
+		const { icon } = machineOf(stage.machine_model);
+		return { title: stage.output.item_name, meta: parts.filter(Boolean).join(" · "), icon };
 	});
 	return [raw, ...steps];
 });

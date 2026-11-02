@@ -6,13 +6,13 @@ import StageInputs from "./StageInputs.vue";
 import StageOutput from "./StageOutput.vue";
 import BreakdownPanel from "./BreakdownPanel.vue";
 import { __ } from "../../lib/api";
-import { MACHINES } from "../../lib/machines";
+import { machineOf } from "../../lib/machines";
 import { fmt, fmtTimer, num, round } from "../../lib/format";
 
 const props = defineProps({ stage: Object, index: Number });
 const run = inject("run");
 
-const machine = computed(() => MACHINES[run.plant.value.stages[props.index]?.machine] || MACHINES.generic);
+const machine = computed(() => machineOf(props.stage.machine_model));
 const plantStage = computed(() => run.state.value.plant.doc.stages[props.index] || {});
 const plan = computed(() => run.state.value.plan);
 const meta = computed(() => {

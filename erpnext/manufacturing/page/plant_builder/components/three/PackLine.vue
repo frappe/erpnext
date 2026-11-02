@@ -8,7 +8,7 @@ import Beacon from "./Beacon.vue";
 import PulseRing from "./PulseRing.vue";
 
 const props = defineProps({
-	type: String,
+	machineModel: String,
 	x0: Number,
 	yc: Number,
 	level: { type: Number, default: 0 },
@@ -20,7 +20,7 @@ const props = defineProps({
 	packaging: { type: Array, default: () => [] },
 });
 
-const bag = computed(() => props.type === "bagger");
+const bag = computed(() => props.machineModel === "Bagging Line");
 const crateList = computed(() =>
 	props.packaging.slice(0, 3).map((name, k) => ({ k, x: props.x0 + 20 + k * 100 }))
 );

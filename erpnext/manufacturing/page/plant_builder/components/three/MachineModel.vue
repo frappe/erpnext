@@ -14,7 +14,7 @@ import { num } from "../../lib/format";
 import { clock } from "../../lib/clock";
 
 const props = defineProps({
-	type: String,
+	machineModel: String,
 	shapes: { type: Array, default: () => [] },
 	x: Number,
 	y: Number,
@@ -29,7 +29,7 @@ const props = defineProps({
 
 const STEAM_TONES = { Blue: "bg-surface-blue-1" };
 
-const design = computed(() => stageShapes({ machine: props.type, shapes: props.shapes }));
+const design = computed(() => stageShapes({ machine_model: props.machineModel, shapes: props.shapes }));
 const bounds = computed(() => machineBounds(design.value));
 const half = computed(() => Math.max(-bounds.value.left, bounds.value.right));
 const deep = computed(() => Math.max(-bounds.value.back, bounds.value.front));

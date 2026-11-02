@@ -4,7 +4,7 @@ import { Button, Dropdown, ScrollArea, Switch } from "frappe-ui";
 import MachinePreview from "../components/designer/MachinePreview.vue";
 import ShapeCard from "../components/designer/ShapeCard.vue";
 import { __, call, openForm } from "../lib/api";
-import { PRESETS, SHAPES, machineKey, machineOf, newShape } from "../lib/machines";
+import { PRESETS, SHAPES, isPackingModel, machineOf, newShape } from "../lib/machines";
 
 const props = defineProps({ name: String });
 const emit = defineEmits(["title", "actions"]);
@@ -17,7 +17,7 @@ const running = ref(true);
 const saving = ref(false);
 
 const dirty = computed(() => JSON.stringify(shapes.value) !== saved.value);
-const isPacking = computed(() => machineOf(design.value.machine_model).kind === "pack");
+const isPacking = computed(() => isPackingModel(design.value.machine_model));
 const editable = computed(() => design.value.can_write && !isPacking.value);
 const preset = computed(() => design.value.machine_model || machineOf("").label);
 
@@ -121,7 +121,7 @@ async function save() {
 			</aside>
 			<div class="relative min-w-0 flex-1 bg-surface-gray-1">
 				<MachinePreview
-					:type="machineKey(design.machine_model)"
+					:machine-model="design.machine_model"
 					:shapes="shapes"
 					:selected="selected"
 					:running="running"

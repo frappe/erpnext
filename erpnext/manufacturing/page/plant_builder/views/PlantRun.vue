@@ -5,7 +5,7 @@ import PlantScene from "../components/three/PlantScene.vue";
 import RunPanel from "../components/run/RunPanel.vue";
 import { __, openForm, setRoute } from "../lib/api";
 import { levels } from "../lib/clock";
-import { MACHINES } from "../lib/machines";
+import { machineOf } from "../lib/machines";
 import { useRun } from "../lib/run";
 import { fmt, fmtTimer, num } from "../lib/format";
 
@@ -68,7 +68,7 @@ function holding(i) {
 	if (stage.breakdown) return __("Breakdown");
 	const weight = num(state.levels.machines[stage.workstation]);
 	if (weight < 1) return __("Empty");
-	const machine = MACHINES[run.plant.value.stages[i]?.machine] || MACHINES.generic;
+	const machine = machineOf(stage.machine_model);
 	const item =
 		stage.phase === "processing" || stage.phase === "review" ? machine.verb : stage.output.item_name;
 	return `${item} · ${fmt(Math.round(weight))} ${state.plan.weight_uom}`;

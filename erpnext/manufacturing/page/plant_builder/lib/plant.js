@@ -1,4 +1,4 @@
-import { MATERIAL_TONES, machineKey, toneFor } from "./machines";
+import { MATERIAL_TONES, toneFor } from "./machines";
 import { num } from "./format";
 
 export const balancePercentage = (doc) =>
@@ -22,10 +22,13 @@ export function newPlantDoc() {
 	};
 }
 
+export const machineModelOf = (stage, machines) =>
+	machines[stage.workstation]?.machine_model || stage.machine_model;
+
 export function toScenePlant(doc, machines, item) {
 	const stages = (doc.stages || []).map((s, i) => ({
 		id: s.name || `stage-${i}`,
-		machine: machineKey(machines[s.workstation]?.machine_model || s.machine_model),
+		machine_model: machineModelOf(s, machines),
 		shapes: machines[s.workstation]?.shapes || [],
 		name: s.stage_name,
 		output: s.semi_finished_good || "",
