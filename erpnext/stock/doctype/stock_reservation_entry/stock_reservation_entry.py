@@ -1266,15 +1266,17 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 
 
 class StockReservation:
-	def __init__(self, doc, items=None, kwargs=None):
+	def __init__(self, doc, items=None, table_name=None, qty_field=None, warehouse_field=None):
 		if isinstance(doc, str):
 			doc = parse_json(doc)
 			doc = frappe.get_doc("Work Order", doc.get("name"))
 
 		self.doc = doc
 		self.items = items
-		self.kwargs = kwargs
 		self.initialize_fields()
+		self.table_name = table_name or self.table_name
+		self.qty_field = qty_field or self.qty_field
+		self.warehouse_field = warehouse_field or self.warehouse_field
 
 	def initialize_fields(self) -> None:
 		self.table_name = "items"
@@ -1291,9 +1293,6 @@ class StockReservation:
 		elif self.doc.doctype == "Subcontracting Order":
 			self.table_name = "supplied_items"
 			self.qty_field = "required_qty"
-		elif self.doc.doctype == "Production Plan" and self.kwargs:
-			for key, value in self.kwargs.items():
-				setattr(self, key, value)
 
 	def cancel_stock_reservation_entries(self, names=None) -> None:
 		"""Cancels Stock Reservation Entries for the Voucher."""

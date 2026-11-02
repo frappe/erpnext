@@ -169,15 +169,15 @@ class ProductionPlanStockReservation:
 		if items and isinstance(items, str):
 			items = parse_json(items)
 
-		for child_table_name, kwargs in _RESERVATION_TABLES.items():
+		for child_table_name, table in _RESERVATION_TABLES.items():
 			if table_name and table_name != child_table_name:
 				continue
-			self._reserve_or_cancel_plan_table(items, kwargs)
+			self._reserve_or_cancel_plan_table(items, table)
 
 		self.doc.reload()
 
-	def _reserve_or_cancel_plan_table(self, items, kwargs):
-		sre = StockReservation(self.doc, items=items, kwargs=kwargs)
+	def _reserve_or_cancel_plan_table(self, items, table):
+		sre = StockReservation(self.doc, items=items, **table)
 		if self.doc.docstatus == 1:
 			if sre.make_stock_reservation_entries():
 				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True)
@@ -220,7 +220,7 @@ class ProductionPlanStockReservation:
 			return
 
 		StockReservation(
-			self.doc, items=items, kwargs=_RESERVATION_TABLES["mr_items"]
+			self.doc, items=items, **_RESERVATION_TABLES["mr_items"]
 		).make_stock_reservation_entries()
 		self.hand_off_to_work_orders(items)
 
