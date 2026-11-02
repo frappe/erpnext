@@ -110,7 +110,6 @@ class PlantFloor(Document):
 	def get_batch_plan(self, qty: float | None = None) -> BatchPlan:
 		return BatchPlan(self, qty)
 
-	@frappe.whitelist(methods=["POST"])
 	def make_work_order(self, qty: float | None = None):
 		frappe.has_permission("Work Order", "create", throw=True)
 		work_order = frappe.new_doc("Work Order")
