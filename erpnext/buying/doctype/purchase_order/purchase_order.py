@@ -232,8 +232,11 @@ class PurchaseOrder(BuyingController):
 
 		for d in self.get("items"):
 			if d.item_code:
-				d.last_purchase_rate = item_last_purchase_rate(
-					self.name, self.conversion_rate, d.item_code, d.conversion_factor
+				d.last_purchase_rate = flt(
+					item_last_purchase_rate(
+						self.name, self.conversion_rate, d.item_code, d.conversion_factor
+					),
+					d.precision("last_purchase_rate"),
 				)
 
 	def set_has_unit_price_items(self):
