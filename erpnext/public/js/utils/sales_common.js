@@ -66,7 +66,7 @@ erpnext.sales_common = {
 
 				if (this.frm.fields_dict.tc_name) {
 					this.frm.set_query("tc_name", function () {
-						return { filters: { selling: 1 } };
+						return { filters: { selling: 1, disabled: 0 } };
 					});
 				}
 
