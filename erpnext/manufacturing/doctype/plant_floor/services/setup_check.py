@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, flt
+
+from erpnext.manufacturing.doctype.plant_floor.services.batch_plan import get_stage_row_id
 
 
 class PlantSetupCheck:
@@ -66,6 +68,47 @@ class PlantSetupCheck:
 
 		for stage in stages:
 			errors.extend(self.get_errors_for_stage(stage))
+		return errors + self.get_sequence_errors() + self.get_material_stage_errors()
+
+	def get_sequence_errors(self):
+		stages, errors = self.plant_floor.stages, []
+		if not any(stage.sequence_id for stage in stages):
+			return []
+
+		previous = 0
+		for stage in stages:
+			sequence_id = cint(stage.sequence_id)
+			if stage.idx == 1 and sequence_id != 1:
+				errors.append(_("Stage 1 needs Sequence ID 1"))
+			elif stage.idx > 1 and sequence_id not in (previous, previous + 1):
+				errors.append(
+					_("Stage {0} needs Sequence ID {1} or {2}").format(stage.idx, previous, previous + 1)
+				)
+			previous = sequence_id
+
+		if len(stages) > 1 and stages[-1].sequence_id == stages[-2].sequence_id:
+			errors.append(_("The packing stage runs on its own, after all other stages"))
+		return errors
+
+	def get_material_stage_errors(self):
+		process_stages = {
+			stage.idx for stage in self.plant_floor.stages if not self.plant_floor.is_packing_stage(stage)
+		}
+		errors = [
+			_("Raw material {0} goes into stage {1}, which is not a process stage").format(
+				row.item_code, get_stage_row_id(row)
+			)
+			for row in self.plant_floor.materials
+			if get_stage_row_id(row) not in process_stages
+		]
+
+		charged = {get_stage_row_id(row) for row in self.plant_floor.materials}
+		first_sequence = self.plant_floor.stage_sequences[0] if self.plant_floor.stages else []
+		for stage in first_sequence:
+			if stage.idx in process_stages and stage.idx not in charged:
+				errors.append(
+					_("Stage {0} starts the process, so give it at least one raw material").format(stage.idx)
+				)
 		return errors
 
 	def get_errors_for_stage(self, stage):

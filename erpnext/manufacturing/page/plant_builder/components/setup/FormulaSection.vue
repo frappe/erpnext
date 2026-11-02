@@ -4,11 +4,11 @@ import { Badge, Button, Dropdown, TextInput } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
-import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH } from "../../lib/machines";
+import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH, machineOf } from "../../lib/machines";
 import { balancePercentage } from "../../lib/plant";
 import { fmt } from "../../lib/format";
 
-const props = defineProps({ doc: Object });
+const props = defineProps({ doc: Object, machines: { type: Object, default: () => ({}) } });
 
 const materials = computed(() => props.doc.materials);
 const balanceRow = computed(() => materials.value.find((row) => row.is_balance_item));
@@ -22,6 +22,24 @@ const summary = computed(() => {
 	return { label: __("Total {0}%", [fmt(total)]), theme: Math.abs(rest.value) < 0.001 ? "green" : "red" };
 });
 
+const stageOptions = computed(() =>
+	props.doc.stages
+		.map((stage, i) => ({ stage, label: String(i + 1), value: String(i + 1) }))
+		.filter(({ stage }) => {
+			const model = props.machines[stage.workstation]?.machine_model || stage.machine_model;
+			return machineOf(model).kind !== "pack";
+		})
+		.map(({ label, value }) => ({ label, value }))
+);
+const showStage = computed(() => stageOptions.value.length > 1);
+const columns = computed(() =>
+	showStage.value
+		? "grid-cols-[1.25rem_minmax(0,1fr)_3.5rem_5rem_4rem_1.75rem]"
+		: "grid-cols-[1.25rem_minmax(0,1fr)_5.5rem_4.5rem_1.75rem]"
+);
+const stageOf = (row) => String(row.stage_row_id || 1);
+const setStage = (row, value) => (row.stage_row_id = Number(value) || 1);
+
 const setBalance = (row) => materials.value.forEach((m) => (m.is_balance_item = m === row ? 1 : 0));
 const remove = (row) => materials.value.splice(materials.value.indexOf(row), 1);
 const rowMenu = (row) => [
@@ -33,6 +51,7 @@ const add = () =>
 		item_code: "",
 		percentage: 5,
 		is_balance_item: materials.value.length ? 0 : 1,
+		stage_row_id: 1,
 		storage: "Tank",
 	});
 </script>
@@ -42,7 +61,7 @@ const add = () =>
 		<SectionHead
 			:title="__('Formula')"
 			:description="
-				__('Raw materials charged into the first stage, as a percentage of the batch weight.')
+				__('Raw materials as a percentage of the batch weight, and the stage that takes each one.')
 			"
 		>
 			<Badge :label="summary.label" :theme="summary.theme" variant="subtle" />
@@ -51,11 +70,10 @@ const add = () =>
 			v-if="materials.length"
 			class="divide-y divide-outline-gray-1 rounded-5 border border-outline-gray-2"
 		>
-			<div
-				class="grid h-8 grid-cols-[1.25rem_minmax(0,1fr)_5.5rem_4.5rem_1.75rem] items-center gap-2 px-2 text-xs text-ink-gray-5"
-			>
+			<div class="grid h-8 items-center gap-2 px-2 text-xs text-ink-gray-5" :class="columns">
 				<span />
 				<span>{{ __("Raw Material") }}</span>
+				<span v-if="showStage">{{ __("Stage") }}</span>
 				<span>{{ __("Storage") }}</span>
 				<span class="text-right">%</span>
 				<span />
@@ -63,13 +81,21 @@ const add = () =>
 			<div
 				v-for="(row, i) in materials"
 				:key="row.name || i"
-				class="grid h-11 grid-cols-[1.25rem_minmax(0,1fr)_5.5rem_4.5rem_1.75rem] items-center gap-2 px-2"
+				class="grid h-11 items-center gap-2 px-2"
+				:class="columns"
 			>
 				<span
 					class="size-4 rounded-full border border-outline-gray-3"
 					:class="SWATCH[MATERIAL_TONES[i % MATERIAL_TONES.length]]"
 				/>
 				<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
+				<DeskControl
+					v-if="showStage"
+					:model-value="stageOf(row)"
+					fieldtype="Select"
+					:options="stageOptions"
+					@update:model-value="setStage(row, $event)"
+				/>
 				<DeskControl v-model="row.storage" fieldtype="Select" :options="STORAGE_OPTIONS" />
 				<span
 					v-if="row.is_balance_item"

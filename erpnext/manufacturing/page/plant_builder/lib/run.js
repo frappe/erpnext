@@ -7,6 +7,8 @@ import { fmt, num, round } from "./format";
 
 const CHARGE_MS = 2500;
 
+const rowKey = (row) => row.name || row.item_code;
+
 export function useRun(workOrder) {
 	const state = ref(null);
 	const busy = ref(false);
@@ -64,33 +66,40 @@ export function useRun(workOrder) {
 	const stages = computed(() =>
 		(state.value?.stages || []).map((stage) => ({ ...stage, phase: phaseOf(stage) }))
 	);
-	const activeIndex = computed(() => stages.value.findIndex((s) => !["waiting", "done"].includes(s.phase)));
+	const isActive = (stage) => stage.can_start || !["waiting", "done"].includes(stage.phase);
+	const hasActiveStage = computed(() => stages.value.some(isActive));
 
 	function progressOf(stage) {
 		if (stage.phase === "charging") return 100;
 		return Math.min(100, (stageSeconds(stage) / 60 / Math.max(stage.planned_minutes, 1)) * 100);
 	}
 
-	const activity = computed(() => {
-		const stage = stages.value.find((s) => ["charging", "processing"].includes(s.phase));
-		if (!stage) return paused.value ? { label: "Work Order on hold", progress: null } : null;
+	function activityOf(stage) {
 		const machine = MACHINES[plant.value.stages[stage.idx - 1]?.machine] || MACHINES.generic;
 		const minutes = Math.round(stageSeconds(stage) / 60);
-		const label =
-			stage.phase === "charging"
-				? `Charging ${stage.workstation}`
-				: `${machine.verb} · ${fmt(minutes)} of ${fmt(stage.planned_minutes)} min`;
-		return { label: paused.value ? `On hold · ${label}` : label, progress: progressOf(stage) };
+		return stage.phase === "charging"
+			? `Charging ${stage.workstation}`
+			: `${machine.verb} · ${fmt(minutes)} of ${fmt(stage.planned_minutes)} min`;
+	}
+
+	const activity = computed(() => {
+		const busy = stages.value.filter((s) => ["charging", "processing"].includes(s.phase));
+		if (!busy.length) return paused.value ? { label: "Work Order on hold", progress: null } : null;
+		const label = busy.length > 1 ? busy.map((s) => s.stage_name).join(" · ") : activityOf(busy[0]);
+		return { label: paused.value ? `On hold · ${label}` : label, progress: progressOf(busy[0]) };
 	});
 
 	function seedLocal(data) {
 		data.stages.forEach((stage) => {
-			if (local.seeded[stage.idx] === stage.phase) return;
-			local.seeded[stage.idx] = stage.phase;
+			const waiting = stage.inputs.map((row) => row.waiting_qty).join();
+			const key = `${stage.job_card?.name}:${stage.phase}:${waiting}`;
+			if (local.seeded[stage.idx] === key) return;
+			local.seeded[stage.idx] = key;
 			local.actual[stage.idx] = Object.fromEntries(
-				stage.items.map((row) => [row.item_code, row.required_qty])
+				stage.items.map((row) => [rowKey(row), row.is_input ? row.waiting_qty : row.required_qty])
 			);
-			local.output[stage.idx] = stage.output.planned_qty;
+			if (stage.phase === "ready") rescale(stage);
+			local.output[stage.idx] = stage.output.expected_qty || stage.output.planned_qty;
 			local.rejected[stage.idx] = 0;
 			if (stage.quality && !local.readings[stage.idx]) {
 				local.readings[stage.idx] = Object.fromEntries(
@@ -181,21 +190,71 @@ export function useRun(workOrder) {
 		delete local.review[stage.idx];
 	}
 
+	const weightOf = (row, qty) => num(qty) / (row.weight_factor || 1);
+
+	function shareOf(stage) {
+		const inputs = stage.items.filter((row) => row.is_input);
+		if (!inputs.length) return 1;
+		const planned = inputs.reduce((sum, row) => sum + weightOf(row, row.planned_qty), 0);
+		const passed = inputs.reduce(
+			(sum, row) => sum + weightOf(row, local.actual[stage.idx]?.[rowKey(row)]),
+			0
+		);
+		return planned ? passed / planned : 0;
+	}
+
+	function plannedOutput(stage) {
+		const output = stage.output;
+		if (!stage.items.some((row) => row.is_input)) return output.planned_qty;
+		const roundDown = output.whole_number
+			? (qty) => Math.floor(qty + 0.000001)
+			: (qty) => Math.floor(qty * 1000 + 0.000001) / 1000;
+		const total = output.operation_qty * (output.done_share + shareOf(stage));
+		const planned = roundDown(total) - output.done_qty;
+		return roundDown(Math.max(Math.min(planned, output.limit ?? Infinity), 0));
+	}
+
+	function scaleOf(stage) {
+		if (!stage.items.some((row) => row.is_input)) return 1;
+		return stage.output.operation_qty ? plannedOutput(stage) / stage.output.operation_qty : 0;
+	}
+
+	function plannedOf(stage, row) {
+		if (stage.phase !== "ready") return row.required_qty;
+		return row.is_input ? row.waiting_qty : round(row.planned_qty * scaleOf(stage), 3);
+	}
+
+	function rescale(stage) {
+		stage.items
+			.filter((row) => !row.is_input && !row.is_balance_item)
+			.forEach((row) => (local.actual[stage.idx][rowKey(row)] = plannedOf(stage, row)));
+	}
+
+	function setPass(stage, row, value) {
+		const share = row.waiting_qty ? num(value) / row.waiting_qty : 0;
+		stage.items
+			.filter((other) => other.is_input && other !== row)
+			.forEach(
+				(other) => (local.actual[stage.idx][rowKey(other)] = round(other.waiting_qty * share, 3))
+			);
+		local.actual[stage.idx][rowKey(row)] = value;
+		rescale(stage);
+	}
+
 	function actualOf(stage, row) {
-		if (row.is_fixed) return row.required_qty;
-		if (!row.is_balance_item) return num(local.actual[stage.idx]?.[row.item_code]);
+		if (!row.is_balance_item) return num(local.actual[stage.idx]?.[rowKey(row)]);
 		const shift = stage.items
-			.filter((r) => !r.is_balance_item && !r.is_fixed && r.weight_factor)
+			.filter((r) => !r.is_input && !r.is_balance_item && r.weight_factor)
 			.reduce(
 				(sum, r) =>
-					sum + (num(local.actual[stage.idx]?.[r.item_code]) - r.required_qty) / r.weight_factor,
+					sum + (num(local.actual[stage.idx]?.[rowKey(r)]) - plannedOf(stage, r)) / r.weight_factor,
 				0
 			);
-		return round(row.required_qty - shift * (row.weight_factor || 1), 3);
+		return round(plannedOf(stage, row) - shift * (row.weight_factor || 1), 3);
 	}
 
 	const actualQuantities = (stage) =>
-		Object.fromEntries(stage.items.map((row) => [row.item_code, actualOf(stage, row)]));
+		Object.fromEntries(stage.items.map((row) => [row.name, actualOf(stage, row)]));
 
 	return {
 		state,
@@ -207,15 +266,19 @@ export function useRun(workOrder) {
 		paused,
 		elapsed,
 		activity,
-		activeIndex,
+		isActive,
+		hasActiveStage,
 		stageSeconds,
 		progressOf,
 		actualOf,
+		plannedOf,
+		plannedOutput,
+		setPass,
 		refresh,
 		consume,
 		produce,
 		setQty: (qty) => act("set_run_qty", { qty }),
-		start: () => act("start_run"),
+		start: (stage) => act("start_run", { job_card: stage?.job_card?.name }),
 		pause: () => act("pause_run"),
 		resume: () => act("resume_run"),
 		openReview: (stage) => (local.review[stage.idx] = true),

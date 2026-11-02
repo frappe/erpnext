@@ -18,6 +18,7 @@ class PlantFloorStage(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		semi_finished_good: DF.Link | None
+		sequence_id: DF.Int
 		stage_name: DF.Data
 		time_in_mins: DF.Float
 		workstation: DF.Link

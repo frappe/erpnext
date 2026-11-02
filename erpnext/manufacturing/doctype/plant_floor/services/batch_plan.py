@@ -1,7 +1,7 @@
-import math
+from collections import defaultdict
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 
@@ -34,7 +34,7 @@ class BatchPlan:
 
 	@property
 	def process_yield(self):
-		return math.prod(flt(stage.yield_percentage) / 100 for stage in self.process_stages)
+		return self.get_flows(1)[1]
 
 	@property
 	def output_weight(self):
@@ -71,6 +71,7 @@ class BatchPlan:
 					item_code=row.item_code,
 					item_name=row.item_name,
 					storage=row.storage,
+					stage_row_id=get_stage_row_id(row),
 					is_balance_item=row.is_balance_item,
 					percentage=self.get_percentage(row),
 					weight=flt(weight, 3),
@@ -79,27 +80,46 @@ class BatchPlan:
 			)
 		return materials
 
+	def get_flows(self, input_weight):
+		charged = defaultdict(float)
+		for row in self.plant_floor.materials:
+			charged[get_stage_row_id(row)] += input_weight * self.get_percentage(row) / 100
+
+		flows, carried = {}, 0.0
+		for sequence in self.plant_floor.stage_sequences:
+			for stage in sequence:
+				weight = carried / len(sequence) + charged[stage.idx]
+				flows[stage.idx] = (weight, weight * self.get_yield(stage))
+			carried = sum(flows[stage.idx][1] for stage in sequence)
+		return flows, carried
+
+	def get_yield(self, stage):
+		return 1 if self.plant_floor.is_packing_stage(stage) else flt(stage.yield_percentage) / 100
+
 	def get_stages(self):
-		stages, weight = [], self.input_weight
-		for stage in self.plant_floor.stages:
-			is_packing = self.plant_floor.is_packing_stage(stage)
-			output_weight = weight if is_packing else weight * flt(stage.yield_percentage) / 100
-			output_item = self.plant_floor.production_item if is_packing else stage.semi_finished_good
-			stages.append(
-				frappe._dict(
-					idx=stage.idx,
-					stage_name=stage.stage_name,
-					workstation=stage.workstation,
-					operation=stage.operation,
-					is_packing=is_packing,
-					input_weight=flt(weight, 3),
-					output_weight=flt(output_weight, 3),
-					output_item=output_item,
-					output_qty=self.qty if is_packing else self.to_stock_qty(output_item, output_weight),
-				)
-			)
-			weight = output_weight
-		return stages
+		flows, stages, previous = self.get_flows(self.input_weight)[0], {}, []
+		for sequence_id, sequence in enumerate(self.plant_floor.stage_sequences, start=1):
+			for stage in sequence:
+				stages[stage.idx] = self.get_stage(stage, sequence_id, flows[stage.idx])
+				stages[stage.idx].inputs = get_inputs(previous, len(sequence))
+			previous = [stages[stage.idx] for stage in sequence]
+		return [stages[stage.idx] for stage in self.plant_floor.stages]
+
+	def get_stage(self, stage, sequence_id, flow):
+		is_packing = self.plant_floor.is_packing_stage(stage)
+		output_item = self.plant_floor.production_item if is_packing else stage.semi_finished_good
+		return frappe._dict(
+			idx=stage.idx,
+			stage_name=stage.stage_name,
+			workstation=stage.workstation,
+			operation=stage.operation,
+			sequence_id=sequence_id,
+			is_packing=is_packing,
+			input_weight=flt(flow[0], 3),
+			output_weight=flt(flow[1], 3),
+			output_item=output_item,
+			output_qty=self.qty if is_packing else self.to_stock_qty(output_item, flow[1]),
+		)
 
 	def get_packing_materials(self):
 		return [
@@ -122,6 +142,22 @@ class BatchPlan:
 			stages=self.get_stages(),
 			packing_materials=self.get_packing_materials(),
 		)
+
+
+def get_stage_row_id(row):
+	return cint(row.stage_row_id) or 1
+
+
+def get_inputs(sources, share_count):
+	return [
+		frappe._dict(
+			stage_idx=source.idx,
+			item_code=source.output_item,
+			share=1 / share_count,
+			qty=flt(source.output_qty / share_count, 3),
+		)
+		for source in sources
+	]
 
 
 def get_weight_factors(item_codes, weight_uom):

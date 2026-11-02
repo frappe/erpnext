@@ -40,8 +40,8 @@ const view = computed(() => {
 		mode: modes,
 		working: modes.map((mode, i) => mode === "run" && stages[i].phase !== "charging"),
 		flow: stages.map((s) => s.phase === "charging"),
-		active: stages.map((_, i) => run.activeIndex.value === i),
-		storeActive: stages[0]?.phase === "charging",
+		active: stages.map(run.isActive),
+		storeActive: stages.some((s) => s.phase === "charging" && s.items.some((row) => !row.is_input)),
 		fgActive: run.status.value === "Completed",
 		cartons: levels.cartons ?? 0,
 		crates: levels.crates ?? 1,
@@ -105,7 +105,7 @@ const live = computed(() => {
 						v-if="run.status.value === 'In Process'"
 						icon-left="lucide-pause"
 						:label="__('Pause')"
-						:disabled="run.activeIndex.value < 0 || run.busy.value"
+						:disabled="!run.hasActiveStage.value || run.busy.value"
 						@click="run.pause"
 					/>
 					<Button

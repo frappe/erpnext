@@ -1,38 +1,23 @@
-from collections import defaultdict
-
 import frappe
-from frappe.utils import flt, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils import flt, get_datetime, now_datetime
 
+from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import is_whole_number
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
-
-JOB_CARD_FIELDS = [
-	"name",
-	"docstatus",
-	"status",
-	"is_paused",
-	"operation_row_id",
-	"for_quantity",
-	"total_completed_qty",
-	"process_loss_qty",
-	"quality_inspection",
-	"quality_inspection_template",
-]
 
 
 class PlantRunState:
 	def __init__(self, run):
 		self.run = run
 		self.work_order = run.work_order
-		self.plan = run.plant_floor.get_batch_plan(self.work_order.qty)
-		self.stages = self.plan.get_stages()
+		self.flow = run.get_flow()
+		self.plan = self.flow.plan
 		self.machines = {
 			row.workstation: run.plant_floor.machine_warehouses.get(row.workstation)
 			for row in run.plant_floor.stages
 		}
 		self.stock = get_stock([run.plant_floor.warehouse, *self.machines.values()])
-		self.job_cards = self.get_job_cards()
 
 	def as_dict(self):
 		return frappe._dict(
@@ -44,93 +29,130 @@ class PlantRunState:
 			levels=self.get_levels(),
 		)
 
+	@property
+	def all_cards(self):
+		return [card for cards in self.flow.cards.values() for card in cards]
+
 	def get_work_order(self):
 		fields = ["name", "status", "docstatus", "qty", "produced_qty", "process_loss_qty", "production_item"]
 		values = {field: self.work_order.get(field) for field in fields}
+		worked_seconds, running_since = get_union_timing(
+			[log for card in self.all_cards for log in card.time_logs]
+		)
 		values.update(
 			item_name=self.work_order.item_name,
 			stock_uom=self.work_order.stock_uom,
 			plant_floor=self.work_order.plant_floor,
 			actual_start_date=self.work_order.actual_start_date,
 			actual_end_date=self.work_order.actual_end_date,
-			is_paused=any(card.is_paused for card in self.job_cards.values() if card.docstatus == 0),
-			worked_seconds=sum(card.worked_seconds for card in self.job_cards.values()),
-			running_since=next(
-				(card.running_since for card in self.job_cards.values() if card.running_since), None
-			),
+			is_paused=any(card.is_paused for card in self.all_cards if card.docstatus == 0),
+			worked_seconds=worked_seconds,
+			running_since=running_since,
+			charged_weight=self.get_charged_weight(),
 		)
 		return values
 
-	def get_job_cards(self):
-		cards = frappe.get_all(
-			"Job Card",
-			filters={"work_order": self.work_order.name, "docstatus": ("<", 2), "is_corrective_job_card": 0},
-			fields=JOB_CARD_FIELDS,
-			order_by="creation asc",
+	def get_charged_weight(self):
+		materials = {row.item_code for row in self.run.plant_floor.materials}
+		return flt(
+			sum(
+				self.flow.get_weight(row.item_code, row.transferred_qty)
+				for card in self.all_cards
+				for row in card.materials
+				if row.item_code in materials
+			),
+			3,
 		)
-		names = [card.name for card in cards]
-		items = get_child_rows("Job Card Item", names, "items")
-		logs = get_child_rows("Job Card Time Log", names, "time_logs")
-		for card in cards:
-			card.materials = items.get(card.name, [])
-			card.update(get_timing(logs.get(card.name, [])))
-		return {card.operation_row_id: card for card in cards}
 
 	def get_stage(self, operation):
-		card = self.job_cards.get(operation.idx)
-		stage = self.stages[operation.idx - 1]
+		idx, stage = operation.idx, self.flow.get_stage(operation.idx)
+		cards = self.flow.get_cards(idx)
+		card = self.flow.get_open_card(idx) or (cards[-1] if cards else None)
+		phase = self.get_phase(idx, card)
 		return frappe._dict(
-			idx=operation.idx,
+			idx=idx,
 			stage_name=operation.description or operation.operation,
 			operation=operation.operation,
 			workstation=operation.workstation,
 			machine_model=self.run.plant_floor.machine_models.get(operation.workstation),
+			sequence_id=stage.sequence_id,
 			is_packing=stage.is_packing,
 			planned_minutes=flt(operation.time_in_mins),
-			phase=get_phase(card),
+			phase=phase,
+			can_start=bool(phase == "waiting" and card and card.docstatus == 0 and self.flow.has_input(idx)),
+			lot=len(cards),
 			job_card=card,
-			items=self.get_stage_items(operation, card),
-			output=self.get_output(stage, card),
+			job_cards=[row.name for row in cards],
+			worked_seconds=sum(row.worked_seconds for row in cards),
+			inputs=self.flow.get_inputs(idx),
+			items=self.get_stage_items(idx, card),
+			output=self.get_output(stage, cards, card),
 			quality=get_quality(card),
 		)
 
-	def get_stage_items(self, operation, card):
-		planned = {
-			row.item_code: row
-			for row in self.work_order.required_items
-			if row.operation_row_id == operation.idx
-		}
-		rows = card.materials if card else planned.values()
-		fixed = self.run.get_fixed_items(frappe._dict(operation_row_id=operation.idx))
+	def get_phase(self, idx, card):
+		if self.flow.is_done(idx):
+			return "done"
+		if not card or card.docstatus == 1 or not card.started_at:
+			return "waiting"
+		if not any(flt(row.transferred_qty) for row in card.materials):
+			return "ready"
+		return "processing"
+
+	def get_stage_items(self, idx, card):
+		planned = self.flow.get_planned_quantities(idx)
+		inputs = {(row.item_code, row.warehouse): row for row in self.flow.get_inputs(idx)}
+		rows = card.materials if card else self.get_planned_rows(idx)
 		return [
-			frappe._dict(
-				item_code=row.item_code,
-				item_name=row.item_name,
-				uom=row.get("uom") or row.get("stock_uom"),
-				available_qty=self.stock.get((row.item_code, planned[row.item_code].source_warehouse), 0),
-				planned_qty=flt(planned[row.item_code].required_qty),
-				required_qty=flt(row.required_qty),
-				transferred_qty=flt(row.get("transferred_qty")),
-				is_balance_item=row.item_code in self.balance_items,
-				is_fixed=row.item_code in fixed,
-				weight_factor=flt(self.plan.weight_factors.get(row.item_code)),
-			)
-			for row in rows
+			self.get_item(row, planned, inputs.get((row.item_code, row.source_warehouse))) for row in rows
 		]
 
-	@property
-	def balance_items(self):
-		return {row.item_code for row in self.run.plant_floor.materials if row.is_balance_item}
+	def get_planned_rows(self, idx):
+		return [
+			frappe._dict(row.as_dict(), name=None, transferred_qty=0)
+			for row in self.work_order.required_items
+			if row.operation_row_id == idx
+		]
 
-	def get_output(self, stage, card):
+	def get_item(self, row, planned, source):
+		return frappe._dict(
+			name=row.name,
+			item_code=row.item_code,
+			item_name=row.item_name,
+			uom=row.get("uom") or row.get("stock_uom"),
+			source_warehouse=row.source_warehouse,
+			available_qty=self.stock.get((row.item_code, row.source_warehouse), 0),
+			planned_qty=flt(planned.get((row.item_code, row.source_warehouse))),
+			required_qty=flt(row.required_qty),
+			transferred_qty=flt(row.get("transferred_qty")),
+			is_input=bool(source),
+			waiting_qty=source.waiting_qty if source else 0,
+			source_stage=source.stage_name if source else None,
+			is_balance_item=not source and row.item_code in self.flow.balance_items,
+			weight_factor=flt(self.plan.weight_factors.get(row.item_code)),
+		)
+
+	def get_output(self, stage, cards, card):
+		done = [row for row in cards if row.docstatus == 1]
 		return frappe._dict(
 			item_code=stage.output_item,
 			item_name=frappe.get_cached_value("Item", stage.output_item, "item_name"),
 			uom=frappe.get_cached_value("Item", stage.output_item, "stock_uom"),
-			planned_qty=flt(card.for_quantity) if card else stage.output_qty,
-			completed_qty=flt(card.total_completed_qty) if card else 0,
-			process_loss_qty=flt(card.process_loss_qty) if card else 0,
+			planned_qty=flt(card.for_quantity) if card and card.docstatus == 0 else stage.output_qty,
+			expected_qty=self.get_expected_qty(stage, card),
+			done_share=self.flow.get_done_share(stage.idx),
+			done_qty=self.flow.get_done_qty(stage.idx),
+			operation_qty=self.flow.get_operation_qty(stage),
+			limit=self.flow.get_output_limit(stage.idx),
+			whole_number=is_whole_number(stage.output_item),
+			completed_qty=sum(flt(row.total_completed_qty) for row in done),
+			process_loss_qty=sum(flt(row.process_loss_qty) for row in done),
 		)
+
+	def get_expected_qty(self, stage, card):
+		if not card or card.docstatus != 0:
+			return 0
+		return self.flow.get_planned_output(stage.idx, self.flow.get_card_share(stage.idx, card))
 
 	def get_entries(self):
 		entry = frappe.qb.DocType("Stock Entry")
@@ -181,41 +203,6 @@ class PlantRunState:
 			for (item, stock_warehouse), qty in self.stock.items()
 			if stock_warehouse == warehouse and flt(factors.get(item))
 		)
-
-
-def get_child_rows(doctype, parents, parentfield):
-	rows = defaultdict(list)
-	if not parents:
-		return rows
-
-	filters = {"parenttype": "Job Card", "parentfield": parentfield, "parent": ("in", parents)}
-	for row in frappe.get_all(doctype, filters=filters, fields=["*"], order_by="idx"):
-		rows[row.parent].append(row)
-	return rows
-
-
-def get_timing(logs):
-	worked, running_since = 0.0, None
-	for log in logs:
-		if log.to_time:
-			worked += time_diff_in_seconds(log.to_time, log.from_time)
-		elif log.from_time:
-			running_since = get_datetime(log.from_time)
-	return {
-		"started_at": logs[0].from_time if logs else None,
-		"worked_seconds": worked,
-		"running_since": running_since,
-	}
-
-
-def get_phase(card):
-	if not card or (card.docstatus == 0 and not card.started_at):
-		return "waiting"
-	if card.docstatus == 1:
-		return "done"
-	if not any(flt(row.transferred_qty) for row in card.materials):
-		return "ready"
-	return "processing"
 
 
 def get_quality(card):
@@ -275,3 +262,23 @@ def get_stock(warehouses):
 		fields=["item_code", "warehouse", "actual_qty"],
 	)
 	return {(row.item_code, row.warehouse): flt(row.actual_qty) for row in bins}
+
+
+def get_union_timing(logs):
+	spans = sorted(
+		(get_datetime(log.from_time), get_datetime(log.to_time) if log.to_time else None)
+		for log in logs
+		if log.from_time
+	)
+	worked, start, end = 0.0, None, None
+	for span_start, span_end in spans:
+		if start and (end is None or span_start <= end):
+			end = None if end is None or span_end is None else max(end, span_end)
+			continue
+		if start:
+			worked += (end - start).total_seconds()
+		start, end = span_start, span_end
+
+	if start and end:
+		worked += (end - start).total_seconds()
+	return worked, start if start and end is None else None

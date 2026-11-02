@@ -19,14 +19,20 @@ watch(qty, (value) => {
 		timer = setTimeout(() => run.setQty(num(value)), 600);
 });
 
-const firstMachine = computed(
-	() => run.state.value.plant.machines[run.state.value.stages[0]?.workstation] || {}
+const overfull = computed(() =>
+	plan.value.stages
+		.filter((stage) => !stage.inputs.length)
+		.map((stage) => ({
+			stage,
+			limit: num(run.state.value.plant.machines[stage.workstation]?.batch_capacity),
+		}))
+		.find(({ stage, limit }) => limit && stage.input_weight > limit)
 );
 const error = computed(() => {
 	if (num(qty.value) < 1) return __("Make at least one {0}", [unit.value]);
-	const limit = num(firstMachine.value.batch_capacity);
-	if (limit && plan.value.input_weight > limit) {
-		return __("The first machine holds {0} {1}", [fmt(limit), plan.value.weight_uom]);
+	if (overfull.value) {
+		const { stage, limit } = overfull.value;
+		return __("{0} holds {1} {2}", [stage.workstation, fmt(limit), plan.value.weight_uom]);
 	}
 	return "";
 });
@@ -117,7 +123,7 @@ const subtitle = computed(() =>
 				class="w-full"
 				:loading="run.busy.value"
 				:disabled="!!error"
-				@click="run.start"
+				@click="run.start()"
 			/>
 		</div>
 	</div>

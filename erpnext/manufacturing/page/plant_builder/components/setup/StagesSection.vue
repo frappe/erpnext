@@ -5,6 +5,7 @@ import SectionHead from "./SectionHead.vue";
 import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
 import { MACHINES, machineKey, machineOf } from "../../lib/machines";
+import { insertStage } from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
@@ -34,8 +35,8 @@ function addStage(type) {
 	};
 	const stages = props.doc.stages;
 	const packingAt = stages.findIndex(isPackingStage);
-	if (machine.kind === "pack" || packingAt < 0) stages.push(stage);
-	else stages.splice(packingAt, 0, stage);
+	const at = machine.kind === "pack" || packingAt < 0 ? stages.length : packingAt;
+	insertStage(props.doc, at, stage);
 }
 
 const addOptions = computed(() =>
@@ -55,7 +56,7 @@ const addOptions = computed(() =>
 			:title="__('Process Stages')"
 			:description="
 				__(
-					'Each stage is one machine. It takes the batch from the stage before and makes a semi-finished good. The last stage packs the finished good.'
+					'Each stage is one machine that makes a semi-finished good. It takes the output of the stage before it, or of every stage that runs with it. The last stage packs the finished good.'
 				)
 			"
 		/>
