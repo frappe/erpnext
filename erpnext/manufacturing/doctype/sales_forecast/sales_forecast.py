@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_to_date, cint, formatdate, getdate
@@ -155,7 +155,21 @@ def create_mps(source_name: str, target_doc: str | dict | Document | None = None
 		for item_code in {d.item_code for d in source.items if d.item_code}:
 			doc.append("select_items", {"item_code": item_code})
 
+		# Items only ever reflects actual demand (Sales Orders, Material Requests).
+		# Forecast demand is reconciled against it later in the MRP report, so it is
+		# deliberately not added here - doing so would double count against that report.
 		doc.get_actual_demand()
+
+		if not doc.items:
+			frappe.msgprint(
+				_(
+					"No open Sales Orders or Material Requests were found yet for this Sales Forecast's items, "
+					"so the Items table is empty. Forecasted demand is applied in the Material Requirements "
+					"Planning Report - use {0} to see it."
+				).format(bold(_("View MRP"))),
+				alert=True,
+				indicator="blue",
+			)
 
 	doc = get_mapped_doc(
 		"Sales Forecast",
