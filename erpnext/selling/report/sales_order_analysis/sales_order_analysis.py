@@ -12,6 +12,7 @@ from frappe.utils import date_diff, flt, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
+from erpnext.accounts.report.utils import get_filter_values
 
 
 def execute(filters=None):
@@ -120,8 +121,10 @@ def get_data(filters):
 		.orderby(soi.item_code)
 	)
 
-	if filters.get("warehouse"):
-		warehouses = [*get_descendants_of("Warehouse", filters.get("warehouse")), filters.get("warehouse")]
+	if selected_warehouses := get_filter_values(filters.get("warehouse")):
+		warehouses = set()
+		for warehouse in selected_warehouses:
+			warehouses.update([*get_descendants_of("Warehouse", warehouse), warehouse])
 		query = query.where(soi.warehouse.isin(warehouses))
 
 	return query.run(as_dict=True)
