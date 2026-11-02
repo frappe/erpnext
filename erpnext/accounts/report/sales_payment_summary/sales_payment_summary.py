@@ -3,10 +3,14 @@
 
 import frappe
 from frappe import _
+from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cstr
 
 
 def execute(filters=None):
+	filters = frappe._dict(filters or {})
+	# computed on the server for restricted users; never taken from the caller
+	filters.pop("permitted_invoices", None)
 	columns, data = [], []
 	columns = get_columns(filters)
 	data = (
@@ -114,6 +118,10 @@ def get_conditions(filters):
 		conditions += " and a.owner = %(owner)s"
 	if filters.get("is_pos"):
 		conditions += " and a.is_pos = %(is_pos)s"
+	if is_restricted_user():
+		if "permitted_invoices" not in filters:
+			filters["permitted_invoices"] = get_permitted_invoices(filters)
+		conditions += " and a.name in %(permitted_invoices)s"
 	return conditions
 
 
@@ -127,7 +135,7 @@ def get_pos_invoice_data(filters):
 		"mode_of_payment, warehouse, cost_center "
 		"FROM ("
 		"SELECT "
-		'parent, item_code, sum(amount) as "base_total", warehouse, cost_center '
+		"parent, item_code, warehouse, cost_center "
 		"from `tabSales Invoice Item`  group by parent"
 		") t1 "
 		"left join "
@@ -135,14 +143,15 @@ def get_pos_invoice_data(filters):
 		"on (t3.parent = t1.parent) "
 		"JOIN ("
 		"SELECT "
-		'docstatus, company, is_pos, name, posting_date, owner, sum(base_total) as "base_total", '
-		'sum(net_total) as "net_total", sum(total_taxes_and_charges) as "total_taxes", '
-		'sum(base_paid_amount) as "paid_amount", sum(outstanding_amount) as "outstanding_amount" '
+		"docstatus, company, customer, is_pos, name, posting_date, owner, "
+		'sum(base_net_total) as "net_total", sum(base_total_taxes_and_charges) as "total_taxes", '
+		'sum(base_paid_amount - base_change_amount) as "paid_amount", '
+		'sum(outstanding_amount) as "outstanding_amount" '
 		"FROM `tabSales Invoice` "
 		"GROUP BY name"
 		") a "
 		"ON ("
-		"t1.parent = a.name and t1.base_total = a.base_total) "
+		"t1.parent = a.name) "
 		"WHERE a.docstatus = 1"
 		f" AND {conditions} "
 		"GROUP BY "
@@ -159,8 +168,8 @@ def get_sales_invoice_data(filters):
 		f"""
 		select
 			a.posting_date, a.owner,
-			sum(a.net_total) as "net_total",
-			sum(a.total_taxes_and_charges) as "total_taxes",
+			sum(a.base_net_total) as "net_total",
+			sum(a.base_total_taxes_and_charges) as "total_taxes",
 			sum(a.base_paid_amount) as "paid_amount",
 			sum(a.outstanding_amount) as "outstanding_amount"
 		from `tabSales Invoice` a
@@ -193,11 +202,13 @@ def get_mode_of_payments(filters):
 			and b.docstatus = 1
 			and a.name in ({invoice_list_names})
 			union
-			select a.owner, a.posting_date,
+			select si.owner, si.posting_date,
 			ifnull(a.voucher_type,'') as mode_of_payment
-			from `tabJournal Entry` a, `tabJournal Entry Account` b
+			from `tabJournal Entry` a, `tabJournal Entry Account` b, `tabSales Invoice` si
 			where a.name = b.parent
+			and si.name = b.reference_name
 			and a.docstatus = 1
+			and a.voucher_type != 'Exchange Gain Or Loss'
 			and b.reference_type = 'Sales Invoice'
 			and b.reference_name in ({invoice_list_names})
 			""",
@@ -238,24 +249,28 @@ def get_mode_of_payment_details(filters):
 				and a.docstatus = 1
 				and a.name in ({invoice_list_names})
 				group by a.owner, a.posting_date, mode_of_payment
-				union
+				union all
 				select a.owner,a.posting_date,
-				ifnull(b.mode_of_payment, '') as mode_of_payment, sum(c.allocated_amount) as paid_amount
+				ifnull(b.mode_of_payment, '') as mode_of_payment,
+				sum(c.allocated_amount * case when b.payment_type = 'Receive'
+					then b.source_exchange_rate else b.target_exchange_rate end) as paid_amount
 				from `tabSales Invoice` a, `tabPayment Entry` b,`tabPayment Entry Reference` c
 				where a.name = c.reference_name
 				and b.name = c.parent
 				and b.docstatus = 1
 				and a.name in ({invoice_list_names})
 				group by a.owner, a.posting_date, mode_of_payment
-				union
-				select a.owner, a.posting_date,
+				union all
+				select si.owner, si.posting_date,
 				ifnull(a.voucher_type,'') as mode_of_payment, sum(b.credit)
-				from `tabJournal Entry` a, `tabJournal Entry Account` b
+				from `tabJournal Entry` a, `tabJournal Entry Account` b, `tabSales Invoice` si
 				where a.name = b.parent
+				and si.name = b.reference_name
 				and a.docstatus = 1
+				and a.voucher_type != 'Exchange Gain Or Loss'
 				and b.reference_type = 'Sales Invoice'
 				and b.reference_name in ({invoice_list_names})
-				group by a.owner, a.posting_date, mode_of_payment
+				group by si.owner, si.posting_date, mode_of_payment
 			) t
 			group by t.owner, t.posting_date, t.mode_of_payment
 			""",
@@ -290,3 +305,23 @@ def get_mode_of_payment_details(filters):
 			)
 
 	return mode_of_payment_details
+
+
+def is_restricted_user() -> bool:
+	"""Whether the session user may read only some Sales Invoices."""
+	if not frappe.has_permission("Sales Invoice", "read"):
+		return True
+	return bool(DatabaseQuery("Sales Invoice").build_match_conditions(as_condition=True))
+
+
+def get_permitted_invoices(filters) -> tuple[str, ...]:
+	"""Submitted Sales Invoices of the period that the session user may read."""
+	invoice_filters = [["docstatus", "=", 1], ["company", "=", filters.get("company")]]
+	if filters.get("from_date"):
+		invoice_filters.append(["posting_date", ">=", filters.get("from_date")])
+	if filters.get("to_date"):
+		invoice_filters.append(["posting_date", "<=", filters.get("to_date")])
+
+	names = frappe.get_list("Sales Invoice", filters=invoice_filters, pluck="name", limit_page_length=0)
+	# an empty tuple is not valid SQL, and no invoice has an empty name
+	return tuple(names) or ("",)
