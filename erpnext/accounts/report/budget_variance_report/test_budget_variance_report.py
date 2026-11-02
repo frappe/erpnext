@@ -47,7 +47,9 @@ class TestBudgetVarianceReport(FrappeTestCase):
 		make_journal_entry(ACCOUNT, "_Test Bank - _TC", 5000, cost_center=COST_CENTER, submit=True)
 		actual = self.get_actual(self.run_report(), COST_CENTER)
 
-		closing = make_journal_entry("_Test Bank - _TC", ACCOUNT, actual, cost_center=COST_CENTER, submit=True)
+		closing = make_journal_entry(
+			"_Test Bank - _TC", ACCOUNT, actual, cost_center=COST_CENTER, submit=True
+		)
 		gl_entry = frappe.qb.DocType("GL Entry")
 		frappe.qb.update(gl_entry).set(gl_entry.voucher_type, "Period Closing Voucher").where(
 			gl_entry.voucher_no == closing.name
@@ -59,7 +61,9 @@ class TestBudgetVarianceReport(FrappeTestCase):
 		make_large_budget(COST_CENTER)
 		actual = self.get_actual(self.run_report(), COST_CENTER)
 
-		journal_entry = make_journal_entry(ACCOUNT, "_Test Bank - _TC", 7000, cost_center=COST_CENTER, save=False)
+		journal_entry = make_journal_entry(
+			ACCOUNT, "_Test Bank - _TC", 7000, cost_center=COST_CENTER, save=False
+		)
 		journal_entry.finance_book = make_finance_book()
 		journal_entry.submit()
 
