@@ -3702,6 +3702,7 @@ def get_reference_as_per_payment_terms(
 	payment_schedule, dt, dn, doc, grand_total, outstanding_amount, party_account_currency
 ):
 	references = []
+	remaining_outstanding = outstanding_amount
 	is_multi_currency_acc = (doc.currency != doc.company_currency) and (
 		party_account_currency != doc.company_currency
 	)
@@ -3716,6 +3717,15 @@ def get_reference_as_per_payment_terms(
 			)
 
 		if payment_term_outstanding:
+			# Independently rounded terms can exceed the invoice outstanding after conversion.
+			allocated_amount = (
+				min(payment_term_outstanding, remaining_outstanding)
+				if payment_term_outstanding > 0
+				else max(payment_term_outstanding, remaining_outstanding)
+			)
+			remaining_outstanding = flt(
+				remaining_outstanding - allocated_amount, payment_term.precision("payment_amount")
+			)
 			references.append(
 				{
 					"reference_doctype": dt,
@@ -3726,7 +3736,7 @@ def get_reference_as_per_payment_terms(
 					"outstanding_amount": outstanding_amount,
 					"payment_term_outstanding": payment_term_outstanding,
 					"payment_term": payment_term.payment_term,
-					"allocated_amount": payment_term_outstanding,
+					"allocated_amount": allocated_amount,
 				}
 			)
 
