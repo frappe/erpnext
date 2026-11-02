@@ -73,7 +73,8 @@ def _make_naming_series_key(prefix):
 	if not str(prefix):
 		return ""
 	else:
-		return prefix.upper() + ".#####"
+		parts = (part if part.startswith("{") else part.upper() for part in prefix.split("."))
+		return ".".join(parts) + ".#####"
 
 
 def get_batch_naming_series():
