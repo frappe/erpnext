@@ -14,7 +14,7 @@ from frappe.contacts.address_and_contact import (
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, CustomFunction
 from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import cint, cstr, flt, get_formatted_email, get_link_to_form, today
 from frappe.utils.deprecations import deprecated
@@ -686,22 +686,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
-	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0
-
-	# if credit limit check is bypassed at sales order level,
-	# we should not consider outstanding Sales Orders, when customer credit balance report is run
-	if not ignore_outstanding_sales_order:
-		outstanding_based_on_so = frappe.db.sql(
-			"""
-			select sum(base_grand_total*(100 - per_billed)/100)
-			from `tabSales Order`
-			where customer=%s and docstatus = 1 and company=%s
-			and per_billed < 100 and status != 'Closed'""",
-			(customer, company),
-		)
-
-		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0
+	outstanding_based_on_so = get_sales_order_outstanding(
+		customer, company, delivered_only=ignore_outstanding_sales_order
+	)
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
@@ -776,6 +763,48 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	outstanding_based_on_dn = flt(dn_res[0][0]) if dn_res and dn_res[0][0] is not None else 0.0
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
+
+
+def get_sales_order_outstanding(customer, company, delivered_only=False):
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	query = (
+		frappe.qb.from_(SalesOrder)
+		.where(SalesOrder.customer == customer)
+		.where(SalesOrder.company == company)
+		.where(SalesOrder.docstatus == 1)
+		.where(SalesOrder.per_billed < 100)
+		.where(SalesOrder.status != "Closed")
+	)
+
+	if delivered_only:
+		SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+		Greatest = CustomFunction("GREATEST", ["a", "b"])
+		# Billing ahead of delivery is already in the ledger, so only the delivered excess counts.
+		unbilled_delivered_share = Greatest(
+			SalesOrderItem.delivered_qty / SalesOrderItem.qty
+			- SalesOrderItem.billed_amt / SalesOrderItem.amount,
+			0,
+		)
+		query = (
+			query.join(SalesOrderItem)
+			.on(SalesOrderItem.parent == SalesOrder.name)
+			.select(
+				Sum(
+					unbilled_delivered_share
+					* SalesOrderItem.base_net_amount
+					/ SalesOrder.base_net_total
+					* SalesOrder.base_grand_total
+				)
+			)
+			.where(SalesOrder.base_net_total > 0)
+			.where(SalesOrderItem.amount > 0)
+			.where(SalesOrderItem.delivered_qty > 0)
+		)
+	else:
+		query = query.select(Sum(SalesOrder.base_grand_total * (100 - SalesOrder.per_billed) / 100))
+
+	res = query.run()
+	return flt(res[0][0]) if res and res[0][0] is not None else 0.0
 
 
 def get_credit_limit(customer, company):
