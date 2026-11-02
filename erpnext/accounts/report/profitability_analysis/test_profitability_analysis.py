@@ -181,6 +181,23 @@ class TestProfitabilityAnalysis(FrappeTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_entries_of_other_finance_books_are_left_out(self):
+		cc = self.make_cc("_Test PA Finance Book")
+		self.book_expense(cc, 300)
+		journal_entry = make_journal_entry(
+			EXPENSE, BANK, 500, cost_center=cc, posting_date="2026-06-01", save=False
+		)
+		journal_entry.finance_book = (
+			frappe.get_doc({"doctype": "Finance Book", "finance_book_name": "_Test PA Finance Book"})
+			.insert(ignore_if_duplicate=True)
+			.name
+		)
+		journal_entry.submit()
+
+		self.assertEqual(self.row(self.run_report(), cc)["expense"], 300)
+		data = self.run_report(finance_book=journal_entry.finance_book)
+		self.assertEqual(self.row(data, cc)["expense"], 800)
+
 
 def make_restricted_user(user, doctype, value, roles=("Accounts User",)):
 	if not frappe.db.exists("User", user):
