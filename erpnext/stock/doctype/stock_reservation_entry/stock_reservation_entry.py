@@ -1614,7 +1614,7 @@ class StockReservation:
 
 	def update_delivered_qty(self, data):
 		for name, qty in data.get("sre_names").items():
-			sre = frappe.get_doc("Stock Reservation Entry", name)
+			sre = frappe.get_doc("Stock Reservation Entry", name, for_update=True)
 			delivered_qty = flt(sre.delivered_qty + qty, sre.precision("delivered_qty"))
 			sre.db_set(
 				{
