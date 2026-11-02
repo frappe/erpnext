@@ -1232,6 +1232,37 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(reposted.count(fg_sle.name), 1)
 		self.assertEqual(fg_sle.stock_value, (3000 / 20) * 5 + (4000 / 20) * 5)
 
+	def test_started_pending_item_wh_is_kept_for_resume(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm1, rm2, _fg = self.make_two_material_manufacture(warehouse)
+
+		kept_for_resume = []
+		original_repost = update_entries_after.repost_stock_ledger_entry
+
+		def record_repost(self, sle):
+			if sle.item_code == rm1:
+				kept_for_resume.append((rm2, warehouse) in self.item_wh_wise_last_posted_sle)
+			return original_repost(self, sle)
+
+		# rm2's walk starts at -9, but its first entry after that is at -7, after rm1's -8 receipt
+		pending = frappe._dict(
+			item_code=rm2,
+			warehouse=warehouse,
+			posting_datetime=get_combine_datetime(add_days(today(), -9), "00:00:00"),
+		)
+		with patch.object(update_entries_after, "repost_stock_ledger_entry", record_repost):
+			update_entries_after(
+				{
+					"item_code": rm1,
+					"warehouse": warehouse,
+					"posting_date": add_days(today(), -8),
+					"posting_time": "00:00:00",
+					"pending_item_wh": [pending],
+				}
+			)
+
+		self.assertTrue(kept_for_resume[0])
+
 	def test_queued_item_reposts_are_merged_into_one_pass(self):
 		warehouse = "_Test Warehouse - _TC"
 		rm1, rm2, fg = self.make_two_material_manufacture(warehouse)
