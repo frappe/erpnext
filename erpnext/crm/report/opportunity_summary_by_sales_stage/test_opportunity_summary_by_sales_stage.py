@@ -24,6 +24,13 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 		create_customer()
 		create_opportunity()
 
+	def setUp(self):
+		# keep each test's opportunities out of the counts of the others
+		frappe.db.savepoint("opportunity_summary_test")
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="opportunity_summary_test")
+
 	def test_opportunity_summary_by_sales_stage(self):
 		self.check_for_opportunity_owner()
 		self.check_for_source()
