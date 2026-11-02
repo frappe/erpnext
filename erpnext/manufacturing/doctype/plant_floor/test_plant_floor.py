@@ -184,6 +184,57 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(run["stages"][1]["items"][0].item_code, "_Test Ketchup Pre-mix")
 		self.assertTrue(run["stages"][1]["items"][0].is_input)
 
+	def test_plant_builder_save_numbers_stages_by_position(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import (
+			check_plant,
+			get_plant,
+			make_work_order,
+			save_plant,
+		)
+
+		plant_floor = make_ketchup_plant()
+		make_item("_Test Cooled Ketchup Base", {"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10})
+		workstation, operation = make_machine("Cooler", "Cooler")
+		doc = get_plant(plant_floor.name)["doc"]
+		insert_stage(
+			doc,
+			2,
+			{
+				"stage_name": "Cooler",
+				"workstation": workstation,
+				"operation": operation,
+				"semi_finished_good": "_Test Cooled Ketchup Base",
+				"yield_percentage": 100,
+				"time_in_mins": 30,
+			},
+		)
+		self.assertEqual(get_plan_stages(check_plant(doc)), ["Mixer", "Kettle", "Cooler", "Filler"])
+		result = save_plant(doc)
+		self.assertEqual(result["errors"], [])
+		self.assertEqual(get_plan_stages(result), ["Mixer", "Kettle", "Cooler", "Filler"])
+		work_order = frappe.get_doc("Work Order", make_work_order(plant_floor.name, 2000))
+		self.assertEqual(
+			[(row.description, row.finished_good) for row in work_order.operations],
+			[
+				("Mixer", "_Test Ketchup Pre-mix"),
+				("Kettle", "_Test Cooked Ketchup Base"),
+				("Cooler", "_Test Cooled Ketchup Base"),
+				("Filler", "_Test Ketchup Bottle"),
+			],
+		)
+
+		doc = get_plant(plant_floor.name)["doc"]
+		remove_stage(doc, 0)
+		result = save_plant(doc)
+		self.assertEqual(result["errors"], [])
+		self.assertEqual(get_plan_stages(result), ["Kettle", "Cooler", "Filler"])
+		work_order = frappe.get_doc("Work Order", make_work_order(plant_floor.name, 2000))
+		self.assertEqual([row.description for row in work_order.operations], ["Kettle", "Cooler", "Filler"])
+		self.assertEqual(
+			{row.item_code for row in work_order.required_items if row.operation_row_id == 1},
+			{"_Test Tomato Paste", "_Test Process Water", "_Test Ketchup Sugar"},
+		)
+
 	def test_next_stage_waits_while_its_machine_is_busy(self):
 		plant_floor = make_ketchup_plant()
 		stock_ketchup_materials()
@@ -350,6 +401,27 @@ def run_stage(work_order, start, end, output_qty, rejected_qty=0, actual=None, s
 
 	with minutes_ago(end):
 		PlantRun(work_order.name).produce(job_card.name, output_qty, rejected_qty)
+
+
+def insert_stage(doc, index, stage):
+	doc.stages.insert(index, frappe._dict(stage))
+	set_stage_numbers(doc, lambda no: no + 1 if no > index else no)
+
+
+def remove_stage(doc, index):
+	doc.stages.pop(index)
+	set_stage_numbers(doc, lambda no: 1 if no == index + 1 else no - 1 if no > index + 1 else no)
+
+
+def set_stage_numbers(doc, stage_of):
+	for row in doc.materials:
+		row.stage_row_id = stage_of(row.stage_row_id or 1)
+	for sequence_id, stage in enumerate(doc.stages, start=1):
+		stage.sequence_id = sequence_id
+
+
+def get_plan_stages(result):
+	return [stage.stage_name for stage in result["plan"].stages]
 
 
 def get_next_stage(run):

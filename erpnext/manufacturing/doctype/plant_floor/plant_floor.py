@@ -44,6 +44,12 @@ class PlantFloor(Document):
 		self.validate_warehouse(self.warehouse)
 		self.validate_warehouse(self.fg_warehouse)
 		self.validate_formula()
+		self.set_row_numbers()
+
+	def set_row_numbers(self):
+		for table in ("stages", "materials", "packing_materials"):
+			for idx, row in enumerate(self.get(table), start=1):
+				row.idx = idx
 		self.set_sequence_ids()
 
 	def set_sequence_ids(self):
