@@ -401,9 +401,15 @@ def get_booking_settings():
 
 def lock_booking_capacity() -> int:
 	"""Read the number of agents with a row lock, held until commit."""
-	return cint(
-		frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents", for_update=True)
+	singles = frappe.qb.DocType("Singles")
+	number_of_agents = (
+		frappe.qb.from_(singles)
+		.select(singles.value)
+		.where((singles.doctype == "Appointment Booking Settings") & (singles.field == "number_of_agents"))
+		.for_update()
+		.run()
 	)
+	return cint(number_of_agents[0][0]) if number_of_agents else 0
 
 
 def is_appointment_scheduling_enabled():

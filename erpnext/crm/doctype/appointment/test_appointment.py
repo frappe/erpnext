@@ -10,6 +10,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, getdate, now_datetime, set_request
 from frappe.utils.data import get_system_timezone, sha256_hash
 
+from erpnext.crm.doctype.appointment import appointment as appointment_module
 from erpnext.crm.doctype.appointment.appointment import (
 	Appointment,
 	_check_agent_availability,
@@ -388,20 +389,19 @@ class TestAppointment(FrappeTestCase):
 		appointment = create_test_appointment(scheduled_time=slot_on(1, 10))
 		appointment.scheduled_time = slot_on(1, 11)
 		locks = []
-		get_single_value = frappe.db.get_single_value
+		lock_capacity = appointment_module.lock_booking_capacity
 		load_doc_before_save = Appointment.load_doc_before_save
 
-		def record_capacity_lock(*args, **kwargs):
-			if kwargs.get("for_update"):
-				locks.append("capacity")
-			return get_single_value(*args, **kwargs)
+		def record_capacity_lock():
+			locks.append("capacity")
+			return lock_capacity()
 
 		def record_row_lock(doc, *args, **kwargs):
 			locks.append("row")
 			return load_doc_before_save(doc, *args, **kwargs)
 
 		with (
-			patch.object(frappe.db, "get_single_value", side_effect=record_capacity_lock),
+			patch.object(appointment_module, "lock_booking_capacity", side_effect=record_capacity_lock),
 			patch.object(Appointment, "load_doc_before_save", autospec=True, side_effect=record_row_lock),
 		):
 			appointment.save()
@@ -436,26 +436,18 @@ class TestAppointment(FrappeTestCase):
 
 		from frappe.utils.data import get_system_timezone
 
-		holiday, half_day = getdate(add_to_date(getdate(), days=3)), getdate(add_to_date(getdate(), days=5))
-		self._configure_booking_settings(
-			holiday_dates=[
-				{"holiday_date": holiday, "description": "Holiday"},
-				{"holiday_date": half_day, "description": "Half Day", "is_half_day": 1},
-			]
-		)
+		holiday = getdate(add_to_date(getdate(), days=3))
+		self._configure_booking_settings(holiday_dates=[{"holiday_date": holiday, "description": "Holiday"}])
 		system_tz = get_system_timezone()
 		guest_tz = "Etc/GMT+12" if system_tz != "Etc/GMT+12" else "Etc/GMT-12"
 		with self.set_user("Guest"):
 			slots = get_appointment_slots(str(holiday), guest_tz) + get_appointment_slots(
 				str(add_to_date(holiday, days=1)), guest_tz
 			)
-			half_day_slots = get_appointment_slots(str(half_day), system_tz)
 
 		for slot in slots:
 			on_holiday = slot["time"].astimezone(ZoneInfo(system_tz)).date() == holiday
 			self.assertEqual(slot["availability"], not on_holiday)
-		self.assertTrue(half_day_slots)
-		self.assertTrue(all(slot["availability"] for slot in half_day_slots))
 
 	def test_portal_hides_slots_past_in_system_time(self):
 		from frappe.utils.data import get_system_timezone

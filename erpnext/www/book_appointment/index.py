@@ -179,8 +179,10 @@ def is_slot_available(timeslot, booked_times, settings):
 
 
 def _is_holiday(date, holiday_list):
-	# half-day holidays still take appointments, as the server allows them
-	return any(h.holiday_date == date and not h.is_half_day for h in holiday_list.holidays)
+	for holiday in holiday_list.holidays:
+		if holiday.holiday_date == date:
+			return True
+	return False
 
 
 def _get_records(start_time, end_time, settings):
