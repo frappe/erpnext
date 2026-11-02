@@ -208,12 +208,8 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
-<<<<<<< HEAD
-		self.check_on_hold_or_closed_status()
-=======
 		self.set_last_purchase_rate()
-		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
->>>>>>> db91e4f (fix(buying): recompute last purchase rate in row UOM on purchase order save)
+		self.check_on_hold_or_closed_status()
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
