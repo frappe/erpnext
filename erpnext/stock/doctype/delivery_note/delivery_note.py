@@ -608,19 +608,18 @@ class DeliveryNote(SellingController):
 		self.delete_auto_created_batches()
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		if self.per_billed == 100:
 			return
 
 		extra_amount = 0
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				fieldname="bypass_credit_limit_check",
-			)
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:

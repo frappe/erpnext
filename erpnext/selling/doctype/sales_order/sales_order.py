@@ -25,7 +25,10 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
-from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.selling.doctype.customer.customer import (
+	check_credit_limit,
+	is_sales_order_credit_check_bypassed,
+)
 from erpnext.selling.doctype.sales_order.services.delivery_schedule import DeliveryScheduleService
 from erpnext.selling.doctype.sales_order.services.reservation import SalesOrderStockReservation
 from erpnext.selling.doctype.sales_order.services.status import StatusService
@@ -642,15 +645,7 @@ class SalesOrder(SellingController):
 			project.db_update()
 
 	def check_credit_limit(self):
-		# if bypass credit limit check is set to true (1) at sales order level,
-		# then we need not to check credit limit and vise versa
-		if not cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				{"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				"bypass_credit_limit_check",
-			)
-		):
+		if not is_sales_order_credit_check_bypassed(self.customer, self.company):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
