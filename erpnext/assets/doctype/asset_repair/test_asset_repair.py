@@ -165,7 +165,7 @@ class TestAssetRepair(unittest.TestCase):
 		serial_no = serial_nos[0]
 
 		# should not raise any error
-		create_asset_repair(
+		consumed_repair = create_asset_repair(
 			stock_consumption=1,
 			item_code=stock_entry.get("items")[0].item_code,
 			warehouse="_Test Warehouse - _TC",
@@ -182,6 +182,15 @@ class TestAssetRepair(unittest.TestCase):
 
 		asset_repair.repair_status = "Completed"
 		self.assertRaises(frappe.ValidationError, asset_repair.submit)
+
+		# cancelling the repair cancels its stock entry and the consumed bundle
+		consumed_bundle = consumed_repair.stock_items[0].serial_and_batch_bundle
+		consumed_repair.cancel()
+		repair_stock_entry = frappe.db.get_value(
+			"Stock Entry", {"asset_repair": consumed_repair.name}, "docstatus"
+		)
+		self.assertEqual(repair_stock_entry, 2)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", consumed_bundle, "docstatus"), 2)
 
 	def test_no_increase_in_asset_value_when_not_capitalized(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
