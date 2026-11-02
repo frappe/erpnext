@@ -211,15 +211,21 @@ class ProductionPlanStockReservation:
 	def hand_off_to_work_orders(self, items: list) -> None:
 		work_order_rows = self.get_reserving_work_order_items(list({item.item_code for item in items}))
 		work_order_items = [
-			frappe._dict(voucher_detail_no=name, from_voucher_detail_no=item.voucher_detail_no)
+			frappe._dict(voucher_detail_no=row.name, from_voucher_detail_no=item.voucher_detail_no)
 			for item in items
-			for name, item_code in work_order_rows
-			if item_code == item.item_code
+			for row in work_order_rows
+			if row.item_code == item.item_code
 		]
 		if work_order_items:
 			StockReservation(self.doc, items=work_order_items).transfer_reservation_entries_to(
 				self.doc.name, from_doctype=self.doc.doctype, to_doctype="Work Order"
 			)
+			self.update_work_order_status({row.parent for row in work_order_rows})
+
+	def update_work_order_status(self, work_orders: set) -> None:
+		for name in work_orders:
+			work_order = frappe.get_doc("Work Order", name)
+			work_order.db_set("status", work_order.get_status())
 
 	def get_reserving_work_order_items(self, item_codes: list) -> list:
 		work_order = frappe.qb.DocType("Work Order")
@@ -228,7 +234,7 @@ class ProductionPlanStockReservation:
 			frappe.qb.from_(work_order)
 			.inner_join(work_order_item)
 			.on(work_order_item.parent == work_order.name)
-			.select(work_order_item.name, work_order_item.item_code)
+			.select(work_order_item.name, work_order_item.item_code, work_order_item.parent)
 			.where(
 				(work_order.production_plan == self.doc.name)
 				& (work_order.docstatus == 1)
@@ -236,7 +242,7 @@ class ProductionPlanStockReservation:
 				& (work_order.status != "Closed")
 				& work_order_item.item_code.isin(item_codes)
 			)
-		).run()
+		).run(as_dict=True)
 
 	def get_unclaimed_qty(self, plan_rows: set) -> defaultdict:
 		unclaimed_qty = defaultdict(float)
