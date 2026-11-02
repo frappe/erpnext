@@ -11,6 +11,8 @@ from erpnext.accounts.report.payment_period_based_on_invoice_date.payment_period
 	execute,
 )
 
+TEST_CUSTOMERS = ("_Test Customer", "_Test Customer 1")
+
 
 class TestPaymentPeriodBasedOnInvoiceDate(FrappeTestCase):
 	def tearDown(self):
@@ -79,7 +81,7 @@ class TestPaymentPeriodBasedOnInvoiceDate(FrappeTestCase):
 		self.pay_invoices_of_two_customers()
 		user = self.create_user_with_customer_permission("_Test Customer")
 
-		self.assertEqual({row["party"] for row in self.run_report_as(user)}, {"_Test Customer"})
+		self.assertEqual(self.get_test_parties(self.run_report_as(user)), {"_Test Customer"})
 
 	def test_customer_permission_for_other_doctype_does_not_restrict(self):
 		self.pay_invoices_of_two_customers()
@@ -87,12 +89,14 @@ class TestPaymentPeriodBasedOnInvoiceDate(FrappeTestCase):
 			"_Test Customer", apply_to_all_doctypes=0, applicable_for="Sales Invoice"
 		)
 
-		self.assertEqual(
-			{row["party"] for row in self.run_report_as(user)}, {"_Test Customer", "_Test Customer 1"}
-		)
+		self.assertEqual(self.get_test_parties(self.run_report_as(user)), set(TEST_CUSTOMERS))
+
+	def get_test_parties(self, data):
+		"""Parties of these tests in the report, ignoring other parties' committed data."""
+		return {row["party"] for row in data} & set(TEST_CUSTOMERS)
 
 	def pay_invoices_of_two_customers(self):
-		for customer in ("_Test Customer", "_Test Customer 1"):
+		for customer in TEST_CUSTOMERS:
 			invoice = create_sales_invoice(customer=customer, rate=1000, posting_date="2026-06-01")
 			self.pay_invoice(invoice, "2026-06-20")
 
