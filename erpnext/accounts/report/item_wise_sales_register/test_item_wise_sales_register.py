@@ -79,6 +79,70 @@ class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
 		report_output = {k: v for k, v in report[1][0].items() if k in expected_result}
 		self.assertDictEqual(report_output, expected_result)
 
+	def test_tax_columns_are_split_by_account(self):
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "_Test Account VAT - _TC", "description": "GST", "rate": 5},
+				{"account_head": "_Test Account Service Tax - _TC", "description": "GST", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		vat, service_tax = (frappe.scrub(f"_Test Account {name} - _TC") for name in ("VAT", "Service Tax"))
+		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (5, 5))
+		self.assertEqual((row[f"{service_tax}_rate"], row[f"{service_tax}_amount"]), (2, 2))
+
+	def test_tax_rows_on_same_account_combine_rates(self):
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "_Test Account VAT - _TC", "description": "VAT A", "rate": 2},
+				{"account_head": "_Test Account VAT - _TC", "description": "VAT B", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		vat = frappe.scrub("_Test Account VAT - _TC")
+		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (4, 4))
+
+	def test_accounts_with_same_scrubbed_name_keep_their_own_columns(self):
+		accounts = [self.create_tax_account(name) for name in ("_Test Tax-1", "_Test Tax 1")]
+		customers = ("_Test Customer", "_Test Customer 1")
+		for customer, account in zip(customers, accounts, strict=True):
+			self.customer = customer
+			self.create_sales_invoice(taxes=[{"account_head": account, "description": "Tax", "rate": 5}])
+
+		all_fieldnames = self.get_amount_fieldnames()
+		self.assertEqual(len(set(all_fieldnames.values())), 2)
+		for customer, account in zip(customers, accounts, strict=True):
+			# filtering out the other account must not move this account to another column
+			fieldnames = self.get_amount_fieldnames(customer=customer)
+			self.assertEqual(fieldnames, {account: all_fieldnames[account]})
+
+	def get_amount_fieldnames(self, **filters):
+		filters = frappe._dict(from_date=today(), to_date=today(), company=self.company, **filters)
+		columns = execute(filters)[0]
+		return {
+			column["label"].removesuffix(" Amount"): column["fieldname"]
+			for column in columns
+			if column["fieldname"].endswith("_amount") and column["label"].startswith("_Test Tax")
+		}
+
+	def create_tax_account(self, account_name):
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": account_name,
+				"parent_account": "Duties and Taxes - _TC",
+				"company": self.company,
+				"account_type": "Tax",
+			}
+		).insert()
+		return account.name
+
 	def test_grouped_report_handles_different_tax_descriptions(self):
 		self.create_item(item_name="_Test Item Tax Description A")
 		first_item = self.item
@@ -87,8 +151,8 @@ class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
 
 		first_tax_description = "Tax Description A"
 		second_tax_description = "Tax Description B"
-		first_tax_amount_field = f"{frappe.scrub(first_tax_description)}_amount"
-		second_tax_amount_field = f"{frappe.scrub(second_tax_description)}_amount"
+		first_tax_amount_field = f"{frappe.scrub('_Test Account VAT - _TC')}_amount"
+		second_tax_amount_field = f"{frappe.scrub('_Test Account Service Tax - _TC')}_amount"
 
 		self.create_sales_invoice(
 			item=first_item,
