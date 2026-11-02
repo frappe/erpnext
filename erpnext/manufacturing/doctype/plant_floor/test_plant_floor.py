@@ -187,6 +187,26 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual((work_order.status, work_order.produced_qty), ("Completed", 1975))
 		self.assertEqual(work_order.process_loss_qty, 25.34)
 
+	def test_lot_preview_plans_materials_and_lists_errors(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		work_order = plant_floor.make_work_order(2000)
+		with minutes_ago(60):
+			PlantRun(work_order.name).start()
+		job_card = PlantRun(work_order.name).get_open_job_card(1)
+		rows = {row.item_code: row.name for row in job_card.items}
+
+		preview = PlantRun(work_order.name).preview(job_card.name, {})
+		self.assertEqual((preview.output_qty, preview.errors), (1250, []))
+		self.assertEqual(preview["items"][rows["_Test Tomato Paste"]].qty, 500)
+
+		preview = PlantRun(work_order.name).preview(job_card.name, {rows["_Test Tomato Paste"]: 520})
+		self.assertIn(
+			"_Test Tomato Paste is 4.0% off the formula. The allowed range is ±2.0%.", preview.errors
+		)
+		self.assertTrue(preview["items"][rows["_Test Tomato Paste"]].is_off)
+		self.assertEqual(preview["items"][rows["_Test Process Water"]].qty, 355)
+
 	def test_consume_refuses_quantity_off_formula(self):
 		plant_floor = make_ketchup_plant()
 		stock_ketchup_materials()

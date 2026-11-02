@@ -121,6 +121,10 @@ class PlantRun:
 		job_card.resume_job(start_time=now_datetime())
 		return downtime.name
 
+	def preview(self, job_card, quantities):
+		lot = Lot(self.get_flow(), self.get_job_card(job_card), quantities)
+		return lot.get_preview(flt(self.plant_floor.formula_tolerance))
+
 	def consume(self, job_card, quantities):
 		job_card = self.get_job_card(job_card)
 		if job_card.is_paused:

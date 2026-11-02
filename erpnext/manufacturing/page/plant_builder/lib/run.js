@@ -6,8 +6,7 @@ import { toScenePlant } from "./plant";
 import { fmt, num, round } from "./format";
 
 const CHARGE_MS = 2500;
-
-const rowKey = (row) => row.name || row.item_code;
+const PREVIEW_MS = 300;
 
 export function useRun(workOrder) {
 	const state = ref(null);
@@ -20,9 +19,14 @@ export function useRun(workOrder) {
 		rejected: {},
 		readings: {},
 		seeded: {},
+		preview: {},
+		previewing: {},
+		replan: {},
 	});
 	const now = ref(Date.now());
 	const capacity = {};
+	const previewTimers = {};
+	const previewRequests = {};
 	let offset = 0;
 
 	const timer = setInterval(() => (now.value = Date.now()), 1000);
@@ -97,9 +101,11 @@ export function useRun(workOrder) {
 			if (local.seeded[stage.idx] === key) return;
 			local.seeded[stage.idx] = key;
 			local.actual[stage.idx] = Object.fromEntries(
-				stage.items.map((row) => [rowKey(row), row.is_input ? row.waiting_qty : row.required_qty])
+				stage.items.map((row) => [row.name, row.is_input ? row.waiting_qty : row.required_qty])
 			);
-			if (stage.phase === "ready") rescale(stage);
+			delete local.preview[stage.idx];
+			local.replan[stage.idx] = true;
+			if (stage.phase === "ready") schedulePreview(stage, 0);
 			local.output[stage.idx] = stage.output.expected_qty || stage.output.planned_qty;
 			local.rejected[stage.idx] = 0;
 			if (stage.quality && !local.readings[stage.idx]) {
@@ -166,7 +172,7 @@ export function useRun(workOrder) {
 		try {
 			await act(
 				"consume_materials",
-				{ job_card: stage.job_card.name, quantities: actualQuantities(stage) },
+				{ job_card: stage.job_card.name, quantities: local.actual[stage.idx] },
 				CHARGE_MS
 			);
 			setTimeout(() => (local.charging = null), CHARGE_MS);
@@ -191,71 +197,59 @@ export function useRun(workOrder) {
 		delete local.review[stage.idx];
 	}
 
-	const weightOf = (row, qty) => num(qty) / (row.weight_factor || 1);
-
-	function shareOf(stage) {
-		const inputs = stage.items.filter((row) => row.is_input);
-		if (!inputs.length) return 1;
-		const planned = inputs.reduce((sum, row) => sum + weightOf(row, row.planned_qty), 0);
-		const passed = inputs.reduce(
-			(sum, row) => sum + weightOf(row, local.actual[stage.idx]?.[rowKey(row)]),
-			0
-		);
-		return planned ? passed / planned : 0;
+	function schedulePreview(stage, delay = PREVIEW_MS) {
+		clearTimeout(previewTimers[stage.idx]);
+		local.previewing[stage.idx] = true;
+		previewTimers[stage.idx] = setTimeout(() => previewLot(stage), delay);
 	}
 
-	function plannedOutput(stage) {
-		const output = stage.output;
-		if (!stage.items.some((row) => row.is_input)) return output.planned_qty;
-		const roundDown = output.whole_number
-			? (qty) => Math.floor(qty + 0.000001)
-			: (qty) => Math.floor(qty * 1000 + 0.000001) / 1000;
-		const total = output.operation_qty * (output.done_share + shareOf(stage));
-		const planned = roundDown(total) - output.done_qty;
-		return roundDown(Math.max(Math.min(planned, output.limit ?? Infinity), 0));
-	}
-
-	function scaleOf(stage) {
-		if (!stage.items.some((row) => row.is_input)) return 1;
-		return stage.output.operation_qty ? plannedOutput(stage) / stage.output.operation_qty : 0;
-	}
-
-	function plannedOf(stage, row) {
-		if (stage.phase !== "ready") return row.required_qty;
-		return row.is_input ? row.waiting_qty : round(row.planned_qty * scaleOf(stage), 3);
-	}
-
-	function rescale(stage) {
-		stage.items
-			.filter((row) => !row.is_input && !row.is_balance_item)
-			.forEach((row) => (local.actual[stage.idx][rowKey(row)] = plannedOf(stage, row)));
+	async function previewLot(stage) {
+		const request = (previewRequests[stage.idx] = {});
+		const replan = local.replan[stage.idx];
+		const actual = local.actual[stage.idx];
+		const inputs = stage.items.filter((row) => row.is_input).map((row) => row.name);
+		try {
+			const preview = await call("preview_lot", {
+				work_order: workOrder,
+				job_card: stage.job_card.name,
+				quantities: replan ? Object.fromEntries(inputs.map((name) => [name, actual[name]])) : actual,
+			});
+			if (previewRequests[stage.idx] !== request) return;
+			if (replan) {
+				stage.items
+					.filter((row) => !row.is_input)
+					.forEach((row) => (actual[row.name] = preview.items[row.name].qty));
+				local.replan[stage.idx] = false;
+			}
+			local.preview[stage.idx] = preview;
+		} finally {
+			if (previewRequests[stage.idx] === request) local.previewing[stage.idx] = false;
+		}
 	}
 
 	function setPass(stage, row, value) {
 		const share = row.waiting_qty ? num(value) / row.waiting_qty : 0;
 		stage.items
-			.filter((other) => other.is_input && other !== row)
+			.filter((other) => other.is_input)
 			.forEach(
-				(other) => (local.actual[stage.idx][rowKey(other)] = round(other.waiting_qty * share, 3))
+				(other) =>
+					(local.actual[stage.idx][other.name] =
+						other === row ? value : round(other.waiting_qty * share, 3))
 			);
-		local.actual[stage.idx][rowKey(row)] = value;
-		rescale(stage);
+		local.replan[stage.idx] = true;
+		schedulePreview(stage);
 	}
 
-	function actualOf(stage, row) {
-		if (!row.is_balance_item) return num(local.actual[stage.idx]?.[rowKey(row)]);
-		const shift = stage.items
-			.filter((r) => !r.is_input && !r.is_balance_item && r.weight_factor)
-			.reduce(
-				(sum, r) =>
-					sum + (num(local.actual[stage.idx]?.[rowKey(r)]) - plannedOf(stage, r)) / r.weight_factor,
-				0
-			);
-		return round(plannedOf(stage, row) - shift * (row.weight_factor || 1), 3);
+	function setMaterial(stage, row, value) {
+		local.actual[stage.idx][row.name] = value;
+		schedulePreview(stage);
 	}
 
-	const actualQuantities = (stage) =>
-		Object.fromEntries(stage.items.map((row) => [row.name, actualOf(stage, row)]));
+	const previewOf = (stage) => local.preview[stage.idx];
+	const plannedOf = (stage, row) => previewOf(stage)?.items[row.name]?.planned_qty ?? row.required_qty;
+	const usedOf = (stage, row) => previewOf(stage)?.items[row.name]?.qty ?? row.transferred_qty;
+	const isOff = (stage, row) => !!previewOf(stage)?.items[row.name]?.is_off;
+	const isPreviewing = (stage) => !!local.previewing[stage.idx];
 
 	return {
 		state,
@@ -272,10 +266,13 @@ export function useRun(workOrder) {
 		hasActiveStage,
 		stageSeconds,
 		progressOf,
-		actualOf,
+		previewOf,
 		plannedOf,
-		plannedOutput,
+		usedOf,
+		isOff,
+		isPreviewing,
 		setPass,
+		setMaterial,
 		refresh,
 		consume,
 		produce,

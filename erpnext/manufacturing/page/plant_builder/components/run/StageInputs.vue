@@ -1,12 +1,11 @@
 <script setup>
-import { computed, inject } from "vue";
+import { inject } from "vue";
 import { TextInput } from "frappe-ui";
 import { __ } from "../../lib/api";
-import { fmt, num } from "../../lib/format";
+import { fmt } from "../../lib/format";
 
 const props = defineProps({ stage: Object, editable: Boolean });
 const run = inject("run");
-const tolerance = computed(() => num(run.state.value.plant.doc.formula_tolerance));
 
 const key = (row) => row.name || row.item_code;
 const sub = (row) => {
@@ -15,19 +14,11 @@ const sub = (row) => {
 	return props.editable ? __("Waiting in {0}", [row.source_stage]) : __("From {0}", [row.source_stage]);
 };
 const canEdit = (row) => props.editable && !row.is_balance_item;
-const planned = (row) => run.plannedOf(props.stage, row);
-const isOff = (row) => {
-	const actual = run.actualOf(props.stage, row);
-	if (row.is_input) return actual > row.waiting_qty + 0.0001 && props.editable;
-	if (row.is_balance_item || !planned(row)) return false;
-	return Math.abs(((actual - planned(row)) / planned(row)) * 100) > tolerance.value + 0.0001;
-};
+const isOff = (row) => run.isOff(props.stage, row);
 function setActual(row, value) {
 	if (row.is_input) run.setPass(props.stage, row, value);
-	else run.local.actual[props.stage.idx][key(row)] = value;
+	else run.setMaterial(props.stage, row, value);
 }
-
-defineExpose({ isOff });
 </script>
 
 <template>
@@ -49,7 +40,7 @@ defineExpose({ isOff });
 				<p class="truncate text-xs text-ink-gray-5">{{ sub(row) }}</p>
 			</div>
 			<span class="truncate whitespace-nowrap text-right text-sm tabular-nums text-ink-gray-6">
-				{{ fmt(planned(row)) }} {{ row.uom }}
+				{{ fmt(run.plannedOf(stage, row)) }} {{ row.uom }}
 			</span>
 			<TextInput
 				v-if="canEdit(row)"
@@ -65,7 +56,7 @@ defineExpose({ isOff });
 				class="text-right text-sm tabular-nums"
 				:class="isOff(row) ? 'text-ink-red-5' : 'text-ink-gray-8'"
 			>
-				{{ fmt(run.actualOf(stage, row)) }}
+				{{ fmt(run.usedOf(stage, row)) }}
 			</span>
 		</div>
 	</div>
