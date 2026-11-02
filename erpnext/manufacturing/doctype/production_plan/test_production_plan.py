@@ -4639,6 +4639,26 @@ class TestProductionPlan(ERPNextTestSuite):
 		reserved_entries = StockReservation(work_order).get_reserved_entries("Work Order", work_order.name)
 		self.assertEqual(sum({row.name: row.reserved_qty for row in reserved_entries}.values()), 10)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_receipt_skips_closed_work_orders(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		plan = self.make_plan_short_of_stock("RM For SR Closed Work Order")
+		work_order = self.submit_plan_work_order(plan)
+		close_work_order(work_order.name, "Closed")
+
+		self.receive_for_plan(plan, 6)
+
+		self.assertFalse(StockReservation(work_order).get_reserved_entries("Work Order", work_order.name))
+
+	def submit_plan_work_order(self, plan):
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.source_warehouse = work_order.wip_warehouse = "_Test Warehouse - _TC"
+		work_order.fg_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+		return work_order
+
 	def make_plan_short_of_stock(self, rm_item):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
