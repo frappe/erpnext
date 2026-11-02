@@ -214,7 +214,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
 	else:
 		return gl_entries
 
@@ -952,7 +952,7 @@ def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
 	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
 	return gl_entries
 
 
