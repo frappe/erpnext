@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 from frappe.printing.doctype.print_format.classic_converter import convert_classic_to_beta
 from frappe.printing.layout import iter_fields, iter_zones
-from frappe.query_builder.functions import Max
+from frappe.query_builder.functions import Max, Min
 from frappe.rate_limiter import rate_limit
 from frappe.translate import get_translation_version
 from frappe.utils import add_days, cint, date_diff, escape_html, flt, getdate, today
@@ -225,8 +225,11 @@ INVOICE_ITEM_FIELDS = (*ITEM_FIELDS, "purchase_order")
 # Purchase Order statuses while the order is still running
 ACTIVE_ORDER_STATUSES = ("To Receive and Bill", "To Receive", "To Bill", "To Pay", "On Hold")
 
-# of those, the ones the supplier delivers on: the buyer paused an order on hold
-DELIVERING_ORDER_STATUSES = tuple(status for status in ACTIVE_ORDER_STATUSES if status != "On Hold")
+# of those, the ones the supplier delivers on: the buyer paused an order On Hold, and owes the
+# advance an order To Pay waits for
+DELIVERING_ORDER_STATUSES = tuple(
+	status for status in ACTIVE_ORDER_STATUSES if status not in ("On Hold", "To Pay")
+)
 
 # ERPNext marks an invoice overdue once any instalment is late; `due_date` is only the last one's
 OVERDUE_INVOICE_STATUSES = ("Overdue",)
@@ -283,13 +286,9 @@ LIST_PAGES = {
 			"Closed": [["status", "=", "Closed"]],
 		},
 		"search": ("name",),
-		"scope": lambda: _documents_scope("Purchase Order", _add_last_receipts),
-		# still running, not on hold, not all delivered, and past its required-by date
-		"urgent": lambda: [
-			["status", "in", DELIVERING_ORDER_STATUSES],
-			["per_received", "<", 100],
-			["schedule_date", "<", today()],
-		],
+		"scope": lambda: _documents_scope("Purchase Order", _add_order_dates),
+		# a line not all delivered and past its date
+		"urgent": lambda: [["name", "in", _late_orders(_running_orders()) or [""]]],
 		"deadline": "schedule_date",
 	},
 	"receipts": {
@@ -411,6 +410,25 @@ def _supplier_filters(doctype: str) -> list:
 	]
 
 
+def _replaced_by(doctype: str, name: str) -> dict | None:
+	"""For an old link to one of the user's suppliers' documents that has since been cancelled and
+	amended: the revision that took its place, for the page to open instead. Anything else is None."""
+	field = SUPPLIER_DOCTYPES[doctype]
+	suppliers = get_parents_for_user("Supplier") or [""]
+	if not frappe.db.exists(doctype, [["name", "=", name], ["docstatus", "=", 2], [field, "in", suppliers]]):
+		return None
+	seen = {name}
+	current = name
+	while (
+		current := frappe.db.get_value(doctype, {"amended_from": current}, "name")
+	) and current not in seen:
+		seen.add(current)
+		# still this supplier's: a buyer can amend a document to another supplier
+		if frappe.db.exists(doctype, [["name", "=", current], *_supplier_filters(doctype)]):
+			return {"name": name, "replaced_by": current}
+	return None
+
+
 def _supplier_doc(doctype: str, name: str):
 	"""One of the user's suppliers' submitted documents; anything else is not found."""
 	if not frappe.db.exists(doctype, [["name", "=", name], *_supplier_filters(doctype)]):
@@ -454,9 +472,46 @@ def _lost_quotations(quotations: list[str]) -> set[str]:
 	return {name for name, rfq in rfqs.items() if rfq in lost}
 
 
-def _add_last_receipts(rows: list) -> dict:
-	"""When the buyer last received goods against each order: the date its note shows once delivered."""
-	return _latest_dates(rows, "Purchase Receipt", "Purchase Receipt Item", "purchase_order", "last_receipt")
+def _add_order_dates(rows: list) -> dict:
+	"""When the buyer last received goods against each order, the date its note shows once delivered,
+	and when its next delivery falls due."""
+	added = _latest_dates(rows, "Purchase Receipt", "Purchase Receipt Item", "purchase_order", "last_receipt")
+	for name, due in _next_due([row.name for row in rows]).items():
+		added.setdefault(name, {})["next_due"] = due
+	return added
+
+
+def _running_orders() -> list:
+	"""Filters for the user's suppliers' orders still to deliver."""
+	return [
+		*_supplier_filters("Purchase Order"),
+		["status", "in", DELIVERING_ORDER_STATUSES],
+		["per_received", "<", 100],
+	]
+
+
+def _next_due(orders: list[str]) -> dict:
+	"""When each order's next delivery falls due: the earliest date of its lines not all received.
+	ERPNext dates the order by its earliest line, delivered or not."""
+	if not orders:
+		return {}
+	line = frappe.qb.DocType("Purchase Order Item")
+	return dict(
+		frappe.qb.from_(line)
+		.select(line.parent, Min(line.schedule_date))
+		.where(line.parent.isin(orders) & (line.received_qty < line.qty) & line.schedule_date.isnotnull())
+		.groupby(line.parent)
+		.run()
+	)
+
+
+def _late_orders(filters: list) -> list[str]:
+	"""Of the orders these filters match, those with a line not all received and past its date. An
+	order is dated by its earliest line, so only one past its own date can have such a line."""
+	candidates = frappe.get_all(
+		"Purchase Order", filters=[*filters, ["schedule_date", "<", today()]], pluck="name"
+	)
+	return [name for name, due in _next_due(candidates).items() if getdate(due) < getdate(today())]
 
 
 def _add_last_payments(rows: list) -> dict:
@@ -962,6 +1017,8 @@ def _as_administrator():
 def get_quotation(name: str) -> dict:
 	"""One of the user's suppliers' sent quotations: its lines, the RFQ it answers, and the orders
 	placed from it."""
+	if replaced := _replaced_by("Supplier Quotation", name):
+		return replaced
 	quotation = _supplier_doc("Supplier Quotation", name)
 	rfq = _quotation_rfqs([name]).get(name)
 	reply = {field: quotation.get(field) for field in QUOTE_PAGE_FIELDS}
@@ -1007,9 +1064,31 @@ def _quotation_rfqs(quotations: list[str]) -> dict[str, str]:
 
 @frappe.whitelist()
 def get_order(name: str) -> dict:
-	"""One of the supplier's purchase orders, with only what its page shows."""
+	"""One of the supplier's purchase orders, with only what its page shows, and the receipts and
+	invoices booked against it."""
+	if replaced := _replaced_by("Purchase Order", name):
+		return replaced
 	order = _supplier_doc("Purchase Order", name)
-	return {**_reply(order, ORDER_FIELDS, ORDER_ITEM_FIELDS), "quotation_numbers": _quotation_numbers(order)}
+	return {
+		**_reply(order, ORDER_FIELDS, ORDER_ITEM_FIELDS),
+		"quotation_numbers": _quotation_numbers(order),
+		"next_due": _next_due([name]).get(name),
+		"receipts": _booked_against(name, "Purchase Receipt"),
+		"invoices": _booked_against(name, "Purchase Invoice"),
+	}
+
+
+def _booked_against(order: str, doctype: str) -> list[str]:
+	"""The user's suppliers' submitted receipts or invoices with a line for this order."""
+	return sorted(
+		set(
+			frappe.get_all(
+				doctype,
+				filters=[*_supplier_filters(doctype), [f"{doctype} Item", "purchase_order", "=", order]],
+				pluck="name",
+			)
+		)
+	)
 
 
 def _quotation_numbers(order) -> dict[str, str]:
@@ -1035,6 +1114,8 @@ def _quotation_numbers(order) -> dict[str, str]:
 @frappe.whitelist()
 def get_receipt(name: str) -> dict:
 	"""One of the supplier's purchase receipts, with the order lines it receives against."""
+	if replaced := _replaced_by("Purchase Receipt", name):
+		return replaced
 	receipt = _supplier_doc("Purchase Receipt", name)
 	return {
 		**_pick(receipt, RECEIPT_FIELDS),
@@ -1046,6 +1127,8 @@ def get_receipt(name: str) -> dict:
 @frappe.whitelist()
 def get_invoice(name: str) -> dict:
 	"""One of the supplier's purchase invoices, with only what its page shows, and its payments."""
+	if replaced := _replaced_by("Purchase Invoice", name):
+		return replaced
 	invoice = _supplier_doc("Purchase Invoice", name)
 	return {
 		**_reply(invoice, INVOICE_FIELDS, INVOICE_ITEM_FIELDS),
@@ -1200,11 +1283,17 @@ def get_portal_comments(doctype: str, name: str) -> list[dict]:
 
 
 def _earlier_revisions(doctype: str, name: str) -> list[str]:
-	"""The documents this one revises, newest first. Each was the same supplier's: an amendment keeps
-	the supplier."""
+	"""The documents this one revises, newest first, while they were the same supplier's: a buyer can
+	amend a document to another supplier, and the conversation before that is not this one's."""
+	field = SUPPLIER_DOCTYPES[doctype]
+	supplier, name = frappe.db.get_value(doctype, name, [field, "amended_from"]) or (None, None)
 	earlier = []
-	while (name := frappe.db.get_value(doctype, name, "amended_from")) and name not in earlier:
+	while name and name not in earlier:
+		before, previous = frappe.db.get_value(doctype, name, [field, "amended_from"]) or (None, None)
+		if before != supplier:
+			break
 		earlier.append(name)
+		name = previous
 	return earlier
 
 
@@ -1384,11 +1473,9 @@ def get_home() -> dict:
 def _home_summary(invited: dict[str, str]) -> dict:
 	"""Home's figures, counted in the database."""
 	to_quote = _scope(invited, "Pending")
-	running = [
-		*_supplier_filters("Purchase Order"),
-		["status", "in", DELIVERING_ORDER_STATUSES],
-		["per_received", "<", 100],
-	]
+	running = frappe.get_all("Purchase Order", filters=_running_orders(), pluck="name")
+	# by the lines still to deliver: ERPNext dates an order by its earliest line, delivered or not
+	due = list(_next_due(running).values())
 	unpaid = [*_supplier_filters("Purchase Invoice"), ["outstanding_amount", ">", 0]]
 	return {
 		"rfqs": {
@@ -1405,14 +1492,9 @@ def _home_summary(invited: dict[str, str]) -> dict:
 			)["count"],
 		},
 		"orders": {
-			**_aggregate(
-				"Purchase Order",
-				running,
-				{"count": ("COUNT", "*"), "next_delivery": ("MIN", "schedule_date")},
-			),
-			"late": _aggregate(
-				"Purchase Order", [*running, ["schedule_date", "<", today()]], {"count": ("COUNT", "*")}
-			)["count"],
+			"count": len(running),
+			"next_delivery": min(due, default=None),
+			"late": sum(getdate(date) < getdate(today()) for date in due),
 		},
 		"invoices": {
 			**_aggregate("Purchase Invoice", unpaid, {"count": ("COUNT", "*")}),

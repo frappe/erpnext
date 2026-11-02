@@ -36,7 +36,7 @@ import { usePortalComments } from "@app/composables/usePortalComments"
 import { __ } from "@app/lib/translate"
 
 export default function setup(context) {
-	// a revised quotation is cancelled, so its old link is "not found" too
+	// a revised quotation is cancelled; its old link opens the revision instead
 	const { loaded, doc, notFound, failure, docId } = usePortalDocument(
 		context, "quotation", __("We could not find this quotation"),
 	)

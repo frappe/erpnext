@@ -170,8 +170,9 @@ export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: 
 }
 
 // ---------------------------------------------------------------- orders
-/** Purchase Order statuses the supplier still delivers on: the buyer paused an order On Hold. */
-const DELIVERING_ORDER_STATUSES = ["To Receive and Bill", "To Receive", "To Bill", "To Pay"]
+/** Purchase Order statuses the supplier still delivers on: the buyer paused an order On Hold, and
+ *  owes the advance an order To Pay waits for. */
+const DELIVERING_ORDER_STATUSES = ["To Receive and Bill", "To Receive", "To Bill"]
 
 /** ERPNext's words are the buyer's: they receive what the supplier delivers, and pay the advance
  *  that "To Pay" means. */
@@ -189,10 +190,16 @@ export function orderIsDelivered(o: any): boolean {
 	return Number(o.per_received ?? 0) >= 100
 }
 
+/** When the next delivery falls due: the earliest date of the lines still to deliver, which the server
+ *  sends. ERPNext dates the order itself by its earliest line, delivered or not. */
+export function orderDueDate(o: any): string {
+	return o.next_due || o.schedule_date || ""
+}
+
 /** Still running, not on hold, not all delivered, and past the date the buyer needs it by. */
 export function orderIsOverdue(o: any): boolean {
 	if (!DELIVERING_ORDER_STATUSES.includes(o.status) || orderIsDelivered(o)) return false
-	const left = daysUntil(o.schedule_date)
+	const left = daysUntil(orderDueDate(o))
 	return left !== null && left < 0
 }
 
@@ -203,9 +210,10 @@ export function orderNote(o: any): string {
 		// the day the buyer last received goods: the required-by date is not when they arrived
 		return o.last_receipt ? __("delivered {0}", [formatDate(o.last_receipt)]) : __("delivered")
 	}
-	if (!o.schedule_date) return __("no delivery date set")
-	if (orderIsOverdue(o)) return __("delivery was due {0}", [formatDate(o.schedule_date)])
-	return __("deliver by {0}", [formatDate(o.schedule_date)])
+	const due = orderDueDate(o)
+	if (!due) return __("no delivery date set")
+	if (orderIsOverdue(o)) return __("delivery was due {0}", [formatDate(due)])
+	return __("deliver by {0}", [formatDate(due)])
 }
 
 // ---------------------------------------------------------------- receipts
