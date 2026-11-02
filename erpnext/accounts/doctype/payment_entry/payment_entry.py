@@ -3677,7 +3677,7 @@ def make_payment_order(source_name, target_doc=None):
 				"doctype": "Payment Order",
 				"validation": {"docstatus": ["=", 1]},
 				# keep the company of an existing order; references are validated against it
-				"field_no_map": ["company"] if target_doc else [],
+				"field_no_map": ["naming_series", "company"] if target_doc else ["naming_series"],
 			}
 		},
 		target_doc,

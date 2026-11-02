@@ -202,6 +202,20 @@ class TestProformaInvoice(ERPNextTestSuite):
 			[(sales_order.items[0].name, 4)],
 		)
 
+	def test_sales_order_onload_carries_proforma_settings(self):
+		"""Sales Users cannot read Selling Settings, so the form gets them through onload."""
+		frappe.db.set_single_value("Selling Settings", "default_proforma_print_format", "Standard")
+		sales_order = make_sales_order(qty=10)
+
+		sales_order.run_method("onload")
+		self.assertTrue(sales_order.get_onload().enable_proforma_invoice)
+		self.assertEqual(sales_order.get_onload().default_proforma_print_format, "Standard")
+
+		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 0)
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+		sales_order.run_method("onload")
+		self.assertFalse(sales_order.get_onload().get("enable_proforma_invoice"))
+
 	def test_cannot_email_cancelled_proforma(self):
 		sales_order = make_sales_order(qty=10)
 		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])

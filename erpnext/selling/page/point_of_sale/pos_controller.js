@@ -47,8 +47,8 @@ erpnext.PointOfSale.Controller = class {
 			if (!pos_profile) return;
 			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
 				dialog.fields_dict.balance_details.df.data = [];
-				payments.forEach((pay) => {
-					const { mode_of_payment } = pay;
+				const modes_of_payment = new Set(payments.map((pay) => pay.mode_of_payment));
+				modes_of_payment.forEach((mode_of_payment) => {
 					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: "0" });
 				});
 				dialog.fields_dict.balance_details.grid.refresh();
