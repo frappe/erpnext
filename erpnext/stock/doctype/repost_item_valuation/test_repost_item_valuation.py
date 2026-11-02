@@ -1166,6 +1166,72 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		self.assertGreater(len(fetched_batches), 1)
 		self.assertLessEqual(max(fetched_batches), batch_size)
 
+	def make_two_material_manufacture(self, warehouse):
+		rm1, rm2, fg = (
+			self.make_item(properties={"valuation_method": "Moving Average"}).name for _ in range(3)
+		)
+		for rm in (rm1, rm2):
+			make_stock_entry(
+				item_code=rm, target=warehouse, qty=10, rate=100, posting_date=add_days(today(), -10)
+			)
+
+		manufacture = make_stock_entry(
+			item_code=rm1,
+			source=warehouse,
+			qty=5,
+			purpose="Manufacture",
+			posting_date=add_days(today(), -6),
+			do_not_save=True,
+		)
+		manufacture.append("items", {"item_code": rm2, "s_warehouse": warehouse, "qty": 5})
+		manufacture.append(
+			"items", {"item_code": fg, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1}
+		)
+		manufacture.submit()
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			make_stock_entry(
+				item_code=rm1, target=warehouse, qty=10, rate=200, posting_date=add_days(today(), -8)
+			)
+			make_stock_entry(
+				item_code=rm2, target=warehouse, qty=10, rate=300, posting_date=add_days(today(), -7)
+			)
+
+		return rm1, rm2, fg
+
+	def test_pending_item_wh_is_reposted_in_the_same_pass(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm1, rm2, fg = self.make_two_material_manufacture(warehouse)
+
+		reposted = []
+		original_repost = update_entries_after.repost_stock_ledger_entry
+
+		def record_repost(self, sle):
+			reposted.append(sle.name)
+			return original_repost(self, sle)
+
+		pending = frappe._dict(
+			item_code=rm2,
+			warehouse=warehouse,
+			posting_datetime=get_combine_datetime(add_days(today(), -7), "00:00:00"),
+		)
+		with patch.object(update_entries_after, "repost_stock_ledger_entry", record_repost):
+			update_entries_after(
+				{
+					"item_code": rm1,
+					"warehouse": warehouse,
+					"posting_date": add_days(today(), -8),
+					"posting_time": "00:00:00",
+					"pending_item_wh": [pending],
+				}
+			)
+
+		fg_sle = frappe.get_value(
+			"Stock Ledger Entry", {"item_code": fg, "is_cancelled": 0}, ["name", "stock_value"], as_dict=True
+		)
+		self.assertEqual(reposted.count(fg_sle.name), 1)
+		self.assertEqual(fg_sle.stock_value, (3000 / 20) * 5 + (4000 / 20) * 5)
+
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 
