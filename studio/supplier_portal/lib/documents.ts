@@ -74,7 +74,8 @@ export function rfqIsUrgent(r: any): boolean {
 /** The deliver-by date counts down only while the supplier still has to quote. */
 export function rfqNote(r: any): string {
 	if (rfqStatus(r) === "Closed") return __("ordered from another supplier")
-	if (!r.schedule_date) return __("requested {0}", [formatDate(r.transaction_date)])
+	// not the request date: that has its own column
+	if (!r.schedule_date) return __("no delivery date set")
 	const left = daysUntil(r.schedule_date)
 	if (r.quote_status !== "Pending" || left === null || left > 7) {
 		return __("deliver by {0}", [formatDate(r.schedule_date)])

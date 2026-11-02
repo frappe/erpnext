@@ -678,8 +678,13 @@ def submit_rfq_quotation(
 		quotation.insert()
 		quotation.submit()
 
-	# insert() records the session user as the owner; the quote is the supplier's
-	frappe.db.set_value("Supplier Quotation", quotation.name, "owner", sender, update_modified=False)
+	# saving elevated records Administrator as the owner and editor; the quote and its revision are
+	# the supplier's
+	frappe.db.set_value(
+		"Supplier Quotation", quotation.name, {"owner": sender, "modified_by": sender}, update_modified=False
+	)
+	if previous:
+		frappe.db.set_value("Supplier Quotation", previous, "modified_by", sender, update_modified=False)
 
 	# whoever raised the RFQ, or is assigned to it, hears of the quote
 	headline = _("{0} sent a revised quotation for {1}") if previous else _("{0} sent a quotation for {1}")
@@ -723,6 +728,8 @@ def _build_quotation(rfq, supplier: str, items: list):
 			"supplier": supplier,
 			"company": rfq.company,
 			"currency": _quote_currency(supplier, rfq.company),
+			# the supplier's rate is final: a buying pricing rule must not change it, as in the old portal
+			"ignore_pricing_rule": 1,
 			"buying_price_list": frappe.db.get_value("Supplier", supplier, "default_price_list")
 			or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 		}

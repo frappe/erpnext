@@ -143,7 +143,7 @@ export function usePagedList(kind: string, tabs: string[], emptyWords: EmptyWord
 		},
 	})
 	const filterOptions = computed(() =>
-		tabs.map((name) => ({ label: `${__(name)} ${counts.value[name] ?? 0}`, value: name })),
+		tabs.map((name) => ({ label: `${tabLabel(name)} ${counts.value[name] ?? 0}`, value: name })),
 	)
 
 	// nothing to show is "none at all", "the tab or search is too narrow", or "it did not load"; each
@@ -168,4 +168,26 @@ export function usePagedList(kind: string, tabs: string[], emptyWords: EmptyWord
 		emptyCaption: computed(() => empty.value.caption),
 		loadMore: () => load(true),
 	}
+}
+
+/** A tab's name in the supplier's language. Each is a literal `__()` call, which is what puts it in
+ *  the translation files; a name passed in a variable would never reach them. */
+function tabLabel(name: string): string {
+	const labels: Record<string, string> = {
+		"To quote": __("To quote"),
+		All: __("All"),
+		Quoted: __("Quoted"),
+		Open: __("Open"),
+		Ordered: __("Ordered"),
+		Expired: __("Expired"),
+		Active: __("Active"),
+		Completed: __("Completed"),
+		Closed: __("Closed"),
+		Received: __("Received"),
+		Returned: __("Returned"),
+		Outstanding: __("Outstanding"),
+		Overdue: __("Overdue"),
+		Paid: __("Paid"),
+	}
+	return labels[name] ?? __(name)
 }

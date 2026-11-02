@@ -4,7 +4,7 @@
  *  lib/documents.ts. */
 
 import { dayjs, toast } from "frappe-ui"
-import { DEFAULT_NUMBER_FORMAT, formatNumber } from "@framework/ui/components/FormLayout/formatNumber"
+import { DEFAULT_NUMBER_FORMAT, flt, formatNumber } from "@framework/ui/components/FormLayout/formatNumber"
 import { __ } from "@app/lib/translate"
 
 export const EMPTY = "—"
@@ -53,6 +53,12 @@ function money(value: number | null | undefined, currency: string | undefined, f
 /** A negative prints a hyphen; in a column of figures it reads as a dash. */
 function withMinusSign(text: string): string {
 	return text.replace(/^-/, "\u2212")
+}
+
+/** A number as the supplier typed it, read with the site's separators as Desk reads it: "1,250" is
+ *  1250, and "12,50" is 12.5 where the comma is the decimal mark. Empty or unreadable is 0. */
+export function parseNumber(text: string | number | null | undefined): number {
+	return flt(text, { numberFormat: boot.number_format || DEFAULT_NUMBER_FORMAT })
 }
 
 export function daysUntil(date: string | null | undefined): number | null {
