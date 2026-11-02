@@ -7,6 +7,7 @@ from frappe.utils import add_months, flt, today
 
 from erpnext.accounts.report.purchase_register.purchase_register import execute
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.tests.permission_test_utils import make_fenced_user
 
 
 class TestPurchaseRegister(FrappeTestCase):
@@ -211,14 +212,8 @@ class TestPurchaseRegister(FrappeTestCase):
 			save=1,
 			submit=1,
 		)
-		frappe.get_doc(
-			{
-				"doctype": "User Permission",
-				"user": "test@example.com",
-				"allow": "Supplier",
-				"for_value": "_Test Supplier 1",
-			}
-		).insert()
+		user = "test_purchase_register_fenced@example.com"
+		make_fenced_user(user, ["Accounts User"], [("Supplier", "_Test Supplier 1")])
 		filters = frappe._dict(
 			company="_Test Company",
 			from_date=add_months(today(), -1),
@@ -227,12 +222,12 @@ class TestPurchaseRegister(FrappeTestCase):
 			supplier="_Test Supplier",
 		)
 
-		frappe.set_user("test@example.com")
+		frappe.set_user(user)
 		try:
 			self.assertRaises(frappe.PermissionError, execute, filters)
 		finally:
 			frappe.set_user("Administrator")
-			frappe.clear_cache(user="test@example.com")
+			frappe.clear_cache(user=user)
 
 	def test_internal_transfer_invoice_columns(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
