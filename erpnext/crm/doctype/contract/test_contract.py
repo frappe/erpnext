@@ -4,6 +4,9 @@ import unittest
 from unittest.mock import patch
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
 from erpnext.crm.doctype.contract.contract import update_status_for_contracts
@@ -111,6 +114,75 @@ class TestContract(ERPNextTestSuite):
 		self.contract_doc.save()
 
 		self.assertEqual(self.contract_doc.fulfilment_status, "Lapsed")
+
+	def test_party_managers_reach_only_contracts_of_their_party_type(self):
+		contracts = self.make_party_contracts()
+		purchase_manager = create_user("contract-purchase-manager@example.com", "Purchase Manager")
+		sales_manager = create_user("contract-sales-manager@example.com", "Sales Manager")
+
+		self.assertEqual(
+			self.get_visible_contracts(purchase_manager.name, contracts), {contracts["supplier"]}
+		)
+		self.assertEqual(
+			self.get_visible_contracts(sales_manager.name, contracts),
+			{contracts["customer"], contracts["other_customer"]},
+		)
+		self.assertFalse(
+			frappe.has_permission("Contract", "write", doc=contracts["customer"], user=purchase_manager.name)
+		)
+		self.assertTrue(
+			frappe.has_permission("Contract", "write", doc=contracts["supplier"], user=purchase_manager.name)
+		)
+
+	def test_user_permissions_on_the_party_restrict_contracts(self):
+		contracts = self.make_party_contracts()
+		user = create_user(
+			"contract-restricted-sales-manager@example.com", "Sales Manager", "Purchase Manager"
+		)
+		add_user_permission("Customer", "_Test Customer", user.name)
+
+		self.assertEqual(
+			self.get_visible_contracts(user.name, contracts), {contracts["customer"], contracts["supplier"]}
+		)
+		self.assertTrue(frappe.has_permission("Contract", "read", doc=contracts["customer"], user=user.name))
+		self.assertFalse(
+			frappe.has_permission("Contract", "read", doc=contracts["other_customer"], user=user.name)
+		)
+
+	def test_no_contracts_when_none_of_the_party_types_exist(self):
+		contract = get_contract()
+		employee = frappe.db.get_value("Employee", {"first_name": "_Test Employee"})
+		contract.update({"party_type": "Employee", "party_name": employee})
+		contract.insert()
+
+		make_property_setter("Contract", "party_type", "options", "Customer\nSupplier", "Text")
+		self.addCleanup(frappe.clear_cache, doctype="Contract")
+		user = create_user("contract-hr-manager@example.com", "HR Manager")
+
+		self.assertEqual(self.get_visible_contracts(user.name, {"employee": contract.name}), set())
+		self.assertFalse(frappe.has_permission("Contract", "read", doc=contract, user=user.name))
+
+	def make_party_contracts(self) -> dict[str, str]:
+		parties = {
+			"customer": ("Customer", "_Test Customer"),
+			"other_customer": ("Customer", "_Test Customer 1"),
+			"supplier": ("Supplier", "_Test Supplier"),
+		}
+		contracts = {}
+		for key, (party_type, party_name) in parties.items():
+			contract = get_contract()
+			contract.update({"party_type": party_type, "party_name": party_name})
+			contracts[key] = contract.insert().name
+
+		return contracts
+
+	def get_visible_contracts(self, user: str, contracts: dict[str, str]) -> set[str]:
+		with self.set_user(user):
+			names = frappe.get_list(
+				"Contract", filters={"name": ("in", list(contracts.values()))}, pluck="name"
+			)
+
+		return set(names)
 
 	def test_daily_job_lapses_fulfilment_after_the_deadline(self):
 		contract = self.make_signed_contract(fulfilment_deadline=nowdate())
