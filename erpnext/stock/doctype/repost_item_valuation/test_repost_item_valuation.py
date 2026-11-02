@@ -1302,6 +1302,28 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(frappe.db.get_value("Repost Item Valuation", earlier.name, "status"), "Queued")
 
+	def test_queued_item_reposts_are_not_merged_after_a_merged_repost_fails(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm1, rm2, fg = self.make_two_material_manufacture(warehouse)
+		failed = self.make_queued_item_repost(fg, add_days(today(), -9))
+		failed.db_set(
+			{
+				"status": "Failed",
+				"items_to_be_repost": frappe.as_json([{"item_code": fg}, {"item_code": rm1}]),
+			}
+		)
+		rivs = [
+			self.make_queued_item_repost(rm1, add_days(today(), -8)),
+			self.make_queued_item_repost(rm2, add_days(today(), -7)),
+		]
+
+		execute_reposting_entry(rivs[0].name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Repost Item Valuation", riv.name, "status") for riv in rivs],
+			["Completed", "Queued"],
+		)
+
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
 
