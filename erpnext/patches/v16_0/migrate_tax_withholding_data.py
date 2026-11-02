@@ -97,7 +97,14 @@ def execute():
 	paid_journals = set()
 	for suppliers in get_supplier_groups(column_cache, party_tax_id_cache, created_before):
 		purchase_migrator = PurchaseInvoiceMigrator(
-			tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before, suppliers
+			tds_accounts,
+			tax_rate_map,
+			column_cache,
+			party_tax_id_cache,
+			party_categories,
+			skip_docs,
+			created_before,
+			suppliers,
 		)
 		purchase_migrator.migrate()
 		paid_journals.update(
@@ -467,6 +474,7 @@ class PurchaseInvoiceMigrator:
 		tax_rate_map,
 		column_cache,
 		party_tax_id_cache,
+		party_categories,
 		skip_docs,
 		created_before,
 		suppliers,
@@ -475,6 +483,7 @@ class PurchaseInvoiceMigrator:
 		self.tax_rate_map = tax_rate_map
 		self.column_cache = column_cache
 		self.party_tax_id_cache = party_tax_id_cache
+		self.party_categories = party_categories
 		self.skip_docs = skip_docs
 		self.created_before = created_before
 		self.suppliers = suppliers
@@ -574,6 +583,7 @@ class PurchaseInvoiceMigrator:
 				pi.base_tax_withholding_net_total,
 				pi.tax_withholding_category,
 				pi.is_return,
+				pi.apply_tds,
 				pi.currency,
 				pi.conversion_rate,
 				ptc.account_head,
@@ -626,6 +636,7 @@ class PurchaseInvoiceMigrator:
 				pi.base_tax_withholding_net_total,
 				pi.tax_withholding_category,
 				pi.is_return,
+				pi.apply_tds,
 				pi.currency,
 				pi.conversion_rate,
 			)
@@ -680,6 +691,7 @@ class PurchaseInvoiceMigrator:
 				pi.base_tax_withholding_net_total,
 				pi.tax_withholding_category,
 				pi.is_return,
+				pi.apply_tds,
 				pi.currency,
 				pi.conversion_rate,
 			)
@@ -847,6 +859,9 @@ class PurchaseInvoiceMigrator:
 		# Get party info
 		party_type = "Supplier"
 		party = info.supplier
+
+		# Like the v15 Tax Withholding Details report, fall back to the supplier's category
+		category = category or self.party_categories.get((party_type, party))
 		tax_id = get_party_tax_id(party_type, party, self.column_cache, self.party_tax_id_cache)
 		tax_rate, tax_on_excess = get_tax_rate_for_date(self.tax_rate_map, category, info.posting_date)
 
@@ -944,7 +959,8 @@ class PurchaseInvoiceMigrator:
 				calc_taxable = ctx["current_taxable"]
 
 			# Handle threshold exemption for tax_on_excess categories
-			if ctx["tax_on_excess"] and calc_taxable < ctx["current_taxable"]:
+			# v15 counted only invoices with apply_tds towards the threshold
+			if ctx["tax_on_excess"] and info.apply_tds and calc_taxable < ctx["current_taxable"]:
 				taxable_exemption_amount = flt(ctx["current_taxable"] - calc_taxable, 2)
 
 				# Create threshold exemption entry (no TDS on threshold amount)
@@ -1019,7 +1035,11 @@ class PurchaseInvoiceMigrator:
 
 	def _process_underwithheld(self, invoice_name, ctx):
 		# Skip if TDS was paid by another invoice or the advance covered the whole invoice
-		if ("Purchase Invoice", invoice_name) in self.tds_paid_by_other or not ctx["current_taxable"]:
+		if (
+			("Purchase Invoice", invoice_name) in self.tds_paid_by_other
+			or not ctx["current_taxable"]
+			or not ctx["info"].apply_tds
+		):
 			return []
 
 		info = ctx["info"]
