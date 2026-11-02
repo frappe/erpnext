@@ -947,9 +947,13 @@ class PurchaseInvoiceMigrator:
 		# Calculate TDS split between current and past invoices
 		if not ctx["tax_on_excess"] and ctx["past_taxable_total"] > 0 and tax_rate:
 			tds_for_past = flt(ctx["past_taxable_total"] * tax_rate / 100, 2)
-			tds_for_current = max(0, tds_for_current_and_past - tds_for_past)
-		else:
-			tds_for_current = tds_for_current_and_past
+
+			# v15 listed the vouchers until the threshold was crossed, so with less TDS than they need
+			# this invoice did not tax them
+			if tds_for_past > tds_for_current_and_past + 1:
+				tds_for_past = 0
+
+		tds_for_current = max(0, tds_for_current_and_past - tds_for_past)
 
 		# Entry for current invoice
 		if tds_for_current:
