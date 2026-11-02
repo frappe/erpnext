@@ -627,8 +627,8 @@ class DeliveryNote(SellingController):
 			for d in self.get("items"):
 				if not d.against_sales_invoice:
 					validate_against_credit_limit = True
-					# Only submitted standalone rows are already included in customer outstanding.
-					if (d.against_sales_order or self.docstatus == 0) and self.base_net_total:
+					# Submitted rows are already in customer outstanding, directly or via the Sales Order.
+					if self.docstatus == 0 and self.base_net_total:
 						extra_amount += d.base_net_amount / self.base_net_total * self.base_grand_total
 			if validate_against_credit_limit and not self.base_net_total:
 				# Customer outstanding excludes zero-net deliveries, including their freight charges.
