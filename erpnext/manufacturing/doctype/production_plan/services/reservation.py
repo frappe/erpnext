@@ -233,10 +233,13 @@ class ProductionPlanStockReservation:
 			if row.item_code == item.item_code
 		]
 		if work_order_items:
-			StockReservation(self.doc, items=work_order_items).transfer_reservation_entries_to(
-				self.doc.name, from_doctype=self.doc.doctype, to_doctype="Work Order"
-			)
+			self.hand_off("Work Order", work_order_items)
 			self.update_work_order_status({row.parent for row in work_order_rows})
+
+	def hand_off(self, to_doctype: str, items: list | None = None) -> None:
+		StockReservation(self.doc, items=items).transfer_reservation_entries_to(
+			self.doc.name, from_doctype=self.doc.doctype, to_doctype=to_doctype
+		)
 
 	def update_work_order_status(self, work_orders: set) -> None:
 		for name in work_orders:
@@ -301,6 +304,10 @@ def get_received_item(receipt: Document, row: Document, plan_row: str, qty: floa
 		item.serial_and_batch_bundles = [row.serial_and_batch_bundle]
 
 	return item
+
+
+def hand_off_reserved_stock(plan: str, to_doctype: str, items: list | None = None) -> None:
+	ProductionPlanStockReservation(frappe.get_doc("Production Plan", plan)).hand_off(to_doctype, items)
 
 
 def reserve_received_stock(receipt: Document) -> None:
