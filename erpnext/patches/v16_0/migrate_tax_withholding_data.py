@@ -394,7 +394,6 @@ class PurchaseInvoiceMigrator:
 		self.nil_certificates = defaultdict(list)  # {(supplier, company, category): [certificates]}
 
 		# Sets for tracking
-		self.invoices_with_twv = set()
 		self.invoices_with_advance_tax = set()
 		self.tds_paid_by_other = set()
 
@@ -447,6 +446,8 @@ class PurchaseInvoiceMigrator:
 		pe = frappe.qb.DocType("Payment Entry")
 		atc = frappe.qb.DocType("Advance Taxes and Charges")
 
+		tds_row = ptc.account_head.isin(list(self.all_tds_accounts))
+
 		# Query 1: Invoices with TDS in taxes table
 		self._invoices_with_tds = (
 			frappe.qb.from_(pi)
@@ -467,33 +468,27 @@ class PurchaseInvoiceMigrator:
 				ptc.base_tax_amount_after_discount_amount,
 			)
 			.where(pi.docstatus == 1)
-			.where(ptc.account_head.isin(list(self.all_tds_accounts)))
+			.where(tds_row)
 			.run(as_dict=True)
 		)
 
-		# Query 2: Tax withheld vouchers
+		# Query 2: Tax withheld vouchers, only of invoices with TDS: they are read to split that TDS over
+		# the vouchers it paid for, and v15 listed every earlier voucher on each invoice until TDS started
 		self._all_withheld_vouchers = (
 			frappe.qb.from_(twv)
 			# JV / PE withholding possible
-			.left_join(pi)
-			.on(twv.parent == pi.name)
-			.select(
-				twv.parent,
-				twv.voucher_type,
-				twv.voucher_name,
-				twv.taxable_amount,
-				pi.supplier,
-				pi.company,
-				pi.posting_date,
-				pi.base_net_total,
-				pi.base_tax_withholding_net_total,
-				pi.tax_withholding_category,
-				pi.is_return,
-				pi.currency,
-				pi.conversion_rate,
-			)
+			.select(twv.parent, twv.voucher_type, twv.voucher_name, twv.taxable_amount)
 			.where(twv.parenttype == "Purchase Invoice")
-			.where(pi.docstatus == 1)
+			.where(
+				twv.parent.isin(
+					frappe.qb.from_(ptc)
+					.join(pi)
+					.on(ptc.parent == pi.name)
+					.select(ptc.parent)
+					.where(pi.docstatus == 1)
+					.where(tds_row)
+				)
+			)
 			.run(as_dict=True)
 		)
 
@@ -614,7 +609,6 @@ class PurchaseInvoiceMigrator:
 	def _build_withheld_vouchers_lookup(self):
 		for row in self._all_withheld_vouchers:
 			self.withheld_by_invoice[row.parent].append(row)
-			self.invoices_with_twv.add(row.parent)
 
 			if row.voucher_type != "Purchase Invoice":
 				continue
@@ -649,10 +643,6 @@ class PurchaseInvoiceMigrator:
 		for row in self._invoices_with_tds:
 			if row.name not in self.invoice_info:
 				self.invoice_info[row.name] = row
-
-		for row in self._all_withheld_vouchers:
-			if row.parent not in self.invoice_info:
-				self.invoice_info[row.parent] = row
 
 		for row in self._all_advance_taxes:
 			if row.parent not in self.invoice_info:
@@ -691,7 +681,6 @@ class PurchaseInvoiceMigrator:
 	def _process_invoices(self):
 		all_invoice_names = (
 			set(self.invoice_taxes.keys())
-			| self.invoices_with_twv
 			| self.invoices_with_advance_tax
 			| {row.name for row in self._threshold_invoices}
 		)
