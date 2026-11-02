@@ -29,6 +29,7 @@ from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
 	sync_financial_report_templates,
 )
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 from erpnext.stock.utils import check_pending_reposting
 
@@ -175,6 +176,9 @@ class Company(NestedSet):
 
 	def validate(self):
 		old_doc = self.get_doc_before_save()
+		for field, module in (("default_selling_terms", "selling"), ("default_buying_terms", "buying")):
+			if not old_doc or self.get(field) != old_doc.get(field):
+				validate_terms_and_conditions(self.get(field), module)
 		self.update_default_account = False
 		if self.is_new():
 			self.update_default_account = True
