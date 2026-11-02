@@ -1236,19 +1236,10 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		warehouse = "_Test Warehouse - _TC"
 		rm1, rm2, fg = self.make_two_material_manufacture(warehouse)
 
-		rivs = []
-		for item_code, days in ((rm1, -8), (rm2, -7)):
-			riv = frappe.get_doc(
-				doctype="Repost Item Valuation",
-				based_on="Item and Warehouse",
-				item_code=item_code,
-				warehouse=warehouse,
-				posting_date=add_days(today(), days),
-				posting_time="00:00:00",
-			)
-			riv.flags.dont_run_in_test = True
-			riv.submit()
-			rivs.append(riv)
+		rivs = [
+			self.make_queued_item_repost(rm1, add_days(today(), -8)),
+			self.make_queued_item_repost(rm2, add_days(today(), -7)),
+		]
 
 		reposted = []
 		original_repost = update_entries_after.repost_stock_ledger_entry
@@ -1269,6 +1260,16 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(reposted.count(fg_sle.name), 1)
 		self.assertEqual(fg_sle.stock_value, (3000 / 20) * 5 + (4000 / 20) * 5)
+
+	def test_earlier_repost_of_same_item_wh_is_not_merged(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm1, _rm2, _fg = self.make_two_material_manufacture(warehouse)
+		later = self.make_queued_item_repost(rm1, add_days(today(), -6))
+		earlier = self.make_queued_item_repost(rm1, add_days(today(), -8))
+
+		execute_reposting_entry(later.name)
+
+		self.assertEqual(frappe.db.get_value("Repost Item Valuation", earlier.name, "status"), "Queued")
 
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
