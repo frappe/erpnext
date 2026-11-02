@@ -1542,6 +1542,7 @@ class StockReservation:
 								"voucher_type": entry.voucher_type or to_doctype,
 								"voucher_no": entry.voucher_no,
 								"voucher_detail_no": entry.voucher_detail_no,
+								"voucher_qty": entry.get("required_qty"),
 								"stock_uom": entry.stock_uom,
 								"serial_nos": [],
 								"sre_names": defaultdict(float),
@@ -1644,7 +1645,7 @@ class StockReservation:
 
 		sre.available_qty = row.get("qty_to_reserve")
 		sre.reserved_qty = row.get("qty_to_reserve")
-		sre.voucher_qty = row.get("qty_to_reserve")
+		sre.voucher_qty = row.get("voucher_qty") or row.get("qty_to_reserve")
 
 		against_row = row.get("against_row")
 		sre.from_voucher_no = against_row.voucher_no
