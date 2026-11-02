@@ -1,11 +1,12 @@
 <script setup>
 import { computed, ref } from "vue";
-import { useElementSize, useEventListener } from "@vueuse/core";
+import { useElementSize } from "@vueuse/core";
 import { Button, Progress, TabButtons, Tooltip } from "frappe-ui";
 import PlantFloor from "./PlantFloor.vue";
 import { buildLayout } from "../../lib/layout";
-import { buildTags } from "../../lib/scene";
+import { buildTags, useOrbitCamera } from "../../lib/scene";
 import { useClock } from "../../lib/clock";
+import { clamp } from "../../lib/format";
 
 const props = defineProps({
 	plant: Object,
@@ -17,19 +18,12 @@ const props = defineProps({
 const emit = defineEmits(["resume"]);
 
 const PERSPECTIVE = 2200;
-const PRESETS = { "3d": [-24, 56], top: [0, 0], front: [0, 72] };
 
 const layout = computed(() => buildLayout(props.plant));
 const tags = computed(() => buildTags(props.plant, layout.value, props.view, props.live));
 
-const viewName = ref("3d");
-const rot = ref(-24);
-const tilt = ref(56);
-const zoom = ref(1);
-const dragging = ref(false);
 const stage = ref(null);
-const orbit = { on: false, x: 0, y: 0, moved: 0 };
-const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const { viewName, rot, tilt, zoom, dragging, animateTo, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
 
 const { width, height } = useElementSize(stage);
 useClock(stage);
@@ -43,49 +37,6 @@ const fit = computed(() => {
 });
 const scale = computed(() => fit.value * zoom.value * (1 - tilt.value / 300));
 const center = computed(() => ({ x: width.value / 2, y: height.value / 2 + 50 }));
-
-function animateTo(toRot, toTilt) {
-	const from = [rot.value, tilt.value];
-	const start = performance.now();
-	const step = (now) => {
-		const p = Math.min(1, (now - start) / 350);
-		const e = 1 - (1 - p) ** 3;
-		rot.value = from[0] + (toRot - from[0]) * e;
-		tilt.value = from[1] + (toTilt - from[1]) * e;
-		if (p < 1) requestAnimationFrame(step);
-	};
-	requestAnimationFrame(step);
-}
-
-function setView(v) {
-	viewName.value = v;
-	animateTo(...PRESETS[v]);
-}
-
-function onDown(e) {
-	if (e.button !== 0) return;
-	Object.assign(orbit, { on: true, x: e.clientX, y: e.clientY, moved: 0 });
-}
-
-useEventListener(window, "pointermove", (e) => {
-	if (!orbit.on) return;
-	const dx = e.clientX - orbit.x;
-	const dy = e.clientY - orbit.y;
-	orbit.moved += Math.abs(dx) + Math.abs(dy);
-	dragging.value = orbit.moved > 4;
-	rot.value += dx * 0.35;
-	tilt.value = clamp(tilt.value - dy * 0.3, 0, 80);
-	Object.assign(orbit, { x: e.clientX, y: e.clientY });
-});
-
-useEventListener(window, "pointerup", () => {
-	orbit.on = false;
-	dragging.value = false;
-});
-
-function onWheel(e) {
-	zoom.value = clamp(zoom.value - e.deltaY * 0.0015, 0.5, 3);
-}
 
 function project(t) {
 	const r = (rot.value * Math.PI) / 180;
@@ -186,10 +137,10 @@ const grid = {
 					><Button variant="ghost" icon="lucide-rotate-cw" @click="animateTo(rot + 45, tilt)"
 				/></Tooltip>
 				<Tooltip text="Zoom out"
-					><Button variant="ghost" icon="lucide-zoom-out" @click="zoom = clamp(zoom - 0.2, 0.5, 3)"
+					><Button variant="ghost" icon="lucide-zoom-out" @click="zoomBy(-0.2)"
 				/></Tooltip>
 				<Tooltip text="Zoom in"
-					><Button variant="ghost" icon="lucide-zoom-in" @click="zoom = clamp(zoom + 0.2, 0.5, 3)"
+					><Button variant="ghost" icon="lucide-zoom-in" @click="zoomBy(0.2)"
 				/></Tooltip>
 				<Tooltip text="Fit plant"
 					><Button

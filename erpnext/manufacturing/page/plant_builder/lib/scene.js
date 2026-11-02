@@ -1,6 +1,61 @@
+import { ref } from "vue";
+import { useEventListener } from "@vueuse/core";
 import { machineOf, machineSize } from "./machines";
 import { YC } from "./layout";
-import { fmt, plural } from "./format";
+import { clamp, fmt, plural } from "./format";
+
+const VIEWS = { "3d": [-24, 56], top: [0, 0], front: [0, 72] };
+
+export function useOrbitCamera() {
+	const [rot, tilt] = VIEWS["3d"].map((angle) => ref(angle));
+	const viewName = ref("3d");
+	const zoom = ref(1);
+	const dragging = ref(false);
+	const orbit = { on: false, x: 0, y: 0, moved: 0 };
+
+	const animateTo = (toRot, toTilt) => turnCamera(rot, tilt, toRot, toTilt);
+	const zoomBy = (step) => (zoom.value = clamp(zoom.value + step, 0.5, 3));
+	const onWheel = (e) => zoomBy(-e.deltaY * 0.0015);
+
+	function setView(name) {
+		viewName.value = name;
+		animateTo(...VIEWS[name]);
+	}
+
+	function onDown(e) {
+		if (e.button === 0) Object.assign(orbit, { on: true, x: e.clientX, y: e.clientY, moved: 0 });
+	}
+
+	useEventListener(window, "pointermove", (e) => {
+		if (!orbit.on) return;
+		const dx = e.clientX - orbit.x;
+		const dy = e.clientY - orbit.y;
+		orbit.moved += Math.abs(dx) + Math.abs(dy);
+		dragging.value = orbit.moved > 4;
+		rot.value += dx * 0.35;
+		tilt.value = clamp(tilt.value - dy * 0.3, 0, 80);
+		Object.assign(orbit, { x: e.clientX, y: e.clientY });
+	});
+	useEventListener(window, "pointerup", () => {
+		orbit.on = false;
+		dragging.value = false;
+	});
+
+	return { viewName, rot, tilt, zoom, dragging, animateTo, setView, zoomBy, onWheel, onDown };
+}
+
+function turnCamera(rot, tilt, toRot, toTilt) {
+	const from = [rot.value, tilt.value];
+	const start = performance.now();
+	const step = (now) => {
+		const p = Math.min(1, (now - start) / 350);
+		const e = 1 - (1 - p) ** 3;
+		rot.value = from[0] + (toRot - from[0]) * e;
+		tilt.value = from[1] + (toTilt - from[1]) * e;
+		if (p < 1) requestAnimationFrame(step);
+	};
+	requestAnimationFrame(step);
+}
 
 export function previewView(plant, animate, focus) {
 	const level = {};
