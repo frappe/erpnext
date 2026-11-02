@@ -46,19 +46,8 @@ class SalesPipelineAnalytics:
 	def set_range_columns(self):
 		based_on = {"Number": "Int", "Amount": "Currency"}[self.filters.get("based_on")]
 
-		if self.filters.get("range") == "Monthly":
-			month_list = self.get_month_list()
-
-			for month in month_list:
-				self.columns.append(
-					{"fieldname": month, "fieldtype": based_on, "label": _(month), "width": 200}
-				)
-
-		elif self.filters.get("range") == "Quarterly":
-			for quarter in range(1, 5):
-				self.columns.append(
-					{"fieldname": f"Q{quarter}", "fieldtype": based_on, "label": f"Q{quarter}", "width": 200}
-				)
+		for period in self.get_periods():
+			self.columns.append({**period, "fieldtype": based_on, "width": 200})
 
 	def set_pipeline_based_on_column(self):
 		if self.filters.get("pipeline_by") == "Owner":
@@ -83,21 +72,18 @@ class SalesPipelineAnalytics:
 			self.filters.get("pipeline_by")
 		]
 
-		self.group_by_period = {
-			"Monthly": "month(expected_closing)",
-			"Quarterly": "QUARTER(expected_closing)",
-		}[self.filters.get("range")]
+		period_function = "month" if self.filters.get("range") == "Monthly" else "quarter"
+		self.group_by_period = f"year(expected_closing), {period_function}(expected_closing)"
+		self.period_fields = [
+			"year(expected_closing) as year",
+			f"{period_function}(expected_closing) as period",
+		]
 
 		self.pipeline_by = {"Owner": "opportunity_owner", "Sales Stage": "sales_stage"}[
 			self.filters.get("pipeline_by")
 		]
 
-		self.duration = {
-			"Monthly": "monthname(expected_closing) as month",
-			"Quarterly": "QUARTER(expected_closing) as quarter",
-		}[self.filters.get("range")]
-
-		self.period_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
+		self.period_by = "period"
 
 	def get_data(self):
 		self.get_fields()
@@ -106,18 +92,20 @@ class SalesPipelineAnalytics:
 			self.query_result = frappe.db.get_list(
 				"Opportunity",
 				filters=self.get_conditions(),
-				fields=[self.based_on, self.data_based_on, self.duration],
+				fields=[self.based_on, self.data_based_on, *self.period_fields],
 				group_by=f"{self.group_by_based_on},{self.group_by_period}",
 				order_by=self.group_by_period,
 			)
+			self.set_row_periods()
 
 		if self.filters.get("based_on") == "Amount":
 			self.query_result = frappe.db.get_list(
 				"Opportunity",
 				filters=self.get_conditions(),
-				fields=[self.based_on, self.data_based_on, self.duration, "conversion_rate"],
+				fields=[self.based_on, self.data_based_on, *self.period_fields, "conversion_rate"],
 			)
 
+			self.set_row_periods()
 			self.convert_to_base_currency()
 
 			self.grouped_data = []
@@ -169,7 +157,7 @@ class SalesPipelineAnalytics:
 
 		for column in self.columns:
 			if column["fieldname"] != "opportunity_owner" and column["fieldname"] != "sales_stage":
-				labels.append(_(column["fieldname"]))
+				labels.append(column["label"])
 
 		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
@@ -184,13 +172,8 @@ class SalesPipelineAnalytics:
 			self.filters.get("pipeline_by")
 		]
 
-		frequency = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
-
 		for info in self.query_result:
-			if self.filters.get("range") == "Monthly":
-				period = info.get(frequency)
-			if self.filters.get("range") == "Quarterly":
-				period = f'Q{cint(info.get("quarter"))}'
+			period = info.get(self.period_by)
 
 			value = info.get(pipeline_by)
 			count_or_amount = info.get(based_on)
@@ -236,32 +219,40 @@ class SalesPipelineAnalytics:
 		else:
 			self.set_formatted_data(period, value, count_or_amount, assigned_to)
 
-	def get_month_list(self):
-		month_list = []
+	def get_periods(self) -> list[dict]:
+		periods = []
+		months_per_period = 1 if self.filters.get("range") == "Monthly" else 3
 		current_date = getdate(self.filters.get("from_date"))
+		if self.filters.get("range") == "Quarterly":
+			current_date = date(current_date.year, (current_date.month - 1) // 3 * 3 + 1, 1)
 
 		while current_date < getdate(self.filters.get("to_date")):
-			month_list.append(current_date.strftime("%B"))
-			current_date = current_date + relativedelta(months=1)
+			periods.append(self.get_period(current_date))
+			current_date = current_date + relativedelta(months=months_per_period)
 
-		return month_list
+		return periods
+
+	def get_period(self, period_start: date) -> dict:
+		if self.filters.get("range") == "Monthly":
+			label = f"{_(period_start.strftime('%B'))} {period_start.year}"
+			return {"fieldname": period_start.strftime("%B_%Y").lower(), "label": label}
+
+		quarter = (period_start.month - 1) // 3 + 1
+		return {"fieldname": f"q{quarter}_{period_start.year}", "label": f"Q{quarter} {period_start.year}"}
+
+	def set_row_periods(self):
+		for row in self.query_result:
+			month = cint(row.period) if self.filters.get("range") == "Monthly" else cint(row.period) * 3 - 2
+			row.period = self.get_period(date(cint(row.year), month, 1))["fieldname"]
 
 	def append_to_dataset(self, datasets):
-		range_by = {"Monthly": "month", "Quarterly": "quarter"}[self.filters.get("range")]
-
 		based_on = {"Amount": "amount", "Number": "count"}[self.filters.get("based_on")]
-
-		if self.filters.get("range") == "Quarterly":
-			frequency_list = [1, 2, 3, 4]
-			count = [0] * 4
-
-		if self.filters.get("range") == "Monthly":
-			frequency_list = self.get_month_list()
-			count = [0] * len(frequency_list)
+		frequency_list = [period["fieldname"] for period in self.get_periods()]
+		count = [0] * len(frequency_list)
 
 		for info in self.query_result:
 			for i in range(len(frequency_list)):
-				if info[range_by] == frequency_list[i]:
+				if info[self.period_by] == frequency_list[i]:
 					count[i] = count[i] + info[based_on]
 		datasets.append({"name": based_on, "values": count})
 
@@ -270,12 +261,7 @@ class SalesPipelineAnalytics:
 		for pipeline, period_data in self.periodic_data.items():
 			row = {pipeline_by: pipeline}
 			for info in self.query_result:
-				if self.filters.get("range") == "Monthly":
-					period = info.get(period_by)
-
-				if self.filters.get("range") == "Quarterly":
-					period = f"Q{cint(info.get(period_by))}"
-
+				period = info.get(period_by)
 				count = period_data.get(period, 0.0)
 				row[period] = count
 
