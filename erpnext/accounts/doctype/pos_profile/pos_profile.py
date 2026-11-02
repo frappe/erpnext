@@ -8,6 +8,7 @@ from frappe.core.doctype.user_permission.user_permission import get_permitted_do
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
 
+import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
@@ -38,6 +39,7 @@ class POSProfile(Document):
 		applicable_for_users: DF.Table[POSProfileUser]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		auto_add_item_to_cart: DF.Check
+		cash_difference_account: DF.Link | None
 		company: DF.Link
 		company_address: DF.Link | None
 		cost_center: DF.Link | None
@@ -169,6 +171,7 @@ class POSProfile(Document):
 		for fieldname, doctype in (
 			("write_off_account", "Account"),
 			("write_off_cost_center", "Cost Center"),
+			("cash_difference_account", "Account"),
 		):
 			if not (value := self.get(fieldname)):
 				continue
@@ -182,7 +185,13 @@ class POSProfile(Document):
 				doctype == "Account"
 				and frappe.get_cached_value("Account", value, "report_type") != "Profit and Loss"
 			):
-				frappe.throw(_("Write Off Account must be a Profit and Loss account"))
+				frappe.throw(
+					_("{0} must be a Profit and Loss account").format(_(self.meta.get_label(fieldname)))
+				)
+
+		# closing differences are in the profile's currency, but the journal entry is in the company's
+		if self.cash_difference_account and self.currency != erpnext.get_company_currency(self.company):
+			frappe.throw(_("Cash Difference Account can only be set if the currency is the company currency"))
 
 	def validate_duplicate_groups(self):
 		item_groups = [d.item_group for d in self.item_groups]

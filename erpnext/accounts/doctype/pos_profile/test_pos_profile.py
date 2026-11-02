@@ -101,6 +101,18 @@ class TestPOSProfile(ERPNextTestSuite):
 				with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company"):
 					profile.save()
 
+	def test_cash_difference_account_must_be_profit_and_loss(self):
+		profile = make_pos_profile(do_not_insert=True)
+		profile.cash_difference_account = "Cash - _TC"
+		with self.assertRaisesRegex(frappe.ValidationError, "must be a Profit and Loss account"):
+			profile.insert()
+
+	def test_cash_difference_account_needs_company_currency(self):
+		profile = make_pos_profile(do_not_insert=True, currency="USD")
+		profile.cash_difference_account = "_Test Write Off - _TC"
+		with self.assertRaisesRegex(frappe.ValidationError, "company currency"):
+			profile.insert()
+
 
 def get_customers_list(pos_profile=None):
 	if pos_profile is None:

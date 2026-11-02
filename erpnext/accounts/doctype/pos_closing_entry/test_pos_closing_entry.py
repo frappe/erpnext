@@ -585,8 +585,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		closing_entry = make_closing_entry_from_opening(opening_entry)
 		closing_entry.submit()
 
-		with failures_handled_outside_tests(), patch(
-			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		with (
+			failures_handled_outside_tests(),
+			patch(f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError),
 		):
 			self.assertRaises(frappe.ValidationError, closing_entry.cancel)
 
@@ -600,8 +601,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		make_paid_pos_invoice([("Cash", 90)])
 		closing_entry = make_closing_entry_from_opening(opening_entry).insert()
 
-		with failures_handled_outside_tests(), patch(
-			f"{MERGE_LOG_CLASS}.submit", side_effect=frappe.ValidationError
+		with (
+			failures_handled_outside_tests(),
+			patch(f"{MERGE_LOG_CLASS}.submit", side_effect=frappe.ValidationError),
 		):
 			self.assertRaises(frappe.ValidationError, closing_entry.submit)
 
@@ -623,8 +625,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			closing_entry.cancel()
 
 		job, job_arguments = enqueue.call_args.args[0], enqueue.call_args.kwargs
-		with failures_handled_outside_tests(), patch(
-			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		with (
+			failures_handled_outside_tests(),
+			patch(f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError),
 		):
 			self.assertRaises(
 				frappe.ValidationError,
@@ -679,6 +682,149 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		message = str(context.exception)
 		self.assertIn("and 1 more", message)
 		self.assertEqual(sum(name in message for name in late_sales), 10)
+
+	def make_closing_with_counted_amounts(self, counted, payments=None):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice(payments or [("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		for row in closing_entry.payment_reconciliation:
+			row.closing_amount = counted[row.mode_of_payment]
+		return closing_entry
+
+	def set_cash_difference_account(self, account="_Test Write Off - _TC"):
+		with self.set_user("Administrator"):
+			self.pos_profile.cash_difference_account = account
+			self.pos_profile.save()
+
+	def get_difference_entry_rows(self, closing_entry):
+		return frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Journal Entry",
+				"voucher_no": closing_entry.difference_journal_entry,
+				"is_cancelled": 0,
+			},
+			fields=["account", "debit", "credit", "cost_center"],
+		)
+
+	def test_shortage_is_posted_to_cash_difference_account(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70})
+		closing_entry.submit()
+
+		cost_center = self.pos_profile.write_off_cost_center
+		self.assertEqual(closing_entry.payment_reconciliation[0].difference, -20)
+		rows = {
+			row.account: (row.debit, row.credit, row.cost_center)
+			for row in self.get_difference_entry_rows(closing_entry)
+		}
+		self.assertEqual(
+			rows, {"Cash - _TC": (0, 20, cost_center), "_Test Write Off - _TC": (20, 0, cost_center)}
+		)
+
+	def test_excess_is_posted_to_cash_difference_account(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 110})
+		closing_entry.submit()
+
+		rows = {row.account: (row.debit, row.credit) for row in self.get_difference_entry_rows(closing_entry)}
+		self.assertEqual(rows, {"Cash - _TC": (20, 0), "_Test Write Off - _TC": (0, 20)})
+
+	def test_no_journal_entry_without_cash_difference_account(self):
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70})
+		closing_entry.submit()
+
+		self.assertFalse(closing_entry.difference_journal_entry)
+
+	def test_no_journal_entry_without_difference(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 90})
+		closing_entry.submit()
+
+		self.assertFalse(closing_entry.difference_journal_entry)
+
+	def test_difference_is_recalculated_on_the_server(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70})
+		closing_entry.payment_reconciliation[0].difference = -50
+		closing_entry.submit()
+
+		rows = {row.account: (row.debit, row.credit) for row in self.get_difference_entry_rows(closing_entry)}
+		self.assertEqual(rows["Cash - _TC"], (0, 20))
+
+	def test_differences_cancelling_out_only_move_money_between_accounts(self):
+		with self.set_user("Administrator"):
+			wallet_account = make_cash_account("_Test Wallet Cash")
+			add_wallet_mode_of_payment(self.pos_profile, wallet_account)
+		self.set_cash_difference_account()
+
+		closing_entry = self.make_closing_with_counted_amounts(
+			{"Cash": 35, "_Test Wallet": 55}, payments=[("Cash", 40), ("_Test Wallet", 50)]
+		)
+		closing_entry.submit()
+
+		rows = {row.account: (row.debit, row.credit) for row in self.get_difference_entry_rows(closing_entry)}
+		self.assertEqual(rows, {"Cash - _TC": (0, 5), wallet_account: (5, 0)})
+
+	def test_differences_on_the_same_account_net_to_nothing(self):
+		with self.set_user("Administrator"):
+			add_wallet_mode_of_payment(self.pos_profile, "Cash - _TC")
+		self.set_cash_difference_account()
+
+		closing_entry = self.make_closing_with_counted_amounts(
+			{"Cash": 35, "_Test Wallet": 55}, payments=[("Cash", 40), ("_Test Wallet", 50)]
+		)
+		closing_entry.submit()
+
+		self.assertFalse(closing_entry.difference_journal_entry)
+
+	def test_cancelling_closing_entry_cancels_difference_journal_entry(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70})
+		closing_entry.submit()
+		journal_entry = closing_entry.difference_journal_entry
+
+		closing_entry.load_from_db()
+		closing_entry.cancel()
+
+		self.assertEqual(frappe.db.get_value("Journal Entry", journal_entry, "docstatus"), 2)
+
+	def test_difference_journal_entry_cannot_be_cancelled_alone(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70})
+		closing_entry.submit()
+
+		with self.set_user("Administrator"):
+			journal_entry = frappe.get_doc("Journal Entry", closing_entry.difference_journal_entry)
+			self.assertRaises(frappe.LinkExistsError, journal_entry.cancel)
+
+	def test_retry_does_not_post_difference_again(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70})
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+			closing_entry.db_set("status", "Failed")
+			closing_entry.retry()
+
+		self.assertEqual(
+			frappe.db.count("Journal Entry", {"user_remark": ["like", f"%{closing_entry.name}"]}), 1
+		)
+
+	def test_failed_consolidation_leaves_no_difference_journal_entry(self):
+		self.set_cash_difference_account()
+		closing_entry = self.make_closing_with_counted_amounts({"Cash": 70}).insert()
+
+		with (
+			failures_handled_outside_tests(),
+			patch(f"{MERGE_LOG_CLASS}.submit", side_effect=frappe.ValidationError),
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		self.assertEqual(
+			frappe.db.count("Journal Entry", {"user_remark": ["like", f"%{closing_entry.name}"]}), 0
+		)
 
 
 MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"
