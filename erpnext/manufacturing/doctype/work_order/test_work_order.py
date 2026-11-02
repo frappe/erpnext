@@ -547,6 +547,49 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	def test_additional_costs_of_foreign_currency_bom(self):
+		rm_item = make_item("_Test USD BOM RM", {"is_stock_item": 1, "valuation_rate": 80}).name
+		service_item = make_item("_Test USD BOM Service", {"is_stock_item": 0, "valuation_rate": 160}).name
+		fg_item = make_item("_Test USD BOM FG", {"is_stock_item": 1}).name
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=2, basic_rate=80
+		)
+		bom = (
+			frappe.get_doc(
+				{
+					"doctype": "BOM",
+					"item": fg_item,
+					"company": "_Test Company",
+					"currency": "USD",
+					"conversion_rate": 80,
+					"quantity": 1,
+					"rm_cost_as_per": "Valuation Rate",
+					"items": [
+						{"item_code": item_code, "qty": 1, "source_warehouse": "_Test Warehouse - _TC"}
+						for item_code in (rm_item, service_item)
+					],
+					"fg_based_operating_cost": 1,
+					"operating_cost_per_bom_quantity": 3,
+				}
+			)
+			.insert()
+			.submit()
+		)
+
+		for use_multi_level_bom in (0, 1):
+			wo = make_wo_order_test_record(
+				item=fg_item,
+				bom_no=bom.name,
+				qty=1,
+				skip_transfer=1,
+				use_multi_level_bom=use_multi_level_bom,
+				source_warehouse="_Test Warehouse - _TC",
+			)
+			ste = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+			ste.insert()
+			# USD 2 service + USD 3 operating cost at 80
+			self.assertEqual(ste.total_additional_costs, 400)
+
 	@timeout(seconds=60)
 	def test_job_card(self):
 		stock_entries = []
