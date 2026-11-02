@@ -8,7 +8,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import flt, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
@@ -45,7 +45,7 @@ def validate_filters(filters):
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
 
-	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
+	validate_date_range(filters)
 
 	if filters.get("group_by_so") and filters.get("group_by_item"):
 		frappe.throw(_("Group the report by Sales Order or by Item, not both."))
