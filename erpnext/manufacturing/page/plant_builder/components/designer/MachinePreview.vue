@@ -1,10 +1,12 @@
 <script setup>
 import { computed, ref } from "vue";
-import { useElementSize, useEventListener } from "@vueuse/core";
+import { useElementSize } from "@vueuse/core";
 import { Button, TabButtons, Tooltip } from "frappe-ui";
 import MachineModel from "../three/MachineModel.vue";
 import { shapeExtent } from "../../lib/machines";
+import { useOrbitCamera } from "../../lib/scene";
 import { useClock } from "../../lib/clock";
+import { clamp } from "../../lib/format";
 
 const props = defineProps({
 	machineModel: String,
@@ -15,15 +17,9 @@ const props = defineProps({
 
 const FLOOR = 480;
 const CENTRE = FLOOR / 2;
-const VIEWS = { "3d": [-24, 56], top: [0, 0], front: [0, 72] };
 
 const stage = ref(null);
-const viewName = ref("3d");
-const rot = ref(-24);
-const tilt = ref(56);
-const zoom = ref(1);
-const orbit = { on: false, x: 0, y: 0 };
-const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const { viewName, rot, tilt, zoom, dragging, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
 
 const { width, height } = useElementSize(stage);
 useClock(stage);
@@ -59,33 +55,17 @@ const outline = computed(() => {
 		style: { ...box, transform: `translateZ(${z + 1}px)` },
 	}));
 });
-
-function setView(name) {
-	viewName.value = name;
-	[rot.value, tilt.value] = VIEWS[name];
-}
-
-function onDown(e) {
-	if (e.button === 0) Object.assign(orbit, { on: true, x: e.clientX, y: e.clientY });
-}
-
-useEventListener(window, "pointermove", (e) => {
-	if (!orbit.on) return;
-	rot.value += (e.clientX - orbit.x) * 0.35;
-	tilt.value = clamp(tilt.value - (e.clientY - orbit.y) * 0.3, 0, 80);
-	Object.assign(orbit, { x: e.clientX, y: e.clientY });
-});
-useEventListener(window, "pointerup", () => (orbit.on = false));
 </script>
 
 <template>
 	<div class="absolute inset-0 overflow-hidden">
 		<div
 			ref="stage"
-			class="absolute inset-0 cursor-grab select-none"
+			class="absolute inset-0 select-none"
+			:class="dragging ? 'cursor-grabbing' : 'cursor-grab'"
 			:style="{ perspective: '2200px', touchAction: 'none' }"
 			@pointerdown="onDown"
-			@wheel.prevent="zoom = clamp(zoom - $event.deltaY * 0.0015, 0.5, 3)"
+			@wheel.prevent="onWheel"
 		>
 			<div class="absolute rounded-5 border border-outline-gray-3 bg-surface-base" :style="floorStyle">
 				<div class="pointer-events-none absolute inset-0 rounded-5 text-ink-gray-2" :style="grid" />
@@ -130,10 +110,10 @@ useEventListener(window, "pointerup", () => (orbit.on = false));
 				class="flex items-center gap-0.5 rounded-4 border border-outline-gray-2 bg-surface-base p-0.5"
 			>
 				<Tooltip text="Zoom out"
-					><Button variant="ghost" icon="lucide-zoom-out" @click="zoom = clamp(zoom - 0.2, 0.5, 3)"
+					><Button variant="ghost" icon="lucide-zoom-out" @click="zoomBy(-0.2)"
 				/></Tooltip>
 				<Tooltip text="Zoom in"
-					><Button variant="ghost" icon="lucide-zoom-in" @click="zoom = clamp(zoom + 0.2, 0.5, 3)"
+					><Button variant="ghost" icon="lucide-zoom-in" @click="zoomBy(0.2)"
 				/></Tooltip>
 			</div>
 		</div>
