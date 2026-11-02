@@ -194,6 +194,7 @@ class PlantRunState:
 				entry.job_card,
 				entry.posting_date,
 				entry.posting_time,
+				detail.name.as_("detail"),
 				detail.item_code,
 				detail.item_name,
 				detail.qty,
@@ -204,6 +205,7 @@ class PlantRunState:
 			.where((entry.work_order == self.work_order.name) & (entry.docstatus == 1))
 			.orderby(entry.creation, order=frappe.qb.desc)
 			.orderby(detail.idx)
+			.orderby(bundle.idx)
 		).run(as_dict=True)
 		return group_entries(rows)
 
@@ -246,7 +248,7 @@ def get_quality(card):
 
 
 def group_entries(rows):
-	entries = {}
+	entries, items = {}, {}
 	for row in rows:
 		entry = entries.setdefault(
 			row.name,
@@ -259,16 +261,18 @@ def group_entries(rows):
 				items=[],
 			),
 		)
-		entry["items"].append(
-			frappe._dict(
+		if row.detail not in items:
+			items[row.detail] = frappe._dict(
 				item_code=row.item_code,
 				item_name=row.item_name,
 				qty=row.qty,
 				uom=row.uom,
 				is_finished_item=row.is_finished_item,
-				batch_id=row.batch_id,
+				batch_ids=[],
 			)
-		)
+			entry["items"].append(items[row.detail])
+		if row.batch_id:
+			items[row.detail].batch_ids.append(row.batch_id)
 	return list(entries.values())
 
 
