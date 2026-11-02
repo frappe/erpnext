@@ -13,6 +13,37 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestMasterProductionSchedule(ERPNextTestSuite):
+	def test_fetch_sales_orders_is_limited_to_company(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		matching = make_sales_order(item_code=item, qty=10)
+		other = make_sales_order(item_code=item, qty=10, company="_Test Company 1", warehouse="Stores - _TC1")
+		mps = make_mps(to_date=add_days(today(), 30), select_items=[item])
+		mps.fetch_sales_orders()
+		orders = [row.sales_order for row in mps.sales_orders]
+		self.assertIn(matching.name, orders)
+		self.assertNotIn(other.name, orders)
+
+	def test_fetch_material_requests_is_limited_to_company(self):
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		matching = make_material_request(item_code=item, uom="Nos", material_request_type="Manufacture")
+		other = make_material_request(
+			item_code=item,
+			uom="Nos",
+			material_request_type="Manufacture",
+			company="_Test Company 1",
+			warehouse="Stores - _TC1",
+			cost_center=frappe.db.get_value("Company", "_Test Company 1", "cost_center"),
+		)
+		mps = make_mps(to_date=add_days(today(), 30))
+		mps.fetch_materials_requests(material_request_type="Manufacture")
+		requests = [row.material_request for row in mps.material_requests]
+		self.assertIn(matching.name, requests)
+		self.assertNotIn(other.name, requests)
+
 	def test_to_date_is_kept_on_save(self):
 		mps = make_mps(to_date=add_days(today(), 30))
 		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 30)))

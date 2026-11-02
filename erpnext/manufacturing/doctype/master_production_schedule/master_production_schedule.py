@@ -438,6 +438,7 @@ class MasterProductionSchedule(Document):
 				doctype.transaction_date,
 			)
 			.where((doctype.docstatus == 1) & (doctype.status.notin(["Closed", "Completed"])))
+			.where(doctype.company == self.company)
 			.orderby(doctype.schedule_date)
 		)
 
@@ -498,6 +499,7 @@ class MasterProductionSchedule(Document):
 				doctype.grand_total,
 			)
 			.where((doctype.docstatus == 1) & (doctype.status.notin(["Closed", "Completed"])))
+			.where(doctype.company == self.company)
 			.orderby(doctype.delivery_date)
 		)
 
