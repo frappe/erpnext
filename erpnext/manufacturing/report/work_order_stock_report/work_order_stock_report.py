@@ -26,11 +26,12 @@ def get_item_list(wo_list, filters):
 
 	descriptions = get_bom_descriptions(wo_list)
 	items_by_order = get_work_order_items(wo_list)
+	# a selected group holds no stock itself, so expand the selection to its child warehouses
 	selected_warehouses = get_filter_values(filters.get("warehouse"))
-	stock = get_stock(items_by_order, selected_warehouses)
-	set_aside_transferred_stock(wo_list, stock)
 	warehouses = {child for w in selected_warehouses for child in get_child_warehouses(w)}
-	warehouses_by_company = get_warehouses_by_company(selected_warehouses)
+	stock = get_stock(items_by_order, warehouses)
+	set_aside_transferred_stock(wo_list, stock)
+	warehouses_by_company = get_warehouses_by_company(warehouses)
 
 	out = []
 	for wo_details in wo_list:
@@ -162,9 +163,9 @@ def get_work_order_items(wo_list):
 	return items_by_order
 
 
-def get_stock(items_by_order, selected_warehouses):
+def get_stock(items_by_order, filter_warehouses):
 	rows = [row for items in items_by_order.values() for row in items]
-	warehouses = ({row.source_warehouse for row in rows} | set(selected_warehouses)) - {None, ""}
+	warehouses = ({row.source_warehouse for row in rows} | set(filter_warehouses)) - {None, ""}
 	if not rows or not warehouses:
 		return {}
 
@@ -210,7 +211,10 @@ def get_warehouses_by_company(warehouses):
 		return warehouses_by_company
 
 	for name, company in frappe.get_all(
-		"Warehouse", filters={"name": ["in", warehouses]}, fields=["name", "company"], as_list=True
+		"Warehouse",
+		filters={"name": ["in", list(warehouses)], "is_group": 0},
+		fields=["name", "company"],
+		as_list=True,
 	):
 		warehouses_by_company.setdefault(company, []).append(name)
 
