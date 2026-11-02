@@ -38,7 +38,7 @@ def validate_filters(filters):
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
 
-	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
+	validate_date_range(filters)
 
 
 def get_data(filters):

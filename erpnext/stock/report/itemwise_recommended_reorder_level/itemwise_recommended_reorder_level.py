@@ -23,6 +23,7 @@ def execute(filters=None):
 
 	avg_daily_outgoing = 0
 <<<<<<< HEAD
+<<<<<<< HEAD
 	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
 	if diff <= 0:
 		frappe.throw(_("'From Date' must be after 'To Date'"))
@@ -31,6 +32,10 @@ def execute(filters=None):
 	validate_date_range({"from_date": from_date, "to_date": to_date})
 	diff = (to_date - from_date).days + 1
 >>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
+=======
+	validate_date_range(filters)
+	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
+>>>>>>> 0b5a186 (refactor(reports): pass filters straight to validate_date_range)
 
 	columns = get_columns()
 	items = get_item_info(filters)
