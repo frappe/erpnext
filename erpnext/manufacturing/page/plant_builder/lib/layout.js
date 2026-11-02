@@ -1,4 +1,4 @@
-import { isPack, machineSize } from "./machines";
+import { isPackingModel, machineSize } from "./machines";
 
 const STORE_W = 330;
 export const YC = 185;
@@ -20,7 +20,7 @@ function storeItems(plant) {
 }
 
 function station(s, i, x, row) {
-	const pack = isPack(s);
+	const pack = isPackingModel(s.machine_model);
 	const w = pack ? PACK_W : PROC_W;
 	const { half } = machineSize(s);
 	const y = YC + row * ROW_H;

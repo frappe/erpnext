@@ -4,8 +4,8 @@ import { Button, Dropdown } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
-import { MACHINES, machineKey, machineOf } from "../../lib/machines";
-import { insertStage } from "../../lib/plant";
+import { isPackingModel, machineOf } from "../../lib/machines";
+import { insertStage, machineModelOf } from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
@@ -15,11 +15,8 @@ const props = defineProps({
 });
 const emit = defineEmits(["focus"]);
 
-const stageMachine = (stage) =>
-	machineKey(props.machines[stage.workstation]?.machine_model || stage.machine_model);
-const isPackingStage = (stage) => MACHINES[stageMachine(stage)].kind === "pack";
-const isPackingType = (type) => machineOf(type.machine_model).kind === "pack";
-const hasPacking = computed(() => props.doc.stages.some(isPackingStage));
+const models = computed(() => props.doc.stages.map((stage) => machineModelOf(stage, props.machines)));
+const hasPacking = computed(() => models.value.some(isPackingModel));
 
 function addStage(type) {
 	const machine = machineOf(type.machine_model);
@@ -34,14 +31,14 @@ function addStage(type) {
 		time_in_mins: 30,
 	};
 	const stages = props.doc.stages;
-	const packingAt = stages.findIndex(isPackingStage);
-	const at = machine.kind === "pack" || packingAt < 0 ? stages.length : packingAt;
+	const packingAt = models.value.findIndex(isPackingModel);
+	const at = isPackingModel(type.machine_model) || packingAt < 0 ? stages.length : packingAt;
 	insertStage(props.doc, at, stage);
 }
 
 const addOptions = computed(() =>
 	props.catalog
-		.filter((type) => !isPackingType(type) || !hasPacking.value)
+		.filter((type) => !isPackingModel(type.machine_model) || !hasPacking.value)
 		.map((type) => ({
 			label: type.name,
 			icon: machineOf(type.machine_model).icon,
@@ -66,7 +63,7 @@ const addOptions = computed(() =>
 			:doc="doc"
 			:stage="stage"
 			:index="i"
-			:machine="stageMachine(stage)"
+			:machine-model="models[i]"
 			:focused="focus === i"
 			@focus="emit('focus', $event)"
 		/>

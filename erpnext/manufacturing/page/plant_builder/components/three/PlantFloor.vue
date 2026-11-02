@@ -122,7 +122,7 @@ function zoneClass(zone) {
 	<template v-for="st in layout.stations" :key="st.stage.id">
 		<PackLine
 			v-if="st.pack"
-			:type="st.stage.machine"
+			:machine-model="st.stage.machine_model"
 			:x0="st.zone.x"
 			:yc="st.y"
 			:level="lvl(`s${st.i}`)"
@@ -135,7 +135,7 @@ function zoneClass(zone) {
 		/>
 		<MachineModel
 			v-else
-			:type="st.stage.machine"
+			:machine-model="st.stage.machine_model"
 			:shapes="st.stage.shapes"
 			:x="st.x"
 			:y="st.y"

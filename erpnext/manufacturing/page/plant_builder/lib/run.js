@@ -1,7 +1,7 @@
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { call } from "./api";
 import { holdClock, levels, setLevels, tween } from "./clock";
-import { MACHINES } from "./machines";
+import { machineOf } from "./machines";
 import { toScenePlant } from "./plant";
 import { fmt, num, round } from "./format";
 
@@ -76,7 +76,7 @@ export function useRun(workOrder) {
 	}
 
 	function activityOf(stage) {
-		const machine = MACHINES[plant.value.stages[stage.idx - 1]?.machine] || MACHINES.generic;
+		const machine = machineOf(stage.machine_model);
 		const minutes = Math.round(stageSeconds(stage) / 60);
 		return stage.phase === "charging"
 			? `Charging ${stage.workstation}`

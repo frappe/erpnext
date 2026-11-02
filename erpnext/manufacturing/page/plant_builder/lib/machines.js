@@ -1,35 +1,41 @@
 import MACHINE_SHAPES from "../../../doctype/workstation_type/machine_shapes.json";
 import { num } from "./format";
 
-export const MACHINES = {
-	mixer: { label: "Mixer", stage: "Blending", icon: "lucide-blend", kind: "process", verb: "Mixing" },
-	kettle: {
+const MACHINES = {
+	Mixer: { label: "Mixer", stage: "Blending", icon: "lucide-blend", kind: "process", verb: "Mixing" },
+	"Steam Kettle": {
 		label: "Steam Kettle",
 		stage: "Cooking",
 		icon: "lucide-flame",
 		kind: "process",
 		verb: "Cooking",
 	},
-	reactor: { label: "Reactor", stage: "Reaction", icon: "lucide-atom", kind: "process", verb: "Reacting" },
-	fermenter: {
+	Reactor: { label: "Reactor", stage: "Reaction", icon: "lucide-atom", kind: "process", verb: "Reacting" },
+	Fermenter: {
 		label: "Fermenter",
 		stage: "Fermentation",
 		icon: "lucide-flask-round",
 		kind: "process",
 		verb: "Fermenting",
 	},
-	mill: { label: "Mill", stage: "Grinding", icon: "lucide-cog", kind: "process", verb: "Grinding" },
-	dryer: { label: "Dryer", stage: "Drying", icon: "lucide-wind", kind: "process", verb: "Drying" },
-	cooler: { label: "Cooler", stage: "Cooling", icon: "lucide-snowflake", kind: "process", verb: "Cooling" },
-	filler: { label: "Filling Line", stage: "Filling", icon: "lucide-milk", kind: "pack", verb: "Filling" },
-	bagger: {
+	Mill: { label: "Mill", stage: "Grinding", icon: "lucide-cog", kind: "process", verb: "Grinding" },
+	Dryer: { label: "Dryer", stage: "Drying", icon: "lucide-wind", kind: "process", verb: "Drying" },
+	Cooler: { label: "Cooler", stage: "Cooling", icon: "lucide-snowflake", kind: "process", verb: "Cooling" },
+	"Filling Line": {
+		label: "Filling Line",
+		stage: "Filling",
+		icon: "lucide-milk",
+		kind: "pack",
+		verb: "Filling",
+	},
+	"Bagging Line": {
 		label: "Bagging Line",
 		stage: "Bagging",
 		icon: "lucide-package",
 		kind: "pack",
 		verb: "Bagging",
 	},
-	generic: {
+	Machine: {
 		label: "Machine",
 		stage: "Processing",
 		icon: "lucide-factory",
@@ -38,31 +44,15 @@ export const MACHINES = {
 	},
 };
 
-const MODEL_KEYS = {
-	Mixer: "mixer",
-	"Steam Kettle": "kettle",
-	Reactor: "reactor",
-	Fermenter: "fermenter",
-	Mill: "mill",
-	Dryer: "dryer",
-	Cooler: "cooler",
-	"Filling Line": "filler",
-	"Bagging Line": "bagger",
-};
-
-export const machineKey = (model) => MODEL_KEYS[model] || "generic";
-export const machineOf = (model) => MACHINES[machineKey(model)];
-export const isPack = (stage) => MACHINES[stage?.machine]?.kind === "pack";
+export const machineOf = (model) => MACHINES[model] || MACHINES.Machine;
+export const isPackingModel = (model) => machineOf(model).kind === "pack";
 
 export const SHAPES = MACHINE_SHAPES.shapes;
 export const PRESETS = MACHINE_SHAPES.presets;
-const PRESET_OF = Object.fromEntries(
-	Object.keys(PRESETS).map((model) => [machineKey(model), PRESETS[model]])
-);
 const PACK_SIZE = { half: 0, height: 80 };
 
 export const stageShapes = (stage) =>
-	stage?.shapes?.length ? stage.shapes : PRESET_OF[stage?.machine] || [];
+	stage?.shapes?.length ? stage.shapes : PRESETS[stage?.machine_model || "Machine"] || [];
 
 export function newShape(shape) {
 	const spec = SHAPES[shape];
@@ -108,7 +98,7 @@ export function machineBounds(shapes) {
 }
 
 export function machineSize(stage) {
-	if (isPack(stage)) return PACK_SIZE;
+	if (isPackingModel(stage.machine_model)) return PACK_SIZE;
 	const bounds = machineBounds(stageShapes(stage));
 	return { half: Math.max(-bounds.left, bounds.right), height: bounds.top };
 }

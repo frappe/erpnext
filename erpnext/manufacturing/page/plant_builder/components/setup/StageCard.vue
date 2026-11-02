@@ -3,20 +3,20 @@ import { computed } from "vue";
 import { Badge, Button, FormControl, Switch, TextInput, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
-import { MACHINES } from "../../lib/machines";
+import { isPackingModel, machineOf } from "../../lib/machines";
 import { moveStage, removeStage, runsWithStageAbove, setRunsWithStageAbove } from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
 	stage: Object,
 	index: Number,
-	machine: String,
+	machineModel: String,
 	focused: Boolean,
 });
 const emit = defineEmits(["focus"]);
 
-const model = computed(() => MACHINES[props.machine] || MACHINES.generic);
-const isPacking = computed(() => model.value.kind === "pack");
+const machine = computed(() => machineOf(props.machineModel));
+const isPacking = computed(() => isPackingModel(props.machineModel));
 const stages = computed(() => props.doc.stages);
 const processCount = computed(() => stages.value.filter((s) => s !== props.stage).length);
 const canUp = computed(() => !isPacking.value && props.index > 0);
@@ -53,9 +53,9 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			>
 				{{ index + 1 }}
 			</span>
-			<span class="size-4 shrink-0 text-ink-gray-6" :class="model.icon" aria-hidden="true" />
+			<span class="size-4 shrink-0 text-ink-gray-6" :class="machine.icon" aria-hidden="true" />
 			<p class="min-w-0 flex-1 truncate text-base font-medium text-ink-gray-8">
-				{{ stage.stage_name || model.label }}
+				{{ stage.stage_name || machine.label }}
 			</p>
 			<Badge v-if="parallel" :label="__('With Stage {0}', [index])" theme="blue" variant="subtle" />
 			<Tooltip :text="__('Move Up')">

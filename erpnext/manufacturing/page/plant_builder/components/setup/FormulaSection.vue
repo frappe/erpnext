@@ -4,8 +4,8 @@ import { Badge, Button, Dropdown, TextInput } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
-import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH, machineOf } from "../../lib/machines";
-import { balancePercentage } from "../../lib/plant";
+import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH, isPackingModel } from "../../lib/machines";
+import { balancePercentage, machineModelOf } from "../../lib/plant";
 import { fmt } from "../../lib/format";
 
 const props = defineProps({ doc: Object, machines: { type: Object, default: () => ({}) } });
@@ -25,10 +25,7 @@ const summary = computed(() => {
 const stageOptions = computed(() =>
 	props.doc.stages
 		.map((stage, i) => ({ stage, label: String(i + 1), value: String(i + 1) }))
-		.filter(({ stage }) => {
-			const model = props.machines[stage.workstation]?.machine_model || stage.machine_model;
-			return machineOf(model).kind !== "pack";
-		})
+		.filter(({ stage }) => !isPackingModel(machineModelOf(stage, props.machines)))
 		.map(({ label, value }) => ({ label, value }))
 );
 const showStage = computed(() => stageOptions.value.length > 1);
