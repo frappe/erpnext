@@ -2073,7 +2073,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		payment.references[0].allocated_amount = 30
 		payment.references[1].allocated_amount = 18
 		payment.paid_amount = payment.received_amount = 48
-		with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+		# the journal has already cleared 80 from the schedule, so the first term has only 20 left
+		with self.assertRaisesRegex(frappe.ValidationError, "is greater than outstanding amount:20"):
 			payment.submit()
 
 		payment.references[0].allocated_amount = 20

@@ -49,6 +49,7 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes,
 	get_outstanding_invoices,
 	get_reconciliation_effect_date,
+	sync_payment_schedule_outstanding,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -379,6 +380,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_linked_dunnings()
 		self.delink_advance_entry_references()
+		self.sync_payment_schedules()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
 
@@ -590,6 +592,12 @@ class PaymentEntry(AccountsController):
 			# Check for negative outstanding invoices as well
 			if allocated_amount < 0 and total_allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
+
+	def sync_payment_schedules(self):
+		"""Reconciled references carry no payment term, so cancel cannot reverse them term by term."""
+		for reference in {(d.reference_doctype, d.reference_name) for d in self.references}:
+			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
+				sync_payment_schedule_outstanding(*reference)
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -944,12 +952,15 @@ class PaymentEntry(AccountsController):
 						"discount",
 						"outstanding",
 						"discount_type",
+						"discounted_amount",
 					],
 				)
 				for term in payment_schedule:
 					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
 					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
+					invoice_paid_amount_map[invoice_key]["paid_amount"] = term.paid_amount
+					invoice_paid_amount_map[invoice_key]["discounted_amount"] = term.discounted_amount
 					# Older payments booked the configured discount, even when it was not applied.
 					if self.payment_term_discounts_calculated or not (term.discount_type and term.discount):
 						continue
@@ -976,6 +987,14 @@ class PaymentEntry(AccountsController):
 
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
+
+			if cancel:
+				# Reconciliation can move paid amounts between terms, so reverse only what this term
+				# still has paid and discounted. sync_payment_schedules puts back the rest.
+				term = invoice_paid_amount_map.get(key, {})
+				discounted_amt = min(discounted_amt, flt(term.get("discounted_amount")))
+				paid = min(allocated_amount - discounted_amt, flt(term.get("paid_amount")))
+				allocated_amount = max(paid, 0) + discounted_amt
 
 			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
 			base_paid_amount_precision = get_field_precision(
