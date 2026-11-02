@@ -1,10 +1,28 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from pathlib import Path
+
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import flt
+
+MACHINE_SHAPES = frappe.get_file_json(Path(__file__).with_name("machine_shapes.json"))
+SHAPE_FIELDS = (
+	"shape",
+	"finish",
+	"x",
+	"y",
+	"z",
+	"width",
+	"depth",
+	"radius",
+	"height",
+	"shows_level",
+	"is_small",
+	"shakes",
+)
 
 
 class WorkstationType(Document):
@@ -17,6 +35,9 @@ class WorkstationType(Document):
 		from frappe.types import DF
 
 		from erpnext.manufacturing.doctype.workstation_cost.workstation_cost import WorkstationCost
+		from erpnext.manufacturing.doctype.workstation_type_shape.workstation_type_shape import (
+			WorkstationTypeShape,
+		)
 
 		description: DF.SmallText | None
 		hour_rate: DF.Currency
@@ -32,12 +53,34 @@ class WorkstationType(Document):
 			"Filling Line",
 			"Bagging Line",
 		]
+		shapes: DF.Table[WorkstationTypeShape]
 		workstation_costs: DF.Table[WorkstationCost]
 		workstation_type: DF.Data
 	# end: auto-generated types
 
 	def validate(self):
 		self.validate_duplicate_operating_component()
+		self.validate_shapes()
+
+	@property
+	def machine_shapes(self) -> list[dict]:
+		if self.shapes:
+			return [{field: row.get(field) for field in SHAPE_FIELDS} for row in self.shapes]
+		return get_preset_shapes(self.machine_model)
+
+	@frappe.whitelist(methods=["POST"])
+	def copy_preset_shapes(self):
+		self.set("shapes", get_preset_shapes(self.machine_model))
+
+	def validate_shapes(self):
+		for row in self.shapes:
+			for field in MACHINE_SHAPES["shapes"].get(row.shape, {}).get("size", {}):
+				if flt(row.get(field)) <= 0:
+					frappe.throw(
+						_("Row {0}: {1} needs a {2} greater than zero").format(
+							row.idx, _(row.shape), _(row.meta.get_label(field))
+						)
+					)
 
 	def validate_duplicate_operating_component(self):
 		components = []
@@ -102,6 +145,10 @@ class WorkstationType(Document):
 				workstation_costs[row.name].append(row)
 
 		return [name for name, rows in workstation_costs.items() if get_cost_map(rows) == costs]
+
+
+def get_preset_shapes(machine_model: str | None = None) -> list[dict]:
+	return [dict(row) for row in MACHINE_SHAPES["presets"].get(machine_model or "Machine", [])]
 
 
 def get_cost_map(rows):

@@ -128,6 +128,7 @@ const lvl = (key) => props.view.level[key] ?? 0;
 		<MachineModel
 			v-else
 			:type="st.stage.machine"
+			:shapes="st.stage.shapes"
 			:x="st.x"
 			:y="st.y"
 			:level="lvl(`s${st.i}`)"

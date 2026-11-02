@@ -17,6 +17,8 @@
   "workstation_costs",
   "section_break_8",
   "hour_rate",
+  "model_section",
+  "shapes",
   "description_tab",
   "description"
  ],
@@ -77,11 +79,27 @@
    "label": "Machine Model",
    "options": "\nMixer\nSteam Kettle\nReactor\nFermenter\nMill\nDryer\nCooler\nFilling Line\nBagging Line",
    "show_description_on_click": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "shapes",
+   "depends_on": "eval:![\"Filling Line\", \"Bagging Line\"].includes(doc.machine_model)",
+   "fieldname": "model_section",
+   "fieldtype": "Section Break",
+   "label": "3D Model"
+  },
+  {
+   "description": "Shapes that draw this machine in the Plant Builder, placed from the machine centre. Leave empty to draw the Machine Model preset.",
+   "fieldname": "shapes",
+   "fieldtype": "Table",
+   "label": "Shapes",
+   "options": "Workstation Type Shape",
+   "show_description_on_click": 1
   }
  ],
  "icon": "tag",
  "links": [],
- "modified": "2026-10-31 11:14:25.034364",
+ "modified": "2026-11-02 07:28:28.413387",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation Type",

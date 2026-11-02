@@ -26,6 +26,7 @@ export function toScenePlant(doc, machines, item) {
 	const stages = (doc.stages || []).map((s, i) => ({
 		id: s.name || `stage-${i}`,
 		machine: machineKey(machines[s.workstation]?.machine_model || s.machine_model),
+		shapes: machines[s.workstation]?.shapes || [],
 		name: s.stage_name,
 		output: s.semi_finished_good || "",
 		packaging: (doc.packing_materials || []).map((p) => p.item_name || p.item_code),

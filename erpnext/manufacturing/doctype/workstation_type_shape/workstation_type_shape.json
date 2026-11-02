@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "creation": "2026-11-02 07:28:28.413387",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "shape",
+  "finish",
+  "x",
+  "y",
+  "z",
+  "column_break_size",
+  "width",
+  "depth",
+  "radius",
+  "height",
+  "shows_level",
+  "is_small",
+  "shakes"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "default": "Box",
+   "fieldname": "shape",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Shape",
+   "options": "Box\nTank\nOpen Tank\nBand\nAgitator\nSteam\nBubbles\nFizz\nFlow Strip",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:![\"Agitator\", \"Bubbles\", \"Fizz\"].includes(doc.shape)",
+   "description": "Product takes the colour of the batch. Heat flashes red and amber while the machine works.",
+   "fieldname": "finish",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Finish",
+   "options": "\nSteel\nDark\nPlate\nProduct\nHeat\nRed\nAmber\nCream\nBlue\nGreen\nViolet\nGray",
+   "show_description_on_click": 1
+  },
+  {
+   "columns": 1,
+   "description": "Distance from the machine centre, from left to right.",
+   "fieldname": "x",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "X",
+   "show_description_on_click": 1
+  },
+  {
+   "columns": 1,
+   "description": "Distance from the machine centre, from back to front.",
+   "fieldname": "y",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Y",
+   "show_description_on_click": 1
+  },
+  {
+   "columns": 1,
+   "description": "Height of the bottom of the shape above the floor.",
+   "fieldname": "z",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Z",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_size",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:[\"Box\", \"Flow Strip\"].includes(doc.shape)",
+   "fieldname": "width",
+   "fieldtype": "Float",
+   "label": "Width",
+   "non_negative": 1
+  },
+  {
+   "depends_on": "eval:[\"Box\", \"Flow Strip\"].includes(doc.shape)",
+   "fieldname": "depth",
+   "fieldtype": "Float",
+   "label": "Depth",
+   "non_negative": 1
+  },
+  {
+   "depends_on": "eval:[\"Tank\", \"Open Tank\", \"Band\", \"Agitator\", \"Fizz\"].includes(doc.shape)",
+   "fieldname": "radius",
+   "fieldtype": "Float",
+   "label": "Radius",
+   "non_negative": 1
+  },
+  {
+   "depends_on": "eval:[\"Box\", \"Tank\", \"Open Tank\", \"Band\", \"Bubbles\", \"Fizz\"].includes(doc.shape)",
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Height",
+   "non_negative": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:[\"Tank\", \"Open Tank\"].includes(doc.shape)",
+   "description": "Fill the tank up to the batch level.",
+   "fieldname": "shows_level",
+   "fieldtype": "Check",
+   "label": "Show Batch Level",
+   "show_description_on_click": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.shape === \"Steam\"",
+   "description": "Draw a small steam plume.",
+   "fieldname": "is_small",
+   "fieldtype": "Check",
+   "label": "Small",
+   "show_description_on_click": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "shakes",
+   "fieldtype": "Check",
+   "label": "Shake While Working"
+  }
+ ],
+ "grid_page_length": 50,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-02 07:43:37.486307",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Workstation Type Shape",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

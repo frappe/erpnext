@@ -1,4 +1,4 @@
-import { MACHINES, isPack } from "./machines";
+import { isPack, machineSize } from "./machines";
 
 const STORE_W = 330;
 export const YC = 185;
@@ -19,7 +19,7 @@ function storeItems(plant) {
 function station(s, i, x) {
 	const pack = isPack(s);
 	const w = pack ? PACK_W : PROC_W;
-	const half = MACHINES[s.machine]?.half ?? 50;
+	const { half } = machineSize(s);
 	const zone = pack ? { x, y: 20, w, h: 330 } : { x, y: YC - 150, w, h: 300 };
 	const cx = x + w / 2;
 	return {
