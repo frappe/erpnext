@@ -37,7 +37,7 @@ def get_data(filters):
 =======
 	from_date = get_datetime(filters.get("from_date"))
 	to_date = get_datetime(filters.get("to_date"))
-	validate_date_range(filters)
+	validate_date_range({"from_date": from_date, "to_date": to_date})
 
 	query_filters["from_time"] = ("<", to_date)
 	query_filters["to_time"] = (">", from_date)
