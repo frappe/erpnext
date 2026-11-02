@@ -59,7 +59,7 @@ def execute():
 		or now()
 	)
 
-	# One query per party type instead of one per party; other party types are still looked up one by one
+	# Suppliers and customers are read up front; other party types are looked up one by one
 	for party_type in ("Supplier", "Customer"):
 		tax_id_field = next((f for f in ("pan", "tax_id") if column_cache[party_type][f]), None)
 		fields = ["name", "tax_withholding_category", *([tax_id_field] if tax_id_field else [])]
@@ -961,7 +961,7 @@ class PurchaseInvoiceMigrator:
 			if not (ldc.valid_from <= info.posting_date <= ldc.valid_upto):
 				continue
 
-			# a return gives back the limit its invoice used
+			# A return gives back the limit its invoice used
 			covered = taxable if info.is_return else min(taxable, ldc.balance)
 			ldc.balance += covered if info.is_return else -covered
 			if covered:
@@ -1114,7 +1114,6 @@ def migrate_sales_invoices(
 	# Get Sales Invoices with TCS amounts aggregated
 	tcs_accounts_list = list(all_tcs_accounts)
 
-	# Only the TCS rows of GL Entry are aggregated, through the account index
 	tcs_gl = (
 		frappe.qb.from_(gle)
 		.select(
@@ -1150,7 +1149,7 @@ def migrate_sales_invoices(
 		.where(si.docstatus == 1)
 		.where(si.creation < created_before)
 		.where(si.is_opening == "No")
-		# without a category or a TCS row there is no rate, so the invoice would be skipped below
+		# Without a category or a TCS row there is no rate, so the invoice would be skipped below
 		.where((IfNull(cust.tax_withholding_category, "") != "") | tcs_gl.account.isnotnull())
 		.run(as_dict=True)
 	)
