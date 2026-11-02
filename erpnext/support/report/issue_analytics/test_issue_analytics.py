@@ -14,8 +14,7 @@ months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
 
 
 class TestIssueAnalytics(unittest.TestCase):
-	@classmethod
-	def setUpClass(self):
+	def setUp(self):
 		frappe.db.sql("delete from `tabIssue` where company='_Test Company'")
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 
@@ -115,6 +114,75 @@ class TestIssueAnalytics(unittest.TestCase):
 
 		self.assertEqual(expected_data, report[1])  # rows
 		self.assertEqual(len(report[0]), 4)  # cols
+
+	def test_weekly_issue_count_across_year_end(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2025-12-30"), "__Test Customer", 1)
+		make_issue(getdate("2026-01-14"), "__Test Customer", 2)
+
+		self.assertEqual(self.get_total("2025-12-01", "2026-01-31", "Weekly"), 2)
+
+	def test_quarterly_issue_count_from_mid_quarter(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		for index, opening_date in enumerate(["2026-05-20", "2026-08-10", "2026-11-10"]):
+			make_issue(getdate(opening_date), "__Test Customer", index)
+
+		self.assertEqual(self.get_total("2026-05-15", "2026-12-31", "Quarterly"), 3)
+
+	def test_issue_count_respects_user_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		create_customer("__Test Customer 1", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2026-05-20"), "__Test Customer", 1)
+		make_issue(getdate("2026-05-21"), "__Test Customer 1", 2)
+
+		user = "test_issue_analytics_user@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Support",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Support Team"}],
+				}
+			).insert(ignore_permissions=True)
+		add_user_permission("Customer", "__Test Customer", user)
+		self.addCleanup(frappe.db.delete, "User Permission", {"user": user})
+
+		filters = {
+			"company": "_Test Company",
+			"based_on": "Issue Type",
+			"from_date": "2026-05-01",
+			"to_date": "2026-05-31",
+			"range": "Monthly",
+		}
+		frappe.set_user(user)
+		try:
+			rows = execute(filters)[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(sum(row["total"] for row in rows), 1)
+
+	def test_issue_count_over_a_long_weekly_range(self):
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		make_issue(getdate("2027-02-15"), "__Test Customer", 1)
+
+		self.assertEqual(self.get_total("2026-01-01", "2027-03-31", "Weekly"), 1)
+
+	def get_total(self, from_date, to_date, period_range):
+		filters = {
+			"company": "_Test Company",
+			"based_on": "Customer",
+			"customer": "__Test Customer",
+			"from_date": from_date,
+			"to_date": to_date,
+			"range": period_range,
+		}
+		rows = execute(filters)[1]
+		return sum(row["total"] for row in rows)
 
 
 def create_issue_types():

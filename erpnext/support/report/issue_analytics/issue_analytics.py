@@ -3,6 +3,7 @@
 
 
 import json
+from bisect import bisect_left
 
 import frappe
 from frappe import _, scrub
@@ -115,15 +116,17 @@ class IssueAnalytics:
 
 		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(self.filters.range, 1)
 
-		if self.filters.range in ["Monthly", "Quarterly"]:
+		if self.filters.range == "Monthly":
 			from_date = from_date.replace(day=1)
+		elif self.filters.range == "Quarterly":
+			from_date = from_date.replace(month=(from_date.month - 1) // 3 * 3 + 1, day=1)
 		elif self.filters.range == "Yearly":
 			from_date = get_fiscal_year(from_date)[1]
 		else:
 			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
 
 		self.periodic_daterange = []
-		for _dummy in range(1, 53):
+		while True:
 			if self.filters.range == "Weekly":
 				period_end_date = add_days(from_date, 6)
 			else:
@@ -147,7 +150,7 @@ class IssueAnalytics:
 			"Assigned To": "_assign",
 		}
 
-		self.entries = frappe.db.get_all(
+		self.entries = frappe.get_list(
 			"Issue",
 			fields=[self.field_map.get(self.filters.based_on), "name", "opening_date"],
 			filters=filters,
@@ -195,7 +198,7 @@ class IssueAnalytics:
 		self.issue_periodic_data = frappe._dict()
 
 		for d in self.entries:
-			period = self.get_period(d.get("opening_date"))
+			period = self.get_period_of(d.get("opening_date"))
 
 			if self.filters.based_on == "Assigned To":
 				if d._assign:
@@ -211,6 +214,11 @@ class IssueAnalytics:
 
 				self.issue_periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0.0)
 				self.issue_periodic_data[value][period] += 1
+
+	def get_period_of(self, date) -> str:
+		"""Label of the period whose date range holds the date."""
+		index = bisect_left(self.periodic_daterange, getdate(date))
+		return self.get_period(self.periodic_daterange[index])
 
 	def get_chart_data(self):
 		length = len(self.columns)
