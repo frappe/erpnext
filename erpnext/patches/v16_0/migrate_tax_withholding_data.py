@@ -52,8 +52,6 @@ def execute():
 	copy_category_to_items_for_purchase(column_cache)
 	copy_category_to_items_for_sales(column_cache)
 
-	mark_tax_withholding_rows()
-
 
 def get_column_cache():
 	return {
@@ -389,6 +387,20 @@ class PurchaseInvoiceMigrator:
 		bulk_insert_entries(
 			{key: rows for key, rows in self.all_entries.items() if key not in self.skip_docs}
 		)
+
+		# v15 advance tax rows have no withholding flag; an "Add" row is a reversal, not the deduction
+		if pe_names := [name for name in self.pe_taxes if ("Payment Entry", name) not in self.skip_docs]:
+			frappe.db.set_value(
+				"Advance Taxes and Charges",
+				{
+					"parent": ("in", pe_names),
+					"parenttype": "Payment Entry",
+					"account_head": ("in", list(self.all_tds_accounts)),
+					"add_deduct_tax": "Deduct",
+				},
+				"is_tax_withholding_account",
+				1,
+			)
 
 	# -------------------------------------------------------------------------
 	# Data Fetching
@@ -1084,13 +1096,28 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 
 	bulk_insert_entries(all_entries)
 
-	# Update Sales Invoice and Sales Invoice Item
+	# Update Sales Invoice Item
 	for category, invoices in category_wise_invoices.items():
-		frappe.db.set_value("Sales Invoice", {"name": ("in", invoices)}, {"apply_tds": 1})
 		frappe.db.set_value(
 			"Sales Invoice Item",
 			{"parent": ("in", invoices), "parenttype": "Sales Invoice"},
 			{"tax_withholding_category": category, "apply_tds": 1},
+		)
+
+	if all_entries:
+		invoices = [name for _doctype, name in all_entries]
+		frappe.db.set_value("Sales Invoice", {"name": ("in", invoices)}, {"apply_tds": 1})
+
+		# v15 sales tax rows have no withholding flag; without it the new flow adds a second TCS row
+		frappe.db.set_value(
+			"Sales Taxes and Charges",
+			{
+				"parent": ("in", invoices),
+				"parenttype": "Sales Invoice",
+				"account_head": ("in", tcs_accounts_list),
+			},
+			"is_tax_withholding_account",
+			1,
 		)
 
 
@@ -1276,6 +1303,21 @@ def migrate_journal_entries(tds_accounts, tax_rate_map, column_cache, party_tax_
 			{"apply_tds": 1, "tax_withholding_category": category},
 		)
 
+	# Only the deduction row: a debit is a TDS payment and a party row is the party's own account
+	if all_entries:
+		frappe.db.set_value(
+			"Journal Entry Account",
+			{
+				"parent": ("in", [name for _doctype, name in all_entries]),
+				"parenttype": "Journal Entry",
+				"account": ("in", list(all_tds_accounts)),
+				"credit": (">", 0),
+				"party": ("is", "not set"),
+			},
+			"is_tax_withholding_account",
+			1,
+		)
+
 
 # =============================================================================
 # ITEM LEVEL CATEGORY COPY
@@ -1336,40 +1378,3 @@ def copy_category_to_items_for_sales(column_cache):
 		.where(IfNull(item.tax_withholding_category, "") == "")
 		.run()
 	)
-
-
-# =============================================================================
-# TAX ROW FLAGS
-# =============================================================================
-
-
-def mark_tax_withholding_rows():
-	# Sales Invoice and Journal Entry are migrated from GL, so their tax rows were never flagged
-	twe = frappe.qb.DocType("Tax Withholding Entry")
-	twa = frappe.qb.DocType("Tax Withholding Account")
-
-	for parent_doctype, tax_doctype, account_field in (
-		("Sales Invoice", "Sales Taxes and Charges", "account_head"),
-		("Journal Entry", "Journal Entry Account", "account"),
-	):
-		tax = frappe.qb.DocType(tax_doctype)
-		migrated_docs = (
-			frappe.qb.from_(twe)
-			.select(twe.parent)
-			.where(twe.parenttype == parent_doctype)
-			.where(twe.created_by_migration == 1)
-		)
-
-		query = (
-			frappe.qb.update(tax)
-			.set(tax.is_tax_withholding_account, 1)
-			.where(tax.parenttype == parent_doctype)
-			.where(tax.parent.isin(migrated_docs))
-			.where(getattr(tax, account_field).isin(frappe.qb.from_(twa).select(twa.account)))
-		)
-
-		if tax_doctype == "Journal Entry Account":
-			# the deduction is the credit row; a debit on the account is a TDS payment
-			query = query.where(tax.credit > 0)
-
-		query.run()
