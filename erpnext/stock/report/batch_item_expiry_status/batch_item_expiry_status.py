@@ -11,11 +11,14 @@ from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, today
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	validate_filters(filters)
 
 	columns = get_columns()

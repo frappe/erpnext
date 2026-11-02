@@ -5,10 +5,14 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 AMOUNT_FIELDS = ("invoiced_amount", "amount_eligible_for_commission", "total_commission")
 
 
 def execute(filters: dict | None = None) -> tuple[list, list]:
+	validate_date_range(filters)
+
 	filters = frappe._dict(filters or {})
 	return get_columns(), get_data(filters)
 

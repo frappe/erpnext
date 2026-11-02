@@ -7,12 +7,14 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import get_descendants_of
 
-from erpnext.accounts.report.utils import get_filter_values
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	data = get_data(filters)
 	columns = get_columns(filters, data)
 

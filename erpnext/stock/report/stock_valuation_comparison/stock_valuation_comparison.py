@@ -15,6 +15,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_datetime, getdate, nowdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.expected_valuation import iterate_expected_valuations
 from erpnext.stock.report.stock_ledger_entries_of_cancelled_vouchers.stock_ledger_entries_of_cancelled_vouchers import (
@@ -44,6 +45,8 @@ DIFFERENCE_FIELDS = [difference_field for _actual, _expected, difference_field i
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters = frappe._dict(filters or {})
 	if not filters.company:
 		frappe.throw(_("Please select a Company"))
