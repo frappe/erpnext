@@ -4694,8 +4694,34 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.make_material_request()
 		return plan
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_purchase_invoice_with_update_stock_reserves_for_the_plan(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+
+		plan = self.make_plan_short_of_stock("RM For SR Purchase Invoice")
+		invoice = make_purchase_invoice(self.order_for_plan(plan, 6).name)
+		invoice.update_stock = 1
+		invoice.submit()
+		self.assertEqual(self.get_plan_reserved_qty(plan), 10)
+
+		invoice.cancel()
+		self.assertEqual(self.get_plan_reserved_qty(plan), 4)
+
+	def get_plan_reserved_qty(self, plan):
+		return sum(
+			frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_type": "Production Plan", "voucher_no": plan.name, "docstatus": 1},
+				pluck="reserved_qty",
+			)
+		)
+
 	def receive_for_plan(self, plan, qty):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		make_purchase_receipt(self.order_for_plan(plan, qty).name).submit()
+
+	def order_for_plan(self, plan, qty):
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		mr_name = frappe.db.get_value("Material Request", {"production_plan": plan.name})
@@ -4703,7 +4729,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		po.supplier = "_Test Supplier"
 		po.items[0].qty = qty
 		po.submit()
-		make_purchase_receipt(po.name).submit()
+		return po
 
 	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
