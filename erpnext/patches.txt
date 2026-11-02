@@ -455,7 +455,7 @@ erpnext.patches.v16_0.migrate_account_freezing_settings_to_company
 erpnext.patches.v16_0.populate_budget_distribution_total
 erpnext.patches.v16_0.set_mr_picked_qty
 erpnext.patches.v16_0.update_tax_withholding_field_in_payment_entry
-erpnext.patches.v16_0.migrate_tax_withholding_data
+erpnext.patches.v16_0.migrate_tax_withholding_data #2026-11-02
 erpnext.patches.v16_0.update_corrected_cancelled_status
 erpnext.patches.v16_0.fix_barcode_typo
 erpnext.patches.v16_0.add_accounting_dimensions_to_journal_template_accounts

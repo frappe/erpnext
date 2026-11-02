@@ -26,6 +26,15 @@ from frappe.utils import flt, now
 
 
 def execute():
+	# Entries are rebuilt from the v15 data, so once that is gone nothing can be rebuilt or cleaned up
+	if not (
+		frappe.db.table_exists("Tax Withheld Vouchers", cached=False)
+		and frappe.db.table_exists("Advance Tax", cached=False)
+		and frappe.db.has_column("Purchase Invoice", "tax_withholding_category")
+		and frappe.db.has_column("Purchase Invoice", "base_tax_withholding_net_total")
+	):
+		return
+
 	tds_accounts = get_tds_accounts()
 	if not tds_accounts:
 		return
