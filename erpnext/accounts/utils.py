@@ -2833,17 +2833,13 @@ def _check_credit_limit_warn(doc):
 	if doc.get("is_return") or not doc.get("customer"):
 		return
 
-	from erpnext.selling.doctype.customer.customer import check_credit_limit
+	from erpnext.selling.doctype.customer.customer import (
+		check_credit_limit,
+		is_sales_order_credit_check_bypassed,
+	)
 
 	try:
-		bypass = cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				filters={"parent": doc.customer, "parenttype": "Customer", "company": doc.company},
-				fieldname="bypass_credit_limit_check",
-			)
-			or 0
-		)
+		bypass = is_sales_order_credit_check_bypassed(doc.customer, doc.company)
 
 		if doc.doctype == "Sales Invoice":
 			validate_against_credit_limit = bypass or any(

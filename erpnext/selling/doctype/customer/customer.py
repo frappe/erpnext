@@ -912,31 +912,43 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 
 def get_credit_limit(customer, company):
-	credit_limit = None
+	return get_credit_limit_settings(customer, company)[0]
+
+
+def is_sales_order_credit_check_bypassed(customer, company):
+	return get_credit_limit_settings(customer, company)[1]
+
+
+def get_credit_limit_settings(customer, company):
+	credit_limit, bypass = 0.0, False
 
 	if customer:
-		credit_limit = frappe.db.get_value(
+		customer_limit = frappe.db.get_value(
 			"Customer Credit Limit",
 			{"parent": customer, "parenttype": "Customer", "company": company},
-			"credit_limit",
+			["credit_limit", "bypass_credit_limit_check"],
+			as_dict=True,
 		)
+		if customer_limit:
+			credit_limit = flt(customer_limit.credit_limit)
+			bypass = bool(customer_limit.bypass_credit_limit_check)
 
 		if not credit_limit:
 			customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
-
-			result = frappe.db.get_values(
+			group_limit = frappe.db.get_value(
 				"Customer Credit Limit",
 				{"parent": customer_group, "parenttype": "Customer Group", "company": company},
-				fieldname=["credit_limit", "bypass_credit_limit_check"],
+				["credit_limit", "bypass_credit_limit_check"],
 				as_dict=True,
 			)
-			if result and not result[0].bypass_credit_limit_check:
-				credit_limit = result[0].credit_limit
+			if group_limit:
+				credit_limit = flt(group_limit.credit_limit)
+				bypass = bypass or bool(group_limit.bypass_credit_limit_check)
 
 	if not credit_limit:
-		credit_limit = frappe.get_cached_value("Company", company, "credit_limit")
+		credit_limit = flt(frappe.get_cached_value("Company", company, "credit_limit"))
 
-	return flt(credit_limit)
+	return credit_limit, bypass
 
 
 @frappe.whitelist()
