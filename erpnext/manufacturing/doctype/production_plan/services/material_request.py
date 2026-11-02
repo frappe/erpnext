@@ -35,6 +35,9 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	get_warehouse_list,
 	set_default_warehouses,
 )
+from erpnext.manufacturing.doctype.production_plan.services.plant_floor_planning import (
+	get_plant_floor_materials,
+)
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
 	get_raw_materials_of_sub_assembly_items,
 	get_sub_assembly_items,
@@ -212,7 +215,15 @@ def _authorize_mr_request(doc, warehouses=None):
 	# Every value below arrives through frappe.parse_json, so container elements are untyped: a dict
 	# in any of these reaches frappe.db.get_value() in its *name* position and becomes a filter.
 	for row in _iter_mr_rows(doc):
-		for fieldname in ("item_code", "warehouse", "bom_no", "sales_order", "uom", "purchase_uom"):
+		for fieldname in (
+			"item_code",
+			"warehouse",
+			"bom_no",
+			"plant_floor",
+			"sales_order",
+			"uom",
+			"purchase_uom",
+		):
 			value = row.get(fieldname)
 			if value is not None and not isinstance(value, str):
 				frappe.throw(_("Invalid {0}").format(fieldname), frappe.PermissionError)
@@ -361,6 +372,8 @@ def _item_details_for_row(doc, data, company, sub_assembly_items, existing_sub_a
 		return _bom_item_details(
 			doc, data, company, planned_qty, sub_assembly_items, existing_sub_assembly_items
 		)
+	if data.get("plant_floor"):
+		return get_plant_floor_materials(doc, data, planned_qty)
 	if data.get("item_code"):
 		return _plain_item_details(doc, data, planned_qty)
 	return {}

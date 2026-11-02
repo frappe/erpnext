@@ -9,8 +9,13 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, now_datetime
 from pypika.terms import ExistsCriterion
 
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_sales_orders
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_plant_floors,
+	get_sales_orders,
+	plant_floor_exists,
+)
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.stock.get_item_details import get_default_bom
 
 
 class SalesOrderSourcingService:
@@ -69,7 +74,7 @@ class SalesOrderSourcingService:
 				& (mr.company == self.doc.company)
 				& (mr_item.qty > IfNull(mr_item.ordered_qty, 0))
 				& (mr_item.stock_qty > IfNull(_mr_item_planned_qty_query(mr_item), 0))
-				& bom_exists
+				& (bom_exists | plant_floor_exists(mr_item.item_code, self.doc.company))
 			)
 		)
 
@@ -115,6 +120,7 @@ class SalesOrderSourcingService:
 				"conversion_factor": 1.0,
 				"description": row.description,
 				"bom_no": row.bom_no,
+				"plant_floor": row.plant_floor,
 			}
 		)
 
@@ -170,7 +176,10 @@ class SalesOrderSourcingService:
 				self.get_bom_item_condition() or bom.item == so_item.item_code
 			)
 
-		items = items_query.where(ExistsCriterion(items_subquery)).run(as_dict=True)
+		has_bom_or_plant_floor = ExistsCriterion(items_subquery) | plant_floor_exists(
+			so_item.item_code, self.doc.company
+		)
+		items = items_query.where(has_bom_or_plant_floor).run(as_dict=True)
 		_set_so_item_pending_qty(items)
 		return items
 
@@ -208,7 +217,7 @@ class SalesOrderSourcingService:
 			frappe.qb.from_(mr_item)
 			.select(*_mr_item_columns(mr_item))
 			.distinct()
-			.where(_mr_items_filter(bom, mr_item, mr_list))
+			.where(_mr_items_filter(bom, mr_item, mr_list, self.doc.company))
 		)
 		if self.doc.item_code:
 			query = query.where(mr_item.item_code == self.doc.item_code)
@@ -221,36 +230,44 @@ class SalesOrderSourcingService:
 
 	def add_items(self, items):
 		refs = {}
+		plant_floors = get_plant_floors({data.item_code for data in items}, self.doc.company)
 		for data in items:
 			if not data.pending_qty:
 				continue
 
-			item_details = get_item_details(data.item_code, throw=False)
-			if self.doc.combine_items and self._add_combine_ref(refs, data, item_details):
+			item_details, bom_no = self.get_item_and_bom(data, data.item_code in plant_floors)
+			plant_floor = "" if bom_no else data.get("plant_floor") or plant_floors.get(data.item_code, "")
+			if self.doc.combine_items and self._add_combine_ref(refs, data, bom_no or plant_floor):
 				continue
 
-			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
-			if not bom_no:
-				continue
-			self._append_po_item(data, item_details, bom_no)
+			if bom_no or plant_floor:
+				self._append_po_item(data, item_details, bom_no, plant_floor)
 
 		if refs:
 			self._apply_combined_refs(refs)
 
 	@staticmethod
-	def _add_combine_ref(refs, data, item_details):
-		bom_no = data.get("bom_no") or item_details.get("bom_no")
+	def get_item_and_bom(data, has_plant_floor):
+		item_details = get_item_details(data.item_code, throw=False, skip_bom_info=has_plant_floor)
+		if data.bom_no:
+			return item_details, data.bom_no
+		if has_plant_floor:
+			return item_details, get_default_bom(data.item_code) or ""
+		return item_details, item_details and item_details.get("bom_no") or ""
+
+	@staticmethod
+	def _add_combine_ref(refs, data, key):
 		detail = {"sales_order": data.parent, "sales_order_item": data.name, "qty": data.pending_qty}
-		if bom_no in refs:
-			refs[bom_no]["so_details"].append(detail)
-			refs[bom_no]["qty"] += data.pending_qty
+		if key in refs:
+			refs[key]["so_details"].append(detail)
+			refs[key]["qty"] += data.pending_qty
 			return True
 
-		refs[bom_no] = {"qty": data.pending_qty, "po_item_ref": data.name, "so_details": [detail]}
+		refs[key] = {"qty": data.pending_qty, "po_item_ref": data.name, "so_details": [detail]}
 		return False
 
-	def _append_po_item(self, data, item_details, bom_no):
-		pi = self.doc.append("po_items", self._po_item_values(data, item_details, bom_no))
+	def _append_po_item(self, data, item_details, bom_no, plant_floor):
+		pi = self.doc.append("po_items", self._po_item_values(data, item_details, bom_no, plant_floor))
 		pi._set_defaults()
 
 		if self.doc.get_items_from == "Sales Order":
@@ -263,13 +280,14 @@ class SalesOrderSourcingService:
 			pi.description = data.description
 
 	@staticmethod
-	def _po_item_values(data, item_details, bom_no):
+	def _po_item_values(data, item_details, bom_no, plant_floor):
 		return {
 			"warehouse": data.warehouse,
 			"item_code": data.item_code,
 			"description": data.description or item_details.description,
 			"stock_uom": item_details and item_details.stock_uom or "",
 			"bom_no": bom_no,
+			"plant_floor": plant_floor,
 			"planned_qty": data.pending_qty,
 			"pending_qty": data.pending_qty,
 			"planned_start_date": now_datetime(),
@@ -278,18 +296,19 @@ class SalesOrderSourcingService:
 
 	def _apply_combined_refs(self, refs):
 		for po_item in self.doc.po_items:
-			po_item.planned_qty = refs[po_item.bom_no]["qty"]
-			po_item.pending_qty = refs[po_item.bom_no]["qty"]
+			ref = refs[po_item.bom_no or po_item.plant_floor]
+			po_item.planned_qty = ref["qty"]
+			po_item.pending_qty = ref["qty"]
 			po_item.sales_order = ""
 		self.add_pp_ref(refs)
 
 	def add_pp_ref(self, refs):
-		for bom_no in refs:
-			for so_detail in refs[bom_no]["so_details"]:
+		for key in refs:
+			for so_detail in refs[key]["so_details"]:
 				self.doc.append(
 					"prod_plan_references",
 					{
-						"item_reference": refs[bom_no]["po_item_ref"],
+						"item_reference": refs[key]["po_item_ref"],
 						"sales_order": so_detail["sales_order"],
 						"sales_order_item": so_detail["sales_order_item"],
 						"qty": so_detail["qty"],
@@ -391,7 +410,7 @@ def _mr_item_planned_qty_query(mr_item):
 	)
 
 
-def _mr_items_filter(bom, mr_item, mr_list):
+def _mr_items_filter(bom, mr_item, mr_list, company):
 	bom_exists = ExistsCriterion(
 		frappe.qb.from_(bom).select(bom.name).where((bom.item == mr_item.item_code) & (bom.is_active == 1))
 	)
@@ -399,5 +418,5 @@ def _mr_items_filter(bom, mr_item, mr_list):
 		(mr_item.parent.isin(mr_list))
 		& (mr_item.docstatus == 1)
 		& (mr_item.qty > mr_item.ordered_qty)
-		& bom_exists
+		& (bom_exists | plant_floor_exists(mr_item.item_code, company))
 	)

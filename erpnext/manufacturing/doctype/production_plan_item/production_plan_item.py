@@ -14,7 +14,7 @@ class ProductionPlanItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		bom_no: DF.Link
+		bom_no: DF.Link | None
 		description: DF.TextEditor | None
 		include_exploded_items: DF.Check
 		item_code: DF.Link
@@ -28,6 +28,7 @@ class ProductionPlanItem(Document):
 		pending_qty: DF.Float
 		planned_qty: DF.Float
 		planned_start_date: DF.Datetime
+		plant_floor: DF.Link | None
 		process_loss_percentage: DF.Percent
 		produced_qty: DF.Float
 		product_bundle_item: DF.Link | None
@@ -38,4 +39,6 @@ class ProductionPlanItem(Document):
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	@property
+	def is_plant_floor_item(self) -> bool:
+		return bool(self.plant_floor and not self.bom_no)

@@ -15,6 +15,7 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+from erpnext.manufacturing.doctype.work_order.services.plant_floor import PlantFloorService
 
 _SUB_ASSEMBLY_WO_FIELDS = [
 	"production_item",
@@ -78,6 +79,7 @@ class WorkOrderCreationService:
 			"material_request": d.material_request,
 			"material_request_item": d.material_request_item,
 			"bom_no": d.bom_no,
+			"plant_floor": d.plant_floor,
 			"description": d.description,
 			"stock_uom": d.stock_uom,
 			"company": self.doc.company,
@@ -248,8 +250,11 @@ class WorkOrderCreationService:
 		if item.get("warehouse"):
 			wo.fg_warehouse = item.get("warehouse")
 
-		wo.set_work_order_operations()
-		wo.set_required_items()
+		if wo.is_plant_floor_order:
+			PlantFloorService(wo).sync(None)
+		else:
+			wo.set_work_order_operations()
+			wo.set_required_items()
 		return wo
 
 

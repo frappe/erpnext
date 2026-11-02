@@ -96,6 +96,12 @@ frappe.ui.form.on("Production Plan", {
 			} else frappe.msgprint(__("Please enter Item first"));
 		});
 
+		frm.set_query("plant_floor", "po_items", (doc, cdt, cdn) => {
+			return {
+				filters: { production_item: locals[cdt][cdn].item_code },
+			};
+		});
+
 		frm.set_query("warehouse", "mr_items", (doc) => {
 			return {
 				filters: {
@@ -967,12 +973,22 @@ frappe.ui.form.on("Production Plan Item", {
 				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_item_data",
 				args: {
 					item_code: row.item_code,
+					company: frm.doc.company,
 				},
 				callback: function (r) {
 					for (let key in r.message) {
 						frappe.model.set_value(cdt, cdn, key, r.message[key]);
 					}
 				},
+			});
+		}
+	},
+
+	plant_floor(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.plant_floor) {
+			frappe.db.get_value("Plant Floor", row.plant_floor, "fg_warehouse").then(({ message }) => {
+				frappe.model.set_value(cdt, cdn, "warehouse", message.fg_warehouse);
 			});
 		}
 	},
