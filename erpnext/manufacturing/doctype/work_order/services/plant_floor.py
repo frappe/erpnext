@@ -14,16 +14,27 @@ class PlantFloorService:
 		return self._plant_floor
 
 	def sync(self, previous):
-		if self.doc.docstatus != 0 or not self.has_plan_changed(previous):
+		if self.doc.docstatus != 0:
 			return
 
-		self.validate_plant_floor()
-		self.set_items_and_operations()
+		self.validate_company()
+		if self.has_plan_changed(previous):
+			self.validate_plant_floor()
+			self.set_items_and_operations()
 
 	def has_plan_changed(self, previous):
 		if previous is None or not self.doc.operations:
 			return True
 		return previous.plant_floor != self.doc.plant_floor or flt(previous.qty) != flt(self.doc.qty)
+
+	def validate_company(self):
+		company = self.plant_floor.company
+		if company and self.doc.company and company != self.doc.company:
+			frappe.throw(
+				_("Plant Floor {0} belongs to company {1}, not {2}").format(
+					frappe.bold(self.plant_floor.name), frappe.bold(company), frappe.bold(self.doc.company)
+				)
+			)
 
 	def validate_plant_floor(self):
 		plant_floor = self.plant_floor
