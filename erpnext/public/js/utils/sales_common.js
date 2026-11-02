@@ -202,8 +202,23 @@ erpnext.sales_common = {
 				erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
 			}
 
-			sales_partner() {
+			async sales_partner() {
 				this.apply_pricing_rule();
+				if (!this.frm.fields_dict.commission_rate) return;
+
+				const partner = this.frm.doc.sales_partner;
+				const rate = partner
+					? await frappe.xcall(
+							"erpnext.setup.doctype.sales_partner.sales_partner.get_commission_rate",
+							{
+								sales_partner: partner,
+							}
+					  )
+					: 0;
+				if (partner === this.frm.doc.sales_partner) {
+					await this.frm.set_value("commission_rate", rate);
+					this.calculate_commission();
+				}
 			}
 
 			campaign() {
