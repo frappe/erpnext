@@ -632,6 +632,28 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(po.items[0].last_purchase_rate, 120)
 
+	def test_last_purchase_rate_follows_update_items_uom_change(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}]).name
+		create_purchase_order(item_code=item, rate=10)
+		po = create_purchase_order(item_code=item, rate=10)
+
+		trans_item = json.dumps(
+			[
+				{
+					"docname": po.items[0].name,
+					"item_code": item,
+					"qty": 1,
+					"rate": 120,
+					"uom": "Box",
+					"conversion_factor": 12,
+				}
+			]
+		)
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+		po.reload()
+
+		self.assertEqual(po.items[0].last_purchase_rate, 120)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
 		po = make_purchase_order(make_material_request(qty=5).name)
