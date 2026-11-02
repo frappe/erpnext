@@ -4872,7 +4872,7 @@ class TestProductionPlan(ERPNextTestSuite):
 				"quantity": 10,
 				"required_bom_qty": 10,
 				"material_request_type": "Purchase",
-				"uom": "_Test UOM",
+				"uom": frappe.db.get_value("Item", sub_assembly_item, "stock_uom"),
 				"conversion_factor": 1,
 			},
 		)
