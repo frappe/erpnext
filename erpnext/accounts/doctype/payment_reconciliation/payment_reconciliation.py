@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from functools import cache
+
 import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
@@ -505,6 +507,12 @@ class PaymentReconciliation(Document):
 			currency=account_currency,
 		)
 
+		revalued_rate = cache(
+			lambda doctype, name, on_date: get_revalued_exchange_rate(
+				doctype, name, on_date, *self.party_details()
+			)
+		)
+
 		entries = []
 		for pay in args.get("payments"):
 			pay.update({"unreconciled_amount": pay.get("amount")})
@@ -524,18 +532,12 @@ class PaymentReconciliation(Document):
 					)
 					pay["amount"] = 0
 
-				inv["exchange_rate"] = get_revalued_exchange_rate(
-					inv.get("invoice_type"),
-					inv.get("invoice_number"),
-					pay.get("posting_date"),
-					*self.party_details(),
+				inv["exchange_rate"] = revalued_rate(
+					inv.get("invoice_type"), inv.get("invoice_number"), pay.get("posting_date")
 				) or invoice_exchange_map.get(inv.get("invoice_number"))
 				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice", "Journal Entry"]:
-					pay["exchange_rate"] = get_revalued_exchange_rate(
-						pay.get("reference_type"),
-						pay.get("reference_name"),
-						pay.get("posting_date"),
-						*self.party_details(),
+					pay["exchange_rate"] = revalued_rate(
+						pay.get("reference_type"), pay.get("reference_name"), pay.get("posting_date")
 					) or invoice_exchange_map.get(pay.get("reference_name"))
 
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])

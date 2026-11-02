@@ -29,10 +29,14 @@ class ExchangeRateRevaluation(Document):
 		from erpnext.accounts.doctype.exchange_rate_revaluation_account.exchange_rate_revaluation_account import (
 			ExchangeRateRevaluationAccount,
 		)
+		from erpnext.accounts.doctype.exchange_rate_revaluation_voucher.exchange_rate_revaluation_voucher import (
+			ExchangeRateRevaluationVoucher,
+		)
 
 		accounts: DF.Table[ExchangeRateRevaluationAccount]
 		amended_from: DF.Link | None
 		company: DF.Link
+		covered_vouchers: DF.Table[ExchangeRateRevaluationVoucher]
 		gain_loss_booked: DF.Currency
 		gain_loss_unbooked: DF.Currency
 		posting_date: DF.Date
@@ -77,6 +81,41 @@ class ExchangeRateRevaluation(Document):
 
 	def before_submit(self):
 		self.remove_accounts_without_gain_loss()
+		self.set_covered_vouchers()
+
+	def set_covered_vouchers(self):
+		"""Remember the open vouchers behind each revalued party balance, as the balance is a single total."""
+		self.set("covered_vouchers", [])
+		ple = qb.DocType("Payment Ledger Entry")
+		for row in self.accounts:
+			if row.zero_balance or not row.party:
+				continue
+			vouchers = (
+				qb.from_(ple)
+				.select(ple.against_voucher_type, ple.against_voucher_no)
+				.where(
+					(ple.company == self.company)
+					& (ple.account == row.account)
+					& (ple.party_type == row.party_type)
+					& (ple.party == row.party)
+					& (ple.posting_date <= self.posting_date)
+					& (ple.delinked == 0)
+				)
+				.groupby(ple.against_voucher_type, ple.against_voucher_no)
+				.having(Sum(ple.amount_in_account_currency) != 0)
+				.run(as_dict=True)
+			)
+			for voucher in vouchers:
+				self.append(
+					"covered_vouchers",
+					{
+						"account": row.account,
+						"party_type": row.party_type,
+						"party": row.party,
+						"voucher_type": voucher.against_voucher_type,
+						"voucher_no": voucher.against_voucher_no,
+					},
+				)
 
 	def remove_accounts_without_gain_loss(self):
 		self.accounts = [account for account in self.accounts if account.gain_loss]

@@ -271,7 +271,6 @@ def get_revalued_exchange_rate(
 		account, party_type, party = party_rows[0].account, party_rows[0].party_type, party_rows[0].party
 	else:
 		return None
-	invoice_booked_at = _booked_at(invoice_doctype, invoice_name)
 
 	je = qb.DocType("Journal Entry")
 	jea = qb.DocType("Journal Entry Account")
@@ -289,6 +288,7 @@ def get_revalued_exchange_rate(
 		)
 		.select(
 			je.name,
+			err_acc.parent.as_("revaluation"),
 			err_acc.new_exchange_rate,
 			err_acc.balance_in_account_currency,
 			je.posting_date,
@@ -314,17 +314,22 @@ def get_revalued_exchange_rate(
 	)
 
 	for row in revaluations:
-		# The revaluation covers the invoice if it hit the ledger after the invoice, or, when reposting
-		# has renewed the invoice's ledger entries, if the balance it revalued is still unchanged.
-		# Limitation: misses an invoice that was reposted and has a back-dated entry on the same party;
-		# it then falls back to the invoice rate.
-		revaluation_booked_at = _booked_at("Journal Entry", row.name)
-		booked_after_invoice = (
-			invoice_booked_at and revaluation_booked_at and revaluation_booked_at > invoice_booked_at
-		)
-		if not booked_after_invoice and _balance_in_account_currency(
-			inv.company, account, party_type, party, row.posting_date
-		) != flt(row.balance_in_account_currency, get_currency_precision()):
+		party_vouchers = {
+			"parent": row.revaluation,
+			"account": account,
+			"party_type": party_type,
+			"party": party,
+		}
+		if frappe.db.exists("Exchange Rate Revaluation Voucher", party_vouchers):
+			covered = frappe.db.exists(
+				"Exchange Rate Revaluation Voucher",
+				{**party_vouchers, "voucher_type": invoice_doctype, "voucher_no": invoice_name},
+			)
+		else:
+			covered = _covered_by_revaluation_without_vouchers(
+				row, invoice_doctype, invoice_name, inv.company, account, party_type, party
+			)
+		if not covered:
 			continue
 		reversed_by_date = frappe.db.exists(
 			"Journal Entry",
@@ -333,6 +338,22 @@ def get_revalued_exchange_rate(
 		if not reversed_by_date:
 			return flt(row.new_exchange_rate)
 	return None
+
+
+def _covered_by_revaluation_without_vouchers(
+	row, invoice_doctype, invoice_name, company, account, party_type, party
+) -> bool:
+	"""Best guess for revaluations submitted before covered vouchers were recorded: the revaluation
+	covers the invoice if it hit the ledger after the invoice, or, when reposting has renewed the
+	invoice's ledger entries, if the balance it revalued is still unchanged.
+	Limitation: misses an invoice that was reposted and has a back-dated entry on the same party."""
+	invoice_booked_at = _booked_at(invoice_doctype, invoice_name)
+	revaluation_booked_at = _booked_at("Journal Entry", row.name)
+	if invoice_booked_at and revaluation_booked_at and revaluation_booked_at > invoice_booked_at:
+		return True
+	return _balance_in_account_currency(company, account, party_type, party, row.posting_date) == flt(
+		row.balance_in_account_currency, get_currency_precision()
+	)
 
 
 def _balance_in_account_currency(company, account, party_type, party, posting_date) -> float:
