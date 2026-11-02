@@ -20,6 +20,7 @@ erpnext.sales_common = {
 						filters: {
 							shipping_rule_type: "Selling",
 							company: doc.company,
+							disabled: 0,
 						},
 					};
 				});

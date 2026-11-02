@@ -21,6 +21,7 @@ erpnext.buying = {
 					return {
 						filters: {
 							shipping_rule_type: "Buying",
+							disabled: 0,
 						},
 					};
 				});
