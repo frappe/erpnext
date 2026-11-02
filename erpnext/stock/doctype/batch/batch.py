@@ -68,7 +68,8 @@ def _make_naming_series_key(prefix):
 	if not str(prefix):
 		return ""
 	else:
-		return prefix.upper() + ".#####"
+		parts = (part if part.startswith("{") else part.upper() for part in prefix.split("."))
+		return ".".join(parts) + ".#####"
 
 
 def get_batch_naming_series():
@@ -148,7 +149,7 @@ class Batch(Document):
 		self.image = frappe.db.get_value("Item", self.item, "image")
 
 	def after_delete(self):
-		revert_series_if_last(get_batch_naming_series(), self.name)
+		revert_series_if_last(get_batch_naming_series(), self.name, self)
 
 	def validate(self):
 		self.item_has_batch_enabled()
