@@ -263,3 +263,49 @@ class TestWorkOrderStockReport(ERPNextTestSuite):
 
 		self.assertEqual(self.get_rows(first.name, warehouse=STORES)[material].ready_to_build, "Y")
 		self.assertEqual(self.get_rows(second.name, warehouse=STORES)[material].ready_to_build, "N")
+
+	def test_selected_warehouse_of_another_company_is_not_counted(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.report.work_order_stock_report.work_order_stock_report import execute
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		other = create_warehouse("_Test WO Stock Report Other", company="_Test Company 1")
+		create_stock_reconciliation(
+			item_code=rm_item, warehouse=other, qty=500, rate=10, company="_Test Company 1"
+		)
+
+		wo = make_wo_order_test_record(production_item=fg_item, qty=1, do_not_submit=True)
+		for item in wo.required_items:
+			item.source_warehouse = None
+		wo.submit()
+
+		filters = frappe._dict(company="_Test Company", warehouse=["_Test Warehouse - _TC", other])
+		row = next(row for row in execute(filters)[1] if row["work_order"] == wo.name)
+		self.assertEqual(row["ready_to_build"], "N")
+
+	def test_selected_group_warehouse_counts_child_warehouse_stock(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		group = create_warehouse("_Test WO Stock Report Group", properties={"is_group": 1})
+		child = create_warehouse("_Test WO Stock Report Child", properties={"parent_warehouse": group})
+		test_stock_entry.make_stock_entry(item_code=rm_item, target=child, qty=5, basic_rate=10)
+
+		wo = make_wo_order_test_record(production_item=fg_item, qty=1, do_not_submit=True)
+		for item in wo.required_items:
+			item.source_warehouse = None
+		wo.submit()
+
+		# a group holds no stock itself, so the selection must expand to its child warehouses
+		row = self.get_rows(wo.name, company="_Test Company", warehouse=[group])[rm_item]
+		self.assertEqual(row.ready_to_build, "Y")
