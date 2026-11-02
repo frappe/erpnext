@@ -9,14 +9,7 @@ from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
-<<<<<<< HEAD
-=======
 	validate_date_range(filters)
-
-	if not (filters or {}).get("company"):
-		frappe.throw(_("{0} is mandatory").format(_("Company")))
-
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data

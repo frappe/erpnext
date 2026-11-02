@@ -2,13 +2,7 @@ import frappe
 from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-<<<<<<< HEAD
-from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
-=======
-from frappe.utils import flt, formatdate, get_datetime, get_datetime_str, get_link_to_form, get_table_name
-from frappe.utils.data import DateTimeLikeObject
-from frappe.utils.nestedset import get_descendants_of
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
+from frappe.utils import flt, formatdate, get_datetime, get_datetime_str, get_table_name
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company

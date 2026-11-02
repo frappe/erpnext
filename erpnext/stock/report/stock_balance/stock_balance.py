@@ -43,21 +43,9 @@ SLEntry = dict[str, Any]
 
 def execute(filters: StockBalanceFilter | None = None):
 	validate_date_range(filters)
-
 	return StockBalanceReport(filters).run()
 
 
-<<<<<<< HEAD
-=======
-def execute_snapshot_report(filters: StockBalanceFilter | None = None):
-	from erpnext.stock.report.stock_balance.stock_balance_snapshot import execute as execute_from_snapshot
-
-	validate_date_range(filters)
-
-	return execute_from_snapshot(filters)
-
-
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 class StockBalanceReport:
 	def __init__(self, filters: StockBalanceFilter | None) -> None:
 		self.filters = filters

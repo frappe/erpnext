@@ -4,28 +4,18 @@
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
 from frappe.desk.reportview import build_match_conditions
+
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	if not filters:
 		filters = {}
 	elif filters.get("from_date") or filters.get("to_date"):
 		filters["from_time"] = "00:00:00"
 		filters["to_time"] = "24:00:00"
-=======
-from frappe.utils import add_days, getdate
-
-from erpnext.accounts.report.utils import validate_date_range
-from erpnext.stock.utils import get_combine_datetime
-
-
-def execute(filters=None):
-	validate_date_range(filters)
-
-	filters = filters or {}
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 	columns = get_column()
 	conditions = get_conditions(filters)

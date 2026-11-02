@@ -14,10 +14,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 	validate_fiscal_year,
 )
-<<<<<<< HEAD
-=======
-from erpnext.accounts.report.utils import get_filter_values, validate_date_range
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
 
@@ -121,6 +118,7 @@ def get_data(filters):
 
 
 def get_conditions(filters):
+	validate_date_range(filters)
 	conditions = {"docstatus": 1}
 	status = filters.status
 	date_field = frappe.scrub(filters.date_based_on or "Purchase Date")
@@ -129,7 +127,6 @@ def get_conditions(filters):
 		conditions["company"] = filters.company
 
 	if filters.filter_based_on == "Date Range":
-		validate_date_range(filters)
 		if not filters.from_date and not filters.to_date:
 			filters.from_date = add_months(nowdate(), -12)
 			filters.to_date = nowdate()
