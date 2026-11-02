@@ -150,6 +150,7 @@ def get_machine_catalog() -> dict:
 
 @frappe.whitelist()
 def get_workstation(name: str) -> dict:
+	frappe.has_permission("Workstation", doc=name, throw=True)
 	return get_machines((name,)).get(name)
 
 
@@ -176,13 +177,16 @@ def save_machine_design(workstation_type: str, shapes: str | list) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def make_work_order(plant_floor: str, qty: float | None = None) -> str:
-	return frappe.get_doc("Plant Floor", plant_floor).make_work_order(qty).name
+	plant_floor = frappe.get_doc("Plant Floor", plant_floor)
+	plant_floor.check_permission("read")
+	return plant_floor.make_work_order(qty).name
 
 
 @frappe.whitelist()
 def get_run(work_order: str) -> dict:
 	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
 	run = PlantRun(work_order)
+	run.plant_floor.check_permission("read")
 	return {**PlantRunState(run).as_dict(), "plant": get_plant_data(run.plant_floor)}
 
 

@@ -184,6 +184,15 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(run["stages"][1]["items"][0].item_code, "_Test Ketchup Pre-mix")
 		self.assertTrue(run["stages"][1]["items"][0].is_input)
 
+	def test_plant_builder_run_needs_plant_floor_read(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run
+
+		work_order = make_ketchup_plant().make_work_order(2000)
+		user = create_user("plant-builder-stock-user@example.com", "Stock User")
+		with self.set_user(user.name):
+			self.assertTrue(frappe.has_permission("Work Order", "read", doc=work_order.name))
+			self.assertRaises(frappe.PermissionError, get_run, work_order.name)
+
 	def test_plant_builder_save_numbers_stages_by_position(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import (
 			check_plant,
