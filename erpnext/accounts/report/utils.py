@@ -35,7 +35,7 @@ def validate_mandatory_date_range(filters, from_field="from_date", to_field="to_
 	validate_date_range(filters, from_field, to_field)
 
 
-def validate_date_range(filters, from_field="from_date", to_field="to_date", message=None):
+def validate_date_range(filters, from_field="from_date", to_field="to_date"):
 	if not filters:
 		return
 
@@ -43,7 +43,7 @@ def validate_date_range(filters, from_field="from_date", to_field="to_date", mes
 	to_date = filters.get(to_field)
 
 	if from_date and to_date and get_datetime(from_date) > get_datetime(to_date):
-		frappe.throw(message or _("From Date must be before To Date"))
+		frappe.throw(_("From Date must be before To Date"))
 
 
 def get_currency(filters):
