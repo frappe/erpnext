@@ -14,13 +14,10 @@ class MachineBusyError(frappe.ValidationError):
 
 
 class PlantRun:
-	def __init__(self, work_order):
-		if isinstance(work_order, str):
-			work_order = frappe.get_doc("Work Order", work_order)
-
-		self.work_order = work_order
-		if not work_order.is_plant_floor_order:
-			frappe.throw(_("Work Order {0} is not made from a Plant Floor").format(work_order.name))
+	def __init__(self, work_order: str):
+		self.work_order = frappe.get_doc("Work Order", work_order)
+		if not self.work_order.is_plant_floor_order:
+			frappe.throw(_("Work Order {0} is not made from a Plant Floor").format(work_order))
 
 	@property
 	def plant_floor(self):

@@ -188,27 +188,27 @@ def get_run(work_order: str) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def set_run_qty(work_order: str, qty: float) -> dict:
-	return run_action(work_order, "set_qty", qty=flt(qty))
+	return run_action(work_order, lambda run: run.set_qty(flt(qty)))
 
 
 @frappe.whitelist(methods=["POST"])
 def start_run(work_order: str, job_card: str | None = None) -> dict:
-	return run_action(work_order, "start", job_card=job_card)
+	return run_action(work_order, lambda run: run.start(job_card))
 
 
 @frappe.whitelist(methods=["POST"])
 def pause_run(work_order: str) -> dict:
-	return run_action(work_order, "pause")
+	return run_action(work_order, lambda run: run.pause())
 
 
 @frappe.whitelist(methods=["POST"])
 def resume_run(work_order: str) -> dict:
-	return run_action(work_order, "resume")
+	return run_action(work_order, lambda run: run.resume())
 
 
 @frappe.whitelist(methods=["POST"])
 def report_breakdown(work_order: str, job_card: str) -> dict:
-	return run_action(work_order, "report_breakdown", job_card=job_card)
+	return run_action(work_order, lambda run: run.report_breakdown(job_card))
 
 
 @frappe.whitelist(methods=["POST"])
@@ -219,19 +219,12 @@ def restart_machine(
 	remarks: str | None = None,
 	operator: str | None = None,
 ) -> dict:
-	return run_action(
-		work_order,
-		"restart_machine",
-		job_card=job_card,
-		stop_reason=stop_reason,
-		remarks=remarks,
-		operator=operator,
-	)
+	return run_action(work_order, lambda run: run.restart_machine(job_card, stop_reason, remarks, operator))
 
 
 @frappe.whitelist(methods=["POST"])
 def consume_materials(work_order: str, job_card: str, quantities: str | dict) -> dict:
-	return run_action(work_order, "consume", job_card=job_card, quantities=frappe.parse_json(quantities))
+	return run_action(work_order, lambda run: run.consume(job_card, frappe.parse_json(quantities)))
 
 
 @frappe.whitelist(methods=["POST"])
@@ -242,18 +235,14 @@ def produce_output(
 	rejected_qty: float = 0,
 	readings: str | list | None = None,
 ) -> dict:
+	readings = frappe.parse_json(readings) if readings else None
 	return run_action(
-		work_order,
-		"produce",
-		job_card=job_card,
-		output_qty=flt(output_qty),
-		rejected_qty=flt(rejected_qty),
-		readings=frappe.parse_json(readings) if readings else None,
+		work_order, lambda run: run.produce(job_card, flt(output_qty), flt(rejected_qty), readings)
 	)
 
 
-def run_action(work_order, method, **kwargs):
+def run_action(work_order, action):
 	frappe.has_permission("Work Order", "write", doc=work_order, throw=True)
-	getattr(PlantRun(work_order), method)(**kwargs)
+	action(PlantRun(work_order))
 	frappe.clear_messages()
 	return get_run(work_order)
