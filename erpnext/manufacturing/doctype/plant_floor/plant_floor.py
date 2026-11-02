@@ -103,11 +103,9 @@ class PlantFloor(Document):
 
 	@property
 	def stage_sequences(self) -> list[list]:
-		has_sequence = any(stage.sequence_id for stage in self.stages)
 		sequences = {}
 		for stage in self.stages:
-			sequence_id = cint(stage.sequence_id) if has_sequence else stage.idx
-			sequences.setdefault(sequence_id, []).append(stage)
+			sequences.setdefault(cint(stage.sequence_id), []).append(stage)
 		return [sequences[sequence_id] for sequence_id in sorted(sequences)]
 
 	def get_batch_plan(self, qty: float | None = None) -> BatchPlan:

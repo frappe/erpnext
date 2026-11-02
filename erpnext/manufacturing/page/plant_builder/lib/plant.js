@@ -23,7 +23,6 @@ export function newPlantDoc() {
 }
 
 export function toScenePlant(doc, machines, item) {
-	const hasSequence = (doc.stages || []).some((s) => num(s.sequence_id));
 	const stages = (doc.stages || []).map((s, i) => ({
 		id: s.name || `stage-${i}`,
 		machine: machineKey(machines[s.workstation]?.machine_model || s.machine_model),
@@ -31,7 +30,7 @@ export function toScenePlant(doc, machines, item) {
 		name: s.stage_name,
 		output: s.semi_finished_good || "",
 		packaging: (doc.packing_materials || []).map((p) => p.item_name || p.item_code),
-		sequence: hasSequence ? num(s.sequence_id) : i + 1,
+		sequence: num(s.sequence_id),
 	}));
 	return {
 		id: doc.name || "new",
